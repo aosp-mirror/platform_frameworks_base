@@ -73,7 +73,7 @@
     <drawable name="editbox_dropdown_light_frame">@drawable/editbox_dropdown_background</drawable>
 
     <drawable name="input_method_fullscreen_background">#fff9f9f9</drawable>
-    <color name="input_method_navigation_guard">#ff000000</color>
+    <color name="decor_view_status_guard">#ff000000</color>
 
     <!-- For date picker widget -->
     <drawable name="selected_day_background">#ff0092f4</drawable>

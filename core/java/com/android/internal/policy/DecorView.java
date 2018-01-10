@@ -101,7 +101,6 @@ import static android.view.Window.DECOR_CAPTION_SHADE_LIGHT;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
-import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
@@ -194,8 +193,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
 
     // View added at runtime to draw under the status bar area
     private View mStatusGuard;
-    // View added at runtime to draw under the navigation bar area
-    private View mNavigationGuard;
 
     private final ColorViewState mStatusColorViewState =
             new ColorViewState(STATUS_BAR_COLOR_VIEW_ATTRIBUTES);
@@ -1002,7 +999,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         mFrameOffsets.set(insets.getSystemWindowInsets());
         insets = updateColorViews(insets, true /* animate */);
         insets = updateStatusGuard(insets);
-        insets = updateNavigationGuard(insets);
         if (getForeground() != null) {
             drawableChanged();
         }
@@ -1062,7 +1058,10 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         WindowManager.LayoutParams attrs = mWindow.getAttributes();
         int sysUiVisibility = attrs.systemUiVisibility | getWindowSystemUiVisibility();
 
-        if (!mWindow.mIsFloating) {
+        // IME is an exceptional floating window that requires color view.
+        final boolean isImeWindow =
+                mWindow.getAttributes().type == WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+        if (!mWindow.mIsFloating || isImeWindow) {
             boolean disallowAnimate = !isLaidOut();
             disallowAnimate |= ((mLastWindowFlags ^ attrs.flags)
                     & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
@@ -1363,7 +1362,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                         if (mStatusGuard == null) {
                             mStatusGuard = new View(mContext);
                             mStatusGuard.setBackgroundColor(mContext.getColor(
-                                    R.color.input_method_navigation_guard));
+                                    R.color.decor_view_status_guard));
                             addView(mStatusGuard, indexOfChild(mStatusColorViewState.view),
                                     new LayoutParams(LayoutParams.MATCH_PARENT,
                                             mlp.topMargin, Gravity.START | Gravity.TOP));
@@ -1405,51 +1404,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             mStatusGuard.setVisibility(showStatusGuard ? View.VISIBLE : View.GONE);
         }
         return insets;
-    }
-
-    private WindowInsets updateNavigationGuard(WindowInsets insets) {
-        // IME windows lay out below the nav bar, but the content view must not (for back compat)
-        // Only make this adjustment if the window is not requesting layout in overscan
-        if (mWindow.getAttributes().type == WindowManager.LayoutParams.TYPE_INPUT_METHOD
-                && (mWindow.getAttributes().flags & FLAG_LAYOUT_IN_OVERSCAN) == 0) {
-            // prevent the content view from including the nav bar height
-            if (mWindow.mContentParent != null) {
-                if (mWindow.mContentParent.getLayoutParams() instanceof MarginLayoutParams) {
-                    MarginLayoutParams mlp =
-                            (MarginLayoutParams) mWindow.mContentParent.getLayoutParams();
-                    mlp.bottomMargin = insets.getSystemWindowInsetBottom();
-                    mWindow.mContentParent.setLayoutParams(mlp);
-                }
-            }
-            // position the navigation guard view, creating it if necessary
-            if (mNavigationGuard == null) {
-                mNavigationGuard = new View(mContext);
-                mNavigationGuard.setBackgroundColor(mContext.getColor(
-                        R.color.input_method_navigation_guard));
-                addView(mNavigationGuard, indexOfChild(mNavigationColorViewState.view),
-                        new LayoutParams(LayoutParams.MATCH_PARENT,
-                                insets.getSystemWindowInsetBottom(),
-                                Gravity.START | Gravity.BOTTOM));
-            } else {
-                LayoutParams lp = (LayoutParams) mNavigationGuard.getLayoutParams();
-                lp.height = insets.getSystemWindowInsetBottom();
-                mNavigationGuard.setLayoutParams(lp);
-            }
-            updateNavigationGuardColor();
-            insets = insets.consumeSystemWindowInsets(
-                    false, false, false, true /* bottom */);
-        }
-        return insets;
-    }
-
-    void updateNavigationGuardColor() {
-        if (mNavigationGuard != null) {
-            // Make navigation bar guard invisible if the transparent color is specified.
-            // Only TRANSPARENT is sufficient for hiding the navigation bar if the no software
-            // keyboard is shown by IMS.
-            mNavigationGuard.setVisibility(mWindow.getNavigationBarColor() == Color.TRANSPARENT ?
-                    View.INVISIBLE : View.VISIBLE);
-        }
     }
 
     /**
@@ -2103,7 +2057,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             for (int i = getChildCount() - 1; i >= 0; i--) {
                 View v = getChildAt(i);
                 if (v != mStatusColorViewState.view && v != mNavigationColorViewState.view
-                        && v != mStatusGuard && v != mNavigationGuard) {
+                        && v != mStatusGuard) {
                     removeViewAt(i);
                 }
             }

@@ -1815,7 +1815,7 @@
   <java-symbol type="bool" name="config_wimaxEnabled" />
   <java-symbol type="bool" name="show_ongoing_ime_switcher" />
   <java-symbol type="color" name="config_defaultNotificationColor" />
-  <java-symbol type="color" name="input_method_navigation_guard" />
+  <java-symbol type="color" name="decor_view_status_guard" />
   <java-symbol type="drawable" name="ic_notification_ime_default" />
   <java-symbol type="drawable" name="ic_menu_refresh" />
   <java-symbol type="drawable" name="ic_settings" />
