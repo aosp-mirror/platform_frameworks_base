@@ -1445,38 +1445,22 @@
     <string name="notification_header_default_channel">Notifications</string>
 
     <!-- Notification Inline Controls: Shown when a channel's notifications are currently blocked -->
-    <string name="notification_channel_disabled">You won\'t get these notifications anymore</string>
+    <string name="notification_channel_disabled">You won\'t see these notifications anymore</string>
 
-    <!-- Notification: Control panel: Label that shows how many channels are included in this bundle
-        of notifications.  Replaces the channel name and only appears when there is more than one channel. -->
-    <string name="notification_num_channels"> <xliff:g id="number">%d</xliff:g> notification categories</string>
+    <!-- Notification Inline controls: continue receiving notifications prompt, channel level -->
+    <string name="inline_keep_showing">Keep showing these notifications?</string>
 
-    <!-- Notification: Control panel: Label that shows when an app has not upgraded to use channels.
-        Hints that the user's only option is to block all of the app's notifications. -->
-    <string name="notification_default_channel_desc">This app doesn\'t have notification categories</string>
+    <!-- Notification inline controls: block notifications button -->
+    <string name="inline_stop_button">Stop notifications</string>
+
+    <!-- Notification inline controls: keep getting notifications button -->
+    <string name="inline_keep_button">Keep showing</string>
+
+    <!-- Notification Inline controls: continue receiving notifications prompt, app level -->
+    <string name="inline_keep_showing_app">Keep showing notifications from this app?</string>
 
     <!-- Notification: Control panel: Label that displays when the app's notifications cannot be blocked. -->
-    <string name="notification_unblockable_desc">Notifications from this app can\'t be turned off</string>
-
-    <!-- Notification: Control panel: Label that shows how many channels this application has
-        defined, describing the current notification channel as "1 out of n notification categories from this app". -->
-    <plurals name="notification_num_channels_desc">
-        <item quantity="one">1 out of <xliff:g id="number">%s</xliff:g> notification category from this app</item>
-        <item quantity="other">1 out of <xliff:g id="number">%s</xliff:g> notification categories from this app</item>
-    </plurals>
-
-    <!-- Notification: Control panel: For bundles of notifications, this label that lists the
-        channels used by the contained notifications.  The first two channels are listed by name,
-        followed by "and N others"
-        Example: "Friend requests, Friend confirmations"
-        Example: "Friend requests, Friend confirmations, and 1 other"
-        Example: "Friend requests, Friend confirmations, and 2 others"
-    -->
-    <string name="notification_channels_list_desc_2"><xliff:g id="channel_name_1">%1$s</xliff:g>, <xliff:g id="channel_name_2">%2$s</xliff:g></string>
-    <plurals name="notification_channels_list_desc_2_and_others">
-        <item quantity="one"><xliff:g id="channel_name_1">%1$s</xliff:g>, <xliff:g id="channel_name_2">%2$s</xliff:g>, and <xliff:g id="number">%3$d</xliff:g> other</item>
-        <item quantity="other"><xliff:g id="channel_name_1">%1$s</xliff:g>, <xliff:g id="channel_name_2">%2$s</xliff:g>, and <xliff:g id="number">%3$d</xliff:g> others</item>
-    </plurals>
+    <string name="notification_unblockable_desc">These notifications can\'t be turned off</string>
 
     <!-- Notification: Control panel: Accessibility description for expanded inline controls view, used
         to control settings about notifications related to the current notification.  -->
@@ -1488,16 +1472,15 @@
         or disable notifications from this channel -->
     <string name="notification_channel_switch_accessibility">Allow notifications from this channel</string>
     <!-- Notification: Control panel: Label for button that launches notification settings. Used
-        when this app has defined more than a single channel for notifications. -->
-    <string name="notification_all_categories">All Categories</string>
-    <!-- Notification: Control panel: Label for button that launches notification settings. Used
         when this app has only defined a single channel for notifications. -->
     <string name="notification_more_settings">More settings</string>
     <!-- Notification: Control panel: Label for a link that launches notification settings in the
         app that sent the notification. -->
-    <string name="notification_app_settings">Customize: <xliff:g id="sub_category" example="Work chats">%1$s</xliff:g></string>
+    <string name="notification_app_settings">Customize</string>
     <!-- Notification: Control panel: Label for button that dismisses control panel. [CHAR LIMIT=NONE] -->
     <string name="notification_done">Done</string>
+    <!-- Notification: inline controls: undo block button -->
+    <string name="inline_undo">Undo</string>
 
     <!-- Notification: Menu row: Content description for menu items. [CHAR LIMIT=NONE] -->
     <string name="notification_menu_accessibility"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> <xliff:g id="menu_description" example="notification controls">%2$s</xliff:g></string>
