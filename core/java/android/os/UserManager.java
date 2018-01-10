@@ -209,6 +209,21 @@ public class UserManager {
     public static final String DISALLOW_AIRPLANE_MODE = "no_airplane_mode";
 
     /**
+     * Specifies if a user is disallowed from configuring brightness. When device owner sets it,
+     * it'll only be applied on the target(system) user.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * <p>This user restriction has no effect on managed profiles.
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONFIG_BRIGHTNESS = "no_config_brightness";
+
+    /**
      * Specifies if a user is disallowed from enabling the
      * "Unknown Sources" setting, that allows installation of apps from unknown sources.
      * The default value is <code>false</code>.
