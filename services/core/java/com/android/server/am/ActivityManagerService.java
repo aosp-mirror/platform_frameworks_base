@@ -24741,6 +24741,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ActivityManagerService.this.onUserStoppedLocked(userId);
             }
             mBatteryStatsService.onUserRemoved(userId);
+            mUserController.onUserRemoved(userId);
         }
 
         @Override
