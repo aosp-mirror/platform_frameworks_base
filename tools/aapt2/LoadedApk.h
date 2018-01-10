@@ -42,6 +42,8 @@ enum ApkFormat {
 // Info about an APK loaded in memory.
 class LoadedApk {
  public:
+  virtual ~LoadedApk() = default;
+
   // Loads both binary and proto APKs from disk.
   static std::unique_ptr<LoadedApk> LoadApkFromPath(const ::android::StringPiece& path,
                                                     IDiagnostics* diag);
