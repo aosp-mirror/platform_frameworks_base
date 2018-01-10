@@ -33,7 +33,7 @@ public:
     LogListener();
     virtual ~LogListener();
 
-    virtual void OnLogEvent(const LogEvent& msg) = 0;
+    virtual void OnLogEvent(LogEvent* msg) = 0;
 };
 
 }  // namespace statsd

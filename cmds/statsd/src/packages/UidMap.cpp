@@ -269,7 +269,7 @@ void UidMap::removeIsolatedUid(int isolatedUid, int parentUid) {
     }
 }
 
-int UidMap::getParentUidOrSelf(int uid) {
+int UidMap::getHostUidOrSelf(int uid) const {
     lock_guard<mutex> lock(mIsolatedMutex);
 
     auto it = mIsolatedUidMap.find(uid);

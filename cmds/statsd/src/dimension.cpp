@@ -19,7 +19,6 @@
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_internal.pb.h"
 #include "dimension.h"
-#include "field_util.h"
 
 
 namespace android {
@@ -220,33 +219,35 @@ constexpr int ATTRIBUTION_FIELD_NUM_IN_ATOM_PROTO = 1;
 constexpr int UID_FIELD_NUM_IN_ATTRIBUTION_NODE_PROTO = 1;
 constexpr int TAG_FIELD_NUM_IN_ATTRIBUTION_NODE_PROTO = 2;
 
-void buildAttributionUidFieldMatcher(const int tagId, const Position position,
-                                     FieldMatcher *matcher) {
-    matcher->set_field(tagId);
-    matcher->add_child()->set_field(ATTRIBUTION_FIELD_NUM_IN_ATOM_PROTO);
-    FieldMatcher* child = matcher->mutable_child(0)->add_child();
-    child->set_field(UID_FIELD_NUM_IN_ATTRIBUTION_NODE_PROTO);
-}
-
-void buildAttributionTagFieldMatcher(const int tagId, const Position position,
-                                     FieldMatcher *matcher) {
-    matcher->set_field(tagId);
-    FieldMatcher* child = matcher->add_child();
+FieldMatcher buildAttributionUidFieldMatcher(const int tagId, const Position position) {
+    FieldMatcher matcher;
+    matcher.set_field(tagId);
+    auto child = matcher.add_child();
     child->set_field(ATTRIBUTION_FIELD_NUM_IN_ATOM_PROTO);
     child->set_position(position);
-    child = child->add_child();
-    child->set_field(TAG_FIELD_NUM_IN_ATTRIBUTION_NODE_PROTO);
+    child->add_child()->set_field(UID_FIELD_NUM_IN_ATTRIBUTION_NODE_PROTO);
+    return matcher;
 }
 
-void buildAttributionFieldMatcher(const int tagId, const Position position,
-                                  FieldMatcher *matcher) {
-    matcher->set_field(tagId);
-    FieldMatcher* child = matcher->add_child();
+FieldMatcher buildAttributionTagFieldMatcher(const int tagId, const Position position) {
+    FieldMatcher matcher;
+    matcher.set_field(tagId);
+    FieldMatcher* child = matcher.add_child();
     child->set_field(ATTRIBUTION_FIELD_NUM_IN_ATOM_PROTO);
     child->set_position(position);
-    child = child->add_child();
-    child->set_field(UID_FIELD_NUM_IN_ATTRIBUTION_NODE_PROTO);
-    child->set_field(TAG_FIELD_NUM_IN_ATTRIBUTION_NODE_PROTO);
+    child->add_child()->set_field(TAG_FIELD_NUM_IN_ATTRIBUTION_NODE_PROTO);
+    return matcher;
+}
+
+FieldMatcher buildAttributionFieldMatcher(const int tagId, const Position position) {
+    FieldMatcher matcher;
+    matcher.set_field(tagId);
+    FieldMatcher* child = matcher.add_child();
+    child->set_field(ATTRIBUTION_FIELD_NUM_IN_ATOM_PROTO);
+    child->set_position(position);
+    child->add_child()->set_field(UID_FIELD_NUM_IN_ATTRIBUTION_NODE_PROTO);
+    child->add_child()->set_field(TAG_FIELD_NUM_IN_ATTRIBUTION_NODE_PROTO);
+    return matcher;
 }
 
 void DimensionsValueToString(const DimensionsValue& value, std::string *flattened) {

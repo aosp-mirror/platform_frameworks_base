@@ -72,7 +72,7 @@ public:
     /**
      * Called by LogReader when there's a log event to process.
      */
-    virtual void OnLogEvent(const LogEvent& event);
+    virtual void OnLogEvent(LogEvent* event);
 
     /**
      * Binder call for clients to request data for this configuration key.

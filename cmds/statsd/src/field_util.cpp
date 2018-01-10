@@ -184,6 +184,7 @@ void setPositionForLeaf(Field *field, int index) {
     }
 }
 
+namespace {
 void findFields(
        const FieldValueMap& fieldValueMap,
        const FieldMatcher& matcher,
@@ -287,9 +288,18 @@ void findFields(
     }
 }
 
+}  // namespace
+
+void findFields(
+       const FieldValueMap& fieldValueMap,
+       const FieldMatcher& matcher,
+       std::vector<Field>* rootFields) {
+    return findFields(fieldValueMap, matcher, buildSimpleAtomField(matcher.field()), rootFields);
+}
+
 void filterFields(const FieldMatcher& matcher, FieldValueMap* fieldValueMap) {
     std::vector<Field> rootFields;
-    findFields(*fieldValueMap, matcher, buildSimpleAtomField(matcher.field()), &rootFields);
+    findFields(*fieldValueMap, matcher, &rootFields);
     std::set<Field, FieldCmp> rootFieldSet(rootFields.begin(), rootFields.end());
     auto it = fieldValueMap->begin();
     while (it != fieldValueMap->end()) {
@@ -311,6 +321,11 @@ bool hasLeafNode(const FieldMatcher& matcher) {
         }
     }
     return true;
+}
+
+bool IsAttributionUidField(const Field& field) {
+    return field.child_size() == 1 && field.child(0).field() == 1
+        && field.child(0).child_size() == 1 && field.child(0).child(0).field() == 1;
 }
 
 }  // namespace statsd
