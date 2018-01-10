@@ -72,8 +72,16 @@ public final class RadioAccessSpecifier implements Parcelable {
     */
     public RadioAccessSpecifier(int ran, int[] bands, int[] channels) {
         this.mRadioAccessNetwork = ran;
-        this.mBands = bands.clone();
-        this.mChannels = channels.clone();
+        if (bands != null) {
+            this.mBands = bands.clone();
+        } else {
+            this.mBands = null;
+        }
+        if (channels != null) {
+            this.mChannels = channels.clone();
+        } else {
+            this.mChannels = null;
+        }
     }
 
     /**
@@ -93,12 +101,12 @@ public final class RadioAccessSpecifier implements Parcelable {
      * it depends on the returned value of {@link #getRadioAccessNetwork()}.
      */
     public int[] getBands() {
-        return mBands.clone();
+        return mBands == null ? null : mBands.clone();
     }
 
     /** Returns the frequency channels that need to be scanned. */
     public int[] getChannels() {
-        return mChannels.clone();
+        return mChannels == null ? null : mChannels.clone();
     }
 
     public static final Parcelable.Creator<RadioAccessSpecifier> CREATOR =
