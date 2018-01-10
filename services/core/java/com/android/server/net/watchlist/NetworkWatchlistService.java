@@ -29,6 +29,7 @@ import android.os.SharedMemory;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -53,9 +54,6 @@ public class NetworkWatchlistService extends INetworkWatchlistManager.Stub {
     private static final String TAG = NetworkWatchlistService.class.getSimpleName();
     static final boolean DEBUG = false;
 
-    private static final String PROPERTY_NETWORK_WATCHLIST_ENABLED =
-            "ro.network_watchlist_enabled";
-
     private static final int MAX_NUM_OF_WATCHLIST_DIGESTS = 10000;
 
     public static class Lifecycle extends SystemService {
@@ -67,8 +65,10 @@ public class NetworkWatchlistService extends INetworkWatchlistManager.Stub {
 
         @Override
         public void onStart() {
-            if (!SystemProperties.getBoolean(PROPERTY_NETWORK_WATCHLIST_ENABLED, false)) {
+            if (Settings.Global.getInt(getContext().getContentResolver(),
+                    Settings.Global.NETWORK_WATCHLIST_ENABLED, 0) == 0) {
                 // Watchlist service is disabled
+                Slog.i(TAG, "Network Watchlist service is disabled");
                 return;
             }
             mService = new NetworkWatchlistService(getContext());
@@ -77,11 +77,13 @@ public class NetworkWatchlistService extends INetworkWatchlistManager.Stub {
 
         @Override
         public void onBootPhase(int phase) {
-            if (!SystemProperties.getBoolean(PROPERTY_NETWORK_WATCHLIST_ENABLED, false)) {
-                // Watchlist service is disabled
-                return;
-            }
             if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+                if (Settings.Global.getInt(getContext().getContentResolver(),
+                        Settings.Global.NETWORK_WATCHLIST_ENABLED, 0) == 0) {
+                    // Watchlist service is disabled
+                    Slog.i(TAG, "Network Watchlist service is disabled");
+                    return;
+                }
                 try {
                     mService.initIpConnectivityMetrics();
                     mService.startWatchlistLogging();

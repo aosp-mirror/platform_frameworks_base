@@ -340,24 +340,6 @@ public class Log {
         return sSessionManager;
     }
 
-    private static MessageDigest sMessageDigest;
-
-    public static void initMd5Sum() {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            public Void doInBackground(Void... args) {
-                MessageDigest md;
-                try {
-                    md = MessageDigest.getInstance("SHA-1");
-                } catch (NoSuchAlgorithmException e) {
-                    md = null;
-                }
-                sMessageDigest = md;
-                return null;
-            }
-        }.execute();
-    }
-
     public static void setTag(String tag) {
         TAG = tag;
         DEBUG = isLoggable(android.util.Log.DEBUG);
@@ -425,44 +407,13 @@ public class Log {
     /**
      * Redact personally identifiable information for production users.
      * If we are running in verbose mode, return the original string,
-     * and return "****" if we are running on the user build, otherwise
-     * return a SHA-1 hash of the input string.
+     * and return "***" otherwise.
      */
     public static String pii(Object pii) {
         if (pii == null || VERBOSE) {
             return String.valueOf(pii);
         }
-        return "[" + secureHash(String.valueOf(pii).getBytes()) + "]";
-    }
-
-    private static String secureHash(byte[] input) {
-        // Refrain from logging user personal information in user build.
-        if (USER_BUILD) {
-            return "****";
-        }
-
-        if (sMessageDigest != null) {
-            sMessageDigest.reset();
-            sMessageDigest.update(input);
-            byte[] result = sMessageDigest.digest();
-            return encodeHex(result);
-        } else {
-            return "Uninitialized SHA1";
-        }
-    }
-
-    private static String encodeHex(byte[] bytes) {
-        StringBuffer hex = new StringBuffer(bytes.length * 2);
-
-        for (int i = 0; i < bytes.length; i++) {
-            int byteIntValue = bytes[i] & 0xff;
-            if (byteIntValue < 0x10) {
-                hex.append("0");
-            }
-            hex.append(Integer.toString(byteIntValue, 16));
-        }
-
-        return hex.toString();
+        return "***";
     }
 
     private static String getPrefixFromObject(Object obj) {

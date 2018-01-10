@@ -18,6 +18,6 @@
 -->
 <resources>
     <!-- A list of apps to be removed from the managed user. -->
-    <string-array name="disallowed_apps_managed_user">
+    <string-array translatable="false" name="disallowed_apps_managed_user">
     </string-array>
 </resources>

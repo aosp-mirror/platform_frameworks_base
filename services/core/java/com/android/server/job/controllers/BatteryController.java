@@ -27,11 +27,13 @@ import android.os.BatteryManagerInternal;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateChangedListener;
+import com.android.server.job.StateControllerProto;
 
 import java.io.PrintWriter;
 
@@ -262,5 +264,36 @@ public final class BatteryController extends StateController {
             UserHandle.formatUid(pw, js.getSourceUid());
             pw.println();
         }
+    }
+
+    @Override
+    public void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId, int filterUid) {
+        final long token = proto.start(fieldId);
+        final long mToken = proto.start(StateControllerProto.BATTERY);
+
+        proto.write(StateControllerProto.BatteryController.IS_ON_STABLE_POWER,
+                mChargeTracker.isOnStablePower());
+        proto.write(StateControllerProto.BatteryController.IS_BATTERY_NOT_LOW,
+                mChargeTracker.isBatteryNotLow());
+
+        proto.write(StateControllerProto.BatteryController.IS_MONITORING,
+                mChargeTracker.isMonitoring());
+        proto.write(StateControllerProto.BatteryController.LAST_BROADCAST_SEQUENCE_NUMBER,
+                mChargeTracker.getSeq());
+
+        for (int i = 0; i < mTrackedTasks.size(); i++) {
+            final JobStatus js = mTrackedTasks.valueAt(i);
+            if (!js.shouldDump(filterUid)) {
+                continue;
+            }
+            final long jsToken = proto.start(StateControllerProto.BatteryController.TRACKED_JOBS);
+            js.writeToShortProto(proto, StateControllerProto.BatteryController.TrackedJob.INFO);
+            proto.write(StateControllerProto.BatteryController.TrackedJob.SOURCE_UID,
+                    js.getSourceUid());
+            proto.end(jsToken);
+        }
+
+        proto.end(mToken);
+        proto.end(token);
     }
 }

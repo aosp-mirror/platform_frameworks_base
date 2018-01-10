@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package android.net.wifi.rtt;
 
 import static android.Manifest.permission.ACCESS_COARSE_LOCATION;
@@ -5,6 +21,7 @@ import static android.Manifest.permission.ACCESS_WIFI_STATE;
 import static android.Manifest.permission.CHANGE_WIFI_STATE;
 import static android.Manifest.permission.LOCATION_HARDWARE;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
@@ -38,8 +55,6 @@ import java.util.List;
  *     changes in RTT usability register for the {@link #ACTION_WIFI_RTT_STATE_CHANGED}
  *     broadcast. Note that this broadcast is not sticky - you should register for it and then
  *     check the above API to avoid a race condition.
- *
- * @hide RTT_API
  */
 @SystemService(Context.WIFI_RTT_RANGING_SERVICE)
 public class WifiRttManager {
@@ -71,6 +86,8 @@ public class WifiRttManager {
      * Returns the current status of RTT API: whether or not RTT is available. To track
      * changes in the state of RTT API register for the
      * {@link #ACTION_WIFI_RTT_STATE_CHANGED} broadcast.
+     * <p>Note: availability of RTT does not mean that the app can use the API. The app's
+     * permissions and platform Location Mode are validated at run-time.
      *
      * @return A boolean indicating whether the app can use the RTT API at this time (true) or
      * not (false).
@@ -95,8 +112,8 @@ public class WifiRttManager {
      *                 will be used.
      */
     @RequiresPermission(allOf = {ACCESS_COARSE_LOCATION, CHANGE_WIFI_STATE, ACCESS_WIFI_STATE})
-    public void startRanging(RangingRequest request, RangingResultCallback callback,
-            @Nullable Handler handler) {
+    public void startRanging(@NonNull RangingRequest request,
+            @NonNull RangingResultCallback callback, @Nullable Handler handler) {
         startRanging(null, request, callback, handler);
     }
 
@@ -112,12 +129,13 @@ public class WifiRttManager {
      *                 callback} object. If a null is provided then the application's main thread
      *                 will be used.
      *
-     * @hide (@SystemApi)
+     * @hide
      */
+    @SystemApi
     @RequiresPermission(allOf = {LOCATION_HARDWARE, ACCESS_COARSE_LOCATION, CHANGE_WIFI_STATE,
             ACCESS_WIFI_STATE})
-    public void startRanging(@Nullable WorkSource workSource, RangingRequest request,
-            RangingResultCallback callback, @Nullable Handler handler) {
+    public void startRanging(@Nullable WorkSource workSource, @NonNull RangingRequest request,
+            @NonNull RangingResultCallback callback, @Nullable Handler handler) {
         if (VDBG) {
             Log.v(TAG, "startRanging: workSource=" + workSource + ", request=" + request
                     + ", callback=" + callback + ", handler=" + handler);
@@ -143,10 +161,11 @@ public class WifiRttManager {
      *
      * @param workSource The work-sources of the requesters.
      *
-     * @hide (@SystemApi)
+     * @hide
      */
+    @SystemApi
     @RequiresPermission(allOf = {LOCATION_HARDWARE})
-    public void cancelRanging(WorkSource workSource) {
+    public void cancelRanging(@Nullable WorkSource workSource) {
         if (VDBG) {
             Log.v(TAG, "cancelRanging: workSource=" + workSource);
         }

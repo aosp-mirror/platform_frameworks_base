@@ -51,6 +51,8 @@ import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.platform.test.annotations.Presubmit;
+import android.support.test.filters.SmallTest;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.Display;
@@ -69,6 +71,8 @@ import java.util.List;
  * Unit test for AppStandbyController.
  */
 @RunWith(AndroidJUnit4.class)
+@Presubmit
+@SmallTest
 public class AppStandbyControllerTests {
 
     private static final String PACKAGE_1 = "com.example.foo";
@@ -285,6 +289,10 @@ public class AppStandbyControllerTests {
                 true);
     }
 
+    private void assertBucket(int bucket) {
+        assertEquals(bucket, getStandbyBucket(mController));
+    }
+
     @Test
     public void testBuckets() throws Exception {
         assertTimeout(mController, 0, STANDBY_BUCKET_NEVER);
@@ -424,5 +432,28 @@ public class AppStandbyControllerTests {
         mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_NEVER,
                 REASON_PREDICTED, 2 * HOUR_MS);
         assertEquals(STANDBY_BUCKET_ACTIVE, getStandbyBucket(mController));
+    }
+
+    @Test
+    public void testTimeout() throws Exception {
+        setChargingState(mController, false);
+
+        reportEvent(mController, USER_INTERACTION, 0);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        mInjector.mElapsedRealtime = 2000;
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_FREQUENT,
+                REASON_PREDICTED, mInjector.mElapsedRealtime);
+        assertBucket(STANDBY_BUCKET_ACTIVE);
+
+        // bucketing works after timeout
+        mInjector.mElapsedRealtime = FREQUENT_THRESHOLD - 100;
+        mController.checkIdleStates(USER_ID);
+        assertBucket(STANDBY_BUCKET_WORKING_SET);
+
+        mController.setAppStandbyBucket(PACKAGE_1, USER_ID, STANDBY_BUCKET_FREQUENT,
+                REASON_PREDICTED, mInjector.mElapsedRealtime);
+        assertBucket(STANDBY_BUCKET_FREQUENT);
+
     }
 }

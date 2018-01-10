@@ -331,4 +331,24 @@ public class WorkSourceTest extends TestCase {
         wc.addNode(200, "tag2");
         assertEquals(100, wc.getAttributionUid());
     }
+
+    public void testRemove_fromChainedWorkSource() {
+        WorkSource ws1 = new WorkSource();
+        ws1.createWorkChain().addNode(50, "foo");
+        ws1.createWorkChain().addNode(75, "bar");
+        ws1.add(100);
+
+        WorkSource ws2 = new WorkSource();
+        ws2.add(100);
+
+        assertTrue(ws1.remove(ws2));
+        assertEquals(2, ws1.getWorkChains().size());
+        assertEquals(50, ws1.getWorkChains().get(0).getAttributionUid());
+        assertEquals(75, ws1.getWorkChains().get(1).getAttributionUid());
+
+        ws2.createWorkChain().addNode(50, "foo");
+        assertTrue(ws1.remove(ws2));
+        assertEquals(1, ws1.getWorkChains().size());
+        assertEquals(75, ws1.getWorkChains().get(0).getAttributionUid());
+    }
 }

@@ -21,6 +21,7 @@
 
 #include <gtest/gtest_prod.h>
 #include <log/log_time.h>
+#include <list>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -44,6 +45,9 @@ public:
     const static int kMaxConditionCountPerConfig = 200;
     const static int kMaxMetricCountPerConfig = 300;
     const static int kMaxMatcherCountPerConfig = 500;
+
+    // The max number of old config stats we keep.
+    const static int kMaxIceBoxSize = 20;
 
     const static int kMaxTimestampCount = 20;
 
@@ -202,19 +206,21 @@ private:
     StatsdStatsReport_UidMapStats mUidMapStats;
 
     // The stats about the configs that are still in use.
+    // The map size is capped by kMaxConfigCount.
     std::map<const ConfigKey, StatsdStatsReport_ConfigStats> mConfigStats;
 
     // Stores the stats for the configs that are no longer in use.
-    std::vector<const StatsdStatsReport_ConfigStats> mIceBox;
+    // The size of the vector is capped by kMaxIceBoxSize.
+    std::list<const StatsdStatsReport_ConfigStats> mIceBox;
 
     // Stores the number of output tuple of condition trackers when it's bigger than
     // kDimensionKeySizeSoftLimit. When you see the number is kDimensionKeySizeHardLimit +1,
-    // it means some data has been dropped.
+    // it means some data has been dropped. The map size is capped by kMaxConfigCount.
     std::map<const ConfigKey, std::map<const int64_t, int>> mConditionStats;
 
     // Stores the number of output tuple of metric producers when it's bigger than
     // kDimensionKeySizeSoftLimit. When you see the number is kDimensionKeySizeHardLimit +1,
-    // it means some data has been dropped.
+    // it means some data has been dropped. The map size is capped by kMaxConfigCount.
     std::map<const ConfigKey, std::map<const int64_t, int>> mMetricsStats;
 
     // Stores the number of times a pushed atom is logged.
@@ -223,6 +229,7 @@ private:
     // This is a vector, not a map because it will be accessed A LOT -- for each stats log.
     std::vector<int> mPushedAtomStats;
 
+    // Maps PullAtomId to its stats. The size is capped by the puller atom counts.
     std::map<int, PulledAtomStats> mPulledAtomStats;
 
     // Stores the number of times statsd modified the anomaly alarm registered with
@@ -230,10 +237,10 @@ private:
     int mAnomalyAlarmRegisteredStats = 0;
 
     // Stores the number of times an anomaly detection alert has been declared
-    // (per config, per alert name).
+    // (per config, per alert name). The map size is capped by kMaxConfigCount.
     std::map<const ConfigKey, std::map<const int64_t, int>> mAlertStats;
 
-    // Stores how many times a matcher have been matched.
+    // Stores how many times a matcher have been matched. The map size is capped by kMaxConfigCount.
     std::map<const ConfigKey, std::map<const int64_t, int>> mMatcherStats;
 
     void noteConfigRemovedInternalLocked(const ConfigKey& key);
@@ -248,6 +255,8 @@ private:
     void noteMetricsReportSent(const ConfigKey& key, int32_t timeSec);
 
     void noteBroadcastSent(const ConfigKey& key, int32_t timeSec);
+
+    void addToIceBoxLocked(const StatsdStatsReport_ConfigStats& stats);
 
     FRIEND_TEST(StatsdStatsTest, TestValidConfigAdd);
     FRIEND_TEST(StatsdStatsTest, TestInvalidConfigAdd);

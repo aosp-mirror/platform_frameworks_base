@@ -140,6 +140,7 @@ private:
 
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensions);
     FRIEND_TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks);
+    FRIEND_TEST(AttributionE2eTest, TestAttributionMatchAndSlice);
 };
 
 }  // namespace statsd

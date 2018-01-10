@@ -8704,6 +8704,8 @@ public final class Settings {
 
         /**
          * Whether soft AP will shut down after a timeout period when no devices are connected.
+         *
+         * Type: int (0 for false, 1 for true)
          * @hide
          */
         public static final String SOFT_AP_TIMEOUT_ENABLED = "soft_ap_timeout_enabled";
@@ -9798,6 +9800,14 @@ public final class Settings {
          * @hide
          */
         public static final java.lang.String APP_STANDBY_ENABLED = "app_standby_enabled";
+
+        /**
+         * Whether or not Network Watchlist feature is enabled.
+         * Type: int (0 for false, 1 for true)
+         * Default: 0
+         * @hide
+         */
+        public static final String NETWORK_WATCHLIST_ENABLED = "network_watchlist_enabled";
 
         /**
          * Get the key that retrieves a bluetooth headset's priority.

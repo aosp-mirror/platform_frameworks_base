@@ -1801,6 +1801,15 @@
     <permission android:name="android.permission.ALLOCATE_AGGRESSIVE"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi @hide
+         Allows an application to use reserved disk space.
+         <p>Not for use by third-party applications.  Should only be requested by
+         apps that provide core system functionality, to ensure system stability
+         when disk is otherwise completely full.
+    -->
+    <permission android:name="android.permission.USE_RESERVED_DISK"
+        android:protectionLevel="signature|privileged" />
+
     <!-- ================================== -->
     <!-- Permissions for screenlock         -->
     <!-- ================================== -->

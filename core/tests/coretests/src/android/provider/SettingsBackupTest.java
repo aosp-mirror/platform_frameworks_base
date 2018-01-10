@@ -282,6 +282,7 @@ public class SettingsBackupTest {
                     Settings.Global.NETWORK_SCORING_UI_ENABLED,
                     Settings.Global.NETWORK_SWITCH_NOTIFICATION_DAILY_LIMIT,
                     Settings.Global.NETWORK_SWITCH_NOTIFICATION_RATE_LIMIT_MILLIS,
+                    Settings.Global.NETWORK_WATCHLIST_ENABLED,
                     Settings.Global.NEW_CONTACT_AGGREGATOR,
                     Settings.Global.NITZ_UPDATE_DIFF,
                     Settings.Global.NITZ_UPDATE_SPACING,

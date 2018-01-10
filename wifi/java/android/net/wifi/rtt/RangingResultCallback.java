@@ -17,6 +17,7 @@
 package android.net.wifi.rtt;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.os.Handler;
 
 import java.lang.annotation.Retention;
@@ -31,8 +32,6 @@ import java.util.List;
  * peers then the {@link #onRangingResults(List)} will be called with the set of results (@link
  * {@link RangingResult}, each of which has its own success/failure code
  * {@link RangingResult#getStatus()}.
- *
- * @hide RTT_API
  */
 public abstract class RangingResultCallback {
     /** @hide */
@@ -68,5 +67,5 @@ public abstract class RangingResultCallback {
      *
      * @param results List of range measurements, one per requested device.
      */
-    public abstract void onRangingResults(List<RangingResult> results);
+    public abstract void onRangingResults(@NonNull List<RangingResult> results);
 }

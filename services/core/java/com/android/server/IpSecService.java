@@ -52,6 +52,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -1030,6 +1031,30 @@ public class IpSecService extends IIpSecService.Stub {
         releaseResource(userRecord.mEncapSocketRecords, resourceId);
     }
 
+    @VisibleForTesting
+    void validateAlgorithms(IpSecConfig config, int direction) throws IllegalArgumentException {
+            IpSecAlgorithm auth = config.getAuthentication(direction);
+            IpSecAlgorithm crypt = config.getEncryption(direction);
+            IpSecAlgorithm aead = config.getAuthenticatedEncryption(direction);
+
+            // Validate the algorithm set
+            Preconditions.checkArgument(
+                    aead != null || crypt != null || auth != null,
+                    "No Encryption or Authentication algorithms specified");
+            Preconditions.checkArgument(
+                    auth == null || auth.isAuthentication(),
+                    "Unsupported algorithm for Authentication");
+            Preconditions.checkArgument(
+                crypt == null || crypt.isEncryption(), "Unsupported algorithm for Encryption");
+            Preconditions.checkArgument(
+                    aead == null || aead.isAead(),
+                    "Unsupported algorithm for Authenticated Encryption");
+            Preconditions.checkArgument(
+                    aead == null || (auth == null && crypt == null),
+                    "Authenticated Encryption is mutually exclusive with other Authentication "
+                                    + "or Encryption algorithms");
+    }
+
     /**
      * Checks an IpSecConfig parcel to ensure that the contents are sane and throws an
      * IllegalArgumentException if they are not.
@@ -1079,17 +1104,7 @@ public class IpSecService extends IIpSecService.Stub {
         }
 
         for (int direction : DIRECTIONS) {
-            IpSecAlgorithm crypt = config.getEncryption(direction);
-            IpSecAlgorithm auth = config.getAuthentication(direction);
-            IpSecAlgorithm authenticatedEncryption = config.getAuthenticatedEncryption(direction);
-            if (authenticatedEncryption == null && crypt == null && auth == null) {
-                throw new IllegalArgumentException(
-                        "No Encryption or Authentication algorithms specified");
-            } else if (authenticatedEncryption != null && (auth != null || crypt != null)) {
-                throw new IllegalArgumentException(
-                        "Authenticated Encryption is mutually"
-                                + " exclusive with other Authentication or Encryption algorithms");
-            }
+            validateAlgorithms(config, direction);
 
             // Retrieve SPI record; will throw IllegalArgumentException if not found
             userRecord.mSpiRecords.getResourceOrThrow(config.getSpiResourceId(direction));

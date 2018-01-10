@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.Nullable;
 import android.util.ArrayMap;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.XmlUtils;
 
@@ -320,5 +321,22 @@ public final class PersistableBundle extends BaseBundle implements Cloneable, Pa
             }
         }
         return mMap.toString();
+    }
+
+    /** @hide */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+
+        if (mParcelledData != null) {
+            if (isEmptyParcel()) {
+                proto.write(PersistableBundleProto.PARCELLED_DATA_SIZE, 0);
+            } else {
+                proto.write(PersistableBundleProto.PARCELLED_DATA_SIZE, mParcelledData.dataSize());
+            }
+        } else {
+            proto.write(PersistableBundleProto.MAP_DATA, mMap.toString());
+        }
+
+        proto.end(token);
     }
 }

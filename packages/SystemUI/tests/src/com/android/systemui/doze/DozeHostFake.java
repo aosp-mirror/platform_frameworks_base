@@ -61,7 +61,7 @@ class DozeHostFake implements DozeHost {
 
     @Override
     public void dozeTimeTick() {
-        throw new RuntimeException("not implemented");
+        // Nothing to do in here. Real host would just update the UI.
     }
 
     @Override

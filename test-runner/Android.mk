@@ -117,5 +117,20 @@ update-android-test-runner-api: $(ANDROID_TEST_RUNNER_OUTPUT_API_FILE) | $(ACP)
 
 endif  # not TARGET_BUILD_APPS not TARGET_BUILD_PDK=true
 
+# Build the android.test.legacy library
+# =====================================
+include $(CLEAR_VARS)
+
+LOCAL_MODULE := android.test.legacy
+
+LOCAL_SRC_FILES := $(call all-java-files-under, src/android)
+
+LOCAL_SDK_VERSION := current
+
+LOCAL_JAVA_LIBRARIES := android.test.mock.stubs junit
+LOCAL_STATIC_JAVA_LIBRARIES := android.test.base-minus-junit
+
+include $(BUILD_STATIC_JAVA_LIBRARY)
+
 # additionally, build unit tests in a separate .apk
 include $(call all-makefiles-under,$(LOCAL_PATH))

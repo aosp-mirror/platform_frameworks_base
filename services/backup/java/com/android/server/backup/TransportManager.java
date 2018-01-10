@@ -112,23 +112,6 @@ public class TransportManager {
     @GuardedBy("mTransportLock")
     private volatile String mCurrentTransportName;
 
-
-    /**
-     * Callback interface for {@link #ensureTransportReady(ComponentName, TransportReadyCallback)}.
-     */
-    public interface TransportReadyCallback {
-
-        /**
-         * Will be called when the transport is ready.
-         */
-        void onSuccess(String transportName);
-
-        /**
-         * Will be called when it's not possible to make transport ready.
-         */
-        void onFailure(int reason);
-    }
-
     TransportManager(
             Context context,
             Set<ComponentName> whitelist,
@@ -240,6 +223,17 @@ public class TransportManager {
     }
 
     /**
+     * Returns the transport name associated with {@code transportComponent}.
+     * @throws TransportNotRegisteredException if the transport is not registered.
+     */
+    public String getTransportName(ComponentName transportComponent)
+            throws TransportNotRegisteredException {
+        synchronized (mTransportLock) {
+            return getRegisteredTransportDescriptionOrThrowLocked(transportComponent).name;
+        }
+    }
+
+    /**
      * Retrieve the configuration intent of {@code transportName}.
      * @throws TransportNotRegisteredException if the transport is not registered.
      */
@@ -338,23 +332,6 @@ public class TransportManager {
             }
         }
         return null;
-    }
-
-    /**
-     * Returns the transport name associated with {@param transportComponent} or {@code null} if not
-     * found.
-     */
-    @Nullable
-    public String getTransportName(ComponentName transportComponent) {
-        synchronized (mTransportLock) {
-            TransportDescription description =
-                    mRegisteredTransportsDescriptionMap.get(transportComponent);
-            if (description == null) {
-                Slog.e(TAG, "Trying to find name of unregistered transport " + transportComponent);
-                return null;
-            }
-            return description.name;
-        }
     }
 
     @GuardedBy("mTransportLock")
@@ -552,29 +529,6 @@ public class TransportManager {
         return mCurrentTransportName;
     }
 
-    String selectTransport(String transport) {
-        synchronized (mTransportLock) {
-            String prevTransport = mCurrentTransportName;
-            mCurrentTransportName = transport;
-            return prevTransport;
-        }
-    }
-
-    void ensureTransportReady(ComponentName transportComponent,
-            TransportReadyCallback listener) {
-        synchronized (mTransportLock) {
-            TransportConnection conn = mValidTransports.get(transportComponent);
-            if (conn == null) {
-                listener.onFailure(BackupManager.ERROR_TRANSPORT_UNAVAILABLE);
-                return;
-            }
-            // Transport can be unbound if the process hosting it crashed.
-            conn.bindIfUnbound();
-            conn.addListener(listener);
-        }
-    }
-
-
     // This is for mocking, Mockito can't mock if package-protected and in the same package but
     // different class loaders. Checked with the debugger and class loaders are different
     // See https://github.com/mockito/mockito/issues/796
@@ -674,6 +628,90 @@ public class TransportManager {
                 createSystemUserHandle());
     }
 
+    String selectTransport(String transportName) {
+        synchronized (mTransportLock) {
+            String prevTransport = mCurrentTransportName;
+            mCurrentTransportName = transportName;
+            return prevTransport;
+        }
+    }
+
+    /**
+     * Tries to register the transport if not registered. If successful also selects the transport.
+     *
+     * @param transportComponent Host of the transport.
+     * @return One of {@link BackupManager#SUCCESS}, {@link BackupManager#ERROR_TRANSPORT_INVALID}
+     *     or {@link BackupManager#ERROR_TRANSPORT_UNAVAILABLE}.
+     */
+    public int registerAndSelectTransport(ComponentName transportComponent) {
+        synchronized (mTransportLock) {
+            if (!mRegisteredTransportsDescriptionMap.containsKey(transportComponent)) {
+                int result = registerTransport(transportComponent);
+                if (result != BackupManager.SUCCESS) {
+                    return result;
+                }
+            }
+
+            try {
+                selectTransport(getTransportName(transportComponent));
+                return BackupManager.SUCCESS;
+            } catch (TransportNotRegisteredException e) {
+                // Shouldn't happen because we are holding the lock
+                Slog.wtf(TAG, "Transport unexpectedly not registered");
+                return BackupManager.ERROR_TRANSPORT_UNAVAILABLE;
+            }
+        }
+    }
+
+    /**
+     * Tries to register transport represented by {@code transportComponent}.
+     *
+     * @param transportComponent Host of the transport that we want to register.
+     * @return One of {@link BackupManager#SUCCESS}, {@link BackupManager#ERROR_TRANSPORT_INVALID}
+     *     or {@link BackupManager#ERROR_TRANSPORT_UNAVAILABLE}.
+     */
+    private int registerTransport(ComponentName transportComponent) {
+        String transportString = transportComponent.flattenToShortString();
+
+        String callerLogString = "TransportManager.registerTransport()";
+        TransportClient transportClient =
+                mTransportClientManager.getTransportClient(transportComponent, callerLogString);
+
+        final IBackupTransport transport;
+        try {
+            transport = transportClient.connectOrThrow(callerLogString);
+        } catch (TransportNotAvailableException e) {
+            Slog.e(TAG, "Couldn't connect to transport " + transportString + " for registration");
+            mTransportClientManager.disposeOfTransportClient(transportClient, callerLogString);
+            return BackupManager.ERROR_TRANSPORT_UNAVAILABLE;
+        }
+
+        EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_LIFECYCLE, transportString, 1);
+
+        int result;
+        if (isTransportValid(transport)) {
+            try {
+                registerTransport(transportComponent, transport);
+                // If registerTransport() hasn't thrown...
+                result = BackupManager.SUCCESS;
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Transport " + transportString + " died while registering");
+                result = BackupManager.ERROR_TRANSPORT_UNAVAILABLE;
+            }
+        } else {
+            Slog.w(TAG, "Can't register invalid transport " + transportString);
+            result = BackupManager.ERROR_TRANSPORT_INVALID;
+        }
+
+        mTransportClientManager.disposeOfTransportClient(transportClient, callerLogString);
+        if (result == BackupManager.SUCCESS) {
+            Slog.d(TAG, "Transport " + transportString + " registered");
+        } else {
+            EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_LIFECYCLE, transportString, 0);
+        }
+        return result;
+    }
+
     /** If {@link RemoteException} is thrown the transport is guaranteed to not be registered. */
     private void registerTransport(ComponentName transportComponent, IBackupTransport transport)
             throws RemoteException {
@@ -690,11 +728,18 @@ public class TransportManager {
         }
     }
 
+    private boolean isTransportValid(IBackupTransport transport) {
+        if (mTransportBoundListener == null) {
+            Slog.w(TAG, "setTransportBoundListener() not called, assuming transport invalid");
+            return false;
+        }
+        return mTransportBoundListener.onTransportBound(transport);
+    }
+
     private class TransportConnection implements ServiceConnection {
 
         // Hold mTransportLock to access these fields so as to provide a consistent view of them.
         private volatile IBackupTransport mBinder;
-        private final List<TransportReadyCallback> mListeners = new ArrayList<>();
         private volatile String mTransportName;
 
         private final ComponentName mTransportComponent;
@@ -716,15 +761,7 @@ public class TransportManager {
                     mTransportName = mBinder.name();
                     // BackupManager requests some fields from the transport. If they are
                     // invalid, throw away this transport.
-                    final boolean valid;
-                    if (mTransportBoundListener != null) {
-                        valid = mTransportBoundListener.onTransportBound(mBinder);
-                    } else {
-                        Slog.w(TAG, "setTransportBoundListener() not called, assuming transport "
-                                + component + " valid");
-                        valid = true;
-                    }
-                    if (valid) {
+                    if (isTransportValid(mBinder)) {
                         // We're now using the always-bound connection to do the registration but
                         // when we remove the always-bound code this will be in the first binding
                         // TODO: Move registration to first binding
@@ -742,9 +779,6 @@ public class TransportManager {
                     if (success) {
                         Slog.d(TAG, "Bound to transport: " + componentShortString);
                         mBoundTransports.put(mTransportName, component);
-                        for (TransportReadyCallback listener : mListeners) {
-                            listener.onSuccess(mTransportName);
-                        }
                         // cancel rebinding on timeout for this component as we've already connected
                         mHandler.removeMessages(REBINDING_TIMEOUT_MSG, componentShortString);
                     } else {
@@ -756,11 +790,7 @@ public class TransportManager {
                         mValidTransports.remove(component);
                         mEligibleTransports.remove(component);
                         mBinder = null;
-                        for (TransportReadyCallback listener : mListeners) {
-                            listener.onFailure(BackupManager.ERROR_TRANSPORT_INVALID);
-                        }
                     }
-                    mListeners.clear();
                 }
             }
         }
@@ -812,19 +842,6 @@ public class TransportManager {
                 Slog.d(TAG,
                         "Rebinding to transport " + mTransportComponent.flattenToShortString());
                 bindToTransport(mTransportComponent, this);
-            }
-        }
-
-        private void addListener(TransportReadyCallback listener) {
-            synchronized (mTransportLock) {
-                if (mBinder == null) {
-                    // We are waiting for bind to complete. If mBinder is set to null after the bind
-                    // is complete due to transport being invalid, we won't find 'this' connection
-                    // object in mValidTransports list and this function can't be called.
-                    mListeners.add(listener);
-                } else {
-                    listener.onSuccess(mTransportName);
-                }
             }
         }
 

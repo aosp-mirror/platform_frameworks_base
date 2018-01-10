@@ -47,7 +47,6 @@ public class WindowAnimator {
     final WindowManagerService mService;
     final Context mContext;
     final WindowManagerPolicy mPolicy;
-    private final WindowSurfacePlacer mWindowPlacerLocked;
 
     /** Is any window animating? */
     private boolean mAnimating;
@@ -74,7 +73,7 @@ public class WindowAnimator {
 
     SparseArray<DisplayContentsAnimator> mDisplayContentsAnimators = new SparseArray<>(2);
 
-    boolean mInitialized = false;
+    private boolean mInitialized = false;
 
     // When set to true the animator will go over all windows after an animation frame is posted and
     // check if some got replaced and can be removed.
@@ -98,7 +97,6 @@ public class WindowAnimator {
         mService = service;
         mContext = service.mContext;
         mPolicy = service.mPolicy;
-        mWindowPlacerLocked = service.mWindowPlacerLocked;
         AnimationThread.getHandler().runWithScissors(
                 () -> mChoreographer = Choreographer.getSfInstance(), 0 /* timeout */);
 
@@ -241,7 +239,7 @@ public class WindowAnimator {
             }
 
             if (hasPendingLayoutChanges || doRequest) {
-                mWindowPlacerLocked.requestTraversal();
+                mService.mWindowPlacerLocked.requestTraversal();
             }
 
             final boolean rootAnimating = mService.mRoot.isSelfOrChildAnimating();
@@ -254,7 +252,7 @@ public class WindowAnimator {
                 Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
             }
             if (!rootAnimating && mLastRootAnimating) {
-                mWindowPlacerLocked.requestTraversal();
+                mService.mWindowPlacerLocked.requestTraversal();
                 mService.mTaskSnapshotController.setPersisterPaused(false);
                 Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
             }

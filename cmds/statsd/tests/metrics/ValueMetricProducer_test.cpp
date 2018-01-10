@@ -249,7 +249,8 @@ TEST(ValueMetricProducerTest, TestAnomalyDetection) {
     alert.set_metric_id(metricId);
     alert.set_trigger_if_sum_gt(130);
     alert.set_num_buckets(2);
-    alert.set_refractory_period_secs(3);
+    const int32_t refPeriodSec = 3;
+    alert.set_refractory_period_secs(refPeriodSec);
 
     ValueMetric metric;
     metric.set_id(metricId);
@@ -297,23 +298,28 @@ TEST(ValueMetricProducerTest, TestAnomalyDetection) {
     // Two events in bucket #0.
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event1);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event2);
-    EXPECT_EQ(anomalyTracker->getLastAnomalyTimestampNs(), -1LL); // Value sum == 30 <= 130.
+    // Value sum == 30 <= 130.
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_DIMENSION_KEY), 0U);
 
     // One event in bucket #2. No alarm as bucket #0 is trashed out.
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event3);
-    EXPECT_EQ(anomalyTracker->getLastAnomalyTimestampNs(), -1LL); // Value sum == 130 <= 130.
+    // Value sum == 130 <= 130.
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_DIMENSION_KEY), 0U);
 
     // Three events in bucket #3.
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event4);
     // Anomaly at event 4 since Value sum == 131 > 130!
-    EXPECT_EQ(anomalyTracker->getLastAnomalyTimestampNs(), (long long)event4->GetTimestampNs());
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_DIMENSION_KEY),
+            event4->GetTimestampNs() / NS_PER_SEC + refPeriodSec);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event5);
     // Event 5 is within 3 sec refractory period. Thus last alarm timestamp is still event4.
-    EXPECT_EQ(anomalyTracker->getLastAnomalyTimestampNs(), (long long)event4->GetTimestampNs());
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_DIMENSION_KEY),
+            event4->GetTimestampNs() / NS_PER_SEC + refPeriodSec);
 
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event6);
     // Anomaly at event 6 since Value sum == 160 > 130 and after refractory period.
-    EXPECT_EQ(anomalyTracker->getLastAnomalyTimestampNs(), (long long)event6->GetTimestampNs());
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_DIMENSION_KEY),
+            event6->GetTimestampNs() / NS_PER_SEC + refPeriodSec);
 }
 
 }  // namespace statsd

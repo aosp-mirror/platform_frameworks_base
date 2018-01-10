@@ -3001,63 +3001,63 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         }
     }
 
-    // Select which transport to use for the next backup operation.
+    /** Selects transport {@code transportName} and returns previous selected transport. */
     @Override
-    public String selectBackupTransport(String transport) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "selectBackupTransport");
+    public String selectBackupTransport(String transportName) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BACKUP, "selectBackupTransport");
 
         final long oldId = Binder.clearCallingIdentity();
         try {
-            String prevTransport = mTransportManager.selectTransport(transport);
-            updateStateForTransport(transport);
-            Slog.v(TAG, "selectBackupTransport() set " + mTransportManager.getCurrentTransportName()
-                    + " returning " + prevTransport);
-            return prevTransport;
+            String previousTransportName = mTransportManager.selectTransport(transportName);
+            updateStateForTransport(transportName);
+            Slog.v(TAG, "selectBackupTransport(transport = " + transportName
+                    + "): previous transport = " + previousTransportName);
+            return previousTransportName;
         } finally {
             Binder.restoreCallingIdentity(oldId);
         }
     }
 
     @Override
-    public void selectBackupTransportAsync(final ComponentName transport,
-            final ISelectBackupTransportCallback listener) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "selectBackupTransportAsync");
+    public void selectBackupTransportAsync(
+            ComponentName transportComponent, ISelectBackupTransportCallback listener) {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.BACKUP, "selectBackupTransportAsync");
 
         final long oldId = Binder.clearCallingIdentity();
-
-        Slog.v(TAG, "selectBackupTransportAsync() called with transport " +
-                transport.flattenToShortString());
-
-        mTransportManager.ensureTransportReady(transport,
-                new TransportManager.TransportReadyCallback() {
-                    @Override
-                    public void onSuccess(String transportName) {
-                        mTransportManager.selectTransport(transportName);
-                        updateStateForTransport(mTransportManager.getCurrentTransportName());
-                        Slog.v(TAG, "Transport successfully selected: "
-                                + transport.flattenToShortString());
-                        try {
-                            listener.onSuccess(transportName);
-                        } catch (RemoteException e) {
-                            // Nothing to do here.
+        try {
+            String transportString = transportComponent.flattenToShortString();
+            Slog.v(TAG, "selectBackupTransportAsync(transport = " + transportString + ")");
+            mBackupHandler.post(
+                    () -> {
+                        String transportName = null;
+                        int result =
+                                mTransportManager.registerAndSelectTransport(transportComponent);
+                        if (result == BackupManager.SUCCESS) {
+                            try {
+                                transportName =
+                                        mTransportManager.getTransportName(transportComponent);
+                                updateStateForTransport(transportName);
+                            } catch (TransportNotRegisteredException e) {
+                                Slog.e(TAG, "Transport got unregistered");
+                                result = BackupManager.ERROR_TRANSPORT_UNAVAILABLE;
+                            }
                         }
-                    }
 
-                    @Override
-                    public void onFailure(int reason) {
-                        Slog.v(TAG,
-                                "Failed to select transport: " + transport.flattenToShortString());
                         try {
-                            listener.onFailure(reason);
+                            if (transportName != null) {
+                                listener.onSuccess(transportName);
+                            } else {
+                                listener.onFailure(result);
+                            }
                         } catch (RemoteException e) {
-                            // Nothing to do here.
+                            Slog.e(TAG, "ISelectBackupTransportCallback listener not available");
                         }
-                    }
-                });
-
-        Binder.restoreCallingIdentity(oldId);
+                    });
+        } finally {
+            Binder.restoreCallingIdentity(oldId);
+        }
     }
 
     private void updateStateForTransport(String newTransportName) {
@@ -3066,18 +3066,23 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 Settings.Secure.BACKUP_TRANSPORT, newTransportName);
 
         // And update our current-dataset bookkeeping
-        IBackupTransport transport = mTransportManager.getTransportBinder(newTransportName);
-        if (transport != null) {
+        String callerLogString = "BMS.updateStateForTransport()";
+        TransportClient transportClient =
+                mTransportManager.getTransportClient(newTransportName, callerLogString);
+        if (transportClient != null) {
             try {
+                IBackupTransport transport = transportClient.connectOrThrow(callerLogString);
                 mCurrentToken = transport.getCurrentRestoreSet();
             } catch (Exception e) {
                 // Oops.  We can't know the current dataset token, so reset and figure it out
                 // when we do the next k/v backup operation on this transport.
                 mCurrentToken = 0;
+                Slog.w(TAG, "Transport " + newTransportName + " not available: current token = 0");
             }
         } else {
-            // The named transport isn't bound at this particular moment, so we can't
-            // know yet what its current dataset token is.  Reset as above.
+            Slog.w(TAG, "Transport " + newTransportName + " not registered: current token = 0");
+            // The named transport isn't registered, so we can't know what its current dataset token
+            // is. Reset as above.
             mCurrentToken = 0;
         }
     }

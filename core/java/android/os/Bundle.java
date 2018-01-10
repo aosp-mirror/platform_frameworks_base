@@ -21,6 +21,7 @@ import android.util.ArrayMap;
 import android.util.Size;
 import android.util.SizeF;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -1271,5 +1272,22 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
             }
         }
         return mMap.toString();
+    }
+
+    /** @hide */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+
+        if (mParcelledData != null) {
+            if (isEmptyParcel()) {
+                proto.write(BundleProto.PARCELLED_DATA_SIZE, 0);
+            } else {
+                proto.write(BundleProto.PARCELLED_DATA_SIZE, mParcelledData.dataSize());
+            }
+        } else {
+            proto.write(BundleProto.MAP_DATA, mMap.toString());
+        }
+
+        proto.end(token);
     }
 }

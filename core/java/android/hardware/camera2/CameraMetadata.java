@@ -336,6 +336,30 @@ public abstract class CameraMetadata<TKey> {
     public static final int LENS_FACING_EXTERNAL = 2;
 
     //
+    // Enumeration values for CameraCharacteristics#LENS_POSE_REFERENCE
+    //
+
+    /**
+     * <p>The value of {@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation} is relative to the optical center of
+     * the largest camera device facing the same direction as this camera.</p>
+     * <p>This default value for API levels before Android P.</p>
+     *
+     * @see CameraCharacteristics#LENS_POSE_TRANSLATION
+     * @see CameraCharacteristics#LENS_POSE_REFERENCE
+     */
+    public static final int LENS_POSE_REFERENCE_PRIMARY_CAMERA = 0;
+
+    /**
+     * <p>The value of {@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation} is relative to the position of the
+     * primary gyroscope of this Android device.</p>
+     * <p>This is the value reported by all devices that support the MOTION_TRACKING capability.</p>
+     *
+     * @see CameraCharacteristics#LENS_POSE_TRANSLATION
+     * @see CameraCharacteristics#LENS_POSE_REFERENCE
+     */
+    public static final int LENS_POSE_REFERENCE_GYROSCOPE = 1;
+
+    //
     // Enumeration values for CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
     //
 
@@ -665,6 +689,7 @@ public abstract class CameraMetadata<TKey> {
      * </ul>
      * </li>
      * <li>The {@link CameraCharacteristics#DEPTH_DEPTH_IS_EXCLUSIVE android.depth.depthIsExclusive} entry is listed by this device.</li>
+     * <li>As of Android P, the {@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference} entry is listed by this device.</li>
      * <li>A LIMITED camera with only the DEPTH_OUTPUT capability does not have to support
      *   normal YUV_420_888, JPEG, and PRIV-format outputs. It only has to support the DEPTH16
      *   format.</li>
@@ -680,6 +705,7 @@ public abstract class CameraMetadata<TKey> {
      * @see CameraCharacteristics#DEPTH_DEPTH_IS_EXCLUSIVE
      * @see CameraCharacteristics#LENS_FACING
      * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
+     * @see CameraCharacteristics#LENS_POSE_REFERENCE
      * @see CameraCharacteristics#LENS_POSE_ROTATION
      * @see CameraCharacteristics#LENS_POSE_TRANSLATION
      * @see CameraCharacteristics#LENS_RADIAL_DISTORTION
@@ -773,6 +799,51 @@ public abstract class CameraMetadata<TKey> {
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO = 9;
+
+    /**
+     * <p>The device supports controls and metadata required for accurate motion tracking for
+     * use cases such as augmented reality, electronic image stabilization, and so on.</p>
+     * <p>This means this camera device has accurate optical calibration and timestamps relative
+     * to the inertial sensors.</p>
+     * <p>This capability requires the camera device to support the following:</p>
+     * <ul>
+     * <li>Capture request templates {@link android.hardware.camera2.CameraDevice#TEMPLATE_MOTION_TRACKING_PREVIEW } and {@link android.hardware.camera2.CameraDevice#TEMPLATE_MOTION_TRACKING_BEST } are defined.</li>
+     * <li>The stream configurations listed in {@link android.hardware.camera2.CameraDevice#createCaptureSession } for MOTION_TRACKING are
+     *   supported, either at 30 or 60fps maximum frame rate.</li>
+     * <li>The following camera characteristics and capture result metadata are provided:<ul>
+     * <li>{@link CameraCharacteristics#LENS_INTRINSIC_CALIBRATION android.lens.intrinsicCalibration}</li>
+     * <li>{@link CameraCharacteristics#LENS_RADIAL_DISTORTION android.lens.radialDistortion}</li>
+     * <li>{@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation}</li>
+     * <li>{@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}</li>
+     * <li>{@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference} with value GYROSCOPE</li>
+     * </ul>
+     * </li>
+     * <li>The {@link CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE android.sensor.info.timestampSource} field has value <code>REALTIME</code>. When compared to
+     *   timestamps from the device's gyroscopes, the clock difference for events occuring at
+     *   the same actual time instant will be less than 1 ms.</li>
+     * <li>The value of the {@link CaptureResult#SENSOR_ROLLING_SHUTTER_SKEW android.sensor.rollingShutterSkew} field is accurate to within 1 ms.</li>
+     * <li>The value of {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime} is guaranteed to be available in the
+     *   capture result.</li>
+     * <li>The {@link CaptureRequest#CONTROL_CAPTURE_INTENT android.control.captureIntent} control supports MOTION_TRACKING to limit maximum
+     *   exposure to 20 milliseconds.</li>
+     * <li>The stream configurations required for MOTION_TRACKING (listed at {@link android.hardware.camera2.CameraDevice#createCaptureSession }) can operate at least at
+     *   30fps; optionally, they can operate at 60fps, and '[60, 60]' is listed in
+     *   {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES android.control.aeAvailableTargetFpsRanges}.</li>
+     * </ul>
+     *
+     * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES
+     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
+     * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
+     * @see CameraCharacteristics#LENS_POSE_REFERENCE
+     * @see CameraCharacteristics#LENS_POSE_ROTATION
+     * @see CameraCharacteristics#LENS_POSE_TRANSLATION
+     * @see CameraCharacteristics#LENS_RADIAL_DISTORTION
+     * @see CaptureRequest#SENSOR_EXPOSURE_TIME
+     * @see CameraCharacteristics#SENSOR_INFO_TIMESTAMP_SOURCE
+     * @see CaptureResult#SENSOR_ROLLING_SHUTTER_SKEW
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_MOTION_TRACKING = 10;
 
     //
     // Enumeration values for CameraCharacteristics#SCALER_CROPPING_TYPE
@@ -1660,6 +1731,16 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#CONTROL_CAPTURE_INTENT
      */
     public static final int CONTROL_CAPTURE_INTENT_MANUAL = 6;
+
+    /**
+     * <p>This request is for a motion tracking use case, where
+     * the application will use camera and inertial sensor data to
+     * locate and track objects in the world.</p>
+     * <p>The camera device auto-exposure routine will limit the exposure time
+     * of the camera to no more than 20 milliseconds, to minimize motion blur.</p>
+     * @see CaptureRequest#CONTROL_CAPTURE_INTENT
+     */
+    public static final int CONTROL_CAPTURE_INTENT_MOTION_TRACKING = 7;
 
     //
     // Enumeration values for CaptureRequest#CONTROL_EFFECT_MODE

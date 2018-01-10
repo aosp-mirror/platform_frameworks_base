@@ -31,6 +31,7 @@ import "frameworks/base/core/proto/android/providers/settings.proto";
 import "frameworks/base/core/proto/android/server/activitymanagerservice.proto";
 import "frameworks/base/core/proto/android/server/alarmmanagerservice.proto";
 import "frameworks/base/core/proto/android/server/fingerprint.proto";
+import "frameworks/base/core/proto/android/server/jobscheduler.proto";
 import "frameworks/base/core/proto/android/server/powermanagerservice.proto";
 import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
 import "frameworks/base/core/proto/android/service/appwidget.proto";
@@ -247,4 +248,8 @@ message IncidentProto {
         (section).args = "graphicsstats --proto"
     ];
 
+    optional com.android.server.job.JobSchedulerServiceDumpProto jobscheduler = 3020 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "jobscheduler --proto"
+    ];
 }

@@ -695,11 +695,11 @@ public class WifiManager {
      * representing if the scan was successful or not.
      * Scans may fail for multiple reasons, these may include:
      * <ol>
-     * <li>A non-privileged app requested too many scans in a certain period of time.
-     * This may lead to additional scan request rejections via "scan throttling".
-     * See
-     * <a href="https://developer.android.com/preview/features/background-location-limits.html">
-     * here</a> for details.
+     * <li>An app requested too many scans in a certain period of time.
+     * This may lead to additional scan request rejections via "scan throttling" for both
+     * foreground and background apps.
+     * Note: Apps holding android.Manifest.permission.NETWORK_SETTINGS permission are
+     * exempted from scan throttling.
      * </li>
      * <li>The device is idle and scanning is disabled.</li>
      * <li>Wifi hardware reported a scan failure.</li>
@@ -1596,7 +1596,10 @@ public class WifiManager {
      * {@code ((WifiManager) getSystemService(WIFI_SERVICE)).getScanResults()}</li>
      * </ol>
      * @return {@code true} if the operation succeeded, i.e., the scan was initiated.
+     * @deprecated The ability for apps to trigger scan requests will be removed in a future
+     * release.
      */
+    @Deprecated
     public boolean startScan() {
         return startScan(null);
     }
@@ -1612,53 +1615,6 @@ public class WifiManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    /**
-     * startLocationRestrictedScan()
-     * Trigger a scan which will not make use of DFS channels and is thus not suitable for
-     * establishing wifi connection.
-     * @deprecated This API is nolonger supported.
-     * Use {@link android.net.wifi.WifiScanner} API
-     * @hide
-     * @removed
-     */
-    @Deprecated
-    @SystemApi
-    @SuppressLint("Doclava125")
-    public boolean startLocationRestrictedScan(WorkSource workSource) {
-        return false;
-    }
-
-    /**
-     * Check if the Batched Scan feature is supported.
-     *
-     * @return false if not supported.
-     * @deprecated This API is nolonger supported.
-     * Use {@link android.net.wifi.WifiScanner} API
-     * @hide
-     * @removed
-     */
-    @Deprecated
-    @SystemApi
-    @SuppressLint("Doclava125")
-    public boolean isBatchedScanSupported() {
-        return false;
-    }
-
-    /**
-     * Retrieve the latest batched scan result.  This should be called immediately after
-     * {@link BATCHED_SCAN_RESULTS_AVAILABLE_ACTION} is received.
-     * @deprecated This API is nolonger supported.
-     * Use {@link android.net.wifi.WifiScanner} API
-     * @hide
-     * @removed
-     */
-    @Deprecated
-    @SystemApi
-    @SuppressLint("Doclava125")
-    public List<BatchedScanResult> getBatchedScanResults() {
-        return null;
     }
 
     /**

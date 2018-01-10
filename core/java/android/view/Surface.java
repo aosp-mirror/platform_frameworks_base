@@ -182,6 +182,11 @@ public class Surface implements Parcelable {
      * SurfaceTexture}, which can attach them to an OpenGL ES texture via {@link
      * SurfaceTexture#updateTexImage}.
      *
+     * Please note that holding onto the Surface created here is not enough to
+     * keep the provided SurfaceTexture from being reclaimed.  In that sense,
+     * the Surface will act like a
+     * {@link java.lang.ref.WeakReference weak reference} to the SurfaceTexture.
+     *
      * @param surfaceTexture The {@link SurfaceTexture} that is updated by this
      * Surface.
      * @throws OutOfResourcesException if the surface could not be created.

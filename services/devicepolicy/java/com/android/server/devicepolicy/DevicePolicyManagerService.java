@@ -7190,13 +7190,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
 
-        final int userId = mInjector.userHandleGetCallingUserId();
         synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            if (!isUserAffiliatedWithDeviceLocked(userId)) {
-                throw new SecurityException("Admin " + who +
-                        " is neither the device owner or affiliated user's profile owner.");
-            }
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
             long token = mInjector.binderClearCallingIdentity();
             try {
                 mLockPatternUtils.setDeviceOwnerInfo(info != null ? info.toString() : null);
@@ -9663,6 +9658,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         " is neither the device owner or affiliated user's profile owner.");
             }
         }
+        if (isManagedProfile(userId)) {
+            throw new SecurityException("Managed profile cannot disable keyguard");
+        }
 
         long ident = mInjector.binderClearCallingIdentity();
         try {
@@ -9688,6 +9686,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             if (!isUserAffiliatedWithDeviceLocked(userId)) {
                 throw new SecurityException("Admin " + who +
                         " is neither the device owner or affiliated user's profile owner.");
+            }
+            if (isManagedProfile(userId)) {
+                throw new SecurityException("Managed profile cannot disable status bar");
             }
             DevicePolicyData policy = getUserData(userId);
             if (policy.mStatusBarDisabled != disabled) {

@@ -407,11 +407,11 @@ public class WorkSource implements Parcelable {
     }
 
     public boolean remove(WorkSource other) {
-        if (mNum <= 0 || other.mNum <= 0) {
+        if (isEmpty() || other.isEmpty()) {
             return false;
         }
 
-        boolean uidRemoved = false;
+        boolean uidRemoved;
         if (mNames == null && other.mNames == null) {
             uidRemoved = removeUids(other);
         } else {
@@ -427,13 +427,8 @@ public class WorkSource implements Parcelable {
         }
 
         boolean chainRemoved = false;
-        if (other.mChains != null) {
-            if (mChains != null) {
-                chainRemoved = mChains.removeAll(other.mChains);
-            }
-        } else if (mChains != null) {
-            mChains.clear();
-            chainRemoved = true;
+        if (other.mChains != null && mChains != null) {
+            chainRemoved = mChains.removeAll(other.mChains);
         }
 
         return uidRemoved || chainRemoved;

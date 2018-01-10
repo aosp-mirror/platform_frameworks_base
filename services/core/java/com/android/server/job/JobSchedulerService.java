@@ -64,6 +64,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
@@ -74,6 +75,8 @@ import com.android.internal.util.DumpUtils;
 import com.android.server.DeviceIdleController;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.job.JobSchedulerServiceDumpProto.ActiveJob;
+import com.android.server.job.JobSchedulerServiceDumpProto.PendingJob;
 import com.android.server.job.JobStore.JobStatusFunctor;
 import com.android.server.job.controllers.AppIdleController;
 import com.android.server.job.controllers.BackgroundJobsController;
@@ -196,7 +199,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
     int mMaxActiveJobs = 1;
 
     /**
-     * Which uids are currently in the foreground.
+     * A mapping of which uids are currently in the foreground to their effective priority.
      */
     final SparseIntArray mUidPriorityOverride = new SparseIntArray();
 
@@ -553,6 +556,36 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 pw.print(STANDBY_BEATS[i]);
             }
             pw.println('}');
+        }
+
+        void dump(ProtoOutputStream proto, long fieldId) {
+            final long token = proto.start(fieldId);
+
+            proto.write(ConstantsProto.MIN_IDLE_COUNT, MIN_IDLE_COUNT);
+            proto.write(ConstantsProto.MIN_CHARGING_COUNT, MIN_CHARGING_COUNT);
+            proto.write(ConstantsProto.MIN_BATTERY_NOT_LOW_COUNT, MIN_BATTERY_NOT_LOW_COUNT);
+            proto.write(ConstantsProto.MIN_STORAGE_NOT_LOW_COUNT, MIN_STORAGE_NOT_LOW_COUNT);
+            proto.write(ConstantsProto.MIN_CONNECTIVITY_COUNT, MIN_CONNECTIVITY_COUNT);
+            proto.write(ConstantsProto.MIN_CONTENT_COUNT, MIN_CONTENT_COUNT);
+            proto.write(ConstantsProto.MIN_READY_JOBS_COUNT, MIN_READY_JOBS_COUNT);
+            proto.write(ConstantsProto.HEAVY_USE_FACTOR, HEAVY_USE_FACTOR);
+            proto.write(ConstantsProto.MODERATE_USE_FACTOR, MODERATE_USE_FACTOR);
+            proto.write(ConstantsProto.FG_JOB_COUNT, FG_JOB_COUNT);
+            proto.write(ConstantsProto.BG_NORMAL_JOB_COUNT, BG_NORMAL_JOB_COUNT);
+            proto.write(ConstantsProto.BG_MODERATE_JOB_COUNT, BG_MODERATE_JOB_COUNT);
+            proto.write(ConstantsProto.BG_LOW_JOB_COUNT, BG_LOW_JOB_COUNT);
+            proto.write(ConstantsProto.BG_CRITICAL_JOB_COUNT, BG_CRITICAL_JOB_COUNT);
+            proto.write(ConstantsProto.MAX_STANDARD_RESCHEDULE_COUNT, MAX_STANDARD_RESCHEDULE_COUNT);
+            proto.write(ConstantsProto.MAX_WORK_RESCHEDULE_COUNT, MAX_WORK_RESCHEDULE_COUNT);
+            proto.write(ConstantsProto.MIN_LINEAR_BACKOFF_TIME_MS, MIN_LINEAR_BACKOFF_TIME);
+            proto.write(ConstantsProto.MIN_EXP_BACKOFF_TIME_MS, MIN_EXP_BACKOFF_TIME);
+            proto.write(ConstantsProto.STANDBY_HEARTBEAT_TIME_MS, STANDBY_HEARTBEAT_TIME);
+
+            for (int period : STANDBY_BEATS) {
+                proto.write(ConstantsProto.STANDBY_BEATS, period);
+            }
+
+            proto.end(token);
         }
     }
 
@@ -2333,9 +2366,46 @@ public final class JobSchedulerService extends com.android.server.SystemService
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpAndUsageStatsPermission(getContext(), TAG, pw)) return;
 
+            int filterUid = -1;
+            boolean proto = false;
+            if (!ArrayUtils.isEmpty(args)) {
+                int opti = 0;
+                while (opti < args.length) {
+                    String arg = args[opti];
+                    if ("-h".equals(arg)) {
+                        dumpHelp(pw);
+                        return;
+                    } else if ("-a".equals(arg)) {
+                        // Ignore, we always dump all.
+                    } else if ("--proto".equals(arg)) {
+                        proto = true;
+                    } else if (arg.length() > 0 && arg.charAt(0) == '-') {
+                        pw.println("Unknown option: " + arg);
+                        return;
+                    } else {
+                        break;
+                    }
+                    opti++;
+                }
+                if (opti < args.length) {
+                    String pkg = args[opti];
+                    try {
+                        filterUid = getContext().getPackageManager().getPackageUid(pkg,
+                                PackageManager.MATCH_ANY_USER);
+                    } catch (NameNotFoundException ignored) {
+                        pw.println("Invalid package: " + pkg);
+                        return;
+                    }
+                }
+            }
+
             long identityToken = Binder.clearCallingIdentity();
             try {
-                JobSchedulerService.this.dumpInternal(pw, args);
+                if (proto) {
+                    JobSchedulerService.this.dumpInternalProto(fd, filterUid);
+                } else {
+                    JobSchedulerService.this.dumpInternal(pw, filterUid);
+                }
             } finally {
                 Binder.restoreCallingIdentity(identityToken);
             }
@@ -2600,37 +2670,24 @@ public final class JobSchedulerService extends com.android.server.SystemService
         pw.println("  [package] is an optional package name to limit the output to.");
     }
 
-    void dumpInternal(final PrintWriter pw, String[] args) {
-        int filterUid = -1;
-        if (!ArrayUtils.isEmpty(args)) {
-            int opti = 0;
-            while (opti < args.length) {
-                String arg = args[opti];
-                if ("-h".equals(arg)) {
-                    dumpHelp(pw);
-                    return;
-                } else if ("-a".equals(arg)) {
-                    // Ignore, we always dump all.
-                } else if (arg.length() > 0 && arg.charAt(0) == '-') {
-                    pw.println("Unknown option: " + arg);
-                    return;
-                } else {
-                    break;
+    /** Sort jobs by caller UID, then by Job ID. */
+    private static void sortJobs(List<JobStatus> jobs) {
+        Collections.sort(jobs, new Comparator<JobStatus>() {
+            @Override
+            public int compare(JobStatus o1, JobStatus o2) {
+                int uid1 = o1.getUid();
+                int uid2 = o2.getUid();
+                int id1 = o1.getJobId();
+                int id2 = o2.getJobId();
+                if (uid1 != uid2) {
+                    return uid1 < uid2 ? -1 : 1;
                 }
-                opti++;
+                return id1 < id2 ? -1 : (id1 > id2 ? 1 : 0);
             }
-            if (opti < args.length) {
-                String pkg = args[opti];
-                try {
-                    filterUid = getContext().getPackageManager().getPackageUid(pkg,
-                            PackageManager.MATCH_ANY_USER);
-                } catch (NameNotFoundException ignored) {
-                    pw.println("Invalid package: " + pkg);
-                    return;
-                }
-            }
-        }
+        });
+    }
 
+    void dumpInternal(final PrintWriter pw, int filterUid) {
         final int filterUidFinal = UserHandle.getAppId(filterUid);
         final long nowElapsed = sElapsedRealtimeClock.millis();
         final long nowUptime = sUptimeMillisClock.millis();
@@ -2643,19 +2700,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
             pw.println(" jobs:");
             if (mJobs.size() > 0) {
                 final List<JobStatus> jobs = mJobs.mJobSet.getAllJobs();
-                Collections.sort(jobs, new Comparator<JobStatus>() {
-                    @Override
-                    public int compare(JobStatus o1, JobStatus o2) {
-                        int uid1 = o1.getUid();
-                        int uid2 = o2.getUid();
-                        int id1 = o1.getJobId();
-                        int id2 = o2.getJobId();
-                        if (uid1 != uid2) {
-                            return uid1 < uid2 ? -1 : 1;
-                        }
-                        return id1 < id2 ? -1 : (id1 > id2 ? 1 : 0);
-                    }
-                });
+                sortJobs(jobs);
                 for (JobStatus job : jobs) {
                     pw.print("  JOB #"); job.printUniqueId(pw); pw.print(": ");
                     pw.println(job.toShortStringExceptUniqueId());
@@ -2791,5 +2836,145 @@ public final class JobSchedulerService extends com.android.server.SystemService
             pw.println(mJobs.getPersistStats());
         }
         pw.println();
+    }
+
+    void dumpInternalProto(final FileDescriptor fd, int filterUid) {
+        ProtoOutputStream proto = new ProtoOutputStream(fd);
+        final int filterUidFinal = UserHandle.getAppId(filterUid);
+        final long nowElapsed = sElapsedRealtimeClock.millis();
+        final long nowUptime = sUptimeMillisClock.millis();
+
+        synchronized (mLock) {
+            mConstants.dump(proto, JobSchedulerServiceDumpProto.SETTINGS);
+            for (int u : mStartedUsers) {
+                proto.write(JobSchedulerServiceDumpProto.STARTED_USERS, u);
+            }
+            if (mJobs.size() > 0) {
+                final List<JobStatus> jobs = mJobs.mJobSet.getAllJobs();
+                sortJobs(jobs);
+                for (JobStatus job : jobs) {
+                    final long rjToken = proto.start(JobSchedulerServiceDumpProto.REGISTERED_JOBS);
+                    job.writeToShortProto(proto, JobSchedulerServiceDumpProto.RegisteredJob.INFO);
+
+                    // Skip printing details if the caller requested a filter
+                    if (!job.shouldDump(filterUidFinal)) {
+                        continue;
+                    }
+
+                    job.dump(proto, JobSchedulerServiceDumpProto.RegisteredJob.DUMP, true, nowElapsed);
+
+                    // isReadyToBeExecuted
+                    proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_JOB_READY,
+                            job.isReady());
+                    proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_USER_STARTED,
+                            ArrayUtils.contains(mStartedUsers, job.getUserId()));
+                    proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_JOB_PENDING,
+                            mPendingJobs.contains(job));
+                    proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_JOB_CURRENTLY_ACTIVE,
+                            isCurrentlyActiveLocked(job));
+                    proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_UID_BACKING_UP,
+                            mBackingUpUids.indexOfKey(job.getSourceUid()) >= 0);
+                    boolean componentPresent = false;
+                    try {
+                        componentPresent = (AppGlobals.getPackageManager().getServiceInfo(
+                                job.getServiceComponent(),
+                                PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
+                                job.getUserId()) != null);
+                    } catch (RemoteException e) {
+                    }
+                    proto.write(JobSchedulerServiceDumpProto.RegisteredJob.IS_COMPONENT_PRESENT,
+                            componentPresent);
+
+                    proto.end(rjToken);
+                }
+            }
+            for (StateController controller : mControllers) {
+                controller.dumpControllerStateLocked(
+                        proto, JobSchedulerServiceDumpProto.CONTROLLERS, filterUidFinal);
+            }
+            for (int i=0; i< mUidPriorityOverride.size(); i++) {
+                int uid = mUidPriorityOverride.keyAt(i);
+                if (filterUidFinal == -1 || filterUidFinal == UserHandle.getAppId(uid)) {
+                    long pToken = proto.start(JobSchedulerServiceDumpProto.PRIORITY_OVERRIDES);
+                    proto.write(JobSchedulerServiceDumpProto.PriorityOverride.UID, uid);
+                    proto.write(JobSchedulerServiceDumpProto.PriorityOverride.OVERRIDE_VALUE,
+                            mUidPriorityOverride.valueAt(i));
+                    proto.end(pToken);
+                }
+            }
+            for (int i = 0; i < mBackingUpUids.size(); i++) {
+                int uid = mBackingUpUids.keyAt(i);
+                if (filterUidFinal == -1 || filterUidFinal == UserHandle.getAppId(uid)) {
+                    proto.write(JobSchedulerServiceDumpProto.BACKING_UP_UIDS, uid);
+                }
+            }
+
+            mJobPackageTracker.dump(proto, JobSchedulerServiceDumpProto.PACKAGE_TRACKER,
+                    filterUidFinal);
+            mJobPackageTracker.dumpHistory(proto, JobSchedulerServiceDumpProto.HISTORY,
+                    filterUidFinal);
+
+            for (JobStatus job : mPendingJobs) {
+                final long pjToken = proto.start(JobSchedulerServiceDumpProto.PENDING_JOBS);
+
+                job.writeToShortProto(proto, PendingJob.INFO);
+                job.dump(proto, PendingJob.DUMP, false, nowElapsed);
+                int priority = evaluateJobPriorityLocked(job);
+                if (priority != JobInfo.PRIORITY_DEFAULT) {
+                    proto.write(PendingJob.EVALUATED_PRIORITY, priority);
+                }
+                proto.write(PendingJob.ENQUEUED_DURATION_MS, nowUptime - job.madePending);
+
+                proto.end(pjToken);
+            }
+            for (JobServiceContext jsc : mActiveServices) {
+                final long ajToken = proto.start(JobSchedulerServiceDumpProto.ACTIVE_JOBS);
+                final JobStatus job = jsc.getRunningJobLocked();
+
+                if (job == null) {
+                    final long ijToken = proto.start(ActiveJob.INACTIVE);
+
+                        proto.write(ActiveJob.InactiveJob.TIME_SINCE_STOPPED_MS,
+                                nowElapsed - jsc.mStoppedTime);
+                    if (jsc.mStoppedReason != null) {
+                        proto.write(ActiveJob.InactiveJob.STOPPED_REASON,
+                                jsc.mStoppedReason);
+                    }
+
+                    proto.end(ijToken);
+                } else {
+                    final long rjToken = proto.start(ActiveJob.RUNNING);
+
+                    job.writeToShortProto(proto, ActiveJob.RunningJob.INFO);
+
+                    proto.write(ActiveJob.RunningJob.RUNNING_DURATION_MS,
+                            nowElapsed - jsc.getExecutionStartTimeElapsed());
+                    proto.write(ActiveJob.RunningJob.TIME_UNTIL_TIMEOUT_MS,
+                            jsc.getTimeoutElapsed() - nowElapsed);
+
+                    job.dump(proto, ActiveJob.RunningJob.DUMP, false, nowElapsed);
+
+                    int priority = evaluateJobPriorityLocked(jsc.getRunningJobLocked());
+                    if (priority != JobInfo.PRIORITY_DEFAULT) {
+                        proto.write(ActiveJob.RunningJob.EVALUATED_PRIORITY, priority);
+                    }
+
+                    proto.write(ActiveJob.RunningJob.TIME_SINCE_MADE_ACTIVE_MS,
+                            nowUptime - job.madeActive);
+                    proto.write(ActiveJob.RunningJob.PENDING_DURATION_MS,
+                            job.madeActive - job.madePending);
+
+                    proto.end(rjToken);
+                }
+                proto.end(ajToken);
+            }
+            if (filterUid == -1) {
+                proto.write(JobSchedulerServiceDumpProto.IS_READY_TO_ROCK, mReadyToRock);
+                proto.write(JobSchedulerServiceDumpProto.REPORTED_ACTIVE, mReportedActive);
+                proto.write(JobSchedulerServiceDumpProto.MAX_ACTIVE_JOBS, mMaxActiveJobs);
+            }
+        }
+
+        proto.flush();
     }
 }

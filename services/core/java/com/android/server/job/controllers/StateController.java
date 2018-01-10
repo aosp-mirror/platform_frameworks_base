@@ -17,6 +17,7 @@
 package com.android.server.job.controllers;
 
 import android.content.Context;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateChangedListener;
@@ -65,4 +66,6 @@ public abstract class StateController {
     }
 
     public abstract void dumpControllerStateLocked(PrintWriter pw, int filterUid);
+    public abstract void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId,
+            int filterUid);
 }

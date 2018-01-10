@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
@@ -31,6 +30,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
+
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
@@ -56,7 +56,6 @@ import static com.android.server.wm.proto.AppWindowTokenProto.WINDOW_TOKEN;
 
 import android.annotation.CallSuper;
 import android.app.Activity;
-import android.app.WindowConfiguration.WindowingMode;
 import android.content.res.Configuration;
 import android.graphics.GraphicBuffer;
 import android.graphics.Point;
@@ -69,13 +68,14 @@ import android.os.Trace;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
-import android.view.SurfaceControl.Transaction;
-import android.view.animation.Animation;
 import android.view.IApplicationToken;
 import android.view.SurfaceControl;
+import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.animation.Animation;
 
+import com.android.internal.R;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.input.InputApplicationHandle;
 import com.android.server.policy.WindowManagerPolicy.StartingSurface;
@@ -1773,6 +1773,37 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         clearThumbnail();
         mThumbnail = new AppWindowThumbnail(getPendingTransaction(), this, thumbnailHeader);
         mThumbnail.startAnimation(getPendingTransaction(), loadThumbnailAnimation(thumbnailHeader));
+    }
+
+    /**
+     * Attaches a surface with a thumbnail for the
+     * {@link android.app.ActivityOptions#ANIM_OPEN_CROSS_PROFILE_APPS} animation.
+     */
+    void attachCrossProfileAppsThumbnailAnimation() {
+        if (!isReallyAnimating()) {
+            return;
+        }
+        clearThumbnail();
+
+        final WindowState win = findMainWindow();
+        if (win == null) {
+            return;
+        }
+        final Rect frame = win.mFrame;
+        final int thumbnailDrawableRes = getTask().mUserId == mService.mCurrentUserId
+                ? R.drawable.ic_account_circle
+                : R.drawable.ic_corp_badge_no_background;
+        final GraphicBuffer thumbnail =
+                mService.mAppTransition
+                        .createCrossProfileAppsThumbnail(thumbnailDrawableRes, frame);
+        if (thumbnail == null) {
+            return;
+        }
+        mThumbnail = new AppWindowThumbnail(getPendingTransaction(), this, thumbnail);
+        final Animation animation =
+                mService.mAppTransition.createCrossProfileAppsThumbnailAnimationLocked(win.mFrame);
+        mThumbnail.startAnimation(getPendingTransaction(), animation, new Point(frame.left,
+                frame.top));
     }
 
     private Animation loadThumbnailAnimation(GraphicBuffer thumbnailHeader) {

@@ -25,10 +25,12 @@ import android.content.IntentFilter;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateChangedListener;
+import com.android.server.job.StateControllerProto;
 import com.android.server.storage.DeviceStorageMonitorService;
 
 import java.io.PrintWriter;
@@ -119,7 +121,7 @@ public final class StorageController extends StateController {
          */
         private boolean mStorageLow;
         /** Sequence number of last broadcast. */
-        private int mLastBatterySeq = -1;
+        private int mLastStorageSeq = -1;
 
         public StorageTracker() {
         }
@@ -139,7 +141,7 @@ public final class StorageController extends StateController {
         }
 
         public int getSeq() {
-            return mLastBatterySeq;
+            return mLastStorageSeq;
         }
 
         @Override
@@ -150,8 +152,8 @@ public final class StorageController extends StateController {
         @VisibleForTesting
         public void onReceiveInternal(Intent intent) {
             final String action = intent.getAction();
-            mLastBatterySeq = intent.getIntExtra(DeviceStorageMonitorService.EXTRA_SEQUENCE,
-                    mLastBatterySeq);
+            mLastStorageSeq = intent.getIntExtra(DeviceStorageMonitorService.EXTRA_SEQUENCE,
+                    mLastStorageSeq);
             if (Intent.ACTION_DEVICE_STORAGE_LOW.equals(action)) {
                 if (DEBUG) {
                     Slog.d(TAG, "Available storage too low to do work. @ "
@@ -189,5 +191,31 @@ public final class StorageController extends StateController {
             UserHandle.formatUid(pw, js.getSourceUid());
             pw.println();
         }
+    }
+
+    @Override
+    public void dumpControllerStateLocked(ProtoOutputStream proto, long fieldId, int filterUid) {
+        final long token = proto.start(fieldId);
+        final long mToken = proto.start(StateControllerProto.STORAGE);
+
+        proto.write(StateControllerProto.StorageController.IS_STORAGE_NOT_LOW,
+                mStorageTracker.isStorageNotLow());
+        proto.write(StateControllerProto.StorageController.LAST_BROADCAST_SEQUENCE_NUMBER,
+                mStorageTracker.getSeq());
+
+        for (int i = 0; i < mTrackedTasks.size(); i++) {
+            final JobStatus js = mTrackedTasks.valueAt(i);
+            if (!js.shouldDump(filterUid)) {
+                continue;
+            }
+            final long jsToken = proto.start(StateControllerProto.StorageController.TRACKED_JOBS);
+            js.writeToShortProto(proto, StateControllerProto.StorageController.TrackedJob.INFO);
+            proto.write(StateControllerProto.StorageController.TrackedJob.SOURCE_UID,
+                    js.getSourceUid());
+            proto.end(jsToken);
+        }
+
+        proto.end(mToken);
+        proto.end(token);
     }
 }

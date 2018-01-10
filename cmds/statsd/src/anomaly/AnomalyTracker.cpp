@@ -162,45 +162,23 @@ int64_t AnomalyTracker::getSumOverPastBuckets(const HashableDimensionKey& key) c
     return 0;
 }
 
-bool AnomalyTracker::detectAnomaly(const int64_t& currentBucketNum,
-                                   const DimToValMap& currentBucket) {
-    if (currentBucketNum > mMostRecentBucketNum + 1) {
-        addPastBucket(nullptr, currentBucketNum - 1);
-    }
-    for (auto itr = currentBucket.begin(); itr != currentBucket.end(); itr++) {
-        if (itr->second + getSumOverPastBuckets(itr->first) > mAlert.trigger_if_sum_gt()) {
-            return true;
-        }
-    }
-    // In theory, we also need to check the dimsions not in the current bucket. In single-thread
-    // mode, usually we could avoid the following loops.
-    for (auto itr = mSumOverPastBuckets.begin(); itr != mSumOverPastBuckets.end(); itr++) {
-        if (itr->second > mAlert.trigger_if_sum_gt()) {
-            return true;
-        }
-    }
-    return false;
-}
-
 bool AnomalyTracker::detectAnomaly(const int64_t& currentBucketNum, const HashableDimensionKey& key,
                                    const int64_t& currentBucketValue) {
     if (currentBucketNum > mMostRecentBucketNum + 1) {
+        // TODO: This creates a needless 0 entry in mSumOverPastBuckets. Fix this.
         addPastBucket(key, 0, currentBucketNum - 1);
     }
     return mAlert.has_trigger_if_sum_gt()
             && getSumOverPastBuckets(key) + currentBucketValue > mAlert.trigger_if_sum_gt();
 }
 
-void AnomalyTracker::declareAnomaly(const uint64_t& timestampNs) {
-    // TODO: This should also take in the const HashableDimensionKey& key, to pass
-    //       more details to incidentd and to make mRefractoryPeriodEndsSec key-specific.
+void AnomalyTracker::declareAnomaly(const uint64_t& timestampNs, const HashableDimensionKey& key) {
     // TODO: Why receive timestamp? RefractoryPeriod should always be based on real time right now.
-    if (isInRefractoryPeriod(timestampNs)) {
+    if (isInRefractoryPeriod(timestampNs, key)) {
         VLOG("Skipping anomaly declaration since within refractory period");
         return;
     }
-    // TODO(guardrail): Consider guarding against too short refractory periods.
-    mLastAnomalyTimestampNs = timestampNs;
+    mRefractoryPeriodEndsSec[key] = (timestampNs / NS_PER_SEC) + mAlert.refractory_period_secs();
 
     // TODO: If we had access to the bucket_size_millis, consider calling resetStorage()
     // if (mAlert.refractory_period_secs() > mNumOfPastBuckets * bucketSizeNs) { resetStorage(); }
@@ -208,7 +186,7 @@ void AnomalyTracker::declareAnomaly(const uint64_t& timestampNs) {
     if (!mSubscriptions.empty()) {
         if (mAlert.has_id()) {
             ALOGI("An anomaly (%llu) has occurred! Informing subscribers.",mAlert.id());
-            informSubscribers();
+            informSubscribers(key);
         } else {
             ALOGI("An anomaly (with no id) has occurred! Not informing any subscribers.");
         }
@@ -218,6 +196,7 @@ void AnomalyTracker::declareAnomaly(const uint64_t& timestampNs) {
 
     StatsdStats::getInstance().noteAnomalyDeclared(mConfigKey, mAlert.id());
 
+    // TODO: This should also take in the const HashableDimensionKey& key?
     android::util::stats_write(android::util::ANOMALY_DETECTED, mConfigKey.GetUid(),
                                mConfigKey.GetId(), mAlert.id());
 }
@@ -227,24 +206,24 @@ void AnomalyTracker::detectAndDeclareAnomaly(const uint64_t& timestampNs,
                                              const HashableDimensionKey& key,
                                              const int64_t& currentBucketValue) {
     if (detectAnomaly(currBucketNum, key, currentBucketValue)) {
-        declareAnomaly(timestampNs);
+        declareAnomaly(timestampNs, key);
     }
 }
 
-void AnomalyTracker::detectAndDeclareAnomaly(const uint64_t& timestampNs,
-                                             const int64_t& currBucketNum,
-                                             const DimToValMap& currentBucket) {
-    if (detectAnomaly(currBucketNum, currentBucket)) {
-        declareAnomaly(timestampNs);
+bool AnomalyTracker::isInRefractoryPeriod(const uint64_t& timestampNs,
+                                          const HashableDimensionKey& key) {
+    const auto& it = mRefractoryPeriodEndsSec.find(key);
+    if (it != mRefractoryPeriodEndsSec.end()) {
+        if ((timestampNs / NS_PER_SEC) <= it->second) {
+            return true;
+        } else {
+            mRefractoryPeriodEndsSec.erase(key);
+        }
     }
+    return false;
 }
 
-bool AnomalyTracker::isInRefractoryPeriod(const uint64_t& timestampNs) const {
-    return mLastAnomalyTimestampNs >= 0 &&
-            timestampNs - mLastAnomalyTimestampNs <= mAlert.refractory_period_secs() * NS_PER_SEC;
-}
-
-void AnomalyTracker::informSubscribers() {
+void AnomalyTracker::informSubscribers(const HashableDimensionKey& key) {
     VLOG("informSubscribers called.");
     if (mSubscriptions.empty()) {
         ALOGE("Attempt to call with no subscribers.");

@@ -3376,9 +3376,7 @@ public class NotificationManagerService extends SystemService {
                     mListenersDisablingEffects.valueAt(i);
                 for (int j = 0; j < listeners.size(); j++) {
                     final ManagedServiceInfo listener = listeners.valueAt(i);
-                    listenersToken = proto.start(ListenersDisablingEffectsProto.LISTENERS);
-                    listener.toProto(proto, null);
-                    proto.end(listenersToken);
+                    listener.writeToProto(proto, ListenersDisablingEffectsProto.LISTENERS, null);
                 }
 
                 proto.end(effectsToken);

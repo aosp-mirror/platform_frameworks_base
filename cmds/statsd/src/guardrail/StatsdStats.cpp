@@ -85,6 +85,14 @@ StatsdStats& StatsdStats::getInstance() {
     return statsInstance;
 }
 
+void StatsdStats::addToIceBoxLocked(const StatsdStatsReport_ConfigStats& stats) {
+    // The size of mIceBox grows strictly by one at a time. It won't be > kMaxIceBoxSize.
+    if (mIceBox.size() == kMaxIceBoxSize) {
+        mIceBox.pop_front();
+    }
+    mIceBox.push_back(stats);
+}
+
 void StatsdStats::noteConfigReceived(const ConfigKey& key, int metricsCount, int conditionsCount,
                                      int matchersCount, int alertsCount, bool isValid) {
     lock_guard<std::mutex> lock(mLock);
@@ -107,7 +115,7 @@ void StatsdStats::noteConfigReceived(const ConfigKey& key, int metricsCount, int
         mConfigStats[key] = configStats;
     } else {
         configStats.set_deletion_time_sec(nowTimeSec);
-        mIceBox.push_back(configStats);
+        addToIceBoxLocked(configStats);
     }
 }
 
@@ -123,7 +131,7 @@ void StatsdStats::noteConfigRemovedInternalLocked(const ConfigKey& key) {
         mMetricsStats.erase(key);
         mAlertStats.erase(key);
         mConditionStats.erase(key);
-        mIceBox.push_back(it->second);
+        addToIceBoxLocked(it->second);
         mConfigStats.erase(it);
     }
 }

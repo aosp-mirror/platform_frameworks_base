@@ -17,23 +17,23 @@
 package android.telephony;
 
 /**
- * Contains radio access network related constants.
+ * Contains access network related constants.
  */
-public final class RadioNetworkConstants {
+public final class AccessNetworkConstants {
 
-    public static final class RadioAccessNetworks {
+    public static final class AccessNetworkType {
         public static final int GERAN = 1;
         public static final int UTRAN = 2;
         public static final int EUTRAN = 3;
-        /** @hide */
         public static final int CDMA2000 = 4;
+        public static final int IWLAN = 5;
     }
 
     /**
      * Frenquency bands for GERAN.
      * http://www.etsi.org/deliver/etsi_ts/145000_145099/145005/14.00.00_60/ts_145005v140000p.pdf
      */
-    public static final class GeranBands {
+    public static final class GeranBand {
         public static final int BAND_T380 = 1;
         public static final int BAND_T410 = 2;
         public static final int BAND_450 = 3;
@@ -54,7 +54,7 @@ public final class RadioNetworkConstants {
      * Frenquency bands for UTRAN.
      * http://www.etsi.org/deliver/etsi_ts/125100_125199/125104/13.03.00_60/ts_125104v130p.pdf
      */
-    public static final class UtranBands {
+    public static final class UtranBand {
         public static final int BAND_1 = 1;
         public static final int BAND_2 = 2;
         public static final int BAND_3 = 3;
@@ -83,7 +83,7 @@ public final class RadioNetworkConstants {
      * Frenquency bands for EUTRAN.
      * http://www.etsi.org/deliver/etsi_ts/136100_136199/136101/14.03.00_60/ts_136101v140p.pdf
      */
-    public static final class EutranBands {
+    public static final class EutranBand {
         public static final int BAND_1 = 1;
         public static final int BAND_2 = 2;
         public static final int BAND_3 = 3;

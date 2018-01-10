@@ -210,7 +210,8 @@ TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
     alert.set_metric_id(metricId);
     alert.set_trigger_if_sum_gt(32 * NS_PER_SEC);
     alert.set_num_buckets(2);
-    alert.set_refractory_period_secs(1);
+    const int32_t refPeriodSec = 1;
+    alert.set_refractory_period_secs(refPeriodSec);
 
     unordered_map<HashableDimensionKey, vector<DurationBucket>> buckets;
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
@@ -225,15 +226,16 @@ TEST(MaxDurationTrackerTest, TestAnomalyDetection) {
 
     tracker.noteStart(key1, true, eventStartTimeNs, ConditionKey());
     tracker.noteStop(key1, eventStartTimeNs + 10, false);
-    EXPECT_EQ(anomalyTracker->mLastAnomalyTimestampNs, -1);
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey), 0U);
     EXPECT_EQ(10LL, tracker.mDuration);
 
     tracker.noteStart(key2, true, eventStartTimeNs + 20, ConditionKey());
     tracker.flushIfNeeded(eventStartTimeNs + 2 * bucketSizeNs + 3 * NS_PER_SEC, &buckets);
     tracker.noteStop(key2, eventStartTimeNs + 2 * bucketSizeNs + 3 * NS_PER_SEC, false);
     EXPECT_EQ((long long)(4 * NS_PER_SEC + 1LL), tracker.mDuration);
-    EXPECT_EQ(anomalyTracker->mLastAnomalyTimestampNs,
-              (long long)(eventStartTimeNs + 2 * bucketSizeNs + 3 * NS_PER_SEC));
+
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey),
+              (eventStartTimeNs + 2 * bucketSizeNs) / NS_PER_SEC  + 3 + refPeriodSec);
 }
 
 }  // namespace statsd

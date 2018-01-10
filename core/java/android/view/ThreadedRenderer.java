@@ -969,8 +969,6 @@ public final class ThreadedRenderer {
             mInitialized = true;
             mAppContext = context.getApplicationContext();
 
-            // b/68769804: For low FPS experiments.
-            setFPSDivisor(SystemProperties.getInt(DEBUG_FPS_DIVISOR, 1));
             initSched(renderProxy);
             initGraphicsStats();
         }
@@ -1025,9 +1023,7 @@ public final class ThreadedRenderer {
 
     /** b/68769804: For low FPS experiments. */
     public static void setFPSDivisor(int divisor) {
-        if (divisor <= 0) divisor = 1;
-        Choreographer.getInstance().setFPSDivisor(divisor);
-        nHackySetRTAnimationsEnabled(divisor == 1);
+        nHackySetRTAnimationsEnabled(divisor <= 1);
     }
 
     /** Not actually public - internal use only. This doc to make lint happy */

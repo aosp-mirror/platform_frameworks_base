@@ -23,7 +23,6 @@ import static android.app.usage.UsageStatsManager.REASON_USAGE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_NEVER;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
-import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_WORKING_SET;
 
 import android.app.usage.UsageStatsManager;
 import android.os.SystemClock;
@@ -66,13 +65,7 @@ public class AppIdleHistory {
 
     // History for all users and all packages
     private SparseArray<ArrayMap<String,AppUsageHistory>> mIdleHistory = new SparseArray<>();
-    private long mLastPeriod = 0;
     private static final long ONE_MINUTE = 60 * 1000;
-    private static final int HISTORY_SIZE = 100;
-    private static final int FLAG_LAST_STATE = 2;
-    private static final int FLAG_PARTIAL_ACTIVE = 1;
-    private static final long PERIOD_DURATION = UsageStatsService.COMPRESS_TIME ? ONE_MINUTE
-            : 60 * ONE_MINUTE;
 
     @VisibleForTesting
     static final String APP_IDLE_FILENAME = "app_idle_stats.xml";
@@ -89,6 +82,10 @@ public class AppIdleHistory {
     private static final String ATTR_CURRENT_BUCKET = "appLimitBucket";
     // The reason the app was put in the above bucket
     private static final String ATTR_BUCKETING_REASON = "bucketReason";
+    // The last time a job was run for this app
+    private static final String ATTR_LAST_RUN_JOB_TIME = "lastJobRunTime";
+    // The time when the forced active state can be overridden.
+    private static final String ATTR_BUCKET_TIMEOUT_TIME = "bucketTimeoutTime";
 
     // device on time = mElapsedDuration + (timeNow - mElapsedSnapshot)
     private long mElapsedSnapshot; // Elapsed time snapshot when last write of mDeviceOnDuration
@@ -103,8 +100,6 @@ public class AppIdleHistory {
     private boolean mScreenOn;
 
     static class AppUsageHistory {
-        // Debug
-        final byte[] recent = new byte[HISTORY_SIZE];
         // Last used time using elapsed timebase
         long lastUsedElapsedTime;
         // Last used time using screen_on timebase
@@ -118,6 +113,13 @@ public class AppIdleHistory {
         String bucketingReason;
         // In-memory only, last bucket for which the listeners were informed
         int lastInformedBucket;
+        // The last time a job was run for this app, using elapsed timebase
+        long lastJobRunTime;
+        // When should the bucket state timeout, in elapsed timebase, if greater than
+        // lastUsedElapsedTime.
+        // This is used to keep the app in a high bucket regardless of other timeouts and
+        // predictions.
+        long bucketTimeoutTime;
     }
 
     AppIdleHistory(File storageDir, long elapsedRealtime) {
@@ -195,79 +197,45 @@ public class AppIdleHistory {
         writeScreenOnTime();
     }
 
-    public int reportUsage(String packageName, int userId, long elapsedRealtime) {
+    /**
+     * Mark the app as used and update the bucket if necessary. If there is a timeout specified
+     * that's in the future, then the usage event is temporary and keeps the app in the specified
+     * bucket at least until the timeout is reached. This can be used to keep the app in an
+     * elevated bucket for a while until some important task gets to run.
+     * @param packageName
+     * @param userId
+     * @param bucket the bucket to set the app to
+     * @param elapsedRealtime mark as used time if non-zero
+     * @param timeout set the timeout of the specified bucket, if non-zero
+     * @return
+     */
+    public int reportUsage(String packageName, int userId, int bucket, long elapsedRealtime,
+            long timeout) {
         ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
         AppUsageHistory appUsageHistory = getPackageHistory(userHistory, packageName,
                 elapsedRealtime, true);
 
-        shiftHistoryToNow(userHistory, elapsedRealtime);
+        if (elapsedRealtime != 0) {
+            appUsageHistory.lastUsedElapsedTime = mElapsedDuration
+                    + (elapsedRealtime - mElapsedSnapshot);
+            appUsageHistory.lastUsedScreenTime = getScreenOnTime(elapsedRealtime);
+        }
 
-        appUsageHistory.lastUsedElapsedTime = mElapsedDuration
-                + (elapsedRealtime - mElapsedSnapshot);
-        appUsageHistory.lastUsedScreenTime = getScreenOnTime(elapsedRealtime);
-        appUsageHistory.recent[HISTORY_SIZE - 1] = FLAG_LAST_STATE | FLAG_PARTIAL_ACTIVE;
-        if (appUsageHistory.currentBucket > STANDBY_BUCKET_ACTIVE) {
-            appUsageHistory.currentBucket = STANDBY_BUCKET_ACTIVE;
+        if (appUsageHistory.currentBucket > bucket) {
+            appUsageHistory.currentBucket = bucket;
             if (DEBUG) {
-                Slog.d(TAG, "Moved " + packageName + " to bucket=" + appUsageHistory.currentBucket
+                Slog.d(TAG, "Moved " + packageName + " to bucket=" + appUsageHistory
+                        .currentBucket
                         + ", reason=" + appUsageHistory.bucketingReason);
+            }
+            if (timeout > elapsedRealtime) {
+                // Convert to elapsed timebase
+                appUsageHistory.bucketTimeoutTime = mElapsedDuration + (timeout - mElapsedSnapshot);
             }
         }
         appUsageHistory.bucketingReason = REASON_USAGE;
 
         return appUsageHistory.currentBucket;
-    }
-
-    public int reportMildUsage(String packageName, int userId, long elapsedRealtime) {
-        ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
-        AppUsageHistory appUsageHistory = getPackageHistory(userHistory, packageName,
-                elapsedRealtime, true);
-        if (appUsageHistory.currentBucket > STANDBY_BUCKET_WORKING_SET) {
-            appUsageHistory.currentBucket = STANDBY_BUCKET_WORKING_SET;
-            if (DEBUG) {
-                Slog.d(TAG, "Moved " + packageName + " to bucket=" + appUsageHistory.currentBucket
-                        + ", reason=" + appUsageHistory.bucketingReason);
-            }
-        }
-        // TODO: Should this be a different reason for partial usage?
-        appUsageHistory.bucketingReason = REASON_USAGE;
-
-        return appUsageHistory.currentBucket;
-    }
-
-    public void setIdle(String packageName, int userId, long elapsedRealtime) {
-        ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
-        AppUsageHistory appUsageHistory = getPackageHistory(userHistory, packageName,
-                elapsedRealtime, true);
-
-        shiftHistoryToNow(userHistory, elapsedRealtime);
-
-        appUsageHistory.recent[HISTORY_SIZE - 1] &= ~FLAG_LAST_STATE;
-    }
-
-    private void shiftHistoryToNow(ArrayMap<String, AppUsageHistory> userHistory,
-            long elapsedRealtime) {
-        long thisPeriod = elapsedRealtime / PERIOD_DURATION;
-        // Has the period switched over? Slide all users' package histories
-        if (mLastPeriod != 0 && mLastPeriod < thisPeriod
-                && (thisPeriod - mLastPeriod) < HISTORY_SIZE - 1) {
-            int diff = (int) (thisPeriod - mLastPeriod);
-            final int NUSERS = mIdleHistory.size();
-            for (int u = 0; u < NUSERS; u++) {
-                userHistory = mIdleHistory.valueAt(u);
-                for (AppUsageHistory idleState : userHistory.values()) {
-                    // Shift left
-                    System.arraycopy(idleState.recent, diff, idleState.recent, 0,
-                            HISTORY_SIZE - diff);
-                    // Replicate last state across the diff
-                    for (int i = 0; i < diff; i++) {
-                        idleState.recent[HISTORY_SIZE - i - 1] =
-                            (byte) (idleState.recent[HISTORY_SIZE - diff - 1] & FLAG_LAST_STATE);
-                    }
-                }
-            }
-        }
-        mLastPeriod = thisPeriod;
     }
 
     private ArrayMap<String, AppUsageHistory> getUserHistory(int userId) {
@@ -291,6 +259,7 @@ public class AppIdleHistory {
             appUsageHistory.currentBucket = STANDBY_BUCKET_NEVER;
             appUsageHistory.bucketingReason = REASON_DEFAULT;
             appUsageHistory.lastInformedBucket = -1;
+            appUsageHistory.lastJobRunTime = Long.MIN_VALUE; // long long time ago
             userHistory.put(packageName, appUsageHistory);
         }
         return appUsageHistory;
@@ -336,6 +305,38 @@ public class AppIdleHistory {
             Slog.d(TAG, "Moved " + packageName + " to bucket=" + appUsageHistory.currentBucket
                     + ", reason=" + appUsageHistory.bucketingReason);
         }
+    }
+
+    /**
+     * Marks the last time a job was run, with the given elapsedRealtime. The time stored is
+     * based on the elapsed timebase.
+     * @param packageName
+     * @param userId
+     * @param elapsedRealtime
+     */
+    public void setLastJobRunTime(String packageName, int userId, long elapsedRealtime) {
+        ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
+        AppUsageHistory appUsageHistory =
+                getPackageHistory(userHistory, packageName, elapsedRealtime, true);
+        appUsageHistory.lastJobRunTime = getElapsedTime(elapsedRealtime);
+    }
+
+    /**
+     * Returns the time since the last job was run for this app. This can be larger than the
+     * current elapsedRealtime, in case it happened before boot or a really large value if no jobs
+     * were ever run.
+     * @param packageName
+     * @param userId
+     * @param elapsedRealtime
+     * @return
+     */
+    public long getTimeSinceLastJobRun(String packageName, int userId, long elapsedRealtime) {
+        ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
+        AppUsageHistory appUsageHistory =
+                getPackageHistory(userHistory, packageName, elapsedRealtime, true);
+        // Don't adjust the default, else it'll wrap around to a positive value
+        if (appUsageHistory.lastJobRunTime == Long.MIN_VALUE) return Long.MAX_VALUE;
+        return getElapsedTime(elapsedRealtime) - appUsageHistory.lastJobRunTime;
     }
 
     public int getAppStandbyBucket(String packageName, int userId, long elapsedRealtime) {
@@ -473,12 +474,8 @@ public class AppIdleHistory {
                                 Long.parseLong(parser.getAttributeValue(null, ATTR_ELAPSED_IDLE));
                         appUsageHistory.lastUsedScreenTime =
                                 Long.parseLong(parser.getAttributeValue(null, ATTR_SCREEN_IDLE));
-                        String lastPredictedTimeString = parser.getAttributeValue(null,
-                                ATTR_LAST_PREDICTED_TIME);
-                        if (lastPredictedTimeString != null) {
-                            appUsageHistory.lastPredictedTime =
-                                    Long.parseLong(lastPredictedTimeString);
-                        }
+                        appUsageHistory.lastPredictedTime = getLongValue(parser,
+                                ATTR_LAST_PREDICTED_TIME, 0L);
                         String currentBucketString = parser.getAttributeValue(null,
                                 ATTR_CURRENT_BUCKET);
                         appUsageHistory.currentBucket = currentBucketString == null
@@ -486,6 +483,10 @@ public class AppIdleHistory {
                                 : Integer.parseInt(currentBucketString);
                         appUsageHistory.bucketingReason =
                                 parser.getAttributeValue(null, ATTR_BUCKETING_REASON);
+                        appUsageHistory.lastJobRunTime = getLongValue(parser,
+                                ATTR_LAST_RUN_JOB_TIME, Long.MIN_VALUE);
+                        appUsageHistory.bucketTimeoutTime = getLongValue(parser,
+                                ATTR_BUCKET_TIMEOUT_TIME, 0L);
                         if (appUsageHistory.bucketingReason == null) {
                             appUsageHistory.bucketingReason = REASON_DEFAULT;
                         }
@@ -499,6 +500,12 @@ public class AppIdleHistory {
         } finally {
             IoUtils.closeQuietly(fis);
         }
+    }
+
+    private long getLongValue(XmlPullParser parser, String attrName, long defValue) {
+        String value = parser.getAttributeValue(null, attrName);
+        if (value == null) return defValue;
+        return Long.parseLong(value);
     }
 
     public void writeAppIdleTimes(int userId) {
@@ -531,6 +538,14 @@ public class AppIdleHistory {
                 xml.attribute(null, ATTR_CURRENT_BUCKET,
                         Integer.toString(history.currentBucket));
                 xml.attribute(null, ATTR_BUCKETING_REASON, history.bucketingReason);
+                if (history.bucketTimeoutTime > 0) {
+                    xml.attribute(null, ATTR_BUCKET_TIMEOUT_TIME, Long.toString(history
+                            .bucketTimeoutTime));
+                }
+                if (history.lastJobRunTime != Long.MIN_VALUE) {
+                    xml.attribute(null, ATTR_LAST_RUN_JOB_TIME, Long.toString(history
+                            .lastJobRunTime));
+                }
                 xml.endTag(null, TAG_PACKAGE);
             }
 
@@ -565,6 +580,10 @@ public class AppIdleHistory {
             TimeUtils.formatDuration(screenOnTime - appUsageHistory.lastUsedScreenTime, idpw);
             idpw.print(" lastPredictedTime=");
             TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.lastPredictedTime, idpw);
+            idpw.print(" bucketTimeoutTime=");
+            TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.bucketTimeoutTime, idpw);
+            idpw.print(" lastJobRunTime=");
+            TimeUtils.formatDuration(totalElapsedTime - appUsageHistory.lastJobRunTime, idpw);
             idpw.print(" idle=" + (isIdle(packageName, userId, elapsedRealtime) ? "y" : "n"));
             idpw.print(" bucket=" + appUsageHistory.currentBucket
                     + " reason=" + appUsageHistory.bucketingReason);
@@ -578,22 +597,5 @@ public class AppIdleHistory {
         TimeUtils.formatDuration(getScreenOnTime(elapsedRealtime), idpw);
         idpw.println();
         idpw.decreaseIndent();
-    }
-
-    public void dumpHistory(IndentingPrintWriter idpw, int userId) {
-        ArrayMap<String, AppUsageHistory> userHistory = mIdleHistory.get(userId);
-        final long elapsedRealtime = SystemClock.elapsedRealtime();
-        if (userHistory == null) return;
-        final int P = userHistory.size();
-        for (int p = 0; p < P; p++) {
-            final String packageName = userHistory.keyAt(p);
-            final byte[] history = userHistory.valueAt(p).recent;
-            for (int i = 0; i < HISTORY_SIZE; i++) {
-                idpw.print(history[i] == 0 ? '.' : 'A');
-            }
-            idpw.print(" idle=" + (isIdle(packageName, userId, elapsedRealtime) ? "y" : "n"));
-            idpw.print("  " + packageName);
-            idpw.println();
-        }
     }
 }

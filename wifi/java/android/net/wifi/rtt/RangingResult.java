@@ -18,6 +18,7 @@ package android.net.wifi.rtt;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.net.MacAddress;
 import android.net.wifi.aware.PeerHandle;
 import android.os.Handler;
@@ -36,8 +37,6 @@ import java.util.Objects;
  * <p>
  * A ranging result is the distance measurement result for a single device specified in the
  * {@link RangingRequest}.
- *
- * @hide RTT_API
  */
 public final class RangingResult implements Parcelable {
     private static final String TAG = "RangingResult";
@@ -108,6 +107,7 @@ public final class RangingResult implements Parcelable {
      * Will return a {@code null} for results corresponding to requests issued using a {@code
      * PeerHandle}, i.e. using the {@link RangingRequest.Builder#addWifiAwarePeer(PeerHandle)} API.
      */
+    @Nullable
     public MacAddress getMacAddress() {
         return mMac;
     }
@@ -119,7 +119,7 @@ public final class RangingResult implements Parcelable {
      * <p>
      * Will return a {@code null} for results corresponding to requests issued using a MAC address.
      */
-    public PeerHandle getPeerHandle() {
+    @Nullable public PeerHandle getPeerHandle() {
         return mPeerHandle;
     }
 
@@ -182,13 +182,11 @@ public final class RangingResult implements Parcelable {
         return mTimestamp;
     }
 
-    /** @hide */
     @Override
     public int describeContents() {
         return 0;
     }
 
-    /** @hide */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mStatus);
@@ -210,7 +208,6 @@ public final class RangingResult implements Parcelable {
         dest.writeLong(mTimestamp);
     }
 
-    /** @hide */
     public static final Creator<RangingResult> CREATOR = new Creator<RangingResult>() {
         @Override
         public RangingResult[] newArray(int size) {

@@ -47,8 +47,7 @@ import static android.view.WindowManager.DOCKED_TOP;
 /**
  * Class to detect gestures on the navigation bar.
  */
-public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureListener
-        implements TunerService.Tunable, GestureHelper {
+public class NavigationBarGestureHelper implements TunerService.Tunable, GestureHelper {
 
     private static final String TAG = "NavBarGestureHelper";
     private static final String KEY_DOCK_WINDOW_GESTURE = "overview_nav_bar_gesture";
@@ -72,11 +71,8 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
     private Context mContext;
     private NavigationBarView mNavigationBarView;
     private boolean mIsVertical;
-    private boolean mIsRTL;
 
-    private final GestureDetector mTaskSwitcherDetector;
     private final int mScrollTouchSlop;
-    private final int mMinFlingVelocity;
     private final Matrix mTransformGlobalMatrix = new Matrix();
     private final Matrix mTransformLocalMatrix = new Matrix();
     private int mTouchDownX;
@@ -91,11 +87,8 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
 
     public NavigationBarGestureHelper(Context context) {
         mContext = context;
-        ViewConfiguration configuration = ViewConfiguration.get(context);
         Resources r = context.getResources();
         mScrollTouchSlop = r.getDimensionPixelSize(R.dimen.navigation_bar_min_swipe_distance);
-        mMinFlingVelocity = configuration.getScaledMinimumFlingVelocity();
-        mTaskSwitcherDetector = new GestureDetector(context, this);
         Dependency.get(TunerService.class).addTunable(this, KEY_DOCK_WINDOW_GESTURE);
     }
 
@@ -112,7 +105,6 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
 
     public void setBarState(boolean isVertical, boolean isRTL) {
         mIsVertical = isVertical;
-        mIsRTL = isRTL;
     }
 
     private boolean proxyMotionEvents(MotionEvent event) {
@@ -161,11 +153,7 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
             case MotionEvent.ACTION_UP:
                 break;
         }
-        if (!proxyMotionEvents(event)) {
-            // If we move more than a fixed amount, then start capturing for the
-            // task switcher detector, disabled when proxying motion events to launcher service
-            mTaskSwitcherDetector.onTouchEvent(event);
-        }
+        proxyMotionEvents(event);
         return result || (mDockWindowEnabled && interceptDockWindowEvent(event));
     }
 
@@ -306,34 +294,11 @@ public class NavigationBarGestureHelper extends GestureDetector.SimpleOnGestureL
     }
 
     public boolean onTouchEvent(MotionEvent event) {
-        boolean result = proxyMotionEvents(event) || mTaskSwitcherDetector.onTouchEvent(event);
+        boolean result = proxyMotionEvents(event);
         if (mDockWindowEnabled) {
             result |= handleDockWindowEvent(event);
         }
         return result;
-    }
-
-    @Override
-    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        float absVelX = Math.abs(velocityX);
-        float absVelY = Math.abs(velocityY);
-        boolean isValidFling = absVelX > mMinFlingVelocity &&
-                mIsVertical ? (absVelY > absVelX) : (absVelX > absVelY);
-        if (isValidFling && mRecentsComponent != null) {
-            boolean showNext;
-            if (!mIsRTL) {
-                showNext = mIsVertical ? (velocityY < 0) : (velocityX < 0);
-            } else {
-                // In RTL, vertical is still the same, but horizontal is flipped
-                showNext = mIsVertical ? (velocityY < 0) : (velocityX > 0);
-            }
-            if (showNext) {
-                mRecentsComponent.showNextAffiliatedTask();
-            } else {
-                mRecentsComponent.showPrevAffiliatedTask();
-            }
-        }
-        return true;
     }
 
     @Override

@@ -19,21 +19,26 @@ package android.hardware.location;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import java.util.Arrays;
 
 /**
+ * @deprecated Use {@link android.hardware.location.NanoAppMessage} instead to send messages with
+ *             {@link android.hardware.location.ContextHubClient#sendMessageToNanoApp(
+ *             NanoAppMessage)} and receive messages with
+ *             {@link android.hardware.location.ContextHubClientCallback#onMessageFromNanoApp(
+ *             ContextHubClient, NanoAppMessage)}.
+ *
  * @hide
  */
 @SystemApi
+@Deprecated
 public class ContextHubMessage {
     private int mType;
     private int mVersion;
     private byte[]mData;
 
     private static final String TAG = "ContextHubMessage";
-
 
     /**
      * Get the message type
