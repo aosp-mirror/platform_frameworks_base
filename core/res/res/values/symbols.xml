@@ -3203,4 +3203,6 @@
   <java-symbol type="array" name="config_autoBrightnessDisplayValuesNits" />
   <java-symbol type="array" name="config_screenBrightnessBacklight" />
   <java-symbol type="array" name="config_screenBrightnessNits" />
+
+  <java-symbol type="string" name="shortcut_disabled_reason_unknown" />
 </resources>

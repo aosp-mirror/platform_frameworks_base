@@ -181,6 +181,11 @@ public final class ShortcutInfo implements Parcelable {
     public static final int DISABLED_REASON_APP_CHANGED = 2;
 
     /**
+     * Shortcut is disabled for an unknown reason.
+     */
+    public static final int DISABLED_REASON_UNKNOWN = 3;
+
+    /**
      * A disabled reason that's equal to or bigger than this is due to backup and restore issue.
      * A shortcut with such a reason wil be visible to the launcher, but not to the publisher.
      * ({@link #isVisibleToPublisher()} will be false.)
@@ -214,6 +219,7 @@ public final class ShortcutInfo implements Parcelable {
             DISABLED_REASON_NOT_DISABLED,
             DISABLED_REASON_BY_APP,
             DISABLED_REASON_APP_CHANGED,
+            DISABLED_REASON_UNKNOWN,
             DISABLED_REASON_VERSION_LOWER,
             DISABLED_REASON_BACKUP_NOT_SUPPORTED,
             DISABLED_REASON_SIGNATURE_MISMATCH,
@@ -272,6 +278,9 @@ public final class ShortcutInfo implements Parcelable {
             case DISABLED_REASON_OTHER_RESTORE_ISSUE:
                 return res.getString(
                         com.android.internal.R.string.shortcut_restore_unknown_issue);
+            case DISABLED_REASON_UNKNOWN:
+                return res.getString(
+                        com.android.internal.R.string.shortcut_disabled_reason_unknown);
         }
         return null;
     }
