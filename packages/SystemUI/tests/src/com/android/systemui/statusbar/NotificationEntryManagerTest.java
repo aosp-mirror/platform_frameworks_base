@@ -32,11 +32,14 @@ import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
+import android.service.notification.NotificationRankingUpdate;
 import android.service.notification.StatusBarNotification;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -120,6 +123,23 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         }
     }
 
+    private void setUserSentiment(String key, int sentiment) {
+        doAnswer(invocationOnMock -> {
+            NotificationListenerService.Ranking ranking = (NotificationListenerService.Ranking)
+                    invocationOnMock.getArguments()[1];
+            ranking.populate(
+                    key,
+                    0,
+                    false,
+                    0,
+                    0,
+                    NotificationManager.IMPORTANCE_DEFAULT,
+                    null, null,
+                    null, null, null, true, sentiment);
+            return true;
+        }).when(mRankingMap).getRanking(eq(key), any(NotificationListenerService.Ranking.class));
+    }
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -158,6 +178,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         mEntryManager = new TestableNotificationEntryManager(mContext, mBarService);
         mEntryManager.setUpWithPresenter(mPresenter, mListContainer, mCallback, mHeadsUpManager);
+
+        setUserSentiment(mEntry.key, NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL);
     }
 
     @Test
@@ -196,6 +218,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         assertEquals(mEntryManager.getNotificationData().get(mSbn.getKey()), entry);
         assertNotNull(entry.row);
+        assertEquals(mEntry.userSentiment,
+                NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL);
     }
 
     @Test
@@ -203,6 +227,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         com.android.systemui.util.Assert.isNotMainThread();
 
         mEntryManager.getNotificationData().add(mEntry);
+
+        setUserSentiment(mEntry.key, NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE);
 
         mHandler.post(() -> {
             mEntryManager.updateNotification(mSbn, mRankingMap);
@@ -219,6 +245,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         verify(mForegroundServiceController).updateNotification(eq(mSbn), anyInt());
         verify(mCallback).onNotificationUpdated(mSbn);
         assertNotNull(mEntry.row);
+        assertEquals(mEntry.userSentiment,
+                NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE);
     }
 
     @Test
