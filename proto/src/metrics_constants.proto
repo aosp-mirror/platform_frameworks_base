@@ -5144,6 +5144,11 @@ message MetricsEvent {
     // OS: P
     APPLICATIONS_STORAGE_DETAIL = 1284;
 
+    // OPEN: Settings > Battery > Smart Battery > Restricted apps
+    // CATEGORY: SETTINGS
+    // OS: P
+    FUELGAUGE_RESTRICTED_APP_DETAILS = 1285;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
