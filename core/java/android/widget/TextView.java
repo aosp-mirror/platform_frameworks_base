@@ -11952,7 +11952,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private final Choreographer mChoreographer;
 
         private byte mStatus = MARQUEE_STOPPED;
-        private final float mPixelsPerSecond;
+        private final float mPixelsPerMs;
         private float mMaxScroll;
         private float mMaxFadeScroll;
         private float mGhostStart;
@@ -11965,7 +11965,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         Marquee(TextView v) {
             final float density = v.getContext().getResources().getDisplayMetrics().density;
-            mPixelsPerSecond = MARQUEE_DP_PER_SECOND * density;
+            mPixelsPerMs = MARQUEE_DP_PER_SECOND * density / 1000f;
             mView = new WeakReference<TextView>(v);
             mChoreographer = Choreographer.getInstance();
         }
@@ -12010,7 +12010,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 long currentMs = mChoreographer.getFrameTime();
                 long deltaMs = currentMs - mLastAnimationMs;
                 mLastAnimationMs = currentMs;
-                float deltaPx = deltaMs / 1000f * mPixelsPerSecond;
+                float deltaPx = deltaMs * mPixelsPerMs;
                 mScroll += deltaPx;
                 if (mScroll > mMaxScroll) {
                     mScroll = mMaxScroll;
