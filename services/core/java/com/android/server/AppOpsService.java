@@ -39,6 +39,7 @@ import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManagerInternal;
@@ -248,7 +249,7 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     public AppOpsService(File storagePath, Handler handler) {
         LockGuard.installLock(this, LockGuard.INDEX_APP_OPS);
-        mFile = new AtomicFile(storagePath);
+        mFile = new AtomicFile(storagePath, "appops");
         mHandler = handler;
         readState();
     }
@@ -1666,8 +1667,6 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     void writeState() {
         synchronized (mFile) {
-            List<AppOpsManager.PackageOps> allOps = getPackagesForOps(null);
-
             FileOutputStream stream;
             try {
                 stream = mFile.startWrite();
@@ -1675,6 +1674,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 Slog.w(TAG, "Failed to write state: " + e);
                 return;
             }
+
+            List<AppOpsManager.PackageOps> allOps = getPackagesForOps(null);
 
             try {
                 XmlSerializer out = new FastXmlSerializer();

@@ -208,7 +208,7 @@ class UsbProfileGroupSettingsManager {
         mParentUser = user;
         mSettingsFile = new AtomicFile(new File(
                 Environment.getUserSystemDirectory(user.getIdentifier()),
-                "usb_device_manager.xml"));
+                "usb_device_manager.xml"), "usb-state");
 
         mDisablePermissionDialogs = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_disableUsbPermissionDialogs);

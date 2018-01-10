@@ -47,7 +47,7 @@ public class PasswordBlacklist {
      * This is a lightweight operation to prepare variables but not perform any IO.
      */
     public PasswordBlacklist(File file) {
-        mFile = new AtomicFile(file);
+        mFile = new AtomicFile(file, "device-policy");
     }
 
     /**

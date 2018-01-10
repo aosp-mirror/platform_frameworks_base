@@ -102,7 +102,7 @@ option java_package com.android.server.am
 # Report collection of global memory state
 30046 am_meminfo (Cached|2|2),(Free|2|2),(Zram|2|2),(Kernel|2|2),(Native|2|2)
 # Report collection of memory used by a process
-30047 am_pss (Pid|1|5),(UID|1|5),(Process Name|3),(Pss|2|2),(Uss|2|2),(SwapPss|2|2)
+30047 am_pss (Pid|1|5),(UID|1|5),(Process Name|3),(Pss|2|2),(Uss|2|2),(SwapPss|2|2),(Rss|2|2),(StatType|1|5),(ProcState|1|5),(TimeToCollect|2|2)
 
 # Attempting to stop an activity
 30048 am_stop_activity (User|1|5),(Token|1|5),(Component Name|3)

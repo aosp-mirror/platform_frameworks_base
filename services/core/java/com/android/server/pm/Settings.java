@@ -1994,6 +1994,8 @@ public final class Settings {
         if (DEBUG_MU) {
             Log.i(TAG, "Writing package restrictions for user=" + userId);
         }
+        final long startTime = SystemClock.uptimeMillis();
+
         // Keep the old stopped packages around until we know the new ones have
         // been successfully written.
         File userPackagesStateFile = getUserPackagesStateFile(userId);
@@ -2126,6 +2128,9 @@ public final class Settings {
                     FileUtils.S_IRUSR|FileUtils.S_IWUSR
                     |FileUtils.S_IRGRP|FileUtils.S_IWGRP,
                     -1, -1);
+
+            com.android.internal.logging.EventLogTags.writeCommitSysConfigFile(
+                    "package-user-" + userId, SystemClock.uptimeMillis() - startTime);
 
             // Done, all is good!
             return;
@@ -2388,6 +2393,8 @@ public final class Settings {
     void writeLPr() {
         //Debug.startMethodTracing("/data/system/packageprof", 8 * 1024 * 1024);
 
+        final long startTime = SystemClock.uptimeMillis();
+
         // Keep the old settings around until we know the new ones have
         // been successfully written.
         if (mSettingsFilename.exists()) {
@@ -2533,6 +2540,8 @@ public final class Settings {
             writePackageListLPr();
             writeAllUsersPackageRestrictionsLPr();
             writeAllRuntimePermissionsLPr();
+            com.android.internal.logging.EventLogTags.writeCommitSysConfigFile(
+                    "package", SystemClock.uptimeMillis() - startTime);
             return;
 
         } catch(java.io.IOException e) {
@@ -5131,7 +5140,8 @@ public final class Settings {
         }
 
         private void writePermissionsSync(int userId) {
-            AtomicFile destination = new AtomicFile(getUserRuntimePermissionsFile(userId));
+            AtomicFile destination = new AtomicFile(getUserRuntimePermissionsFile(userId),
+                    "package-perms-" + userId);
 
             ArrayMap<String, List<PermissionState>> permissionsForPackage = new ArrayMap<>();
             ArrayMap<String, List<PermissionState>> permissionsForSharedUser = new ArrayMap<>();

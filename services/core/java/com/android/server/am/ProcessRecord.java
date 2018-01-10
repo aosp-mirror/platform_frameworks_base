@@ -66,6 +66,8 @@ final class ProcessRecord {
     final String processName;   // name of the process
     // List of packages running in the process
     final ArrayMap<String, ProcessStats.ProcessStateHolder> pkgList = new ArrayMap<>();
+    final ProcessList.ProcStateMemTracker procStateMemTracker
+            = new ProcessList.ProcStateMemTracker();
     UidRecord uidRecord;        // overall state of process's uid.
     ArraySet<String> pkgDeps;   // additional packages we have a dependency on
     IApplicationThread thread;  // the actual proc...  may be null only if
@@ -102,6 +104,7 @@ final class ProcessRecord {
     int repProcState = PROCESS_STATE_NONEXISTENT; // Last reported process state
     int setProcState = PROCESS_STATE_NONEXISTENT; // Last set process state in process tracker
     int pssProcState = PROCESS_STATE_NONEXISTENT; // Currently requesting pss for
+    int pssStatType;            // The type of stat collection that we are currently requesting
     int savedPriority;          // Previous priority value if we're switching to non-SCHED_OTHER
     int renderThreadTid;        // TID for RenderThread
     boolean serviceb;           // Process currently is on the service B list
@@ -285,6 +288,7 @@ final class ProcessRecord {
                 TimeUtils.formatDuration(lastActivityTime, nowUptime, pw);
                 pw.print(" lastPssTime=");
                 TimeUtils.formatDuration(lastPssTime, nowUptime, pw);
+                pw.print(" pssStatType="); pw.print(pssStatType);
                 pw.print(" nextPssTime=");
                 TimeUtils.formatDuration(nextPssTime, nowUptime, pw);
                 pw.println();
@@ -295,6 +299,8 @@ final class ProcessRecord {
                 pw.print(" lastCachedPss="); DebugUtils.printSizeValue(pw, lastCachedPss*1024);
                 pw.print(" lastCachedSwapPss="); DebugUtils.printSizeValue(pw, lastCachedSwapPss*1024);
                 pw.println();
+        pw.print(prefix); pw.print("procStateMemTracker: ");
+        procStateMemTracker.dumpLine(pw);
         pw.print(prefix); pw.print("cached="); pw.print(cached);
                 pw.print(" empty="); pw.println(empty);
         if (serviceb) {
