@@ -376,7 +376,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         // Reset the state of mHiddenSetFromTransferredStartingWindow since visibility is actually
         // been set by the app now.
         mHiddenSetFromTransferredStartingWindow = false;
-        setClientHidden(!visible);
 
         // Allow for state changes and animation to be applied if:
         // * token is transitioning visibility state
@@ -459,6 +458,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 // We need to inform the client the enter animation was finished.
                 mEnteringAnimation = true;
                 mService.mActivityManagerAppTransitionNotifier.onAppTransitionFinishedLocked(token);
+            }
+
+            // Update the client visibility if we are not running an animation. Otherwise, we'll
+            // update client visibility state in onAnimationFinished.
+            if (!visible && !delayed) {
+                setClientHidden(true);
             }
 
             // If we are hidden but there is no delay needed we immediately
@@ -1721,6 +1726,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 "AppWindowToken");
 
         clearThumbnail();
+        setClientHidden(isHidden());
 
         if (mService.mInputMethodTarget != null && mService.mInputMethodTarget.mAppToken == this) {
             getDisplayContent().computeImeTarget(true /* updateImeTarget */);

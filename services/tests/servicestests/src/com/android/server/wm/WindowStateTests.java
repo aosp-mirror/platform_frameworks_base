@@ -223,6 +223,19 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(app.canAffectSystemUiFlags());
     }
 
+    @Test
+    public void testIsSelfOrAncestorWindowAnimating() throws Exception {
+        final WindowState root = createWindow(null, TYPE_APPLICATION, "root");
+        final WindowState child1 = createWindow(root, FIRST_SUB_WINDOW, "child1");
+        final WindowState child2 = createWindow(child1, FIRST_SUB_WINDOW, "child2");
+        assertFalse(child2.isSelfOrAncestorWindowAnimatingExit());
+        child2.mAnimatingExit = true;
+        assertTrue(child2.isSelfOrAncestorWindowAnimatingExit());
+        child2.mAnimatingExit = false;
+        root.mAnimatingExit = true;
+        assertTrue(child2.isSelfOrAncestorWindowAnimatingExit());
+    }
+
     private void testPrepareWindowToDisplayDuringRelayout(boolean wasVisible) {
         final WindowState root = createWindow(null, TYPE_APPLICATION, "root");
         root.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;

@@ -189,6 +189,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.input.InputWindowHandle;
 import com.android.server.policy.WindowManagerPolicy;
@@ -198,7 +199,6 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.function.Predicate;
 
 /** A window in the window manager. */
@@ -3923,6 +3923,22 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return null;
     }
 
+    /**
+     * @return True if we our one of our ancestors has {@link #mAnimatingExit} set to true, false
+     *         otherwise.
+     */
+    @VisibleForTesting
+    boolean isSelfOrAncestorWindowAnimatingExit() {
+        WindowState window = this;
+        do {
+            if (window.mAnimatingExit) {
+                return true;
+            }
+            window = window.getParentWindow();
+        } while (window != null);
+        return false;
+    }
+
     void onExitAnimationDone() {
         if (DEBUG_ANIM) Slog.v(TAG, "onExitAnimationDone in " + this
                 + ": exiting=" + mAnimatingExit + " remove=" + mRemoveOnExit
@@ -3958,7 +3974,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mService.mAccessibilityController.onSomeWindowResizedOrMovedLocked();
         }
 
-        if (!mAnimatingExit) {
+        if (!isSelfOrAncestorWindowAnimatingExit()) {
             return;
         }
 
