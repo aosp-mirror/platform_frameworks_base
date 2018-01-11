@@ -300,7 +300,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     WindowManagerService mWindowManager;
     DisplayManager mDisplayManager;
 
-    private LaunchingBoundsController mLaunchingBoundsController;
+    private LaunchParamsController mLaunchParamsController;
 
     /**
      * Maps the task identifier that activities are currently being started in to the userId of the
@@ -593,8 +593,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 mHandler.getLooper());
         mKeyguardController = new KeyguardController(mService, this);
 
-        mLaunchingBoundsController = new LaunchingBoundsController();
-        mLaunchingBoundsController.registerDefaultPositioners(this);
+        mLaunchParamsController = new LaunchParamsController(mService);
+        mLaunchParamsController.registerDefaultModifiers(this);
     }
 
 
@@ -2220,8 +2220,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 || mService.mSupportsFreeformWindowManagement;
     }
 
-    LaunchingBoundsController getLaunchingBoundsController() {
-        return mLaunchingBoundsController;
+    LaunchParamsController getLaunchParamsController() {
+        return mLaunchParamsController;
     }
 
     protected <T extends ActivityStack> T getStack(int stackId) {

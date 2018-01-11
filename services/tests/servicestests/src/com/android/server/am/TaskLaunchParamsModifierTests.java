@@ -23,6 +23,7 @@ import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import android.view.Gravity;
+
 import org.junit.runner.RunWith;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +33,7 @@ import org.mockito.invocation.InvocationOnMock;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 
-import static com.android.server.am.LaunchingBoundsController.LaunchingBoundsPositioner.RESULT_CONTINUE;
+import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -42,15 +43,15 @@ import static org.junit.Assert.assertEquals;
 
 
 /**
- * Tests for exercising resizing bounds.
+ * Tests for exercising resizing task bounds.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.am.LaunchingTaskPositionerTests
+ *  atest FrameworksServicesTests:TaskLaunchParamsModifierTests
  */
 @MediumTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
-public class LaunchingTaskPositionerTests extends ActivityTestsBase {
+public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
     private final static int STACK_WIDTH = 100;
     private final static int STACK_HEIGHT = 200;
 
@@ -60,10 +61,10 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
     private ActivityStack mStack;
     private TaskRecord mTask;
 
-    private LaunchingTaskPositioner mPositioner;
+    private TaskLaunchParamsModifier mPositioner;
 
-    private Rect mCurrent;
-    private Rect mResult;
+    private LaunchParamsController.LaunchParams mCurrent;
+    private LaunchParamsController.LaunchParams mResult;
 
     @Before
     @Override
@@ -79,10 +80,10 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
         // dimensions on resize.
         mTask = new TaskBuilder(mService.mStackSupervisor).setStack(mStack).build();
 
-        mPositioner = new LaunchingTaskPositioner();
+        mPositioner = new TaskLaunchParamsModifier();
 
-        mResult = new Rect();
-        mCurrent = new Rect();
+        mResult = new LaunchParamsController.LaunchParams();
+        mCurrent = new LaunchParamsController.LaunchParams();
     }
 
     /**
@@ -103,9 +104,9 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
      */
     @Test
     public void testLaunchNoWindowLayout() throws Exception {
-        assertEquals(RESULT_CONTINUE, mPositioner.onCalculateBounds(mTask, null /*layout*/,
+        assertEquals(RESULT_CONTINUE, mPositioner.onCalculate(mTask, null /*layout*/,
                 null /*record*/, null /*source*/, null /*options*/, mCurrent, mResult));
-        assertEquals(getDefaultBounds(Gravity.NO_GRAVITY), mResult);
+        assertEquals(getDefaultBounds(Gravity.NO_GRAVITY), mResult.mBounds);
     }
 
     /**
@@ -115,10 +116,10 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
      */
     @Test
     public void testlaunchEmptyWindowLayout() throws Exception {
-        assertEquals(RESULT_CONTINUE, mPositioner.onCalculateBounds(mTask,
+        assertEquals(RESULT_CONTINUE, mPositioner.onCalculate(mTask,
                 new WindowLayout(0, 0, 0, 0, Gravity.NO_GRAVITY, 0, 0), null /*activity*/,
                 null /*source*/, null /*options*/, mCurrent, mResult));
-        assertEquals(mResult, getDefaultBounds(Gravity.NO_GRAVITY));
+        assertEquals(mResult.mBounds, getDefaultBounds(Gravity.NO_GRAVITY));
     }
 
     /**
@@ -148,13 +149,13 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
 
     private void testGravity(int gravity) {
         try {
-            assertEquals(RESULT_CONTINUE, mPositioner.onCalculateBounds(mTask,
+            assertEquals(RESULT_CONTINUE, mPositioner.onCalculate(mTask,
                     new WindowLayout(0, 0, 0, 0, gravity, 0, 0), null /*activity*/,
                     null /*source*/, null /*options*/, mCurrent, mResult));
-            assertEquals(mResult, getDefaultBounds(gravity));
+            assertEquals(mResult.mBounds, getDefaultBounds(gravity));
         } finally {
-            mCurrent.setEmpty();
-            mResult.setEmpty();
+            mCurrent.reset();
+            mResult.reset();
         }
     }
 
@@ -178,7 +179,7 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
         final WindowLayout layout = new WindowLayout(0, 0, 0, 0, gravity, 0, 0);
 
         // layout first task
-        mService.mStackSupervisor.getLaunchingBoundsController().layoutTask(mTask, layout);
+        mService.mStackSupervisor.getLaunchParamsController().layoutTask(mTask, layout);
 
         // Second task will be laid out on top of the first so starting bounds is the same.
         final Rect expectedBounds = new Rect(mTask.getOverrideBounds());
@@ -196,25 +197,25 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
 
             // layout second task
             assertEquals(RESULT_CONTINUE,
-                    mPositioner.onCalculateBounds(secondTask, layout, null /*activity*/,
+                    mPositioner.onCalculate(secondTask, layout, null /*activity*/,
                             null /*source*/, null /*options*/, mCurrent, mResult));
 
             if ((gravity & (Gravity.TOP | Gravity.RIGHT)) == (Gravity.TOP | Gravity.RIGHT)
                     || (gravity & (Gravity.BOTTOM | Gravity.RIGHT))
                     == (Gravity.BOTTOM | Gravity.RIGHT)) {
-                expectedBounds.offset(-LaunchingTaskPositioner.getHorizontalStep(
+                expectedBounds.offset(-TaskLaunchParamsModifier.getHorizontalStep(
                         mStack.getOverrideBounds()), 0);
             } else if ((gravity & Gravity.TOP) == Gravity.TOP
                     || (gravity & Gravity.BOTTOM) == Gravity.BOTTOM) {
                 expectedBounds.offset(
-                        LaunchingTaskPositioner.getHorizontalStep(mStack.getOverrideBounds()), 0);
+                        TaskLaunchParamsModifier.getHorizontalStep(mStack.getOverrideBounds()), 0);
             } else {
                 expectedBounds.offset(
-                        LaunchingTaskPositioner.getHorizontalStep(mStack.getOverrideBounds()),
-                        LaunchingTaskPositioner.getVerticalStep(mStack.getOverrideBounds()));
+                        TaskLaunchParamsModifier.getHorizontalStep(mStack.getOverrideBounds()),
+                        TaskLaunchParamsModifier.getVerticalStep(mStack.getOverrideBounds()));
             }
 
-            assertEquals(mResult, expectedBounds);
+            assertEquals(mResult.mBounds, expectedBounds);
         } finally {
             // Remove task and activity to prevent influencing future tests
             if (activity != null) {
@@ -232,9 +233,9 @@ public class LaunchingTaskPositionerTests extends ActivityTestsBase {
         bounds.set(mStack.getOverrideBounds());
 
         final int verticalInset =
-                LaunchingTaskPositioner.getFreeformStartTop(mStack.getOverrideBounds());
+                TaskLaunchParamsModifier.getFreeformStartTop(mStack.getOverrideBounds());
         final int horizontalInset =
-                LaunchingTaskPositioner.getFreeformStartLeft(mStack.getOverrideBounds());
+                TaskLaunchParamsModifier.getFreeformStartLeft(mStack.getOverrideBounds());
 
         bounds.inset(horizontalInset, verticalInset);
 
