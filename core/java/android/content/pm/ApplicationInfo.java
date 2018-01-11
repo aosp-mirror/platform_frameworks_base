@@ -958,6 +958,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * Version of the sandbox the application wants to run in.
      * @hide
      */
+    @SystemApi
     public int targetSandboxVersion;
 
     /**
@@ -1655,7 +1656,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0;
     }
 
-    /** @hide */
+    /**
+     * True if the application is installed as an instant app.
+     * @hide
+     */
+    @SystemApi
     public boolean isInstantApp() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_INSTANT) != 0;
     }

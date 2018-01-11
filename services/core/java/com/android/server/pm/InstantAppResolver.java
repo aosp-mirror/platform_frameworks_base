@@ -268,10 +268,14 @@ public abstract class InstantAppResolver {
                 | Intent.FLAG_ACTIVITY_NO_HISTORY
                 | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
         if (token != null) {
+            // TODO(b/72700831): remove populating old extra
             intent.putExtra(Intent.EXTRA_EPHEMERAL_TOKEN, token);
+            intent.putExtra(Intent.EXTRA_INSTANT_APP_TOKEN, token);
         }
         if (origIntent.getData() != null) {
+            // TODO(b/72700831): remove populating old extra
             intent.putExtra(Intent.EXTRA_EPHEMERAL_HOSTNAME, origIntent.getData().getHost());
+            intent.putExtra(Intent.EXTRA_INSTANT_APP_HOSTNAME, origIntent.getData().getHost());
         }
         intent.putExtra(Intent.EXTRA_INSTANT_APP_ACTION, origIntent.getAction());
         intent.putExtra(Intent.EXTRA_INTENT, sanitizedIntent);
@@ -305,8 +309,10 @@ public abstract class InstantAppResolver {
                                             | PendingIntent.FLAG_ONE_SHOT
                                             | PendingIntent.FLAG_IMMUTABLE,
                                     null /*bOptions*/, userId);
-                    intent.putExtra(Intent.EXTRA_EPHEMERAL_FAILURE,
-                            new IntentSender(failureIntentTarget));
+                    IntentSender failureSender = new IntentSender(failureIntentTarget);
+                    // TODO(b/72700831): remove populating old extra
+                    intent.putExtra(Intent.EXTRA_EPHEMERAL_FAILURE, failureSender);
+                    intent.putExtra(Intent.EXTRA_INSTANT_APP_FAILURE, failureSender);
                 } catch (RemoteException ignore) { /* ignore; same process */ }
             }
 
@@ -323,8 +329,10 @@ public abstract class InstantAppResolver {
                                 PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
                                         | PendingIntent.FLAG_IMMUTABLE,
                                 null /*bOptions*/, userId);
-                intent.putExtra(Intent.EXTRA_EPHEMERAL_SUCCESS,
-                        new IntentSender(successIntentTarget));
+                IntentSender successSender = new IntentSender(successIntentTarget);
+                // TODO(b/72700831): remove populating old extra
+                intent.putExtra(Intent.EXTRA_EPHEMERAL_SUCCESS, successSender);
+                intent.putExtra(Intent.EXTRA_INSTANT_APP_SUCCESS, successSender);
             } catch (RemoteException ignore) { /* ignore; same process */ }
             if (verificationBundle != null) {
                 intent.putExtra(Intent.EXTRA_VERIFICATION_BUNDLE, verificationBundle);
