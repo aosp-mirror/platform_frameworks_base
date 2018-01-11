@@ -101,7 +101,7 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="8364140853305528449">"لقد رسمت نقش إلغاء التأمين بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الهاتف باستخدام حساب بريد إلكتروني لإلغاء تأمين الهاتف.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
     <string name="kg_password_wrong_pin_code_pukked" msgid="3389829202093674267">"‏رمز \"رقم التعريف الشخصي\" لشريحة SIM غير صحيح، ويلزمك الاتصال الآن بمشغّل شبكة الجوّال لإلغاء قفل الجهاز."</string>
     <plurals name="kg_password_wrong_pin_code" formatted="false" msgid="4314341367727055967">
-      <item quantity="zero">‏رمز رقم التعريف الشخصي لشريحة SIM غير صحيح، ولم تتبق لديك أية محاولات (<xliff:g id="NUMBER_1">%d</xliff:g>).</item>
+      <item quantity="zero">‏رمز رقم التعريف الشخصي لشريحة SIM غير صحيح، ولم تتبق لديك أي محاولات (<xliff:g id="NUMBER_1">%d</xliff:g>).</item>
       <item quantity="two">‏رمز رقم التعريف الشخصي لشريحة SIM غير صحيح، ويتبقى لديك محاولتان (<xliff:g id="NUMBER_1">%d</xliff:g>).</item>
       <item quantity="few">‏رمز رقم التعريف الشخصي لشريحة SIM غير صحيح، ويتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولات.</item>
       <item quantity="many">‏رمز رقم التعريف الشخصي لشريحة SIM غير صحيح، ويتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولة.</item>
@@ -110,7 +110,7 @@
     </plurals>
     <string name="kg_password_wrong_puk_code_dead" msgid="3329017604125179374">"‏شريحة SIM غير صالحة للاستخدام. يُرجى الاتصال بمشغّل شبكة الجوّال."</string>
     <plurals name="kg_password_wrong_puk_code" formatted="false" msgid="2287504898931957513">
-      <item quantity="zero">‏رمز PUK لشريحة SIM غير صحيح، ولم تتبق لديك أية محاولات (<xliff:g id="NUMBER_1">%d</xliff:g>) تصبح بعدها شريحة SIM غير صالحة للاستخدام بشكل دائم.</item>
+      <item quantity="zero">‏رمز PUK لشريحة SIM غير صحيح، ولم تتبق لديك أي محاولات (<xliff:g id="NUMBER_1">%d</xliff:g>) تصبح بعدها شريحة SIM غير صالحة للاستخدام بشكل دائم.</item>
       <item quantity="two">‏رمز PUK لشريحة SIM غير صحيح، ويتبقى لديك محاولتان (<xliff:g id="NUMBER_1">%d</xliff:g>) تصبح بعدها شريحة SIM غير صالحة للاستخدام بشكل دائم.</item>
       <item quantity="few">‏رمز PUK لشريحة SIM غير صحيح، ويتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولات تصبح بعدها شريحة SIM غير صالحة للاستخدام بشكل دائم.</item>
       <item quantity="many">‏رمز PUK لشريحة SIM غير صحيح، ويتبقى لديك <xliff:g id="NUMBER_1">%d</xliff:g> محاولة تصبح بعدها شريحة SIM غير صالحة للاستخدام بشكل دائم.</item>

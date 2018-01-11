@@ -503,6 +503,13 @@
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Tik om te demp."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s volumekontroles word gewys. Swiep na bo om toe te maak."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Volumekontroles is versteek"</string>
+    <string name="output_title" msgid="5355078100792942802">"Media-uitvoer"</string>
+    <string name="output_calls_title" msgid="8717692905017206161">"Foonoproep-uitvoer"</string>
+    <string name="output_none_found" msgid="5544982839808921091">"Geen toestelle gekry nie"</string>
+    <string name="output_none_found_service_off" msgid="8631969668659757069">"Geen toestelle gekry nie. Probeer om <xliff:g id="SERVICE">%1$s</xliff:g> aan te skakel"</string>
+    <string name="output_service_bt" msgid="6224213415445509542">"Bluetooth"</string>
+    <string name="output_service_wifi" msgid="3749735218931825054">"Wi-Fi"</string>
+    <string name="output_service_bt_wifi" msgid="4486837869988770896">"Bluetooth en Wi-Fi"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Stelsel-UI-ontvanger"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Wys persentasie van ingebedde battery"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Wys batteryvlakpersentasie binne die statusbalkikoon wanneer dit nie laai nie"</string>
@@ -724,6 +731,8 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Vou uit"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimeer"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Maak toe"</string>
+    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
+    <skip />
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Sleep af om toe te maak"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Kieslys"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> is in beeld-in-beeld"</string>

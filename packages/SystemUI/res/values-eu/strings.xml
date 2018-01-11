@@ -226,8 +226,8 @@
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Flasha aktibatuta dago."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Flasha desaktibatu egin da."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Flasha aktibatu egin da."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Koloreak alderantzikatzeko aukera desaktibatu egin da."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Koloreak alderantzikatzeko aukera aktibatu egin da."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Koloreen alderantzikatzea desaktibatu egin da."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Koloreen alderantzikatzea aktibatu egin da."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Konexioa partekatzeko aukera desaktibatu egin da."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Konexioa partekatzeko aukera aktibatu egin da."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Pantaila igortzeari utzi zaio."</string>
@@ -505,6 +505,13 @@
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Sakatu hau audioa desaktibatzeko."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Bolumena kontrolatzeko %s aukera daude ikusgai. Pasatu hatza gora baztertzeko."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Ezkutatuta daude bolumena kontrolatzeko aukerak"</string>
+    <string name="output_title" msgid="5355078100792942802">"Multimedia-irteera"</string>
+    <string name="output_calls_title" msgid="8717692905017206161">"Telefono-deiaren irteera"</string>
+    <string name="output_none_found" msgid="5544982839808921091">"Ez da aurkitu gailurik"</string>
+    <string name="output_none_found_service_off" msgid="8631969668659757069">"Ez da aurkitu gailurik. Aktibatu <xliff:g id="SERVICE">%1$s</xliff:g>."</string>
+    <string name="output_service_bt" msgid="6224213415445509542">"Bluetooth konexioa"</string>
+    <string name="output_service_wifi" msgid="3749735218931825054">"Wi-Fi konexioa"</string>
+    <string name="output_service_bt_wifi" msgid="4486837869988770896">"Bluetooth eta Wi-Fi konexioak"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Sistemako erabiltzaile-interfazearen konfiguratzailea"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Erakutsi txertatutako bateriaren ehunekoa"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Erakutsi bateria-mailaren ehunekoa egoera-barraren ikonoan, kargatzen ari ez denean"</string>
@@ -726,6 +733,8 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Zabaldu"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizatu"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Itxi"</string>
+    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
+    <skip />
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Baztertzeko, arrastatu behera"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Menua"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"Pantaila txiki gainjarrian dago <xliff:g id="NAME">%s</xliff:g>"</string>

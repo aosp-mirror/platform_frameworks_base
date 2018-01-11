@@ -507,6 +507,13 @@
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Kliknij, by wyciszyć."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Wyświetlane są elementy sterowania głośnością aplikacji %s. Przesuń palcem, by odrzucić."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Elementy sterowania głośnością ukryte"</string>
+    <string name="output_title" msgid="5355078100792942802">"Wyjście multimediów"</string>
+    <string name="output_calls_title" msgid="8717692905017206161">"Wyjście dla połączeń telefonicznych"</string>
+    <string name="output_none_found" msgid="5544982839808921091">"Nie znaleziono urządzeń"</string>
+    <string name="output_none_found_service_off" msgid="8631969668659757069">"Nie znaleziono urządzeń. Spróbuj włączyć <xliff:g id="SERVICE">%1$s</xliff:g>"</string>
+    <string name="output_service_bt" msgid="6224213415445509542">"Bluetooth"</string>
+    <string name="output_service_wifi" msgid="3749735218931825054">"Wi-Fi"</string>
+    <string name="output_service_bt_wifi" msgid="4486837869988770896">"Bluetooth i Wi-Fi"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Kalibrator System UI"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Pokaż procent naładowania baterii"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Pokaż procent naładowania baterii w ikonie na pasku stanu, gdy telefon się nie ładuje"</string>
@@ -736,10 +743,12 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Rozwiń"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimalizuj"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Zamknij"</string>
+    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
+    <skip />
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Przeciągnij w dół, by zamknąć"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Menu"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"Aplikacja <xliff:g id="NAME">%s</xliff:g> działa w trybie obraz w obrazie"</string>
-    <string name="pip_notification_message" msgid="5619512781514343311">"Jeśli nie chcesz, by aplikacja <xliff:g id="NAME">%s</xliff:g> korzystała z tej funkcji, otwórz ustawienia i ją wyłącz."</string>
+    <string name="pip_notification_message" msgid="5619512781514343311">"Jeśli nie chcesz, by aplikacja <xliff:g id="NAME">%s</xliff:g> korzystała z tej funkcji, otwórz ustawienia i wyłącz ją."</string>
     <string name="pip_play" msgid="1417176722760265888">"Odtwórz"</string>
     <string name="pip_pause" msgid="8881063404466476571">"Wstrzymaj"</string>
     <string name="pip_skip_to_next" msgid="1948440006726306284">"Dalej"</string>

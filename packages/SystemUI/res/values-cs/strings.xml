@@ -509,6 +509,13 @@
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Klepnutím vypnete zvuk."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Ovládací prvky hlasitosti aplikace %s jsou zobrazeny. Zavřete je přejetím prstem."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Ovládací prvky hlasitosti jsou skryty"</string>
+    <string name="output_title" msgid="5355078100792942802">"Výstup médií"</string>
+    <string name="output_calls_title" msgid="8717692905017206161">"Výstup telefonního hovoru"</string>
+    <string name="output_none_found" msgid="5544982839808921091">"Nebyla nalezena žádná zařízení"</string>
+    <string name="output_none_found_service_off" msgid="8631969668659757069">"Nebyla nalezena žádná zařízení. Zkuste zapnout <xliff:g id="SERVICE">%1$s</xliff:g>"</string>
+    <string name="output_service_bt" msgid="6224213415445509542">"Bluetooth"</string>
+    <string name="output_service_wifi" msgid="3749735218931825054">"Wi-Fi"</string>
+    <string name="output_service_bt_wifi" msgid="4486837869988770896">"Bluetooth a Wi-Fi"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Nástroj na ladění uživatelského rozhraní systému"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Zobrazovat vložené procento nabití baterie"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Když neprobíhá nabíjení, zobrazit v ikoně na stavovém řádku procento nabití baterie"</string>
@@ -738,6 +745,8 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Rozbalit"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimalizovat"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Zavřít"</string>
+    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
+    <skip />
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Nápovědu zavřete přetažením dolů"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Nabídka"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"Aplikace <xliff:g id="NAME">%s</xliff:g> je v režimu obraz v obraze"</string>

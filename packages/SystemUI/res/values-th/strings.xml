@@ -503,6 +503,13 @@
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s แตะเพื่อปิดเสียง"</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s ตัวควบคุมระดับเสียงแสดงอยู่ เลื่อนขึ้นเพื่อปิด"</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"ตัวควบคุมระดับเสียงซ่อนอยู่"</string>
+    <string name="output_title" msgid="5355078100792942802">"เอาต์พุตสื่อ"</string>
+    <string name="output_calls_title" msgid="8717692905017206161">"เอาต์พุตการโทรออก"</string>
+    <string name="output_none_found" msgid="5544982839808921091">"ไม่พบอุปกรณ์"</string>
+    <string name="output_none_found_service_off" msgid="8631969668659757069">"ไม่พบอุปกรณ์ ลองเปิด <xliff:g id="SERVICE">%1$s</xliff:g>"</string>
+    <string name="output_service_bt" msgid="6224213415445509542">"บลูทูธ"</string>
+    <string name="output_service_wifi" msgid="3749735218931825054">"Wi-Fi"</string>
+    <string name="output_service_bt_wifi" msgid="4486837869988770896">"บลูทูธและ Wi-Fi"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"ตัวรับสัญญาณ UI ระบบ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"แสดงเปอร์เซ็นต์ของแบตเตอรี่ในตัว"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"แสดงเปอร์เซ็นต์ของระดับแบตเตอรี่ภายในไอคอนแถบสถานะเมื่อไม่มีการชาร์จ"</string>
@@ -724,6 +731,8 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"ขยาย"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"ย่อเล็กสุด"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"ปิด"</string>
+    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
+    <skip />
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"ลากลงเพื่อปิด"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"เมนู"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ใช้การแสดงภาพซ้อนภาพ"</string>
