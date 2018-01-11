@@ -492,8 +492,7 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"புளூடூத்"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"டூயல் டோன் மல்டி ஃப்ரீக்வென்சி"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"அணுகல்தன்மை"</string>
-    <!-- no translation found for ring_toggle_title (3281244519428819576) -->
-    <skip />
+    <string name="ring_toggle_title" msgid="3281244519428819576">"அழைப்புகள்"</string>
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"ஒலி"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"அதிர்வு"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"அமைதி"</string>
@@ -504,6 +503,13 @@
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. ஒலியடக்க, தட்டவும்."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s ஒலிக் கட்டுப்பாடுகள் காட்டப்பட்டன. நிராகரிக்க, மேலே ஸ்வைப் செய்யவும்."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"ஒலிக் கட்டுப்பாடுகள் மறைக்கப்பட்டன"</string>
+    <string name="output_title" msgid="5355078100792942802">"மீடியா வெளியீடு"</string>
+    <string name="output_calls_title" msgid="8717692905017206161">"ஃபோன் அழைப்பு வெளியீடு"</string>
+    <string name="output_none_found" msgid="5544982839808921091">"சாதனங்கள் எதுவும் இல்லை"</string>
+    <string name="output_none_found_service_off" msgid="8631969668659757069">"சாதனங்கள் எதுவும் இல்லை. <xliff:g id="SERVICE">%1$s</xliff:g>ஐ ஆன் செய்யவும்"</string>
+    <string name="output_service_bt" msgid="6224213415445509542">"புளூடூத்"</string>
+    <string name="output_service_wifi" msgid="3749735218931825054">"வைஃபை"</string>
+    <string name="output_service_bt_wifi" msgid="4486837869988770896">"புளூடூத் மற்றும் வைஃபை"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"உள்ளிணைந்த பேட்டரி சதவீதத்தைக் காட்டு"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"சார்ஜ் செய்யாத போது, நிலைப் பட்டி ஐகானின் உள்ளே பேட்டரி அளவு சதவீதத்தைக் காட்டும்"</string>
@@ -725,6 +731,8 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"விரி"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"சிறிதாக்கு"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"மூடு"</string>
+    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
+    <skip />
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"நிராகரிக்க, கீழே இழுக்கவும்"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"மெனு"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> தற்போது பிக்ச்சர்-இன்-பிக்ச்சரில் உள்ளது"</string>

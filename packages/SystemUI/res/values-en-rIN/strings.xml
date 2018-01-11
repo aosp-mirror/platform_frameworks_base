@@ -492,6 +492,10 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"Dual multi-tone frequency"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"Accessibility"</string>
+    <string name="ring_toggle_title" msgid="3281244519428819576">"Calls"</string>
+    <string name="volume_ringer_status_normal" msgid="4273142424125855384">"Ring"</string>
+    <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"Vibrate"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"Mute"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Tap to unmute."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Tap to set to vibrate. Accessibility services may be muted."</string>
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Tap to mute. Accessibility services may be muted."</string>
@@ -499,6 +503,13 @@
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Tap to mute."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s volume controls shown. Swipe up to dismiss."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Volume controls hidden"</string>
+    <string name="output_title" msgid="5355078100792942802">"Media output"</string>
+    <string name="output_calls_title" msgid="8717692905017206161">"Phone call output"</string>
+    <string name="output_none_found" msgid="5544982839808921091">"No devices found"</string>
+    <string name="output_none_found_service_off" msgid="8631969668659757069">"No devices found. Try turning on <xliff:g id="SERVICE">%1$s</xliff:g>"</string>
+    <string name="output_service_bt" msgid="6224213415445509542">"Bluetooth"</string>
+    <string name="output_service_wifi" msgid="3749735218931825054">"Wi-Fi"</string>
+    <string name="output_service_bt_wifi" msgid="4486837869988770896">"Bluetooth and Wi-Fi"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Show embedded battery percentage"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Show battery level percentage inside the status bar icon when not charging"</string>
@@ -720,6 +731,8 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Expand"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimise"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Close"</string>
+    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
+    <skip />
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Drag down to dismiss"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Menu"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> is in picture-in-picture"</string>
@@ -756,7 +769,7 @@
     <string name="instant_apps" msgid="6647570248119804907">"Instant Apps"</string>
     <string name="instant_apps_message" msgid="8116608994995104836">"Instant apps don\'t require installation."</string>
     <string name="app_info" msgid="6856026610594615344">"App info"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"Go to web"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"Go to browser"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobile data"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi is off"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth is off"</string>

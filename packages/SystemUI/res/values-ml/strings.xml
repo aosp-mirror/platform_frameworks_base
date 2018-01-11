@@ -492,8 +492,7 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"ബ്ലൂടൂത്ത്"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"ഡ്യുവൽ മൾട്ടി റ്റോൺ ഫ്രീക്വൻസി"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"ഉപയോഗസഹായി"</string>
-    <!-- no translation found for ring_toggle_title (3281244519428819576) -->
-    <skip />
+    <string name="ring_toggle_title" msgid="3281244519428819576">"കോളുകൾ"</string>
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"റിംഗ് ചെയ്യുക"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"വൈബ്രേറ്റ് ചെയ്യുക"</string>
     <string name="volume_ringer_status_silent" msgid="6896394161022916369">"മ്യൂട്ട് ചെയ്യുക"</string>
@@ -504,6 +503,13 @@
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s മ്യൂട്ടുചെയ്യുന്നതിന് ടാപ്പുചെയ്യുക."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s വോളിയം നിയന്ത്രണങ്ങൾ കാണിച്ചിരിക്കുന്നു. ഡിസ്മിസ് ചെയ്യുന്നതിന് മുകളിലേക്ക് സ്വൈപ്പുചെയ്യുക."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"വോളിയം നിയന്ത്രണങ്ങൾ മറച്ചിരിക്കുന്നു"</string>
+    <string name="output_title" msgid="5355078100792942802">"മീഡിയ ഔട്ട്പുട്ട്"</string>
+    <string name="output_calls_title" msgid="8717692905017206161">"ഫോൺ കോൾ ഔട്ട്പുട്ട്"</string>
+    <string name="output_none_found" msgid="5544982839808921091">"ഉപകരണങ്ങളൊന്നും കണ്ടെത്തിയില്ല"</string>
+    <string name="output_none_found_service_off" msgid="8631969668659757069">"ഉപകരണങ്ങളൊന്നും കണ്ടെത്തിയില്ല. <xliff:g id="SERVICE">%1$s</xliff:g> ഓണാക്കുന്നത് പരീക്ഷിക്കുക"</string>
+    <string name="output_service_bt" msgid="6224213415445509542">"Bluetooth"</string>
+    <string name="output_service_wifi" msgid="3749735218931825054">"വൈഫൈ"</string>
+    <string name="output_service_bt_wifi" msgid="4486837869988770896">"Bluetooth-ഉം വൈഫൈയും"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"സിസ്റ്റം UI ട്യൂണർ"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"എംബഡ് ചെയ്‌ത ബാറ്ററി ശതമാനം കാണിക്കുക"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ചാർജ്ജുചെയ്യാതിരിക്കുമ്പോൾ സ്റ്റാറ്റസ് ബാർ ഐക്കണിൽ ബാറ്ററി ലെവൽ ശതമാനം കാണിക്കുക"</string>
@@ -725,6 +731,8 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"വികസിപ്പിക്കുക"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"ചെറുതാക്കുക‍"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"അവസാനിപ്പിക്കുക"</string>
+    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
+    <skip />
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"തള്ളിക്കളയാൻ താഴേക്ക് വലിച്ചിടുക"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"മെനു"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ചിത്രത്തിനുള്ളിലെ ചിത്രത്തിലാണ്"</string>

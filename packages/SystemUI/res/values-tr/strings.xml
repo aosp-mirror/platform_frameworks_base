@@ -503,6 +503,13 @@
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Sesi kapatmak için dokunun."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s ses denetimleri gösteriliyor. Kapatmak için hızlıca yukarı kaydırın."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Ses denetimleri gizlendi"</string>
+    <string name="output_title" msgid="5355078100792942802">"Medya çıkışı"</string>
+    <string name="output_calls_title" msgid="8717692905017206161">"Telefon çağrısı çıkışı"</string>
+    <string name="output_none_found" msgid="5544982839808921091">"Cihaz bulunamadı"</string>
+    <string name="output_none_found_service_off" msgid="8631969668659757069">"Cihaz bulunamadı. <xliff:g id="SERVICE">%1$s</xliff:g> hizmetini açmayı deneyin"</string>
+    <string name="output_service_bt" msgid="6224213415445509542">"Bluetooth"</string>
+    <string name="output_service_wifi" msgid="3749735218931825054">"Kablosuz"</string>
+    <string name="output_service_bt_wifi" msgid="4486837869988770896">"Bluetooth ve Kablosuz"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Sistem Arayüzü Ayarlayıcısı"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Yerleşik pil yüzdesini göster"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Şarj olmazken durum çubuğu simgesinin içinde pil düzeyi yüzdesini göster"</string>
@@ -724,6 +731,8 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Genişlet"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Simge durumuna getir"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Kapat"</string>
+    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
+    <skip />
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Kapatmak için aşağıya sürükleyin"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Menü"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g>, pencere içinde pencere özelliğini kullanıyor"</string>
