@@ -4275,6 +4275,7 @@ package android.telephony {
     method public java.util.List<android.telephony.SubscriptionPlan> getSubscriptionPlans(int);
     method public void setSubscriptionPlans(int, java.util.List<android.telephony.SubscriptionPlan>);
     field public static final java.lang.String ACTION_MANAGE_SUBSCRIPTION_PLANS = "android.telephony.action.MANAGE_SUBSCRIPTION_PLANS";
+    field public static final java.lang.String ACTION_REFRESH_SUBSCRIPTION_PLANS = "android.telephony.action.REFRESH_SUBSCRIPTION_PLANS";
   }
 
   public final class SubscriptionPlan implements android.os.Parcelable {
