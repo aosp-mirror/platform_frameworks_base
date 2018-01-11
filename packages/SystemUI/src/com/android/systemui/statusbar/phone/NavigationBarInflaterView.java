@@ -63,6 +63,7 @@ public class NavigationBarInflaterView extends FrameLayout
     public static final String RECENT = "recent";
     public static final String NAVSPACE = "space";
     public static final String CLIPBOARD = "clipboard";
+    public static final String ROTATE = "rotate";
     public static final String KEY = "key";
     public static final String LEFT = "left";
     public static final String RIGHT = "right";
@@ -311,7 +312,7 @@ public class NavigationBarInflaterView extends FrameLayout
         View v = null;
         String button = extractButton(buttonSpec);
         if (LEFT.equals(button)) {
-            String s = Dependency.get(TunerService.class).getValue(NAV_BAR_LEFT, NAVSPACE);
+            String s = Dependency.get(TunerService.class).getValue(NAV_BAR_LEFT, ROTATE);
             button = extractButton(s);
         } else if (RIGHT.equals(button)) {
             String s = Dependency.get(TunerService.class).getValue(NAV_BAR_RIGHT, MENU_IME);
@@ -334,6 +335,8 @@ public class NavigationBarInflaterView extends FrameLayout
             v = inflater.inflate(R.layout.nav_key_space, parent, false);
         } else if (CLIPBOARD.equals(button)) {
             v = inflater.inflate(R.layout.clipboard, parent, false);
+        } else if (ROTATE.equals(button)) {
+            v = inflater.inflate(R.layout.rotate_suggestion, parent, false);
         } else if (button.startsWith(KEY)) {
             String uri = extractImage(button);
             int code = extractKeycode(button);
