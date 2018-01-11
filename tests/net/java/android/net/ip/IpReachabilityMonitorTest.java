@@ -21,6 +21,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.when;
 
+import android.net.util.InterfaceParams;
 import android.net.util.SharedLog;
 import android.os.Handler;
 import android.os.Looper;
@@ -54,8 +55,8 @@ public class IpReachabilityMonitorTest {
     }
 
     IpReachabilityMonitor makeMonitor() {
-        return new IpReachabilityMonitor(
-                "fake0", 1, mHandler, mLog, mCallback, null, mDependencies);
+        final InterfaceParams ifParams = new InterfaceParams("fake0", 1, null);
+        return new IpReachabilityMonitor(ifParams, mHandler, mLog, mCallback, null, mDependencies);
     }
 
     @Test
