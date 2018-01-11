@@ -2769,6 +2769,13 @@
          some existing device-specific resource overlays. -->
     <bool name="config_mainBuiltInDisplayIsRound">@bool/config_windowIsRound</bool>
 
+    <!-- The bounding path of the cutout region of the main built-in display.
+         Must either be empty if there is no cutout region, or a string that is parsable by
+         {@link android.util.PathParser}.
+         The path is assumed to be specified in display coordinates with pixel units and in
+         the display's native orientation. -->
+    <string translatable="false" name="config_mainBuiltInDisplayCutout"></string>
+
     <!-- Ultrasound support for Mic/speaker path -->
     <!-- Whether the default microphone audio source supports near-ultrasound frequencies
          (range of 18 - 21 kHz). -->

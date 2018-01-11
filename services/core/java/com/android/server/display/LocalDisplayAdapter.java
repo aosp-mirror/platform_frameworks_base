@@ -30,9 +30,12 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.text.TextUtils;
+import android.util.PathParser;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.Display;
+import android.view.DisplayCutout;
 import android.view.DisplayEventReceiver;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -400,12 +403,14 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             && SystemProperties.getBoolean(PROPERTY_EMULATOR_CIRCULAR, false))) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_ROUND;
                     }
+                    mInfo.displayCutout = parseDefaultDisplayCutout(res);
                     mInfo.type = Display.TYPE_BUILT_IN;
                     mInfo.densityDpi = (int)(phys.density * 160 + 0.5f);
                     mInfo.xDpi = phys.xDpi;
                     mInfo.yDpi = phys.yDpi;
                     mInfo.touch = DisplayDeviceInfo.TOUCH_INTERNAL;
                 } else {
+                    mInfo.displayCutout = null;
                     mInfo.type = Display.TYPE_HDMI;
                     mInfo.flags |= DisplayDeviceInfo.FLAG_PRESENTATION;
                     mInfo.name = getContext().getResources().getString(
@@ -432,6 +437,15 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 }
             }
             return mInfo;
+        }
+
+        private DisplayCutout parseDefaultDisplayCutout(Resources res) {
+            String cutoutString = res.getString(
+                    com.android.internal.R.string.config_mainBuiltInDisplayCutout);
+            if (TextUtils.isEmpty(cutoutString)) {
+                return null;
+            }
+            return DisplayCutout.fromBounds(PathParser.createPathFromPathData(cutoutString));
         }
 
         @Override

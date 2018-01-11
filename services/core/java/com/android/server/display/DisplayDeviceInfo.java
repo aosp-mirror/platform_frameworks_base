@@ -19,6 +19,7 @@ package com.android.server.display;
 import android.hardware.display.DisplayViewport;
 import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.DisplayCutout;
 import android.view.Surface;
 
 import java.util.Arrays;
@@ -229,6 +230,11 @@ final class DisplayDeviceInfo {
     public int flags;
 
     /**
+     * The {@link DisplayCutout} if present or {@code null} otherwise.
+     */
+    public DisplayCutout displayCutout;
+
+    /**
      * The touch attachment, per {@link DisplayViewport#touch}.
      */
     public int touch;
@@ -321,6 +327,7 @@ final class DisplayDeviceInfo {
                 || appVsyncOffsetNanos != other.appVsyncOffsetNanos
                 || presentationDeadlineNanos != other.presentationDeadlineNanos
                 || flags != other.flags
+                || !Objects.equal(displayCutout, other.displayCutout)
                 || touch != other.touch
                 || rotation != other.rotation
                 || type != other.type
@@ -354,6 +361,7 @@ final class DisplayDeviceInfo {
         appVsyncOffsetNanos = other.appVsyncOffsetNanos;
         presentationDeadlineNanos = other.presentationDeadlineNanos;
         flags = other.flags;
+        displayCutout = other.displayCutout;
         touch = other.touch;
         rotation = other.rotation;
         type = other.type;
@@ -380,6 +388,9 @@ final class DisplayDeviceInfo {
         sb.append(", ").append(xDpi).append(" x ").append(yDpi).append(" dpi");
         sb.append(", appVsyncOff ").append(appVsyncOffsetNanos);
         sb.append(", presDeadline ").append(presentationDeadlineNanos);
+        if (displayCutout != null) {
+            sb.append(", cutout ").append(displayCutout);
+        }
         sb.append(", touch ").append(touchToString(touch));
         sb.append(", rotation ").append(rotation);
         sb.append(", type ").append(Display.typeToString(type));
