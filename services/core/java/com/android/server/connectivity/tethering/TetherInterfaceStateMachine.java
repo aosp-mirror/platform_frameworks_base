@@ -30,6 +30,7 @@ import android.net.RouteInfo;
 import android.net.ip.InterfaceController;
 import android.net.ip.RouterAdvertisementDaemon;
 import android.net.ip.RouterAdvertisementDaemon.RaParams;
+import android.net.util.InterfaceParams;
 import android.net.util.NetdService;
 import android.net.util.SharedLog;
 import android.os.INetworkManagementService;
@@ -48,7 +49,6 @@ import com.android.internal.util.StateMachine;
 
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -120,8 +120,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
     private int mLastError;
     private int mServingMode;
     private String mMyUpstreamIfaceName;  // may change over time
-    private NetworkInterface mNetworkInterface;
-    private byte[] mHwAddr;
+    private InterfaceParams mInterfaceParams;
     // TODO: De-duplicate this with mLinkProperties above. Currently, these link
     // properties are those selected by the IPv6TetheringCoordinator and relayed
     // to us. By comparison, mLinkProperties contains the addresses and directly
@@ -247,31 +246,16 @@ public class TetherInterfaceStateMachine extends StateMachine {
     }
 
     private boolean startIPv6() {
-        // TODO: Refactor for testability (perhaps passing an android.system.Os
-        // instance and calling getifaddrs() directly).
-        try {
-            mNetworkInterface = NetworkInterface.getByName(mIfaceName);
-        } catch (SocketException e) {
-            mLog.e("Error looking up NetworkInterfaces: " + e);
-            stopIPv6();
-            return false;
-        }
-        if (mNetworkInterface == null) {
-            mLog.e("Failed to find NetworkInterface");
+        // TODO: Refactor for better testability.  This is one of the things
+        // that prohibits unittesting IPv6 tethering setup.
+        mInterfaceParams = InterfaceParams.getByName(mIfaceName);
+        if (mInterfaceParams == null) {
+            mLog.e("Failed to find InterfaceParams");
             stopIPv6();
             return false;
         }
 
-        try {
-            mHwAddr = mNetworkInterface.getHardwareAddress();
-        } catch (SocketException e) {
-            mLog.e("Failed to find hardware address: " + e);
-            stopIPv6();
-            return false;
-        }
-
-        final int ifindex = mNetworkInterface.getIndex();
-        mRaDaemon = new RouterAdvertisementDaemon(mIfaceName, ifindex, mHwAddr);
+        mRaDaemon = new RouterAdvertisementDaemon(mInterfaceParams);
         if (!mRaDaemon.start()) {
             stopIPv6();
             return false;
@@ -281,8 +265,7 @@ public class TetherInterfaceStateMachine extends StateMachine {
     }
 
     private void stopIPv6() {
-        mNetworkInterface = null;
-        mHwAddr = null;
+        mInterfaceParams = null;
         setRaParams(null);
 
         if (mRaDaemon != null) {
