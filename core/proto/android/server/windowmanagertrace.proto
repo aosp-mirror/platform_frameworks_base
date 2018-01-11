@@ -16,11 +16,7 @@
 
 syntax = "proto2";
 
-import "frameworks/base/core/proto/android/content/configuration.proto";
-import "frameworks/base/core/proto/android/graphics/rect.proto";
 import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
-import "frameworks/base/core/proto/android/view/displayinfo.proto";
-import "frameworks/base/core/proto/android/view/windowlayoutparams.proto";
 
 package com.android.server.wm.proto;
 
