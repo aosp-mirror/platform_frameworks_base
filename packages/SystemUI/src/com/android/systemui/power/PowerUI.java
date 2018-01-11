@@ -131,10 +131,15 @@ public class PowerUI extends SystemUI {
                 com.android.internal.R.integer.config_criticalBatteryWarningLevel);
 
         final ContentResolver resolver = mContext.getContentResolver();
-        int defWarnLevel = mContext.getResources().getInteger(
+        final int defWarnLevel = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_lowBatteryWarningLevel);
-        int warnLevel = Settings.Global.getInt(resolver,
+        final int lowPowerModeTriggerLevel = Settings.Global.getInt(resolver,
                 Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL, defWarnLevel);
+
+        // NOTE: Keep the logic in sync with BatteryService.
+        // TODO: Propagate this value from BatteryService to system UI, really.
+        int warnLevel =  Math.min(defWarnLevel, lowPowerModeTriggerLevel);
+
         if (warnLevel == 0) {
             warnLevel = defWarnLevel;
         }

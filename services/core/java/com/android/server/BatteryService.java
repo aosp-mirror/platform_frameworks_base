@@ -298,6 +298,8 @@ public final class BatteryService extends SystemService {
         final int lowPowerModeTriggerLevel = Settings.Global.getInt(resolver,
                 Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL, defWarnLevel);
 
+        // NOTE: Keep the logic in sync with PowerUI.java in systemUI.
+        // TODO: Propagate this value from BatteryService to system UI, really.
         mLowBatteryWarningLevel = Math.min(defWarnLevel, lowPowerModeTriggerLevel);
 
         if (mLowBatteryWarningLevel == 0) {
