@@ -224,7 +224,7 @@ public class DhcpClient extends StateMachine {
 
     // TODO: Take an InterfaceParams instance instead of an interface name String.
     private DhcpClient(Context context, StateMachine controller, String iface) {
-        super(TAG);
+        super(TAG, controller.getHandler());
 
         mContext = context;
         mController = controller;
