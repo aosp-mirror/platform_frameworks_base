@@ -66,6 +66,15 @@ StatsPullerManagerImpl::StatsPullerManagerImpl()
     mPullers.insert({android::util::CPU_TIME_PER_UID_FREQ, make_shared<CpuTimePerUidFreqPuller>()});
     mPullers.insert({android::util::CPU_SUSPEND_TIME, make_shared<StatsCompanionServicePuller>(android::util::CPU_SUSPEND_TIME)});
     mPullers.insert({android::util::CPU_IDLE_TIME, make_shared<StatsCompanionServicePuller>(android::util::CPU_IDLE_TIME)});
+    mPullers.insert({android::util::DISK_SPACE,
+                     make_shared<StatsCompanionServicePuller>(android::util::DISK_SPACE)});
+    mPullers.insert({android::util::SYSTEM_UPTIME,
+                     make_shared<StatsCompanionServicePuller>(android::util::SYSTEM_UPTIME)});
+    mPullers.insert(
+            {android::util::WIFI_ACTIVITY_ENERGY_INFO,
+             make_shared<StatsCompanionServicePuller>(android::util::WIFI_ACTIVITY_ENERGY_INFO)});
+    mPullers.insert({android::util::MODEM_ACTIVITY_INFO,
+                     make_shared<StatsCompanionServicePuller>(android::util::MODEM_ACTIVITY_INFO)});
 
     mStatsCompanionService = StatsService::getStatsCompanionService();
 }
