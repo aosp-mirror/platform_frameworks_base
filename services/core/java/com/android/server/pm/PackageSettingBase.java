@@ -437,7 +437,8 @@ public abstract class PackageSettingBase extends SettingBase {
             boolean notLaunched, boolean hidden, boolean suspended, boolean instantApp,
             boolean virtualPreload, String lastDisableAppCaller,
             ArraySet<String> enabledComponents, ArraySet<String> disabledComponents,
-            int domainVerifState, int linkGeneration, int installReason) {
+            int domainVerifState, int linkGeneration, int installReason,
+            String harmfulAppWarning) {
         PackageUserState state = modifyUserState(userId);
         state.ceDataInode = ceDataInode;
         state.enabled = enabled;
@@ -454,6 +455,7 @@ public abstract class PackageSettingBase extends SettingBase {
         state.installReason = installReason;
         state.instantApp = instantApp;
         state.virtualPreload = virtualPreload;
+        state.harmfulAppWarning = harmfulAppWarning;
     }
 
     ArraySet<String> getEnabledComponents(int userId) {
@@ -619,5 +621,15 @@ public abstract class PackageSettingBase extends SettingBase {
                     state.lastDisableAppCaller);
             proto.end(userToken);
         }
+    }
+
+    void setHarmfulAppWarning(int userId, String harmfulAppWarning) {
+        PackageUserState userState = modifyUserState(userId);
+        userState.harmfulAppWarning = harmfulAppWarning;
+    }
+
+    String getHarmfulAppWarning(int userId) {
+        PackageUserState userState = readUserState(userId);
+        return userState.harmfulAppWarning;
     }
 }

@@ -30,6 +30,7 @@ import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ApplicationInfo.FLAG_SUSPENDED;
 
 import android.app.ActivityOptions;
+import android.app.AppGlobals;
 import android.app.KeyguardManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.Context;
@@ -40,10 +41,12 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.os.Binder;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.HarmfulAppWarningActivity;
 import com.android.internal.app.UnlaunchableAppActivity;
 import com.android.server.LocalServices;
 
@@ -115,6 +118,15 @@ class ActivityStartInterceptor {
         mCallingPackage = callingPackage;
     }
 
+    private IntentSender createIntentSenderForOriginalIntent(int callingUid, int flags) {
+        final IIntentSender target = mService.getIntentSenderLocked(
+                INTENT_SENDER_ACTIVITY, mCallingPackage, callingUid, mUserId, null /*token*/,
+                null /*resultCode*/, 0 /*requestCode*/,
+                new Intent[] { mIntent }, new String[] { mResolvedType },
+                flags, null /*bOptions*/);
+        return new IntentSender(target);
+    }
+
     /**
      * Intercept the launch intent based on various signals. If an interception happened the
      * internal variables get assigned and need to be read explicitly by the caller.
@@ -144,6 +156,11 @@ class ActivityStartInterceptor {
             // be unlocked when profile's user is running.
             return true;
         }
+        if (interceptHarmfulAppIfNeeded()) {
+            // If the app has a "harmful app" warning associated with it, we should ask to uninstall
+            // before issuing the work challenge.
+            return true;
+        }
         return interceptWorkProfileChallengeIfNeeded();
     }
 
@@ -152,13 +169,10 @@ class ActivityStartInterceptor {
         if (!mUserManager.isQuietModeEnabled(UserHandle.of(mUserId))) {
             return false;
         }
-        IIntentSender target = mService.getIntentSenderLocked(
-                INTENT_SENDER_ACTIVITY, mCallingPackage, mCallingUid, mUserId, null, null, 0,
-                new Intent[] {mIntent}, new String[] {mResolvedType},
-                FLAG_CANCEL_CURRENT | FLAG_ONE_SHOT, null);
+        IntentSender target = createIntentSenderForOriginalIntent(mCallingUid,
+                FLAG_CANCEL_CURRENT | FLAG_ONE_SHOT);
 
-        mIntent = UnlaunchableAppActivity.createInQuietModeDialogIntent(mUserId,
-                new IntentSender(target));
+        mIntent = UnlaunchableAppActivity.createInQuietModeDialogIntent(mUserId, target);
         mCallingPid = mRealCallingPid;
         mCallingUid = mRealCallingUid;
         mResolvedType = null;
@@ -240,11 +254,8 @@ class ActivityStartInterceptor {
             return null;
         }
         // TODO(b/28935539): should allow certain activities to bypass work challenge
-        final IIntentSender target = mService.getIntentSenderLocked(
-                INTENT_SENDER_ACTIVITY, callingPackage,
-                Binder.getCallingUid(), userId, null, null, 0, new Intent[]{ intent },
-                new String[]{ resolvedType },
-                FLAG_CANCEL_CURRENT | FLAG_ONE_SHOT | FLAG_IMMUTABLE, null);
+        final IntentSender target = createIntentSenderForOriginalIntent(Binder.getCallingUid(),
+                FLAG_CANCEL_CURRENT | FLAG_ONE_SHOT | FLAG_IMMUTABLE);
         final KeyguardManager km = (KeyguardManager) mServiceContext
                 .getSystemService(KEYGUARD_SERVICE);
         final Intent newIntent = km.createConfirmDeviceCredentialIntent(null, null, userId);
@@ -254,8 +265,36 @@ class ActivityStartInterceptor {
         newIntent.setFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS |
                 FLAG_ACTIVITY_TASK_ON_HOME);
         newIntent.putExtra(EXTRA_PACKAGE_NAME, aInfo.packageName);
-        newIntent.putExtra(EXTRA_INTENT, new IntentSender(target));
+        newIntent.putExtra(EXTRA_INTENT, target);
         return newIntent;
+    }
+
+    private boolean interceptHarmfulAppIfNeeded() {
+        CharSequence harmfulAppWarning;
+        try {
+            harmfulAppWarning = AppGlobals.getPackageManager().getHarmfulAppWarning(
+                    mAInfo.packageName, mUserId);
+        } catch (RemoteException e) {
+            return false;
+        }
+
+        if (harmfulAppWarning == null) {
+            return false;
+        }
+
+        final IntentSender target = createIntentSenderForOriginalIntent(mCallingUid,
+                FLAG_CANCEL_CURRENT | FLAG_ONE_SHOT | FLAG_IMMUTABLE);
+
+        mIntent = HarmfulAppWarningActivity.createHarmfulAppWarningIntent(mServiceContext,
+                mAInfo.packageName, target, harmfulAppWarning);
+
+        mCallingPid = mRealCallingPid;
+        mCallingUid = mRealCallingUid;
+        mResolvedType = null;
+
+        mRInfo = mSupervisor.resolveIntent(mIntent, mResolvedType, mUserId);
+        mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
+        return true;
     }
 
 }

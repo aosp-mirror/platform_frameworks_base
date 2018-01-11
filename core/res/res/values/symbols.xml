@@ -3209,4 +3209,8 @@
   <java-symbol type="array" name="config_screenBrightnessNits" />
 
   <java-symbol type="string" name="shortcut_disabled_reason_unknown" />
+
+  <java-symbol type="string" name="harmful_app_warning_uninstall" />
+  <java-symbol type="string" name="harmful_app_warning_launch_anyway" />
+  <java-symbol type="string" name="harmful_app_warning_title" />
 </resources>

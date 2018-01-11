@@ -227,6 +227,7 @@ public final class Settings {
     private static final String ATTR_INSTALL_REASON = "install-reason";
     private static final String ATTR_INSTANT_APP = "instant-app";
     private static final String ATTR_VIRTUAL_PRELOAD = "virtual-preload";
+    private static final String ATTR_HARMFUL_APP_WARNING = "harmful-app-warning";
 
     private static final String ATTR_PACKAGE_NAME = "packageName";
     private static final String ATTR_FINGERPRINT = "fingerprint";
@@ -742,7 +743,8 @@ public final class Settings {
                                 null /*enabledComponents*/,
                                 null /*disabledComponents*/,
                                 INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED,
-                                0, PackageManager.INSTALL_REASON_UNKNOWN);
+                                0, PackageManager.INSTALL_REASON_UNKNOWN,
+                                null /*harmfulAppWarning*/);
                     }
                 }
             }
@@ -1680,7 +1682,8 @@ public final class Settings {
                                 null /*enabledComponents*/,
                                 null /*disabledComponents*/,
                                 INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED,
-                                0, PackageManager.INSTALL_REASON_UNKNOWN);
+                                0, PackageManager.INSTALL_REASON_UNKNOWN,
+                                null /*harmfulAppWarning*/);
                     }
                     return;
                 }
@@ -1755,7 +1758,8 @@ public final class Settings {
                             COMPONENT_ENABLED_STATE_DEFAULT);
                     final String enabledCaller = parser.getAttributeValue(null,
                             ATTR_ENABLED_CALLER);
-
+                    final String harmfulAppWarning =
+                            parser.getAttributeValue(null, ATTR_HARMFUL_APP_WARNING);
                     final int verifState = XmlUtils.readIntAttribute(parser,
                             ATTR_DOMAIN_VERIFICATON_STATE,
                             PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED);
@@ -1792,7 +1796,7 @@ public final class Settings {
                     ps.setUserState(userId, ceDataInode, enabled, installed, stopped, notLaunched,
                             hidden, suspended, instantApp, virtualPreload, enabledCaller,
                             enabledComponents, disabledComponents, verifState, linkGeneration,
-                            installReason);
+                            installReason, harmfulAppWarning);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
                 } else if (tagName.equals(TAG_PERSISTENT_PREFERRED_ACTIVITIES)) {
@@ -2124,6 +2128,10 @@ public final class Settings {
                 if (ustate.installReason != PackageManager.INSTALL_REASON_UNKNOWN) {
                     serializer.attribute(null, ATTR_INSTALL_REASON,
                             Integer.toString(ustate.installReason));
+                }
+                if (ustate.harmfulAppWarning != null) {
+                    serializer.attribute(null, ATTR_HARMFUL_APP_WARNING,
+                            ustate.harmfulAppWarning);
                 }
                 if (!ArrayUtils.isEmpty(ustate.enabledComponents)) {
                     serializer.startTag(null, TAG_ENABLED_COMPONENTS);
@@ -4347,6 +4355,22 @@ public final class Settings {
         return false;
     }
 
+    void setHarmfulAppWarningLPw(String packageName, CharSequence warning, int userId) {
+        final PackageSetting pkgSetting = mPackages.get(packageName);
+        if (pkgSetting == null) {
+            throw new IllegalArgumentException("Unknown package: " + packageName);
+        }
+        pkgSetting.setHarmfulAppWarning(userId, warning == null ? null : warning.toString());
+    }
+
+    String getHarmfulAppWarningLPr(String packageName, int userId) {
+        final PackageSetting pkgSetting = mPackages.get(packageName);
+        if (pkgSetting == null) {
+            throw new IllegalArgumentException("Unknown package: " + packageName);
+        }
+        return pkgSetting.getHarmfulAppWarning(userId);
+    }
+
     private static List<UserInfo> getAllUsers(UserManagerService userManager) {
         long id = Binder.clearCallingIdentity();
         try {
@@ -4493,11 +4517,14 @@ public final class Settings {
                 pw.print(ps.getNotLaunched(user.id) ? "l" : "L");
                 pw.print(ps.getInstantApp(user.id) ? "IA" : "ia");
                 pw.print(ps.getVirtulalPreload(user.id) ? "VPI" : "vpi");
+                String harmfulAppWarning = ps.getHarmfulAppWarning(user.id);
+                pw.print(harmfulAppWarning != null ? "HA" : "ha");
                 pw.print(",");
                 pw.print(ps.getEnabled(user.id));
                 String lastDisabledAppCaller = ps.getLastDisabledAppCaller(user.id);
                 pw.print(",");
                 pw.print(lastDisabledAppCaller != null ? lastDisabledAppCaller : "?");
+                pw.print(",");
                 pw.println();
             }
             return;
@@ -4768,6 +4795,12 @@ public final class Settings {
                 dumpGidsLPr(pw, prefix + "    ", permissionsState.computeGids(user.id));
                 dumpRuntimePermissionsLPr(pw, prefix + "    ", permissionNames, permissionsState
                         .getRuntimePermissionStates(user.id), dumpAll);
+            }
+
+            String harmfulAppWarning = ps.getHarmfulAppWarning(user.id);
+            if (harmfulAppWarning != null) {
+                pw.print(prefix); pw.print("      harmfulAppWarning: ");
+                pw.println(harmfulAppWarning);
             }
 
             if (permissionNames == null) {
