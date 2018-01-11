@@ -14,5 +14,5 @@
 
 service statsd /system/bin/statsd
     class main
-    user system
-    group system
+    user statsd
+    group statsd log

@@ -168,6 +168,8 @@
     <assign-permission name="android.permission.ACCESS_LOWPAN_STATE" uid="lowpan" />
     <assign-permission name="android.permission.MANAGE_LOWPAN_INTERFACES" uid="lowpan" />
 
+    <assign-permission name="android.permission.STATSCOMPANION" uid="statsd" />
+
     <!-- This is a list of all the libraries available for application
          code to link against. -->
 
