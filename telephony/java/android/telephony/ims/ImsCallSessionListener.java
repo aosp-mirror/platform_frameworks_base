@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,17 @@
  * limitations under the License
  */
 
-package android.telephony.ims.internal;
+package android.telephony.ims;
 
 import android.os.RemoteException;
-import android.telephony.ims.internal.aidl.IImsCallSessionListener;
+import android.telephony.ims.aidl.IImsCallSessionListener;
 
 import com.android.ims.ImsCallProfile;
 import com.android.ims.ImsConferenceState;
 import com.android.ims.ImsReasonInfo;
 import com.android.ims.ImsStreamMediaProfile;
 import com.android.ims.ImsSuppServiceNotification;
+import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.ImsCallSession;
 
 /**
@@ -138,12 +139,37 @@ public class ImsCallSessionListener {
     }
 
     /**
+     * Called when the session merge has been started.  At this point, the {@code newSession}
+     * represents the session which has been initiated to the IMS conference server for the
+     * new merged conference.
+     *
+     * @param newSession the session object that is merged with an active & hold session
+     *
+     * @hide
+     */
+    public void callSessionMergeStarted(IImsCallSession newSession, ImsCallProfile profile)
+            throws RemoteException {
+        mListener.callSessionMergeStarted(newSession, profile);
+    }
+
+    /**
      * Called when the session merge is successful and the merged session is active.
      *
      * @param newSession the new session object that is used for the conference
      */
     public void callSessionMergeComplete(ImsCallSession newSession) throws RemoteException {
         mListener.callSessionMergeComplete(newSession != null ? newSession.getSession() : null);
+    }
+
+    /**
+     * Called when the session merge is successful and the merged session is active.
+     *
+     * @param newSession the new session object that is used for the conference
+     *
+     * @hide
+     */
+    public void callSessionMergeComplete(IImsCallSession newSession) throws RemoteException {
+        mListener.callSessionMergeComplete(newSession);
     }
 
     /**
@@ -191,6 +217,18 @@ public class ImsCallSessionListener {
     }
 
     /**
+     * Called when the session has been extended to a conference session.
+     *
+     * @param newSession the session object that is extended to the conference
+     *      from the active session
+     * @hide
+     */
+    public void callSessionConferenceExtended(IImsCallSession newSession, ImsCallProfile profile)
+            throws RemoteException {
+        mListener.callSessionConferenceExtended(newSession, profile);
+    }
+
+    /**
      * Called when the conference extension has failed.
      *
      * @param reasonInfo detailed reason of the conference extension failure
@@ -206,6 +244,16 @@ public class ImsCallSessionListener {
             ImsCallProfile profile) throws RemoteException {
         mListener.callSessionConferenceExtendReceived(newSession != null
                 ? newSession.getSession() : null, profile);
+    }
+
+    /**
+     * Called when the conference extension is received from the remote user.
+     *
+     * @hide
+     */
+    public void callSessionConferenceExtendReceived(IImsCallSession newSession,
+            ImsCallProfile profile) throws RemoteException {
+        mListener.callSessionConferenceExtendReceived(newSession, profile);
     }
 
     /**

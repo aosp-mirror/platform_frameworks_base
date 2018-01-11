@@ -18,12 +18,13 @@ package android.telephony.ims.stub;
 
 import android.os.Message;
 import android.os.RemoteException;
+import android.telephony.ims.ImsCallSessionListener;
+import android.telephony.ims.aidl.IImsCallSessionListener;
 
 import com.android.ims.ImsCallProfile;
 import com.android.ims.ImsStreamMediaProfile;
 import com.android.ims.internal.ImsCallSession;
 import com.android.ims.internal.IImsCallSession;
-import com.android.ims.internal.IImsCallSessionListener;
 import com.android.ims.internal.IImsVideoCallProvider;
 
 /**
@@ -38,11 +39,26 @@ import com.android.ims.internal.IImsVideoCallProvider;
 
 public class ImsCallSessionImplBase extends IImsCallSession.Stub {
 
+    @Override
+    public final void setListener(IImsCallSessionListener listener) throws RemoteException {
+        setListener(new ImsCallSessionListener(listener));
+    }
+
+    /**
+     * Sets the listener to listen to the session events. An {@link ImsCallSession}
+     * can only hold one listener at a time. Subsequent calls to this method
+     * override the previous listener.
+     *
+     * @param listener to listen to the session events of this object
+     */
+    public void setListener(ImsCallSessionListener listener) {
+    }
+
     /**
      * Closes the object. This object is not usable after being closed.
      */
     @Override
-    public void close() throws RemoteException {
+    public void close() {
 
     }
 
@@ -52,7 +68,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @return the call ID
      */
     @Override
-    public String getCallId() throws RemoteException {
+    public String getCallId() {
         return null;
     }
 
@@ -62,7 +78,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @return the {@link ImsCallProfile} that this session is associated with
      */
     @Override
-    public ImsCallProfile getCallProfile() throws RemoteException {
+    public ImsCallProfile getCallProfile() {
         return null;
     }
 
@@ -72,7 +88,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @return the local {@link ImsCallProfile} that this session is associated with
      */
     @Override
-    public ImsCallProfile getLocalCallProfile() throws RemoteException {
+    public ImsCallProfile getLocalCallProfile() {
         return null;
     }
 
@@ -82,7 +98,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @return the remote {@link ImsCallProfile} that this session is associated with
      */
     @Override
-    public ImsCallProfile getRemoteCallProfile() throws RemoteException {
+    public ImsCallProfile getRemoteCallProfile() {
         return null;
     }
 
@@ -92,7 +108,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @return the string value associated with the specified property
      */
     @Override
-    public String getProperty(String name) throws RemoteException {
+    public String getProperty(String name) {
         return null;
     }
 
@@ -103,7 +119,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @return the session state
      */
     @Override
-    public int getState() throws RemoteException {
+    public int getState() {
         return ImsCallSession.State.INVALID;
     }
 
@@ -113,19 +129,8 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @return true if the session is in call, false otherwise
      */
     @Override
-    public boolean isInCall() throws RemoteException {
+    public boolean isInCall() {
         return false;
-    }
-
-    /**
-     * Sets the listener to listen to the session events. An {@link ImsCallSession}
-     * can only hold one listener at a time. Subsequent calls to this method
-     * override the previous listener.
-     *
-     * @param listener to listen to the session events of this object
-     */
-    @Override
-    public void setListener(IImsCallSessionListener listener) throws RemoteException {
     }
 
     /**
@@ -134,7 +139,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @param muted true if the call is muted, false otherwise
      */
     @Override
-    public void setMute(boolean muted) throws RemoteException {
+    public void setMute(boolean muted) {
     }
 
     /**
@@ -150,7 +155,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * {@link ImsCallSession.Listener#callSessionStartFailed}
      */
     @Override
-    public void start(String callee, ImsCallProfile profile) throws RemoteException {
+    public void start(String callee, ImsCallProfile profile) {
     }
 
     /**
@@ -166,8 +171,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * {@link ImsCallSession.Listener#callSessionStartFailed}
      */
     @Override
-    public void startConference(String[] participants, ImsCallProfile profile)
-            throws RemoteException {
+    public void startConference(String[] participants, ImsCallProfile profile) {
     }
 
     /**
@@ -178,7 +182,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @see {@link ImsCallSession.Listener#callSessionStarted}
      */
     @Override
-    public void accept(int callType, ImsStreamMediaProfile profile) throws RemoteException {
+    public void accept(int callType, ImsStreamMediaProfile profile) {
     }
 
     /**
@@ -189,7 +193,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * {@link ImsCallSession.Listener#callSessionStartFailed}
      */
     @Override
-    public void reject(int reason) throws RemoteException {
+    public void reject(int reason) {
     }
 
     /**
@@ -201,7 +205,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @see {@link ImsCallSession.Listener#callSessionTerminated}
      */
     @Override
-    public void terminate(int reason) throws RemoteException {
+    public void terminate(int reason) {
     }
 
     /**
@@ -213,7 +217,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * {@link ImsCallSession.Listener#callSessionHoldFailed}
      */
     @Override
-    public void hold(ImsStreamMediaProfile profile) throws RemoteException {
+    public void hold(ImsStreamMediaProfile profile) {
     }
 
     /**
@@ -225,7 +229,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * {@link ImsCallSession.Listener#callSessionResumeFailed}
      */
     @Override
-    public void resume(ImsStreamMediaProfile profile) throws RemoteException {
+    public void resume(ImsStreamMediaProfile profile) {
     }
 
     /**
@@ -240,7 +244,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      *      {@link ImsCallSession.Listener#callSessionMergeFailed}
      */
     @Override
-    public void merge() throws RemoteException {
+    public void merge() {
     }
 
     /**
@@ -252,7 +256,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * {@link ImsCallSession.Listener#callSessionUpdateFailed}
      */
     @Override
-    public void update(int callType, ImsStreamMediaProfile profile) throws RemoteException {
+    public void update(int callType, ImsStreamMediaProfile profile) {
     }
 
     /**
@@ -264,7 +268,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * {@link ImsCallSession.Listener#callSessionConferenceExtendFailed}
      */
     @Override
-    public void extendToConference(String[] participants) throws RemoteException {
+    public void extendToConference(String[] participants) {
     }
 
     /**
@@ -286,7 +290,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      *      {@link ImsCallSession.Listener#callSessionRemoveParticipantsRequestFailed}
      */
     @Override
-    public void removeParticipants(String[] participants) throws RemoteException {
+    public void removeParticipants(String[] participants) {
     }
 
     /**
@@ -297,7 +301,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @param c the DTMF to send. '0' ~ '9', 'A' ~ 'D', '*', '#' are valid inputs.
      */
     @Override
-    public void sendDtmf(char c, Message result) throws RemoteException {
+    public void sendDtmf(char c, Message result) {
     }
 
     /**
@@ -308,14 +312,14 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @param c the DTMF to send. '0' ~ '9', 'A' ~ 'D', '*', '#' are valid inputs.
      */
     @Override
-    public void startDtmf(char c) throws RemoteException {
+    public void startDtmf(char c) {
     }
 
     /**
      * Stop a DTMF code.
      */
     @Override
-    public void stopDtmf() throws RemoteException {
+    public void stopDtmf() {
     }
 
     /**
@@ -324,7 +328,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @param ussdMessage USSD message to send
      */
     @Override
-    public void sendUssd(String ussdMessage) throws RemoteException {
+    public void sendUssd(String ussdMessage) {
     }
 
     /**
@@ -333,7 +337,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * intermediates between the propriety implementation and Telecomm/InCall.
      */
     @Override
-    public IImsVideoCallProvider getVideoCallProvider() throws RemoteException {
+    public IImsVideoCallProvider getVideoCallProvider() {
         return null;
     }
 
@@ -342,7 +346,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @return {@code True} if the session is multiparty.
      */
     @Override
-    public boolean isMultiparty() throws RemoteException {
+    public boolean isMultiparty() {
         return false;
     }
 
