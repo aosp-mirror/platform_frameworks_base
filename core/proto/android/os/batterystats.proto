@@ -674,14 +674,13 @@ message UidProto {
     // needed:
     // top > foreground service > foreground > background > top sleeping > heavy weight > cache
     enum State {
-      // Time this uid has any processes in the top state (or above such as
-      // persistent).
+      // Time this uid has any processes in the top state.
       PROCESS_STATE_TOP = 0;
-      // Time this uid has any process with a started out bound foreground
-      // service, but none in the "top" state.
+      // Time this uid has any process with a started foreground service, but
+      // none in the "top" state.
       PROCESS_STATE_FOREGROUND_SERVICE = 1;
-      // Time this uid has any process in an active foreground state, but none
-      // in the "top sleeping" or better state.
+      // Time this uid has any process in an active foreground state, but none in the
+      // "foreground service" or better state. Persistent and other foreground states go here.
       PROCESS_STATE_FOREGROUND = 2;
       // Time this uid has any process in an active background state, but none
       // in the "foreground" or better state.
