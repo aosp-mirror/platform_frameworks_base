@@ -22106,7 +22106,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @param id the ID to search for
      * @return a view with given ID if found, or {@code null} otherwise
-     * @see View#findViewById(int)
+     * @see View#requireViewById(int)
      */
     @Nullable
     public final <T extends View> T findViewById(@IdRes int id) {
@@ -22114,6 +22114,29 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return null;
         }
         return findViewTraversal(id);
+    }
+
+    /**
+     * Finds the first descendant view with the given ID, the view itself if the ID matches
+     * {@link #getId()}, or throws an IllegalArgumentException if the ID is invalid or there is no
+     * matching view in the hierarchy.
+     * <p>
+     * <strong>Note:</strong> In most cases -- depending on compiler support --
+     * the resulting view is automatically cast to the target class type. If
+     * the target class type is unconstrained, an explicit cast may be
+     * necessary.
+     *
+     * @param id the ID to search for
+     * @return a view with given ID
+     * @see View#findViewById(int)
+     */
+    @NonNull
+    public final <T extends View> T requireViewById(@IdRes int id) {
+        T view = findViewById(id);
+        if (view == null) {
+            throw new IllegalArgumentException("ID does not reference a View inside this View");
+        }
+        return view;
     }
 
     /**
