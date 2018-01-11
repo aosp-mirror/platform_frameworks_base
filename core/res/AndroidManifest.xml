@@ -574,7 +574,7 @@
 
     <!-- Added in P -->
     <protected-broadcast android:name="android.app.action.PROFILE_OWNER_CHANGED" />
-    <protected-broadcast android:name="android.app.action.TRANSFER_OWNER_COMPLETE" />
+    <protected-broadcast android:name="android.app.action.TRANSFER_OWNERSHIP_COMPLETE" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
