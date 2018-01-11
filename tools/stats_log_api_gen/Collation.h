@@ -32,6 +32,7 @@ using std::set;
 using std::string;
 using std::vector;
 using google::protobuf::Descriptor;
+using google::protobuf::FieldDescriptor;
 
 /**
  * The types for atom parameters.
@@ -93,14 +94,15 @@ struct AtomDecl {
 struct Atoms {
     set<vector<java_type_t>> signatures;
     set<AtomDecl> decls;
+    set<AtomDecl> non_chained_decls;
+    set<vector<java_type_t>> non_chained_signatures;
 };
 
 /**
  * Gather the information about the atoms.  Returns the number of errors.
  */
 int collate_atoms(const Descriptor* descriptor, Atoms* atoms);
-int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
-                 vector<java_type_t> *signature);
+int collate_atom(const Descriptor *atom, AtomDecl *atomDecl, vector<java_type_t> *signature);
 
 }  // namespace stats_log_api_gen
 }  // namespace android
