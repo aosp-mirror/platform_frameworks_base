@@ -35,7 +35,6 @@ import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
 import static android.os.Build.VERSION_CODES.O;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
@@ -819,9 +818,6 @@ public class PackageParser {
     public static final int PARSE_COLLECT_CERTIFICATES = 1 << 5;
     public static final int PARSE_ENFORCE_CODE = 1 << 6;
     public static final int PARSE_FORCE_SDK = 1 << 7;
-    /** @deprecated remove when fixing b/68860689 */
-    @Deprecated
-    public static final int PARSE_IS_EPHEMERAL = 1 << 8;
     public static final int PARSE_CHATTY = 1 << 31;
 
     @IntDef(flag = true, prefix = { "PARSE_" }, value = {
@@ -832,7 +828,6 @@ public class PackageParser {
             PARSE_FORCE_SDK,
             PARSE_FORWARD_LOCK,
             PARSE_IGNORE_PROCESSES,
-            PARSE_IS_EPHEMERAL,
             PARSE_IS_SYSTEM_DIR,
             PARSE_MUST_BE_APK,
     })
@@ -1524,14 +1519,6 @@ public class PackageParser {
         } else {
             verified = ApkSignatureVerifier.verify(apkPath, minSignatureScheme);
         }
-        if (verified.signatureSchemeVersion
-                < SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V2) {
-            // TODO (b/68860689): move this logic to packagemanagerserivce
-            if ((parseFlags & PARSE_IS_EPHEMERAL) != 0) {
-                throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
-                    "No APK Signature Scheme v2 signature in ephemeral package " + apkPath);
-            }
-        }
 
         // Verify that entries are signed consistently with the first pkg
         // we encountered. Note that for splits, certificates may have
@@ -1982,11 +1969,6 @@ public class PackageParser {
         String str = sa.getNonConfigurationString(
                 com.android.internal.R.styleable.AndroidManifest_sharedUserId, 0);
         if (str != null && str.length() > 0) {
-            if ((flags & PARSE_IS_EPHEMERAL) != 0) {
-                outError[0] = "sharedUserId not allowed in ephemeral application";
-                mParseError = PackageManager.INSTALL_PARSE_FAILED_BAD_SHARED_USER_ID;
-                return null;
-            }
             String nameError = validateName(str, true, false);
             if (nameError != null && !"android".equals(pkg.packageName)) {
                 outError[0] = "<manifest> specifies bad sharedUserId name \""
