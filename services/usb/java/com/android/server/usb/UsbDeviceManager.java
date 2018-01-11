@@ -434,6 +434,8 @@ public class UsbDeviceManager {
             try {
                 // Restore default functions.
 
+                mCurrentOemFunctions = SystemProperties.get(UsbDeviceManager.getPersistProp(false),
+                        UsbManager.USB_FUNCTION_NONE);
                 if (isNormalBoot()) {
                     mCurrentFunctions = SystemProperties.get(USB_CONFIG_PROPERTY,
                             UsbManager.USB_FUNCTION_NONE);
@@ -662,8 +664,7 @@ public class UsbDeviceManager {
             }
 
             if ((!functions.equals(oemFunctions) &&
-                    (mCurrentOemFunctions == null ||
-                            !mCurrentOemFunctions.equals(oemFunctions)))
+                            !mCurrentOemFunctions.equals(oemFunctions))
                     || !mCurrentFunctions.equals(functions)
                     || !mCurrentFunctionsApplied
                     || forceRestart) {
