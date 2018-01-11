@@ -148,6 +148,7 @@ public class RecoverableKeyStoreManager {
             throws RemoteException {
         checkRecoverKeyStorePermission();
         int userId = UserHandle.getCallingUserId();
+        int uid = Binder.getCallingUid();
         // TODO: open /system/etc/security/... cert file, and check the signature on the public keys
         PublicKey publicKey;
         try {
@@ -162,7 +163,10 @@ public class RecoverableKeyStoreManager {
             throw new ServiceSpecificException(
                     ERROR_BAD_X509_CERTIFICATE, "Not a valid X509 certificate.");
         }
-        mDatabase.setRecoveryServicePublicKey(userId, Binder.getCallingUid(), publicKey);
+        long updatedRows = mDatabase.setRecoveryServicePublicKey(userId, uid, publicKey);
+        if (updatedRows > 0) {
+            mDatabase.setShouldCreateSnapshot(userId, uid, true);
+        }
     }
 
     /**
@@ -204,7 +208,11 @@ public class RecoverableKeyStoreManager {
     public void setServerParameters(long serverParameters) throws RemoteException {
         checkRecoverKeyStorePermission();
         int userId = UserHandle.getCallingUserId();
-        mDatabase.setServerParameters(userId, Binder.getCallingUid(), serverParameters);
+        int uid = Binder.getCallingUid();
+        long updatedRows = mDatabase.setServerParameters(userId, uid, serverParameters);
+        if (updatedRows > 0) {
+            mDatabase.setShouldCreateSnapshot(userId, uid, true);
+        }
     }
 
     /**
@@ -256,8 +264,12 @@ public class RecoverableKeyStoreManager {
             @NonNull @KeyStoreRecoveryMetadata.UserSecretType int[] secretTypes)
             throws RemoteException {
         checkRecoverKeyStorePermission();
-        mDatabase.setRecoverySecretTypes(UserHandle.getCallingUserId(), Binder.getCallingUid(),
-            secretTypes);
+        int userId = UserHandle.getCallingUserId();
+        int uid = Binder.getCallingUid();
+        long updatedRows = mDatabase.setRecoverySecretTypes(userId, uid, secretTypes);
+        if (updatedRows > 0) {
+            mDatabase.setShouldCreateSnapshot(userId, uid, true);
+        }
     }
 
     /**
