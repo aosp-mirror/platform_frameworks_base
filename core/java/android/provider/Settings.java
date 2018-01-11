@@ -9077,14 +9077,18 @@ public final class Settings {
          */
         public static final String TETHER_OFFLOAD_DISABLED = "tether_offload_disabled";
 
-       /**
-        * List of carrier apps which are whitelisted to prompt the user for install when
-        * a sim card with matching uicc carrier privilege rules is inserted.
-        *
-        * The value is "package1;package2;..."
-        * @hide
-        */
-       public static final String CARRIER_APP_WHITELIST = "carrier_app_whitelist";
+        /**
+         * List of certificate (hex string representation of the application's certificate - SHA-1
+         * or SHA-256) and carrier app package pairs which are whitelisted to prompt the user for
+         * install when a sim card with matching UICC carrier privilege rules is inserted.  The
+         * certificate is used as a key, so the certificate encoding here must be the same as the
+         * certificate encoding used on the SIM.
+         *
+         * The value is "cert1:package1;cert2:package2;..."
+         * @hide
+         */
+        @SystemApi
+        public static final String CARRIER_APP_WHITELIST = "carrier_app_whitelist";
 
        /**
         * USB Mass Storage Enabled
