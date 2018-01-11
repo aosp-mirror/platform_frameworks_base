@@ -787,7 +787,8 @@ public abstract class PackageManager {
 
     /**
      * Flag parameter for {@link #installPackage} to indicate that this package is an
-     * upgrade to a package that refers to the SDK via release letter.
+     * upgrade to a package that refers to the SDK via release letter or is targeting an SDK via
+     * release letter that the current build does not support.
      *
      * @hide
      */
