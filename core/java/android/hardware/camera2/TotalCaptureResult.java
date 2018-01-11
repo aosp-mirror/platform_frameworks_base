@@ -17,11 +17,14 @@
 package android.hardware.camera2;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.CaptureResultExtras;
+import android.hardware.camera2.impl.PhysicalCaptureResultInfo;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -44,6 +47,12 @@ import java.util.List;
  * as {@link CaptureRequest#STATISTICS_FACE_DETECT_MODE}). Refer to each key documentation on
  * a case-by-case basis.</p>
  *
+ * <p>For a logical multi-camera device, if the CaptureRequest contains a surface for an underlying
+ * physical camera, the corresponding {@link TotalCaptureResult} object will include the metadata
+ * for that physical camera. And its keys and values can be accessed by
+ * {@link #getPhysicalCameraKey}. If all requested surfaces are for the logical camera, no
+ * metadata for physical camera will be included.</p>
+ *
  * <p>{@link TotalCaptureResult} objects are immutable.</p>
  *
  * @see CameraDevice.CaptureCallback#onCaptureCompleted
@@ -52,6 +61,8 @@ public final class TotalCaptureResult extends CaptureResult {
 
     private final List<CaptureResult> mPartialResults;
     private final int mSessionId;
+    // The map between physical camera id and capture result
+    private final HashMap<String, CameraMetadataNative> mPhysicalCaptureResults;
 
     /**
      * Takes ownership of the passed-in camera metadata and the partial results
@@ -60,7 +71,8 @@ public final class TotalCaptureResult extends CaptureResult {
      * @hide
      */
     public TotalCaptureResult(CameraMetadataNative results, CaptureRequest parent,
-            CaptureResultExtras extras, List<CaptureResult> partials, int sessionId) {
+            CaptureResultExtras extras, List<CaptureResult> partials, int sessionId,
+            PhysicalCaptureResultInfo physicalResults[]) {
         super(results, parent, extras);
 
         if (partials == null) {
@@ -70,6 +82,12 @@ public final class TotalCaptureResult extends CaptureResult {
         }
 
         mSessionId = sessionId;
+
+        mPhysicalCaptureResults = new HashMap<String, CameraMetadataNative>();
+        for (PhysicalCaptureResultInfo onePhysicalResult : physicalResults) {
+            mPhysicalCaptureResults.put(onePhysicalResult.getCameraId(),
+                    onePhysicalResult.getCameraMetadata());
+        }
     }
 
     /**
@@ -83,6 +101,7 @@ public final class TotalCaptureResult extends CaptureResult {
 
         mPartialResults = new ArrayList<>();
         mSessionId = CameraCaptureSession.SESSION_ID_NONE;
+        mPhysicalCaptureResults = new HashMap<String, CameraMetadataNative>();
     }
 
     /**
@@ -110,5 +129,39 @@ public final class TotalCaptureResult extends CaptureResult {
      */
     public int getSessionId() {
         return mSessionId;
+    }
+
+    /**
+     * Get a capture result field value for a particular physical camera id.
+     *
+     * <p>The field definitions can be found in {@link CaptureResult}.</p>
+     *
+     * <p>This function can be called for logical camera devices, which are devices that have
+     * REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA capability and calls to {@link
+     * CameraCharacteristics#getPhysicalCameraIds} return a non-empty list of physical devices that
+     * are backing the logical camera. The camera id included in physicalCameraId argument
+     * selects an individual physical device, and returns its specific capture result field.</p>
+     *
+     * <p>This function should only be called if one or more streams from the underlying
+     * 'physicalCameraId' was requested by the corresponding capture request.</p>
+     *
+     * @throws IllegalArgumentException if the key was not valid, or the physicalCameraId is not
+     * applicable to the current camera, or a stream from 'physicalCameraId' is not requested by the
+     * corresponding capture request.
+     *
+     * @param key The result field to read.
+     * @param physicalCameraId The physical camera the result originates from.
+     *
+     * @return The value of that key, or {@code null} if the field is not set.
+     */
+    @Nullable
+    public <T> T getPhysicalCameraKey(Key<T> key, @NonNull String physicalCameraId) {
+        if (!mPhysicalCaptureResults.containsKey(physicalCameraId)) {
+            throw new IllegalArgumentException(
+                    "No TotalCaptureResult exists for physical camera " + physicalCameraId);
+        }
+
+        CameraMetadataNative physicalMetadata = mPhysicalCaptureResults.get(physicalCameraId);
+        return physicalMetadata.get(key);
     }
 }

@@ -23,6 +23,7 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.impl.CameraDeviceImpl;
 import android.hardware.camera2.impl.CaptureResultExtras;
+import android.hardware.camera2.impl.PhysicalCaptureResultInfo;
 import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.utils.ArrayUtils;
@@ -253,7 +254,8 @@ public class LegacyCameraDevice implements AutoCloseable {
                                 holder.getRequestId());
                     }
                     try {
-                        mDeviceCallbacks.onResultReceived(result, extras);
+                        mDeviceCallbacks.onResultReceived(result, extras,
+                                new PhysicalCaptureResultInfo[0]);
                     } catch (RemoteException e) {
                         throw new IllegalStateException(
                                 "Received remote exception during onCameraError callback: ", e);

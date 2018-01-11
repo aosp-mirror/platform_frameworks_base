@@ -35,6 +35,7 @@ import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.CaptureResultExtras;
+import android.hardware.camera2.impl.PhysicalCaptureResultInfo;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.utils.SubmitInfo;
 import android.media.Image;
@@ -135,8 +136,8 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
          * android.hardware.camera2.impl.CameraMetadataNative,
          * android.hardware.camera2.CaptureResultExtras)
          */
-        public void onResultReceived(CameraMetadataNative result, CaptureResultExtras resultExtras)
-                throws RemoteException {
+        public void onResultReceived(CameraMetadataNative result, CaptureResultExtras resultExtras,
+                PhysicalCaptureResultInfo physicalResults[]) throws RemoteException {
             // TODO Auto-generated method stub
 
         }
@@ -445,12 +446,14 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         // Test both single request and streaming request.
         verify(mMockCb, timeout(WAIT_FOR_COMPLETE_TIMEOUT_MS).times(1)).onResultReceived(
                 argThat(matcher),
-                any(CaptureResultExtras.class));
+                any(CaptureResultExtras.class),
+                any(PhysicalCaptureResultInfo[].class));
 
         verify(mMockCb, timeout(WAIT_FOR_COMPLETE_TIMEOUT_MS).atLeast(NUM_CALLBACKS_CHECKED))
                 .onResultReceived(
                         argThat(matcher),
-                        any(CaptureResultExtras.class));
+                        any(CaptureResultExtras.class),
+                        any(PhysicalCaptureResultInfo[].class));
     }
 
     @SmallTest
