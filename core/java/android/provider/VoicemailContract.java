@@ -172,6 +172,11 @@ public class VoicemailContract {
          */
         public static final String DURATION = Calls.DURATION;
         /**
+         * Whether or not the voicemail has been acknowledged (notification sent to the user).
+         * <P>Type: INTEGER (boolean)</P>
+         */
+        public static final String NEW = Calls.NEW;
+        /**
          * Whether this item has been read or otherwise consumed by the user.
          * <P>Type: INTEGER (boolean)</P>
          */

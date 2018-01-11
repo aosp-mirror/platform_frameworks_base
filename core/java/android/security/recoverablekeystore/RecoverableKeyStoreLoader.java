@@ -478,12 +478,29 @@ public class RecoverableKeyStoreLoader {
      * Generates a key called {@code alias} and loads it into the recoverable key store. Returns the
      * raw material of the key.
      *
+     * @param alias The key alias.
      * @throws RecoverableKeyStoreLoaderException if an error occurred generating and storing the
      *     key.
      */
-    public byte[] generateAndStoreKey(String alias) throws RecoverableKeyStoreLoaderException {
+    public byte[] generateAndStoreKey(@NonNull String alias)
+            throws RecoverableKeyStoreLoaderException {
         try {
             return mBinder.generateAndStoreKey(alias);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (ServiceSpecificException e) {
+            throw RecoverableKeyStoreLoaderException.fromServiceSpecificException(e);
+        }
+    }
+
+    /**
+     * Removes a key called {@code alias} from the recoverable key store.
+     *
+     * @param alias The key alias.
+     */
+    public void removeKey(@NonNull String alias) throws RecoverableKeyStoreLoaderException {
+        try {
+            mBinder.removeKey(alias);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {

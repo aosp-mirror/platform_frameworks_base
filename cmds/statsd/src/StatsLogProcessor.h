@@ -38,7 +38,7 @@ public:
                       const std::function<void(const ConfigKey&)>& sendBroadcast);
     virtual ~StatsLogProcessor();
 
-    void OnLogEvent(const LogEvent& event);
+    void OnLogEvent(LogEvent* event);
 
     void OnConfigUpdated(const ConfigKey& key, const StatsdConfig& config);
     void OnConfigRemoved(const ConfigKey& key);
@@ -46,7 +46,8 @@ public:
     size_t GetMetricsSize(const ConfigKey& key) const;
 
     void onDumpReport(const ConfigKey& key, vector<uint8_t>* outData);
-    void onDumpReport(const ConfigKey& key, const uint64_t& dumpTimeStampNs, ConfigMetricsReportList* report);
+    void onDumpReport(const ConfigKey& key, const uint64_t& dumpTimeStampNs,
+                      ConfigMetricsReportList* report);
 
     /* Tells MetricsManager that the alarms in anomalySet have fired. Modifies anomalySet. */
     void onAnomalyAlarmFired(
@@ -78,6 +79,12 @@ private:
      * actually delete the data. */
     void flushIfNecessaryLocked(uint64_t timestampNs, const ConfigKey& key,
                                 MetricsManager& metricsManager);
+
+    // Maps the isolated uid in the log event to host uid if the log event contains uid fields.
+    void mapIsolatedUidToHostUidIfNecessaryLocked(LogEvent* event) const;
+
+    // Handler over the isolated uid change event.
+    void onIsolatedUidChangedEventLocked(const LogEvent& event);
 
     // Function used to send a broadcast so that receiver for the config key can call getData
     // to retrieve the stored data.

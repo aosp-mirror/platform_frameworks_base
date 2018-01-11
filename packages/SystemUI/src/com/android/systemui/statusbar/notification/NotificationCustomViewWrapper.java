@@ -38,7 +38,6 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
     private final Paint mGreyPaint = new Paint();
     private boolean mIsLegacy;
     private int mLegacyColor;
-    private boolean mBeforeP;
 
     protected NotificationCustomViewWrapper(Context ctx, View view, ExpandableNotificationRow row) {
         super(ctx, view, row);
@@ -119,15 +118,7 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
     }
 
     @Override
-    public boolean shouldClipToSidePaddings() {
-        // Before P we ensure that they are now drawing inside out content bounds since we inset
-        // the view. If they target P, then we don't have that guarantee and we need to be safe.
-        return !mBeforeP;
-    }
-
-    @Override
-    public void onContentUpdated(ExpandableNotificationRow row) {
-        super.onContentUpdated(row);
-        mBeforeP = row.getEntry().targetSdk < Build.VERSION_CODES.P;
+    public boolean shouldClipToRounding() {
+        return true;
     }
 }

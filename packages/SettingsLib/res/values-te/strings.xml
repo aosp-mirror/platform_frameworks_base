@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"టెథెరింగ్ హార్డ్‌వేర్ వేగవృద్ధి"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"పేర్లు లేని బ్లూటూత్ పరికరాలు  చూపించు"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"సంపూర్ణ వాల్యూమ్‌‍ను నిలిపివేయి"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"ఇన్-బ్యాండ్ రింగింగ్‌ని ప్రారంభించండి"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"బ్లూటూత్ AVRCP వెర్షన్"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"బ్లూటూత్ AVRCP సంస్కరణను ఎంచుకోండి"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"బ్లూటూత్ ఆడియో కోడెక్"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"హానికరమైన ప్రవర్తన కోసం ADB/ADT ద్వారా ఇన్‌స్టాల్ చేయబడిన అనువర్తనాలను తనిఖీ చేయి."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"పేర్లు (MAC చిరునామాలు మాత్రమే) లేని బ్లూటూత్ పరికరాలు ప్రదర్శించబడతాయి"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"రిమోట్ పరికరాల్లో ఆమోదించలేని స్థాయిలో అధిక వాల్యూమ్ ఉండటం లేదా వాల్యూమ్ నియంత్రణ లేకపోవడం వంటి సమస్యలు ఉంటే బ్లూటూత్ సంపూర్ణ వాల్యూమ్ లక్షణాన్ని నిలిపివేస్తుంది."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"బ్లూటూత్ హెడ్‌సెట్‌లలో ప్లే చేయడానికి ఫోన్‌లో రింగ్‌టోన్‌లను అనుమతించండి"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"స్థానిక టెర్మినల్"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"స్థానిక షెల్ ప్రాప్యతను అందించే టెర్మినల్ అనువర్తనాన్ని ప్రారంభించు"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP తనిఖీ"</string>

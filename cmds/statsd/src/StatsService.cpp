@@ -695,7 +695,7 @@ void StatsService::Startup() {
     mConfigManager->Startup();
 }
 
-void StatsService::OnLogEvent(const LogEvent& event) {
+void StatsService::OnLogEvent(LogEvent* event) {
     mProcessor->OnLogEvent(event);
 }
 

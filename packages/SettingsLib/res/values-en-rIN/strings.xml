@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Tethering hardware acceleration"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Show Bluetooth devices without names"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Disable absolute volume"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Enable in-band ringing"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP Version"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Select Bluetooth AVRCP Version"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth Audio Codec"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Check apps installed via ADB/ADT for harmful behaviour."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Bluetooth devices without names (MAC addresses only) will be displayed"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Disables the Bluetooth absolute volume feature in case of volume issues with remote devices such as unacceptably loud volume or lack of control."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Allow ringtones on the phone to be played on Bluetooth headsets"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Local terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Enable terminal app that offers local shell access"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP checking"</string>

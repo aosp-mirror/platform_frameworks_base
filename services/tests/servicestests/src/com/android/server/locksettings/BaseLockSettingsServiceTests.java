@@ -192,11 +192,15 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
         assertTrue(FileUtils.deleteContents(storageDir));
     }
 
+    protected void assertNotEquals(long expected, long actual) {
+        assertTrue(expected != actual);
+    }
+
     protected static void assertArrayEquals(byte[] expected, byte[] actual) {
         assertTrue(Arrays.equals(expected, actual));
     }
 
-    protected static void assertArrayNotSame(byte[] expected, byte[] actual) {
+    protected static void assertArrayNotEquals(byte[] expected, byte[] actual) {
         assertFalse(Arrays.equals(expected, actual));
     }
 }

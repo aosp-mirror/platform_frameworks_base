@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ဖုန်းကို မိုဒမ်အဖြစ်အသုံးပြုမှု စက်ပစ္စည်းဖြင့် အရှိန်မြှင့်တင်ခြင်း"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"အမည်မရှိသော ဘလူးတုသ်စက်ပစ္စည်းများကို ပြသရန်"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"ပကတိ အသံနှုန်း သတ်မှတ်ချက် ပိတ်ရန်"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"သတ်မှတ်ထားသည့်ဖုန်းမြည်သံကို အသုံးပြုခြင်းအား ဖွင့်ရန်"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"ဘလူးတုသ် AVRCP ဗားရှင်း"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"ဘလူးတုသ် AVRCP ဗားရှင်းကို ရွေးပါ"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"ဘလူးတုသ်အသံ ကိုးဒက်ခ်"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT မှတဆင့် ထည့်သွင်းသော အပလီကေးရှင်းများကို အန္တရာယ်ဖြစ်နိုင်ခြင်း ရှိမရှိ စစ်ဆေးရန်။"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"အမည်မရှိသော (MAC လိပ်စာများသာပါသော) ဘလူးတုသ်စက်ပစ္စည်းများကို ပြသပါမည်"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"ချိတ်ဆက်ထားသည့် ကိရိယာတွင် လက်မခံနိုင်လောက်အောင် ဆူညံ သို့မဟုတ် ထိန်းညှိမရနိုင်သော အသံပိုင်းပြဿနာ ရှိခဲ့လျှင် ဘလူးတုသ် ပကတိ အသံနှုန်းကို ပိတ်ပါ။"</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"ဖုန်းတွင်းရှိ ဖုန်းမြည်သံများကို ဘလူးတုသ် မိုက်ခွက်ပါနားကြပ်တွင် ဖွင့်ခွင့်ပြုရန်"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"လိုကယ်တာမီနယ်"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"local shell အသုံးပြုခွင့်ကမ်းလှမ်းသော တာမင်နယ်အပလီကေးရှင်းဖွင့်ပါ"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP စစ်ဆေးမှု"</string>

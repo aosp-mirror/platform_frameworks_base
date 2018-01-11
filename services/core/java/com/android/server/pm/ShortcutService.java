@@ -396,7 +396,7 @@ public class ShortcutService extends IShortcutService.Stub {
     private final long[] mDurationStats = new long[Stats.COUNT];
 
     private static final int PROCESS_STATE_FOREGROUND_THRESHOLD =
-            ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+            ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
 
     static final int OPERATION_SET = 0;
     static final int OPERATION_ADD = 1;

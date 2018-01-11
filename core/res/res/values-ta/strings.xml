@@ -21,6 +21,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"பை."</string>
+    <string name="kilobyteShort" msgid="7542884022844556968">"கி.பை."</string>
+    <string name="megabyteShort" msgid="6355851576770428922">"மெ.பை."</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"ஜி.பை."</string>
+    <string name="terabyteShort" msgid="231613018159186962">"டெ.பை."</string>
     <string name="petabyteShort" msgid="5637816680144990219">"பெ.பை."</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;பெயரிடப்படாதது&gt;"</string>
@@ -1116,6 +1120,9 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"எல்லா நெட்வொர்க்குகளையும் பார்க்க, தட்டவும்"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"இணை"</string>
     <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"எல்லா நெட்வொர்க்குகளும்"</string>
+    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"வைஃபை தானாக ஆன் ஆகும்"</string>
+    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"சேமித்த, உயர்தர நெட்வொர்க்கிற்கு அருகில் இருக்கும்போது"</string>
+    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"மீண்டும் ஆன் செய்யாதே"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"வைஃபை நெட்வொர்க்கில் உள்நுழையவும்"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"நெட்வொர்க்கில் உள்நுழையவும்"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1801,4 +1808,6 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"காப்புப் பிரதி மற்றும் மீட்டமைவைப் பயன்பாடு ஆதரிக்காத காரணத்தால், ஷார்ட்கட்டை மீட்டமைக்க முடியவில்லை"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"பயன்பாட்டுச் சான்றுகள் பொருந்தாத காரணத்தினால், ஷார்ட்கட்டை மீட்டமைக்க முடியவில்லை"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"ஷார்ட்கட்டை மீட்டமைக்க முடியவில்லை"</string>
+    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <skip />
 </resources>

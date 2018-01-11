@@ -85,6 +85,9 @@ void findFields(
 // Filter out the fields not in the field matcher.
 void filterFields(const FieldMatcher& matcher, FieldValueMap* fieldValueMap);
 
+// Returns if the field is attribution node uid field.
+bool IsAttributionUidField(const Field& field);
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

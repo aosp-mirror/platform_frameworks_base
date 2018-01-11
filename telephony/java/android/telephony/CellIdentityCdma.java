@@ -17,8 +17,6 @@
 package android.telephony;
 
 import android.os.Parcel;
-import android.os.Parcelable;
-import android.telephony.Rlog;
 import android.text.TextUtils;
 
 import java.util.Objects;
@@ -26,9 +24,8 @@ import java.util.Objects;
 /**
  * CellIdentity is to represent a unique CDMA cell
  */
-public final class CellIdentityCdma implements Parcelable {
-
-    private static final String LOG_TAG = "CellSignalStrengthCdma";
+public final class CellIdentityCdma extends CellIdentity {
+    private static final String TAG = CellIdentityCdma.class.getSimpleName();
     private static final boolean DBG = false;
 
     // Network Id 0..65535
@@ -60,6 +57,7 @@ public final class CellIdentityCdma implements Parcelable {
      * @hide
      */
     public CellIdentityCdma() {
+        super(TAG, TYPE_CDMA, null, null);
         mNetworkId = Integer.MAX_VALUE;
         mSystemId = Integer.MAX_VALUE;
         mBasestationId = Integer.MAX_VALUE;
@@ -81,7 +79,7 @@ public final class CellIdentityCdma implements Parcelable {
      *
      * @hide
      */
-    public CellIdentityCdma (int nid, int sid, int bid, int lon, int lat) {
+    public CellIdentityCdma(int nid, int sid, int bid, int lon, int lat) {
         this(nid, sid, bid, lon, lat, null, null);
     }
 
@@ -99,8 +97,9 @@ public final class CellIdentityCdma implements Parcelable {
      *
      * @hide
      */
-    public CellIdentityCdma (int nid, int sid, int bid, int lon, int lat, String alphal,
+    public CellIdentityCdma(int nid, int sid, int bid, int lon, int lat, String alphal,
                              String alphas) {
+        super(TAG, TYPE_CDMA, null, null);
         mNetworkId = nid;
         mSystemId = sid;
         mBasestationId = bid;
@@ -196,40 +195,33 @@ public final class CellIdentityCdma implements Parcelable {
 
         CellIdentityCdma o = (CellIdentityCdma) other;
 
-        return mNetworkId == o.mNetworkId &&
-                mSystemId == o.mSystemId &&
-                mBasestationId == o.mBasestationId &&
-                mLatitude == o.mLatitude &&
-                mLongitude == o.mLongitude &&
-                TextUtils.equals(mAlphaLong, o.mAlphaLong) &&
-                TextUtils.equals(mAlphaShort, o.mAlphaShort);
+        return mNetworkId == o.mNetworkId
+                && mSystemId == o.mSystemId
+                && mBasestationId == o.mBasestationId
+                && mLatitude == o.mLatitude
+                && mLongitude == o.mLongitude
+                && TextUtils.equals(mAlphaLong, o.mAlphaLong)
+                && TextUtils.equals(mAlphaShort, o.mAlphaShort);
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("CellIdentityCdma:{");
-        sb.append(" mNetworkId="); sb.append(mNetworkId);
-        sb.append(" mSystemId="); sb.append(mSystemId);
-        sb.append(" mBasestationId="); sb.append(mBasestationId);
-        sb.append(" mLongitude="); sb.append(mLongitude);
-        sb.append(" mLatitude="); sb.append(mLatitude);
-        sb.append(" mAlphaLong="); sb.append(mAlphaLong);
-        sb.append(" mAlphaShort="); sb.append(mAlphaShort);
-        sb.append("}");
-
-        return sb.toString();
-    }
-
-    /** Implement the Parcelable interface */
-    @Override
-    public int describeContents() {
-        return 0;
+        return new StringBuilder(TAG)
+        .append(":{ mNetworkId=").append(mNetworkId)
+        .append(" mSystemId=").append(mSystemId)
+        .append(" mBasestationId=").append(mBasestationId)
+        .append(" mLongitude=").append(mLongitude)
+        .append(" mLatitude=").append(mLatitude)
+        .append(" mAlphaLong=").append(mAlphaLong)
+        .append(" mAlphaShort=").append(mAlphaShort)
+        .append("}").toString();
     }
 
     /** Implement the Parcelable interface */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         if (DBG) log("writeToParcel(Parcel, int): " + toString());
+        super.writeToParcel(dest, TYPE_CDMA);
         dest.writeInt(mNetworkId);
         dest.writeInt(mSystemId);
         dest.writeInt(mBasestationId);
@@ -241,10 +233,16 @@ public final class CellIdentityCdma implements Parcelable {
 
     /** Construct from Parcel, type has already been processed */
     private CellIdentityCdma(Parcel in) {
-        this(in.readInt(), in.readInt(), in.readInt(), in.readInt(), in.readInt(),
-                in.readString(), in.readString());
+        super(TAG, TYPE_CDMA, in);
+        mNetworkId = in.readInt();
+        mSystemId = in.readInt();
+        mBasestationId = in.readInt();
+        mLongitude = in.readInt();
+        mLatitude = in.readInt();
+        mAlphaLong = in.readString();
+        mAlphaShort = in.readString();
 
-        if (DBG) log("CellIdentityCdma(Parcel): " + toString());
+        if (DBG) log(toString());
     }
 
     /** Implement the Parcelable interface */
@@ -253,7 +251,8 @@ public final class CellIdentityCdma implements Parcelable {
             new Creator<CellIdentityCdma>() {
         @Override
         public CellIdentityCdma createFromParcel(Parcel in) {
-            return new CellIdentityCdma(in);
+            in.readInt();   // skip
+            return createFromParcelBody(in);
         }
 
         @Override
@@ -262,10 +261,8 @@ public final class CellIdentityCdma implements Parcelable {
         }
     };
 
-    /**
-     * log
-     */
-    private static void log(String s) {
-        Rlog.w(LOG_TAG, s);
+    /** @hide */
+    protected static CellIdentityCdma createFromParcelBody(Parcel in) {
+        return new CellIdentityCdma(in);
     }
 }

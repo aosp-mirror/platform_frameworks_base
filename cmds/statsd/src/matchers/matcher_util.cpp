@@ -93,11 +93,6 @@ bool combinationMatch(const vector<int>& children, const LogicalOperation& opera
     return matched;
 }
 
-bool IsAttributionUidField(const Field& field) {
-    return field.child_size() == 1 && field.child(0).field() == 1
-        && field.child(0).child_size() == 1 && field.child(0).child(0).field() == 1;
-}
-
 bool matchesNonRepeatedField(
        const UidMap& uidMap,
        const FieldValueMap& fieldMap,

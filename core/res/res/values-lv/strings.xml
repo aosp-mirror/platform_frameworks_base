@@ -21,6 +21,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
+    <string name="kilobyteShort" msgid="7542884022844556968">"kB"</string>
+    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
+    <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Bez nosaukuma&gt;"</string>
@@ -1138,6 +1142,9 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Pieskarieties, lai skatītu visus tīklus"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Izveidot savienojumu"</string>
     <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Visi tīkli"</string>
+    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi tiks automātiski ieslēgts"</string>
+    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Kad atrodaties saglabāta augstas kvalitātes tīkla tuvumā"</string>
+    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Neieslēgt atkārtoti"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Pierakstieties Wi-Fi tīklā"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Pierakstīšanās tīklā"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1835,4 +1842,6 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Nevarēja atjaunot saīsni, jo lietotnē netiek atbalstīta dublēšana un atjaunošana."</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Saīsni nevarēja atjaunot lietotnes paraksta neatbilstības dēļ."</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Nevarēja atjaunot saīsni."</string>
+    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <skip />
 </resources>

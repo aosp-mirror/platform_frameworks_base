@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"வன்பொருள் விரைவுப்படுத்துதல் இணைப்பு முறை"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"பெயர்கள் இல்லாத புளூடூத் சாதனங்களைக் காட்டு"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"அப்சல்யூட் ஒலியளவு அம்சத்தை முடக்கு"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"இன்-பேண்ட் ரிங் செய்வதை இயக்கு"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"புளூடூத் AVRCP பதிப்பு"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"புளூடூத் AVRCP பதிப்பைத் தேர்ந்தெடு"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"புளூடூத் ஆடியோ கோடெக்"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"தீங்கு விளைவிக்கும் செயல்பாட்டை அறிய ADB/ADT மூலம் நிறுவப்பட்டப் பயன்பாடுகளைச் சரிபார்."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"பெயர்கள் இல்லாத புளூடூத் சாதனங்கள் (MAC முகவரிகள் மட்டும்) காட்டப்படும்"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"மிகவும் அதிகமான ஒலியளவு அல்லது கட்டுப்பாடு இழப்பு போன்ற தொலைநிலைச் சாதனங்களில் ஏற்படும் ஒலி தொடர்பான சிக்கல்கள் இருக்கும் சமயங்களில், புளூடூத் அப்சல்யூட் ஒலியளவு அம்சத்தை முடக்கும்."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"ஃபோனில் இருக்கும் ரிங்டோன்களை, புளூடூத் ஹெட்செட்களில் இயக்க அனுமதி"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"அக முனையம்"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"அக ஷெல் அணுகலை வழங்கும் இறுதிப் பயன்பாட்டை இயக்கு"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP சரிபார்ப்பு"</string>

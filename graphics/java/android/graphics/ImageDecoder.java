@@ -20,6 +20,7 @@ import static android.system.OsConstants.SEEK_SET;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RawRes;
 import android.content.ContentResolver;
 import android.content.res.AssetFileDescriptor;
@@ -209,18 +210,36 @@ public final class ImageDecoder implements AutoCloseable {
      *  Contains information about the encoded image.
      */
     public static class ImageInfo {
+        /**
+         * Width of the image, without scaling or cropping.
+         */
         public final int width;
-        public final int height;
-        // TODO?: Add more info? mimetype, ninepatch etc?
 
-        ImageInfo(int width, int height) {
-            this.width = width;
-            this.height = height;
+        /**
+         * Height of the image, without scaling or cropping.
+         */
+        public final int height;
+
+        /* @hide */
+        ImageDecoder decoder;
+
+        /* @hide */
+        ImageInfo(ImageDecoder decoder) {
+            this.width   = decoder.mWidth;
+            this.height  = decoder.mHeight;
+            this.decoder = decoder;
+        }
+
+        /**
+         * The mimeType of the image, if known.
+         */
+        public String getMimeType() {
+            return decoder.getMimeType();
         }
     };
 
     /**
-     *  Supplied to onException if the provided data is incomplete.
+     *  Supplied to onPartialImage if the provided data is incomplete.
      *
      *  Will never be thrown by ImageDecoder.
      *
@@ -233,7 +252,7 @@ public final class ImageDecoder implements AutoCloseable {
      *
      *  May be thrown if there is nothing to display.
      *
-     *  If supplied to onException, there may be a correct partial image to
+     *  If supplied to onPartialImage, there may be a correct partial image to
      *  display.
      */
     public static class CorruptException extends IOException {};
@@ -256,17 +275,21 @@ public final class ImageDecoder implements AutoCloseable {
     /**
      *  Optional listener supplied to the ImageDecoder.
      */
-    public static interface OnExceptionListener {
+    public static interface OnPartialImageListener {
         /**
-         *  Called when there is a problem in the stream or in the data.
-         *  FIXME: Report how much of the image has been decoded?
+         *  Called when there is only a partial image to display.
          *
-         *  @param e IOException containing information about the error.
-         *  @return True to create and return a {@link Drawable}/
-         *      {@link Bitmap} with partial data. False to return
-         *      {@code null}. True is the default.
+         *  If the input is incomplete or contains an error, this listener lets
+         *  the client know that and allows them to optionally bypass the rest
+         *  of the decode/creation process.
+         *
+         *  @param e IOException containing information about the error that
+         *      interrupted the decode.
+         *  @return True (which is the default) to create and return a
+         *      {@link Drawable}/{@link Bitmap} with partial data. False to
+         *      abort the decode and throw the {@link java.io.IOException}.
          */
-        public boolean onException(IOException e);
+        public boolean onPartialImage(IOException e);
     };
 
     // Fields
@@ -283,8 +306,8 @@ public final class ImageDecoder implements AutoCloseable {
     private boolean mAsAlphaMask = false;
     private Rect    mCropRect;
 
-    private PostProcess         mPostProcess;
-    private OnExceptionListener mOnExceptionListener;
+    private PostProcess            mPostProcess;
+    private OnPartialImageListener mOnPartialImageListener;
 
     // Objects for interacting with the input.
     private InputStream         mInputStream;
@@ -359,7 +382,6 @@ public final class ImageDecoder implements AutoCloseable {
      * @throws ArrayIndexOutOfBoundsException if offset and length are
      *      not within data.
      */
-    // TODO: Overloads that don't use offset, length
     public static Source createSource(@NonNull byte[] data, int offset,
             int length) throws ArrayIndexOutOfBoundsException {
         if (data == null) {
@@ -371,6 +393,13 @@ public final class ImageDecoder implements AutoCloseable {
                     "invalid offset/length!");
         }
         return new ByteArraySource(data, offset, length);
+    }
+
+    /**
+     * See {@link #createSource(byte[], int, int).
+     */
+    public static Source createSource(@NonNull byte[] data) {
+        return createSource(data, 0, data.length);
     }
 
     /**
@@ -532,13 +561,13 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     /**
-     *  Set (replace) the {@link OnExceptionListener} on this object.
+     *  Set (replace) the {@link OnPartialImageListener} on this object.
      *
      *  Will be called if there is an error in the input. Without one, a
      *  partial {@link Bitmap} will be created.
      */
-    public void setOnExceptionListener(OnExceptionListener l) {
-        mOnExceptionListener = l;
+    public void setOnPartialImageListener(OnPartialImageListener l) {
+        mOnPartialImageListener = l;
     }
 
     /**
@@ -648,17 +677,28 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     /**
-     *  Create a {@link Drawable}.
+     *  Create a {@link Drawable} from a {@code Source}.
+     *
+     *  @param src representing the encoded image.
+     *  @param listener for learning the {@link ImageInfo} and changing any
+     *      default settings on the {@code ImageDecoder}. If not {@code null},
+     *      this will be called on the same thread as {@code decodeDrawable}
+     *      before that method returns.
+     *  @return Drawable for displaying the image.
      *  @throws IOException if {@code src} is not found, is an unsupported
      *      format, or cannot be decoded for any reason.
      */
     @NonNull
-    public static Drawable decodeDrawable(Source src, OnHeaderDecodedListener listener)
-            throws IOException {
+    public static Drawable decodeDrawable(@NonNull Source src,
+            @Nullable OnHeaderDecodedListener listener) throws IOException {
         try (ImageDecoder decoder = src.createImageDecoder()) {
             if (listener != null) {
-                ImageInfo info = new ImageInfo(decoder.mWidth, decoder.mHeight);
-                listener.onHeaderDecoded(info, decoder);
+                ImageInfo info = new ImageInfo(decoder);
+                try {
+                    listener.onHeaderDecoded(info, decoder);
+                } finally {
+                    info.decoder = null;
+                }
             }
 
             decoder.checkState();
@@ -676,7 +716,7 @@ public final class ImageDecoder implements AutoCloseable {
             }
 
             Bitmap bm = nDecodeBitmap(decoder.mNativePtr,
-                                      decoder.mOnExceptionListener,
+                                      decoder.mOnPartialImageListener,
                                       decoder.mPostProcess,
                                       decoder.mDesiredWidth,
                                       decoder.mDesiredHeight,
@@ -686,13 +726,6 @@ public final class ImageDecoder implements AutoCloseable {
                                       false,    // mRequireUnpremultiplied
                                       decoder.mPreferRamOverQuality,
                                       decoder.mAsAlphaMask);
-            if (bm == null) {
-                // FIXME: bm should never be null. Currently a return value
-                // of false from onException will result in bm being null. What
-                // is the right API to choose to discard partial Bitmaps?
-                return null;
-            }
-
             Resources res = src.getResources();
             if (res == null) {
                 bm.setDensity(Bitmap.DENSITY_NONE);
@@ -714,23 +747,43 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     /**
-     *  Create a {@link Bitmap}.
+     * See {@link #decodeDrawable(Source, OnHeaderDecodedListener)}.
+     */
+    @NonNull
+    public static Drawable decodeDrawable(@NonNull Source src)
+            throws IOException {
+        return decodeDrawable(src, null);
+    }
+
+    /**
+     *  Create a {@link Bitmap} from a {@code Source}.
+     *
+     *  @param src representing the encoded image.
+     *  @param listener for learning the {@link ImageInfo} and changing any
+     *      default settings on the {@code ImageDecoder}. If not {@code null},
+     *      this will be called on the same thread as {@code decodeBitmap}
+     *      before that method returns.
+     *  @return Bitmap containing the image.
      *  @throws IOException if {@code src} is not found, is an unsupported
      *      format, or cannot be decoded for any reason.
      */
     @NonNull
-    public static Bitmap decodeBitmap(Source src, OnHeaderDecodedListener listener)
-            throws IOException {
+    public static Bitmap decodeBitmap(@NonNull Source src,
+            @Nullable OnHeaderDecodedListener listener) throws IOException {
         try (ImageDecoder decoder = src.createImageDecoder()) {
             if (listener != null) {
-                ImageInfo info = new ImageInfo(decoder.mWidth, decoder.mHeight);
-                listener.onHeaderDecoded(info, decoder);
+                ImageInfo info = new ImageInfo(decoder);
+                try {
+                    listener.onHeaderDecoded(info, decoder);
+                } finally {
+                    info.decoder = null;
+                }
             }
 
             decoder.checkState();
 
             return nDecodeBitmap(decoder.mNativePtr,
-                                 decoder.mOnExceptionListener,
+                                 decoder.mOnPartialImageListener,
                                  decoder.mPostProcess,
                                  decoder.mDesiredWidth,
                                  decoder.mDesiredHeight,
@@ -743,6 +796,18 @@ public final class ImageDecoder implements AutoCloseable {
         }
     }
 
+    private String getMimeType() {
+        return nGetMimeType(mNativePtr);
+    }
+
+    /**
+     *  See {@link #decodeBitmap(Source, OnHeaderDecodedListener)}.
+     */
+    @NonNull
+    public static Bitmap decodeBitmap(@NonNull Source src) throws IOException {
+        return decodeBitmap(src, null);
+    }
+
     private static native ImageDecoder nCreate(long asset) throws IOException;
     private static native ImageDecoder nCreate(ByteBuffer buffer,
                                                int position,
@@ -753,7 +818,7 @@ public final class ImageDecoder implements AutoCloseable {
     private static native ImageDecoder nCreate(FileDescriptor fd) throws IOException;
     @NonNull
     private static native Bitmap nDecodeBitmap(long nativePtr,
-            OnExceptionListener listener,
+            OnPartialImageListener listener,
             PostProcess postProcess,
             int width, int height,
             Rect cropRect, boolean mutable,
@@ -764,4 +829,5 @@ public final class ImageDecoder implements AutoCloseable {
                                                 int sampleSize);
     private static native void nGetPadding(long nativePtr, Rect outRect);
     private static native void nClose(long nativePtr);
+    private static native String nGetMimeType(long nativePtr);
 }

@@ -152,11 +152,11 @@
     <dimen name="dialog_padding">16dp</dimen>
 
     <!-- The margin on the start of the content view -->
-    <dimen name="notification_content_margin_start">24dp</dimen>
+    <dimen name="notification_content_margin_start">16dp</dimen>
 
     <!-- The margin on the end of the content view
         Keep in sync with notification_content_plus_picture_margin! -->
-    <dimen name="notification_content_margin_end">24dp</dimen>
+    <dimen name="notification_content_margin_end">16dp</dimen>
 
     <!-- The margin on the end of the content view with a picture.
         Keep in sync with notification_content_plus_picture_margin! -->
@@ -166,7 +166,7 @@
         content end margin.
         Keep equal to (notification_content_picture_margin + notification_content_margin_end)!
     -->
-    <dimen name="notification_content_plus_picture_margin_end">80dp</dimen>
+    <dimen name="notification_content_plus_picture_margin_end">72dp</dimen>
 
     <!-- The additional margin on the sides of the ambient view. -->
     <dimen name="notification_extra_margin_ambient">16dp</dimen>
@@ -175,10 +175,10 @@
     <dimen name="notification_action_list_height">56dp</dimen>
 
     <!-- height of the content margin to accomodate for the header -->
-    <dimen name="notification_content_margin_top">41.5dp</dimen>
+    <dimen name="notification_content_margin_top">46dp</dimen>
 
     <!-- height of the content margin on the bottom -->
-    <dimen name="notification_content_margin_bottom">18dp</dimen>
+    <dimen name="notification_content_margin_bottom">20dp</dimen>
 
     <!-- The height of the progress bar. -->
     <dimen name="notification_progress_bar_height">15dp</dimen>
@@ -187,19 +187,19 @@
     <dimen name="notification_progress_margin_top">8dp</dimen>
 
     <!-- height of the notification header (for icon and package name) -->
-    <dimen name="notification_header_height">54dp</dimen>
+    <dimen name="notification_header_height">50dp</dimen>
 
     <!-- The height of the background for a notification header on a group -->
     <dimen name="notification_header_background_height">49.5dp</dimen>
 
     <!-- The top padding for the notification header -->
-    <dimen name="notification_header_padding_top">14dp</dimen>
+    <dimen name="notification_header_padding_top">16dp</dimen>
 
     <!-- The bottom padding for the notification header -->
-    <dimen name="notification_header_padding_bottom">13dp</dimen>
+    <dimen name="notification_header_padding_bottom">16dp</dimen>
 
     <!-- The margin at the bottom of the notification header. -->
-    <dimen name="notification_header_margin_bottom">5dp</dimen>
+    <dimen name="notification_header_margin_bottom">0dp</dimen>
 
     <!-- The end margin after the application icon in the notification header -->
     <dimen name="notification_header_icon_margin_end">3dp</dimen>
@@ -250,7 +250,7 @@
     <dimen name="media_notification_expanded_image_margin_bottom">20dp</dimen>
 
     <!-- The absolute height for the header in a media notification. -->
-    <dimen name="media_notification_header_height">53dp</dimen>
+    <dimen name="media_notification_header_height">@dimen/notification_header_height</dimen>
 
     <!-- The margin of the content to an image-->
     <dimen name="notification_content_image_margin_end">8dp</dimen>
@@ -590,7 +590,7 @@
     <!-- The maximum width of a image in a media notification. The images will be reduced to that width in case they are bigger.-->
     <dimen name="notification_media_image_max_width">280dp</dimen>
     <!-- The size of the right icon -->
-    <dimen name="notification_right_icon_size">40dp</dimen>
+    <dimen name="notification_right_icon_size">38dp</dimen>
 
     <!-- The maximum height of any image in a remote view. This is applied to all images in custom remoteviews. -->
     <dimen name="notification_custom_view_max_image_height_low_ram">208dp</dimen>
@@ -607,7 +607,7 @@
     <!-- The size of the right icon image when on low ram -->
     <dimen name="notification_right_icon_size_low_ram">40dp</dimen>
 
-    <dimen name="messaging_avatar_size">24dp</dimen>
+    <dimen name="messaging_avatar_size">@dimen/notification_right_icon_size</dimen>
 
     <!-- Max width/height of the autofill data set picker as a fraction of the screen width/height -->
     <dimen name="autofill_dataset_picker_max_size">90%</dimen>

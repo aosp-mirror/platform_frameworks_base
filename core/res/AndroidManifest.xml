@@ -570,6 +570,7 @@
 
     <!-- Made protected in P (was introduced in JB-MR2) -->
     <protected-broadcast android:name="android.intent.action.GET_RESTRICTION_ENTRIES" />
+    <protected-broadcast android:name="android.telephony.euicc.action.OTA_STATUS_CHANGED" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
@@ -2846,6 +2847,16 @@
     -->
     <permission
         android:name="android.permission.CLEAR_APP_GRANTED_URI_PERMISSIONS"
+        android:protectionLevel="signature" />
+
+    <!-- @hide
+         Allows an application to change the status of Scoped Access Directory requests granted or
+         rejected by the user.
+         <p>This permission should <em>only</em> be requested by the platform
+         settings app.  This permission cannot be granted to third-party apps.
+         <p>Protection level: signature
+    -->
+    <permission android:name="android.permission.MANAGE_SCOPED_ACCESS_DIRECTORY_PERMISSIONS"
         android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows an application to delete cache files.

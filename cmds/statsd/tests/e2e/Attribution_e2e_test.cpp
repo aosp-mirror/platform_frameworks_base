@@ -106,6 +106,10 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSlice) {
         {CreateAttribution(111, "App1"), CreateAttribution(333, "App3")};
     std::vector<AttributionNode> attributions8 = {CreateAttribution(111, "App1")};
 
+    // GMS core node with isolated uid.
+    const int isolatedUid = 666;
+    std::vector<AttributionNode> attributions9 =
+        {CreateAttribution(isolatedUid, "GMSCoreModule3")};
 
     std::vector<std::unique_ptr<LogEvent>> events;
     // Events 1~4 are in the 1st bucket.
@@ -124,22 +128,30 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSlice) {
     events.push_back(CreateAcquireWakelockEvent(
         attributions6, "wl2", bucketStartTimeNs + 2 * bucketSizeNs + 100));
     events.push_back(CreateAcquireWakelockEvent(
-        attributions7, "wl2", bucketStartTimeNs + 3 * bucketSizeNs - 1));
+        attributions7, "wl2", bucketStartTimeNs + 3 * bucketSizeNs - 2));
     events.push_back(CreateAcquireWakelockEvent(
         attributions8, "wl2", bucketStartTimeNs + 3 * bucketSizeNs));
+    events.push_back(CreateAcquireWakelockEvent(
+        attributions9, "wl2", bucketStartTimeNs + 3 * bucketSizeNs + 1));
+    events.push_back(CreateAcquireWakelockEvent(
+        attributions9, "wl2", bucketStartTimeNs + 3 * bucketSizeNs + 100));
+    events.push_back(CreateIsolatedUidChangedEvent(
+        isolatedUid, 222, true/* is_create*/, bucketStartTimeNs + 3 * bucketSizeNs - 1));
+    events.push_back(CreateIsolatedUidChangedEvent(
+        isolatedUid, 222, false/* is_create*/, bucketStartTimeNs + 3 * bucketSizeNs + 10));
 
     sortLogEventsByTimestamp(&events);
 
     for (const auto& event : events) {
-        processor->OnLogEvent(*event);
+        processor->OnLogEvent(event.get());
     }
     ConfigMetricsReportList reports;
-    processor->onDumpReport(cfgKey, bucketStartTimeNs + 3 * bucketSizeNs + 1, &reports);
+    processor->onDumpReport(cfgKey, bucketStartTimeNs + 4 * bucketSizeNs + 1, &reports);
     EXPECT_EQ(reports.reports_size(), 1);
     EXPECT_EQ(reports.reports(0).metrics_size(), 1);
     StatsLogReport::CountMetricDataWrapper countMetrics;
     sortMetricDataByDimensionsValue(reports.reports(0).metrics(0).count_metrics(), &countMetrics);
-    EXPECT_EQ(countMetrics.data_size(), 3);
+    EXPECT_EQ(countMetrics.data_size(), 4);
 
     auto data = countMetrics.data(0);
     ValidateAttributionUidAndTagDimension(
@@ -164,6 +176,14 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSlice) {
     EXPECT_EQ(data.bucket_info(1).end_bucket_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
 
     data = countMetrics.data(2);
+    ValidateAttributionUidAndTagDimension(
+        data.dimension(), android::util::WAKELOCK_STATE_CHANGED, 222, "GMSCoreModule3");
+    EXPECT_EQ(data.bucket_info_size(), 1);
+    EXPECT_EQ(data.bucket_info(0).count(), 1);
+    EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs + 3 * bucketSizeNs);
+    EXPECT_EQ(data.bucket_info(0).end_bucket_nanos(), bucketStartTimeNs + 4 * bucketSizeNs);
+
+    data = countMetrics.data(3);
     ValidateAttributionUidAndTagDimension(
         data.dimension(), android::util::WAKELOCK_STATE_CHANGED, 444, "GMSCoreModule2");
     EXPECT_EQ(data.bucket_info_size(), 1);

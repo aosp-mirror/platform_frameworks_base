@@ -120,7 +120,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -134,6 +133,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -1568,6 +1568,57 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     @Override
+    public void updateAppWidgetProviderInfo(ComponentName componentName, String metadataKey) {
+        final int userId = UserHandle.getCallingUserId();
+        if (DEBUG) {
+            Slog.i(TAG, "updateAppWidgetProvider() " + userId);
+        }
+
+        // Make sure the package runs under the caller uid.
+        mSecurityPolicy.enforceCallFromPackage(componentName.getPackageName());
+
+        synchronized (mLock) {
+            ensureGroupStateLoadedLocked(userId);
+
+            // NOTE: The lookup is enforcing security across users by making
+            // sure the caller can access only its providers.
+            ProviderId providerId = new ProviderId(Binder.getCallingUid(), componentName);
+            Provider provider = lookupProviderLocked(providerId);
+            if (provider == null) {
+                throw new IllegalArgumentException(
+                        componentName + " is not a valid AppWidget provider");
+            }
+            if (Objects.equals(provider.infoTag, metadataKey)) {
+                // No change
+                return;
+            }
+
+            String keyToUse = metadataKey == null
+                    ? AppWidgetManager.META_DATA_APPWIDGET_PROVIDER : metadataKey;
+            AppWidgetProviderInfo info =
+                    parseAppWidgetProviderInfo(providerId, provider.info.providerInfo, keyToUse);
+            if (info == null) {
+                throw new IllegalArgumentException("Unable to parse " + keyToUse
+                        + " meta-data to a valid AppWidget provider");
+            }
+
+            provider.info = info;
+            provider.infoTag = metadataKey;
+
+            // Update all widgets for this provider
+            final int N = provider.widgets.size();
+            for (int i = 0; i < N; i++) {
+                Widget widget = provider.widgets.get(i);
+                scheduleNotifyProviderChangedLocked(widget);
+                updateAppWidgetInstanceLocked(widget, widget.views, false /* isPartialUpdate */);
+            }
+
+            saveGroupStateAsync(userId);
+            scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
+        }
+    }
+
+    @Override
     public boolean isRequestPinAppWidgetSupported() {
         return LocalServices.getService(ShortcutServiceInternal.class)
                 .isRequestPinItemSupported(UserHandle.getCallingUserId(),
@@ -2168,7 +2219,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 ri.activityInfo.name);
         ProviderId providerId = new ProviderId(ri.activityInfo.applicationInfo.uid, componentName);
 
-        Provider provider = parseProviderInfoXml(providerId, ri);
+        Provider provider = parseProviderInfoXml(providerId, ri, null);
         if (provider != null) {
             // we might have an inactive entry for this provider already due to
             // a preceding restore operation.  if so, fix it up in place; otherwise
@@ -2362,6 +2413,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         out.attribute(null, "pkg", p.info.provider.getPackageName());
         out.attribute(null, "cl", p.info.provider.getClassName());
         out.attribute(null, "tag", Integer.toHexString(p.tag));
+        if (!TextUtils.isEmpty(p.infoTag)) {
+            out.attribute(null, "info_tag", p.infoTag);
+        }
         out.endTag(null, "p");
     }
 
@@ -2422,17 +2476,33 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     @SuppressWarnings("deprecation")
-    private Provider parseProviderInfoXml(ProviderId providerId, ResolveInfo ri) {
-        Provider provider = null;
-
-        ActivityInfo activityInfo = ri.activityInfo;
-        XmlResourceParser parser = null;
-        try {
-            parser = activityInfo.loadXmlMetaData(mContext.getPackageManager(),
+    private Provider parseProviderInfoXml(ProviderId providerId, ResolveInfo ri,
+            Provider oldProvider) {
+        AppWidgetProviderInfo info = null;
+        if (oldProvider != null && !TextUtils.isEmpty(oldProvider.infoTag)) {
+            info = parseAppWidgetProviderInfo(providerId, ri.activityInfo, oldProvider.infoTag);
+        }
+        if (info == null) {
+            info = parseAppWidgetProviderInfo(providerId, ri.activityInfo,
                     AppWidgetManager.META_DATA_APPWIDGET_PROVIDER);
+        }
+        if (info == null) {
+            return null;
+        }
+
+        Provider provider = new Provider();
+        provider.id = providerId;
+        provider.info = info;
+        return provider;
+    }
+
+    private AppWidgetProviderInfo parseAppWidgetProviderInfo(
+            ProviderId providerId, ActivityInfo activityInfo, String metadataKey) {
+        try (XmlResourceParser parser =
+                     activityInfo.loadXmlMetaData(mContext.getPackageManager(), metadataKey)) {
             if (parser == null) {
-                Slog.w(TAG, "No " + AppWidgetManager.META_DATA_APPWIDGET_PROVIDER
-                        + " meta-data for " + "AppWidget provider '" + providerId + '\'');
+                Slog.w(TAG, "No " + metadataKey + " meta-data for AppWidget provider '"
+                        + providerId + '\'');
                 return null;
             }
 
@@ -2452,9 +2522,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 return null;
             }
 
-            provider = new Provider();
-            provider.id = providerId;
-            AppWidgetProviderInfo info = provider.info = new AppWidgetProviderInfo();
+            AppWidgetProviderInfo info = new AppWidgetProviderInfo();
             info.provider = providerId.componentName;
             info.providerInfo = activityInfo;
 
@@ -2501,7 +2569,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         className);
             }
             info.label = activityInfo.loadLabel(mContext.getPackageManager()).toString();
-            info.icon = ri.getIconResource();
+            info.icon = activityInfo.getIconResource();
             info.previewImage = sa.getResourceId(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_previewImage, 0);
             info.autoAdvanceViewId = sa.getResourceId(
@@ -2516,6 +2584,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     com.android.internal.R.styleable.AppWidgetProviderInfo_widgetFeatures, 0);
 
             sa.recycle();
+            return info;
         } catch (IOException | PackageManager.NameNotFoundException | XmlPullParserException e) {
             // Ok to catch Exception here, because anything going wrong because
             // of what a client process passes to us should not be fatal for the
@@ -2523,12 +2592,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             Slog.w(TAG, "XML parsing failed for AppWidget provider "
                     + providerId.componentName + " for user " + providerId.uid, e);
             return null;
-        } finally {
-            if (parser != null) {
-                parser.close();
-            }
         }
-        return provider;
     }
 
     private int getUidForPackage(String packageName, int userId) {
@@ -2891,7 +2955,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 if (provider.getUserId() != userId) {
                     continue;
                 }
-                if (provider.widgets.size() > 0) {
+                if (provider.shouldBePersisted()) {
                     serializeProvider(out, provider);
                 }
             }
@@ -3000,6 +3064,15 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         final int providerTag = !TextUtils.isEmpty(tagAttribute)
                                 ? Integer.parseInt(tagAttribute, 16) : legacyProviderIndex;
                         provider.tag = providerTag;
+
+                        provider.infoTag = parser.getAttributeValue(null, "info_tag");
+                        if (!TextUtils.isEmpty(provider.infoTag) && !mSafeMode) {
+                            AppWidgetProviderInfo info = parseAppWidgetProviderInfo(
+                                    providerId, providerInfo, provider.infoTag);
+                            if (info != null) {
+                                provider.info = info;
+                            }
+                        }
                     } else if ("h".equals(tag)) {
                         legacyHostIndex++;
                         Host host = new Host();
@@ -3254,7 +3327,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         providersUpdated = true;
                     }
                 } else {
-                    Provider parsed = parseProviderInfoXml(providerId, ri);
+                    Provider parsed = parseProviderInfoXml(providerId, ri, provider);
                     if (parsed != null) {
                         keep.add(providerId);
                         // Use the new AppWidgetProviderInfo.
@@ -3725,6 +3798,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         AppWidgetProviderInfo info;
         ArrayList<Widget> widgets = new ArrayList<>();
         PendingIntent broadcast;
+        String infoTag;
         boolean zombie; // if we're in safe mode, don't prune this just because nobody references it
 
         boolean maskedByLockedProfile;
@@ -3783,6 +3857,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
         public boolean isMaskedLocked() {
             return maskedByQuietProfile || maskedByLockedProfile || maskedBySuspendedPackage;
+        }
+
+        public boolean shouldBePersisted() {
+            return !widgets.isEmpty() || !TextUtils.isEmpty(infoTag);
         }
     }
 
@@ -4114,7 +4192,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     for (int i = 0; i < N; i++) {
                         Provider provider = mProviders.get(i);
 
-                        if (!provider.widgets.isEmpty()
+                        if (provider.shouldBePersisted()
                                 && (provider.isInPackageForUser(backedupPackage, userId)
                                 || provider.hostedByPackageForUser(backedupPackage, userId))) {
                             provider.tag = index;

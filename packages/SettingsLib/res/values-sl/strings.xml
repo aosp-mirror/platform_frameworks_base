@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Strojno pospeševanje za internetno povezavo prek mobilnega telefona"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Naprave Bluetooth prikaži brez imen"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Onemogočanje absolutnega praga glasnosti"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Omogoči zvonjenje iz telefona"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Različica profila AVRCP za Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Izberite različico profila AVRCP za Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Zvočni kodek za Bluetooth"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Preveri, ali so aplikacije, nameščene prek ADB/ADT, škodljive."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Naprave Bluetooth bodo prikazane brez imen (samo z naslovi MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Onemogoči funkcijo absolutnega praga glasnosti za Bluetooth, če pride do težav z glasnostjo z oddaljenimi napravami, kot je nesprejemljivo visoka glasnost ali pomanjkanje nadzora."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Omogoči, da se toni zvonjenja v telefonu predvajajo v slušalkah z mikrofonom Bluetooth"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Lokalni terminal"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Omogočanje terminalske aplikacije za dostop do lokalne lupine"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Preverjanje HDCP"</string>

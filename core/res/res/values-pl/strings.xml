@@ -21,6 +21,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
+    <string name="kilobyteShort" msgid="7542884022844556968">"KB"</string>
+    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
+    <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Bez nazwy&gt;"</string>
@@ -392,9 +396,9 @@
     <string name="permdesc_writeCalendar" product="tv" msgid="9017809326268135866">"Ta aplikacja może dodawać, usuwać i zmieniać wydarzenia z kalendarza na telewizorze. Ta aplikacja może wysyłać wiadomości wyglądające jak utworzone przez właścicieli kalendarza lub zmieniać wydarzenia bez wiedzy ich właścicieli."</string>
     <string name="permdesc_writeCalendar" product="default" msgid="7592791790516943173">"Ta aplikacja może dodawać, usuwać i zmieniać wydarzenia z kalendarza na telefonie. Ta aplikacja może wysyłać wiadomości wyglądające jak utworzone przez właścicieli kalendarza lub zmieniać wydarzenia bez wiedzy ich właścicieli."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"dostęp do dodatkowych poleceń dostawcy informacji o lokalizacji"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Pozwala aplikacji na dostęp do dodatkowych poleceń dostawcy informacji o lokalizacji. Aplikacje z tym uprawnieniem mogą wpływać na działanie GPS-u lub innych źródeł lokalizacji."</string>
-    <string name="permlab_accessFineLocation" msgid="251034415460950944">"dostęp do dokładnej lokalizacji (na podstawie GPS-u i sieci)"</string>
-    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Ta aplikacja może określać Twoją lokalizację na podstawie GPS-u lub sieciowych źródeł lokalizacji, takich jak stacje bazowe i sieci Wi-Fi. Te usługi lokalizacyjne muszą być włączone i dostępne na telefonie, by aplikacja mogła z nich korzystać. Może to zwiększyć zużycie baterii."</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Pozwala aplikacji na dostęp do dodatkowych poleceń dostawcy informacji o lokalizacji. Aplikacje z tym uprawnieniem mogą wpływać na działanie GPS-a lub innych źródeł lokalizacji."</string>
+    <string name="permlab_accessFineLocation" msgid="251034415460950944">"dostęp do dokładnej lokalizacji (na podstawie GPS-a i sieci)"</string>
+    <string name="permdesc_accessFineLocation" msgid="5821994817969957884">"Ta aplikacja może określać Twoją lokalizację na podstawie GPS-a lub sieciowych źródeł lokalizacji, takich jak stacje bazowe i sieci Wi-Fi. Te usługi lokalizacyjne muszą być włączone i dostępne na telefonie, by aplikacja mogła z nich korzystać. Może to zwiększyć zużycie baterii."</string>
     <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"dostęp do przybliżonej lokalizacji (na podstawie sieci)"</string>
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Ta aplikacja może określać Twoją lokalizację na podstawie źródeł sieciowych, takich jak stacje bazowe i sieci Wi-Fi. Te usługi lokalizacyjne muszą być włączone i dostępne na tablecie, by aplikacja mogła z nich korzystać."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Ta aplikacja może określać Twoją lokalizację na podstawie źródeł sieciowych, takich jak stacje bazowe i sieci Wi-Fi. Te usługi lokalizacyjne muszą być włączone i dostępne na telewizorze, by aplikacja mogła z nich korzystać."</string>
@@ -1160,6 +1164,9 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Kliknij, by zobaczyć wszystkie sieci"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Połącz"</string>
     <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Wszystkie sieci"</string>
+    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi włączy się automatycznie"</string>
+    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Gdy znajdziesz się w pobliżu zapisanej sieci o mocnym sygnale"</string>
+    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Nie włączaj ponownie"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Zaloguj się w sieci Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Zaloguj się do sieci"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1260,7 +1267,7 @@
     <string name="alert_windows_notification_channel_group_name" msgid="1463953341148606396">"Wyświetlanie nad innymi aplikacjami"</string>
     <string name="alert_windows_notification_channel_name" msgid="3116610965549449803">"Wyświetlanie aplikacji <xliff:g id="NAME">%s</xliff:g> nad innymi"</string>
     <string name="alert_windows_notification_title" msgid="3697657294867638947">"Aplikacja <xliff:g id="NAME">%s</xliff:g> jest nad innymi"</string>
-    <string name="alert_windows_notification_message" msgid="8917232109522912560">"Jeśli nie chcesz, by aplikacja <xliff:g id="NAME">%s</xliff:g> korzystała z tej funkcji, otwórz ustawienia i ją wyłącz."</string>
+    <string name="alert_windows_notification_message" msgid="8917232109522912560">"Jeśli nie chcesz, by aplikacja <xliff:g id="NAME">%s</xliff:g> korzystała z tej funkcji, otwórz ustawienia i wyłącz ją."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="3367294525884949878">"WYŁĄCZ"</string>
     <string name="ext_media_checking_notification_title" msgid="5734005953288045806">"Przygotowuję: <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_checking_notification_message" msgid="4747432538578886744">"Sprawdzanie w poszukiwaniu błędów"</string>
@@ -1870,4 +1877,6 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Nie można przywrócić skrótu, bo aplikacja nie obsługuje tworzenia i przywracania kopii zapasowej"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Nie można przywrócić skrótu z powodu niezgodności podpisu aplikacji"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Nie można przywrócić skrótu"</string>
+    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <skip />
 </resources>

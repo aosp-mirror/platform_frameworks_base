@@ -47,7 +47,7 @@ public class ValidateNotificationPeopleTest extends UiServiceTestCase {
     public void testSingleString() throws Exception {
         String[] expected = { "foobar" };
         Bundle bundle = new Bundle();
-        bundle.putString(Notification.EXTRA_PEOPLE, expected[0]);
+        bundle.putString(Notification.EXTRA_PEOPLE_LIST, expected[0]);
         String[] result = ValidateNotificationPeople.getExtraPeople(bundle);
         assertStringArrayEquals("string should be in result[0]", expected, result);
     }
@@ -56,7 +56,7 @@ public class ValidateNotificationPeopleTest extends UiServiceTestCase {
     public void testSingleCharArray() throws Exception {
         String[] expected = { "foobar" };
         Bundle bundle = new Bundle();
-        bundle.putCharArray(Notification.EXTRA_PEOPLE, expected[0].toCharArray());
+        bundle.putCharArray(Notification.EXTRA_PEOPLE_LIST, expected[0].toCharArray());
         String[] result = ValidateNotificationPeople.getExtraPeople(bundle);
         assertStringArrayEquals("char[] should be in result[0]", expected, result);
     }
@@ -65,7 +65,7 @@ public class ValidateNotificationPeopleTest extends UiServiceTestCase {
     public void testSingleCharSequence() throws Exception {
         String[] expected = { "foobar" };
         Bundle bundle = new Bundle();
-        bundle.putCharSequence(Notification.EXTRA_PEOPLE, new SpannableString(expected[0]));
+        bundle.putCharSequence(Notification.EXTRA_PEOPLE_LIST, new SpannableString(expected[0]));
         String[] result = ValidateNotificationPeople.getExtraPeople(bundle);
         assertStringArrayEquals("charSequence should be in result[0]", expected, result);
     }
@@ -74,7 +74,7 @@ public class ValidateNotificationPeopleTest extends UiServiceTestCase {
     public void testStringArraySingle() throws Exception {
         Bundle bundle = new Bundle();
         String[] expected = { "foobar" };
-        bundle.putStringArray(Notification.EXTRA_PEOPLE, expected);
+        bundle.putStringArray(Notification.EXTRA_PEOPLE_LIST, expected);
         String[] result = ValidateNotificationPeople.getExtraPeople(bundle);
         assertStringArrayEquals("wrapped string should be in result[0]", expected, result);
     }
@@ -83,7 +83,7 @@ public class ValidateNotificationPeopleTest extends UiServiceTestCase {
     public void testStringArrayMultiple() throws Exception {
         Bundle bundle = new Bundle();
         String[] expected = { "foo", "bar", "baz" };
-        bundle.putStringArray(Notification.EXTRA_PEOPLE, expected);
+        bundle.putStringArray(Notification.EXTRA_PEOPLE_LIST, expected);
         String[] result = ValidateNotificationPeople.getExtraPeople(bundle);
         assertStringArrayEquals("testStringArrayMultiple", expected, result);
     }
@@ -92,7 +92,7 @@ public class ValidateNotificationPeopleTest extends UiServiceTestCase {
     public void testStringArrayNulls() throws Exception {
         Bundle bundle = new Bundle();
         String[] expected = { "foo", null, "baz" };
-        bundle.putStringArray(Notification.EXTRA_PEOPLE, expected);
+        bundle.putStringArray(Notification.EXTRA_PEOPLE_LIST, expected);
         String[] result = ValidateNotificationPeople.getExtraPeople(bundle);
         assertStringArrayEquals("testStringArrayNulls", expected, result);
     }
@@ -105,7 +105,7 @@ public class ValidateNotificationPeopleTest extends UiServiceTestCase {
         for (int i = 0; i < expected.length; i++) {
             charSeqArray[i] = new SpannableString(expected[i]);
         }
-        bundle.putCharSequenceArray(Notification.EXTRA_PEOPLE, charSeqArray);
+        bundle.putCharSequenceArray(Notification.EXTRA_PEOPLE_LIST, charSeqArray);
         String[] result = ValidateNotificationPeople.getExtraPeople(bundle);
         assertStringArrayEquals("testCharSequenceArrayMultiple", expected, result);
     }
@@ -122,7 +122,7 @@ public class ValidateNotificationPeopleTest extends UiServiceTestCase {
                 charSeqArray[i] = new SpannableString(expected[i]);
             }
         }
-        bundle.putCharSequenceArray(Notification.EXTRA_PEOPLE, charSeqArray);
+        bundle.putCharSequenceArray(Notification.EXTRA_PEOPLE_LIST, charSeqArray);
         String[] result = ValidateNotificationPeople.getExtraPeople(bundle);
         assertStringArrayEquals("testMixedCharSequenceArrayList", expected, result);
     }
@@ -135,7 +135,7 @@ public class ValidateNotificationPeopleTest extends UiServiceTestCase {
         for (int i = 0; i < expected.length; i++) {
             stringArrayList.add(expected[i]);
         }
-        bundle.putStringArrayList(Notification.EXTRA_PEOPLE, stringArrayList);
+        bundle.putStringArrayList(Notification.EXTRA_PEOPLE_LIST, stringArrayList);
         String[] result = ValidateNotificationPeople.getExtraPeople(bundle);
         assertStringArrayEquals("testStringArrayList", expected, result);
     }
@@ -149,9 +149,22 @@ public class ValidateNotificationPeopleTest extends UiServiceTestCase {
         for (int i = 0; i < expected.length; i++) {
             stringArrayList.add(new SpannableString(expected[i]));
         }
-        bundle.putCharSequenceArrayList(Notification.EXTRA_PEOPLE, stringArrayList);
+        bundle.putCharSequenceArrayList(Notification.EXTRA_PEOPLE_LIST, stringArrayList);
         String[] result = ValidateNotificationPeople.getExtraPeople(bundle);
         assertStringArrayEquals("testCharSequenceArrayList", expected, result);
+    }
+
+    @Test
+    public void testPeopleArrayList() throws Exception {
+        Bundle bundle = new Bundle();
+        String[] expected = { "name:test" , "tel:1234" };
+        final ArrayList<Notification.Person> arrayList =
+                new ArrayList<>(expected.length);
+        arrayList.add(new Notification.Person().setName("test"));
+        arrayList.add(new Notification.Person().setUri(expected[1]));
+        bundle.putParcelableArrayList(Notification.EXTRA_PEOPLE_LIST, arrayList);
+        String[] result = ValidateNotificationPeople.getExtraPeople(bundle);
+        assertStringArrayEquals("testPeopleArrayList", expected, result);
     }
 
     private void assertStringArrayEquals(String message, String[] expected, String[] result) {

@@ -142,7 +142,7 @@
     <string name="tts_play_example_summary" msgid="8029071615047894486">"Reproduzir uma rápida demonstração da voz sintetizada"</string>
     <string name="tts_install_data_title" msgid="4264378440508149986">"Instalar dados de voz"</string>
     <string name="tts_install_data_summary" msgid="5742135732511822589">"É necessário instalar os dados de voz para a sintetização da fala"</string>
-    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Este mecanismo de síntese de fala pode coletar todo texto que será falado, inclusive dados pessoais como senhas e números de cartão de crédito. Ele é proveniente do mecanismo <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Deseja ativar o uso desse mecanismo de síntese de fala?"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Este mecanismo de síntese de fala pode coletar todo texto que será falado, inclusive dados pessoais como senhas e números de cartão de crédito. Ele é proveniente do mecanismo <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Quer ativar o uso desse mecanismo de síntese de fala?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"Este idioma requer uma conexão de rede ativa para a conversão de texto em voz."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Este é um exemplo de sintetização de voz."</string>
     <string name="tts_status_title" msgid="7268566550242584413">"Status de idioma padrão"</string>
@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Aceleração de hardware de tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Mostrar dispositivos Bluetooth sem nomes"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Desativar volume absoluto"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Ativar o toque em banda"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Versão do Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Selecionar versão do Bluetooth AVRCP"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Codec de áudio Bluetooth"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Verificar comportamento nocivo em apps instalados via ADB/ADT."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Dispositivos Bluetooth sem nomes (somente endereços MAC) serão exibidos"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Desativa o recurso Bluetooth de volume absoluto em caso de problemas com o volume em dispositivos remotos, como volume excessivamente alto ou falta de controle."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Permitir que os toques no smartphone sejam reproduzidos em fones de ouvido Bluetooth"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Ativar o app terminal que oferece acesso ao shell local"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"Verificação HDCP"</string>

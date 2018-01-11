@@ -29,6 +29,7 @@ import android.content.Context;
 import android.os.ShellCommand;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.annotation.Nullable;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
@@ -62,7 +63,7 @@ class WindowTracing {
         mTraceFile = file;
     }
 
-    void startTrace(PrintWriter pw) throws IOException {
+    void startTrace(@Nullable PrintWriter pw) throws IOException {
         if (IS_USER){
             logAndPrintln(pw, "Error: Tracing is not supported on user builds.");
             return;
@@ -81,13 +82,15 @@ class WindowTracing {
         }
     }
 
-    private void logAndPrintln(PrintWriter pw, String msg) {
+    private void logAndPrintln(@Nullable PrintWriter pw, String msg) {
         Log.i(TAG, msg);
-        pw.println(msg);
-        pw.flush();
+        if (pw != null) {
+            pw.println(msg);
+            pw.flush();
+        }
     }
 
-    void stopTrace(PrintWriter pw) {
+    void stopTrace(@Nullable PrintWriter pw) {
         if (IS_USER){
             logAndPrintln(pw, "Error: Tracing is not supported on user builds.");
             return;

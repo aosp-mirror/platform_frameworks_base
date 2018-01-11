@@ -16,11 +16,14 @@
 
 package android.telephony;
 
+import android.annotation.IntDef;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telephony.Rlog;
 import android.text.TextUtils;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Contains phone state and service related information.
@@ -105,6 +108,31 @@ public class ServiceState implements Parcelable {
     /** @hide */
     public static final int RIL_REG_STATE_UNKNOWN_EMERGENCY_CALL_ENABLED = 14;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "RIL_RADIO_TECHNOLOGY_" },
+            value = {
+                    RIL_RADIO_TECHNOLOGY_UNKNOWN,
+                    RIL_RADIO_TECHNOLOGY_GPRS,
+                    RIL_RADIO_TECHNOLOGY_EDGE,
+                    RIL_RADIO_TECHNOLOGY_UMTS,
+                    RIL_RADIO_TECHNOLOGY_IS95A,
+                    RIL_RADIO_TECHNOLOGY_IS95B,
+                    RIL_RADIO_TECHNOLOGY_1xRTT,
+                    RIL_RADIO_TECHNOLOGY_EVDO_0,
+                    RIL_RADIO_TECHNOLOGY_EVDO_A,
+                    RIL_RADIO_TECHNOLOGY_HSDPA,
+                    RIL_RADIO_TECHNOLOGY_HSUPA,
+                    RIL_RADIO_TECHNOLOGY_HSPA,
+                    RIL_RADIO_TECHNOLOGY_EVDO_B,
+                    RIL_RADIO_TECHNOLOGY_EHRPD,
+                    RIL_RADIO_TECHNOLOGY_LTE,
+                    RIL_RADIO_TECHNOLOGY_HSPAP,
+                    RIL_RADIO_TECHNOLOGY_GSM,
+                    RIL_RADIO_TECHNOLOGY_TD_SCDMA,
+                    RIL_RADIO_TECHNOLOGY_IWLAN,
+                    RIL_RADIO_TECHNOLOGY_LTE_CA})
+    public @interface RilRadioTechnology {}
     /**
      * Available radio technologies for GSM, UMTS and CDMA.
      * Duplicates the constants from hardware/radio/include/ril.h
@@ -162,6 +190,12 @@ public class ServiceState implements Parcelable {
      */
     public static final int RIL_RADIO_TECHNOLOGY_LTE_CA = 19;
 
+    /**
+     * Number of radio technologies for GSM, UMTS and CDMA.
+     * @hide
+     */
+    private static final int NEXT_RIL_RADIO_TECHNOLOGY = 20;
+
     /** @hide */
     public static final int RIL_RADIO_CDMA_TECHNOLOGY_BITMASK =
             (1 << (RIL_RADIO_TECHNOLOGY_IS95A - 1))
@@ -215,6 +249,11 @@ public class ServiceState implements Parcelable {
      * @hide
      */
     public static final int ROAMING_TYPE_INTERNATIONAL = 3;
+
+    /**
+     * Unknown ID. Could be returned by {@link #getNetworkId()} or {@link #getSystemId()}
+     */
+    public static final int UNKNOWN_ID = -1;
 
     private int mVoiceRoamingType;
     private int mDataRoamingType;
@@ -1153,7 +1192,8 @@ public class ServiceState implements Parcelable {
         return getRilDataRadioTechnology();
     }
 
-    private int rilRadioTechnologyToNetworkType(int rt) {
+    /** @hide */
+    public static int rilRadioTechnologyToNetworkType(@RilRadioTechnology int rt) {
         switch(rt) {
         case ServiceState.RIL_RADIO_TECHNOLOGY_GPRS:
             return TelephonyManager.NETWORK_TYPE_GPRS;
@@ -1212,12 +1252,20 @@ public class ServiceState implements Parcelable {
         return this.mCssIndicator ? 1 : 0;
     }
 
-    /** @hide */
+    /**
+     * Get the CDMA NID (Network Identification Number), a number uniquely identifying a network
+     * within a wireless system. (Defined in 3GPP2 C.S0023 3.4.8)
+     * @return The CDMA NID or {@link #UNKNOWN_ID} if not available.
+     */
     public int getNetworkId() {
         return this.mNetworkId;
     }
 
-    /** @hide */
+    /**
+     * Get the CDMA SID (System Identification Number), a number uniquely identifying a wireless
+     * system. (Defined in 3GPP2 C.S0023 3.4.8)
+     * @return The CDMA SID or {@link #UNKNOWN_ID} if not available.
+     */
     public int getSystemId() {
         return this.mSystemId;
     }
@@ -1298,6 +1346,34 @@ public class ServiceState implements Parcelable {
             bearerBitmask |= getBitmaskForTech(bearerInt);
         }
         return bearerBitmask;
+    }
+
+    /** @hide */
+    public static int convertNetworkTypeBitmaskToBearerBitmask(int networkTypeBitmask) {
+        if (networkTypeBitmask == 0) {
+            return 0;
+        }
+        int bearerBitmask = 0;
+        for (int bearerInt = 0; bearerInt < NEXT_RIL_RADIO_TECHNOLOGY; bearerInt++) {
+            if (bitmaskHasTech(networkTypeBitmask, rilRadioTechnologyToNetworkType(bearerInt))) {
+                bearerBitmask |= getBitmaskForTech(bearerInt);
+            }
+        }
+        return bearerBitmask;
+    }
+
+    /** @hide */
+    public static int convertBearerBitmaskToNetworkTypeBitmask(int bearerBitmask) {
+        if (bearerBitmask == 0) {
+            return 0;
+        }
+        int networkTypeBitmask = 0;
+        for (int bearerInt = 0; bearerInt < NEXT_RIL_RADIO_TECHNOLOGY; bearerInt++) {
+            if (bitmaskHasTech(bearerBitmask, bearerInt)) {
+                networkTypeBitmask |= getBitmaskForTech(rilRadioTechnologyToNetworkType(bearerInt));
+            }
+        }
+        return networkTypeBitmask;
     }
 
     /**

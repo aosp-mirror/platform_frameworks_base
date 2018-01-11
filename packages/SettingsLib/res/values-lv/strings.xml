@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Paātrināta aparatūras darbība piesaistei"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Rādīt Bluetooth ierīces bez nosaukumiem"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"Atspējot absolūto skaļumu"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"Iespējot iekšjoslas zvanīšanu"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"Bluetooth AVRCP versija"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"Atlasiet Bluetooth AVRCP versiju"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"Bluetooth audio kodeks"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"Pārbaudīt, vai lietotņu, kuru instalēšanai izmantots ADB/ADT, darbība nav kaitīga."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"Tiks parādītas Bluetooth ierīces bez nosaukumiem (tikai MAC adreses)."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"Atspējo Bluetooth absolūtā skaļuma funkciju skaļuma problēmu gadījumiem attālajās ierīcēs, piemēram, ja ir nepieņemami liels skaļums vai nav iespējas kontrolēt skaļumu."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"Atļaut tālrunī esošo zvana signālu atskaņošanu Bluetooth austiņās"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"Vietējā beigu lietotne"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"Iespējot beigu lietotni, kurā piedāvāta vietējā čaulas piekļuve"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP pārbaude"</string>

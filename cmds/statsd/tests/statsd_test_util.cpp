@@ -292,6 +292,17 @@ std::unique_ptr<LogEvent> CreateAppCrashEvent(const int uid, uint64_t timestampN
         uid, ProcessLifeCycleStateChanged::PROCESS_CRASHED, timestampNs);
 }
 
+std::unique_ptr<LogEvent> CreateIsolatedUidChangedEvent(
+    int isolatedUid, int hostUid, bool is_create, uint64_t timestampNs) {
+    auto logEvent = std::make_unique<LogEvent>(
+        android::util::ISOLATED_UID_CHANGED, timestampNs);
+    logEvent->write(hostUid);
+    logEvent->write(isolatedUid);
+    logEvent->write(is_create);
+    logEvent->init();
+    return logEvent;
+}
+
 sp<StatsLogProcessor> CreateStatsLogProcessor(const long timeBaseSec, const StatsdConfig& config,
                                               const ConfigKey& key) {
     sp<UidMap> uidMap = new UidMap();

@@ -9802,6 +9802,14 @@ public final class Settings {
         public static final java.lang.String APP_STANDBY_ENABLED = "app_standby_enabled";
 
         /**
+         * Feature flag to enable or disable the Forced App Standby feature.
+         * Type: int (0 for false, 1 for true)
+         * Default: 1
+         * @hide
+         */
+        public static final String FORCED_APP_STANDBY_ENABLED = "forced_app_standby_enabled";
+
+        /**
          * Whether or not Network Watchlist feature is enabled.
          * Type: int (0 for false, 1 for true)
          * Default: 0

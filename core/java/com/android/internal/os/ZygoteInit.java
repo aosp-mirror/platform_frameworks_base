@@ -782,6 +782,9 @@ public class ZygoteInit {
             // Zygote process unmounts root storage spaces.
             Zygote.nativeUnmountStorageOnInit();
 
+            // Set seccomp policy
+            Seccomp.setPolicy();
+
             ZygoteHooks.stopZygoteNoThreadCreation();
 
             if (startSystemServer) {

@@ -58,6 +58,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     private static final Path EMPTY_PATH = new Path();
 
     private final Rect mOutlineRect = new Rect();
+    private final Path mClipPath = new Path();
     private boolean mCustomOutline;
     private float mOutlineAlpha = -1f;
     private float mOutlineRadius;
@@ -69,13 +70,14 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     private float mBottomRoundness;
     private float mTopRoundness;
     private int mBackgroundTop;
-    protected int mCurrentSidePaddings;
 
     /**
      * {@code true} if the children views of the {@link ExpandableOutlineView} are translated when
      * it is moved. Otherwise, the translation is set on the {@code ExpandableOutlineView} itself.
      */
     protected boolean mShouldTranslateContents;
+    private boolean mClipRoundedToClipTopAmount;
+    private float mDistanceToTopRoundness = -1;
 
     private final ViewOutlineProvider mProvider = new ViewOutlineProvider() {
         @Override
@@ -83,9 +85,9 @@ public abstract class ExpandableOutlineView extends ExpandableView {
             if (!mCustomOutline && mCurrentTopRoundness == 0.0f
                     && mCurrentBottomRoundness == 0.0f && !mAlwaysRoundBothCorners) {
                 int translation = mShouldTranslateContents ? (int) getTranslation() : 0;
-                int left = Math.max(translation + mCurrentSidePaddings, mCurrentSidePaddings);
+                int left = Math.max(translation, 0);
                 int top = mClipTopAmount + mBackgroundTop;
-                int right = getWidth() - mCurrentSidePaddings + Math.min(translation, 0);
+                int right = getWidth() + Math.min(translation, 0);
                 int bottom = Math.max(getActualHeight() - mClipBottomAmount, top);
                 outline.setRect(left, top, right, bottom);
             } else {
@@ -115,9 +117,9 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         if (!mCustomOutline) {
             int translation = mShouldTranslateContents && !ignoreTranslation
                     ? (int) getTranslation() : 0;
-            left = Math.max(translation + mCurrentSidePaddings, mCurrentSidePaddings);
+            left = Math.max(translation, 0);
             top = mClipTopAmount + mBackgroundTop;
-            right = getWidth() - mCurrentSidePaddings + Math.min(translation, 0);
+            right = getWidth() + Math.min(translation, 0);
             bottom = Math.max(getActualHeight(), top);
             int intersectBottom = Math.max(getActualHeight() - mClipBottomAmount, top);
             if (bottom != intersectBottom) {
@@ -135,8 +137,6 @@ public abstract class ExpandableOutlineView extends ExpandableView {
             top = mOutlineRect.top;
             right = mOutlineRect.right;
             bottom = mOutlineRect.bottom;
-            left = Math.max(mCurrentSidePaddings, left);
-            right = Math.min(getWidth() - mCurrentSidePaddings, right);
         }
         height = bottom - top;
         if (height == 0) {
@@ -162,15 +162,8 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         return roundedRectPath;
     }
 
-    protected Path getRoundedRectPath(int left, int top, int right, int bottom, float topRoundness,
-            float bottomRoundness) {
-        getRoundedRectPath(left, top, right, bottom, topRoundness, bottomRoundness,
-                mTmpPath);
-        return mTmpPath;
-    }
-
-    private void getRoundedRectPath(int left, int top, int right, int bottom, float topRoundness,
-            float bottomRoundness, Path outPath) {
+    public static void getRoundedRectPath(int left, int top, int right, int bottom,
+            float topRoundness, float bottomRoundness, Path outPath) {
         outPath.reset();
         int width = right - left;
         float topRoundnessX = topRoundness;
@@ -207,18 +200,48 @@ public abstract class ExpandableOutlineView extends ExpandableView {
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
         canvas.save();
+        Path intersectPath = null;
+        if (mClipRoundedToClipTopAmount) {
+            int left = 0;
+            int top = (int) (mClipTopAmount - mDistanceToTopRoundness);
+            int right = getWidth();
+            int bottom = (int) Math.max(getActualHeight() - mClipBottomAmount,
+                    top + mOutlineRadius);
+            ExpandableOutlineView.getRoundedRectPath(left, top, right, bottom, mOutlineRadius,
+                    0.0f,
+                    mClipPath);
+            intersectPath = mClipPath;
+        }
+        boolean clipped = false;
         if (childNeedsClipping(child)) {
             Path clipPath = getCustomClipPath(child);
             if (clipPath == null) {
                 clipPath = getClipPath();
             }
             if (clipPath != null) {
+                if (intersectPath != null) {
+                    clipPath.op(intersectPath, Path.Op.INTERSECT);
+                }
                 canvas.clipPath(clipPath);
+                clipped = true;
             }
+        }
+        if (!clipped && intersectPath != null) {
+            canvas.clipPath(intersectPath);
         }
         boolean result = super.drawChild(canvas, child, drawingTime);
         canvas.restore();
         return result;
+    }
+
+    @Override
+    public void setDistanceToTopRoundness(float distanceToTopRoundness) {
+        super.setDistanceToTopRoundness(distanceToTopRoundness);
+        if (distanceToTopRoundness != mDistanceToTopRoundness) {
+            mClipRoundedToClipTopAmount = distanceToTopRoundness >= 0;
+            mDistanceToTopRoundness = distanceToTopRoundness;
+            invalidate();
+        }
     }
 
     protected boolean childNeedsClipping(View child) {
@@ -394,11 +417,5 @@ public abstract class ExpandableOutlineView extends ExpandableView {
 
     public Path getCustomClipPath(View child) {
         return null;
-    }
-
-    public void setCurrentSidePaddings(float currentSidePaddings) {
-        mCurrentSidePaddings = (int) currentSidePaddings;
-        invalidateOutline();
-        invalidate();
     }
 }

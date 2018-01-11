@@ -257,6 +257,7 @@ java_library {
         "core/java/android/service/euicc/IGetEuiccInfoCallback.aidl",
         "core/java/android/service/euicc/IGetEuiccProfileInfoListCallback.aidl",
         "core/java/android/service/euicc/IGetOtaStatusCallback.aidl",
+        "core/java/android/service/euicc/IOtaStatusChangedCallback.aidl",
         "core/java/android/service/euicc/IRetainSubscriptionsForFactoryResetCallback.aidl",
         "core/java/android/service/euicc/ISwitchToSubscriptionCallback.aidl",
         "core/java/android/service/euicc/IUpdateSubscriptionNicknameCallback.aidl",

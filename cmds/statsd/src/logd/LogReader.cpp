@@ -110,7 +110,7 @@ int LogReader::connect_and_read() {
             LogEvent event(msg);
 
             // Call the listener
-            mListener->OnLogEvent(event);
+            mListener->OnLogEvent(&event);
         }
     }
 

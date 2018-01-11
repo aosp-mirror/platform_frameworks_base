@@ -21,6 +21,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
+    <string name="kilobyteShort" msgid="7542884022844556968">"kB"</string>
+    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
+    <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Adsız&gt;"</string>
@@ -270,7 +274,7 @@
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"takviminize erişme"</string>
     <string name="permgrouprequest_calendar" msgid="6704529828699071445">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uygulamasının takviminize erişmesine izin verin"</string>
     <string name="permgrouplab_sms" msgid="228308803364967808">"SMS"</string>
-    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS iletileri gönderme ve görüntüleme"</string>
+    <string name="permgroupdesc_sms" msgid="4656988620100940350">"SMS mesajları gönderme ve görüntüleme"</string>
     <string name="permgrouprequest_sms" msgid="605618939583628306">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uygulamasının SMS mesajları göndermesine ve gelen mesajları görüntülemesine izin verin"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Depolama"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"cihazınızdaki fotoğraflara, medyaya ve dosyalara erişme"</string>
@@ -282,8 +286,8 @@
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotoğraf çekme ve video kaydetme"</string>
     <string name="permgrouprequest_camera" msgid="810824326507258410">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uygulamasının resim çekmesine ve video kaydı yapmasına izin verin"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telefon"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefon aramaları yapma ve çağrıları yönetme"</string>
-    <string name="permgrouprequest_phone" msgid="7084161459732093690">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uygulamasının telefon etmesine ve gelen çağrıları yönetmesine izin verin"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"telefon çağrıları yapma ve yönetme"</string>
+    <string name="permgrouprequest_phone" msgid="7084161459732093690">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uygulamasına telefon çağrıları yapma ve yönetme izni verin"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Vücut Sensörleri"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"hayati belirtilerinizle ilgili sensör verilerine erişme"</string>
     <string name="permgrouprequest_sensors" msgid="8631146669524259656">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uygulamasının hayati belirtilerinizle ilgili sensör verilerine erişmesine izin verin"</string>
@@ -321,7 +325,7 @@
     <string name="permdesc_readCellBroadcasts" msgid="6361972776080458979">"Uygulamaya, cihazınız tarafından alınan hücre yayını mesajlarını okuma izni verir. Hücre yayını uyarıları bazı yerlerde acil durumlar konusunda sizi uyarmak için gönderilir. Kötü amaçlı uygulamalar acil hücre yayını alındığında cihazınızın performansına ya da çalışmasına engel olabilir."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"abone olunan yayınları okuma"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="5557058907906144505">"Uygulamaya, o anda senkronize olan özet akışları ile ilgili bilgi alma izni verir."</string>
-    <string name="permlab_sendSms" msgid="7544599214260982981">"SMS iletileri gönderme ve görüntüleme"</string>
+    <string name="permlab_sendSms" msgid="7544599214260982981">"SMS mesajları gönderme ve görüntüleme"</string>
     <string name="permdesc_sendSms" msgid="7094729298204937667">"Uygulamaya SMS iletisi gönderme izni verir. Bu durum beklenmeyen ödemelere neden olabilir. Kötü amaçlı uygulamalar onayınız olmadan iletiler göndererek sizi zarara uğratabilir."</string>
     <string name="permlab_readSms" msgid="8745086572213270480">"kısa mesajlarımı (SMS veya MMS) oku"</string>
     <string name="permdesc_readSms" product="tablet" msgid="4741697454888074891">"Bu uygulama, tabletinizde kayıtlı tüm SMS mesajlarını (kısa mesajları) okuyabilir."</string>
@@ -1116,6 +1120,9 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Tüm ağları görmek için dokunun"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Bağlan"</string>
     <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Tüm Ağlar"</string>
+    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Kablosuz özelliği otomatik olarak açılacak"</string>
+    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Daha önce kaydedilmiş yüksek kaliteli bir ağın yakınında olduğunuzda"</string>
+    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Tekrar açılmasın"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Kablosuz ağda oturum açın"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Ağda oturum açın"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1800,4 +1807,6 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Uygulama, yedekleme ve geri yüklemeyi desteklemediğinden kısayol geri yüklenemedi"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Uygulama imzası eşleşmediğinden kısayol geri yüklenemedi"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Kısayol geri yüklenemedi"</string>
+    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <skip />
 </resources>

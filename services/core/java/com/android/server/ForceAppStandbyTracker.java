@@ -25,6 +25,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -33,8 +34,10 @@ import android.os.PowerManagerInternal;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.Pair;
+import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
 
@@ -59,15 +62,16 @@ import java.util.List;
  * - Global "force all apps standby" mode enforced by battery saver.
  *
  * TODO: In general, we can reduce the number of callbacks by checking all signals before sending
- *    each callback. For example, even when an UID comes into the foreground, if it wasn't
- *    originally restricted, then there's no need to send an event.
- *    Doing this would be error-prone, so we punt it for now, but we should revisit it later.
+ * each callback. For example, even when an UID comes into the foreground, if it wasn't
+ * originally restricted, then there's no need to send an event.
+ * Doing this would be error-prone, so we punt it for now, but we should revisit it later.
  *
  * Test:
-   atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/servicestests/src/com/android/server/ForceAppStandbyTrackerTest.java
+ * atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/servicestests/src/com/android/server/ForceAppStandbyTrackerTest.java
  */
 public class ForceAppStandbyTracker {
     private static final String TAG = "ForceAppStandbyTracker";
+    private static final boolean DEBUG = false;
 
     @GuardedBy("ForceAppStandbyTracker.class")
     private static ForceAppStandbyTracker sInstance;
@@ -107,7 +111,43 @@ public class ForceAppStandbyTracker {
     boolean mStarted;
 
     @GuardedBy("mLock")
-    boolean mForceAllAppsStandby;
+    boolean mForceAllAppsStandby;   // True if device is in extreme battery saver mode
+
+    @GuardedBy("mLock")
+    boolean mForcedAppStandbyEnabled;   // True if the forced app standby feature is enabled
+
+    private class FeatureFlagObserver extends ContentObserver {
+        FeatureFlagObserver() {
+            super(null);
+        }
+
+        void register() {
+            mContext.getContentResolver().registerContentObserver(
+                    Settings.Global.getUriFor(Settings.Global.FORCED_APP_STANDBY_ENABLED),
+                    false, this);
+        }
+
+        boolean isForcedAppStandbyEnabled() {
+            return Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.FORCED_APP_STANDBY_ENABLED, 1) == 1;
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            final boolean enabled = isForcedAppStandbyEnabled();
+            synchronized (mLock) {
+                if (mForcedAppStandbyEnabled == enabled) {
+                    return;
+                }
+                mForcedAppStandbyEnabled = enabled;
+                if (DEBUG) {
+                    Slog.d(TAG,
+                            "Forced app standby feature flag changed: " + mForcedAppStandbyEnabled);
+                }
+            }
+            mHandler.notifyFeatureFlagChanged();
+        }
+    }
 
     public static abstract class Listener {
         /**
@@ -246,6 +286,9 @@ public class ForceAppStandbyTracker {
             mAppOpsManager = Preconditions.checkNotNull(injectAppOpsManager());
             mAppOpsService = Preconditions.checkNotNull(injectIAppOpsService());
             mPowerManagerInternal = Preconditions.checkNotNull(injectPowerManagerInternal());
+            final FeatureFlagObserver flagObserver = new FeatureFlagObserver();
+            flagObserver.register();
+            mForcedAppStandbyEnabled = flagObserver.isForcedAppStandbyEnabled();
 
             try {
                 mIActivityManager.registerUidObserver(new UidObserver(),
@@ -364,7 +407,7 @@ public class ForceAppStandbyTracker {
      */
     boolean updateForcedAppStandbyUidPackageLocked(int uid, @NonNull String packageName,
             boolean restricted) {
-        final int index =  findForcedAppStandbyUidPackageIndexLocked(uid, packageName);
+        final int index = findForcedAppStandbyUidPackageIndexLocked(uid, packageName);
         final boolean wasRestricted = index >= 0;
         if (wasRestricted == restricted) {
             return false;
@@ -418,25 +461,30 @@ public class ForceAppStandbyTracker {
     }
 
     private final class UidObserver extends IUidObserver.Stub {
-        @Override public void onUidStateChanged(int uid, int procState, long procStateSeq) {
+        @Override
+        public void onUidStateChanged(int uid, int procState, long procStateSeq) {
         }
 
-        @Override public void onUidGone(int uid, boolean disabled) {
+        @Override
+        public void onUidGone(int uid, boolean disabled) {
             uidToBackground(uid, /*remove=*/ true);
         }
 
-        @Override public void onUidActive(int uid) {
+        @Override
+        public void onUidActive(int uid) {
             uidToForeground(uid);
         }
 
-        @Override public void onUidIdle(int uid, boolean disabled) {
+        @Override
+        public void onUidIdle(int uid, boolean disabled) {
             // Just to avoid excessive memcpy, don't remove from the array in this case.
             uidToBackground(uid, /*remove=*/ false);
         }
 
-        @Override public void onUidCachedChanged(int uid, boolean cached) {
+        @Override
+        public void onUidCachedChanged(int uid, boolean cached) {
         }
-    };
+    }
 
     private final class AppOpsWatcher extends IAppOpsCallback.Stub {
         @Override
@@ -481,8 +529,8 @@ public class ForceAppStandbyTracker {
         private static final int MSG_ALL_WHITELIST_CHANGED = 4;
         private static final int MSG_TEMP_WHITELIST_CHANGED = 5;
         private static final int MSG_FORCE_ALL_CHANGED = 6;
-
         private static final int MSG_USER_REMOVED = 7;
+        private static final int MSG_FEATURE_FLAG_CHANGED = 8;
 
         public MyHandler(Looper looper) {
             super(looper);
@@ -491,6 +539,7 @@ public class ForceAppStandbyTracker {
         public void notifyUidForegroundStateChanged(int uid) {
             obtainMessage(MSG_UID_STATE_CHANGED, uid, 0).sendToTarget();
         }
+
         public void notifyRunAnyAppOpsChanged(int uid, @NonNull String packageName) {
             obtainMessage(MSG_RUN_ANY_CHANGED, uid, 0, packageName).sendToTarget();
         }
@@ -511,12 +560,16 @@ public class ForceAppStandbyTracker {
             obtainMessage(MSG_FORCE_ALL_CHANGED).sendToTarget();
         }
 
+        public void notifyFeatureFlagChanged() {
+            obtainMessage(MSG_FEATURE_FLAG_CHANGED).sendToTarget();
+        }
+
         public void doUserRemoved(int userId) {
             obtainMessage(MSG_USER_REMOVED, userId, 0).sendToTarget();
         }
 
         @Override
-        public void dispatchMessage(Message msg) {
+        public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_USER_REMOVED:
                     handleUserRemoved(msg.arg1);
@@ -560,6 +613,19 @@ public class ForceAppStandbyTracker {
                 case MSG_FORCE_ALL_CHANGED:
                     for (Listener l : cloneListeners()) {
                         l.onForceAllAppsStandbyChanged(sender);
+                    }
+                    return;
+                case MSG_FEATURE_FLAG_CHANGED:
+                    // Feature flag for forced app standby changed.
+                    final boolean unblockAlarms;
+                    synchronized (mLock) {
+                        unblockAlarms = !mForcedAppStandbyEnabled && !mForceAllAppsStandby;
+                    }
+                    for (Listener l: cloneListeners()) {
+                        l.updateAllJobs();
+                        if (unblockAlarms) {
+                            l.unblockAllUnrestrictedAlarms();
+                        }
                     }
                     return;
                 case MSG_USER_REMOVED:
@@ -701,7 +767,7 @@ public class ForceAppStandbyTracker {
                 return true;
             }
 
-            return isRunAnyRestrictedLocked(uid, packageName);
+            return mForcedAppStandbyEnabled && isRunAnyRestrictedLocked(uid, packageName);
         }
     }
 
@@ -765,6 +831,9 @@ public class ForceAppStandbyTracker {
 
     public void dump(PrintWriter pw, String indent) {
         synchronized (mLock) {
+            pw.print(indent);
+            pw.println("Forced App Standby Feature enabled: " + mForcedAppStandbyEnabled);
+
             pw.print(indent);
             pw.print("Force all apps standby: ");
             pw.println(isForceAllAppsStandbyEnabled());

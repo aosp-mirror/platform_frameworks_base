@@ -202,7 +202,6 @@
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ටෙදරින් දෘඪාංග ත්වරණය"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"නම් නොමැති බ්ලූටූත් උපාංග පෙන්වන්න"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="2660673801947898809">"නිරපේක්ෂ හඩ පරිමාව අබල කරන්න"</string>
-    <string name="bluetooth_enable_inband_ringing" msgid="3291686366721786740">"කලාපය තුළ නාද වීම සබල කරන්න"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="3750059931120293633">"බ්ලූටූත් AVRCP අනුවාදය"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7277329668298705702">"බ්ලූටූත් AVRCP අනුවාදය තෝරන්න"</string>
     <string name="bluetooth_select_a2dp_codec_type" msgid="90597356942154882">"බ්ලූටූත් ශ්‍රව්‍ය Codec"</string>
@@ -248,7 +247,6 @@
     <string name="verify_apps_over_usb_summary" msgid="9164096969924529200">"ADB/ADT හරහා ස්ථාපනය වූ යෙදුම්, විනාශකාරී ක්‍රියාවන් ඇත්දැයි පරික්ෂාකර බලන්න."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="2351196058115755520">"නම් නොමැති බ්ලූටූත් උපාංග (MAC ලිපින පමණි) සංදර්ශනය කරනු ඇත"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="6031284410786545957">"පිළිගත නොහැකි ලෙස වැඩි හඩ පරිමාව හෝ පාලනය නොමැති වීම යනාදී දුරස්ථ උපාංග සමගින් වන හඬ පරිමා ගැටලුවලදී බ්ලූටූත් නිරපේක්ෂ හඬ පරිමා විශේෂාංගය අබල කරයි."</string>
-    <string name="bluetooth_enable_inband_ringing_summary" msgid="2787866074741784975">"දුරකථනයේ නාද රටාවලට බ්ලූටූත් මත වාදනය වීමට ඉඩ දෙන්න"</string>
     <string name="enable_terminal_title" msgid="95572094356054120">"අභ්‍යන්තර අන්තය"</string>
     <string name="enable_terminal_summary" msgid="67667852659359206">"දේශීය ෂෙල් ප්‍රවේශනය පිරිනමන ටර්මිනල් යෙදුම සබල කරන්න"</string>
     <string name="hdcp_checking_title" msgid="8605478913544273282">"HDCP පරික්ෂාව"</string>

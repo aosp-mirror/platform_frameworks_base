@@ -315,6 +315,10 @@ package android.app {
     method public void onInstantAppResolveInfo(java.util.List<android.content.pm.InstantAppResolveInfo>);
   }
 
+  public class KeyguardManager {
+    method public android.content.Intent createConfirmFactoryResetCredentialIntent(java.lang.CharSequence, java.lang.CharSequence, java.lang.CharSequence);
+  }
+
   public class Notification implements android.os.Parcelable {
     field public static final java.lang.String EXTRA_ALLOW_DURING_SETUP = "android.allowDuringSetup";
     field public static final java.lang.String EXTRA_SUBSTITUTE_APP_NAME = "android.substName";

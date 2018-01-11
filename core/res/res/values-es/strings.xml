@@ -21,6 +21,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="byteShort" msgid="8340973892742019101">"B"</string>
+    <string name="kilobyteShort" msgid="7542884022844556968">"kB"</string>
+    <string name="megabyteShort" msgid="6355851576770428922">"MB"</string>
+    <string name="gigabyteShort" msgid="3259882455212193214">"GB"</string>
+    <string name="terabyteShort" msgid="231613018159186962">"TB"</string>
     <string name="petabyteShort" msgid="5637816680144990219">"PB"</string>
     <string name="fileSizeSuffix" msgid="8897567456150907538">"<xliff:g id="NUMBER">%1$s</xliff:g> <xliff:g id="UNIT">%2$s</xliff:g>"</string>
     <string name="untitled" msgid="4638956954852782576">"&lt;Sin título&gt;"</string>
@@ -449,7 +453,7 @@
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Permite que la aplicación se conecte a puntos de acceso Wi-Fi y se desconecte de ellos y que realice cambios en la configuración de redes Wi-Fi del dispositivo."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"permitir recepción multidifusión Wi-Fi"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="7969774021256336548">"Permite que la aplicación reciba paquetes enviados a todos los dispositivos de una red Wi-Fi que utilicen direcciones de multidifusión, no solo al tablet. Utiliza más batería que el modo de no multidifusión."</string>
-    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Permite que la aplicación reciba paquetes enviados a todos los dispositivos a través de una red Wi-Fi mediante direcciones de multidifusión, no solo la TV. Consume más energía que el modo sin multidifusión."</string>
+    <string name="permdesc_changeWifiMulticastState" product="tv" msgid="9031975661145014160">"Permite que la aplicación reciba paquetes enviados a todos los dispositivos a través de una red Wi-Fi mediante direcciones de multidifusión, no solo la TV. Consume más batería que el modo sin multidifusión."</string>
     <string name="permdesc_changeWifiMulticastState" product="default" msgid="6851949706025349926">"Permite que la aplicación reciba paquetes enviados a todos los dispositivos de una red Wi-Fi que utilicen direcciones de multidifusión, no solo al teléfono. Utiliza más batería que el modo de no multidifusión."</string>
     <string name="permlab_bluetoothAdmin" msgid="6006967373935926659">"acceder a los ajustes de Bluetooth"</string>
     <string name="permdesc_bluetoothAdmin" product="tablet" msgid="6921177471748882137">"Permite que la aplicación configure el tablet Bluetooth local y que detecte dispositivos remotos y se vincule con ellos."</string>
@@ -1116,6 +1120,9 @@
     <string name="wifi_available_content_failed_to_connect" msgid="3377406637062802645">"Toca para ver todas las redes"</string>
     <string name="wifi_available_action_connect" msgid="2635699628459488788">"Conectarse"</string>
     <string name="wifi_available_action_all_networks" msgid="1100098935861622985">"Todas las redes"</string>
+    <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"La conexión Wi‑Fi se activará automáticamente"</string>
+    <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Cuando estés cerca de una red de alta calidad guardada"</string>
+    <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"No volver a activar"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Iniciar sesión en red Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Iniciar sesión en la red"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1800,4 +1807,6 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"No se ha podido restaurar el acceso directo porque la aplicación no es compatible con la función de copia de seguridad y restauración"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"No se ha podido restaurar el acceso directo porque la firma de la aplicación no coincide"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"No se ha podido restaurar el acceso directo"</string>
+    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <skip />
 </resources>

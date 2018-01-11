@@ -278,7 +278,7 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
 
     // VisibleForTesting
     public static String[] getExtraPeople(Bundle extras) {
-        Object people = extras.get(Notification.EXTRA_PEOPLE);
+        Object people = extras.get(Notification.EXTRA_PEOPLE_LIST);
         if (people instanceof String[]) {
             return (String[]) people;
         }
@@ -301,6 +301,16 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
                 String[] array = new String[N];
                 for (int i = 0; i < N; i++) {
                     array[i] = charSeqList.get(i).toString();
+                }
+                return array;
+            }
+
+            if (arrayList.get(0) instanceof Notification.Person) {
+                ArrayList<Notification.Person> list = (ArrayList<Notification.Person>) arrayList;
+                final int N = list.size();
+                String[] array = new String[N];
+                for (int i = 0; i < N; i++) {
+                    array[i] = list.get(i).resolveToLegacyUri();
                 }
                 return array;
             }
@@ -459,7 +469,9 @@ public class ValidateNotificationPeople implements NotificationSignalExtractor {
                     lookupResult = searchContacts(mContext, uri);
                 } else {
                     lookupResult = new LookupResult();  // invalid person for the cache
-                    Slog.w(TAG, "unsupported URI " + handle);
+                    if (!"name".equals(uri.getScheme())) {
+                        Slog.w(TAG, "unsupported URI " + handle);
+                    }
                 }
                 if (lookupResult != null) {
                     synchronized (mPeopleCache) {

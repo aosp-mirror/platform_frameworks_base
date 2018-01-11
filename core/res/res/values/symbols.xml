@@ -1815,7 +1815,7 @@
   <java-symbol type="bool" name="config_wimaxEnabled" />
   <java-symbol type="bool" name="show_ongoing_ime_switcher" />
   <java-symbol type="color" name="config_defaultNotificationColor" />
-  <java-symbol type="color" name="input_method_navigation_guard" />
+  <java-symbol type="color" name="decor_view_status_guard" />
   <java-symbol type="drawable" name="ic_notification_ime_default" />
   <java-symbol type="drawable" name="ic_menu_refresh" />
   <java-symbol type="drawable" name="ic_settings" />
@@ -2608,10 +2608,12 @@
   <java-symbol type="string" name="notification_hidden_text" />
   <java-symbol type="id" name="app_name_text" />
   <java-symbol type="id" name="header_text" />
+  <java-symbol type="id" name="header_text_secondary" />
   <java-symbol type="id" name="expand_button" />
   <java-symbol type="id" name="notification_header" />
   <java-symbol type="id" name="time_divider" />
   <java-symbol type="id" name="header_text_divider" />
+  <java-symbol type="id" name="header_text_secondary_divider" />
   <java-symbol type="id" name="text_line_1" />
   <java-symbol type="drawable" name="ic_expand_notification" />
   <java-symbol type="drawable" name="ic_collapse_notification" />
@@ -3203,4 +3205,6 @@
   <java-symbol type="array" name="config_autoBrightnessDisplayValuesNits" />
   <java-symbol type="array" name="config_screenBrightnessBacklight" />
   <java-symbol type="array" name="config_screenBrightnessNits" />
+
+  <java-symbol type="string" name="shortcut_disabled_reason_unknown" />
 </resources>

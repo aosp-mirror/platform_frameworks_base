@@ -309,7 +309,7 @@ public class NotificationPanelView extends PanelView implements
         mIndicationBottomPadding = getResources().getDimensionPixelSize(
                 R.dimen.keyguard_indication_bottom_padding);
         mQsNotificationTopPadding = getResources().getDimensionPixelSize(
-                R.dimen.qs_notification_keyguard_padding);
+                R.dimen.qs_notification_padding);
     }
 
     public void updateResources() {
@@ -451,7 +451,8 @@ public class NotificationPanelView extends PanelView implements
         boolean animate = mNotificationStackScroller.isAddOrRemoveAnimationPending();
         int stackScrollerPadding;
         if (mStatusBarState != StatusBarState.KEYGUARD) {
-            stackScrollerPadding = (mQs != null ? mQs.getHeader().getHeight() : 0) + mQsPeekHeight;
+            stackScrollerPadding = (mQs != null ? mQs.getHeader().getHeight() : 0) + mQsPeekHeight
+            +  mQsNotificationTopPadding;
             mTopPaddingAdjustment = 0;
         } else {
             mClockPositionAlgorithm.setup(
@@ -1381,7 +1382,7 @@ public class NotificationPanelView extends PanelView implements
                     mNotificationStackScroller.getIntrinsicPadding(),
                     mQsMaxExpansionHeight + mQsNotificationTopPadding);
         } else {
-            return mQsExpansionHeight;
+            return mQsExpansionHeight + mQsNotificationTopPadding;
         }
     }
 

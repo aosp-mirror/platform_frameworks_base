@@ -27,7 +27,6 @@ namespace android {
 namespace os {
 namespace statsd {
 
-
 // Returns the leaf node from the DimensionsValue proto. It assume that the input has only one
 // leaf node at most.
 const DimensionsValue* getSingleLeafValue(const DimensionsValue* value);

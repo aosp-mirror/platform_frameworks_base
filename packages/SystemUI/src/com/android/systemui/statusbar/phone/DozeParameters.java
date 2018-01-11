@@ -25,12 +25,14 @@ import android.util.MathUtils;
 import android.util.SparseBooleanArray;
 
 import com.android.internal.hardware.AmbientDisplayConfiguration;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
+import com.android.systemui.tuner.TunerService;
 
 import java.io.PrintWriter;
 
-public class DozeParameters {
+public class DozeParameters implements TunerService.Tunable {
     private static final int MAX_DURATION = 60 * 1000;
     public static final String DOZE_SENSORS_WAKE_UP_FULLY = "doze_sensors_wake_up_fully";
 
@@ -40,10 +42,15 @@ public class DozeParameters {
     private static IntInOutMatcher sPickupSubtypePerformsProxMatcher;
     private final AlwaysOnDisplayPolicy mAlwaysOnPolicy;
 
+    private boolean mDozeAlwaysOn;
+
     public DozeParameters(Context context) {
         mContext = context;
         mAmbientDisplayConfiguration = new AmbientDisplayConfiguration(mContext);
         mAlwaysOnPolicy = new AlwaysOnDisplayPolicy(context);
+
+        Dependency.get(TunerService.class).addTunable(this, Settings.Secure.DOZE_ALWAYS_ON,
+                Settings.Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED);
     }
 
     public void dump(PrintWriter pw) {
@@ -144,7 +151,7 @@ public class DozeParameters {
      * @return {@code true} if enabled and available.
      */
     public boolean getAlwaysOn() {
-        return mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
+        return mDozeAlwaysOn;
     }
 
     /**
@@ -207,6 +214,10 @@ public class DozeParameters {
         return mContext.getResources().getBoolean(R.bool.doze_double_tap_reports_touch_coordinates);
     }
 
+    @Override
+    public void onTuningChanged(String key, String newValue) {
+        mDozeAlwaysOn = mAmbientDisplayConfiguration.alwaysOnEnabled(UserHandle.USER_CURRENT);
+    }
 
     /**
      * Parses a spec of the form `1,2,3,!5,*`. The resulting object will match numbers that are

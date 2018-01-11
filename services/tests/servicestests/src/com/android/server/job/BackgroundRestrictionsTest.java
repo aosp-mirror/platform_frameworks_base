@@ -37,6 +37,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -50,7 +51,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * TODO: Also add a test for temp power whitelist
  * Tests that background restrictions on jobs work as expected.
  * This test requires test-apps/JobTestApp to be installed on the device.
  * To run this test from root of checkout:
@@ -144,15 +144,29 @@ public class BackgroundRestrictionsTest {
                 awaitJobStop(DEFAULT_WAIT_TIMEOUT));
     }
 
+    @Test
+    public void testFeatureFlag() throws Exception {
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.FORCED_APP_STANDBY_ENABLED, 0);
+        scheduleAndAssertJobStarted();
+        setAppOpsModeAllowed(false);
+        mIActivityManager.makePackageIdle(TEST_APP_PACKAGE, UserHandle.USER_CURRENT);
+        assertFalse("Job stopped even when feature flag was disabled",
+                awaitJobStop(DEFAULT_WAIT_TIMEOUT));
+    }
+
     @After
     public void tearDown() throws Exception {
-        Intent cancelJobsIntent = new Intent(TestJobActivity.ACTION_CANCEL_JOBS);
+        final Intent cancelJobsIntent = new Intent(TestJobActivity.ACTION_CANCEL_JOBS);
         cancelJobsIntent.setComponent(new ComponentName(TEST_APP_PACKAGE, TEST_APP_ACTIVITY));
         cancelJobsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         mContext.startActivity(cancelJobsIntent);
         mContext.unregisterReceiver(mJobStateChangeReceiver);
+        Thread.sleep(500); // To avoid race with register in the next setUp
         setAppOpsModeAllowed(true);
         setPowerWhiteListed(false);
+        Settings.Global.putInt(mContext.getContentResolver(),
+                Settings.Global.FORCED_APP_STANDBY_ENABLED, 1);
     }
 
     private void setPowerWhiteListed(boolean whitelist) throws RemoteException {
