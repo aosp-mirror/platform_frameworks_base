@@ -64,7 +64,7 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
 
     public void setSystemSetting(ComponentName who, String setting, String value){}
 
-    public void transferOwner(ComponentName admin, ComponentName target, PersistableBundle bundle) {}
+    public void transferOwnership(ComponentName admin, ComponentName target, PersistableBundle bundle) {}
 
     public boolean generateKeyPair(ComponentName who, String callerPackage, String algorithm,
             ParcelableKeyGenParameterSpec keySpec, int idAttestationFlags,

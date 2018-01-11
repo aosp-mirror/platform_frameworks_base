@@ -572,6 +572,10 @@
     <protected-broadcast android:name="android.intent.action.GET_RESTRICTION_ENTRIES" />
     <protected-broadcast android:name="android.telephony.euicc.action.OTA_STATUS_CHANGED" />
 
+    <!-- Added in P -->
+    <protected-broadcast android:name="android.app.action.PROFILE_OWNER_CHANGED" />
+    <protected-broadcast android:name="android.app.action.TRANSFER_OWNER_COMPLETE" />
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
