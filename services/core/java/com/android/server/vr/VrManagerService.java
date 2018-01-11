@@ -19,6 +19,7 @@ import static android.view.Display.INVALID_DISPLAY;
 
 import android.Manifest;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityManagerInternal.ScreenObserver;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.INotificationManager;
@@ -104,7 +105,8 @@ import java.util.Objects;
  *
  * @hide
  */
-public class VrManagerService extends SystemService implements EnabledComponentChangeListener{
+public class VrManagerService extends SystemService
+        implements EnabledComponentChangeListener, ScreenObserver {
 
     public static final String TAG = "VrManagerService";
     static final boolean DBG = false;
@@ -231,15 +233,17 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
     }
 
-    private void setSleepState(boolean isAsleep) {
-        setSystemState(FLAG_AWAKE, !isAsleep);
-    }
-
     private void setScreenOn(boolean isScreenOn) {
         setSystemState(FLAG_SCREEN_ON, isScreenOn);
     }
 
-    private void setKeyguardShowing(boolean isShowing) {
+    @Override
+    public void onAwakeStateChanged(boolean isAwake) {
+        setSystemState(FLAG_AWAKE, isAwake);
+    }
+
+    @Override
+    public void onKeyguardStateChanged(boolean isShowing) {
         setSystemState(FLAG_KEYGUARD_UNLOCKED, !isShowing);
     }
 
@@ -675,18 +679,8 @@ public class VrManagerService extends SystemService implements EnabledComponentC
         }
 
         @Override
-        public void onSleepStateChanged(boolean isAsleep) {
-            VrManagerService.this.setSleepState(isAsleep);
-        }
-
-        @Override
         public void onScreenStateChanged(boolean isScreenOn) {
             VrManagerService.this.setScreenOn(isScreenOn);
-        }
-
-        @Override
-        public void onKeyguardStateChanged(boolean isShowing) {
-            VrManagerService.this.setKeyguardShowing(isShowing);
         }
 
         @Override
@@ -740,6 +734,9 @@ public class VrManagerService extends SystemService implements EnabledComponentC
     @Override
     public void onBootPhase(int phase) {
         if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
+            LocalServices.getService(ActivityManagerInternal.class)
+                    .registerScreenObserver(this);
+
             mNotificationManager = INotificationManager.Stub.asInterface(
                     ServiceManager.getService(Context.NOTIFICATION_SERVICE));
             synchronized (mLock) {
