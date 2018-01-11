@@ -24,6 +24,10 @@ import static com.android.systemui.statusbar.phone.StatusBar.DEBUG_WINDOW_STATE;
 import static com.android.systemui.statusbar.phone.StatusBar.dumpBarTransitions;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -39,6 +43,7 @@ import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.drawable.AnimatedVectorDrawable;
 import android.inputmethodservice.InputMethodService;
 import android.os.Binder;
 import android.os.Bundle;
@@ -70,17 +75,22 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.LatencyTracker;
 import com.android.systemui.Dependency;
 import com.android.systemui.OverviewProxyService;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
+import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 import com.android.systemui.statusbar.policy.KeyButtonView;
+import com.android.systemui.statusbar.policy.RotationLockController;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 import java.io.FileDescriptor;
@@ -100,6 +110,8 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
     /** Allow some time inbetween the long press for back and recents. */
     private static final int LOCK_TO_APP_GESTURE_TOLERENCE = 200;
+
+    private static final int ROTATE_SUGGESTION_TIMEOUT_MS = 4000;
 
     protected NavigationBarView mNavigationBarView = null;
     protected AssistManager mAssistManager;
@@ -129,6 +141,15 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     private OverviewProxyService mOverviewProxyService;
 
     public boolean mHomeBlockedThisTouch;
+
+    private int mLastRotationSuggestion;
+    private RotationLockController mRotationLockController;
+    private TaskStackListenerImpl mTaskStackListener;
+
+    private final Runnable mRemoveRotationProposal = () -> setRotateSuggestionButtonState(false);
+    private Animator mRotateShowAnimator;
+    private Animator mRotateHideAnimator;
+
 
     // ----- Fragment Lifecycle Callbacks -----
 
@@ -163,6 +184,12 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+
+        mRotationLockController = Dependency.get(RotationLockController.class);
+
+        // Register the task stack listener
+        mTaskStackListener = new TaskStackListenerImpl();
+        ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
     }
 
     @Override
@@ -178,6 +205,9 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+
+        // Unregister the task stack listener
+        ActivityManagerWrapper.getInstance().unregisterTaskStackListener(mTaskStackListener);
     }
 
     @Override
@@ -304,6 +334,92 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         }
     }
 
+    @Override
+    public void onRotationProposal(final int rotation) {
+        // This method will only be called if rotation is valid but will include proposals for the
+        // current system rotation
+        Handler h = getView().getHandler();
+        if (rotation == mWindowManager.getDefaultDisplay().getRotation()) {
+            // Use this as a signal to remove any current suggestions
+            h.removeCallbacks(mRemoveRotationProposal);
+            setRotateSuggestionButtonState(false);
+        } else {
+            mLastRotationSuggestion = rotation; // Remember rotation for click
+            setRotateSuggestionButtonState(true);
+            h.removeCallbacks(mRemoveRotationProposal); // Stop any pending removal
+            h.postDelayed(mRemoveRotationProposal,
+                    ROTATE_SUGGESTION_TIMEOUT_MS); // Schedule timeout
+        }
+    }
+
+    public void setRotateSuggestionButtonState(final boolean visible) {
+        setRotateSuggestionButtonState(visible, false);
+    }
+
+    public void setRotateSuggestionButtonState(final boolean visible, final boolean skipAnim) {
+        ButtonDispatcher rotBtn = mNavigationBarView.getRotateSuggestionButton();
+        boolean currentlyVisible = rotBtn.getVisibility() == View.VISIBLE;
+
+        // Rerun a show animation to indicate change but don't rerun a hide animation
+        if (!visible && !currentlyVisible) return;
+
+        View currentView = mNavigationBarView.getRotateSuggestionButton().getCurrentView();
+        if (currentView == null) return;
+
+        KeyButtonDrawable kbd = mNavigationBarView.getRotateSuggestionButton().getImageDrawable();
+        if (kbd == null) return;
+
+        AnimatedVectorDrawable animIcon = (AnimatedVectorDrawable) kbd.getDrawable(0);
+        if (visible) { // Appear and change
+            rotBtn.setVisibility(View.VISIBLE);
+
+            if (skipAnim) {
+                currentView.setAlpha(1f);
+                return;
+            }
+
+            // Start a new animation if running
+            if (mRotateShowAnimator != null) mRotateShowAnimator.pause();
+            if (mRotateHideAnimator != null) mRotateHideAnimator.pause();
+
+            ObjectAnimator appearFade = ObjectAnimator.ofFloat(currentView, "alpha",
+                    0f, 1f);
+            appearFade.setDuration(100);
+            appearFade.setInterpolator(Interpolators.LINEAR);
+            mRotateShowAnimator = appearFade;
+            appearFade.start();
+
+            // Run the rotate icon's animation
+            animIcon.reset();
+            animIcon.start();
+        } else { // Hide
+
+            if (skipAnim) {
+                rotBtn.setVisibility(View.INVISIBLE);
+                return;
+            }
+
+            // Don't start any new hide animations if one is running
+            if (mRotateHideAnimator != null && mRotateHideAnimator.isRunning()) return;
+            // Pause any active show animations but don't reset the AVD to avoid jumps
+            if (mRotateShowAnimator != null) mRotateShowAnimator.pause();
+
+            ObjectAnimator fadeOut = ObjectAnimator.ofFloat(currentView, "alpha",
+                    0f);
+            fadeOut.setDuration(100);
+            fadeOut.setInterpolator(Interpolators.LINEAR);
+            fadeOut.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    rotBtn.setVisibility(View.INVISIBLE);
+                }
+            });
+
+            mRotateHideAnimator = fadeOut;
+            fadeOut.start();
+        }
+    }
+
     // Injected from StatusBar at creation.
     public void setCurrentSysuiVisibility(int systemUiVisibility) {
         mSystemUiVisibility = systemUiVisibility;
@@ -406,6 +522,9 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         accessibilityButton.setOnClickListener(this::onAccessibilityClick);
         accessibilityButton.setOnLongClickListener(this::onAccessibilityLongClick);
         updateAccessibilityServicesState(mAccessibilityManager);
+
+        ButtonDispatcher rotateSuggestionButton = mNavigationBarView.getRotateSuggestionButton();
+        rotateSuggestionButton.setOnClickListener(this::onRotateSuggestionClick);
     }
 
     private boolean onHomeTouch(View v, MotionEvent event) {
@@ -598,6 +717,10 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         mNavigationBarView.setAccessibilityButtonState(showAccessibilityButton, targetSelection);
     }
 
+    private void onRotateSuggestionClick(View v) {
+        mRotationLockController.setRotationLockedAtAngle(true, mLastRotationSuggestion);
+    }
+
     // ----- Methods that StatusBar talks to (should be minimized) -----
 
     public void setLightBarController(LightBarController lightBarController) {
@@ -646,6 +769,13 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     private final Stub mRotationWatcher = new Stub() {
         @Override
         public void onRotationChanged(int rotation) throws RemoteException {
+            // If the screen rotation changes while locked, update lock rotation to flow with
+            // new screen rotation and hide any showing suggestions.
+            if (mRotationLockController.isRotationLocked()) {
+                mRotationLockController.setRotationLockedAtAngle(true, rotation);
+                setRotateSuggestionButtonState(false, true);
+            }
+
             // We need this to be scheduled as early as possible to beat the redrawing of
             // window in response to the orientation change.
             Handler h = getView().getHandler();
@@ -670,6 +800,31 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
             }
         }
     };
+
+    class TaskStackListenerImpl extends SysUiTaskStackChangeListener {
+        // Invalidate any rotation suggestion on task change or activity orientation change
+        // Note: all callbacks happen on main thread
+
+        @Override
+        public void onTaskStackChanged() {
+            setRotateSuggestionButtonState(false);
+        }
+
+        @Override
+        public void onTaskRemoved(int taskId) {
+            setRotateSuggestionButtonState(false);
+        }
+
+        @Override
+        public void onTaskMovedToFront(int taskId) {
+            setRotateSuggestionButtonState(false);
+        }
+
+        @Override
+        public void onActivityRequestedOrientationChanged(int taskId, int requestedOrientation) {
+            setRotateSuggestionButtonState(false);
+        }
+    }
 
     public static View create(Context context, FragmentListener listener) {
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(

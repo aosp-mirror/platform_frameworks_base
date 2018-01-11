@@ -31,6 +31,7 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.support.annotation.ColorInt;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -56,6 +57,7 @@ import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.phone.NavGesture;
 import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
 import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.statusbar.policy.TintedKeyButtonDrawable;
 import com.android.systemui.statusbar.policy.DeadZone;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 
@@ -94,6 +96,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private KeyButtonDrawable mImeIcon;
     private KeyButtonDrawable mMenuIcon;
     private KeyButtonDrawable mAccessibilityIcon;
+    private KeyButtonDrawable mRotateSuggestionIcon;
 
     private GestureHelper mGestureHelper;
     private DeadZone mDeadZone;
@@ -229,6 +232,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mButtonDispatchers.put(R.id.ime_switcher, new ButtonDispatcher(R.id.ime_switcher));
         mButtonDispatchers.put(R.id.accessibility_button,
                 new ButtonDispatcher(R.id.accessibility_button));
+        mButtonDispatchers.put(R.id.rotate_suggestion,
+                new ButtonDispatcher(R.id.rotate_suggestion));
+
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
     }
 
@@ -305,6 +311,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         return mButtonDispatchers.get(R.id.accessibility_button);
     }
 
+    public ButtonDispatcher getRotateSuggestionButton() {
+        return mButtonDispatchers.get(R.id.rotate_suggestion);
+    }
+
     public SparseArray<ButtonDispatcher> getButtonDispatchers() {
         return mButtonDispatchers;
     }
@@ -349,6 +359,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             mImeIcon = getDrawable(darkContext, lightContext,
                     R.drawable.ic_ime_switcher_default, R.drawable.ic_ime_switcher_default);
 
+            int lightColor = Utils.getColorAttr(lightContext, R.attr.singleToneColor);
+            int darkColor = Utils.getColorAttr(darkContext, R.attr.singleToneColor);
+            mRotateSuggestionIcon = getDrawable(ctx, R.drawable.ic_sysbar_rotate_button,
+                    lightColor, darkColor);
+
             if (ALTERNATE_CAR_MODE_UI) {
                 updateCarModeIcons(ctx);
             }
@@ -364,6 +379,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             @DrawableRes int lightIcon, @DrawableRes int darkIcon) {
         return KeyButtonDrawable.create(lightContext.getDrawable(lightIcon),
                 darkContext.getDrawable(darkIcon));
+    }
+
+    private KeyButtonDrawable getDrawable(Context ctx, @DrawableRes int icon,
+            @ColorInt int lightColor, @ColorInt int darkColor) {
+        return TintedKeyButtonDrawable.create(ctx.getDrawable(icon), lightColor, darkColor);
     }
 
     @Override
@@ -438,6 +458,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
         setAccessibilityButtonState(mShowAccessibilityButton, mLongClickableAccessibilityButton);
         getAccessibilityButton().setImageDrawable(mAccessibilityIcon);
+
+        getRotateSuggestionButton().setImageDrawable(mRotateSuggestionIcon);
 
         setDisabledFlags(mDisabledFlags, true);
 
