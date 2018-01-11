@@ -1076,6 +1076,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *   <li>{@link #CONTROL_AE_MODE_ON_AUTO_FLASH ON_AUTO_FLASH}</li>
      *   <li>{@link #CONTROL_AE_MODE_ON_ALWAYS_FLASH ON_ALWAYS_FLASH}</li>
      *   <li>{@link #CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE ON_AUTO_FLASH_REDEYE}</li>
+     *   <li>{@link #CONTROL_AE_MODE_ON_EXTERNAL_FLASH ON_EXTERNAL_FLASH}</li>
      * </ul></p>
      * <p><b>Available values for this device:</b><br>
      * {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_MODES android.control.aeAvailableModes}</p>
@@ -1093,6 +1094,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @see #CONTROL_AE_MODE_ON_AUTO_FLASH
      * @see #CONTROL_AE_MODE_ON_ALWAYS_FLASH
      * @see #CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE
+     * @see #CONTROL_AE_MODE_ON_EXTERNAL_FLASH
      */
     @PublicKey
     public static final Key<Integer> CONTROL_AE_MODE =
