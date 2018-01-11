@@ -18,10 +18,12 @@ package android.telephony;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.app.BroadcastOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -36,6 +38,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 import com.android.internal.telephony.ISub;
@@ -46,6 +49,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * SubscriptionManager is the application interface to SubscriptionController
@@ -453,6 +457,39 @@ public class SubscriptionManager {
     @SystemApi
     public static final String ACTION_MANAGE_SUBSCRIPTION_PLANS
             = "android.telephony.action.MANAGE_SUBSCRIPTION_PLANS";
+
+    /**
+     * Broadcast Action: Request a refresh of the billing relationship plans
+     * between a carrier and a specific subscriber.
+     * <p>
+     * Carrier apps are encouraged to implement this receiver, and the OS will
+     * provide an affordance to request a refresh. This affordance will only be
+     * shown when the carrier app is actively providing subscription plan
+     * information via {@link #setSubscriptionPlans(int, List)}.
+     * <p>
+     * Contains {@link #EXTRA_SUBSCRIPTION_INDEX} to indicate which subscription
+     * the user is interested in.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @SystemApi
+    public static final String ACTION_REFRESH_SUBSCRIPTION_PLANS
+            = "android.telephony.action.REFRESH_SUBSCRIPTION_PLANS";
+
+    /**
+     * Broadcast Action: The billing relationship plans between a carrier and a
+     * specific subscriber has changed.
+     * <p>
+     * Contains {@link #EXTRA_SUBSCRIPTION_INDEX} to indicate which subscription
+     * changed.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @RequiresPermission(android.Manifest.permission.MANAGE_SUBSCRIPTION_PLANS)
+    public static final String ACTION_SUBSCRIPTION_PLANS_CHANGED
+            = "android.telephony.action.SUBSCRIPTION_PLANS_CHANGED";
 
     /**
      * Integer extra used with {@link #ACTION_DEFAULT_SUBSCRIPTION_CHANGED} and
@@ -1637,7 +1674,7 @@ public class SubscriptionManager {
      * This method is only accessible to the following narrow set of apps:
      * <ul>
      * <li>The carrier app for this subscriberId, as determined by
-     * {@link TelephonyManager#hasCarrierPrivileges(int)}.
+     * {@link TelephonyManager#hasCarrierPrivileges()}.
      * <li>The carrier app explicitly delegated access through
      * {@link CarrierConfigManager#KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING}.
      * </ul>
@@ -1664,7 +1701,7 @@ public class SubscriptionManager {
      * This method is only accessible to the following narrow set of apps:
      * <ul>
      * <li>The carrier app for this subscriberId, as determined by
-     * {@link TelephonyManager#hasCarrierPrivileges(int)}.
+     * {@link TelephonyManager#hasCarrierPrivileges()}.
      * <li>The carrier app explicitly delegated access through
      * {@link CarrierConfigManager#KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING}.
      * </ul>
@@ -1695,8 +1732,8 @@ public class SubscriptionManager {
     }
 
     /**
-     * Create an {@link Intent} that will launch towards the carrier app that is
-     * currently defining the billing relationship plan through
+     * Create an {@link Intent} that can be launched towards the carrier app
+     * that is currently defining the billing relationship plan through
      * {@link #setSubscriptionPlans(int, List)}.
      *
      * @return ready to launch Intent targeted towards the carrier app, or
@@ -1724,5 +1761,56 @@ public class SubscriptionManager {
         }
 
         return intent;
+    }
+
+    /** @hide */
+    private @Nullable Intent createRefreshSubscriptionIntent(int subId) {
+        // Bail if no owner
+        final String owner = getSubscriptionPlansOwner(subId);
+        if (owner == null) return null;
+
+        // Bail if no plans
+        final List<SubscriptionPlan> plans = getSubscriptionPlans(subId);
+        if (plans.isEmpty()) return null;
+
+        final Intent intent = new Intent(ACTION_REFRESH_SUBSCRIPTION_PLANS);
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        intent.setPackage(owner);
+        intent.putExtra(EXTRA_SUBSCRIPTION_INDEX, subId);
+
+        // Bail if not implemented
+        if (mContext.getPackageManager().queryBroadcastReceivers(intent, 0).isEmpty()) {
+            return null;
+        }
+
+        return intent;
+    }
+
+    /**
+     * Check if there is a carrier app that is currently defining the billing
+     * relationship plan through {@link #setSubscriptionPlans(int, List)} that
+     * supports refreshing of subscription plans.
+     *
+     * @hide
+     */
+    public boolean isSubscriptionPlansRefreshSupported(int subId) {
+        return createRefreshSubscriptionIntent(subId) != null;
+    }
+
+    /**
+     * Request that the carrier app that is currently defining the billing
+     * relationship plan through {@link #setSubscriptionPlans(int, List)}
+     * refresh its subscription plans.
+     * <p>
+     * If the app is able to successfully update the plans, you'll expect to
+     * receive the {@link #ACTION_SUBSCRIPTION_PLANS_CHANGED} broadcast.
+     *
+     * @hide
+     */
+    public void requestSubscriptionPlansRefresh(int subId) {
+        final Intent intent = createRefreshSubscriptionIntent(subId);
+        final BroadcastOptions options = BroadcastOptions.makeBasic();
+        options.setTemporaryAppWhitelistDuration(TimeUnit.MINUTES.toMillis(1));
+        mContext.sendBroadcast(intent, null, options.toBundle());
     }
 }

@@ -2793,6 +2793,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     handleNetworkPoliciesUpdateAL(true);
                 }
             }
+
+            final Intent intent = new Intent(SubscriptionManager.ACTION_SUBSCRIPTION_PLANS_CHANGED);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId);
+            mContext.sendBroadcast(intent, android.Manifest.permission.MANAGE_SUBSCRIPTION_PLANS);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
