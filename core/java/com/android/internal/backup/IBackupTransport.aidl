@@ -306,4 +306,13 @@ interface IBackupTransport {
      *    operation will immediately be finished with no further attempts to restore app data.
      */
     int abortFullRestore();
+
+    /**
+     * Returns flags with additional information about the transport, which is accessible to the
+     * {@link android.app.backup.BackupAgent}. This allows the agent to decide what to backup or
+     * restore based on properties of the transport.
+     *
+     * <p>For supported flags see {@link android.app.backup.BackupAgent}.
+     */
+    int getTransportFlags();
 }

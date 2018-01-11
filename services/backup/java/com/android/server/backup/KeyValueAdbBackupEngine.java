@@ -153,8 +153,9 @@ public class KeyValueAdbBackupEngine {
                     OP_TYPE_BACKUP_WAIT);
 
             // Start backup and wait for BackupManagerService to get callback for success or timeout
-            agent.doBackup(mSavedState, mBackupData, mNewState, Long.MAX_VALUE, token,
-                    mBackupManagerService.getBackupManagerBinder());
+            agent.doBackup(
+                    mSavedState, mBackupData, mNewState, Long.MAX_VALUE, token,
+                    mBackupManagerService.getBackupManagerBinder(), /*transportFlags=*/ 0);
             if (!mBackupManagerService.waitUntilOperationComplete(token)) {
                 Slog.e(TAG, "Key-value backup failed on package " + packageName);
                 return false;

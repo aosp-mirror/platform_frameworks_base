@@ -569,6 +569,7 @@ package android.app.backup {
     method public long getCurrentRestoreSet();
     method public int getNextFullRestoreDataChunk(android.os.ParcelFileDescriptor);
     method public int getRestoreData(android.os.ParcelFileDescriptor);
+    method public int getTransportFlags();
     method public int initializeDevice();
     method public boolean isAppEligibleForBackup(android.content.pm.PackageInfo, boolean);
     method public java.lang.String name();

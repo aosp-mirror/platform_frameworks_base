@@ -378,7 +378,8 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                         enginePipes = ParcelFileDescriptor.createPipe();
                         mBackupRunner =
                                 new SinglePackageBackupRunner(enginePipes[1], currentPackage,
-                                        mTransportClient, quota, mBackupRunnerOpToken);
+                                        mTransportClient, quota, mBackupRunnerOpToken,
+                                        transport.getTransportFlags());
                         // The runner dup'd the pipe half, so we close it here
                         enginePipes[1].close();
                         enginePipes[1] = null;
@@ -681,12 +682,17 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         final TransportClient mTransportClient;
         final long mQuota;
         private final int mCurrentOpToken;
+        private final int mTransportFlags;
 
         SinglePackageBackupPreflight(
-                TransportClient transportClient, long quota, int currentOpToken) {
+                TransportClient transportClient,
+                long quota,
+                int currentOpToken,
+                int transportFlags) {
             mTransportClient = transportClient;
             mQuota = quota;
             mCurrentOpToken = currentOpToken;
+            mTransportFlags = transportFlags;
         }
 
         @Override
@@ -700,7 +706,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                     Slog.d(TAG, "Preflighting full payload of " + pkg.packageName);
                 }
                 agent.doMeasureFullBackup(mQuota, mCurrentOpToken,
-                        backupManagerService.getBackupManagerBinder());
+                        backupManagerService.getBackupManagerBinder(), mTransportFlags);
 
                 // Now wait to get our result back.  If this backstop timeout is reached without
                 // the latch being thrown, flow will continue as though a result or "normal"
@@ -785,20 +791,23 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         private volatile int mBackupResult;
         private final long mQuota;
         private volatile boolean mIsCancelled;
+        private final int mTransportFlags;
 
         SinglePackageBackupRunner(ParcelFileDescriptor output, PackageInfo target,
-                TransportClient transportClient, long quota, int currentOpToken)
+                TransportClient transportClient, long quota, int currentOpToken, int transportFlags)
                 throws IOException {
             mOutput = ParcelFileDescriptor.dup(output.getFileDescriptor());
             mTarget = target;
             mCurrentOpToken = currentOpToken;
             mEphemeralToken = backupManagerService.generateRandomIntegerToken();
-            mPreflight = new SinglePackageBackupPreflight(transportClient, quota, mEphemeralToken);
+            mPreflight = new SinglePackageBackupPreflight(
+                    transportClient, quota, mEphemeralToken, transportFlags);
             mPreflightLatch = new CountDownLatch(1);
             mBackupLatch = new CountDownLatch(1);
             mPreflightResult = BackupTransport.AGENT_ERROR;
             mBackupResult = BackupTransport.AGENT_ERROR;
             mQuota = quota;
+            mTransportFlags = transportFlags;
             registerTask();
         }
 
@@ -819,7 +828,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
         public void run() {
             FileOutputStream out = new FileOutputStream(mOutput.getFileDescriptor());
             mEngine = new FullBackupEngine(backupManagerService, out, mPreflight, mTarget, false,
-                    this, mQuota, mCurrentOpToken);
+                    this, mQuota, mCurrentOpToken, mTransportFlags);
             try {
                 try {
                     if (!mIsCancelled) {

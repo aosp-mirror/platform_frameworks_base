@@ -65,6 +65,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
@@ -387,7 +388,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         mWakelock = wakelock;
     }
 
-    public BackupHandler getBackupHandler() {
+    public Handler getBackupHandler() {
         return mBackupHandler;
     }
 

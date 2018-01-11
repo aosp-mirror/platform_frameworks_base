@@ -18,6 +18,7 @@ package android.app.backup;
 
 import android.annotation.SystemApi;
 import android.os.ParcelFileDescriptor;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 
@@ -62,7 +63,10 @@ import java.io.IOException;
  * @see BackupAgent
  */
 public class BackupDataOutput {
-    final long mQuota;
+
+    private final long mQuota;
+    private final int mTransportFlags;
+
     long mBackupWriter;
 
     /**
@@ -71,14 +75,20 @@ public class BackupDataOutput {
      * @hide */
     @SystemApi
     public BackupDataOutput(FileDescriptor fd) {
-        this(fd, -1);
+        this(fd, /*quota=*/ -1, /*transportFlags=*/ 0);
     }
 
     /** @hide */
     @SystemApi
     public BackupDataOutput(FileDescriptor fd, long quota) {
+        this(fd, quota, /*transportFlags=*/ 0);
+    }
+
+    /** @hide */
+    public BackupDataOutput(FileDescriptor fd, long quota, int transportFlags) {
         if (fd == null) throw new NullPointerException();
         mQuota = quota;
+        mTransportFlags = transportFlags;
         mBackupWriter = ctor(fd);
         if (mBackupWriter == 0) {
             throw new RuntimeException("Native initialization failed with fd=" + fd);
@@ -93,6 +103,16 @@ public class BackupDataOutput {
      */
     public long getQuota() {
         return mQuota;
+    }
+
+    /**
+     * Returns flags with additional information about the backup transport. For supported flags see
+     * {@link android.app.backup.BackupAgent}
+     *
+     * @see FullBackupDataOutput#getTransportFlags()
+     */
+    public int getTransportFlags() {
+        return mTransportFlags;
     }
 
     /**

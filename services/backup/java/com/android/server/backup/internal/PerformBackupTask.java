@@ -714,8 +714,9 @@ public class PerformBackupTask implements BackupRestoreTask {
                     mEphemeralOpToken, TIMEOUT_BACKUP_INTERVAL, this, OP_TYPE_BACKUP_WAIT);
             backupManagerService.addBackupTrace("calling agent doBackup()");
 
-            agent.doBackup(mSavedState, mBackupData, mNewState, quota, mEphemeralOpToken,
-                    backupManagerService.getBackupManagerBinder());
+            agent.doBackup(
+                    mSavedState, mBackupData, mNewState, quota, mEphemeralOpToken,
+                    backupManagerService.getBackupManagerBinder(), transport.getTransportFlags());
         } catch (Exception e) {
             Slog.e(TAG, "Error invoking for backup on " + packageName + ". " + e);
             backupManagerService.addBackupTrace("exception: " + e);
