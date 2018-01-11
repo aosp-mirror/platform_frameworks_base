@@ -89,9 +89,11 @@ import android.view.accessibility.AccessibilityManager.HighTextContrastChangeLis
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.accessibility.AccessibilityNodeProvider;
+import android.view.accessibility.AccessibilityViewHierarchyState;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
+import android.view.accessibility.ThrottlingAccessibilityEventSender;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.inputmethod.InputMethodManager;
@@ -113,7 +115,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -460,10 +461,6 @@ public final class ViewRootImpl implements ViewParent,
             new AccessibilityInteractionConnectionManager();
     final HighContrastTextManager mHighContrastTextManager;
 
-    SendWindowContentChangedAccessibilityEvent mSendWindowContentChangedAccessibilityEvent;
-
-    HashSet<View> mTempHashSet;
-
     private final int mDensity;
     private final int mNoncompatDensity;
 
@@ -477,6 +474,8 @@ public final class ViewRootImpl implements ViewParent,
     private boolean mRemoved;
 
     private boolean mNeedsRendererSetup;
+
+    protected AccessibilityViewHierarchyState mAccessibilityState;
 
     /**
      * Consistency verifier for debugging purposes.
@@ -7262,11 +7261,9 @@ public final class ViewRootImpl implements ViewParent,
      * {@link ViewConfiguration#getSendRecurringAccessibilityEventsInterval()}.
      */
     private void postSendWindowContentChangedCallback(View source, int changeType) {
-        if (mSendWindowContentChangedAccessibilityEvent == null) {
-            mSendWindowContentChangedAccessibilityEvent =
-                new SendWindowContentChangedAccessibilityEvent();
-        }
-        mSendWindowContentChangedAccessibilityEvent.runOrPost(source, changeType);
+        getAccessibilityState()
+                .getSendWindowContentChangedAccessibilityEvent()
+                .runOrPost(source, changeType);
     }
 
     /**
@@ -7274,9 +7271,18 @@ public final class ViewRootImpl implements ViewParent,
      * {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED} event.
      */
     private void removeSendWindowContentChangedCallback() {
-        if (mSendWindowContentChangedAccessibilityEvent != null) {
-            mHandler.removeCallbacks(mSendWindowContentChangedAccessibilityEvent);
+        if (mAccessibilityState != null
+                && mAccessibilityState.isWindowContentChangedEventSenderInitialized()) {
+            ThrottlingAccessibilityEventSender.cancelIfPending(
+                    mAccessibilityState.getSendWindowContentChangedAccessibilityEvent());
         }
+    }
+
+    AccessibilityViewHierarchyState getAccessibilityState() {
+        if (mAccessibilityState == null) {
+            mAccessibilityState = new AccessibilityViewHierarchyState();
+        }
+        return mAccessibilityState;
     }
 
     @Override
@@ -7314,12 +7320,8 @@ public final class ViewRootImpl implements ViewParent,
             return false;
         }
 
-        // Immediately flush pending content changed event (if any) to preserve event order
-        if (event.getEventType() != AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED
-                && mSendWindowContentChangedAccessibilityEvent != null
-                && mSendWindowContentChangedAccessibilityEvent.mSource != null) {
-            mSendWindowContentChangedAccessibilityEvent.removeCallbacksAndRun();
-        }
+        // Send any pending event to prevent reordering
+        flushPendingAccessibilityEvents();
 
         // Intercept accessibility focus events fired by virtual nodes to keep
         // track of accessibility focus position in such nodes.
@@ -7361,6 +7363,19 @@ public final class ViewRootImpl implements ViewParent,
         }
         mAccessibilityManager.sendAccessibilityEvent(event);
         return true;
+    }
+
+    /** @hide */
+    public void flushPendingAccessibilityEvents() {
+        if (mAccessibilityState != null) {
+            if (mAccessibilityState.isScrollEventSenderInitialized()) {
+                mAccessibilityState.getSendViewScrolledAccessibilityEvent().sendNowIfPending();
+            }
+            if (mAccessibilityState.isWindowContentChangedEventSenderInitialized()) {
+                mAccessibilityState.getSendWindowContentChangedAccessibilityEvent()
+                        .sendNowIfPending();
+            }
+        }
     }
 
     /**
@@ -7495,39 +7510,6 @@ public final class ViewRootImpl implements ViewParent,
     @Override
     public int getTextAlignment() {
         return View.TEXT_ALIGNMENT_RESOLVED_DEFAULT;
-    }
-
-    private View getCommonPredecessor(View first, View second) {
-        if (mTempHashSet == null) {
-            mTempHashSet = new HashSet<View>();
-        }
-        HashSet<View> seen = mTempHashSet;
-        seen.clear();
-        View firstCurrent = first;
-        while (firstCurrent != null) {
-            seen.add(firstCurrent);
-            ViewParent firstCurrentParent = firstCurrent.mParent;
-            if (firstCurrentParent instanceof View) {
-                firstCurrent = (View) firstCurrentParent;
-            } else {
-                firstCurrent = null;
-            }
-        }
-        View secondCurrent = second;
-        while (secondCurrent != null) {
-            if (seen.contains(secondCurrent)) {
-                seen.clear();
-                return secondCurrent;
-            }
-            ViewParent secondCurrentParent = secondCurrent.mParent;
-            if (secondCurrentParent instanceof View) {
-                secondCurrent = (View) secondCurrentParent;
-            } else {
-                secondCurrent = null;
-            }
-        }
-        seen.clear();
-        return null;
     }
 
     void checkThread() {
@@ -8137,80 +8119,6 @@ public final class ViewRootImpl implements ViewParent,
                     /* best effort - ignore */
                 }
             }
-        }
-    }
-
-    private class SendWindowContentChangedAccessibilityEvent implements Runnable {
-        private int mChangeTypes = 0;
-
-        public View mSource;
-        public long mLastEventTimeMillis;
-
-        @Override
-        public void run() {
-            // Protect against re-entrant code and attempt to do the right thing in the case that
-            // we're multithreaded.
-            View source = mSource;
-            mSource = null;
-            if (source == null) {
-                Log.e(TAG, "Accessibility content change has no source");
-                return;
-            }
-            // The accessibility may be turned off while we were waiting so check again.
-            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
-                mLastEventTimeMillis = SystemClock.uptimeMillis();
-                AccessibilityEvent event = AccessibilityEvent.obtain();
-                event.setEventType(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-                event.setContentChangeTypes(mChangeTypes);
-                source.sendAccessibilityEventUnchecked(event);
-            } else {
-                mLastEventTimeMillis = 0;
-            }
-            // In any case reset to initial state.
-            source.resetSubtreeAccessibilityStateChanged();
-            mChangeTypes = 0;
-        }
-
-        public void runOrPost(View source, int changeType) {
-            if (mHandler.getLooper() != Looper.myLooper()) {
-                CalledFromWrongThreadException e = new CalledFromWrongThreadException("Only the "
-                        + "original thread that created a view hierarchy can touch its views.");
-                // TODO: Throw the exception
-                Log.e(TAG, "Accessibility content change on non-UI thread. Future Android "
-                        + "versions will throw an exception.", e);
-                // Attempt to recover. This code does not eliminate the thread safety issue, but
-                // it should force any issues to happen near the above log.
-                mHandler.removeCallbacks(this);
-                if (mSource != null) {
-                    // Dispatch whatever was pending. It's still possible that the runnable started
-                    // just before we removed the callbacks, and bad things will happen, but at
-                    // least they should happen very close to the logged error.
-                    run();
-                }
-            }
-            if (mSource != null) {
-                // If there is no common predecessor, then mSource points to
-                // a removed view, hence in this case always prefer the source.
-                View predecessor = getCommonPredecessor(mSource, source);
-                mSource = (predecessor != null) ? predecessor : source;
-                mChangeTypes |= changeType;
-                return;
-            }
-            mSource = source;
-            mChangeTypes = changeType;
-            final long timeSinceLastMillis = SystemClock.uptimeMillis() - mLastEventTimeMillis;
-            final long minEventIntevalMillis =
-                    ViewConfiguration.getSendRecurringAccessibilityEventsInterval();
-            if (timeSinceLastMillis >= minEventIntevalMillis) {
-                removeCallbacksAndRun();
-            } else {
-                mHandler.postDelayed(this, minEventIntevalMillis - timeSinceLastMillis);
-            }
-        }
-
-        public void removeCallbacksAndRun() {
-            mHandler.removeCallbacks(this);
-            run();
         }
     }
 

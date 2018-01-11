@@ -4418,7 +4418,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private CheckForLongPress mPendingCheckForLongPress;
     private CheckForTap mPendingCheckForTap = null;
     private PerformClick mPerformClick;
-    private SendViewScrolledAccessibilityEvent mSendViewScrolledAccessibilityEvent;
 
     private UnsetPressedState mUnsetPressedState;
 
@@ -7175,7 +7174,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (gainFocus) {
             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_FOCUSED);
         } else {
-            notifyViewAccessibilityStateChangedIfNeeded(
+            notifyAccessibilityStateChanged(
                     AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
         }
 
@@ -8875,9 +8874,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final boolean nonEmptyDesc = contentDescription != null && contentDescription.length() > 0;
         if (nonEmptyDesc && getImportantForAccessibility() == IMPORTANT_FOR_ACCESSIBILITY_AUTO) {
             setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_YES);
-            notifySubtreeAccessibilityStateChangedIfNeeded();
+            notifyAccessibilitySubtreeChanged();
         } else {
-            notifyViewAccessibilityStateChangedIfNeeded(
+            notifyAccessibilityStateChanged(
                     AccessibilityEvent.CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION);
         }
     }
@@ -8910,7 +8909,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return;
         }
         mAccessibilityTraversalBeforeId = beforeId;
-        notifyViewAccessibilityStateChangedIfNeeded(
+        notifyAccessibilityStateChanged(
                 AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
     }
 
@@ -8954,7 +8953,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return;
         }
         mAccessibilityTraversalAfterId = afterId;
-        notifyViewAccessibilityStateChangedIfNeeded(
+        notifyAccessibilityStateChanged(
                 AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
     }
 
@@ -8997,7 +8996,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 && mID == View.NO_ID) {
             mID = generateViewId();
         }
-        notifyViewAccessibilityStateChangedIfNeeded(
+        notifyAccessibilityStateChanged(
                 AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
     }
 
@@ -10498,8 +10497,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (pflags3 != mPrivateFlags3) {
             mPrivateFlags3 = pflags3;
-            notifyViewAccessibilityStateChangedIfNeeded(
-                    AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+            notifyAccessibilityStateChanged(AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
         }
     }
 
@@ -11327,7 +11325,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPrivateFlags2 &= ~PFLAG2_ACCESSIBILITY_LIVE_REGION_MASK;
             mPrivateFlags2 |= (mode << PFLAG2_ACCESSIBILITY_LIVE_REGION_SHIFT)
                     & PFLAG2_ACCESSIBILITY_LIVE_REGION_MASK;
-            notifyViewAccessibilityStateChangedIfNeeded(
+            notifyAccessibilityStateChanged(
                     AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
         }
     }
@@ -11385,9 +11383,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPrivateFlags2 |= (mode << PFLAG2_IMPORTANT_FOR_ACCESSIBILITY_SHIFT)
                     & PFLAG2_IMPORTANT_FOR_ACCESSIBILITY_MASK;
             if (!maySkipNotify || oldIncludeForAccessibility != includeForAccessibility()) {
-                notifySubtreeAccessibilityStateChangedIfNeeded();
+                notifyAccessibilitySubtreeChanged();
             } else {
-                notifyViewAccessibilityStateChangedIfNeeded(
+                notifyAccessibilityStateChanged(
                         AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
             }
         }
@@ -11564,25 +11562,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    public void notifyViewAccessibilityStateChangedIfNeeded(int changeType) {
-        if (!AccessibilityManager.getInstance(mContext).isEnabled() || mAttachInfo == null) {
-            return;
-        }
-        // If this is a live region, we should send a subtree change event
-        // from this view immediately. Otherwise, we can let it propagate up.
-        if (getAccessibilityLiveRegion() != ACCESSIBILITY_LIVE_REGION_NONE) {
-            final AccessibilityEvent event = AccessibilityEvent.obtain();
-            event.setEventType(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-            event.setContentChangeTypes(changeType);
-            sendAccessibilityEventUnchecked(event);
-        } else if (mParent != null) {
-            try {
-                mParent.notifySubtreeAccessibilityStateChanged(this, this, changeType);
-            } catch (AbstractMethodError e) {
-                Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
-                        " does not fully implement ViewParent", e);
-            }
-        }
+    public void notifyAccessibilityStateChanged(int changeType) {
+        notifyAccessibilityStateChanged(this, changeType);
     }
 
     /**
@@ -11596,20 +11577,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * @hide
      */
-    public void notifySubtreeAccessibilityStateChangedIfNeeded() {
+    public void notifyAccessibilitySubtreeChanged() {
+        if ((mPrivateFlags2 & PFLAG2_SUBTREE_ACCESSIBILITY_STATE_CHANGED) == 0) {
+            mPrivateFlags2 |= PFLAG2_SUBTREE_ACCESSIBILITY_STATE_CHANGED;
+            notifyAccessibilityStateChanged(AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
+        }
+    }
+
+    void notifyAccessibilityStateChanged(View source, int changeType) {
         if (!AccessibilityManager.getInstance(mContext).isEnabled() || mAttachInfo == null) {
             return;
         }
-        if ((mPrivateFlags2 & PFLAG2_SUBTREE_ACCESSIBILITY_STATE_CHANGED) == 0) {
-            mPrivateFlags2 |= PFLAG2_SUBTREE_ACCESSIBILITY_STATE_CHANGED;
-            if (mParent != null) {
-                try {
-                    mParent.notifySubtreeAccessibilityStateChanged(
-                            this, this, AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
-                } catch (AbstractMethodError e) {
-                    Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
-                            " does not fully implement ViewParent", e);
-                }
+        if (mParent != null) {
+            try {
+                mParent.notifySubtreeAccessibilityStateChanged(this, source, changeType);
+            } catch (AbstractMethodError e) {
+                Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName()
+                        + " does not fully implement ViewParent", e);
             }
         }
     }
@@ -11631,8 +11615,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Reset the flag indicating the accessibility state of the subtree rooted
      * at this view changed.
+     *
+     * @hide
      */
-    void resetSubtreeAccessibilityStateChanged() {
+    public void resetSubtreeAccessibilityStateChanged() {
         mPrivateFlags2 &= ~PFLAG2_SUBTREE_ACCESSIBILITY_STATE_CHANGED;
     }
 
@@ -11793,7 +11779,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         || getAccessibilitySelectionEnd() != end)
                         && (start == end)) {
                     setAccessibilitySelection(start, end);
-                    notifyViewAccessibilityStateChangedIfNeeded(
+                    notifyAccessibilityStateChanged(
                             AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
                     return true;
                 }
@@ -13787,7 +13773,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         ((!(mParent instanceof ViewGroup)) || ((ViewGroup) mParent).isShown())) {
                     dispatchVisibilityAggregated(newVisibility == VISIBLE);
                 }
-                notifySubtreeAccessibilityStateChangedIfNeeded();
+                notifyAccessibilitySubtreeChanged();
             }
         }
 
@@ -13833,13 +13819,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     || (changed & CLICKABLE) != 0 || (changed & LONG_CLICKABLE) != 0
                     || (changed & CONTEXT_CLICKABLE) != 0) {
                 if (oldIncludeForAccessibility != includeForAccessibility()) {
-                    notifySubtreeAccessibilityStateChangedIfNeeded();
+                    notifyAccessibilitySubtreeChanged();
                 } else {
-                    notifyViewAccessibilityStateChangedIfNeeded(
+                    notifyAccessibilityStateChanged(
                             AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
                 }
             } else if ((changed & ENABLED_MASK) != 0) {
-                notifyViewAccessibilityStateChangedIfNeeded(
+                notifyAccessibilityStateChanged(
                         AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
             }
         }
@@ -13874,10 +13860,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param oldt Previous vertical scroll origin.
      */
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
-        notifySubtreeAccessibilityStateChangedIfNeeded();
+        notifyAccessibilitySubtreeChanged();
 
-        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
-            postSendViewScrolledAccessibilityEventCallback(l - oldl, t - oldt);
+        ViewRootImpl root = getViewRootImpl();
+        if (root != null) {
+            root.getAccessibilityState()
+                    .getSendViewScrolledAccessibilityEvent()
+                    .post(this, /* dx */ l - oldl, /* dy */ t - oldt);
         }
 
         mBackgroundSizeChanged = true;
@@ -14273,7 +14262,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             invalidateViewProperty(false, true);
 
             invalidateParentIfNeededAndWasQuickRejected();
-            notifySubtreeAccessibilityStateChangedIfNeeded();
+            notifyAccessibilitySubtreeChanged();
         }
     }
 
@@ -14317,7 +14306,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             invalidateViewProperty(false, true);
 
             invalidateParentIfNeededAndWasQuickRejected();
-            notifySubtreeAccessibilityStateChangedIfNeeded();
+            notifyAccessibilitySubtreeChanged();
         }
     }
 
@@ -14361,7 +14350,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             invalidateViewProperty(false, true);
 
             invalidateParentIfNeededAndWasQuickRejected();
-            notifySubtreeAccessibilityStateChangedIfNeeded();
+            notifyAccessibilitySubtreeChanged();
         }
     }
 
@@ -14398,7 +14387,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             invalidateViewProperty(false, true);
 
             invalidateParentIfNeededAndWasQuickRejected();
-            notifySubtreeAccessibilityStateChangedIfNeeded();
+            notifyAccessibilitySubtreeChanged();
         }
     }
 
@@ -14435,7 +14424,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             invalidateViewProperty(false, true);
 
             invalidateParentIfNeededAndWasQuickRejected();
-            notifySubtreeAccessibilityStateChangedIfNeeded();
+            notifyAccessibilitySubtreeChanged();
         }
     }
 
@@ -14638,7 +14627,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mTransformationInfo.mAlpha != alpha) {
             // Report visibility changes, which can affect children, to accessibility
             if ((alpha == 0) ^ (mTransformationInfo.mAlpha == 0)) {
-                notifySubtreeAccessibilityStateChangedIfNeeded();
+                notifyAccessibilitySubtreeChanged();
             }
             mTransformationInfo.mAlpha = alpha;
             if (onSetAlpha((int) (alpha * 255))) {
@@ -15140,7 +15129,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             invalidateViewProperty(false, true);
 
             invalidateParentIfNeededAndWasQuickRejected();
-            notifySubtreeAccessibilityStateChangedIfNeeded();
+            notifyAccessibilitySubtreeChanged();
         }
     }
 
@@ -15174,7 +15163,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             invalidateViewProperty(false, true);
 
             invalidateParentIfNeededAndWasQuickRejected();
-            notifySubtreeAccessibilityStateChangedIfNeeded();
+            notifyAccessibilitySubtreeChanged();
         }
     }
 
@@ -15344,7 +15333,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void invalidateOutline() {
         rebuildOutline();
 
-        notifySubtreeAccessibilityStateChangedIfNeeded();
+        notifyAccessibilitySubtreeChanged();
         invalidateViewProperty(false, false);
     }
 
@@ -15539,7 +15528,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
                 invalidateParentIfNeeded();
             }
-            notifySubtreeAccessibilityStateChangedIfNeeded();
+            notifyAccessibilitySubtreeChanged();
         }
     }
 
@@ -15587,7 +15576,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 }
                 invalidateParentIfNeeded();
             }
-            notifySubtreeAccessibilityStateChangedIfNeeded();
+            notifyAccessibilitySubtreeChanged();
         }
     }
 
@@ -16462,18 +16451,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
             attachInfo.mViewRootImpl.dispatchInvalidateRectOnAnimation(info);
         }
-    }
-
-    /**
-     * Post a callback to send a {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} event.
-     * This event is sent at most once every
-     * {@link ViewConfiguration#getSendRecurringAccessibilityEventsInterval()}.
-     */
-    private void postSendViewScrolledAccessibilityEventCallback(int dx, int dy) {
-        if (mSendViewScrolledAccessibilityEvent == null) {
-            mSendViewScrolledAccessibilityEvent = new SendViewScrolledAccessibilityEvent();
-        }
-        mSendViewScrolledAccessibilityEvent.post(dx, dy);
     }
 
     /**
@@ -17731,7 +17708,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         removeUnsetPressCallback();
         removeLongPressCallback();
         removePerformClickCallback();
-        cancel(mSendViewScrolledAccessibilityEvent);
+        if (mAttachInfo != null
+                && mAttachInfo.mViewRootImpl.mAccessibilityState != null
+                && mAttachInfo.mViewRootImpl.mAccessibilityState.isScrollEventSenderInitialized()) {
+            mAttachInfo.mViewRootImpl.mAccessibilityState
+                    .getSendViewScrolledAccessibilityEvent()
+                    .cancelIfPendingFor(this);
+        }
         stopNestedScroll();
 
         // Anything that started animating right before detach should already
@@ -20350,7 +20333,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 mForegroundInfo.mBoundsChanged = true;
             }
 
-            notifySubtreeAccessibilityStateChangedIfNeeded();
+            notifyAccessibilitySubtreeChanged();
         }
         return changed;
     }
@@ -21794,7 +21777,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (selected) {
                 sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
             } else {
-                notifyViewAccessibilityStateChangedIfNeeded(
+                notifyAccessibilityStateChanged(
                         AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
             }
         }
@@ -26348,53 +26331,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 host.invalidate(true);
             }
         }
-    }
-
-    /**
-     * Resuable callback for sending
-     * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} accessibility event.
-     */
-    private class SendViewScrolledAccessibilityEvent implements Runnable {
-        public volatile boolean mIsPending;
-        public int mDeltaX;
-        public int mDeltaY;
-
-        public void post(int dx, int dy) {
-            mDeltaX += dx;
-            mDeltaY += dy;
-            if (!mIsPending) {
-                mIsPending = true;
-                postDelayed(this, ViewConfiguration.getSendRecurringAccessibilityEventsInterval());
-            }
-        }
-
-        @Override
-        public void run() {
-            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
-                AccessibilityEvent event = AccessibilityEvent.obtain(
-                        AccessibilityEvent.TYPE_VIEW_SCROLLED);
-                event.setScrollDeltaX(mDeltaX);
-                event.setScrollDeltaY(mDeltaY);
-                sendAccessibilityEventUnchecked(event);
-            }
-            reset();
-        }
-
-        private void reset() {
-            mIsPending = false;
-            mDeltaX = 0;
-            mDeltaY = 0;
-        }
-    }
-
-    /**
-     * Remove the pending callback for sending a
-     * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} accessibility event.
-     */
-    private void cancel(@Nullable SendViewScrolledAccessibilityEvent callback) {
-        if (callback == null || !callback.mIsPending) return;
-        removeCallbacks(callback);
-        callback.reset();
     }
 
     /**

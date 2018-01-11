@@ -6849,7 +6849,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             // detached and we do not allow detached views to fire accessibility
             // events. So we are announcing that the subtree changed giving a chance
             // to clients holding on to a view in this subtree to refresh it.
-            notifyViewAccessibilityStateChangedIfNeeded(
+            notifyAccessibilityStateChanged(
                     AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
 
             // Don't scrap views that have transient state.
