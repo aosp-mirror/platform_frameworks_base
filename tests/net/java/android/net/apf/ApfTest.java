@@ -35,6 +35,7 @@ import android.net.apf.ApfGenerator.Register;
 import android.net.ip.IpManager;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.RaEvent;
+import android.net.util.InterfaceParams;
 import android.os.ConditionVariable;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -62,7 +63,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Random;
@@ -635,7 +635,7 @@ public class ApfTest {
 
         public TestApfFilter(ApfConfiguration config, IpManager.Callback ipManagerCallback,
                 IpConnectivityLog log) throws Exception {
-            super(config, NetworkInterface.getByName("lo"), ipManagerCallback, log);
+            super(config, InterfaceParams.getByName("lo"), ipManagerCallback, log);
         }
 
         // Pretend an RA packet has been received and show it to ApfFilter.

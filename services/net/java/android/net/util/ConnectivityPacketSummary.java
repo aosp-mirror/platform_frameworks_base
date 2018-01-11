@@ -17,6 +17,7 @@
 package android.net.util;
 
 import android.net.dhcp.DhcpPacket;
+import android.net.MacAddress;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -45,21 +46,20 @@ public class ConnectivityPacketSummary {
     private final ByteBuffer mPacket;
     private final String mSummary;
 
-    public static String summarize(byte[] hwaddr, byte[] buffer) {
+    public static String summarize(MacAddress hwaddr, byte[] buffer) {
         return summarize(hwaddr, buffer, buffer.length);
     }
 
     // Methods called herein perform some but by no means all error checking.
     // They may throw runtime exceptions on malformed packets.
-    public static String summarize(byte[] hwaddr, byte[] buffer, int length) {
-        if ((hwaddr == null) || (hwaddr.length != ETHER_ADDR_LEN)) return null;
-        if (buffer == null) return null;
+    public static String summarize(MacAddress macAddr, byte[] buffer, int length) {
+        if ((macAddr == null) || (buffer == null)) return null;
         length = Math.min(length, buffer.length);
-        return (new ConnectivityPacketSummary(hwaddr, buffer, length)).toString();
+        return (new ConnectivityPacketSummary(macAddr, buffer, length)).toString();
     }
 
-    private ConnectivityPacketSummary(byte[] hwaddr, byte[] buffer, int length) {
-        mHwAddr = hwaddr;
+    private ConnectivityPacketSummary(MacAddress macAddr, byte[] buffer, int length) {
+        mHwAddr = macAddr.toByteArray();
         mBytes = buffer;
         mLength = Math.min(length, mBytes.length);
         mPacket = ByteBuffer.wrap(mBytes, 0, mLength);
