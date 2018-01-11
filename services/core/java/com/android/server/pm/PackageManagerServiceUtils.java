@@ -504,13 +504,13 @@ public class PackageManagerServiceUtils {
      * system upgrade) and {@code scannedSigs} will be in the newer format.
      */
     private static boolean matchSignaturesCompat(String packageName,
-            PackageSignatures packageSignatures, Signature[] parsedSignatures) {
+            PackageSignatures packageSignatures, PackageParser.SigningDetails parsedSignatures) {
         ArraySet<Signature> existingSet = new ArraySet<Signature>();
         for (Signature sig : packageSignatures.mSignatures) {
             existingSet.add(sig);
         }
         ArraySet<Signature> scannedCompatSet = new ArraySet<Signature>();
-        for (Signature sig : parsedSignatures) {
+        for (Signature sig : parsedSignatures.signatures) {
             try {
                 Signature[] chainSignatures = sig.getChainSignatures();
                 for (Signature chainSig : chainSignatures) {
@@ -552,21 +552,25 @@ public class PackageManagerServiceUtils {
      * @throws PackageManagerException if the signatures did not match.
      */
     public static boolean verifySignatures(PackageSetting pkgSetting,
-            Signature[] parsedSignatures, boolean compareCompat, boolean compareRecover)
+            PackageParser.SigningDetails parsedSignatures, boolean compareCompat,
+            boolean compareRecover)
             throws PackageManagerException {
         final String packageName = pkgSetting.name;
         boolean compatMatch = false;
         if (pkgSetting.signatures.mSignatures != null) {
             // Already existing package. Make sure signatures match
-            boolean match = compareSignatures(pkgSetting.signatures.mSignatures, parsedSignatures)
+            boolean match = compareSignatures(pkgSetting.signatures.mSignatures,
+                    parsedSignatures.signatures)
                     == PackageManager.SIGNATURE_MATCH;
             if (!match && compareCompat) {
-                match = matchSignaturesCompat(packageName, pkgSetting.signatures, parsedSignatures);
+                match = matchSignaturesCompat(packageName, pkgSetting.signatures,
+                        parsedSignatures);
                 compatMatch = match;
             }
             if (!match && compareRecover) {
                 match = matchSignaturesRecover(
-                        packageName, pkgSetting.signatures.mSignatures, parsedSignatures);
+                        packageName, pkgSetting.signatures.mSignatures,
+                        parsedSignatures.signatures);
             }
             if (!match) {
                 throw new PackageManagerException(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
@@ -578,14 +582,14 @@ public class PackageManagerServiceUtils {
         if (pkgSetting.sharedUser != null && pkgSetting.sharedUser.signatures.mSignatures != null) {
             // Already existing package. Make sure signatures match
             boolean match = compareSignatures(pkgSetting.sharedUser.signatures.mSignatures,
-                    parsedSignatures) == PackageManager.SIGNATURE_MATCH;
+                    parsedSignatures.signatures) == PackageManager.SIGNATURE_MATCH;
             if (!match && compareCompat) {
                 match = matchSignaturesCompat(
                         packageName, pkgSetting.sharedUser.signatures, parsedSignatures);
             }
             if (!match && compareRecover) {
-                match = matchSignaturesRecover(
-                        packageName, pkgSetting.sharedUser.signatures.mSignatures, parsedSignatures);
+                match = matchSignaturesRecover(packageName,
+                        pkgSetting.sharedUser.signatures.mSignatures, parsedSignatures.signatures);
                 compatMatch |= match;
             }
             if (!match) {

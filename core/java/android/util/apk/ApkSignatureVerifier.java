@@ -25,6 +25,7 @@ import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
+import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.Signature;
 import android.os.Trace;
 import android.util.jar.StrictJarFile;
@@ -52,10 +53,6 @@ import java.util.zip.ZipEntry;
  */
 public class ApkSignatureVerifier {
 
-    public static final int VERSION_JAR_SIGNATURE_SCHEME = 1;
-    public static final int VERSION_APK_SIGNATURE_SCHEME_V2 = 2;
-    public static final int VERSION_APK_SIGNATURE_SCHEME_V3 = 3;
-
     private static final AtomicReference<byte[]> sBuffer = new AtomicReference<>();
 
     /**
@@ -63,10 +60,11 @@ public class ApkSignatureVerifier {
      *
      * @throws PackageParserException if the APK's signature failed to verify.
      */
-    public static Result verify(String apkPath, int minSignatureSchemeVersion)
+    public static PackageParser.SigningDetails verify(String apkPath,
+            @SignatureSchemeVersion int minSignatureSchemeVersion)
             throws PackageParserException {
 
-        if (minSignatureSchemeVersion > VERSION_APK_SIGNATURE_SCHEME_V3) {
+        if (minSignatureSchemeVersion > SignatureSchemeVersion.SIGNING_BLOCK_V3) {
             // V3 and before are older than the requested minimum signing version
             throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
                     "No signature found in package of version " + minSignatureSchemeVersion
@@ -80,10 +78,11 @@ public class ApkSignatureVerifier {
                     ApkSignatureSchemeV3Verifier.verify(apkPath);
             Certificate[][] signerCerts = new Certificate[][] { vSigner.certs };
             Signature[] signerSigs = convertToSignatures(signerCerts);
-            return new Result(signerCerts, signerSigs, VERSION_APK_SIGNATURE_SCHEME_V3);
+            return new PackageParser.SigningDetails(signerSigs,
+                    SignatureSchemeVersion.SIGNING_BLOCK_V3);
         } catch (SignatureNotFoundException e) {
             // not signed with v2, try older if allowed
-            if (minSignatureSchemeVersion >= VERSION_APK_SIGNATURE_SCHEME_V3) {
+            if (minSignatureSchemeVersion >= SignatureSchemeVersion.SIGNING_BLOCK_V3) {
                 throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
                         "No APK Signature Scheme v3 signature in package " + apkPath, e);
             }
@@ -97,7 +96,7 @@ public class ApkSignatureVerifier {
         }
 
         // redundant, protective version check
-        if (minSignatureSchemeVersion > VERSION_APK_SIGNATURE_SCHEME_V2) {
+        if (minSignatureSchemeVersion > SignatureSchemeVersion.SIGNING_BLOCK_V2) {
             // V2 and before are older than the requested minimum signing version
             throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
                     "No signature found in package of version " + minSignatureSchemeVersion
@@ -110,10 +109,11 @@ public class ApkSignatureVerifier {
             Certificate[][] signerCerts = ApkSignatureSchemeV2Verifier.verify(apkPath);
             Signature[] signerSigs = convertToSignatures(signerCerts);
 
-            return new Result(signerCerts, signerSigs, VERSION_APK_SIGNATURE_SCHEME_V2);
+            return new PackageParser.SigningDetails(
+                    signerSigs, SignatureSchemeVersion.SIGNING_BLOCK_V2);
         } catch (SignatureNotFoundException e) {
             // not signed with v2, try older if allowed
-            if (minSignatureSchemeVersion >= VERSION_APK_SIGNATURE_SCHEME_V2) {
+            if (minSignatureSchemeVersion >= SignatureSchemeVersion.SIGNING_BLOCK_V2) {
                 throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
                         "No APK Signature Scheme v2 signature in package " + apkPath, e);
             }
@@ -127,7 +127,7 @@ public class ApkSignatureVerifier {
         }
 
         // redundant, protective version check
-        if (minSignatureSchemeVersion > VERSION_JAR_SIGNATURE_SCHEME) {
+        if (minSignatureSchemeVersion > SignatureSchemeVersion.JAR) {
             // V1 and is older than the requested minimum signing version
             throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
                     "No signature found in package of version " + minSignatureSchemeVersion
@@ -145,7 +145,8 @@ public class ApkSignatureVerifier {
      *
      * @throws PackageParserException if there was a problem collecting certificates
      */
-    private static Result verifyV1Signature(String apkPath, boolean verifyFull)
+    private static PackageParser.SigningDetails verifyV1Signature(
+            String apkPath, boolean verifyFull)
             throws PackageParserException {
         StrictJarFile jarFile = null;
 
@@ -211,7 +212,7 @@ public class ApkSignatureVerifier {
                     }
                 }
             }
-            return new Result(lastCerts, lastSigs, VERSION_JAR_SIGNATURE_SCHEME);
+            return new PackageParser.SigningDetails(lastSigs, SignatureSchemeVersion.JAR);
         } catch (GeneralSecurityException e) {
             throw new PackageParserException(INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING,
                     "Failed to collect certificates from " + apkPath, e);
@@ -289,10 +290,11 @@ public class ApkSignatureVerifier {
      * @throws PackageParserException if the APK's signature failed to verify.
      * or greater is not found, except in the case of no JAR signature.
      */
-    public static Result plsCertsNoVerifyOnlyCerts(String apkPath, int minSignatureSchemeVersion)
+    public static PackageParser.SigningDetails plsCertsNoVerifyOnlyCerts(
+            String apkPath, int minSignatureSchemeVersion)
             throws PackageParserException {
 
-        if (minSignatureSchemeVersion > VERSION_APK_SIGNATURE_SCHEME_V3) {
+        if (minSignatureSchemeVersion > SignatureSchemeVersion.SIGNING_BLOCK_V3) {
             // V3 and before are older than the requested minimum signing version
             throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
                     "No signature found in package of version " + minSignatureSchemeVersion
@@ -306,10 +308,11 @@ public class ApkSignatureVerifier {
                     ApkSignatureSchemeV3Verifier.plsCertsNoVerifyOnlyCerts(apkPath);
             Certificate[][] signerCerts = new Certificate[][] { vSigner.certs };
             Signature[] signerSigs = convertToSignatures(signerCerts);
-            return new Result(signerCerts, signerSigs, VERSION_APK_SIGNATURE_SCHEME_V3);
+            return new PackageParser.SigningDetails(signerSigs,
+                    SignatureSchemeVersion.SIGNING_BLOCK_V3);
         } catch (SignatureNotFoundException e) {
             // not signed with v2, try older if allowed
-            if (minSignatureSchemeVersion >= VERSION_APK_SIGNATURE_SCHEME_V3) {
+            if (minSignatureSchemeVersion >= SignatureSchemeVersion.SIGNING_BLOCK_V3) {
                 throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
                         "No APK Signature Scheme v3 signature in package " + apkPath, e);
             }
@@ -323,7 +326,7 @@ public class ApkSignatureVerifier {
         }
 
         // redundant, protective version check
-        if (minSignatureSchemeVersion > VERSION_APK_SIGNATURE_SCHEME_V2) {
+        if (minSignatureSchemeVersion > SignatureSchemeVersion.SIGNING_BLOCK_V2) {
             // V2 and before are older than the requested minimum signing version
             throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
                     "No signature found in package of version " + minSignatureSchemeVersion
@@ -336,10 +339,11 @@ public class ApkSignatureVerifier {
             Certificate[][] signerCerts =
                     ApkSignatureSchemeV2Verifier.plsCertsNoVerifyOnlyCerts(apkPath);
             Signature[] signerSigs = convertToSignatures(signerCerts);
-            return new Result(signerCerts, signerSigs, VERSION_APK_SIGNATURE_SCHEME_V2);
+            return new PackageParser.SigningDetails(signerSigs,
+                    SignatureSchemeVersion.SIGNING_BLOCK_V2);
         } catch (SignatureNotFoundException e) {
             // not signed with v2, try older if allowed
-            if (minSignatureSchemeVersion >= VERSION_APK_SIGNATURE_SCHEME_V2) {
+            if (minSignatureSchemeVersion >= SignatureSchemeVersion.SIGNING_BLOCK_V2) {
                 throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
                         "No APK Signature Scheme v2 signature in package " + apkPath, e);
             }
@@ -353,7 +357,7 @@ public class ApkSignatureVerifier {
         }
 
         // redundant, protective version check
-        if (minSignatureSchemeVersion > VERSION_JAR_SIGNATURE_SCHEME) {
+        if (minSignatureSchemeVersion > SignatureSchemeVersion.JAR) {
             // V1 and is older than the requested minimum signing version
             throw new PackageParserException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
                     "No signature found in package of version " + minSignatureSchemeVersion
@@ -362,20 +366,5 @@ public class ApkSignatureVerifier {
 
         // v2 didn't work, try jarsigner
         return verifyV1Signature(apkPath, false);
-    }
-
-    /**
-     * Result of a successful APK verification operation.
-     */
-    public static class Result {
-        public final Certificate[][] certs;
-        public final Signature[] sigs;
-        public final int signatureSchemeVersion;
-
-        public Result(Certificate[][] certs, Signature[] sigs, int signingVersion) {
-            this.certs = certs;
-            this.sigs = sigs;
-            this.signatureSchemeVersion = signingVersion;
-        }
     }
 }
