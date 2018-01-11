@@ -1807,4 +1807,6 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"无法恢复快捷方式，因为应用不支持备份和恢复功能"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"无法恢复快捷方式，因为应用签名不相符"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"无法恢复快捷方式"</string>
+    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <skip />
 </resources>

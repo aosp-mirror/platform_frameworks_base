@@ -1807,4 +1807,6 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Չհաջողվեց վերականգնել դյուրանցումը, քանի որ հավելվածում չի աջակցվում պահուստավորման և վերականգնման գործառույթը"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Չհաջողվեց վերականգնել դյուրանցումը, քանի որ հավելվածների ստորագրությունները տարբեր են"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Չհաջողվեց վերականգնել դյուրանցումը"</string>
+    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <skip />
 </resources>

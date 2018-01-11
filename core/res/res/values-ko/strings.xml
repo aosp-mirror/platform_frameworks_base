@@ -1807,4 +1807,6 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"앱이 백업 및 복원을 지원하지 않으므로 바로가기를 복원할 수 없습니다"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"앱 서명이 일치하지 않아 바로가기를 복원할 수 없습니다"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"바로가기를 복원할 수 없습니다"</string>
+    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <skip />
 </resources>
