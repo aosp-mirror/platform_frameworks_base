@@ -469,6 +469,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowState mNavigationBar = null;
     boolean mHasNavigationBar = false;
     boolean mNavigationBarCanMove = false; // can the navigation bar ever move to the side?
+    @NavigationBarPosition
     int mNavigationBarPosition = NAV_BAR_BOTTOM;
     int[] mNavigationBarHeightForRotationDefault = new int[4];
     int[] mNavigationBarWidthForRotationDefault = new int[4];
@@ -4685,6 +4686,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return mNavigationBarController.checkHiddenLw();
     }
 
+    @NavigationBarPosition
     private int navigationBarPosition(int displayWidth, int displayHeight, int displayRotation) {
         if (mNavigationBarCanMove && displayWidth > displayHeight) {
             if (displayRotation == Surface.ROTATION_270) {
@@ -7852,16 +7854,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return vis;
     }
 
-    private int updateLightNavigationBarLw(int vis, WindowState opaque,
-            WindowState opaqueOrDimming) {
-        final WindowState imeWin = mWindowManagerFuncs.getInputMethodWindowLw();
-
-        final WindowState navColorWin;
-        if (imeWin != null && imeWin.isVisibleLw() && mNavigationBarPosition == NAV_BAR_BOTTOM) {
-            navColorWin = imeWin;
+    @VisibleForTesting
+    @Nullable
+    static WindowState chooseNavigationColorWindowLw(WindowState opaque,
+            WindowState opaqueOrDimming, WindowState imeWindow,
+            @NavigationBarPosition int navBarPosition) {
+        if (imeWindow != null && imeWindow.isVisibleLw() && navBarPosition == NAV_BAR_BOTTOM) {
+            return imeWindow;
         } else {
-            navColorWin = opaqueOrDimming;
+            return opaqueOrDimming;
         }
+    }
+
+    @VisibleForTesting
+    static int updateLightNavigationBarLw(int vis, WindowState opaque, WindowState opaqueOrDimming,
+            WindowState imeWindow, WindowState navColorWin) {
 
         if (navColorWin != null) {
             if (navColorWin == opaque) {
@@ -7870,7 +7877,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 vis &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
                 vis |= PolicyControl.getSystemUiVisibility(navColorWin, null)
                         & View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-            } else if (navColorWin.isDimming() || navColorWin == imeWin) {
+            } else if ((navColorWin == opaqueOrDimming && navColorWin.isDimming())
+                    || navColorWin == imeWindow) {
                 // Otherwise if it's dimming or it's the IME window, clear the light flag.
                 vis &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
             }
@@ -8009,8 +8017,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         vis = mNavigationBarController.updateVisibilityLw(transientNavBarAllowed, oldVis, vis);
 
+        final WindowState navColorWin = chooseNavigationColorWindowLw(
+                mTopFullscreenOpaqueWindowState, mTopFullscreenOpaqueOrDimmingWindowState,
+                mWindowManagerFuncs.getInputMethodWindowLw(), mNavigationBarPosition);
         vis = updateLightNavigationBarLw(vis, mTopFullscreenOpaqueWindowState,
-                mTopFullscreenOpaqueOrDimmingWindowState);
+                mTopFullscreenOpaqueOrDimmingWindowState,
+                mWindowManagerFuncs.getInputMethodWindowLw(), navColorWin);
 
         return vis;
     }

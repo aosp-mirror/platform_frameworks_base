@@ -61,6 +61,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
 import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
@@ -140,6 +142,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     int NAV_BAR_LEFT = 1 << 0;
     int NAV_BAR_RIGHT = 1 << 1;
     int NAV_BAR_BOTTOM = 1 << 2;
+
+    @Retention(SOURCE)
+    @IntDef({NAV_BAR_LEFT, NAV_BAR_RIGHT, NAV_BAR_BOTTOM})
+    @interface NavigationBarPosition {}
 
     /**
      * Pass this event to the user / app.  To be returned from
@@ -1637,6 +1643,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @see #NAV_BAR_RIGHT
      * @see #NAV_BAR_BOTTOM
      */
+    @NavigationBarPosition
     int getNavBarPosition();
 
     /**

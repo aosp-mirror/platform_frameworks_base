@@ -43,6 +43,7 @@ public class FakeWindowState implements WindowManagerPolicy.WindowState {
     public boolean inMultiWindowMode;
     public boolean visible = true;
     public int surfaceLayer = 1;
+    public boolean isDimming = false;
 
     public boolean policyVisible = true;
 
@@ -221,7 +222,7 @@ public class FakeWindowState implements WindowManagerPolicy.WindowState {
 
     @Override
     public boolean isDimming() {
-        throw new UnsupportedOperationException("not implemented");
+        return isDimming;
     }
 
     @Override
