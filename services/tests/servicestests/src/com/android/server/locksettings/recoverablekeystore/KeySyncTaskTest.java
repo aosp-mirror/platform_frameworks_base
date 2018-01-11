@@ -16,6 +16,8 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
+import static android.security.recoverablekeystore.KeyStoreRecoveryMetadata.TYPE_LOCKSCREEN;
+
 import static android.security.recoverablekeystore.KeyStoreRecoveryMetadata.TYPE_PASSWORD;
 import static android.security.recoverablekeystore.KeyStoreRecoveryMetadata.TYPE_PATTERN;
 import static android.security.recoverablekeystore.KeyStoreRecoveryMetadata.TYPE_PIN;
@@ -104,6 +106,10 @@ public class KeySyncTaskTest {
         mRecoverableKeyStoreDb = RecoverableKeyStoreDb.newInstance(context);
         mKeyPair = SecureBox.genKeyPair();
 
+        mRecoverableKeyStoreDb.setRecoverySecretTypes(TEST_USER_ID, TEST_RECOVERY_AGENT_UID,
+                new int[] {TYPE_LOCKSCREEN});
+        mRecoverableKeyStoreDb.setRecoverySecretTypes(TEST_USER_ID, TEST_RECOVERY_AGENT_UID2,
+                new int[] {TYPE_LOCKSCREEN});
         mRecoverySnapshotStorage = new RecoverySnapshotStorage();
 
         mKeySyncTask = new KeySyncTask(
@@ -406,10 +412,8 @@ public class KeySyncTaskTest {
                 isEqualTo(TYPE_PATTERN);
     }
 
-
     @Test
     public void run_sendsEncryptedKeysWithTwoRegisteredAgents() throws Exception {
-
         mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());
         mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
@@ -425,8 +429,30 @@ public class KeySyncTaskTest {
     }
 
     @Test
-    public void run_doesNotSendKeyToNonregisteredAgent() throws Exception {
+    public void run_sendsEncryptedKeysOnlyForAgentWhichActiveUserSecretType() throws Exception {
+        mRecoverableKeyStoreDb.setRecoverySecretTypes(TEST_USER_ID, TEST_RECOVERY_AGENT_UID,
+                new int[] {TYPE_LOCKSCREEN, 100});
+        // Snapshot will not be created during unlock event.
+        mRecoverableKeyStoreDb.setRecoverySecretTypes(TEST_USER_ID, TEST_RECOVERY_AGENT_UID2,
+                new int[] {100});
 
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID2, mKeyPair.getPublic());
+        when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
+        when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID2)).thenReturn(true);
+        addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
+        addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID2, TEST_APP_KEY_ALIAS);
+        mKeySyncTask.run();
+
+        verify(mSnapshotListenersStorage).recoverySnapshotAvailable(TEST_RECOVERY_AGENT_UID);
+        verify(mSnapshotListenersStorage, never()).
+                recoverySnapshotAvailable(TEST_RECOVERY_AGENT_UID2);
+    }
+
+    @Test
+    public void run_doesNotSendKeyToNonregisteredAgent() throws Exception {
         mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());
         mRecoverableKeyStoreDb.setRecoveryServicePublicKey(

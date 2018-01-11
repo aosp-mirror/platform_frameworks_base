@@ -28,6 +28,7 @@ import android.security.recoverablekeystore.KeyStoreRecoveryMetadata;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;
@@ -304,6 +305,12 @@ public class KeySyncTask implements Runnable {
      * @param recoveryAgentUid uid of the recovery agent.
      */
     private boolean shoudCreateSnapshot(int recoveryAgentUid) {
+        int[] types = mRecoverableKeyStoreDb.getRecoverySecretTypes(mUserId, recoveryAgentUid);
+        if (!ArrayUtils.contains(types, KeyStoreRecoveryMetadata.TYPE_LOCKSCREEN)) {
+            // Only lockscreen type is supported.
+            // We will need to pass extra argument to KeySyncTask to support custom pass phrase.
+            return false;
+        }
         if (mCredentialUpdated) {
             // Sync credential if at least one snapshot was created.
             if (mRecoverableKeyStoreDb.getSnapshotVersion(mUserId, recoveryAgentUid) != null) {
