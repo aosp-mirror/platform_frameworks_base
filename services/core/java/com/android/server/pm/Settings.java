@@ -785,11 +785,12 @@ public final class Settings {
      */
     static void updatePackageSetting(@NonNull PackageSetting pkgSetting,
             @Nullable PackageSetting disabledPkg, @Nullable SharedUserSetting sharedUser,
-            @NonNull File codePath, @Nullable String legacyNativeLibraryPath,
-            @Nullable String primaryCpuAbi, @Nullable String secondaryCpuAbi,
-            int pkgFlags, int pkgPrivateFlags, @Nullable List<String> childPkgNames,
-            @NonNull UserManagerService userManager, @Nullable String[] usesStaticLibraries,
-            @Nullable long[] usesStaticLibrariesVersions) throws PackageManagerException {
+            @NonNull File codePath, File resourcePath,
+            @Nullable String legacyNativeLibraryPath, @Nullable String primaryCpuAbi,
+            @Nullable String secondaryCpuAbi, int pkgFlags, int pkgPrivateFlags,
+            @Nullable List<String> childPkgNames, @NonNull UserManagerService userManager,
+            @Nullable String[] usesStaticLibraries, @Nullable long[] usesStaticLibrariesVersions)
+                    throws PackageManagerException {
         final String pkgName = pkgSetting.name;
         if (pkgSetting.sharedUser != sharedUser) {
             PackageManagerService.reportSettingsProblem(Log.WARN,
@@ -801,29 +802,19 @@ public final class Settings {
         }
 
         if (!pkgSetting.codePath.equals(codePath)) {
-            // Check to see if its a disabled system app
-            if ((pkgSetting.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                // This is an updated system app with versions in both system
-                // and data partition. Just let the most recent version
-                // take precedence.
-                Slog.w(PackageManagerService.TAG,
-                        "Trying to update system app code path from "
-                        + pkgSetting.codePathString + " to " + codePath.toString());
-            } else {
-                // Just a change in the code path is not an issue, but
-                // let's log a message about it.
-                Slog.i(PackageManagerService.TAG,
-                        "Package " + pkgName + " codePath changed from "
-                        + pkgSetting.codePath + " to " + codePath
-                        + "; Retaining data and using new");
-
-                // The owner user's installed flag is set false
-                // when the application was installed by other user
-                // and the installed flag is not updated
-                // when the application is appended as system app later.
-                if ((pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0
-                        && disabledPkg == null) {
-                    List<UserInfo> allUserInfos = getAllUsers(userManager);
+            final boolean isSystem = pkgSetting.isSystem();
+            Slog.i(PackageManagerService.TAG,
+                    "Update" + (isSystem ? " system" : "")
+                    + " package " + pkgName
+                    + " code path from " + pkgSetting.codePathString
+                    + " to " + codePath.toString()
+                    + "; Retain data and using new");
+            if (!isSystem) {
+                // The package isn't considered as installed if the application was
+                // first installed by another user. Update the installed flag when the
+                // application ever becomes part of the system.
+                if ((pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0 && disabledPkg == null) {
+                    final List<UserInfo> allUserInfos = getAllUsers(userManager);
                     if (allUserInfos != null) {
                         for (UserInfo userInfo : allUserInfos) {
                             pkgSetting.setInstalled(true, userInfo.id);
@@ -831,14 +822,24 @@ public final class Settings {
                     }
                 }
 
-                /*
-                 * Since we've changed paths, we need to prefer the new
-                 * native library path over the one stored in the
-                 * package settings since we might have moved from
-                 * internal to external storage or vice versa.
-                 */
+                // Since we've changed paths, prefer the new native library path over
+                // the one stored in the package settings since we might have moved from
+                // internal to external storage or vice versa.
                 pkgSetting.legacyNativeLibraryPathString = legacyNativeLibraryPath;
             }
+            pkgSetting.codePath = codePath;
+            pkgSetting.codePathString = codePath.toString();
+        }
+        if (!pkgSetting.resourcePath.equals(resourcePath)) {
+            final boolean isSystem = pkgSetting.isSystem();
+            Slog.i(PackageManagerService.TAG,
+                    "Update" + (isSystem ? " system" : "")
+                    + " package " + pkgName
+                    + " resource path from " + pkgSetting.resourcePathString
+                    + " to " + resourcePath.toString()
+                    + "; Retain data and using new");
+            pkgSetting.resourcePath = resourcePath;
+            pkgSetting.resourcePathString = resourcePath.toString();
         }
         // If what we are scanning is a system (and possibly privileged) package,
         // then make it so, regardless of whether it was previously installed only
@@ -855,13 +856,14 @@ public final class Settings {
         if (childPkgNames != null) {
             pkgSetting.childPackageNames = new ArrayList<>(childPkgNames);
         }
-        if (usesStaticLibraries != null) {
-            pkgSetting.usesStaticLibraries = Arrays.copyOf(usesStaticLibraries,
-                    usesStaticLibraries.length);
-        }
-        if (usesStaticLibrariesVersions != null) {
-            pkgSetting.usesStaticLibrariesVersions = Arrays.copyOf(usesStaticLibrariesVersions,
-                    usesStaticLibrariesVersions.length);
+        // Update static shared library dependencies if needed
+        if (usesStaticLibraries != null && usesStaticLibrariesVersions != null
+                && usesStaticLibraries.length == usesStaticLibrariesVersions.length) {
+            pkgSetting.usesStaticLibraries = usesStaticLibraries;
+            pkgSetting.usesStaticLibrariesVersions = usesStaticLibrariesVersions;
+        } else {
+            pkgSetting.usesStaticLibraries = null;
+            pkgSetting.usesStaticLibrariesVersions = null;
         }
     }
 
@@ -914,69 +916,17 @@ public final class Settings {
                 userId);
     }
 
+    // TODO: Move to scanPackageOnlyLI() after verifying signatures are setup correctly
+    // by that time.
     void insertPackageSettingLPw(PackageSetting p, PackageParser.Package pkg) {
-        p.pkg = pkg;
-        // pkg.mSetEnabled = p.getEnabled(userId);
-        // pkg.mSetStopped = p.getStopped(userId);
-        final String volumeUuid = pkg.applicationInfo.volumeUuid;
-        final String codePath = pkg.applicationInfo.getCodePath();
-        final String resourcePath = pkg.applicationInfo.getResourcePath();
-        final String legacyNativeLibraryPath = pkg.applicationInfo.nativeLibraryRootDir;
-        // Update volume if needed
-        if (!Objects.equals(volumeUuid, p.volumeUuid)) {
-            Slog.w(PackageManagerService.TAG, "Volume for " + p.pkg.packageName +
-                    " changing from " + p.volumeUuid + " to " + volumeUuid);
-            p.volumeUuid = volumeUuid;
-        }
-        // Update code path if needed
-        if (!Objects.equals(codePath, p.codePathString)) {
-            Slog.w(PackageManagerService.TAG, "Code path for " + p.pkg.packageName +
-                    " changing from " + p.codePathString + " to " + codePath);
-            p.codePath = new File(codePath);
-            p.codePathString = codePath;
-        }
-        //Update resource path if needed
-        if (!Objects.equals(resourcePath, p.resourcePathString)) {
-            Slog.w(PackageManagerService.TAG, "Resource path for " + p.pkg.packageName +
-                    " changing from " + p.resourcePathString + " to " + resourcePath);
-            p.resourcePath = new File(resourcePath);
-            p.resourcePathString = resourcePath;
-        }
-        // Update the native library paths if needed
-        if (!Objects.equals(legacyNativeLibraryPath, p.legacyNativeLibraryPathString)) {
-            p.legacyNativeLibraryPathString = legacyNativeLibraryPath;
-        }
-
-        // Update the required Cpu Abi
-        p.primaryCpuAbiString = pkg.applicationInfo.primaryCpuAbi;
-        p.secondaryCpuAbiString = pkg.applicationInfo.secondaryCpuAbi;
-        p.cpuAbiOverrideString = pkg.cpuAbiOverride;
-        // Update version code if needed
-        if (pkg.getLongVersionCode() != p.versionCode) {
-            p.versionCode = pkg.getLongVersionCode();
-        }
         // Update signatures if needed.
         if (p.signatures.mSignatures == null) {
             p.signatures.assignSignatures(pkg.mSigningDetails);
-        }
-        // Update flags if needed.
-        if (pkg.applicationInfo.flags != p.pkgFlags) {
-            p.pkgFlags = pkg.applicationInfo.flags;
         }
         // If this app defines a shared user id initialize
         // the shared user signatures as well.
         if (p.sharedUser != null && p.sharedUser.signatures.mSignatures == null) {
             p.sharedUser.signatures.assignSignatures(pkg.mSigningDetails);
-        }
-        // Update static shared library dependencies if needed
-        if (pkg.usesStaticLibraries != null && pkg.usesStaticLibrariesVersions != null
-                && pkg.usesStaticLibraries.size() == pkg.usesStaticLibrariesVersions.length) {
-            p.usesStaticLibraries = new String[pkg.usesStaticLibraries.size()];
-            pkg.usesStaticLibraries.toArray(p.usesStaticLibraries);
-            p.usesStaticLibrariesVersions = pkg.usesStaticLibrariesVersions;
-        } else {
-            p.usesStaticLibraries = null;
-            p.usesStaticLibrariesVersions = null;
         }
         addPackageSettingLPw(p, p.sharedUser);
     }
