@@ -29,7 +29,6 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.telephony.SubscriptionPlan;
 import android.util.DebugUtils;
 import android.util.Pair;
 
@@ -329,7 +328,7 @@ public class NetworkPolicyManager {
      * to access network when the device is idle or in battery saver mode. Otherwise, false.
      */
     public static boolean isProcStateAllowedWhileIdleOrPowerSaveMode(int procState) {
-        return procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+        return procState <= ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
     }
 
     /**
@@ -337,7 +336,7 @@ public class NetworkPolicyManager {
      * to access network when the device is in data saver mode. Otherwise, false.
      */
     public static boolean isProcStateAllowedWhileOnRestrictBackground(int procState) {
-        return procState <= ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
+        return procState <= ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
     }
 
     public static String resolveNetworkId(WifiConfiguration config) {
