@@ -76,8 +76,8 @@ public class VintfObject {
     /**
      * @return a list of VNDK snapshots supported by the framework, as
      * specified in framework manifest. For example,
-     * [("25.0.5", ["libjpeg.so", "libbase.so"]),
-     *  ("25.1.3", ["libjpeg.so", "libbase.so"])]
+     * [("27", ["libjpeg.so", "libbase.so"]),
+     *  ("28", ["libjpeg.so", "libbase.so"])]
      */
     public static native Map<String, String[]> getVndkSnapshots();
 }
