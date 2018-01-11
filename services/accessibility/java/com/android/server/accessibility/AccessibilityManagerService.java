@@ -1280,7 +1280,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         int servicePackageUid = serviceInfo.applicationInfo.uid;
-        if (mAppOpsManager.noteOpNoThrow(AppOpsManager.OP_BIND_ACCESSIBILITY_SERVICE,
+        if (mAppOpsManager.noteOpNoThrow(AppOpsManager.OPSTR_BIND_ACCESSIBILITY_SERVICE,
                 servicePackageUid, serviceInfo.packageName) != AppOpsManager.MODE_ALLOWED) {
             Slog.w(LOG_TAG, "Skipping accessibility service " + new ComponentName(
                     serviceInfo.packageName, serviceInfo.name).flattenToShortString()
