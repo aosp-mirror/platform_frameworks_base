@@ -49,6 +49,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.ObbInfo;
+import android.database.ContentObserver;
 import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.Binder;
@@ -169,6 +170,10 @@ class StorageManagerService extends IStorageManager.Stub
 
     // Static direct instance pointer for the tightly-coupled idle service to use
     static StorageManagerService sSelf = null;
+
+    /* Read during boot to decide whether to enable zram when available */
+    private static final String ZRAM_ENABLED_PROPERTY =
+        "persist.sys.zram_enabled";
 
     public static class Lifecycle extends SystemService {
         private StorageManagerService mStorageManagerService;
@@ -733,6 +738,41 @@ class StorageManagerService extends IStorageManager.Stub
 
         // Start scheduling nominally-daily fstrim operations
         MountServiceIdler.scheduleIdlePass(mContext);
+
+        // Toggle zram-enable system property in response to settings
+        mContext.getContentResolver().registerContentObserver(
+            Settings.Global.getUriFor(Settings.Global.ZRAM_ENABLED),
+            false /*notifyForDescendants*/,
+            new ContentObserver(null /* current thread */) {
+                @Override
+                public void onChange(boolean selfChange) {
+                    refreshZramSettings();
+                }
+            });
+        refreshZramSettings();
+    }
+
+    /**
+     * Update the zram_enabled system property (which init reads to
+     * decide whether to enable zram) to reflect the zram_enabled
+     * preference (which we can change for experimentation purposes).
+     */
+    private void refreshZramSettings() {
+        String propertyValue = SystemProperties.get(ZRAM_ENABLED_PROPERTY);
+        if ("".equals(propertyValue)) {
+            return;  // System doesn't have zram toggling support
+        }
+        String desiredPropertyValue =
+            Settings.Global.getInt(mContext.getContentResolver(),
+                                   Settings.Global.ZRAM_ENABLED,
+                                   1) != 0
+            ? "1" : "0";
+        if (!desiredPropertyValue.equals(propertyValue)) {
+            // Avoid redundant disk writes by setting only if we're
+            // changing the property value. There's no race: we're the
+            // sole writer.
+            SystemProperties.set(ZRAM_ENABLED_PROPERTY, desiredPropertyValue);
+        }
     }
 
     /**
