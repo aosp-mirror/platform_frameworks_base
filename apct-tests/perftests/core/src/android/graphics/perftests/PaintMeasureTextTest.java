@@ -80,11 +80,11 @@ public class PaintMeasureTextTest {
         }
 
         while (state.keepRunning()) {
-            state.pauseTiming();
             if (mCacheMode == DONT_USE_CACHE) {
+                state.pauseTiming();
                 Canvas.freeTextLayoutCaches();
+                state.resumeTiming();
             }
-            state.resumeTiming();
 
             paint.measureText(mText);
         }
