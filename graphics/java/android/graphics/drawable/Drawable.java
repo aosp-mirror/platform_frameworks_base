@@ -1229,8 +1229,8 @@ public abstract class Drawable {
                 source = ImageDecoder.createSource(res, is);
             }
 
-            return ImageDecoder.decodeDrawable(source, (info, decoder) -> {
-                decoder.setAllocator(ImageDecoder.SOFTWARE_ALLOCATOR);
+            return ImageDecoder.decodeDrawable(source, (decoder, info, src) -> {
+                decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
             });
         } catch (IOException e) {
             /*  do nothing.

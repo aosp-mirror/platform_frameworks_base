@@ -58,8 +58,7 @@ static jlong AnimatedImageDrawable_nCreate(JNIEnv* env, jobject /*clazz*/,
         SkPictureRecorder recorder;
         SkCanvas* skcanvas = recorder.beginRecording(bounds);
         std::unique_ptr<Canvas> canvas(Canvas::create_canvas(skcanvas));
-        postProcessAndRelease(env, jpostProcess, std::move(canvas), bounds.width(),
-                              bounds.height());
+        postProcessAndRelease(env, jpostProcess, std::move(canvas));
         if (env->ExceptionCheck()) {
             return 0;
         }
