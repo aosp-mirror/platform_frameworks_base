@@ -618,6 +618,7 @@ public final class BluetoothDevice implements Parcelable {
      *
      * @hide
      */
+    @SystemApi
     public static final int ACCESS_UNKNOWN = 0;
 
     /**
@@ -626,6 +627,7 @@ public final class BluetoothDevice implements Parcelable {
      *
      * @hide
      */
+    @SystemApi
     public static final int ACCESS_ALLOWED = 1;
 
     /**
@@ -634,6 +636,7 @@ public final class BluetoothDevice implements Parcelable {
      *
      * @hide
      */
+    @SystemApi
     public static final int ACCESS_REJECTED = 2;
 
     /**
