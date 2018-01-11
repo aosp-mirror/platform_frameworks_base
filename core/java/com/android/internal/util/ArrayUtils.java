@@ -184,6 +184,13 @@ public class ArrayUtils {
     }
 
     /**
+     * Length of the given collection or 0 if it's null.
+     */
+    public static int size(@Nullable Collection<?> collection) {
+        return collection == null ? 0 : collection.size();
+    }
+
+    /**
      * Checks that value is present as at least one of the elements of the array.
      * @param array the array to check in
      * @param value the value to check for
