@@ -19,9 +19,9 @@ package com.android.internal.widget;
 import android.app.PendingIntent;
 import android.app.trust.IStrongAuthTracker;
 import android.os.Bundle;
-import android.security.recoverablekeystore.KeyEntryRecoveryData;
-import android.security.recoverablekeystore.KeyStoreRecoveryData;
-import android.security.recoverablekeystore.KeyStoreRecoveryMetadata;
+import android.security.keystore.EntryRecoveryData;
+import android.security.keystore.RecoveryData;
+import android.security.keystore.RecoveryMetadata;
 import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.VerifyCredentialResponse;
 
@@ -60,11 +60,11 @@ interface ILockSettings {
             in byte[] token, int requestedQuality, int userId);
     void unlockUserWithToken(long tokenHandle, in byte[] token, int userId);
 
-    // RecoverableKeyStoreLoader methods.
+    // Keystore RecoveryManager methods.
     // {@code ServiceSpecificException} may be thrown to signal an error, which caller can
-    // convert to  {@code RecoverableKeyStoreLoader}.
+    // convert to  {@code RecoveryManagerException}.
     void initRecoveryService(in String rootCertificateAlias, in byte[] signedPublicKeyList);
-    KeyStoreRecoveryData getRecoveryData(in byte[] account);
+    RecoveryData getRecoveryData(in byte[] account);
     byte[] generateAndStoreKey(String alias);
     void removeKey(String alias);
     void setSnapshotCreatedPendingIntent(in PendingIntent intent);
@@ -75,10 +75,10 @@ interface ILockSettings {
     void setRecoverySecretTypes(in int[] secretTypes);
     int[] getRecoverySecretTypes();
     int[] getPendingRecoverySecretTypes();
-    void recoverySecretAvailable(in KeyStoreRecoveryMetadata recoverySecret);
+    void recoverySecretAvailable(in RecoveryMetadata recoverySecret);
     byte[] startRecoverySession(in String sessionId,
             in byte[] verifierPublicKey, in byte[] vaultParams, in byte[] vaultChallenge,
-            in List<KeyStoreRecoveryMetadata> secrets);
+            in List<RecoveryMetadata> secrets);
     Map/*<String, byte[]>*/ recoverKeys(in String sessionId, in byte[] recoveryKeyBlob,
-            in List<KeyEntryRecoveryData> applicationKeys);
+            in List<EntryRecoveryData> applicationKeys);
 }

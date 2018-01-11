@@ -29,7 +29,7 @@ import org.junit.runner.RunWith;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.security.recoverablekeystore.RecoverableKeyStoreLoader;
+import android.security.keystore.RecoveryManager;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -277,8 +277,7 @@ public class RecoverableKeyStoreDbTest {
 
         Map<String, Integer> statuses = mRecoverableKeyStoreDb.getStatusForAllKeys(uid);
         assertThat(statuses).hasSize(3);
-        assertThat(statuses).containsEntry(alias,
-                RecoverableKeyStoreLoader.RECOVERY_STATUS_SYNC_IN_PROGRESS);
+        assertThat(statuses).containsEntry(alias, RecoveryManager.RECOVERY_STATUS_SYNC_IN_PROGRESS);
         assertThat(statuses).containsEntry(alias2, status);
         assertThat(statuses).containsEntry(alias3, status);
 

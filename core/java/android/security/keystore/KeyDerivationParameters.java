@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.security.recoverablekeystore;
+package android.security.keystore;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -48,11 +48,13 @@ public final class KeyDerivationParameters implements Parcelable {
 
     /**
      * Salted SHA256
+     * @hide
      */
     public static final int ALGORITHM_SHA256 = 1;
 
     /**
      * Argon2ID
+     * @hide
      */
     // TODO: add Argon2ID support.
     public static final int ALGORITHM_ARGON2ID = 2;
@@ -94,12 +96,18 @@ public final class KeyDerivationParameters implements Parcelable {
         }
     };
 
+    /**
+     * @hide
+     */
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mAlgorithm);
         out.writeByteArray(mSalt);
     }
 
+    /**
+     * @hide
+     */
     protected KeyDerivationParameters(Parcel in) {
         mAlgorithm = in.readInt();
         mSalt = in.createByteArray();

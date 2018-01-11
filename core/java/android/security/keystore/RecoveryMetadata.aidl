@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.security.recoverablekeystore;
+package android.security.keystore;
 
 /* @hide */
-parcelable KeyStoreRecoveryData;
+parcelable RecoveryMetadata;

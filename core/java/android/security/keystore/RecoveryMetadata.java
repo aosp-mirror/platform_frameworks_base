@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.security.recoverablekeystore;
+package android.security.keystore;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -33,7 +33,7 @@ import java.util.Arrays;
  *
  * @hide
  */
-public final class KeyStoreRecoveryMetadata implements Parcelable {
+public final class RecoveryMetadata implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({TYPE_LOCKSCREEN, TYPE_CUSTOM_PASSWORD})
@@ -43,12 +43,12 @@ public final class KeyStoreRecoveryMetadata implements Parcelable {
     /**
      * Lockscreen secret is required to recover KeyStore.
      */
-    public static final int TYPE_LOCKSCREEN = 1;
+    public static final int TYPE_LOCKSCREEN = 100;
 
     /**
      * Custom passphrase, unrelated to lock screen, is required to recover KeyStore.
      */
-    public static final int TYPE_CUSTOM_PASSWORD = 2;
+    public static final int TYPE_CUSTOM_PASSWORD = 101;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -72,10 +72,10 @@ public final class KeyStoreRecoveryMetadata implements Parcelable {
     public static final int TYPE_PATTERN = 3;
 
     @UserSecretType
-    private final int mUserSecretType;
+    private Integer mUserSecretType;
 
     @LockScreenUiFormat
-    private final int mLockScreenUiFormat;
+    private Integer mLockScreenUiFormat;
 
     /**
      * Parameters of key derivation function, including algorithm, difficulty, salt.
@@ -86,22 +86,37 @@ public final class KeyStoreRecoveryMetadata implements Parcelable {
     /**
      * @param secret Constructor creates a reference to the secret. Caller must use
      * @link {#clearSecret} to overwrite its value in memory.
+     * @hide
      */
-    public KeyStoreRecoveryMetadata(@UserSecretType int userSecretType,
+    public RecoveryMetadata(@UserSecretType int userSecretType,
             @LockScreenUiFormat int lockScreenUiFormat,
-            @NonNull KeyDerivationParameters keyDerivationParameters, @NonNull byte[] secret) {
+            @NonNull KeyDerivationParameters keyDerivationParameters,
+            @NonNull byte[] secret) {
         mUserSecretType = userSecretType;
         mLockScreenUiFormat = lockScreenUiFormat;
         mKeyDerivationParameters = Preconditions.checkNotNull(keyDerivationParameters);
         mSecret = Preconditions.checkNotNull(secret);
     }
 
+    private RecoveryMetadata() {
+
+    }
+
+    /**
+     * @see TYPE_LOCKSCREEN
+     * @see TYPE_CUSTOM_PASSWORD
+     */
+    public @UserSecretType int getUserSecretType() {
+        return mUserSecretType;
+    }
+
     /**
      * Specifies UX shown to user during recovery.
+     * Default value is {@code TYPE_LOCKSCREEN}
      *
-     * @see KeyStore.TYPE_PIN
-     * @see KeyStore.TYPE_PASSWORD
-     * @see KeyStore.TYPE_PATTERN
+     * @see TYPE_PIN
+     * @see TYPE_PASSWORD
+     * @see TYPE_PATTERN
      */
     public @LockScreenUiFormat int getLockScreenUiFormat() {
         return mLockScreenUiFormat;
@@ -116,18 +131,91 @@ public final class KeyStoreRecoveryMetadata implements Parcelable {
     }
 
     /**
-     * Secret string derived from user input.
+     * Secret derived from user input.
+     * Default value is empty array
+     *
+     * @return secret or empty array
      */
     public @NonNull byte[] getSecret() {
         return mSecret;
     }
 
     /**
-     * @see KeyStore.TYPE_LOCKSCREEN
-     * @see KeyStore.TYPE_CUSTOM_PASSWORD
+     * Builder for creating {@link RecoveryMetadata}.
      */
-    public @UserSecretType int getUserSecretType() {
-        return mUserSecretType;
+    public static class Builder {
+        private RecoveryMetadata mInstance = new RecoveryMetadata();
+
+        /**
+         * Sets user secret type.
+         *
+         * @see TYPE_LOCKSCREEN
+         * @see TYPE_CUSTOM_PASSWORD
+         * @param userSecretType The secret type
+         * @return This builder.
+         */
+        public Builder setUserSecretType(@UserSecretType int userSecretType) {
+            mInstance.mUserSecretType = userSecretType;
+            return this;
+        }
+
+        /**
+         * Sets UI format.
+         *
+         * @see TYPE_PIN
+         * @see TYPE_PASSWORD
+         * @see TYPE_PATTERN
+         * @param lockScreenUiFormat The UI format
+         * @return This builder.
+         */
+        public Builder setLockScreenUiFormat(@LockScreenUiFormat int lockScreenUiFormat) {
+            mInstance.mLockScreenUiFormat = lockScreenUiFormat;
+            return this;
+        }
+
+        /**
+         * Sets parameters of the key derivation function.
+         *
+         * @param keyDerivationParameters Key derivation parameters
+         * @return This builder.
+         */
+        public Builder setKeyDerivationParameters(@NonNull KeyDerivationParameters
+                keyDerivationParameters) {
+            mInstance.mKeyDerivationParameters = keyDerivationParameters;
+            return this;
+        }
+
+        /**
+         * Secret derived from user input, or empty array.
+         *
+         * @param secret The secret.
+         * @return This builder.
+         */
+        public Builder setSecret(@NonNull byte[] secret) {
+            mInstance.mSecret = secret;
+            return this;
+        }
+
+
+        /**
+         * Creates a new {@link RecoveryMetadata} instance.
+         * The instance will include default values, if {@link setSecret}
+         * or {@link setUserSecretType} were not called.
+         *
+         * @return new instance
+         * @throws NullPointerException if some required fields were not set.
+         */
+        public @NonNull RecoveryMetadata build() {
+            if (mInstance.mUserSecretType == null) {
+                mInstance.mUserSecretType = TYPE_LOCKSCREEN;
+            }
+            Preconditions.checkNotNull(mInstance.mLockScreenUiFormat);
+            Preconditions.checkNotNull(mInstance.mKeyDerivationParameters);
+            if (mInstance.mSecret == null) {
+                mInstance.mSecret = new byte[]{};
+            }
+            return mInstance;
+        }
     }
 
     /**
@@ -147,17 +235,20 @@ public final class KeyStoreRecoveryMetadata implements Parcelable {
         Arrays.fill(mSecret, (byte) 0);
     }
 
-    public static final Parcelable.Creator<KeyStoreRecoveryMetadata> CREATOR =
-            new Parcelable.Creator<KeyStoreRecoveryMetadata>() {
-        public KeyStoreRecoveryMetadata createFromParcel(Parcel in) {
-            return new KeyStoreRecoveryMetadata(in);
+    public static final Parcelable.Creator<RecoveryMetadata> CREATOR =
+            new Parcelable.Creator<RecoveryMetadata>() {
+        public RecoveryMetadata createFromParcel(Parcel in) {
+            return new RecoveryMetadata(in);
         }
 
-        public KeyStoreRecoveryMetadata[] newArray(int length) {
-            return new KeyStoreRecoveryMetadata[length];
+        public RecoveryMetadata[] newArray(int length) {
+            return new RecoveryMetadata[length];
         }
     };
 
+    /**
+     * @hide
+     */
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mUserSecretType);
@@ -166,7 +257,10 @@ public final class KeyStoreRecoveryMetadata implements Parcelable {
         out.writeByteArray(mSecret);
     }
 
-    protected KeyStoreRecoveryMetadata(Parcel in) {
+    /**
+     * @hide
+     */
+    protected RecoveryMetadata(Parcel in) {
         mUserSecretType = in.readInt();
         mLockScreenUiFormat = in.readInt();
         mKeyDerivationParameters = in.readTypedObject(KeyDerivationParameters.CREATOR);

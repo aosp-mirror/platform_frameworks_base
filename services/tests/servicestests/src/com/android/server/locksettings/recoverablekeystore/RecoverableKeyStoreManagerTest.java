@@ -16,8 +16,8 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import static android.security.recoverablekeystore.KeyStoreRecoveryMetadata.TYPE_LOCKSCREEN;
-import static android.security.recoverablekeystore.KeyStoreRecoveryMetadata.TYPE_PASSWORD;
+import static android.security.keystore.RecoveryMetadata.TYPE_LOCKSCREEN;
+import static android.security.keystore.RecoveryMetadata.TYPE_PASSWORD;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
@@ -35,18 +35,19 @@ import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.Manifest;
 import android.os.Binder;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
-import android.security.recoverablekeystore.KeyDerivationParameters;
-import android.security.recoverablekeystore.KeyEntryRecoveryData;
-import android.security.recoverablekeystore.KeyStoreRecoveryMetadata;
-import android.security.recoverablekeystore.RecoverableKeyStoreLoader;
-import android.support.test.InstrumentationRegistry;
+import android.security.keystore.KeyDerivationParameters;
+import android.security.keystore.EntryRecoveryData;
+import android.security.keystore.RecoveryMetadata;
+import android.security.keystore.RecoveryManager;
 import android.support.test.filters.SmallTest;
+import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
@@ -250,7 +251,7 @@ public class RecoverableKeyStoreManagerTest {
                 TEST_VAULT_PARAMS,
                 TEST_VAULT_CHALLENGE,
                 ImmutableList.of(
-                        new KeyStoreRecoveryMetadata(
+                        new RecoveryMetadata(
                                 TYPE_LOCKSCREEN,
                                 TYPE_PASSWORD,
                                 KeyDerivationParameters.createSha256Parameters(TEST_SALT),
@@ -258,7 +259,7 @@ public class RecoverableKeyStoreManagerTest {
 
         verify(mMockContext, times(1))
                 .enforceCallingOrSelfPermission(
-                        eq(RecoverableKeyStoreLoader.PERMISSION_RECOVER_KEYSTORE), any());
+                        eq(Manifest.permission.RECOVER_KEYSTORE), any());
     }
 
     @Test
@@ -269,7 +270,7 @@ public class RecoverableKeyStoreManagerTest {
                 TEST_VAULT_PARAMS,
                 TEST_VAULT_CHALLENGE,
                 ImmutableList.of(
-                        new KeyStoreRecoveryMetadata(
+                        new RecoveryMetadata(
                                 TYPE_LOCKSCREEN,
                                 TYPE_PASSWORD,
                                 KeyDerivationParameters.createSha256Parameters(TEST_SALT),
@@ -294,7 +295,7 @@ public class RecoverableKeyStoreManagerTest {
             fail("should have thrown");
         } catch (ServiceSpecificException e) {
             assertThat(e.getMessage()).startsWith(
-                    "Only a single KeyStoreRecoveryMetadata is supported");
+                    "Only a single RecoveryMetadata is supported");
         }
     }
 
@@ -307,7 +308,7 @@ public class RecoverableKeyStoreManagerTest {
                     TEST_VAULT_PARAMS,
                     TEST_VAULT_CHALLENGE,
                     ImmutableList.of(
-                            new KeyStoreRecoveryMetadata(
+                            new RecoveryMetadata(
                                     TYPE_LOCKSCREEN,
                                     TYPE_PASSWORD,
                                     KeyDerivationParameters.createSha256Parameters(TEST_SALT),
@@ -329,7 +330,7 @@ public class RecoverableKeyStoreManagerTest {
                     vaultParams,
                     TEST_VAULT_CHALLENGE,
                     ImmutableList.of(
-                            new KeyStoreRecoveryMetadata(
+                            new RecoveryMetadata(
                                     TYPE_LOCKSCREEN,
                                     TYPE_PASSWORD,
                                     KeyDerivationParameters.createSha256Parameters(TEST_SALT),
@@ -347,7 +348,7 @@ public class RecoverableKeyStoreManagerTest {
                     TEST_SESSION_ID,
                     /*recoveryKeyBlob=*/ randomBytes(32),
                     /*applicationKeys=*/ ImmutableList.of(
-                            new KeyEntryRecoveryData("alias", randomBytes(32))
+                            new EntryRecoveryData("alias", randomBytes(32))
                     ));
             fail("should have thrown");
         } catch (ServiceSpecificException e) {
@@ -362,7 +363,7 @@ public class RecoverableKeyStoreManagerTest {
                 TEST_PUBLIC_KEY,
                 TEST_VAULT_PARAMS,
                 TEST_VAULT_CHALLENGE,
-                ImmutableList.of(new KeyStoreRecoveryMetadata(
+                ImmutableList.of(new RecoveryMetadata(
                         TYPE_LOCKSCREEN,
                         TYPE_PASSWORD,
                         KeyDerivationParameters.createSha256Parameters(TEST_SALT),
@@ -386,7 +387,7 @@ public class RecoverableKeyStoreManagerTest {
                 TEST_PUBLIC_KEY,
                 TEST_VAULT_PARAMS,
                 TEST_VAULT_CHALLENGE,
-                ImmutableList.of(new KeyStoreRecoveryMetadata(
+                ImmutableList.of(new RecoveryMetadata(
                         TYPE_LOCKSCREEN,
                         TYPE_PASSWORD,
                         KeyDerivationParameters.createSha256Parameters(TEST_SALT),
@@ -396,7 +397,7 @@ public class RecoverableKeyStoreManagerTest {
         SecretKey recoveryKey = randomRecoveryKey();
         byte[] encryptedClaimResponse = encryptClaimResponse(
                 keyClaimant, TEST_SECRET, TEST_VAULT_PARAMS, recoveryKey);
-        KeyEntryRecoveryData badApplicationKey = new KeyEntryRecoveryData(
+        EntryRecoveryData badApplicationKey = new EntryRecoveryData(
                 TEST_ALIAS,
                 randomBytes(32));
 
@@ -418,7 +419,7 @@ public class RecoverableKeyStoreManagerTest {
                 TEST_PUBLIC_KEY,
                 TEST_VAULT_PARAMS,
                 TEST_VAULT_CHALLENGE,
-                ImmutableList.of(new KeyStoreRecoveryMetadata(
+                ImmutableList.of(new RecoveryMetadata(
                         TYPE_LOCKSCREEN,
                         TYPE_PASSWORD,
                         KeyDerivationParameters.createSha256Parameters(TEST_SALT),
@@ -429,7 +430,7 @@ public class RecoverableKeyStoreManagerTest {
         byte[] encryptedClaimResponse = encryptClaimResponse(
                 keyClaimant, TEST_SECRET, TEST_VAULT_PARAMS, recoveryKey);
         byte[] applicationKeyBytes = randomBytes(32);
-        KeyEntryRecoveryData applicationKey = new KeyEntryRecoveryData(
+        EntryRecoveryData applicationKey = new EntryRecoveryData(
                 TEST_ALIAS,
                 encryptedApplicationKey(recoveryKey, applicationKeyBytes));
 

@@ -37,8 +37,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
 /**
- * Utility functions for the flow where the RecoverableKeyStoreLoader syncs keys with remote
- * storage.
+ * Utility functions for the flow where the RecoveryManager syncs keys with remote storage.
  *
  * @hide
  */
