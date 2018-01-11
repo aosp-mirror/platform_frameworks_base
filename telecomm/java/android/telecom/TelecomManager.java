@@ -236,6 +236,15 @@ public class TelecomManager {
             "android.telecom.extra.INCOMING_CALL_EXTRAS";
 
     /**
+     * Optional extra for {@link #ACTION_INCOMING_CALL} containing a boolean to indicate that the
+     * call has an externally generated ringer. Used by the HfpClientConnectionService when In Band
+     * Ringtone is enabled to prevent two ringers from being generated.
+     * @hide
+     */
+    public static final String EXTRA_CALL_EXTERNAL_RINGER =
+            "android.telecom.extra.CALL_EXTERNAL_RINGER";
+
+    /**
      * Optional extra for {@link android.content.Intent#ACTION_CALL} and
      * {@link android.content.Intent#ACTION_DIAL} {@code Intent} containing a {@link Bundle}
      * which contains metadata about the call. This {@link Bundle} will be saved into
