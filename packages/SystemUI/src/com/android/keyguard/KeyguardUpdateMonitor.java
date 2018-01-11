@@ -372,6 +372,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
+    @Override
+    public void onTrustError(CharSequence message) {
+        dispatchErrorMessage(message);
+    }
+
     protected void handleSimSubscriptionInfoChanged() {
         if (DEBUG_SIM_STATES) {
             Log.v(TAG, "onSubscriptionInfoChanged()");
@@ -704,6 +709,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
     public boolean isScreenOn() {
         return mScreenOn;
+    }
+
+    private void dispatchErrorMessage(CharSequence message) {
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onTrustAgentErrorMessage(message);
+            }
+        }
     }
 
     static class DisplayClientState {

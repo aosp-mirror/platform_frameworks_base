@@ -3995,6 +3995,7 @@ package android.service.trust {
     method public final void removeEscrowToken(long, android.os.UserHandle);
     method public final void revokeTrust();
     method public final void setManagingTrust(boolean);
+    method public final void showKeyguardErrorMessage(java.lang.CharSequence);
     method public final void unlockUserWithToken(long, byte[], android.os.UserHandle);
     field public static final int FLAG_GRANT_TRUST_DISMISS_KEYGUARD = 2; // 0x2
     field public static final int FLAG_GRANT_TRUST_INITIATED_BY_USER = 1; // 0x1
