@@ -21,6 +21,9 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.view.Display.DEFAULT_DISPLAY;
+
+import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
+import static com.android.server.am.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_BOTTOM;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_LEFT;
@@ -32,11 +35,14 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.servertransaction.ClientTransaction;
+import android.app.servertransaction.PauseActivityItem;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.MediumTest;
@@ -46,11 +52,13 @@ import org.junit.runner.RunWith;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.mockito.ArgumentCaptor;
+
 /**
  * Tests for the {@link ActivityRecord} class.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.am.ActivityRecordTests
+ *  atest FrameworksServicesTests:com.android.server.am.ActivityRecordTests
  */
 @MediumTest
 @Presubmit
@@ -98,6 +106,27 @@ public class ActivityRecordTests extends ActivityTestsBase {
                 .build();
         mActivity.reparent(newTask, 0, null /*reason*/);
         assertEquals(mStack.onActivityRemovedFromStackInvocationCount(), 0);
+    }
+
+    @Test
+    public void testPausingWhenVisibleFromStopped() throws Exception {
+        mActivity.state = STOPPED;
+        mActivity.makeVisibleIfNeeded(null /* starting */);
+        assertEquals(mActivity.state, PAUSING);
+
+        final ArgumentCaptor<ClientTransaction> transaction =
+                ArgumentCaptor.forClass(ClientTransaction.class);
+        verify(mActivity.app.thread, atLeast(1)).scheduleTransaction(transaction.capture());
+
+        boolean pauseFound = false;
+
+        for (ClientTransaction targetTransaction : transaction.getAllValues()) {
+            if (targetTransaction.getLifecycleStateRequest() instanceof PauseActivityItem) {
+                pauseFound = true;
+            }
+        }
+
+        assertTrue(pauseFound);
     }
 
     @Test
