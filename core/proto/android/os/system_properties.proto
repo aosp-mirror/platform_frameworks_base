@@ -228,8 +228,9 @@ message SystemPropertiesProto {
     }
     optional PmDexopt pm_dexopt = 20;
 
+    // Read only properites on the device.
     message Ro {
-        optional int32  adb_secure = 1;
+        optional bool  adb_secure = 1;
         optional string arch = 2;
         optional bool   audio_ignore_effects = 3;
         optional bool   audio_monitorRotation = 4;
@@ -262,21 +263,29 @@ message SystemPropertiesProto {
         }
         optional Boot boot = 7;
 
+        // boot.img's properties.
         message BootImage {
+            // When the boot.img is built.
             optional string build_date = 1;
-            optional int32  build_date_utc = 2;
+            // UTC timestamp of build date.
+            optional int64 build_date_utc = 2;
+            // Android Build fingerprint of the build, e.g.
+            // google/marlin/marlin:P/MASTER/android-build/dev-keys
             optional string build_fingerprint = 3;
 
             // Next Tag: 4
         }
         optional BootImage bootimage = 8;
 
+        // Version of bootloader on device.
         optional string bootloader = 9;
+        // Kernel bootmode, e.g. charger.
         optional string bootmode = 10;
 
+        // Android Platform build metadata.
         message Build {
             optional string date = 1;
-            optional int32  date_utc = 2;
+            optional int64  date_utc = 2;
             optional string description = 3;
             optional string display_id = 4;
             optional string host = 5;
@@ -304,7 +313,7 @@ message SystemPropertiesProto {
         }
         optional Build build = 11;
 
-        optional int32  camera_notify_nfc = 12;
+        optional bool   camera_notify_nfc = 12;
         optional string carrier = 13;
         optional bool   com_android_dataroaming = 14;
         optional bool   com_android_prov_mobiledata = 15;
@@ -327,7 +336,7 @@ message SystemPropertiesProto {
         optional string crypto_state = 21;
         optional string crypto_type = 22;
         optional string dalvik_vm_native_bridge = 23;
-        optional bool  debuggable = 24;
+        optional bool   debuggable = 24;
         optional string frp_pst = 25;
         optional string gfx_driver_0 = 26;
 
@@ -426,7 +435,7 @@ message SystemPropertiesProto {
 
         message Vendor {
             optional string build_date = 1;
-            optional int32  build_date_utc = 2;
+            optional int64  build_date_utc = 2;
             optional string build_fingerprint = 3;
         }
         optional Vendor vendor = 41;

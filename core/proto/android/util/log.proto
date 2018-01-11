@@ -57,10 +57,10 @@ message BinaryLogEntry {
     optional uint32 tag_index = 6;
 
     message Elem {
-        // must be sync with liblog log/log.h
+        // must be sync with AOSP liblog's log.h
         enum Type {
-            EVENT_TYPE_LIST_STOP = 10; // '\n'
-            EVENT_TYPE_UNKNOWN = 63; // '?'
+            EVENT_TYPE_LIST_STOP = 10; // ascii decimal value of char '\n'
+            EVENT_TYPE_UNKNOWN = 63; // ascii decimal value of char '?'
 
             EVENT_TYPE_INT = 0;
             EVENT_TYPE_LONG = 1;
