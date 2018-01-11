@@ -1584,6 +1584,11 @@ public class SettingsProvider extends ContentProvider {
                 restriction = UserManager.DISALLOW_SAFE_BOOT;
                 break;
 
+            case Settings.Global.AIRPLANE_MODE_ON:
+                if ("0".equals(value)) return false;
+                restriction = UserManager.DISALLOW_AIRPLANE_MODE;
+                break;
+
             default:
                 if (setting != null && setting.startsWith(Settings.Global.DATA_ROAMING)) {
                     if ("0".equals(value)) return false;
