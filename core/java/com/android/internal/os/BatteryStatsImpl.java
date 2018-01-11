@@ -10810,7 +10810,7 @@ public class BatteryStatsImpl extends BatteryStats {
         return null;
     }
 
-    /**
+   /**
      * Distribute WiFi energy info and network traffic to apps.
      * @param info The energy information from the WiFi controller.
      */
@@ -11074,6 +11074,9 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    private ModemActivityInfo mLastModemActivityInfo =
+            new ModemActivityInfo(0, 0, 0, new int[0], 0, 0);
+
     /**
      * Distribute Cell radio energy info and network traffic to apps.
      */
@@ -11094,6 +11097,22 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
+        int rxTimeMs = 0;
+        int[] txTimeMs = new int[ModemActivityInfo.TX_POWER_LEVELS];
+        int idleTimeMs = 0;
+        int sleepTimeMs = 0;
+        if (activityInfo != null) {
+            rxTimeMs = activityInfo.getRxTimeMillis() - mLastModemActivityInfo.getRxTimeMillis();
+            for (int i = 0; i < ModemActivityInfo.TX_POWER_LEVELS; i++) {
+                txTimeMs[i] = activityInfo.getTxTimeMillis()[i]
+                        - mLastModemActivityInfo.getTxTimeMillis()[i];
+            }
+            idleTimeMs =
+                    activityInfo.getIdleTimeMillis() - mLastModemActivityInfo.getIdleTimeMillis();
+            sleepTimeMs =
+                    activityInfo.getSleepTimeMillis() - mLastModemActivityInfo.getSleepTimeMillis();
+        }
+
         synchronized (this) {
             if (!mOnBatteryInternal) {
                 if (delta != null) {
@@ -11105,11 +11124,11 @@ public class BatteryStatsImpl extends BatteryStats {
             if (activityInfo != null) {
                 mHasModemReporting = true;
                 mModemActivity.getIdleTimeCounter().addCountLocked(
-                    activityInfo.getIdleTimeMillis());
-                mModemActivity.getRxTimeCounter().addCountLocked(activityInfo.getRxTimeMillis());
+                    idleTimeMs);
+                mModemActivity.getRxTimeCounter().addCountLocked(rxTimeMs);
                 for (int lvl = 0; lvl < ModemActivityInfo.TX_POWER_LEVELS; lvl++) {
                     mModemActivity.getTxTimeCounters()[lvl]
-                        .addCountLocked(activityInfo.getTxTimeMillis()[lvl]);
+                        .addCountLocked(txTimeMs[lvl]);
                 }
 
                 // POWER_MODEM_CONTROLLER_OPERATING_VOLTAGE is measured in mV, so convert to V.
@@ -11117,16 +11136,15 @@ public class BatteryStatsImpl extends BatteryStats {
                     PowerProfile.POWER_MODEM_CONTROLLER_OPERATING_VOLTAGE) / 1000.0;
                 if (opVolt != 0) {
                     double energyUsed =
-                        activityInfo.getSleepTimeMillis() *
+                        sleepTimeMs *
                             mPowerProfile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_SLEEP)
-                            + activityInfo.getIdleTimeMillis() *
+                            + idleTimeMs *
                             mPowerProfile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_IDLE)
-                            + activityInfo.getRxTimeMillis() *
+                            + rxTimeMs *
                             mPowerProfile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_RX);
-                    int[] txCurrentMa = activityInfo.getTxTimeMillis();
-                    for (int i = 0; i < Math.min(txCurrentMa.length,
+                    for (int i = 0; i < Math.min(txTimeMs.length,
                         SignalStrength.NUM_SIGNAL_STRENGTH_BINS); i++) {
-                        energyUsed += txCurrentMa[i] * mPowerProfile.getAveragePower(
+                        energyUsed += txTimeMs[i] * mPowerProfile.getAveragePower(
                             PowerProfile.POWER_MODEM_CONTROLLER_TX, i);
                     }
 
@@ -11207,7 +11225,7 @@ public class BatteryStatsImpl extends BatteryStats {
                             ControllerActivityCounterImpl activityCounter =
                                     u.getOrCreateModemControllerActivityLocked();
                             if (totalRxPackets > 0 && entry.rxPackets > 0) {
-                                final long rxMs = (entry.rxPackets * activityInfo.getRxTimeMillis())
+                                final long rxMs = (entry.rxPackets * rxTimeMs)
                                         / totalRxPackets;
                                 activityCounter.getRxTimeCounter().addCountLocked(rxMs);
                             }
@@ -11215,7 +11233,7 @@ public class BatteryStatsImpl extends BatteryStats {
                             if (totalTxPackets > 0 && entry.txPackets > 0) {
                                 for (int lvl = 0; lvl < ModemActivityInfo.TX_POWER_LEVELS; lvl++) {
                                     long txMs =
-                                            entry.txPackets * activityInfo.getTxTimeMillis()[lvl];
+                                            entry.txPackets * txTimeMs[lvl];
                                     txMs /= totalTxPackets;
                                     activityCounter.getTxTimeCounters()[lvl].addCountLocked(txMs);
                                 }
@@ -11236,6 +11254,10 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
+    // Cache last value for comparison.
+    private BluetoothActivityEnergyInfo mLastBluetoothActivityEnergyInfo =
+            new BluetoothActivityEnergyInfo(0, 0, 0, 0, 0, 0);
+
     /**
      * Distribute Bluetooth energy info and network traffic to apps.
      * @param info The energy information from the bluetooth controller.
@@ -11252,14 +11274,17 @@ public class BatteryStatsImpl extends BatteryStats {
         mHasBluetoothReporting = true;
 
         final long elapsedRealtimeMs = mClocks.elapsedRealtime();
-        final long rxTimeMs = info.getControllerRxTimeMillis();
-        final long txTimeMs = info.getControllerTxTimeMillis();
-
+        final long rxTimeMs = info.getControllerRxTimeMillis() -
+                mLastBluetoothActivityEnergyInfo.getControllerRxTimeMillis();
+        final long txTimeMs = info.getControllerTxTimeMillis() -
+                mLastBluetoothActivityEnergyInfo.getControllerTxTimeMillis();
+        final long idleTimeMs = info.getControllerIdleTimeMillis() -
+                mLastBluetoothActivityEnergyInfo.getControllerIdleTimeMillis();
         if (DEBUG_ENERGY) {
             Slog.d(TAG, "------ BEGIN BLE power blaming ------");
             Slog.d(TAG, "  Tx Time:    " + txTimeMs + " ms");
             Slog.d(TAG, "  Rx Time:    " + rxTimeMs + " ms");
-            Slog.d(TAG, "  Idle Time:  " + info.getControllerIdleTimeMillis() + " ms");
+            Slog.d(TAG, "  Idle Time:  " + idleTimeMs + " ms");
         }
 
         long totalScanTimeMs = 0;
@@ -11338,9 +11363,25 @@ public class BatteryStatsImpl extends BatteryStats {
         long totalRxBytes = 0;
 
         final UidTraffic[] uidTraffic = info.getUidTraffic();
-        final int numUids = uidTraffic != null ? uidTraffic.length : 0;
-        for (int i = 0; i < numUids; i++) {
-            final UidTraffic traffic = uidTraffic[i];
+        final UidTraffic[] lastUidTraffic = mLastBluetoothActivityEnergyInfo.getUidTraffic();
+        final ArrayList<UidTraffic> deltaTraffic = new ArrayList<>();
+        int m = 0, n = 0;
+        for (; m < uidTraffic.length && n < lastUidTraffic.length; m++) {
+            final UidTraffic traffic = uidTraffic[m];
+            final UidTraffic lastTraffic = lastUidTraffic[n];
+            if (traffic.getUid() == lastTraffic.getUid()) {
+                deltaTraffic.add(new UidTraffic(traffic.getUid(),
+                        traffic.getRxBytes() - lastTraffic.getRxBytes(),
+                        traffic.getTxBytes() - lastTraffic.getTxBytes()));
+                n++;
+            }
+        }
+        for (; m < uidTraffic.length; m ++) {
+            deltaTraffic.add(uidTraffic[m]);
+        }
+
+        for (int i = 0, j = 0; i < deltaTraffic.size(); i++) {
+            final UidTraffic traffic = deltaTraffic.get(i);
 
             // Add to the global counters.
             mNetworkByteActivityCounters[NETWORK_BT_RX_DATA].addCountLocked(
@@ -11360,8 +11401,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
         if ((totalTxBytes != 0 || totalRxBytes != 0) &&
                 (leftOverRxTimeMs != 0 || leftOverTxTimeMs != 0)) {
-            for (int i = 0; i < numUids; i++) {
-                final UidTraffic traffic = uidTraffic[i];
+            for (int i = 0; i < deltaTraffic.size(); i++) {
+                final UidTraffic traffic = deltaTraffic.get(i);
 
                 final Uid u = getUidStatsLocked(mapUid(traffic.getUid()));
                 final ControllerActivityCounterImpl counter =
@@ -11392,12 +11433,9 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        mBluetoothActivity.getRxTimeCounter().addCountLocked(
-                info.getControllerRxTimeMillis());
-        mBluetoothActivity.getTxTimeCounters()[0].addCountLocked(
-                info.getControllerTxTimeMillis());
-        mBluetoothActivity.getIdleTimeCounter().addCountLocked(
-                info.getControllerIdleTimeMillis());
+        mBluetoothActivity.getRxTimeCounter().addCountLocked(rxTimeMs);
+        mBluetoothActivity.getTxTimeCounters()[0].addCountLocked(txTimeMs);
+        mBluetoothActivity.getIdleTimeCounter().addCountLocked(idleTimeMs);
 
         // POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE is measured in mV, so convert to V.
         final double opVolt = mPowerProfile.getAveragePower(
@@ -11405,8 +11443,10 @@ public class BatteryStatsImpl extends BatteryStats {
         if (opVolt != 0) {
             // We store the power drain as mAms.
             mBluetoothActivity.getPowerCounter().addCountLocked(
-                    (long) (info.getControllerEnergyUsed() / opVolt));
+                    (long) ((info.getControllerEnergyUsed() -
+                            mLastBluetoothActivityEnergyInfo.getControllerEnergyUsed() )/ opVolt));
         }
+        mLastBluetoothActivityEnergyInfo = info;
     }
 
     /**
