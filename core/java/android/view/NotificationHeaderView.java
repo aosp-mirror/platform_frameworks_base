@@ -47,6 +47,7 @@ public class NotificationHeaderView extends ViewGroup {
     private final int mGravity;
     private View mAppName;
     private View mHeaderText;
+    private View mSecondaryHeaderText;
     private OnClickListener mExpandClickListener;
     private HeaderTouchListener mTouchListener = new HeaderTouchListener();
     private ImageView mExpandButton;
@@ -58,7 +59,6 @@ public class NotificationHeaderView extends ViewGroup {
     private boolean mShowExpandButtonAtEnd;
     private boolean mShowWorkBadgeAtEnd;
     private Drawable mBackground;
-    private int mHeaderBackgroundHeight;
     private boolean mEntireHeaderClickable;
     private boolean mExpandOnlyOnButton;
     private boolean mAcceptAllTouches;
@@ -68,7 +68,7 @@ public class NotificationHeaderView extends ViewGroup {
         @Override
         public void getOutline(View view, Outline outline) {
             if (mBackground != null) {
-                outline.setRect(0, 0, getWidth(), mHeaderBackgroundHeight);
+                outline.setRect(0, 0, getWidth(), getHeight());
                 outline.setAlpha(1f);
             }
         }
@@ -91,8 +91,6 @@ public class NotificationHeaderView extends ViewGroup {
         Resources res = getResources();
         mChildMinWidth = res.getDimensionPixelSize(R.dimen.notification_header_shrink_min_width);
         mContentEndMargin = res.getDimensionPixelSize(R.dimen.notification_content_margin_end);
-        mHeaderBackgroundHeight = res.getDimensionPixelSize(
-                R.dimen.notification_header_background_height);
         mEntireHeaderClickable = res.getBoolean(R.bool.config_notificationHeaderClickableForExpand);
 
         int[] attrIds = { android.R.attr.gravity };
@@ -106,6 +104,7 @@ public class NotificationHeaderView extends ViewGroup {
         super.onFinishInflate();
         mAppName = findViewById(com.android.internal.R.id.app_name_text);
         mHeaderText = findViewById(com.android.internal.R.id.header_text);
+        mSecondaryHeaderText = findViewById(com.android.internal.R.id.header_text_secondary);
         mExpandButton = findViewById(com.android.internal.R.id.expand_button);
         mIcon = findViewById(com.android.internal.R.id.icon);
         mProfileBadge = findViewById(com.android.internal.R.id.profile_badge);
@@ -137,24 +136,31 @@ public class NotificationHeaderView extends ViewGroup {
         if (totalWidth > givenWidth) {
             int overFlow = totalWidth - givenWidth;
             // We are overflowing, lets shrink the app name first
-            final int appWidth = mAppName.getMeasuredWidth();
-            if (overFlow > 0 && mAppName.getVisibility() != GONE && appWidth > mChildMinWidth) {
-                int newSize = appWidth - Math.min(appWidth - mChildMinWidth, overFlow);
-                int childWidthSpec = MeasureSpec.makeMeasureSpec(newSize, MeasureSpec.AT_MOST);
-                mAppName.measure(childWidthSpec, wrapContentHeightSpec);
-                overFlow -= appWidth - newSize;
-            }
-            // still overflowing, finaly we shrink the header text
-            if (overFlow > 0 && mHeaderText.getVisibility() != GONE) {
-                // we're still too big
-                final int textWidth = mHeaderText.getMeasuredWidth();
-                int newSize = Math.max(0, textWidth - overFlow);
-                int childWidthSpec = MeasureSpec.makeMeasureSpec(newSize, MeasureSpec.AT_MOST);
-                mHeaderText.measure(childWidthSpec, wrapContentHeightSpec);
-            }
+            overFlow = shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mAppName,
+                    mChildMinWidth);
+
+            // still overflowing, we shrink the header text
+            overFlow = shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mHeaderText, 0);
+
+            // still overflowing, finally we shrink the secondary header text
+            shrinkViewForOverflow(wrapContentHeightSpec, overFlow, mSecondaryHeaderText,
+                    0);
         }
         mTotalWidth = Math.min(totalWidth, givenWidth);
         setMeasuredDimension(givenWidth, givenHeight);
+    }
+
+    private int shrinkViewForOverflow(int heightSpec, int overFlow, View targetView,
+            int minimumWidth) {
+        final int oldWidth = targetView.getMeasuredWidth();
+        if (overFlow > 0 && targetView.getVisibility() != GONE && oldWidth > minimumWidth) {
+            // we're still too big
+            int newSize = Math.max(minimumWidth, oldWidth - overFlow);
+            int childWidthSpec = MeasureSpec.makeMeasureSpec(newSize, MeasureSpec.AT_MOST);
+            targetView.measure(childWidthSpec, heightSpec);
+            overFlow -= oldWidth - newSize;
+        }
+        return overFlow;
     }
 
     @Override
@@ -228,7 +234,7 @@ public class NotificationHeaderView extends ViewGroup {
     @Override
     protected void onDraw(Canvas canvas) {
         if (mBackground != null) {
-            mBackground.setBounds(0, 0, getWidth(), mHeaderBackgroundHeight);
+            mBackground.setBounds(0, 0, getWidth(), getHeight());
             mBackground.draw(canvas);
         }
     }

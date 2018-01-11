@@ -76,7 +76,6 @@ import com.android.systemui.statusbar.ActivatableNotificationView;
 import com.android.systemui.statusbar.DismissView;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
-import com.android.systemui.statusbar.ExpandableOutlineView;
 import com.android.systemui.statusbar.ExpandableView;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationGuts;
@@ -86,10 +85,8 @@ import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.NotificationSnooze;
 import com.android.systemui.statusbar.StackScrollerDecorView;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
-import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -126,16 +123,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     /**
      * Sentinel value for no current active pointer. Used by {@link #mActivePointerId}.
      */
-    private static final int INVALID_POINTER = -1;
-    private static final AnimatableProperty SIDE_PADDINGS = AnimatableProperty.from(
-            "sidePaddings",
-            NotificationStackScrollLayout::setCurrentSidePadding,
-            NotificationStackScrollLayout::getCurrentSidePadding,
-            R.id.side_padding_animator_tag,
-            R.id.side_padding_animator_end_tag,
-            R.id.side_padding_animator_start_tag);
-    private static final AnimationProperties SIDE_PADDING_PROPERTIES =
-            new AnimationProperties().setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+    private static final int INVALID_POINTER = -1;;
 
     private ExpandHelper mExpandHelper;
     private NotificationSwipeHelper mSwipeHelper;
@@ -143,7 +131,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mCurrentStackHeight = Integer.MAX_VALUE;
     private final Paint mBackgroundPaint = new Paint();
     private final Path mBackgroundPath = new Path();
-    private final float[] mBackgroundRadii = new float[8];
     private final boolean mShouldDrawNotificationBackground;
 
     private float mExpandedHeight;
@@ -174,7 +161,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     private int mTopPadding;
     private int mBottomMargin;
     private int mBottomInset = 0;
-    private float mCurrentSidePadding;
 
     /**
      * The algorithm which calculates the properties for our children
@@ -402,7 +388,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     private boolean mHeadsUpGoingAwayAnimationsAllowed = true;
     private Runnable mAnimateScroll = this::animateScroll;
     private int mCornerRadius;
-    private int mLockscreenSidePaddings;
     private int mSidePaddings;
 
     public NotificationStackScrollLayout(Context context) {
@@ -440,8 +425,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 res.getBoolean(R.bool.config_fadeNotificationsOnDismiss);
 
         updateWillNotDraw();
-        mBackgroundPaint.setAntiAlias(true);
-        mBackgroundPaint.setStyle(Paint.Style.FILL);
+        mBackgroundPaint.setAntiAlias(true);;
         if (DEBUG) {
             mDebugPaint = new Paint();
             mDebugPaint.setColor(0xffff0000);
@@ -490,7 +474,8 @@ public class NotificationStackScrollLayout extends ViewGroup
     protected void onDraw(Canvas canvas) {
         if (mShouldDrawNotificationBackground && !mAmbientState.isDark()
                 && mCurrentBounds.top < mCurrentBounds.bottom) {
-            canvas.drawPath(mBackgroundPath, mBackgroundPaint);
+            canvas.drawRoundRect(mSidePaddings, mCurrentBounds.top, getWidth() - mSidePaddings,
+                    mCurrentBounds.bottom, mCornerRadius, mCornerRadius, mBackgroundPaint);
         }
 
         if (DEBUG) {
@@ -543,8 +528,7 @@ public class NotificationStackScrollLayout extends ViewGroup
                 R.dimen.min_top_overscroll_to_qs);
         mStatusBarHeight = res.getDimensionPixelOffset(R.dimen.status_bar_height);
         mBottomMargin = res.getDimensionPixelSize(R.dimen.notification_panel_margin_bottom);
-        mLockscreenSidePaddings = res.getDimensionPixelSize(
-                R.dimen.notification_lockscreen_side_paddings);
+        mSidePaddings = res.getDimensionPixelSize(R.dimen.notification_side_paddings);
         mMinInteractionHeight = res.getDimensionPixelSize(
                 R.dimen.notification_min_interaction_height);
         mCornerRadius = res.getDimensionPixelSize(
@@ -575,11 +559,15 @@ public class NotificationStackScrollLayout extends ViewGroup
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int childWidthSpec = MeasureSpec.makeMeasureSpec(width - mSidePaddings * 2,
+                MeasureSpec.getMode(widthMeasureSpec));
         // We need to measure all children even the GONE ones, such that the heights are calculated
         // correctly as they are used to calculate how many we can fit on the screen.
         final int size = getChildCount();
         for (int i = 0; i < size; i++) {
-            measureChild(getChildAt(i), widthMeasureSpec, heightMeasureSpec);
+            measureChild(getChildAt(i), childWidthSpec, heightMeasureSpec);
         }
     }
 
@@ -675,8 +663,29 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void onPreDrawDuringAnimation() {
         mShelf.updateAppearance();
+        updateClippingToTopRoundedCorner();
         if (!mNeedsAnimation && !mChildrenUpdateRequested) {
             updateBackground();
+        }
+    }
+
+    private void updateClippingToTopRoundedCorner() {
+        Float clipStart = (float) mTopPadding;
+        Float clipEnd = clipStart + mCornerRadius;
+        boolean first = true;
+        for (int i = 0; i < getChildCount(); i++) {
+            ExpandableView child = (ExpandableView) getChildAt(i);
+            if (child.getVisibility() == GONE) {
+                continue;
+            }
+            float start = child.getTranslationY();
+            float end = start + Math.max(child.getActualHeight() - child.getClipBottomAmount(),
+                    0);
+            boolean clip = clipStart > start && clipStart < end
+                    || clipEnd >= start && clipEnd <= end;
+            clip &= !(first && mOwnScrollY == 0);
+            child.setDistanceToTopRoundness(clip ? Math.max(start - clipStart, 0) : -1);
+            first = false;
         }
     }
 
@@ -2255,29 +2264,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mScrimController.setExcludedBackgroundArea(
                 mFadingOut || mParentNotFullyVisible || mAmbientState.isDark() || mIsClipped ? null
                         : mCurrentBounds);
-        updateBackgroundPath();
         invalidate();
-    }
-
-    private void updateBackgroundPath() {
-        mBackgroundPath.reset();
-        float topRoundness = 0;
-        if (mFirstVisibleBackgroundChild != null) {
-            topRoundness = mFirstVisibleBackgroundChild.getCurrentBackgroundRadiusTop();
-        }
-        topRoundness = onKeyguard() ? mCornerRadius : topRoundness;
-        float bottomRoundNess = mCornerRadius;
-        mBackgroundRadii[0] = topRoundness;
-        mBackgroundRadii[1] = topRoundness;
-        mBackgroundRadii[2] = topRoundness;
-        mBackgroundRadii[3] = topRoundness;
-        mBackgroundRadii[4] = bottomRoundNess;
-        mBackgroundRadii[5] = bottomRoundNess;
-        mBackgroundRadii[6] = bottomRoundNess;
-        mBackgroundRadii[7] = bottomRoundNess;
-        mBackgroundPath.addRoundRect(mCurrentSidePadding, mCurrentBounds.top,
-                getWidth() - mCurrentSidePadding, mCurrentBounds.bottom, mBackgroundRadii,
-                Path.Direction.CCW);
     }
 
     /**
@@ -2292,8 +2279,8 @@ public class NotificationStackScrollLayout extends ViewGroup
             mBackgroundBounds.left = mTempInt2[0];
             mBackgroundBounds.right = mTempInt2[0] + getWidth();
         }
-        mBackgroundBounds.left += mCurrentSidePadding;
-        mBackgroundBounds.right -= mCurrentSidePadding;
+        mBackgroundBounds.left += mSidePaddings;
+        mBackgroundBounds.right -= mSidePaddings;
         if (!mIsExpanded) {
             mBackgroundBounds.top = 0;
             mBackgroundBounds.bottom = 0;
@@ -2902,8 +2889,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private void applyRoundedNess() {
         if (mFirstVisibleBackgroundChild != null) {
-            mFirstVisibleBackgroundChild.setTopRoundness(
-                    mStatusBarState == StatusBarState.KEYGUARD ? 1.0f : 0.0f,
+            mFirstVisibleBackgroundChild.setTopRoundness(1.0f,
                     mFirstVisibleBackgroundChild.isShown()
                             && !mChildrenToAddAnimated.contains(mFirstVisibleBackgroundChild));
         }
@@ -2912,7 +2898,6 @@ public class NotificationStackScrollLayout extends ViewGroup
                     mLastVisibleBackgroundChild.isShown()
                             && !mChildrenToAddAnimated.contains(mLastVisibleBackgroundChild));
         }
-        updateBackgroundPath();
         invalidate();
     }
 
@@ -2922,7 +2907,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         generateAddAnimation(child, false /* fromMoreCard */);
         updateAnimationState(child);
         updateChronometerForChild(child);
-        updateCurrentSidePaddings(child);
     }
 
     private void updateHideSensitiveForChild(View child) {
@@ -3021,6 +3005,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             mAnimationEvents.clear();
             updateBackground();
             updateViewShadows();
+            updateClippingToTopRoundedCorner();
         } else {
             applyCurrentState();
         }
@@ -3714,6 +3699,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         setAnimationRunning(false);
         updateBackground();
         updateViewShadows();
+        updateClippingToTopRoundedCorner();
     }
 
     private void updateViewShadows() {
@@ -4382,43 +4368,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setStatusBarState(int statusBarState) {
         mStatusBarState = statusBarState;
         mAmbientState.setStatusBarState(statusBarState);
-        applyRoundedNess();
-        updateSidePaddings();
-    }
-
-    private void updateSidePaddings() {
-        int sidePaddings = mStatusBarState == StatusBarState.KEYGUARD ? mLockscreenSidePaddings : 0;
-        if (sidePaddings != mSidePaddings) {
-            boolean animate = isShown();
-            mSidePaddings = sidePaddings;
-            PropertyAnimator.setProperty(this, SIDE_PADDINGS, sidePaddings,
-                    SIDE_PADDING_PROPERTIES, animate);
-        }
-    }
-
-    protected void setCurrentSidePadding(float sidePadding) {
-        mCurrentSidePadding = sidePadding;
-        updateBackground();
-        applySidePaddingsToChildren();
-    }
-
-    private void applySidePaddingsToChildren() {
-        for (int i = 0; i < getChildCount(); i++) {
-            View view = getChildAt(i);
-            updateCurrentSidePaddings(view);
-        }
-    }
-
-    private void updateCurrentSidePaddings(View view) {
-        if (!(view instanceof ExpandableOutlineView)) {
-            return;
-        }
-        ExpandableOutlineView outlineView = (ExpandableOutlineView) view;
-        outlineView.setCurrentSidePaddings(mCurrentSidePadding);
-    }
-
-    protected float getCurrentSidePadding() {
-        return mCurrentSidePadding;
     }
 
     public void setExpandingVelocity(float expandingVelocity) {

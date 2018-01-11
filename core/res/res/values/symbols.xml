@@ -2608,10 +2608,12 @@
   <java-symbol type="string" name="notification_hidden_text" />
   <java-symbol type="id" name="app_name_text" />
   <java-symbol type="id" name="header_text" />
+  <java-symbol type="id" name="header_text_secondary" />
   <java-symbol type="id" name="expand_button" />
   <java-symbol type="id" name="notification_header" />
   <java-symbol type="id" name="time_divider" />
   <java-symbol type="id" name="header_text_divider" />
+  <java-symbol type="id" name="header_text_secondary_divider" />
   <java-symbol type="id" name="text_line_1" />
   <java-symbol type="drawable" name="ic_expand_notification" />
   <java-symbol type="drawable" name="ic_collapse_notification" />

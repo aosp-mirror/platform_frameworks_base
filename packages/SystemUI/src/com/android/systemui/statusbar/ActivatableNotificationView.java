@@ -931,13 +931,6 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     }
 
     @Override
-    public void setCurrentSidePaddings(float currentSidePaddings) {
-        super.setCurrentSidePaddings(currentSidePaddings);
-        mBackgroundNormal.setCurrentSidePaddings(currentSidePaddings);
-        mBackgroundDimmed.setCurrentSidePaddings(currentSidePaddings);
-    }
-
-    @Override
     protected boolean childNeedsClipping(View child) {
         if (child instanceof NotificationBackgroundView && isClippingNeeded()) {
             return true;

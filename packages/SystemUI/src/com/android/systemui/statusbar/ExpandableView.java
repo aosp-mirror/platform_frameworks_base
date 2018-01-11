@@ -130,6 +130,14 @@ public abstract class ExpandableView extends FrameLayout {
         }
     }
 
+    /**
+     * Set the distance to the top roundness, from where we should start clipping a value above
+     * or equal to 0 is the effective distance, and if a value below 0 is received, there should
+     * be no clipping.
+     */
+    public void setDistanceToTopRoundness(float distanceToTopRoundness) {
+    }
+
     public void setActualHeight(int actualHeight) {
         setActualHeight(actualHeight, true /* notifyListeners */);
     }

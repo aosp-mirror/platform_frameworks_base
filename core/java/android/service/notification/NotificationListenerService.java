@@ -890,6 +890,8 @@ public abstract class NotificationListenerService extends Service {
                 createLegacyIconExtras(notification);
                 // populate remote views for older clients.
                 maybePopulateRemoteViews(notification);
+                // populate people for older clients.
+                maybePopulatePeople(notification);
             } catch (IllegalArgumentException e) {
                 if (corruptNotifications == null) {
                     corruptNotifications = new ArrayList<>(N);
@@ -1175,6 +1177,25 @@ public abstract class NotificationListenerService extends Service {
             notification.contentView = content;
             notification.bigContentView = big;
             notification.headsUpContentView = headsUp;
+        }
+    }
+
+    /**
+     * Populates remote views for pre-P targeting apps.
+     */
+    private void maybePopulatePeople(Notification notification) {
+        if (getContext().getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.P) {
+            ArrayList<Notification.Person> people = notification.extras.getParcelableArrayList(
+                    Notification.EXTRA_PEOPLE_LIST);
+            if (people != null && people.isEmpty()) {
+                int size = people.size();
+                String[] peopleArray = new String[size];
+                for (int i = 0; i < size; i++) {
+                    Notification.Person person = people.get(i);
+                    peopleArray[i] = person.resolveToLegacyUri();
+                }
+                notification.extras.putStringArray(Notification.EXTRA_PEOPLE, peopleArray);
+            }
         }
     }
 

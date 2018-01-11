@@ -136,7 +136,6 @@ public class NotificationContentView extends FrameLayout {
     private int mClipBottomAmount;
     private boolean mIsLowPriority;
     private boolean mIsContentExpandable;
-    private int mCustomViewSidePaddings;
 
 
     public NotificationContentView(Context context, AttributeSet attrs) {
@@ -150,8 +149,6 @@ public class NotificationContentView extends FrameLayout {
                 R.dimen.min_notification_layout_height);
         mNotificationContentMarginEnd = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.notification_content_margin_end);
-        mCustomViewSidePaddings = getResources().getDimensionPixelSize(
-                R.dimen.notification_content_custom_view_side_padding);
     }
 
     public void setHeights(int smallHeight, int headsUpMaxHeight, int maxHeight,
@@ -391,22 +388,6 @@ public class NotificationContentView extends FrameLayout {
         mContractedWrapper = NotificationViewWrapper.wrap(getContext(), child,
                 mContainingNotification);
         mContractedWrapper.setDark(mDark, false /* animate */, 0 /* delay */);
-        updateMargins(child);
-    }
-
-    private void updateMargins(View child) {
-        if (child == null) {
-            return;
-        }
-        NotificationViewWrapper wrapper = getWrapperForView(child);
-        boolean isCustomView = wrapper instanceof NotificationCustomViewWrapper;
-        boolean needsMargins = isCustomView &&
-                child.getContext().getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.P;
-        int padding = needsMargins ? mCustomViewSidePaddings : 0;
-        MarginLayoutParams layoutParams = (MarginLayoutParams) child.getLayoutParams();
-        layoutParams.setMarginStart(padding);
-        layoutParams.setMarginEnd(padding);
-        child.setLayoutParams(layoutParams);
     }
 
     private NotificationViewWrapper getWrapperForView(View child) {
@@ -456,7 +437,6 @@ public class NotificationContentView extends FrameLayout {
         mExpandedChild = child;
         mExpandedWrapper = NotificationViewWrapper.wrap(getContext(), child,
                 mContainingNotification);
-        updateMargins(child);
     }
 
     public void setHeadsUpChild(View child) {
@@ -490,7 +470,6 @@ public class NotificationContentView extends FrameLayout {
         mHeadsUpChild = child;
         mHeadsUpWrapper = NotificationViewWrapper.wrap(getContext(), child,
                 mContainingNotification);
-        updateMargins(child);
     }
 
     public void setAmbientChild(View child) {
@@ -1510,19 +1489,19 @@ public class NotificationContentView extends FrameLayout {
         return false;
     }
 
-    public boolean shouldClipToSidePaddings() {
-        boolean needsPaddings = shouldClipToSidePaddings(getVisibleType());
+    public boolean shouldClipToRounding() {
+        boolean needsPaddings = shouldClipToRounding(getVisibleType());
         if (mUserExpanding) {
-             needsPaddings |= shouldClipToSidePaddings(mTransformationStartVisibleType);
+             needsPaddings |= shouldClipToRounding(mTransformationStartVisibleType);
         }
         return needsPaddings;
     }
 
-    private boolean shouldClipToSidePaddings(int visibleType) {
+    private boolean shouldClipToRounding(int visibleType) {
         NotificationViewWrapper visibleWrapper = getVisibleWrapper(visibleType);
         if (visibleWrapper == null) {
             return false;
         }
-        return visibleWrapper.shouldClipToSidePaddings();
+        return visibleWrapper.shouldClipToRounding();
     }
 }

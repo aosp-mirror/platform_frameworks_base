@@ -1022,8 +1022,16 @@ public class Notification implements Parcelable
     /**
      * {@link #extras} key: A String array containing the people that this notification relates to,
      * each of which was supplied to {@link Builder#addPerson(String)}.
+     *
+     * @deprecated the actual objects are now in {@link #EXTRA_PEOPLE_LIST}
      */
     public static final String EXTRA_PEOPLE = "android.people";
+
+    /**
+     * {@link #extras} key: An arrayList of {@link Person} objects containing the people that
+     * this notification relates to.
+     */
+    public static final String EXTRA_PEOPLE_LIST = "android.people.list";
 
     /**
      * Allow certain system-generated notifications to appear before the device is provisioned.
@@ -1063,8 +1071,18 @@ public class Notification implements Parcelable
      * direct replies
      * {@link android.app.Notification.MessagingStyle} notification. This extra is a
      * {@link CharSequence}
+     *
+     * @deprecated use {@link #EXTRA_MESSAGING_PERSON}
      */
     public static final String EXTRA_SELF_DISPLAY_NAME = "android.selfDisplayName";
+
+    /**
+     * {@link #extras} key: the person to be displayed for all messages sent by the user including
+     * direct replies
+     * {@link android.app.Notification.MessagingStyle} notification. This extra is a
+     * {@link Person}
+     */
+    public static final String EXTRA_MESSAGING_PERSON = "android.messagingUser";
 
     /**
      * {@link #extras} key: a {@link CharSequence} to be displayed as the title to a conversation
@@ -2819,7 +2837,7 @@ public class Notification implements Parcelable
         private Bundle mUserExtras = new Bundle();
         private Style mStyle;
         private ArrayList<Action> mActions = new ArrayList<Action>(MAX_ACTION_BUTTONS);
-        private ArrayList<String> mPersonList = new ArrayList<String>();
+        private ArrayList<Person> mPersonList = new ArrayList<>();
         private NotificationColorUtil mColorUtil;
         private boolean mIsLegacy;
         private boolean mIsLegacyInitialized;
@@ -2910,8 +2928,9 @@ public class Notification implements Parcelable
                     Collections.addAll(mActions, mN.actions);
                 }
 
-                if (mN.extras.containsKey(EXTRA_PEOPLE)) {
-                    Collections.addAll(mPersonList, mN.extras.getStringArray(EXTRA_PEOPLE));
+                if (mN.extras.containsKey(EXTRA_PEOPLE_LIST)) {
+                    ArrayList<Person> people = mN.extras.getParcelableArrayList(EXTRA_PEOPLE_LIST);
+                    mPersonList.addAll(people);
                 }
 
                 if (mN.getSmallIcon() == null && mN.icon != 0) {
@@ -3621,13 +3640,41 @@ public class Notification implements Parcelable
          * URIs.  The path part of these URIs must exist in the contacts database, in the
          * appropriate column, or the reference will be discarded as invalid. Telephone schema
          * URIs will be resolved by {@link android.provider.ContactsContract.PhoneLookup}.
+         * It is also possible to provide a URI with the schema {@code name:} in order to uniquely
+         * identify a person without an entry in the contacts database.
          * </P>
          *
          * @param uri A URI for the person.
          * @see Notification#EXTRA_PEOPLE
+         * @deprecated use {@link #addPerson(Person)}
          */
         public Builder addPerson(String uri) {
-            mPersonList.add(uri);
+            addPerson(new Person().setUri(uri));
+            return this;
+        }
+
+        /**
+         * Add a person that is relevant to this notification.
+         *
+         * <P>
+         * Depending on user preferences, this annotation may allow the notification to pass
+         * through interruption filters, if this notification is of category {@link #CATEGORY_CALL}
+         * or {@link #CATEGORY_MESSAGE}. The addition of people may also cause this notification to
+         * appear more prominently in the user interface.
+         * </P>
+         *
+         * <P>
+         * A person should usually contain a uri in order to benefit from the ranking boost.
+         * However, even if no uri is provided, it's beneficial to provide other people in the
+         * notification, such that listeners and voice only devices can announce and handle them
+         * properly.
+         * </P>
+         *
+         * @param person the person to add.
+         * @see Notification#EXTRA_PEOPLE_LIST
+         */
+        public Builder addPerson(Person person) {
+            mPersonList.add(person);
             return this;
         }
 
@@ -3934,7 +3981,10 @@ public class Notification implements Parcelable
             contentView.setViewVisibility(R.id.chronometer, View.GONE);
             contentView.setViewVisibility(R.id.header_text, View.GONE);
             contentView.setTextViewText(R.id.header_text, null);
+            contentView.setViewVisibility(R.id.header_text_secondary, View.GONE);
+            contentView.setTextViewText(R.id.header_text_secondary, null);
             contentView.setViewVisibility(R.id.header_text_divider, View.GONE);
+            contentView.setViewVisibility(R.id.header_text_secondary_divider, View.GONE);
             contentView.setViewVisibility(R.id.time_divider, View.GONE);
             contentView.setViewVisibility(R.id.time, View.GONE);
             contentView.setImageViewIcon(R.id.profile_badge, null);
@@ -3965,7 +4015,7 @@ public class Notification implements Parcelable
 
             final Bundle ex = mN.extras;
             updateBackgroundColor(contentView);
-            bindNotificationHeader(contentView, p.ambient);
+            bindNotificationHeader(contentView, p.ambient, p.headerTextSecondary);
             bindLargeIcon(contentView, p.hideLargeIcon, p.alwaysShowReply);
             boolean showProgress = handleProgressBar(p.hasProgress, contentView, ex);
             if (p.title != null) {
@@ -4248,12 +4298,14 @@ public class Notification implements Parcelable
             return null;
         }
 
-        private void bindNotificationHeader(RemoteViews contentView, boolean ambient) {
+        private void bindNotificationHeader(RemoteViews contentView, boolean ambient,
+                CharSequence secondaryHeaderText) {
             bindSmallIcon(contentView, ambient);
             bindHeaderAppName(contentView, ambient);
             if (!ambient) {
                 // Ambient view does not have these
                 bindHeaderText(contentView);
+                bindHeaderTextSecondary(contentView, secondaryHeaderText);
                 bindHeaderChronometerAndTime(contentView);
                 bindProfileBadge(contentView);
             }
@@ -4319,6 +4371,17 @@ public class Notification implements Parcelable
                 contentView.setViewVisibility(R.id.header_text, View.VISIBLE);
                 contentView.setViewVisibility(R.id.header_text_divider, View.VISIBLE);
                 setTextViewColorSecondary(contentView, R.id.header_text_divider);
+            }
+        }
+
+        private void bindHeaderTextSecondary(RemoteViews contentView, CharSequence secondaryText) {
+            if (!TextUtils.isEmpty(secondaryText)) {
+                contentView.setTextViewText(R.id.header_text_secondary, processTextSpans(
+                        processLegacyText(secondaryText)));
+                setTextViewColorSecondary(contentView, R.id.header_text_secondary);
+                contentView.setViewVisibility(R.id.header_text_secondary, View.VISIBLE);
+                contentView.setViewVisibility(R.id.header_text_secondary_divider, View.VISIBLE);
+                setTextViewColorSecondary(contentView, R.id.header_text_secondary_divider);
             }
         }
 
@@ -4555,7 +4618,7 @@ public class Notification implements Parcelable
                     ambient ? R.layout.notification_template_ambient_header
                             : R.layout.notification_template_header);
             resetNotificationHeader(header);
-            bindNotificationHeader(header, ambient);
+            bindNotificationHeader(header, ambient, null);
             if (colorized != null) {
                 mN.extras.putBoolean(EXTRA_COLORIZED, colorized);
             } else {
@@ -4968,8 +5031,7 @@ public class Notification implements Parcelable
                 mActions.toArray(mN.actions);
             }
             if (!mPersonList.isEmpty()) {
-                mN.extras.putStringArray(EXTRA_PEOPLE,
-                        mPersonList.toArray(new String[mPersonList.size()]));
+                mN.extras.putParcelableArrayList(EXTRA_PEOPLE_LIST, mPersonList);
             }
             if (mN.bigContentView != null || mN.contentView != null
                     || mN.headsUpContentView != null) {
@@ -5965,7 +6027,7 @@ public class Notification implements Parcelable
          */
         public static final int MAXIMUM_RETAINED_MESSAGES = 25;
 
-        CharSequence mUserDisplayName;
+        @NonNull Person mUser;
         @Nullable CharSequence mConversationTitle;
         List<Message> mMessages = new ArrayList<>();
         List<Message> mHistoricMessages = new ArrayList<>();
@@ -5979,16 +6041,40 @@ public class Notification implements Parcelable
          * user before the posting app reposts the notification with those messages after they've
          * been actually sent and in previous messages sent by the user added in
          * {@link #addMessage(Notification.MessagingStyle.Message)}
+         *
+         * @deprecated use {@code MessagingStyle(Person)}
          */
         public MessagingStyle(@NonNull CharSequence userDisplayName) {
-            mUserDisplayName = userDisplayName;
+            this(new Person().setName(userDisplayName));
+        }
+
+        /**
+         * @param user Required - The person displayed for any messages that are sent by the
+         * user. Any messages added with {@link #addMessage(Notification.MessagingStyle.Message)}
+         * who don't have a Person associated with it will be displayed as if they were sent
+         * by this user. The user also needs to have a valid name associated with it.
+         */
+        public MessagingStyle(@NonNull Person user) {
+            mUser = user;
+            if (user == null || user.getName() == null) {
+                throw new RuntimeException("user must be valid and have a name");
+            }
+        }
+
+        /**
+         * @return the user to be displayed for any replies sent by the user
+         */
+        public Person getUser() {
+            return mUser;
         }
 
         /**
          * Returns the name to be displayed for any replies sent by the user
+         *
+         * @deprecated use {@link #getUser()} instead
          */
         public CharSequence getUserDisplayName() {
-            return mUserDisplayName;
+            return mUser.getName();
         }
 
         /**
@@ -6031,8 +6117,28 @@ public class Notification implements Parcelable
          * @see Message#Message(CharSequence, long, CharSequence)
          *
          * @return this object for method chaining
+         *
+         * @deprecated use {@link #addMessage(CharSequence, long, Person)}
          */
         public MessagingStyle addMessage(CharSequence text, long timestamp, CharSequence sender) {
+            return addMessage(text, timestamp,
+                    sender == null ? null : new Person().setName(sender));
+        }
+
+        /**
+         * Adds a message for display by this notification. Convenience call for a simple
+         * {@link Message} in {@link #addMessage(Notification.MessagingStyle.Message)}.
+         * @param text A {@link CharSequence} to be displayed as the message content
+         * @param timestamp Time at which the message arrived
+         * @param sender The {@link Person} who sent the message.
+         * Should be <code>null</code> for messages by the current user, in which case
+         * the platform will insert the user set in {@code MessagingStyle(Person)}.
+         *
+         * @see Message#Message(CharSequence, long, CharSequence)
+         *
+         * @return this object for method chaining
+         */
+        public MessagingStyle addMessage(CharSequence text, long timestamp, Person sender) {
             return addMessage(new Message(text, timestamp, sender));
         }
 
@@ -6131,8 +6237,10 @@ public class Notification implements Parcelable
         @Override
         public void addExtras(Bundle extras) {
             super.addExtras(extras);
-            if (mUserDisplayName != null) {
-                extras.putCharSequence(EXTRA_SELF_DISPLAY_NAME, mUserDisplayName);
+            if (mUser != null) {
+                // For legacy usages
+                extras.putCharSequence(EXTRA_SELF_DISPLAY_NAME, mUser.getName());
+                extras.putParcelable(EXTRA_MESSAGING_PERSON, mUser);
             }
             if (mConversationTitle != null) {
                 extras.putCharSequence(EXTRA_CONVERSATION_TITLE, mConversationTitle);
@@ -6152,14 +6260,15 @@ public class Notification implements Parcelable
             Message m = findLatestIncomingMessage();
             CharSequence text = (m == null) ? null : m.mText;
             CharSequence sender = m == null ? null
-                    : TextUtils.isEmpty(m.mSender) ? mUserDisplayName : m.mSender;
+                    : m.mSender == null || TextUtils.isEmpty(m.mSender.getName())
+                            ? mUser.getName() : m.mSender.getName();
             CharSequence title;
             if (!TextUtils.isEmpty(mConversationTitle)) {
                 if (!TextUtils.isEmpty(sender)) {
                     BidiFormatter bidi = BidiFormatter.getInstance();
                     title = mBuilder.mContext.getString(
                             com.android.internal.R.string.notification_messaging_title_template,
-                            bidi.unicodeWrap(mConversationTitle), bidi.unicodeWrap(m.mSender));
+                            bidi.unicodeWrap(mConversationTitle), bidi.unicodeWrap(sender));
                 } else {
                     title = mConversationTitle;
                 }
@@ -6182,7 +6291,11 @@ public class Notification implements Parcelable
         protected void restoreFromExtras(Bundle extras) {
             super.restoreFromExtras(extras);
 
-            mUserDisplayName = extras.getCharSequence(EXTRA_SELF_DISPLAY_NAME);
+            mUser = extras.getParcelable(EXTRA_MESSAGING_PERSON);
+            if (mUser == null) {
+                CharSequence displayName = extras.getCharSequence(EXTRA_SELF_DISPLAY_NAME);
+                mUser = new Person().setName(displayName);
+            }
             mConversationTitle = extras.getCharSequence(EXTRA_CONVERSATION_TITLE);
             Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES);
             mMessages = Message.getMessagesFromBundleArray(messages);
@@ -6198,7 +6311,7 @@ public class Notification implements Parcelable
         public RemoteViews makeContentView(boolean increasedHeight) {
             mBuilder.mOriginalActions = mBuilder.mActions;
             mBuilder.mActions = new ArrayList<>();
-            RemoteViews remoteViews = makeBigContentView();
+            RemoteViews remoteViews = makeBigContentView(true /* showRightIcon */);
             mBuilder.mActions = mBuilder.mOriginalActions;
             mBuilder.mOriginalActions = null;
             return remoteViews;
@@ -6217,7 +6330,7 @@ public class Notification implements Parcelable
             for (int i = messages.size() - 1; i >= 0; i--) {
                 Message m = messages.get(i);
                 // Incoming messages have a non-empty sender.
-                if (!TextUtils.isEmpty(m.mSender)) {
+                if (m.mSender != null && !TextUtils.isEmpty(m.mSender.getName())) {
                     return m;
                 }
             }
@@ -6233,23 +6346,31 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeBigContentView() {
+            return makeBigContentView(false /* showRightIcon */);
+        }
+
+        @NonNull
+        private RemoteViews makeBigContentView(boolean showRightIcon) {
             CharSequence conversationTitle = !TextUtils.isEmpty(super.mBigContentTitle)
                     ? super.mBigContentTitle
                     : mConversationTitle;
             boolean isOneToOne = TextUtils.isEmpty(conversationTitle);
-            if (isOneToOne) {
-                // Let's add the conversationTitle in case we didn't have one before and all
-                // messages are from the same sender
-                conversationTitle = createConversationTitleFromMessages();
-            } else if (hasOnlyWhiteSpaceSenders()) {
+            if (hasOnlyWhiteSpaceSenders()) {
                 isOneToOne = true;
             }
-            boolean hasTitle = !TextUtils.isEmpty(conversationTitle);
             RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(
                     mBuilder.getMessagingLayoutResource(),
                     mBuilder.mParams.reset().hasProgress(false).title(conversationTitle).text(null)
-                            .hideLargeIcon(isOneToOne).alwaysShowReply(true));
+                            .hideLargeIcon(!showRightIcon || isOneToOne)
+                            .headerTextSecondary(conversationTitle)
+                            .alwaysShowReply(showRightIcon));
             addExtras(mBuilder.mN.extras);
+            // also update the end margin if there is an image
+            int endMargin = R.dimen.notification_content_margin_end;
+            if (mBuilder.mN.hasLargeIcon() && showRightIcon) {
+                endMargin = R.dimen.notification_content_plus_picture_margin_end;
+            }
+            contentView.setViewLayoutMarginEndDimen(R.id.notification_main_column, endMargin);
             contentView.setInt(R.id.status_bar_latest_event_content, "setLayoutColor",
                     mBuilder.resolveContrastColor());
             contentView.setIcon(R.id.status_bar_latest_event_content, "setLargeIcon",
@@ -6264,8 +6385,8 @@ public class Notification implements Parcelable
         private boolean hasOnlyWhiteSpaceSenders() {
             for (int i = 0; i < mMessages.size(); i++) {
                 Message m = mMessages.get(i);
-                CharSequence sender = m.getSender();
-                if (!isWhiteSpace(sender)) {
+                Person sender = m.getSenderPerson();
+                if (sender != null && !isWhiteSpace(sender.getName())) {
                     return false;
                 }
             }
@@ -6294,9 +6415,9 @@ public class Notification implements Parcelable
             ArraySet<CharSequence> names = new ArraySet<>();
             for (int i = 0; i < mMessages.size(); i++) {
                 Message m = mMessages.get(i);
-                CharSequence sender = m.getSender();
+                Person sender = m.getSenderPerson();
                 if (sender != null) {
-                    names.add(sender);
+                    names.add(sender.getName());
                 }
             }
             SpannableStringBuilder title = new SpannableStringBuilder();
@@ -6316,7 +6437,7 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
-            RemoteViews remoteViews = makeBigContentView();
+            RemoteViews remoteViews = makeBigContentView(true /* showRightIcon */);
             remoteViews.setInt(R.id.notification_messaging, "setMaxDisplayedLines", 1);
             return remoteViews;
         }
@@ -6331,13 +6452,15 @@ public class Notification implements Parcelable
             static final String KEY_TEXT = "text";
             static final String KEY_TIMESTAMP = "time";
             static final String KEY_SENDER = "sender";
+            static final String KEY_SENDER_PERSON = "sender_person";
             static final String KEY_DATA_MIME_TYPE = "type";
             static final String KEY_DATA_URI= "uri";
             static final String KEY_EXTRAS_BUNDLE = "extras";
 
             private final CharSequence mText;
             private final long mTimestamp;
-            private final CharSequence mSender;
+            @Nullable
+            private final Person mSender;
 
             private Bundle mExtras = new Bundle();
             private String mDataMimeType;
@@ -6352,8 +6475,28 @@ public class Notification implements Parcelable
              * the platform will insert {@link MessagingStyle#getUserDisplayName()}.
              * Should be unique amongst all individuals in the conversation, and should be
              * consistent during re-posts of the notification.
+             *
+             *  @deprecated use {@code Message(CharSequence, long, Person)}
              */
             public Message(CharSequence text, long timestamp, CharSequence sender){
+                this(text, timestamp, sender == null ? null : new Person().setName(sender));
+            }
+
+            /**
+             * Constructor
+             * @param text A {@link CharSequence} to be displayed as the message content
+             * @param timestamp Time at which the message arrived
+             * @param sender The {@link Person} who sent the message.
+             * Should be <code>null</code> for messages by the current user, in which case
+             * the platform will insert the user set in {@code MessagingStyle(Person)}.
+             * <p>
+             * The person provided should contain an Icon, set with {@link Person#setIcon(Icon)}
+             * and also have a name provided with {@link Person#setName(CharSequence)}. If multiple
+             * users have the same name, consider providing a key with {@link Person#setKey(String)}
+             * in order to differentiate between the different users.
+             * </p>
+             */
+            public Message(CharSequence text, long timestamp, @Nullable Person sender){
                 mText = text;
                 mTimestamp = timestamp;
                 mSender = sender;
@@ -6416,8 +6559,18 @@ public class Notification implements Parcelable
 
             /**
              * Get the text used to display the contact's name in the messaging experience
+             *
+             * @deprecated use {@link #getSenderPerson()}
              */
             public CharSequence getSender() {
+                return mSender == null ? null : mSender.getName();
+            }
+
+            /**
+             * Get the sender associated with this message.
+             */
+            @Nullable
+            public Person getSenderPerson() {
                 return mSender;
             }
 
@@ -6443,7 +6596,9 @@ public class Notification implements Parcelable
                 }
                 bundle.putLong(KEY_TIMESTAMP, mTimestamp);
                 if (mSender != null) {
-                    bundle.putCharSequence(KEY_SENDER, mSender);
+                    // Legacy listeners need this
+                    bundle.putCharSequence(KEY_SENDER, mSender.getName());
+                    bundle.putParcelable(KEY_SENDER_PERSON, mSender);
                 }
                 if (mDataMimeType != null) {
                     bundle.putString(KEY_DATA_MIME_TYPE, mDataMimeType);
@@ -6492,8 +6647,20 @@ public class Notification implements Parcelable
                     if (!bundle.containsKey(KEY_TEXT) || !bundle.containsKey(KEY_TIMESTAMP)) {
                         return null;
                     } else {
+
+                        Person senderPerson = bundle.getParcelable(KEY_SENDER_PERSON);
+                        if (senderPerson == null) {
+                            // Legacy apps that use compat don't actually provide the sender objects
+                            // We need to fix the compat version to provide people / use
+                            // the native api instead
+                            CharSequence senderName = bundle.getCharSequence(KEY_SENDER);
+                            if (senderName != null) {
+                                senderPerson = new Person().setName(senderName);
+                            }
+                        }
                         Message message = new Message(bundle.getCharSequence(KEY_TEXT),
-                                bundle.getLong(KEY_TIMESTAMP), bundle.getCharSequence(KEY_SENDER));
+                                bundle.getLong(KEY_TIMESTAMP),
+                                senderPerson);
                         if (bundle.containsKey(KEY_DATA_MIME_TYPE) &&
                                 bundle.containsKey(KEY_DATA_URI)) {
                             message.setData(bundle.getString(KEY_DATA_MIME_TYPE),
@@ -7126,6 +7293,176 @@ public class Notification implements Parcelable
             }
             return remoteViews;
         }
+    }
+
+    /**
+     * A Person associated with this Notification.
+     */
+    public static final class Person implements Parcelable {
+        @Nullable private CharSequence mName;
+        @Nullable private Icon mIcon;
+        @Nullable private String mUri;
+        @Nullable private String mKey;
+
+        protected Person(Parcel in) {
+            mName = in.readCharSequence();
+            if (in.readInt() != 0) {
+                mIcon = Icon.CREATOR.createFromParcel(in);
+            }
+            mUri = in.readString();
+            mKey = in.readString();
+        }
+
+        /**
+         * Create a new person.
+         */
+        public Person() {
+        }
+
+        /**
+         * Give this person a name.
+         *
+         * @param name the name of this person
+         */
+        public Person setName(@Nullable CharSequence name) {
+            this.mName = name;
+            return this;
+        }
+
+        /**
+         * Add an icon for this person.
+         * <br />
+         * This is currently only used for {@link MessagingStyle} notifications and should not be
+         * provided otherwise, in order to save memory. The system will prefer this icon over any
+         * images that are resolved from the URI.
+         *
+         * @param icon the icon of the person
+         */
+        public Person setIcon(@Nullable Icon icon) {
+            this.mIcon = icon;
+            return this;
+        }
+
+        /**
+         * Set a URI associated with this person.
+         *
+         * <P>
+         * Depending on user preferences, adding a URI to a Person may allow the notification to
+         * pass through interruption filters, if this notification is of
+         * category {@link #CATEGORY_CALL} or {@link #CATEGORY_MESSAGE}.
+         * The addition of people may also cause this notification to appear more prominently in
+         * the user interface.
+         * </P>
+         *
+         * <P>
+         * The person should be specified by the {@code String} representation of a
+         * {@link android.provider.ContactsContract.Contacts#CONTENT_LOOKUP_URI}.
+         * </P>
+         *
+         * <P>The system will also attempt to resolve {@code mailto:} and {@code tel:} schema
+         * URIs.  The path part of these URIs must exist in the contacts database, in the
+         * appropriate column, or the reference will be discarded as invalid. Telephone schema
+         * URIs will be resolved by {@link android.provider.ContactsContract.PhoneLookup}.
+         * </P>
+         *
+         * @param uri a URI for the person
+         */
+        public Person setUri(@Nullable String uri) {
+            mUri = uri;
+            return this;
+        }
+
+        /**
+         * Add a key to this person in order to uniquely identify it.
+         * This is especially useful if the name doesn't uniquely identify this person or if the
+         * display name is a short handle of the actual name.
+         *
+         * <P>If no key is provided, the name serves as as the key for the purpose of
+         * identification.</P>
+         *
+         * @param key the key that uniquely identifies this person
+         */
+        public Person setKey(@Nullable String key) {
+            mKey = key;
+            return this;
+        }
+
+
+        /**
+         * @return the uri provided for this person or {@code null} if no Uri was provided
+         */
+        @Nullable
+        public String getUri() {
+            return mUri;
+        }
+
+        /**
+         * @return the name provided for this person or {@code null} if no name was provided
+         */
+        @Nullable
+        public CharSequence getName() {
+            return mName;
+        }
+
+        /**
+         * @return the icon provided for this person or {@code null} if no icon was provided
+         */
+        @Nullable
+        public Icon getIcon() {
+            return mIcon;
+        }
+
+        /**
+         * @return the key provided for this person or {@code null} if no key was provided
+         */
+        @Nullable
+        public String getKey() {
+            return mKey;
+        }
+
+        /**
+         * @return the URI associated with this person, or "name:mName" otherwise
+         *  @hide
+         */
+        public String resolveToLegacyUri() {
+            if (mUri != null) {
+                return mUri;
+            }
+            if (mName != null) {
+                return "name:" + mName;
+            }
+            return "";
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, @WriteFlags int flags) {
+            dest.writeCharSequence(mName);
+            if (mIcon != null) {
+                dest.writeInt(1);
+                mIcon.writeToParcel(dest, 0);
+            } else {
+                dest.writeInt(0);
+            }
+            dest.writeString(mUri);
+            dest.writeString(mKey);
+        }
+
+        public static final Creator<Person> CREATOR = new Creator<Person>() {
+            @Override
+            public Person createFromParcel(Parcel in) {
+                return new Person(in);
+            }
+
+            @Override
+            public Person[] newArray(int size) {
+                return new Person[size];
+            }
+        };
     }
 
     // When adding a new Style subclass here, don't forget to update
@@ -8567,6 +8904,7 @@ public class Notification implements Parcelable
         boolean ambient = false;
         CharSequence title;
         CharSequence text;
+        CharSequence headerTextSecondary;
         boolean hideLargeIcon;
         public boolean alwaysShowReply;
 
@@ -8575,6 +8913,7 @@ public class Notification implements Parcelable
             ambient = false;
             title = null;
             text = null;
+            headerTextSecondary = null;
             return this;
         }
 
@@ -8590,6 +8929,11 @@ public class Notification implements Parcelable
 
         final StandardTemplateParams text(CharSequence text) {
             this.text = text;
+            return this;
+        }
+
+        final StandardTemplateParams headerTextSecondary(CharSequence text) {
+            this.headerTextSecondary = text;
             return this;
         }
 

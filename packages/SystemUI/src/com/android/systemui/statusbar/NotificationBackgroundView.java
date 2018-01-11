@@ -41,7 +41,6 @@ public class NotificationBackgroundView extends View {
     private int mClipBottomAmount;
     private int mTintColor;
     private float[] mCornerRadii = new float[8];
-    private int mCurrentSidePaddings;
     private boolean mBottomIsRounded;
     private int mBackgroundTop;
     private boolean mBottomAmountClips = true;
@@ -68,8 +67,7 @@ public class NotificationBackgroundView extends View {
             if (mBottomIsRounded && mBottomAmountClips) {
                 bottom -= mClipBottomAmount;
             }
-            drawable.setBounds(mCurrentSidePaddings, mBackgroundTop,
-                    getWidth() - mCurrentSidePaddings, bottom);
+            drawable.setBounds(0, mBackgroundTop, getWidth(), bottom);
             drawable.draw(canvas);
         }
     }
@@ -204,11 +202,6 @@ public class NotificationBackgroundView extends View {
                     (GradientDrawable) ((LayerDrawable) mBackground).getDrawable(0);
             gradientDrawable.setCornerRadii(mCornerRadii);
         }
-    }
-
-    public void setCurrentSidePaddings(float currentSidePaddings) {
-        mCurrentSidePaddings = (int) currentSidePaddings;
-        invalidate();
     }
 
     public void setBackgroundTop(int backgroundTop) {
