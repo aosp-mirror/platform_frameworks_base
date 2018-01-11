@@ -151,6 +151,12 @@ public class Process {
      */
     public static final int OTA_UPDATE_UID = 1061;
 
+    /**
+     * Defines the UID used for incidentd.
+     * @hide
+     */
+    public static final int INCIDENTD_UID = 1067;
+
     /** {@hide} */
     public static final int NOBODY_UID = 9999;
 

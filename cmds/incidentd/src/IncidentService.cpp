@@ -43,8 +43,9 @@ String16 const DUMP_PERMISSION("android.permission.DUMP");
 String16 const USAGE_STATS_PERMISSION("android.permission.PACKAGE_USAGE_STATS");
 
 static Status
-checkIncidentPermissions()
+checkIncidentPermissions(const IncidentReportArgs& args)
 {
+    // checking calling permission.
     if (!checkCallingPermission(DUMP_PERMISSION)) {
         ALOGW("Calling pid %d and uid %d does not have permission: android.permission.DUMP",
                 IPCThreadState::self()->getCallingPid(), IPCThreadState::self()->getCallingUid());
@@ -57,10 +58,24 @@ checkIncidentPermissions()
         return Status::fromExceptionCode(Status::EX_SECURITY,
                 "Calling process does not have permission: android.permission.USAGE_STATS");
     }
+
+    // checking calling request uid permission.
+    uid_t callingUid = IPCThreadState::self()->getCallingUid();
+    switch (args.dest()) {
+        case DEST_LOCAL:
+            if (callingUid != AID_SHELL || callingUid != AID_ROOT) {
+                return Status::fromExceptionCode(Status::EX_SECURITY,
+                    "Calling process does not have permission to get local data.");
+            }
+        case DEST_EXPLICIT:
+            if (callingUid != AID_SHELL || callingUid != AID_ROOT ||
+                callingUid != AID_STATSD || callingUid != AID_SYSTEM) {
+                return Status::fromExceptionCode(Status::EX_SECURITY,
+                    "Calling process does not have permission to get explicit data.");
+            }
+    }
     return Status::ok();
 }
-
-
 // ================================================================================
 ReportRequestQueue::ReportRequestQueue()
 {
@@ -71,7 +86,7 @@ ReportRequestQueue::~ReportRequestQueue()
 }
 
 void
-ReportRequestQueue::addRequest(const sp<ReportRequest>& request) 
+ReportRequestQueue::addRequest(const sp<ReportRequest>& request)
 {
     unique_lock<mutex> lock(mLock);
     mQueue.push_back(request);
@@ -196,7 +211,7 @@ IncidentService::reportIncident(const IncidentReportArgs& args)
 {
     ALOGI("reportIncident");
 
-    Status status = checkIncidentPermissions();
+    Status status = checkIncidentPermissions(args);
     if (!status.isOk()) {
         return status;
     }
@@ -212,7 +227,7 @@ IncidentService::reportIncidentToStream(const IncidentReportArgs& args,
 {
     ALOGI("reportIncidentToStream");
 
-    Status status = checkIncidentPermissions();
+    Status status = checkIncidentPermissions(args);
     if (!status.isOk()) {
         return status;
     }

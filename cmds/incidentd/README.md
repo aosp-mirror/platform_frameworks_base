@@ -12,8 +12,8 @@ Run the test on a device manually
 
 ```
 root$ mmm -j frameworks/base/cmds/incidentd && \
-adb push $OUT/data/nativetest/incidentd_test/* /data/nativetest/incidentd_test/ && \
-adb shell /data/nativetest/incidentd_test/incidentd_test 2>/dev/null
+adb push $OUT/data/nativetest/incidentd_test/* /data/nativetest/ && \
+adb shell /data/nativetest/incidentd_test 2>/dev/null
 ```
 
 Run the test via AndroidTest.xml
