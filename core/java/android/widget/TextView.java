@@ -77,8 +77,8 @@ import android.text.GraphicsOperations;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Layout;
+import android.text.MeasuredText;
 import android.text.ParcelableSpan;
-import android.text.PremeasuredText;
 import android.text.Selection;
 import android.text.SpanWatcher;
 import android.text.Spannable;
@@ -5393,7 +5393,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (imm != null) imm.restartInput(this);
         } else if (type == BufferType.SPANNABLE || mMovement != null) {
             text = mSpannableFactory.newSpannable(text);
-        } else if (!(text instanceof PremeasuredText || text instanceof CharWrapper)) {
+        } else if (!(text instanceof MeasuredText || text instanceof CharWrapper)) {
             text = TextUtils.stringOrSpannedString(text);
         }
 
