@@ -51,7 +51,7 @@ please see themes_device_defaults.xml.
         <item name="primaryContentAlpha">@dimen/primary_content_alpha_material_dark</item>
         <item name="secondaryContentAlpha">@dimen/secondary_content_alpha_material_dark</item>
         <item name="backgroundDimAmount">0.6</item>
-        <item name="colorError">@color/error_color_material</item>
+        <item name="colorError">@color/error_color_material_dark</item>
 
         <!-- Text styles -->
         <item name="textAppearance">@style/TextAppearance.Material</item>
@@ -420,6 +420,7 @@ please see themes_device_defaults.xml.
         <item name="primaryContentAlpha">@dimen/primary_content_alpha_material_light</item>
         <item name="secondaryContentAlpha">@dimen/secondary_content_alpha_material_light</item>
         <item name="backgroundDimAmount">0.6</item>
+        <item name="colorError">@color/error_color_material_light</item>
 
         <!-- Text styles -->
         <item name="textAppearance">@style/TextAppearance.Material</item>
@@ -811,6 +812,7 @@ please see themes_device_defaults.xml.
         <item name="colorBackground">@color/background_material_light</item>
         <item name="colorBackgroundFloating">@color/background_floating_material_light</item>
         <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_material_light</item>
+        <item name="colorError">@color/error_color_material_light</item>
 
         <item name="textColorPrimary">@color/text_color_primary</item>
         <item name="textColorPrimaryInverse">@color/primary_text_material_dark</item>
@@ -844,6 +846,7 @@ please see themes_device_defaults.xml.
         <item name="colorBackground">@color/background_material_dark</item>
         <item name="colorBackgroundFloating">@color/background_floating_material_dark</item>
         <item name="colorBackgroundCacheHint">@color/background_cache_hint_selector_material_dark</item>
+        <item name="colorError">@color/error_color_material_dark</item>
 
         <item name="textColorPrimary">@color/text_color_primary</item>
         <item name="textColorPrimaryInverse">@color/primary_text_material_light</item>

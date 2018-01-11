@@ -44,7 +44,8 @@
 
     <color name="button_material_dark">#ff5a595b</color>
     <color name="button_material_light">#ffd6d7d7</color>
-    <color name="error_color_material">#F4511E</color>
+    <color name="error_color_material_dark">#ff7043</color><!-- deep orange 400 -->
+    <color name="error_color_material_light">#ff5722</color><!-- deep orange 500 -->
 
     <color name="switch_thumb_normal_material_dark">#ffbdbdbd</color>
     <color name="switch_thumb_normal_material_light">#fff1f1f1</color>
