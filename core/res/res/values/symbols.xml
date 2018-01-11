@@ -445,6 +445,7 @@
   <java-symbol type="integer" name="config_keepPreloadsMinDays" />
   <java-symbol type="bool" name="config_hasPermanentDpad" />
   <java-symbol type="bool" name="config_useDefaultFocusHighlight" />
+  <java-symbol type="integer" name="config_num_physical_slots" />
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
 
