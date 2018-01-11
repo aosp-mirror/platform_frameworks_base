@@ -268,4 +268,11 @@ public abstract class ActivityManagerInternal {
      * @param token The IApplicationToken for the activity
      */
     public abstract void setFocusedActivity(IBinder token);
+
+    public interface ScreenObserver {
+        public void onAwakeStateChanged(boolean isAwake);
+        public void onKeyguardStateChanged(boolean isShowing);
+    }
+
+    public abstract void registerScreenObserver(ScreenObserver observer);
 }

@@ -200,6 +200,7 @@ import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityManager.TaskThumbnailInfo;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityManagerInternal.ScreenObserver;
 import android.app.ActivityManagerInternal.SleepToken;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
@@ -1548,6 +1549,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    final List<ScreenObserver> mScreenObservers = new ArrayList<>();
+
     final RemoteCallbackList<IProcessObserver> mProcessObservers = new RemoteCallbackList<>();
     ProcessChangeItem[] mActiveProcessChanges = new ProcessChangeItem[5];
 
@@ -1689,6 +1692,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int PUSH_TEMP_WHITELIST_UI_MSG = 68;
     static final int SERVICE_FOREGROUND_CRASH_MSG = 69;
     static final int DISPATCH_OOM_ADJ_OBSERVER_MSG = 70;
+    static final int DISPATCH_SCREEN_AWAKE_MSG = 71;
+    static final int DISPATCH_SCREEN_KEYGUARD_MSG = 72;
     static final int START_USER_SWITCH_FG_MSG = 712;
     static final int NOTIFY_VR_KEYGUARD_MSG = 74;
 
@@ -2412,11 +2417,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
             } break;
-            case NOTIFY_VR_SLEEPING_MSG: {
-                notifyVrManagerOfSleepState(msg.arg1 != 0);
+            case DISPATCH_SCREEN_AWAKE_MSG: {
+                final boolean isAwake = msg.arg1 != 0;
+                for (int i = mScreenObservers.size() - 1; i >= 0; i--) {
+                    mScreenObservers.get(i).onAwakeStateChanged(isAwake);
+                }
             } break;
-            case NOTIFY_VR_KEYGUARD_MSG: {
-                notifyVrManagerOfKeyguardState(msg.arg1 != 0);
+            case DISPATCH_SCREEN_KEYGUARD_MSG: {
+                final boolean isShowing = msg.arg1 != 0;
+                for (int i = mScreenObservers.size() - 1; i >= 0; i--) {
+                    mScreenObservers.get(i).onKeyguardStateChanged(isShowing);
+                }
             } break;
             case HANDLE_TRUST_STORAGE_UPDATE_MSG: {
                 synchronized (ActivityManagerService.this) {
@@ -3258,32 +3269,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         mHandler.sendMessage(
                 mHandler.obtainMessage(VR_MODE_CHANGE_MSG, 0, 0, r));
-    }
-
-    private void sendNotifyVrManagerOfSleepState(boolean isSleeping) {
-        mHandler.sendMessage(
-                mHandler.obtainMessage(NOTIFY_VR_SLEEPING_MSG, isSleeping ? 1 : 0, 0));
-    }
-
-    private void notifyVrManagerOfSleepState(boolean isSleeping) {
-        final VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
-        if (vrService == null) {
-            return;
-        }
-        vrService.onSleepStateChanged(isSleeping);
-    }
-
-    private void sendNotifyVrManagerOfKeyguardState(boolean isShowing) {
-        mHandler.sendMessage(
-                mHandler.obtainMessage(NOTIFY_VR_KEYGUARD_MSG, isShowing ? 1 : 0, 0));
-    }
-
-    private void notifyVrManagerOfKeyguardState(boolean isShowing) {
-        final VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
-        if (vrService == null) {
-            return;
-        }
-        vrService.onKeyguardStateChanged(isShowing);
     }
 
     final void showAskCompatModeDialogLocked(ActivityRecord r) {
@@ -12497,7 +12482,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (wasAwake != isAwake) {
                 // Also update state in a special way for running foreground services UI.
                 mServices.updateScreenStateLocked(isAwake);
-                sendNotifyVrManagerOfSleepState(!isAwake);
+                mHandler.obtainMessage(DISPATCH_SCREEN_AWAKE_MSG, isAwake ? 1 : 0, 0)
+                        .sendToTarget();
             }
         }
     }
@@ -12650,7 +12636,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Binder.restoreCallingIdentity(ident);
             }
         }
-        sendNotifyVrManagerOfKeyguardState(showing);
+
+        mHandler.obtainMessage(DISPATCH_SCREEN_KEYGUARD_MSG, showing ? 1 : 0, 0)
+                .sendToTarget();
     }
 
     @Override
@@ -24257,6 +24245,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mStackSupervisor.resumeFocusedStackTopActivityLocked();
                 }
             }
+        }
+
+        @Override
+        public void registerScreenObserver(ScreenObserver observer) {
+            mScreenObservers.add(observer);
         }
     }
 
