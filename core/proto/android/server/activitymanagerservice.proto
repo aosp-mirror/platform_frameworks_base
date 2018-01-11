@@ -19,6 +19,7 @@ syntax = "proto2";
 package com.android.server.am.proto;
 
 import "frameworks/base/core/proto/android/app/activitymanager.proto";
+import "frameworks/base/core/proto/android/app/enums.proto";
 import "frameworks/base/core/proto/android/app/notification.proto";
 import "frameworks/base/core/proto/android/app/profilerinfo.proto";
 import "frameworks/base/core/proto/android/content/component_name.proto";
@@ -681,7 +682,7 @@ message ActiveInstrumentationProto {
 message UidRecordProto {
   optional string hex_hash = 1;
   optional int32 uid = 2;
-  optional .android.app.ProcessState current = 3;
+  optional .android.app.ProcessStateEnum current = 3;
   optional bool ephemeral = 4;
   optional bool fg_services = 5;
   optional bool whilelist = 6;
@@ -733,7 +734,7 @@ message ProcessOomProto {
     bool services = 6;
   }
 
-  optional .android.app.ProcessState state = 7;
+  optional .android.app.ProcessStateEnum state = 7;
   optional int32 trim_memory_level = 8;
   optional ProcessRecordProto proc = 9;
   optional string adj_type = 10;
@@ -754,8 +755,8 @@ message ProcessOomProto {
     optional int32 set_raw_adj = 3;
     optional int32 cur_adj = 4;
     optional int32 set_adj = 5;
-    optional .android.app.ProcessState current_state = 7;
-    optional .android.app.ProcessState set_state = 8;
+    optional .android.app.ProcessStateEnum current_state = 7;
+    optional .android.app.ProcessStateEnum set_state = 8;
     optional string last_pss = 9;
     optional string last_swap_pss = 10;
     optional string last_cached_pss = 11;

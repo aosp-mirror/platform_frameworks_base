@@ -3900,12 +3900,8 @@ public final class PowerManagerService extends SystemService
                 proto.write(PowerManagerServiceDumpProto.UidStateProto.UID_STRING, UserHandle.formatUid(uid));
                 proto.write(PowerManagerServiceDumpProto.UidStateProto.IS_ACTIVE, state.mActive);
                 proto.write(PowerManagerServiceDumpProto.UidStateProto.NUM_WAKE_LOCKS, state.mNumWakeLocks);
-                if (state.mProcState == ActivityManager.PROCESS_STATE_UNKNOWN) {
-                    proto.write(PowerManagerServiceDumpProto.UidStateProto.IS_PROCESS_STATE_UNKNOWN, true);
-                } else {
-                    proto.write(PowerManagerServiceDumpProto.UidStateProto.PROCESS_STATE,
-                            ActivityManager.processStateAmToProto(state.mProcState));
-                }
+                proto.write(PowerManagerServiceDumpProto.UidStateProto.PROCESS_STATE,
+                        ActivityManager.processStateAmToProto(state.mProcState));
                 proto.end(uIDToken);
             }
 

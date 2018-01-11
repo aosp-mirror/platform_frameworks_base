@@ -19,7 +19,7 @@ package com.android.server.power;
 
 option java_multiple_files = true;
 
-import "frameworks/base/core/proto/android/app/activitymanager.proto";
+import "frameworks/base/core/proto/android/app/enums.proto";
 import "frameworks/base/core/proto/android/content/intent.proto";
 import "frameworks/base/core/proto/android/os/batterymanager.proto";
 import "frameworks/base/core/proto/android/os/looper.proto";
@@ -56,8 +56,7 @@ message PowerManagerServiceDumpProto {
         optional string uid_string = 2;
         optional bool is_active = 3;
         optional int32 num_wake_locks = 4;
-        optional bool is_process_state_unknown = 5;
-        optional .android.app.ProcessState process_state = 6;
+        optional .android.app.ProcessStateEnum process_state = 5;
     }
 
     optional ConstantsProto constants = 1;

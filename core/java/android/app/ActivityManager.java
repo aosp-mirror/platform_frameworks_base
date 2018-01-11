@@ -569,18 +569,68 @@ public class ActivityManager {
     /** @hide Process does not exist. */
     public static final int PROCESS_STATE_NONEXISTENT = 19;
 
-    // NOTE: If PROCESS_STATEs are added or changed, then new fields must be added
-    // to frameworks/base/core/proto/android/app/activitymanager.proto and the following method must
+    // NOTE: If PROCESS_STATEs are added, then new fields must be added
+    // to frameworks/base/core/proto/android/app/enums.proto and the following method must
     // be updated to correctly map between them.
+    // However, if the current ActivityManager values are merely modified, no update should be made
+    // to enums.proto, to which values can only be added but never modified. Note that the proto
+    // versions do NOT have the ordering restrictions of the ActivityManager process state.
     /**
-     * Maps ActivityManager.PROCESS_STATE_ values to ProcessState enum.
+     * Maps ActivityManager.PROCESS_STATE_ values to enums.proto ProcessStateEnum value.
      *
      * @param amInt a process state of the form ActivityManager.PROCESS_STATE_
-     * @return the value of the corresponding ActivityManager's ProcessState enum.
+     * @return the value of the corresponding enums.proto ProcessStateEnum value.
      * @hide
      */
     public static final int processStateAmToProto(int amInt) {
-        return amInt * 100;
+        switch (amInt) {
+            case PROCESS_STATE_UNKNOWN:
+                return AppProtoEnums.PROCESS_STATE_UNKNOWN;
+            case PROCESS_STATE_PERSISTENT:
+                return AppProtoEnums.PROCESS_STATE_PERSISTENT;
+            case PROCESS_STATE_PERSISTENT_UI:
+                return AppProtoEnums.PROCESS_STATE_PERSISTENT_UI;
+            case PROCESS_STATE_TOP:
+                return AppProtoEnums.PROCESS_STATE_TOP;
+            case PROCESS_STATE_FOREGROUND_SERVICE:
+                return AppProtoEnums.PROCESS_STATE_FOREGROUND_SERVICE;
+            case PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
+                return AppProtoEnums.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+            case PROCESS_STATE_IMPORTANT_FOREGROUND:
+                return AppProtoEnums.PROCESS_STATE_IMPORTANT_FOREGROUND;
+            case PROCESS_STATE_IMPORTANT_BACKGROUND:
+                return AppProtoEnums.PROCESS_STATE_IMPORTANT_BACKGROUND;
+            case PROCESS_STATE_TRANSIENT_BACKGROUND:
+                return AppProtoEnums.PROCESS_STATE_TRANSIENT_BACKGROUND;
+            case PROCESS_STATE_BACKUP:
+                return AppProtoEnums.PROCESS_STATE_BACKUP;
+            case PROCESS_STATE_SERVICE:
+                return AppProtoEnums.PROCESS_STATE_SERVICE;
+            case PROCESS_STATE_RECEIVER:
+                return AppProtoEnums.PROCESS_STATE_RECEIVER;
+            case PROCESS_STATE_TOP_SLEEPING:
+                return AppProtoEnums.PROCESS_STATE_TOP_SLEEPING;
+            case PROCESS_STATE_HEAVY_WEIGHT:
+                return AppProtoEnums.PROCESS_STATE_HEAVY_WEIGHT;
+            case PROCESS_STATE_HOME:
+                return AppProtoEnums.PROCESS_STATE_HOME;
+            case PROCESS_STATE_LAST_ACTIVITY:
+                return AppProtoEnums.PROCESS_STATE_LAST_ACTIVITY;
+            case PROCESS_STATE_CACHED_ACTIVITY:
+                return AppProtoEnums.PROCESS_STATE_CACHED_ACTIVITY;
+            case PROCESS_STATE_CACHED_ACTIVITY_CLIENT:
+                return AppProtoEnums.PROCESS_STATE_CACHED_ACTIVITY_CLIENT;
+            case PROCESS_STATE_CACHED_RECENT:
+                return AppProtoEnums.PROCESS_STATE_CACHED_RECENT;
+            case PROCESS_STATE_CACHED_EMPTY:
+                return AppProtoEnums.PROCESS_STATE_CACHED_EMPTY;
+            case PROCESS_STATE_NONEXISTENT:
+                return AppProtoEnums.PROCESS_STATE_NONEXISTENT;
+            default:
+                // ActivityManager process state (amInt)
+                // could not be mapped to an AppProtoEnums ProcessState state.
+                return AppProtoEnums.PROCESS_STATE_UNKNOWN_TO_PROTO;
+        }
     }
 
     /** @hide The lowest process state number */
