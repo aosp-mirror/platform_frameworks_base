@@ -19,6 +19,7 @@ package com.android.server.policy;
 import android.annotation.Nullable;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.IApplicationToken;
@@ -252,6 +253,11 @@ public class FakeWindowState implements WindowManagerPolicy.WindowState {
 
     @Override
     public boolean canAcquireSleepToken() {
+        throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
+    public void writeIdentifierToProto(ProtoOutputStream proto, long fieldId){
         throw new UnsupportedOperationException("not implemented");
     }
 }

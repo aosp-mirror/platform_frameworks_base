@@ -1,6 +1,11 @@
 package com.android.server.policy.keyguard;
 
 import static android.view.Display.INVALID_DISPLAY;
+import static com.android.server.wm.proto.KeyguardServiceDelegateProto.INTERACTIVE_STATE;
+import static com.android.server.wm.proto.KeyguardServiceDelegateProto.OCCLUDED;
+import static com.android.server.wm.proto.KeyguardServiceDelegateProto.SCREEN_STATE;
+import static com.android.server.wm.proto.KeyguardServiceDelegateProto.SECURE;
+import static com.android.server.wm.proto.KeyguardServiceDelegateProto.SHOWING;
 
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -15,6 +20,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 import android.view.WindowManagerPolicyConstants;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -404,6 +410,16 @@ public class KeyguardServiceDelegate {
         if (mKeyguardService != null) {
             mKeyguardService.onShortPowerPressedGoHome();
         }
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(SHOWING, mKeyguardState.showing);
+        proto.write(OCCLUDED, mKeyguardState.occluded);
+        proto.write(SECURE, mKeyguardState.secure);
+        proto.write(SCREEN_STATE, mKeyguardState.screenState);
+        proto.write(INTERACTIVE_STATE, mKeyguardState.interactiveState);
+        proto.end(token);
     }
 
     public void dump(String prefix, PrintWriter pw) {

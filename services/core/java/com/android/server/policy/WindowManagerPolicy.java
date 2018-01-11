@@ -474,6 +474,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * visible. That is, they have the permission {@link Manifest.permission#DEVICE_POWER}.
          */
         boolean canAcquireSleepToken();
+
+        /**
+         * Writes {@link com.android.server.wm.proto.IdentifierProto} to stream.
+         */
+        void writeIdentifierToProto(ProtoOutputStream proto, long fieldId);
     }
 
     /**
