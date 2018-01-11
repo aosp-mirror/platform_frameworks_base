@@ -2813,6 +2813,14 @@
     <permission android:name="android.permission.INSTALL_SELF_UPDATES"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows an application to install updates. This is a limited version
+         of {@link android.Manifest.permission#INSTALL_PACKAGES}.
+        <p>Not for use by third-party applications.
+        @hide
+    -->
+    <permission android:name="android.permission.INSTALL_PACKAGE_UPDATES"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi Allows an application to clear user data.
          <p>Not for use by third-party applications
          @hide
