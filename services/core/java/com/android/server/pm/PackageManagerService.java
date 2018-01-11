@@ -2697,6 +2697,12 @@ public class PackageManagerService extends IPackageManager.Stub
                                 mSettings.getDisabledSystemPkgLPr(ps.name);
                         if (disabledPs.codePath == null || !disabledPs.codePath.exists()
                                 || disabledPs.pkg == null) {
+if (REFACTOR_DEBUG) {
+Slog.e("TODD",
+        "Possibly deleted app: " + ps.dumpState_temp()
+        + "; path: " + (disabledPs.codePath == null ? "<<NULL>>":disabledPs.codePath)
+        + "; pkg: " + (disabledPs.pkg==null?"<<NULL>>":disabledPs.pkg.toString()));
+}
                             possiblyDeletedUpdatedSystemApps.add(ps.name);
                         }
                     }
@@ -2748,6 +2754,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 for (String deletedAppName : possiblyDeletedUpdatedSystemApps) {
                     PackageParser.Package deletedPkg = mPackages.get(deletedAppName);
                     mSettings.removeDisabledSystemPackageLPw(deletedAppName);
+if (REFACTOR_DEBUG) {
+Slog.e("TODD",
+        "remove update; name: " + deletedAppName + ", exists? " + (deletedPkg != null));
+}
                     final String msg;
                     if (deletedPkg == null) {
                         // should have found an update, but, we didn't; remove everything
@@ -8310,6 +8320,8 @@ public class PackageManagerService extends IPackageManager.Stub
         return scannedPkg;
     }
 
+    // Temporary to catch potential issues with refactoring
+    private static boolean REFACTOR_DEBUG = true;
     /**
      * Adds a new package to the internal data structures during platform initialization.
      * <p>After adding, the package is known to the system and available for querying.
@@ -8350,6 +8362,10 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mPackages) {
             renamedPkgName = mSettings.getRenamedPackageLPr(pkg.mRealPackage);
             final String realPkgName = getRealPackageName(pkg, renamedPkgName);
+if (REFACTOR_DEBUG) {
+Slog.e("TODD",
+        "Add pkg: " + pkg.packageName + (realPkgName==null?"":", realName: " + realPkgName));
+}
             if (realPkgName != null) {
                 ensurePackageRenamed(pkg, renamedPkgName);
             }
@@ -8364,6 +8380,12 @@ public class PackageManagerService extends IPackageManager.Stub
             if (DEBUG_INSTALL && isSystemPkgUpdated) {
                 Slog.d(TAG, "updatedPkg = " + disabledPkgSetting);
             }
+if (REFACTOR_DEBUG) {
+Slog.e("TODD",
+        "SSP? " + scanSystemPartition
+        + ", exists? " + pkgAlreadyExists + (pkgAlreadyExists?" "+pkgSetting.toString():"")
+        + ", upgraded? " + isSystemPkgUpdated + (isSystemPkgUpdated?" "+disabledPkgSetting.toString():""));
+}
 
             final SharedUserSetting sharedUserSetting = (pkg.mSharedUserId != null)
                     ? mSettings.getSharedUserLPw(pkg.mSharedUserId,
@@ -8375,6 +8397,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 Log.d(TAG, "Shared UserID " + pkg.mSharedUserId
                         + " (uid=" + sharedUserSetting.userId + "):"
                         + " packages=" + sharedUserSetting.packages);
+if (REFACTOR_DEBUG) {
+Slog.e("TODD",
+        "Shared UserID " + pkg.mSharedUserId
+        + " (uid=" + sharedUserSetting.userId + "):"
+        + " packages=" + sharedUserSetting.packages);
+}
             }
 
             if (scanSystemPartition) {
@@ -8383,6 +8411,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 // version on /data, cycle through all of its children packages and
                 // remove children that are no longer defined.
                 if (isSystemPkgUpdated) {
+if (REFACTOR_DEBUG) {
+Slog.e("TODD",
+        "Disable child packages");
+}
                     final int scannedChildCount = (pkg.childPackages != null)
                             ? pkg.childPackages.size() : 0;
                     final int disabledChildCount = disabledPkgSetting.childPackageNames != null
@@ -8394,11 +8426,19 @@ public class PackageManagerService extends IPackageManager.Stub
                         for (int j = 0; j < scannedChildCount; j++) {
                             PackageParser.Package childPkg = pkg.childPackages.get(j);
                             if (childPkg.packageName.equals(disabledChildPackageName)) {
+if (REFACTOR_DEBUG) {
+Slog.e("TODD",
+        "Ignore " + disabledChildPackageName);
+}
                                 disabledPackageAvailable = true;
                                 break;
                             }
                         }
                         if (!disabledPackageAvailable) {
+if (REFACTOR_DEBUG) {
+Slog.e("TODD",
+        "Disable " + disabledChildPackageName);
+}
                             mSettings.removeDisabledSystemPackageLPw(disabledChildPackageName);
                         }
                     }
@@ -8407,17 +8447,44 @@ public class PackageManagerService extends IPackageManager.Stub
                             disabledPkgSetting /* pkgSetting */, null /* disabledPkgSetting */,
                             null /* originalPkgSetting */, null, parseFlags, scanFlags,
                             (pkg == mPlatformPackage), user);
+if (REFACTOR_DEBUG) {
+Slog.e("TODD",
+        "Scan disabled system package");
+Slog.e("TODD",
+        "Pre: " + request.pkgSetting.dumpState_temp());
+}
+final ScanResult result =
                     scanPackageOnlyLI(request, mFactoryTest, -1L);
+if (REFACTOR_DEBUG) {
+Slog.e("TODD",
+        "Post: " + (result.success?result.pkgSetting.dumpState_temp():"FAILED scan"));
+}
                 }
             }
         }
 
         final boolean newPkgChangedPaths =
                 pkgAlreadyExists && !pkgSetting.codePathString.equals(pkg.codePath);
+if (REFACTOR_DEBUG) {
+Slog.e("TODD",
+        "paths changed? " + newPkgChangedPaths
+        + "; old: " + pkg.codePath
+        + ", new: " + (pkgSetting==null?"<<NULL>>":pkgSetting.codePathString));
+}
         final boolean newPkgVersionGreater =
                 pkgAlreadyExists && pkg.getLongVersionCode() > pkgSetting.versionCode;
+if (REFACTOR_DEBUG) {
+Slog.e("TODD",
+        "version greater? " + newPkgVersionGreater
+        + "; old: " + pkg.getLongVersionCode()
+        + ", new: " + (pkgSetting==null?"<<NULL>>":pkgSetting.versionCode));
+}
         final boolean isSystemPkgBetter = scanSystemPartition && isSystemPkgUpdated
                 && newPkgChangedPaths && newPkgVersionGreater;
+if (REFACTOR_DEBUG) {
+    Slog.e("TODD",
+            "system better? " + isSystemPkgBetter);
+}
         if (isSystemPkgBetter) {
             // The version of the application on /system is greater than the version on
             // /data. Switch back to the application on /system.
@@ -8433,6 +8500,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     + " name: " + pkgSetting.name
                     + "; " + pkgSetting.versionCode + " --> " + pkg.getLongVersionCode()
                     + "; " + pkgSetting.codePathString + " --> " + pkg.codePath);
+if (REFACTOR_DEBUG) {
+Slog.e("TODD",
+        "System package changed;"
+        + " name: " + pkgSetting.name
+        + "; " + pkgSetting.versionCode + " --> " + pkg.getLongVersionCode()
+        + "; " + pkgSetting.codePathString + " --> " + pkg.codePath);
+}
 
             final InstallArgs args = createInstallArgsForExisting(
                     packageFlagsToInstallFlags(pkgSetting), pkgSetting.codePathString,
@@ -8444,6 +8518,10 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         if (scanSystemPartition && isSystemPkgUpdated && !isSystemPkgBetter) {
+if (REFACTOR_DEBUG) {
+Slog.e("TODD",
+        "THROW exception; system pkg version not good enough");
+}
             // The version of the application on the /system partition is less than or
             // equal to the version on the /data partition. Throw an exception and use
             // the application already installed on the /data partition.
@@ -8466,6 +8544,11 @@ public class PackageManagerService extends IPackageManager.Stub
                 logCriticalInfo(Log.WARN,
                         "System package signature mismatch;"
                         + " name: " + pkgSetting.name);
+if (REFACTOR_DEBUG) {
+Slog.e("TODD",
+        "System package signature mismatch;"
+        + " name: " + pkgSetting.name);
+}
                 try (PackageFreezer freezer = freezePackage(pkg.packageName,
                         "scanPackageInternalLI")) {
                     deletePackageLIF(pkg.packageName, null, true, null, 0, null, false, null);
@@ -8480,6 +8563,13 @@ public class PackageManagerService extends IPackageManager.Stub
                         + " name: " + pkgSetting.name
                         + "; " + pkgSetting.versionCode + " --> " + pkg.getLongVersionCode()
                         + "; " + pkgSetting.codePathString + " --> " + pkg.codePath);
+if (REFACTOR_DEBUG) {
+Slog.e("TODD",
+        "System package enabled;"
+        + " name: " + pkgSetting.name
+        + "; " + pkgSetting.versionCode + " --> " + pkg.getLongVersionCode()
+        + "; " + pkgSetting.codePathString + " --> " + pkg.codePath);
+}
                 InstallArgs args = createInstallArgsForExisting(
                         packageFlagsToInstallFlags(pkgSetting), pkgSetting.codePathString,
                         pkgSetting.resourcePathString, getAppDexInstructionSets(pkgSetting));
@@ -8496,13 +8586,35 @@ public class PackageManagerService extends IPackageManager.Stub
                         + " name: " + pkgSetting.name
                         + "; old: " + pkgSetting.codePathString + " @ " + pkgSetting.versionCode
                         + "; new: " + pkg.codePath + " @ " + pkg.codePath);
+if (REFACTOR_DEBUG) {
+Slog.e("TODD",
+        "System package disabled;"
+        + " name: " + pkgSetting.name
+        + "; old: " + pkgSetting.codePathString + " @ " + pkgSetting.versionCode
+        + "; new: " + pkg.codePath + " @ " + pkg.codePath);
+}
             }
         }
 
+if (REFACTOR_DEBUG) {
+Slog.e("TODD",
+        "Scan package");
+Slog.e("TODD",
+        "Pre: " + (pkgSetting==null?"<<NONE>>":pkgSetting.dumpState_temp()));
+}
         final PackageParser.Package scannedPkg = scanPackageNewLI(pkg, parseFlags, scanFlags
                 | SCAN_UPDATE_SIGNATURE, currentTime, user);
+if (REFACTOR_DEBUG) {
+pkgSetting = mSettings.getPackageLPr(pkg.packageName);
+Slog.e("TODD",
+        "Post: " + (pkgSetting==null?"<<NONE>>":pkgSetting.dumpState_temp()));
+}
 
         if (shouldHideSystemApp) {
+if (REFACTOR_DEBUG) {
+Slog.e("TODD",
+        "Disable package: " + pkg.packageName);
+}
             synchronized (mPackages) {
                 mSettings.disableSystemPackageLPw(pkg.packageName, true);
             }
