@@ -16,13 +16,16 @@
 
 package com.android.server.policy;
 
+import static com.android.server.wm.proto.BarControllerProto.STATE;
+import static com.android.server.wm.proto.BarControllerProto.TRANSIENT_STATE;
+
 import android.app.StatusBarManager;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import com.android.server.LocalServices;
@@ -309,6 +312,13 @@ public class BarController {
         if (state == TRANSIENT_BAR_SHOW_REQUESTED) return "TRANSIENT_BAR_SHOW_REQUESTED";
         if (state == TRANSIENT_BAR_NONE) return "TRANSIENT_BAR_NONE";
         throw new IllegalArgumentException("Unknown state " + state);
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(STATE, mState);
+        proto.write(TRANSIENT_STATE, mTransientBarState);
+        proto.end(token);
     }
 
     public void dump(PrintWriter pw, String prefix) {

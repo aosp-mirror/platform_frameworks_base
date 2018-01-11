@@ -127,6 +127,26 @@ import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.C
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.FOCUSED_APP_TOKEN;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.FOCUSED_WINDOW;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.FORCE_STATUS_BAR;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.FORCE_STATUS_BAR_FROM_KEYGUARD;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.KEYGUARD_DELEGATE;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.KEYGUARD_DRAW_COMPLETE;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.KEYGUARD_OCCLUDED;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.KEYGUARD_OCCLUDED_CHANGED;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.KEYGUARD_OCCLUDED_PENDING;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.LAST_SYSTEM_UI_FLAGS;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.NAVIGATION_BAR;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.ORIENTATION;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.ORIENTATION_LISTENER;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.ROTATION;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.ROTATION_MODE;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.SCREEN_ON_FULLY;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.STATUS_BAR;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.TOP_FULLSCREEN_OPAQUE_OR_DIMMING_WINDOW;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.TOP_FULLSCREEN_OPAQUE_WINDOW;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.WINDOW_MANAGER_DRAW_COMPLETE;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -172,7 +192,6 @@ import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.session.MediaSessionLegacyHelper;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.FactoryTest;
 import android.os.Handler;
@@ -8218,6 +8237,40 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void writeToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
+        proto.write(LAST_SYSTEM_UI_FLAGS, mLastSystemUiFlags);
+        proto.write(ROTATION_MODE, mUserRotationMode);
+        proto.write(ROTATION, mUserRotation);
+        proto.write(ORIENTATION, mCurrentAppOrientation);
+        proto.write(SCREEN_ON_FULLY, mScreenOnFully);
+        proto.write(KEYGUARD_DRAW_COMPLETE, mKeyguardDrawComplete);
+        proto.write(WINDOW_MANAGER_DRAW_COMPLETE, mWindowManagerDrawComplete);
+        if (mFocusedApp != null) {
+            proto.write(FOCUSED_APP_TOKEN, mFocusedApp.toString());
+        }
+        if (mFocusedWindow != null) {
+            mFocusedWindow.writeIdentifierToProto(proto, FOCUSED_WINDOW);
+        }
+        if (mTopFullscreenOpaqueWindowState != null) {
+            mTopFullscreenOpaqueWindowState.writeIdentifierToProto(
+                    proto, TOP_FULLSCREEN_OPAQUE_WINDOW);
+        }
+        if (mTopFullscreenOpaqueOrDimmingWindowState != null) {
+            mTopFullscreenOpaqueOrDimmingWindowState.writeIdentifierToProto(
+                    proto, TOP_FULLSCREEN_OPAQUE_OR_DIMMING_WINDOW);
+        }
+        proto.write(KEYGUARD_OCCLUDED, mKeyguardOccluded);
+        proto.write(KEYGUARD_OCCLUDED_CHANGED, mKeyguardOccludedChanged);
+        proto.write(KEYGUARD_OCCLUDED_PENDING, mPendingKeyguardOccluded);
+        proto.write(FORCE_STATUS_BAR, mForceStatusBar);
+        proto.write(FORCE_STATUS_BAR_FROM_KEYGUARD, mForceStatusBarFromKeyguard);
+        mStatusBarController.writeToProto(proto, STATUS_BAR);
+        mNavigationBarController.writeToProto(proto, NAVIGATION_BAR);
+        if (mOrientationListener != null) {
+            mOrientationListener.writeToProto(proto, ORIENTATION_LISTENER);
+        }
+        if (mKeyguardDelegate != null) {
+            mKeyguardDelegate.writeToProto(proto, KEYGUARD_DELEGATE);
+        }
         proto.end(token);
     }
 

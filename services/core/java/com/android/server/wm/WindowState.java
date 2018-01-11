@@ -3136,7 +3136,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         proto.end(token);
     }
 
-    void writeIdentifierToProto(ProtoOutputStream proto, long fieldId) {
+    @Override
+    public void writeIdentifierToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(HASH_CODE, System.identityHashCode(this));
         proto.write(USER_ID, UserHandle.getUserId(mOwnerUid));
