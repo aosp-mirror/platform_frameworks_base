@@ -78,6 +78,7 @@ import android.provider.Settings;
 import android.security.KeyChain;
 import android.security.keystore.AttestationUtils;
 import android.telephony.TelephonyManager;
+import android.telephony.data.ApnSetting;
 import android.test.MoreAsserts;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.util.ArraySet;
@@ -4608,6 +4609,23 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(mContext.spiedContext, times(1)).sendBroadcastAsUser(
                 MockUtils.checkIntent(expectedIntent),
                 MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
+    }
+
+    public void testOverrideApnAPIsFailWithPO() throws Exception {
+        setupProfileOwner();
+        ApnSetting apn = (new ApnSetting.Builder()).build();
+        assertExpectException(SecurityException.class, null, () ->
+                dpm.addOverrideApn(admin1, apn));
+        assertExpectException(SecurityException.class, null, () ->
+                dpm.updateOverrideApn(admin1, 0, apn));
+        assertExpectException(SecurityException.class, null, () ->
+                dpm.removeOverrideApn(admin1, 0));
+        assertExpectException(SecurityException.class, null, () ->
+                dpm.getOverrideApns(admin1));
+        assertExpectException(SecurityException.class, null, () ->
+                dpm.setOverrideApnsEnabled(admin1, false));
+        assertExpectException(SecurityException.class, null, () ->
+                dpm.isOverrideApnEnabled(admin1));
     }
 
     private void verifyCanGetOwnerInstalledCaCerts(

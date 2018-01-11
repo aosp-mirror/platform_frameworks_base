@@ -22,11 +22,13 @@ import android.os.PersistableBundle;
 import android.os.UserHandle;
 import android.security.keymaster.KeymasterCertificateChain;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
+import android.telephony.data.ApnSetting;
 
 import com.android.internal.R;
 import com.android.server.SystemService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -145,5 +147,33 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     @Override
     public List<String> getMeteredDataDisabled(ComponentName admin) {
         return new ArrayList<>();
+    }
+
+    @Override
+    public int addOverrideApn(ComponentName admin, ApnSetting apnSetting) {
+        return -1;
+    }
+
+    @Override
+    public boolean updateOverrideApn(ComponentName admin, int apnId, ApnSetting apnSetting) {
+        return false;
+    }
+
+    @Override
+    public boolean removeOverrideApn(ComponentName admin, int apnId) {
+        return false;
+    }
+
+    @Override
+    public List<ApnSetting> getOverrideApns(ComponentName admin) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public void setOverrideApnsEnabled(ComponentName admin, boolean enabled) {}
+
+    @Override
+    public boolean isOverrideApnEnabled(ComponentName admin) {
+        return false;
     }
 }

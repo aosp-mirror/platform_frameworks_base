@@ -68,6 +68,7 @@ import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
 import android.service.restrictions.RestrictionsReceiver;
 import android.telephony.TelephonyManager;
+import android.telephony.data.ApnSetting;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -9297,5 +9298,139 @@ public class DevicePolicyManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Called by device owner to add an override APN.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with
+     * @param apnSetting the override APN to insert
+     * @return The {@code id} of inserted override APN. Or {@code -1} when failed to insert into
+     *         the database.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     *
+     * @see #setOverrideApnsEnabled(ComponentName, boolean)
+     */
+    public int addOverrideApn(@NonNull ComponentName admin, @NonNull ApnSetting apnSetting) {
+        throwIfParentInstance("addOverrideApn");
+        if (mService != null) {
+            try {
+                return mService.addOverrideApn(admin, apnSetting);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Called by device owner to update an override APN.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with
+     * @param apnId the {@code id} of the override APN to update
+     * @param apnSetting the override APN to update
+     * @return {@code true} if the required override APN is successfully updated,
+     *         {@code false} otherwise.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     *
+     * @see #setOverrideApnsEnabled(ComponentName, boolean)
+     */
+    public boolean updateOverrideApn(@NonNull ComponentName admin, int apnId,
+            @NonNull ApnSetting apnSetting) {
+        throwIfParentInstance("updateOverrideApn");
+        if (mService != null) {
+            try {
+                return mService.updateOverrideApn(admin, apnId, apnSetting);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Called by device owner to remove an override APN.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with
+     * @param apnId the {@code id} of the override APN to remove
+     * @return {@code true} if the required override APN is successfully removed, {@code false}
+     *         otherwise.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     *
+     * @see #setOverrideApnsEnabled(ComponentName, boolean)
+     */
+    public boolean removeOverrideApn(@NonNull ComponentName admin, int apnId) {
+        throwIfParentInstance("removeOverrideApn");
+        if (mService != null) {
+            try {
+                return mService.removeOverrideApn(admin, apnId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Called by device owner to get all override APNs inserted by device owner.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with
+     * @return A list of override APNs inserted by device owner.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     *
+     * @see #setOverrideApnsEnabled(ComponentName, boolean)
+     */
+    public List<ApnSetting> getOverrideApns(@NonNull ComponentName admin) {
+        throwIfParentInstance("getOverrideApns");
+        if (mService != null) {
+            try {
+                return mService.getOverrideApns(admin);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * Called by device owner to set if override APNs should be enabled.
+     * <p> Override APNs are separated from other APNs on the device, and can only be inserted or
+     * modified by the device owner. When enabled, only override APNs are in use, any other APNs
+     * are ignored.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with
+     * @param enabled {@code true} if override APNs should be enabled, {@code false} otherwise
+     * @throws SecurityException if {@code admin} is not a device owner.
+     */
+    public void setOverrideApnsEnabled(@NonNull ComponentName admin, boolean enabled) {
+        throwIfParentInstance("setOverrideApnEnabled");
+        if (mService != null) {
+            try {
+                mService.setOverrideApnsEnabled(admin, enabled);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Called by device owner to check if override APNs are currently enabled.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with
+     * @return {@code true} if override APNs are currently enabled, {@code false} otherwise.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     *
+     * @see #setOverrideApnsEnabled(ComponentName, boolean)
+     */
+    public boolean isOverrideApnEnabled(@NonNull ComponentName admin) {
+        throwIfParentInstance("isOverrideApnEnabled");
+        if (mService != null) {
+            try {
+                return mService.isOverrideApnEnabled(admin);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return false;
     }
 }

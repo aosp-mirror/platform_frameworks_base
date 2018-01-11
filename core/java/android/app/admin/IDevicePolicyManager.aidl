@@ -38,6 +38,7 @@ import android.os.RemoteCallback;
 import android.os.UserHandle;
 import android.security.keymaster.KeymasterCertificateChain;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
+import android.telephony.data.ApnSetting;
 
 import java.util.List;
 
@@ -403,4 +404,11 @@ interface IDevicePolicyManager {
 
     List<String> setMeteredDataDisabled(in ComponentName admin, in List<String> packageNames);
     List<String> getMeteredDataDisabled(in ComponentName admin);
+
+    int addOverrideApn(in ComponentName admin, in ApnSetting apnSetting);
+    boolean updateOverrideApn(in ComponentName admin, int apnId, in ApnSetting apnSetting);
+    boolean removeOverrideApn(in ComponentName admin, int apnId);
+    List<ApnSetting> getOverrideApns(in ComponentName admin);
+    void setOverrideApnsEnabled(in ComponentName admin, boolean enabled);
+    boolean isOverrideApnEnabled(in ComponentName admin);
 }

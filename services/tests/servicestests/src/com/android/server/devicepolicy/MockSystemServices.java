@@ -32,6 +32,7 @@ import android.app.NotificationManager;
 import android.app.backup.IBackupManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -39,8 +40,10 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
+import android.database.Cursor;
 import android.media.IAudioService;
 import android.net.IIpConnectivityMetrics;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -51,6 +54,7 @@ import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.security.KeyChain;
 import android.telephony.TelephonyManager;
+import android.test.mock.MockContentProvider;
 import android.test.mock.MockContentResolver;
 import android.util.ArrayMap;
 import android.util.Pair;
@@ -144,6 +148,23 @@ public class MockSystemServices {
         packageManager = spy(realContext.getPackageManager());
 
         contentResolver = new MockContentResolver();
+        contentResolver.addProvider("telephony", new MockContentProvider(realContext) {
+            @Override
+            public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+                return 0;
+            }
+
+            @Override
+            public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs,
+                    String sortOrder) {
+                return null;
+            }
+
+            @Override
+            public int delete(Uri uri, String selection, String[] selectionArgs) {
+                return 0;
+            }
+        });
         contentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
 
         // Add the system user with a fake profile group already set up (this can happen in the real
