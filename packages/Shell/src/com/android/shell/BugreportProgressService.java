@@ -1909,7 +1909,7 @@ public class BugreportProgressService extends Service {
             }
             final IDumpstate dumpstate = IDumpstate.Stub.asInterface(service);
             try {
-                token = dumpstate.setListener("Shell", this);
+                token = dumpstate.setListener("Shell", this, /* perSectionDetails= */ false);
                 if (token != null) {
                     token.asBinder().linkToDeath(this, 0);
                 }
@@ -1976,6 +1976,15 @@ public class BugreportProgressService extends Service {
         public void onMaxProgressUpdated(int maxProgress) throws RemoteException {
             Log.d(TAG, "onMaxProgressUpdated: " + maxProgress);
             info.realMax = maxProgress;
+        }
+
+        @Override
+        public void onSectionComplete(String title, int status, int size, int durationMs)
+                throws RemoteException {
+            if (DEBUG) {
+                Log.v(TAG, "Title: " + title + " Status: " + status + " Size: " + size
+                        + " Duration: " + durationMs + "ms");
+            }
         }
 
         public void dump(String prefix, PrintWriter pw) {
