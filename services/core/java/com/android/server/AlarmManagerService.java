@@ -89,10 +89,10 @@ import static android.app.AlarmManager.ELAPSED_REALTIME;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.LocalLog;
 import com.android.server.ForceAppStandbyTracker.Listener;
-import com.android.server.LocalServices;
 
 /**
  * Alarm manager implementaion.
@@ -152,6 +152,8 @@ class AlarmManagerService extends SystemService {
     private long mLastTickSet;
     private long mLastTickIssued; // elapsed
     private long mLastTickReceived;
+    private long mLastTickAdded;
+    private long mLastTickRemoved;
     int mBroadcastRefCount = 0;
     PowerManager.WakeLock mWakeLock;
     boolean mLastWakeLockUnimportantForLogging;
@@ -431,6 +433,9 @@ class AlarmManagerService extends SystemService {
             end = seed.maxWhenElapsed;
             flags = seed.flags;
             alarms.add(seed);
+            if (seed.operation == mTimeTickSender) {
+                mLastTickAdded = System.currentTimeMillis();
+            }
         }
 
         int size() {
@@ -453,6 +458,9 @@ class AlarmManagerService extends SystemService {
                 index = 0 - index - 1;
             }
             alarms.add(index, alarm);
+            if (alarm.operation == mTimeTickSender) {
+                mLastTickAdded = System.currentTimeMillis();
+            }
             if (DEBUG_BATCH) {
                 Slog.v(TAG, "Adding " + alarm + " to " + this);
             }
@@ -483,6 +491,9 @@ class AlarmManagerService extends SystemService {
                     didRemove = true;
                     if (alarm.alarmClock != null) {
                         mNextAlarmClockMayChange = true;
+                    }
+                    if (alarm.operation == mTimeTickSender) {
+                        mLastTickRemoved = System.currentTimeMillis();
                     }
                 } else {
                     if (alarm.whenElapsed > newStart) {
@@ -700,6 +711,39 @@ class AlarmManagerService extends SystemService {
         }
         return -1;
     }
+    /** @return total count of the alarms in a set of alarm batches. */
+    static int getAlarmCount(ArrayList<Batch> batches) {
+        int ret = 0;
+
+        final int size = batches.size();
+        for (int i = 0; i < size; i++) {
+            ret += batches.get(i).size();
+        }
+        return ret;
+    }
+
+    boolean haveAlarmsTimeTickAlarm(ArrayList<Alarm> alarms) {
+        if (alarms.size() == 0) {
+            return false;
+        }
+        final int batchSize = alarms.size();
+        for (int j = 0; j < batchSize; j++) {
+            if (alarms.get(j).operation == mTimeTickSender) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    boolean haveBatchesTimeTickAlarm(ArrayList<Batch> batches) {
+        final int numBatches = batches.size();
+        for (int i = 0; i < numBatches; i++) {
+            if (haveAlarmsTimeTickAlarm(batches.get(i).alarms)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     // The RTC clock has moved arbitrarily, so we need to recalculate all the batching
     void rebatchAllAlarms() {
@@ -709,6 +753,11 @@ class AlarmManagerService extends SystemService {
     }
 
     void rebatchAllAlarmsLocked(boolean doValidate) {
+        final int oldCount =
+                getAlarmCount(mAlarmBatches) + ArrayUtils.size(mPendingWhileIdleAlarms);
+        final boolean oldHasTick = haveBatchesTimeTickAlarm(mAlarmBatches)
+                || haveAlarmsTimeTickAlarm(mPendingWhileIdleAlarms);
+
         ArrayList<Batch> oldSet = (ArrayList<Batch>) mAlarmBatches.clone();
         mAlarmBatches.clear();
         Alarm oldPendingIdleUntil = mPendingIdleUntil;
@@ -729,6 +778,18 @@ class AlarmManagerService extends SystemService {
                 restorePendingWhileIdleAlarmsLocked();
             }
         }
+        final int newCount =
+                getAlarmCount(mAlarmBatches) + ArrayUtils.size(mPendingWhileIdleAlarms);
+        final boolean newHasTick = haveBatchesTimeTickAlarm(mAlarmBatches)
+                || haveAlarmsTimeTickAlarm(mPendingWhileIdleAlarms);
+
+        if (oldCount != newCount) {
+            Slog.wtf(TAG, "Rebatching: total count changed from " + oldCount + " to " + newCount);
+        }
+        if (oldHasTick != newHasTick) {
+            Slog.wtf(TAG, "Rebatching: hasTick changed from " + oldHasTick + " to " + newHasTick);
+        }
+
         rescheduleKernelAlarmsLocked();
         updateNextAlarmClockLocked();
     }
@@ -1603,7 +1664,7 @@ class AlarmManagerService extends SystemService {
 
             final long nowRTC = System.currentTimeMillis();
             final long nowELAPSED = SystemClock.elapsedRealtime();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
             pw.print("  nowRTC="); pw.print(nowRTC);
             pw.print("="); pw.print(sdf.format(new Date(nowRTC)));
@@ -1613,10 +1674,11 @@ class AlarmManagerService extends SystemService {
             pw.print("="); pw.println(sdf.format(new Date(mLastTimeChangeClockTime)));
             pw.print("  mLastTimeChangeRealtime="); pw.println(mLastTimeChangeRealtime);
             pw.print("  mLastTickIssued=");
-            TimeUtils.formatDuration(mLastTickIssued - nowELAPSED, pw);
-            pw.println();
+            pw.println(sdf.format(new Date(nowRTC - (nowELAPSED - mLastTickIssued))));
             pw.print("  mLastTickReceived="); pw.println(sdf.format(new Date(mLastTickReceived)));
             pw.print("  mLastTickSet="); pw.println(sdf.format(new Date(mLastTickSet)));
+            pw.print("  mLastTickAdded="); pw.println(sdf.format(new Date(mLastTickAdded)));
+            pw.print("  mLastTickRemoved="); pw.println(sdf.format(new Date(mLastTickRemoved)));
             pw.println();
             if (!mInteractive) {
                 pw.print("  Time since non-interactive: ");
@@ -2400,6 +2462,10 @@ class AlarmManagerService extends SystemService {
     }
 
     void removeLocked(final int uid) {
+        if (uid == Process.SYSTEM_UID) {
+            Slog.wtf(TAG, "removeLocked: Shouldn't for UID=" + uid);
+            return;
+        }
         boolean didRemove = false;
         final Predicate<Alarm> whichAlarms = (Alarm a) -> a.uid == uid;
         for (int i = mAlarmBatches.size() - 1; i >= 0; i--) {
@@ -2448,6 +2514,7 @@ class AlarmManagerService extends SystemService {
 
         boolean didRemove = false;
         final Predicate<Alarm> whichAlarms = (Alarm a) -> a.matches(packageName);
+        final boolean oldHasTick = haveBatchesTimeTickAlarm(mAlarmBatches);
         for (int i = mAlarmBatches.size() - 1; i >= 0; i--) {
             Batch b = mAlarmBatches.get(i);
             didRemove |= b.remove(whichAlarms);
@@ -2455,6 +2522,11 @@ class AlarmManagerService extends SystemService {
                 mAlarmBatches.remove(i);
             }
         }
+        final boolean newHasTick = haveBatchesTimeTickAlarm(mAlarmBatches);
+        if (oldHasTick != newHasTick) {
+            Slog.wtf(TAG, "removeLocked: hasTick changed from " + oldHasTick + " to " + newHasTick);
+        }
+
         for (int i = mPendingWhileIdleAlarms.size() - 1; i >= 0; i--) {
             final Alarm a = mPendingWhileIdleAlarms.get(i);
             if (a.matches(packageName)) {
@@ -2484,6 +2556,10 @@ class AlarmManagerService extends SystemService {
     }
 
     void removeForStoppedLocked(final int uid) {
+        if (uid == Process.SYSTEM_UID) {
+            Slog.wtf(TAG, "removeForStoppedLocked: Shouldn't for UID=" + uid);
+            return;
+        }
         boolean didRemove = false;
         final Predicate<Alarm> whichAlarms = (Alarm a) -> {
             try {
@@ -2524,6 +2600,10 @@ class AlarmManagerService extends SystemService {
     }
 
     void removeUserLocked(int userHandle) {
+        if (userHandle == UserHandle.USER_SYSTEM) {
+            Slog.wtf(TAG, "removeForStoppedLocked: Shouldn't for user=" + userHandle);
+            return;
+        }
         boolean didRemove = false;
         final Predicate<Alarm> whichAlarms =
                 (Alarm a) -> UserHandle.getUserId(a.creatorUid) == userHandle;
@@ -3688,6 +3768,9 @@ class AlarmManagerService extends SystemService {
                                     mDeliveryTracker, mHandler, null,
                                     allowWhileIdle ? mIdleOptions : null);
                 } catch (PendingIntent.CanceledException e) {
+                    if (alarm.operation == mTimeTickSender) {
+                        Slog.wtf(TAG, "mTimeTickSender canceled");
+                    }
                     if (alarm.repeatInterval > 0) {
                         // This IntentSender is no longer valid, but this
                         // is a repeating alarm, so toss it
