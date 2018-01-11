@@ -555,7 +555,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             case StatsLog.CPU_TIME_PER_FREQ: {
                 List<StatsLogEventWrapper> ret = new ArrayList();
                 for (int cluster = 0; cluster < mKernelCpuSpeedReaders.length; cluster++) {
-                    long[] clusterTimeMs = mKernelCpuSpeedReaders[cluster].readDelta();
+                    long[] clusterTimeMs = mKernelCpuSpeedReaders[cluster].readAbsolute();
                     if (clusterTimeMs != null) {
                         for (int speed = clusterTimeMs.length - 1; speed >= 0; --speed) {
                             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 3);
