@@ -1596,7 +1596,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         final boolean hasArtwork = artworkDrawable != null;
 
-        if ((hasArtwork || DEBUG_MEDIA_FAKE_ARTWORK)
+        if ((hasArtwork || DEBUG_MEDIA_FAKE_ARTWORK) && !mDozing
                 && (mState != StatusBarState.SHADE || allowWhenShade)
                 && mFingerprintUnlockController.getMode()
                         != FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING
@@ -1657,15 +1657,16 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
             }
         } else {
-            // need to hide the album art, either because we are unlocked or because
-            // the metadata isn't there to support it
+            // need to hide the album art, either because we are unlocked, on AOD
+            // or because the metadata isn't there to support it
             if (mBackdrop.getVisibility() != View.GONE) {
                 if (DEBUG_MEDIA) {
                     Log.v(TAG, "DEBUG_MEDIA: Fading out album artwork");
                 }
+                boolean cannotAnimateDoze = mDozing && !ScrimState.AOD.getAnimateChange();
                 if (mFingerprintUnlockController.getMode()
                         == FingerprintUnlockController.MODE_WAKE_AND_UNLOCK_PULSING
-                        || hideBecauseOccluded) {
+                        || hideBecauseOccluded || cannotAnimateDoze) {
 
                     // We are unlocking directly - no animation!
                     mBackdrop.setVisibility(View.GONE);
