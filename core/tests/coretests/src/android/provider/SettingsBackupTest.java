@@ -512,6 +512,7 @@ public class SettingsBackupTest {
                  Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE,
                  Settings.Secure.SETTINGS_CLASSNAME,
                  Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING, // candidate?
+                 Settings.Secure.SHOW_ROTATION_SUGGESTIONS,
                  Settings.Secure.SKIP_FIRST_USE_HINTS, // candidate?
                  Settings.Secure.SMS_DEFAULT_APPLICATION,
                  Settings.Secure.TRUST_AGENTS_INITIALIZED,

@@ -6802,6 +6802,37 @@ public final class Settings {
         public static final String ASSIST_DISCLOSURE_ENABLED = "assist_disclosure_enabled";
 
         /**
+         * Control if rotation suggestions are sent to System UI when in rotation locked mode.
+         * Done to enable screen rotation while the the screen rotation is locked. Enabling will
+         * poll the accelerometer in rotation locked mode.
+         *
+         * If 0, then rotation suggestions are not sent to System UI. If 1, suggestions are sent.
+         *
+         * @hide
+         */
+
+        public static final String SHOW_ROTATION_SUGGESTIONS = "show_rotation_suggestions";
+
+        /**
+         * The disabled state of SHOW_ROTATION_SUGGESTIONS.
+         * @hide
+         */
+        public static final int SHOW_ROTATION_SUGGESTIONS_DISABLED = 0x0;
+
+        /**
+         * The enabled state of SHOW_ROTATION_SUGGESTIONS.
+         * @hide
+         */
+        public static final int SHOW_ROTATION_SUGGESTIONS_ENABLED = 0x1;
+
+        /**
+         * The default state of SHOW_ROTATION_SUGGESTIONS.
+         * @hide
+         */
+        public static final int SHOW_ROTATION_SUGGESTIONS_DEFAULT =
+                SHOW_ROTATION_SUGGESTIONS_DISABLED;
+
+        /**
          * Read only list of the service components that the current user has explicitly allowed to
          * see and assist with all of the user's notifications.
          *
