@@ -7540,13 +7540,28 @@ public class DevicePolicyManager {
     /**
      * Called by device owners to set a local system update policy. When a new policy is set,
      * {@link #ACTION_SYSTEM_UPDATE_POLICY_CHANGED} is broadcasted.
+     * <p>
+     * If the supplied system update policy has freeze periods set but the freeze periods do not
+     * meet 90-day maximum length or 60-day minimum separation requirement set out in
+     * {@link SystemUpdatePolicy#setFreezePeriods},
+     * {@link SystemUpdatePolicy.ValidationFailedException} will the thrown. Note that the system
+     * keeps a record of freeze periods the device experienced previously, and combines them with
+     * the new freeze periods to be set when checking the maximum freeze length and minimum freeze
+     * separation constraints. As a result, freeze periods that passed validation during
+     * {@link SystemUpdatePolicy#setFreezePeriods} might fail the additional checks here due to
+     * the freeze period history. If this is causing issues during development,
+     * {@code adb shell dpm clear-freeze-period-record} can be used to clear the record.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with. All
      *            components in the device owner package can set system update policies and the most
      *            recent policy takes effect.
      * @param policy the new policy, or {@code null} to clear the current policy.
      * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws IllegalArgumentException if the policy type or maintenance window is not valid.
+     * @throws SystemUpdatePolicy.ValidationFailedException if the policy's freeze period does not
+     *             meet the requirement.
      * @see SystemUpdatePolicy
+     * @see SystemUpdatePolicy#setFreezePeriods(List)
      */
     public void setSystemUpdatePolicy(@NonNull ComponentName admin, SystemUpdatePolicy policy) {
         throwIfParentInstance("setSystemUpdatePolicy");
@@ -7576,6 +7591,22 @@ public class DevicePolicyManager {
         return null;
     }
 
+    /**
+     * Reset record of previous system update freeze period the device went through.
+     * Only callable by ADB.
+     * @hide
+     */
+    public void clearSystemUpdatePolicyFreezePeriodRecord() {
+        throwIfParentInstance("clearSystemUpdatePolicyFreezePeriodRecord");
+        if (mService == null) {
+            return;
+        }
+        try {
+            mService.clearSystemUpdatePolicyFreezePeriodRecord();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
     /**
      * Called by a device owner or profile owner of secondary users that is affiliated with the
      * device to disable the keyguard altogether.

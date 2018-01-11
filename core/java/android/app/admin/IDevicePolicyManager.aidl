@@ -295,6 +295,7 @@ interface IDevicePolicyManager {
 
     void setSystemUpdatePolicy(in ComponentName who, in SystemUpdatePolicy policy);
     SystemUpdatePolicy getSystemUpdatePolicy();
+    void clearSystemUpdatePolicyFreezePeriodRecord();
 
     boolean setKeyguardDisabled(in ComponentName admin, boolean disabled);
     boolean setStatusBarDisabled(in ComponentName who, boolean disabled);

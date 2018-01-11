@@ -238,6 +238,7 @@ import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -725,7 +726,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 handlePackagesChanged(intent.getData().getSchemeSpecificPart(), userHandle);
             } else if (Intent.ACTION_MANAGED_PROFILE_ADDED.equals(action)) {
                 clearWipeProfileNotification();
+            } else if (Intent.ACTION_DATE_CHANGED.equals(action)
+                    || Intent.ACTION_TIME_CHANGED.equals(action)) {
+                // Update freeze period record when clock naturally progresses to the next day
+                // (ACTION_DATE_CHANGED), or when manual clock adjustment is made
+                // (ACTION_TIME_CHANGED)
+                updateSystemUpdateFreezePeriodsRecord(/* saveIfChanged */ true);
             }
+
         }
 
         private void sendDeviceOwnerUserCommand(String action, int userHandle) {
@@ -2113,6 +2121,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, mHandler);
         filter = new IntentFilter();
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
+        filter.addAction(Intent.ACTION_TIME_CHANGED);
+        filter.addAction(Intent.ACTION_DATE_CHANGED);
         mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, mHandler);
 
         LocalServices.addService(DevicePolicyManagerInternal.class, mLocalService);
@@ -3353,6 +3363,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             deleteTransferOwnershipMetadataFileLocked();
             deleteTransferOwnershipBundleLocked(metadata.userId);
         }
+        updateSystemUpdateFreezePeriodsRecord(/* saveIfChanged */ true);
     }
 
     private void ensureDeviceOwnerUserStarted() {
@@ -10422,8 +10433,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void setSystemUpdatePolicy(ComponentName who, SystemUpdatePolicy policy) {
-        if (policy != null && !policy.isValid()) {
-            throw new IllegalArgumentException("Invalid system update policy.");
+        if (policy != null) {
+            // throws exception if policy type is invalid
+            policy.validateType();
+            // throws exception if freeze period is invalid
+            policy.validateFreezePeriods();
+            Pair<LocalDate, LocalDate> record = mOwners.getSystemUpdateFreezePeriodRecord();
+            // throws exception if freeze period is incompatible with previous freeze period record
+            policy.validateAgainstPreviousFreezePeriod(record.first, record.second,
+                    LocalDate.now());
         }
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
@@ -10431,6 +10449,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mOwners.clearSystemUpdatePolicy();
             } else {
                 mOwners.setSystemUpdatePolicy(policy);
+                updateSystemUpdateFreezePeriodsRecord(/* saveIfChanged */ false);
             }
             mOwners.writeDeviceOwner();
         }
@@ -10448,6 +10467,83 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 return null;
             }
             return policy;
+        }
+    }
+
+    private static boolean withinRange(Pair<LocalDate, LocalDate> range, LocalDate date) {
+        return (!date.isBefore(range.first) && !date.isAfter(range.second));
+    }
+
+    /**
+     * keeps track of the last continuous period when the system is under OTA freeze.
+     *
+     * DPMS keeps track of the previous dates during which OTA was freezed as a result of an
+     * system update policy with freeze periods in effect. This is needed to make robust
+     * validation on new system update polices, for example to prevent the OTA from being
+     * frozen for more than 90 days if the DPC keeps resetting a new 24-hour freeze period
+     * on midnight everyday, or having freeze periods closer than 60 days apart by DPC resetting
+     * a new freeze period after a few days.
+     *
+     * @param saveIfChanged whether to persist the result on disk if freeze period record is
+     *            updated. This should only be set to {@code false} if there is a guaranteed
+     *            mOwners.writeDeviceOwner() later in the control flow to reduce the number of
+     *            disk writes. Otherwise you risk inconsistent on-disk state.
+     *
+     * @see SystemUpdatePolicy#validateAgainstPreviousFreezePeriod
+     */
+    private void updateSystemUpdateFreezePeriodsRecord(boolean saveIfChanged) {
+        Slog.d(LOG_TAG, "updateSystemUpdateFreezePeriodsRecord");
+        synchronized (this) {
+            final SystemUpdatePolicy policy = mOwners.getSystemUpdatePolicy();
+            if (policy == null) {
+                return;
+            }
+            final LocalDate now = LocalDate.now();
+            final Pair<LocalDate, LocalDate> currentPeriod = policy.getCurrentFreezePeriod(now);
+            if (currentPeriod == null) {
+                return;
+            }
+            final Pair<LocalDate, LocalDate> record = mOwners.getSystemUpdateFreezePeriodRecord();
+            final LocalDate start = record.first;
+            final LocalDate end = record.second;
+            final boolean changed;
+            if (end == null || start == null) {
+                // Start a new period if there is none at the moment
+                changed = mOwners.setSystemUpdateFreezePeriodRecord(now, now);
+            } else if (now.equals(end.plusDays(1))) {
+                // Extend the existing period
+                changed = mOwners.setSystemUpdateFreezePeriodRecord(start, now);
+            } else if (now.isAfter(end.plusDays(1))) {
+                if (withinRange(currentPeriod, start) && withinRange(currentPeriod, end)) {
+                    // The device might be off for some period. If the past freeze record
+                    // is within range of the current freeze period, assume the device was off
+                    // during the period [end, now] and extend the freeze record to [start, now].
+                    changed = mOwners.setSystemUpdateFreezePeriodRecord(start, now);
+                } else {
+                    changed = mOwners.setSystemUpdateFreezePeriodRecord(now, now);
+                }
+            } else if (now.isBefore(start)) {
+                // Systm clock was adjusted backwards, restart record
+                changed = mOwners.setSystemUpdateFreezePeriodRecord(now, now);
+            } else /* start <= now <= end */ {
+                changed = false;
+            }
+            if (changed && saveIfChanged) {
+                mOwners.writeDeviceOwner();
+            }
+        }
+    }
+
+    @Override
+    public void clearSystemUpdatePolicyFreezePeriodRecord() {
+        enforceShell("clearSystemUpdatePolicyFreezePeriodRecord");
+        synchronized (this) {
+            // Print out current record to help diagnosed CTS failures
+            Slog.i(LOG_TAG, "Clear freeze period record: "
+                    + mOwners.getSystemUpdateFreezePeriodRecordAsString());
+            if (mOwners.setSystemUpdateFreezePeriodRecord(null, null)) {
+                mOwners.writeDeviceOwner();
+            }
         }
     }
 
