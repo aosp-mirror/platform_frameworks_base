@@ -19,6 +19,7 @@ package com.android.providers.settings;
 import android.annotation.NonNull;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.providers.settings.GlobalSettingsProto;
 import android.providers.settings.SecureSettingsProto;
 import android.providers.settings.SettingProto;
@@ -1137,6 +1138,12 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.SHOW_MUTE_IN_CRASH_DIALOG,
                 GlobalSettingsProto.SHOW_MUTE_IN_CRASH_DIALOG);
+        dumpSetting(s, p,
+                Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED,
+                GlobalSettingsProto.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED);
+        dumpSetting(s, p,
+                Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED,
+                GlobalSettingsProto.CHAINED_BATTERY_ATTRIBUTION_ENABLED);
     }
 
     /** Dump a single {@link SettingsState.Setting} to a proto buf */

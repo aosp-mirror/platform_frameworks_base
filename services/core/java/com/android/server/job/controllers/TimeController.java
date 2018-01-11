@@ -18,9 +18,11 @@ package com.android.server.job.controllers;
 
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
+import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.AlarmManager.OnAlarmListener;
 import android.content.Context;
+import android.os.Process;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.util.Slog;
@@ -52,6 +54,8 @@ public final class TimeController extends StateController {
     private long mNextJobExpiredElapsedMillis;
     private long mNextDelayExpiredElapsedMillis;
 
+    private final boolean mChainedAttributionEnabled;
+
     private AlarmManager mAlarmService = null;
     /** List of tracked jobs, sorted asc. by deadline */
     private final List<JobStatus> mTrackedJobs = new LinkedList<>();
@@ -71,6 +75,7 @@ public final class TimeController extends StateController {
 
         mNextJobExpiredElapsedMillis = Long.MAX_VALUE;
         mNextDelayExpiredElapsedMillis = Long.MAX_VALUE;
+        mChainedAttributionEnabled = WorkSource.isChainedBatteryAttributionEnabled(context);
     }
 
     /**
@@ -113,7 +118,7 @@ public final class TimeController extends StateController {
             maybeUpdateAlarmsLocked(
                     job.hasTimingDelayConstraint() ? job.getEarliestRunTime() : Long.MAX_VALUE,
                     job.hasDeadlineConstraint() ? job.getLatestRunTimeElapsed() : Long.MAX_VALUE,
-                    new WorkSource(job.getSourceUid(), job.getSourcePackageName()));
+                    deriveWorkSource(job.getSourceUid(), job.getSourcePackageName()));
         }
     }
 
@@ -179,9 +184,8 @@ public final class TimeController extends StateController {
                     break;
                 }
             }
-            setDeadlineExpiredAlarmLocked(nextExpiryTime, nextExpiryPackageName != null
-                    ? new WorkSource(nextExpiryUid, nextExpiryPackageName)
-                    : new WorkSource(nextExpiryUid));
+            setDeadlineExpiredAlarmLocked(nextExpiryTime,
+                    deriveWorkSource(nextExpiryUid, nextExpiryPackageName));
         }
     }
 
@@ -236,9 +240,20 @@ public final class TimeController extends StateController {
             if (ready) {
                 mStateChangedListener.onControllerStateChanged();
             }
-            setDelayExpiredAlarmLocked(nextDelayTime, nextDelayPackageName != null
-                    ? new WorkSource(nextDelayUid, nextDelayPackageName)
-                    : new WorkSource(nextDelayUid));
+            setDelayExpiredAlarmLocked(nextDelayTime,
+                    deriveWorkSource(nextDelayUid, nextDelayPackageName));
+        }
+    }
+
+    private WorkSource deriveWorkSource(int uid, @Nullable String packageName) {
+        if (mChainedAttributionEnabled) {
+            WorkSource ws = new WorkSource();
+            ws.createWorkChain()
+                    .addNode(uid, packageName)
+                    .addNode(Process.SYSTEM_UID, "JobScheduler");
+            return ws;
+        } else {
+            return packageName == null ? new WorkSource(uid) : new WorkSource(uid, packageName);
         }
     }
 

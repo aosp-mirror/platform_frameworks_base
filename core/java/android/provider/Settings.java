@@ -11248,6 +11248,16 @@ public final class Settings {
          */
         public static final String OVERRIDE_SETTINGS_PROVIDER_RESTORE_ANY_VERSION =
                 "override_settings_provider_restore_any_version";
+        /**
+         * Flag to toggle whether system services report attribution chains when they attribute
+         * battery use via a {@code WorkSource}.
+         *
+         * Type: int (0 to disable, 1 to enable)
+         *
+         * @hide
+         */
+        public static final String CHAINED_BATTERY_ATTRIBUTION_ENABLED =
+                "chained_battery_attribution_enabled";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings

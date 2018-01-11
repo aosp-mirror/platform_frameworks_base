@@ -444,7 +444,8 @@ public class SettingsBackupTest {
                     Settings.Global.ZEN_MODE_CONFIG_ETAG,
                     Settings.Global.ZEN_MODE_RINGER_LEVEL,
                     Settings.Global.ZRAM_ENABLED,
-                    Settings.Global.OVERRIDE_SETTINGS_PROVIDER_RESTORE_ANY_VERSION);
+                    Settings.Global.OVERRIDE_SETTINGS_PROVIDER_RESTORE_ANY_VERSION,
+                    Settings.Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED);
 
     private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
              newHashSet(
