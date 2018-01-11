@@ -9124,4 +9124,84 @@ public class DevicePolicyManager {
             throw re.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Called by a device owner to specify the user session start message. This may be displayed
+     * during a user switch.
+     * <p>
+     * The message should be limited to a short statement or it may be truncated.
+     * <p>
+     * If the message needs to be localized, it is the responsibility of the
+     * {@link DeviceAdminReceiver} to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast
+     * and set a new version of this message accordingly.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
+     * @param startUserSessionMessage message for starting user session, or {@code null} to use
+     * system default message.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     */
+    public void setStartUserSessionMessage(
+            @NonNull ComponentName admin, @Nullable CharSequence startUserSessionMessage) {
+        throwIfParentInstance("setStartUserSessionMessage");
+        try {
+            mService.setStartUserSessionMessage(admin, startUserSessionMessage);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Called by a device owner to specify the user session end message. This may be displayed
+     * during a user switch.
+     * <p>
+     * The message should be limited to a short statement or it may be truncated.
+     * <p>
+     * If the message needs to be localized, it is the responsibility of the
+     * {@link DeviceAdminReceiver} to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast
+     * and set a new version of this message accordingly.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
+     * @param endUserSessionMessage message for ending user session, or {@code null} to use system
+     * default message.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     */
+    public void setEndUserSessionMessage(
+            @NonNull ComponentName admin, @Nullable CharSequence endUserSessionMessage) {
+        throwIfParentInstance("setEndUserSessionMessage");
+        try {
+            mService.setEndUserSessionMessage(admin, endUserSessionMessage);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the user session start message.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     */
+    public CharSequence getStartUserSessionMessage(@NonNull ComponentName admin) {
+        throwIfParentInstance("getStartUserSessionMessage");
+        try {
+            return mService.getStartUserSessionMessage(admin);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the user session end message.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     */
+    public CharSequence getEndUserSessionMessage(@NonNull ComponentName admin) {
+        throwIfParentInstance("getEndUserSessionMessage");
+        try {
+            return mService.getEndUserSessionMessage(admin);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
 }

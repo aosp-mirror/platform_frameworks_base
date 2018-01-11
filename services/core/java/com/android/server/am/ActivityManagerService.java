@@ -25133,6 +25133,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         public boolean canStartMoreUsers() {
             return mUserController.canStartMoreUsers();
         }
+
+        @Override
+        public void setSwitchingFromSystemUserMessage(String switchingFromSystemUserMessage) {
+            mUserController.setSwitchingFromSystemUserMessage(switchingFromSystemUserMessage);
+        }
+
+        @Override
+        public void setSwitchingToSystemUserMessage(String switchingToSystemUserMessage) {
+            mUserController.setSwitchingToSystemUserMessage(switchingToSystemUserMessage);
+        }
     }
 
     /**

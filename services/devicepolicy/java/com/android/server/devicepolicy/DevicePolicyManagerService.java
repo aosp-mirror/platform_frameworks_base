@@ -200,6 +200,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.devicepolicy.DevicePolicyManagerService.ActiveAdmin.TrustAgentInfo;
 import com.android.server.pm.UserRestrictionsUtils;
+
 import com.google.android.collect.Sets;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -792,6 +793,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         private static final String ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS = "num-notifications";
         private static final String TAG_IS_LOGOUT_ENABLED = "is_logout_enabled";
         private static final String TAG_MANDATORY_BACKUP_TRANSPORT = "mandatory_backup_transport";
+        private static final String TAG_START_USER_SESSION_MESSAGE = "start_user_session_message";
+        private static final String TAG_END_USER_SESSION_MESSAGE = "end_user_session_message";
 
         DeviceAdminInfo info;
 
@@ -911,6 +914,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         // The component name of the backup transport which has to be used if backups are mandatory
         // or null if backups are not mandatory.
         ComponentName mandatoryBackupTransport = null;
+
+        // Message for user switcher
+        String startUserSessionMessage = null;
+        String endUserSessionMessage = null;
 
         ActiveAdmin(DeviceAdminInfo _info, boolean parent) {
             info = _info;
@@ -1180,6 +1187,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 out.attribute(null, ATTR_VALUE, mandatoryBackupTransport.flattenToString());
                 out.endTag(null, TAG_MANDATORY_BACKUP_TRANSPORT);
             }
+            if (startUserSessionMessage != null) {
+                out.startTag(null, TAG_START_USER_SESSION_MESSAGE);
+                out.text(startUserSessionMessage);
+                out.endTag(null, TAG_START_USER_SESSION_MESSAGE);
+            }
+            if (endUserSessionMessage != null) {
+                out.startTag(null, TAG_END_USER_SESSION_MESSAGE);
+                out.text(endUserSessionMessage);
+                out.endTag(null, TAG_END_USER_SESSION_MESSAGE);
+            }
         }
 
         void writePackageListToXml(XmlSerializer out, String outerTag,
@@ -1361,6 +1378,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 } else if (TAG_MANDATORY_BACKUP_TRANSPORT.equals(tag)) {
                     mandatoryBackupTransport = ComponentName.unflattenFromString(
                             parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_START_USER_SESSION_MESSAGE.equals(tag)) {
+                    type = parser.next();
+                    if (type == XmlPullParser.TEXT) {
+                        startUserSessionMessage = parser.getText();
+                    } else {
+                        Log.w(LOG_TAG, "Missing text when loading start session message");
+                    }
+                } else if (TAG_END_USER_SESSION_MESSAGE.equals(tag)) {
+                    type = parser.next();
+                    if (type == XmlPullParser.TEXT) {
+                        endUserSessionMessage = parser.getText();
+                    } else {
+                        Log.w(LOG_TAG, "Missing text when loading end session message");
+                    }
                 } else {
                     Slog.w(LOG_TAG, "Unknown admin tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -3215,10 +3246,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         synchronized (this) {
-            // push the force-ephemeral-users policy to the user manager.
             ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
             if (deviceOwner != null) {
+                // Push the force-ephemeral-users policy to the user manager.
                 mUserManagerInternal.setForceEphemeralUsers(deviceOwner.forceEphemeralUsers);
+
+                // Update user switcher message to activity manager.
+                ActivityManagerInternal activityManagerInternal =
+                        mInjector.getActivityManagerInternal();
+                activityManagerInternal.setSwitchingFromSystemUserMessage(
+                        deviceOwner.startUserSessionMessage);
+                activityManagerInternal.setSwitchingToSystemUserMessage(
+                        deviceOwner.endUserSessionMessage);
             }
         }
     }
@@ -12007,15 +12046,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return;
         }
         Preconditions.checkNotNull(admin);
-        getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
 
-        if (enabled == isLogoutEnabledInternalLocked()) {
-            // already in the requested state
-            return;
+        synchronized (this) {
+            ActiveAdmin deviceOwner =
+                    getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+
+            if (deviceOwner.isLogoutEnabled == enabled) {
+                // already in the requested state
+                return;
+            }
+            deviceOwner.isLogoutEnabled = enabled;
+            saveSettingsLocked(mInjector.userHandleGetCallingUserId());
         }
-        ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
-        deviceOwner.isLogoutEnabled = enabled;
-        saveSettingsLocked(mInjector.userHandleGetCallingUserId());
     }
 
     @Override
@@ -12024,13 +12066,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return false;
         }
         synchronized (this) {
-            return isLogoutEnabledInternalLocked();
+            ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
+            return (deviceOwner != null) && deviceOwner.isLogoutEnabled;
         }
-    }
-
-    private boolean isLogoutEnabledInternalLocked() {
-        ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
-        return (deviceOwner != null) && deviceOwner.isLogoutEnabled;
     }
 
     @Override
@@ -12124,5 +12162,84 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             extras.putParcelable(EXTRA_TRANSFER_OWNER_ADMIN_EXTRAS_BUNDLE, bundle);
         }
         return extras;
+    }
+
+    @Override
+    public void setStartUserSessionMessage(
+            ComponentName admin, CharSequence startUserSessionMessage) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkNotNull(admin);
+
+        final String startUserSessionMessageString =
+                startUserSessionMessage != null ? startUserSessionMessage.toString() : null;
+
+        synchronized (this) {
+            final ActiveAdmin deviceOwner =
+                    getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+
+            if (TextUtils.equals(deviceOwner.startUserSessionMessage, startUserSessionMessage)) {
+                return;
+            }
+            deviceOwner.startUserSessionMessage = startUserSessionMessageString;
+            saveSettingsLocked(mInjector.userHandleGetCallingUserId());
+        }
+
+        mInjector.getActivityManagerInternal()
+                .setSwitchingFromSystemUserMessage(startUserSessionMessageString);
+    }
+
+    @Override
+    public void setEndUserSessionMessage(ComponentName admin, CharSequence endUserSessionMessage) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkNotNull(admin);
+
+        final String endUserSessionMessageString =
+                endUserSessionMessage != null ? endUserSessionMessage.toString() : null;
+
+        synchronized (this) {
+            final ActiveAdmin deviceOwner =
+                    getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+
+            if (TextUtils.equals(deviceOwner.endUserSessionMessage, endUserSessionMessage)) {
+                return;
+            }
+            deviceOwner.endUserSessionMessage = endUserSessionMessageString;
+            saveSettingsLocked(mInjector.userHandleGetCallingUserId());
+        }
+
+        mInjector.getActivityManagerInternal()
+                .setSwitchingToSystemUserMessage(endUserSessionMessageString);
+    }
+
+    @Override
+    public String getStartUserSessionMessage(ComponentName admin) {
+        if (!mHasFeature) {
+            return null;
+        }
+        Preconditions.checkNotNull(admin);
+
+        synchronized (this) {
+            final ActiveAdmin deviceOwner =
+                    getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            return deviceOwner.startUserSessionMessage;
+        }
+    }
+
+    @Override
+    public String getEndUserSessionMessage(ComponentName admin) {
+        if (!mHasFeature) {
+            return null;
+        }
+        Preconditions.checkNotNull(admin);
+
+        synchronized (this) {
+            final ActiveAdmin deviceOwner =
+                    getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            return deviceOwner.endUserSessionMessage;
+        }
     }
 }
