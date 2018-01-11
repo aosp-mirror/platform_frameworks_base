@@ -21,9 +21,6 @@ import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.NETWORK_SETTINGS;
 import static android.Manifest.permission.NETWORK_STACK;
 import static android.Manifest.permission.SHUTDOWN;
-import static android.net.ConnectivityManager.PRIVATE_DNS_DEFAULT_MODE;
-import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_OPPORTUNISTIC;
-import static android.net.ConnectivityManager.PRIVATE_DNS_MODE_PROVIDER_HOSTNAME;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_DOZABLE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_DOZABLE;
 import static android.net.NetworkPolicyManager.FIREWALL_CHAIN_NAME_NONE;
@@ -1955,15 +1952,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private static boolean shouldUseTls(ContentResolver cr) {
-        String privateDns = Settings.Global.getString(cr, Settings.Global.PRIVATE_DNS_MODE);
-        if (TextUtils.isEmpty(privateDns)) {
-            privateDns = PRIVATE_DNS_DEFAULT_MODE;
-        }
-        return privateDns.equals(PRIVATE_DNS_MODE_OPPORTUNISTIC) ||
-               privateDns.startsWith(PRIVATE_DNS_MODE_PROVIDER_HOSTNAME);
     }
 
     @Override
