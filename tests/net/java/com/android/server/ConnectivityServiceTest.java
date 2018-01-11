@@ -55,13 +55,19 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -116,6 +122,7 @@ import android.test.mock.MockContentResolver;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.WakeupMessage;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.FakeSettingsProvider;
@@ -132,6 +139,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
@@ -174,7 +182,10 @@ public class ConnectivityServiceTest {
 
     @Mock IpConnectivityMetrics.Logger mMetricsService;
     @Mock DefaultNetworkMetrics mDefaultNetworkMetrics;
+    @Mock INetworkManagementService mNetworkManagementService;
     @Mock INetworkStatsService mStatsService;
+
+    private ArgumentCaptor<String[]> mStringArrayCaptor = ArgumentCaptor.forClass(String[].class);
 
     // This class exists to test bindProcessToNetwork and getBoundNetworkForProcess. These methods
     // do not go through ConnectivityService but talk to netd directly, so they don't automatically
@@ -872,7 +883,7 @@ public class ConnectivityServiceTest {
         LocalServices.addService(
                 NetworkPolicyManagerInternal.class, mock(NetworkPolicyManagerInternal.class));
         mService = new WrappedConnectivityService(mServiceContext,
-                mock(INetworkManagementService.class),
+                mNetworkManagementService,
                 mStatsService,
                 mock(INetworkPolicyManager.class),
                 mock(IpConnectivityLog.class));
@@ -3487,6 +3498,44 @@ public class ConnectivityServiceTest {
         waitForIdle();
         verify(mStatsService, atLeastOnce()).forceUpdateIfaces();
         reset(mStatsService);
+    }
+
+    @Test
+    public void testBasicDnsConfigurationPushed() throws Exception {
+        mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+        waitForIdle();
+        verify(mNetworkManagementService, never()).setDnsConfigurationForNetwork(
+                anyInt(), any(), any(), any(), anyBoolean(), anyString());
+
+        final LinkProperties cellLp = new LinkProperties();
+        cellLp.setInterfaceName("test_rmnet_data0");
+        mCellNetworkAgent.sendLinkProperties(cellLp);
+        mCellNetworkAgent.connect(false);
+        waitForIdle();
+        verify(mNetworkManagementService, times(1)).setDnsConfigurationForNetwork(
+                anyInt(), mStringArrayCaptor.capture(), any(), any(), anyBoolean(), anyString());
+        // CS tells netd about the empty DNS config for this network.
+        assertEmpty(mStringArrayCaptor.getValue());
+        reset(mNetworkManagementService);
+
+        cellLp.addDnsServer(InetAddress.getByName("2001:db8::1"));
+        mCellNetworkAgent.sendLinkProperties(cellLp);
+        waitForIdle();
+        verify(mNetworkManagementService, times(1)).setDnsConfigurationForNetwork(
+                anyInt(), mStringArrayCaptor.capture(), any(), any(), anyBoolean(), anyString());
+        assertEquals(1, mStringArrayCaptor.getValue().length);
+        assertTrue(ArrayUtils.contains(mStringArrayCaptor.getValue(), "2001:db8::1"));
+        reset(mNetworkManagementService);
+
+        cellLp.addDnsServer(InetAddress.getByName("192.0.2.1"));
+        mCellNetworkAgent.sendLinkProperties(cellLp);
+        waitForIdle();
+        verify(mNetworkManagementService, times(1)).setDnsConfigurationForNetwork(
+                anyInt(), mStringArrayCaptor.capture(), any(), any(), anyBoolean(), anyString());
+        assertEquals(2, mStringArrayCaptor.getValue().length);
+        assertTrue(ArrayUtils.containsAll(mStringArrayCaptor.getValue(),
+                new String[]{"2001:db8::1", "192.0.2.1"}));
+        reset(mNetworkManagementService);
     }
 
     private void checkDirectlyConnectedRoutes(Object callbackObj,
