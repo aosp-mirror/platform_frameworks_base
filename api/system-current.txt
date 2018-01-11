@@ -689,12 +689,20 @@ package android.bluetooth {
     method public boolean isEncrypted();
     method public boolean removeBond();
     method public boolean setPhonebookAccessPermission(int);
+    field public static final int ACCESS_ALLOWED = 1; // 0x1
+    field public static final int ACCESS_REJECTED = 2; // 0x2
+    field public static final int ACCESS_UNKNOWN = 0; // 0x0
   }
 
   public final class BluetoothHeadset implements android.bluetooth.BluetoothProfile {
     method public boolean connect(android.bluetooth.BluetoothDevice);
     method public boolean disconnect(android.bluetooth.BluetoothDevice);
     method public boolean setPriority(android.bluetooth.BluetoothDevice, int);
+  }
+
+  public abstract interface BluetoothProfile {
+    field public static final int PRIORITY_OFF = 0; // 0x0
+    field public static final int PRIORITY_ON = 100; // 0x64
   }
 
 }

@@ -556,8 +556,8 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * Set priority of the profile
      *
      * <p> The device should already be paired.
-     * Priority can be one of {@link #PRIORITY_ON} or
-     * {@link #PRIORITY_OFF},
+     * Priority can be one of {@link BluetoothProfile#PRIORITY_ON} or
+     * {@link BluetoothProfile#PRIORITY_OFF},
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN}
      * permission.
