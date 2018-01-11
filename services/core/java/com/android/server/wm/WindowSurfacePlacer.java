@@ -86,8 +86,7 @@ class WindowSurfacePlacer {
     static final int SET_WALLPAPER_MAY_CHANGE           = 1 << 1;
     static final int SET_FORCE_HIDING_CHANGED           = 1 << 2;
     static final int SET_ORIENTATION_CHANGE_COMPLETE    = 1 << 3;
-    static final int SET_TURN_ON_SCREEN                 = 1 << 4;
-    static final int SET_WALLPAPER_ACTION_PENDING       = 1 << 5;
+    static final int SET_WALLPAPER_ACTION_PENDING       = 1 << 4;
 
     private boolean mTraversalScheduled;
     private int mDeferDepth = 0;
