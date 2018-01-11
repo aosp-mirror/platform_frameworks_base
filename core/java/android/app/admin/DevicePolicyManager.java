@@ -9108,6 +9108,11 @@ public class DevicePolicyManager {
      * will be received in the
      * {@link DeviceAdminReceiver#onTransferOwnershipComplete(Context, PersistableBundle)} callback.
      *
+     * <p>The incoming target administrator must have the
+     * {@link DeviceAdminReceiver#SUPPORT_TRANSFER_OWNERSHIP_META_DATA} <code>meta-data</code> tag
+     * included in its corresponding <code>receiver</code> component with a value of {@code true}.
+     * Otherwise an {@link IllegalArgumentException} will be thrown.
+     *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param target which {@link DeviceAdminReceiver} we want the new administrator to be
      * @param bundle data to be sent to the new administrator
