@@ -395,7 +395,7 @@ public class NotificationChildrenContainer extends ViewGroup {
             }
         } else if (mOverflowNumber != null) {
             removeView(mOverflowNumber);
-            if (isShown()) {
+            if (isShown() && isAttachedToWindow()) {
                 final View removedOverflowNumber = mOverflowNumber;
                 addTransientView(removedOverflowNumber, getTransientViewCount());
                 CrossFadeHelper.fadeOut(removedOverflowNumber, new Runnable() {
