@@ -190,8 +190,11 @@ public class StaticLayoutPerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             state.pauseTiming();
-            final MeasuredText text = MeasuredText.build(
-                    generateRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT, LTR);
+            final MeasuredText text = new MeasuredText.Builder(
+                    generateRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
+                    .build();
             state.resumeTiming();
 
             StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
@@ -206,8 +209,11 @@ public class StaticLayoutPerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             state.pauseTiming();
-            final MeasuredText text = MeasuredText.build(
-                    generateRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT, LTR);
+            final MeasuredText text = new MeasuredText.Builder(
+                    generateRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
+                    .build();
             state.resumeTiming();
 
             StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
@@ -222,8 +228,11 @@ public class StaticLayoutPerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             state.pauseTiming();
-            final MeasuredText text = MeasuredText.build(
-                    generateRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT, LTR);
+            final MeasuredText text = new MeasuredText.Builder(
+                    generateRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
+                    .build();
             state.resumeTiming();
 
             StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
@@ -238,8 +247,11 @@ public class StaticLayoutPerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             state.pauseTiming();
-            final MeasuredText text = MeasuredText.build(
-                    generateRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT, LTR);
+            final MeasuredText text = new MeasuredText.Builder(
+                    generateRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_BALANCED)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NORMAL)
+                    .build();
             state.resumeTiming();
 
             StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
@@ -254,8 +266,11 @@ public class StaticLayoutPerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             state.pauseTiming();
-            final MeasuredText text = MeasuredText.build(
-                    generateRandomParagraph(WORD_LENGTH, STYLE_TEXT), PAINT, LTR);
+            final MeasuredText text = new MeasuredText.Builder(
+                    generateRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT)
+                    .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
+                    .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
+                    .build();
             state.resumeTiming();
 
             StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH)
