@@ -146,8 +146,8 @@ static jobject android_os_VintfObject_getVndkSnapshots(JNIEnv* env, jclass) {
         return nullptr;
     }
     jobject jMap = env->NewObject(gHashMapClazz, gHashMapInit);
-    for (const Vndk &vndk : manifest->vndks()) {
-        std::string key = to_string(vndk.versionRange());
+    for (const auto &vndk : manifest->vendorNdks()) {
+        std::string key = vndk.version();
         env->CallObjectMethod(jMap, gHashMapPut,
                 env->NewStringUTF(key.c_str()), toJavaStringArray(env, vndk.libraries()));
     }
