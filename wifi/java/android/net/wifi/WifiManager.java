@@ -2408,14 +2408,17 @@ public class WifiManager {
      * Registers a callback for Soft AP. See {@link SoftApCallback}. Caller will receive the current
      * soft AP state and number of connected devices immediately after a successful call to this API
      * via callback. Note that receiving an immediate WIFI_AP_STATE_FAILED value for soft AP state
-     * indicates that the latest attempt to start soft AP has failed. Only one registered callback
-     * is allowed for each process, and multiple calls to this API from the same process will simply
-     * replace the previously registered callback with the new one.
+     * indicates that the latest attempt to start soft AP has failed. Caller can unregister a
+     * previously registered callback using {@link unregisterSoftApCallback}
+     * <p>
+     * Applications should have the
+     * {@link android.Manifest.permission#NETWORK_SETTINGS NETWORK_SETTINGS} permission. Callers
+     * without the permission will trigger a {@link java.lang.SecurityException}.
+     * <p>
      *
-     * @param callback A callback for the number of connected clients.
-     * @param handler  The Handler on whose thread to execute the callbacks of the {@code
-     *                 callback} object. If a null is provided then the application's main thread
-     *                 will be used.
+     * @param callback Callback for soft AP events
+     * @param handler  The Handler on whose thread to execute the callbacks of the {@code callback}
+     *                 object. If null, then the application's main thread will be used.
      *
      * @hide
      */
@@ -2423,13 +2426,33 @@ public class WifiManager {
     public void registerSoftApCallback(@NonNull SoftApCallback callback,
                                        @Nullable Handler handler) {
         if (callback == null) throw new IllegalArgumentException("callback cannot be null");
-
         Log.v(TAG, "registerSoftApCallback: callback=" + callback + ", handler=" + handler);
 
         Looper looper = (handler == null) ? mContext.getMainLooper() : handler.getLooper();
         Binder binder = new Binder();
         try {
-            mService.registerSoftApCallback(binder, new SoftApCallbackProxy(looper, callback));
+            mService.registerSoftApCallback(binder, new SoftApCallbackProxy(looper, callback),
+                    callback.hashCode());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Allow callers to unregister a previously registered callback. After calling this method,
+     * applications will no longer receive soft AP events.
+     *
+     * @param callback Callback to unregister for soft AP events
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void unregisterSoftApCallback(@NonNull SoftApCallback callback) {
+        if (callback == null) throw new IllegalArgumentException("callback cannot be null");
+        Log.v(TAG, "unregisterSoftApCallback: callback=" + callback);
+
+        try {
+            mService.unregisterSoftApCallback(callback.hashCode());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
