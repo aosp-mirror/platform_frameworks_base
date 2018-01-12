@@ -186,7 +186,8 @@ LOCAL_SRC_FILES := \
     tests/statsd_test_util.cpp \
     tests/e2e/WakelockDuration_e2e_test.cpp \
     tests/e2e/MetricConditionLink_e2e_test.cpp \
-    tests/e2e/Attribution_e2e_test.cpp
+    tests/e2e/Attribution_e2e_test.cpp \
+    tests/e2e/GaugeMetric_e2e_test.cpp
 
 LOCAL_STATIC_LIBRARIES := \
     $(statsd_common_static_libraries) \
