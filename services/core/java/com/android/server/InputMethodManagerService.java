@@ -51,6 +51,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.Manifest;
+import android.annotation.AnyThread;
 import android.annotation.BinderThread;
 import android.annotation.ColorInt;
 import android.annotation.IntDef;
@@ -110,6 +111,7 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -255,6 +257,44 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     private static final String ACTION_SHOW_INPUT_METHOD_PICKER =
             "com.android.server.InputMethodManagerService.SHOW_INPUT_METHOD_PICKER";
+
+    /**
+     * Debug flag for overriding runtime {@link SystemProperties}.
+     */
+    @AnyThread
+    private static final class DebugFlag {
+        private static final Object LOCK = new Object();
+        private final String mKey;
+        @GuardedBy("LOCK")
+        private boolean mValue;
+
+        public DebugFlag(String key) {
+            mKey = key;
+            refresh();
+        }
+
+        void refresh() {
+            synchronized (LOCK) {
+                mValue = SystemProperties.getBoolean(mKey, true);
+            }
+        }
+
+        boolean value() {
+            synchronized (LOCK) {
+                return mValue;
+            }
+        }
+    }
+
+    /**
+     * Debug flags that can be overridden using "adb shell setprop <key>"
+     * Note: These flags are cached. To refresh, run "adb shell ime refresh_debug_properties".
+     */
+    private static final class DebugFlags {
+        static final DebugFlag FLAG_OPTIMIZE_START_INPUT =
+                new DebugFlag("debug.optimize_startinput");
+    }
+
 
     final Context mContext;
     final Resources mRes;
@@ -2930,8 +2970,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
 
                 if (!didStart && attribute != null) {
-                    res = startInputUncheckedLocked(cs, inputContext, missingMethods, attribute,
-                            controlFlags, startInputReason);
+                    if (!DebugFlags.FLAG_OPTIMIZE_START_INPUT.value()
+                            || (controlFlags
+                                    & InputMethodManager.CONTROL_WINDOW_IS_TEXT_EDITOR) != 0) {
+                        res = startInputUncheckedLocked(cs, inputContext, missingMethods, attribute,
+                                controlFlags, startInputReason);
+                    }
                 }
             }
         } finally {
@@ -4703,6 +4747,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         return mService.handleShellCommandSetInputMethod(this);
                     case "reset":
                         return mService.handleShellCommandResetInputMethod(this);
+                    case "refresh_debug_properties":
+                        return refreshDebugProperties();
                     default:
                         getOutPrintWriter().println("Unknown command: " + imeCommand);
                         return ShellCommandResult.FAILURE;
@@ -4710,6 +4756,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
 
             return handleDefaultCommands(cmd);
+        }
+
+        @BinderThread
+        @ShellCommandResult
+        private int refreshDebugProperties() {
+            DebugFlags.FLAG_OPTIMIZE_START_INPUT.refresh();
+            return ShellCommandResult.SUCCESS;
         }
 
         @BinderThread
