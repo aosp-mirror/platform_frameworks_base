@@ -1268,10 +1268,67 @@ public class Notification implements Parcelable
          */
         private static final String EXTRA_DATA_ONLY_INPUTS = "android.extra.DATA_ONLY_INPUTS";
 
+        /**
+         * {@link }: No semantic action defined.
+         */
+        public static final int SEMANTIC_ACTION_NONE = 0;
+
+        /**
+         * {@code SemanticAction}: Reply to a conversation, chat, group, or wherever replies
+         * may be appropriate.
+         */
+        public static final int SEMANTIC_ACTION_REPLY = 1;
+
+        /**
+         * {@code SemanticAction}: Mark content as read.
+         */
+        public static final int SEMANTIC_ACTION_MARK_AS_READ = 2;
+
+        /**
+         * {@code SemanticAction}: Mark content as unread.
+         */
+        public static final int SEMANTIC_ACTION_MARK_AS_UNREAD = 3;
+
+        /**
+         * {@code SemanticAction}: Delete the content associated with the notification. This
+         * could mean deleting an email, message, etc.
+         */
+        public static final int SEMANTIC_ACTION_DELETE = 4;
+
+        /**
+         * {@code SemanticAction}: Archive the content associated with the notification. This
+         * could mean archiving an email, message, etc.
+         */
+        public static final int SEMANTIC_ACTION_ARCHIVE = 5;
+
+        /**
+         * {@code SemanticAction}: Mute the content associated with the notification. This could
+         * mean silencing a conversation or currently playing media.
+         */
+        public static final int SEMANTIC_ACTION_MUTE = 6;
+
+        /**
+         * {@code SemanticAction}: Unmute the content associated with the notification. This could
+         * mean un-silencing a conversation or currently playing media.
+         */
+        public static final int SEMANTIC_ACTION_UNMUTE = 7;
+
+        /**
+         * {@code SemanticAction}: Mark content with a thumbs up.
+         */
+        public static final int SEMANTIC_ACTION_THUMBS_UP = 8;
+
+        /**
+         * {@code SemanticAction}: Mark content with a thumbs down.
+         */
+        public static final int SEMANTIC_ACTION_THUMBS_DOWN = 9;
+
+
         private final Bundle mExtras;
         private Icon mIcon;
         private final RemoteInput[] mRemoteInputs;
         private boolean mAllowGeneratedReplies = true;
+        private final @SemanticAction int mSemanticAction;
 
         /**
          * Small icon representing the action.
@@ -1306,6 +1363,7 @@ public class Notification implements Parcelable
             mExtras = Bundle.setDefusable(in.readBundle(), true);
             mRemoteInputs = in.createTypedArray(RemoteInput.CREATOR);
             mAllowGeneratedReplies = in.readInt() == 1;
+            mSemanticAction = in.readInt();
         }
 
         /**
@@ -1313,12 +1371,14 @@ public class Notification implements Parcelable
          */
         @Deprecated
         public Action(int icon, CharSequence title, PendingIntent intent) {
-            this(Icon.createWithResource("", icon), title, intent, new Bundle(), null, true);
+            this(Icon.createWithResource("", icon), title, intent, new Bundle(), null, true,
+                    SEMANTIC_ACTION_NONE);
         }
 
         /** Keep in sync with {@link Notification.Action.Builder#Builder(Action)}! */
         private Action(Icon icon, CharSequence title, PendingIntent intent, Bundle extras,
-                RemoteInput[] remoteInputs, boolean allowGeneratedReplies) {
+                RemoteInput[] remoteInputs, boolean allowGeneratedReplies,
+                       @SemanticAction int semanticAction) {
             this.mIcon = icon;
             if (icon != null && icon.getType() == Icon.TYPE_RESOURCE) {
                 this.icon = icon.getResId();
@@ -1328,6 +1388,7 @@ public class Notification implements Parcelable
             this.mExtras = extras != null ? extras : new Bundle();
             this.mRemoteInputs = remoteInputs;
             this.mAllowGeneratedReplies = allowGeneratedReplies;
+            this.mSemanticAction = semanticAction;
         }
 
         /**
@@ -1366,6 +1427,15 @@ public class Notification implements Parcelable
         }
 
         /**
+         * Returns the {@code SemanticAction} associated with this {@link Action}. A
+         * {@code SemanticAction} denotes what an {@link Action}'s {@link PendingIntent} will do
+         * (eg. reply, mark as read, delete, etc).
+         */
+        public @SemanticAction int getSemanticAction() {
+            return mSemanticAction;
+        }
+
+        /**
          * Get the list of inputs to be collected from the user that ONLY accept data when this
          * action is sent. These remote inputs are guaranteed to return true on a call to
          * {@link RemoteInput#isDataOnly}.
@@ -1389,6 +1459,7 @@ public class Notification implements Parcelable
             private boolean mAllowGeneratedReplies = true;
             private final Bundle mExtras;
             private ArrayList<RemoteInput> mRemoteInputs;
+            private @SemanticAction int mSemanticAction;
 
             /**
              * Construct a new builder for {@link Action} object.
@@ -1408,7 +1479,7 @@ public class Notification implements Parcelable
              * @param intent the {@link PendingIntent} to fire when users trigger this action
              */
             public Builder(Icon icon, CharSequence title, PendingIntent intent) {
-                this(icon, title, intent, new Bundle(), null, true);
+                this(icon, title, intent, new Bundle(), null, true, SEMANTIC_ACTION_NONE);
             }
 
             /**
@@ -1419,11 +1490,12 @@ public class Notification implements Parcelable
             public Builder(Action action) {
                 this(action.getIcon(), action.title, action.actionIntent,
                         new Bundle(action.mExtras), action.getRemoteInputs(),
-                        action.getAllowGeneratedReplies());
+                        action.getAllowGeneratedReplies(), action.getSemanticAction());
             }
 
             private Builder(Icon icon, CharSequence title, PendingIntent intent, Bundle extras,
-                    RemoteInput[] remoteInputs, boolean allowGeneratedReplies) {
+                    RemoteInput[] remoteInputs, boolean allowGeneratedReplies,
+                            @SemanticAction int semanticAction) {
                 mIcon = icon;
                 mTitle = title;
                 mIntent = intent;
@@ -1433,6 +1505,7 @@ public class Notification implements Parcelable
                     Collections.addAll(mRemoteInputs, remoteInputs);
                 }
                 mAllowGeneratedReplies = allowGeneratedReplies;
+                mSemanticAction = semanticAction;
             }
 
             /**
@@ -1488,6 +1561,19 @@ public class Notification implements Parcelable
             }
 
             /**
+             * Sets the {@code SemanticAction} for this {@link Action}. A
+             * {@code SemanticAction} denotes what an {@link Action}'s
+             * {@link PendingIntent} will do (eg. reply, mark as read, delete, etc).
+             * @param semanticAction a SemanticAction defined within {@link Action} with
+             * {@code SEMANTIC_ACTION_} prefixes
+             * @return this object for method chaining
+             */
+            public Builder setSemanticAction(@SemanticAction int semanticAction) {
+                mSemanticAction = semanticAction;
+                return this;
+            }
+
+            /**
              * Apply an extender to this action builder. Extenders may be used to add
              * metadata or change options on this builder.
              */
@@ -1528,7 +1614,7 @@ public class Notification implements Parcelable
                 RemoteInput[] textInputsArr = textInputs.isEmpty()
                         ? null : textInputs.toArray(new RemoteInput[textInputs.size()]);
                 return new Action(mIcon, mTitle, mIntent, mExtras, textInputsArr,
-                        mAllowGeneratedReplies);
+                        mAllowGeneratedReplies, mSemanticAction);
             }
         }
 
@@ -1540,12 +1626,15 @@ public class Notification implements Parcelable
                     actionIntent, // safe to alias
                     mExtras == null ? new Bundle() : new Bundle(mExtras),
                     getRemoteInputs(),
-                    getAllowGeneratedReplies());
+                    getAllowGeneratedReplies(),
+                    getSemanticAction());
         }
+
         @Override
         public int describeContents() {
             return 0;
         }
+
         @Override
         public void writeToParcel(Parcel out, int flags) {
             final Icon ic = getIcon();
@@ -1565,7 +1654,9 @@ public class Notification implements Parcelable
             out.writeBundle(mExtras);
             out.writeTypedArray(mRemoteInputs, flags);
             out.writeInt(mAllowGeneratedReplies ? 1 : 0);
+            out.writeInt(mSemanticAction);
         }
+
         public static final Parcelable.Creator<Action> CREATOR =
                 new Parcelable.Creator<Action>() {
             public Action createFromParcel(Parcel in) {
@@ -1827,6 +1918,29 @@ public class Notification implements Parcelable
                 return (mFlags & FLAG_HINT_DISPLAY_INLINE) != 0;
             }
         }
+
+        /**
+         * Provides meaning to an {@link Action} that hints at what the associated
+         * {@link PendingIntent} will do. For example, an {@link Action} with a
+         * {@link PendingIntent} that replies to a text message notification may have the
+         * {@link #SEMANTIC_ACTION_REPLY} {@code SemanticAction} set within it.
+         *
+         * @hide
+         */
+        @IntDef(prefix = { "SEMANTIC_ACTION_" }, value = {
+                SEMANTIC_ACTION_NONE,
+                SEMANTIC_ACTION_REPLY,
+                SEMANTIC_ACTION_MARK_AS_READ,
+                SEMANTIC_ACTION_MARK_AS_UNREAD,
+                SEMANTIC_ACTION_DELETE,
+                SEMANTIC_ACTION_ARCHIVE,
+                SEMANTIC_ACTION_MUTE,
+                SEMANTIC_ACTION_UNMUTE,
+                SEMANTIC_ACTION_THUMBS_UP,
+                SEMANTIC_ACTION_THUMBS_DOWN
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface SemanticAction {}
     }
 
     /**
