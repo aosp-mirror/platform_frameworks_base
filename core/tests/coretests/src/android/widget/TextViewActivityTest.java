@@ -311,11 +311,20 @@ public class TextViewActivityTest {
 
     @Test
     public void testToolbarAppearsAfterLinkClicked() throws Throwable {
+        runToolbarAppearsAfterLinkClickedTest(R.id.textview);
+    }
+
+    @Test
+    public void testToolbarAppearsAfterLinkClickedNonselectable() throws Throwable {
+        runToolbarAppearsAfterLinkClickedTest(R.id.nonselectable_textview);
+    }
+
+    private void runToolbarAppearsAfterLinkClickedTest(int id) throws Throwable {
+        TextView textView = mActivity.findViewById(id);
         useSystemDefaultTextClassifier();
         TextClassificationManager textClassificationManager =
                 mActivity.getSystemService(TextClassificationManager.class);
         TextClassifier textClassifier = textClassificationManager.getTextClassifier();
-        final TextView textView = mActivity.findViewById(R.id.textview);
         SpannableString content = new SpannableString("Call me at +19148277737");
         TextLinks links = textClassifier.generateLinks(content);
         links.apply(content, null);
@@ -331,7 +340,7 @@ public class TextViewActivityTest {
 
         TextLinks.TextLink textLink = links.getLinks().iterator().next();
         int position = (textLink.getStart() + textLink.getEnd()) / 2;
-        onView(withId(R.id.textview)).perform(clickOnTextAtIndex(position));
+        onView(withId(id)).perform(clickOnTextAtIndex(position));
         sleepForFloatingToolbarPopup();
         assertFloatingToolbarIsDisplayed();
     }

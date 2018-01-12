@@ -2095,14 +2095,7 @@ public class Editor {
         if (!(mTextView.getText() instanceof Spannable)) {
             return;
         }
-        Spannable text = (Spannable) mTextView.getText();
         stopTextActionMode();
-        if (mTextView.isTextSelectable()) {
-            Selection.setSelection((Spannable) text, link.getStart(), link.getEnd());
-        } else {
-            //TODO: Nonselectable text
-        }
-
         getSelectionActionModeHelper().startLinkActionModeAsync(link);
     }
 
@@ -2179,7 +2172,8 @@ public class Editor {
             return false;
         }
 
-        if (!checkField() || !mTextView.hasSelection()) {
+        if (actionMode != TextActionMode.TEXT_LINK
+                && (!checkField() || !mTextView.hasSelection())) {
             return false;
         }
 

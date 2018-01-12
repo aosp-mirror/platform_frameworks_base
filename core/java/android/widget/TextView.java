@@ -11233,11 +11233,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public boolean requestActionMode(@NonNull TextLinks.TextLink link) {
         Preconditions.checkNotNull(link);
-        if (mEditor != null) {
-            mEditor.startLinkActionModeAsync(link);
-            return true;
-        }
-        return false;
+        createEditorIfNeeded();
+        mEditor.startLinkActionModeAsync(link);
+        return true;
     }
     /**
      * @hide
