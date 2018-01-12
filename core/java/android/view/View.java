@@ -7240,8 +7240,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     public void setAccessibilityPaneTitle(CharSequence accessibilityPaneTitle) {
         if (!TextUtils.equals(accessibilityPaneTitle, mAccessibilityPaneTitle)) {
             mAccessibilityPaneTitle = accessibilityPaneTitle;
-            notifyViewAccessibilityStateChangedIfNeeded(
-                    AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_TITLE);
+            notifyAccessibilityStateChanged(AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_TITLE);
         }
     }
 
