@@ -1379,7 +1379,7 @@ public class ApplicationPackageManager extends PackageManager {
                     sameUid ? app.sourceDir : app.publicSourceDir,
                     sameUid ? app.splitSourceDirs : app.splitPublicSourceDirs,
                     app.resourceDirs, app.sharedLibraryFiles, Display.DEFAULT_DISPLAY,
-                    mContext.mPackageInfo);
+                    mContext.mLoadedApk);
         if (r != null) {
             return r;
         }
