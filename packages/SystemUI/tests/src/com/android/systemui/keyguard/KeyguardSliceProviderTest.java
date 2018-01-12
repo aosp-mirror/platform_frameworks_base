@@ -33,8 +33,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Arrays;
+
 import androidx.app.slice.SliceItem;
+import androidx.app.slice.SliceProvider;
+import androidx.app.slice.SliceSpecs;
 import androidx.app.slice.core.SliceQuery;
+import androidx.app.slice.widget.SliceLiveData;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -47,6 +52,7 @@ public class KeyguardSliceProviderTest extends SysuiTestCase {
     public void setup() {
         mProvider = new TestableKeyguardSliceProvider();
         mProvider.attachInfo(getContext(), null);
+        SliceProvider.setSpecs(Arrays.asList(SliceSpecs.LIST));
     }
 
     @Test
