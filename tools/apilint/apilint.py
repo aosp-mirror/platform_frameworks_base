@@ -100,9 +100,11 @@ class Method():
         self.typ = raw[0]
         self.name = raw[1]
         self.args = []
+        self.throws = []
+        target = self.args
         for r in raw[2:]:
-            if r == "throws": break
-            self.args.append(r)
+            if r == "throws": target = self.throws
+            else: target.append(r)
 
         # identity for compat purposes
         ident = self.raw
@@ -391,7 +393,7 @@ def verify_actions(clazz):
                         prefix = clazz.pkg.name + ".action"
                     expected = prefix + "." + f.name[7:]
                     if f.value != expected:
-                        error(clazz, f, "C4", "Inconsistent action value; expected %s" % (expected))
+                        error(clazz, f, "C4", "Inconsistent action value; expected '%s'" % (expected))
 
 
 def verify_extras(clazz):
@@ -421,7 +423,7 @@ def verify_extras(clazz):
                         prefix = clazz.pkg.name + ".extra"
                     expected = prefix + "." + f.name[6:]
                     if f.value != expected:
-                        error(clazz, f, "C4", "Inconsistent extra value; expected %s" % (expected))
+                        error(clazz, f, "C4", "Inconsistent extra value; expected '%s'" % (expected))
 
 
 def verify_equals(clazz):
@@ -449,6 +451,10 @@ def verify_parcelable(clazz):
         if ((" final class " not in clazz.raw) and
             (" final deprecated class " not in clazz.raw)):
             error(clazz, None, "FW8", "Parcelable classes must be final")
+
+        for c in clazz.ctors:
+            if c.args == ["android.os.Parcel"]:
+                error(clazz, c, "FW3", "Parcelable inflation is exposed through CREATOR, not raw constructors")
 
 
 def verify_protected(clazz):
@@ -572,7 +578,7 @@ def verify_helper_classes(clazz):
             if f.name == "SERVICE_INTERFACE":
                 found = True
                 if f.value != clazz.fullname:
-                    error(clazz, f, "C4", "Inconsistent interface constant; expected %s" % (clazz.fullname))
+                    error(clazz, f, "C4", "Inconsistent interface constant; expected '%s'" % (clazz.fullname))
 
     if "extends android.content.ContentProvider" in clazz.raw:
         test_methods = True
@@ -584,7 +590,7 @@ def verify_helper_classes(clazz):
             if f.name == "PROVIDER_INTERFACE":
                 found = True
                 if f.value != clazz.fullname:
-                    error(clazz, f, "C4", "Inconsistent interface constant; expected %s" % (clazz.fullname))
+                    error(clazz, f, "C4", "Inconsistent interface constant; expected '%s'" % (clazz.fullname))
 
     if "extends android.content.BroadcastReceiver" in clazz.raw:
         test_methods = True
@@ -764,15 +770,19 @@ def verify_flags(clazz):
 def verify_exception(clazz):
     """Verifies that methods don't throw generic exceptions."""
     for m in clazz.methods:
-        if "throws java.lang.Exception" in m.raw or "throws java.lang.Throwable" in m.raw or "throws java.lang.Error" in m.raw:
-            error(clazz, m, "S1", "Methods must not throw generic exceptions")
+        for t in m.throws:
+            if t in ["java.lang.Exception", "java.lang.Throwable", "java.lang.Error"]:
+                error(clazz, m, "S1", "Methods must not throw generic exceptions")
 
-        if "throws android.os.RemoteException" in m.raw:
-            if clazz.name == "android.content.ContentProviderClient": continue
-            if clazz.name == "android.os.Binder": continue
-            if clazz.name == "android.os.IBinder": continue
+            if t in ["android.os.RemoteException"]:
+                if clazz.name == "android.content.ContentProviderClient": continue
+                if clazz.name == "android.os.Binder": continue
+                if clazz.name == "android.os.IBinder": continue
 
-            error(clazz, m, "FW9", "Methods calling into system server should rethrow RemoteException as RuntimeException")
+                error(clazz, m, "FW9", "Methods calling into system server should rethrow RemoteException as RuntimeException")
+
+            if len(m.args) == 0 and t in ["java.lang.IllegalArgumentException", "java.lang.NullPointerException"]:
+                warn(clazz, m, "S1", "Methods taking no arguments should throw IllegalStateException")
 
 
 def verify_google(clazz):
@@ -927,7 +937,8 @@ def verify_callback_handlers(clazz):
 
     found = {}
     by_name = collections.defaultdict(list)
-    for m in clazz.methods:
+    examine = clazz.ctors + clazz.methods
+    for m in examine:
         if m.name.startswith("unregister"): continue
         if m.name.startswith("remove"): continue
         if re.match("on[A-Z]+", m.name): continue
@@ -971,7 +982,7 @@ def verify_listener_last(clazz):
         for a in m.args:
             if a.endswith("Callback") or a.endswith("Callbacks") or a.endswith("Listener"):
                 found = True
-            elif found and a != "android.os.Handler" and a != "java.util.concurrent.Executor":
+            elif found:
                 warn(clazz, m, "M3", "Listeners should always be at end of argument list")
 
 
@@ -1078,16 +1089,11 @@ def verify_runtime_exceptions(clazz):
         "java.nio.BufferOverflowException",
     ]
 
-    test = []
-    test.extend(clazz.ctors)
-    test.extend(clazz.methods)
-
-    for t in test:
-        if " throws " not in t.raw: continue
-        throws = t.raw[t.raw.index(" throws "):]
-        for b in banned:
-            if b in throws:
-                error(clazz, t, None, "Methods must not mention RuntimeException subclasses in throws clauses")
+    examine = clazz.ctors + clazz.methods
+    for m in examine:
+        for t in m.throws:
+            if t in banned:
+                error(clazz, m, None, "Methods must not mention RuntimeException subclasses in throws clauses")
 
 
 def verify_error(clazz):
@@ -1233,6 +1239,58 @@ def verify_collections_over_arrays(clazz):
                 warn(clazz, m, None, "Method argument should be Collection<> (or subclass) instead of raw array")
 
 
+def verify_user_handle(clazz):
+    """Methods taking UserHandle should be ForUser or AsUser."""
+    if clazz.name.endswith("Listener") or clazz.name.endswith("Callback") or clazz.name.endswith("Callbacks"): return
+    if clazz.fullname == "android.app.admin.DeviceAdminReceiver": return
+    if clazz.fullname == "android.content.pm.LauncherApps": return
+    if clazz.fullname == "android.os.UserHandle": return
+    if clazz.fullname == "android.os.UserManager": return
+
+    for m in clazz.methods:
+        if m.name.endswith("AsUser") or m.name.endswith("ForUser"): continue
+        if re.match("on[A-Z]+", m.name): continue
+        if "android.os.UserHandle" in m.args:
+            warn(clazz, m, None, "Method taking UserHandle should be named 'doFooAsUser' or 'queryFooForUser'")
+
+
+def verify_params(clazz):
+    """Parameter classes should be 'Params'."""
+    if clazz.name.endswith("Params"): return
+    if clazz.fullname == "android.app.ActivityOptions": return
+    if clazz.fullname == "android.app.BroadcastOptions": return
+    if clazz.fullname == "android.os.Bundle": return
+    if clazz.fullname == "android.os.BaseBundle": return
+    if clazz.fullname == "android.os.PersistableBundle": return
+
+    bad = ["Param","Parameter","Parameters","Args","Arg","Argument","Arguments","Options","Bundle"]
+    for b in bad:
+        if clazz.name.endswith(b):
+            error(clazz, None, None, "Classes holding a set of parameters should be called 'FooParams'")
+
+
+def verify_services(clazz):
+    """Service name should be FOO_BAR_SERVICE = 'foo_bar'."""
+    if clazz.fullname != "android.content.Context": return
+
+    for f in clazz.fields:
+        if f.typ != "java.lang.String": continue
+        found = re.match(r"([A-Z_]+)_SERVICE", f.name)
+        if found:
+            expected = found.group(1).lower()
+            if f.value != expected:
+                error(clazz, f, "C4", "Inconsistent service value; expected '%s'" % (expected))
+
+
+def verify_tense(clazz):
+    """Verify tenses of method names."""
+    if clazz.fullname.startswith("android.opengl"): return
+
+    for m in clazz.methods:
+        if m.name.endswith("Enable"):
+            warn(clazz, m, None, "Unexpected tense; probably meant 'enabled'")
+
+
 def examine_clazz(clazz):
     """Find all style issues in the given class."""
 
@@ -1290,6 +1348,10 @@ def examine_clazz(clazz):
     verify_member_name_not_kotlin_keyword(clazz)
     verify_method_name_not_kotlin_operator(clazz)
     verify_collections_over_arrays(clazz)
+    verify_user_handle(clazz)
+    verify_params(clazz)
+    verify_services(clazz)
+    verify_tense(clazz)
 
 
 def examine_stream(stream):
