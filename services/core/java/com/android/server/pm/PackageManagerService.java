@@ -9604,58 +9604,58 @@ public class PackageManagerService extends IPackageManager.Stub
             this.originalPkgSetting = originalPkgSetting;
             this.realPkgName = realPkgName;
             this.parseFlags = parseFlags;
-            this.scanFlags = adjustScanFlags(scanFlags, pkgSetting, disabledPkgSetting, user);
+            this.scanFlags = scanFlags;
             this.isPlatformPackage = isPlatformPackage;
             this.user = user;
         }
+    }
 
-        /**
-         * Returns the actual scan flags depending upon the state of the other settings.
-         * <p>Updated system applications will not have the following flags set
-         * by default and need to be adjusted after the fact:
-         * <ul>
-         * <li>{@link #SCAN_AS_SYSTEM}</li>
-         * <li>{@link #SCAN_AS_PRIVILEGED}</li>
-         * <li>{@link #SCAN_AS_OEM}</li>
-         * <li>{@link #SCAN_AS_VENDOR}</li>
-         * <li>{@link #SCAN_AS_INSTANT_APP}</li>
-         * <li>{@link #SCAN_AS_VIRTUAL_PRELOAD}</li>
-         * </ul>
-         */
-        private static @ScanFlags int adjustScanFlags(@ScanFlags int scanFlags,
-                PackageSetting pkgSetting, PackageSetting disabledPkgSetting, UserHandle user) {
-            if (disabledPkgSetting != null) {
-                // updated system application, must at least have SCAN_AS_SYSTEM
-                scanFlags |= SCAN_AS_SYSTEM;
-                if ((disabledPkgSetting.pkgPrivateFlags
-                        & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0) {
-                    scanFlags |= SCAN_AS_PRIVILEGED;
-                }
-                if ((disabledPkgSetting.pkgPrivateFlags
-                        & ApplicationInfo.PRIVATE_FLAG_OEM) != 0) {
-                    scanFlags |= SCAN_AS_OEM;
-                }
-                if ((disabledPkgSetting.pkgPrivateFlags
-                        & ApplicationInfo.PRIVATE_FLAG_VENDOR) != 0) {
-                    scanFlags |= SCAN_AS_VENDOR;
-                }
+    /**
+     * Returns the actual scan flags depending upon the state of the other settings.
+     * <p>Updated system applications will not have the following flags set
+     * by default and need to be adjusted after the fact:
+     * <ul>
+     * <li>{@link #SCAN_AS_SYSTEM}</li>
+     * <li>{@link #SCAN_AS_PRIVILEGED}</li>
+     * <li>{@link #SCAN_AS_OEM}</li>
+     * <li>{@link #SCAN_AS_VENDOR}</li>
+     * <li>{@link #SCAN_AS_INSTANT_APP}</li>
+     * <li>{@link #SCAN_AS_VIRTUAL_PRELOAD}</li>
+     * </ul>
+     */
+    private static @ScanFlags int adjustScanFlags(@ScanFlags int scanFlags,
+            PackageSetting pkgSetting, PackageSetting disabledPkgSetting, UserHandle user) {
+        if (disabledPkgSetting != null) {
+            // updated system application, must at least have SCAN_AS_SYSTEM
+            scanFlags |= SCAN_AS_SYSTEM;
+            if ((disabledPkgSetting.pkgPrivateFlags
+                    & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0) {
+                scanFlags |= SCAN_AS_PRIVILEGED;
             }
-            if (pkgSetting != null) {
-                final int userId = ((user == null) ? 0 : user.getIdentifier());
-                if (pkgSetting.getInstantApp(userId)) {
-                    scanFlags |= SCAN_AS_INSTANT_APP;
-                }
-                if (pkgSetting.getVirtulalPreload(userId)) {
-                    scanFlags |= SCAN_AS_VIRTUAL_PRELOAD;
-                }
+            if ((disabledPkgSetting.pkgPrivateFlags
+                    & ApplicationInfo.PRIVATE_FLAG_OEM) != 0) {
+                scanFlags |= SCAN_AS_OEM;
             }
-            return scanFlags;
+            if ((disabledPkgSetting.pkgPrivateFlags
+                    & ApplicationInfo.PRIVATE_FLAG_VENDOR) != 0) {
+                scanFlags |= SCAN_AS_VENDOR;
+            }
         }
+        if (pkgSetting != null) {
+            final int userId = ((user == null) ? 0 : user.getIdentifier());
+            if (pkgSetting.getInstantApp(userId)) {
+                scanFlags |= SCAN_AS_INSTANT_APP;
+            }
+            if (pkgSetting.getVirtulalPreload(userId)) {
+                scanFlags |= SCAN_AS_VIRTUAL_PRELOAD;
+            }
+        }
+        return scanFlags;
     }
 
     @GuardedBy("mInstallLock")
     private PackageParser.Package scanPackageNewLI(@NonNull PackageParser.Package pkg,
-            final @ParseFlags int parseFlags, final @ScanFlags int scanFlags, long currentTime,
+            final @ParseFlags int parseFlags, @ScanFlags int scanFlags, long currentTime,
             @Nullable UserHandle user) throws PackageManagerException {
 
         final String renamedPkgName = mSettings.getRenamedPackageLPr(pkg.mRealPackage);
@@ -9673,6 +9673,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     + " was transferred to another, but its .apk remains");
         }
 
+        scanFlags = adjustScanFlags(scanFlags, pkgSetting, disabledPkgSetting, user);
         synchronized (mPackages) {
             applyPolicy(pkg, parseFlags, scanFlags);
             assertPackageIsValid(pkg, parseFlags, scanFlags);
