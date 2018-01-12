@@ -565,6 +565,42 @@ public final class PowerManager {
         int OPTIONAL_SENSORS = 13;
     }
 
+    /**
+     * Either the location providers shouldn't be affected by battery saver,
+     * or battery saver is off.
+     */
+    public static final int LOCATION_MODE_NO_CHANGE = 0;
+
+    /**
+     * In this mode, the GPS based location provider should be disabled when battery saver is on and
+     * the device is non-interactive.
+     */
+    public static final int LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF = 1;
+
+    /**
+     * All location providers should be disabled when battery saver is on and
+     * the device is non-interactive.
+     */
+    public static final int LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF = 2;
+
+    /**
+     * In this mode, all the location providers will be kept available, but location fixes
+     * should only be provided to foreground apps.
+     */
+    public static final int LOCATION_MODE_FOREGROUND_ONLY = 3;
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"LOCATION_MODE_"}, value = {
+            LOCATION_MODE_NO_CHANGE,
+            LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF,
+            LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF,
+            LOCATION_MODE_FOREGROUND_ONLY,
+    })
+    public @interface LocationPowerSaveMode {}
+
     final Context mContext;
     final IPowerManager mService;
     final Handler mHandler;
@@ -1140,6 +1176,24 @@ public final class PowerManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Returns how location features should behave when battery saver is on. When battery saver
+     * is off, this will always return {@link #LOCATION_MODE_NO_CHANGE}.
+     *
+     * <p>This API is normally only useful for components that provide location features.
+     *
+     * @see #isPowerSaveMode()
+     * @see #ACTION_POWER_SAVE_MODE_CHANGED
+     */
+    @LocationPowerSaveMode
+    public int getLocationPowerSaveMode() {
+        final PowerSaveState powerSaveState = getPowerSaveState(ServiceType.GPS);
+        if (!powerSaveState.globalBatterySaverEnabled) {
+            return LOCATION_MODE_NO_CHANGE;
+        }
+        return powerSaveState.gpsMode;
     }
 
     /**

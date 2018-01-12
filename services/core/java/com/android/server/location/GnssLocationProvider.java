@@ -84,8 +84,6 @@ import com.android.internal.location.GpsNetInitiatedHandler.GpsNiNotification;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
 
-import com.android.server.power.BatterySaverPolicy;
-
 import libcore.io.IoUtils;
 
 import java.io.File;
@@ -579,7 +577,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
         final PowerSaveState result =
                 mPowerManager.getPowerSaveState(ServiceType.GPS);
         switch (result.gpsMode) {
-            case BatterySaverPolicy.GPS_MODE_DISABLED_WHEN_SCREEN_OFF:
+            case PowerManager.LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF:
                 // If we are in battery saver mode and the screen is off, disable GPS.
                 disableGps |= result.batterySaverEnabled && !mPowerManager.isInteractive();
                 break;
