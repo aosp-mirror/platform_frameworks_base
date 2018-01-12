@@ -464,6 +464,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int SCAN_AS_PRIVILEGED = 1<<18;
     static final int SCAN_AS_OEM = 1<<19;
     static final int SCAN_AS_VENDOR = 1<<20;
+    static final int SCAN_AS_PRODUCT = 1<<21;
 
     @IntDef(flag = true, prefix = { "SCAN_" }, value = {
             SCAN_NO_DEX,
@@ -567,6 +568,8 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final String PACKAGE_SCHEME = "package";
 
     private static final String VENDOR_OVERLAY_DIR = "/vendor/overlay";
+
+    private static final String PRODUCT_OVERLAY_DIR = "/product/overlay";
 
     private static final String PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB = "pm.dexopt.priv-apps-oob";
 
@@ -2550,7 +2553,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 scanFlags = scanFlags | SCAN_FIRST_BOOT_OR_UPGRADE;
             }
 
-            // Collect vendor overlay packages. (Do this before scanning any apps.)
+            // Collect vendor/product overlay packages. (Do this before scanning any apps.)
             // For security and version matching reason, only consider
             // overlay packages if they reside in the right directory.
             scanDirTracedLI(new File(VENDOR_OVERLAY_DIR),
@@ -2559,6 +2562,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     scanFlags
                     | SCAN_AS_SYSTEM
                     | SCAN_AS_VENDOR,
+                    0);
+            scanDirTracedLI(new File(PRODUCT_OVERLAY_DIR),
+                    mDefParseFlags
+                    | PackageParser.PARSE_IS_SYSTEM_DIR,
+                    scanFlags
+                    | SCAN_AS_SYSTEM
+                    | SCAN_AS_PRODUCT,
                     0);
 
             mParallelPackageParserCallback.findStaticOverlayPackages();
@@ -2593,8 +2603,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     0);
 
             // Collected privileged vendor packages.
-                File privilegedVendorAppDir = new File(Environment.getVendorDirectory(),
-                        "priv-app");
+            File privilegedVendorAppDir = new File(Environment.getVendorDirectory(), "priv-app");
             try {
                 privilegedVendorAppDir = privilegedVendorAppDir.getCanonicalFile();
             } catch (IOException e) {
@@ -2632,6 +2641,37 @@ public class PackageManagerService extends IPackageManager.Stub
                     scanFlags
                     | SCAN_AS_SYSTEM
                     | SCAN_AS_OEM,
+                    0);
+
+            // Collected privileged product packages.
+            File privilegedProductAppDir = new File(Environment.getProductDirectory(), "priv-app");
+            try {
+                privilegedProductAppDir = privilegedProductAppDir.getCanonicalFile();
+            } catch (IOException e) {
+                // failed to look up canonical path, continue with original one
+            }
+            scanDirTracedLI(privilegedProductAppDir,
+                    mDefParseFlags
+                    | PackageParser.PARSE_IS_SYSTEM_DIR,
+                    scanFlags
+                    | SCAN_AS_SYSTEM
+                    | SCAN_AS_PRODUCT
+                    | SCAN_AS_PRIVILEGED,
+                    0);
+
+            // Collect ordinary product packages.
+            File productAppDir = new File(Environment.getProductDirectory(), "app");
+            try {
+                productAppDir = productAppDir.getCanonicalFile();
+            } catch (IOException e) {
+                // failed to look up canonical path, continue with original one
+            }
+            scanDirTracedLI(productAppDir,
+                    mDefParseFlags
+                    | PackageParser.PARSE_IS_SYSTEM_DIR,
+                    scanFlags
+                    | SCAN_AS_SYSTEM
+                    | SCAN_AS_PRODUCT,
                     0);
 
             // Prune any system packages that no longer exist.
@@ -2840,6 +2880,23 @@ Slog.e("TODD",
                                     scanFlags
                                     | SCAN_AS_SYSTEM
                                     | SCAN_AS_OEM;
+                        } else if (FileUtils.contains(privilegedProductAppDir, scanFile)) {
+                            reparseFlags =
+                                    mDefParseFlags |
+                                    PackageParser.PARSE_IS_SYSTEM_DIR;
+                            rescanFlags =
+                                    scanFlags
+                                    | SCAN_AS_SYSTEM
+                                    | SCAN_AS_PRODUCT
+                                    | SCAN_AS_PRIVILEGED;
+                        } else if (FileUtils.contains(productAppDir, scanFile)) {
+                            reparseFlags =
+                                    mDefParseFlags |
+                                    PackageParser.PARSE_IS_SYSTEM_DIR;
+                            rescanFlags =
+                                    scanFlags
+                                    | SCAN_AS_SYSTEM
+                                    | SCAN_AS_PRODUCT;
                         } else {
                             Slog.e(TAG, "Ignoring unexpected fallback path " + scanFile);
                             continue;
@@ -9826,6 +9883,7 @@ Slog.e("TODD",
      * <li>{@link #SCAN_AS_PRIVILEGED}</li>
      * <li>{@link #SCAN_AS_OEM}</li>
      * <li>{@link #SCAN_AS_VENDOR}</li>
+     * <li>{@link #SCAN_AS_PRODUCT}</li>
      * <li>{@link #SCAN_AS_INSTANT_APP}</li>
      * <li>{@link #SCAN_AS_VIRTUAL_PRELOAD}</li>
      * </ul>
@@ -9847,6 +9905,10 @@ Slog.e("TODD",
             if ((disabledPkgSetting.pkgPrivateFlags
                     & ApplicationInfo.PRIVATE_FLAG_VENDOR) != 0) {
                 scanFlags |= SCAN_AS_VENDOR;
+            }
+            if ((disabledPkgSetting.pkgPrivateFlags
+                    & ApplicationInfo.PRIVATE_FLAG_PRODUCT) != 0) {
+                scanFlags |= SCAN_AS_PRODUCT;
             }
         }
         if (pkgSetting != null) {
@@ -10624,6 +10686,10 @@ Slog.e("TODD",
 
         if ((scanFlags & SCAN_AS_VENDOR) != 0) {
             pkg.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_VENDOR;
+        }
+
+        if ((scanFlags & SCAN_AS_PRODUCT) != 0) {
+            pkg.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_PRODUCT;
         }
 
         if (!isSystemApp(pkg)) {
@@ -11672,6 +11738,8 @@ Slog.e("TODD",
             codeRoot = Environment.getOemDirectory();
         } else if (FileUtils.contains(Environment.getVendorDirectory(), codePath)) {
             codeRoot = Environment.getVendorDirectory();
+        } else if (FileUtils.contains(Environment.getProductDirectory(), codePath)) {
+            codeRoot = Environment.getProductDirectory();
         } else {
             // Unrecognized code path; take its top real segment as the apk root:
             // e.g. /something/app/blah.apk => /something
@@ -16074,7 +16142,7 @@ Slog.e("TODD",
 
         boolean sysPkg = (isSystemApp(oldPackage));
         if (sysPkg) {
-            // Set the system/privileged/oem/vendor flags as needed
+            // Set the system/privileged/oem/vendor/product flags as needed
             final boolean privileged =
                     (oldPackage.applicationInfo.privateFlags
                             & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
@@ -16084,12 +16152,16 @@ Slog.e("TODD",
             final boolean vendor =
                     (oldPackage.applicationInfo.privateFlags
                             & ApplicationInfo.PRIVATE_FLAG_VENDOR) != 0;
+            final boolean product =
+                    (oldPackage.applicationInfo.privateFlags
+                            & ApplicationInfo.PRIVATE_FLAG_PRODUCT) != 0;
             final @ParseFlags int systemParseFlags = parseFlags;
             final @ScanFlags int systemScanFlags = scanFlags
                     | SCAN_AS_SYSTEM
                     | (privileged ? SCAN_AS_PRIVILEGED : 0)
                     | (oem ? SCAN_AS_OEM : 0)
-                    | (vendor ? SCAN_AS_VENDOR : 0);
+                    | (vendor ? SCAN_AS_VENDOR : 0)
+                    | (product ? SCAN_AS_PRODUCT : 0);
 
             replaceSystemPackageLIF(oldPackage, pkg, systemParseFlags, systemScanFlags,
                     user, allUsers, installerPackageName, res, installReason);
@@ -17339,6 +17411,10 @@ Slog.e("TODD",
         return (pkg.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_VENDOR) != 0;
     }
 
+    private static boolean isProductApp(PackageParser.Package pkg) {
+        return (pkg.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRODUCT) != 0;
+    }
+
     private static boolean hasDomainURLs(PackageParser.Package pkg) {
         return (pkg.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS) != 0;
     }
@@ -18078,8 +18154,10 @@ Slog.e("TODD",
         try {
             final File privilegedAppDir = new File(Environment.getRootDirectory(), "priv-app");
             final File privilegedVendorAppDir = new File(Environment.getVendorDirectory(), "priv-app");
+            final File privilegedProductAppDir = new File(Environment.getProductDirectory(), "priv-app");
             return path.startsWith(privilegedAppDir.getCanonicalPath())
-                    || path.startsWith(privilegedVendorAppDir.getCanonicalPath());
+                    || path.startsWith(privilegedVendorAppDir.getCanonicalPath())
+                    || path.startsWith(privilegedProductAppDir.getCanonicalPath());
         } catch (IOException e) {
             Slog.e(TAG, "Unable to access code path " + path);
         }
@@ -18098,6 +18176,15 @@ Slog.e("TODD",
     static boolean locationIsVendor(String path) {
         try {
             return path.startsWith(Environment.getVendorDirectory().getCanonicalPath());
+        } catch (IOException e) {
+            Slog.e(TAG, "Unable to access code path " + path);
+        }
+        return false;
+    }
+
+    static boolean locationIsProduct(String path) {
+        try {
+            return path.startsWith(Environment.getProductDirectory().getCanonicalPath());
         } catch (IOException e) {
             Slog.e(TAG, "Unable to access code path " + path);
         }
@@ -18227,6 +18314,9 @@ Slog.e("TODD",
         }
         if (locationIsVendor(codePathString)) {
             scanFlags |= SCAN_AS_VENDOR;
+        }
+        if (locationIsProduct(codePathString)) {
+            scanFlags |= SCAN_AS_PRODUCT;
         }
 
         final File codePath = new File(codePathString);
