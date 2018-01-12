@@ -56,6 +56,11 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
     /** Target client activity. Might be null if the entire transaction is targeting an app. */
     private IBinder mActivityToken;
 
+    /** Get the target client of the transaction. */
+    public IApplicationThread getClient() {
+        return mClient;
+    }
+
     /**
      * Add a message to the end of the sequence of callbacks.
      * @param activityCallback A single message that can contain a lifecycle request/callback.

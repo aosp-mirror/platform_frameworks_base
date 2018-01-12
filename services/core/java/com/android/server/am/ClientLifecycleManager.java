@@ -21,6 +21,7 @@ import android.app.IApplicationThread;
 import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.ClientTransactionItem;
 import android.app.servertransaction.ActivityLifecycleItem;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 
@@ -42,9 +43,14 @@ class ClientLifecycleManager {
      * @see ClientTransaction
      */
     void scheduleTransaction(ClientTransaction transaction) throws RemoteException {
+        final IApplicationThread client = transaction.getClient();
         transaction.schedule();
-        // TODO: b/70616950
-        //transaction.recycle();
+        if (!(client instanceof Binder)) {
+            // If client is not an instance of Binder - it's a remote call and at this point it is
+            // safe to recycle the object. All objects used for local calls will be recycled after
+            // the transaction is executed on client in ActivityThread.
+            transaction.recycle();
+        }
     }
 
     /**
