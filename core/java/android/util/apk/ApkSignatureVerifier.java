@@ -36,7 +36,9 @@ import libcore.io.IoUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.DigestException;
 import java.security.GeneralSecurityException;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
@@ -366,5 +368,52 @@ public class ApkSignatureVerifier {
 
         // v2 didn't work, try jarsigner
         return verifyV1Signature(apkPath, false);
+    }
+
+    /**
+     * @return the verity root hash in the Signing Block.
+     */
+    public static byte[] getVerityRootHash(String apkPath)
+            throws IOException, SignatureNotFoundException, SecurityException {
+        // first try v3
+        try {
+            return ApkSignatureSchemeV3Verifier.getVerityRootHash(apkPath);
+        } catch (SignatureNotFoundException e) {
+            // try older version
+        }
+        return ApkSignatureSchemeV2Verifier.getVerityRootHash(apkPath);
+    }
+
+    /**
+     * Generates the Merkle tree and verity metadata to the buffer allocated by the {@code
+     * ByteBufferFactory}.
+     *
+     * @return the verity root hash of the generated Merkle tree.
+     */
+    public static byte[] generateApkVerity(String apkPath, ByteBufferFactory bufferFactory)
+            throws IOException, SignatureNotFoundException, SecurityException, DigestException,
+                   NoSuchAlgorithmException {
+        // first try v3
+        try {
+            return ApkSignatureSchemeV3Verifier.generateApkVerity(apkPath, bufferFactory);
+        } catch (SignatureNotFoundException e) {
+            // try older version
+        }
+        return ApkSignatureSchemeV2Verifier.generateApkVerity(apkPath, bufferFactory);
+    }
+
+    /**
+     * Result of a successful APK verification operation.
+     */
+    public static class Result {
+        public final Certificate[][] certs;
+        public final Signature[] sigs;
+        public final int signatureSchemeVersion;
+
+        public Result(Certificate[][] certs, Signature[] sigs, int signingVersion) {
+            this.certs = certs;
+            this.sigs = sigs;
+            this.signatureSchemeVersion = signingVersion;
+        }
     }
 }

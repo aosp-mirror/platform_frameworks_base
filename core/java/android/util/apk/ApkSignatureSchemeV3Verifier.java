@@ -16,6 +16,7 @@
 
 package android.util.apk;
 
+import static android.util.apk.ApkSigningBlockUtils.CONTENT_DIGEST_VERITY_CHUNKED_SHA256;
 import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_DSA_WITH_SHA256;
 import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_ECDSA_WITH_SHA256;
 import static android.util.apk.ApkSigningBlockUtils.SIGNATURE_ECDSA_WITH_SHA512;
@@ -43,6 +44,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.security.DigestException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -209,6 +211,10 @@ public class ApkSignatureSchemeV3Verifier {
 
         if (doVerifyIntegrity) {
             ApkSigningBlockUtils.verifyIntegrity(contentDigests, apk, signatureInfo);
+        }
+
+        if (contentDigests.containsKey(CONTENT_DIGEST_VERITY_CHUNKED_SHA256)) {
+            result.verityRootHash = contentDigests.get(CONTENT_DIGEST_VERITY_CHUNKED_SHA256);
         }
 
         return result;
@@ -499,6 +505,24 @@ public class ApkSignatureSchemeV3Verifier {
         return new VerifiedProofOfRotation(certs, flagsList);
     }
 
+    static byte[] getVerityRootHash(String apkPath)
+            throws IOException, SignatureNotFoundException, SecurityException {
+        try (RandomAccessFile apk = new RandomAccessFile(apkPath, "r")) {
+            SignatureInfo signatureInfo = findSignature(apk);
+            VerifiedSigner vSigner = verify(apk, false);
+            return vSigner.verityRootHash;
+        }
+    }
+
+    static byte[] generateApkVerity(String apkPath, ByteBufferFactory bufferFactory)
+            throws IOException, SignatureNotFoundException, SecurityException, DigestException,
+                   NoSuchAlgorithmException {
+        try (RandomAccessFile apk = new RandomAccessFile(apkPath, "r")) {
+            SignatureInfo signatureInfo = findSignature(apk);
+            return ApkSigningBlockUtils.generateApkVerity(apkPath, bufferFactory, signatureInfo);
+        }
+    }
+
     private static boolean isSupportedSignatureAlgorithm(int sigAlgorithm) {
         switch (sigAlgorithm) {
             case SIGNATURE_RSA_PSS_WITH_SHA256:
@@ -540,6 +564,8 @@ public class ApkSignatureSchemeV3Verifier {
     public static class VerifiedSigner {
         public final X509Certificate[] certs;
         public final VerifiedProofOfRotation por;
+
+        public byte[] verityRootHash;
 
         public VerifiedSigner(X509Certificate[] certs, VerifiedProofOfRotation por) {
             this.certs = certs;
