@@ -191,10 +191,6 @@ package android {
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int requiredSystemPropertyName = 16844133; // 0x1010565
     field public static final int requiredSystemPropertyValue = 16844134; // 0x1010566
-    field public static final int searchKeyphrase = 16843871; // 0x101045f
-    field public static final int searchKeyphraseId = 16843870; // 0x101045e
-    field public static final int searchKeyphraseRecognitionFlags = 16843942; // 0x10104a6
-    field public static final int searchKeyphraseSupportedLocales = 16843872; // 0x1010460
   }
 
   public static final class R.raw {
