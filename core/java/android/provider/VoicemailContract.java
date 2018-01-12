@@ -106,9 +106,12 @@ public class VoicemailContract {
 
     /**
      * Broadcast intent to inform a new visual voicemail SMS has been received. This intent will
-     * only be delivered to the telephony service. {@link #EXTRA_VOICEMAIL_SMS} will be included.
-     */
-    /** @hide */
+     * only be delivered to the telephony service.
+     *
+     * @see #EXTRA_VOICEMAIL_SMS
+     * @see #EXTRA_TARGET_PACKAGE
+     *
+     * @hide */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_VOICEMAIL_SMS_RECEIVED =
             "com.android.internal.provider.action.VOICEMAIL_SMS_RECEIVED";
@@ -119,6 +122,19 @@ public class VoicemailContract {
      * @hide
      */
     public static final String EXTRA_VOICEMAIL_SMS = "android.provider.extra.VOICEMAIL_SMS";
+
+    /**
+     * Extra in {@link #ACTION_VOICEMAIL_SMS_RECEIVED} indicating the target package to bind {@link
+     * android.telephony.VisualVoicemailService}.
+     *
+     * <p>This extra should be set to android.telephony.VisualVoicemailSmsFilterSettings#packageName
+     * while performing filtering. Since the default dialer might change between the filter sending
+     * it and telephony binding to the service, this ensures the service will not receive SMS
+     * filtered by the previous app.
+     *
+     * @hide
+     */
+    public static final String EXTRA_TARGET_PACKAGE = "android.provider.extra.TARGET_PACAKGE";
 
     /**
      * Extra included in {@link Intent#ACTION_PROVIDER_CHANGED} broadcast intents to indicate if the
