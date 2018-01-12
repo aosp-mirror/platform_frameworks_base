@@ -110,7 +110,7 @@ public final class PowerManager {
     /* NOTE: Wake lock levels were previously defined as a bit field, except that only a few
      * combinations were actually supported so the bit field was removed.  This explains
      * why the numbering scheme is so odd.  If adding a new wake lock level, any unused
-     * value can be used.
+     * value (in frameworks/base/core/proto/android/os/enums.proto) can be used.
      */
 
     /**
@@ -121,7 +121,7 @@ public final class PowerManager {
      * but the CPU will be kept on until all partial wake locks have been released.
      * </p>
      */
-    public static final int PARTIAL_WAKE_LOCK = 0x00000001;
+    public static final int PARTIAL_WAKE_LOCK = OsProtoEnums.PARTIAL_WAKE_LOCK; // 0x00000001
 
     /**
      * Wake lock level: Ensures that the screen is on (but may be dimmed);
@@ -138,7 +138,7 @@ public final class PowerManager {
      * as the user moves between applications and doesn't require a special permission.
      */
     @Deprecated
-    public static final int SCREEN_DIM_WAKE_LOCK = 0x00000006;
+    public static final int SCREEN_DIM_WAKE_LOCK = OsProtoEnums.SCREEN_DIM_WAKE_LOCK; // 0x00000006
 
     /**
      * Wake lock level: Ensures that the screen is on at full brightness;
@@ -155,7 +155,8 @@ public final class PowerManager {
      * as the user moves between applications and doesn't require a special permission.
      */
     @Deprecated
-    public static final int SCREEN_BRIGHT_WAKE_LOCK = 0x0000000a;
+    public static final int SCREEN_BRIGHT_WAKE_LOCK =
+            OsProtoEnums.SCREEN_BRIGHT_WAKE_LOCK; // 0x0000000a
 
     /**
      * Wake lock level: Ensures that the screen and keyboard backlight are on at
@@ -172,7 +173,7 @@ public final class PowerManager {
      * as the user moves between applications and doesn't require a special permission.
      */
     @Deprecated
-    public static final int FULL_WAKE_LOCK = 0x0000001a;
+    public static final int FULL_WAKE_LOCK = OsProtoEnums.FULL_WAKE_LOCK; // 0x0000001a
 
     /**
      * Wake lock level: Turns the screen off when the proximity sensor activates.
@@ -193,7 +194,8 @@ public final class PowerManager {
      * Cannot be used with {@link #ACQUIRE_CAUSES_WAKEUP}.
      * </p>
      */
-    public static final int PROXIMITY_SCREEN_OFF_WAKE_LOCK = 0x00000020;
+    public static final int PROXIMITY_SCREEN_OFF_WAKE_LOCK =
+            OsProtoEnums.PROXIMITY_SCREEN_OFF_WAKE_LOCK; // 0x00000020
 
     /**
      * Wake lock level: Put the screen in a low power state and allow the CPU to suspend
@@ -207,7 +209,7 @@ public final class PowerManager {
      *
      * {@hide}
      */
-    public static final int DOZE_WAKE_LOCK = 0x00000040;
+    public static final int DOZE_WAKE_LOCK = OsProtoEnums.DOZE_WAKE_LOCK; // 0x00000040
 
     /**
      * Wake lock level: Keep the device awake enough to allow drawing to occur.
@@ -221,7 +223,7 @@ public final class PowerManager {
      *
      * {@hide}
      */
-    public static final int DRAW_WAKE_LOCK = 0x00000080;
+    public static final int DRAW_WAKE_LOCK = OsProtoEnums.DRAW_WAKE_LOCK; // 0x00000080
 
     /**
      * Mask for the wake lock level component of a combined wake lock level and flags integer.

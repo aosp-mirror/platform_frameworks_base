@@ -43,17 +43,17 @@ import android.hardware.health.V2_0.IHealthInfoCallback;
 import android.hardware.health.V2_0.IHealth;
 import android.hardware.health.V2_0.Result;
 import android.os.BatteryManager;
-import android.os.BatteryManagerProto;
 import android.os.BatteryManagerInternal;
 import android.os.BatteryProperty;
 import android.os.Binder;
+import android.os.DropBoxManager;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBatteryPropertiesListener;
 import android.os.IBatteryPropertiesRegistrar;
 import android.os.IBinder;
-import android.os.DropBoxManager;
+import android.os.OsProtoEnums;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -127,7 +127,7 @@ public final class BatteryService extends SystemService {
     private static final String DUMPSYS_DATA_PATH = "/data/system/";
 
     // This should probably be exposed in the API, though it's not critical
-    private static final int BATTERY_PLUGGED_NONE = 0;
+    private static final int BATTERY_PLUGGED_NONE = OsProtoEnums.BATTERY_PLUGGED_NONE; // = 0
 
     private final Context mContext;
     private final IBatteryStats mBatteryStats;
@@ -921,13 +921,13 @@ public final class BatteryService extends SystemService {
 
         synchronized (mLock) {
             proto.write(BatteryServiceDumpProto.ARE_UPDATES_STOPPED, mUpdatesStopped);
-            int batteryPluggedValue = BatteryManagerProto.PLUG_TYPE_NONE;
+            int batteryPluggedValue = OsProtoEnums.BATTERY_PLUGGED_NONE;
             if (mHealthInfo.chargerAcOnline) {
-                batteryPluggedValue = BatteryManagerProto.PLUG_TYPE_AC;
+                batteryPluggedValue = OsProtoEnums.BATTERY_PLUGGED_AC;
             } else if (mHealthInfo.chargerUsbOnline) {
-                batteryPluggedValue = BatteryManagerProto.PLUG_TYPE_USB;
+                batteryPluggedValue = OsProtoEnums.BATTERY_PLUGGED_USB;
             } else if (mHealthInfo.chargerWirelessOnline) {
-                batteryPluggedValue = BatteryManagerProto.PLUG_TYPE_WIRELESS;
+                batteryPluggedValue = OsProtoEnums.BATTERY_PLUGGED_WIRELESS;
             }
             proto.write(BatteryServiceDumpProto.PLUGGED, batteryPluggedValue);
             proto.write(BatteryServiceDumpProto.MAX_CHARGING_CURRENT, mHealthInfo.maxChargingCurrent);

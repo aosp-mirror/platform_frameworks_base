@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,24 @@
  */
 
 syntax = "proto2";
-option java_package = "android.telephony";
-option java_multiple_files = true;
-
 package android.telephony;
 
-/**
- * An android.telephony.SignalStrength object.
- */
-message SignalStrengthProto {
-  enum StrengthName {
+option java_outer_classname = "TelephonyProtoEnums";
+option java_multiple_files = true;
+
+// Data conn. power states, primarily used by android/telephony/DataConnectionRealTimeInfo.java.
+enum DataConnectionPowerStateEnum {
+    DATA_CONNECTION_POWER_STATE_LOW = 1;
+    DATA_CONNECTION_POWER_STATE_MEDIUM = 2;
+    DATA_CONNECTION_POWER_STATE_HIGH = 3;
+    DATA_CONNECTION_POWER_STATE_UNKNOWN = 2147483647; // Java Integer.MAX_VALUE;
+}
+
+// Signal strength levels, primarily used by android/telephony/SignalStrength.java.
+enum SignalStrengthEnum {
     SIGNAL_STRENGTH_NONE_OR_UNKNOWN = 0;
     SIGNAL_STRENGTH_POOR = 1;
     SIGNAL_STRENGTH_MODERATE = 2;
     SIGNAL_STRENGTH_GOOD = 3;
     SIGNAL_STRENGTH_GREAT = 4;
-  }
 }

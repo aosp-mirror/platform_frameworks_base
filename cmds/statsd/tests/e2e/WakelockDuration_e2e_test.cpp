@@ -73,11 +73,13 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensions) {
         EXPECT_TRUE(processor->mMetricsManagers.begin()->second->isConfigValid());
 
         auto screenTurnedOnEvent =
-            CreateScreenStateChangedEvent(ScreenStateChanged::STATE_ON, bucketStartTimeNs + 1);
+            CreateScreenStateChangedEvent(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
+                                          bucketStartTimeNs + 1);
         auto screenTurnedOffEvent =
-            CreateScreenStateChangedEvent(ScreenStateChanged::STATE_OFF, bucketStartTimeNs + 200);
+            CreateScreenStateChangedEvent(android::view::DisplayStateEnum::DISPLAY_STATE_OFF,
+                                          bucketStartTimeNs + 200);
         auto screenTurnedOnEvent2 =
-            CreateScreenStateChangedEvent(ScreenStateChanged::STATE_ON,
+            CreateScreenStateChangedEvent(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
                                           bucketStartTimeNs + bucketSizeNs + 500);
 
         std::vector<AttributionNode> attributions1 =
@@ -156,7 +158,8 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensions) {
 
         events.clear();
         events.push_back(CreateScreenStateChangedEvent(
-            ScreenStateChanged::STATE_OFF, bucketStartTimeNs + 2 * bucketSizeNs + 90));
+            android::view::DisplayStateEnum::DISPLAY_STATE_OFF,
+            bucketStartTimeNs + 2 * bucketSizeNs + 90));
         events.push_back(CreateAcquireWakelockEvent(
             attributions1, "wl3", bucketStartTimeNs + 2 * bucketSizeNs + 100));
         events.push_back(CreateReleaseWakelockEvent(
