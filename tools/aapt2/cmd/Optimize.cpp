@@ -38,6 +38,7 @@
 #include "io/Util.h"
 #include "optimize/MultiApkGenerator.h"
 #include "optimize/ResourceDeduper.h"
+#include "optimize/ResourceFilter.h"
 #include "optimize/VersionCollapser.h"
 #include "split/TableSplitter.h"
 #include "util/Files.h"
@@ -61,6 +62,9 @@ struct OptimizeOptions {
 
   // Details of the app extracted from the AndroidManifest.xml
   AppInfo app_info;
+
+  // Blacklist of unused resources that should be removed from the apk.
+  std::unordered_set<ResourceName> resources_blacklist;
 
   // Split APK options.
   TableSplitterOptions table_splitter_options;
@@ -146,6 +150,13 @@ class OptimizeCommand {
   int Run(std::unique_ptr<LoadedApk> apk) {
     if (context_->IsVerbose()) {
       context_->GetDiagnostics()->Note(DiagMessage() << "Optimizing APK...");
+    }
+    if (!options_.resources_blacklist.empty()) {
+      ResourceFilter filter(options_.resources_blacklist);
+      if (!filter.Consume(context_, apk->GetResourceTable())) {
+        context_->GetDiagnostics()->Error(DiagMessage() << "failed filtering resources");
+        return 1;
+      }
     }
 
     VersionCollapser collapser;
@@ -284,16 +295,62 @@ class OptimizeCommand {
   OptimizeContext* context_;
 };
 
-bool ExtractWhitelistFromConfig(const std::string& path, OptimizeContext* context,
-                                OptimizeOptions* options) {
+bool ExtractObfuscationWhitelistFromConfig(const std::string& path, OptimizeContext* context,
+                                           OptimizeOptions* options) {
   std::string contents;
   if (!ReadFileToString(path, &contents, true)) {
     context->GetDiagnostics()->Error(DiagMessage()
                                      << "failed to parse whitelist from config file: " << path);
     return false;
   }
-  for (const StringPiece& resource_name : util::Tokenize(contents, ',')) {
-    options->table_flattener_options.whitelisted_resources.insert(resource_name.to_string());
+  for (StringPiece resource_name : util::Tokenize(contents, ',')) {
+    options->table_flattener_options.whitelisted_resources.insert(
+        resource_name.to_string());
+  }
+  return true;
+}
+
+bool ExtractConfig(const std::string& path, OptimizeContext* context,
+                                    OptimizeOptions* options) {
+  std::string content;
+  if (!android::base::ReadFileToString(path, &content, true /*follow_symlinks*/)) {
+    context->GetDiagnostics()->Error(DiagMessage(path) << "failed reading whitelist");
+    return false;
+  }
+
+  size_t line_no = 0;
+  for (StringPiece line : util::Tokenize(content, '\n')) {
+    line_no++;
+    line = util::TrimWhitespace(line);
+    if (line.empty()) {
+      continue;
+    }
+
+    auto split_line = util::Split(line, '#');
+    if (split_line.size() < 2) {
+      context->GetDiagnostics()->Error(DiagMessage(line) << "No # found in line");
+      return false;
+    }
+    StringPiece resource_string = split_line[0];
+    StringPiece directives = split_line[1];
+    ResourceNameRef resource_name;
+    if (!ResourceUtils::ParseResourceName(resource_string, &resource_name)) {
+      context->GetDiagnostics()->Error(DiagMessage(line) << "Malformed resource name");
+      return false;
+    }
+    if (!resource_name.package.empty()) {
+      context->GetDiagnostics()->Error(DiagMessage(line)
+                                       << "Package set for resource. Only use type/name");
+      return false;
+    }
+    for (StringPiece directive : util::Tokenize(directives, ',')) {
+      if (directive == "remove") {
+        options->resources_blacklist.insert(resource_name.ToResourceName());
+      } else if (directive == "no_obfuscate") {
+        options->table_flattener_options.whitelisted_resources.insert(
+            resource_name.entry.to_string());
+      }
+    }
   }
   return true;
 }
@@ -322,6 +379,7 @@ int Optimize(const std::vector<StringPiece>& args) {
   OptimizeOptions options;
   Maybe<std::string> config_path;
   Maybe<std::string> whitelist_path;
+  Maybe<std::string> resources_config_path;
   Maybe<std::string> target_densities;
   std::vector<std::string> configs;
   std::vector<std::string> split_args;
@@ -340,10 +398,15 @@ int Optimize(const std::vector<StringPiece>& args) {
               "All the resources that would be unused on devices of the given densities will be \n"
               "removed from the APK.",
               &target_densities)
-          .OptionalFlag("--whitelist-config-path",
+          .OptionalFlag("--whitelist-path",
                         "Path to the whitelist.cfg file containing whitelisted resources \n"
                         "whose names should not be altered in final resource tables.",
                         &whitelist_path)
+          .OptionalFlag("--resources-config-path",
+                        "Path to the resources.cfg file containing the list of resources and \n"
+                        "directives to each resource. \n"
+                        "Format: type/resource_name#[directive][,directive]",
+                        &resources_config_path)
           .OptionalFlagList("-c",
                             "Comma separated list of configurations to include. The default\n"
                             "is all configurations.",
@@ -460,9 +523,16 @@ int Optimize(const std::vector<StringPiece>& args) {
   if (options.table_flattener_options.collapse_key_stringpool) {
     if (whitelist_path) {
       std::string& path = whitelist_path.value();
-      if (!ExtractWhitelistFromConfig(path, &context, &options)) {
+      if (!ExtractObfuscationWhitelistFromConfig(path, &context, &options)) {
         return 1;
       }
+    }
+  }
+
+  if (resources_config_path) {
+    std::string& path = resources_config_path.value();
+    if (!ExtractConfig(path, &context, &options)) {
+      return 1;
     }
   }
 

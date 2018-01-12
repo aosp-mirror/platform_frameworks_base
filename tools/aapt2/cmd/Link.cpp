@@ -17,6 +17,7 @@
 #include <sys/stat.h>
 #include <cinttypes>
 
+#include <algorithm>
 #include <queue>
 #include <unordered_map>
 #include <vector>

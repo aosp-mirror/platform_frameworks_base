@@ -110,6 +110,7 @@ cc_library_host_static {
         "link/XmlReferenceLinker.cpp",
         "optimize/MultiApkGenerator.cpp",
         "optimize/ResourceDeduper.cpp",
+        "optimize/ResourceFilter.cpp",
         "optimize/VersionCollapser.cpp",
         "process/SymbolTable.cpp",
         "split/TableSplitter.cpp",
