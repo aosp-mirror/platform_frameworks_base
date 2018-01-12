@@ -20,12 +20,14 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.res.AssetFileDescriptor;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.ImageDecoder;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.SystemClock;
+import android.util.DisplayMetrics;
 
 import libcore.io.IoUtils;
 import libcore.util.NativeAllocationRegistry;
@@ -59,22 +61,31 @@ public class AnimatedImageDrawable extends Drawable implements Animatable {
      * decoder is only non-null if it has a PostProcess
      */
     public AnimatedImageDrawable(long nativeImageDecoder,
-            @Nullable ImageDecoder decoder, int width, int height, Rect cropRect,
+            @Nullable ImageDecoder decoder, int width, int height,
+            int srcDensity, int dstDensity, Rect cropRect,
             InputStream inputStream, AssetFileDescriptor afd)
             throws IOException {
-        mNativePtr = nCreate(nativeImageDecoder, decoder, width, height, cropRect);
-        mInputStream = inputStream;
-        mAssetFd = afd;
+        width = Bitmap.scaleFromDensity(width, srcDensity, dstDensity);
+        height = Bitmap.scaleFromDensity(height, srcDensity, dstDensity);
 
         if (cropRect == null) {
             mIntrinsicWidth  = width;
             mIntrinsicHeight = height;
         } else {
+            cropRect.set(Bitmap.scaleFromDensity(cropRect.left, srcDensity, dstDensity),
+                    Bitmap.scaleFromDensity(cropRect.top, srcDensity, dstDensity),
+                    Bitmap.scaleFromDensity(cropRect.right, srcDensity, dstDensity),
+                    Bitmap.scaleFromDensity(cropRect.bottom, srcDensity, dstDensity));
             mIntrinsicWidth  = cropRect.width();
             mIntrinsicHeight = cropRect.height();
         }
 
-        long nativeSize = nNativeByteSize(mNativePtr);
+        mNativePtr = nCreate(nativeImageDecoder, decoder, width, height, cropRect);
+        mInputStream = inputStream;
+        mAssetFd = afd;
+
+        // FIXME: Use the right size for the native allocation.
+        long nativeSize = 200;
         NativeAllocationRegistry registry = new NativeAllocationRegistry(
                 AnimatedImageDrawable.class.getClassLoader(), nGetNativeFinalizer(), nativeSize);
         registry.registerNativeAllocation(this, mNativePtr);
