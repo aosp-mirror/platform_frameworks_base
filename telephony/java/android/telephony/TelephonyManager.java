@@ -6264,8 +6264,10 @@ public class TelephonyManager {
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
      *
-     * @hide
+     * {@hide}
      **/
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setSimPowerState(int state) {
         setSimPowerStateForSlot(getSlotIndex(), state);
     }
@@ -6284,8 +6286,10 @@ public class TelephonyManager {
      * <p>Requires Permission:
      *   {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}
      *
-     * @hide
+     * {@hide}
      **/
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void setSimPowerStateForSlot(int slotIndex, int state) {
         try {
             ITelephony telephony = getITelephony();
