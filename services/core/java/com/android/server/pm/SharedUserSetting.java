@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import android.annotation.Nullable;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageParser;
 import android.service.pm.PackageServiceDumpProto;
 import android.util.ArraySet;
@@ -101,5 +102,9 @@ public final class SharedUserSetting extends SettingBase {
             pkgList.add(ps.pkg);
         }
         return pkgList;
+    }
+
+    public boolean isPrivileged() {
+        return (this.pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
     }
 }
