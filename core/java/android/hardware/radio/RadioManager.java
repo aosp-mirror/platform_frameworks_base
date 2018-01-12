@@ -20,6 +20,7 @@ import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -33,9 +34,13 @@ import android.os.ServiceManager.ServiceNotFoundException;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.util.Preconditions;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1382,35 +1387,44 @@ public class RadioManager {
         };
     }
 
-    /** Radio program information returned by
-     * {@link RadioTuner#getProgramInformation(RadioManager.ProgramInfo[])} */
+    /** Radio program information. */
     public static class ProgramInfo implements Parcelable {
 
-        // sourced from hardware/interfaces/broadcastradio/1.1/types.hal
+        // sourced from hardware/interfaces/broadcastradio/2.0/types.hal
         private static final int FLAG_LIVE = 1 << 0;
         private static final int FLAG_MUTED = 1 << 1;
         private static final int FLAG_TRAFFIC_PROGRAM = 1 << 2;
         private static final int FLAG_TRAFFIC_ANNOUNCEMENT = 1 << 3;
+        private static final int FLAG_TUNED = 1 << 4;
+        private static final int FLAG_STEREO = 1 << 5;
 
         @NonNull private final ProgramSelector mSelector;
-        private final boolean mTuned;  // TODO(b/69958777): replace with mFlags
-        private final boolean mStereo;
-        private final boolean mDigital;
-        private final int mFlags;
-        private final int mSignalStrength;
-        private final RadioMetadata mMetadata;
+        @Nullable private final ProgramSelector.Identifier mLogicallyTunedTo;
+        @Nullable private final ProgramSelector.Identifier mPhysicallyTunedTo;
+        @NonNull private final Collection<ProgramSelector.Identifier> mRelatedContent;
+        private final int mInfoFlags;
+        private final int mSignalQuality;
+        @Nullable private final RadioMetadata mMetadata;
         @NonNull private final Map<String, String> mVendorInfo;
 
         /** @hide */
-        public ProgramInfo(@NonNull ProgramSelector selector, boolean tuned, boolean stereo,
-                boolean digital, int signalStrength, RadioMetadata metadata, int flags,
-                Map<String, String> vendorInfo) {
-            mSelector = selector;
-            mTuned = tuned;
-            mStereo = stereo;
-            mDigital = digital;
-            mFlags = flags;
-            mSignalStrength = signalStrength;
+        public ProgramInfo(@NonNull ProgramSelector selector,
+                @Nullable ProgramSelector.Identifier logicallyTunedTo,
+                @Nullable ProgramSelector.Identifier physicallyTunedTo,
+                @Nullable Collection<ProgramSelector.Identifier> relatedContent,
+                int infoFlags, int signalQuality, @Nullable RadioMetadata metadata,
+                @Nullable Map<String, String> vendorInfo) {
+            mSelector = Objects.requireNonNull(selector);
+            mLogicallyTunedTo = logicallyTunedTo;
+            mPhysicallyTunedTo = physicallyTunedTo;
+            if (relatedContent == null) {
+                mRelatedContent = Collections.emptyList();
+            } else {
+                Preconditions.checkCollectionElementsNotNull(relatedContent, "relatedContent");
+                mRelatedContent = relatedContent;
+            }
+            mInfoFlags = infoFlags;
+            mSignalQuality = signalQuality;
             mMetadata = metadata;
             mVendorInfo = (vendorInfo == null) ? new HashMap<>() : vendorInfo;
         }
@@ -1422,6 +1436,51 @@ public class RadioManager {
          */
         public @NonNull ProgramSelector getSelector() {
             return mSelector;
+        }
+
+        /**
+         * Identifier currently used for program selection.
+         *
+         * This identifier can be used to determine which technology is
+         * currently being used for reception.
+         *
+         * Some program selectors contain tuning information for different radio
+         * technologies (i.e. FM RDS and DAB). For example, user may tune using
+         * a ProgramSelector with RDS_PI primary identifier, but the tuner hardware
+         * may choose to use DAB technology to make actual tuning. This identifier
+         * must reflect that.
+         */
+        public @Nullable ProgramSelector.Identifier getLogicallyTunedTo() {
+            return mLogicallyTunedTo;
+        }
+
+        /**
+         * Identifier currently used by hardware to physically tune to a channel.
+         *
+         * Some radio technologies broadcast the same program on multiple channels,
+         * i.e. with RDS AF the same program may be broadcasted on multiple
+         * alternative frequencies; the same DAB program may be broadcast on
+         * multiple ensembles. This identifier points to the channel to which the
+         * radio hardware is physically tuned to.
+         */
+        public @Nullable ProgramSelector.Identifier getPhysicallyTunedTo() {
+            return mPhysicallyTunedTo;
+        }
+
+        /**
+         * Primary identifiers of related contents.
+         *
+         * Some radio technologies provide pointers to other programs that carry
+         * related content (i.e. DAB soft-links). This field is a list of pointers
+         * to other programs on the program list.
+         *
+         * Please note, that these identifiers does not have to exist on the program
+         * list - i.e. DAB tuner may provide information on FM RDS alternatives
+         * despite not supporting FM RDS. If the system has multiple tuners, another
+         * one may have it on its list.
+         */
+        public @Nullable Collection<ProgramSelector.Identifier> getRelatedContent() {
+            return mRelatedContent;
         }
 
         /** Main channel expressed in units according to band type.
@@ -1458,19 +1517,28 @@ public class RadioManager {
          * @return {@code true} if currently tuned, {@code false} otherwise.
          */
         public boolean isTuned() {
-            return mTuned;
+            return (mInfoFlags & FLAG_TUNED) != 0;
         }
+
         /** {@code true} if the received program is stereo
          * @return {@code true} if stereo, {@code false} otherwise.
          */
         public boolean isStereo() {
-            return mStereo;
+            return (mInfoFlags & FLAG_STEREO) != 0;
         }
+
         /** {@code true} if the received program is digital (e.g HD radio)
          * @return {@code true} if digital, {@code false} otherwise.
+         * @deprecated Use {@link getLogicallyTunedTo()} instead.
          */
+        @Deprecated
         public boolean isDigital() {
-            return mDigital;
+            ProgramSelector.Identifier id = mLogicallyTunedTo;
+            if (id == null) id = mSelector.getPrimaryId();
+
+            int type = id.getType();
+            return (type != ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY
+                && type != ProgramSelector.IDENTIFIER_TYPE_RDS_PI);
         }
 
         /**
@@ -1479,7 +1547,7 @@ public class RadioManager {
          * usually targetted at reduced latency.
          */
         public boolean isLive() {
-            return (mFlags & FLAG_LIVE) != 0;
+            return (mInfoFlags & FLAG_LIVE) != 0;
         }
 
         /**
@@ -1489,7 +1557,7 @@ public class RadioManager {
          * It does NOT mean the user has muted audio.
          */
         public boolean isMuted() {
-            return (mFlags & FLAG_MUTED) != 0;
+            return (mInfoFlags & FLAG_MUTED) != 0;
         }
 
         /**
@@ -1497,7 +1565,7 @@ public class RadioManager {
          * regularily.
          */
         public boolean isTrafficProgram() {
-            return (mFlags & FLAG_TRAFFIC_PROGRAM) != 0;
+            return (mInfoFlags & FLAG_TRAFFIC_PROGRAM) != 0;
         }
 
         /**
@@ -1505,15 +1573,18 @@ public class RadioManager {
          * at the very moment.
          */
         public boolean isTrafficAnnouncementActive() {
-            return (mFlags & FLAG_TRAFFIC_ANNOUNCEMENT) != 0;
+            return (mInfoFlags & FLAG_TRAFFIC_ANNOUNCEMENT) != 0;
         }
 
-        /** Signal strength indicator from 0 (no signal) to 100 (excellent)
-         * @return the signal strength indication.
+        /**
+         * Signal quality (as opposed to the name) indication from 0 (no signal)
+         * to 100 (excellent)
+         * @return the signal quality indication.
          */
         public int getSignalStrength() {
-            return mSignalStrength;
+            return mSignalQuality;
         }
+
         /** Metadata currently received from this station.
          * null if no metadata have been received
          * @return current meta data received from this program.
@@ -1537,17 +1608,13 @@ public class RadioManager {
         }
 
         private ProgramInfo(Parcel in) {
-            mSelector = in.readParcelable(null);
-            mTuned = in.readByte() == 1;
-            mStereo = in.readByte() == 1;
-            mDigital = in.readByte() == 1;
-            mSignalStrength = in.readInt();
-            if (in.readByte() == 1) {
-                mMetadata = RadioMetadata.CREATOR.createFromParcel(in);
-            } else {
-                mMetadata = null;
-            }
-            mFlags = in.readInt();
+            mSelector = Objects.requireNonNull(in.readTypedObject(ProgramSelector.CREATOR));
+            mLogicallyTunedTo = in.readTypedObject(ProgramSelector.Identifier.CREATOR);
+            mPhysicallyTunedTo = in.readTypedObject(ProgramSelector.Identifier.CREATOR);
+            mRelatedContent = in.createTypedArrayList(ProgramSelector.Identifier.CREATOR);
+            mInfoFlags = in.readInt();
+            mSignalQuality = in.readInt();
+            mMetadata = in.readTypedObject(RadioMetadata.CREATOR);
             mVendorInfo = Utils.readStringMap(in);
         }
 
@@ -1564,18 +1631,13 @@ public class RadioManager {
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeParcelable(mSelector, 0);
-            dest.writeByte((byte)(mTuned ? 1 : 0));
-            dest.writeByte((byte)(mStereo ? 1 : 0));
-            dest.writeByte((byte)(mDigital ? 1 : 0));
-            dest.writeInt(mSignalStrength);
-            if (mMetadata == null) {
-                dest.writeByte((byte)0);
-            } else {
-                dest.writeByte((byte)1);
-                mMetadata.writeToParcel(dest, flags);
-            }
-            dest.writeInt(mFlags);
+            dest.writeTypedObject(mSelector, flags);
+            dest.writeTypedObject(mLogicallyTunedTo, flags);
+            dest.writeTypedObject(mPhysicallyTunedTo, flags);
+            Utils.writeTypedCollection(dest, mRelatedContent);
+            dest.writeInt(mInfoFlags);
+            dest.writeInt(mSignalQuality);
+            dest.writeTypedObject(mMetadata, flags);
             Utils.writeStringMap(dest, mVendorInfo);
         }
 
@@ -1586,52 +1648,38 @@ public class RadioManager {
 
         @Override
         public String toString() {
-            return "ProgramInfo [mSelector=" + mSelector
-                    + ", mTuned=" + mTuned + ", mStereo=" + mStereo + ", mDigital=" + mDigital
-                    + ", mFlags=" + mFlags + ", mSignalStrength=" + mSignalStrength
-                    + ((mMetadata == null) ? "" : (", mMetadata=" + mMetadata.toString()))
+            return "ProgramInfo"
+                    + " [selector=" + mSelector
+                    + ", logicallyTunedTo=" + Objects.toString(mLogicallyTunedTo)
+                    + ", physicallyTunedTo=" + Objects.toString(mPhysicallyTunedTo)
+                    + ", relatedContent=" + mRelatedContent.size()
+                    + ", infoFlags=" + mInfoFlags
+                    + ", mSignalQuality=" + mSignalQuality
+                    + ", mMetadata=" + Objects.toString(mMetadata)
                     + "]";
         }
 
         @Override
         public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + mSelector.hashCode();
-            result = prime * result + (mTuned ? 1 : 0);
-            result = prime * result + (mStereo ? 1 : 0);
-            result = prime * result + (mDigital ? 1 : 0);
-            result = prime * result + mFlags;
-            result = prime * result + mSignalStrength;
-            result = prime * result + ((mMetadata == null) ? 0 : mMetadata.hashCode());
-            result = prime * result + mVendorInfo.hashCode();
-            return result;
+            return Objects.hash(mSelector, mLogicallyTunedTo, mPhysicallyTunedTo,
+                mRelatedContent, mInfoFlags, mSignalQuality, mMetadata, mVendorInfo);
         }
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (!(obj instanceof ProgramInfo))
-                return false;
+            if (this == obj) return true;
+            if (!(obj instanceof ProgramInfo)) return false;
             ProgramInfo other = (ProgramInfo) obj;
-            if (!mSelector.equals(other.getSelector())) return false;
-            if (mTuned != other.isTuned())
-                return false;
-            if (mStereo != other.isStereo())
-                return false;
-            if (mDigital != other.isDigital())
-                return false;
-            if (mFlags != other.mFlags)
-                return false;
-            if (mSignalStrength != other.getSignalStrength())
-                return false;
-            if (mMetadata == null) {
-                if (other.getMetadata() != null)
-                    return false;
-            } else if (!mMetadata.equals(other.getMetadata()))
-                return false;
-            if (!mVendorInfo.equals(other.mVendorInfo)) return false;
+
+            if (!Objects.equals(mSelector, other.mSelector)) return false;
+            if (!Objects.equals(mLogicallyTunedTo, other.mLogicallyTunedTo)) return false;
+            if (!Objects.equals(mPhysicallyTunedTo, other.mPhysicallyTunedTo)) return false;
+            if (!Objects.equals(mRelatedContent, other.mRelatedContent)) return false;
+            if (mInfoFlags != other.mInfoFlags) return false;
+            if (mSignalQuality != other.mSignalQuality) return false;
+            if (!Objects.equals(mMetadata, other.mMetadata)) return false;
+            if (!Objects.equals(mVendorInfo, other.mVendorInfo)) return false;
+
             return true;
         }
     }

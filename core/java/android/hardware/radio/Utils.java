@@ -22,6 +22,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -91,6 +93,19 @@ final class Utils {
                 return new Integer[size];
             }
         });
+    }
+
+    static <T extends Parcelable> void writeTypedCollection(@NonNull Parcel dest,
+            @Nullable Collection<T> coll) {
+        ArrayList<T> list = null;
+        if (coll != null) {
+            if (coll instanceof ArrayList) {
+                list = (ArrayList) coll;
+            } else {
+                list = new ArrayList<>(coll);
+            }
+        }
+        dest.writeTypedList(list);
     }
 
     static void close(ICloseHandle handle) {

@@ -1804,6 +1804,7 @@ package android.hardware.radio {
     method public deprecated int getProgramType();
     method public android.hardware.radio.ProgramSelector.Identifier[] getSecondaryIds();
     method public deprecated long[] getVendorIds();
+    method public android.hardware.radio.ProgramSelector withSecondaryPreferred(android.hardware.radio.ProgramSelector.Identifier);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.hardware.radio.ProgramSelector> CREATOR;
     field public static final int IDENTIFIER_TYPE_AMFM_FREQUENCY = 1; // 0x1
@@ -1988,12 +1989,15 @@ package android.hardware.radio {
   public static class RadioManager.ProgramInfo implements android.os.Parcelable {
     method public int describeContents();
     method public deprecated int getChannel();
+    method public android.hardware.radio.ProgramSelector.Identifier getLogicallyTunedTo();
     method public android.hardware.radio.RadioMetadata getMetadata();
+    method public android.hardware.radio.ProgramSelector.Identifier getPhysicallyTunedTo();
+    method public java.util.Collection<android.hardware.radio.ProgramSelector.Identifier> getRelatedContent();
     method public android.hardware.radio.ProgramSelector getSelector();
     method public int getSignalStrength();
     method public deprecated int getSubChannel();
     method public java.util.Map<java.lang.String, java.lang.String> getVendorInfo();
-    method public boolean isDigital();
+    method public deprecated boolean isDigital();
     method public boolean isLive();
     method public boolean isMuted();
     method public boolean isStereo();

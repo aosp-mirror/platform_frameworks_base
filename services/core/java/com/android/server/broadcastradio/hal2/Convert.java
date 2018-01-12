@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.hardware.broadcastradio.V2_0.AmFmBandRange;
 import android.hardware.broadcastradio.V2_0.AmFmRegionConfig;
 import android.hardware.broadcastradio.V2_0.Announcement;
+import android.hardware.broadcastradio.V2_0.IdentifierType;
 import android.hardware.broadcastradio.V2_0.ProgramFilter;
 import android.hardware.broadcastradio.V2_0.ProgramIdentifier;
 import android.hardware.broadcastradio.V2_0.ProgramInfo;
@@ -37,6 +38,7 @@ import android.util.Slog;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -219,31 +221,38 @@ class Convert {
         return hwId;
     }
 
-    static @NonNull ProgramSelector.Identifier programIdentifierFromHal(@NonNull ProgramIdentifier id) {
+    static @Nullable ProgramSelector.Identifier programIdentifierFromHal(
+            @NonNull ProgramIdentifier id) {
+        if (id.type == IdentifierType.INVALID) return null;
         return new ProgramSelector.Identifier(id.type, id.value);
     }
 
     static @NonNull ProgramSelector programSelectorFromHal(
             @NonNull android.hardware.broadcastradio.V2_0.ProgramSelector sel) {
-        ProgramSelector.Identifier[] secondaryIds = sel.secondaryIds.stream().map(
-            id -> programIdentifierFromHal(id)).toArray(ProgramSelector.Identifier[]::new);
+        ProgramSelector.Identifier[] secondaryIds = sel.secondaryIds.stream().
+                map(id -> Objects.requireNonNull(programIdentifierFromHal(id))).
+                toArray(ProgramSelector.Identifier[]::new);
 
         return new ProgramSelector(
-            identifierTypeToProgramType(sel.primaryId.type),
-            programIdentifierFromHal(sel.primaryId),
-            secondaryIds, null);
+                identifierTypeToProgramType(sel.primaryId.type),
+                Objects.requireNonNull(programIdentifierFromHal(sel.primaryId)),
+                secondaryIds, null);
     }
 
     static @NonNull RadioManager.ProgramInfo programInfoFromHal(@NonNull ProgramInfo info) {
+        Collection<ProgramSelector.Identifier> relatedContent = info.relatedContent.stream().
+                map(id -> Objects.requireNonNull(programIdentifierFromHal(id))).
+                collect(Collectors.toList());
+
         return new RadioManager.ProgramInfo(
-            programSelectorFromHal(info.selector),
-            (info.infoFlags & ProgramInfoFlags.TUNED) != 0,
-            (info.infoFlags & ProgramInfoFlags.STEREO) != 0,
-            false,  // TODO(b/69860743): digital
-            info.signalQuality,
-            null,  // TODO(b/69860743): metadata
-            info.infoFlags,
-            vendorInfoFromHal(info.vendorInfo)
+                programSelectorFromHal(info.selector),
+                programIdentifierFromHal(info.logicallyTunedTo),
+                programIdentifierFromHal(info.physicallyTunedTo),
+                relatedContent,
+                info.infoFlags,
+                info.signalQuality,
+                null,  // TODO(b/69860743): metadata
+                vendorInfoFromHal(info.vendorInfo)
         );
     }
 
@@ -260,10 +269,11 @@ class Convert {
     }
 
     static @NonNull ProgramList.Chunk programListChunkFromHal(@NonNull ProgramListChunk chunk) {
-        Set<RadioManager.ProgramInfo> modified = chunk.modified.stream().map(
-            info -> programInfoFromHal(info)).collect(Collectors.toSet());
-        Set<ProgramSelector.Identifier> removed = chunk.removed.stream().map(
-            id -> programIdentifierFromHal(id)).collect(Collectors.toSet());
+        Set<RadioManager.ProgramInfo> modified = chunk.modified.stream().
+                map(info -> programInfoFromHal(info)).collect(Collectors.toSet());
+        Set<ProgramSelector.Identifier> removed = chunk.removed.stream().
+                map(id -> Objects.requireNonNull(programIdentifierFromHal(id))).
+                collect(Collectors.toSet());
 
         return new ProgramList.Chunk(chunk.purge, chunk.complete, modified, removed);
     }
