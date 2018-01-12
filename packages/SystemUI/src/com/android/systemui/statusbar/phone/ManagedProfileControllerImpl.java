@@ -61,7 +61,7 @@ public class ManagedProfileControllerImpl implements ManagedProfileController {
     public void setWorkModeEnabled(boolean enableWorkMode) {
         synchronized (mProfiles) {
             for (UserInfo ui : mProfiles) {
-                if (!mUserManager.trySetQuietModeEnabled(!enableWorkMode, UserHandle.of(ui.id))) {
+                if (!mUserManager.requestQuietModeEnabled(!enableWorkMode, UserHandle.of(ui.id))) {
                     StatusBarManager statusBarManager = (StatusBarManager) mContext
                             .getSystemService(android.app.Service.STATUS_BAR_SERVICE);
                     statusBarManager.collapsePanels();
