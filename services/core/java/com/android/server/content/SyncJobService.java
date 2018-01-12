@@ -122,10 +122,12 @@ public class SyncJobService extends JobService {
 
             final long startUptime = mJobStartUptimes.get(jobId);
             final long nowUptime = SystemClock.uptimeMillis();
+            final long runtime = nowUptime - startUptime;
+
             if (startUptime == 0) {
                 wtf("Job " + jobId + " start uptime not found: "
                         + " params=" + jobParametersToString(params));
-            } else if ((nowUptime - startUptime) > 60 * 1000) {
+            } else if (runtime > 60 * 1000) {
                 // WTF if startSyncH() hasn't happened, *unless* onStopJob() was called too soon.
                 // (1 minute threshold.)
                 if (!mStartedSyncs.get(jobId)) {
@@ -134,6 +136,12 @@ public class SyncJobService extends JobService {
                             + " nowUptime=" + nowUptime
                             + " params=" + jobParametersToString(params));
                 }
+            } else if (runtime < 10 * 1000) {
+                // Job stopped too soon. WTF.
+                wtf("Job " + jobId + " stopped in " + runtime + " ms: "
+                        + " startUptime=" + startUptime
+                        + " nowUptime=" + nowUptime
+                        + " params=" + jobParametersToString(params));
             }
 
             mStartedSyncs.delete(jobId);
@@ -183,6 +191,7 @@ public class SyncJobService extends JobService {
             return "job:null";
         } else {
             return "job:#" + params.getJobId() + ":"
+                    + "sr=[" + params.getStopReason() + "/" + params.getDebugStopReason() + "]:"
                     + SyncOperation.maybeCreateFromJobExtras(params.getExtras());
         }
     }

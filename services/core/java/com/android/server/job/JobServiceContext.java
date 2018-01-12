@@ -312,13 +312,14 @@ public final class JobServiceContext implements ServiceConnection {
         return mTimeoutElapsed;
     }
 
-    boolean timeoutIfExecutingLocked(String pkgName, int userId, boolean matchJobId, int jobId) {
+    boolean timeoutIfExecutingLocked(String pkgName, int userId, boolean matchJobId, int jobId,
+            String reason) {
         final JobStatus executing = getRunningJobLocked();
         if (executing != null && (userId == UserHandle.USER_ALL || userId == executing.getUserId())
                 && (pkgName == null || pkgName.equals(executing.getSourcePackageName()))
                 && (!matchJobId || jobId == executing.getJobId())) {
             if (mVerb == VERB_EXECUTING) {
-                mParams.setStopReason(JobParameters.REASON_TIMEOUT);
+                mParams.setStopReason(JobParameters.REASON_TIMEOUT, reason);
                 sendStopMessageLocked("force timeout from shell");
                 return true;
             }
@@ -537,7 +538,7 @@ public final class JobServiceContext implements ServiceConnection {
             }
             return;
         }
-        mParams.setStopReason(arg1);
+        mParams.setStopReason(arg1, debugReason);
         if (arg1 == JobParameters.REASON_PREEMPT) {
             mPreferredUid = mRunningJob != null ? mRunningJob.getUid() :
                     NO_PREFERRED_UID;
@@ -687,7 +688,7 @@ public final class JobServiceContext implements ServiceConnection {
                 // Not an error - client ran out of time.
                 Slog.i(TAG, "Client timed out while executing (no jobFinished received), " +
                         "sending onStop: " + getRunningJobNameLocked());
-                mParams.setStopReason(JobParameters.REASON_TIMEOUT);
+                mParams.setStopReason(JobParameters.REASON_TIMEOUT, "client timed out");
                 sendStopMessageLocked("timeout while executing");
                 break;
             default:
