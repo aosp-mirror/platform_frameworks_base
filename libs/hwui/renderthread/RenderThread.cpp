@@ -24,6 +24,7 @@
 #include "hwui/Bitmap.h"
 #include "pipeline/skia/SkiaOpenGLPipeline.h"
 #include "pipeline/skia/SkiaOpenGLReadback.h"
+#include "pipeline/skia/SkiaVulkanReadback.h"
 #include "pipeline/skia/SkiaVulkanPipeline.h"
 #include "renderstate/RenderState.h"
 #include "renderthread/OpenGLPipeline.h"
@@ -158,11 +159,10 @@ Readback& RenderThread::readback() {
                 mReadback = new OpenGLReadbackImpl(*this);
                 break;
             case RenderPipelineType::SkiaGL:
-            case RenderPipelineType::SkiaVulkan:
-                // It works to use the OpenGL pipeline for Vulkan but this is not
-                // ideal as it causes us to create an OpenGL context in addition
-                // to the Vulkan one.
                 mReadback = new skiapipeline::SkiaOpenGLReadback(*this);
+                break;
+            case RenderPipelineType::SkiaVulkan:
+                mReadback = new skiapipeline::SkiaVulkanReadback(*this);
                 break;
             default:
                 LOG_ALWAYS_FATAL("canvas context type %d not supported", (int32_t)renderType);
