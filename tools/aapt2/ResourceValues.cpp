@@ -507,17 +507,10 @@ void BinaryPrimitive::PrettyPrint(Printer* printer) const {
   }
 }
 
-Attribute::Attribute()
-    : type_mask(0u),
-      min_int(std::numeric_limits<int32_t>::min()),
-      max_int(std::numeric_limits<int32_t>::max()) {
-}
-
-Attribute::Attribute(bool w, uint32_t t)
+Attribute::Attribute(uint32_t t)
     : type_mask(t),
       min_int(std::numeric_limits<int32_t>::min()),
       max_int(std::numeric_limits<int32_t>::max()) {
-  weak_ = w;
 }
 
 std::ostream& operator<<(std::ostream& out, const Attribute::Symbol& s) {
@@ -566,6 +559,20 @@ bool Attribute::Equals(const Value* value) const {
                     [](const Symbol* a, const Symbol* b) -> bool {
                       return a->symbol.Equals(&b->symbol) && a->value == b->value;
                     });
+}
+
+bool Attribute::IsCompatibleWith(const Attribute& attr) const {
+  // If the high bits are set on any of these attribute type masks, then they are incompatible.
+  // We don't check that flags and enums are identical.
+  if ((type_mask & ~android::ResTable_map::TYPE_ANY) != 0 ||
+      (attr.type_mask & ~android::ResTable_map::TYPE_ANY) != 0) {
+    return false;
+  }
+
+  // Every attribute accepts a reference.
+  uint32_t this_type_mask = type_mask | android::ResTable_map::TYPE_REFERENCE;
+  uint32_t that_type_mask = attr.type_mask | android::ResTable_map::TYPE_REFERENCE;
+  return this_type_mask == that_type_mask;
 }
 
 Attribute* Attribute::Clone(StringPool* /*new_pool*/) const {

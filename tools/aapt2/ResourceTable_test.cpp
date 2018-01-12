@@ -102,21 +102,35 @@ TEST(ResourceTableTest, AddMultipleResources) {
 TEST(ResourceTableTest, OverrideWeakResourceValue) {
   ResourceTable table;
 
-  ASSERT_TRUE(table.AddResource(
-      test::ParseNameOrDie("android:attr/foo"), ConfigDescription{}, "",
-      util::make_unique<Attribute>(true), test::GetDiagnostics()));
+  ASSERT_TRUE(table.AddResource(test::ParseNameOrDie("android:attr/foo"), ConfigDescription{}, "",
+                                test::AttributeBuilder().SetWeak(true).Build(),
+                                test::GetDiagnostics()));
 
   Attribute* attr = test::GetValue<Attribute>(&table, "android:attr/foo");
   ASSERT_THAT(attr, NotNull());
   EXPECT_TRUE(attr->IsWeak());
 
-  ASSERT_TRUE(table.AddResource(
-      test::ParseNameOrDie("android:attr/foo"), ConfigDescription{}, "",
-      util::make_unique<Attribute>(false), test::GetDiagnostics()));
+  ASSERT_TRUE(table.AddResource(test::ParseNameOrDie("android:attr/foo"), ConfigDescription{}, "",
+                                util::make_unique<Attribute>(), test::GetDiagnostics()));
 
   attr = test::GetValue<Attribute>(&table, "android:attr/foo");
   ASSERT_THAT(attr, NotNull());
   EXPECT_FALSE(attr->IsWeak());
+}
+
+TEST(ResourceTableTest, AllowCompatibleDuplicateAttributes) {
+  ResourceTable table;
+
+  const ResourceName name = test::ParseNameOrDie("android:attr/foo");
+  Attribute attr_one(android::ResTable_map::TYPE_STRING);
+  attr_one.SetWeak(true);
+  Attribute attr_two(android::ResTable_map::TYPE_STRING | android::ResTable_map::TYPE_REFERENCE);
+  attr_two.SetWeak(true);
+
+  ASSERT_TRUE(table.AddResource(name, ConfigDescription{}, "",
+                                util::make_unique<Attribute>(attr_one), test::GetDiagnostics()));
+  ASSERT_TRUE(table.AddResource(name, ConfigDescription{}, "",
+                                util::make_unique<Attribute>(attr_two), test::GetDiagnostics()));
 }
 
 TEST(ResourceTableTest, ProductVaryingValues) {

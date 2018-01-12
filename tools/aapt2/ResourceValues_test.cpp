@@ -24,6 +24,18 @@ using ::testing::StrEq;
 
 namespace aapt {
 
+namespace {
+
+// Attribute types.
+constexpr const uint32_t TYPE_DIMENSION = android::ResTable_map::TYPE_DIMENSION;
+constexpr const uint32_t TYPE_ENUM = android::ResTable_map::TYPE_ENUM;
+constexpr const uint32_t TYPE_FLAGS = android::ResTable_map::TYPE_FLAGS;
+constexpr const uint32_t TYPE_INTEGER = android::ResTable_map::TYPE_INTEGER;
+constexpr const uint32_t TYPE_REFERENCE = android::Res_value::TYPE_REFERENCE;
+constexpr const uint32_t TYPE_STRING = android::ResTable_map::TYPE_STRING;
+
+}  // namespace
+
 TEST(ResourceValuesTest, PluralEquals) {
   StringPool pool;
 
@@ -206,23 +218,19 @@ TEST(ResourcesValuesTest, EmptyReferenceFlattens) {
   android::Res_value value = {};
   ASSERT_TRUE(Reference().Flatten(&value));
 
-  EXPECT_EQ(android::Res_value::TYPE_REFERENCE, value.dataType);
-  EXPECT_EQ(0x0u, value.data);
+  EXPECT_THAT(value.dataType, Eq(android::Res_value::TYPE_REFERENCE));
+  EXPECT_THAT(value.data, Eq(0u));
 }
 
 TEST(ResourcesValuesTest, AttributeMatches) {
-  constexpr const uint32_t TYPE_DIMENSION = android::ResTable_map::TYPE_DIMENSION;
-  constexpr const uint32_t TYPE_ENUM = android::ResTable_map::TYPE_ENUM;
-  constexpr const uint32_t TYPE_FLAGS = android::ResTable_map::TYPE_FLAGS;
-  constexpr const uint32_t TYPE_INTEGER = android::ResTable_map::TYPE_INTEGER;
   constexpr const uint8_t TYPE_INT_DEC = android::Res_value::TYPE_INT_DEC;
 
-  Attribute attr1(false /*weak*/, TYPE_DIMENSION);
+  Attribute attr1(TYPE_DIMENSION);
   EXPECT_FALSE(attr1.Matches(*ResourceUtils::TryParseColor("#7fff00")));
   EXPECT_TRUE(attr1.Matches(*ResourceUtils::TryParseFloat("23dp")));
   EXPECT_TRUE(attr1.Matches(*ResourceUtils::TryParseReference("@android:string/foo")));
 
-  Attribute attr2(false /*weak*/, TYPE_INTEGER | TYPE_ENUM);
+  Attribute attr2(TYPE_INTEGER | TYPE_ENUM);
   attr2.min_int = 0;
   attr2.symbols.push_back(Attribute::Symbol{Reference(test::ParseNameOrDie("android:id/foo")),
                                             static_cast<uint32_t>(-1)});
@@ -231,7 +239,7 @@ TEST(ResourcesValuesTest, AttributeMatches) {
   EXPECT_TRUE(attr2.Matches(BinaryPrimitive(TYPE_INT_DEC, 1u)));
   EXPECT_FALSE(attr2.Matches(BinaryPrimitive(TYPE_INT_DEC, static_cast<uint32_t>(-2))));
 
-  Attribute attr3(false /*weak*/, TYPE_INTEGER | TYPE_FLAGS);
+  Attribute attr3(TYPE_INTEGER | TYPE_FLAGS);
   attr3.max_int = 100;
   attr3.symbols.push_back(
       Attribute::Symbol{Reference(test::ParseNameOrDie("android:id/foo")), 0x01u});
@@ -251,11 +259,33 @@ TEST(ResourcesValuesTest, AttributeMatches) {
   // Not a flag and greater than max_int.
   EXPECT_FALSE(attr3.Matches(BinaryPrimitive(TYPE_INT_DEC, 127u)));
 
-  Attribute attr4(false /*weak*/, TYPE_ENUM);
+  Attribute attr4(TYPE_ENUM);
   attr4.symbols.push_back(
       Attribute::Symbol{Reference(test::ParseNameOrDie("android:id/foo")), 0x01u});
   EXPECT_TRUE(attr4.Matches(BinaryPrimitive(TYPE_INT_DEC, 0x01u)));
   EXPECT_FALSE(attr4.Matches(BinaryPrimitive(TYPE_INT_DEC, 0x02u)));
+}
+
+TEST(ResourcesValuesTest, AttributeIsCompatible) {
+  Attribute attr_one(TYPE_STRING | TYPE_REFERENCE);
+  Attribute attr_two(TYPE_STRING);
+  Attribute attr_three(TYPE_ENUM);
+  Attribute attr_four(TYPE_REFERENCE);
+
+  EXPECT_TRUE(attr_one.IsCompatibleWith(attr_one));
+  EXPECT_TRUE(attr_one.IsCompatibleWith(attr_two));
+  EXPECT_FALSE(attr_one.IsCompatibleWith(attr_three));
+  EXPECT_FALSE(attr_one.IsCompatibleWith(attr_four));
+
+  EXPECT_TRUE(attr_two.IsCompatibleWith(attr_one));
+  EXPECT_TRUE(attr_two.IsCompatibleWith(attr_two));
+  EXPECT_FALSE(attr_two.IsCompatibleWith(attr_three));
+  EXPECT_FALSE(attr_two.IsCompatibleWith(attr_four));
+
+  EXPECT_FALSE(attr_three.IsCompatibleWith(attr_one));
+  EXPECT_FALSE(attr_three.IsCompatibleWith(attr_two));
+  EXPECT_FALSE(attr_three.IsCompatibleWith(attr_three));
+  EXPECT_FALSE(attr_three.IsCompatibleWith(attr_four));
 }
 
 } // namespace aapt
