@@ -267,8 +267,15 @@ public class WifiConfiguration implements Parcelable {
     public static final int AP_BAND_5GHZ = 1;
 
     /**
+     * Device is allowed to choose the optimal band (2Ghz or 5Ghz) based on device capability,
+     * operating country code and current radio conditions.
+     * @hide
+     */
+    public static final int AP_BAND_ANY = -1;
+
+    /**
      * The band which AP resides on
-     * 0-2G  1-5G
+     * -1:Any 0:2G 1:5G
      * By default, 2G is chosen
      * @hide
      */
