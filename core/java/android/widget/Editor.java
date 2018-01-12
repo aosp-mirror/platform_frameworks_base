@@ -4632,7 +4632,7 @@ public class Editor {
             return 0;
         }
 
-        protected final void showMagnifier() {
+        protected final void showMagnifier(@NonNull final MotionEvent event) {
             if (mMagnifier == null) {
                 return;
             }
@@ -4658,9 +4658,10 @@ public class Editor {
 
             final Layout layout = mTextView.getLayout();
             final int lineNumber = layout.getLineForOffset(offset);
-            // Horizontally snap to character offset.
-            final float xPosInView = getHorizontal(mTextView.getLayout(), offset)
-                    + mTextView.getTotalPaddingLeft() - mTextView.getScrollX();
+            // Horizontally move the magnifier smoothly.
+            final int[] textViewLocationOnScreen = new int[2];
+            mTextView.getLocationOnScreen(textViewLocationOnScreen);
+            final float xPosInView = event.getRawX() - textViewLocationOnScreen[0];
             // Vertically snap to middle of current line.
             final float yPosInView = (mTextView.getLayout().getLineTop(lineNumber)
                     + mTextView.getLayout().getLineBottom(lineNumber)) / 2.0f
@@ -4855,11 +4856,11 @@ public class Editor {
                 case MotionEvent.ACTION_DOWN:
                     mDownPositionX = ev.getRawX();
                     mDownPositionY = ev.getRawY();
-                    showMagnifier();
+                    showMagnifier(ev);
                     break;
 
                 case MotionEvent.ACTION_MOVE:
-                    showMagnifier();
+                    showMagnifier(ev);
                     break;
 
                 case MotionEvent.ACTION_UP:
@@ -5213,11 +5214,11 @@ public class Editor {
                     // re-engages the handle.
                     mTouchWordDelta = 0.0f;
                     mPrevX = UNSET_X_VALUE;
-                    showMagnifier();
+                    showMagnifier(event);
                     break;
 
                 case MotionEvent.ACTION_MOVE:
-                    showMagnifier();
+                    showMagnifier(event);
                     break;
 
                 case MotionEvent.ACTION_UP:
