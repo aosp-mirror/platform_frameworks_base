@@ -29,6 +29,23 @@ java_library {
     ],
 }
 
+// Build the android.test.runner-minus-junit library
+// =================================================
+// This is provided solely for use by the legacy-android-test module.
+java_library {
+    name: "android.test.runner-minus-junit",
+
+    srcs: ["src/android/**/*.java"],
+
+    no_framework_libs: true,
+    libs: [
+        "framework",
+        "legacy-test",
+        "android.test.mock",
+        "junit",
+    ],
+}
+
 // Build the repackaged.android.test.runner library
 // ================================================
 java_library_static {
