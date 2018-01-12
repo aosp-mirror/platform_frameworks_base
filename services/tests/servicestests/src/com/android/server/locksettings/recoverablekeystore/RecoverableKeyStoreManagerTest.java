@@ -78,6 +78,7 @@ import javax.crypto.spec.SecretKeySpec;
 public class RecoverableKeyStoreManagerTest {
     private static final String DATABASE_FILE_NAME = "recoverablekeystore.db";
 
+    private static final String ROOT_CERTIFICATE_ALIAS = "put_default_alias_here";
     private static final String TEST_SESSION_ID = "karlin";
     private static final byte[] TEST_PUBLIC_KEY = new byte[] {
         (byte) 0x30, (byte) 0x59, (byte) 0x30, (byte) 0x13, (byte) 0x06, (byte) 0x07, (byte) 0x2a,
@@ -206,15 +207,37 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
-    public void removeKey_UpdatesShouldCreateSnapshot() throws Exception {
+    public void removeKey_updatesShouldCreateSnapshot() throws Exception {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
-
         mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS);
         // Pretend that key was synced
         mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
 
         mRecoverableKeyStoreManager.removeKey(TEST_ALIAS);
+
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
+    }
+
+    @Test
+    public void removeKey_failureDoesNotUpdateShouldCreateSnapshot() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
+        // Key did not exist
+        mRecoverableKeyStoreManager.removeKey(TEST_ALIAS);
+
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isFalse();
+    }
+
+    @Test
+    public void initRecoveryService_updatesShouldCreateSnapshot() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        // Sync is not needed.
+        mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
+
+        mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS, TEST_PUBLIC_KEY);
 
         assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
     }
@@ -446,6 +469,20 @@ public class RecoverableKeyStoreManagerTest {
         mRecoverableKeyStoreManager.setRecoverySecretTypes(types3);
         assertThat(mRecoverableKeyStoreManager.getRecoverySecretTypes()).isEqualTo(
                 types3);
+    }
+
+    @Test
+    public void setRecoverySecretTypes_updatesShouldCreateSnapshot() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        int[] types = new int[]{1, 2, 3};
+
+        mRecoverableKeyStoreManager.generateAndStoreKey(TEST_ALIAS);
+        // Pretend that key was synced
+        mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
+        mRecoverableKeyStoreManager.setRecoverySecretTypes(types);
+
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
     }
 
     @Test

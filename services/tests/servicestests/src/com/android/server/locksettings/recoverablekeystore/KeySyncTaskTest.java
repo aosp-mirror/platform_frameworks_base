@@ -355,11 +355,11 @@ public class KeySyncTaskTest {
 
         KeyStoreRecoveryData recoveryData = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
         assertThat(recoveryData.getRecoveryMetadata()).hasSize(1);
-        assertThat(recoveryData.getRecoveryMetadata().get(1).getLockScreenUiFormat()).
+        assertThat(recoveryData.getRecoveryMetadata().get(0).getLockScreenUiFormat()).
                 isEqualTo(TYPE_PASSWORD);
     }
 
-   @Test
+    @Test
     public void run_setsCorrectTypeForPin() throws Exception {
         mKeySyncTask = new KeySyncTask(
                 mRecoverableKeyStoreDb,
@@ -382,7 +382,7 @@ public class KeySyncTaskTest {
         KeyStoreRecoveryData recoveryData = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
         assertThat(recoveryData.getRecoveryMetadata()).hasSize(1);
         // Password with only digits is changed to pin.
-        assertThat(recoveryData.getRecoveryMetadata().get(1).getLockScreenUiFormat()).
+        assertThat(recoveryData.getRecoveryMetadata().get(0).getLockScreenUiFormat()).
                 isEqualTo(TYPE_PIN);
     }
 
@@ -408,7 +408,7 @@ public class KeySyncTaskTest {
 
         KeyStoreRecoveryData recoveryData = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
         assertThat(recoveryData.getRecoveryMetadata()).hasSize(1);
-        assertThat(recoveryData.getRecoveryMetadata().get(1).getLockScreenUiFormat()).
+        assertThat(recoveryData.getRecoveryMetadata().get(0).getLockScreenUiFormat()).
                 isEqualTo(TYPE_PATTERN);
     }
 
