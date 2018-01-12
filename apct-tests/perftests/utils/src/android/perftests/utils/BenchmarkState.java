@@ -25,7 +25,6 @@ import android.util.Log;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -78,46 +77,13 @@ public final class BenchmarkState {
 
     // Statistics. These values will be filled when the benchmark has finished.
     // The computation needs double precision, but long int is fine for final reporting.
-    private long mMedian = 0;
-    private double mMean = 0.0;
-    private double mStandardDeviation = 0.0;
-    private long mMin = 0;
+    private Stats mStats;
 
     // Individual duration in nano seconds.
     private ArrayList<Long> mResults = new ArrayList<>();
 
     private static final long ms2ns(long ms) {
         return TimeUnit.MILLISECONDS.toNanos(ms);
-    }
-
-    /**
-     * Calculates statistics.
-     */
-    private void calculateSatistics() {
-        final int size = mResults.size();
-        if (size <= 1) {
-            throw new IllegalStateException("At least two results are necessary.");
-        }
-
-        Collections.sort(mResults);
-        mMedian = size % 2 == 0 ? (mResults.get(size / 2) + mResults.get(size / 2 + 1)) / 2 :
-                mResults.get(size / 2);
-
-        mMin = mResults.get(0);
-        for (int i = 0; i < size; ++i) {
-            long result = mResults.get(i);
-            mMean += result;
-            if (result < mMin) {
-                mMin = result;
-            }
-        }
-        mMean /= (double) size;
-
-        for (int i = 0; i < size; ++i) {
-            final double tmp = mResults.get(i) - mMean;
-            mStandardDeviation += tmp * tmp;
-        }
-        mStandardDeviation = Math.sqrt(mStandardDeviation / (double) (size - 1));
     }
 
     // Stops the benchmark timer.
@@ -173,7 +139,7 @@ public final class BenchmarkState {
             if (ENABLE_PROFILING) {
                 Debug.stopMethodTracing();
             }
-            calculateSatistics();
+            mStats = new Stats(mResults);
             mState = FINISHED;
             return false;
         }
@@ -224,28 +190,28 @@ public final class BenchmarkState {
         if (mState != FINISHED) {
             throw new IllegalStateException("The benchmark hasn't finished");
         }
-        return (long) mMean;
+        return (long) mStats.getMean();
     }
 
     private long median() {
         if (mState != FINISHED) {
             throw new IllegalStateException("The benchmark hasn't finished");
         }
-        return mMedian;
+        return mStats.getMedian();
     }
 
     private long min() {
         if (mState != FINISHED) {
             throw new IllegalStateException("The benchmark hasn't finished");
         }
-        return mMin;
+        return mStats.getMin();
     }
 
     private long standardDeviation() {
         if (mState != FINISHED) {
             throw new IllegalStateException("The benchmark hasn't finished");
         }
-        return (long) mStandardDeviation;
+        return (long) mStats.getStandardDeviation();
     }
 
     private String summaryLine() {
