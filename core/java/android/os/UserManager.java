@@ -2209,6 +2209,12 @@ public class UserManager {
         }
     }
 
+    /** @removed */
+    @Deprecated
+    public boolean trySetQuietModeEnabled(boolean enableQuietMode, @NonNull UserHandle userHandle) {
+        return requestQuietModeEnabled(enableQuietMode, userHandle);
+    }
+
     /**
      * Enables or disables quiet mode for a managed profile. If quiet mode is enabled, apps in a
      * managed profile don't run, generate notifications, or consume data or battery.
@@ -2234,22 +2240,22 @@ public class UserManager {
      *
      * @see #isQuietModeEnabled(UserHandle)
      */
-    public boolean trySetQuietModeEnabled(boolean enableQuietMode, @NonNull UserHandle userHandle) {
-        return trySetQuietModeEnabled(enableQuietMode, userHandle, null);
+    public boolean requestQuietModeEnabled(boolean enableQuietMode, @NonNull UserHandle userHandle) {
+        return requestQuietModeEnabled(enableQuietMode, userHandle, null);
     }
 
     /**
-     * Similar to {@link #trySetQuietModeEnabled(boolean, UserHandle)}, except you can specify
+     * Similar to {@link #requestQuietModeEnabled(boolean, UserHandle)}, except you can specify
      * a target to start when user is unlocked. If {@code target} is specified, caller must have
      * the {@link android.Manifest.permission#MANAGE_USERS} permission.
      *
-     * @see {@link #trySetQuietModeEnabled(boolean, UserHandle)}
+     * @see {@link #requestQuietModeEnabled(boolean, UserHandle)}
      * @hide
      */
-    public boolean trySetQuietModeEnabled(
+    public boolean requestQuietModeEnabled(
             boolean enableQuietMode, @NonNull UserHandle userHandle, IntentSender target) {
         try {
-            return mService.trySetQuietModeEnabled(
+            return mService.requestQuietModeEnabled(
                     mContext.getPackageName(), enableQuietMode, userHandle.getIdentifier(), target);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
