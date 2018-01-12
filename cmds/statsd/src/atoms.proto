@@ -1088,14 +1088,10 @@ message IsolatedUidChanged {
 
 /**
  * Pulls Cpu time per frequency.
- * Note: this should be pulled for gauge metric only, without condition.
- * The puller keeps internal state of last values. It should not be pulled by
- * different metrics.
- * The pulled data is delta of cpu time from last pull, calculated as
- * following:
- * if current time is larger than last value, take delta between the two.
- * if current time is smaller than last value, there must be a cpu
- * hotplug event, and the current time is taken as delta.
+ * Pulls the time the cpu spend on the frequency index. Frequency index
+ * starts from highest to lowest. The value should be monotonically
+ * increasing since boot. However, if there is a cpu
+ * hotplug event, the value would be reset as well.
  */
 message CpuTimePerFreq {
     optional uint32 cluster = 1;
