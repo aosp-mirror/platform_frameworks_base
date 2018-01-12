@@ -30,10 +30,10 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include "external/ResourcePowerManagerPuller.h"
+#include "external/SubsystemSleepStatePuller.h"
 #include "external/StatsPuller.h"
 
-#include "ResourcePowerManagerPuller.h"
+#include "SubsystemSleepStatePuller.h"
 #include "logd/LogEvent.h"
 #include "statslog.h"
 
@@ -73,10 +73,10 @@ bool getPowerHal() {
     return gPowerHalV1_0 != nullptr;
 }
 
-ResourcePowerManagerPuller::ResourcePowerManagerPuller(int tagId) : StatsPuller(tagId) {
+SubsystemSleepStatePuller::SubsystemSleepStatePuller() : StatsPuller(android::util::SUBSYSTEM_SLEEP_STATE) {
 }
 
-bool ResourcePowerManagerPuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
+bool SubsystemSleepStatePuller::PullInternal(vector<shared_ptr<LogEvent>>* data) {
     std::lock_guard<std::mutex> lock(gPowerHalMutex);
 
     if (!getPowerHal()) {
@@ -89,8 +89,6 @@ bool ResourcePowerManagerPuller::PullInternal(vector<shared_ptr<LogEvent>>* data
     data->clear();
 
     Return<void> ret;
-    if (mTagId == android::util::PLATFORM_SLEEP_STATE ||
-        mTagId == android::util::SLEEP_STATE_VOTER) {
         ret = gPowerHalV1_0->getPlatformLowPowerStats(
                 [&data, timestamp](hidl_vec<PowerStatePlatformSleepState> states, Status status) {
                     if (status != Status::SUCCESS) return;
@@ -98,12 +96,11 @@ bool ResourcePowerManagerPuller::PullInternal(vector<shared_ptr<LogEvent>>* data
                     for (size_t i = 0; i < states.size(); i++) {
                         const PowerStatePlatformSleepState& state = states[i];
 
-                        auto statePtr = make_shared<LogEvent>(android::util::PLATFORM_SLEEP_STATE,
+                        auto statePtr = make_shared<LogEvent>(android::util::SUBSYSTEM_SLEEP_STATE,
                                                               timestamp);
                         statePtr->write(state.name);
-                        statePtr->write(state.residencyInMsecSinceBoot);
                         statePtr->write(state.totalTransitions);
-                        statePtr->write(state.supportedOnlyInSuspend);
+                        statePtr->write(state.residencyInMsecSinceBoot);
                         statePtr->init();
                         data->push_back(statePtr);
                         VLOG("powerstate: %s, %lld, %lld, %d", state.name.c_str(),
@@ -111,12 +108,11 @@ bool ResourcePowerManagerPuller::PullInternal(vector<shared_ptr<LogEvent>>* data
                              (long long)state.totalTransitions,
                              state.supportedOnlyInSuspend ? 1 : 0);
                         for (auto voter : state.voters) {
-                            auto voterPtr = make_shared<LogEvent>(android::util::SLEEP_STATE_VOTER,
+                            auto voterPtr = make_shared<LogEvent>(android::util::SUBSYSTEM_SLEEP_STATE,
                                                                   timestamp);
-                            voterPtr->write(state.name);
-                            voterPtr->write(voter.name);
-                            voterPtr->write(voter.totalTimeInMsecVotedForSinceBoot);
+                            voterPtr->write((std::string)state.name + "." + (std::string)voter.name);
                             voterPtr->write(voter.totalNumberOfTimesVotedSinceBoot);
+                            voterPtr->write(voter.totalTimeInMsecVotedForSinceBoot);
                             voterPtr->init();
                             data->push_back(voterPtr);
                             VLOG("powerstatevoter: %s, %s, %lld, %lld", state.name.c_str(),
@@ -131,9 +127,7 @@ bool ResourcePowerManagerPuller::PullInternal(vector<shared_ptr<LogEvent>>* data
             gPowerHalV1_0 = nullptr;
             return false;
         }
-    }
 
-    if (mTagId == android::util::SUBSYSTEM_SLEEP_STATE) {
         // Trying to cast to IPower 1.1, this will succeed only for devices supporting 1.1
         sp<android::hardware::power::V1_1::IPower> gPowerHal_1_1 =
                 android::hardware::power::V1_1::IPower::castFrom(gPowerHalV1_0);
@@ -149,13 +143,10 @@ bool ResourcePowerManagerPuller::PullInternal(vector<shared_ptr<LogEvent>>* data
                                     const PowerStateSubsystemSleepState& state =
                                             subsystem.states[j];
                                     auto subsystemStatePtr = make_shared<LogEvent>(
-                                            android::util::SUBSYSTEM_SLEEP_STATE, timestamp);
-                                    subsystemStatePtr->write(subsystem.name);
-                                    subsystemStatePtr->write(state.name);
-                                    subsystemStatePtr->write(state.residencyInMsecSinceBoot);
+                                        android::util::SUBSYSTEM_SLEEP_STATE, timestamp);
+                                    subsystemStatePtr->write((std::string)subsystem.name + "." + (std::string)state.name);
                                     subsystemStatePtr->write(state.totalTransitions);
-                                    subsystemStatePtr->write(state.lastEntryTimestampMs);
-                                    subsystemStatePtr->write(state.supportedOnlyInSuspend);
+                                    subsystemStatePtr->write(state.residencyInMsecSinceBoot);
                                     subsystemStatePtr->init();
                                     data->push_back(subsystemStatePtr);
                                     VLOG("subsystemstate: %s, %s, %lld, %lld, %lld",
@@ -168,7 +159,6 @@ bool ResourcePowerManagerPuller::PullInternal(vector<shared_ptr<LogEvent>>* data
                         }
                     });
         }
-    }
     return true;
 }
 
