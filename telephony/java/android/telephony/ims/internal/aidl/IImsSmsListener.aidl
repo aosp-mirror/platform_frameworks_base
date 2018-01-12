@@ -21,7 +21,8 @@ package android.telephony.ims.internal.aidl;
  * {@hide}
  */
 interface IImsSmsListener {
-    void onSendSmsResult(in int messageRef, in int status, in int reason);
-    void onSmsStatusReportReceived(in int messageRef, in String format, in byte[] pdu);
-    void onSmsReceived(in String format, in byte[] pdu);
+    void onSendSmsResult(in int token, in int messageRef, in int status, in int reason);
+    void onSmsStatusReportReceived(in int token, in int messageRef, in String format,
+            in byte[] pdu);
+    void onSmsReceived(in int token, in String format, in byte[] pdu);
 }
