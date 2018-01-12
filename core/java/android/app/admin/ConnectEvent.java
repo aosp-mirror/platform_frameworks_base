@@ -68,7 +68,7 @@ public final class ConnectEvent extends NetworkEvent implements Parcelable {
 
     @Override
     public String toString() {
-        return String.format("ConnectEvent(%s, %d, %d, %s)", mIpAddress, mPort, mTimestamp,
+        return String.format("ConnectEvent(%d, %s, %d, %d, %s)", mId, mIpAddress, mPort, mTimestamp,
                 mPackageName);
     }
 
