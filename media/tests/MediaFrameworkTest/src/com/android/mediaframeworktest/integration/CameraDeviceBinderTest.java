@@ -197,7 +197,7 @@ public class CameraDeviceBinderTest extends AndroidTestCase {
         assertFalse(metadata.isEmpty());
 
         CaptureRequest.Builder request = new CaptureRequest.Builder(metadata, /*reprocess*/false,
-                CameraCaptureSession.SESSION_ID_NONE);
+                CameraCaptureSession.SESSION_ID_NONE, mCameraId, /*physicalCameraIdSet*/null);
         assertFalse(request.isEmpty());
         assertFalse(metadata.isEmpty());
         if (needStream) {

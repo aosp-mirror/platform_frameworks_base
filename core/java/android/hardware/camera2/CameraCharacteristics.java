@@ -173,6 +173,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     private List<CameraCharacteristics.Key<?>> mKeys;
     private List<CaptureRequest.Key<?>> mAvailableRequestKeys;
     private List<CaptureRequest.Key<?>> mAvailableSessionKeys;
+    private List<CaptureRequest.Key<?>> mAvailablePhysicalRequestKeys;
     private List<CaptureResult.Key<?>> mAvailableResultKeys;
 
     /**
@@ -313,6 +314,45 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
                     getAvailableKeyList(CaptureRequest.class, crKeyTyped, filterTags);
         }
         return mAvailableSessionKeys;
+    }
+
+    /**
+     * <p>Returns a subset of {@link #getAvailableCaptureRequestKeys} keys that can
+     * be overriden for physical devices backing a logical multi-camera.</p>
+     *
+     * <p>This is a subset of android.request.availableRequestKeys which contains a list
+     * of keys that can be overriden using {@link CaptureRequest.Builder#setPhysicalCameraKey }.
+     * The respective value of such request key can be obtained by calling
+     * {@link CaptureRequest.Builder#getPhysicalCameraKey }. Capture requests that contain
+     * individual physical device requests must be built via
+     * {@link android.hardware.camera2.CameraDevice#createCaptureRequest(int, Set)}.
+     * Such extended capture requests can be passed only to
+     * {@link CameraCaptureSession#capture } or {@link CameraCaptureSession#captureBurst } and
+     * not to {@link CameraCaptureSession#setRepeatingRequest } or
+     * {@link CameraCaptureSession#setRepeatingBurst }.</p>
+     *
+     * <p>The list returned is not modifiable, so any attempts to modify it will throw
+     * a {@code UnsupportedOperationException}.</p>
+     *
+     * <p>Each key is only listed once in the list. The order of the keys is undefined.</p>
+     *
+     * @return List of keys that can be overriden in individual physical device requests.
+     * In case the camera device doesn't support such keys the list can be null.
+     */
+    @SuppressWarnings({"unchecked"})
+    public List<CaptureRequest.Key<?>> getAvailablePhysicalCameraRequestKeys() {
+        if (mAvailableSessionKeys == null) {
+            Object crKey = CaptureRequest.Key.class;
+            Class<CaptureRequest.Key<?>> crKeyTyped = (Class<CaptureRequest.Key<?>>)crKey;
+
+            int[] filterTags = get(REQUEST_AVAILABLE_PHYSICAL_CAMERA_REQUEST_KEYS);
+            if (filterTags == null) {
+                return null;
+            }
+            mAvailablePhysicalRequestKeys =
+                    getAvailableKeyList(CaptureRequest.class, crKeyTyped, filterTags);
+        }
+        return mAvailablePhysicalRequestKeys;
     }
 
     /**
@@ -1744,6 +1784,30 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     public static final Key<int[]> REQUEST_AVAILABLE_SESSION_KEYS =
             new Key<int[]>("android.request.availableSessionKeys", int[].class);
+
+    /**
+     * <p>A subset of the available request keys that can be overriden for
+     * physical devices backing a logical multi-camera.</p>
+     * <p>This is a subset of android.request.availableRequestKeys which contains a list
+     * of keys that can be overriden using {@link CaptureRequest.Builder#setPhysicalCameraKey }.
+     * The respective value of such request key can be obtained by calling
+     * {@link CaptureRequest.Builder#getPhysicalCameraKey }. Capture requests that contain
+     * individual physical device requests must be built via
+     * {@link android.hardware.camera2.CameraDevice#createCaptureRequest(int, Set)}.
+     * Such extended capture requests can be passed only to
+     * {@link CameraCaptureSession#capture } or {@link CameraCaptureSession#captureBurst } and
+     * not to {@link CameraCaptureSession#setRepeatingRequest } or
+     * {@link CameraCaptureSession#setRepeatingBurst }.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @hide
+     */
+    public static final Key<int[]> REQUEST_AVAILABLE_PHYSICAL_CAMERA_REQUEST_KEYS =
+            new Key<int[]>("android.request.availablePhysicalCameraRequestKeys", int[].class);
 
     /**
      * <p>The list of image formats that are supported by this
