@@ -351,7 +351,7 @@ public class ImsCallProfile implements Parcelable {
         mServiceType = in.readInt();
         mCallType = in.readInt();
         mCallExtras = in.readBundle();
-        mMediaProfile = in.readParcelable(null);
+        mMediaProfile = in.readParcelable(ImsStreamMediaProfile.class.getClassLoader());
     }
 
     public static final Creator<ImsCallProfile> CREATOR = new Creator<ImsCallProfile>() {
