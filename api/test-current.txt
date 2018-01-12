@@ -483,6 +483,7 @@ package android.provider {
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
+    field public static final java.lang.String LOW_POWER_MODE = "low_power";
     field public static final java.lang.String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
   }
 
