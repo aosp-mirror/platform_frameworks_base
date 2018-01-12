@@ -6001,34 +6001,6 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    public void noteWifiMulticastEnabledFromSourceLocked(WorkSource ws) {
-        int N = ws.size();
-        for (int i=0; i<N; i++) {
-            noteWifiMulticastEnabledLocked(ws.get(i));
-        }
-
-        final List<WorkChain> workChains = ws.getWorkChains();
-        if (workChains != null) {
-            for (int i = 0; i < workChains.size(); ++i) {
-                noteWifiMulticastEnabledLocked(workChains.get(i).getAttributionUid());
-            }
-        }
-    }
-
-    public void noteWifiMulticastDisabledFromSourceLocked(WorkSource ws) {
-        int N = ws.size();
-        for (int i=0; i<N; i++) {
-            noteWifiMulticastDisabledLocked(ws.get(i));
-        }
-
-        final List<WorkChain> workChains = ws.getWorkChains();
-        if (workChains != null) {
-            for (int i = 0; i < workChains.size(); ++i) {
-                noteWifiMulticastDisabledLocked(workChains.get(i).getAttributionUid());
-            }
-        }
-    }
-
     private static String[] includeInStringArray(String[] array, String str) {
         if (ArrayUtils.indexOf(array, str) >= 0) {
             return array;

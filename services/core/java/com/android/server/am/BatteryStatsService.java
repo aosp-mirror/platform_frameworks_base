@@ -933,21 +933,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    public void noteWifiMulticastEnabledFromSource(WorkSource ws) {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteWifiMulticastEnabledFromSourceLocked(ws);
-        }
-    }
-
-    @Override
-    public void noteWifiMulticastDisabledFromSource(WorkSource ws) {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteWifiMulticastDisabledFromSourceLocked(ws);
-        }
-    }
-
     @Override
     public void noteNetworkInterfaceType(String iface, int networkType) {
         enforceCallingPermission();
