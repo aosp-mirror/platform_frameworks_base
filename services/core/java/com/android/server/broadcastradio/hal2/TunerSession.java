@@ -212,7 +212,7 @@ class TunerSession extends ITuner.Stub {
             MutableInt halResult = new MutableInt(Result.UNKNOWN_ERROR);
             MutableBoolean flagState = new MutableBoolean(false);
             try {
-                mHwSession.getConfigFlag(flag, (int result, boolean value) -> {
+                mHwSession.isConfigFlagSet(flag, (int result, boolean value) -> {
                     halResult.value = result;
                     flagState.value = value;
                 });
