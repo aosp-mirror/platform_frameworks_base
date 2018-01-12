@@ -71,6 +71,8 @@ final class SharedPreferencesImpl implements SharedPreferences {
 
     @GuardedBy("mLock")
     private Map<String, Object> mMap;
+    @GuardedBy("mLock")
+    private Throwable mThrowable;
 
     @GuardedBy("mLock")
     private int mDiskWritesInFlight = 0;
@@ -107,6 +109,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         mMode = mode;
         mLoaded = false;
         mMap = null;
+        mThrowable = null;
         startLoadFromDisk();
     }
 
@@ -139,13 +142,14 @@ final class SharedPreferencesImpl implements SharedPreferences {
 
         Map<String, Object> map = null;
         StructStat stat = null;
+        Throwable thrown = null;
         try {
             stat = Os.stat(mFile.getPath());
             if (mFile.canRead()) {
                 BufferedInputStream str = null;
                 try {
                     str = new BufferedInputStream(
-                            new FileInputStream(mFile), 16*1024);
+                            new FileInputStream(mFile), 16 * 1024);
                     map = (Map<String, Object>) XmlUtils.readMapXml(str);
                 } catch (Exception e) {
                     Log.w(TAG, "Cannot read " + mFile.getAbsolutePath(), e);
@@ -154,19 +158,36 @@ final class SharedPreferencesImpl implements SharedPreferences {
                 }
             }
         } catch (ErrnoException e) {
-            /* ignore */
+            // An errno exception means the stat failed. Treat as empty/non-existing by
+            // ignoring.
+        } catch (Throwable t) {
+            thrown = t;
         }
 
         synchronized (mLock) {
             mLoaded = true;
-            if (map != null) {
-                mMap = map;
-                mStatTimestamp = stat.st_mtim;
-                mStatSize = stat.st_size;
-            } else {
-                mMap = new HashMap<>();
+            mThrowable = thrown;
+
+            // It's important that we always signal waiters, even if we'll make
+            // them fail with an exception. The try-finally is pretty wide, but
+            // better safe than sorry.
+            try {
+                if (thrown == null) {
+                    if (map != null) {
+                        mMap = map;
+                        mStatTimestamp = stat.st_mtim;
+                        mStatSize = stat.st_size;
+                    } else {
+                        mMap = new HashMap<>();
+                    }
+                }
+                // In case of a thrown exception, we retain the old map. That allows
+                // any open editors to commit and store updates.
+            } catch (Throwable t) {
+                mThrowable = t;
+            } finally {
+                mLock.notifyAll();
             }
-            mLock.notifyAll();
         }
     }
 
@@ -226,6 +247,7 @@ final class SharedPreferencesImpl implements SharedPreferences {
         }
     }
 
+    @GuardedBy("mLock")
     private void awaitLoadedLocked() {
         if (!mLoaded) {
             // Raise an explicit StrictMode onReadFromDisk for this
@@ -238,6 +260,9 @@ final class SharedPreferencesImpl implements SharedPreferences {
                 mLock.wait();
             } catch (InterruptedException unused) {
             }
+        }
+        if (mThrowable != null) {
+            throw new IllegalStateException(mThrowable);
         }
     }
 
