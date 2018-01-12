@@ -1739,6 +1739,27 @@ package android.hardware.location {
 
 package android.hardware.radio {
 
+  public final class Announcement implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.hardware.radio.ProgramSelector getSelector();
+    method public int getType();
+    method public java.util.Map<java.lang.String, java.lang.String> getVendorInfo();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.hardware.radio.Announcement> CREATOR;
+    field public static final int TYPE_EMERGENCY = 1; // 0x1
+    field public static final int TYPE_EVENT = 6; // 0x6
+    field public static final int TYPE_MISC = 8; // 0x8
+    field public static final int TYPE_NEWS = 5; // 0x5
+    field public static final int TYPE_SPORT = 7; // 0x7
+    field public static final int TYPE_TRAFFIC = 3; // 0x3
+    field public static final int TYPE_WARNING = 2; // 0x2
+    field public static final int TYPE_WEATHER = 4; // 0x4
+  }
+
+  public static abstract interface Announcement.OnListUpdatedListener {
+    method public abstract void onListUpdated(java.util.Collection<android.hardware.radio.Announcement>);
+  }
+
   public final class ProgramList implements java.lang.AutoCloseable {
     method public void addOnCompleteListener(java.util.concurrent.Executor, android.hardware.radio.ProgramList.OnCompleteListener);
     method public void addOnCompleteListener(android.hardware.radio.ProgramList.OnCompleteListener);
@@ -1833,8 +1854,11 @@ package android.hardware.radio {
   }
 
   public class RadioManager {
+    method public void addAnnouncementListener(java.util.Set<java.lang.Integer>, android.hardware.radio.Announcement.OnListUpdatedListener);
+    method public void addAnnouncementListener(java.util.concurrent.Executor, java.util.Set<java.lang.Integer>, android.hardware.radio.Announcement.OnListUpdatedListener);
     method public int listModules(java.util.List<android.hardware.radio.RadioManager.ModuleProperties>);
     method public android.hardware.radio.RadioTuner openTuner(int, android.hardware.radio.RadioManager.BandConfig, boolean, android.hardware.radio.RadioTuner.Callback, android.os.Handler);
+    method public void removeAnnouncementListener(android.hardware.radio.Announcement.OnListUpdatedListener);
     field public static final int BAND_AM = 0; // 0x0
     field public static final int BAND_AM_HD = 3; // 0x3
     field public static final int BAND_FM = 1; // 0x1

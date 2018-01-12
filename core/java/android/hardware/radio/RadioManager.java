@@ -17,6 +17,7 @@
 package android.hardware.radio;
 
 import android.Manifest;
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
@@ -40,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 /**
@@ -1711,6 +1713,68 @@ public class RadioManager {
         }
         return new TunerAdapter(tuner, halCallback,
                 config != null ? config.getType() : BAND_INVALID);
+    }
+
+    private final Map<Announcement.OnListUpdatedListener, ICloseHandle> mAnnouncementListeners =
+            new HashMap<>();
+
+    /**
+     * Adds new announcement listener.
+     *
+     * @param enabledAnnouncementTypes a set of announcement types to listen to
+     * @param listener announcement listener
+     */
+    @RequiresPermission(Manifest.permission.ACCESS_BROADCAST_RADIO)
+    public void addAnnouncementListener(@NonNull Set<Integer> enabledAnnouncementTypes,
+            @NonNull Announcement.OnListUpdatedListener listener) {
+        addAnnouncementListener(cmd -> cmd.run(), enabledAnnouncementTypes, listener);
+    }
+
+    /**
+     * Adds new announcement listener with executor.
+     *
+     * @param executor the executor
+     * @param enabledAnnouncementTypes a set of announcement types to listen to
+     * @param listener announcement listener
+     */
+    @RequiresPermission(Manifest.permission.ACCESS_BROADCAST_RADIO)
+    public void addAnnouncementListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull Set<Integer> enabledAnnouncementTypes,
+            @NonNull Announcement.OnListUpdatedListener listener) {
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(listener);
+        int[] types = enabledAnnouncementTypes.stream().mapToInt(Integer::intValue).toArray();
+        IAnnouncementListener listenerIface = new IAnnouncementListener.Stub() {
+            public void onListUpdated(List<Announcement> activeAnnouncements) {
+                executor.execute(() -> listener.onListUpdated(activeAnnouncements));
+            }
+        };
+        synchronized (mAnnouncementListeners) {
+            ICloseHandle closeHandle = null;
+            try {
+                closeHandle = mService.addAnnouncementListener(types, listenerIface);
+            } catch (RemoteException ex) {
+                ex.rethrowFromSystemServer();
+            }
+            Objects.requireNonNull(closeHandle);
+            ICloseHandle oldCloseHandle = mAnnouncementListeners.put(listener, closeHandle);
+            if (oldCloseHandle != null) Utils.close(oldCloseHandle);
+        }
+    }
+
+    /**
+     * Removes previously registered announcement listener.
+     *
+     * @param listener announcement listener, previously registered with
+     *        {@link addAnnouncementListener}
+     */
+    @RequiresPermission(Manifest.permission.ACCESS_BROADCAST_RADIO)
+    public void removeAnnouncementListener(@NonNull Announcement.OnListUpdatedListener listener) {
+        Objects.requireNonNull(listener);
+        synchronized (mAnnouncementListeners) {
+            ICloseHandle closeHandle = mAnnouncementListeners.remove(listener);
+            if (closeHandle != null) Utils.close(closeHandle);
+        }
     }
 
     @NonNull private final Context mContext;

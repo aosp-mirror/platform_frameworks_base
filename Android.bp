@@ -177,6 +177,8 @@ java_library {
         "core/java/android/hardware/location/IContextHubClientCallback.aidl",
         "core/java/android/hardware/location/IContextHubService.aidl",
         "core/java/android/hardware/location/IContextHubTransactionCallback.aidl",
+        "core/java/android/hardware/radio/IAnnouncementListener.aidl",
+        "core/java/android/hardware/radio/ICloseHandle.aidl",
         "core/java/android/hardware/radio/IRadioService.aidl",
         "core/java/android/hardware/radio/ITuner.aidl",
         "core/java/android/hardware/radio/ITunerCallback.aidl",

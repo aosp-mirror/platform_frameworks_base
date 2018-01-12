@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.broadcastradio.V2_0.AmFmBandRange;
 import android.hardware.broadcastradio.V2_0.AmFmRegionConfig;
+import android.hardware.broadcastradio.V2_0.Announcement;
 import android.hardware.broadcastradio.V2_0.ProgramFilter;
 import android.hardware.broadcastradio.V2_0.ProgramIdentifier;
 import android.hardware.broadcastradio.V2_0.ProgramInfo;
@@ -265,5 +266,14 @@ class Convert {
             id -> programIdentifierFromHal(id)).collect(Collectors.toSet());
 
         return new ProgramList.Chunk(chunk.purge, chunk.complete, modified, removed);
+    }
+
+    public static @NonNull android.hardware.radio.Announcement announcementFromHal(
+            @NonNull Announcement hwAnnouncement) {
+        return new android.hardware.radio.Announcement(
+            programSelectorFromHal(hwAnnouncement.selector),
+            hwAnnouncement.type,
+            vendorInfoFromHal(hwAnnouncement.vendorInfo)
+        );
     }
 }
