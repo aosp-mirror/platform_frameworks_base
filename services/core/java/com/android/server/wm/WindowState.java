@@ -4488,6 +4488,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         // Leash is now responsible for position, so set our position to 0.
         t.setPosition(mSurfaceControl, 0, 0);
+        mLastSurfacePosition.set(0, 0);
     }
 
     @Override
@@ -4503,8 +4504,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         transformFrameToSurfacePosition(mFrame.left, mFrame.top, mSurfacePosition);
-        if (!mSurfaceAnimator.hasLeash()) {
+        if (!mSurfaceAnimator.hasLeash() && !mLastSurfacePosition.equals(mSurfacePosition)) {
             t.setPosition(mSurfaceControl, mSurfacePosition.x, mSurfacePosition.y);
+            mLastSurfacePosition.set(mSurfacePosition.x, mSurfacePosition.y);
         }
     }
 

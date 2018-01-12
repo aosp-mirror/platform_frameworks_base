@@ -86,7 +86,6 @@ import static com.android.server.wm.WindowManagerService.H.WINDOW_FREEZE_TIMEOUT
 import static com.android.server.wm.WindowManagerService.logSurface;
 import static com.android.server.wm.WindowSurfacePlacer.SET_FORCE_HIDING_CHANGED;
 import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
-import static com.android.server.wm.WindowSurfacePlacer.SET_TURN_ON_SCREEN;
 import static com.android.server.wm.WindowSurfacePlacer.SET_UPDATE_ROTATION;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_ACTION_PENDING;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_MAY_CHANGE;
@@ -968,9 +967,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 doRequest = true;
             }
         }
-        if ((bulkUpdateParams & SET_TURN_ON_SCREEN) != 0) {
-            mService.mTurnOnScreen = true;
-        }
+
         if ((bulkUpdateParams & SET_WALLPAPER_ACTION_PENDING) != 0) {
             mWallpaperActionPending = true;
         }

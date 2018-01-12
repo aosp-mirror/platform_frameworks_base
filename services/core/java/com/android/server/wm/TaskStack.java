@@ -49,6 +49,7 @@ import static com.android.server.wm.proto.StackProto.WINDOW_CONTAINER;
 
 import android.annotation.CallSuper;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.RemoteException;
@@ -150,6 +151,7 @@ public class TaskStack extends WindowContainer<Task> implements
      * For {@link #prepareSurfaces}.
      */
     final Rect mTmpDimBoundsRect = new Rect();
+    private final Point mLastSurfaceSize = new Point();
 
     TaskStack(WindowManagerService service, int stackId, StackWindowController controller) {
         super(service);
@@ -749,7 +751,13 @@ public class TaskStack extends WindowContainer<Task> implements
         }
 
         final Rect stackBounds = getBounds();
-        transaction.setSize(mSurfaceControl, stackBounds.width(), stackBounds.height());
+        final int width = stackBounds.width();
+        final int height = stackBounds.height();
+        if (width == mLastSurfaceSize.x && height == mLastSurfaceSize.y) {
+            return;
+        }
+        transaction.setSize(mSurfaceControl, width, height);
+        mLastSurfaceSize.set(width, height);
     }
 
     @Override

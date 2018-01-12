@@ -41,7 +41,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
 import static com.android.server.wm.WindowManagerService.logWithStack;
 import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
-import static com.android.server.wm.WindowSurfacePlacer.SET_TURN_ON_SCREEN;
 import static com.android.server.wm.proto.WindowStateAnimatorProto.DRAW_STATE;
 import static com.android.server.wm.proto.WindowStateAnimatorProto.LAST_CLIP_RECT;
 import static com.android.server.wm.proto.WindowStateAnimatorProto.SURFACE;
@@ -1165,7 +1164,7 @@ class WindowStateAnimator {
                     // potentially occurring while turning off the screen. This would lead to the
                     // screen incorrectly turning back on.
                     if (!mService.mPowerManager.isInteractive()) {
-                        mAnimator.mBulkUpdateParams |= SET_TURN_ON_SCREEN;
+                        mService.mTurnOnScreen = true;
                     }
                 }
             }

@@ -95,6 +95,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     protected final WindowManagerService mService;
 
     private final Point mTmpPos = new Point();
+    protected final Point mLastSurfacePosition = new Point();
 
     /** Total number of elements in this subtree, including our own hierarchy element. */
     private int mTreeWeight = 1;
@@ -1179,7 +1180,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
 
         getRelativePosition(mTmpPos);
+        if (mTmpPos.equals(mLastSurfacePosition)) {
+            return;
+        }
+
         transaction.setPosition(mSurfaceControl, mTmpPos.x, mTmpPos.y);
+        mLastSurfacePosition.set(mTmpPos.x, mTmpPos.y);
 
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             mChildren.get(i).updateSurfacePosition(transaction);
