@@ -10058,6 +10058,7 @@ public final class Settings {
          * If 1 low power mode is enabled.
          * @hide
          */
+        @TestApi
         public static final String LOW_POWER_MODE = "low_power";
 
         /**
