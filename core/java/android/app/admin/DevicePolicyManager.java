@@ -18,7 +18,6 @@ package android.app.admin;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
-import android.annotation.Condemned;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -50,8 +49,6 @@ import android.graphics.Bitmap;
 import android.net.ProxyInfo;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.Process;
@@ -8926,15 +8923,6 @@ public class DevicePolicyManager {
         }
     }
 
-    /** {@hide} */
-    @Condemned
-    @Deprecated
-    public boolean clearApplicationUserData(@NonNull ComponentName admin,
-            @NonNull String packageName, @NonNull OnClearApplicationUserDataListener listener,
-            @NonNull Handler handler) {
-        return clearApplicationUserData(admin, packageName, listener, new HandlerExecutor(handler));
-    }
-
     /**
      * Called by the device owner or profile owner to clear application user data of a given
      * package. The behaviour of this is equivalent to the target application calling
@@ -8945,14 +8933,14 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageName The name of the package which will have its user data wiped.
-     * @param listener A callback object that will inform the caller when the clearing is done.
      * @param executor The executor through which the listener should be invoked.
+     * @param listener A callback object that will inform the caller when the clearing is done.
      * @throws SecurityException if the caller is not the device owner/profile owner.
      * @return whether the clearing succeeded.
      */
     public boolean clearApplicationUserData(@NonNull ComponentName admin,
-            @NonNull String packageName, @NonNull OnClearApplicationUserDataListener listener,
-            @NonNull @CallbackExecutor Executor executor) {
+            @NonNull String packageName, @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnClearApplicationUserDataListener listener) {
         throwIfParentInstance("clearAppData");
         Preconditions.checkNotNull(executor);
         try {
