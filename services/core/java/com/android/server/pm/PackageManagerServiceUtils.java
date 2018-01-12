@@ -33,10 +33,12 @@ import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.PackageDexUsage;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AppGlobals;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
+import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
 import android.os.Build;
@@ -45,6 +47,7 @@ import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.service.pm.PackageServiceDumpProto;
 import android.system.ErrnoException;
@@ -547,13 +550,46 @@ public class PackageManagerServiceUtils {
     }
 
     /**
+     * Make sure the updated priv app is signed with the same key as the original APK file on the
+     * /system partition.
+     *
+     * <p>The rationale is that {@code disabledPkg} is a PackageSetting backed by xml files in /data
+     * and is not tamperproof.
+     */
+    private static boolean matchSignatureInSystem(PackageSetting pkgSetting,
+            PackageSetting disabledPkgSetting) {
+        try {
+            PackageParser.collectCertificates(disabledPkgSetting.pkg,
+                    PackageParser.PARSE_IS_SYSTEM_DIR);
+            if (compareSignatures(pkgSetting.signatures.mSignatures,
+                        disabledPkgSetting.signatures.mSignatures)
+                    != PackageManager.SIGNATURE_MATCH) {
+                logCriticalInfo(Log.ERROR, "Updated system app mismatches cert on /system: " +
+                        pkgSetting.name);
+                return false;
+            }
+        } catch (PackageParserException e) {
+            logCriticalInfo(Log.ERROR, "Failed to collect cert for " + pkgSetting.name + ": " +
+                    e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    /** Returns true to force apk verification if the updated package (in /data) is a priv app. */
+    static boolean isApkVerificationForced(@Nullable PackageSetting disabledPs) {
+        return disabledPs != null && disabledPs.isPrivileged() &&
+                SystemProperties.getInt("ro.apk_verity.mode", 0) != 0;
+    }
+
+    /**
      * Verifies that signatures match.
      * @returns {@code true} if the compat signatures were matched; otherwise, {@code false}.
      * @throws PackageManagerException if the signatures did not match.
      */
     public static boolean verifySignatures(PackageSetting pkgSetting,
-            PackageParser.SigningDetails parsedSignatures, boolean compareCompat,
-            boolean compareRecover)
+            PackageSetting disabledPkgSetting, PackageParser.SigningDetails parsedSignatures,
+            boolean compareCompat, boolean compareRecover)
             throws PackageManagerException {
         final String packageName = pkgSetting.name;
         boolean compatMatch = false;
@@ -572,6 +608,11 @@ public class PackageManagerServiceUtils {
                         packageName, pkgSetting.signatures.mSignatures,
                         parsedSignatures.signatures);
             }
+
+            if (!match && isApkVerificationForced(disabledPkgSetting)) {
+                match = matchSignatureInSystem(pkgSetting, disabledPkgSetting);
+            }
+
             if (!match) {
                 throw new PackageManagerException(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
                         "Package " + packageName +
