@@ -9653,6 +9653,17 @@ public final class Settings {
         public static final String ALWAYS_ON_DISPLAY_CONSTANTS = "always_on_display_constants";
 
         /**
+        * System VDSO global setting. This links to the "sys.vdso" system property.
+        * The following values are supported:
+        * false  -> both 32 and 64 bit vdso disabled
+        * 32     -> 32 bit vdso enabled
+        * 64     -> 64 bit vdso enabled
+        * Any other value defaults to both 32 bit and 64 bit true.
+        * @hide
+        */
+        public static final String SYS_VDSO = "sys_vdso";
+
+        /**
          * App standby (app idle) specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          * <p>

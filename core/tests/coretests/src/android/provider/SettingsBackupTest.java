@@ -350,6 +350,7 @@ public class SettingsBackupTest {
                     Settings.Global.SYS_STORAGE_FULL_THRESHOLD_BYTES,
                     Settings.Global.SYS_STORAGE_THRESHOLD_MAX_BYTES,
                     Settings.Global.SYS_STORAGE_THRESHOLD_PERCENTAGE,
+                    Settings.Global.SYS_VDSO,
                     Settings.Global.TCP_DEFAULT_INIT_RWND,
                     Settings.Global.TETHER_DUN_APN,
                     Settings.Global.TETHER_DUN_REQUIRED,
