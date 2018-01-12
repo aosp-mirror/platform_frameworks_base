@@ -16,11 +16,11 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import static android.security.recoverablekeystore.KeyStoreRecoveryMetadata.TYPE_LOCKSCREEN;
+import static android.security.keystore.RecoveryMetadata.TYPE_LOCKSCREEN;
 
-import static android.security.recoverablekeystore.KeyStoreRecoveryMetadata.TYPE_PASSWORD;
-import static android.security.recoverablekeystore.KeyStoreRecoveryMetadata.TYPE_PATTERN;
-import static android.security.recoverablekeystore.KeyStoreRecoveryMetadata.TYPE_PIN;
+import static android.security.keystore.RecoveryMetadata.TYPE_PASSWORD;
+import static android.security.keystore.RecoveryMetadata.TYPE_PATTERN;
+import static android.security.keystore.RecoveryMetadata.TYPE_PIN;
 
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
@@ -40,9 +40,9 @@ import android.content.Context;
 import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
-import android.security.recoverablekeystore.KeyDerivationParameters;
-import android.security.recoverablekeystore.KeyEntryRecoveryData;
-import android.security.recoverablekeystore.KeyStoreRecoveryData;
+import android.security.keystore.KeyDerivationParameters;
+import android.security.keystore.EntryRecoveryData;
+import android.security.keystore.RecoveryData;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -275,7 +275,6 @@ public class KeySyncTaskTest {
 
     @Test
     public void run_sendsEncryptedKeysIfAvailableToSync() throws Exception {
-
         mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
@@ -283,7 +282,7 @@ public class KeySyncTaskTest {
                 addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
         mKeySyncTask.run();
 
-        KeyStoreRecoveryData recoveryData = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
+        RecoveryData recoveryData = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
         KeyDerivationParameters keyDerivationParameters =
                 recoveryData.getRecoveryMetadata().get(0).getKeyDerivationParameters();
         assertThat(keyDerivationParameters.getAlgorithm()).isEqualTo(
@@ -302,9 +301,9 @@ public class KeySyncTaskTest {
                         counterId,
                         /*maxAttempts=*/ 10,
                         TEST_DEVICE_ID));
-        List<KeyEntryRecoveryData> applicationKeys = recoveryData.getApplicationKeyBlobs();
+        List<EntryRecoveryData> applicationKeys = recoveryData.getEntryRecoveryData();
         assertThat(applicationKeys).hasSize(1);
-        KeyEntryRecoveryData keyData = applicationKeys.get(0);
+        EntryRecoveryData keyData = applicationKeys.get(0);
         assertEquals(TEST_APP_KEY_ALIAS, keyData.getAlias());
         assertThat(keyData.getAlias()).isEqualTo(keyData.getAlias());
         byte[] appKey = KeySyncUtils.decryptApplicationKey(
@@ -314,7 +313,6 @@ public class KeySyncTaskTest {
 
     @Test
     public void run_setsCorrectSnapshotVersion() throws Exception {
-
         mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
@@ -323,7 +321,7 @@ public class KeySyncTaskTest {
 
         mKeySyncTask.run();
 
-        KeyStoreRecoveryData recoveryData = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
+        RecoveryData recoveryData = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
         assertThat(recoveryData.getSnapshotVersion()).isEqualTo(1); // default value;
         mRecoverableKeyStoreDb.setShouldCreateSnapshot(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, true);
 
@@ -353,13 +351,13 @@ public class KeySyncTaskTest {
 
         mKeySyncTask.run();
 
-        KeyStoreRecoveryData recoveryData = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
+        RecoveryData recoveryData = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
         assertThat(recoveryData.getRecoveryMetadata()).hasSize(1);
         assertThat(recoveryData.getRecoveryMetadata().get(0).getLockScreenUiFormat()).
                 isEqualTo(TYPE_PASSWORD);
     }
 
-    @Test
+   @Test
     public void run_setsCorrectTypeForPin() throws Exception {
         mKeySyncTask = new KeySyncTask(
                 mRecoverableKeyStoreDb,
@@ -379,7 +377,7 @@ public class KeySyncTaskTest {
 
         mKeySyncTask.run();
 
-        KeyStoreRecoveryData recoveryData = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
+        RecoveryData recoveryData = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
         assertThat(recoveryData.getRecoveryMetadata()).hasSize(1);
         // Password with only digits is changed to pin.
         assertThat(recoveryData.getRecoveryMetadata().get(0).getLockScreenUiFormat()).
@@ -406,7 +404,7 @@ public class KeySyncTaskTest {
 
         mKeySyncTask.run();
 
-        KeyStoreRecoveryData recoveryData = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
+        RecoveryData recoveryData = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
         assertThat(recoveryData.getRecoveryMetadata()).hasSize(1);
         assertThat(recoveryData.getRecoveryMetadata().get(0).getLockScreenUiFormat()).
                 isEqualTo(TYPE_PATTERN);
@@ -431,10 +429,10 @@ public class KeySyncTaskTest {
     @Test
     public void run_sendsEncryptedKeysOnlyForAgentWhichActiveUserSecretType() throws Exception {
         mRecoverableKeyStoreDb.setRecoverySecretTypes(TEST_USER_ID, TEST_RECOVERY_AGENT_UID,
-                new int[] {TYPE_LOCKSCREEN, 100});
+                new int[] {TYPE_LOCKSCREEN, 1000});
         // Snapshot will not be created during unlock event.
         mRecoverableKeyStoreDb.setRecoverySecretTypes(TEST_USER_ID, TEST_RECOVERY_AGENT_UID2,
-                new int[] {100});
+                new int[] {1000});
 
         mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());

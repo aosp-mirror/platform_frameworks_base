@@ -16,32 +16,28 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import static android.security.recoverablekeystore.RecoverableKeyStoreLoader
-        .ERROR_BAD_X509_CERTIFICATE;
-import static android.security.recoverablekeystore.RecoverableKeyStoreLoader.ERROR_DATABASE_ERROR;
-import static android.security.recoverablekeystore.RecoverableKeyStoreLoader
-        .ERROR_DECRYPTION_FAILED;
-import static android.security.recoverablekeystore.RecoverableKeyStoreLoader.ERROR_INSECURE_USER;
-import static android.security.recoverablekeystore.RecoverableKeyStoreLoader
-        .ERROR_KEYSTORE_INTERNAL_ERROR;
-import static android.security.recoverablekeystore.RecoverableKeyStoreLoader
-        .ERROR_NOT_YET_SUPPORTED;
-import static android.security.recoverablekeystore.RecoverableKeyStoreLoader
-        .ERROR_UNEXPECTED_MISSING_ALGORITHM;
+import static android.security.keystore.RecoveryManager.ERROR_BAD_X509_CERTIFICATE;
+import static android.security.keystore.RecoveryManager.ERROR_DATABASE_ERROR;
+import static android.security.keystore.RecoveryManager.ERROR_DECRYPTION_FAILED;
+import static android.security.keystore.RecoveryManager.ERROR_INSECURE_USER;
+import static android.security.keystore.RecoveryManager.ERROR_KEYSTORE_INTERNAL_ERROR;
+import static android.security.keystore.RecoveryManager.ERROR_NOT_YET_SUPPORTED;
+import static android.security.keystore.RecoveryManager.ERROR_UNEXPECTED_MISSING_ALGORITHM;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.Manifest;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 
-import android.security.recoverablekeystore.KeyEntryRecoveryData;
-import android.security.recoverablekeystore.KeyStoreRecoveryData;
-import android.security.recoverablekeystore.KeyStoreRecoveryMetadata;
-import android.security.recoverablekeystore.RecoverableKeyStoreLoader;
+import android.security.keystore.EntryRecoveryData;
+import android.security.keystore.RecoveryData;
+import android.security.keystore.RecoveryMetadata;
+import android.security.keystore.RecoveryManager;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -69,7 +65,7 @@ import java.util.concurrent.Executors;
 import javax.crypto.AEADBadTagException;
 
 /**
- * Class with {@link RecoverableKeyStoreLoader} API implementation and internal methods to interact
+ * Class with {@link RecoveryManager} API implementation and internal methods to interact
  * with {@code LockSettingsService}.
  *
  * @hide
@@ -175,13 +171,13 @@ public class RecoverableKeyStoreManager {
      * @return recovery data
      * @hide
      */
-    public @NonNull KeyStoreRecoveryData getRecoveryData(@NonNull byte[] account)
+    public @NonNull RecoveryData getRecoveryData(@NonNull byte[] account)
             throws RemoteException {
         checkRecoverKeyStorePermission();
         int uid = Binder.getCallingUid();
-        KeyStoreRecoveryData snapshot = mSnapshotStorage.get(uid);
+        RecoveryData snapshot = mSnapshotStorage.get(uid);
         if (snapshot == null) {
-            throw new ServiceSpecificException(RecoverableKeyStoreLoader.ERROR_NO_SNAPSHOT_PENDING);
+            throw new ServiceSpecificException(RecoveryManager.ERROR_NO_SNAPSHOT_PENDING);
         }
         return snapshot;
     }
@@ -261,7 +257,7 @@ public class RecoverableKeyStoreManager {
      * @hide
      */
     public void setRecoverySecretTypes(
-            @NonNull @KeyStoreRecoveryMetadata.UserSecretType int[] secretTypes)
+            @NonNull @RecoveryMetadata.UserSecretType int[] secretTypes)
             throws RemoteException {
         checkRecoverKeyStorePermission();
         int userId = UserHandle.getCallingUserId();
@@ -285,7 +281,7 @@ public class RecoverableKeyStoreManager {
     }
 
     /**
-     * Gets secret types RecoverableKeyStoreLoaders is waiting for to create new Recovery Data.
+     * Gets secret types RecoveryManagers is waiting for to create new Recovery Data.
      *
      * @return secret types
      * @hide
@@ -296,9 +292,9 @@ public class RecoverableKeyStoreManager {
     }
 
     public void recoverySecretAvailable(
-            @NonNull KeyStoreRecoveryMetadata recoverySecret) throws RemoteException {
+            @NonNull RecoveryMetadata recoverySecret) throws RemoteException {
         int uid = Binder.getCallingUid();
-        if (recoverySecret.getLockScreenUiFormat() == KeyStoreRecoveryMetadata.TYPE_LOCKSCREEN) {
+        if (recoverySecret.getLockScreenUiFormat() == RecoveryMetadata.TYPE_LOCKSCREEN) {
             throw new SecurityException(
                     "Caller " + uid + " is not allowed to set lock screen secret");
         }
@@ -324,7 +320,7 @@ public class RecoverableKeyStoreManager {
             @NonNull byte[] verifierPublicKey,
             @NonNull byte[] vaultParams,
             @NonNull byte[] vaultChallenge,
-            @NonNull List<KeyStoreRecoveryMetadata> secrets)
+            @NonNull List<RecoveryMetadata> secrets)
             throws RemoteException {
         checkRecoverKeyStorePermission();
         int uid = Binder.getCallingUid();
@@ -333,7 +329,7 @@ public class RecoverableKeyStoreManager {
             // TODO: support multiple secrets
             throw new ServiceSpecificException(
                     ERROR_NOT_YET_SUPPORTED,
-                    "Only a single KeyStoreRecoveryMetadata is supported");
+                    "Only a single RecoveryMetadata is supported");
         }
 
         PublicKey publicKey;
@@ -391,7 +387,7 @@ public class RecoverableKeyStoreManager {
     public Map<String, byte[]> recoverKeys(
             @NonNull String sessionId,
             @NonNull byte[] encryptedRecoveryKey,
-            @NonNull List<KeyEntryRecoveryData> applicationKeys)
+            @NonNull List<EntryRecoveryData> applicationKeys)
             throws RemoteException {
         checkRecoverKeyStorePermission();
         int uid = Binder.getCallingUid();
@@ -481,9 +477,9 @@ public class RecoverableKeyStoreManager {
      */
     private Map<String, byte[]> recoverApplicationKeys(
             @NonNull byte[] recoveryKey,
-            @NonNull List<KeyEntryRecoveryData> applicationKeys) throws RemoteException {
+            @NonNull List<EntryRecoveryData> applicationKeys) throws RemoteException {
         HashMap<String, byte[]> keyMaterialByAlias = new HashMap<>();
-        for (KeyEntryRecoveryData applicationKey : applicationKeys) {
+        for (EntryRecoveryData applicationKey : applicationKeys) {
             String alias = applicationKey.getAlias();
             byte[] encryptedKeyMaterial = applicationKey.getEncryptedKeyMaterial();
 
@@ -567,7 +563,7 @@ public class RecoverableKeyStoreManager {
 
     private void checkRecoverKeyStorePermission() {
         mContext.enforceCallingOrSelfPermission(
-                RecoverableKeyStoreLoader.PERMISSION_RECOVER_KEYSTORE,
+                Manifest.permission.RECOVER_KEYSTORE,
                 "Caller " + Binder.getCallingUid() + " doesn't have RecoverKeyStore permission.");
     }
 

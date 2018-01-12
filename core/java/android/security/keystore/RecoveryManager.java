@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.security.recoverablekeystore;
+package android.security.keystore;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -37,9 +37,7 @@ import java.util.Map;
  *
  * @hide
  */
-public class RecoverableKeyStoreLoader {
-
-    public static final String PERMISSION_RECOVER_KEYSTORE = "android.permission.RECOVER_KEYSTORE";
+public class RecoveryManager {
 
     public static final int NO_ERROR = KeyStore.NO_ERROR;
     public static final int SYSTEM_ERROR = KeyStore.SYSTEM_ERROR;
@@ -110,50 +108,50 @@ public class RecoverableKeyStoreLoader {
 
     private final ILockSettings mBinder;
 
-    private RecoverableKeyStoreLoader(ILockSettings binder) {
+    private RecoveryManager(ILockSettings binder) {
         mBinder = binder;
     }
 
-    /** @hide */
-    public static RecoverableKeyStoreLoader getInstance() {
+    /**
+     * Gets a new instance of the class.
+     */
+    public static RecoveryManager getInstance() {
         ILockSettings lockSettings =
                 ILockSettings.Stub.asInterface(ServiceManager.getService("lock_settings"));
-        return new RecoverableKeyStoreLoader(lockSettings);
+        return new RecoveryManager(lockSettings);
     }
 
     /**
-     * Exceptions returned by {@link RecoverableKeyStoreLoader}.
-     *
-     * @hide
+     * Exceptions returned by {@link RecoveryManager}.
      */
-    public static class RecoverableKeyStoreLoaderException extends AndroidException {
+    public static class RecoveryManagerException extends AndroidException {
         private int mErrorCode;
 
         /**
-         * Creates new {@link #RecoverableKeyStoreLoaderException} instance from the error code.
+         * Creates new {@link #RecoveryManagerException} instance from the error code.
          *
          * @param errorCode An error code, as listed at the top of this file.
          * @param message The associated error message.
          * @hide
          */
-        public static RecoverableKeyStoreLoaderException fromErrorCode(
+        public static RecoveryManagerException fromErrorCode(
                 int errorCode, String message) {
-            return new RecoverableKeyStoreLoaderException(errorCode, message);
+            return new RecoveryManagerException(errorCode, message);
         }
 
         /**
-         * Creates new {@link #RecoverableKeyStoreLoaderException} from {@link
+         * Creates new {@link #RecoveryManagerException} from {@link
          * ServiceSpecificException}.
          *
          * @param e exception thrown on service side.
          * @hide
          */
-        static RecoverableKeyStoreLoaderException fromServiceSpecificException(
-                ServiceSpecificException e) throws RecoverableKeyStoreLoaderException {
-            throw RecoverableKeyStoreLoaderException.fromErrorCode(e.errorCode, e.getMessage());
+        static RecoveryManagerException fromServiceSpecificException(
+                ServiceSpecificException e) throws RecoveryManagerException {
+            throw RecoveryManagerException.fromErrorCode(e.errorCode, e.getMessage());
         }
 
-        private RecoverableKeyStoreLoaderException(int errorCode, String message) {
+        private RecoveryManagerException(int errorCode, String message) {
             super(message);
             mErrorCode = errorCode;
         }
@@ -165,32 +163,32 @@ public class RecoverableKeyStoreLoader {
     }
 
     /**
-     * Initializes key recovery service for the calling application. RecoverableKeyStoreLoader
+     * Initializes key recovery service for the calling application. RecoveryManager
      * randomly chooses one of the keys from the list and keeps it to use for future key export
      * operations. Collection of all keys in the list must be signed by the provided {@code
      * rootCertificateAlias}, which must also be present in the list of root certificates
-     * preinstalled on the device. The random selection allows RecoverableKeyStoreLoader to select
+     * preinstalled on the device. The random selection allows RecoveryManager to select
      * which of a set of remote recovery service devices will be used.
      *
-     * <p>In addition, RecoverableKeyStoreLoader enforces a delay of three months between
+     * <p>In addition, RecoveryManager enforces a delay of three months between
      * consecutive initialization attempts, to limit the ability of an attacker to often switch
      * remote recovery devices and significantly increase number of recovery attempts.
      *
      * @param rootCertificateAlias alias of a root certificate preinstalled on the device
      * @param signedPublicKeyList binary blob a list of X509 certificates and signature
-     * @throws RecoverableKeyStoreLoaderException if signature is invalid, or key rotation was rate
+     * @throws RecoveryManagerException if signature is invalid, or key rotation was rate
      *     limited.
      * @hide
      */
     public void initRecoveryService(
             @NonNull String rootCertificateAlias, @NonNull byte[] signedPublicKeyList)
-            throws RecoverableKeyStoreLoaderException {
+            throws RecoveryManagerException {
         try {
             mBinder.initRecoveryService(rootCertificateAlias, signedPublicKeyList);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
-            throw RecoverableKeyStoreLoaderException.fromServiceSpecificException(e);
+            throw RecoveryManagerException.fromServiceSpecificException(e);
         }
     }
 
@@ -202,15 +200,15 @@ public class RecoverableKeyStoreLoader {
      * @return Data necessary to recover keystore.
      * @hide
      */
-    public @NonNull KeyStoreRecoveryData getRecoveryData(@NonNull byte[] account)
-            throws RecoverableKeyStoreLoaderException {
+    public @NonNull RecoveryData getRecoveryData(@NonNull byte[] account)
+            throws RecoveryManagerException {
         try {
-            KeyStoreRecoveryData recoveryData = mBinder.getRecoveryData(account);
+            RecoveryData recoveryData = mBinder.getRecoveryData(account);
             return recoveryData;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
-            throw RecoverableKeyStoreLoaderException.fromServiceSpecificException(e);
+            throw RecoveryManagerException.fromServiceSpecificException(e);
         }
     }
 
@@ -224,13 +222,13 @@ public class RecoverableKeyStoreLoader {
      * @hide
      */
     public void setSnapshotCreatedPendingIntent(@Nullable PendingIntent intent)
-            throws RecoverableKeyStoreLoaderException {
+            throws RecoveryManagerException {
         try {
             mBinder.setSnapshotCreatedPendingIntent(intent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
-            throw RecoverableKeyStoreLoaderException.fromServiceSpecificException(e);
+            throw RecoveryManagerException.fromServiceSpecificException(e);
         }
     }
 
@@ -239,11 +237,11 @@ public class RecoverableKeyStoreLoader {
      * version. Version zero is used, if no snapshots were created for the account.
      *
      * @return Map from recovery agent accounts to snapshot versions.
-     * @see KeyStoreRecoveryData#getSnapshotVersion
+     * @see RecoveryData#getSnapshotVersion
      * @hide
      */
     public @NonNull Map<byte[], Integer> getRecoverySnapshotVersions()
-            throws RecoverableKeyStoreLoaderException {
+            throws RecoveryManagerException {
         try {
             // IPC doesn't support generic Maps.
             @SuppressWarnings("unchecked")
@@ -253,28 +251,28 @@ public class RecoverableKeyStoreLoader {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
-            throw RecoverableKeyStoreLoaderException.fromServiceSpecificException(e);
+            throw RecoveryManagerException.fromServiceSpecificException(e);
         }
     }
 
     /**
      * Server parameters used to generate new recovery key blobs. This value will be included in
-     * {@code KeyStoreRecoveryData.getEncryptedRecoveryKeyBlob()}. The same value must be included
+     * {@code RecoveryData.getEncryptedRecoveryKeyBlob()}. The same value must be included
      * in vaultParams {@link #startRecoverySession}
      *
      * @param serverParameters included in recovery key blob.
      * @see #getRecoveryData
-     * @throws RecoverableKeyStoreLoaderException If parameters rotation is rate limited.
+     * @throws RecoveryManagerException If parameters rotation is rate limited.
      * @hide
      */
     public void setServerParameters(long serverParameters)
-            throws RecoverableKeyStoreLoaderException {
+            throws RecoveryManagerException {
         try {
             mBinder.setServerParameters(serverParameters);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
-            throw RecoverableKeyStoreLoaderException.fromServiceSpecificException(e);
+            throw RecoveryManagerException.fromServiceSpecificException(e);
         }
     }
 
@@ -290,13 +288,13 @@ public class RecoverableKeyStoreLoader {
      */
     public void setRecoveryStatus(
             @NonNull String packageName, @Nullable String[] aliases, int status)
-            throws NameNotFoundException, RecoverableKeyStoreLoaderException {
+            throws NameNotFoundException, RecoveryManagerException {
         try {
             mBinder.setRecoveryStatus(packageName, aliases, status);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
-            throw RecoverableKeyStoreLoaderException.fromServiceSpecificException(e);
+            throw RecoveryManagerException.fromServiceSpecificException(e);
         }
     }
 
@@ -318,7 +316,7 @@ public class RecoverableKeyStoreLoader {
      * @hide
      */
     public Map<String, Integer> getRecoveryStatus(@Nullable String packageName)
-            throws RecoverableKeyStoreLoaderException {
+            throws RecoveryManagerException {
         try {
             // IPC doesn't support generic Maps.
             @SuppressWarnings("unchecked")
@@ -329,7 +327,7 @@ public class RecoverableKeyStoreLoader {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
-            throw RecoverableKeyStoreLoaderException.fromServiceSpecificException(e);
+            throw RecoveryManagerException.fromServiceSpecificException(e);
         }
     }
 
@@ -337,36 +335,36 @@ public class RecoverableKeyStoreLoader {
      * Specifies a set of secret types used for end-to-end keystore encryption. Knowing all of them
      * is necessary to recover data.
      *
-     * @param secretTypes {@link KeyStoreRecoveryMetadata#TYPE_LOCKSCREEN} or {@link
-     *     KeyStoreRecoveryMetadata#TYPE_CUSTOM_PASSWORD}
+     * @param secretTypes {@link RecoveryMetadata#TYPE_LOCKSCREEN} or {@link
+     *     RecoveryMetadata#TYPE_CUSTOM_PASSWORD}
      */
     public void setRecoverySecretTypes(
-            @NonNull @KeyStoreRecoveryMetadata.UserSecretType int[] secretTypes)
-            throws RecoverableKeyStoreLoaderException {
+            @NonNull @RecoveryMetadata.UserSecretType int[] secretTypes)
+            throws RecoveryManagerException {
         try {
             mBinder.setRecoverySecretTypes(secretTypes);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
-            throw RecoverableKeyStoreLoaderException.fromServiceSpecificException(e);
+            throw RecoveryManagerException.fromServiceSpecificException(e);
         }
     }
 
     /**
      * Defines a set of secret types used for end-to-end keystore encryption. Knowing all of them is
-     * necessary to generate KeyStoreRecoveryData.
+     * necessary to generate RecoveryData.
      *
      * @return list of recovery secret types
-     * @see KeyStoreRecoveryData
+     * @see RecoveryData
      */
-    public @NonNull @KeyStoreRecoveryMetadata.UserSecretType int[] getRecoverySecretTypes()
-            throws RecoverableKeyStoreLoaderException {
+    public @NonNull @RecoveryMetadata.UserSecretType int[] getRecoverySecretTypes()
+            throws RecoveryManagerException {
         try {
             return mBinder.getRecoverySecretTypes();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
-            throw RecoverableKeyStoreLoaderException.fromServiceSpecificException(e);
+            throw RecoveryManagerException.fromServiceSpecificException(e);
         }
     }
 
@@ -376,35 +374,37 @@ public class RecoverableKeyStoreLoader {
      * called.
      *
      * @return list of recovery secret types
+     * @hide
      */
-    public @NonNull @KeyStoreRecoveryMetadata.UserSecretType int[] getPendingRecoverySecretTypes()
-            throws RecoverableKeyStoreLoaderException {
+    public @NonNull @RecoveryMetadata.UserSecretType int[] getPendingRecoverySecretTypes()
+            throws RecoveryManagerException {
         try {
             return mBinder.getPendingRecoverySecretTypes();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
-            throw RecoverableKeyStoreLoaderException.fromServiceSpecificException(e);
+            throw RecoveryManagerException.fromServiceSpecificException(e);
         }
     }
 
     /**
      * Method notifies KeyStore that a user-generated secret is available. This method generates a
      * symmetric session key which a trusted remote device can use to return a recovery key. Caller
-     * should use {@link KeyStoreRecoveryMetadata#clearSecret} to override the secret value in
+     * should use {@link RecoveryMetadata#clearSecret} to override the secret value in
      * memory.
      *
      * @param recoverySecret user generated secret together with parameters necessary to regenerate
      *     it on a new device.
+     * @hide
      */
-    public void recoverySecretAvailable(@NonNull KeyStoreRecoveryMetadata recoverySecret)
-            throws RecoverableKeyStoreLoaderException {
+    public void recoverySecretAvailable(@NonNull RecoveryMetadata recoverySecret)
+            throws RecoveryManagerException {
         try {
             mBinder.recoverySecretAvailable(recoverySecret);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
-            throw RecoverableKeyStoreLoaderException.fromServiceSpecificException(e);
+            throw RecoveryManagerException.fromServiceSpecificException(e);
         }
     }
 
@@ -430,8 +430,8 @@ public class RecoverableKeyStoreLoader {
             @NonNull byte[] verifierPublicKey,
             @NonNull byte[] vaultParams,
             @NonNull byte[] vaultChallenge,
-            @NonNull List<KeyStoreRecoveryMetadata> secrets)
-            throws RecoverableKeyStoreLoaderException {
+            @NonNull List<RecoveryMetadata> secrets)
+            throws RecoveryManagerException {
         try {
             byte[] recoveryClaim =
                     mBinder.startRecoverySession(
@@ -444,7 +444,7 @@ public class RecoverableKeyStoreLoader {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
-            throw RecoverableKeyStoreLoaderException.fromServiceSpecificException(e);
+            throw RecoveryManagerException.fromServiceSpecificException(e);
         }
     }
 
@@ -456,21 +456,21 @@ public class RecoverableKeyStoreLoader {
      * @param recoveryKeyBlob Recovery blob encrypted by symmetric key generated for this session.
      * @param applicationKeys Application keys. Key material can be decrypted using recoveryKeyBlob
      *     and session. KeyStore only uses package names from the application info in {@link
-     *     KeyEntryRecoveryData}. Caller is responsibility to perform certificates check.
+     *     EntryRecoveryData}. Caller is responsibility to perform certificates check.
      * @return Map from alias to raw key material.
      */
     public Map<String, byte[]> recoverKeys(
             @NonNull String sessionId,
             @NonNull byte[] recoveryKeyBlob,
-            @NonNull List<KeyEntryRecoveryData> applicationKeys)
-            throws RecoverableKeyStoreLoaderException {
+            @NonNull List<EntryRecoveryData> applicationKeys)
+            throws RecoveryManagerException {
         try {
             return (Map<String, byte[]>) mBinder.recoverKeys(
                     sessionId, recoveryKeyBlob, applicationKeys);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
-            throw RecoverableKeyStoreLoaderException.fromServiceSpecificException(e);
+            throw RecoveryManagerException.fromServiceSpecificException(e);
         }
     }
 
@@ -479,17 +479,17 @@ public class RecoverableKeyStoreLoader {
      * raw material of the key.
      *
      * @param alias The key alias.
-     * @throws RecoverableKeyStoreLoaderException if an error occurred generating and storing the
+     * @throws RecoveryManagerException if an error occurred generating and storing the
      *     key.
      */
     public byte[] generateAndStoreKey(@NonNull String alias)
-            throws RecoverableKeyStoreLoaderException {
+            throws RecoveryManagerException {
         try {
             return mBinder.generateAndStoreKey(alias);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
-            throw RecoverableKeyStoreLoaderException.fromServiceSpecificException(e);
+            throw RecoveryManagerException.fromServiceSpecificException(e);
         }
     }
 
@@ -498,13 +498,13 @@ public class RecoverableKeyStoreLoader {
      *
      * @param alias The key alias.
      */
-    public void removeKey(@NonNull String alias) throws RecoverableKeyStoreLoaderException {
+    public void removeKey(@NonNull String alias) throws RecoveryManagerException {
         try {
             mBinder.removeKey(alias);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
-            throw RecoverableKeyStoreLoaderException.fromServiceSpecificException(e);
+            throw RecoveryManagerException.fromServiceSpecificException(e);
         }
     }
 }
