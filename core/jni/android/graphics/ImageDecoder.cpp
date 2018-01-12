@@ -67,8 +67,8 @@ struct ImageDecoder {
         kOpaque      = -1,
     };
 
-    std::unique_ptr<SkAndroidCodec> mCodec;
     NinePatchPeeker mPeeker;
+    std::unique_ptr<SkAndroidCodec> mCodec;
 };
 
 static jobject native_create(JNIEnv* env, std::unique_ptr<SkStream> stream) {
