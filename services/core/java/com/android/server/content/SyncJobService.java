@@ -22,10 +22,12 @@ import android.content.Intent;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.SparseLongArray;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -43,6 +45,9 @@ public class SyncJobService extends JobService {
 
     @GuardedBy("mLock")
     private final SparseBooleanArray mStartedSyncs = new SparseBooleanArray();
+
+    @GuardedBy("mLock")
+    private final SparseLongArray mJobStartUptimes = new SparseLongArray();
 
     private final SyncLogger mLogger = SyncLogger.getInstance();
 
@@ -82,7 +87,9 @@ public class SyncJobService extends JobService {
         synchronized (mLock) {
             final int jobId = params.getJobId();
             mJobParamsMap.put(jobId, params);
+
             mStartedSyncs.delete(jobId);
+            mJobStartUptimes.put(jobId, SystemClock.uptimeMillis());
         }
         Message m = Message.obtain();
         m.what = SyncManager.SyncHandler.MESSAGE_START_SYNC;
@@ -113,14 +120,24 @@ public class SyncJobService extends JobService {
             final int jobId = params.getJobId();
             mJobParamsMap.remove(jobId);
 
-            if (!mStartedSyncs.get(jobId)) {
-                final String message = "Job " + jobId + " didn't start: params=" +
-                        jobParametersToString(params);
-                mLogger.log(message);
-                Slog.wtf(TAG, message);
+            final long startUptime = mJobStartUptimes.get(jobId);
+            final long nowUptime = SystemClock.uptimeMillis();
+            if (startUptime == 0) {
+                wtf("Job " + jobId + " start uptime not found: "
+                        + " params=" + jobParametersToString(params));
+            } else if ((nowUptime - startUptime) > 60 * 1000) {
+                // WTF if startSyncH() hasn't happened, *unless* onStopJob() was called too soon.
+                // (1 minute threshold.)
+                if (!mStartedSyncs.get(jobId)) {
+                    wtf("Job " + jobId + " didn't start: "
+                            + " startUptime=" + startUptime
+                            + " nowUptime=" + nowUptime
+                            + " params=" + jobParametersToString(params));
+                }
             }
 
             mStartedSyncs.delete(jobId);
+            mJobStartUptimes.delete(jobId);
         }
         Message m = Message.obtain();
         m.what = SyncManager.SyncHandler.MESSAGE_STOP_SYNC;
@@ -168,5 +185,10 @@ public class SyncJobService extends JobService {
             return "job:#" + params.getJobId() + ":"
                     + SyncOperation.maybeCreateFromJobExtras(params.getExtras());
         }
+    }
+
+    private void wtf(String message) {
+        mLogger.log(message);
+        Slog.wtf(TAG, message);
     }
 }
