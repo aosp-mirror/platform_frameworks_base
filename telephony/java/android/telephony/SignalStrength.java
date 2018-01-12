@@ -19,8 +19,12 @@ package android.telephony;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.CarrierConfigManager;
 import android.util.Log;
 import android.content.res.Resources;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Contains phone signal strength related information.
@@ -51,6 +55,8 @@ public class SignalStrength implements Parcelable {
     //Use int max, as -1 is a valid value in signal strength
     public static final int INVALID = 0x7FFFFFFF;
 
+    private static final int LTE_RSRP_THRESHOLDS_NUM = 6;
+
     private int mGsmSignalStrength; // Valid values are (0-31, 99) as defined in TS 27.007 8.5
     private int mGsmBitErrorRate;   // bit error rate (0-7, 99) as defined in TS 27.007 8.5
     private int mCdmaDbm;   // This value is the RSSI value
@@ -69,6 +75,9 @@ public class SignalStrength implements Parcelable {
 
     private boolean isGsm; // This value is set by the ServiceStateTracker onSignalStrengthResult
     private boolean mUseOnlyRsrpForLteLevel; // Use only RSRP for the number of LTE signal bar.
+
+    // The threshold of LTE RSRP for determining the display level of LTE signal bar.
+    private int mLteRsrpThresholds[] = new int[LTE_RSRP_THRESHOLDS_NUM];
 
     /**
      * Create a new SignalStrength from a intent notifier Bundle
@@ -110,6 +119,7 @@ public class SignalStrength implements Parcelable {
         mTdScdmaRscp = INVALID;
         isGsm = true;
         mUseOnlyRsrpForLteLevel = false;
+        setLteRsrpThresholds(getDefaultLteRsrpThresholds());
     }
 
     /**
@@ -137,6 +147,7 @@ public class SignalStrength implements Parcelable {
         mTdScdmaRscp = INVALID;
         isGsm = gsmFlag;
         mUseOnlyRsrpForLteLevel = false;
+        setLteRsrpThresholds(getDefaultLteRsrpThresholds());
     }
 
     /**
@@ -276,6 +287,8 @@ public class SignalStrength implements Parcelable {
         mTdScdmaRscp = INVALID;
         isGsm = gsm;
         mUseOnlyRsrpForLteLevel = useOnlyRsrpForLteLevel;
+
+        setLteRsrpThresholds(getDefaultLteRsrpThresholds());
         if (DBG) log("initialize: " + toString());
     }
 
@@ -299,6 +312,7 @@ public class SignalStrength implements Parcelable {
         mTdScdmaRscp = s.mTdScdmaRscp;
         isGsm = s.isGsm;
         mUseOnlyRsrpForLteLevel = s.mUseOnlyRsrpForLteLevel;
+        setLteRsrpThresholds(s.mLteRsrpThresholds);
     }
 
     /**
@@ -325,6 +339,9 @@ public class SignalStrength implements Parcelable {
         mTdScdmaRscp = in.readInt();
         isGsm = (in.readInt() != 0);
         mUseOnlyRsrpForLteLevel = (in.readInt() != 0);
+        for (int i = 0; i < LTE_RSRP_THRESHOLDS_NUM; i++) {
+            mLteRsrpThresholds[i] = in.readInt();
+        }
     }
 
     /**
@@ -374,6 +391,9 @@ public class SignalStrength implements Parcelable {
         out.writeInt(mTdScdmaRscp);
         out.writeInt(isGsm ? 1 : 0);
         out.writeInt(mUseOnlyRsrpForLteLevel ? 1 : 0);
+        for (int i = 0; i < LTE_RSRP_THRESHOLDS_NUM; i++) {
+            out.writeInt(mLteRsrpThresholds[i]);
+        }
     }
 
     /**
@@ -477,6 +497,22 @@ public class SignalStrength implements Parcelable {
      */
     public void setLteRsrpBoost(int lteRsrpBoost) {
         mLteRsrpBoost = lteRsrpBoost;
+    }
+
+    /**
+     * Sets the threshold array for determining the display level of LTE signal bar.
+     *
+     * @param lteRsrpThresholds int array for determining the display level.
+     *
+     * @hide
+     */
+    public void setLteRsrpThresholds(int[] lteRsrpThresholds) {
+        if ((lteRsrpThresholds == null)
+                || (lteRsrpThresholds.length != LTE_RSRP_THRESHOLDS_NUM)) {
+            Log.wtf(LOG_TAG, "setLteRsrpThresholds - lteRsrpThresholds is invalid.");
+            return;
+        }
+        System.arraycopy(lteRsrpThresholds, 0, mLteRsrpThresholds, 0, LTE_RSRP_THRESHOLDS_NUM);
     }
 
     /**
@@ -833,25 +869,18 @@ public class SignalStrength implements Parcelable {
          */
         int rssiIconLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN, rsrpIconLevel = -1, snrIconLevel = -1;
 
-        int[] threshRsrp = Resources.getSystem().getIntArray(
-                com.android.internal.R.array.config_lteDbmThresholds);
-        if (threshRsrp.length != 6) {
-            Log.wtf(LOG_TAG, "getLteLevel - config_lteDbmThresholds has invalid num of elements."
-                    + " Cannot evaluate RSRP signal.");
-        } else {
-            if (mLteRsrp > threshRsrp[5]) {
-                rsrpIconLevel = -1;
-            } else if (mLteRsrp >= (threshRsrp[4] - mLteRsrpBoost)) {
-                rsrpIconLevel = SIGNAL_STRENGTH_GREAT;
-            } else if (mLteRsrp >= (threshRsrp[3] - mLteRsrpBoost)) {
-                rsrpIconLevel = SIGNAL_STRENGTH_GOOD;
-            } else if (mLteRsrp >= (threshRsrp[2] - mLteRsrpBoost)) {
-                rsrpIconLevel = SIGNAL_STRENGTH_MODERATE;
-            } else if (mLteRsrp >= (threshRsrp[1] - mLteRsrpBoost)) {
-                rsrpIconLevel = SIGNAL_STRENGTH_POOR;
-            } else if (mLteRsrp >= threshRsrp[0]) {
-                rsrpIconLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
-            }
+        if (mLteRsrp > mLteRsrpThresholds[5]) {
+            rsrpIconLevel = -1;
+        } else if (mLteRsrp >= (mLteRsrpThresholds[4] - mLteRsrpBoost)) {
+            rsrpIconLevel = SIGNAL_STRENGTH_GREAT;
+        } else if (mLteRsrp >= (mLteRsrpThresholds[3] - mLteRsrpBoost)) {
+            rsrpIconLevel = SIGNAL_STRENGTH_GOOD;
+        } else if (mLteRsrp >= (mLteRsrpThresholds[2] - mLteRsrpBoost)) {
+            rsrpIconLevel = SIGNAL_STRENGTH_MODERATE;
+        } else if (mLteRsrp >= (mLteRsrpThresholds[1] - mLteRsrpBoost)) {
+            rsrpIconLevel = SIGNAL_STRENGTH_POOR;
+        } else if (mLteRsrp >= mLteRsrpThresholds[0]) {
+            rsrpIconLevel = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
         }
 
         if (useOnlyRsrpForLteLevel()) {
@@ -1010,7 +1039,7 @@ public class SignalStrength implements Parcelable {
                 + (mLteSignalStrength * primeNum) + (mLteRsrp * primeNum)
                 + (mLteRsrq * primeNum) + (mLteRssnr * primeNum) + (mLteCqi * primeNum)
                 + (mLteRsrpBoost * primeNum) + (mTdScdmaRscp * primeNum) + (isGsm ? 1 : 0)
-                + (mUseOnlyRsrpForLteLevel ? 1 : 0));
+                + (mUseOnlyRsrpForLteLevel ? 1 : 0) + (Arrays.hashCode(mLteRsrpThresholds)));
     }
 
     /**
@@ -1045,7 +1074,8 @@ public class SignalStrength implements Parcelable {
                 && mLteRsrpBoost == s.mLteRsrpBoost
                 && mTdScdmaRscp == s.mTdScdmaRscp
                 && isGsm == s.isGsm
-                && mUseOnlyRsrpForLteLevel == s.mUseOnlyRsrpForLteLevel);
+                && mUseOnlyRsrpForLteLevel == s.mUseOnlyRsrpForLteLevel
+                && Arrays.equals(mLteRsrpThresholds, s.mLteRsrpThresholds));
     }
 
     /**
@@ -1070,7 +1100,8 @@ public class SignalStrength implements Parcelable {
                 + " " + mTdScdmaRscp
                 + " " + (isGsm ? "gsm|lte" : "cdma")
                 + " " + (mUseOnlyRsrpForLteLevel ? "use_only_rsrp_for_lte_level" :
-                         "use_rsrp_and_rssnr_for_lte_level"));
+                         "use_rsrp_and_rssnr_for_lte_level")
+                + " " + (Arrays.toString(mLteRsrpThresholds)));
     }
 
     /** Returns the signal strength related to GSM. */
@@ -1126,6 +1157,10 @@ public class SignalStrength implements Parcelable {
         mTdScdmaRscp = m.getInt("TdScdma");
         isGsm = m.getBoolean("isGsm");
         mUseOnlyRsrpForLteLevel = m.getBoolean("useOnlyRsrpForLteLevel");
+        ArrayList<Integer> lteRsrpThresholds = m.getIntegerArrayList("lteRsrpThresholds");
+        for (int i = 0; i < lteRsrpThresholds.size(); i++) {
+            mLteRsrpThresholds[i] = lteRsrpThresholds.get(i);
+        }
     }
 
     /**
@@ -1151,6 +1186,21 @@ public class SignalStrength implements Parcelable {
         m.putInt("TdScdma", mTdScdmaRscp);
         m.putBoolean("isGsm", isGsm);
         m.putBoolean("useOnlyRsrpForLteLevel", mUseOnlyRsrpForLteLevel);
+        ArrayList<Integer> lteRsrpThresholds = new ArrayList<Integer>();
+        for (int value : mLteRsrpThresholds) {
+            lteRsrpThresholds.add(value);
+        }
+        m.putIntegerArrayList("lteRsrpThresholds", lteRsrpThresholds);
+    }
+
+    /**
+     * Gets the default threshold array for determining the display level of LTE signal bar.
+     *
+     * @return int array for determining the display level.
+     */
+    private int[] getDefaultLteRsrpThresholds() {
+        return CarrierConfigManager.getDefaultConfig().getIntArray(
+                CarrierConfigManager.KEY_LTE_RSRP_THRESHOLDS_INT_ARRAY);
     }
 
     /**
