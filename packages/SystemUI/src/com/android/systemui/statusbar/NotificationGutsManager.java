@@ -15,8 +15,6 @@
  */
 package com.android.systemui.statusbar;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.app.INotificationManager;
 import android.app.NotificationChannel;
 import android.content.Context;
@@ -32,17 +30,14 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
-import com.android.systemui.Interpolators;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.stack.StackStateAnimator;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -110,6 +105,11 @@ public class NotificationGutsManager implements Dumpable {
 
     public void setKeyToRemoveOnGutsClosed(String keyToRemoveOnGutsClosed) {
         mKeyToRemoveOnGutsClosed = keyToRemoveOnGutsClosed;
+    }
+
+    public void onDensityOrFontScaleChanged(ExpandableNotificationRow row) {
+        setExposedGuts(row.getGuts());
+        bindGuts(row);
     }
 
     private void saveAndCloseNotificationMenu(
@@ -271,7 +271,7 @@ public class NotificationGutsManager implements Dumpable {
     }
 
     /**
-     *  Opens guts on the given ExpandableNotificationRow |v|.
+     * Opens guts on the given ExpandableNotificationRow |v|.
      *
      * @param v ExpandableNotificationRow to open guts on
      * @param x x coordinate of origin of circular reveal
@@ -327,26 +327,15 @@ public class NotificationGutsManager implements Dumpable {
                         true /* removeControls */, -1 /* x */, -1 /* y */,
                         false /* resetMenu */);
                 guts.setVisibility(View.VISIBLE);
-                final double horz = Math.max(guts.getWidth() - x, x);
-                final double vert = Math.max(guts.getHeight() - y, y);
-                final float r = (float) Math.hypot(horz, vert);
-                final Animator a
-                        = ViewAnimationUtils.createCircularReveal(guts, x, y, 0, r);
-                a.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
-                a.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
-                a.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        super.onAnimationEnd(animation);
-                        // Move the notification view back over the menu
-                        row.resetTranslation();
-                    }
-                });
-                a.start();
+
                 final boolean needsFalsingProtection =
                         (mPresenter.isPresenterLocked() &&
                                 !mAccessibilityManager.isTouchExplorationEnabled());
-                guts.setExposed(true /* exposed */, needsFalsingProtection);
+                guts.openControls(x, y, needsFalsingProtection, () -> {
+                    // Move the notification view back over the menu
+                    row.resetTranslation();
+                });
+
                 row.closeRemoteInput();
                 mListContainer.onHeightChanged(row, true /* needsAnimation */);
                 mNotificationGutsExposed = guts;

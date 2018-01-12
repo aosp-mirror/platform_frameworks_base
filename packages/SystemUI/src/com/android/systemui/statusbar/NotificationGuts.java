@@ -23,6 +23,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -187,6 +188,12 @@ public class NotificationGuts extends FrameLayout {
         }
     }
 
+    public void openControls(
+            int x, int y, boolean needsFalsingProtection, @Nullable Runnable onAnimationEnd) {
+        animateOpen(x, y, onAnimationEnd);
+        setExposed(true /* exposed */, needsFalsingProtection);
+    }
+
     public void closeControls(boolean leavebehinds, boolean controls, int x, int y, boolean force) {
         if (mGutsContent != null) {
             if (mGutsContent.isLeavebehind() && leavebehinds) {
@@ -212,6 +219,27 @@ public class NotificationGuts extends FrameLayout {
                 mClosedListener.onGutsClosed(this);
             }
         }
+    }
+
+    private void animateOpen(int x, int y, @Nullable Runnable onAnimationEnd) {
+        final double horz = Math.max(getWidth() - x, x);
+        final double vert = Math.max(getHeight() - y, y);
+        final float r = (float) Math.hypot(horz, vert);
+
+        final Animator a
+                = ViewAnimationUtils.createCircularReveal(this, x, y, 0, r);
+        a.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
+        a.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+        a.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                if (onAnimationEnd != null) {
+                    onAnimationEnd.run();
+                }
+            }
+        });
+        a.start();
     }
 
     private void animateClose(int x, int y) {
@@ -279,7 +307,7 @@ public class NotificationGuts extends FrameLayout {
         }
     }
 
-    public void setExposed(boolean exposed, boolean needsFalsingProtection) {
+    private void setExposed(boolean exposed, boolean needsFalsingProtection) {
         final boolean wasExposed = mExposed;
         mExposed = exposed;
         mNeedsFalsingProtection = needsFalsingProtection;
