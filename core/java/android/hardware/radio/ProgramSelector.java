@@ -59,24 +59,56 @@ import java.util.stream.Stream;
  */
 @SystemApi
 public final class ProgramSelector implements Parcelable {
+    /** Invalid program type.
+     * @deprecated use {@link ProgramIdentifier} instead
+     */
+    @Deprecated
     public static final int PROGRAM_TYPE_INVALID = 0;
-    /** Analogue AM radio (with or without RDS). */
+    /** Analogue AM radio (with or without RDS).
+     * @deprecated use {@link ProgramIdentifier} instead
+     */
+    @Deprecated
     public static final int PROGRAM_TYPE_AM = 1;
-    /** analogue FM radio (with or without RDS). */
+    /** analogue FM radio (with or without RDS).
+     * @deprecated use {@link ProgramIdentifier} instead
+     */
+    @Deprecated
     public static final int PROGRAM_TYPE_FM = 2;
-    /** AM HD Radio. */
+    /** AM HD Radio.
+     * @deprecated use {@link ProgramIdentifier} instead
+     */
+    @Deprecated
     public static final int PROGRAM_TYPE_AM_HD = 3;
-    /** FM HD Radio. */
+    /** FM HD Radio.
+     * @deprecated use {@link ProgramIdentifier} instead
+     */
+    @Deprecated
     public static final int PROGRAM_TYPE_FM_HD = 4;
-    /** Digital audio broadcasting. */
+    /** Digital audio broadcasting.
+     * @deprecated use {@link ProgramIdentifier} instead
+     */
+    @Deprecated
     public static final int PROGRAM_TYPE_DAB = 5;
-    /** Digital Radio Mondiale. */
+    /** Digital Radio Mondiale.
+     * @deprecated use {@link ProgramIdentifier} instead
+     */
+    @Deprecated
     public static final int PROGRAM_TYPE_DRMO = 6;
-    /** SiriusXM Satellite Radio. */
+    /** SiriusXM Satellite Radio.
+     * @deprecated use {@link ProgramIdentifier} instead
+     */
+    @Deprecated
     public static final int PROGRAM_TYPE_SXM = 7;
-    /** Vendor-specific, not synced across devices. */
+    /** Vendor-specific, not synced across devices.
+     * @deprecated use {@link ProgramIdentifier} instead
+     */
+    @Deprecated
     public static final int PROGRAM_TYPE_VENDOR_START = 1000;
+    /** @deprecated use {@link ProgramIdentifier} instead */
+    @Deprecated
     public static final int PROGRAM_TYPE_VENDOR_END = 1999;
+    /** @deprecated use {@link ProgramIdentifier} instead */
+    @Deprecated
     @IntDef(prefix = { "PROGRAM_TYPE_" }, value = {
         PROGRAM_TYPE_INVALID,
         PROGRAM_TYPE_AM,
@@ -112,18 +144,46 @@ public final class ProgramSelector implements Parcelable {
      *
      * The subchannel index is 0-based (where 0 is MPS and 1..7 are SPS),
      * as opposed to HD Radio standard (where it's 1-based).
+     *
+     * @deprecated use IDENTIFIER_TYPE_HD_STATION_ID_EXT instead
      */
+    @Deprecated
     public static final int IDENTIFIER_TYPE_HD_SUBCHANNEL = 4;
     /**
-     * 24bit compound primary identifier for DAB.
+     * 64bit additional identifier for HD Radio.
+     *
+     * Due to Station ID abuse, some HD_STATION_ID_EXT identifiers may be not
+     * globally unique. To provide a best-effort solution, a short version of
+     * station name may be carried as additional identifier and may be used
+     * by the tuner hardware to double-check tuning.
+     *
+     * The name is limited to the first 8 A-Z0-9 characters (lowercase letters
+     * must be converted to uppercase). Encoded in little-endian ASCII:
+     * the first character of the name is the LSB.
+     *
+     * For example: "Abc" is encoded as 0x434241.
+     */
+    public static final int IDENTIFIER_TYPE_HD_STATION_NAME = 10004;
+    /**
+     * @see {@link IDENTIFIER_TYPE_DAB_SID_EXT}
+     */
+    public static final int IDENTIFIER_TYPE_DAB_SIDECC = 5;
+    /**
+     * 28bit compound primary identifier for Digital Audio Broadcasting.
      *
      * Consists of (from the LSB):
      * - 16bit: SId;
-     * - 8bit: ECC code.
+     * - 8bit: ECC code;
+     * - 4bit: SCIdS.
+     *
+     * SCIdS (Service Component Identifier within the Service) value
+     * of 0 represents the main service, while 1 and above represents
+     * secondary services.
+     *
      * The remaining bits should be set to zeros when writing on the chip side
      * and ignored when read.
      */
-    public static final int IDENTIFIER_TYPE_DAB_SIDECC = 5;
+    public static final int IDENTIFIER_TYPE_DAB_SID_EXT = IDENTIFIER_TYPE_DAB_SIDECC;
     /** 16bit */
     public static final int IDENTIFIER_TYPE_DAB_ENSEMBLE = 6;
     /** 12bit */
@@ -134,7 +194,11 @@ public final class ProgramSelector implements Parcelable {
     public static final int IDENTIFIER_TYPE_DRMO_SERVICE_ID = 9;
     /** kHz */
     public static final int IDENTIFIER_TYPE_DRMO_FREQUENCY = 10;
-    /** 1: AM, 2:FM */
+    /**
+     * 1: AM, 2:FM
+     * @deprecated use {@link IDENTIFIER_TYPE_DRMO_FREQUENCY} instead
+     */
+    @Deprecated
     public static final int IDENTIFIER_TYPE_DRMO_MODULATION = 11;
     /** 32bit */
     public static final int IDENTIFIER_TYPE_SXM_SERVICE_ID = 12;
@@ -148,14 +212,29 @@ public final class ProgramSelector implements Parcelable {
      * type between VENDOR_START and VENDOR_END (eg. identifier type 1015 must
      * not be used in any program type other than 1015).
      */
-    public static final int IDENTIFIER_TYPE_VENDOR_PRIMARY_START = PROGRAM_TYPE_VENDOR_START;
-    public static final int IDENTIFIER_TYPE_VENDOR_PRIMARY_END = PROGRAM_TYPE_VENDOR_END;
+    public static final int IDENTIFIER_TYPE_VENDOR_START = PROGRAM_TYPE_VENDOR_START;
+    /**
+     * @see {@link IDENTIFIER_TYPE_VENDOR_START}
+     */
+    public static final int IDENTIFIER_TYPE_VENDOR_END = PROGRAM_TYPE_VENDOR_END;
+    /**
+     * @deprecated use {@link IDENTIFIER_TYPE_VENDOR_START} instead
+     */
+    @Deprecated
+    public static final int IDENTIFIER_TYPE_VENDOR_PRIMARY_START = IDENTIFIER_TYPE_VENDOR_START;
+    /**
+     * @deprecated use {@link IDENTIFIER_TYPE_VENDOR_END} instead
+     */
+    @Deprecated
+    public static final int IDENTIFIER_TYPE_VENDOR_PRIMARY_END = IDENTIFIER_TYPE_VENDOR_END;
     @IntDef(prefix = { "IDENTIFIER_TYPE_" }, value = {
         IDENTIFIER_TYPE_INVALID,
         IDENTIFIER_TYPE_AMFM_FREQUENCY,
         IDENTIFIER_TYPE_RDS_PI,
         IDENTIFIER_TYPE_HD_STATION_ID_EXT,
         IDENTIFIER_TYPE_HD_SUBCHANNEL,
+        IDENTIFIER_TYPE_HD_STATION_NAME,
+        IDENTIFIER_TYPE_DAB_SID_EXT,
         IDENTIFIER_TYPE_DAB_SIDECC,
         IDENTIFIER_TYPE_DAB_ENSEMBLE,
         IDENTIFIER_TYPE_DAB_SCID,
@@ -166,7 +245,7 @@ public final class ProgramSelector implements Parcelable {
         IDENTIFIER_TYPE_SXM_SERVICE_ID,
         IDENTIFIER_TYPE_SXM_CHANNEL,
     })
-    @IntRange(from = IDENTIFIER_TYPE_VENDOR_PRIMARY_START, to = IDENTIFIER_TYPE_VENDOR_PRIMARY_END)
+    @IntRange(from = IDENTIFIER_TYPE_VENDOR_START, to = IDENTIFIER_TYPE_VENDOR_END)
     @Retention(RetentionPolicy.SOURCE)
     public @interface IdentifierType {}
 
@@ -205,7 +284,9 @@ public final class ProgramSelector implements Parcelable {
      * Type of a radio technology.
      *
      * @return program type.
+     * @deprecated use {@link getPrimaryId} instead
      */
+    @Deprecated
     public @ProgramType int getProgramType() {
         return mProgramType;
     }
@@ -273,7 +354,10 @@ public final class ProgramSelector implements Parcelable {
      * preserving elements order.
      *
      * @return an array of vendor identifiers, must not be modified.
+     * @deprecated for HAL 1.x compatibility;
+     *             HAL 2.x uses standard primary/secondary lists for vendor IDs
      */
+    @Deprecated
     public @NonNull long[] getVendorIds() {
         return mVendorIds;
     }
@@ -427,6 +511,10 @@ public final class ProgramSelector implements Parcelable {
         private final long mValue;
 
         public Identifier(@IdentifierType int type, long value) {
+            if (type == IDENTIFIER_TYPE_HD_STATION_NAME) {
+                // see getType
+                type = IDENTIFIER_TYPE_HD_SUBCHANNEL;
+            }
             mType = type;
             mValue = value;
         }
@@ -437,6 +525,13 @@ public final class ProgramSelector implements Parcelable {
          * @return type of an identifier.
          */
         public @IdentifierType int getType() {
+            if (mType == IDENTIFIER_TYPE_HD_SUBCHANNEL && mValue > 10) {
+                /* HD_SUBCHANNEL and HD_STATION_NAME use the same identifier type, but they differ
+                 * in possible values: sub channel is 0-7, station name is greater than ASCII space
+                 * code (32).
+                 */
+                return IDENTIFIER_TYPE_HD_STATION_NAME;
+            }
             return mType;
         }
 
