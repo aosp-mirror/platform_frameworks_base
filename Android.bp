@@ -496,6 +496,7 @@ java_library {
         "telephony/java/com/android/ims/internal/IImsService.aidl",
         "telephony/java/com/android/ims/internal/IImsServiceController.aidl",
         "telephony/java/com/android/ims/internal/IImsServiceFeatureCallback.aidl",
+	"telephony/java/com/android/ims/internal/IImsSmsListener.aidl",
         "telephony/java/com/android/ims/internal/IImsStreamMediaSession.aidl",
         "telephony/java/com/android/ims/internal/IImsUt.aidl",
         "telephony/java/com/android/ims/internal/IImsUtListener.aidl",
