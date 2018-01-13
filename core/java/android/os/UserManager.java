@@ -892,6 +892,27 @@ public class UserManager {
     public static final String DISALLOW_USER_SWITCH = "no_user_switch";
 
     /**
+     * Specifies whether the user can share file / picture / data from the primary user into the
+     * managed profile, either by sending them from the primary side, or by picking up data within
+     * an app in the managed profile.
+     * <p>
+     * When a managed profile is created, the system allows the user to send data from the primary
+     * side to the profile by setting up certain default cross profile intent filters. If
+     * this is undesired, this restriction can be set to disallow it. Note that this restriction
+     * will not block any sharing allowed by explicit
+     * {@link DevicePolicyManager#addCrossProfileIntentFilter} calls by the profile owner.
+     * <p>
+     * This restriction is only meaningful when set by profile owner. When it is set by device
+     * owner, it does not have any effect.
+     * <p>
+     * The default value is <code>false</code>.
+     *
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_SHARE_INTO_MANAGED_PROFILE = "no_sharing_into_profile";
+    /**
      * Application restriction key that is used to indicate the pending arrival
      * of real restrictions for the app.
      *

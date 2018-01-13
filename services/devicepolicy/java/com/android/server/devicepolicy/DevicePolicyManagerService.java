@@ -151,6 +151,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
+import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.os.storage.StorageManager;
 import android.provider.ContactsContract.QuickContact;
 import android.provider.ContactsInternal;
@@ -702,6 +703,33 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
     };
+
+    protected static class RestrictionsListener implements UserRestrictionsListener {
+        private Context mContext;
+
+        public RestrictionsListener(Context context) {
+            mContext = context;
+        }
+
+        public void onUserRestrictionsChanged(int userId, Bundle newRestrictions,
+                Bundle prevRestrictions) {
+            final boolean newlyDisallowed =
+                    newRestrictions.getBoolean(UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE);
+            final boolean previouslyDisallowed =
+                    prevRestrictions.getBoolean(UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE);
+            final boolean restrictionChanged = (newlyDisallowed != previouslyDisallowed);
+
+            if (restrictionChanged) {
+                // Notify ManagedProvisioning to update the built-in cross profile intent filters.
+                Intent intent = new Intent(
+                        DevicePolicyManager.ACTION_DATA_SHARING_RESTRICTION_CHANGED);
+                intent.setPackage(MANAGED_PROVISIONING_PKG);
+                intent.putExtra(Intent.EXTRA_USER_ID, userId);
+                intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+                mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
+            }
+        }
+    }
 
     static class ActiveAdmin {
         private static final String TAG_DISABLE_KEYGUARD_FEATURES = "disable-keyguard-features";
@@ -1982,6 +2010,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         LocalServices.addService(DevicePolicyManagerInternal.class, mLocalService);
 
         mSetupContentObserver = new SetupContentObserver(mHandler);
+
+        mUserManagerInternal.addUserRestrictionsListener(new RestrictionsListener(mContext));
     }
 
     /**

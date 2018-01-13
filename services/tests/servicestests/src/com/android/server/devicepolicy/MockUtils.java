@@ -91,7 +91,8 @@ public class MockUtils {
             @Override
             public boolean matches(Object item) {
                 if (item == null) return false;
-                return intent.filterEquals((Intent) item);
+                if (!intent.filterEquals((Intent) item)) return false;
+                return intent.getExtras().kindofEquals(((Intent) item).getExtras());
             }
             @Override
             public void describeTo(Description description) {
