@@ -397,6 +397,7 @@ import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.os.Zygote;
 import com.android.internal.policy.IKeyguardDismissCallback;
+import com.android.internal.policy.KeyguardDismissCallback;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
@@ -8386,20 +8387,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // entering picture-in-picture (this will prompt the user to authenticate if the
                     // device is currently locked).
                     try {
-                        dismissKeyguard(token, new IKeyguardDismissCallback.Stub() {
-                            @Override
-                            public void onDismissError() throws RemoteException {
-                                // Do nothing
-                            }
-
+                        dismissKeyguard(token, new KeyguardDismissCallback() {
                             @Override
                             public void onDismissSucceeded() throws RemoteException {
                                 mHandler.post(enterPipRunnable);
-                            }
-
-                            @Override
-                            public void onDismissCancelled() throws RemoteException {
-                                // Do nothing
                             }
                         }, null /* message */);
                     } catch (RemoteException e) {
