@@ -33,6 +33,8 @@ import com.android.server.SystemService;
 
 import dalvik.system.VMRuntime;
 
+import java.io.FileDescriptor;
+
 public class Installer extends SystemService {
     private static final String TAG = "Installer";
 
@@ -468,6 +470,16 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.deleteOdex(apkPath, instructionSet, outputPath);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    public void installApkVerity(String filePath, FileDescriptor verityInput)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.installApkVerity(filePath, verityInput);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
