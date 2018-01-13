@@ -151,6 +151,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
 
         mClickActions.clear();
         final int subItemsCount = subItems.size();
+        final int blendedColor = getTextColor();
 
         for (int i = 0; i < subItemsCount; i++) {
             SliceItem item = subItems.get(i);
@@ -159,7 +160,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             KeyguardSliceButton button = mRow.findViewWithTag(itemTag);
             if (button == null) {
                 button = new KeyguardSliceButton(mContext);
-                button.setTextColor(mTextColor);
+                button.setTextColor(blendedColor);
                 button.setTag(itemTag);
             } else {
                 mRow.removeView(button);
@@ -258,7 +259,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     }
 
     private void updateTextColors() {
-        final int blendedColor = ColorUtils.blendARGB(mTextColor, Color.WHITE, mDarkAmount);
+        final int blendedColor = getTextColor();
         mTitle.setTextColor(blendedColor);
         int childCount = mRow.getChildCount();
         for (int i = 0; i < childCount; i++) {
@@ -320,6 +321,10 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         if (wasObserving) {
             mLiveData.observeForever(this);
         }
+    }
+
+    public int getTextColor() {
+        return ColorUtils.blendARGB(mTextColor, Color.WHITE, mDarkAmount);
     }
 
     /**
