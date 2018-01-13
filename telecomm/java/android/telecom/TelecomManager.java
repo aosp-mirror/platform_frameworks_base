@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -1440,6 +1441,13 @@ public class TelecomManager {
     public void addNewIncomingCall(PhoneAccountHandle phoneAccount, Bundle extras) {
         try {
             if (isServiceConnected()) {
+                if (extras != null && extras.getBoolean(EXTRA_IS_HANDOVER) &&
+                        mContext.getApplicationContext().getApplicationInfo().targetSdkVersion >
+                                Build.VERSION_CODES.O_MR1) {
+                    Log.e("TAG", "addNewIncomingCall failed. Use public api " +
+                            "acceptHandover for API > O-MR1");
+                    // TODO add "return" after DUO team adds support for new handover API
+                }
                 getTelecomService().addNewIncomingCall(
                         phoneAccount, extras == null ? new Bundle() : extras);
             }
