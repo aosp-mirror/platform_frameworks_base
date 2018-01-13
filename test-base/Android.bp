@@ -77,7 +77,7 @@ java_library_static {
     ],
 
     static_libs: [
-        "android.test.runner",
+        "android.test.runner-minus-junit",
         "android.test.mock",
     ],
 
