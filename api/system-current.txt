@@ -4076,11 +4076,11 @@ package android.telephony {
 package android.telephony.data {
 
   public final class DataCallResponse implements android.os.Parcelable {
-    ctor public DataCallResponse(int, int, int, int, java.lang.String, java.lang.String, java.util.List<android.telephony.data.InterfaceAddress>, java.util.List<java.net.InetAddress>, java.util.List<java.net.InetAddress>, java.util.List<java.lang.String>, int);
+    ctor public DataCallResponse(int, int, int, int, java.lang.String, java.lang.String, java.util.List<android.net.LinkAddress>, java.util.List<java.net.InetAddress>, java.util.List<java.net.InetAddress>, java.util.List<java.lang.String>, int);
     ctor public DataCallResponse(android.os.Parcel);
     method public int describeContents();
     method public int getActive();
-    method public java.util.List<android.telephony.data.InterfaceAddress> getAddresses();
+    method public java.util.List<android.net.LinkAddress> getAddresses();
     method public int getCallId();
     method public java.util.List<java.net.InetAddress> getDnses();
     method public java.util.List<java.net.InetAddress> getGateways();
@@ -4121,17 +4121,6 @@ package android.telephony.data {
     field public static final int TYPE_3GPP = 1; // 0x1
     field public static final int TYPE_3GPP2 = 2; // 0x2
     field public static final int TYPE_COMMON = 0; // 0x0
-  }
-
-  public final class InterfaceAddress implements android.os.Parcelable {
-    ctor public InterfaceAddress(java.net.InetAddress, int);
-    ctor public InterfaceAddress(java.lang.String, int) throws java.net.UnknownHostException;
-    ctor public InterfaceAddress(android.os.Parcel);
-    method public int describeContents();
-    method public java.net.InetAddress getAddress();
-    method public int getNetworkPrefixLength();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.data.InterfaceAddress> CREATOR;
   }
 
 }
