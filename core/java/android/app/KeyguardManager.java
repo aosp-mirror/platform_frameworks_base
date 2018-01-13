@@ -477,6 +477,39 @@ public class KeyguardManager {
      */
     public void requestDismissKeyguard(@NonNull Activity activity,
             @Nullable KeyguardDismissCallback callback) {
+        requestDismissKeyguard(activity, null /* message */, callback);
+    }
+
+    /**
+     * If the device is currently locked (see {@link #isKeyguardLocked()}, requests the Keyguard to
+     * be dismissed.
+     * <p>
+     * If the Keyguard is not secure or the device is currently in a trusted state, calling this
+     * method will immediately dismiss the Keyguard without any user interaction.
+     * <p>
+     * If the Keyguard is secure and the device is not in a trusted state, this will bring up the
+     * UI so the user can enter their credentials.
+     * <p>
+     * If the value set for the {@link Activity} attr {@link android.R.attr#turnScreenOn} is true,
+     * the screen will turn on when the keyguard is dismissed.
+     *
+     * @param activity The activity requesting the dismissal. The activity must be either visible
+     *                 by using {@link LayoutParams#FLAG_SHOW_WHEN_LOCKED} or must be in a state in
+     *                 which it would be visible if Keyguard would not be hiding it. If that's not
+     *                 the case, the request will fail immediately and
+     *                 {@link KeyguardDismissCallback#onDismissError} will be invoked.
+     * @param message  A message that will be shown in the keyguard explaining why the user
+     *                 would want to dismiss it.
+     * @param callback The callback to be called if the request to dismiss Keyguard was successful
+     *                 or {@code null} if the caller isn't interested in knowing the result. The
+     *                 callback will not be invoked if the activity was destroyed before the
+     *                 callback was received.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SHOW_KEYGUARD_MESSAGE)
+    @SystemApi
+    public void requestDismissKeyguard(@NonNull Activity activity, @Nullable CharSequence message,
+            @Nullable KeyguardDismissCallback callback) {
         try {
             mAm.dismissKeyguard(activity.getActivityToken(), new IKeyguardDismissCallback.Stub() {
                 @Override
@@ -499,7 +532,7 @@ public class KeyguardManager {
                         activity.mHandler.post(callback::onDismissCancelled);
                     }
                 }
-            });
+            }, message);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

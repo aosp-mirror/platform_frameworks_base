@@ -34,6 +34,7 @@ import android.widget.FrameLayout;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityContainer.SecurityCallback;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.settingslib.Utils;
 
 import java.io.File;
 
@@ -171,8 +172,12 @@ public class KeyguardHostView extends FrameLayout implements SecurityCallback {
         mSecurityContainer.showPromptReason(reason);
     }
 
-    public void showMessage(String message, int color) {
+    public void showMessage(CharSequence message, int color) {
         mSecurityContainer.showMessage(message, color);
+    }
+
+    public void showErrorMessage(CharSequence message) {
+        showMessage(message, Utils.getColorError(mContext));
     }
 
     /**

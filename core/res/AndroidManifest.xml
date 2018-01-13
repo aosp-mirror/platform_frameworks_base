@@ -3398,6 +3398,12 @@
     <permission android:name="android.permission.PROVIDE_TRUST_AGENT"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows an application to show a message
+         on the keyguard when asking to dismiss it.
+         @hide For security reasons, this is a platform-only permission. -->
+    <permission android:name="android.permission.SHOW_KEYGUARD_MESSAGE"
+        android:protectionLevel="signature|privileged" />
+
     <!-- Allows an application to launch the trust agent settings activity.
         @hide -->
     <permission android:name="android.permission.LAUNCH_TRUST_AGENT_SETTINGS"

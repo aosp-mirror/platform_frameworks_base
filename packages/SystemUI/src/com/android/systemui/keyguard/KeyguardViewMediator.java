@@ -25,7 +25,6 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT;
 
-
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
@@ -344,6 +343,7 @@ public class KeyguardViewMediator extends SystemUI {
     private boolean mWakeAndUnlocking;
     private IKeyguardDrawnCallback mDrawnCallback;
     private boolean mLockWhenSimRemoved;
+    private CharSequence mCustomMessage;
 
     KeyguardUpdateMonitorCallback mUpdateCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -368,7 +368,7 @@ public class KeyguardViewMediator extends SystemUI {
                     return;
                 } else if (info.isGuest() || info.isDemo()) {
                     // If we just switched to a guest, try to dismiss keyguard.
-                    dismiss(null /* callback */);
+                    dismiss(null /* callback */, null /* message */);
                 }
             }
         }
@@ -651,6 +651,13 @@ public class KeyguardViewMediator extends SystemUI {
                 return KeyguardSecurityView.PROMPT_REASON_AFTER_LOCKOUT;
             }
             return KeyguardSecurityView.PROMPT_REASON_NONE;
+        }
+
+        @Override
+        public CharSequence consumeCustomMessage() {
+            final CharSequence message = mCustomMessage;
+            mCustomMessage = null;
+            return message;
         }
 
         @Override
@@ -1321,20 +1328,22 @@ public class KeyguardViewMediator extends SystemUI {
     /**
      * Dismiss the keyguard through the security layers.
      * @param callback Callback to be informed about the result
+     * @param message Message that should be displayed on the bouncer.
      */
-    private void handleDismiss(IKeyguardDismissCallback callback) {
+    private void handleDismiss(IKeyguardDismissCallback callback, CharSequence message) {
         if (mShowing) {
             if (callback != null) {
                 mDismissCallbackRegistry.addCallback(callback);
             }
+            mCustomMessage = message;
             mStatusBarKeyguardViewManager.dismissAndCollapse();
         } else if (callback != null) {
             new DismissCallbackWrapper(callback).notifyDismissError();
         }
     }
 
-    public void dismiss(IKeyguardDismissCallback callback) {
-        mHandler.obtainMessage(DISMISS, callback).sendToTarget();
+    public void dismiss(IKeyguardDismissCallback callback, CharSequence message) {
+        mHandler.obtainMessage(DISMISS, new DismissMessage(callback, message)).sendToTarget();
     }
 
     /**
@@ -1551,7 +1560,8 @@ public class KeyguardViewMediator extends SystemUI {
                     }
                     break;
                 case DISMISS:
-                    handleDismiss((IKeyguardDismissCallback) msg.obj);
+                    final DismissMessage message = (DismissMessage) msg.obj;
+                    handleDismiss(message.getCallback(), message.getMessage());
                     break;
                 case START_KEYGUARD_EXIT_ANIM:
                     Trace.beginSection("KeyguardViewMediator#handleMessage START_KEYGUARD_EXIT_ANIM");
@@ -2159,6 +2169,24 @@ public class KeyguardViewMediator extends SystemUI {
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to call to IKeyguardStateCallback", e);
             }
+        }
+    }
+
+    private static class DismissMessage {
+        private final CharSequence mMessage;
+        private final IKeyguardDismissCallback mCallback;
+
+        DismissMessage(IKeyguardDismissCallback callback, CharSequence message) {
+            mCallback = callback;
+            mMessage = message;
+        }
+
+        public IKeyguardDismissCallback getCallback() {
+            return mCallback;
+        }
+
+        public CharSequence getMessage() {
+            return mMessage;
         }
     }
 }

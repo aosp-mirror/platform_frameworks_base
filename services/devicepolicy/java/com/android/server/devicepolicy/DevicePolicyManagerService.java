@@ -9739,7 +9739,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 return false;
             }
             mLockPatternUtils.setLockScreenDisabled(disabled, userId);
-            mInjector.getIWindowManager().dismissKeyguard(null);
+            mInjector.getIWindowManager().dismissKeyguard(null /* callback */, null /* message */);
         } catch (RemoteException e) {
             // Same process, does not happen.
         } finally {

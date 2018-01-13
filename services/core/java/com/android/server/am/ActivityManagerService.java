@@ -8401,7 +8401,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             public void onDismissCancelled() throws RemoteException {
                                 // Do nothing
                             }
-                        });
+                        }, null /* message */);
                     } catch (RemoteException e) {
                         // Local call
                     }
@@ -25277,11 +25277,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void dismissKeyguard(IBinder token, IKeyguardDismissCallback callback)
-            throws RemoteException {
+    public void dismissKeyguard(IBinder token, IKeyguardDismissCallback callback,
+            CharSequence message) throws RemoteException {
+        if (message != null) {
+            enforceCallingPermission(permission.SHOW_KEYGUARD_MESSAGE,
+                    "dismissKeyguard()");
+        }
         final long callingId = Binder.clearCallingIdentity();
         try {
-            mKeyguardController.dismissKeyguard(token, callback);
+            mKeyguardController.dismissKeyguard(token, callback, message);
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }

@@ -616,7 +616,7 @@ public class BugreportProgressService extends Service {
         final IWindowManager wm = IWindowManager.Stub
                 .asInterface(ServiceManager.getService(Context.WINDOW_SERVICE));
         try {
-            wm.dismissKeyguard(null);
+            wm.dismissKeyguard(null, null);
         } catch (Exception e) {
             // ignore it
         }

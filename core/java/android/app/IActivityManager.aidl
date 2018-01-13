@@ -620,8 +620,9 @@ interface IActivityManager {
     boolean updateDisplayOverrideConfiguration(in Configuration values, int displayId);
     void moveStackToDisplay(int stackId, int displayId);
     boolean requestAutofillData(in IAssistDataReceiver receiver, in Bundle receiverExtras,
-                                in IBinder activityToken, int flags);
-    void dismissKeyguard(in IBinder token, in IKeyguardDismissCallback callback);
+            in IBinder activityToken, int flags);
+    void dismissKeyguard(in IBinder token, in IKeyguardDismissCallback callback,
+            in CharSequence message);
     int restartUserInBackground(int userId);
 
     /** Cancels the window transitions for the given task. */

@@ -96,9 +96,9 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
-        public void dismiss(IKeyguardDismissCallback callback) {
+        public void dismiss(IKeyguardDismissCallback callback, CharSequence message) {
             checkPermission();
-            mKeyguardViewMediator.dismiss(callback);
+            mKeyguardViewMediator.dismiss(callback, message);
         }
 
         @Override // Binder interface
