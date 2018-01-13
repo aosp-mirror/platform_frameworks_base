@@ -269,6 +269,7 @@ import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.PhoneWindow;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.widget.PointerLocationView;
 import com.android.server.GestureLauncherService;
@@ -460,6 +461,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     AccessibilityManager mAccessibilityManager;
     BurnInProtectionHelper mBurnInProtectionHelper;
     AppOpsManager mAppOpsManager;
+    private ScreenshotHelper mScreenshotHelper;
     private boolean mHasFeatureWatch;
     private boolean mHasFeatureLeanback;
 
@@ -1713,7 +1715,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         @Override
         public void run() {
-            takeScreenshot(mScreenshotType);
+            mScreenshotHelper.takeScreenshot(mScreenshotType,
+                    mStatusBar != null && mStatusBar.isVisibleLw(),
+                    mNavigationBar != null && mNavigationBar.isVisibleLw(), mHandler);
         }
     }
 
@@ -2191,6 +2195,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         mWindowManagerFuncs.notifyKeyguardTrustedChanged();
                     }
                 });
+        mScreenshotHelper = new ScreenshotHelper(mContext);
     }
 
     /**
@@ -5766,100 +5771,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         setHdmiPlugged(!mHdmiPlugged);
     }
 
-    final Object mScreenshotLock = new Object();
-    ServiceConnection mScreenshotConnection = null;
-
-    final Runnable mScreenshotTimeout = new Runnable() {
-        @Override public void run() {
-            synchronized (mScreenshotLock) {
-                if (mScreenshotConnection != null) {
-                    mContext.unbindService(mScreenshotConnection);
-                    mScreenshotConnection = null;
-                    notifyScreenshotError();
-                }
-            }
-        }
-    };
-
-    // Assume this is called from the Handler thread.
-    private void takeScreenshot(final int screenshotType) {
-        synchronized (mScreenshotLock) {
-            if (mScreenshotConnection != null) {
-                return;
-            }
-            final ComponentName serviceComponent = new ComponentName(SYSUI_PACKAGE,
-                    SYSUI_SCREENSHOT_SERVICE);
-            final Intent serviceIntent = new Intent();
-            serviceIntent.setComponent(serviceComponent);
-            ServiceConnection conn = new ServiceConnection() {
-                @Override
-                public void onServiceConnected(ComponentName name, IBinder service) {
-                    synchronized (mScreenshotLock) {
-                        if (mScreenshotConnection != this) {
-                            return;
-                        }
-                        Messenger messenger = new Messenger(service);
-                        Message msg = Message.obtain(null, screenshotType);
-                        final ServiceConnection myConn = this;
-                        Handler h = new Handler(mHandler.getLooper()) {
-                            @Override
-                            public void handleMessage(Message msg) {
-                                synchronized (mScreenshotLock) {
-                                    if (mScreenshotConnection == myConn) {
-                                        mContext.unbindService(mScreenshotConnection);
-                                        mScreenshotConnection = null;
-                                        mHandler.removeCallbacks(mScreenshotTimeout);
-                                    }
-                                }
-                            }
-                        };
-                        msg.replyTo = new Messenger(h);
-                        msg.arg1 = msg.arg2 = 0;
-                        if (mStatusBar != null && mStatusBar.isVisibleLw())
-                            msg.arg1 = 1;
-                        if (mNavigationBar != null && mNavigationBar.isVisibleLw())
-                            msg.arg2 = 1;
-                        try {
-                            messenger.send(msg);
-                        } catch (RemoteException e) {
-                        }
-                    }
-                }
-
-                @Override
-                public void onServiceDisconnected(ComponentName name) {
-                    synchronized (mScreenshotLock) {
-                        if (mScreenshotConnection != null) {
-                            mContext.unbindService(mScreenshotConnection);
-                            mScreenshotConnection = null;
-                            mHandler.removeCallbacks(mScreenshotTimeout);
-                            notifyScreenshotError();
-                        }
-                    }
-                }
-            };
-            if (mContext.bindServiceAsUser(serviceIntent, conn,
-                    Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
-                    UserHandle.CURRENT)) {
-                mScreenshotConnection = conn;
-                mHandler.postDelayed(mScreenshotTimeout, 10000);
-            }
-        }
-    }
-
-    /**
-     * Notifies the screenshot service to show an error.
-     */
-    private void notifyScreenshotError() {
-        // If the service process is killed, then ask it to clean up after itself
-        final ComponentName errorComponent = new ComponentName(SYSUI_PACKAGE,
-                SYSUI_SCREENSHOT_ERROR_RECEIVER);
-        Intent errorIntent = new Intent(Intent.ACTION_USER_PRESENT);
-        errorIntent.setComponent(errorComponent);
-        errorIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT |
-                Intent.FLAG_RECEIVER_FOREGROUND);
-        mContext.sendBroadcastAsUser(errorIntent, UserHandle.CURRENT);
-    }
 
     /** {@inheritDoc} */
     @Override

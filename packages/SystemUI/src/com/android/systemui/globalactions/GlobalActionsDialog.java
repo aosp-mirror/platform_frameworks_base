@@ -24,10 +24,12 @@ import android.app.KeyguardManager;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.graphics.Point;
@@ -36,7 +38,9 @@ import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
+import android.os.Messenger;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
@@ -77,6 +81,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.util.EmergencyAffordanceManager;
+import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.HardwareUiLayout;
@@ -117,6 +122,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private static final String GLOBAL_ACTION_KEY_ASSIST = "assist";
     private static final String GLOBAL_ACTION_KEY_RESTART = "restart";
     private static final String GLOBAL_ACTION_KEY_LOGOUT = "logout";
+    private static final String GLOBAL_ACTION_KEY_SCREENSHOT = "screenshot";
 
     private final Context mContext;
     private final GlobalActionsManager mWindowManagerFuncs;
@@ -143,6 +149,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private boolean mHasLogoutButton;
     private final boolean mShowSilentToggle;
     private final EmergencyAffordanceManager mEmergencyAffordanceManager;
+    private final ScreenshotHelper mScreenshotHelper;
 
     /**
      * @param context everything needs a context :(
@@ -183,6 +190,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 R.bool.config_useFixedVolume);
 
         mEmergencyAffordanceManager = new EmergencyAffordanceManager(context);
+        mScreenshotHelper = new ScreenshotHelper(context);
     }
 
     /**
@@ -340,6 +348,8 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 mItems.add(getAssistAction());
             } else if (GLOBAL_ACTION_KEY_RESTART.equals(actionKey)) {
                 mItems.add(new RestartAction());
+            } else if (GLOBAL_ACTION_KEY_SCREENSHOT.equals(actionKey)) {
+                mItems.add(new ScreenshotAction());
             } else if (GLOBAL_ACTION_KEY_LOGOUT.equals(actionKey)) {
                 if (mDevicePolicyManager.isLogoutEnabled()
                         && getCurrentUser().id != UserHandle.USER_SYSTEM) {
@@ -457,6 +467,38 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
     }
 
+
+    private class ScreenshotAction extends SinglePressAction {
+        public ScreenshotAction() {
+            super(R.drawable.ic_screenshot, R.string.global_action_screenshot);
+        }
+
+        @Override
+        public void onPress() {
+            // Add a little delay before executing, to give the
+            // dialog a chance to go away before it takes a
+            // screenshot.
+            // TODO: instead, omit global action dialog layer
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mScreenshotHelper.takeScreenshot(1, true, true, mHandler);
+                    MetricsLogger.action(mContext,
+                            MetricsEvent.ACTION_SCREENSHOT_POWER_MENU);
+                }
+            }, 500);
+        }
+
+        @Override
+        public boolean showDuringKeyguard() {
+            return true;
+        }
+
+        @Override
+        public boolean showBeforeProvisioning() {
+            return false;
+        }
+    }
 
     private class BugReportAction extends SinglePressAction implements LongPressAction {
 
