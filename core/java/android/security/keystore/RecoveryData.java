@@ -38,7 +38,7 @@ import java.util.List;
  * @hide
  */
 public final class RecoveryData implements Parcelable {
-    private Integer mSnapshotVersion;
+    private int mSnapshotVersion;
     private List<RecoveryMetadata> mRecoveryMetadata;
     private List<EntryRecoveryData> mEntryRecoveryData;
     private byte[] mEncryptedRecoveryKeyBlob;
@@ -163,7 +163,6 @@ public final class RecoveryData implements Parcelable {
          * @throws NullPointerException if some required fields were not set.
          */
         public @NonNull RecoveryData build() {
-            Preconditions.checkNotNull(mInstance.mSnapshotVersion);
             Preconditions.checkCollectionElementsNotNull(mInstance.mRecoveryMetadata,
                     "recoveryMetadata");
             Preconditions.checkCollectionElementsNotNull(mInstance.mEntryRecoveryData,

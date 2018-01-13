@@ -28,27 +28,22 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Collection of parameters which define a key derivation function.
- * Supports
+ * Currently only supports salted SHA-256
  *
- * <ul>
- * <li>SHA256
- * <li>Argon2id
- * </ul>
  * @hide
  */
-public final class KeyDerivationParameters implements Parcelable {
+public final class KeyDerivationParams implements Parcelable {
     private final int mAlgorithm;
     private byte[] mSalt;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({ALGORITHM_SHA256, ALGORITHM_ARGON2ID})
+    @IntDef(prefix = {"ALGORITHM_"}, value = {ALGORITHM_SHA256, ALGORITHM_ARGON2ID})
     public @interface KeyDerivationAlgorithm {
     }
 
     /**
      * Salted SHA256
-     * @hide
      */
     public static final int ALGORITHM_SHA256 = 1;
 
@@ -62,11 +57,11 @@ public final class KeyDerivationParameters implements Parcelable {
     /**
      * Creates instance of the class to to derive key using salted SHA256 hash.
      */
-    public static KeyDerivationParameters createSha256Parameters(@NonNull byte[] salt) {
-        return new KeyDerivationParameters(ALGORITHM_SHA256, salt);
+    public static KeyDerivationParams createSha256Params(@NonNull byte[] salt) {
+        return new KeyDerivationParams(ALGORITHM_SHA256, salt);
     }
 
-    private KeyDerivationParameters(@KeyDerivationAlgorithm int algorithm, @NonNull byte[] salt) {
+    private KeyDerivationParams(@KeyDerivationAlgorithm int algorithm, @NonNull byte[] salt) {
         mAlgorithm = algorithm;
         mSalt = Preconditions.checkNotNull(salt);
     }
@@ -85,14 +80,14 @@ public final class KeyDerivationParameters implements Parcelable {
         return mSalt;
     }
 
-    public static final Parcelable.Creator<KeyDerivationParameters> CREATOR =
-            new Parcelable.Creator<KeyDerivationParameters>() {
-        public KeyDerivationParameters createFromParcel(Parcel in) {
-                return new KeyDerivationParameters(in);
+    public static final Parcelable.Creator<KeyDerivationParams> CREATOR =
+            new Parcelable.Creator<KeyDerivationParams>() {
+        public KeyDerivationParams createFromParcel(Parcel in) {
+                return new KeyDerivationParams(in);
         }
 
-        public KeyDerivationParameters[] newArray(int length) {
-            return new KeyDerivationParameters[length];
+        public KeyDerivationParams[] newArray(int length) {
+            return new KeyDerivationParams[length];
         }
     };
 
@@ -108,7 +103,7 @@ public final class KeyDerivationParameters implements Parcelable {
     /**
      * @hide
      */
-    protected KeyDerivationParameters(Parcel in) {
+    protected KeyDerivationParams(Parcel in) {
         mAlgorithm = in.readInt();
         mSalt = in.createByteArray();
     }

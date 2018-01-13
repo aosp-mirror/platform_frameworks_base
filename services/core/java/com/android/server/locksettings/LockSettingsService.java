@@ -82,7 +82,7 @@ import android.security.keystore.UserNotAuthenticatedException;
 import android.security.keystore.EntryRecoveryData;
 import android.security.keystore.RecoveryData;
 import android.security.keystore.RecoveryMetadata;
-import android.security.keystore.RecoveryManager.RecoveryManagerException;
+import android.security.keystore.RecoveryManagerException;
 import android.service.gatekeeper.GateKeeperResponse;
 import android.service.gatekeeper.IGateKeeperService;
 import android.text.TextUtils;
@@ -1982,8 +1982,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public void setServerParameters(long serverParameters) throws RemoteException {
-        mRecoverableKeyStoreManager.setServerParameters(serverParameters);
+    public void setServerParams(byte[] serverParams) throws RemoteException {
+        mRecoverableKeyStoreManager.setServerParams(serverParams);
     }
 
     @Override

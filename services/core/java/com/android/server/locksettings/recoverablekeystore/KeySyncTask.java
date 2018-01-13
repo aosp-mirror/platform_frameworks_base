@@ -21,7 +21,7 @@ import static android.security.keystore.RecoveryMetadata.TYPE_LOCKSCREEN;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.security.keystore.KeyDerivationParameters;
+import android.security.keystore.KeyDerivationParams;
 import android.security.keystore.EntryRecoveryData;
 import android.security.keystore.RecoveryData;
 import android.security.keystore.RecoveryMetadata;
@@ -175,7 +175,7 @@ public class KeySyncTask implements Runnable {
             return;
         }
 
-        Long deviceId = mRecoverableKeyStoreDb.getServerParameters(mUserId, recoveryAgentUid);
+        byte[] deviceId = mRecoverableKeyStoreDb.getServerParams(mUserId, recoveryAgentUid);
         if (deviceId == null) {
             Log.w(TAG, "No device ID set for user " + mUserId);
             return;
@@ -232,8 +232,8 @@ public class KeySyncTask implements Runnable {
         byte[] vaultParams = KeySyncUtils.packVaultParams(
                 publicKey,
                 counterId,
-                TRUSTED_HARDWARE_MAX_ATTEMPTS,
-                deviceId);
+                deviceId,
+                TRUSTED_HARDWARE_MAX_ATTEMPTS);
 
         byte[] encryptedRecoveryKey;
         try {
@@ -254,7 +254,7 @@ public class KeySyncTask implements Runnable {
         RecoveryMetadata metadata = new RecoveryMetadata(
                 /*userSecretType=*/ TYPE_LOCKSCREEN,
                 /*lockScreenUiFormat=*/ getUiFormat(mCredentialType, mCredential),
-                /*keyDerivationParameters=*/ KeyDerivationParameters.createSha256Parameters(salt),
+                /*keyDerivationParams=*/ KeyDerivationParams.createSha256Params(salt),
                 /*secret=*/ new byte[0]);
         ArrayList<RecoveryMetadata> metadataList = new ArrayList<>();
         metadataList.add(metadata);

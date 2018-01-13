@@ -78,9 +78,9 @@ public final class RecoveryMetadata implements Parcelable {
     private Integer mLockScreenUiFormat;
 
     /**
-     * Parameters of key derivation function, including algorithm, difficulty, salt.
+     * Parameters of the key derivation function, including algorithm, difficulty, salt.
      */
-    private KeyDerivationParameters mKeyDerivationParameters;
+    private KeyDerivationParams mKeyDerivationParams;
     private byte[] mSecret; // Derived from user secret. The field must have limited visibility.
 
     /**
@@ -90,11 +90,11 @@ public final class RecoveryMetadata implements Parcelable {
      */
     public RecoveryMetadata(@UserSecretType int userSecretType,
             @LockScreenUiFormat int lockScreenUiFormat,
-            @NonNull KeyDerivationParameters keyDerivationParameters,
+            @NonNull KeyDerivationParams keyDerivationParams,
             @NonNull byte[] secret) {
         mUserSecretType = userSecretType;
         mLockScreenUiFormat = lockScreenUiFormat;
-        mKeyDerivationParameters = Preconditions.checkNotNull(keyDerivationParameters);
+        mKeyDerivationParams = Preconditions.checkNotNull(keyDerivationParams);
         mSecret = Preconditions.checkNotNull(secret);
     }
 
@@ -126,8 +126,8 @@ public final class RecoveryMetadata implements Parcelable {
      * Specifies function used to derive symmetric key from user input
      * Format is defined in separate util class.
      */
-    public @NonNull KeyDerivationParameters getKeyDerivationParameters() {
-        return mKeyDerivationParameters;
+    public @NonNull KeyDerivationParams getKeyDerivationParams() {
+        return mKeyDerivationParams;
     }
 
     /**
@@ -176,12 +176,12 @@ public final class RecoveryMetadata implements Parcelable {
         /**
          * Sets parameters of the key derivation function.
          *
-         * @param keyDerivationParameters Key derivation parameters
+         * @param keyDerivationParams Key derivation Params
          * @return This builder.
          */
-        public Builder setKeyDerivationParameters(@NonNull KeyDerivationParameters
-                keyDerivationParameters) {
-            mInstance.mKeyDerivationParameters = keyDerivationParameters;
+        public Builder setKeyDerivationParams(@NonNull KeyDerivationParams
+                keyDerivationParams) {
+            mInstance.mKeyDerivationParams = keyDerivationParams;
             return this;
         }
 
@@ -210,7 +210,7 @@ public final class RecoveryMetadata implements Parcelable {
                 mInstance.mUserSecretType = TYPE_LOCKSCREEN;
             }
             Preconditions.checkNotNull(mInstance.mLockScreenUiFormat);
-            Preconditions.checkNotNull(mInstance.mKeyDerivationParameters);
+            Preconditions.checkNotNull(mInstance.mKeyDerivationParams);
             if (mInstance.mSecret == null) {
                 mInstance.mSecret = new byte[]{};
             }
@@ -253,7 +253,7 @@ public final class RecoveryMetadata implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mUserSecretType);
         out.writeInt(mLockScreenUiFormat);
-        out.writeTypedObject(mKeyDerivationParameters, flags);
+        out.writeTypedObject(mKeyDerivationParams, flags);
         out.writeByteArray(mSecret);
     }
 
@@ -263,7 +263,7 @@ public final class RecoveryMetadata implements Parcelable {
     protected RecoveryMetadata(Parcel in) {
         mUserSecretType = in.readInt();
         mLockScreenUiFormat = in.readInt();
-        mKeyDerivationParameters = in.readTypedObject(KeyDerivationParameters.CREATOR);
+        mKeyDerivationParams = in.readTypedObject(KeyDerivationParams.CREATOR);
         mSecret = in.createByteArray();
     }
 

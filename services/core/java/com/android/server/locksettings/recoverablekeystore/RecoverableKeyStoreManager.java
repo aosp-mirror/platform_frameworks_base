@@ -16,13 +16,13 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import static android.security.keystore.RecoveryManager.ERROR_BAD_X509_CERTIFICATE;
-import static android.security.keystore.RecoveryManager.ERROR_DATABASE_ERROR;
-import static android.security.keystore.RecoveryManager.ERROR_DECRYPTION_FAILED;
-import static android.security.keystore.RecoveryManager.ERROR_INSECURE_USER;
-import static android.security.keystore.RecoveryManager.ERROR_KEYSTORE_INTERNAL_ERROR;
-import static android.security.keystore.RecoveryManager.ERROR_NOT_YET_SUPPORTED;
-import static android.security.keystore.RecoveryManager.ERROR_UNEXPECTED_MISSING_ALGORITHM;
+import static android.security.keystore.RecoveryManagerException.ERROR_BAD_X509_CERTIFICATE;
+import static android.security.keystore.RecoveryManagerException.ERROR_DATABASE_ERROR;
+import static android.security.keystore.RecoveryManagerException.ERROR_DECRYPTION_FAILED;
+import static android.security.keystore.RecoveryManagerException.ERROR_INSECURE_USER;
+import static android.security.keystore.RecoveryManagerException.ERROR_KEYSTORE_INTERNAL_ERROR;
+import static android.security.keystore.RecoveryManagerException.ERROR_UNEXPECTED_MISSING_ALGORITHM;
+import static android.security.keystore.RecoveryManagerException.ERROR_NO_SNAPSHOT_PENDING;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -177,7 +177,7 @@ public class RecoverableKeyStoreManager {
         int uid = Binder.getCallingUid();
         RecoveryData snapshot = mSnapshotStorage.get(uid);
         if (snapshot == null) {
-            throw new ServiceSpecificException(RecoveryManager.ERROR_NO_SNAPSHOT_PENDING);
+            throw new ServiceSpecificException(ERROR_NO_SNAPSHOT_PENDING);
         }
         return snapshot;
     }
@@ -201,11 +201,11 @@ public class RecoverableKeyStoreManager {
         throw new UnsupportedOperationException();
     }
 
-    public void setServerParameters(long serverParameters) throws RemoteException {
+    public void setServerParams(byte[] serverParams) throws RemoteException {
         checkRecoverKeyStorePermission();
         int userId = UserHandle.getCallingUserId();
         int uid = Binder.getCallingUid();
-        long updatedRows = mDatabase.setServerParameters(userId, uid, serverParameters);
+        long updatedRows = mDatabase.setServerParams(userId, uid, serverParams);
         if (updatedRows > 0) {
             mDatabase.setShouldCreateSnapshot(userId, uid, true);
         }
@@ -326,10 +326,7 @@ public class RecoverableKeyStoreManager {
         int uid = Binder.getCallingUid();
 
         if (secrets.size() != 1) {
-            // TODO: support multiple secrets
-            throw new ServiceSpecificException(
-                    ERROR_NOT_YET_SUPPORTED,
-                    "Only a single RecoveryMetadata is supported");
+            throw new UnsupportedOperationException("Only a single RecoveryMetadata is supported");
         }
 
         PublicKey publicKey;

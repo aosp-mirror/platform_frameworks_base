@@ -23,8 +23,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
-import android.security.KeyStore;
-import android.util.AndroidException;
 
 import com.android.internal.widget.ILockSettings;
 
@@ -38,64 +36,6 @@ import java.util.Map;
  * @hide
  */
 public class RecoveryManager {
-
-    public static final int NO_ERROR = KeyStore.NO_ERROR;
-    public static final int SYSTEM_ERROR = KeyStore.SYSTEM_ERROR;
-
-    /**
-     * Failed because the loader has not been initialized with a recovery public key yet.
-     */
-    public static final int ERROR_UNINITIALIZED_RECOVERY_PUBLIC_KEY = 20;
-
-    /**
-     * Failed because no snapshot is yet pending to be synced for the user.
-     */
-    public static final int ERROR_NO_SNAPSHOT_PENDING = 21;
-
-    /**
-     * Failed due to an error internal to AndroidKeyStore.
-     */
-    public static final int ERROR_KEYSTORE_INTERNAL_ERROR = 22;
-
-    /**
-     * Failed because the user does not have a lock screen set.
-     */
-    public static final int ERROR_INSECURE_USER = 24;
-
-    /**
-     * Failed because of an internal database error.
-     */
-    public static final int ERROR_DATABASE_ERROR = 25;
-
-    /**
-     * Failed because the provided certificate was not a valid X509 certificate.
-     */
-    public static final int ERROR_BAD_X509_CERTIFICATE = 26;
-
-    /**
-     * Should never be thrown - some algorithm that all AOSP implementations must support is
-     * not available.
-     */
-    public static final int ERROR_UNEXPECTED_MISSING_ALGORITHM = 27;
-
-    /**
-     * The caller is attempting to perform an operation that is not yet fully supported in the API.
-     */
-    public static final int ERROR_NOT_YET_SUPPORTED = 28;
-
-    /**
-     * Error thrown if decryption failed. This might be because the tag is wrong, the key is wrong,
-     * the data has become corrupted, the data has been tampered with, etc.
-     */
-    public static final int ERROR_DECRYPTION_FAILED = 29;
-
-    /**
-     * Rate limit is enforced to prevent using too many trusted remote devices, since each device
-     * can have its own number of user secret guesses allowed.
-     *
-     * @hide
-     */
-    public static final int ERROR_RATE_LIMIT_EXCEEDED = 30;
 
     /** Key has been successfully synced. */
     public static final int RECOVERY_STATUS_SYNCED = 0;
@@ -119,47 +59,6 @@ public class RecoveryManager {
         ILockSettings lockSettings =
                 ILockSettings.Stub.asInterface(ServiceManager.getService("lock_settings"));
         return new RecoveryManager(lockSettings);
-    }
-
-    /**
-     * Exceptions returned by {@link RecoveryManager}.
-     */
-    public static class RecoveryManagerException extends AndroidException {
-        private int mErrorCode;
-
-        /**
-         * Creates new {@link #RecoveryManagerException} instance from the error code.
-         *
-         * @param errorCode An error code, as listed at the top of this file.
-         * @param message The associated error message.
-         * @hide
-         */
-        public static RecoveryManagerException fromErrorCode(
-                int errorCode, String message) {
-            return new RecoveryManagerException(errorCode, message);
-        }
-
-        /**
-         * Creates new {@link #RecoveryManagerException} from {@link
-         * ServiceSpecificException}.
-         *
-         * @param e exception thrown on service side.
-         * @hide
-         */
-        static RecoveryManagerException fromServiceSpecificException(
-                ServiceSpecificException e) throws RecoveryManagerException {
-            throw RecoveryManagerException.fromErrorCode(e.errorCode, e.getMessage());
-        }
-
-        private RecoveryManagerException(int errorCode, String message) {
-            super(message);
-            mErrorCode = errorCode;
-        }
-
-        /** Returns errorCode. */
-        public int getErrorCode() {
-            return mErrorCode;
-        }
     }
 
     /**
@@ -260,15 +159,14 @@ public class RecoveryManager {
      * {@code RecoveryData.getEncryptedRecoveryKeyBlob()}. The same value must be included
      * in vaultParams {@link #startRecoverySession}
      *
-     * @param serverParameters included in recovery key blob.
+     * @param serverParams included in recovery key blob.
      * @see #getRecoveryData
      * @throws RecoveryManagerException If parameters rotation is rate limited.
      * @hide
      */
-    public void setServerParameters(long serverParameters)
-            throws RecoveryManagerException {
+    public void setServerParams(byte[] serverParams) throws RecoveryManagerException {
         try {
-            mBinder.setServerParameters(serverParameters);
+            mBinder.setServerParams(serverParams);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
@@ -309,20 +207,17 @@ public class RecoveryManager {
      *   <li>{@link #RECOVERY_STATUS_PERMANENT_FAILURE}
      * </ul>
      *
-     * @param packageName Application whose recoverable keys' statuses are to be retrieved. if
-     *     {@code null} caller's package will be used.
      * @return {@code Map} from KeyStore alias to recovery status.
      * @see #setRecoveryStatus
      * @hide
      */
-    public Map<String, Integer> getRecoveryStatus(@Nullable String packageName)
+    public Map<String, Integer> getRecoveryStatus()
             throws RecoveryManagerException {
         try {
             // IPC doesn't support generic Maps.
             @SuppressWarnings("unchecked")
             Map<String, Integer> result =
-                    (Map<String, Integer>)
-                            mBinder.getRecoveryStatus(packageName);
+                    (Map<String, Integer>) mBinder.getRecoveryStatus(/*packageName=*/ null);
             return result;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -414,8 +309,9 @@ public class RecoveryManager {
      * return recovery key.
      *
      * @param sessionId ID for recovery session.
-     * @param verifierPublicKey Certificate with Public key used to create the recovery blob on the
-     *     source device. Keystore will verify the certificate using root of trust.
+     * @param verifierPublicKey Encoded {@code java.security.cert.X509Certificate} with Public key
+     * used to create the recovery blob on the source device.
+     * Keystore will verify the certificate using root of trust.
      * @param vaultParams Must match the parameters in the corresponding field in the recovery blob.
      *     Used to limit number of guesses.
      * @param vaultChallenge Data passed from server for this recovery session and used to prevent
