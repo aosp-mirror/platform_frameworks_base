@@ -16,9 +16,8 @@
 
 package android.hardware.camera2.impl;
 
-import static android.hardware.camera2.CameraAccessException.CAMERA_IN_USE;
+import static com.android.internal.util.function.pooled.PooledLambda.obtainRunnable;
 
-import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -31,7 +30,6 @@ import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.InputConfiguration;
 import android.hardware.camera2.params.OutputConfiguration;
-import android.hardware.camera2.params.ReprocessFormatsMap;
 import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.hardware.camera2.utils.SubmitInfo;
@@ -1798,31 +1796,33 @@ public class CameraDeviceImpl extends CameraDevice
                     case ERROR_CAMERA_DISCONNECTED:
                         CameraDeviceImpl.this.mDeviceHandler.post(mCallOnDisconnected);
                         break;
-                    default:
-                        Log.e(TAG, "Unknown error from camera device: " + errorCode);
-                        // no break
-                    case ERROR_CAMERA_DEVICE:
-                    case ERROR_CAMERA_SERVICE:
-                        mInError = true;
-                        final int publicErrorCode = (errorCode == ERROR_CAMERA_DEVICE) ?
-                                StateCallback.ERROR_CAMERA_DEVICE :
-                                StateCallback.ERROR_CAMERA_SERVICE;
-                        Runnable r = new Runnable() {
-                            @Override
-                            public void run() {
-                                if (!CameraDeviceImpl.this.isClosed()) {
-                                    mDeviceCallback.onError(CameraDeviceImpl.this, publicErrorCode);
-                                }
-                            }
-                        };
-                        CameraDeviceImpl.this.mDeviceHandler.post(r);
-                        break;
                     case ERROR_CAMERA_REQUEST:
                     case ERROR_CAMERA_RESULT:
                     case ERROR_CAMERA_BUFFER:
                         onCaptureErrorLocked(errorCode, resultExtras);
                         break;
+                    case ERROR_CAMERA_DEVICE:
+                        scheduleNotifyError(StateCallback.ERROR_CAMERA_DEVICE);
+                        break;
+                    case ERROR_CAMERA_DISABLED:
+                        scheduleNotifyError(StateCallback.ERROR_CAMERA_DISABLED);
+                        break;
+                    default:
+                        Log.e(TAG, "Unknown error from camera device: " + errorCode);
+                        scheduleNotifyError(StateCallback.ERROR_CAMERA_SERVICE);
                 }
+            }
+        }
+
+        private void scheduleNotifyError(int code) {
+            mInError = true;
+            CameraDeviceImpl.this.mDeviceHandler.post(obtainRunnable(
+                    CameraDeviceCallbacks::notifyError, this, code));
+        }
+
+        private void notifyError(int code) {
+            if (!CameraDeviceImpl.this.isClosed()) {
+                mDeviceCallback.onError(CameraDeviceImpl.this, code);
             }
         }
 
