@@ -30,16 +30,14 @@ public class IccCardConstants {
     public static final String INTENT_VALUE_ICC_NOT_READY = "NOT_READY";
     /* ABSENT means ICC is missing */
     public static final String INTENT_VALUE_ICC_ABSENT = "ABSENT";
+    /* PRESENT means ICC is present */
+    public static final String INTENT_VALUE_ICC_PRESENT = "PRESENT";
     /* CARD_IO_ERROR means for three consecutive times there was SIM IO error */
     static public final String INTENT_VALUE_ICC_CARD_IO_ERROR = "CARD_IO_ERROR";
     /* CARD_RESTRICTED means card is present but not usable due to carrier restrictions */
     static public final String INTENT_VALUE_ICC_CARD_RESTRICTED = "CARD_RESTRICTED";
     /* LOCKED means ICC is locked by pin or by network */
     public static final String INTENT_VALUE_ICC_LOCKED = "LOCKED";
-    //TODO: we can remove this state in the future if Bug 18489776 analysis
-    //#42's first race condition is resolved
-    /* INTERNAL LOCKED means ICC is locked by pin or by network */
-    public static final String INTENT_VALUE_ICC_INTERNAL_LOCKED = "INTERNAL_LOCKED";
     /* READY means ICC is ready to access */
     public static final String INTENT_VALUE_ICC_READY = "READY";
     /* IMSI means ICC IMSI is ready in property */
@@ -77,7 +75,8 @@ public class IccCardConstants {
         NOT_READY,      /** ordinal(6) == {@See TelephonyManager#SIM_STATE_NOT_READY} */
         PERM_DISABLED,  /** ordinal(7) == {@See TelephonyManager#SIM_STATE_PERM_DISABLED} */
         CARD_IO_ERROR,  /** ordinal(8) == {@See TelephonyManager#SIM_STATE_CARD_IO_ERROR} */
-        CARD_RESTRICTED;/** ordinal(9) == {@See TelephonyManager#SIM_STATE_CARD_RESTRICTED} */
+        CARD_RESTRICTED,/** ordinal(9) == {@See TelephonyManager#SIM_STATE_CARD_RESTRICTED} */
+        LOADED;         /** ordinal(9) == {@See TelephonyManager#SIM_STATE_LOADED} */
 
         public boolean isPinLocked() {
             return ((this == PIN_REQUIRED) || (this == PUK_REQUIRED));
@@ -85,9 +84,9 @@ public class IccCardConstants {
 
         public boolean iccCardExist() {
             return ((this == PIN_REQUIRED) || (this == PUK_REQUIRED)
-                    || (this == NETWORK_LOCKED) || (this == READY)
+                    || (this == NETWORK_LOCKED) || (this == READY) || (this == NOT_READY)
                     || (this == PERM_DISABLED) || (this == CARD_IO_ERROR)
-                    || (this == CARD_RESTRICTED));
+                    || (this == CARD_RESTRICTED) || (this == LOADED));
         }
 
         public static State intToState(int state) throws IllegalArgumentException {
@@ -102,6 +101,7 @@ public class IccCardConstants {
                 case 7: return PERM_DISABLED;
                 case 8: return CARD_IO_ERROR;
                 case 9: return CARD_RESTRICTED;
+                case 10: return LOADED;
                 default:
                     throw new IllegalArgumentException();
             }
