@@ -154,23 +154,24 @@ public class MmTelFeature extends ImsFeature {
         }
 
         @Override
-        public void sendSms(int messageRef, String format, String smsc, boolean retry, byte[] pdu) {
+        public void sendSms(int token, int messageRef, String format, String smsc, boolean retry,
+                byte[] pdu) {
             synchronized (mLock) {
-                MmTelFeature.this.sendSms(messageRef, format, smsc, retry, pdu);
+                MmTelFeature.this.sendSms(token, messageRef, format, smsc, retry, pdu);
             }
         }
 
         @Override
-        public void acknowledgeSms(int messageRef, int result) {
+        public void acknowledgeSms(int token, int messageRef, int result) {
             synchronized (mLock) {
-                MmTelFeature.this.acknowledgeSms(messageRef, result);
+                MmTelFeature.this.acknowledgeSms(token, messageRef, result);
             }
         }
 
         @Override
-        public void acknowledgeSmsReport(int messageRef, int result) {
+        public void acknowledgeSmsReport(int token, int messageRef, int result) {
             synchronized (mLock) {
-                MmTelFeature.this.acknowledgeSmsReport(messageRef, result);
+                MmTelFeature.this.acknowledgeSmsReport(token, messageRef, result);
             }
         }
 
@@ -447,16 +448,17 @@ public class MmTelFeature extends ImsFeature {
         // Base Implementation - Should be overridden
     }
 
-    private void sendSms(int messageRef, String format, String smsc, boolean isRetry, byte[] pdu) {
-        getSmsImplementation().sendSms(messageRef, format, smsc, isRetry, pdu);
+    private void sendSms(int token, int messageRef, String format, String smsc, boolean isRetry,
+            byte[] pdu) {
+        getSmsImplementation().sendSms(token, messageRef, format, smsc, isRetry, pdu);
     }
 
-    private void acknowledgeSms(int messageRef, @DeliverStatusResult int result) {
-        getSmsImplementation().acknowledgeSms(messageRef, result);
+    private void acknowledgeSms(int token, int messageRef, @DeliverStatusResult int result) {
+        getSmsImplementation().acknowledgeSms(token, messageRef, result);
     }
 
-    private void acknowledgeSmsReport(int messageRef, @StatusReportResult int result) {
-        getSmsImplementation().acknowledgeSmsReport(messageRef, result);
+    private void acknowledgeSmsReport(int token, int messageRef, @StatusReportResult int result) {
+        getSmsImplementation().acknowledgeSmsReport(token, messageRef, result);
     }
 
     private String getSmsFormat() {

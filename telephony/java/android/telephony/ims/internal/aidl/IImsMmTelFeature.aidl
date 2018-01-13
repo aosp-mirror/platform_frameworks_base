@@ -52,8 +52,9 @@ interface IImsMmTelFeature {
             IImsCapabilityCallback c);
     // SMS APIs
     void setSmsListener(IImsSmsListener l);
-    oneway void sendSms(int messageRef, String format, String smsc, boolean retry, in byte[] pdu);
-    oneway void acknowledgeSms(int messageRef, int result);
-    oneway void acknowledgeSmsReport(int messageRef, int result);
+    oneway void sendSms(in int token, int messageRef, String format, String smsc, boolean retry,
+            in byte[] pdu);
+    oneway void acknowledgeSms(int token, int messageRef, int result);
+    oneway void acknowledgeSmsReport(int token, int messageRef, int result);
     String getSmsFormat();
 }
