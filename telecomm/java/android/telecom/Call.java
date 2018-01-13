@@ -1408,7 +1408,7 @@ public final class Call {
      * @param extras Bundle containing extra information associated with the event.
      */
     public void sendCallEvent(String event, Bundle extras) {
-        mInCallAdapter.sendCallEvent(mTelecomCallId, event, extras);
+        mInCallAdapter.sendCallEvent(mTelecomCallId, event, mTargetSdkVersion, extras);
     }
 
     /**
