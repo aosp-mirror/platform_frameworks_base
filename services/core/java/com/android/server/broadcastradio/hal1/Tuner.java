@@ -48,7 +48,7 @@ class Tuner extends ITuner.Stub {
 
     private boolean mIsClosed = false;
     private boolean mIsMuted = false;
-    private int mRegion;  // TODO(b/62710330): find better solution to handle regions
+    private int mRegion;
     private final boolean mWithAudio;
 
     Tuner(@NonNull ITunerCallback clientCallback, int halRev,

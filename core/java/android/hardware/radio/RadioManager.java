@@ -213,6 +213,7 @@ public class RadioManager {
         private final boolean mIsBgScanSupported;
         private final Set<Integer> mSupportedProgramTypes;
         private final Set<Integer> mSupportedIdentifierTypes;
+        @Nullable private final Map<String, Integer> mDabFrequencyTable;
         @NonNull private final Map<String, String> mVendorInfo;
 
         /** @hide */
@@ -221,6 +222,7 @@ public class RadioManager {
                 boolean isCaptureSupported, BandDescriptor[] bands, boolean isBgScanSupported,
                 @ProgramSelector.ProgramType int[] supportedProgramTypes,
                 @ProgramSelector.IdentifierType int[] supportedIdentifierTypes,
+                @Nullable Map<String, Integer> dabFrequencyTable,
                 Map<String, String> vendorInfo) {
             mId = id;
             mServiceName = TextUtils.isEmpty(serviceName) ? "default" : serviceName;
@@ -236,6 +238,13 @@ public class RadioManager {
             mIsBgScanSupported = isBgScanSupported;
             mSupportedProgramTypes = arrayToSet(supportedProgramTypes);
             mSupportedIdentifierTypes = arrayToSet(supportedIdentifierTypes);
+            if (dabFrequencyTable != null) {
+                for (Map.Entry<String, Integer> entry : dabFrequencyTable.entrySet()) {
+                    Objects.requireNonNull(entry.getKey());
+                    Objects.requireNonNull(entry.getValue());
+                }
+            }
+            mDabFrequencyTable = dabFrequencyTable;
             mVendorInfo = (vendorInfo == null) ? new HashMap<>() : vendorInfo;
         }
 
@@ -363,6 +372,19 @@ public class RadioManager {
         }
 
         /**
+         * A frequency table for Digital Audio Broadcasting (DAB).
+         *
+         * The key is a channel name, i.e. 5A, 7B.
+         *
+         * The value is a frequency, in kHz.
+         *
+         * @return a frequency table, or {@code null} if the module doesn't support DAB
+         */
+        public @Nullable Map<String, Integer> getDabFrequencyTable() {
+            return mDabFrequencyTable;
+        }
+
+        /**
          * A map of vendor-specific opaque strings, passed from HAL without changes.
          * Format of these strings can vary across vendors.
          *
@@ -403,6 +425,7 @@ public class RadioManager {
             mIsBgScanSupported = in.readInt() == 1;
             mSupportedProgramTypes = arrayToSet(in.createIntArray());
             mSupportedIdentifierTypes = arrayToSet(in.createIntArray());
+            mDabFrequencyTable = Utils.readStringIntMap(in);
             mVendorInfo = Utils.readStringMap(in);
         }
 
@@ -433,6 +456,7 @@ public class RadioManager {
             dest.writeInt(mIsBgScanSupported ? 1 : 0);
             dest.writeIntArray(setToArray(mSupportedProgramTypes));
             dest.writeIntArray(setToArray(mSupportedIdentifierTypes));
+            Utils.writeStringIntMap(dest, mDabFrequencyTable);
             Utils.writeStringMap(dest, mVendorInfo);
         }
 
@@ -456,67 +480,31 @@ public class RadioManager {
 
         @Override
         public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + mId;
-            result = prime * result + mServiceName.hashCode();
-            result = prime * result + mClassId;
-            result = prime * result + ((mImplementor == null) ? 0 : mImplementor.hashCode());
-            result = prime * result + ((mProduct == null) ? 0 : mProduct.hashCode());
-            result = prime * result + ((mVersion == null) ? 0 : mVersion.hashCode());
-            result = prime * result + ((mSerial == null) ? 0 : mSerial.hashCode());
-            result = prime * result + mNumTuners;
-            result = prime * result + mNumAudioSources;
-            result = prime * result + (mIsCaptureSupported ? 1 : 0);
-            result = prime * result + Arrays.hashCode(mBands);
-            result = prime * result + (mIsBgScanSupported ? 1 : 0);
-            result = prime * result + mVendorInfo.hashCode();
-            return result;
+            return Objects.hash(mId, mServiceName, mClassId, mImplementor, mProduct, mVersion,
+                mSerial, mNumTuners, mNumAudioSources, mIsCaptureSupported, mBands,
+                mIsBgScanSupported, mDabFrequencyTable, mVendorInfo);
         }
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
-                return true;
-            if (!(obj instanceof ModuleProperties))
-                return false;
+            if (this == obj) return true;
+            if (!(obj instanceof ModuleProperties)) return false;
             ModuleProperties other = (ModuleProperties) obj;
-            if (mId != other.getId())
-                return false;
+
+            if (mId != other.getId()) return false;
             if (!TextUtils.equals(mServiceName, other.mServiceName)) return false;
-            if (mClassId != other.getClassId())
-                return false;
-            if (mImplementor == null) {
-                if (other.getImplementor() != null)
-                    return false;
-            } else if (!mImplementor.equals(other.getImplementor()))
-                return false;
-            if (mProduct == null) {
-                if (other.getProduct() != null)
-                    return false;
-            } else if (!mProduct.equals(other.getProduct()))
-                return false;
-            if (mVersion == null) {
-                if (other.getVersion() != null)
-                    return false;
-            } else if (!mVersion.equals(other.getVersion()))
-                return false;
-            if (mSerial == null) {
-                if (other.getSerial() != null)
-                    return false;
-            } else if (!mSerial.equals(other.getSerial()))
-                return false;
-            if (mNumTuners != other.getNumTuners())
-                return false;
-            if (mNumAudioSources != other.getNumAudioSources())
-                return false;
-            if (mIsCaptureSupported != other.isCaptureSupported())
-                return false;
-            if (!Arrays.equals(mBands, other.getBands()))
-                return false;
-            if (mIsBgScanSupported != other.isBackgroundScanningSupported())
-                return false;
-            if (!mVendorInfo.equals(other.mVendorInfo)) return false;
+            if (mClassId != other.mClassId) return false;
+            if (!Objects.equals(mImplementor, other.mImplementor)) return false;
+            if (!Objects.equals(mProduct, other.mProduct)) return false;
+            if (!Objects.equals(mVersion, other.mVersion)) return false;
+            if (!Objects.equals(mSerial, other.mSerial)) return false;
+            if (mNumTuners != other.mNumTuners) return false;
+            if (mNumAudioSources != other.mNumAudioSources) return false;
+            if (mIsCaptureSupported != other.mIsCaptureSupported) return false;
+            if (!Objects.equals(mBands, other.mBands)) return false;
+            if (mIsBgScanSupported != other.mIsBgScanSupported) return false;
+            if (!Objects.equals(mDabFrequencyTable, other.mDabFrequencyTable)) return false;
+            if (!Objects.equals(mVendorInfo, other.mVendorInfo)) return false;
             return true;
         }
     }
