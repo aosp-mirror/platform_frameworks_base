@@ -69,4 +69,5 @@ interface ITelephonyRegistry {
             int activationState, int activationType);
     void notifySubscriptionInfoChanged();
     void notifyCarrierNetworkChange(in boolean active);
+    void notifyUserMobileDataStateChangedForPhoneId(in int phoneId, in int subId, in boolean state);
 }

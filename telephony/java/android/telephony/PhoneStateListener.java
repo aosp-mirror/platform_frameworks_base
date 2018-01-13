@@ -244,6 +244,13 @@ public class PhoneStateListener {
      */
     public static final int LISTEN_DATA_ACTIVATION_STATE                   = 0x00040000;
 
+    /**
+     *  Listen for changes to the user mobile data state
+     *
+     *  @see #onUserMobileDataStateChanged
+     */
+    public static final int LISTEN_USER_MOBILE_DATA_STATE                  = 0x00080000;
+
      /*
      * Subscription used to listen to the phone state changes
      * @hide
@@ -348,6 +355,9 @@ public class PhoneStateListener {
                         break;
                     case LISTEN_DATA_ACTIVATION_STATE:
                         PhoneStateListener.this.onDataActivationStateChanged((int)msg.obj);
+                        break;
+                    case LISTEN_USER_MOBILE_DATA_STATE:
+                        PhoneStateListener.this.onUserMobileDataStateChanged((boolean)msg.obj);
                         break;
                     case LISTEN_CARRIER_NETWORK_CHANGE:
                         PhoneStateListener.this.onCarrierNetworkChange((boolean)msg.obj);
@@ -543,6 +553,14 @@ public class PhoneStateListener {
     }
 
     /**
+     * Callback invoked when the user mobile data state has changed
+     * @param enabled indicates whether the current user mobile data state is enabled or disabled.
+     */
+    public void onUserMobileDataStateChanged(boolean enabled) {
+        // default implementation empty
+    }
+
+    /**
      * Callback invoked when telephony has received notice from a carrier
      * app that a network action that could result in connectivity loss
      * has been requested by an app using
@@ -652,6 +670,10 @@ public class PhoneStateListener {
 
         public void onDataActivationStateChanged(int activationState) {
             send(LISTEN_DATA_ACTIVATION_STATE, 0, 0, activationState);
+        }
+
+        public void onUserMobileDataStateChanged(boolean enabled) {
+            send(LISTEN_USER_MOBILE_DATA_STATE, 0, 0, enabled);
         }
 
         public void onCarrierNetworkChange(boolean active) {
