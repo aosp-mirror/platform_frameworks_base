@@ -106,7 +106,6 @@ import com.android.server.wm.WindowManagerService.H;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 class AppTokenList extends ArrayList<AppWindowToken> {
 }
@@ -511,15 +510,25 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     }
 
     WindowState findMainWindow() {
+        return findMainWindow(true);
+    }
+
+    /**
+     * Finds the main window that either has type base application or application starting if
+     * requested.
+     *
+     * @param includeStartingApp Allow to search application-starting windows to also be returned.
+     * @return The main window of type base application or application starting if requested.
+     */
+    WindowState findMainWindow(boolean includeStartingApp) {
         WindowState candidate = null;
-        int j = mChildren.size();
-        while (j > 0) {
-            j--;
+        for (int j = mChildren.size() - 1; j >= 0; --j) {
             final WindowState win = mChildren.get(j);
             final int type = win.mAttrs.type;
             // No need to loop through child window as base application and starting types can't be
             // child windows.
-            if (type == TYPE_BASE_APPLICATION || type == TYPE_APPLICATION_STARTING) {
+            if (type == TYPE_BASE_APPLICATION
+                    || (includeStartingApp && type == TYPE_APPLICATION_STARTING)) {
                 // In cases where there are multiple windows, we prefer the non-exiting window. This
                 // happens for example when replacing windows during an activity relaunch. When
                 // constructing the animation, we want the new window, not the exiting one.
@@ -1367,8 +1376,11 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
         if (mLastTransactionSequence != mService.mTransactionSequence) {
             mLastTransactionSequence = mService.mTransactionSequence;
-            mNumInterestingWindows = mNumDrawnWindows = 0;
+            mNumDrawnWindows = 0;
             startingDisplayed = false;
+
+            // There is the main base application window, even if it is exiting, wait for it
+            mNumInterestingWindows = findMainWindow(false /* includeStartingApp */) != null ? 1 : 0;
         }
 
         final WindowStateAnimator winAnimator = w.mWinAnimator;
@@ -1390,7 +1402,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
             if (w != startingWindow) {
                 if (w.isInteresting()) {
-                    mNumInterestingWindows++;
+                    // Add non-main window as interesting since the main app has already been added
+                    if (findMainWindow(false /* includeStartingApp */) != w) {
+                        mNumInterestingWindows++;
+                    }
                     if (w.isDrawnLw()) {
                         mNumDrawnWindows++;
 
