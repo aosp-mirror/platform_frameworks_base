@@ -28,6 +28,7 @@ import android.content.pm.UserInfo;
 import android.net.NetworkStats;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiActivityEnergyInfo;
+import android.os.SystemClock;
 import android.telephony.ModemActivityInfo;
 import android.telephony.TelephonyManager;
 import android.os.BatteryStatsInternal;
@@ -619,6 +620,20 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     e.writeLong(modemInfo.getEnergyUsed());
                     ret.add(e);
                 }
+                break;
+            }
+            case StatsLog.CPU_SUSPEND_TIME: {
+                List<StatsLogEventWrapper> ret = new ArrayList();
+                StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 1);
+                e.writeLong(SystemClock.elapsedRealtime());
+                ret.add(e);
+                break;
+            }
+            case StatsLog.CPU_IDLE_TIME: {
+                List<StatsLogEventWrapper> ret = new ArrayList();
+                StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 1);
+                e.writeLong(SystemClock.uptimeMillis());
+                ret.add(e);
                 break;
             }
             default:
