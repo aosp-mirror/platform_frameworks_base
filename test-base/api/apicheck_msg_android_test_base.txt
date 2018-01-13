@@ -6,10 +6,10 @@ To make these errors go away, you have two choices:
    1) You can add "@hide" javadoc comments to the methods, etc. listed in the
       errors above.
 
-   2) You can update legacy-test-current.txt by executing the following command:
-         make update-legacy-test-api
+   2) You can update android-test-base-current.txt by executing the following command:
+         make update-android-test-base-api
 
-      To submit the revised legacy-test-current.txt to the main Android repository,
+      To submit the revised android-test-base-current.txt to the main Android repository,
       you will need approval.
 ******************************
 
