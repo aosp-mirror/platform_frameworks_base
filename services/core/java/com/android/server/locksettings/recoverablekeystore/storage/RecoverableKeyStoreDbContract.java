@@ -130,6 +130,6 @@ class RecoverableKeyStoreDbContract {
         /**
          * The server parameters of the recovery service.
          */
-        static final String COLUMN_NAME_SERVER_PARAMETERS = "server_parameters";
+        static final String COLUMN_NAME_SERVER_PARAMS = "server_params";
     }
 }

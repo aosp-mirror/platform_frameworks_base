@@ -336,17 +336,8 @@ public class RecoverableKeyStoreDb {
      * @hide
      */
     public long setRecoveryServicePublicKey(int userId, int uid, PublicKey publicKey) {
-        SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(RecoveryServiceMetadataEntry.COLUMN_NAME_PUBLIC_KEY, publicKey.getEncoded());
-        String selection =
-                RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID + " = ? AND "
-                        + RecoveryServiceMetadataEntry.COLUMN_NAME_UID + " = ?";
-        String[] selectionArguments = {Integer.toString(userId), Integer.toString(uid)};
-
-        ensureRecoveryServiceMetadataEntryExists(userId, uid);
-        return db.update(
-                RecoveryServiceMetadataEntry.TABLE_NAME, values, selection, selectionArguments);
+        return setBytes(userId, uid, RecoveryServiceMetadataEntry.COLUMN_NAME_PUBLIC_KEY,
+                publicKey.getEncoded());
     }
 
     /**
@@ -393,56 +384,20 @@ public class RecoverableKeyStoreDb {
      */
     @Nullable
     public PublicKey getRecoveryServicePublicKey(int userId, int uid) {
-        SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
-
-        String[] projection = {
-                RecoveryServiceMetadataEntry._ID,
-                RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID,
-                RecoveryServiceMetadataEntry.COLUMN_NAME_UID,
-                RecoveryServiceMetadataEntry.COLUMN_NAME_PUBLIC_KEY};
-        String selection =
-                RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID + " = ? AND "
-                        + RecoveryServiceMetadataEntry.COLUMN_NAME_UID + " = ?";
-        String[] selectionArguments = {Integer.toString(userId), Integer.toString(uid)};
-
-        try (
-                Cursor cursor = db.query(
-                        RecoveryServiceMetadataEntry.TABLE_NAME,
-                        projection,
-                        selection,
-                        selectionArguments,
-                        /*groupBy=*/ null,
-                        /*having=*/ null,
-                        /*orderBy=*/ null)
-        ) {
-            int count = cursor.getCount();
-            if (count == 0) {
-                return null;
-            }
-            if (count > 1) {
-                Log.wtf(TAG,
-                        String.format(Locale.US,
-                                "%d PublicKey entries found for userId=%d uid=%d. "
-                                        + "Should only ever be 0 or 1.", count, userId, uid));
-                return null;
-            }
-            cursor.moveToFirst();
-            int idx = cursor.getColumnIndexOrThrow(
-                    RecoveryServiceMetadataEntry.COLUMN_NAME_PUBLIC_KEY);
-            if (cursor.isNull(idx)) {
-                return null;
-            }
-            byte[] keyBytes = cursor.getBlob(idx);
-            try {
-                return decodeX509Key(keyBytes);
-            } catch (InvalidKeySpecException e) {
-                Log.wtf(TAG,
-                        String.format(Locale.US,
-                                "Recovery service public key entry cannot be decoded for "
-                                        + "userId=%d uid=%d.",
-                                userId, uid));
-                return null;
-            }
+        byte[] keyBytes =
+                getBytes(userId, uid, RecoveryServiceMetadataEntry.COLUMN_NAME_PUBLIC_KEY);
+        if (keyBytes == null) {
+            return null;
+        }
+        try {
+            return decodeX509Key(keyBytes);
+        } catch (InvalidKeySpecException e) {
+            Log.wtf(TAG,
+                    String.format(Locale.US,
+                            "Recovery service public key entry cannot be decoded for "
+                                    + "userId=%d uid=%d.",
+                            userId, uid));
+            return null;
         }
     }
 
@@ -617,14 +572,14 @@ public class RecoverableKeyStoreDb {
      *
      * @param userId The userId of the profile the application is running under.
      * @param uid The uid of the application.
-     * @param serverParameters The server parameters.
+     * @param serverParams The server parameters.
      * @return The primary key of the inserted row, or -1 if failed.
      *
      * @hide
      */
-    public long setServerParameters(int userId, int uid, long serverParameters) {
-        return setLong(userId, uid,
-                RecoveryServiceMetadataEntry.COLUMN_NAME_SERVER_PARAMETERS, serverParameters);
+    public long setServerParams(int userId, int uid, byte[] serverParams) {
+        return setBytes(userId, uid,
+                RecoveryServiceMetadataEntry.COLUMN_NAME_SERVER_PARAMS, serverParams);
     }
 
     /**
@@ -638,9 +593,8 @@ public class RecoverableKeyStoreDb {
      * @hide
      */
     @Nullable
-    public Long getServerParameters(int userId, int uid) {
-        return getLong(userId, uid, RecoveryServiceMetadataEntry.COLUMN_NAME_SERVER_PARAMETERS);
-
+    public byte[] getServerParams(int userId, int uid) {
+        return getBytes(userId, uid, RecoveryServiceMetadataEntry.COLUMN_NAME_SERVER_PARAMS);
     }
 
     /**
@@ -703,6 +657,7 @@ public class RecoverableKeyStoreDb {
                 RecoveryServiceMetadataEntry.COLUMN_NAME_SHOULD_CREATE_SNAPSHOT);
         return res != null && res != 0L;
     }
+
 
     /**
      * Returns given long value from the database.
@@ -771,6 +726,86 @@ public class RecoverableKeyStoreDb {
      */
 
     private long setLong(int userId, int uid, String key, long value) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(key, value);
+        String selection =
+                RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID + " = ? AND "
+                        + RecoveryServiceMetadataEntry.COLUMN_NAME_UID + " = ?";
+        String[] selectionArguments = {Integer.toString(userId), Integer.toString(uid)};
+
+        ensureRecoveryServiceMetadataEntryExists(userId, uid);
+        return db.update(
+                RecoveryServiceMetadataEntry.TABLE_NAME, values, selection, selectionArguments);
+    }
+
+    /**
+     * Returns given binary value from the database.
+     *
+     * @param userId The userId of the profile the application is running under.
+     * @param uid The uid of the application who initialized the local recovery components.
+     * @param key from {@code RecoveryServiceMetadataEntry}
+     * @return The value that were previously set, or null if there's none.
+     *
+     * @hide
+     */
+    private byte[] getBytes(int userId, int uid, String key) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getReadableDatabase();
+
+        String[] projection = {
+                RecoveryServiceMetadataEntry._ID,
+                RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID,
+                RecoveryServiceMetadataEntry.COLUMN_NAME_UID,
+                key};
+        String selection =
+                RecoveryServiceMetadataEntry.COLUMN_NAME_USER_ID + " = ? AND "
+                        + RecoveryServiceMetadataEntry.COLUMN_NAME_UID + " = ?";
+        String[] selectionArguments = {Integer.toString(userId), Integer.toString(uid)};
+
+        try (
+            Cursor cursor = db.query(
+                    RecoveryServiceMetadataEntry.TABLE_NAME,
+                    projection,
+                    selection,
+                    selectionArguments,
+                    /*groupBy=*/ null,
+                    /*having=*/ null,
+                    /*orderBy=*/ null)
+        ) {
+            int count = cursor.getCount();
+            if (count == 0) {
+                return null;
+            }
+            if (count > 1) {
+                Log.wtf(TAG,
+                        String.format(Locale.US,
+                                "%d entries found for userId=%d uid=%d. "
+                                        + "Should only ever be 0 or 1.", count, userId, uid));
+                return null;
+            }
+            cursor.moveToFirst();
+            int idx = cursor.getColumnIndexOrThrow(key);
+            if (cursor.isNull(idx)) {
+                return null;
+            } else {
+                return cursor.getBlob(idx);
+            }
+        }
+    }
+
+    /**
+     * Sets a binary value in the database.
+     *
+     * @param userId The userId of the profile the application is running under.
+     * @param uid The uid of the application who initialized the local recovery components.
+     * @param key defined in {@code RecoveryServiceMetadataEntry}
+     * @param value new value.
+     * @return The primary key of the inserted row, or -1 if failed.
+     *
+     * @hide
+     */
+
+    private long setBytes(int userId, int uid, String key, byte[] value) {
         SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(key, value);
