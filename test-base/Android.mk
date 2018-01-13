@@ -34,8 +34,8 @@ LOCAL_DROIDDOC_SOURCE_PATH := $(LOCAL_PATH)/src
 LEGACY_TEST_OUTPUT_API_FILE := $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/legacy.test.stubs_intermediates/api.txt
 LEGACY_TEST_OUTPUT_REMOVED_API_FILE := $(TARGET_OUT_COMMON_INTERMEDIATES)/JAVA_LIBRARIES/legacy.test.stubs_intermediates/removed.txt
 
-LEGACY_TEST_API_FILE := $(LOCAL_PATH)/api/legacy-test-current.txt
-LEGACY_TEST_REMOVED_API_FILE := $(LOCAL_PATH)/api/legacy-test-removed.txt
+LEGACY_TEST_API_FILE := $(LOCAL_PATH)/api/android-test-base-current.txt
+LEGACY_TEST_REMOVED_API_FILE := $(LOCAL_PATH)/api/android-test-base-removed.txt
 
 LOCAL_DROIDDOC_OPTIONS:= \
     -stubpackages android.test:android.test.suitebuilder.annotation:com.android.internal.util:junit.framework \
@@ -88,7 +88,7 @@ $(eval $(call check-api, \
     -error 7 -error 8 -error 9 -error 10 -error 11 -error 12 -error 13 -error 14 -error 15 \
     -error 16 -error 17 -error 18 -error 19 -error 20 -error 21 -error 23 -error 24 \
     -error 25 -error 26 -error 27, \
-    cat $(LOCAL_PATH)/api/apicheck_msg_legacy_test.txt, \
+    cat $(LOCAL_PATH)/api/apicheck_msg_android_test_base.txt, \
     check-legacy-test-api, \
     $(call doc-timestamp-for,legacy-test-api-stubs-gen) \
     ))
