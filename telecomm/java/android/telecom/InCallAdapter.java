@@ -286,11 +286,12 @@ public final class InCallAdapter {
      *
      * @param callId The callId to send the event for.
      * @param event The event.
+     * @param targetSdkVer Target sdk version of the app calling this api
      * @param extras Extras associated with the event.
      */
-    public void sendCallEvent(String callId, String event, Bundle extras) {
+    public void sendCallEvent(String callId, String event, int targetSdkVer, Bundle extras) {
         try {
-            mAdapter.sendCallEvent(callId, event, extras);
+            mAdapter.sendCallEvent(callId, event, targetSdkVer, extras);
         } catch (RemoteException ignored) {
         }
     }
