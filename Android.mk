@@ -82,7 +82,7 @@ framework_base_android_test_runner_excluding_mock_src_files := \
 # to document and check apis
 files_to_check_apis := \
   $(call find-other-java-files, \
-    legacy-test/src \
+    test-base/src \
     $(non_base_dirs) \
   )
 

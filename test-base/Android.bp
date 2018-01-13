@@ -14,6 +14,24 @@
 // limitations under the License.
 //
 
+// Build the android.test.base library
+// ===================================
+// This contains the junit.framework and android.test classes that were in
+// Android API level 25 excluding those from android.test.runner.
+// Also contains the com.android.internal.util.Predicate[s] classes.
+java_library {
+    name: "android.test.base",
+
+    srcs: ["src/**/*.java"],
+
+    no_framework_libs: true,
+    hostdex: true,
+    libs: [
+        "framework",
+    ],
+
+}
+
 // Build the legacy-test library
 // =============================
 // This contains the junit.framework and android.test classes that were in
@@ -21,23 +39,26 @@
 // Also contains the com.android.internal.util.Predicate[s] classes.
 java_library {
     name: "legacy-test",
-
-    srcs: ["src/**/*.java"],
+    static_libs: ["android.test.base"],
 
     no_framework_libs: true,
     libs: [
         "framework",
     ],
-
 }
 
-// Build the repackaged-legacy-test library
-// ========================================
+// Build the repackaged.android.test.base library
+// ==============================================
 // This contains repackaged versions of the classes from legacy-test.
 java_library_static {
-    name: "repackaged-legacy-test",
+    name: "repackaged.android.test.base",
 
-    static_libs: ["legacy-test"],
+    static_libs: ["android.test.base"],
+
+    no_framework_libs: true,
+    libs: [
+        "framework",
+    ],
 
     jarjar_rules: "jarjar-rules.txt",
 }
