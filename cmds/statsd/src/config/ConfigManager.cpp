@@ -181,8 +181,6 @@ void ConfigManager::Dump(FILE* out) {
 }
 
 void ConfigManager::update_saved_configs(const ConfigKey& key, const StatsdConfig& config) {
-    mkdir(STATS_SERVICE_DIR, S_IRWXU);
-
     // If there is a pre-existing config with same key we should first delete it.
     remove_saved_configs(key);
 

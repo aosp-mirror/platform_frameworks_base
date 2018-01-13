@@ -301,7 +301,6 @@ void StatsLogProcessor::flushIfNecessaryLocked(
 }
 
 void StatsLogProcessor::WriteDataToDisk() {
-    mkdir(STATS_DATA_DIR, S_IRWXU);
     std::lock_guard<std::mutex> lock(mMetricsMutex);
     for (auto& pair : mMetricsManagers) {
         const ConfigKey& key = pair.first;
