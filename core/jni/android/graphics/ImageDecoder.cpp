@@ -77,11 +77,27 @@ static jobject native_create(JNIEnv* env, std::unique_ptr<SkStream> stream) {
         return nullptr;
     }
     std::unique_ptr<ImageDecoder> decoder(new ImageDecoder);
-    decoder->mCodec = SkAndroidCodec::MakeFromStream(std::move(stream), &decoder->mPeeker);
+    SkCodec::Result result;
+    auto codec = SkCodec::MakeFromStream(std::move(stream), &result, &decoder->mPeeker);
+    if (!codec) {
+        switch (result) {
+            case SkCodec::kIncompleteInput:
+                env->ThrowNew(gIncomplete_class, "Incomplete input");
+                break;
+            default:
+                SkString msg;
+                msg.printf("Failed to create image decoder with message '%s'",
+                           SkCodec::ResultToString(result));
+                doThrowIOE(env, msg.c_str());
+                break;
+        }
+
+        return nullptr;
+    }
+
+    decoder->mCodec = SkAndroidCodec::MakeFromCodec(std::move(codec));
     if (!decoder->mCodec.get()) {
-        // FIXME: (b/71578461) Use the error message from
-        // SkCodec::MakeFromStream to report a more informative error message.
-        doThrowIOE(env, "Failed to create an SkCodec");
+        doThrowIOE(env, "Could not create AndroidCodec");
         return nullptr;
     }
 

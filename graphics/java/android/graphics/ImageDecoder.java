@@ -239,11 +239,12 @@ public final class ImageDecoder implements AutoCloseable {
     };
 
     /**
-     *  Supplied to onPartialImage if the provided data is incomplete.
+     *  Used if the provided data is incomplete.
      *
-     *  Will never be thrown by ImageDecoder.
+     *  May be thrown if there is nothing to display.
      *
-     *  There may be a partial image to display.
+     *  If supplied to onPartialImage, there may be a correct partial image to
+     *  display.
      */
     public static class IncompleteException extends IOException {};
 
