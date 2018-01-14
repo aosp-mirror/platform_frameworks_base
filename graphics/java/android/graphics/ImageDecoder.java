@@ -677,6 +677,18 @@ public final class ImageDecoder implements AutoCloseable {
         }
     }
 
+    private Bitmap decodeBitmap() throws IOException {
+        checkState();
+        // nDecodeBitmap calls postProcessAndRelease only if mPostProcess
+        // exists.
+        ImageDecoder postProcessPtr = mPostProcess == null ? null : this;
+        return nDecodeBitmap(mNativePtr, mOnPartialImageListener,
+                postProcessPtr, mDesiredWidth, mDesiredHeight, mCropRect,
+                mMutable, mAllocator, mRequireUnpremultiplied,
+                mPreferRamOverQuality, mAsAlphaMask);
+
+    }
+
     /**
      *  Create a {@link Drawable} from a {@code Source}.
      *
@@ -702,8 +714,6 @@ public final class ImageDecoder implements AutoCloseable {
                 }
             }
 
-            decoder.checkState();
-
             if (decoder.mRequireUnpremultiplied) {
                 // Though this could be supported (ignored) for opaque images,
                 // it seems better to always report this error.
@@ -716,17 +726,7 @@ public final class ImageDecoder implements AutoCloseable {
                                                 "Drawable!");
             }
 
-            Bitmap bm = nDecodeBitmap(decoder.mNativePtr,
-                                      decoder.mOnPartialImageListener,
-                                      decoder.mPostProcess,
-                                      decoder.mDesiredWidth,
-                                      decoder.mDesiredHeight,
-                                      decoder.mCropRect,
-                                      false,    // mMutable
-                                      decoder.mAllocator,
-                                      false,    // mRequireUnpremultiplied
-                                      decoder.mPreferRamOverQuality,
-                                      decoder.mAsAlphaMask);
+            Bitmap bm = decoder.decodeBitmap();
             Resources res = src.getResources();
             if (res == null) {
                 bm.setDensity(Bitmap.DENSITY_NONE);
@@ -781,19 +781,7 @@ public final class ImageDecoder implements AutoCloseable {
                 }
             }
 
-            decoder.checkState();
-
-            return nDecodeBitmap(decoder.mNativePtr,
-                                 decoder.mOnPartialImageListener,
-                                 decoder.mPostProcess,
-                                 decoder.mDesiredWidth,
-                                 decoder.mDesiredHeight,
-                                 decoder.mCropRect,
-                                 decoder.mMutable,
-                                 decoder.mAllocator,
-                                 decoder.mRequireUnpremultiplied,
-                                 decoder.mPreferRamOverQuality,
-                                 decoder.mAsAlphaMask);
+            return decoder.decodeBitmap();
         }
     }
 
@@ -809,6 +797,18 @@ public final class ImageDecoder implements AutoCloseable {
         return decodeBitmap(src, null);
     }
 
+    /**
+     * Private method called by JNI.
+     */
+    @SuppressWarnings("unused")
+    private int postProcessAndRelease(@NonNull Canvas canvas, int width, int height) {
+        try {
+            return mPostProcess.postProcess(canvas, width, height);
+        } finally {
+            canvas.release();
+        }
+    }
+
     private static native ImageDecoder nCreate(long asset) throws IOException;
     private static native ImageDecoder nCreate(ByteBuffer buffer,
                                                int position,
@@ -820,7 +820,7 @@ public final class ImageDecoder implements AutoCloseable {
     @NonNull
     private static native Bitmap nDecodeBitmap(long nativePtr,
             OnPartialImageListener listener,
-            PostProcess postProcess,
+            @Nullable ImageDecoder decoder,     // Only used if mPostProcess != null
             int width, int height,
             Rect cropRect, boolean mutable,
             int allocator, boolean requireUnpremul,

@@ -43,11 +43,11 @@ static jclass    gIncomplete_class;
 static jclass    gCorrupt_class;
 static jclass    gCanvas_class;
 static jmethodID gImageDecoder_constructorMethodID;
+static jmethodID gImageDecoder_postProcessMethodID;
 static jmethodID gPoint_constructorMethodID;
 static jmethodID gIncomplete_constructorMethodID;
 static jmethodID gCorrupt_constructorMethodID;
 static jmethodID gCallback_onPartialImageMethodID;
-static jmethodID gPostProcess_postProcessMethodID;
 static jmethodID gCanvas_constructorMethodID;
 static jmethodID gCanvas_releaseMethodID;
 
@@ -176,6 +176,24 @@ static jobject ImageDecoder_nCreateByteArray(JNIEnv* env, jobject /*clazz*/, jby
     return native_create(env, std::move(stream));
 }
 
+static jint postProcessAndRelease(JNIEnv* env, jobject jimageDecoder,
+                                  std::unique_ptr<Canvas> canvas, int width, int height) {
+    jobject jcanvas = env->NewObject(gCanvas_class, gCanvas_constructorMethodID,
+                                     reinterpret_cast<jlong>(canvas.get()));
+    if (!jcanvas) {
+        doThrowOOME(env, "Failed to create Java Canvas for PostProcess!");
+        return ImageDecoder::kUnknown;
+    }
+
+    // jcanvas now owns canvas.
+    canvas.release();
+
+    return env->CallIntMethod(jimageDecoder, gImageDecoder_postProcessMethodID,
+                              jcanvas, width, height);
+}
+
+// Note: jpostProcess points to an ImageDecoder object if it has a PostProcess object, and nullptr
+// otherwise.
 static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong nativePtr,
                                           jobject jcallback, jobject jpostProcess,
                                           jint desiredWidth, jint desiredHeight, jobject jsubset,
@@ -399,23 +417,9 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
 
     if (jpostProcess) {
         std::unique_ptr<Canvas> canvas(Canvas::create_canvas(bm));
-        jobject jcanvas = env->NewObject(gCanvas_class, gCanvas_constructorMethodID,
-                                         reinterpret_cast<jlong>(canvas.get()));
-        if (!jcanvas) {
-            doThrowOOME(env, "Failed to create Java Canvas for PostProcess!");
-            return nullptr;
-        }
-        // jcanvas will now own canvas.
-        canvas.release();
 
-        jint pixelFormat = env->CallIntMethod(jpostProcess, gPostProcess_postProcessMethodID,
-                                              jcanvas, bm.width(), bm.height());
-        if (env->ExceptionCheck()) {
-            return nullptr;
-        }
-
-        // The Canvas objects are no longer needed, and will not remain valid.
-        env->CallVoidMethod(jcanvas, gCanvas_releaseMethodID);
+        jint pixelFormat = postProcessAndRelease(env, jpostProcess, std::move(canvas),
+                                                 bm.width(), bm.height());
         if (env->ExceptionCheck()) {
             return nullptr;
         }
@@ -511,7 +515,7 @@ static const JNINativeMethod gImageDecoderMethods[] = {
     { "nCreate",        "([BII)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateByteArray },
     { "nCreate",        "(Ljava/io/InputStream;[B)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateInputStream },
     { "nCreate",        "(Ljava/io/FileDescriptor;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateFd },
-    { "nDecodeBitmap",  "(JLandroid/graphics/ImageDecoder$OnPartialImageListener;Landroid/graphics/PostProcess;IILandroid/graphics/Rect;ZIZZZ)Landroid/graphics/Bitmap;",
+    { "nDecodeBitmap",  "(JLandroid/graphics/ImageDecoder$OnPartialImageListener;Landroid/graphics/ImageDecoder;IILandroid/graphics/Rect;ZIZZZ)Landroid/graphics/Bitmap;",
                                                                  (void*) ImageDecoder_nDecodeBitmap },
     { "nGetSampledSize","(JI)Landroid/graphics/Point;",          (void*) ImageDecoder_nGetSampledSize },
     { "nGetPadding",    "(JLandroid/graphics/Rect;)V",           (void*) ImageDecoder_nGetPadding },
@@ -522,6 +526,7 @@ static const JNINativeMethod gImageDecoderMethods[] = {
 int register_android_graphics_ImageDecoder(JNIEnv* env) {
     gImageDecoder_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/ImageDecoder"));
     gImageDecoder_constructorMethodID = GetMethodIDOrDie(env, gImageDecoder_class, "<init>", "(JII)V");
+    gImageDecoder_postProcessMethodID = GetMethodIDOrDie(env, gImageDecoder_class, "postProcessAndRelease", "(Landroid/graphics/Canvas;II)I");
 
     gPoint_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/Point"));
     gPoint_constructorMethodID = GetMethodIDOrDie(env, gPoint_class, "<init>", "(II)V");
@@ -534,9 +539,6 @@ int register_android_graphics_ImageDecoder(JNIEnv* env) {
 
     jclass callback_class = FindClassOrDie(env, "android/graphics/ImageDecoder$OnPartialImageListener");
     gCallback_onPartialImageMethodID = GetMethodIDOrDie(env, callback_class, "onPartialImage", "(Ljava/io/IOException;)Z");
-
-    jclass postProcess_class = FindClassOrDie(env, "android/graphics/PostProcess");
-    gPostProcess_postProcessMethodID = GetMethodIDOrDie(env, postProcess_class, "postProcess", "(Landroid/graphics/Canvas;II)I");
 
     gCanvas_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/Canvas"));
     gCanvas_constructorMethodID = GetMethodIDOrDie(env, gCanvas_class, "<init>", "(J)V");
