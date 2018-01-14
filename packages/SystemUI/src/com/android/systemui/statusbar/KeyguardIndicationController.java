@@ -52,6 +52,8 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.util.wakelock.SettableWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
 
+import java.text.NumberFormat;
+
 /**
  * Controls the indications and error messages shown on the Keyguard
  */
@@ -87,6 +89,7 @@ public class KeyguardIndicationController {
     private boolean mPowerCharged;
     private int mChargingSpeed;
     private int mChargingWattage;
+    private int mBatteryLevel;
     private String mMessageToShowOnScreenOn;
 
     private KeyguardUpdateMonitorCallback mUpdateMonitorCallback;
@@ -285,14 +288,18 @@ public class KeyguardIndicationController {
             // Walk down a precedence-ordered list of what indication
             // should be shown based on user or device state
             if (mDozing) {
-                // If we're dozing, never show a persistent indication.
+                mTextView.setTextColor(Color.WHITE);
                 if (!TextUtils.isEmpty(mTransientIndication)) {
                     // When dozing we ignore any text color and use white instead, because
                     // colors can be hard to read in low brightness.
-                    mTextView.setTextColor(Color.WHITE);
                     mTextView.switchIndication(mTransientIndication);
+                } else if (mPowerPluggedIn) {
+                    String indication = computePowerIndication();
+                    mTextView.switchIndication(indication);
                 } else {
-                    mTextView.switchIndication(null);
+                    String percentage = NumberFormat.getPercentInstance()
+                            .format(mBatteryLevel / 100f);
+                    mTextView.switchIndication(percentage);
                 }
                 return;
             }
@@ -422,6 +429,7 @@ public class KeyguardIndicationController {
             mPowerCharged = status.isCharged();
             mChargingWattage = status.maxChargingWattage;
             mChargingSpeed = status.getChargingSpeed(mSlowThreshold, mFastThreshold);
+            mBatteryLevel = status.level;
             updateIndication();
             if (mDozing) {
                 if (!wasPluggedIn && mPowerPluggedIn) {
