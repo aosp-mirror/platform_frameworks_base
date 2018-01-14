@@ -28,6 +28,7 @@
 #include <SkCanvas.h>
 #include <SkMatrix.h>
 
+class SkAnimatedImage;
 class SkCanvasState;
 class SkVertices;
 
@@ -236,6 +237,9 @@ public:
     virtual void drawNinePatch(Bitmap& bitmap, const android::Res_png_9patch& chunk, float dstLeft,
                                float dstTop, float dstRight, float dstBottom,
                                const SkPaint* paint) = 0;
+
+    virtual void drawAnimatedImage(SkAnimatedImage*, float left, float top,
+                                   const SkPaint* paint) = 0;
 
     /**
      * Specifies if the positions passed to ::drawText are absolute or relative

@@ -26,6 +26,7 @@ import android.content.ContentResolver;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.graphics.drawable.AnimatedImageDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.NinePatchDrawable;
@@ -294,9 +295,10 @@ public final class ImageDecoder implements AutoCloseable {
     };
 
     // Fields
-    private long      mNativePtr;
-    private final int mWidth;
-    private final int mHeight;
+    private long          mNativePtr;
+    private final int     mWidth;
+    private final int     mHeight;
+    private final boolean mAnimated;
 
     private int     mDesiredWidth;
     private int     mDesiredHeight;
@@ -322,12 +324,14 @@ public final class ImageDecoder implements AutoCloseable {
      * called after decoding to delete native resources.
      */
     @SuppressWarnings("unused")
-    private ImageDecoder(long nativePtr, int width, int height) {
+    private ImageDecoder(long nativePtr, int width, int height,
+            boolean animated) {
         mNativePtr = nativePtr;
         mWidth = width;
         mHeight = height;
         mDesiredWidth = width;
         mDesiredHeight = height;
+        mAnimated = animated;
         mCloseGuard.open("close");
     }
 
@@ -726,6 +730,21 @@ public final class ImageDecoder implements AutoCloseable {
                                                 "Drawable!");
             }
 
+            if (decoder.mAnimated) {
+                // AnimatedImageDrawable calls postProcessAndRelease only if
+                // mPostProcess exists.
+                ImageDecoder postProcessPtr = decoder.mPostProcess == null ?
+                        null : decoder;
+                Drawable d = new AnimatedImageDrawable(decoder.mNativePtr,
+                        postProcessPtr, decoder.mDesiredWidth,
+                        decoder.mDesiredHeight, decoder.mCropRect,
+                        decoder.mInputStream, decoder.mAssetFd);
+                // d has taken ownership of these objects.
+                decoder.mInputStream = null;
+                decoder.mAssetFd = null;
+                return d;
+            }
+
             Bitmap bm = decoder.decodeBitmap();
             Resources res = src.getResources();
             if (res == null) {
@@ -742,7 +761,6 @@ public final class ImageDecoder implements AutoCloseable {
                         opticalInsets, null);
             }
 
-            // TODO: Handle animation.
             return new BitmapDrawable(res, bm);
         }
     }

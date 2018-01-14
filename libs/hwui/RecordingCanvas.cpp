@@ -495,6 +495,11 @@ void RecordingCanvas::drawNinePatch(Bitmap& bitmap, const android::Res_png_9patc
                                           refPaint(paint), refBitmap(bitmap), refPatch(&patch)));
 }
 
+void RecordingCanvas::drawAnimatedImage(SkAnimatedImage*, float left, float top,
+                                        const SkPaint*) {
+    // Unimplemented
+}
+
 // Text
 void RecordingCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int glyphCount, const SkPaint& paint,
                                  float x, float y, float boundsLeft, float boundsTop,
