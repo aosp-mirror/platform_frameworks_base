@@ -37,8 +37,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
 /**
- * Utility functions for the flow where the RecoverableKeyStoreLoader syncs keys with remote
- * storage.
+ * Utility functions for the flow where the RecoveryManager syncs keys with remote storage.
  *
  * @hide
  */
@@ -288,17 +287,17 @@ public class KeySyncUtils {
      *
      * @param thmPublicKey Public key of the trusted hardware module.
      * @param counterId ID referring to the specific counter in the hardware module.
-     * @param maxAttempts Maximum allowed guesses before trusted hardware wipes key.
      * @param deviceId ID of the device.
+     * @param maxAttempts Maximum allowed guesses before trusted hardware wipes key.
      * @return The binary vault params, ready for sync.
      */
     public static byte[] packVaultParams(
-            PublicKey thmPublicKey, long counterId, int maxAttempts, long deviceId) {
+            PublicKey thmPublicKey, long counterId, byte[] deviceId, int maxAttempts) {
         return ByteBuffer.allocate(VAULT_PARAMS_LENGTH_BYTES)
                 .order(ByteOrder.LITTLE_ENDIAN)
                 .put(SecureBox.encodePublicKey(thmPublicKey))
                 .putLong(counterId)
-                .putLong(deviceId)
+                .putLong(0L) // TODO: replace with device Id.
                 .putInt(maxAttempts)
                 .array();
     }

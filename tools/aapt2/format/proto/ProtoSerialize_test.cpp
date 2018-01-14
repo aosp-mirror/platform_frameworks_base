@@ -180,7 +180,7 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeXml) {
   attr.name = "name";
   attr.namespace_uri = xml::kSchemaAndroid;
   attr.value = "23dp";
-  attr.compiled_attribute = xml::AaptAttribute({}, ResourceId(0x01010000));
+  attr.compiled_attribute = xml::AaptAttribute(Attribute{}, ResourceId(0x01010000));
   attr.compiled_value =
       ResourceUtils::TryParseItemForAttribute(attr.value, android::ResTable_map::TYPE_DIMENSION);
   attr.compiled_value->SetSource(Source().WithLine(25));

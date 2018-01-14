@@ -2738,6 +2738,24 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public CharSequence getHarmfulAppWarning(String packageName) {
+        try {
+            return mPM.getHarmfulAppWarning(packageName, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
+    public void setHarmfulAppWarning(String packageName, CharSequence warning) {
+        try {
+            mPM.setHarmfulAppWarning(packageName, warning, mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    @Override
     public ArtManager getArtManager() {
         synchronized (mLock) {
             if (mArtManager == null) {

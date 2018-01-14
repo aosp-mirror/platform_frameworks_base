@@ -765,7 +765,8 @@ void SkiaCanvas::drawLayoutOnPath(const minikin::Layout& layout, float hOffset, 
 
     for (size_t i = start; i < end; i++) {
         glyphs[i - start] = layout.getGlyphId(i);
-        float x = hOffset + layout.getX(i);
+        float halfWidth = layout.getCharAdvance(i) * 0.5f;
+        float x = hOffset + layout.getX(i) + halfWidth;
         float y = vOffset + layout.getY(i);
 
         SkPoint pos;
@@ -776,8 +777,8 @@ void SkiaCanvas::drawLayoutOnPath(const minikin::Layout& layout, float hOffset, 
         }
         xform[i - start].fSCos = tan.x();
         xform[i - start].fSSin = tan.y();
-        xform[i - start].fTx = pos.x() - tan.y() * y;
-        xform[i - start].fTy = pos.y() + tan.x() * y;
+        xform[i - start].fTx = pos.x() - tan.y() * y - halfWidth * tan.x();
+        xform[i - start].fTy = pos.y() + tan.x() * y - halfWidth * tan.y();
     }
 
     this->asSkCanvas()->drawTextRSXform(glyphs, sizeof(uint16_t) * N, xform, nullptr, paint);

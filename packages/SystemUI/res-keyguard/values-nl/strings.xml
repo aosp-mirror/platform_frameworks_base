@@ -50,7 +50,7 @@
     <string name="keyguard_accessibility_pin_area" msgid="703175752097279029">"Gebied voor pincode"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="912702510825058921">"Gebied voor pincode van simkaart"</string>
     <string name="keyguard_accessibility_sim_puk_area" msgid="136979425761438705">"Gebied voor pukcode van simkaart"</string>
-    <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Volgende alarm ingesteld voor <xliff:g id="ALARM">%1$s</xliff:g>"</string>
+    <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Volgende wekker ingesteld voor <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"Delete"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"Simkaart uitschakelen"</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>

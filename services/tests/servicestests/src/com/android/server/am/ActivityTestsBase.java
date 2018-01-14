@@ -32,6 +32,7 @@ import static org.mockito.Mockito.spy;
 
 import org.mockito.invocation.InvocationOnMock;
 
+import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -176,6 +177,10 @@ public class ActivityTestsBase {
             if (mTaskRecord != null) {
                 mTaskRecord.addActivityToTop(activity);
             }
+
+            activity.setProcess(new ProcessRecord(null, mService.mContext.getApplicationInfo(),
+                    "name", 12345));
+            activity.app.thread = mock(IApplicationThread.class);
 
             return activity;
         }

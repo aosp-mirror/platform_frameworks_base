@@ -72,7 +72,6 @@ static struct {
 
 // Implements SkMallocPixelRef::ReleaseProc, to delete the screenshot on unref.
 void DeleteScreenshot(void* addr, void* context) {
-    SkASSERT(addr == ((ScreenshotClient*) context)->getPixels());
     delete ((ScreenshotClient*) context);
 }
 

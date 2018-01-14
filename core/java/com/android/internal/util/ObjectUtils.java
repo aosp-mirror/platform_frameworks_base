@@ -29,11 +29,23 @@ public class ObjectUtils {
         return a != null ? a : Preconditions.checkNotNull(b);
     }
 
+    /**
+     * Compares two {@link Nullable} objects with {@code null} values considered the smallest
+     */
     public static <T extends Comparable> int compare(@Nullable T a, @Nullable T b) {
         if (a != null) {
             return (b != null) ? a.compareTo(b) : 1;
         } else {
             return (b != null) ? -1 : 0;
         }
+    }
+
+    /**
+     * @return {@code null} if the given instance is not of the given calss, or the given
+     *         instance otherwise
+     */
+    @Nullable
+    public static <S, T extends S> T castOrNull(@Nullable S instance, @NonNull Class<T> c) {
+        return c.isInstance(instance) ? (T) instance : null;
     }
 }

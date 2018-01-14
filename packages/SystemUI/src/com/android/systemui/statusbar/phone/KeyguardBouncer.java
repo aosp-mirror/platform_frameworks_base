@@ -131,6 +131,10 @@ public class KeyguardBouncer {
             mRoot.setVisibility(View.VISIBLE);
             mKeyguardView.onResume();
             showPromptReason(mBouncerPromptReason);
+            final CharSequence customMessage = mCallback.consumeCustomMessage();
+            if (customMessage != null) {
+                mKeyguardView.showErrorMessage(customMessage);
+            }
             // We might still be collapsed and the view didn't have time to layout yet or still
             // be small, let's wait on the predraw to do the animation in that case.
             if (mKeyguardView.getHeight() != 0 && mKeyguardView.getHeight() != mStatusBarHeight) {

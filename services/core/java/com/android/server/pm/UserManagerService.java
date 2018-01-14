@@ -394,7 +394,7 @@ public class UserManagerService extends IUserManager.Stub {
     /**
      * Start an {@link IntentSender} when user is unlocked after disabling quiet mode.
      *
-     * @see {@link #trySetQuietModeEnabled(String, boolean, int, IntentSender)}
+     * @see {@link #requestQuietModeEnabled(String, boolean, int, IntentSender)}
      */
     private class DisableQuietModeUserUnlockedCallback extends IProgressListener.Stub {
         private final IntentSender mTarget;
@@ -823,7 +823,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public boolean trySetQuietModeEnabled(@NonNull String callingPackage, boolean enableQuietMode,
+    public boolean requestQuietModeEnabled(@NonNull String callingPackage, boolean enableQuietMode,
             int userHandle, @Nullable IntentSender target) {
         Preconditions.checkNotNull(callingPackage);
 

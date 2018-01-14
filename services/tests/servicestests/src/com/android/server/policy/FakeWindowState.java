@@ -19,6 +19,7 @@ package com.android.server.policy;
 import android.annotation.Nullable;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.IApplicationToken;
@@ -43,6 +44,7 @@ public class FakeWindowState implements WindowManagerPolicy.WindowState {
     public boolean inMultiWindowMode;
     public boolean visible = true;
     public int surfaceLayer = 1;
+    public boolean isDimming = false;
 
     public boolean policyVisible = true;
 
@@ -221,7 +223,7 @@ public class FakeWindowState implements WindowManagerPolicy.WindowState {
 
     @Override
     public boolean isDimming() {
-        throw new UnsupportedOperationException("not implemented");
+        return isDimming;
     }
 
     @Override
@@ -251,6 +253,11 @@ public class FakeWindowState implements WindowManagerPolicy.WindowState {
 
     @Override
     public boolean canAcquireSleepToken() {
+        throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
+    public void writeIdentifierToProto(ProtoOutputStream proto, long fieldId){
         throw new UnsupportedOperationException("not implemented");
     }
 }

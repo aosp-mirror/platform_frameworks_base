@@ -1124,6 +1124,7 @@ public class DevicePolicyManager {
      *
      * This broadcast is sent only to the primary user.
      * @see #ACTION_PROVISION_MANAGED_DEVICE
+     * @see DevicePolicyManager#transferOwnership(ComponentName, ComponentName, PersistableBundle)
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_DEVICE_OWNER_CHANGED
@@ -1251,6 +1252,26 @@ public class DevicePolicyManager {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SYSTEM_UPDATE_POLICY_CHANGED
             = "android.app.action.SYSTEM_UPDATE_POLICY_CHANGED";
+
+    /**
+     * Broadcast action to notify ManagedProvisioning that
+     * {@link UserManager#DISALLOW_SHARE_INTO_MANAGED_PROFILE} restriction has changed.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DATA_SHARING_RESTRICTION_CHANGED =
+            "android.app.action.DATA_SHARING_RESTRICTION_CHANGED";
+
+    /**
+     * Broadcast action from ManagedProvisioning to notify that the latest change to
+     * {@link UserManager#DISALLOW_SHARE_INTO_MANAGED_PROFILE} restriction has been successfully
+     * applied (cross profile intent filters updated). Only usesd for CTS tests.
+     * @hide
+     */
+    @TestApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED =
+            "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
 
     /**
      * Permission policy to prompt user for new permission requests for runtime permissions.
@@ -1707,6 +1728,16 @@ public class DevicePolicyManager {
      * @see #generateKeyPair
      */
     public static final int ID_TYPE_MEID = 8;
+
+    /**
+     * Broadcast action: sent when the profile owner is set, changed or cleared.
+     *
+     * This broadcast is sent only to the user managed by the new profile owner.
+     * @see DevicePolicyManager#transferOwnership(ComponentName, ComponentName, PersistableBundle)
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PROFILE_OWNER_CHANGED =
+            "android.app.action.PROFILE_OWNER_CHANGED";
 
     /**
      * Return true if the given administrator component is currently active (enabled) in the system.
@@ -6046,6 +6077,13 @@ public class DevicePolicyManager {
      * Called by a profile owner of a managed profile to remove the cross-profile intent filters
      * that go from the managed profile to the parent, or from the parent to the managed profile.
      * Only removes those that have been set by the profile owner.
+     * <p>
+     * <em>Note</em>: A list of default cross profile intent filters are set up by the system when
+     * the profile is created, some of them ensure the proper functioning of the profile, while
+     * others enable sharing of data from the parent to the managed profile for user convenience.
+     * These default intent filters are not cleared when this API is called. If the default cross
+     * profile data sharing is not desired, they can be disabled with
+     * {@link UserManager#DISALLOW_SHARE_INTO_MANAGED_PROFILE}.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @throws SecurityException if {@code admin} is not a device or profile owner.
@@ -8997,41 +9035,34 @@ public class DevicePolicyManager {
         }
     }
 
-    //TODO STOPSHIP Add link to onTransferComplete callback when implemented.
     /**
-     * Transfers the current administrator. All policies from the current administrator are
-     * migrated to the new administrator. The whole operation is atomic - the transfer is either
-     * complete or not done at all.
+     * Changes the current administrator to another one. All policies from the current
+     * administrator are migrated to the new administrator. The whole operation is atomic -
+     * the transfer is either complete or not done at all.
      *
-     * Depending on the current administrator (device owner, profile owner, corporate owned
-     * profile owner), you have the following expected behaviour:
+     * <p>Depending on the current administrator (device owner, profile owner), you have the
+     * following expected behaviour:
      * <ul>
      *     <li>A device owner can only be transferred to a new device owner</li>
      *     <li>A profile owner can only be transferred to a new profile owner</li>
-     *     <li>A corporate owned managed profile can have two cases:
-     *          <ul>
-     *              <li>If the device owner and profile owner are the same package,
-     *              both will be transferred.</li>
-     *              <li>If the device owner and profile owner are different packages,
-     *              and if this method is called from the profile owner, only the profile owner
-     *              is transferred. Similarly, if it is called from the device owner, only
-     *              the device owner is transferred.</li>
-     *          </ul>
-     *     </li>
      * </ul>
      *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param target Which {@link DeviceAdminReceiver} we want the new administrator to be.
-     * @param bundle Parameters - This bundle allows the current administrator to pass data to the
-     *               new administrator. The parameters will be received in the
-     *               onTransferComplete callback.
-     * @hide
+     * <p>Use the {@code bundle} parameter to pass data to the new administrator. The parameters
+     * will be received in the
+     * {@link DeviceAdminReceiver#onTransferOwnershipComplete(Context, PersistableBundle)} callback.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with
+     * @param target which {@link DeviceAdminReceiver} we want the new administrator to be
+     * @param bundle data to be sent to the new administrator
+     * @throws SecurityException if {@code admin} is not a device owner nor a profile owner
+     * @throws IllegalArgumentException if {@code admin} or {@code target} is {@code null},
+     * both are components in the same package or {@code target} is not an active admin
      */
-    public void transferOwner(@NonNull ComponentName admin, @NonNull ComponentName target,
+    public void transferOwnership(@NonNull ComponentName admin, @NonNull ComponentName target,
             PersistableBundle bundle) {
-        throwIfParentInstance("transferOwner");
+        throwIfParentInstance("transferOwnership");
         try {
-            mService.transferOwner(admin, target, bundle);
+            mService.transferOwnership(admin, target, bundle);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

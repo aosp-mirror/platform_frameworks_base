@@ -714,7 +714,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             } else if (toStackWindowingMode == WINDOWING_MODE_FREEFORM) {
                 Rect bounds = getLaunchBounds();
                 if (bounds == null) {
-                    mService.mStackSupervisor.getLaunchingBoundsController().layoutTask(this, null);
+                    mService.mStackSupervisor.getLaunchParamsController().layoutTask(this, null);
                     bounds = configBounds;
                 }
                 kept = resize(bounds, RESIZE_MODE_FORCED, !mightReplaceWindow, deferResume);
@@ -1838,7 +1838,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
             if (mLastNonFullscreenBounds != null) {
                 updateOverrideConfiguration(mLastNonFullscreenBounds);
             } else {
-                mService.mStackSupervisor.getLaunchingBoundsController().layoutTask(this, null);
+                mService.mStackSupervisor.getLaunchParamsController().layoutTask(this, null);
             }
         } else {
             updateOverrideConfiguration(inStack.getOverrideBounds());

@@ -292,9 +292,6 @@ public class WindowAnimator {
         if ((bulkUpdateParams & WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE) != 0) {
             builder.append(" ORIENTATION_CHANGE_COMPLETE");
         }
-        if ((bulkUpdateParams & WindowSurfacePlacer.SET_TURN_ON_SCREEN) != 0) {
-            builder.append(" TURN_ON_SCREEN");
-        }
         return builder.toString();
     }
 

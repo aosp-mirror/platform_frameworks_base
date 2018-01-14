@@ -815,7 +815,7 @@ public class ResourcesImpl {
             } finally {
                 stack.pop();
             }
-        } catch (Exception e) {
+        } catch (Exception | StackOverflowError e) {
             Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
             final NotFoundException rnf = new NotFoundException(
                     "File " + file + " from drawable resource ID #0x" + Integer.toHexString(id));

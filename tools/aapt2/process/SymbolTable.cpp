@@ -243,7 +243,7 @@ static std::unique_ptr<SymbolTable::Symbol> LookupAttributeInTable(
   // Check to see if it is an attribute.
   for (size_t i = 0; i < (size_t)count; i++) {
     if (entry[i].map.name.ident == android::ResTable_map::ATTR_TYPE) {
-      s->attribute = std::make_shared<Attribute>(false, entry[i].map.value.data);
+      s->attribute = std::make_shared<Attribute>(entry[i].map.value.data);
       break;
     }
   }

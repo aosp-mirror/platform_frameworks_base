@@ -24,12 +24,15 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.util.ArraySet;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.mockito.Mockito;
 import org.mockito.hamcrest.MockitoHamcrest;
+
+import java.util.Arrays;
+import java.util.Set;
 
 public class MockUtils {
     private MockUtils() {
@@ -88,7 +91,8 @@ public class MockUtils {
             @Override
             public boolean matches(Object item) {
                 if (item == null) return false;
-                return intent.filterEquals((Intent) item);
+                if (!intent.filterEquals((Intent) item)) return false;
+                return intent.getExtras().kindofEquals(((Intent) item).getExtras());
             }
             @Override
             public void describeTo(Description description) {
@@ -110,6 +114,30 @@ public class MockUtils {
             @Override
             public void describeTo(Description description) {
                 description.appendText("User restrictions=" + getRestrictionsAsString(expected));
+            }
+        };
+        return MockitoHamcrest.argThat(m);
+    }
+
+    public static Set<String> checkAdminApps(String... adminApps) {
+        final Matcher<Set<String>> m = new BaseMatcher<Set<String>>() {
+            @Override
+            public boolean matches(Object item) {
+                if (item == null) return false;
+                final Set<String> actualAdminApps = (Set<String>) item;
+                if (adminApps.length != actualAdminApps.size()) {
+                    return false;
+                }
+                final Set<String> copyOfAdmins = new ArraySet<>(actualAdminApps);
+                for (String adminApp : adminApps) {
+                    copyOfAdmins.remove(adminApp);
+                }
+                return copyOfAdmins.isEmpty();
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("Admin apps=" + Arrays.toString(adminApps));
             }
         };
         return MockitoHamcrest.argThat(m);

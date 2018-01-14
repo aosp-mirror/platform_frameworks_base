@@ -127,6 +127,26 @@ import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.C
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_ABSENT;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_CLOSED;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.FOCUSED_APP_TOKEN;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.FOCUSED_WINDOW;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.FORCE_STATUS_BAR;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.FORCE_STATUS_BAR_FROM_KEYGUARD;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.KEYGUARD_DELEGATE;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.KEYGUARD_DRAW_COMPLETE;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.KEYGUARD_OCCLUDED;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.KEYGUARD_OCCLUDED_CHANGED;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.KEYGUARD_OCCLUDED_PENDING;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.LAST_SYSTEM_UI_FLAGS;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.NAVIGATION_BAR;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.ORIENTATION;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.ORIENTATION_LISTENER;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.ROTATION;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.ROTATION_MODE;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.SCREEN_ON_FULLY;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.STATUS_BAR;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.TOP_FULLSCREEN_OPAQUE_OR_DIMMING_WINDOW;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.TOP_FULLSCREEN_OPAQUE_WINDOW;
+import static com.android.server.wm.proto.WindowManagerPolicyProto.WINDOW_MANAGER_DRAW_COMPLETE;
 
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -172,7 +192,6 @@ import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.session.MediaSessionLegacyHelper;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.FactoryTest;
 import android.os.Handler;
@@ -250,6 +269,7 @@ import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.PhoneWindow;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.util.ScreenShapeHelper;
 import com.android.internal.widget.PointerLocationView;
 import com.android.server.GestureLauncherService;
@@ -441,6 +461,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     AccessibilityManager mAccessibilityManager;
     BurnInProtectionHelper mBurnInProtectionHelper;
     AppOpsManager mAppOpsManager;
+    private ScreenshotHelper mScreenshotHelper;
     private boolean mHasFeatureWatch;
     private boolean mHasFeatureLeanback;
 
@@ -469,6 +490,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowState mNavigationBar = null;
     boolean mHasNavigationBar = false;
     boolean mNavigationBarCanMove = false; // can the navigation bar ever move to the side?
+    @NavigationBarPosition
     int mNavigationBarPosition = NAV_BAR_BOTTOM;
     int[] mNavigationBarHeightForRotationDefault = new int[4];
     int[] mNavigationBarWidthForRotationDefault = new int[4];
@@ -697,6 +719,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // Behavior of Back button while in-call and screen on
     int mIncallBackBehavior;
+
+    // Behavior of rotation suggestions. (See Settings.Secure.SHOW_ROTATION_SUGGESTION)
+    int mShowRotationSuggestions;
 
     Display mDisplay;
 
@@ -952,6 +977,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             resolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS), false, this,
                     UserHandle.USER_ALL);
+            resolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.SHOW_ROTATION_SUGGESTIONS), false, this,
+                    UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.POLICY_CONTROL), false, this,
                     UserHandle.USER_ALL);
@@ -985,23 +1013,41 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     class MyOrientationListener extends WindowOrientationListener {
-        private final Runnable mUpdateRotationRunnable = new Runnable() {
+
+        private SparseArray<Runnable> mRunnableCache;
+
+        MyOrientationListener(Context context, Handler handler) {
+            super(context, handler);
+            mRunnableCache = new SparseArray<>(5);
+        }
+
+        private class UpdateRunnable implements Runnable {
+            private final int mRotation;
+            UpdateRunnable(int rotation) {
+                mRotation = rotation;
+            }
+
             @Override
             public void run() {
                 // send interaction hint to improve redraw performance
                 mPowerManagerInternal.powerHint(PowerHint.INTERACTION, 0);
-                updateRotation(false);
+                if (showRotationChoice(mCurrentAppOrientation, mRotation)) {
+                    sendProposedRotationChangeToStatusBarInternal(mRotation);
+                } else {
+                    updateRotation(false);
+                }
             }
-        };
-
-        MyOrientationListener(Context context, Handler handler) {
-            super(context, handler);
         }
 
         @Override
         public void onProposedRotationChanged(int rotation) {
             if (localLOGV) Slog.v(TAG, "onProposedRotationChanged, rotation=" + rotation);
-            mHandler.post(mUpdateRotationRunnable);
+            Runnable r = mRunnableCache.get(rotation, null);
+            if (r == null){
+                r = new UpdateRunnable(rotation);
+                mRunnableCache.put(rotation, r);
+            }
+            mHandler.post(r);
         }
     }
     MyOrientationListener mOrientationListener;
@@ -1106,7 +1152,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // orientation for a little bit, which can cause orientation
             // changes to lag, so we'd like to keep it always on.  (It will
             // still be turned off when the screen is off.)
-            return false;
+
+            // When locked we can provide rotation suggestions users can approve to change the
+            // current screen rotation. To do this the sensor needs to be running.
+            return mSupportAutoRotation &&
+                    mShowRotationSuggestions == Settings.Secure.SHOW_ROTATION_SUGGESTIONS_ENABLED;
         }
         return mSupportAutoRotation;
     }
@@ -1665,7 +1715,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         @Override
         public void run() {
-            takeScreenshot(mScreenshotType);
+            mScreenshotHelper.takeScreenshot(mScreenshotType,
+                    mStatusBar != null && mStatusBar.isVisibleLw(),
+                    mNavigationBar != null && mNavigationBar.isVisibleLw(), mHandler);
         }
     }
 
@@ -2143,6 +2195,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         mWindowManagerFuncs.notifyKeyguardTrustedChanged();
                     }
                 });
+        mScreenshotHelper = new ScreenshotHelper(mContext);
     }
 
     /**
@@ -2255,9 +2308,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // http://developer.android.com/guide/practices/screens_support.html#range
         // For car, ignore the dp limitation. It's physically impossible to rotate the car's screen
         // so if the orientation is forced, we need to respect that no matter what.
-        boolean isCar = mContext.getPackageManager().hasSystemFeature(
+        final boolean isCar = mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_AUTOMOTIVE);
-        mForceDefaultOrientation = ((longSizeDp >= 960 && shortSizeDp >= 720) || isCar) &&
+        // For TV, it's usually 960dp x 540dp, ignore the size limitation.
+        // so if the orientation is forced, we need to respect that no matter what.
+        final boolean isTv = mContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_LEANBACK);
+        mForceDefaultOrientation = ((longSizeDp >= 960 && shortSizeDp >= 720) || isCar || isTv) &&
                 res.getBoolean(com.android.internal.R.bool.config_forceDefaultOrientation) &&
                 // For debug purposes the next line turns this feature off with:
                 // $ adb shell setprop config.override_forced_orient true
@@ -2294,6 +2351,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Settings.Secure.INCALL_BACK_BUTTON_BEHAVIOR,
                     Settings.Secure.INCALL_BACK_BUTTON_BEHAVIOR_DEFAULT,
                     UserHandle.USER_CURRENT);
+
+            // Configure rotation suggestions.
+            int showRotationSuggestions = Settings.Secure.getIntForUser(resolver,
+                    Settings.Secure.SHOW_ROTATION_SUGGESTIONS,
+                    Settings.Secure.SHOW_ROTATION_SUGGESTIONS_DEFAULT,
+                    UserHandle.USER_CURRENT);
+            if (mShowRotationSuggestions != showRotationSuggestions) {
+                mShowRotationSuggestions = showRotationSuggestions;
+                updateOrientationListenerLp(); // Enable, disable the orientation listener
+            }
 
             // Configure wake gesture.
             boolean wakeGestureEnabledSetting = Settings.Secure.getIntForUser(resolver,
@@ -4685,6 +4752,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return mNavigationBarController.checkHiddenLw();
     }
 
+    @NavigationBarPosition
     private int navigationBarPosition(int displayWidth, int displayHeight, int displayRotation) {
         if (mNavigationBarCanMove && displayWidth > displayHeight) {
             if (displayRotation == Surface.ROTATION_270) {
@@ -5707,100 +5775,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         setHdmiPlugged(!mHdmiPlugged);
     }
 
-    final Object mScreenshotLock = new Object();
-    ServiceConnection mScreenshotConnection = null;
-
-    final Runnable mScreenshotTimeout = new Runnable() {
-        @Override public void run() {
-            synchronized (mScreenshotLock) {
-                if (mScreenshotConnection != null) {
-                    mContext.unbindService(mScreenshotConnection);
-                    mScreenshotConnection = null;
-                    notifyScreenshotError();
-                }
-            }
-        }
-    };
-
-    // Assume this is called from the Handler thread.
-    private void takeScreenshot(final int screenshotType) {
-        synchronized (mScreenshotLock) {
-            if (mScreenshotConnection != null) {
-                return;
-            }
-            final ComponentName serviceComponent = new ComponentName(SYSUI_PACKAGE,
-                    SYSUI_SCREENSHOT_SERVICE);
-            final Intent serviceIntent = new Intent();
-            serviceIntent.setComponent(serviceComponent);
-            ServiceConnection conn = new ServiceConnection() {
-                @Override
-                public void onServiceConnected(ComponentName name, IBinder service) {
-                    synchronized (mScreenshotLock) {
-                        if (mScreenshotConnection != this) {
-                            return;
-                        }
-                        Messenger messenger = new Messenger(service);
-                        Message msg = Message.obtain(null, screenshotType);
-                        final ServiceConnection myConn = this;
-                        Handler h = new Handler(mHandler.getLooper()) {
-                            @Override
-                            public void handleMessage(Message msg) {
-                                synchronized (mScreenshotLock) {
-                                    if (mScreenshotConnection == myConn) {
-                                        mContext.unbindService(mScreenshotConnection);
-                                        mScreenshotConnection = null;
-                                        mHandler.removeCallbacks(mScreenshotTimeout);
-                                    }
-                                }
-                            }
-                        };
-                        msg.replyTo = new Messenger(h);
-                        msg.arg1 = msg.arg2 = 0;
-                        if (mStatusBar != null && mStatusBar.isVisibleLw())
-                            msg.arg1 = 1;
-                        if (mNavigationBar != null && mNavigationBar.isVisibleLw())
-                            msg.arg2 = 1;
-                        try {
-                            messenger.send(msg);
-                        } catch (RemoteException e) {
-                        }
-                    }
-                }
-
-                @Override
-                public void onServiceDisconnected(ComponentName name) {
-                    synchronized (mScreenshotLock) {
-                        if (mScreenshotConnection != null) {
-                            mContext.unbindService(mScreenshotConnection);
-                            mScreenshotConnection = null;
-                            mHandler.removeCallbacks(mScreenshotTimeout);
-                            notifyScreenshotError();
-                        }
-                    }
-                }
-            };
-            if (mContext.bindServiceAsUser(serviceIntent, conn,
-                    Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
-                    UserHandle.CURRENT)) {
-                mScreenshotConnection = conn;
-                mHandler.postDelayed(mScreenshotTimeout, 10000);
-            }
-        }
-    }
-
-    /**
-     * Notifies the screenshot service to show an error.
-     */
-    private void notifyScreenshotError() {
-        // If the service process is killed, then ask it to clean up after itself
-        final ComponentName errorComponent = new ComponentName(SYSUI_PACKAGE,
-                SYSUI_SCREENSHOT_ERROR_RECEIVER);
-        Intent errorIntent = new Intent(Intent.ACTION_USER_PRESENT);
-        errorIntent.setComponent(errorComponent);
-        errorIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT |
-                Intent.FLAG_RECEIVER_FOREGROUND);
-        mContext.sendBroadcastAsUser(errorIntent, UserHandle.CURRENT);
-    }
 
     /** {@inheritDoc} */
     @Override
@@ -6222,6 +6196,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         Message message = mHandler.obtainMessage(MSG_SYSTEM_KEY_PRESS, keyCode, 0);
         message.setAsynchronous(true);
         mHandler.sendMessage(message);
+    }
+
+    /**
+     * Notify the StatusBar that system rotation suggestion has changed.
+     */
+    private void sendProposedRotationChangeToStatusBarInternal(int rotation) {
+        StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
+        if (statusBar != null) {
+            statusBar.onProposedRotationChanged(rotation);
+        }
     }
 
     /**
@@ -6879,12 +6863,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void dismissKeyguardLw(IKeyguardDismissCallback callback) {
+    public void dismissKeyguardLw(IKeyguardDismissCallback callback, CharSequence message) {
         if (mKeyguardDelegate != null && mKeyguardDelegate.isShowing()) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "PWM.dismissKeyguardLw");
 
             // ask the keyguard to prompt the user to authenticate if necessary
-            mKeyguardDelegate.dismiss(callback);
+            mKeyguardDelegate.dismiss(callback, message);
         } else if (callback != null) {
             try {
                 callback.onDismissError();
@@ -7164,6 +7148,86 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void setRotationLw(int rotation) {
         mOrientationListener.setCurrentRotation(rotation);
+    }
+
+    public boolean showRotationChoice(int orientation, final int preferredRotation) {
+        // Rotation choice is only shown when the user is in locked mode.
+        if (mUserRotationMode != WindowManagerPolicy.USER_ROTATION_LOCKED) return false;
+
+        // We should only show a rotation choice if:
+        // 1. The rotation isn't forced by the lid, dock, demo, hdmi, vr, etc mode
+        // 2. The user choice won't be ignored due to screen orientation settings
+
+        // Determine if the rotation currently forced
+        if (mForceDefaultOrientation) {
+            return false; // Rotation is forced to default orientation
+
+        } else if (mLidState == LID_OPEN && mLidOpenRotation >= 0) {
+            return false; // Rotation is forced mLidOpenRotation
+
+        } else if (mDockMode == Intent.EXTRA_DOCK_STATE_CAR && !mCarDockEnablesAccelerometer) {
+            return false; // Rotation forced to mCarDockRotation
+
+        } else if ((mDockMode == Intent.EXTRA_DOCK_STATE_DESK
+                || mDockMode == Intent.EXTRA_DOCK_STATE_LE_DESK
+                || mDockMode == Intent.EXTRA_DOCK_STATE_HE_DESK)
+                && !mDeskDockEnablesAccelerometer) {
+            return false; // Rotation forced to mDeskDockRotation
+
+        } else if (mHdmiPlugged && mDemoHdmiRotationLock) {
+            return false; // Rotation forced to mDemoHdmiRotation
+
+        } else if (mHdmiPlugged && mDockMode == Intent.EXTRA_DOCK_STATE_UNDOCKED
+                && mUndockedHdmiRotation >= 0) {
+            return false; // Rotation forced to mUndockedHdmiRotation
+
+        } else if (mDemoRotationLock) {
+            return false; // Rotation forced to mDemoRotation
+
+        } else if (mPersistentVrModeEnabled) {
+            return false; // Rotation forced to mPortraitRotation
+
+        } else if (!mSupportAutoRotation) {
+            return false;
+        }
+
+        // Determine if the orientation will ignore user choice
+        switch (orientation) {
+            case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
+            case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
+            case ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT:
+            case ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
+            case ActivityInfo.SCREEN_ORIENTATION_LOCKED:
+                return false; // Forced into a particular rotation, no user choice
+
+            case ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE:
+            case ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT:
+            case ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR:
+            case ActivityInfo.SCREEN_ORIENTATION_SENSOR:
+                return false; // Sensor overrides user choice
+
+            case ActivityInfo.SCREEN_ORIENTATION_NOSENSOR:
+                // TODO Can sensor be used to indirectly determine the orientation?
+                return false;
+
+            case ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE:
+                // If the user has locked sensor-based rotation, this behaves the same as landscape
+                return false; // User has locked the rotation, will behave as LANDSCAPE
+            case ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT:
+                // If the user has locked sensor-based rotation, this behaves the same as portrait
+                return false; // User has locked the rotation, will behave as PORTRAIT
+            case ActivityInfo.SCREEN_ORIENTATION_USER:
+                // Works with any rotation except upside down
+                return (preferredRotation >= 0) && (preferredRotation != mUpsideDownRotation);
+            case ActivityInfo.SCREEN_ORIENTATION_FULL_USER:
+                // Works with any of the 4 rotations
+                return preferredRotation >= 0;
+
+            default:
+                // TODO: how to handle SCREEN_ORIENTATION_BEHIND, UNSET?
+                // For UNSPECIFIED use preferred orientation matching SCREEN_ORIENTATION_USER
+                return (preferredRotation >= 0) && (preferredRotation != mUpsideDownRotation);
+        }
     }
 
     private boolean isLandscapeOrSeascape(int rotation) {
@@ -7852,26 +7916,60 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return vis;
     }
 
-    private int updateLightNavigationBarLw(int vis, WindowState opaque,
-            WindowState opaqueOrDimming) {
-        final WindowState imeWin = mWindowManagerFuncs.getInputMethodWindowLw();
+    @VisibleForTesting
+    @Nullable
+    static WindowState chooseNavigationColorWindowLw(WindowState opaque,
+            WindowState opaqueOrDimming, WindowState imeWindow,
+            @NavigationBarPosition int navBarPosition) {
+        // If the IME window is visible and FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS is set, then IME
+        // window can be navigation color window.
+        final boolean imeWindowCanNavColorWindow = imeWindow != null
+                && imeWindow.isVisibleLw()
+                && navBarPosition == NAV_BAR_BOTTOM
+                && (PolicyControl.getWindowFlags(imeWindow, null)
+                & WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS) != 0;
 
-        final WindowState navColorWin;
-        if (imeWin != null && imeWin.isVisibleLw() && mNavigationBarPosition == NAV_BAR_BOTTOM) {
-            navColorWin = imeWin;
-        } else {
-            navColorWin = opaqueOrDimming;
+        if (opaque != null && opaqueOrDimming == opaque) {
+            // If the top fullscreen-or-dimming window is also the top fullscreen, respect it
+            // unless IME window is also eligible, since currently the IME window is always show
+            // above the opaque fullscreen app window, regardless of the IME target window.
+            // TODO(b/31559891): Maybe we need to revisit this condition once b/31559891 is fixed.
+            return imeWindowCanNavColorWindow ? imeWindow : opaque;
         }
 
+        if (opaqueOrDimming == null || !opaqueOrDimming.isDimming()) {
+            // No dimming window is involved. Determine the result only with the IME window.
+            return imeWindowCanNavColorWindow ? imeWindow : null;
+        }
+
+        if (!imeWindowCanNavColorWindow) {
+            // No IME window is involved. Determine the result only with opaqueOrDimming.
+            return opaqueOrDimming;
+        }
+
+        // The IME window and the dimming window are competing.  Check if the dimming window can be
+        // IME target or not.
+        if (LayoutParams.mayUseInputMethod(PolicyControl.getWindowFlags(opaqueOrDimming, null))) {
+            // The IME window is above the dimming window.
+            return imeWindow;
+        } else {
+            // The dimming window is above the IME window.
+            return opaqueOrDimming;
+        }
+    }
+
+    @VisibleForTesting
+    static int updateLightNavigationBarLw(int vis, WindowState opaque, WindowState opaqueOrDimming,
+            WindowState imeWindow, WindowState navColorWin) {
+
         if (navColorWin != null) {
-            if (navColorWin == opaque) {
-                // If the top fullscreen-or-dimming window is also the top fullscreen, respect
-                // its light flag.
+            if (navColorWin == imeWindow || navColorWin == opaque) {
+                // Respect the light flag.
                 vis &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
                 vis |= PolicyControl.getSystemUiVisibility(navColorWin, null)
                         & View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
-            } else if (navColorWin.isDimming() || navColorWin == imeWin) {
-                // Otherwise if it's dimming or it's the IME window, clear the light flag.
+            } else if (navColorWin == opaqueOrDimming && navColorWin.isDimming()) {
+                // Clear the light flag for dimming window.
                 vis &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
             }
         }
@@ -8009,8 +8107,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         vis = mNavigationBarController.updateVisibilityLw(transientNavBarAllowed, oldVis, vis);
 
+        final WindowState navColorWin = chooseNavigationColorWindowLw(
+                mTopFullscreenOpaqueWindowState, mTopFullscreenOpaqueOrDimmingWindowState,
+                mWindowManagerFuncs.getInputMethodWindowLw(), mNavigationBarPosition);
         vis = updateLightNavigationBarLw(vis, mTopFullscreenOpaqueWindowState,
-                mTopFullscreenOpaqueOrDimmingWindowState);
+                mTopFullscreenOpaqueOrDimmingWindowState,
+                mWindowManagerFuncs.getInputMethodWindowLw(), navColorWin);
 
         return vis;
     }
@@ -8178,6 +8280,40 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public void writeToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
+        proto.write(LAST_SYSTEM_UI_FLAGS, mLastSystemUiFlags);
+        proto.write(ROTATION_MODE, mUserRotationMode);
+        proto.write(ROTATION, mUserRotation);
+        proto.write(ORIENTATION, mCurrentAppOrientation);
+        proto.write(SCREEN_ON_FULLY, mScreenOnFully);
+        proto.write(KEYGUARD_DRAW_COMPLETE, mKeyguardDrawComplete);
+        proto.write(WINDOW_MANAGER_DRAW_COMPLETE, mWindowManagerDrawComplete);
+        if (mFocusedApp != null) {
+            proto.write(FOCUSED_APP_TOKEN, mFocusedApp.toString());
+        }
+        if (mFocusedWindow != null) {
+            mFocusedWindow.writeIdentifierToProto(proto, FOCUSED_WINDOW);
+        }
+        if (mTopFullscreenOpaqueWindowState != null) {
+            mTopFullscreenOpaqueWindowState.writeIdentifierToProto(
+                    proto, TOP_FULLSCREEN_OPAQUE_WINDOW);
+        }
+        if (mTopFullscreenOpaqueOrDimmingWindowState != null) {
+            mTopFullscreenOpaqueOrDimmingWindowState.writeIdentifierToProto(
+                    proto, TOP_FULLSCREEN_OPAQUE_OR_DIMMING_WINDOW);
+        }
+        proto.write(KEYGUARD_OCCLUDED, mKeyguardOccluded);
+        proto.write(KEYGUARD_OCCLUDED_CHANGED, mKeyguardOccludedChanged);
+        proto.write(KEYGUARD_OCCLUDED_PENDING, mPendingKeyguardOccluded);
+        proto.write(FORCE_STATUS_BAR, mForceStatusBar);
+        proto.write(FORCE_STATUS_BAR_FROM_KEYGUARD, mForceStatusBarFromKeyguard);
+        mStatusBarController.writeToProto(proto, STATUS_BAR);
+        mNavigationBarController.writeToProto(proto, NAVIGATION_BAR);
+        if (mOrientationListener != null) {
+            mOrientationListener.writeToProto(proto, ORIENTATION_LISTENER);
+        }
+        if (mKeyguardDelegate != null) {
+            mKeyguardDelegate.writeToProto(proto, KEYGUARD_DELEGATE);
+        }
         proto.end(token);
     }
 

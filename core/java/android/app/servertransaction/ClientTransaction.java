@@ -24,6 +24,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -54,6 +56,11 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
     /** Target client activity. Might be null if the entire transaction is targeting an app. */
     private IBinder mActivityToken;
 
+    /** Get the target client of the transaction. */
+    public IApplicationThread getClient() {
+        return mClient;
+    }
+
     /**
      * Add a message to the end of the sequence of callbacks.
      * @param activityCallback A single message that can contain a lifecycle request/callback.
@@ -78,7 +85,8 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
     }
 
     /** Get the target state lifecycle request. */
-    ActivityLifecycleItem getLifecycleStateRequest() {
+    @VisibleForTesting
+    public ActivityLifecycleItem getLifecycleStateRequest() {
         return mLifecycleStateRequest;
     }
 

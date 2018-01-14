@@ -2481,6 +2481,7 @@
     <string-array translatable="false" name="config_globalActionsList">
         <item>power</item>
         <item>restart</item>
+        <item>screenshot</item>
         <item>logout</item>
         <item>bugreport</item>
         <item>users</item>
@@ -2667,6 +2668,13 @@
 
     <bool name="config_sms_force_7bit_encoding">false</bool>
 
+    <!-- Number of physical SIM slots on the device. This includes both eSIM and pSIM slots, and
+         is not necessarily the same as the number of phones/logical modems supported by the device.
+         For example, a multi-sim device can have 2 phones/logical modems, but 3 physical slots,
+         or a single SIM device can have 1 phones/logical modems, but 2 physical slots (one eSIM
+         and one pSIM) -->
+    <integer name="config_num_physical_slots">1</integer>
+
     <!--Thresholds for LTE dbm in status bar-->
     <integer-array translatable="false" name="config_lteDbmThresholds">
         <item>-140</item>    <!-- SIGNAL_STRENGTH_NONE_OR_UNKNOWN -->
@@ -2768,6 +2776,13 @@
          Defaults to the older, deprecated config_windowIsRound already used in
          some existing device-specific resource overlays. -->
     <bool name="config_mainBuiltInDisplayIsRound">@bool/config_windowIsRound</bool>
+
+    <!-- The bounding path of the cutout region of the main built-in display.
+         Must either be empty if there is no cutout region, or a string that is parsable by
+         {@link android.util.PathParser}.
+         The path is assumed to be specified in display coordinates with pixel units and in
+         the display's native orientation. -->
+    <string translatable="false" name="config_mainBuiltInDisplayCutout"></string>
 
     <!-- Ultrasound support for Mic/speaker path -->
     <!-- Whether the default microphone audio source supports near-ultrasound frequencies

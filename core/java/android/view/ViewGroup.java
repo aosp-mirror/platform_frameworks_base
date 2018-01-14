@@ -3646,44 +3646,34 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return ViewGroup.class.getName();
     }
 
-    @Override
-    public void notifySubtreeAccessibilityStateChanged(View child, View source, int changeType) {
-        // If this is a live region, we should send a subtree change event
-        // from this view. Otherwise, we can let it propagate up.
-        if (getAccessibilityLiveRegion() != ACCESSIBILITY_LIVE_REGION_NONE) {
-            notifyViewAccessibilityStateChangedIfNeeded(
-                    AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE);
-        } else if (mParent != null) {
-            try {
-                mParent.notifySubtreeAccessibilityStateChanged(this, source, changeType);
-            } catch (AbstractMethodError e) {
-                Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName() +
-                        " does not fully implement ViewParent", e);
-            }
-        }
-    }
-
     /** @hide */
     @Override
-    public void notifySubtreeAccessibilityStateChangedIfNeeded() {
+    public void notifyAccessibilitySubtreeChanged() {
         if (!AccessibilityManager.getInstance(mContext).isEnabled() || mAttachInfo == null) {
             return;
         }
         // If something important for a11y is happening in this subtree, make sure it's dispatched
         // from a view that is important for a11y so it doesn't get lost.
-        if ((getImportantForAccessibility() != IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS)
-                && !isImportantForAccessibility() && (getChildCount() > 0)) {
+        if (getImportantForAccessibility() != IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+                && !isImportantForAccessibility()
+                && getChildCount() > 0) {
             ViewParent a11yParent = getParentForAccessibility();
             if (a11yParent instanceof View) {
-                ((View) a11yParent).notifySubtreeAccessibilityStateChangedIfNeeded();
+                ((View) a11yParent).notifyAccessibilitySubtreeChanged();
                 return;
             }
         }
-        super.notifySubtreeAccessibilityStateChangedIfNeeded();
+        super.notifyAccessibilitySubtreeChanged();
     }
 
     @Override
-    void resetSubtreeAccessibilityStateChanged() {
+    public void notifySubtreeAccessibilityStateChanged(View child, View source, int changeType) {
+        notifyAccessibilityStateChanged(source, changeType);
+    }
+
+    /** @hide */
+    @Override
+    public void resetSubtreeAccessibilityStateChanged() {
         super.resetSubtreeAccessibilityStateChanged();
         View[] children = mChildren;
         final int childCount = mChildrenCount;
@@ -5095,7 +5085,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         if (child.getVisibility() != View.GONE) {
-            notifySubtreeAccessibilityStateChangedIfNeeded();
+            notifyAccessibilitySubtreeChanged();
         }
 
         if (mTransientIndices != null) {
@@ -5365,7 +5355,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         dispatchViewRemoved(view);
 
         if (view.getVisibility() != View.GONE) {
-            notifySubtreeAccessibilityStateChangedIfNeeded();
+            notifyAccessibilitySubtreeChanged();
         }
 
         int transientCount = mTransientIndices == null ? 0 : mTransientIndices.size();
@@ -6084,7 +6074,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         if (invalidate) {
             invalidateViewProperty(false, false);
         }
-        notifySubtreeAccessibilityStateChangedIfNeeded();
+        notifyAccessibilitySubtreeChanged();
     }
 
     @Override

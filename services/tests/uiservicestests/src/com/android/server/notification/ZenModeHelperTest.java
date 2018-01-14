@@ -107,6 +107,68 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testAlarmsOnly_alarmMediaMuteNotApplied() {
+        mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_ALARMS;
+        mZenModeHelperSpy.mConfig.allowAlarms = false;
+        mZenModeHelperSpy.mConfig.allowMediaSystemOther = false;
+        assertFalse(mZenModeHelperSpy.mConfig.allowAlarms);
+        assertFalse(mZenModeHelperSpy.mConfig.allowMediaSystemOther);
+        mZenModeHelperSpy.applyRestrictions();
+
+        // Alarms only mode will not silence alarms
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false,
+                AudioAttributes.USAGE_ALARM);
+
+        // Alarms only mode will not silence media
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false,
+                AudioAttributes.USAGE_MEDIA);
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false,
+                AudioAttributes.USAGE_GAME);
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false,
+                AudioAttributes.USAGE_ASSISTANCE_SONIFICATION);
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false,
+                AudioAttributes.USAGE_UNKNOWN);
+    }
+
+    @Test
+    public void testAlarmsOnly_callsMuteApplied() {
+        mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_ALARMS;
+        mZenModeHelperSpy.mConfig.allowCalls = true;
+        assertTrue(mZenModeHelperSpy.mConfig.allowCalls);
+        mZenModeHelperSpy.applyRestrictions();
+
+        // Alarms only mode will silence calls despite priority-mode config
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
+                AudioAttributes.USAGE_NOTIFICATION_RINGTONE);
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
+                AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_REQUEST);
+    }
+
+    @Test
+    public void testAlarmsOnly_allZenConfigToggledCannotBypass_alarmMuteNotApplied() {
+        // Only audio attributes with SUPPRESIBLE_NEVER can bypass
+        mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_ALARMS;
+        mZenModeHelperSpy.mConfig.allowAlarms = false;
+        mZenModeHelperSpy.mConfig.allowMediaSystemOther = false;
+        mZenModeHelperSpy.mConfig.allowReminders = false;
+        mZenModeHelperSpy.mConfig.allowCalls = false;
+        mZenModeHelperSpy.mConfig.allowMessages = false;
+        mZenModeHelperSpy.mConfig.allowEvents = false;
+        mZenModeHelperSpy.mConfig.allowRepeatCallers= false;
+        assertFalse(mZenModeHelperSpy.mConfig.allowAlarms);
+        assertFalse(mZenModeHelperSpy.mConfig.allowMediaSystemOther);
+        assertFalse(mZenModeHelperSpy.mConfig.allowReminders);
+        assertFalse(mZenModeHelperSpy.mConfig.allowCalls);
+        assertFalse(mZenModeHelperSpy.mConfig.allowMessages);
+        assertFalse(mZenModeHelperSpy.mConfig.allowEvents);
+        assertFalse(mZenModeHelperSpy.mConfig.allowRepeatCallers);
+        mZenModeHelperSpy.applyRestrictions();
+
+        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false,
+                AudioAttributes.USAGE_ALARM);
+    }
+
+    @Test
     public void testZenAllCannotBypass() {
         // Only audio attributes with SUPPRESIBLE_NEVER can bypass
         mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;

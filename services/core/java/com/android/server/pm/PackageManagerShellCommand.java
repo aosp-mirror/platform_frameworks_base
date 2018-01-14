@@ -230,6 +230,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runGetInstantAppResolver();
                 case "has-feature":
                     return runHasFeature();
+                case "set-harmful-app-warning":
+                    return runSetHarmfulAppWarning();
                 default: {
                     String nextArg = getNextArg();
                     if (nextArg == null) {
@@ -1277,7 +1279,7 @@ class PackageManagerShellCommand extends ShellCommand {
             return runRemoveSplit(packageName, splitName);
         }
 
-        userId = translateUserId(userId, "runUninstall");
+        userId = translateUserId(userId, true /*allowAll*/, "runUninstall");
         if (userId == UserHandle.USER_ALL) {
             userId = UserHandle.USER_SYSTEM;
             flags |= PackageManager.DELETE_ALL_USERS;
@@ -2088,6 +2090,29 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runSetHarmfulAppWarning() throws RemoteException {
+        int userId = UserHandle.USER_CURRENT;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            if (opt.equals("--user")) {
+                userId = UserHandle.parseUserArg(getNextArgRequired());
+            } else {
+                getErrPrintWriter().println("Error: Unknown option: " + opt);
+                return -1;
+            }
+        }
+
+        userId = translateUserId(userId, false /*allowAll*/, "runSetHarmfulAppWarning");
+
+        final String packageName = getNextArgRequired();
+        final String warning = getNextArg();
+
+        mInterface.setHarmfulAppWarning(packageName, warning, userId);
+
+        return 0;
+    }
+
     private static String checkAbiArgument(String abi) {
         if (TextUtils.isEmpty(abi)) {
             throw new IllegalArgumentException("Missing ABI argument");
@@ -2107,14 +2132,14 @@ class PackageManagerShellCommand extends ShellCommand {
         throw new IllegalArgumentException("ABI " + abi + " not supported on this device");
     }
 
-    private int translateUserId(int userId, String logContext) {
+    private int translateUserId(int userId, boolean allowAll, String logContext) {
         return ActivityManager.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
-                userId, true, true, logContext, "pm command");
+                userId, allowAll, true, logContext, "pm command");
     }
 
     private int doCreateSession(SessionParams params, String installerPackageName, int userId)
             throws RemoteException {
-        userId = translateUserId(userId, "runInstallCreate");
+        userId = translateUserId(userId, true /*allowAll*/, "runInstallCreate");
         if (userId == UserHandle.USER_ALL) {
             userId = UserHandle.USER_SYSTEM;
             params.installFlags |= PackageManager.INSTALL_ALL_USERS;
@@ -2634,6 +2659,9 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("");
         pw.println("  get-instantapp-resolver");
         pw.println("    Return the name of the component that is the current instant app installer.");
+        pw.println("");
+        pw.println("  set-harmful-app-warning [--user <USER_ID>] <PACKAGE> [<WARNING>]");
+        pw.println("    Mark the app as harmful with the given warning message.");
         pw.println();
         Intent.printIntentArgsHelp(pw , "");
     }

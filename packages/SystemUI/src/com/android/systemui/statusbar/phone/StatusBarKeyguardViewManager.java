@@ -175,13 +175,18 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     public void dismissWithAction(OnDismissAction r, Runnable cancelAction,
             boolean afterKeyguardGone) {
+        dismissWithAction(r, cancelAction, afterKeyguardGone, null /* message */);
+    }
+
+    public void dismissWithAction(OnDismissAction r, Runnable cancelAction,
+            boolean afterKeyguardGone, String message) {
         if (mShowing) {
             cancelPendingWakeupAction();
             // If we're dozing, this needs to be delayed until after we wake up - unless we're
             // wake-and-unlocking, because there dozing will last until the end of the transition.
             if (mDozing && !isWakeAndUnlocking()) {
                 mPendingWakeupAction = new DismissWithActionRequest(
-                        r, cancelAction, afterKeyguardGone);
+                        r, cancelAction, afterKeyguardGone, message);
                 return;
             }
 
@@ -632,7 +637,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if (request != null) {
             if (mShowing) {
                 dismissWithAction(request.dismissAction, request.cancelAction,
-                        request.afterKeyguardGone);
+                        request.afterKeyguardGone, request.message);
             } else if (request.dismissAction != null) {
                 request.dismissAction.onDismiss();
             }
@@ -651,12 +656,14 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         final OnDismissAction dismissAction;
         final Runnable cancelAction;
         final boolean afterKeyguardGone;
+        final String message;
 
         DismissWithActionRequest(OnDismissAction dismissAction, Runnable cancelAction,
-                boolean afterKeyguardGone) {
+                boolean afterKeyguardGone, String message) {
             this.dismissAction = dismissAction;
             this.cancelAction = cancelAction;
             this.afterKeyguardGone = afterKeyguardGone;
+            this.message = message;
         }
     }
 }

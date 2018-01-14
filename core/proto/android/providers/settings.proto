@@ -388,8 +388,9 @@ message GlobalSettingsProto {
     optional SettingProto enable_deletion_helper_no_threshold_toggle = 340;
     optional SettingProto notification_snooze_options = 341;
     optional SettingProto enable_gnss_raw_meas_full_tracking = 346;
+    optional SettingProto zram_enabled = 347;
 
-    // Next tag = 347;
+    // Next tag = 348;
 }
 
 message SecureSettingsProto {

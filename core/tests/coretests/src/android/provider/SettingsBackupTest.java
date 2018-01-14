@@ -350,6 +350,7 @@ public class SettingsBackupTest {
                     Settings.Global.SYS_STORAGE_FULL_THRESHOLD_BYTES,
                     Settings.Global.SYS_STORAGE_THRESHOLD_MAX_BYTES,
                     Settings.Global.SYS_STORAGE_THRESHOLD_PERCENTAGE,
+                    Settings.Global.SYS_VDSO,
                     Settings.Global.TCP_DEFAULT_INIT_RWND,
                     Settings.Global.TETHER_DUN_APN,
                     Settings.Global.TETHER_DUN_REQUIRED,
@@ -421,7 +422,8 @@ public class SettingsBackupTest {
                     Settings.Global.WTF_IS_FATAL,
                     Settings.Global.ZEN_MODE,
                     Settings.Global.ZEN_MODE_CONFIG_ETAG,
-                    Settings.Global.ZEN_MODE_RINGER_LEVEL);
+                    Settings.Global.ZEN_MODE_RINGER_LEVEL,
+                    Settings.Global.ZRAM_ENABLED);
 
     private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
              newHashSet(
@@ -513,6 +515,7 @@ public class SettingsBackupTest {
                  Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE,
                  Settings.Secure.SETTINGS_CLASSNAME,
                  Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING, // candidate?
+                 Settings.Secure.SHOW_ROTATION_SUGGESTIONS,
                  Settings.Secure.SKIP_FIRST_USE_HINTS, // candidate?
                  Settings.Secure.SMS_DEFAULT_APPLICATION,
                  Settings.Secure.TRUST_AGENTS_INITIALIZED,

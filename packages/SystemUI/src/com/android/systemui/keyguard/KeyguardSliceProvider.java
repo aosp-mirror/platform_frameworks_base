@@ -103,11 +103,12 @@ public class KeyguardSliceProvider extends SliceProvider implements
 
     @Override
     public Slice onBindSlice(Uri sliceUri) {
-        ListBuilder builder = new ListBuilder(mSliceUri)
-                .addRow(new RowBuilder(mDateUri).setTitle(mLastText));
+        ListBuilder builder = new ListBuilder(getContext(), mSliceUri);
+        builder.addRow(new RowBuilder(builder, mDateUri).setTitle(mLastText));
         if (!TextUtils.isEmpty(mNextAlarm)) {
             Icon icon = Icon.createWithResource(getContext(), R.drawable.ic_access_alarms_big);
-            builder.addRow(new RowBuilder(mAlarmUri).setTitle(mNextAlarm).addEndItem(icon));
+            builder.addRow(new RowBuilder(builder, mAlarmUri)
+                    .setTitle(mNextAlarm).addEndItem(icon));
         }
 
         return builder.build();

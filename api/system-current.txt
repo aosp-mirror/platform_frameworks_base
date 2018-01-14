@@ -153,6 +153,7 @@ package android {
     field public static final java.lang.String SET_ALWAYS_FINISH = "android.permission.SET_ALWAYS_FINISH";
     field public static final java.lang.String SET_ANIMATION_SCALE = "android.permission.SET_ANIMATION_SCALE";
     field public static final java.lang.String SET_DEBUG_APP = "android.permission.SET_DEBUG_APP";
+    field public static final java.lang.String SET_HARMFUL_APP_WARNINGS = "android.permission.SET_HARMFUL_APP_WARNINGS";
     field public static final java.lang.String SET_MEDIA_KEY_LISTENER = "android.permission.SET_MEDIA_KEY_LISTENER";
     field public static final java.lang.String SET_ORIENTATION = "android.permission.SET_ORIENTATION";
     field public static final java.lang.String SET_POINTER_SPEED = "android.permission.SET_POINTER_SPEED";
@@ -161,6 +162,7 @@ package android {
     field public static final java.lang.String SET_TIME = "android.permission.SET_TIME";
     field public static final java.lang.String SET_VOLUME_KEY_LONG_PRESS_LISTENER = "android.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER";
     field public static final java.lang.String SET_WALLPAPER_COMPONENT = "android.permission.SET_WALLPAPER_COMPONENT";
+    field public static final java.lang.String SHOW_KEYGUARD_MESSAGE = "android.permission.SHOW_KEYGUARD_MESSAGE";
     field public static final java.lang.String SHUTDOWN = "android.permission.SHUTDOWN";
     field public static final java.lang.String SIGNAL_PERSISTENT_PROCESSES = "android.permission.SIGNAL_PERSISTENT_PROCESSES";
     field public static final java.lang.String STATUS_BAR = "android.permission.STATUS_BAR";
@@ -190,10 +192,6 @@ package android {
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int requiredSystemPropertyName = 16844133; // 0x1010565
     field public static final int requiredSystemPropertyValue = 16844134; // 0x1010566
-    field public static final int searchKeyphrase = 16843871; // 0x101045f
-    field public static final int searchKeyphraseId = 16843870; // 0x101045e
-    field public static final int searchKeyphraseRecognitionFlags = 16843942; // 0x10104a6
-    field public static final int searchKeyphraseSupportedLocales = 16843872; // 0x1010460
   }
 
   public static final class R.raw {
@@ -317,6 +315,7 @@ package android.app {
 
   public class KeyguardManager {
     method public android.content.Intent createConfirmFactoryResetCredentialIntent(java.lang.CharSequence, java.lang.CharSequence, java.lang.CharSequence);
+    method public void requestDismissKeyguard(android.app.Activity, java.lang.CharSequence, android.app.KeyguardManager.KeyguardDismissCallback);
   }
 
   public class Notification implements android.os.Parcelable {
@@ -688,12 +687,20 @@ package android.bluetooth {
     method public boolean isEncrypted();
     method public boolean removeBond();
     method public boolean setPhonebookAccessPermission(int);
+    field public static final int ACCESS_ALLOWED = 1; // 0x1
+    field public static final int ACCESS_REJECTED = 2; // 0x2
+    field public static final int ACCESS_UNKNOWN = 0; // 0x0
   }
 
   public final class BluetoothHeadset implements android.bluetooth.BluetoothProfile {
     method public boolean connect(android.bluetooth.BluetoothDevice);
     method public boolean disconnect(android.bluetooth.BluetoothDevice);
     method public boolean setPriority(android.bluetooth.BluetoothDevice, int);
+  }
+
+  public abstract interface BluetoothProfile {
+    field public static final int PRIORITY_OFF = 0; // 0x0
+    field public static final int PRIORITY_ON = 100; // 0x64
   }
 
 }
@@ -900,6 +907,7 @@ package android.content.pm {
     method public abstract java.util.List<android.content.IntentFilter> getAllIntentFilters(java.lang.String);
     method public android.content.pm.dex.ArtManager getArtManager();
     method public abstract java.lang.String getDefaultBrowserPackageNameAsUser(int);
+    method public java.lang.CharSequence getHarmfulAppWarning(java.lang.String);
     method public abstract java.util.List<android.content.pm.PackageInfo> getInstalledPackagesAsUser(int, int);
     method public abstract android.graphics.drawable.Drawable getInstantAppIcon(java.lang.String);
     method public abstract android.content.ComponentName getInstantAppInstallerComponent();
@@ -916,6 +924,7 @@ package android.content.pm {
     method public abstract void removeOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
     method public abstract void revokeRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public abstract boolean setDefaultBrowserPackageNameAsUser(java.lang.String, int);
+    method public void setHarmfulAppWarning(java.lang.String, java.lang.CharSequence);
     method public abstract void setUpdateAvailable(java.lang.String, boolean);
     method public abstract boolean updateIntentVerificationStatusAsUser(java.lang.String, int, int);
     method public abstract void updatePermissionFlags(java.lang.String, java.lang.String, int, int, android.os.UserHandle);
@@ -3995,6 +4004,7 @@ package android.service.trust {
     method public final void removeEscrowToken(long, android.os.UserHandle);
     method public final void revokeTrust();
     method public final void setManagingTrust(boolean);
+    method public final void showKeyguardErrorMessage(java.lang.CharSequence);
     method public final void unlockUserWithToken(long, byte[], android.os.UserHandle);
     field public static final int FLAG_GRANT_TRUST_DISMISS_KEYGUARD = 2; // 0x2
     field public static final int FLAG_GRANT_TRUST_INITIATED_BY_USER = 1; // 0x1
@@ -4279,6 +4289,7 @@ package android.telephony {
     method public java.util.List<android.telephony.SubscriptionPlan> getSubscriptionPlans(int);
     method public void setSubscriptionPlans(int, java.util.List<android.telephony.SubscriptionPlan>);
     field public static final java.lang.String ACTION_MANAGE_SUBSCRIPTION_PLANS = "android.telephony.action.MANAGE_SUBSCRIPTION_PLANS";
+    field public static final java.lang.String ACTION_REFRESH_SUBSCRIPTION_PLANS = "android.telephony.action.REFRESH_SUBSCRIPTION_PLANS";
   }
 
   public final class SubscriptionPlan implements android.os.Parcelable {
@@ -4384,6 +4395,8 @@ package android.telephony {
     method public int[] supplyPukReportResult(java.lang.String, java.lang.String);
     method public void toggleRadioOnOff();
     method public void updateServiceLocation();
+    method public void setSimPowerState(int);
+    method public void setSimPowerStateForSlot(int, int);
     field public static final int CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES = -2; // 0xfffffffe
     field public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1; // 0x1
     field public static final int CARRIER_PRIVILEGE_STATUS_NO_ACCESS = 0; // 0x0
@@ -4407,11 +4420,11 @@ package android.telephony {
 package android.telephony.data {
 
   public final class DataCallResponse implements android.os.Parcelable {
-    ctor public DataCallResponse(int, int, int, int, java.lang.String, java.lang.String, java.util.List<android.telephony.data.InterfaceAddress>, java.util.List<java.net.InetAddress>, java.util.List<java.net.InetAddress>, java.util.List<java.lang.String>, int);
+    ctor public DataCallResponse(int, int, int, int, java.lang.String, java.lang.String, java.util.List<android.net.LinkAddress>, java.util.List<java.net.InetAddress>, java.util.List<java.net.InetAddress>, java.util.List<java.lang.String>, int);
     ctor public DataCallResponse(android.os.Parcel);
     method public int describeContents();
     method public int getActive();
-    method public java.util.List<android.telephony.data.InterfaceAddress> getAddresses();
+    method public java.util.List<android.net.LinkAddress> getAddresses();
     method public int getCallId();
     method public java.util.List<java.net.InetAddress> getDnses();
     method public java.util.List<java.net.InetAddress> getGateways();
@@ -4452,17 +4465,6 @@ package android.telephony.data {
     field public static final int TYPE_3GPP = 1; // 0x1
     field public static final int TYPE_3GPP2 = 2; // 0x2
     field public static final int TYPE_COMMON = 0; // 0x0
-  }
-
-  public final class InterfaceAddress implements android.os.Parcelable {
-    ctor public InterfaceAddress(java.net.InetAddress, int);
-    ctor public InterfaceAddress(java.lang.String, int) throws java.net.UnknownHostException;
-    ctor public InterfaceAddress(android.os.Parcel);
-    method public int describeContents();
-    method public java.net.InetAddress getAddress();
-    method public int getNetworkPrefixLength();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.data.InterfaceAddress> CREATOR;
   }
 
 }

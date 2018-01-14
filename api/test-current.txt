@@ -156,6 +156,7 @@ package android.app.admin {
     method public boolean isDeviceManaged();
     field public static final java.lang.String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_ALLOWED = "android.account.DEVICE_OR_PROFILE_OWNER_ALLOWED";
     field public static final java.lang.String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_DISALLOWED = "android.account.DEVICE_OR_PROFILE_OWNER_DISALLOWED";
+    field public static final java.lang.String ACTION_DATA_SHARING_RESTRICTION_APPLIED = "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
     field public static final java.lang.String EXTRA_RESTRICTION = "android.app.extra.RESTRICTION";
   }
 
@@ -483,6 +484,7 @@ package android.provider {
   }
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
+    field public static final java.lang.String LOW_POWER_MODE = "low_power";
     field public static final java.lang.String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
   }
 

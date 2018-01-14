@@ -398,7 +398,7 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
     }
 
     @Override
-    public void showMessage(String message, int color) {
+    public void showMessage(CharSequence message, int color) {
         mSecurityMessageDisplay.setNextMessageColor(color);
         mSecurityMessageDisplay.setMessage(message);
     }

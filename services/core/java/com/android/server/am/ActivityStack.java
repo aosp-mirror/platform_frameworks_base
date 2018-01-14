@@ -5052,7 +5052,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         addTask(task, toTop, "createTaskRecord");
         final boolean isLockscreenShown = mService.mStackSupervisor.getKeyguardController()
                 .isKeyguardShowing(mDisplayId != INVALID_DISPLAY ? mDisplayId : DEFAULT_DISPLAY);
-        if (!mStackSupervisor.getLaunchingBoundsController()
+        if (!mStackSupervisor.getLaunchParamsController()
                 .layoutTask(task, info.windowLayout, activity, source, options)
                 && !matchParentBounds() && task.isResizeable() && !isLockscreenShown) {
             task.updateOverrideConfiguration(getOverrideBounds());

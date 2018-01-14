@@ -24,6 +24,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.graphics.PorterDuff;
 import android.graphics.Region;
 import android.os.Handler;
 import android.os.Looper;
@@ -114,10 +115,9 @@ public class EmulatedDisplayCutout extends SystemUI {
 
         @Override
         public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+            mBounds.reset();
             if (insets.getDisplayCutout() != null) {
                 insets.getDisplayCutout().getBounds().getBoundaryPath(mBounds);
-            } else {
-                mBounds.reset();
             }
             invalidate();
             return insets.consumeDisplayCutout();
@@ -126,7 +126,7 @@ public class EmulatedDisplayCutout extends SystemUI {
         @Override
         protected void onDraw(Canvas canvas) {
             if (!mBounds.isEmpty()) {
-                mPaint.setColor(Color.DKGRAY);
+                mPaint.setColor(Color.BLACK);
                 mPaint.setStyle(Paint.Style.FILL);
 
                 canvas.drawPath(mBounds, mPaint);

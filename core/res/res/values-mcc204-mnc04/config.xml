@@ -25,15 +25,5 @@
     -->
     <integer name="config_mobile_mtu">1358</integer>
 
-    <!--Thresholds for LTE dbm in status bar-->
-    <integer-array translatable="false" name="config_lteDbmThresholds">
-        <item>-140</item>    <!-- SIGNAL_STRENGTH_NONE_OR_UNKNOWN -->
-        <item>-115</item>    <!-- SIGNAL_STRENGTH_POOR -->
-        <item>-105</item>    <!-- SIGNAL_STRENGTH_MODERATE -->
-        <item>-95</item>     <!-- SIGNAL_STRENGTH_GOOD -->
-        <item>-85</item>     <!-- SIGNAL_STRENGTH_GREAT -->
-        <item>-44</item>
-    </integer-array>
-
     <string translatable="false" name="prohibit_manual_network_selection_in_gobal_mode">true;BAE0000000000000</string>
 </resources>

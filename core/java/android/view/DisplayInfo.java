@@ -149,6 +149,13 @@ public final class DisplayInfo implements Parcelable {
     public int overscanBottom;
 
     /**
+     * The {@link DisplayCutout} if present, otherwise {@code null}.
+     *
+     * @hide
+     */
+    public DisplayCutout displayCutout;
+
+    /**
      * The rotation of the display relative to its natural orientation.
      * May be one of {@link android.view.Surface#ROTATION_0},
      * {@link android.view.Surface#ROTATION_90}, {@link android.view.Surface#ROTATION_180},
@@ -301,6 +308,7 @@ public final class DisplayInfo implements Parcelable {
                 && overscanTop == other.overscanTop
                 && overscanRight == other.overscanRight
                 && overscanBottom == other.overscanBottom
+                && Objects.equal(displayCutout, other.displayCutout)
                 && rotation == other.rotation
                 && modeId == other.modeId
                 && defaultModeId == other.defaultModeId
@@ -342,6 +350,7 @@ public final class DisplayInfo implements Parcelable {
         overscanTop = other.overscanTop;
         overscanRight = other.overscanRight;
         overscanBottom = other.overscanBottom;
+        displayCutout = other.displayCutout;
         rotation = other.rotation;
         modeId = other.modeId;
         defaultModeId = other.defaultModeId;
@@ -379,6 +388,7 @@ public final class DisplayInfo implements Parcelable {
         overscanTop = source.readInt();
         overscanRight = source.readInt();
         overscanBottom = source.readInt();
+        displayCutout = DisplayCutout.ParcelableWrapper.readCutoutFromParcel(source);
         rotation = source.readInt();
         modeId = source.readInt();
         defaultModeId = source.readInt();
@@ -425,6 +435,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(overscanTop);
         dest.writeInt(overscanRight);
         dest.writeInt(overscanBottom);
+        DisplayCutout.ParcelableWrapper.writeCutoutToParcel(displayCutout, dest, flags);
         dest.writeInt(rotation);
         dest.writeInt(modeId);
         dest.writeInt(defaultModeId);

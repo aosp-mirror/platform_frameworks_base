@@ -22,6 +22,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.content.pm.PackageParser;
+import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.Signature;
 import android.util.Log;
 
@@ -30,15 +32,17 @@ import java.util.ArrayList;
 
 class PackageSignatures {
     Signature[] mSignatures;
+    @SignatureSchemeVersion int mSignatureSchemeVersion;
 
     PackageSignatures(PackageSignatures orig) {
         if (orig != null && orig.mSignatures != null) {
             mSignatures = orig.mSignatures.clone();
+            mSignatureSchemeVersion = orig.mSignatureSchemeVersion;
         }
     }
 
-    PackageSignatures(Signature[] sigs) {
-        assignSignatures(sigs);
+    PackageSignatures(PackageParser.SigningDetails signingDetails) {
+        assignSignatures(signingDetails);
     }
 
     PackageSignatures() {
@@ -52,6 +56,7 @@ class PackageSignatures {
         serializer.startTag(null, tagName);
         serializer.attribute(null, "count",
                 Integer.toString(mSignatures.length));
+        serializer.attribute(null, "schemeVersion", Integer.toString(mSignatureSchemeVersion));
         for (int i=0; i<mSignatures.length; i++) {
             serializer.startTag(null, "cert");
             final Signature sig = mSignatures[i];
@@ -83,6 +88,15 @@ class PackageSignatures {
                     "Error in package manager settings: <signatures> has"
                        + " no count at " + parser.getPositionDescription());
             XmlUtils.skipCurrentTag(parser);
+        }
+        String schemeVersionStr = parser.getAttributeValue(null, "schemeVersion");
+        if (schemeVersionStr == null) {
+            PackageManagerService.reportSettingsProblem(Log.WARN,
+                    "Error in package manager settings: <signatures> has no schemeVersion at "
+                        + parser.getPositionDescription());
+            mSignatureSchemeVersion = SignatureSchemeVersion.UNKNOWN;
+        } else {
+            mSignatureSchemeVersion = Integer.parseInt(countStr);
         }
         final int count = Integer.parseInt(countStr);
         mSignatures = new Signature[count];
@@ -174,14 +188,15 @@ class PackageSignatures {
         }
     }
 
-    void assignSignatures(Signature[] sigs) {
-        if (sigs == null) {
+    void assignSignatures(PackageParser.SigningDetails signingDetails) {
+        mSignatureSchemeVersion = signingDetails.signatureSchemeVersion;
+        if (!signingDetails.hasSignatures()) {
             mSignatures = null;
             return;
         }
-        mSignatures = new Signature[sigs.length];
-        for (int i=0; i<sigs.length; i++) {
-            mSignatures[i] = sigs[i];
+        mSignatures = new Signature[signingDetails.signatures.length];
+        for (int i=0; i<signingDetails.signatures.length; i++) {
+            mSignatures[i] = signingDetails.signatures[i];
         }
     }
 
@@ -190,7 +205,9 @@ class PackageSignatures {
         StringBuffer buf = new StringBuffer(128);
         buf.append("PackageSignatures{");
         buf.append(Integer.toHexString(System.identityHashCode(this)));
-        buf.append(" [");
+        buf.append(" version:");
+        buf.append(mSignatureSchemeVersion);
+        buf.append(", signatures:[");
         if (mSignatures != null) {
             for (int i=0; i<mSignatures.length; i++) {
                 if (i > 0) buf.append(", ");

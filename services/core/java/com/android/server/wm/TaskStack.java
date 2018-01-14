@@ -16,8 +16,8 @@
 
 package com.android.server.wm;
 
-import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT;
+import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
@@ -31,19 +31,25 @@ import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
-
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_MOVEMENT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.proto.StackProto.ADJUSTED_BOUNDS;
+import static com.android.server.wm.proto.StackProto.ADJUSTED_FOR_IME;
+import static com.android.server.wm.proto.StackProto.ADJUST_DIVIDER_AMOUNT;
+import static com.android.server.wm.proto.StackProto.ADJUST_IME_AMOUNT;
 import static com.android.server.wm.proto.StackProto.ANIMATION_BACKGROUND_SURFACE_IS_DIMMING;
 import static com.android.server.wm.proto.StackProto.BOUNDS;
+import static com.android.server.wm.proto.StackProto.DEFER_REMOVAL;
 import static com.android.server.wm.proto.StackProto.FILLS_PARENT;
 import static com.android.server.wm.proto.StackProto.ID;
+import static com.android.server.wm.proto.StackProto.MINIMIZE_AMOUNT;
 import static com.android.server.wm.proto.StackProto.TASKS;
 import static com.android.server.wm.proto.StackProto.WINDOW_CONTAINER;
 
 import android.annotation.CallSuper;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.RemoteException;
@@ -145,6 +151,7 @@ public class TaskStack extends WindowContainer<Task> implements
      * For {@link #prepareSurfaces}.
      */
     final Rect mTmpDimBoundsRect = new Rect();
+    private final Point mLastSurfaceSize = new Point();
 
     TaskStack(WindowManagerService service, int stackId, StackWindowController controller) {
         super(service);
@@ -744,7 +751,13 @@ public class TaskStack extends WindowContainer<Task> implements
         }
 
         final Rect stackBounds = getBounds();
-        transaction.setSize(mSurfaceControl, stackBounds.width(), stackBounds.height());
+        final int width = stackBounds.width();
+        final int height = stackBounds.height();
+        if (width == mLastSurfaceSize.x && height == mLastSurfaceSize.y) {
+            return;
+        }
+        transaction.setSize(mSurfaceControl, width, height);
+        mLastSurfaceSize.set(width, height);
     }
 
     @Override
@@ -1308,6 +1321,12 @@ public class TaskStack extends WindowContainer<Task> implements
         proto.write(FILLS_PARENT, matchParentBounds());
         getRawBounds().writeToProto(proto, BOUNDS);
         proto.write(ANIMATION_BACKGROUND_SURFACE_IS_DIMMING, mAnimationBackgroundSurfaceIsShown);
+        proto.write(DEFER_REMOVAL, mDeferRemoval);
+        proto.write(MINIMIZE_AMOUNT, mMinimizeAmount);
+        proto.write(ADJUSTED_FOR_IME, mAdjustedForIme);
+        proto.write(ADJUST_IME_AMOUNT, mAdjustImeAmount);
+        proto.write(ADJUST_DIVIDER_AMOUNT, mAdjustDividerAmount);
+        mAdjustedBounds.writeToProto(proto, ADJUSTED_BOUNDS);
         proto.end(token);
     }
 

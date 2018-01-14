@@ -188,7 +188,7 @@ public class KeySetManagerService {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                     "Passed invalid package to keyset validation.");
         }
-        ArraySet<PublicKey> signingKeys = pkg.mSigningKeys;
+        ArraySet<PublicKey> signingKeys = pkg.mSigningDetails.publicKeys;
         if (signingKeys == null || !(signingKeys.size() > 0) || signingKeys.contains(null)) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                     "Package has invalid signing-key-set.");
@@ -223,7 +223,7 @@ public class KeySetManagerService {
         PackageSetting ps = mPackages.get(pkg.packageName);
         Preconditions.checkNotNull(ps, "pkg: " + pkg.packageName
                     + "does not have a corresponding entry in mPackages.");
-        addSigningKeySetToPackageLPw(ps, pkg.mSigningKeys);
+        addSigningKeySetToPackageLPw(ps, pkg.mSigningDetails.publicKeys);
         if (pkg.mKeySetMapping != null) {
             addDefinedKeySetsToPackageLPw(ps, pkg.mKeySetMapping);
             if (pkg.mUpgradeKeySets != null) {
@@ -371,7 +371,7 @@ public class KeySetManagerService {
         long[] upgradeKeySets = oldPS.keySetData.getUpgradeKeySets();
         for (int i = 0; i < upgradeKeySets.length; i++) {
             Set<PublicKey> upgradeSet = getPublicKeysFromKeySetLPr(upgradeKeySets[i]);
-            if (upgradeSet != null && newPkg.mSigningKeys.containsAll(upgradeSet)) {
+            if (upgradeSet != null && newPkg.mSigningDetails.publicKeys.containsAll(upgradeSet)) {
                 return true;
             }
         }

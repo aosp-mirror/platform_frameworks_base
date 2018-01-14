@@ -168,7 +168,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
     }
 
     @Override
-    protected int getPromtReasonStringRes(int reason) {
+    protected int getPromptReasonStringRes(int reason) {
         // No message on SIM Pin
         return 0;
     }

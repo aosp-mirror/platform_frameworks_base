@@ -22,13 +22,13 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PORTRA
 import static android.content.pm.ActivityInfo.RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.res.Configuration.EMPTY;
-
 import static com.android.server.EventLogTags.WM_TASK_REMOVED;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.proto.TaskProto.APP_WINDOW_TOKENS;
 import static com.android.server.wm.proto.TaskProto.BOUNDS;
+import static com.android.server.wm.proto.TaskProto.DEFER_REMOVAL;
 import static com.android.server.wm.proto.TaskProto.FILLS_PARENT;
 import static com.android.server.wm.proto.TaskProto.ID;
 import static com.android.server.wm.proto.TaskProto.TEMP_INSET_BOUNDS;
@@ -670,6 +670,7 @@ class Task extends WindowContainer<AppWindowToken> {
         proto.write(FILLS_PARENT, matchParentBounds());
         getBounds().writeToProto(proto, BOUNDS);
         mTempInsetBounds.writeToProto(proto, TEMP_INSET_BOUNDS);
+        proto.write(DEFER_REMOVAL, mDeferRemoval);
         proto.end(token);
     }
 

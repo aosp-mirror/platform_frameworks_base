@@ -39,7 +39,7 @@ public class KeyButtonDrawable extends LayerDrawable {
         }
     }
 
-    private KeyButtonDrawable(Drawable[] drawables) {
+    protected KeyButtonDrawable(Drawable[] drawables) {
         super(drawables);
         for (int i = 0; i < drawables.length; i++) {
             setLayerGravity(i, Gravity.CENTER);

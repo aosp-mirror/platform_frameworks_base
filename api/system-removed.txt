@@ -126,25 +126,6 @@ package android.net.wifi {
     field public boolean untrusted;
   }
 
-  public class WifiConnectionStatistics implements android.os.Parcelable {
-    ctor public WifiConnectionStatistics();
-    ctor public WifiConnectionStatistics(android.net.wifi.WifiConnectionStatistics);
-    method public int describeContents();
-    method public void incrementOrAddUntrusted(java.lang.String, int, int);
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.net.wifi.WifiConnectionStatistics> CREATOR;
-    field public int num24GhzConnected;
-    field public int num5GhzConnected;
-    field public int numAutoJoinAttempt;
-    field public int numAutoRoamAttempt;
-    field public int numWifiManagerJoinAttempt;
-    field public java.util.HashMap<java.lang.String, android.net.wifi.WifiNetworkConnectionStatistics> untrustedNetworkHistory;
-  }
-
-  public class WifiManager {
-    method public android.net.wifi.WifiConnectionStatistics getConnectionStatistics();
-  }
-
 }
 
 package android.os {

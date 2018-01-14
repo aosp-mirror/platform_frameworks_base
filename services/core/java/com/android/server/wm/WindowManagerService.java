@@ -2941,10 +2941,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void dismissKeyguard(IKeyguardDismissCallback callback) {
+    public void dismissKeyguard(IKeyguardDismissCallback callback, CharSequence message) {
         checkCallingPermission(permission.CONTROL_KEYGUARD, "dismissKeyguard");
         synchronized(mWindowMap) {
-            mPolicy.dismissKeyguardLw(callback);
+            mPolicy.dismissKeyguardLw(callback, message);
         }
     }
 
@@ -5894,6 +5894,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * the screen is.
      * @see WindowManagerPolicy#getNavBarPosition()
      */
+    @WindowManagerPolicy.NavigationBarPosition
     public int getNavBarPosition() {
         synchronized (mWindowMap) {
             // Perform layout if it was scheduled before to make sure that we get correct nav bar

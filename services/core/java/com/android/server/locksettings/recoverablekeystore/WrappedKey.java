@@ -17,7 +17,7 @@
 package com.android.server.locksettings.recoverablekeystore;
 
 import android.util.Log;
-import android.security.recoverablekeystore.RecoverableKeyStoreLoader;
+import android.security.keystore.RecoveryManager;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -97,7 +97,7 @@ public class WrappedKey {
                 /*nonce=*/ cipher.getIV(),
                 /*keyMaterial=*/ encryptedKeyMaterial,
                 /*platformKeyGenerationId=*/ wrappingKey.getGenerationId(),
-                RecoverableKeyStoreLoader.RECOVERY_STATUS_SYNC_IN_PROGRESS);
+                RecoveryManager.RECOVERY_STATUS_SYNC_IN_PROGRESS);
     }
 
     /**
@@ -107,14 +107,14 @@ public class WrappedKey {
      * @param keyMaterial The encrypted bytes of the key material.
      * @param platformKeyGenerationId The generation ID of the key used to wrap this key.
      *
-     * @see RecoverableKeyStoreLoader.RECOVERY_STATUS_SYNC_IN_PROGRESS
+     * @see RecoveryManager.RECOVERY_STATUS_SYNC_IN_PROGRESS
      * @hide
      */
     public WrappedKey(byte[] nonce, byte[] keyMaterial, int platformKeyGenerationId) {
         mNonce = nonce;
         mKeyMaterial = keyMaterial;
         mPlatformKeyGenerationId = platformKeyGenerationId;
-        mRecoveryStatus = RecoverableKeyStoreLoader.RECOVERY_STATUS_SYNC_IN_PROGRESS;
+        mRecoveryStatus = RecoveryManager.RECOVERY_STATUS_SYNC_IN_PROGRESS;
     }
 
     /**

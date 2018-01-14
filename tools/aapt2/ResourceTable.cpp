@@ -262,9 +262,8 @@ ResourceTable::CollisionResult ResourceTable::ResolveValueCollision(Value* exist
   // attributes all-over, we do special handling to see
   // which definition sticks.
   //
-  if (existing_attr->type_mask == incoming_attr->type_mask) {
-    // The two attributes are both DECLs, but they are plain attributes
-    // with the same formats.
+  if (existing_attr->IsCompatibleWith(*incoming_attr)) {
+    // The two attributes are both DECLs, but they are plain attributes with compatible formats.
     // Keep the strongest one.
     return existing_attr->IsWeak() ? CollisionResult::kTakeNew : CollisionResult::kKeepOriginal;
   }

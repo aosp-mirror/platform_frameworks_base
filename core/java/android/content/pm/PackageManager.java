@@ -787,7 +787,8 @@ public abstract class PackageManager {
 
     /**
      * Flag parameter for {@link #installPackage} to indicate that this package is an
-     * upgrade to a package that refers to the SDK via release letter.
+     * upgrade to a package that refers to the SDK via release letter or is targeting an SDK via
+     * release letter that the current build does not support.
      *
      * @hide
      */
@@ -5861,5 +5862,38 @@ public abstract class PackageManager {
     @SystemApi
     public @NonNull ArtManager getArtManager() {
         throw new UnsupportedOperationException("getArtManager not implemented in subclass");
+    }
+
+    /**
+     * Sets or clears the harmful app warning details for the given app.
+     *
+     * When set, any attempt to launch an activity in this package will be intercepted and a
+     * warning dialog will be shown to the user instead, with the given warning. The user
+     * will have the option to proceed with the activity launch, or to uninstall the application.
+     *
+     * @param packageName The full name of the package to warn on.
+     * @param warning A warning string to display to the user describing the threat posed by the
+     *                application, or null to clear the warning.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SET_HARMFUL_APP_WARNINGS)
+    @SystemApi
+    public void setHarmfulAppWarning(@NonNull String packageName, @Nullable CharSequence warning) {
+        throw new UnsupportedOperationException("setHarmfulAppWarning not implemented in subclass");
+    }
+
+    /**
+     * Returns the harmful app warning string for the given app, or null if there is none set.
+     *
+     * @param packageName The full name of the desired package.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.SET_HARMFUL_APP_WARNINGS)
+    @Nullable
+    @SystemApi
+    public CharSequence getHarmfulAppWarning(@NonNull String packageName) {
+        throw new UnsupportedOperationException("getHarmfulAppWarning not implemented in subclass");
     }
 }

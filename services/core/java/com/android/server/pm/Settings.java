@@ -227,6 +227,7 @@ public final class Settings {
     private static final String ATTR_INSTALL_REASON = "install-reason";
     private static final String ATTR_INSTANT_APP = "instant-app";
     private static final String ATTR_VIRTUAL_PRELOAD = "virtual-preload";
+    private static final String ATTR_HARMFUL_APP_WARNING = "harmful-app-warning";
 
     private static final String ATTR_PACKAGE_NAME = "packageName";
     private static final String ATTR_FINGERPRINT = "fingerprint";
@@ -742,7 +743,8 @@ public final class Settings {
                                 null /*enabledComponents*/,
                                 null /*disabledComponents*/,
                                 INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED,
-                                0, PackageManager.INSTALL_REASON_UNKNOWN);
+                                0, PackageManager.INSTALL_REASON_UNKNOWN,
+                                null /*harmfulAppWarning*/);
                     }
                 }
             }
@@ -783,11 +785,12 @@ public final class Settings {
      */
     static void updatePackageSetting(@NonNull PackageSetting pkgSetting,
             @Nullable PackageSetting disabledPkg, @Nullable SharedUserSetting sharedUser,
-            @NonNull File codePath, @Nullable String legacyNativeLibraryPath,
-            @Nullable String primaryCpuAbi, @Nullable String secondaryCpuAbi,
-            int pkgFlags, int pkgPrivateFlags, @Nullable List<String> childPkgNames,
-            @NonNull UserManagerService userManager, @Nullable String[] usesStaticLibraries,
-            @Nullable long[] usesStaticLibrariesVersions) throws PackageManagerException {
+            @NonNull File codePath, File resourcePath,
+            @Nullable String legacyNativeLibraryPath, @Nullable String primaryCpuAbi,
+            @Nullable String secondaryCpuAbi, int pkgFlags, int pkgPrivateFlags,
+            @Nullable List<String> childPkgNames, @NonNull UserManagerService userManager,
+            @Nullable String[] usesStaticLibraries, @Nullable long[] usesStaticLibrariesVersions)
+                    throws PackageManagerException {
         final String pkgName = pkgSetting.name;
         if (pkgSetting.sharedUser != sharedUser) {
             PackageManagerService.reportSettingsProblem(Log.WARN,
@@ -799,29 +802,19 @@ public final class Settings {
         }
 
         if (!pkgSetting.codePath.equals(codePath)) {
-            // Check to see if its a disabled system app
-            if ((pkgSetting.pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                // This is an updated system app with versions in both system
-                // and data partition. Just let the most recent version
-                // take precedence.
-                Slog.w(PackageManagerService.TAG,
-                        "Trying to update system app code path from "
-                        + pkgSetting.codePathString + " to " + codePath.toString());
-            } else {
-                // Just a change in the code path is not an issue, but
-                // let's log a message about it.
-                Slog.i(PackageManagerService.TAG,
-                        "Package " + pkgName + " codePath changed from "
-                        + pkgSetting.codePath + " to " + codePath
-                        + "; Retaining data and using new");
-
-                // The owner user's installed flag is set false
-                // when the application was installed by other user
-                // and the installed flag is not updated
-                // when the application is appended as system app later.
-                if ((pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0
-                        && disabledPkg == null) {
-                    List<UserInfo> allUserInfos = getAllUsers(userManager);
+            final boolean isSystem = pkgSetting.isSystem();
+            Slog.i(PackageManagerService.TAG,
+                    "Update" + (isSystem ? " system" : "")
+                    + " package " + pkgName
+                    + " code path from " + pkgSetting.codePathString
+                    + " to " + codePath.toString()
+                    + "; Retain data and using new");
+            if (!isSystem) {
+                // The package isn't considered as installed if the application was
+                // first installed by another user. Update the installed flag when the
+                // application ever becomes part of the system.
+                if ((pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0 && disabledPkg == null) {
+                    final List<UserInfo> allUserInfos = getAllUsers(userManager);
                     if (allUserInfos != null) {
                         for (UserInfo userInfo : allUserInfos) {
                             pkgSetting.setInstalled(true, userInfo.id);
@@ -829,14 +822,24 @@ public final class Settings {
                     }
                 }
 
-                /*
-                 * Since we've changed paths, we need to prefer the new
-                 * native library path over the one stored in the
-                 * package settings since we might have moved from
-                 * internal to external storage or vice versa.
-                 */
+                // Since we've changed paths, prefer the new native library path over
+                // the one stored in the package settings since we might have moved from
+                // internal to external storage or vice versa.
                 pkgSetting.legacyNativeLibraryPathString = legacyNativeLibraryPath;
             }
+            pkgSetting.codePath = codePath;
+            pkgSetting.codePathString = codePath.toString();
+        }
+        if (!pkgSetting.resourcePath.equals(resourcePath)) {
+            final boolean isSystem = pkgSetting.isSystem();
+            Slog.i(PackageManagerService.TAG,
+                    "Update" + (isSystem ? " system" : "")
+                    + " package " + pkgName
+                    + " resource path from " + pkgSetting.resourcePathString
+                    + " to " + resourcePath.toString()
+                    + "; Retain data and using new");
+            pkgSetting.resourcePath = resourcePath;
+            pkgSetting.resourcePathString = resourcePath.toString();
         }
         // If what we are scanning is a system (and possibly privileged) package,
         // then make it so, regardless of whether it was previously installed only
@@ -853,13 +856,14 @@ public final class Settings {
         if (childPkgNames != null) {
             pkgSetting.childPackageNames = new ArrayList<>(childPkgNames);
         }
-        if (usesStaticLibraries != null) {
-            pkgSetting.usesStaticLibraries = Arrays.copyOf(usesStaticLibraries,
-                    usesStaticLibraries.length);
-        }
-        if (usesStaticLibrariesVersions != null) {
-            pkgSetting.usesStaticLibrariesVersions = Arrays.copyOf(usesStaticLibrariesVersions,
-                    usesStaticLibrariesVersions.length);
+        // Update static shared library dependencies if needed
+        if (usesStaticLibraries != null && usesStaticLibrariesVersions != null
+                && usesStaticLibraries.length == usesStaticLibrariesVersions.length) {
+            pkgSetting.usesStaticLibraries = usesStaticLibraries;
+            pkgSetting.usesStaticLibrariesVersions = usesStaticLibrariesVersions;
+        } else {
+            pkgSetting.usesStaticLibraries = null;
+            pkgSetting.usesStaticLibrariesVersions = null;
         }
     }
 
@@ -912,69 +916,17 @@ public final class Settings {
                 userId);
     }
 
+    // TODO: Move to scanPackageOnlyLI() after verifying signatures are setup correctly
+    // by that time.
     void insertPackageSettingLPw(PackageSetting p, PackageParser.Package pkg) {
-        p.pkg = pkg;
-        // pkg.mSetEnabled = p.getEnabled(userId);
-        // pkg.mSetStopped = p.getStopped(userId);
-        final String volumeUuid = pkg.applicationInfo.volumeUuid;
-        final String codePath = pkg.applicationInfo.getCodePath();
-        final String resourcePath = pkg.applicationInfo.getResourcePath();
-        final String legacyNativeLibraryPath = pkg.applicationInfo.nativeLibraryRootDir;
-        // Update volume if needed
-        if (!Objects.equals(volumeUuid, p.volumeUuid)) {
-            Slog.w(PackageManagerService.TAG, "Volume for " + p.pkg.packageName +
-                    " changing from " + p.volumeUuid + " to " + volumeUuid);
-            p.volumeUuid = volumeUuid;
-        }
-        // Update code path if needed
-        if (!Objects.equals(codePath, p.codePathString)) {
-            Slog.w(PackageManagerService.TAG, "Code path for " + p.pkg.packageName +
-                    " changing from " + p.codePathString + " to " + codePath);
-            p.codePath = new File(codePath);
-            p.codePathString = codePath;
-        }
-        //Update resource path if needed
-        if (!Objects.equals(resourcePath, p.resourcePathString)) {
-            Slog.w(PackageManagerService.TAG, "Resource path for " + p.pkg.packageName +
-                    " changing from " + p.resourcePathString + " to " + resourcePath);
-            p.resourcePath = new File(resourcePath);
-            p.resourcePathString = resourcePath;
-        }
-        // Update the native library paths if needed
-        if (!Objects.equals(legacyNativeLibraryPath, p.legacyNativeLibraryPathString)) {
-            p.legacyNativeLibraryPathString = legacyNativeLibraryPath;
-        }
-
-        // Update the required Cpu Abi
-        p.primaryCpuAbiString = pkg.applicationInfo.primaryCpuAbi;
-        p.secondaryCpuAbiString = pkg.applicationInfo.secondaryCpuAbi;
-        p.cpuAbiOverrideString = pkg.cpuAbiOverride;
-        // Update version code if needed
-        if (pkg.getLongVersionCode() != p.versionCode) {
-            p.versionCode = pkg.getLongVersionCode();
-        }
         // Update signatures if needed.
         if (p.signatures.mSignatures == null) {
-            p.signatures.assignSignatures(pkg.mSignatures);
-        }
-        // Update flags if needed.
-        if (pkg.applicationInfo.flags != p.pkgFlags) {
-            p.pkgFlags = pkg.applicationInfo.flags;
+            p.signatures.assignSignatures(pkg.mSigningDetails);
         }
         // If this app defines a shared user id initialize
         // the shared user signatures as well.
         if (p.sharedUser != null && p.sharedUser.signatures.mSignatures == null) {
-            p.sharedUser.signatures.assignSignatures(pkg.mSignatures);
-        }
-        // Update static shared library dependencies if needed
-        if (pkg.usesStaticLibraries != null && pkg.usesStaticLibrariesVersions != null
-                && pkg.usesStaticLibraries.size() == pkg.usesStaticLibrariesVersions.length) {
-            p.usesStaticLibraries = new String[pkg.usesStaticLibraries.size()];
-            pkg.usesStaticLibraries.toArray(p.usesStaticLibraries);
-            p.usesStaticLibrariesVersions = pkg.usesStaticLibrariesVersions;
-        } else {
-            p.usesStaticLibraries = null;
-            p.usesStaticLibrariesVersions = null;
+            p.sharedUser.signatures.assignSignatures(pkg.mSigningDetails);
         }
         addPackageSettingLPw(p, p.sharedUser);
     }
@@ -1680,7 +1632,8 @@ public final class Settings {
                                 null /*enabledComponents*/,
                                 null /*disabledComponents*/,
                                 INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED,
-                                0, PackageManager.INSTALL_REASON_UNKNOWN);
+                                0, PackageManager.INSTALL_REASON_UNKNOWN,
+                                null /*harmfulAppWarning*/);
                     }
                     return;
                 }
@@ -1755,7 +1708,8 @@ public final class Settings {
                             COMPONENT_ENABLED_STATE_DEFAULT);
                     final String enabledCaller = parser.getAttributeValue(null,
                             ATTR_ENABLED_CALLER);
-
+                    final String harmfulAppWarning =
+                            parser.getAttributeValue(null, ATTR_HARMFUL_APP_WARNING);
                     final int verifState = XmlUtils.readIntAttribute(parser,
                             ATTR_DOMAIN_VERIFICATON_STATE,
                             PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED);
@@ -1792,7 +1746,7 @@ public final class Settings {
                     ps.setUserState(userId, ceDataInode, enabled, installed, stopped, notLaunched,
                             hidden, suspended, instantApp, virtualPreload, enabledCaller,
                             enabledComponents, disabledComponents, verifState, linkGeneration,
-                            installReason);
+                            installReason, harmfulAppWarning);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
                 } else if (tagName.equals(TAG_PERSISTENT_PREFERRED_ACTIVITIES)) {
@@ -2124,6 +2078,10 @@ public final class Settings {
                 if (ustate.installReason != PackageManager.INSTALL_REASON_UNKNOWN) {
                     serializer.attribute(null, ATTR_INSTALL_REASON,
                             Integer.toString(ustate.installReason));
+                }
+                if (ustate.harmfulAppWarning != null) {
+                    serializer.attribute(null, ATTR_HARMFUL_APP_WARNING,
+                            ustate.harmfulAppWarning);
                 }
                 if (!ArrayUtils.isEmpty(ustate.enabledComponents)) {
                     serializer.startTag(null, TAG_ENABLED_COMPONENTS);
@@ -4347,6 +4305,22 @@ public final class Settings {
         return false;
     }
 
+    void setHarmfulAppWarningLPw(String packageName, CharSequence warning, int userId) {
+        final PackageSetting pkgSetting = mPackages.get(packageName);
+        if (pkgSetting == null) {
+            throw new IllegalArgumentException("Unknown package: " + packageName);
+        }
+        pkgSetting.setHarmfulAppWarning(userId, warning == null ? null : warning.toString());
+    }
+
+    String getHarmfulAppWarningLPr(String packageName, int userId) {
+        final PackageSetting pkgSetting = mPackages.get(packageName);
+        if (pkgSetting == null) {
+            throw new IllegalArgumentException("Unknown package: " + packageName);
+        }
+        return pkgSetting.getHarmfulAppWarning(userId);
+    }
+
     private static List<UserInfo> getAllUsers(UserManagerService userManager) {
         long id = Binder.clearCallingIdentity();
         try {
@@ -4493,11 +4467,14 @@ public final class Settings {
                 pw.print(ps.getNotLaunched(user.id) ? "l" : "L");
                 pw.print(ps.getInstantApp(user.id) ? "IA" : "ia");
                 pw.print(ps.getVirtulalPreload(user.id) ? "VPI" : "vpi");
+                String harmfulAppWarning = ps.getHarmfulAppWarning(user.id);
+                pw.print(harmfulAppWarning != null ? "HA" : "ha");
                 pw.print(",");
                 pw.print(ps.getEnabled(user.id));
                 String lastDisabledAppCaller = ps.getLastDisabledAppCaller(user.id);
                 pw.print(",");
                 pw.print(lastDisabledAppCaller != null ? lastDisabledAppCaller : "?");
+                pw.print(",");
                 pw.println();
             }
             return;
@@ -4565,10 +4542,8 @@ public final class Settings {
             }
             pw.print(prefix); pw.print("  versionName="); pw.println(ps.pkg.mVersionName);
             pw.print(prefix); pw.print("  splits="); dumpSplitNames(pw, ps.pkg); pw.println();
-            final int apkSigningVersion = PackageParser.getApkSigningVersion(ps.pkg);
-            if (apkSigningVersion != PackageParser.APK_SIGNING_UNKNOWN) {
-                pw.print(prefix); pw.print("  apkSigningVersion="); pw.println(apkSigningVersion);
-            }
+            final int apkSigningVersion = ps.pkg.mSigningDetails.signatureSchemeVersion;
+            pw.print(prefix); pw.print("  apkSigningVersion="); pw.println(apkSigningVersion);
             pw.print(prefix); pw.print("  applicationInfo=");
                 pw.println(ps.pkg.applicationInfo.toString());
             pw.print(prefix); pw.print("  flags="); printFlags(pw, ps.pkg.applicationInfo.flags,
@@ -4770,6 +4745,12 @@ public final class Settings {
                 dumpGidsLPr(pw, prefix + "    ", permissionsState.computeGids(user.id));
                 dumpRuntimePermissionsLPr(pw, prefix + "    ", permissionNames, permissionsState
                         .getRuntimePermissionStates(user.id), dumpAll);
+            }
+
+            String harmfulAppWarning = ps.getHarmfulAppWarning(user.id);
+            if (harmfulAppWarning != null) {
+                pw.print(prefix); pw.print("      harmfulAppWarning: ");
+                pw.println(harmfulAppWarning);
             }
 
             if (permissionNames == null) {

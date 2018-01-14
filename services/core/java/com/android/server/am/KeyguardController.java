@@ -150,7 +150,7 @@ class KeyguardController {
         }
     }
 
-    void dismissKeyguard(IBinder token, IKeyguardDismissCallback callback) {
+    void dismissKeyguard(IBinder token, IKeyguardDismissCallback callback, CharSequence message) {
         final ActivityRecord activityRecord = ActivityRecord.forTokenLocked(token);
         if (activityRecord == null || !activityRecord.visibleIgnoringKeyguard) {
             failCallback(callback);
@@ -164,7 +164,7 @@ class KeyguardController {
             mStackSupervisor.wakeUp("dismissKeyguard");
         }
 
-        mWindowManager.dismissKeyguard(callback);
+        mWindowManager.dismissKeyguard(callback, message);
     }
 
     private void setKeyguardGoingAway(boolean keyguardGoingAway) {
@@ -304,7 +304,7 @@ class KeyguardController {
         // insecure case, we actually show it on top of the lockscreen. See #canShowWhileOccluded.
         if (!mOccluded && mDismissingKeyguardActivity != null
                 && mWindowManager.isKeyguardSecure()) {
-            mWindowManager.dismissKeyguard(null /* callback */);
+            mWindowManager.dismissKeyguard(null /* callback */, null /* message */);
             mDismissalRequested = true;
 
             // If we are about to unocclude the Keyguard, but we can dismiss it without security,

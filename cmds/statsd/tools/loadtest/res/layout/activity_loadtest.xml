@@ -49,7 +49,7 @@
                 android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:maxLength="3"
+                android:maxLength="4"
                 android:text="@integer/replication_default"
                 android:textSize="30dp"/>
         </LinearLayout>
@@ -108,7 +108,7 @@
                 android:layout_weight="1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:maxLength="2"
+                android:maxLength="4"
                 android:text="@integer/burst_default"
                 android:textSize="30dp"/>
         </LinearLayout>

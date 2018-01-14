@@ -555,7 +555,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             case StatsLog.CPU_TIME_PER_FREQ: {
                 List<StatsLogEventWrapper> ret = new ArrayList();
                 for (int cluster = 0; cluster < mKernelCpuSpeedReaders.length; cluster++) {
-                    long[] clusterTimeMs = mKernelCpuSpeedReaders[cluster].readDelta();
+                    long[] clusterTimeMs = mKernelCpuSpeedReaders[cluster].readAbsolute();
                     if (clusterTimeMs != null) {
                         for (int speed = clusterTimeMs.length - 1; speed >= 0; --speed) {
                             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 3);
@@ -743,9 +743,13 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 filter.addAction(Intent.ACTION_SHUTDOWN);
                 mContext.registerReceiverAsUser(
                         mShutdownEventReceiver, UserHandle.ALL, filter, null, null);
-
-                // Pull the latest state of UID->app name, version mapping when statsd starts.
-                informAllUidsLocked(mContext);
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    // Pull the latest state of UID->app name, version mapping when statsd starts.
+                    informAllUidsLocked(mContext);
+                } finally {
+                    restoreCallingIdentity(token);
+                }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to inform statsd that statscompanion is ready", e);
                 forgetEverything();

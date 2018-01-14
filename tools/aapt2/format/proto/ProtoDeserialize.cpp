@@ -635,8 +635,7 @@ std::unique_ptr<Value> DeserializeValueFromPb(const pb::Value& pb_value,
     switch (pb_compound_value.value_case()) {
       case pb::CompoundValue::kAttr: {
         const pb::Attribute& pb_attr = pb_compound_value.attr();
-        std::unique_ptr<Attribute> attr = util::make_unique<Attribute>();
-        attr->type_mask = pb_attr.format_flags();
+        std::unique_ptr<Attribute> attr = util::make_unique<Attribute>(pb_attr.format_flags());
         attr->min_int = pb_attr.min_int();
         attr->max_int = pb_attr.max_int();
         for (const pb::Attribute_Symbol& pb_symbol : pb_attr.symbol()) {

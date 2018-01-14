@@ -6802,6 +6802,37 @@ public final class Settings {
         public static final String ASSIST_DISCLOSURE_ENABLED = "assist_disclosure_enabled";
 
         /**
+         * Control if rotation suggestions are sent to System UI when in rotation locked mode.
+         * Done to enable screen rotation while the the screen rotation is locked. Enabling will
+         * poll the accelerometer in rotation locked mode.
+         *
+         * If 0, then rotation suggestions are not sent to System UI. If 1, suggestions are sent.
+         *
+         * @hide
+         */
+
+        public static final String SHOW_ROTATION_SUGGESTIONS = "show_rotation_suggestions";
+
+        /**
+         * The disabled state of SHOW_ROTATION_SUGGESTIONS.
+         * @hide
+         */
+        public static final int SHOW_ROTATION_SUGGESTIONS_DISABLED = 0x0;
+
+        /**
+         * The enabled state of SHOW_ROTATION_SUGGESTIONS.
+         * @hide
+         */
+        public static final int SHOW_ROTATION_SUGGESTIONS_ENABLED = 0x1;
+
+        /**
+         * The default state of SHOW_ROTATION_SUGGESTIONS.
+         * @hide
+         */
+        public static final int SHOW_ROTATION_SUGGESTIONS_DEFAULT =
+                SHOW_ROTATION_SUGGESTIONS_DISABLED;
+
+        /**
          * Read only list of the service components that the current user has explicitly allowed to
          * see and assist with all of the user's notifications.
          *
@@ -9622,6 +9653,17 @@ public final class Settings {
         public static final String ALWAYS_ON_DISPLAY_CONSTANTS = "always_on_display_constants";
 
         /**
+        * System VDSO global setting. This links to the "sys.vdso" system property.
+        * The following values are supported:
+        * false  -> both 32 and 64 bit vdso disabled
+        * 32     -> 32 bit vdso enabled
+        * 64     -> 64 bit vdso enabled
+        * Any other value defaults to both 32 bit and 64 bit true.
+        * @hide
+        */
+        public static final String SYS_VDSO = "sys_vdso";
+
+        /**
          * App standby (app idle) specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          * <p>
@@ -10027,6 +10069,7 @@ public final class Settings {
          * If 1 low power mode is enabled.
          * @hide
          */
+        @TestApi
         public static final String LOW_POWER_MODE = "low_power";
 
         /**
@@ -11248,6 +11291,15 @@ public final class Settings {
          */
         public static final String ENABLE_GNSS_RAW_MEAS_FULL_TRACKING =
                 "enable_gnss_raw_meas_full_tracking";
+
+        /**
+         * Whether we've enabled zram on this device. Takes effect on
+         * reboot. The value "1" enables zram; "0" disables it, and
+         * everything else is unspecified.
+         * @hide
+         */
+        public static final String ZRAM_ENABLED =
+                "zram_enabled";
     }
 
     /**

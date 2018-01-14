@@ -209,6 +209,21 @@ public class UserManager {
     public static final String DISALLOW_AIRPLANE_MODE = "no_airplane_mode";
 
     /**
+     * Specifies if a user is disallowed from configuring brightness. When device owner sets it,
+     * it'll only be applied on the target(system) user.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * <p>This user restriction has no effect on managed profiles.
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONFIG_BRIGHTNESS = "no_config_brightness";
+
+    /**
      * Specifies if a user is disallowed from enabling the
      * "Unknown Sources" setting, that allows installation of apps from unknown sources.
      * The default value is <code>false</code>.
@@ -876,6 +891,27 @@ public class UserManager {
      */
     public static final String DISALLOW_USER_SWITCH = "no_user_switch";
 
+    /**
+     * Specifies whether the user can share file / picture / data from the primary user into the
+     * managed profile, either by sending them from the primary side, or by picking up data within
+     * an app in the managed profile.
+     * <p>
+     * When a managed profile is created, the system allows the user to send data from the primary
+     * side to the profile by setting up certain default cross profile intent filters. If
+     * this is undesired, this restriction can be set to disallow it. Note that this restriction
+     * will not block any sharing allowed by explicit
+     * {@link DevicePolicyManager#addCrossProfileIntentFilter} calls by the profile owner.
+     * <p>
+     * This restriction is only meaningful when set by profile owner. When it is set by device
+     * owner, it does not have any effect.
+     * <p>
+     * The default value is <code>false</code>.
+     *
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_SHARE_INTO_MANAGED_PROFILE = "no_sharing_into_profile";
     /**
      * Application restriction key that is used to indicate the pending arrival
      * of real restrictions for the app.
@@ -2194,6 +2230,12 @@ public class UserManager {
         }
     }
 
+    /** @removed */
+    @Deprecated
+    public boolean trySetQuietModeEnabled(boolean enableQuietMode, @NonNull UserHandle userHandle) {
+        return requestQuietModeEnabled(enableQuietMode, userHandle);
+    }
+
     /**
      * Enables or disables quiet mode for a managed profile. If quiet mode is enabled, apps in a
      * managed profile don't run, generate notifications, or consume data or battery.
@@ -2219,22 +2261,22 @@ public class UserManager {
      *
      * @see #isQuietModeEnabled(UserHandle)
      */
-    public boolean trySetQuietModeEnabled(boolean enableQuietMode, @NonNull UserHandle userHandle) {
-        return trySetQuietModeEnabled(enableQuietMode, userHandle, null);
+    public boolean requestQuietModeEnabled(boolean enableQuietMode, @NonNull UserHandle userHandle) {
+        return requestQuietModeEnabled(enableQuietMode, userHandle, null);
     }
 
     /**
-     * Similar to {@link #trySetQuietModeEnabled(boolean, UserHandle)}, except you can specify
+     * Similar to {@link #requestQuietModeEnabled(boolean, UserHandle)}, except you can specify
      * a target to start when user is unlocked. If {@code target} is specified, caller must have
      * the {@link android.Manifest.permission#MANAGE_USERS} permission.
      *
-     * @see {@link #trySetQuietModeEnabled(boolean, UserHandle)}
+     * @see {@link #requestQuietModeEnabled(boolean, UserHandle)}
      * @hide
      */
-    public boolean trySetQuietModeEnabled(
+    public boolean requestQuietModeEnabled(
             boolean enableQuietMode, @NonNull UserHandle userHandle, IntentSender target) {
         try {
-            return mService.trySetQuietModeEnabled(
+            return mService.requestQuietModeEnabled(
                     mContext.getPackageName(), enableQuietMode, userHandle.getIdentifier(), target);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();

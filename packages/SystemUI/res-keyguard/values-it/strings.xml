@@ -140,7 +140,7 @@
       <item quantity="one">Inserisci il codice PIN della SIM. Hai ancora <xliff:g id="NUMBER_0">%d</xliff:g> tentativo a disposizione, dopodiché dovrai contattare l\'operatore per sbloccare il dispositivo.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
-      <item quantity="other">La scheda SIM è ora disattivata. Inserisci il codice PUK per continuare. Hai ancora <xliff:g id="_NUMBER_1">%d</xliff:g> tentativi a disposizione prima che la SIM diventi definitivamente inutilizzabile. Contatta l\'operatore per avere informazioni dettagliate.</item>
-      <item quantity="one">La scheda SIM è ora disattivata. Inserisci il codice PUK per continuare. Hai ancora <xliff:g id="_NUMBER_0">%d</xliff:g> tentativo a disposizione prima che la SIM diventi definitivamente inutilizzabile. Contatta l\'operatore per avere informazioni dettagliate.</item>
+      <item quantity="other">La scheda SIM è ora disattivata. Inserisci il codice PUK per continuare. Hai ancora <xliff:g id="_NUMBER_1">%d</xliff:g> tentativi a disposizione prima che la SIM diventi definitivamente inutilizzabile. Per informazioni dettagliate, contatta l\'operatore.</item>
+      <item quantity="one">La scheda SIM è ora disattivata. Inserisci il codice PUK per continuare. Hai ancora <xliff:g id="_NUMBER_0">%d</xliff:g> tentativo a disposizione prima che la SIM diventi definitivamente inutilizzabile. Per informazioni dettagliate, contatta l\'operatore.</item>
     </plurals>
 </resources>

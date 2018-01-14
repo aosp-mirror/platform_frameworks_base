@@ -572,6 +572,13 @@
     <protected-broadcast android:name="android.intent.action.GET_RESTRICTION_ENTRIES" />
     <protected-broadcast android:name="android.telephony.euicc.action.OTA_STATUS_CHANGED" />
 
+    <!-- Added in P -->
+    <protected-broadcast android:name="android.app.action.PROFILE_OWNER_CHANGED" />
+    <protected-broadcast android:name="android.app.action.TRANSFER_OWNERSHIP_COMPLETE" />
+
+    <!-- Added in P -->
+    <protected-broadcast android:name="android.app.action.DATA_SHARING_RESTRICTION_CHANGED" />
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
@@ -3304,6 +3311,10 @@
     <permission android:name="android.permission.BIND_PACKAGE_VERIFIER"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi @hide Allows an application to mark other applications as harmful -->
+    <permission android:name="android.permission.SET_HARMFUL_APP_WARNINGS"
+        android:protectionLevel="signature|verifier" />
+
     <!-- @SystemApi @hide Intent filter verifier needs to have this permission before the
          PackageManager will trust it to verify intent filters.
     -->
@@ -3388,6 +3399,12 @@
     <!-- @SystemApi Allows an application to provide a trust agent.
          @hide For security reasons, this is a platform-only permission. -->
     <permission android:name="android.permission.PROVIDE_TRUST_AGENT"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi Allows an application to show a message
+         on the keyguard when asking to dismiss it.
+         @hide For security reasons, this is a platform-only permission. -->
+    <permission android:name="android.permission.SHOW_KEYGUARD_MESSAGE"
         android:protectionLevel="signature|privileged" />
 
     <!-- Allows an application to launch the trust agent settings activity.
@@ -3867,6 +3884,13 @@
         <activity android:name="com.android.settings.notification.NotificationAccessConfirmationActivity"
                   android:theme="@android:style/Theme.DeviceDefault.Light.Dialog.Alert"
                   android:excludeFromRecents="true">
+        </activity>
+
+        <activity android:name="com.android.internal.app.HarmfulAppWarningActivity"
+                  android:theme="@style/Theme.DeviceDefault.Light.Dialog.Alert"
+                  android:excludeFromRecents="true"
+                  android:process=":ui"
+                  android:exported="false">
         </activity>
 
         <receiver android:name="com.android.server.BootReceiver"

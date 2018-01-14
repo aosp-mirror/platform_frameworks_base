@@ -70,6 +70,7 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * A service that collects, aggregates, and persists application usage data.
@@ -1019,6 +1020,15 @@ public class UsageStatsService extends SystemService implements
         @Override
         public long getTimeSinceLastJobRun(String packageName, int userId) {
             return mAppStandby.getTimeSinceLastJobRun(packageName, userId);
+        }
+
+        public void onActiveAdminAdded(String packageName, int userId) {
+            mAppStandby.addActiveDeviceAdmin(packageName, userId);
+        }
+
+        @Override
+        public void setActiveAdminApps(Set<String> packageNames, int userId) {
+            mAppStandby.setActiveAdminApps(packageNames, userId);
         }
     }
 }

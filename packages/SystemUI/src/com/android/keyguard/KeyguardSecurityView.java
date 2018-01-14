@@ -106,7 +106,7 @@ public interface KeyguardSecurityView {
      * @param message the message to show
      * @param color the color to use
      */
-    void showMessage(String message, int color);
+    void showMessage(CharSequence message, int color);
 
     /**
      * Instruct the view to show usability hints, if any.

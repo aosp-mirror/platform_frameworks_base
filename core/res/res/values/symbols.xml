@@ -462,6 +462,7 @@
   <java-symbol type="bool" name="config_useDefaultFocusHighlight" />
   <java-symbol type="array" name="config_deviceSpecificSystemServices" />
   <java-symbol type="string" name="config_deviceSpecificDevicePolicyManagerService" />
+  <java-symbol type="integer" name="config_num_physical_slots" />
 
   <java-symbol type="color" name="tab_indicator_text_v4" />
 
@@ -1721,6 +1722,7 @@
   <java-symbol type="string" name="global_action_lockdown" />
   <java-symbol type="string" name="global_action_voice_assist" />
   <java-symbol type="string" name="global_action_assist" />
+  <java-symbol type="string" name="global_action_screenshot" />
   <java-symbol type="string" name="invalidPuk" />
   <java-symbol type="string" name="lockscreen_carrier_default" />
   <java-symbol type="style" name="Animation.LockScreen" />
@@ -1918,6 +1920,8 @@
   <java-symbol type="string" name="wifi_wakeup_onboarding_title" />
   <java-symbol type="string" name="wifi_wakeup_onboarding_subtext" />
   <java-symbol type="string" name="wifi_wakeup_onboarding_action_disable" />
+  <java-symbol type="string" name="wifi_wakeup_enabled_title" />
+  <java-symbol type="string" name="wifi_wakeup_enabled_content" />
   <java-symbol type="string" name="accessibility_binding_label" />
   <java-symbol type="string" name="adb_active_notification_message" />
   <java-symbol type="string" name="adb_active_notification_title" />
@@ -2434,9 +2438,6 @@
   <!-- Cascading submenus -->
   <java-symbol type="dimen" name="cascading_menus_min_smallest_width" />
 
-  <!-- From SignalStrength -->
-  <java-symbol type="array" name="config_lteDbmThresholds" />
-
   <java-symbol type="string" name="android_system_label" />
   <java-symbol type="string" name="system_error_wipe_data" />
   <java-symbol type="string" name="system_error_manufacturer" />
@@ -2889,8 +2890,9 @@
 
   <java-symbol type="bool" name="config_permissionReviewRequired" />
 
-
+  <!-- Global actions icons -->
   <java-symbol type="drawable" name="ic_restart" />
+  <java-symbol type="drawable" name="ic_screenshot" />
 
   <java-symbol type="drawable" name="emergency_icon" />
 
@@ -3200,6 +3202,7 @@
   <java-symbol type="string" name="battery_saver_warning_title" />
 
   <java-symbol type="string" name="global_action_logout" />
+  <java-symbol type="string" name="config_mainBuiltInDisplayCutout" />
   <java-symbol type="drawable" name="ic_logout" />
 
   <java-symbol type="array" name="config_autoBrightnessDisplayValuesNits" />
@@ -3207,4 +3210,8 @@
   <java-symbol type="array" name="config_screenBrightnessNits" />
 
   <java-symbol type="string" name="shortcut_disabled_reason_unknown" />
+
+  <java-symbol type="string" name="harmful_app_warning_uninstall" />
+  <java-symbol type="string" name="harmful_app_warning_launch_anyway" />
+  <java-symbol type="string" name="harmful_app_warning_title" />
 </resources>

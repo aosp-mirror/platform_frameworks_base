@@ -89,6 +89,10 @@ public class ButtonDispatcher {
         return mAlpha != null ? mAlpha : 1;
     }
 
+    public KeyButtonDrawable getImageDrawable() {
+        return mImageDrawable;
+    }
+
     public void setImageDrawable(KeyButtonDrawable drawable) {
         mImageDrawable = drawable;
         final int N = mViews.size();

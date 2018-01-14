@@ -565,6 +565,12 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION = 0x00000004;
 
     /**
+     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * The node's pane title changed.
+     */
+    public static final int CONTENT_CHANGE_TYPE_PANE_TITLE = 0x00000008;
+
+    /**
      * Change type for {@link #TYPE_WINDOWS_CHANGED} event:
      * The window was added.
      */
@@ -654,7 +660,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                     CONTENT_CHANGE_TYPE_UNDEFINED,
                     CONTENT_CHANGE_TYPE_SUBTREE,
                     CONTENT_CHANGE_TYPE_TEXT,
-                    CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION
+                    CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION,
+                    CONTENT_CHANGE_TYPE_PANE_TITLE
             })
     public @interface ContentChangeTypes {}
 
@@ -1244,42 +1251,32 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         builder.append("EventType: ").append(eventTypeToString(mEventType));
         builder.append("; EventTime: ").append(mEventTime);
         builder.append("; PackageName: ").append(mPackageName);
-        builder.append("; MovementGranularity: ").append(mMovementGranularity);
-        builder.append("; Action: ").append(mAction);
-        builder.append("; ContentChangeTypes: ").append(
-                contentChangeTypesToString(mContentChangeTypes));
-        builder.append("; WindowChangeTypes: ").append(
-                windowChangeTypesToString(mWindowChangeTypes));
-        builder.append(super.toString());
-        if (DEBUG) {
-            builder.append("\n");
-            builder.append("; sourceWindowId: ").append(mSourceWindowId);
-            builder.append("; mSourceNodeId: ").append(mSourceNodeId);
-            for (int i = 0; i < getRecordCount(); i++) {
-                final AccessibilityRecord record = getRecord(i);
-                builder.append("  Record ");
-                builder.append(i);
-                builder.append(":");
-                builder.append(" [ ClassName: " + record.mClassName);
-                builder.append("; Text: " + record.mText);
-                builder.append("; ContentDescription: " + record.mContentDescription);
-                builder.append("; ItemCount: " + record.mItemCount);
-                builder.append("; CurrentItemIndex: " + record.mCurrentItemIndex);
-                builder.append("; IsEnabled: " + record.isEnabled());
-                builder.append("; IsPassword: " + record.isPassword());
-                builder.append("; IsChecked: " + record.isChecked());
-                builder.append("; IsFullScreen: " + record.isFullScreen());
-                builder.append("; Scrollable: " + record.isScrollable());
-                builder.append("; BeforeText: " + record.mBeforeText);
-                builder.append("; FromIndex: " + record.mFromIndex);
-                builder.append("; ToIndex: " + record.mToIndex);
-                builder.append("; ScrollX: " + record.mScrollX);
-                builder.append("; ScrollY: " + record.mScrollY);
-                builder.append("; AddedCount: " + record.mAddedCount);
-                builder.append("; RemovedCount: " + record.mRemovedCount);
-                builder.append("; ParcelableData: " + record.mParcelableData);
-                builder.append(" ]");
+        if (!DEBUG_CONCISE_TOSTRING || mMovementGranularity != 0) {
+            builder.append("; MovementGranularity: ").append(mMovementGranularity);
+        }
+        if (!DEBUG_CONCISE_TOSTRING || mAction != 0) {
+            builder.append("; Action: ").append(mAction);
+        }
+        if (!DEBUG_CONCISE_TOSTRING || mContentChangeTypes != 0) {
+            builder.append("; ContentChangeTypes: ").append(
+                    contentChangeTypesToString(mContentChangeTypes));
+        }
+        if (!DEBUG_CONCISE_TOSTRING || mWindowChangeTypes != 0) {
+            builder.append("; WindowChangeTypes: ").append(
+                    contentChangeTypesToString(mWindowChangeTypes));
+        }
+        super.appendTo(builder);
+        if (DEBUG || DEBUG_CONCISE_TOSTRING) {
+            if (!DEBUG_CONCISE_TOSTRING) {
                 builder.append("\n");
+            }
+            if (DEBUG) {
+                builder.append("; SourceWindowId: ").append(mSourceWindowId);
+                builder.append("; SourceNodeId: ").append(mSourceNodeId);
+            }
+            for (int i = 0; i < getRecordCount(); i++) {
+                builder.append("  Record ").append(i).append(":");
+                getRecord(i).appendTo(builder).append("\n");
             }
         } else {
             builder.append("; recordCount: ").append(getRecordCount());

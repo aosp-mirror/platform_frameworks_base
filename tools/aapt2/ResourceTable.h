@@ -81,10 +81,7 @@ class ResourceConfigValue {
   DISALLOW_COPY_AND_ASSIGN(ResourceConfigValue);
 };
 
-/**
- * Represents a resource entry, which may have
- * varying values for each defined configuration.
- */
+// Represents a resource entry, which may have varying values for each defined configuration.
 class ResourceEntry {
  public:
   // The name of the resource. Immutable, as this determines the order of this resource

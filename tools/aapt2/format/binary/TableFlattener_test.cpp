@@ -215,7 +215,7 @@ TEST_F(TableFlattenerTest, FlattenEntriesWithGapsInIds) {
 }
 
 TEST_F(TableFlattenerTest, FlattenMinMaxAttributes) {
-  Attribute attr(false);
+  Attribute attr;
   attr.type_mask = android::ResTable_map::TYPE_INTEGER;
   attr.min_int = 10;
   attr.max_int = 23;

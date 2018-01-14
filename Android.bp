@@ -519,7 +519,9 @@ java_library {
         "telephony/java/com/android/internal/telephony/ITelephony.aidl",
         "telephony/java/com/android/internal/telephony/ITelephonyRegistry.aidl",
         "telephony/java/com/android/internal/telephony/IWapPushManager.aidl",
+        "telephony/java/com/android/internal/telephony/euicc/IEuiccCardController.aidl",
         "telephony/java/com/android/internal/telephony/euicc/IEuiccController.aidl",
+        "telephony/java/com/android/internal/telephony/euicc/IGetAllProfilesCallback.aidl",
         "wifi/java/android/net/wifi/IWifiManager.aidl",
         "wifi/java/android/net/wifi/aware/IWifiAwareDiscoverySessionCallback.aidl",
         "wifi/java/android/net/wifi/aware/IWifiAwareEventCallback.aidl",
@@ -618,6 +620,7 @@ java_library {
         "android.hardware.vibrator-V1.0-java-constants",
         "android.hardware.vibrator-V1.1-java-constants",
         "android.hardware.wifi-V1.0-java-constants",
+        "android.hardware.radio-V1.0-java",
     ],
 
     // Loaded with System.loadLibrary by android.view.textclassifier

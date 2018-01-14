@@ -416,7 +416,8 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void dismissKeyguardLw(@Nullable IKeyguardDismissCallback callback) {
+    public void dismissKeyguardLw(@Nullable IKeyguardDismissCallback callback,
+            CharSequence message) {
     }
 
     @Override
@@ -588,6 +589,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
         return false;
     }
 
+    @NavigationBarPosition
     @Override
     public int getNavBarPosition() {
         return NAV_BAR_BOTTOM;

@@ -58,7 +58,6 @@ import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ApkLite;
 import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
-import android.content.pm.Signature;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Binder;
@@ -84,6 +83,7 @@ import android.util.ArraySet;
 import android.util.ExceptionUtils;
 import android.util.MathUtils;
 import android.util.Slog;
+import android.util.apk.ApkSignatureVerifier;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.NativeLibraryHelper;
@@ -107,7 +107,7 @@ import java.io.FileDescriptor;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -227,9 +227,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private long mVersionCode;
     @GuardedBy("mLock")
-    private Signature[] mSignatures;
-    @GuardedBy("mLock")
-    private Certificate[][] mCertificates;
+    private PackageParser.SigningDetails mSigningDetails;
 
     /**
      * Path to the validated base APK for this session, which may point at an
@@ -857,7 +855,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         Preconditions.checkNotNull(mPackageName);
-        Preconditions.checkNotNull(mSignatures);
+        Preconditions.checkNotNull(mSigningDetails);
         Preconditions.checkNotNull(mResolvedBaseFile);
 
         if (needToAskForPermissionsLocked()) {
@@ -938,7 +936,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         mRelinquished = true;
         mPm.installStage(mPackageName, stageDir, localObserver, params,
-                mInstallerPackageName, mInstallerUid, user, mCertificates);
+                mInstallerPackageName, mInstallerUid, user, mSigningDetails);
     }
 
     /**
@@ -957,7 +955,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throws PackageManagerException {
         mPackageName = null;
         mVersionCode = -1;
-        mSignatures = null;
+        mSigningDetails = PackageParser.SigningDetails.UNKNOWN;
 
         mResolvedBaseFile = null;
         mResolvedStagedFiles.clear();
@@ -990,11 +988,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         for (File addedFile : addedFiles) {
             final ApkLite apk;
             try {
-                int flags = PackageParser.PARSE_COLLECT_CERTIFICATES;
-                if ((params.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
-                    flags |= PackageParser.PARSE_IS_EPHEMERAL;
-                }
-                apk = PackageParser.parseApkLite(addedFile, flags);
+                apk = PackageParser.parseApkLite(
+                        addedFile, PackageParser.PARSE_COLLECT_CERTIFICATES);
             } catch (PackageParserException e) {
                 throw PackageManagerException.from(e);
             }
@@ -1009,9 +1004,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 mPackageName = apk.packageName;
                 mVersionCode = apk.getLongVersionCode();
             }
-            if (mSignatures == null) {
-                mSignatures = apk.signatures;
-                mCertificates = apk.certificates;
+            if (mSigningDetails == PackageParser.SigningDetails.UNKNOWN) {
+                mSigningDetails = apk.signingDetails;
             }
 
             assertApkConsistentLocked(String.valueOf(addedFile), apk);
@@ -1060,8 +1054,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 mPackageName = pkgInfo.packageName;
                 mVersionCode = pkgInfo.getLongVersionCode();
             }
-            if (mSignatures == null) {
-                mSignatures = pkgInfo.signatures;
+            if (mSigningDetails == PackageParser.SigningDetails.UNKNOWN) {
+                try {
+                    mSigningDetails = ApkSignatureVerifier.plsCertsNoVerifyOnlyCerts(
+                            pkgInfo.applicationInfo.sourceDir,
+                            PackageParser.SigningDetails.SignatureSchemeVersion.JAR);
+                } catch (PackageParserException e) {
+                    throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                            "Couldn't obtain signatures from base APK");
+                }
             }
         }
 
@@ -1155,7 +1156,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     + " version code " + apk.versionCode + " inconsistent with "
                     + mVersionCode);
         }
-        if (!Signature.areExactMatch(mSignatures, apk.signatures)) {
+        if (!mSigningDetails.signaturesMatchExactly(apk.signingDetails)) {
             throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                     tag + " signatures are inconsistent");
         }

@@ -752,7 +752,7 @@ public class LockTaskController {
                     USER_CURRENT) != 0;
             if (shouldLockKeyguard) {
                 mWindowManager.lockNow(null);
-                mWindowManager.dismissKeyguard(null /* callback */);
+                mWindowManager.dismissKeyguard(null /* callback */, null /* message */);
                 getLockPatternUtils().requireCredentialEntry(USER_ALL);
             }
         } catch (Settings.SettingNotFoundException e) {

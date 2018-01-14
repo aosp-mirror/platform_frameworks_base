@@ -130,6 +130,7 @@ import com.android.internal.util.WakeupMessage;
 import com.android.internal.util.XmlUtils;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.connectivity.DataConnectionStats;
+import com.android.server.connectivity.DnsManager;
 import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.connectivity.KeepaliveTracker;
 import com.android.server.connectivity.LingerMonitor;
@@ -232,8 +233,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private int mNetworkPreference;
     // 0 is full bad, 100 is full good
     private int mDefaultInetConditionPublished = 0;
-
-    private int mNumDnsEntries;
 
     private boolean mTestMode;
     private static ConnectivityService sServiceInstance;
@@ -408,6 +407,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     final private InternalHandler mHandler;
     /** Handler used for incoming {@link NetworkStateTracker} events. */
     final private NetworkStateTrackerHandler mTrackerHandler;
+    private final DnsManager mDnsManager;
 
     private boolean mSystemReady;
     private Intent mInitialBroadcast;
@@ -880,6 +880,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mMultinetworkPolicyTracker = createMultinetworkPolicyTracker(
                 mContext, mHandler, () -> rematchForAvoidBadWifiUpdate());
         mMultinetworkPolicyTracker.start();
+
+        mDnsManager = new DnsManager(mContext, mNetd, mSystemProperties);
     }
 
     private Tethering makeTethering() {
@@ -1823,24 +1825,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final String sysctlKey = "sys.sysctl.tcp_def_init_rwnd";
         if (rwndValue != 0) {
             mSystemProperties.set(sysctlKey, rwndValue.toString());
-        }
-    }
-
-    private void flushVmDnsCache() {
-        /*
-         * Tell the VMs to toss their DNS caches
-         */
-        Intent intent = new Intent(Intent.ACTION_CLEAR_DNS_CACHE);
-        intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-        /*
-         * Connectivity events can happen before boot has completed ...
-         */
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
         }
     }
 
@@ -4586,40 +4570,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return;  // no updating necessary
         }
 
+        final NetworkAgentInfo defaultNai = getDefaultNetwork();
+        final boolean isDefaultNetwork = (defaultNai != null && defaultNai.network.netId == netId);
+
         Collection<InetAddress> dnses = newLp.getDnsServers();
         if (DBG) log("Setting DNS servers for network " + netId + " to " + dnses);
         try {
-            mNetd.setDnsConfigurationForNetwork(
-                    netId, NetworkUtils.makeStrings(dnses), newLp.getDomains());
+            mDnsManager.setDnsConfigurationForNetwork(
+                    netId, dnses, newLp.getDomains(), isDefaultNetwork);
         } catch (Exception e) {
             loge("Exception in setDnsConfigurationForNetwork: " + e);
-        }
-        final NetworkAgentInfo defaultNai = getDefaultNetwork();
-        if (defaultNai != null && defaultNai.network.netId == netId) {
-            setDefaultDnsSystemProperties(dnses);
-        }
-        flushVmDnsCache();
-    }
-
-    private void setDefaultDnsSystemProperties(Collection<InetAddress> dnses) {
-        int last = 0;
-        for (InetAddress dns : dnses) {
-            ++last;
-            setNetDnsProperty(last, dns.getHostAddress());
-        }
-        for (int i = last + 1; i <= mNumDnsEntries; ++i) {
-            setNetDnsProperty(i, "");
-        }
-        mNumDnsEntries = last;
-    }
-
-    private void setNetDnsProperty(int which, String value) {
-        final String key = "net.dns" + which;
-        // Log and forget errors setting unsupported properties.
-        try {
-            mSystemProperties.set(key, value);
-        } catch (Exception e) {
-            Log.e(TAG, "Error setting unsupported net.dns property: ", e);
         }
     }
 
@@ -4893,7 +4853,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         notifyLockdownVpn(newNetwork);
         handleApplyDefaultProxy(newNetwork.linkProperties.getHttpProxy());
         updateTcpBufferSizes(newNetwork);
-        setDefaultDnsSystemProperties(newNetwork.linkProperties.getDnsServers());
+        mDnsManager.setDefaultDnsSystemProperties(newNetwork.linkProperties.getDnsServers());
     }
 
     private void processListenRequests(NetworkAgentInfo nai, boolean capabilitiesChanged) {

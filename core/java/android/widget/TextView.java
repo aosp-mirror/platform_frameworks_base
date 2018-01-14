@@ -2365,7 +2365,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         setText(mText);
 
         if (hasPasswordTransformationMethod()) {
-            notifyViewAccessibilityStateChangedIfNeeded(
+            notifyAccessibilityStateChanged(
                     AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
         }
 
@@ -5476,7 +5476,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         sendOnTextChanged(text, 0, oldlen, textLength);
         onTextChanged(text, 0, oldlen, textLength);
 
-        notifyViewAccessibilityStateChangedIfNeeded(AccessibilityEvent.CONTENT_CHANGE_TYPE_TEXT);
+        notifyAccessibilityStateChanged(AccessibilityEvent.CONTENT_CHANGE_TYPE_TEXT);
 
         if (needEditableForNotification) {
             sendAfterTextChanged((Editable) text);
@@ -6210,7 +6210,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public void setError(CharSequence error, Drawable icon) {
         createEditorIfNeeded();
         mEditor.setError(error, icon);
-        notifyViewAccessibilityStateChangedIfNeeded(
+        notifyAccessibilityStateChanged(
                 AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
     }
 
@@ -11011,6 +11011,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return true;
 
             case ID_COPY:
+                // For link action mode in a non-selectable/non-focusable TextView,
+                // make sure that we set the appropriate min/max.
+                final int selStart = getSelectionStart();
+                final int selEnd = getSelectionEnd();
+                min = Math.max(0, Math.min(selStart, selEnd));
+                max = Math.max(0, Math.max(selStart, selEnd));
                 final ClipData copyData = ClipData.newPlainText(null, getTransformedText(min, max));
                 if (setPrimaryClip(copyData)) {
                     stopTextActionMode();
@@ -11233,11 +11239,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public boolean requestActionMode(@NonNull TextLinks.TextLink link) {
         Preconditions.checkNotNull(link);
-        if (mEditor != null) {
-            mEditor.startLinkActionModeAsync(link);
-            return true;
-        }
-        return false;
+        createEditorIfNeeded();
+        mEditor.startLinkActionModeAsync(link);
+        return true;
     }
     /**
      * @hide

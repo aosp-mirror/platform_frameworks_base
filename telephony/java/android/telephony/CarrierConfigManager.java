@@ -337,6 +337,19 @@ public class CarrierConfigManager {
             "notify_handover_video_from_wifi_to_lte_bool";
 
     /**
+     * Flag specifying whether the carrier wants to notify the user when a VT call has been handed
+     * over from LTE to WIFI.
+     * <p>
+     * The handover notification is sent as a
+     * {@link TelephonyManager#EVENT_HANDOVER_VIDEO_FROM_LTE_TO_WIFI}
+     * {@link android.telecom.Connection} event, which an {@link android.telecom.InCallService}
+     * should use to trigger the display of a user-facing message.
+     * @hide
+     */
+    public static final String KEY_NOTIFY_HANDOVER_VIDEO_FROM_LTE_TO_WIFI_BOOL =
+            "notify_handover_video_from_lte_to_wifi_bool";
+
+    /**
      * Flag specifying whether the carrier supports downgrading a video call (tx, rx or tx/rx)
      * directly to an audio call.
      * @hide
@@ -1740,6 +1753,13 @@ public class CarrierConfigManager {
     public static final String KEY_CHECK_PRICING_WITH_CARRIER_FOR_DATA_ROAMING_BOOL =
             "check_pricing_with_carrier_data_roaming_bool";
 
+    /**
+     * List of thresholds of RSRP for determining the display level of LTE signal bar.
+     * @hide
+     */
+    public static final String KEY_LTE_RSRP_THRESHOLDS_INT_ARRAY =
+            "lte_rsrp_thresholds_int_array";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1756,6 +1776,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_VT_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_NOTIFY_HANDOVER_VIDEO_FROM_WIFI_TO_LTE_BOOL, false);
+        sDefaults.putBoolean(KEY_NOTIFY_HANDOVER_VIDEO_FROM_LTE_TO_WIFI_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_DOWNGRADE_VT_TO_AUDIO_BOOL, true);
         sDefaults.putString(KEY_DEFAULT_VM_NUMBER_STRING, "");
         sDefaults.putBoolean(KEY_CONFIG_TELEPHONY_USE_OWN_NUMBER_FOR_VOICEMAIL_BOOL, false);
@@ -2028,6 +2049,15 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_DATA_RAT_ICON_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_CONFIG_APPLIED_BOOL, false);
         sDefaults.putBoolean(KEY_CHECK_PRICING_WITH_CARRIER_FOR_DATA_ROAMING_BOOL, false);
+        sDefaults.putIntArray(KEY_LTE_RSRP_THRESHOLDS_INT_ARRAY,
+                new int[] {
+                        -140, /* SIGNAL_STRENGTH_NONE_OR_UNKNOWN */
+                        -128, /* SIGNAL_STRENGTH_POOR */
+                        -118, /* SIGNAL_STRENGTH_MODERATE */
+                        -108, /* SIGNAL_STRENGTH_GOOD */
+                        -98,  /* SIGNAL_STRENGTH_GREAT */
+                        -44
+                });
     }
 
     /**

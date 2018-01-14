@@ -147,8 +147,8 @@
       <item quantity="other">Unesite PIN kôd za SIM. Imate još <xliff:g id="NUMBER_1">%d</xliff:g> pokušaja.</item>
     </plurals>
     <plurals name="kg_password_default_puk_message" formatted="false" msgid="8744416410184198352">
-      <item quantity="one">SIM kartica je onemogućena. Unesite PUK kôd da nastavite. Imate još <xliff:g id="_NUMBER_1">%d</xliff:g> pokušaj prije nego što SIM kartica postane trajno neupotrebljiva. Obratite se operateru za više informacija.</item>
-      <item quantity="few">SIM kartica je onemogućena. Unesite PUK kôd da nastavite. Imate još <xliff:g id="_NUMBER_1">%d</xliff:g> pokušaja prije nego što SIM kartica postane trajno neupotrebljiva. Obratite se operateru za više informacija.</item>
-      <item quantity="other">SIM kartica je onemogućena. Unesite PUK kôd da nastavite. Imate još <xliff:g id="_NUMBER_1">%d</xliff:g> pokušaja prije nego što SIM kartica postane trajno neupotrebljiva. Obratite se operateru za više informacija.</item>
+      <item quantity="one">SIM kartica je onemogućena. Unesite PUK kôd da nastavite. Imate još <xliff:g id="_NUMBER_1">%d</xliff:g> pokušaj prije nego što SIM kartica postane trajno neupotrebljiva. Za više informacija kontaktirajte mobilnog operatera.</item>
+      <item quantity="few">SIM kartica je onemogućena. Unesite PUK kôd da nastavite. Imate još <xliff:g id="_NUMBER_1">%d</xliff:g> pokušaja prije nego što SIM kartica postane trajno neupotrebljiva. Za više informacija kontaktirajte mobilnog operatera.</item>
+      <item quantity="other">SIM kartica je onemogućena. Unesite PUK kôd da nastavite. Imate još <xliff:g id="_NUMBER_1">%d</xliff:g> pokušaja prije nego što SIM kartica postane trajno neupotrebljiva. Za više informacija kontaktirajte mobilnog operatera.</item>
     </plurals>
 </resources>

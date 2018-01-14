@@ -79,16 +79,15 @@ class XmlVisitor : public xml::PackageAwareVisitor {
 
   void Visit(xml::Element* el) override {
     // The default Attribute allows everything except enums or flags.
-    constexpr const static uint32_t kDefaultTypeMask =
-        0xffffffffu & ~(android::ResTable_map::TYPE_ENUM | android::ResTable_map::TYPE_FLAGS);
-    const static Attribute kDefaultAttribute(true /* weak */, kDefaultTypeMask);
+    Attribute default_attribute(android::ResTable_map::TYPE_ANY);
+    default_attribute.SetWeak(true);
 
     const Source source = source_.WithLine(el->line_number);
     for (xml::Attribute& attr : el->attributes) {
       // If the attribute has no namespace, interpret values as if
       // they were assigned to the default Attribute.
 
-      const Attribute* attribute = &kDefaultAttribute;
+      const Attribute* attribute = &default_attribute;
 
       if (Maybe<xml::ExtractedPackage> maybe_package =
               xml::ExtractPackageFromNamespace(attr.namespace_uri)) {

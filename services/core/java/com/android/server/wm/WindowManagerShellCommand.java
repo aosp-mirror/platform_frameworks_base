@@ -231,7 +231,7 @@ public class WindowManagerShellCommand extends ShellCommand {
     }
 
     private int runDismissKeyguard(PrintWriter pw) throws RemoteException {
-        mInterface.dismissKeyguard(null /* callback */);
+        mInterface.dismissKeyguard(null /* callback */, null /* message */);
         return 0;
     }
 

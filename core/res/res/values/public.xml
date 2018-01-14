@@ -2861,6 +2861,7 @@
       <public name="widgetFeatures" />
       <public name="appComponentFactory" />
       <public name="fallbackLineSpacing" />
+      <public name="accessibilityPaneTitle" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">

@@ -147,7 +147,7 @@ interface IWindowManager
     void exitKeyguardSecurely(IOnKeyguardExitResult callback);
     boolean isKeyguardLocked();
     boolean isKeyguardSecure();
-    void dismissKeyguard(IKeyguardDismissCallback callback);
+    void dismissKeyguard(IKeyguardDismissCallback callback, CharSequence message);
 
     // Requires INTERACT_ACROSS_USERS_FULL permission
     void setSwitchingUser(boolean switching);

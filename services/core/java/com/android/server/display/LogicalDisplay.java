@@ -145,6 +145,7 @@ final class LogicalDisplay {
                 mInfo.overscanRight = mOverrideDisplayInfo.overscanRight;
                 mInfo.overscanBottom = mOverrideDisplayInfo.overscanBottom;
                 mInfo.rotation = mOverrideDisplayInfo.rotation;
+                mInfo.displayCutout = mOverrideDisplayInfo.displayCutout;
                 mInfo.logicalDensityDpi = mOverrideDisplayInfo.logicalDensityDpi;
                 mInfo.physicalXDpi = mOverrideDisplayInfo.physicalXDpi;
                 mInfo.physicalYDpi = mOverrideDisplayInfo.physicalYDpi;
@@ -280,6 +281,7 @@ final class LogicalDisplay {
             mBaseDisplayInfo.largestNominalAppHeight = deviceInfo.height;
             mBaseDisplayInfo.ownerUid = deviceInfo.ownerUid;
             mBaseDisplayInfo.ownerPackageName = deviceInfo.ownerPackageName;
+            mBaseDisplayInfo.displayCutout = deviceInfo.displayCutout;
 
             mPrimaryDisplayDeviceInfo = deviceInfo;
             mInfo = null;

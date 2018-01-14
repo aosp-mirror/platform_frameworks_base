@@ -17,13 +17,14 @@ package com.android.keyguard;
 
 import android.app.admin.DevicePolicyManager;
 import android.graphics.Bitmap;
+import android.hardware.fingerprint.FingerprintManager;
 import android.media.AudioManager;
 import android.os.SystemClock;
-import android.hardware.fingerprint.FingerprintManager;
 import android.telephony.TelephonyManager;
 import android.view.WindowManagerPolicyConstants;
 
 import com.android.internal.telephony.IccCardConstants;
+import com.android.systemui.statusbar.KeyguardIndicationController;
 
 /**
  * Callback for general information relevant to lock screen.
@@ -271,4 +272,15 @@ public class KeyguardUpdateMonitorCallback {
      * @param dreaming true if the dream's window has been created and is visible
      */
     public void onDreamingStateChanged(boolean dreaming) { }
+
+    /**
+     * Called when an error message needs to be presented on the keyguard.
+     * Message will be visible briefly, and might be overridden by other keyguard events,
+     * like fingerprint authentication errors.
+     *
+     * @param message Message that indicates an error.
+     * @see KeyguardIndicationController.BaseKeyguardCallback#HIDE_DELAY_MS
+     * @see KeyguardIndicationController#showTransientIndication(CharSequence)
+     */
+    public void onTrustAgentErrorMessage(CharSequence message) { }
 }

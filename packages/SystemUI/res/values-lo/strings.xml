@@ -503,6 +503,13 @@
     <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. ແຕະເພື່ອປິດສຽງ."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"ສະແດງສ່ວນຄວບຄຸມສຽງ %s ແລ້ວ. ປັດອອກຂ້າງເພື່ອປິດໄວ້."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"ເຊື່ອງສ່ວນຄວບຄຸມສຽງແລ້ວ"</string>
+    <string name="output_title" msgid="5355078100792942802">"ມີເດຍເອົ້າພຸດ"</string>
+    <string name="output_calls_title" msgid="8717692905017206161">"ເອົ້າພຸດສາຍໂທອອກ"</string>
+    <string name="output_none_found" msgid="5544982839808921091">"ບໍ່ພົບອຸປະກອນ"</string>
+    <string name="output_none_found_service_off" msgid="8631969668659757069">"ບໍ່ພົບອຸປະກອນ. ກະລຸນາລອງເປີດ <xliff:g id="SERVICE">%1$s</xliff:g> ກ່ອນ"</string>
+    <string name="output_service_bt" msgid="6224213415445509542">"Bluetooth"</string>
+    <string name="output_service_wifi" msgid="3749735218931825054">"Wi-Fi"</string>
+    <string name="output_service_bt_wifi" msgid="4486837869988770896">"Bluetooth ແລະ Wi-Fi"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"System UI Tuner"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"ສະ​ແດງ​ເປີ​ເຊັນ​ແບັດ​ເຕີ​ຣີ​ທີ່​ຕິດ​ມາ"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"ສະ​ແດງ​ເປີ​ເຊັນ​ລະ​ດັບ​ແບັດ​ເຕີ​ຣີ​ຢູ່​ດ້ານ​ໃນ​ໄອ​ຄອນ​ແຖບ​ສະ​ຖາ​ນະ ເມື່ອ​ບໍ່​ສາກ​ຢູ່"</string>
@@ -724,6 +731,8 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"ຂະຫຍາຍ"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"ຫຍໍ້"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"ປິດ"</string>
+    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
+    <skip />
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"ລາກລົງເພື່ອປິດໄວ້"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"ເມນູ"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ແມ່ນເປັນການສະແດງຜົນຫຼາຍຢ່າງພ້ອມກັນ"</string>

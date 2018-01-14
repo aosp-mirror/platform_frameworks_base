@@ -484,6 +484,9 @@
     <!-- label for item that logouts the current user -->
     <string name="global_action_logout">End session</string>
 
+    <!-- label for screenshot item in power menu -->
+    <string name="global_action_screenshot">Screenshot</string>
+
     <!-- Take bug report menu title [CHAR LIMIT=NONE] -->
     <string name="bugreport_title">Take bug report</string>
     <!-- Message in bugreport dialog describing what it does [CHAR LIMIT=NONE] -->
@@ -3030,6 +3033,10 @@
     <string name="wifi_wakeup_onboarding_subtext">When you\'re near a high quality saved network</string>
     <!--Notification action to disable Wi-Fi Wake during onboarding.-->
     <string name="wifi_wakeup_onboarding_action_disable">Don\'t turn back on</string>
+    <!--Notification title for when Wi-Fi Wake enables Wi-Fi.-->
+    <string name="wifi_wakeup_enabled_title">Wi\u2011Fi turned on automatically</string>
+    <!--Notification content for when Wi-Fi Wake enables Wi-Fi. %1$s is the SSID of the nearby saved network that triggered the wakeup. -->
+    <string name="wifi_wakeup_enabled_content">You\u0027re near a saved network: <xliff:g id="network_ssid">%1$s</xliff:g></string>
 
     <!-- A notification is shown when a wifi captive portal network is detected.  This is the notification's title. -->
     <string name="wifi_available_sign_in">Sign in to Wi-Fi network</string>
@@ -4795,4 +4802,11 @@
 
     <!--Battery saver warning. STOPSHIP: Remove it eventually. -->
     <string name="battery_saver_warning_title" translatable="false">Extreme battery saver</string>
+
+    <!-- Label for the uninstall button on the harmful app warning dialog. -->
+    <string name="harmful_app_warning_uninstall">Uninstall</string>
+    <!-- Label for the launch anyway button on the harmful app warning dialog. -->
+    <string name="harmful_app_warning_launch_anyway">Launch anyway</string>
+    <!-- Title for the harmful app warning dialog. -->
+    <string name="harmful_app_warning_title">Uninstall harmful app?</string>
 </resources>

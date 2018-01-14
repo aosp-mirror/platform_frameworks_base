@@ -17,7 +17,7 @@
 package com.android.server.locksettings.recoverablekeystore.storage;
 
 import android.annotation.Nullable;
-import android.security.recoverablekeystore.KeyStoreRecoveryData;
+import android.security.keystore.RecoveryData;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -34,12 +34,12 @@ import com.android.internal.annotations.GuardedBy;
  */
 public class RecoverySnapshotStorage {
     @GuardedBy("this")
-    private final SparseArray<KeyStoreRecoveryData> mSnapshotByUid = new SparseArray<>();
+    private final SparseArray<RecoveryData> mSnapshotByUid = new SparseArray<>();
 
     /**
      * Sets the latest {@code snapshot} for the recovery agent {@code uid}.
      */
-    public synchronized void put(int uid, KeyStoreRecoveryData snapshot) {
+    public synchronized void put(int uid, RecoveryData snapshot) {
         mSnapshotByUid.put(uid, snapshot);
     }
 
@@ -47,7 +47,7 @@ public class RecoverySnapshotStorage {
      * Returns the latest snapshot for the recovery agent {@code uid}, or null if none exists.
      */
     @Nullable
-    public synchronized KeyStoreRecoveryData get(int uid) {
+    public synchronized RecoveryData get(int uid) {
         return mSnapshotByUid.get(uid);
     }
 

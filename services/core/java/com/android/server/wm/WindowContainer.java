@@ -19,26 +19,26 @@ package com.android.server.wm;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+import static android.view.SurfaceControl.Transaction;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.proto.WindowContainerProto.CONFIGURATION_CONTAINER;
 import static com.android.server.wm.proto.WindowContainerProto.ORIENTATION;
+import static com.android.server.wm.proto.WindowContainerProto.SURFACE_ANIMATOR;
 import static com.android.server.wm.proto.WindowContainerProto.VISIBLE;
-import static android.view.SurfaceControl.Transaction;
 
 import android.annotation.CallSuper;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.util.Pools;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 import android.view.MagnificationSpec;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Builder;
 import android.view.SurfaceSession;
-import android.util.Pools;
-
-import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wm.SurfaceAnimator.Animatable;
@@ -95,6 +95,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     protected final WindowManagerService mService;
 
     private final Point mTmpPos = new Point();
+    protected final Point mLastSurfacePosition = new Point();
 
     /** Total number of elements in this subtree, including our own hierarchy element. */
     private int mTreeWeight = 1;
@@ -971,6 +972,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         super.writeToProto(proto, CONFIGURATION_CONTAINER, trim);
         proto.write(ORIENTATION, mOrientation);
         proto.write(VISIBLE, isVisible());
+        mSurfaceAnimator.writeToProto(proto, SURFACE_ANIMATOR);
         proto.end(token);
     }
 
@@ -1178,7 +1180,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
 
         getRelativePosition(mTmpPos);
+        if (mTmpPos.equals(mLastSurfacePosition)) {
+            return;
+        }
+
         transaction.setPosition(mSurfaceControl, mTmpPos.x, mTmpPos.y);
+        mLastSurfacePosition.set(mTmpPos.x, mTmpPos.y);
 
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             mChildren.get(i).updateSurfacePosition(transaction);

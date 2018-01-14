@@ -16,10 +16,15 @@
 
 syntax = "proto2";
 
+import "frameworks/base/core/proto/android/app/statusbarmanager.proto";
+import "frameworks/base/core/proto/android/content/activityinfo.proto";
 import "frameworks/base/core/proto/android/content/configuration.proto";
 import "frameworks/base/core/proto/android/graphics/rect.proto";
+import "frameworks/base/core/proto/android/server/appwindowthumbnail.proto";
+import "frameworks/base/core/proto/android/server/surfaceanimator.proto";
 import "frameworks/base/core/proto/android/view/displaycutout.proto";
 import "frameworks/base/core/proto/android/view/displayinfo.proto";
+import "frameworks/base/core/proto/android/view/surface.proto";
 import "frameworks/base/core/proto/android/view/windowlayoutparams.proto";
 
 package com.android.server.wm.proto;
@@ -47,8 +52,62 @@ message RootWindowContainerProto {
   repeated IdentifierProto windows = 3;
 }
 
+message BarControllerProto {
+  optional .android.app.StatusBarManagerProto.WindowState state = 1;
+  optional .android.app.StatusBarManagerProto.TransientWindowState transient_state = 2;
+}
+
+message WindowOrientationListenerProto {
+  optional bool enabled = 1;
+  optional .android.view.SurfaceProto.Rotation rotation = 2;
+}
+
+message KeyguardServiceDelegateProto {
+  optional bool showing = 1;
+  optional bool occluded = 2;
+  optional bool secure = 3;
+  enum ScreenState {
+    SCREEN_STATE_OFF = 0;
+    SCREEN_STATE_TURNING_ON = 1;
+    SCREEN_STATE_ON = 2;
+    SCREEN_STATE_TURNING_OFF = 3;
+  }
+  optional ScreenState screen_state = 4;
+  enum InteractiveState {
+    INTERACTIVE_STATE_SLEEP = 0;
+    INTERACTIVE_STATE_WAKING = 1;
+    INTERACTIVE_STATE_AWAKE = 2;
+    INTERACTIVE_STATE_GOING_TO_SLEEP = 3;
+  }
+  optional InteractiveState interactive_state = 5;
+}
+
 /* represents PhoneWindowManager */
 message WindowManagerPolicyProto {
+  optional int32 last_system_ui_flags = 1;
+  enum UserRotationMode {
+    USER_ROTATION_FREE = 0;
+    USER_ROTATION_LOCKED = 1;
+  }
+  optional UserRotationMode rotation_mode = 2;
+  optional .android.view.SurfaceProto.Rotation rotation = 3;
+  optional .android.content.ActivityInfoProto.ScreenOrientation orientation = 4;
+  optional bool screen_on_fully = 5;
+  optional bool keyguard_draw_complete = 6;
+  optional bool window_manager_draw_complete = 7;
+  optional string focused_app_token = 8;
+  optional IdentifierProto focused_window = 9;
+  optional IdentifierProto top_fullscreen_opaque_window = 10;
+  optional IdentifierProto top_fullscreen_opaque_or_dimming_window = 11;
+  optional bool keyguard_occluded = 12;
+  optional bool keyguard_occluded_changed = 13;
+  optional bool keyguard_occluded_pending = 14;
+  optional bool force_status_bar = 15;
+  optional bool force_status_bar_from_keyguard = 16;
+  optional BarControllerProto status_bar = 17;
+  optional BarControllerProto navigation_bar = 18;
+  optional WindowOrientationListenerProto orientation_listener = 19;
+  optional KeyguardServiceDelegateProto keyguard_delegate = 20;
 }
 
 /* represents AppTransition */
@@ -128,6 +187,12 @@ message StackProto {
   optional bool fills_parent = 4;
   optional .android.graphics.RectProto bounds = 5;
   optional bool animation_background_surface_is_dimming = 6;
+  optional bool defer_removal = 7;
+  optional float minimize_amount = 8;
+  optional bool adjusted_for_ime = 9;
+  optional float adjust_ime_amount = 10;
+  optional float adjust_divider_amount = 11;
+  optional .android.graphics.RectProto adjusted_bounds = 12;
 }
 
 /* represents Task */
@@ -138,6 +203,7 @@ message TaskProto {
   optional bool fills_parent = 4;
   optional .android.graphics.RectProto bounds = 5;
   optional .android.graphics.RectProto temp_inset_bounds = 6;
+  optional bool defer_removal = 7;
 }
 
 /* represents AppWindowToken */
@@ -145,6 +211,27 @@ message AppWindowTokenProto {
   /* obtained from ActivityRecord */
   optional string name = 1;
   optional WindowTokenProto window_token = 2;
+  optional bool last_surface_showing = 3;
+  optional bool is_waiting_for_transition_start =  4;
+  optional bool is_really_animating = 5;
+  optional AppWindowThumbnailProto thumbnail = 6;
+  optional bool fills_parent = 7;
+  optional bool app_stopped = 8;
+  optional bool hidden_requested = 9;
+  optional bool client_hidden = 10;
+  optional bool defer_hiding_client = 11;
+  optional bool reported_drawn = 12;
+  optional bool reported_visible = 13;
+  optional int32 num_interesting_windows = 14;
+  optional int32 num_drawn_windows = 15;
+  optional bool all_drawn = 16;
+  optional bool last_all_drawn = 17;
+  optional bool removed = 18;
+  optional IdentifierProto starting_window = 19;
+  optional bool starting_displayed = 20;
+  optional bool starting_moved = 21;
+  optional bool hidden_set_from_transferred_starting_window = 22;
+  repeated .android.graphics.RectProto frozen_bounds = 23;
 }
 
 /* represents WindowToken */
@@ -152,6 +239,9 @@ message WindowTokenProto {
   optional WindowContainerProto window_container = 1;
   optional int32 hash_code = 2;
   repeated WindowStateProto windows = 3;
+  optional bool hidden = 4;
+  optional bool waiting_to_show = 5;
+  optional bool paused = 6;
 }
 
 /* represents WindowState */
@@ -234,6 +324,7 @@ message WindowContainerProto {
   optional ConfigurationContainerProto configuration_container = 1;
   optional int32 orientation = 2;
   optional bool visible = 3;
+  optional SurfaceAnimatorProto surface_animator = 4;
 }
 
 /* represents ConfigurationContainer */

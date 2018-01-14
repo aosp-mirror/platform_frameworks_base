@@ -300,10 +300,15 @@ struct Attribute : public BaseValue<Attribute> {
   int32_t max_int;
   std::vector<Symbol> symbols;
 
-  Attribute();
-  explicit Attribute(bool w, uint32_t t = 0u);
+  explicit Attribute(uint32_t t = 0u);
 
   bool Equals(const Value* value) const override;
+
+  // Returns true if this Attribute's format is compatible with the given Attribute. The basic
+  // rule is that TYPE_REFERENCE can be ignored for both of the Attributes, and TYPE_FLAGS and
+  // TYPE_ENUMS are never compatible.
+  bool IsCompatibleWith(const Attribute& attr) const;
+
   Attribute* Clone(StringPool* new_pool) const override;
   std::string MaskString() const;
   void Print(std::ostream* out) const override;

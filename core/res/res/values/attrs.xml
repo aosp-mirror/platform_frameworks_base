@@ -3030,6 +3030,10 @@
              value, {@code false}, leaves the screen reader to consider other signals, such as
              focusability or the presence of text, to decide what it focus.-->
         <attr name="screenReaderFocusable" format="boolean" />
+
+        <!-- The title this view should present to accessibility as a pane title.
+             See {@link android.view.View#setAccessibilityPaneTitle(CharSequence)} -->
+        <attr name="accessibilityPaneTitle" format="string" />
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->
@@ -7756,21 +7760,21 @@
         <attr name="settingsActivity" />
     </declare-styleable>
 
-    <!-- @SystemApi Use <code>trust-agent</code> as the root tag of the XML resource that
+    <!--  Use <code>trust-agent</code> as the root tag of the XML resource that
          describes an {@link android.service.trust.TrustAgentService}, which is
          referenced from its {@link android.service.trust.TrustAgentService#TRUST_AGENT_META_DATA}
          meta-data entry.  Described here are the attributes that can be included in that tag.
          @hide -->
     <declare-styleable name="TrustAgent">
-        <!-- @SystemApi Component name of an activity that allows the user to modify
+        <!--  Component name of an activity that allows the user to modify
              the settings for this trust agent. @hide -->
         <attr name="settingsActivity" />
-        <!-- @SystemApi Title for a preference that allows that user to launch the
+        <!--  Title for a preference that allows that user to launch the
              activity to modify trust agent settings. @hide -->
         <attr name="title" />
-        <!-- @SystemApi Summary for the same preference as the title. @hide -->
+        <!--  Summary for the same preference as the title. @hide -->
         <attr name="summary" />
-        <!-- @SystemApi Whether trust agent can unlock a user profile @hide -->
+        <!--  Whether trust agent can unlock a user profile @hide -->
         <attr name="unlockProfile" format="boolean"/>
     </declare-styleable>
 
@@ -7980,16 +7984,16 @@
          by the enrollment application.
          Described here are the attributes that can be included in that tag.
          @hide
-         @SystemApi -->
+          -->
     <declare-styleable name="VoiceEnrollmentApplication">
-        <!-- A globally unique ID for the keyphrase. @hide @SystemApi -->
+        <!-- A globally unique ID for the keyphrase. @hide  -->
         <attr name="searchKeyphraseId" format="integer" />
-        <!-- The actual keyphrase/hint text, or empty if not keyphrase dependent. @hide @SystemApi -->
+        <!-- The actual keyphrase/hint text, or empty if not keyphrase dependent. @hide  -->
         <attr name="searchKeyphrase" format="string" />
         <!-- A comma separated list of BCP-47 language tag for locales that are supported
-             for this keyphrase, or empty if not locale dependent. @hide @SystemApi -->
+             for this keyphrase, or empty if not locale dependent. @hide  -->
         <attr name="searchKeyphraseSupportedLocales" format="string" />
-        <!-- Flags for supported recognition modes. @hide @SystemApi -->
+        <!-- Flags for supported recognition modes. @hide  -->
         <attr name="searchKeyphraseRecognitionFlags">
             <flag name="none" value="0" />
             <flag name="voiceTrigger" value="0x1" />
