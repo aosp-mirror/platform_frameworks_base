@@ -110,6 +110,22 @@
             android:clipChildren="false"
             android:gravity="center_horizontal|center_vertical"/>
 
+        <com.android.systemui.statusbar.LineageStatusBarItemHolder
+            android:id="@+id/network_traffic_holder"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="start|center_vertical"
+            >
+
+            <org.lineageos.internal.statusbar.NetworkTraffic
+                android:id="@+id/network_traffic"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:maxLines="2"
+                android:gravity="center_vertical|start" />
+
+        </com.android.systemui.statusbar.LineageStatusBarItemHolder>
+
         <com.android.keyguard.AlphaOptimizedLinearLayout android:id="@+id/system_icon_area"
             android:layout_width="0dp"
             android:layout_height="match_parent"
