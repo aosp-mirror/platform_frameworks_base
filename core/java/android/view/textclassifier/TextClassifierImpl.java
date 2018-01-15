@@ -32,7 +32,6 @@ import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.text.util.Linkify;
 import android.util.Patterns;
-import android.view.View.OnClickListener;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
@@ -457,12 +456,10 @@ final class TextClassifierImpl implements TextClassifier {
                     }
                 }
                 final String labelString = (label != null) ? label.toString() : null;
-                final OnClickListener onClickListener =
-                        TextClassification.createStartActivityOnClickListener(mContext, intent);
                 if (i == 0) {
-                    builder.setPrimaryAction(intent, labelString, icon, onClickListener);
+                    builder.setPrimaryAction(intent, labelString, icon);
                 } else {
-                    builder.addSecondaryAction(intent, labelString, icon, onClickListener);
+                    builder.addSecondaryAction(intent, labelString, icon);
                 }
             }
         }

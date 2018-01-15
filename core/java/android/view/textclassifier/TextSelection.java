@@ -21,6 +21,8 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.LocaleList;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.ArrayMap;
 import android.view.textclassifier.TextClassifier.EntityType;
 
@@ -36,7 +38,7 @@ public final class TextSelection {
 
     private final int mStartIndex;
     private final int mEndIndex;
-    @NonNull private final EntityConfidence<String> mEntityConfidence;
+    @NonNull private final EntityConfidence mEntityConfidence;
     @NonNull private final String mSignature;
 
     private TextSelection(
@@ -44,7 +46,7 @@ public final class TextSelection {
             @NonNull String signature) {
         mStartIndex = startIndex;
         mEndIndex = endIndex;
-        mEntityConfidence = new EntityConfidence<>(entityConfidence);
+        mEntityConfidence = new EntityConfidence(entityConfidence);
         mSignature = signature;
     }
 
@@ -110,6 +112,22 @@ public final class TextSelection {
                 mStartIndex, mEndIndex, mEntityConfidence, mSignature);
     }
 
+    /** Helper for parceling via #ParcelableWrapper. */
+    private void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mStartIndex);
+        dest.writeInt(mEndIndex);
+        mEntityConfidence.writeToParcel(dest, flags);
+        dest.writeString(mSignature);
+    }
+
+    /** Helper for unparceling via #ParcelableWrapper. */
+    private TextSelection(Parcel in) {
+        mStartIndex = in.readInt();
+        mEndIndex = in.readInt();
+        mEntityConfidence = EntityConfidence.CREATOR.createFromParcel(in);
+        mSignature = in.readString();
+    }
+
     /**
      * Builder used to build {@link TextSelection} objects.
      */
@@ -170,10 +188,12 @@ public final class TextSelection {
     /**
      * Optional input parameters for generating TextSelection.
      */
-    public static final class Options {
+    public static final class Options implements Parcelable {
 
-        private LocaleList mDefaultLocales;
+        private @Nullable LocaleList mDefaultLocales;
         private boolean mDarkLaunchAllowed;
+
+        public Options() {}
 
         /**
          * @param defaultLocales ordered list of locale preferences that may be used to disambiguate
@@ -216,5 +236,82 @@ public final class TextSelection {
         public boolean isDarkLaunchAllowed() {
             return mDarkLaunchAllowed;
         }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mDefaultLocales != null ? 1 : 0);
+            if (mDefaultLocales != null) {
+                mDefaultLocales.writeToParcel(dest, flags);
+            }
+            dest.writeInt(mDarkLaunchAllowed ? 1 : 0);
+        }
+
+        public static final Parcelable.Creator<Options> CREATOR =
+                new Parcelable.Creator<Options>() {
+                    @Override
+                    public Options createFromParcel(Parcel in) {
+                        return new Options(in);
+                    }
+
+                    @Override
+                    public Options[] newArray(int size) {
+                        return new Options[size];
+                    }
+                };
+
+        private Options(Parcel in) {
+            if (in.readInt() > 0) {
+                mDefaultLocales = LocaleList.CREATOR.createFromParcel(in);
+            }
+            mDarkLaunchAllowed = in.readInt() != 0;
+        }
+    }
+
+    /**
+     * Parcelable wrapper for TextSelection objects.
+     * @hide
+     */
+    public static final class ParcelableWrapper implements Parcelable {
+
+        @NonNull private TextSelection mTextSelection;
+
+        public ParcelableWrapper(@NonNull TextSelection textSelection) {
+            Preconditions.checkNotNull(textSelection);
+            mTextSelection = textSelection;
+        }
+
+        @NonNull
+        public TextSelection getTextSelection() {
+            return mTextSelection;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            mTextSelection.writeToParcel(dest, flags);
+        }
+
+        public static final Parcelable.Creator<ParcelableWrapper> CREATOR =
+                new Parcelable.Creator<ParcelableWrapper>() {
+                    @Override
+                    public ParcelableWrapper createFromParcel(Parcel in) {
+                        return new ParcelableWrapper(new TextSelection(in));
+                    }
+
+                    @Override
+                    public ParcelableWrapper[] newArray(int size) {
+                        return new ParcelableWrapper[size];
+                    }
+                };
+
     }
 }
