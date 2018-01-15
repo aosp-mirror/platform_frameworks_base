@@ -202,7 +202,6 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.function.Predicate;
 
 /** A window in the window manager. */
@@ -2981,11 +2980,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     /** @return true when the window is in fullscreen task, but has non-fullscreen bounds set. */
     boolean isLetterboxedAppWindow() {
-        return !isInMultiWindowMode() && mAppToken != null && (!mAppToken.matchParentBounds()
-                || isLetterboxedForCutout());
+        return !isInMultiWindowMode() && mAppToken != null && !mAppToken.matchParentBounds()
+                || isLetterboxedForDisplayCutoutLw();
     }
 
-    private boolean isLetterboxedForCutout() {
+    @Override
+    public boolean isLetterboxedForDisplayCutoutLw() {
+        if (mAppToken == null) {
+            // Only windows with an AppWindowToken are letterboxed.
+            return false;
+        }
         if (getDisplayContent().getDisplayInfo().displayCutout == null) {
             // No cutout, no letterbox.
             return false;
