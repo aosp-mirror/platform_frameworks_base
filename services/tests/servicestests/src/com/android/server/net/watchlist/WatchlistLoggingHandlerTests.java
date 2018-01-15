@@ -36,14 +36,6 @@ import java.util.Arrays;
 @SmallTest
 public class WatchlistLoggingHandlerTests {
 
-    @Before
-    public void setUp() throws Exception {
-    }
-
-    @After
-    public void tearDown() throws Exception {
-    }
-
     @Test
     public void testWatchlistLoggingHandler_getAllSubDomains() throws Exception {
         String[] subDomains = WatchlistLoggingHandler.getAllSubDomains("abc.def.gh.i.jkl.mm");

@@ -16,8 +16,10 @@
 
 package com.android.server.net.watchlist;
 
+import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
@@ -30,14 +32,19 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.HexDump;
 
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -57,14 +64,17 @@ class WatchlistLoggingHandler extends Handler {
     private static final String DROPBOX_TAG = "network_watchlist_report";
 
     private final Context mContext;
+    private final @Nullable DropBoxManager mDropBoxManager;
     private final ContentResolver mResolver;
     private final PackageManager mPm;
     private final WatchlistReportDbHelper mDbHelper;
+    private final WatchlistConfig mConfig;
     private final WatchlistSettings mSettings;
     // A cache for uid and apk digest mapping.
     // As uid won't be reused until reboot, it's safe to assume uid is unique per signature and app.
     // TODO: Use more efficient data structure.
-    private final HashMap<Integer, byte[]> mCachedUidDigestMap = new HashMap<>();
+    private final ConcurrentHashMap<Integer, byte[]> mCachedUidDigestMap =
+            new ConcurrentHashMap<>();
 
     private interface WatchlistEventKeys {
         String HOST = "host";
@@ -79,7 +89,9 @@ class WatchlistLoggingHandler extends Handler {
         mPm = mContext.getPackageManager();
         mResolver = mContext.getContentResolver();
         mDbHelper = WatchlistReportDbHelper.getInstance(context);
+        mConfig = WatchlistConfig.getInstance();
         mSettings = WatchlistSettings.getInstance();
+        mDropBoxManager = mContext.getSystemService(DropBoxManager.class);
     }
 
     @Override
@@ -162,69 +174,88 @@ class WatchlistLoggingHandler extends Handler {
     }
 
     private void tryAggregateRecords() {
-        if (shouldReportNetworkWatchlist()) {
-            Slog.i(TAG, "Start aggregating watchlist records.");
-            final DropBoxManager dbox = mContext.getSystemService(DropBoxManager.class);
-            if (dbox != null && !dbox.isTagEnabled(DROPBOX_TAG)) {
-                final WatchlistReportDbHelper.AggregatedResult aggregatedResult =
-                        mDbHelper.getAggregatedRecords();
-                final byte[] encodedResult = encodeAggregatedResult(aggregatedResult);
-                if (encodedResult != null) {
-                    addEncodedReportToDropBox(encodedResult);
-                }
-            }
-            mDbHelper.cleanup();
-            Settings.Global.putLong(mResolver, Settings.Global.NETWORK_WATCHLIST_LAST_REPORT_TIME,
-                    System.currentTimeMillis());
-        } else {
+        // Check if it's necessary to generate watchlist report now.
+        if (!shouldReportNetworkWatchlist()) {
             Slog.i(TAG, "No need to aggregate record yet.");
+            return;
         }
+        Slog.i(TAG, "Start aggregating watchlist records.");
+        if (mDropBoxManager != null && mDropBoxManager.isTagEnabled(DROPBOX_TAG)) {
+            Settings.Global.putLong(mResolver,
+                    Settings.Global.NETWORK_WATCHLIST_LAST_REPORT_TIME,
+                    System.currentTimeMillis());
+            final WatchlistReportDbHelper.AggregatedResult aggregatedResult =
+                    mDbHelper.getAggregatedRecords();
+            // Get all digests for watchlist report, it should include all installed
+            // application digests and previously recorded app digests.
+            final List<String> digestsForReport = getAllDigestsForReport(aggregatedResult);
+            final byte[] secretKey = mSettings.getPrivacySecretKey();
+            final byte[] encodedResult = ReportEncoder.encodeWatchlistReport(mConfig,
+                    secretKey, digestsForReport, aggregatedResult);
+            if (encodedResult != null) {
+                addEncodedReportToDropBox(encodedResult);
+            }
+        }
+        mDbHelper.cleanup();
     }
 
-    private byte[] encodeAggregatedResult(
-            WatchlistReportDbHelper.AggregatedResult aggregatedResult) {
-        // TODO: Encode results using differential privacy.
-        return null;
+    /**
+     * Get all digests for watchlist report.
+     * It should include:
+     * (1) All installed app digests. We need this because we need to ensure after DP we don't know
+     * if an app is really visited C&C site.
+     * (2) App digests that previously recorded in database.
+     */
+    private List<String> getAllDigestsForReport(WatchlistReportDbHelper.AggregatedResult record) {
+        // Step 1: Get all installed application digests.
+        final List<ApplicationInfo> apps = mContext.getPackageManager().getInstalledApplications(
+                PackageManager.MATCH_ANY_USER | PackageManager.MATCH_ALL);
+        final HashSet<String> result = new HashSet<>(apps.size() + record.appDigestCNCList.size());
+        final int size = apps.size();
+        for (int i = 0; i < size; i++) {
+            byte[] digest = getDigestFromUid(apps.get(i).uid);
+            result.add(HexDump.toHexString(digest));
+        }
+        // Step 2: Add all digests from records
+        result.addAll(record.appDigestCNCList.keySet());
+        return new ArrayList<>(result);
     }
 
     private void addEncodedReportToDropBox(byte[] encodedReport) {
-        final DropBoxManager dbox = mContext.getSystemService(DropBoxManager.class);
-        dbox.addData(DROPBOX_TAG, encodedReport, 0);
+        mDropBoxManager.addData(DROPBOX_TAG, encodedReport, 0);
     }
 
     /**
      * Get app digest from app uid.
+     * Return null if system cannot get digest from uid.
      */
+    @Nullable
     private byte[] getDigestFromUid(int uid) {
-        final byte[] cachedDigest = mCachedUidDigestMap.get(uid);
-        if (cachedDigest != null) {
-            return cachedDigest;
-        }
-        final String[] packageNames = mPm.getPackagesForUid(uid);
-        final int userId = UserHandle.getUserId(uid);
-        if (!ArrayUtils.isEmpty(packageNames)) {
-            for (String packageName : packageNames) {
-                try {
-                    final String apkPath = mPm.getPackageInfoAsUser(packageName,
-                            PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId)
-                            .applicationInfo.publicSourceDir;
-                    if (TextUtils.isEmpty(apkPath)) {
-                        Slog.w(TAG, "Cannot find apkPath for " + packageName);
-                        continue;
+        return mCachedUidDigestMap.computeIfAbsent(uid, key -> {
+            final String[] packageNames = mPm.getPackagesForUid(key);
+            final int userId = UserHandle.getUserId(uid);
+            if (!ArrayUtils.isEmpty(packageNames)) {
+                for (String packageName : packageNames) {
+                    try {
+                        final String apkPath = mPm.getPackageInfoAsUser(packageName,
+                                PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId)
+                                .applicationInfo.publicSourceDir;
+                        if (TextUtils.isEmpty(apkPath)) {
+                            Slog.w(TAG, "Cannot find apkPath for " + packageName);
+                            continue;
+                        }
+                        return DigestUtils.getSha256Hash(new File(apkPath));
+                    } catch (NameNotFoundException | NoSuchAlgorithmException | IOException e) {
+                        Slog.e(TAG, "Should not happen", e);
+                        return null;
                     }
-                    final byte[] digest = DigestUtils.getSha256Hash(new File(apkPath));
-                    mCachedUidDigestMap.put(uid, digest);
-                    return digest;
-                } catch (NameNotFoundException | NoSuchAlgorithmException | IOException e) {
-                    Slog.e(TAG, "Should not happen", e);
-                    return null;
                 }
+            } else {
+                Slog.e(TAG, "Should not happen");
             }
-        } else {
-            Slog.e(TAG, "Should not happen");
-        }
-        return null;
+            return null;
+        });
     }
 
     /**
@@ -247,7 +278,7 @@ class WatchlistLoggingHandler extends Handler {
         if (ipAddr == null) {
             return false;
         }
-        return mSettings.containsIp(ipAddr);
+        return mConfig.containsIp(ipAddr);
     }
 
     /** Search if the host is in watchlist */
@@ -255,7 +286,7 @@ class WatchlistLoggingHandler extends Handler {
         if (host == null) {
             return false;
         }
-        return mSettings.containsDomain(host);
+        return mConfig.containsDomain(host);
     }
 
     /**
