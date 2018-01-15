@@ -896,20 +896,20 @@ public class InputMethodService extends AbstractInputMethodService {
             mWindow.getWindow().setWindowAnimations(
                     com.android.internal.R.style.Animation_InputMethodFancy);
         }
-        mFullscreenArea = (ViewGroup)mRootView.findViewById(com.android.internal.R.id.fullscreenArea);
+        mFullscreenArea = mRootView.findViewById(com.android.internal.R.id.fullscreenArea);
         mExtractViewHidden = false;
-        mExtractFrame = (FrameLayout)mRootView.findViewById(android.R.id.extractArea);
+        mExtractFrame = mRootView.findViewById(android.R.id.extractArea);
         mExtractView = null;
         mExtractEditText = null;
         mExtractAccessories = null;
         mExtractAction = null;
         mFullscreenApplied = false;
-        
-        mCandidatesFrame = (FrameLayout)mRootView.findViewById(android.R.id.candidatesArea);
-        mInputFrame = (FrameLayout)mRootView.findViewById(android.R.id.inputArea);
+
+        mCandidatesFrame = mRootView.findViewById(android.R.id.candidatesArea);
+        mInputFrame = mRootView.findViewById(android.R.id.inputArea);
         mInputView = null;
         mIsInputViewShown = false;
-        
+
         mExtractFrame.setVisibility(View.GONE);
         mCandidatesVisibility = getCandidatesHiddenVisibility();
         mCandidatesFrame.setVisibility(mCandidatesVisibility);
@@ -1490,13 +1490,13 @@ public class InputMethodService extends AbstractInputMethodService {
                 ViewGroup.LayoutParams.MATCH_PARENT));
         mExtractView = view;
         if (view != null) {
-            mExtractEditText = (ExtractEditText)view.findViewById(
+            mExtractEditText = view.findViewById(
                     com.android.internal.R.id.inputExtractEditText);
             mExtractEditText.setIME(this);
             mExtractAction = view.findViewById(
                     com.android.internal.R.id.inputExtractAction);
             if (mExtractAction != null) {
-                mExtractAccessories = (ViewGroup)view.findViewById(
+                mExtractAccessories = view.findViewById(
                         com.android.internal.R.id.inputExtractAccessories);
             }
             startExtractingText(false);
