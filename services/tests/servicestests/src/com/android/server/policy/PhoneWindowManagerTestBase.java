@@ -24,6 +24,8 @@ import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
+import static com.android.server.wm.utils.CoordinateTransforms.transformPhysicalToLogicalCoordinates;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 
@@ -31,6 +33,8 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Matrix;
+import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.IBinder;
@@ -38,6 +42,7 @@ import android.os.UserHandle;
 import android.support.test.InstrumentationRegistry;
 import android.testing.TestableResources;
 import android.view.Display;
+import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.View;
@@ -65,6 +70,9 @@ public class PhoneWindowManagerTestBase {
 
     FakeWindowState mStatusBar;
     FakeWindowState mNavigationBar;
+    private boolean mHasDisplayCutout;
+    private int mRotation = ROTATION_0;
+    private final Matrix mTmpMatrix = new Matrix();
 
     @Before
     public void setUpBase() throws Exception {
@@ -80,16 +88,32 @@ public class PhoneWindowManagerTestBase {
 
         mPolicy = TestablePhoneWindowManager.create(mContext);
 
-        setRotation(ROTATION_0);
+        updateDisplayFrames();
     }
 
     public void setRotation(int rotation) {
+        mRotation = rotation;
+        updateDisplayFrames();
+    }
+
+    private void updateDisplayFrames() {
         DisplayInfo info = new DisplayInfo();
 
-        final boolean flippedDimensions = rotation == ROTATION_90 || rotation == ROTATION_270;
+        final boolean flippedDimensions = mRotation == ROTATION_90 || mRotation == ROTATION_270;
         info.logicalWidth = flippedDimensions ? DISPLAY_HEIGHT : DISPLAY_WIDTH;
         info.logicalHeight = flippedDimensions ? DISPLAY_WIDTH : DISPLAY_HEIGHT;
-        info.rotation = rotation;
+        info.rotation = mRotation;
+        if (mHasDisplayCutout) {
+            Path p = new Path();
+            p.addRect(DISPLAY_WIDTH / 4, 0, DISPLAY_WIDTH * 3 / 4, DISPLAY_CUTOUT_HEIGHT,
+                    Path.Direction.CCW);
+            transformPhysicalToLogicalCoordinates(
+                    mRotation, DISPLAY_WIDTH, DISPLAY_HEIGHT, mTmpMatrix);
+            p.transform(mTmpMatrix);
+            info.displayCutout = DisplayCutout.fromBounds(p);
+        } else {
+            info.displayCutout = null;
+        }
 
         mFrames = new DisplayFrames(Display.DEFAULT_DISPLAY, info);
     }
@@ -116,7 +140,8 @@ public class PhoneWindowManagerTestBase {
     }
 
     public void addDisplayCutout() {
-        mPolicy.mEmulateDisplayCutout = true;
+        mHasDisplayCutout = true;
+        updateDisplayFrames();
     }
 
     /** Asserts that {@code actual} is inset by the given amounts from the full display rect. */

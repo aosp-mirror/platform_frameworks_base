@@ -101,7 +101,7 @@ public class DisplayFrames {
     /** During layout, the current screen borders along which input method windows are placed. */
     public final Rect mDock = new Rect();
 
-    /** The display cutout used for layout (after rotation and emulation) */
+    /** The display cutout used for layout (after rotation) */
     @NonNull public DisplayCutout mDisplayCutout = DisplayCutout.NO_CUTOUT;
 
     /** The cutout as supplied by display info */
@@ -134,7 +134,7 @@ public class DisplayFrames {
                 ? info.displayCutout : DisplayCutout.NO_CUTOUT;
     }
 
-    public void onBeginLayout(boolean emulateDisplayCutout, int statusBarHeight) {
+    public void onBeginLayout() {
         switch (mRotation) {
             case ROTATION_90:
                 mRotatedDisplayInfoOverscan.left = mDisplayInfoOverscan.top;
@@ -172,12 +172,8 @@ public class DisplayFrames {
         mStable.set(mUnrestricted);
         mStableFullscreen.set(mUnrestricted);
         mCurrent.set(mUnrestricted);
-        mDisplayCutout = mDisplayInfoCutout;
-        if (emulateDisplayCutout) {
-            setEmulatedDisplayCutout((int) (statusBarHeight * 0.8));
-        }
-        mDisplayCutout = mDisplayCutout.calculateRelativeTo(mOverscan);
 
+        mDisplayCutout = mDisplayInfoCutout.calculateRelativeTo(mOverscan);
         mDisplayCutoutSafe.set(Integer.MIN_VALUE, Integer.MIN_VALUE,
                 Integer.MAX_VALUE, Integer.MAX_VALUE);
         if (!mDisplayCutout.isEmpty()) {
@@ -199,51 +195,6 @@ public class DisplayFrames {
 
     public int getInputMethodWindowVisibleHeight() {
         return mDock.bottom - mCurrent.bottom;
-    }
-
-    private void setEmulatedDisplayCutout(int height) {
-        final boolean swappedDimensions = mRotation == ROTATION_90 || mRotation == ROTATION_270;
-
-        final int screenWidth = swappedDimensions ? mDisplayHeight : mDisplayWidth;
-        final int screenHeight = swappedDimensions ? mDisplayWidth : mDisplayHeight;
-
-        final int widthTop = (int) (screenWidth * 0.3);
-        final int widthBottom = widthTop - height;
-
-        switch (mRotation) {
-            case ROTATION_90:
-                mDisplayCutout = DisplayCutout.fromBoundingPolygon(Arrays.asList(
-                        new Point(0, (screenWidth - widthTop) / 2),
-                        new Point(height, (screenWidth - widthBottom) / 2),
-                        new Point(height, (screenWidth + widthBottom) / 2),
-                        new Point(0, (screenWidth + widthTop) / 2)
-                ));
-                break;
-            case ROTATION_180:
-                mDisplayCutout = DisplayCutout.fromBoundingPolygon(Arrays.asList(
-                        new Point((screenWidth - widthTop) / 2, screenHeight),
-                        new Point((screenWidth - widthBottom) / 2, screenHeight - height),
-                        new Point((screenWidth + widthBottom) / 2, screenHeight - height),
-                        new Point((screenWidth + widthTop) / 2, screenHeight)
-                ));
-                break;
-            case ROTATION_270:
-                mDisplayCutout = DisplayCutout.fromBoundingPolygon(Arrays.asList(
-                        new Point(screenHeight, (screenWidth - widthTop) / 2),
-                        new Point(screenHeight - height, (screenWidth - widthBottom) / 2),
-                        new Point(screenHeight - height, (screenWidth + widthBottom) / 2),
-                        new Point(screenHeight, (screenWidth + widthTop) / 2)
-                ));
-                break;
-            default:
-                mDisplayCutout = DisplayCutout.fromBoundingPolygon(Arrays.asList(
-                        new Point((screenWidth - widthTop) / 2, 0),
-                        new Point((screenWidth - widthBottom) / 2, height),
-                        new Point((screenWidth + widthBottom) / 2, height),
-                        new Point((screenWidth + widthTop) / 2, 0)
-                ));
-                break;
-        }
     }
 
     public void writeToProto(ProtoOutputStream proto, long fieldId) {

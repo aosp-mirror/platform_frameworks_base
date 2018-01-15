@@ -623,8 +623,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     PointerLocationView mPointerLocationView;
 
-    boolean mEmulateDisplayCutout = false;
-
     // During layout, the layer at which the doc window is placed.
     int mDockLayer;
     // During layout, this is the layer of the status bar.
@@ -982,9 +980,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.POLICY_CONTROL), false, this,
-                    UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.Global.getUriFor(
-                    Settings.Global.EMULATE_DISPLAY_CUTOUT), false, this,
                     UserHandle.USER_ALL);
             updateSettings();
         }
@@ -2411,10 +2406,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (mImmersiveModeConfirmation != null) {
                 mImmersiveModeConfirmation.loadSetting(mCurrentUserId);
             }
-            mEmulateDisplayCutout = Settings.Global.getInt(resolver,
-                    Settings.Global.EMULATE_DISPLAY_CUTOUT,
-                    Settings.Global.EMULATE_DISPLAY_CUTOUT_OFF)
-                    != Settings.Global.EMULATE_DISPLAY_CUTOUT_OFF;
         }
         synchronized (mWindowManagerFuncs.getWindowManagerLock()) {
             PolicyControl.reloadFromSetting(mContext);
@@ -4449,7 +4440,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     @Override
     public void beginLayoutLw(DisplayFrames displayFrames, int uiMode) {
-        displayFrames.onBeginLayout(mEmulateDisplayCutout, mStatusBarHeight);
+        displayFrames.onBeginLayout();
         // TODO(multi-display): This doesn't seem right...Maybe only apply to default display?
         mSystemGestures.screenWidth = displayFrames.mUnrestricted.width();
         mSystemGestures.screenHeight = displayFrames.mUnrestricted.height();
