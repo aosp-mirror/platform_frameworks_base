@@ -20,16 +20,20 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.SurfaceControl.Transaction;
+import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
+import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
+import static android.view.WindowManager.LayoutParams.FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA;
 import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
+import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
@@ -2977,7 +2981,25 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     /** @return true when the window is in fullscreen task, but has non-fullscreen bounds set. */
     boolean isLetterboxedAppWindow() {
-        return !isInMultiWindowMode() && mAppToken != null && !mAppToken.matchParentBounds();
+        return !isInMultiWindowMode() && mAppToken != null && (!mAppToken.matchParentBounds()
+                || isLetterboxedForCutout());
+    }
+
+    private boolean isLetterboxedForCutout() {
+        if (getDisplayContent().getDisplayInfo().displayCutout == null) {
+            // No cutout, no letterbox.
+            return false;
+        }
+        if ((mAttrs.flags2 & FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA) != 0) {
+            // Layout in cutout, no letterbox.
+            return false;
+        }
+        // TODO: handle dialogs and other non-filling windows
+        // Letterbox if any fullscreen mode is set.
+        final int fl = mAttrs.flags;
+        final int sysui = mSystemUiVisibility;
+        return (fl & FLAG_FULLSCREEN) != 0
+                || (sysui & (SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | SYSTEM_UI_FLAG_FULLSCREEN)) != 0;
     }
 
     boolean isDragResizeChanged() {

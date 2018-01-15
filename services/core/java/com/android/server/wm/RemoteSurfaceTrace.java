@@ -33,7 +33,7 @@ import java.io.DataOutputStream;
 // the surface control.
 //
 // See cts/hostsidetests/../../SurfaceTraceReceiver.java for parsing side.
-class RemoteSurfaceTrace extends SurfaceControlWithBackground {
+class RemoteSurfaceTrace extends SurfaceControl {
     static final String TAG = "RemoteSurfaceTrace";
 
     final FileDescriptor mWriteFd;
@@ -42,7 +42,7 @@ class RemoteSurfaceTrace extends SurfaceControlWithBackground {
     final WindowManagerService mService;
     final WindowState mWindow;
 
-    RemoteSurfaceTrace(FileDescriptor fd, SurfaceControlWithBackground wrapped,
+    RemoteSurfaceTrace(FileDescriptor fd, SurfaceControl wrapped,
             WindowState window) {
         super(wrapped);
 
