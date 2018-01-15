@@ -17,9 +17,7 @@
 package com.android.server.backup.transport;
 
 import static com.android.server.backup.TransportManager.SERVICE_ACTION_TRANSPORT_HOST;
-
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -36,12 +34,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
-
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.backup.TransportManager;
 import com.android.server.testing.FrameworkRobolectricTestRunner;
 import com.android.server.testing.SystemLoaderClasses;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -78,11 +74,7 @@ public class TransportClientTest {
         mBindIntent = new Intent(SERVICE_ACTION_TRANSPORT_HOST).setComponent(mTransportComponent);
         mTransportClient =
                 new TransportClient(
-                        mContext,
-                        mBindIntent,
-                        mTransportComponent,
-                        "1",
-                        new Handler(mainLooper));
+                        mContext, mBindIntent, mTransportComponent, "1", new Handler(mainLooper));
 
         when(mContext.bindServiceAsUser(
                         eq(mBindIntent),
@@ -213,32 +205,34 @@ public class TransportClientTest {
                 .onTransportConnectionResult(isNull(), eq(mTransportClient));
     }
 
-    // TODO(b/69153972): Support SDK 26 API (ServiceConnection.inBindingDied) for transport tests
-    /*@Test
+    @Test
     public void testConnectAsync_callsListenerIfBindingDies() throws Exception {
-        mTransportClient.connectAsync(mTransportListener, "caller");
+        mTransportClient.connectAsync(mTransportConnectionListener, "caller");
 
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
         connection.onBindingDied(mTransportComponent);
 
         mShadowLooper.runToEndOfTasks();
-        verify(mTransportListener).onTransportBound(isNull(), eq(mTransportClient));
+        verify(mTransportConnectionListener)
+                .onTransportConnectionResult(isNull(), eq(mTransportClient));
     }
 
     @Test
     public void testConnectAsync_whenPendingConnection_callsListenersIfBindingDies()
             throws Exception {
-        mTransportClient.connectAsync(mTransportListener, "caller1");
+        mTransportClient.connectAsync(mTransportConnectionListener, "caller1");
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
 
-        mTransportClient.connectAsync(mTransportListener2, "caller2");
+        mTransportClient.connectAsync(mTransportConnectionListener2, "caller2");
 
         connection.onBindingDied(mTransportComponent);
 
         mShadowLooper.runToEndOfTasks();
-        verify(mTransportListener).onTransportBound(isNull(), eq(mTransportClient));
-        verify(mTransportListener2).onTransportBound(isNull(), eq(mTransportClient));
-    }*/
+        verify(mTransportConnectionListener)
+                .onTransportConnectionResult(isNull(), eq(mTransportClient));
+        verify(mTransportConnectionListener2)
+                .onTransportConnectionResult(isNull(), eq(mTransportClient));
+    }
 
     private ServiceConnection verifyBindServiceAsUserAndCaptureServiceConnection(Context context) {
         ArgumentCaptor<ServiceConnection> connectionCaptor =
