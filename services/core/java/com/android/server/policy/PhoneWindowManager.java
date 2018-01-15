@@ -4496,7 +4496,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             mHandler.obtainMessage(MSG_DISPOSE_INPUT_CONSUMER, mInputConsumer));
                     mInputConsumer = null;
                 }
-            } else if (mInputConsumer == null) {
+            } else if (mInputConsumer == null && mStatusBar != null && canHideNavigationBar()) {
                 mInputConsumer = mWindowManagerFuncs.createInputConsumer(mHandler.getLooper(),
                         INPUT_CONSUMER_NAVIGATION,
                         (channel, looper) -> new HideNavInputEventReceiver(channel, looper));
