@@ -149,7 +149,7 @@ public class BrightnessTracker {
     /**
      * Start listening for brightness slider events
      *
-     * @param brightness the initial screen brightness
+     * @param initialBrightness the initial screen brightness
      */
     public void start(float initialBrightness) {
         if (DEBUG) {
@@ -219,8 +219,8 @@ public class BrightnessTracker {
                 if (includePackage) {
                     out.add(events[i]);
                 } else {
-                    BrightnessChangeEvent event = new BrightnessChangeEvent((events[i]));
-                    event.packageName = null;
+                    BrightnessChangeEvent event = new BrightnessChangeEvent((events[i]),
+                            /* redactPackage */ true);
                     out.add(event);
                 }
             }
@@ -246,7 +246,8 @@ public class BrightnessTracker {
     }
 
     private void handleBrightnessChanged(float brightness, boolean userInitiated) {
-        final BrightnessChangeEvent event;
+        BrightnessChangeEvent.Builder builder;
+
         synchronized (mDataCollectionLock) {
             if (!mStarted) {
                 // Not currently gathering brightness change information
@@ -263,9 +264,9 @@ public class BrightnessTracker {
                 return;
             }
 
-
-            event = new BrightnessChangeEvent();
-            event.timeStamp = mInjector.currentTimeMillis();
+            builder = new BrightnessChangeEvent.Builder();
+            builder.setBrightness(brightness);
+            builder.setTimeStamp(mInjector.currentTimeMillis());
 
             final int readingCount = mLastSensorReadings.size();
             if (readingCount == 0) {
@@ -273,8 +274,8 @@ public class BrightnessTracker {
                 return;
             }
 
-            event.luxValues = new float[readingCount];
-            event.luxTimestamps = new long[readingCount];
+            float[] luxValues = new float[readingCount];
+            long[] luxTimestamps = new long[readingCount];
 
             int pos = 0;
 
@@ -282,33 +283,35 @@ public class BrightnessTracker {
             long currentTimeMillis = mInjector.currentTimeMillis();
             long elapsedTimeNanos = mInjector.elapsedRealtimeNanos();
             for (LightData reading : mLastSensorReadings) {
-                event.luxValues[pos] = reading.lux;
-                event.luxTimestamps[pos] = currentTimeMillis -
+                luxValues[pos] = reading.lux;
+                luxTimestamps[pos] = currentTimeMillis -
                         TimeUnit.NANOSECONDS.toMillis(elapsedTimeNanos - reading.timestamp);
                 ++pos;
             }
+            builder.setLuxValues(luxValues);
+            builder.setLuxTimestamps(luxTimestamps);
 
-            event.batteryLevel = mLastBatteryLevel;
-            event.lastBrightness = previousBrightness;
+            builder.setBatteryLevel(mLastBatteryLevel);
+            builder.setLastBrightness(previousBrightness);
         }
-
-        event.brightness = brightness;
 
         try {
             final ActivityManager.StackInfo focusedStack = mInjector.getFocusedStack();
-            event.userId = focusedStack.userId;
-            event.packageName = focusedStack.topActivity.getPackageName();
+            builder.setUserId(focusedStack.userId);
+            builder.setPackageName(focusedStack.topActivity.getPackageName());
         } catch (RemoteException e) {
             // Really shouldn't be possible.
+            return;
         }
 
-        event.nightMode = mInjector.getSecureIntForUser(mContentResolver,
+        builder.setNightMode(mInjector.getSecureIntForUser(mContentResolver,
                 Settings.Secure.NIGHT_DISPLAY_ACTIVATED, 0, UserHandle.USER_CURRENT)
-                == 1;
-        event.colorTemperature = mInjector.getSecureIntForUser(mContentResolver,
+                == 1);
+        builder.setColorTemperature(mInjector.getSecureIntForUser(mContentResolver,
                 Settings.Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE,
-                0, UserHandle.USER_CURRENT);
+                0, UserHandle.USER_CURRENT));
 
+        BrightnessChangeEvent event = builder.build();
         if (DEBUG) {
             Slog.d(TAG, "Event " + event.brightness + " " + event.packageName);
         }
@@ -457,40 +460,43 @@ public class BrightnessTracker {
                 }
                 tag = parser.getName();
                 if (TAG_EVENT.equals(tag)) {
-                    BrightnessChangeEvent event = new BrightnessChangeEvent();
+                    BrightnessChangeEvent.Builder builder = new BrightnessChangeEvent.Builder();
 
                     String brightness = parser.getAttributeValue(null, ATTR_NITS);
-                    event.brightness = Float.parseFloat(brightness);
+                    builder.setBrightness(Float.parseFloat(brightness));
                     String timestamp = parser.getAttributeValue(null, ATTR_TIMESTAMP);
-                    event.timeStamp = Long.parseLong(timestamp);
-                    event.packageName = parser.getAttributeValue(null, ATTR_PACKAGE_NAME);
+                    builder.setTimeStamp(Long.parseLong(timestamp));
+                    builder.setPackageName(parser.getAttributeValue(null, ATTR_PACKAGE_NAME));
                     String user = parser.getAttributeValue(null, ATTR_USER);
-                    event.userId = mInjector.getUserId(mUserManager, Integer.parseInt(user));
+                    builder.setUserId(mInjector.getUserId(mUserManager, Integer.parseInt(user)));
                     String batteryLevel = parser.getAttributeValue(null, ATTR_BATTERY_LEVEL);
-                    event.batteryLevel = Float.parseFloat(batteryLevel);
+                    builder.setBatteryLevel(Float.parseFloat(batteryLevel));
                     String nightMode = parser.getAttributeValue(null, ATTR_NIGHT_MODE);
-                    event.nightMode = Boolean.parseBoolean(nightMode);
+                    builder.setNightMode(Boolean.parseBoolean(nightMode));
                     String colorTemperature =
                             parser.getAttributeValue(null, ATTR_COLOR_TEMPERATURE);
-                    event.colorTemperature = Integer.parseInt(colorTemperature);
+                    builder.setColorTemperature(Integer.parseInt(colorTemperature));
                     String lastBrightness = parser.getAttributeValue(null, ATTR_LAST_NITS);
-                    event.lastBrightness = Float.parseFloat(lastBrightness);
+                    builder.setLastBrightness(Float.parseFloat(lastBrightness));
 
                     String luxValue = parser.getAttributeValue(null, ATTR_LUX);
                     String luxTimestamp = parser.getAttributeValue(null, ATTR_LUX_TIMESTAMPS);
 
-                    String[] luxValues = luxValue.split(",");
-                    String[] luxTimestamps = luxTimestamp.split(",");
-                    if (luxValues.length != luxTimestamps.length) {
+                    String[] luxValuesStrings = luxValue.split(",");
+                    String[] luxTimestampsStrings = luxTimestamp.split(",");
+                    if (luxValuesStrings.length != luxTimestampsStrings.length) {
                         continue;
                     }
-                    event.luxValues = new float[luxValues.length];
-                    event.luxTimestamps = new long[luxValues.length];
+                    float[] luxValues = new float[luxValuesStrings.length];
+                    long[] luxTimestamps = new long[luxValuesStrings.length];
                     for (int i = 0; i < luxValues.length; ++i) {
-                        event.luxValues[i] = Float.parseFloat(luxValues[i]);
-                        event.luxTimestamps[i] = Long.parseLong(luxTimestamps[i]);
+                        luxValues[i] = Float.parseFloat(luxValuesStrings[i]);
+                        luxTimestamps[i] = Long.parseLong(luxTimestampsStrings[i]);
                     }
+                    builder.setLuxValues(luxValues);
+                    builder.setLuxTimestamps(luxTimestamps);
 
+                    BrightnessChangeEvent event = builder.build();
                     if (DEBUG) {
                         Slog.i(TAG, "Read event " + event.brightness
                                 + " " + event.packageName);

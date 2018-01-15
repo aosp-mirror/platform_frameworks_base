@@ -447,21 +447,24 @@ public class BrightnessTrackerTest {
     @Test
     public void testParcelUnParcel() {
         Parcel parcel = Parcel.obtain();
-        BrightnessChangeEvent event = new BrightnessChangeEvent();
-        event.brightness = 23f;
-        event.timeStamp = 345L;
-        event.packageName = "com.example";
-        event.userId = 12;
-        event.luxValues = new float[2];
-        event.luxValues[0] = 3000.0f;
-        event.luxValues[1] = 4000.0f;
-        event.luxTimestamps = new long[2];
-        event.luxTimestamps[0] = 325L;
-        event.luxTimestamps[1] = 315L;
-        event.batteryLevel = 0.7f;
-        event.nightMode = false;
-        event.colorTemperature = 345;
-        event.lastBrightness = 50f;
+        BrightnessChangeEvent.Builder builder = new BrightnessChangeEvent.Builder();
+        builder.setBrightness(23f);
+        builder.setTimeStamp(345L);
+        builder.setPackageName("com.example");
+        builder.setUserId(12);
+        float[] luxValues = new float[2];
+        luxValues[0] = 3000.0f;
+        luxValues[1] = 4000.0f;
+        builder.setLuxValues(luxValues);
+        long[] luxTimestamps = new long[2];
+        luxTimestamps[0] = 325L;
+        luxTimestamps[1] = 315L;
+        builder.setLuxTimestamps(luxTimestamps);
+        builder.setBatteryLevel(0.7f);
+        builder.setNightMode(false);
+        builder.setColorTemperature(345);
+        builder.setLastBrightness(50f);
+        BrightnessChangeEvent event = builder.build();
 
         event.writeToParcel(parcel, 0);
         byte[] parceled = parcel.marshall();
@@ -485,7 +488,8 @@ public class BrightnessTrackerTest {
         assertEquals(event.lastBrightness, event2.lastBrightness, FLOAT_DELTA);
 
         parcel = Parcel.obtain();
-        event.batteryLevel = Float.NaN;
+        builder.setBatteryLevel(Float.NaN);
+        event = builder.build();
         event.writeToParcel(parcel, 0);
         parceled = parcel.marshall();
         parcel.recycle();

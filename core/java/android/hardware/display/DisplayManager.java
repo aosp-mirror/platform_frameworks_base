@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.graphics.Point;
@@ -622,6 +623,8 @@ public final class DisplayManager {
      * Fetch {@link BrightnessChangeEvent}s.
      * @hide until we make it a system api.
      */
+    @SystemApi
+    @TestApi
     @RequiresPermission(Manifest.permission.BRIGHTNESS_SLIDER_USAGE)
     public List<BrightnessChangeEvent> getBrightnessEvents() {
         return mGlobal.getBrightnessEvents(mContext.getOpPackageName());
@@ -632,6 +635,9 @@ public final class DisplayManager {
      *
      * @hide
      */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS)
     public void setBrightnessConfiguration(BrightnessConfiguration c) {
         setBrightnessConfigurationForUser(c, UserHandle.myUserId());
     }
