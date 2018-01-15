@@ -3002,8 +3002,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Letterbox if any fullscreen mode is set.
         final int fl = mAttrs.flags;
         final int sysui = mSystemUiVisibility;
-        return (fl & FLAG_FULLSCREEN) != 0
-                || (sysui & (SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | SYSTEM_UI_FLAG_FULLSCREEN)) != 0;
+        return (fl & FLAG_FULLSCREEN) != 0 || (sysui & (SYSTEM_UI_FLAG_FULLSCREEN)) != 0;
     }
 
     boolean isDragResizeChanged() {

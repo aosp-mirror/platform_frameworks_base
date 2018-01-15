@@ -1406,13 +1406,13 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             mLetterbox.setDimensions(mPendingTransaction, getParent().getBounds(), w.mFrame);
         } else if (mLetterbox != null) {
             final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            // Make sure we have a transaction here, in case we're called outside of a transaction.
+            // This does not use mPendingTransaction, because SurfaceAnimator uses a
+            // global transaction in onAnimationEnd.
             SurfaceControl.openTransaction();
             try {
                 mLetterbox.hide(t);
             } finally {
-                // TODO: This should use pendingTransaction eventually, but right now things
-                // happening on the animation finished callback are happening on the global
-                // transaction.
                 SurfaceControl.mergeToGlobalTransaction(t);
                 SurfaceControl.closeTransaction();
             }
