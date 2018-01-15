@@ -161,6 +161,7 @@ import android.app.StatusBarManager;
 import android.app.UiModeManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
+import android.content.ComponentCallbacks;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -2738,6 +2739,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         && isHidden(mLidNavigationAccessibility))) {
             config.navigationHidden = Configuration.NAVIGATIONHIDDEN_YES;
         }
+    }
+
+    @Override
+    public void onOverlayChangedLw() {
+        onConfigurationChanged();
     }
 
     @Override
