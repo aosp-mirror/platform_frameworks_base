@@ -2754,7 +2754,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * application.
      * This cannot be {@code null}.
      * @param inputConnection {@link InputConnection} with which
-     * {@link InputConnection#commitContent(InputContentInfo, Bundle)} will be called.
+     * {@link InputConnection#commitContent(InputContentInfo, int, Bundle)} will be called.
      * @hide
      */
     @Override
