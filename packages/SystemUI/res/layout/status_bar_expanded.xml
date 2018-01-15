@@ -43,6 +43,8 @@
             android:layout_width="@dimen/qs_panel_width"
             android:layout_height="match_parent"
             android:layout_gravity="@integer/notification_panel_layout_gravity"
+            android:layout_marginStart="@dimen/notification_side_paddings"
+            android:layout_marginEnd="@dimen/notification_side_paddings"
             android:clipToPadding="false"
             android:clipChildren="false"
             systemui:viewType="com.android.systemui.plugins.qs.QS" />
