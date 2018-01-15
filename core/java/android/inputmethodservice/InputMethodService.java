@@ -340,42 +340,35 @@ public class InputMethodService extends AbstractInputMethodService {
     final Insets mTmpInsets = new Insets();
     final int[] mTmpLocation = new int[2];
 
-    final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsComputer =
-            new ViewTreeObserver.OnComputeInternalInsetsListener() {
-        public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo info) {
-            if (isExtractViewShown()) {
-                // In true fullscreen mode, we just say the window isn't covering
-                // any content so we don't impact whatever is behind.
-                View decor = getWindow().getWindow().getDecorView();
-                info.contentInsets.top = info.visibleInsets.top
-                        = decor.getHeight();
-                info.touchableRegion.setEmpty();
-                info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME);
-            } else {
-                onComputeInsets(mTmpInsets);
-                info.contentInsets.top = mTmpInsets.contentTopInsets;
-                info.visibleInsets.top = mTmpInsets.visibleTopInsets;
-                info.touchableRegion.set(mTmpInsets.touchableRegion);
-                info.setTouchableInsets(mTmpInsets.touchableInsets);
+    final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsComputer = info -> {
+        if (isExtractViewShown()) {
+            // In true fullscreen mode, we just say the window isn't covering
+            // any content so we don't impact whatever is behind.
+            View decor = getWindow().getWindow().getDecorView();
+            info.contentInsets.top = info.visibleInsets.top = decor.getHeight();
+            info.touchableRegion.setEmpty();
+            info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME);
+        } else {
+            onComputeInsets(mTmpInsets);
+            info.contentInsets.top = mTmpInsets.contentTopInsets;
+            info.visibleInsets.top = mTmpInsets.visibleTopInsets;
+            info.touchableRegion.set(mTmpInsets.touchableRegion);
+            info.setTouchableInsets(mTmpInsets.touchableInsets);
+        }
+    };
+
+    final View.OnClickListener mActionClickListener = v -> {
+        final EditorInfo ei = getCurrentInputEditorInfo();
+        final InputConnection ic = getCurrentInputConnection();
+        if (ei != null && ic != null) {
+            if (ei.actionId != 0) {
+                ic.performEditorAction(ei.actionId);
+            } else if ((ei.imeOptions & EditorInfo.IME_MASK_ACTION) != EditorInfo.IME_ACTION_NONE) {
+                ic.performEditorAction(ei.imeOptions & EditorInfo.IME_MASK_ACTION);
             }
         }
     };
 
-    final View.OnClickListener mActionClickListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            final EditorInfo ei = getCurrentInputEditorInfo();
-            final InputConnection ic = getCurrentInputConnection();
-            if (ei != null && ic != null) {
-                if (ei.actionId != 0) {
-                    ic.performEditorAction(ei.actionId);
-                } else if ((ei.imeOptions&EditorInfo.IME_MASK_ACTION)
-                        != EditorInfo.IME_ACTION_NONE) {
-                    ic.performEditorAction(ei.imeOptions&EditorInfo.IME_MASK_ACTION);
-                }
-            }
-        }
-    };
-    
     /**
      * Concrete implementation of
      * {@link AbstractInputMethodService.AbstractInputMethodImpl} that provides
@@ -896,20 +889,20 @@ public class InputMethodService extends AbstractInputMethodService {
             mWindow.getWindow().setWindowAnimations(
                     com.android.internal.R.style.Animation_InputMethodFancy);
         }
-        mFullscreenArea = (ViewGroup)mRootView.findViewById(com.android.internal.R.id.fullscreenArea);
+        mFullscreenArea = mRootView.findViewById(com.android.internal.R.id.fullscreenArea);
         mExtractViewHidden = false;
-        mExtractFrame = (FrameLayout)mRootView.findViewById(android.R.id.extractArea);
+        mExtractFrame = mRootView.findViewById(android.R.id.extractArea);
         mExtractView = null;
         mExtractEditText = null;
         mExtractAccessories = null;
         mExtractAction = null;
         mFullscreenApplied = false;
-        
-        mCandidatesFrame = (FrameLayout)mRootView.findViewById(android.R.id.candidatesArea);
-        mInputFrame = (FrameLayout)mRootView.findViewById(android.R.id.inputArea);
+
+        mCandidatesFrame = mRootView.findViewById(android.R.id.candidatesArea);
+        mInputFrame = mRootView.findViewById(android.R.id.inputArea);
         mInputView = null;
         mIsInputViewShown = false;
-        
+
         mExtractFrame.setVisibility(View.GONE);
         mCandidatesVisibility = getCandidatesHiddenVisibility();
         mCandidatesFrame.setVisibility(mCandidatesVisibility);
@@ -1490,13 +1483,13 @@ public class InputMethodService extends AbstractInputMethodService {
                 ViewGroup.LayoutParams.MATCH_PARENT));
         mExtractView = view;
         if (view != null) {
-            mExtractEditText = (ExtractEditText)view.findViewById(
+            mExtractEditText = view.findViewById(
                     com.android.internal.R.id.inputExtractEditText);
             mExtractEditText.setIME(this);
             mExtractAction = view.findViewById(
                     com.android.internal.R.id.inputExtractAction);
             if (mExtractAction != null) {
-                mExtractAccessories = (ViewGroup)view.findViewById(
+                mExtractAccessories = view.findViewById(
                         com.android.internal.R.id.inputExtractAccessories);
             }
             startExtractingText(false);
@@ -2754,7 +2747,7 @@ public class InputMethodService extends AbstractInputMethodService {
      * application.
      * This cannot be {@code null}.
      * @param inputConnection {@link InputConnection} with which
-     * {@link InputConnection#commitContent(InputContentInfo, Bundle)} will be called.
+     * {@link InputConnection#commitContent(InputContentInfo, int, Bundle)} will be called.
      * @hide
      */
     @Override
