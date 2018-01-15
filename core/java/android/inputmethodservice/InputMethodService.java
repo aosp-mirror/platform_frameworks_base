@@ -1461,17 +1461,17 @@ public class InputMethodService extends AbstractInputMethodService {
     public int getCandidatesHiddenVisibility() {
         return isExtractViewShown() ? View.GONE : View.INVISIBLE;
     }
-    
+
     public void showStatusIcon(@DrawableRes int iconResId) {
         mStatusIcon = iconResId;
-        mImm.showStatusIcon(mToken, getPackageName(), iconResId);
+        mImm.showStatusIconInternal(mToken, getPackageName(), iconResId);
     }
-    
+
     public void hideStatusIcon() {
         mStatusIcon = 0;
-        mImm.hideStatusIcon(mToken);
+        mImm.hideStatusIconInternal(mToken);
     }
-    
+
     /**
      * Force switch to a new input method, as identified by <var>id</var>.  This
      * input method will be destroyed, and the requested one started on the
@@ -1480,9 +1480,9 @@ public class InputMethodService extends AbstractInputMethodService {
      * @param id Unique identifier of the new input method ot start.
      */
     public void switchInputMethod(String id) {
-        mImm.setInputMethod(mToken, id);
+        mImm.setInputMethodInternal(mToken, id);
     }
-    
+
     public void setExtractView(View view) {
         mExtractFrame.removeAllViews();
         mExtractFrame.addView(view, new FrameLayout.LayoutParams(
