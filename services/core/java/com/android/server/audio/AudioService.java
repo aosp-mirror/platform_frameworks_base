@@ -133,6 +133,7 @@ import com.android.server.pm.UserManagerService;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -4767,6 +4768,16 @@ public class AudioService extends IAudioService.Stub
             Settings.Global.putInt(mContentResolver, Settings.Global.MODE_RINGER, ringerMode);
         }
 
+        private String getSoundEffectFilePath(int effectType) {
+            String filePath = Environment.getProductDirectory() + SOUND_EFFECTS_PATH
+                    + SOUND_EFFECT_FILES.get(SOUND_EFFECT_FILES_MAP[effectType][0]);
+            if (!new File(filePath).isFile()) {
+                filePath = Environment.getRootDirectory() + SOUND_EFFECTS_PATH
+                        + SOUND_EFFECT_FILES.get(SOUND_EFFECT_FILES_MAP[effectType][0]);
+            }
+            return filePath;
+        }
+
         private boolean onLoadSoundEffects() {
             int status;
 
@@ -4836,9 +4847,7 @@ public class AudioService extends IAudioService.Stub
                         continue;
                     }
                     if (poolId[SOUND_EFFECT_FILES_MAP[effect][0]] == -1) {
-                        String filePath = Environment.getRootDirectory()
-                                + SOUND_EFFECTS_PATH
-                                + SOUND_EFFECT_FILES.get(SOUND_EFFECT_FILES_MAP[effect][0]);
+                        String filePath = getSoundEffectFilePath(effect);
                         int sampleId = mSoundPool.load(filePath, 0);
                         if (sampleId <= 0) {
                             Log.w(TAG, "Soundpool could not load file: "+filePath);
@@ -4944,8 +4953,7 @@ public class AudioService extends IAudioService.Stub
                 } else {
                     MediaPlayer mediaPlayer = new MediaPlayer();
                     try {
-                        String filePath = Environment.getRootDirectory() + SOUND_EFFECTS_PATH +
-                                    SOUND_EFFECT_FILES.get(SOUND_EFFECT_FILES_MAP[effectType][0]);
+                        String filePath = getSoundEffectFilePath(effectType);
                         mediaPlayer.setDataSource(filePath);
                         mediaPlayer.setAudioStreamType(AudioSystem.STREAM_SYSTEM);
                         mediaPlayer.prepare();
