@@ -186,6 +186,11 @@ final class TextClassifierImpl implements TextClassifier {
         Utils.validateInput(text);
         final String textString = text.toString();
         final TextLinks.Builder builder = new TextLinks.Builder(textString);
+
+        if (!getSettings().isSmartLinkifyEnabled()) {
+            return builder.build();
+        }
+
         try {
             final LocaleList defaultLocales = options != null ? options.getDefaultLocales() : null;
             final Collection<String> entitiesToIdentify =
