@@ -16,20 +16,14 @@
 
 package com.android.systemui;
 
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+
 import android.content.Context;
-import android.database.ContentObserver;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
-import android.graphics.Point;
-import android.graphics.PorterDuff;
-import android.graphics.Region;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.view.DisplayCutout;
 import android.view.Gravity;
 import android.view.View;
@@ -40,9 +34,6 @@ import android.view.WindowManager;
 
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Emulates a display cutout by drawing its shape in an overlay as supplied by
@@ -101,7 +92,7 @@ public class EmulatedDisplayCutout extends SystemUI implements ConfigurationList
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS
                 | WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
-        lp.flags2 |= WindowManager.LayoutParams.FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA;
+        lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         lp.setTitle("EmulatedDisplayCutout");
         lp.gravity = Gravity.TOP;
         return lp;

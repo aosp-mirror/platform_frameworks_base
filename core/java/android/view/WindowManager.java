@@ -889,7 +889,12 @@ public interface WindowManager extends ViewManager {
          *  decorations around the border (such as the status bar).  The
          *  window must correctly position its contents to take the screen
          *  decoration into account.  This flag is normally set for you
-         *  by Window as described in {@link Window#setFlags}. */
+         *  by Window as described in {@link Window#setFlags}.
+         *
+         *  <p>Note: on displays that have a {@link DisplayCutout}, the window may be placed
+         *  such that it avoids the {@link DisplayCutout} area if necessary according to the
+         *  {@link #layoutInDisplayCutoutMode}.
+         */
         public static final int FLAG_LAYOUT_IN_SCREEN   = 0x00000100;
 
         /** Window flag: allow window to extend outside of the screen. */
@@ -1299,26 +1304,11 @@ public interface WindowManager extends ViewManager {
         @Retention(RetentionPolicy.SOURCE)
         @LongDef(
             flag = true,
-            value = {
-                    LayoutParams.FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA,
-            })
+            value = {})
         @interface Flags2 {}
 
         /**
-         * Window flag: allow placing the window within the area that overlaps with the
-         * display cutout.
-         *
-         * <p>
-         * The window must correctly position its contents to take the display cutout into account.
-         *
-         * @see DisplayCutout
-         */
-        public static final long FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA = 0x00000001;
-
-        /**
          * Various behavioral options/flags.  Default is none.
-         *
-         * @see #FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA
          */
         @Flags2 public long flags2;
 
@@ -2050,6 +2040,77 @@ public interface WindowManager extends ViewManager {
          */
         public boolean hasSystemUiListeners;
 
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(
+                flag = true,
+                value = {LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT,
+                        LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS,
+                        LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER})
+        @interface LayoutInDisplayCutoutMode {}
+
+        /**
+         * Controls how the window is laid out if there is a {@link DisplayCutout}.
+         *
+         * <p>
+         * Defaults to {@link #LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT}.
+         *
+         * @see #LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
+         * @see #LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+         * @see #LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
+         * @see DisplayCutout
+         */
+        @LayoutInDisplayCutoutMode
+        public int layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+
+        /**
+         * The window is allowed to extend into the {@link DisplayCutout} area, only if the
+         * {@link DisplayCutout} is fully contained within the status bar. Otherwise, the window is
+         * laid out such that it does not overlap with the {@link DisplayCutout} area.
+         *
+         * <p>
+         * In practice, this means that if the window did not set FLAG_FULLSCREEN or
+         * SYSTEM_UI_FLAG_FULLSCREEN, it can extend into the cutout area in portrait.
+         * Otherwise (i.e. fullscreen or landscape) it is laid out such that it does overlap the
+         * cutout area.
+         *
+         * <p>
+         * The usual precautions for not overlapping with the status bar are sufficient for ensuring
+         * that no important content overlaps with the DisplayCutout.
+         *
+         * @see DisplayCutout
+         * @see WindowInsets
+         */
+        public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT = 0;
+
+        /**
+         * The window is always allowed to extend into the {@link DisplayCutout} area,
+         * even if fullscreen or in landscape.
+         *
+         * <p>
+         * The window must make sure that no important content overlaps with the
+         * {@link DisplayCutout}.
+         *
+         * @see DisplayCutout
+         * @see WindowInsets#getDisplayCutout()
+         */
+        public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS = 1;
+
+        /**
+         * The window is never allowed to overlap with the DisplayCutout area.
+         *
+         * <p>
+         * This should be used with windows that transiently set SYSTEM_UI_FLAG_FULLSCREEN to
+         * avoid a relayout of the window when the flag is set or cleared.
+         *
+         * @see DisplayCutout
+         * @see View#SYSTEM_UI_FLAG_FULLSCREEN SYSTEM_UI_FLAG_FULLSCREEN
+         * @see View#SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+         */
+        public static final int LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER = 2;
+
+
         /**
          * When this window has focus, disable touch pad pointer gesture processing.
          * The window will receive raw position updates from the touch pad instead
@@ -2276,6 +2337,7 @@ public interface WindowManager extends ViewManager {
             out.writeLong(flags2);
             out.writeInt(privateFlags);
             out.writeInt(softInputMode);
+            out.writeInt(layoutInDisplayCutoutMode);
             out.writeInt(gravity);
             out.writeFloat(horizontalMargin);
             out.writeFloat(verticalMargin);
@@ -2332,6 +2394,7 @@ public interface WindowManager extends ViewManager {
             flags2 = in.readLong();
             privateFlags = in.readInt();
             softInputMode = in.readInt();
+            layoutInDisplayCutoutMode = in.readInt();
             gravity = in.readInt();
             horizontalMargin = in.readFloat();
             verticalMargin = in.readFloat();
@@ -2473,6 +2536,10 @@ public interface WindowManager extends ViewManager {
             if (softInputMode != o.softInputMode) {
                 softInputMode = o.softInputMode;
                 changes |= SOFT_INPUT_MODE_CHANGED;
+            }
+            if (layoutInDisplayCutoutMode != o.layoutInDisplayCutoutMode) {
+                layoutInDisplayCutoutMode = o.layoutInDisplayCutoutMode;
+                changes |= LAYOUT_CHANGED;
             }
             if (gravity != o.gravity) {
                 gravity = o.gravity;
@@ -2650,6 +2717,10 @@ public interface WindowManager extends ViewManager {
                 sb.append(" sim={");
                 sb.append(softInputModeToString(softInputMode));
                 sb.append('}');
+            }
+            if (layoutInDisplayCutoutMode != 0) {
+                sb.append(" layoutInDisplayCutoutMode=");
+                sb.append(layoutInDisplayCutoutModeToString(layoutInDisplayCutoutMode));
             }
             sb.append(" ty=");
             sb.append(ViewDebug.intToString(LayoutParams.class, "type", type));
@@ -2847,6 +2918,20 @@ public interface WindowManager extends ViewManager {
             return x == 0 && y == 0
                     && width == WindowManager.LayoutParams.MATCH_PARENT
                     && height == WindowManager.LayoutParams.MATCH_PARENT;
+        }
+
+        private static String layoutInDisplayCutoutModeToString(
+                @LayoutInDisplayCutoutMode int mode) {
+            switch (mode) {
+                case LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT:
+                    return "default";
+                case LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS:
+                    return "always";
+                case LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER:
+                    return "never";
+                default:
+                    return "unknown(" + mode + ")";
+            }
         }
 
         private static String softInputModeToString(@SoftInputModeFlags int softInputMode) {

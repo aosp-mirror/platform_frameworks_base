@@ -48,7 +48,6 @@ import static android.view.WindowManager.INPUT_CONSUMER_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
-import static android.view.WindowManager.LayoutParams.FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA;
 import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN;
@@ -65,6 +64,9 @@ import static android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SYSTEM_WINDOW;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
 import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
@@ -4792,7 +4794,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         final int type = attrs.type;
         final int fl = PolicyControl.getWindowFlags(win, attrs);
-        final long fl2 = attrs.flags2;
         final int pfl = attrs.privateFlags;
         final int sim = attrs.softInputMode;
         final int requestedSysUiFl = PolicyControl.getSystemUiVisibility(win, null);
@@ -4818,7 +4819,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         final boolean layoutInScreen = (fl & FLAG_LAYOUT_IN_SCREEN) == FLAG_LAYOUT_IN_SCREEN;
         final boolean layoutInsetDecor = (fl & FLAG_LAYOUT_INSET_DECOR) == FLAG_LAYOUT_INSET_DECOR;
-        final boolean layoutInCutout = (fl2 & FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA) != 0;
 
         sf.set(displayFrames.mStable);
 
@@ -4978,9 +4978,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         // moving from a window that is not hiding the status bar to one that is.
                         cf.set(displayFrames.mRestricted);
                     }
-                    if (requestedFullscreen && !layoutInCutout) {
-                        pf.intersectUnchecked(displayFrames.mDisplayCutoutSafe);
-                    }
                     applyStableConstraints(sysUiFl, fl, cf, displayFrames);
                     if (adjust != SOFT_INPUT_ADJUST_NOTHING) {
                         vf.set(displayFrames.mCurrent);
@@ -5066,9 +5063,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     of.set(displayFrames.mUnrestricted);
                     df.set(displayFrames.mUnrestricted);
                     pf.set(displayFrames.mUnrestricted);
-                    if (requestedFullscreen && !layoutInCutout) {
-                        pf.intersectUnchecked(displayFrames.mDisplayCutoutSafe);
-                    }
                 } else if ((sysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) != 0) {
                     of.set(displayFrames.mRestricted);
                     df.set(displayFrames.mRestricted);
@@ -5143,15 +5137,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        // Ensure that windows that did not request to be laid out in the cutout don't get laid
-        // out there.
-        if (!layoutInCutout) {
+        final int cutoutMode = attrs.layoutInDisplayCutoutMode;
+        // Ensure that windows with a DEFAULT or NEVER display cutout mode are laid out in
+        // the cutout safe zone.
+        if (cutoutMode != LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS) {
             final Rect displayCutoutSafeExceptMaybeTop = mTmpRect;
             displayCutoutSafeExceptMaybeTop.set(displayFrames.mDisplayCutoutSafe);
-            if (layoutInScreen && layoutInsetDecor) {
+            if (layoutInScreen && layoutInsetDecor && !requestedFullscreen
+                    && cutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT) {
                 // At the top we have the status bar, so apps that are
-                // LAYOUT_IN_SCREEN | LAYOUT_INSET_DECOR already expect that there's an inset
-                // there and we don't need to exclude the window from that area.
+                // LAYOUT_IN_SCREEN | LAYOUT_INSET_DECOR but not FULLSCREEN
+                // already expect that there's an inset there and we don't need to exclude
+                // the window from that area.
                 displayCutoutSafeExceptMaybeTop.top = Integer.MIN_VALUE;
             }
             pf.intersectUnchecked(displayCutoutSafeExceptMaybeTop);

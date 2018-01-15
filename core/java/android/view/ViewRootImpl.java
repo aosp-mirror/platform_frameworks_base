@@ -20,7 +20,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.View.PFLAG_DRAW_ANIMATION;
 import static android.view.WindowCallbacks.RESIZE_MODE_DOCKED_DIVIDER;
 import static android.view.WindowCallbacks.RESIZE_MODE_FREEFORM;
-import static android.view.WindowManager.LayoutParams.FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
@@ -1597,9 +1597,9 @@ public final class ViewRootImpl implements ViewParent,
 
     void dispatchApplyInsets(View host) {
         WindowInsets insets = getWindowInsets(true /* forceConstruct */);
-        final boolean layoutInCutout =
-                (mWindowAttributes.flags2 & FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA) != 0;
-        if (!layoutInCutout) {
+        final boolean dispatchCutout = (mWindowAttributes.layoutInDisplayCutoutMode
+                == LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS);
+        if (!dispatchCutout) {
             // Window is either not laid out in cutout or the status bar inset takes care of
             // clearing the cutout, so we don't need to dispatch the cutout to the hierarchy.
             insets = insets.consumeDisplayCutout();
