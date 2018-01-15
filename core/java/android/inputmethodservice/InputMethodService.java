@@ -340,42 +340,35 @@ public class InputMethodService extends AbstractInputMethodService {
     final Insets mTmpInsets = new Insets();
     final int[] mTmpLocation = new int[2];
 
-    final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsComputer =
-            new ViewTreeObserver.OnComputeInternalInsetsListener() {
-        public void onComputeInternalInsets(ViewTreeObserver.InternalInsetsInfo info) {
-            if (isExtractViewShown()) {
-                // In true fullscreen mode, we just say the window isn't covering
-                // any content so we don't impact whatever is behind.
-                View decor = getWindow().getWindow().getDecorView();
-                info.contentInsets.top = info.visibleInsets.top
-                        = decor.getHeight();
-                info.touchableRegion.setEmpty();
-                info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME);
-            } else {
-                onComputeInsets(mTmpInsets);
-                info.contentInsets.top = mTmpInsets.contentTopInsets;
-                info.visibleInsets.top = mTmpInsets.visibleTopInsets;
-                info.touchableRegion.set(mTmpInsets.touchableRegion);
-                info.setTouchableInsets(mTmpInsets.touchableInsets);
+    final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsComputer = info -> {
+        if (isExtractViewShown()) {
+            // In true fullscreen mode, we just say the window isn't covering
+            // any content so we don't impact whatever is behind.
+            View decor = getWindow().getWindow().getDecorView();
+            info.contentInsets.top = info.visibleInsets.top = decor.getHeight();
+            info.touchableRegion.setEmpty();
+            info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME);
+        } else {
+            onComputeInsets(mTmpInsets);
+            info.contentInsets.top = mTmpInsets.contentTopInsets;
+            info.visibleInsets.top = mTmpInsets.visibleTopInsets;
+            info.touchableRegion.set(mTmpInsets.touchableRegion);
+            info.setTouchableInsets(mTmpInsets.touchableInsets);
+        }
+    };
+
+    final View.OnClickListener mActionClickListener = v -> {
+        final EditorInfo ei = getCurrentInputEditorInfo();
+        final InputConnection ic = getCurrentInputConnection();
+        if (ei != null && ic != null) {
+            if (ei.actionId != 0) {
+                ic.performEditorAction(ei.actionId);
+            } else if ((ei.imeOptions & EditorInfo.IME_MASK_ACTION) != EditorInfo.IME_ACTION_NONE) {
+                ic.performEditorAction(ei.imeOptions & EditorInfo.IME_MASK_ACTION);
             }
         }
     };
 
-    final View.OnClickListener mActionClickListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            final EditorInfo ei = getCurrentInputEditorInfo();
-            final InputConnection ic = getCurrentInputConnection();
-            if (ei != null && ic != null) {
-                if (ei.actionId != 0) {
-                    ic.performEditorAction(ei.actionId);
-                } else if ((ei.imeOptions&EditorInfo.IME_MASK_ACTION)
-                        != EditorInfo.IME_ACTION_NONE) {
-                    ic.performEditorAction(ei.imeOptions&EditorInfo.IME_MASK_ACTION);
-                }
-            }
-        }
-    };
-    
     /**
      * Concrete implementation of
      * {@link AbstractInputMethodService.AbstractInputMethodImpl} that provides

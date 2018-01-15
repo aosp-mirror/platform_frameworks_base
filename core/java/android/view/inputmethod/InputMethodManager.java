@@ -1258,12 +1258,7 @@ public final class InputMethodManager {
             // The view is running on a different thread than our own, so
             // we need to reschedule our work for over there.
             if (DEBUG) Log.v(TAG, "Starting input: reschedule to view thread");
-            vh.post(new Runnable() {
-                @Override
-                public void run() {
-                    startInputInner(startInputReason, null, 0, 0, 0);
-                }
-            });
+            vh.post(() -> startInputInner(startInputReason, null, 0, 0, 0));
             return false;
         }
 
