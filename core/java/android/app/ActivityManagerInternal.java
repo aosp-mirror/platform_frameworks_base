@@ -319,4 +319,9 @@ public abstract class ActivityManagerInternal {
     }
 
     public abstract void registerScreenObserver(ScreenObserver observer);
+
+    /**
+     * Returns if more users can be started without stopping currently running users.
+     */
+    public abstract boolean canStartMoreUsers();
 }

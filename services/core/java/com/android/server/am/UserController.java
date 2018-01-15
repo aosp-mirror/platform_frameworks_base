@@ -101,6 +101,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -249,39 +250,51 @@ class UserController implements Handler.Callback {
         }
     }
 
-    void stopRunningUsersLU(int maxRunningUsers) {
-        int currentlyRunning = mUserLru.size();
-        int i = 0;
-        while (currentlyRunning > maxRunningUsers && i < mUserLru.size()) {
-            Integer oldUserId = mUserLru.get(i);
-            UserState oldUss = mStartedUsers.get(oldUserId);
-            if (oldUss == null) {
+    List<Integer> getRunningUsersLU() {
+        ArrayList<Integer> runningUsers = new ArrayList<>();
+        for (Integer userId : mUserLru) {
+            UserState uss = mStartedUsers.get(userId);
+            if (uss == null) {
                 // Shouldn't happen, but be sane if it does.
-                mUserLru.remove(i);
-                currentlyRunning--;
                 continue;
             }
-            if (oldUss.state == UserState.STATE_STOPPING
-                    || oldUss.state == UserState.STATE_SHUTDOWN) {
+            if (uss.state == UserState.STATE_STOPPING
+                    || uss.state == UserState.STATE_SHUTDOWN) {
                 // This user is already stopping, doesn't count.
-                currentlyRunning--;
-                i++;
                 continue;
             }
-            if (oldUserId == UserHandle.USER_SYSTEM || oldUserId == mCurrentUserId) {
-                // Owner/System user and current user can't be stopped. We count it as running
-                // when it is not a pure system user.
-                if (UserInfo.isSystemOnly(oldUserId)) {
-                    currentlyRunning--;
+            if (userId == UserHandle.USER_SYSTEM) {
+                // We only count system user as running when it is not a pure system user.
+                if (UserInfo.isSystemOnly(userId)) {
+                    continue;
                 }
-                i++;
+            }
+            runningUsers.add(userId);
+        }
+        return runningUsers;
+    }
+
+    void stopRunningUsersLU(int maxRunningUsers) {
+        List<Integer> currentlyRunning = getRunningUsersLU();
+        Iterator<Integer> iterator = currentlyRunning.iterator();
+        while (currentlyRunning.size() > maxRunningUsers && iterator.hasNext()) {
+            Integer userId = iterator.next();
+            if (userId == UserHandle.USER_SYSTEM || userId == mCurrentUserId) {
+                // Owner/System user and current user can't be stopped
                 continue;
             }
-            // This is a user to be stopped.
-            if (stopUsersLU(oldUserId, false, null) == USER_OP_SUCCESS) {
-                currentlyRunning--;
+            if (stopUsersLU(userId, false, null) == USER_OP_SUCCESS) {
+                iterator.remove();
             }
-            i++;
+        }
+    }
+
+    /**
+     * Returns if more users can be started without stopping currently running users.
+     */
+    boolean canStartMoreUsers() {
+        synchronized (mLock) {
+            return getRunningUsersLU().size() < mMaxRunningUsers;
         }
     }
 
@@ -768,34 +781,23 @@ class UserController implements Handler.Callback {
     /**
      * Stops the guest or ephemeral user if it has gone to the background.
      */
-    private void stopGuestOrEphemeralUserIfBackground() {
-        IntArray userIds = new IntArray();
-        synchronized (mLock) {
-            final int num = mUserLru.size();
-            for (int i = 0; i < num; i++) {
-                Integer oldUserId = mUserLru.get(i);
-                UserState oldUss = mStartedUsers.get(oldUserId);
-                if (oldUserId == UserHandle.USER_SYSTEM || oldUserId == mCurrentUserId
-                        || oldUss.state == UserState.STATE_STOPPING
-                        || oldUss.state == UserState.STATE_SHUTDOWN) {
-                    continue;
-                }
-                userIds.add(oldUserId);
-            }
+    private void stopGuestOrEphemeralUserIfBackground(int oldUserId) {
+        if (DEBUG_MU) Slog.i(TAG, "Stop guest or ephemeral user if background: " + oldUserId);
+        UserState oldUss = mStartedUsers.get(oldUserId);
+        if (oldUserId == UserHandle.USER_SYSTEM || oldUserId == mCurrentUserId
+                || oldUss.state == UserState.STATE_STOPPING
+                || oldUss.state == UserState.STATE_SHUTDOWN) {
+            return;
         }
-        final int userIdsSize = userIds.size();
-        for (int i = 0; i < userIdsSize; i++) {
-            int oldUserId = userIds.get(i);
-            UserInfo userInfo = getUserInfo(oldUserId);
-            if (userInfo.isEphemeral()) {
-                LocalServices.getService(UserManagerInternal.class).onEphemeralUserStop(oldUserId);
-            }
-            if (userInfo.isGuest() || userInfo.isEphemeral()) {
-                // This is a user to be stopped.
-                synchronized (mLock) {
-                    stopUsersLU(oldUserId, true, null);
-                }
-                break;
+
+        UserInfo userInfo = getUserInfo(oldUserId);
+        if (userInfo.isEphemeral()) {
+            LocalServices.getService(UserManagerInternal.class).onEphemeralUserStop(oldUserId);
+        }
+        if (userInfo.isGuest() || userInfo.isEphemeral()) {
+            // This is a user to be stopped.
+            synchronized (mLock) {
+                stopUsersLU(oldUserId, true, null);
             }
         }
     }
@@ -1333,7 +1335,7 @@ class UserController implements Handler.Callback {
         mHandler.removeMessages(REPORT_USER_SWITCH_COMPLETE_MSG);
         mHandler.sendMessage(mHandler.obtainMessage(REPORT_USER_SWITCH_COMPLETE_MSG,
                 newUserId, 0));
-        stopGuestOrEphemeralUserIfBackground();
+        stopGuestOrEphemeralUserIfBackground(oldUserId);
         stopBackgroundUsersIfEnforced(oldUserId);
     }
 
