@@ -25,6 +25,7 @@ import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
 import android.os.ParcelableException;
+import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.server.SystemService;
@@ -86,7 +87,7 @@ public class BroadcastRadioService extends SystemService {
 
         @Override
         public ITuner openTuner(int moduleId, RadioManager.BandConfig bandConfig,
-                boolean withAudio, ITunerCallback callback) {
+                boolean withAudio, ITunerCallback callback) throws RemoteException {
             Slog.i(TAG, "openTuner(" + moduleId + ", _, " + withAudio + ", _)");
             enforcePolicyAccess();
             if (callback == null) {

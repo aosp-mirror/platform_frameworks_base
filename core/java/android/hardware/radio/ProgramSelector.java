@@ -59,6 +59,7 @@ import java.util.stream.Stream;
  */
 @SystemApi
 public final class ProgramSelector implements Parcelable {
+    public static final int PROGRAM_TYPE_INVALID = 0;
     /** Analogue AM radio (with or without RDS). */
     public static final int PROGRAM_TYPE_AM = 1;
     /** analogue FM radio (with or without RDS). */
@@ -77,6 +78,7 @@ public final class ProgramSelector implements Parcelable {
     public static final int PROGRAM_TYPE_VENDOR_START = 1000;
     public static final int PROGRAM_TYPE_VENDOR_END = 1999;
     @IntDef(prefix = { "PROGRAM_TYPE_" }, value = {
+        PROGRAM_TYPE_INVALID,
         PROGRAM_TYPE_AM,
         PROGRAM_TYPE_FM,
         PROGRAM_TYPE_AM_HD,
@@ -89,6 +91,7 @@ public final class ProgramSelector implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProgramType {}
 
+    public static final int IDENTIFIER_TYPE_INVALID = 0;
     /** kHz */
     public static final int IDENTIFIER_TYPE_AMFM_FREQUENCY = 1;
     /** 16bit */
@@ -148,6 +151,7 @@ public final class ProgramSelector implements Parcelable {
     public static final int IDENTIFIER_TYPE_VENDOR_PRIMARY_START = PROGRAM_TYPE_VENDOR_START;
     public static final int IDENTIFIER_TYPE_VENDOR_PRIMARY_END = PROGRAM_TYPE_VENDOR_END;
     @IntDef(prefix = { "IDENTIFIER_TYPE_" }, value = {
+        IDENTIFIER_TYPE_INVALID,
         IDENTIFIER_TYPE_AMFM_FREQUENCY,
         IDENTIFIER_TYPE_RDS_PI,
         IDENTIFIER_TYPE_HD_STATION_ID_EXT,
@@ -268,7 +272,7 @@ public final class ProgramSelector implements Parcelable {
      * Vendor identifiers are passed as-is to the HAL implementation,
      * preserving elements order.
      *
-     * @return a array of vendor identifiers, must not be modified.
+     * @return an array of vendor identifiers, must not be modified.
      */
     public @NonNull long[] getVendorIds() {
         return mVendorIds;

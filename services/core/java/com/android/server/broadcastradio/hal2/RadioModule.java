@@ -63,20 +63,16 @@ class RadioModule {
         }
     }
 
-    public @NonNull TunerSession openSession(@NonNull android.hardware.radio.ITunerCallback userCb) {
+    public @NonNull TunerSession openSession(@NonNull android.hardware.radio.ITunerCallback userCb)
+            throws RemoteException {
         TunerCallback cb = new TunerCallback(Objects.requireNonNull(userCb));
         Mutable<ITunerSession> hwSession = new Mutable<>();
         MutableInt halResult = new MutableInt(Result.UNKNOWN_ERROR);
 
-        try {
-            mService.openSession(cb, (int result, ITunerSession session) -> {
-                hwSession.value = session;
-                halResult.value = result;
-            });
-        } catch (RemoteException ex) {
-            Slog.e(TAG, "failed to open session", ex);
-            throw new ParcelableException(ex);
-        }
+        mService.openSession(cb, (int result, ITunerSession session) -> {
+            hwSession.value = session;
+            halResult.value = result;
+        });
 
         Convert.throwOnError("openSession", halResult.value);
         Objects.requireNonNull(hwSession.value);
