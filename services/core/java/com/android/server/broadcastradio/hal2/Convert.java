@@ -73,7 +73,26 @@ class Convert {
         }
     }
 
-    private static @NonNull Map<String, String>
+    static @NonNull ArrayList<VendorKeyValue>
+    vendorInfoToHal(@Nullable Map<String, String> info) {
+        if (info == null) return new ArrayList<>();
+
+        ArrayList<VendorKeyValue> list = new ArrayList<>();
+        for (Map.Entry<String, String> entry : info.entrySet()) {
+            VendorKeyValue elem = new VendorKeyValue();
+            elem.key = entry.getKey();
+            elem.value = entry.getValue();
+            if (elem.key == null || elem.value == null) {
+                Slog.w(TAG, "VendorKeyValue contains null pointers");
+                continue;
+            }
+            list.add(elem);
+        }
+
+        return list;
+    }
+
+    static @NonNull Map<String, String>
     vendorInfoFromHal(@Nullable List<VendorKeyValue> info) {
         if (info == null) return Collections.emptyMap();
 
@@ -206,18 +225,23 @@ class Convert {
                 false,  // isCaptureSupported
 
                 amfmConfigToBands(amfmConfig),
-                false,  // isBgScanSupported is deprecated
+                true,  // isBgScanSupported is deprecated
                 supportedProgramTypes,
                 supportedIdentifierTypes,
                 vendorInfoFromHal(prop.vendorInfo)
         );
     }
 
+    static void programIdentifierToHal(@NonNull ProgramIdentifier hwId,
+            @NonNull ProgramSelector.Identifier id) {
+        hwId.type = id.getType();
+        hwId.value = id.getValue();
+    }
+
     static @NonNull ProgramIdentifier programIdentifierToHal(
             @NonNull ProgramSelector.Identifier id) {
         ProgramIdentifier hwId = new ProgramIdentifier();
-        hwId.type = id.getType();
-        hwId.value = id.getValue();
+        programIdentifierToHal(hwId, id);
         return hwId;
     }
 
@@ -227,10 +251,22 @@ class Convert {
         return new ProgramSelector.Identifier(id.type, id.value);
     }
 
+    static @NonNull android.hardware.broadcastradio.V2_0.ProgramSelector programSelectorToHal(
+            @NonNull ProgramSelector sel) {
+        android.hardware.broadcastradio.V2_0.ProgramSelector hwSel =
+            new android.hardware.broadcastradio.V2_0.ProgramSelector();
+
+        programIdentifierToHal(hwSel.primaryId, sel.getPrimaryId());
+        Arrays.stream(sel.getSecondaryIds()).map(Convert::programIdentifierToHal).
+                forEachOrdered(hwSel.secondaryIds::add);
+
+        return hwSel;
+    }
+
     static @NonNull ProgramSelector programSelectorFromHal(
             @NonNull android.hardware.broadcastradio.V2_0.ProgramSelector sel) {
         ProgramSelector.Identifier[] secondaryIds = sel.secondaryIds.stream().
-                map(id -> Objects.requireNonNull(programIdentifierFromHal(id))).
+                map(Convert::programIdentifierFromHal).map(Objects::requireNonNull).
                 toArray(ProgramSelector.Identifier[]::new);
 
         return new ProgramSelector(
@@ -285,5 +321,11 @@ class Convert {
             hwAnnouncement.type,
             vendorInfoFromHal(hwAnnouncement.vendorInfo)
         );
+    }
+
+    static <T> @Nullable ArrayList<T> listToArrayList(@Nullable List<T> list) {
+        if (list == null) return null;
+        if (list instanceof ArrayList) return (ArrayList) list;
+        return new ArrayList<>(list);
     }
 }

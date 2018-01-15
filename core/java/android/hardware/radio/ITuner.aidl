@@ -64,8 +64,6 @@ interface ITuner {
 
     void cancelAnnouncement();
 
-    RadioManager.ProgramInfo getProgramInformation();
-
     Bitmap getImage(int id);
 
     /**
@@ -92,6 +90,4 @@ interface ITuner {
      * @return Vendor-specific key-value pairs, must be Map<String, String>
      */
     Map getParameters(in List<String> keys);
-
-    boolean isAntennaConnected();
 }

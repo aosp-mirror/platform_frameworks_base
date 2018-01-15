@@ -249,6 +249,15 @@ static jobject nativeOpenTuner(JNIEnv *env, jobject obj, long nativeContext, jin
 
     Tuner::assignHalInterfaces(env, tuner, module.radioModule, halTuner);
     ALOGD("Opened tuner %p", halTuner.get());
+
+    bool isConnected = true;
+    halTuner->getConfiguration([&](Result result, const BandConfig& config) {
+        if (result == Result::OK) isConnected = config.antennaConnected;
+    });
+    if (!isConnected) {
+        tunerCb->antennaStateChange(false);
+    }
+
     return tuner.release();
 }
 

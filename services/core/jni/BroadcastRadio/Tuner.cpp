@@ -352,39 +352,6 @@ static void nativeCancelAnnouncement(JNIEnv *env, jobject obj, jlong nativeConte
     convert::ThrowIfFailed(env, halTuner->cancelAnnouncement());
 }
 
-static jobject nativeGetProgramInformation(JNIEnv *env, jobject obj, jlong nativeContext) {
-    ALOGV("%s", __func__);
-    lock_guard<mutex> lk(gContextMutex);
-    auto& ctx = getNativeContext(nativeContext);
-
-    auto halTuner10 = getHalTuner(ctx);
-    auto halTuner11 = ctx.mHalTuner11;
-    if (halTuner10 == nullptr) return nullptr;
-
-    JavaRef<jobject> jInfo;
-    Result halResult;
-    Return<void> hidlResult;
-    if (halTuner11 != nullptr) {
-        hidlResult = halTuner11->getProgramInformation_1_1([&](Result result,
-                const V1_1::ProgramInfo& info) {
-            halResult = result;
-            if (result != Result::OK) return;
-            jInfo = convert::ProgramInfoFromHal(env, info);
-        });
-    } else {
-        hidlResult = halTuner10->getProgramInformation([&](Result result,
-                const V1_0::ProgramInfo& info) {
-            halResult = result;
-            if (result != Result::OK) return;
-            jInfo = convert::ProgramInfoFromHal(env, info, ctx.mBand);
-        });
-    }
-
-    if (jInfo != nullptr) return jInfo.release();
-    convert::ThrowIfFailed(env, hidlResult, halResult);
-    return nullptr;
-}
-
 static bool nativeStartBackgroundScan(JNIEnv *env, jobject obj, jlong nativeContext) {
     ALOGV("%s", __func__);
     auto halTuner = getHalTuner11(nativeContext);
@@ -541,21 +508,6 @@ static jobject nativeGetParameters(JNIEnv *env, jobject obj, jlong nativeContext
     return jResults.release();
 }
 
-static bool nativeIsAntennaConnected(JNIEnv *env, jobject obj, jlong nativeContext) {
-    ALOGV("%s", __func__);
-    auto halTuner = getHalTuner(nativeContext);
-    if (halTuner == nullptr) return false;
-
-    bool isConnected = false;
-    Result halResult;
-    auto hidlResult = halTuner->getConfiguration([&](Result result, const BandConfig& config) {
-        halResult = result;
-        isConnected = config.antennaConnected;
-    });
-    convert::ThrowIfFailed(env, hidlResult, halResult);
-    return isConnected;
-}
-
 static const JNINativeMethod gTunerMethods[] = {
     { "nativeInit", "(IZI)J", (void*)nativeInit },
     { "nativeFinalize", "(J)V", (void*)nativeFinalize },
@@ -570,8 +522,6 @@ static const JNINativeMethod gTunerMethods[] = {
     { "nativeTune", "(JLandroid/hardware/radio/ProgramSelector;)V", (void*)nativeTune },
     { "nativeCancel", "(J)V", (void*)nativeCancel },
     { "nativeCancelAnnouncement", "(J)V", (void*)nativeCancelAnnouncement },
-    { "nativeGetProgramInformation", "(J)Landroid/hardware/radio/RadioManager$ProgramInfo;",
-            (void*)nativeGetProgramInformation },
     { "nativeStartBackgroundScan", "(J)Z", (void*)nativeStartBackgroundScan },
     { "nativeGetProgramList", "(JLjava/util/Map;)Ljava/util/List;",
             (void*)nativeGetProgramList },
@@ -580,7 +530,6 @@ static const JNINativeMethod gTunerMethods[] = {
     { "nativeSetAnalogForced", "(JZ)V", (void*)nativeSetAnalogForced },
     { "nativeSetParameters", "(JLjava/util/Map;)Ljava/util/Map;", (void*)nativeSetParameters },
     { "nativeGetParameters", "(JLjava/util/List;)Ljava/util/Map;", (void*)nativeGetParameters },
-    { "nativeIsAntennaConnected", "(J)Z", (void*)nativeIsAntennaConnected },
 };
 
 } // namespace Tuner
