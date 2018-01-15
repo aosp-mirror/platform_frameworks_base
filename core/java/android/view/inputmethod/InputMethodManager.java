@@ -337,20 +337,23 @@ public final class InputMethodManager {
     int mCursorCandEnd;
 
     /**
-     * Represents an invalid action notification sequence number. {@link InputMethodManagerService}
-     * always issues a positive integer for action notification sequence numbers. Thus -1 is
-     * guaranteed to be different from any valid sequence number.
+     * Represents an invalid action notification sequence number.
+     * {@link com.android.server.InputMethodManagerService} always issues a positive integer for
+     * action notification sequence numbers. Thus {@code -1} is guaranteed to be different from any
+     * valid sequence number.
      */
     private static final int NOT_AN_ACTION_NOTIFICATION_SEQUENCE_NUMBER = -1;
     /**
-     * The next sequence number that is to be sent to {@link InputMethodManagerService} via
+     * The next sequence number that is to be sent to
+     * {@link com.android.server.InputMethodManagerService} via
      * {@link IInputMethodManager#notifyUserAction(int)} at once when a user action is observed.
      */
     private int mNextUserActionNotificationSequenceNumber =
             NOT_AN_ACTION_NOTIFICATION_SEQUENCE_NUMBER;
 
     /**
-     * The last sequence number that is already sent to {@link InputMethodManagerService}.
+     * The last sequence number that is already sent to
+     * {@link com.android.server.InputMethodManagerService}.
      */
     private int mLastSentUserActionNotificationSequenceNumber =
             NOT_AN_ACTION_NOTIFICATION_SEQUENCE_NUMBER;
@@ -1255,12 +1258,7 @@ public final class InputMethodManager {
             // The view is running on a different thread than our own, so
             // we need to reschedule our work for over there.
             if (DEBUG) Log.v(TAG, "Starting input: reschedule to view thread");
-            vh.post(new Runnable() {
-                @Override
-                public void run() {
-                    startInputInner(startInputReason, null, 0, 0, 0);
-                }
-            });
+            vh.post(() -> startInputInner(startInputReason, null, 0, 0, 0));
             return false;
         }
 
@@ -2429,8 +2427,8 @@ public final class InputMethodManager {
      * Allow the receiver of {@link InputContentInfo} to obtain a temporary read-only access
      * permission to the content.
      *
-     * <p>See {@link android.inputmethodservice.InputMethodService#exposeContent(InputContentInfo, EditorInfo)}
-     * for details.</p>
+     * <p>See {@link android.inputmethodservice.InputMethodService#exposeContent(InputContentInfo,
+     * InputConnection)} for details.</p>
      *
      * @param token Supplies the identifying token given to an input method when it was started,
      * which allows it to perform this operation on itself.
