@@ -9197,4 +9197,50 @@ public class DevicePolicyManager {
             throw re.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Allows/disallows printing.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
+     * @param enabled whether printing should be allowed or not.
+     * @throws SecurityException if {@code admin} is neither device, nor profile owner.
+     * @hide
+     */
+    public void setPrintingEnabled(@NonNull ComponentName admin, boolean enabled) {
+        try {
+            mService.setPrintingEnabled(admin, enabled);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns whether printing is enabled for current user.
+     *
+     * @return {@code true} iff printing is enabled.
+     * @hide
+     */
+    public boolean isPrintingEnabled() {
+        try {
+            return mService.isPrintingEnabled();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns error message to be displayed when printing is disabled.
+     *
+     * Used only by PrintService.
+     * @return Localized error message.
+     * @throws SecurityException if caller is not system.
+     * @hide
+     */
+    public CharSequence getPrintingDisabledReason() {
+        try {
+            return mService.getPrintingDisabledReason();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
 }

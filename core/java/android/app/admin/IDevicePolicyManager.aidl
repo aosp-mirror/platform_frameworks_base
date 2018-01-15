@@ -396,4 +396,8 @@ interface IDevicePolicyManager {
     void setEndUserSessionMessage(in ComponentName admin, in CharSequence endUserSessionMessage);
     CharSequence getStartUserSessionMessage(in ComponentName admin);
     CharSequence getEndUserSessionMessage(in ComponentName admin);
+
+    void setPrintingEnabled(in ComponentName admin, boolean enabled);
+    boolean isPrintingEnabled();
+    CharSequence getPrintingDisabledReason();
 }

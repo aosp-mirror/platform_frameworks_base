@@ -878,6 +878,7 @@
   <java-symbol type="string" name="preposition_for_time" />
   <java-symbol type="string" name="print_service_installed_title" />
   <java-symbol type="string" name="print_service_installed_message" />
+  <java-symbol type="string" name="printing_disabled_by" />
   <java-symbol type="string" name="progress_erasing" />
   <java-symbol type="string" name="mobile_provisioning_apn" />
   <java-symbol type="string" name="mobile_provisioning_url" />
