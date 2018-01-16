@@ -11915,6 +11915,19 @@ public final class Settings {
          * @hide
          */
         public static final String SHOW_FIRST_CRASH_DIALOG = "show_first_crash_dialog";
+
+        /**
+         * If nonzero, crash dialogs will show an option to restart the app.
+         * @hide
+         */
+        public static final String SHOW_RESTART_IN_CRASH_DIALOG = "show_restart_in_crash_dialog";
+
+        /**
+         * If nonzero, crash dialogs will show an option to mute all future crash dialogs for
+         * this app.
+         * @hide
+         */
+        public static final String SHOW_MUTE_IN_CRASH_DIALOG = "show_mute_in_crash_dialog";
     }
 
     /**

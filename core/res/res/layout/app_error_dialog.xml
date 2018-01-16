@@ -18,48 +18,50 @@
 */
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="@dimen/aerr_padding_list_top"
+    android:paddingBottom="@dimen/aerr_padding_list_bottom">
+
+    <Button
+        android:id="@+id/aerr_restart"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingTop="@dimen/aerr_padding_list_top"
-        android:paddingBottom="@dimen/aerr_padding_list_bottom">
-
-
-    <Button
-            android:id="@+id/aerr_restart"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/aerr_restart"
-            android:drawableStart="@drawable/ic_refresh"
-            style="@style/aerr_list_item"
-    />
+        android:text="@string/aerr_restart"
+        android:drawableStart="@drawable/ic_refresh"
+        style="@style/aerr_list_item" />
 
     <Button
-            android:id="@+id/aerr_close"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/aerr_close_app"
-            android:drawableStart="@drawable/ic_close"
-            style="@style/aerr_list_item"
-    />
+        android:id="@+id/aerr_app_info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/app_info"
+        android:drawableStart="@drawable/ic_info_outline_24"
+        style="@style/aerr_list_item" />
 
     <Button
-            android:id="@+id/aerr_report"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/aerr_report"
-            android:drawableStart="@drawable/ic_feedback"
-            style="@style/aerr_list_item"
-    />
+        android:id="@+id/aerr_close"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/aerr_close_app"
+        android:drawableStart="@drawable/ic_close"
+        style="@style/aerr_list_item" />
 
     <Button
-            android:id="@+id/aerr_mute"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/aerr_mute"
-            android:drawableStart="@drawable/ic_eject_24dp"
-            style="@style/aerr_list_item"
-    />
+        android:id="@+id/aerr_report"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/aerr_report"
+        android:drawableStart="@drawable/ic_feedback"
+        style="@style/aerr_list_item" />
 
+    <Button
+        android:id="@+id/aerr_mute"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/aerr_mute"
+        android:drawableStart="@drawable/ic_eject_24dp"
+        style="@style/aerr_list_item" />
 
 </LinearLayout>

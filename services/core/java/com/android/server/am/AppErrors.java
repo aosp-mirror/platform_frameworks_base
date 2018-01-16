@@ -33,6 +33,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Message;
 import android.os.Process;
@@ -429,6 +430,11 @@ class AppErrors {
                 } finally {
                     Binder.restoreCallingIdentity(orig);
                 }
+            }
+            if (res == AppErrorDialog.APP_INFO) {
+                appErrorIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                appErrorIntent.setData(Uri.parse("package:" + r.info.packageName));
+                appErrorIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             }
             if (res == AppErrorDialog.FORCE_QUIT_AND_REPORT) {
                 appErrorIntent = createAppErrorIntentLocked(r, timeMillis, crashInfo);

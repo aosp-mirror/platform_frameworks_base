@@ -2650,6 +2650,7 @@
   <java-symbol type="id" name="aerr_report" />
   <java-symbol type="id" name="aerr_restart" />
   <java-symbol type="id" name="aerr_close" />
+  <java-symbol type="id" name="aerr_app_info" />
   <java-symbol type="id" name="aerr_mute" />
 
   <java-symbol type="string" name="status_bar_rotate" />
