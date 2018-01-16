@@ -1122,6 +1122,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                     Settings.Global.ZRAM_ENABLED,
                     GlobalSettingsProto.ZRAM_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.ENABLE_SMART_REPLIES_IN_NOTIFICATIONS,
+                GlobalSettingsProto.ENABLE_SMART_REPLIES_IN_NOTIFICATIONS);
     }
 
     /** Dump a single {@link SettingsState.Setting} to a proto buf */
