@@ -4889,8 +4889,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final int adjust = sim & SOFT_INPUT_MASK_ADJUST;
 
         final boolean requestedFullscreen = (fl & FLAG_FULLSCREEN) != 0
-                || (requestedSysUiFl & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0
-                || (requestedSysUiFl & View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN) != 0;
+                || (requestedSysUiFl & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0;
 
         final boolean layoutInScreen = (fl & FLAG_LAYOUT_IN_SCREEN) == FLAG_LAYOUT_IN_SCREEN;
         final boolean layoutInsetDecor = (fl & FLAG_LAYOUT_INSET_DECOR) == FLAG_LAYOUT_INSET_DECOR;
