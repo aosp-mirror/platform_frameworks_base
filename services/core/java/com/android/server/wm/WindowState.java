@@ -630,6 +630,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private final Point mSurfacePosition = new Point();
 
     /**
+     * A region inside of this window to be excluded from touch-related focus switches.
+     */
+    private TapExcludeRegionHolder mTapExcludeRegionHolder;
+
+    /**
      * Compares two window sub-layers and returns -1 if the first is lesser than the second in terms
      * of z-order and 1 otherwise.
      */
@@ -1869,6 +1874,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final int type = mAttrs.type;
         if (WindowManagerService.excludeWindowTypeFromTapOutTask(type)) {
             dc.mTapExcludedWindows.remove(this);
+        }
+        if (mTapExcludeRegionHolder != null) {
+            // If a tap exclude region container was initialized for this window, then it should've
+            // also been registered in display.
+            dc.mTapExcludeProvidingWindows.remove(this);
         }
         mPolicy.removeWindowLw(this);
 
@@ -4618,6 +4628,37 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             w.assignChildLayers(t);
             layer++;
         }
+    }
+
+    /**
+     * Update a tap exclude region with a rectangular area identified by provided id. The requested
+     * area will be clipped to the window bounds.
+     */
+    void updateTapExcludeRegion(int regionId, int left, int top, int width, int height) {
+        final DisplayContent currentDisplay = getDisplayContent();
+        if (currentDisplay == null) {
+            throw new IllegalStateException("Trying to update window not attached to any display.");
+        }
+
+        if (mTapExcludeRegionHolder == null) {
+            mTapExcludeRegionHolder = new TapExcludeRegionHolder();
+
+            // Make sure that this window is registered as one that provides a tap exclude region
+            // for its containing display.
+            currentDisplay.mTapExcludeProvidingWindows.add(this);
+        }
+
+        mTapExcludeRegionHolder.updateRegion(regionId, left, top, width, height);
+        // Trigger touch exclude region update on current display.
+        final boolean isAppFocusedOnDisplay = mService.mFocusedApp != null
+                && mService.mFocusedApp.getDisplayContent() == currentDisplay;
+        currentDisplay.setTouchExcludeRegion(isAppFocusedOnDisplay ? mService.mFocusedApp.getTask()
+                : null);
+    }
+
+    /** Union the region with current tap exclude region that this window provides. */
+    void amendTapExcludeRegion(Region region) {
+        mTapExcludeRegionHolder.amendRegion(region, getBounds());
     }
 
     private final class MoveAnimationSpec implements AnimationSpec {

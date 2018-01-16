@@ -17871,6 +17871,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Return the window this view is currently attached to. Used in
+     * {@link android.app.ActivityView} to communicate with WM.
+     * @hide
+     */
+    protected IWindow getWindow() {
+        return mAttachInfo != null ? mAttachInfo.mWindow : null;
+    }
+
+    /**
      * Return the visibility value of the least visible component passed.
      */
     int combineVisibility(int vis1, int vis2) {

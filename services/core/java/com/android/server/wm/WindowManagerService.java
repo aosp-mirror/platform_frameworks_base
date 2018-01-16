@@ -6923,6 +6923,23 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /**
+     * Update a tap exclude region with a rectangular area in the window identified by the provided
+     * id. Touches on this region will not switch focus to this window. Passing an empty rect will
+     * remove the area from the exclude region of this window.
+     */
+    void updateTapExcludeRegion(IWindow client, int regionId, int left, int top, int width,
+            int height) {
+        synchronized (mWindowMap) {
+            final WindowState callingWin = windowForClientLocked(null, client, false);
+            if (callingWin == null) {
+                Slog.w(TAG_WM, "Bad requesting window " + client);
+                return;
+            }
+            callingWin.updateTapExcludeRegion(regionId, left, top, width, height);
+        }
+    }
+
     @Override
     public void registerShortcutKey(long shortcutCode, IShortcutService shortcutKeyReceiver)
             throws RemoteException {
