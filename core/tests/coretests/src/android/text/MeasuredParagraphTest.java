@@ -31,7 +31,7 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class MeasuredTextTest {
+public class MeasuredParagraphTest {
     private static final TextDirectionHeuristic LTR = TextDirectionHeuristics.LTR;
     private static final TextDirectionHeuristic RTL = TextDirectionHeuristics.RTL;
 
@@ -60,9 +60,9 @@ public class MeasuredTextTest {
 
     @Test
     public void buildForBidi() {
-        MeasuredText mt = null;
+        MeasuredParagraph mt = null;
 
-        mt = MeasuredText.buildForBidi("XXX", 0, 3, LTR, null);
+        mt = MeasuredParagraph.buildForBidi("XXX", 0, 3, LTR, null);
         assertNotNull(mt);
         assertNotNull(mt.getChars());
         assertEquals("XXX", charsToString(mt.getChars()));
@@ -75,7 +75,7 @@ public class MeasuredTextTest {
         assertEquals(0, mt.getNativePtr());
 
         // Recycle it
-        MeasuredText mt2 = MeasuredText.buildForBidi("_VVV_", 1, 4, RTL, mt);
+        MeasuredParagraph mt2 = MeasuredParagraph.buildForBidi("_VVV_", 1, 4, RTL, mt);
         assertEquals(mt2, mt);
         assertNotNull(mt2.getChars());
         assertEquals("VVV", charsToString(mt.getChars()));
@@ -91,9 +91,9 @@ public class MeasuredTextTest {
 
     @Test
     public void buildForMeasurement() {
-        MeasuredText mt = null;
+        MeasuredParagraph mt = null;
 
-        mt = MeasuredText.buildForMeasurement(PAINT, "XXX", 0, 3, LTR, null);
+        mt = MeasuredParagraph.buildForMeasurement(PAINT, "XXX", 0, 3, LTR, null);
         assertNotNull(mt);
         assertNotNull(mt.getChars());
         assertEquals("XXX", charsToString(mt.getChars()));
@@ -109,7 +109,8 @@ public class MeasuredTextTest {
         assertEquals(0, mt.getNativePtr());
 
         // Recycle it
-        MeasuredText mt2 = MeasuredText.buildForMeasurement(PAINT, "_VVV_", 1, 4, RTL, mt);
+        MeasuredParagraph mt2 =
+                MeasuredParagraph.buildForMeasurement(PAINT, "_VVV_", 1, 4, RTL, mt);
         assertEquals(mt2, mt);
         assertNotNull(mt2.getChars());
         assertEquals("VVV", charsToString(mt.getChars()));
@@ -129,9 +130,9 @@ public class MeasuredTextTest {
 
     @Test
     public void buildForStaticLayout() {
-        MeasuredText mt = null;
+        MeasuredParagraph mt = null;
 
-        mt = MeasuredText.buildForStaticLayout(PAINT, "XXX", 0, 3, LTR, null);
+        mt = MeasuredParagraph.buildForStaticLayout(PAINT, "XXX", 0, 3, LTR, null);
         assertNotNull(mt);
         assertNotNull(mt.getChars());
         assertEquals("XXX", charsToString(mt.getChars()));
@@ -145,7 +146,8 @@ public class MeasuredTextTest {
         assertNotEquals(0, mt.getNativePtr());
 
         // Recycle it
-        MeasuredText mt2 = MeasuredText.buildForStaticLayout(PAINT, "_VVV_", 1, 4, RTL, mt);
+        MeasuredParagraph mt2 =
+                MeasuredParagraph.buildForStaticLayout(PAINT, "_VVV_", 1, 4, RTL, mt);
         assertEquals(mt2, mt);
         assertNotNull(mt2.getChars());
         assertEquals("VVV", charsToString(mt.getChars()));
@@ -163,6 +165,6 @@ public class MeasuredTextTest {
 
     @Test
     public void testFor70146381() {
-        MeasuredText.buildForMeasurement(PAINT, "X…", 0, 2, RTL, null);
+        MeasuredParagraph.buildForMeasurement(PAINT, "X…", 0, 2, RTL, null);
     }
 }

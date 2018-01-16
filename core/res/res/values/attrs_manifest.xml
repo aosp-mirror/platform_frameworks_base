@@ -2568,9 +2568,9 @@
              e.g. name=ro.oem.sku value=MKT210.
              Overlay will be ignored unless system property exists and is
              set to specified value -->
-        <!-- @hide @SystemApi This shouldn't be public. -->
+        <!-- @hide This shouldn't be public. -->
         <attr name="requiredSystemPropertyName" format="string" />
-        <!-- @hide @SystemApi This shouldn't be public. -->
+        <!-- @hide This shouldn't be public. -->
         <attr name="requiredSystemPropertyValue" format="string" />
     </declare-styleable>
 

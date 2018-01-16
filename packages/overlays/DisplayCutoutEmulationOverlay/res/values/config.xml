@@ -1,0 +1,44 @@
+<!--
+  ~ Copyright (C) 2018 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+
+    <!-- The bounding path of the cutout region of the main built-in display.
+         Must either be empty if there is no cutout region, or a string that is parsable by
+         {@link android.util.PathParser}. -->
+    <string translatable="false" name="config_mainBuiltInDisplayCutout">
+        M 687.0,0
+        l -66,50
+        l 0,50
+        l 66,50
+        l 66,0
+        l 66,-50
+        l 0,-50
+        l -66,-50
+        z
+    </string>
+
+    <!-- Whether the display cutout region of the main built-in display should be forced to
+     black in software (to avoid aliasing or emulate a cutout that is not physically existent).
+     -->
+    <bool name="config_fillMainBuiltInDisplayCutout">true</bool>
+
+    <!-- Height of the status bar -->
+    <dimen name="status_bar_height">150px</dimen>
+
+</resources>
+
+

@@ -280,9 +280,27 @@ public abstract class RadioTuner {
      * @throws IllegalStateException if the scan is in progress or has not been started,
      *         startBackgroundScan() call may fix it.
      * @throws IllegalArgumentException if the vendorFilter argument is not valid.
+     * @deprecated Use {@link getDynamicProgramList} instead.
      */
+    @Deprecated
     public abstract @NonNull List<RadioManager.ProgramInfo>
             getProgramList(@Nullable Map<String, String> vendorFilter);
+
+    /**
+     * Get the dynamic list of discovered radio stations.
+     *
+     * The list object is updated asynchronously; to get the updates register
+     * with {@link ProgramList#addListCallback}.
+     *
+     * When the returned object is no longer used, it must be closed.
+     *
+     * @param filter filter for the list, or null to get the full list.
+     * @return the dynamic program list object, close it after use
+     *         or {@code null} if program list is not supported by the tuner
+     */
+    public @Nullable ProgramList getDynamicProgramList(@Nullable ProgramList.Filter filter) {
+        return null;
+    }
 
     /**
      * Checks, if the analog playback is forced, see setAnalogForced.

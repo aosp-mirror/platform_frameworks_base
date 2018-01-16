@@ -24,6 +24,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.SurfaceControl.HIDDEN;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
@@ -245,6 +246,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     /** Whether this token should be boosted at the top of all app window tokens. */
     private boolean mNeedsZBoost;
+    private Letterbox mLetterbox;
 
     private final Point mTmpPoint = new Point();
     private final Rect mTmpRect = new Rect();
@@ -678,6 +680,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         if (destroyedSomething) {
             final DisplayContent dc = getDisplayContent();
             dc.assignWindowLayers(true /*setLayoutNeeded*/);
+            updateLetterbox(null);
         }
     }
 
@@ -944,6 +947,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
     void removeChild(WindowState child) {
         super.removeChild(child);
         checkKeyguardFlagsChanged();
+        updateLetterbox(child);
     }
 
     private boolean waitingForReplacement() {
@@ -1409,6 +1413,33 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return isInterestingAndDrawn;
     }
 
+    void updateLetterbox(WindowState winHint) {
+        final WindowState w = findMainWindow();
+        if (w != winHint && winHint != null && w != null) {
+            return;
+        }
+        final boolean needsLetterbox = w != null && w.isLetterboxedAppWindow()
+                && fillsParent() && w.hasDrawnLw();
+        if (needsLetterbox) {
+            if (mLetterbox == null) {
+                mLetterbox = new Letterbox(() -> makeChildSurface(null));
+            }
+            mLetterbox.setDimensions(mPendingTransaction, getParent().getBounds(), w.mFrame);
+        } else if (mLetterbox != null) {
+            final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+            SurfaceControl.openTransaction();
+            try {
+                mLetterbox.hide(t);
+            } finally {
+                // TODO: This should use pendingTransaction eventually, but right now things
+                // happening on the animation finished callback are happening on the global
+                // transaction.
+                SurfaceControl.mergeToGlobalTransaction(t);
+                SurfaceControl.closeTransaction();
+            }
+        }
+    }
+
     @Override
     boolean forAllWindows(ToBooleanFunction<WindowState> callback, boolean traverseTopToBottom) {
         // For legacy reasons we process the TaskStack.mExitingAppTokens first in DisplayContent
@@ -1635,6 +1666,8 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             // the status bar). In that case we need to use the final frame.
             if (freeform) {
                 frame.set(win.mFrame);
+            } else if (win.isLetterboxedAppWindow()) {
+                frame.set(getTask().getBounds());
             } else {
                 frame.set(win.mContainingFrame);
             }

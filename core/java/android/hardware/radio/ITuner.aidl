@@ -17,6 +17,7 @@
 package android.hardware.radio;
 
 import android.graphics.Bitmap;
+import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 
@@ -73,14 +74,8 @@ interface ITuner {
      */
     boolean startBackgroundScan();
 
-    /**
-     * @param vendorFilter Vendor-specific filter, must be Map<String, String>
-     * @return the list, or null if scan is in progress
-     * @throws IllegalArgumentException if invalid arguments are passed
-     * @throws IllegalStateException if the scan has not been started, client may
-     *         call startBackgroundScan to fix this.
-     */
-    List<RadioManager.ProgramInfo> getProgramList(in Map vendorFilter);
+    void startProgramListUpdates(in ProgramList.Filter filter);
+    void stopProgramListUpdates();
 
     boolean isConfigFlagSupported(int flag);
     boolean isConfigFlagSet(int flag);

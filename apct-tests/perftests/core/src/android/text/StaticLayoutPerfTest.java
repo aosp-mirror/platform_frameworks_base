@@ -190,7 +190,7 @@ public class StaticLayoutPerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             state.pauseTiming();
-            final PremeasuredText text = PremeasuredText.build(
+            final MeasuredText text = MeasuredText.build(
                     generateRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT, LTR);
             state.resumeTiming();
 
@@ -206,7 +206,7 @@ public class StaticLayoutPerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             state.pauseTiming();
-            final PremeasuredText text = PremeasuredText.build(
+            final MeasuredText text = MeasuredText.build(
                     generateRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT, LTR);
             state.resumeTiming();
 
@@ -222,7 +222,7 @@ public class StaticLayoutPerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             state.pauseTiming();
-            final PremeasuredText text = PremeasuredText.build(
+            final MeasuredText text = MeasuredText.build(
                     generateRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT, LTR);
             state.resumeTiming();
 
@@ -238,7 +238,7 @@ public class StaticLayoutPerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             state.pauseTiming();
-            final PremeasuredText text = PremeasuredText.build(
+            final MeasuredText text = MeasuredText.build(
                     generateRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT, LTR);
             state.resumeTiming();
 
@@ -254,7 +254,7 @@ public class StaticLayoutPerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         while (state.keepRunning()) {
             state.pauseTiming();
-            final PremeasuredText text = PremeasuredText.build(
+            final MeasuredText text = MeasuredText.build(
                     generateRandomParagraph(WORD_LENGTH, STYLE_TEXT), PAINT, LTR);
             state.resumeTiming();
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "MeasuredText"
+#define LOG_TAG "MeasuredParagraph"
 
 #include "ScopedIcuLocale.h"
 #include "unicode/locid.h"
@@ -49,7 +49,7 @@ static inline Paint* toPaint(jlong ptr) {
     return reinterpret_cast<Paint*>(ptr);
 }
 
-static inline minikin::MeasuredText* toMeasuredText(jlong ptr) {
+static inline minikin::MeasuredText* toMeasuredParagraph(jlong ptr) {
     return reinterpret_cast<minikin::MeasuredText*>(ptr);
 }
 
@@ -57,8 +57,8 @@ template<typename Ptr> static inline jlong toJLong(Ptr ptr) {
     return reinterpret_cast<jlong>(ptr);
 }
 
-static void releaseMeasuredText(jlong measuredTextPtr) {
-    delete toMeasuredText(measuredTextPtr);
+static void releaseMeasuredParagraph(jlong measuredTextPtr) {
+    delete toMeasuredParagraph(measuredTextPtr);
 }
 
 // Regular JNI
@@ -84,7 +84,7 @@ static void nAddReplacementRun(JNIEnv* /* unused */, jclass /* unused */, jlong 
 }
 
 // Regular JNI
-static jlong nBuildNativeMeasuredText(JNIEnv* env, jclass /* unused */, jlong builderPtr,
+static jlong nBuildNativeMeasuredParagraph(JNIEnv* env, jclass /* unused */, jlong builderPtr,
                                       jcharArray javaText) {
     ScopedCharArrayRO text(env, javaText);
     const minikin::U16StringPiece textBuffer(text.get(), text.size());
@@ -100,23 +100,23 @@ static void nFreeBuilder(JNIEnv* env, jclass /* unused */, jlong builderPtr) {
 
 // CriticalNative
 static jlong nGetReleaseFunc() {
-    return toJLong(&releaseMeasuredText);
+    return toJLong(&releaseMeasuredParagraph);
 }
 
 static const JNINativeMethod gMethods[] = {
-    // MeasuredTextBuilder native functions.
+    // MeasuredParagraphBuilder native functions.
     {"nInitBuilder", "()J", (void*) nInitBuilder},
     {"nAddStyleRun", "(JJIIZ)V", (void*) nAddStyleRun},
     {"nAddReplacementRun", "(JJIIF)V", (void*) nAddReplacementRun},
-    {"nBuildNativeMeasuredText", "(J[C)J", (void*) nBuildNativeMeasuredText},
+    {"nBuildNativeMeasuredParagraph", "(J[C)J", (void*) nBuildNativeMeasuredParagraph},
     {"nFreeBuilder", "(J)V", (void*) nFreeBuilder},
 
-    // MeasuredText native functions.
+    // MeasuredParagraph native functions.
     {"nGetReleaseFunc", "()J", (void*) nGetReleaseFunc},  // Critical Natives
 };
 
-int register_android_text_MeasuredText(JNIEnv* env) {
-    return RegisterMethodsOrDie(env, "android/text/MeasuredText", gMethods, NELEM(gMethods));
+int register_android_text_MeasuredParagraph(JNIEnv* env) {
+    return RegisterMethodsOrDie(env, "android/text/MeasuredParagraph", gMethods, NELEM(gMethods));
 }
 
 }

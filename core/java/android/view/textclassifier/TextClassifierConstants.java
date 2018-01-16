@@ -45,19 +45,24 @@ public final class TextClassifierConstants {
             "smart_selection_dark_launch";
     private static final String SMART_SELECTION_ENABLED_FOR_EDIT_TEXT =
             "smart_selection_enabled_for_edit_text";
+    private static final String SMART_LINKIFY_ENABLED =
+            "smart_linkify_enabled";
 
     private static final boolean SMART_SELECTION_DARK_LAUNCH_DEFAULT = false;
     private static final boolean SMART_SELECTION_ENABLED_FOR_EDIT_TEXT_DEFAULT = true;
+    private static final boolean SMART_LINKIFY_ENABLED_DEFAULT = true;
 
     /** Default settings. */
     static final TextClassifierConstants DEFAULT = new TextClassifierConstants();
 
     private final boolean mDarkLaunch;
     private final boolean mSuggestSelectionEnabledForEditableText;
+    private final boolean mSmartLinkifyEnabled;
 
     private TextClassifierConstants() {
         mDarkLaunch = SMART_SELECTION_DARK_LAUNCH_DEFAULT;
         mSuggestSelectionEnabledForEditableText = SMART_SELECTION_ENABLED_FOR_EDIT_TEXT_DEFAULT;
+        mSmartLinkifyEnabled = SMART_LINKIFY_ENABLED_DEFAULT;
     }
 
     private TextClassifierConstants(@Nullable String settings) {
@@ -74,6 +79,9 @@ public final class TextClassifierConstants {
         mSuggestSelectionEnabledForEditableText = parser.getBoolean(
                 SMART_SELECTION_ENABLED_FOR_EDIT_TEXT,
                 SMART_SELECTION_ENABLED_FOR_EDIT_TEXT_DEFAULT);
+        mSmartLinkifyEnabled = parser.getBoolean(
+                SMART_LINKIFY_ENABLED,
+                SMART_LINKIFY_ENABLED_DEFAULT);
     }
 
     static TextClassifierConstants loadFromString(String settings) {
@@ -86,5 +94,9 @@ public final class TextClassifierConstants {
 
     public boolean isSuggestSelectionEnabledForEditableText() {
         return mSuggestSelectionEnabledForEditableText;
+    }
+
+    public boolean isSmartLinkifyEnabled() {
+        return mSmartLinkifyEnabled;
     }
 }

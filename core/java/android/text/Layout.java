@@ -1917,10 +1917,10 @@ public abstract class Layout {
 
     private static float measurePara(TextPaint paint, CharSequence text, int start, int end,
             TextDirectionHeuristic textDir) {
-        MeasuredText mt = null;
+        MeasuredParagraph mt = null;
         TextLine tl = TextLine.obtain();
         try {
-            mt = MeasuredText.buildForBidi(text, start, end, textDir, mt);
+            mt = MeasuredParagraph.buildForBidi(text, start, end, textDir, mt);
             final char[] chars = mt.getChars();
             final int len = chars.length;
             final Directions directions = mt.getDirections(0, len);

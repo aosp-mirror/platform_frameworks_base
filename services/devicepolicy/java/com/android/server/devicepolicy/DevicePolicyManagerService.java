@@ -54,7 +54,6 @@ import static android.app.admin.DevicePolicyManager.LEAVE_ALL_SYSTEM_APPS_ENABLE
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_COMPLEX;
 import static android.app.admin.DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED;
 import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
-import static android.app.admin.DevicePolicyManager.START_USER_IN_BACKGROUND;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
@@ -1725,6 +1724,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         IActivityManager getIActivityManager() {
             return ActivityManager.getService();
+        }
+
+        ActivityManagerInternal getActivityManagerInternal() {
+            return LocalServices.getService(ActivityManagerInternal.class);
         }
 
         IPackageManager getIPackageManager() {
@@ -8641,14 +8644,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         Settings.Secure.USER_SETUP_COMPLETE, 1, userHandle);
             }
 
-            if ((flags & START_USER_IN_BACKGROUND) != 0) {
-                try {
-                    mInjector.getIActivityManager().startUserInBackground(userHandle);
-                } catch (RemoteException re) {
-                    // Does not happen, same process
-                }
-            }
-
             return user;
         } catch (Throwable re) {
             mUserManager.removeUser(userHandle);
@@ -8661,6 +8656,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean removeUser(ComponentName who, UserHandle userHandle) {
         Preconditions.checkNotNull(who, "ComponentName is null");
+        Preconditions.checkNotNull(userHandle, "UserHandle is null");
+
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
         }
@@ -8699,6 +8696,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @Override
     public boolean switchUser(ComponentName who, UserHandle userHandle) {
         Preconditions.checkNotNull(who, "ComponentName is null");
+
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
 
@@ -8719,8 +8717,40 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
+    public boolean startUserInBackground(ComponentName who, UserHandle userHandle) {
+        Preconditions.checkNotNull(who, "ComponentName is null");
+        Preconditions.checkNotNull(userHandle, "UserHandle is null");
+
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        }
+
+        final int userId = userHandle.getIdentifier();
+        if (isManagedProfile(userId)) {
+            Log.w(LOG_TAG, "Managed profile cannot be started in background");
+            return false;
+        }
+
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            if (!mInjector.getActivityManagerInternal().canStartMoreUsers()) {
+                Log.w(LOG_TAG, "Cannot start more users in background");
+                return false;
+            }
+
+            return mInjector.getIActivityManager().startUserInBackground(userId);
+        } catch (RemoteException e) {
+            // Same process, should not happen.
+            return false;
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
+        }
+    }
+
+    @Override
     public boolean stopUser(ComponentName who, UserHandle userHandle) {
         Preconditions.checkNotNull(who, "ComponentName is null");
+        Preconditions.checkNotNull(userHandle, "UserHandle is null");
 
         synchronized (this) {
             getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);

@@ -22,7 +22,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Implements the ITunerCallback interface by forwarding calls to RadioTuner.Callback.
@@ -30,8 +32,13 @@ import java.util.Map;
 class TunerCallbackAdapter extends ITunerCallback.Stub {
     private static final String TAG = "BroadcastRadio.TunerCallbackAdapter";
 
+    private final Object mLock = new Object();
     @NonNull private final RadioTuner.Callback mCallback;
     @NonNull private final Handler mHandler;
+
+    @Nullable ProgramList mProgramList;
+    @Nullable List<RadioManager.ProgramInfo> mLastCompleteList;  // for legacy getProgramList call
+    private boolean mDelayedCompleteCallback = false;
 
     TunerCallbackAdapter(@NonNull RadioTuner.Callback callback, @Nullable Handler handler) {
         mCallback = callback;
@@ -39,6 +46,49 @@ class TunerCallbackAdapter extends ITunerCallback.Stub {
             mHandler = new Handler(Looper.getMainLooper());
         } else {
             mHandler = handler;
+        }
+    }
+
+    void setProgramListObserver(@Nullable ProgramList programList,
+            @NonNull ProgramList.OnCloseListener closeListener) {
+        Objects.requireNonNull(closeListener);
+        synchronized (mLock) {
+            if (mProgramList != null) {
+                Log.w(TAG, "Previous program list observer wasn't properly closed, closing it...");
+                mProgramList.close();
+            }
+            mProgramList = programList;
+            if (programList == null) return;
+            programList.setOnCloseListener(() -> {
+                synchronized (mLock) {
+                    if (mProgramList != programList) return;
+                    mProgramList = null;
+                    mLastCompleteList = null;
+                    closeListener.onClose();
+                }
+            });
+            programList.addOnCompleteListener(() -> {
+                synchronized (mLock) {
+                    if (mProgramList != programList) return;
+                    mLastCompleteList = programList.toList();
+                    if (mDelayedCompleteCallback) {
+                        Log.d(TAG, "Sending delayed onBackgroundScanComplete callback");
+                        sendBackgroundScanCompleteLocked();
+                    }
+                }
+            });
+        }
+    }
+
+    @Nullable List<RadioManager.ProgramInfo> getLastCompleteList() {
+        synchronized (mLock) {
+            return mLastCompleteList;
+        }
+    }
+
+    void clearLastCompleteList() {
+        synchronized (mLock) {
+            mLastCompleteList = null;
         }
     }
 
@@ -87,14 +137,35 @@ class TunerCallbackAdapter extends ITunerCallback.Stub {
         mHandler.post(() -> mCallback.onBackgroundScanAvailabilityChange(isAvailable));
     }
 
+    private void sendBackgroundScanCompleteLocked() {
+        mDelayedCompleteCallback = false;
+        mHandler.post(() -> mCallback.onBackgroundScanComplete());
+    }
+
     @Override
     public void onBackgroundScanComplete() {
-        mHandler.post(() -> mCallback.onBackgroundScanComplete());
+        synchronized (mLock) {
+            if (mLastCompleteList == null) {
+                Log.i(TAG, "Got onBackgroundScanComplete callback, but the "
+                        + "program list didn't get through yet. Delaying it...");
+                mDelayedCompleteCallback = true;
+                return;
+            }
+            sendBackgroundScanCompleteLocked();
+        }
     }
 
     @Override
     public void onProgramListChanged() {
         mHandler.post(() -> mCallback.onProgramListChanged());
+    }
+
+    @Override
+    public void onProgramListUpdated(ProgramList.Chunk chunk) {
+        synchronized (mLock) {
+            if (mProgramList == null) return;
+            mProgramList.apply(Objects.requireNonNull(chunk));
+        }
     }
 
     @Override

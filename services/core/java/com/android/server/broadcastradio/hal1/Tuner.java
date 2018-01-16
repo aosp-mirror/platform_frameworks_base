@@ -21,6 +21,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
+import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.os.IBinder;
@@ -249,8 +250,7 @@ class Tuner extends ITuner.Stub {
         }
     }
 
-    @Override
-    public List<RadioManager.ProgramInfo> getProgramList(Map vendorFilter) {
+    List<RadioManager.ProgramInfo> getProgramList(Map vendorFilter) {
         Map<String, String> sFilter = vendorFilter;
         synchronized (mLock) {
             checkNotClosedLocked();
@@ -260,6 +260,16 @@ class Tuner extends ITuner.Stub {
             }
             return list;
         }
+    }
+
+    @Override
+    public void startProgramListUpdates(ProgramList.Filter filter) {
+        mTunerCallback.startProgramListUpdates(filter);
+    }
+
+    @Override
+    public void stopProgramListUpdates() {
+        mTunerCallback.stopProgramListUpdates();
     }
 
     @Override

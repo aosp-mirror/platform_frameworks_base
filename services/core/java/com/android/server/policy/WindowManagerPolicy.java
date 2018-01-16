@@ -176,6 +176,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     void onKeyguardOccludedChangedLw(boolean occluded);
 
     /**
+     * Called when the resource overlays change.
+     */
+    default void onOverlayChangedLw() {}
+
+    /**
      * Interface to the Window Manager state associated with a particular
      * window.  You can hold on to an instance of this interface from the call
      * to prepareAddWindow() until removeWindow().
@@ -445,6 +450,13 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
          * Check whether the window is currently dimming.
          */
         public boolean isDimming();
+
+        /**
+         * Returns true if the window is letterboxed for the display cutout.
+         */
+        default boolean isLetterboxedForDisplayCutoutLw() {
+            return false;
+        }
 
         /** @return the current windowing mode of this window. */
         int getWindowingMode();

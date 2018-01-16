@@ -24,7 +24,7 @@ java_library {
     no_framework_libs: true,
     libs: [
         "framework",
-        "legacy-test",
+        "android.test.base",
         "android.test.mock",
     ],
 }

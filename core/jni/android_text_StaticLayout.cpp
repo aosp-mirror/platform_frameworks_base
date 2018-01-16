@@ -174,7 +174,7 @@ static const JNINativeMethod gMethods[] = {
 
         // Inputs
         "[C"  // text
-        "J"  // MeasuredText ptr.
+        "J"  // MeasuredParagraph ptr.
         "I"  // length
         "F"  // firstWidth
         "I"  // firstWidthLineCount

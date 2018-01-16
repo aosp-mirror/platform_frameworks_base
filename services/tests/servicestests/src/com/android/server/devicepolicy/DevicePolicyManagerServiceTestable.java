@@ -15,6 +15,7 @@
  */
 package com.android.server.devicepolicy;
 
+import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.NotificationManager;
@@ -185,6 +186,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         IActivityManager getIActivityManager() {
             return services.iactivityManager;
+        }
+
+        @Override
+        ActivityManagerInternal getActivityManagerInternal() {
+            return services.activityManagerInternal;
         }
 
         @Override

@@ -185,25 +185,6 @@ public class RadioManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ConfigFlag {}
 
-    private static void writeStringMap(@NonNull Parcel dest, @NonNull Map<String, String> map) {
-        dest.writeInt(map.size());
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            dest.writeString(entry.getKey());
-            dest.writeString(entry.getValue());
-        }
-    }
-
-    private static @NonNull Map<String, String> readStringMap(@NonNull Parcel in) {
-        int size = in.readInt();
-        Map<String, String> map = new HashMap<>();
-        while (size-- > 0) {
-            String key = in.readString();
-            String value = in.readString();
-            map.put(key, value);
-        }
-        return map;
-    }
-
     /*****************************************************************************
      * Lists properties, options and radio bands supported by a given broadcast radio module.
      * Each module has a unique ID used to address it when calling RadioManager APIs.
@@ -415,7 +396,7 @@ public class RadioManager {
             mIsBgScanSupported = in.readInt() == 1;
             mSupportedProgramTypes = arrayToSet(in.createIntArray());
             mSupportedIdentifierTypes = arrayToSet(in.createIntArray());
-            mVendorInfo = readStringMap(in);
+            mVendorInfo = Utils.readStringMap(in);
         }
 
         public static final Parcelable.Creator<ModuleProperties> CREATOR
@@ -445,7 +426,7 @@ public class RadioManager {
             dest.writeInt(mIsBgScanSupported ? 1 : 0);
             dest.writeIntArray(setToArray(mSupportedProgramTypes));
             dest.writeIntArray(setToArray(mSupportedIdentifierTypes));
-            writeStringMap(dest, mVendorInfo);
+            Utils.writeStringMap(dest, mVendorInfo);
         }
 
         @Override
@@ -1410,7 +1391,7 @@ public class RadioManager {
         private static final int FLAG_TRAFFIC_ANNOUNCEMENT = 1 << 3;
 
         @NonNull private final ProgramSelector mSelector;
-        private final boolean mTuned;
+        private final boolean mTuned;  // TODO(b/69958777): replace with mFlags
         private final boolean mStereo;
         private final boolean mDigital;
         private final int mFlags;
@@ -1418,7 +1399,8 @@ public class RadioManager {
         private final RadioMetadata mMetadata;
         @NonNull private final Map<String, String> mVendorInfo;
 
-        ProgramInfo(@NonNull ProgramSelector selector, boolean tuned, boolean stereo,
+        /** @hide */
+        public ProgramInfo(@NonNull ProgramSelector selector, boolean tuned, boolean stereo,
                 boolean digital, int signalStrength, RadioMetadata metadata, int flags,
                 Map<String, String> vendorInfo) {
             mSelector = selector;
@@ -1564,7 +1546,7 @@ public class RadioManager {
                 mMetadata = null;
             }
             mFlags = in.readInt();
-            mVendorInfo = readStringMap(in);
+            mVendorInfo = Utils.readStringMap(in);
         }
 
         public static final Parcelable.Creator<ProgramInfo> CREATOR
@@ -1592,7 +1574,7 @@ public class RadioManager {
                 mMetadata.writeToParcel(dest, flags);
             }
             dest.writeInt(mFlags);
-            writeStringMap(dest, mVendorInfo);
+            Utils.writeStringMap(dest, mVendorInfo);
         }
 
         @Override
@@ -1727,7 +1709,8 @@ public class RadioManager {
             Log.e(TAG, "Failed to open tuner");
             return null;
         }
-        return new TunerAdapter(tuner, config != null ? config.getType() : BAND_INVALID);
+        return new TunerAdapter(tuner, halCallback,
+                config != null ? config.getType() : BAND_INVALID);
     }
 
     @NonNull private final Context mContext;

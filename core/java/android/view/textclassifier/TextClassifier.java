@@ -23,6 +23,8 @@ import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.annotation.WorkerThread;
 import android.os.LocaleList;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.ArraySet;
 
 import com.android.internal.util.Preconditions;
@@ -305,7 +307,7 @@ public interface TextClassifier {
      *
      * Configs are initially based on a predefined preset, and can be modified from there.
      */
-    final class EntityConfig {
+    final class EntityConfig implements Parcelable {
         private final @TextClassifier.EntityPreset int mEntityPreset;
         private final Collection<String> mExcludedEntityTypes;
         private final Collection<String> mIncludedEntityTypes;
@@ -354,6 +356,37 @@ public interface TextClassifier {
                 }
             }
             return Collections.unmodifiableList(entities);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mEntityPreset);
+            dest.writeStringList(new ArrayList<>(mExcludedEntityTypes));
+            dest.writeStringList(new ArrayList<>(mIncludedEntityTypes));
+        }
+
+        public static final Parcelable.Creator<EntityConfig> CREATOR =
+                new Parcelable.Creator<EntityConfig>() {
+                    @Override
+                    public EntityConfig createFromParcel(Parcel in) {
+                        return new EntityConfig(in);
+                    }
+
+                    @Override
+                    public EntityConfig[] newArray(int size) {
+                        return new EntityConfig[size];
+                    }
+                };
+
+        private EntityConfig(Parcel in) {
+            mEntityPreset = in.readInt();
+            mExcludedEntityTypes = new ArraySet<>(in.createStringArrayList());
+            mIncludedEntityTypes = new ArraySet<>(in.createStringArrayList());
         }
     }
 

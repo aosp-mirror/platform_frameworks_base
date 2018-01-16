@@ -22,6 +22,7 @@ import android.hardware.broadcastradio.V2_0.ConfigFlag;
 import android.hardware.broadcastradio.V2_0.ITunerSession;
 import android.hardware.broadcastradio.V2_0.Result;
 import android.hardware.radio.ITuner;
+import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.media.AudioSystem;
@@ -184,10 +185,19 @@ class TunerSession extends ITuner.Stub {
     }
 
     @Override
-    public List<RadioManager.ProgramInfo> getProgramList(Map vendorFilter) {
+    public void startProgramListUpdates(ProgramList.Filter filter) throws RemoteException {
         synchronized (mLock) {
             checkNotClosedLocked();
-            return null;
+            int halResult = mHwSession.startProgramListUpdates(Convert.programFilterToHal(filter));
+            Convert.throwOnError("startProgramListUpdates", halResult);
+        }
+    }
+
+    @Override
+    public void stopProgramListUpdates() throws RemoteException {
+        synchronized (mLock) {
+            checkNotClosedLocked();
+            mHwSession.stopProgramListUpdates();
         }
     }
 
@@ -226,17 +236,12 @@ class TunerSession extends ITuner.Stub {
     }
 
     @Override
-    public void setConfigFlag(int flag, boolean value) {
+    public void setConfigFlag(int flag, boolean value) throws RemoteException {
         Slog.v(TAG, "setConfigFlag " + ConfigFlag.toString(flag) + " = " + value);
         synchronized (mLock) {
             checkNotClosedLocked();
 
-            int halResult;
-            try {
-                halResult = mHwSession.setConfigFlag(flag, value);
-            } catch (RemoteException ex) {
-                throw new RuntimeException("Failed to set flag " + ConfigFlag.toString(flag), ex);
-            }
+            int halResult = mHwSession.setConfigFlag(flag, value);
             Convert.throwOnError("setConfigFlag", halResult);
         }
     }

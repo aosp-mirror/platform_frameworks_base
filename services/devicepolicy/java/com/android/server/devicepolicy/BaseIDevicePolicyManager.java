@@ -19,6 +19,7 @@ import android.annotation.UserIdInt;
 import android.app.admin.IDevicePolicyManager;
 import android.content.ComponentName;
 import android.os.PersistableBundle;
+import android.os.UserHandle;
 import android.security.keymaster.KeymasterCertificateChain;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
 
@@ -101,6 +102,11 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
 
     public boolean setKeyPairCertificate(ComponentName who, String callerPackage, String alias,
             byte[] cert, byte[] chain, boolean isUserSelectable) {
+        return false;
+    }
+
+    @Override
+    public boolean startUserInBackground(ComponentName who, UserHandle userHandle) {
         return false;
     }
 }

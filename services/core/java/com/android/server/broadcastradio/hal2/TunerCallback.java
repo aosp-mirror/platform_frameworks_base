@@ -56,7 +56,9 @@ class TunerCallback extends ITunerCallback.Stub {
     public void onCurrentProgramInfoChanged(ProgramInfo info) {}
 
     @Override
-    public void onProgramListUpdated(ProgramListChunk chunk) {}
+    public void onProgramListUpdated(ProgramListChunk chunk) {
+        dispatch(() -> mClientCb.onProgramListUpdated(Convert.programListChunkFromHal(chunk)));
+    }
 
     @Override
     public void onAntennaStateChange(boolean connected) {}

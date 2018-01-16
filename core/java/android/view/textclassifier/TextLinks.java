@@ -20,6 +20,8 @@ import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.LocaleList;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.SpannableString;
 import android.text.style.ClickableSpan;
 import android.view.View;
@@ -38,7 +40,7 @@ import java.util.function.Function;
  * A collection of links, representing subsequences of text and the entity types (phone number,
  * address, url, etc) they may be.
  */
-public final class TextLinks {
+public final class TextLinks implements Parcelable {
     private final String mFullText;
     private final List<TextLink> mLinks;
 
@@ -83,11 +85,40 @@ public final class TextLinks {
         return true;
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mFullText);
+        dest.writeTypedList(mLinks);
+    }
+
+    public static final Parcelable.Creator<TextLinks> CREATOR =
+            new Parcelable.Creator<TextLinks>() {
+                @Override
+                public TextLinks createFromParcel(Parcel in) {
+                    return new TextLinks(in);
+                }
+
+                @Override
+                public TextLinks[] newArray(int size) {
+                    return new TextLinks[size];
+                }
+            };
+
+    private TextLinks(Parcel in) {
+        mFullText = in.readString();
+        mLinks = in.createTypedArrayList(TextLink.CREATOR);
+    }
+
     /**
      * A link, identifying a substring of text and possible entity types for it.
      */
-    public static final class TextLink {
-        private final EntityConfidence<String> mEntityScores;
+    public static final class TextLink implements Parcelable {
+        private final EntityConfidence mEntityScores;
         private final String mOriginalText;
         private final int mStart;
         private final int mEnd;
@@ -105,7 +136,7 @@ public final class TextLinks {
             mOriginalText = originalText;
             mStart = start;
             mEnd = end;
-            mEntityScores = new EntityConfidence<>(entityScores);
+            mEntityScores = new EntityConfidence(entityScores);
         }
 
         /**
@@ -153,15 +184,50 @@ public final class TextLinks {
                 @TextClassifier.EntityType String entityType) {
             return mEntityScores.getConfidenceScore(entityType);
         }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            mEntityScores.writeToParcel(dest, flags);
+            dest.writeString(mOriginalText);
+            dest.writeInt(mStart);
+            dest.writeInt(mEnd);
+        }
+
+        public static final Parcelable.Creator<TextLink> CREATOR =
+                new Parcelable.Creator<TextLink>() {
+                    @Override
+                    public TextLink createFromParcel(Parcel in) {
+                        return new TextLink(in);
+                    }
+
+                    @Override
+                    public TextLink[] newArray(int size) {
+                        return new TextLink[size];
+                    }
+                };
+
+        private TextLink(Parcel in) {
+            mEntityScores = EntityConfidence.CREATOR.createFromParcel(in);
+            mOriginalText = in.readString();
+            mStart = in.readInt();
+            mEnd = in.readInt();
+        }
     }
 
     /**
      * Optional input parameters for generating TextLinks.
      */
-    public static final class Options {
+    public static final class Options implements Parcelable {
 
         private LocaleList mDefaultLocales;
         private TextClassifier.EntityConfig mEntityConfig;
+
+        public Options() {}
 
         /**
          * @param defaultLocales ordered list of locale preferences that may be used to
@@ -200,6 +266,45 @@ public final class TextLinks {
         @Nullable
         public TextClassifier.EntityConfig getEntityConfig() {
             return mEntityConfig;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mDefaultLocales != null ? 1 : 0);
+            if (mDefaultLocales != null) {
+                mDefaultLocales.writeToParcel(dest, flags);
+            }
+            dest.writeInt(mEntityConfig != null ? 1 : 0);
+            if (mEntityConfig != null) {
+                mEntityConfig.writeToParcel(dest, flags);
+            }
+        }
+
+        public static final Parcelable.Creator<Options> CREATOR =
+                new Parcelable.Creator<Options>() {
+                    @Override
+                    public Options createFromParcel(Parcel in) {
+                        return new Options(in);
+                    }
+
+                    @Override
+                    public Options[] newArray(int size) {
+                        return new Options[size];
+                    }
+                };
+
+        private Options(Parcel in) {
+            if (in.readInt() > 0) {
+                mDefaultLocales = LocaleList.CREATOR.createFromParcel(in);
+            }
+            if (in.readInt() > 0) {
+                mEntityConfig = TextClassifier.EntityConfig.CREATOR.createFromParcel(in);
+            }
         }
     }
 

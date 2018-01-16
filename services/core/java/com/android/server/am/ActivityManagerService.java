@@ -25130,6 +25130,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void registerScreenObserver(ScreenObserver observer) {
             mScreenObservers.add(observer);
         }
+
+        @Override
+        public boolean canStartMoreUsers() {
+            return mUserController.canStartMoreUsers();
+        }
     }
 
     /**
@@ -25339,6 +25344,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
             }
+        }
+        if (updateFrameworkRes && mWindowManager != null) {
+            ActivityThread.currentActivityThread().getExecutor().execute(
+                    mWindowManager::onOverlayChanged);
         }
     }
 

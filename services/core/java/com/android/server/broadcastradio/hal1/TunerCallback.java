@@ -19,6 +19,7 @@ package com.android.server.broadcastradio.hal1;
 import android.annotation.NonNull;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
+import android.hardware.radio.ProgramList;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioMetadata;
 import android.hardware.radio.RadioTuner;
@@ -28,6 +29,10 @@ import android.util.Slog;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 class TunerCallback implements ITunerCallback {
     private static final String TAG = "BroadcastRadioService.TunerCallback";
@@ -39,6 +44,8 @@ class TunerCallback implements ITunerCallback {
 
     @NonNull private final Tuner mTuner;
     @NonNull private final ITunerCallback mClientCallback;
+
+    private final AtomicReference<ProgramList.Filter> mProgramListFilter = new AtomicReference<>();
 
     TunerCallback(@NonNull Tuner tuner, @NonNull ITunerCallback clientCallback, int halRev) {
         mTuner = tuner;
@@ -76,6 +83,15 @@ class TunerCallback implements ITunerCallback {
     private void handleHwFailure() {
         onError(RadioTuner.ERROR_HARDWARE_FAILURE);
         mTuner.close();
+    }
+
+    void startProgramListUpdates(@NonNull ProgramList.Filter filter) {
+        mProgramListFilter.set(Objects.requireNonNull(filter));
+        sendProgramListUpdate();
+    }
+
+    void stopProgramListUpdates() {
+        mProgramListFilter.set(null);
     }
 
     @Override
@@ -121,6 +137,28 @@ class TunerCallback implements ITunerCallback {
     @Override
     public void onProgramListChanged() {
         dispatch(() -> mClientCallback.onProgramListChanged());
+        sendProgramListUpdate();
+    }
+
+    private void sendProgramListUpdate() {
+        ProgramList.Filter filter = mProgramListFilter.get();
+        if (filter == null) return;
+
+        List<RadioManager.ProgramInfo> modified;
+        try {
+            modified = mTuner.getProgramList(filter.getVendorFilter());
+        } catch (IllegalStateException ex) {
+            Slog.d(TAG, "Program list not ready yet");
+            return;
+        }
+        Set<RadioManager.ProgramInfo> modifiedSet = modified.stream().collect(Collectors.toSet());
+        ProgramList.Chunk chunk = new ProgramList.Chunk(true, true, modifiedSet, null);
+        dispatch(() -> mClientCallback.onProgramListUpdated(chunk));
+    }
+
+    @Override
+    public void onProgramListUpdated(ProgramList.Chunk chunk) {
+        dispatch(() -> mClientCallback.onProgramListUpdated(chunk));
     }
 
     @Override
