@@ -29,14 +29,12 @@ import android.content.pm.ResolveInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
-import android.util.EventLog;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.util.Preconditions;
-import com.android.server.EventLogTags;
 import com.android.server.backup.transport.OnTransportRegisteredListener;
 import com.android.server.backup.transport.TransportClient;
 import com.android.server.backup.transport.TransportClientManager;
@@ -574,8 +572,6 @@ public class TransportManager {
             return BackupManager.ERROR_TRANSPORT_UNAVAILABLE;
         }
 
-        EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_LIFECYCLE, transportString, 1);
-
         int result;
         try {
             String transportName = transport.name();
@@ -587,7 +583,6 @@ public class TransportManager {
             result = BackupManager.SUCCESS;
         } catch (RemoteException e) {
             Slog.e(TAG, "Transport " + transportString + " died while registering");
-            EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_LIFECYCLE, transportString, 0);
             result = BackupManager.ERROR_TRANSPORT_UNAVAILABLE;
         }
 
