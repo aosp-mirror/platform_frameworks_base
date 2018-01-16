@@ -55,7 +55,8 @@ public class StaticLayout extends Layout {
      * First, call nInit to setup native line breaker object. Then, for each paragraph, do the
      * following:
      *
-     *   - Create MeasuredText by MeasuredText.buildForStaticLayout which measures in native.
+     *   - Create MeasuredParagraph by MeasuredParagraph.buildForStaticLayout which measures in
+     *     native.
      *   - Run nComputeLineBreaks() to obtain line breaks for the paragraph.
      *
      * After all paragraphs, call finish() to release expensive buffers.
@@ -650,34 +651,34 @@ public class StaticLayout extends Layout {
                 b.mJustificationMode != Layout.JUSTIFICATION_MODE_NONE,
                 indents, mLeftPaddings, mRightPaddings);
 
-        PremeasuredText premeasured = null;
+        MeasuredText measured = null;
         final Spanned spanned;
-        if (source instanceof PremeasuredText) {
-            premeasured = (PremeasuredText) source;
+        if (source instanceof MeasuredText) {
+            measured = (MeasuredText) source;
 
-            final CharSequence original = premeasured.getText();
+            final CharSequence original = measured.getText();
             spanned = (original instanceof Spanned) ? (Spanned) original : null;
 
-            if (bufStart != premeasured.getStart() || bufEnd != premeasured.getEnd()) {
+            if (bufStart != measured.getStart() || bufEnd != measured.getEnd()) {
                 // The buffer position has changed. Re-measure here.
-                premeasured = PremeasuredText.build(original, paint, textDir, bufStart, bufEnd);
+                measured = MeasuredText.build(original, paint, textDir, bufStart, bufEnd);
             } else {
-                // We can use premeasured information.
+                // We can use measured information.
 
-                // Overwrite with the one when premeasured.
+                // Overwrite with the one when emeasured.
                 // TODO: Give an option for developer not to overwrite and measure again here?
-                textDir = premeasured.getTextDir();
-                paint = premeasured.getPaint();
+                textDir = measured.getTextDir();
+                paint = measured.getPaint();
             }
         } else {
-            premeasured = PremeasuredText.build(source, paint, textDir, bufStart, bufEnd);
+            measured = MeasuredText.build(source, paint, textDir, bufStart, bufEnd);
             spanned = (source instanceof Spanned) ? (Spanned) source : null;
         }
 
         try {
-            for (int paraIndex = 0; paraIndex < premeasured.getParagraphCount(); paraIndex++) {
-                final int paraStart = premeasured.getParagraphStart(paraIndex);
-                final int paraEnd = premeasured.getParagraphEnd(paraIndex);
+            for (int paraIndex = 0; paraIndex < measured.getParagraphCount(); paraIndex++) {
+                final int paraStart = measured.getParagraphStart(paraIndex);
+                final int paraEnd = measured.getParagraphEnd(paraIndex);
 
                 int firstWidthLineCount = 1;
                 int firstWidth = outerWidth;
@@ -743,10 +744,10 @@ public class StaticLayout extends Layout {
                     }
                 }
 
-                final MeasuredText measured = premeasured.getMeasuredText(paraIndex);
-                final char[] chs = measured.getChars();
-                final int[] spanEndCache = measured.getSpanEndCache().getRawArray();
-                final int[] fmCache = measured.getFontMetrics().getRawArray();
+                final MeasuredParagraph measuredPara = measured.getMeasuredParagraph(paraIndex);
+                final char[] chs = measuredPara.getChars();
+                final int[] spanEndCache = measuredPara.getSpanEndCache().getRawArray();
+                final int[] fmCache = measuredPara.getFontMetrics().getRawArray();
                 // TODO: Stop keeping duplicated width copy in native and Java.
                 widths.resize(chs.length);
 
@@ -759,7 +760,7 @@ public class StaticLayout extends Layout {
 
                         // Inputs
                         chs,
-                        measured.getNativePtr(),
+                        measuredPara.getNativePtr(),
                         paraEnd - paraStart,
                         firstWidth,
                         firstWidthLineCount,
@@ -863,7 +864,7 @@ public class StaticLayout extends Layout {
                         v = out(source, here, endPos,
                                 ascent, descent, fmTop, fmBottom,
                                 v, spacingmult, spacingadd, chooseHt, chooseHtv, fm,
-                                flags[breakIndex], needMultiply, measured, bufEnd,
+                                flags[breakIndex], needMultiply, measuredPara, bufEnd,
                                 includepad, trackpad, addLastLineSpacing, chs, widths.getRawArray(),
                                 paraStart, ellipsize, ellipsizedWidth, lineWidths[breakIndex],
                                 paint, moreChars);
@@ -894,8 +895,8 @@ public class StaticLayout extends Layout {
 
             if ((bufEnd == bufStart || source.charAt(bufEnd - 1) == CHAR_NEW_LINE)
                     && mLineCount < mMaximumVisibleLineCount) {
-                final MeasuredText measured =
-                        MeasuredText.buildForBidi(source, bufEnd, bufEnd, textDir, null);
+                final MeasuredParagraph measuredPara =
+                        MeasuredParagraph.buildForBidi(source, bufEnd, bufEnd, textDir, null);
                 paint.getFontMetricsInt(fm);
                 v = out(source,
                         bufEnd, bufEnd, fm.ascent, fm.descent,
@@ -903,7 +904,7 @@ public class StaticLayout extends Layout {
                         v,
                         spacingmult, spacingadd, null,
                         null, fm, 0,
-                        needMultiply, measured, bufEnd,
+                        needMultiply, measuredPara, bufEnd,
                         includepad, trackpad, addLastLineSpacing, null,
                         null, bufStart, ellipsize,
                         ellipsizedWidth, 0, paint, false);
@@ -918,7 +919,7 @@ public class StaticLayout extends Layout {
     private int out(final CharSequence text, final int start, final int end, int above, int below,
             int top, int bottom, int v, final float spacingmult, final float spacingadd,
             final LineHeightSpan[] chooseHt, final int[] chooseHtv, final Paint.FontMetricsInt fm,
-            final int flags, final boolean needMultiply, @NonNull final MeasuredText measured,
+            final int flags, final boolean needMultiply, @NonNull final MeasuredParagraph measured,
             final int bufEnd, final boolean includePad, final boolean trackPad,
             final boolean addLastLineLineSpacing, final char[] chs, final float[] widths,
             final int widthStart, final TextUtils.TruncateAt ellipsize, final float ellipsisWidth,

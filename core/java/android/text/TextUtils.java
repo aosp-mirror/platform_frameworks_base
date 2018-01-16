@@ -1250,10 +1250,10 @@ public class TextUtils {
             @NonNull String ellipsis) {
 
         final int len = text.length();
-        MeasuredText mt = null;
-        MeasuredText resultMt = null;
+        MeasuredParagraph mt = null;
+        MeasuredParagraph resultMt = null;
         try {
-            mt = MeasuredText.buildForMeasurement(paint, text, 0, text.length(), textDir, mt);
+            mt = MeasuredParagraph.buildForMeasurement(paint, text, 0, text.length(), textDir, mt);
             float width = mt.getWholeWidth();
 
             if (width <= avail) {
@@ -1332,7 +1332,7 @@ public class TextUtils {
                 if (remaining == 0) { // All text is gone.
                     textFits = true;
                 } else {
-                    resultMt = MeasuredText.buildForMeasurement(
+                    resultMt = MeasuredParagraph.buildForMeasurement(
                             paint, result, 0, result.length(), textDir, resultMt);
                     width = resultMt.getWholeWidth();
                     if (width <= avail) {
@@ -1479,11 +1479,11 @@ public class TextUtils {
     public static CharSequence commaEllipsize(CharSequence text, TextPaint p,
          float avail, String oneMore, String more, TextDirectionHeuristic textDir) {
 
-        MeasuredText mt = null;
-        MeasuredText tempMt = null;
+        MeasuredParagraph mt = null;
+        MeasuredParagraph tempMt = null;
         try {
             int len = text.length();
-            mt = MeasuredText.buildForMeasurement(p, text, 0, len, textDir, mt);
+            mt = MeasuredParagraph.buildForMeasurement(p, text, 0, len, textDir, mt);
             final float width = mt.getWholeWidth();
             if (width <= avail) {
                 return text;
@@ -1523,7 +1523,7 @@ public class TextUtils {
                     }
 
                     // XXX this is probably ok, but need to look at it more
-                    tempMt = MeasuredText.buildForMeasurement(
+                    tempMt = MeasuredParagraph.buildForMeasurement(
                             p, format, 0, format.length(), textDir, tempMt);
                     float moreWid = tempMt.getWholeWidth();
 
