@@ -3226,6 +3226,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private static final int PFLAG3_SCREEN_READER_FOCUSABLE = 0x10000000;
 
+    /**
+     * The last aggregated visibility. Used to detect when it truly changes.
+     */
+    private static final int PFLAG3_AGGREGATED_VISIBLE = 0x20000000;
+
     /* End of masks for mPrivateFlags3 */
 
     /**
@@ -7354,7 +7359,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void sendAccessibilityEventUncheckedInternal(AccessibilityEvent event) {
-        if (!isShown()) {
+        // Panes disappearing are relevant even if though the view is no longer visible.
+        boolean isWindowStateChanged =
+                (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+        boolean isWindowDisappearedEvent = isWindowStateChanged && ((event.getContentChangeTypes()
+                & AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_DISAPPEARED) != 0);
+        if (!isShown() && !isWindowDisappearedEvent) {
             return;
         }
         onInitializeAccessibilityEvent(event);
@@ -7462,6 +7472,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void onPopulateAccessibilityEventInternal(AccessibilityEvent event) {
+        if ((event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED)
+                && !TextUtils.isEmpty(getAccessibilityPaneTitle())) {
+            event.getText().add(getAccessibilityPaneTitle());
+        }
     }
 
     /**
@@ -11587,6 +11601,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (!AccessibilityManager.getInstance(mContext).isEnabled() || mAttachInfo == null) {
             return;
         }
+        // Changes to views with a pane title count as window state changes, as the pane title
+        // marks them as significant parts of the UI.
+        if (!TextUtils.isEmpty(getAccessibilityPaneTitle())) {
+            final AccessibilityEvent event = AccessibilityEvent.obtain();
+            event.setEventType(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+            event.setContentChangeTypes(changeType);
+            onPopulateAccessibilityEvent(event);
+            if (mParent != null) {
+                try {
+                    mParent.requestSendAccessibilityEvent(this, event);
+                } catch (AbstractMethodError e) {
+                    Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName()
+                            + " does not fully implement ViewParent", e);
+                }
+            }
+        }
+
         if (mParent != null) {
             try {
                 mParent.notifySubtreeAccessibilityStateChanged(this, source, changeType);
@@ -12520,6 +12551,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @CallSuper
     public void onVisibilityAggregated(boolean isVisible) {
+        // Update our internal visibility tracking so we can detect changes
+        boolean oldVisible = (mPrivateFlags3 & PFLAG3_AGGREGATED_VISIBLE) != 0;
+        mPrivateFlags3 = isVisible ? (mPrivateFlags3 | PFLAG3_AGGREGATED_VISIBLE)
+                : (mPrivateFlags3 & ~PFLAG3_AGGREGATED_VISIBLE);
         if (isVisible && mAttachInfo != null) {
             initialAwakenScrollBars();
         }
@@ -12558,6 +12593,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     // finish before checking state
                     mVisibilityChangeForAutofillHandler.obtainMessage(0, this).sendToTarget();
                 }
+            }
+        }
+        if (!TextUtils.isEmpty(getAccessibilityPaneTitle())) {
+            if (isVisible != oldVisible) {
+                notifyAccessibilityStateChanged(isVisible
+                        ? AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_APPEARED
+                        : AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_DISAPPEARED);
             }
         }
     }
