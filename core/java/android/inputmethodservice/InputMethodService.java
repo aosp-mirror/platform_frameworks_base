@@ -1089,33 +1089,6 @@ public class InputMethodService extends AbstractInputMethodService {
     }
 
     /**
-     * Close/hide the input method's soft input area, so the user no longer
-     * sees it or can interact with it.  This can only be called
-     * from the currently active input method, as validated by the given token.
-     *
-     * @param flags Provides additional operating flags.  Currently may be
-     * 0 or have the {@link InputMethodManager#HIDE_IMPLICIT_ONLY},
-     * {@link InputMethodManager#HIDE_NOT_ALWAYS} bit set.
-     */
-    public void hideSoftInputFromInputMethod(int flags) {
-        mImm.hideSoftInputFromInputMethodInternal(mToken, flags);
-    }
-
-    /**
-     * Show the input method's soft input area, so the user
-     * sees the input method window and can interact with it.
-     * This can only be called from the currently active input method,
-     * as validated by the given token.
-     *
-     * @param flags Provides additional operating flags.  Currently may be
-     * 0 or have the {@link InputMethodManager#SHOW_IMPLICIT} or
-     * {@link InputMethodManager#SHOW_FORCED} bit set.
-     */
-    public void showSoftInputFromInputMethod(int flags) {
-        mImm.showSoftInputFromInputMethodInternal(mToken, flags);
-    }
-
-    /**
      * Force switch to the last used input method and subtype. If the last input method didn't have
      * any subtypes, the framework will simply switch to the last input method with no subtype
      * specified.
@@ -1745,7 +1718,7 @@ public class InputMethodService extends AbstractInputMethodService {
             // Rethrow the exception to preserve the existing behavior.  Some IMEs may have directly
             // called this method and relied on this exception for some clean-up tasks.
             // TODO: Give developers a clear guideline of whether it's OK to call this method or
-            // InputMethodManager#showSoftInputFromInputMethod() should always be used instead.
+            // InputMethodService#requestShowSelf(int) should always be used instead.
             throw e;
         } finally {
             // TODO: Is it OK to set true when we get BadTokenException?
@@ -2067,27 +2040,30 @@ public class InputMethodService extends AbstractInputMethodService {
 
     /**
      * Close this input method's soft input area, removing it from the display.
-     * The input method will continue running, but the user can no longer use
-     * it to generate input by touching the screen.
-     * @param flags Provides additional operating flags.  Currently may be
-     * 0 or have the {@link InputMethodManager#HIDE_IMPLICIT_ONLY
-     * InputMethodManager.HIDE_IMPLICIT_ONLY} bit set.
+     *
+     * The input method will continue running, but the user can no longer use it to generate input
+     * by touching the screen.
+     *
+     * @see InputMethodManager#HIDE_IMPLICIT_ONLY
+     * @see InputMethodManager#HIDE_NOT_ALWAYS
+     * @param flags Provides additional operating flags.
      */
     public void requestHideSelf(int flags) {
-        mImm.hideSoftInputFromInputMethod(mToken, flags);
+        mImm.hideSoftInputFromInputMethodInternal(mToken, flags);
     }
-    
+
     /**
-     * Show the input method. This is a call back to the
-     * IMF to handle showing the input method.
-     * @param flags Provides additional operating flags.  Currently may be
-     * 0 or have the {@link InputMethodManager#SHOW_FORCED
-     * InputMethodManager.} bit set.
+     * Show the input method's soft input area, so the user sees the input method window and can
+     * interact with it.
+     *
+     * @see InputMethodManager#SHOW_IMPLICIT
+     * @see InputMethodManager#SHOW_FORCED
+     * @param flags Provides additional operating flags.
      */
-    private void requestShowSelf(int flags) {
-        mImm.showSoftInputFromInputMethod(mToken, flags);
+    public void requestShowSelf(int flags) {
+        mImm.showSoftInputFromInputMethodInternal(mToken, flags);
     }
-    
+
     private boolean handleBack(boolean doIt) {
         if (mShowInputRequested) {
             // If the soft input area is shown, back closes it and we
