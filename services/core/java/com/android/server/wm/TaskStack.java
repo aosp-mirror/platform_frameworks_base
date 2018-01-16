@@ -1397,15 +1397,23 @@ public class TaskStack extends WindowContainer<Task> implements
         return getDockSide(getRawBounds());
     }
 
+    int getDockSideForDisplay(DisplayContent dc) {
+        return getDockSide(dc, getRawBounds());
+    }
+
     private int getDockSide(Rect bounds) {
-        if (!inSplitScreenWindowingMode()) {
-            return DOCKED_INVALID;
-        }
         if (mDisplayContent == null) {
             return DOCKED_INVALID;
         }
-        mDisplayContent.getBounds(mTmpRect);
-        final int orientation = mDisplayContent.getConfiguration().orientation;
+        return getDockSide(mDisplayContent, bounds);
+    }
+
+    private int getDockSide(DisplayContent dc, Rect bounds) {
+        if (!inSplitScreenWindowingMode()) {
+            return DOCKED_INVALID;
+        }
+        dc.getBounds(mTmpRect);
+        final int orientation = dc.getConfiguration().orientation;
         return getDockSideUnchecked(bounds, mTmpRect, orientation);
     }
 
