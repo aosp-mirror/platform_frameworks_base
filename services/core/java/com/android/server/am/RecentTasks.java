@@ -1150,6 +1150,11 @@ class RecentTasks {
                 }
         }
 
+        // If we're in lock task mode, ignore the root task
+        if (task == mService.mLockTaskController.getRootTask()) {
+            return false;
+        }
+
         return true;
     }
 
