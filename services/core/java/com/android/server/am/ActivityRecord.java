@@ -1609,9 +1609,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             mStackSupervisor.mStoppingActivities.remove(this);
             mStackSupervisor.mGoingToSleepActivities.remove(this);
 
-            // If an activity is not in the paused state when becoming visible, cycle to the paused
-            // state.
-            if (state != PAUSED) {
+            // If the activity is stopped or stopping, cycle to the paused state.
+            if (state == STOPPED || state == STOPPING) {
                 // An activity must be in the {@link PAUSING} state for the system to validate
                 // the move to {@link PAUSED}.
                 state = PAUSING;
