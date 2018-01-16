@@ -17,9 +17,15 @@
 package android.app.slice;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemService;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.IContentProvider;
+import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -27,6 +33,9 @@ import android.os.ServiceManager.ServiceNotFoundException;
 import android.util.ArrayMap;
 import android.util.Pair;
 
+import com.android.internal.util.Preconditions;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -220,6 +229,99 @@ public class SliceManager {
             return Arrays.asList(mService.getPinnedSpecs(uri, mContext.getPackageName()));
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Turns a slice Uri into slice content.
+     *
+     * @param uri The URI to a slice provider
+     * @param supportedSpecs List of supported specs.
+     * @return The Slice provided by the app or null if none is given.
+     * @see Slice
+     */
+    public @Nullable Slice bindSlice(@NonNull Uri uri, @NonNull List<SliceSpec> supportedSpecs) {
+        Preconditions.checkNotNull(uri, "uri");
+        ContentResolver resolver = mContext.getContentResolver();
+        IContentProvider provider = resolver.acquireProvider(uri);
+        if (provider == null) {
+            throw new IllegalArgumentException("Unknown URI " + uri);
+        }
+        try {
+            Bundle extras = new Bundle();
+            extras.putParcelable(SliceProvider.EXTRA_BIND_URI, uri);
+            extras.putParcelableArrayList(SliceProvider.EXTRA_SUPPORTED_SPECS,
+                    new ArrayList<>(supportedSpecs));
+            final Bundle res = provider.call(resolver.getPackageName(), SliceProvider.METHOD_SLICE,
+                    null, extras);
+            Bundle.setDefusable(res, true);
+            if (res == null) {
+                return null;
+            }
+            return res.getParcelable(SliceProvider.EXTRA_SLICE);
+        } catch (RemoteException e) {
+            // Arbitrary and not worth documenting, as Activity
+            // Manager will kill this process shortly anyway.
+            return null;
+        } finally {
+            resolver.releaseProvider(provider);
+        }
+    }
+
+    /**
+     * Turns a slice intent into slice content. Expects an explicit intent. If there is no
+     * {@link android.content.ContentProvider} associated with the given intent this will throw
+     * {@link IllegalArgumentException}.
+     *
+     * @param intent The intent associated with a slice.
+     * @param supportedSpecs List of supported specs.
+     * @return The Slice provided by the app or null if none is given.
+     * @see Slice
+     * @see SliceProvider#onMapIntentToUri(Intent)
+     * @see Intent
+     */
+    public @Nullable Slice bindSlice(@NonNull Intent intent,
+            @NonNull List<SliceSpec> supportedSpecs) {
+        Preconditions.checkNotNull(intent, "intent");
+        Preconditions.checkArgument(intent.getComponent() != null || intent.getPackage() != null,
+                "Slice intent must be explicit " + intent);
+        ContentResolver resolver = mContext.getContentResolver();
+
+        // Check if the intent has data for the slice uri on it and use that
+        final Uri intentData = intent.getData();
+        if (intentData != null && SliceProvider.SLICE_TYPE.equals(resolver.getType(intentData))) {
+            return bindSlice(intentData, supportedSpecs);
+        }
+        // Otherwise ask the app
+        List<ResolveInfo> providers =
+                mContext.getPackageManager().queryIntentContentProviders(intent, 0);
+        if (providers == null) {
+            throw new IllegalArgumentException("Unable to resolve intent " + intent);
+        }
+        String authority = providers.get(0).providerInfo.authority;
+        Uri uri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
+                .authority(authority).build();
+        IContentProvider provider = resolver.acquireProvider(uri);
+        if (provider == null) {
+            throw new IllegalArgumentException("Unknown URI " + uri);
+        }
+        try {
+            Bundle extras = new Bundle();
+            extras.putParcelable(SliceProvider.EXTRA_INTENT, intent);
+            extras.putParcelableArrayList(SliceProvider.EXTRA_SUPPORTED_SPECS,
+                    new ArrayList<>(supportedSpecs));
+            final Bundle res = provider.call(resolver.getPackageName(),
+                    SliceProvider.METHOD_MAP_INTENT, null, extras);
+            if (res == null) {
+                return null;
+            }
+            return res.getParcelable(SliceProvider.EXTRA_SLICE);
+        } catch (RemoteException e) {
+            // Arbitrary and not worth documenting, as Activity
+            // Manager will kill this process shortly anyway.
+            return null;
+        } finally {
+            resolver.releaseProvider(provider);
         }
     }
 

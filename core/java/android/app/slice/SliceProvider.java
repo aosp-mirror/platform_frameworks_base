@@ -139,14 +139,6 @@ public abstract class SliceProvider extends ContentProvider {
      * @see {@link Slice#HINT_PARTIAL}
      */
     public Slice onBindSlice(Uri sliceUri, List<SliceSpec> supportedSpecs) {
-        return onBindSlice(sliceUri);
-    }
-
-    /**
-     * @deprecated migrating to {@link #onBindSlice(Uri, List)}
-     */
-    @Deprecated
-    public Slice onBindSlice(Uri sliceUri) {
         return null;
     }
 
