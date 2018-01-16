@@ -24,4 +24,5 @@ import com.android.ims.internal.IImsCallSession;
  */
 oneway interface IImsMmTelListener {
     void onIncomingCall(IImsCallSession c);
+    void onVoiceMessageCountUpdate(int count);
 }
