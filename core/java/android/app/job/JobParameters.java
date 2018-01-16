@@ -70,6 +70,7 @@ public class JobParameters implements Parcelable {
     private final Network network;
 
     private int stopReason; // Default value of stopReason is REASON_CANCELED
+    private String debugStopReason; // Human readable stop reason for debugging.
 
     /** @hide */
     public JobParameters(IBinder callback, int jobId, PersistableBundle extras,
@@ -101,6 +102,14 @@ public class JobParameters implements Parcelable {
      */
     public int getStopReason() {
         return stopReason;
+    }
+
+    /**
+     * Reason onStopJob() was called on this job.
+     * @hide
+     */
+    public String getDebugStopReason() {
+        return debugStopReason;
     }
 
     /**
@@ -288,11 +297,13 @@ public class JobParameters implements Parcelable {
             network = null;
         }
         stopReason = in.readInt();
+        debugStopReason = in.readString();
     }
 
     /** @hide */
-    public void setStopReason(int reason) {
+    public void setStopReason(int reason, String debugStopReason) {
         stopReason = reason;
+        this.debugStopReason = debugStopReason;
     }
 
     @Override
@@ -323,6 +334,7 @@ public class JobParameters implements Parcelable {
             dest.writeInt(0);
         }
         dest.writeInt(stopReason);
+        dest.writeString(debugStopReason);
     }
 
     public static final Creator<JobParameters> CREATOR = new Creator<JobParameters>() {

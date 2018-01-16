@@ -934,12 +934,14 @@ public final class JobSchedulerService extends com.android.server.SystemService
      * @param uid Uid of the calling client.
      * @param jobId Id of the job, provided at schedule-time.
      */
-    public boolean cancelJob(int uid, int jobId) {
+    public boolean cancelJob(int uid, int jobId, int callingUid) {
         JobStatus toCancel;
         synchronized (mLock) {
             toCancel = mJobs.getJobByUidAndJobId(uid, jobId);
             if (toCancel != null) {
-                cancelJobImplLocked(toCancel, null, "cancel() called by app");
+                cancelJobImplLocked(toCancel, null,
+                        "cancel() called by app, callingUid=" + callingUid
+                        + " uid=" + uid + " jobId=" + jobId);
             }
             return (toCancel != null);
         }
@@ -2341,7 +2343,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
             final int uid = Binder.getCallingUid();
             long ident = Binder.clearCallingIdentity();
             try {
-                JobSchedulerService.this.cancelJobsForUid(uid, "cancelAll() called by app");
+                JobSchedulerService.this.cancelJobsForUid(uid,
+                        "cancelAll() called by app, callingUid=" + uid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2353,7 +2356,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
             long ident = Binder.clearCallingIdentity();
             try {
-                JobSchedulerService.this.cancelJob(uid, jobId);
+                JobSchedulerService.this.cancelJob(uid, jobId, uid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -2466,7 +2469,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
             for (int i=0; i<mActiveServices.size(); i++) {
                 final JobServiceContext jc = mActiveServices.get(i);
                 final JobStatus js = jc.getRunningJobLocked();
-                if (jc.timeoutIfExecutingLocked(pkgName, userId, hasJobId, jobId)) {
+                if (jc.timeoutIfExecutingLocked(pkgName, userId, hasJobId, jobId, "shell")) {
                     foundSome = true;
                     pw.print("Timing out: ");
                     js.printUniqueId(pw);
@@ -2506,7 +2509,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
             }
         } else {
             pw.println("Canceling job " + pkgName + "/#" + jobId + " in user " + userId);
-            if (!cancelJob(pkgUid, jobId)) {
+            if (!cancelJob(pkgUid, jobId, Process.SHELL_UID)) {
                 pw.println("No matching job found.");
             }
         }
