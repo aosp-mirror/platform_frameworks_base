@@ -98,6 +98,9 @@ public class ForceAppStandbyTracker {
     @GuardedBy("mLock")
     final SparseBooleanArray mForegroundUids = new SparseBooleanArray();
 
+    /**
+     * System except-idle + user whitelist in the device idle controller.
+     */
     @GuardedBy("mLock")
     private int[] mPowerWhitelistedAllAppIds = new int[0];
 
