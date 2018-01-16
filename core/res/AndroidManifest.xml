@@ -3694,6 +3694,10 @@
     <permission android:name="android.permission.READ_RUNTIME_PROFILES"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- @hide Allows audio policy management. -->
+    <permission android:name="android.permission.MANAGE_AUDIO_POLICY"
+        android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows an application to turn on / off quiet mode.
          @hide <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.MODIFY_QUIET_MODE"
