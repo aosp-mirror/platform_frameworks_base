@@ -186,6 +186,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         initializeDpms();
 
         Mockito.reset(getServices().usageStatsManagerInternal);
+        Mockito.reset(getServices().networkPolicyManagerInternal);
         setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_UID);
         setUpPackageManagerForAdmin(admin2, DpmMockContext.CALLER_UID);
         setUpPackageManagerForAdmin(admin3, DpmMockContext.CALLER_UID);
@@ -211,7 +212,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         LocalServices.removeServiceForTest(DevicePolicyManagerInternal.class);
 
         dpms = new DevicePolicyManagerServiceTestable(getServices(), mContext);
-        dpms.handleStart();
         dpms.systemReady(SystemService.PHASE_LOCK_SETTINGS_READY);
         dpms.systemReady(SystemService.PHASE_BOOT_COMPLETED);
 
@@ -283,7 +283,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertNull(LocalServices.getService(DevicePolicyManagerInternal.class));
     }
 
-    public void testHandleStart() throws Exception {
+    public void testLoadAdminData() throws Exception {
         // Device owner in SYSTEM_USER
         setDeviceOwner();
         // Profile owner in CALLER_USER_HANDLE
@@ -307,6 +307,23 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 MockUtils.checkAdminApps(admin2.getPackageName(),
                         adminAnotherPackage.getPackageName()),
                 eq(DpmMockContext.CALLER_USER_HANDLE));
+        verify(getServices().usageStatsManagerInternal).onAdminDataAvailable();
+        verify(getServices().networkPolicyManagerInternal).onAdminDataAvailable();
+    }
+
+    public void testLoadAdminData_noAdmins() throws Exception {
+        final int ANOTHER_USER_ID = 15;
+        getServices().addUser(ANOTHER_USER_ID, 0);
+
+        initializeDpms();
+
+        // Verify
+        verify(getServices().usageStatsManagerInternal).setActiveAdminApps(
+                null, DpmMockContext.CALLER_USER_HANDLE);
+        verify(getServices().usageStatsManagerInternal).setActiveAdminApps(
+                null, ANOTHER_USER_ID);
+        verify(getServices().usageStatsManagerInternal).onAdminDataAvailable();
+        verify(getServices().networkPolicyManagerInternal).onAdminDataAvailable();
     }
 
     /**

@@ -58,6 +58,7 @@ import android.view.IWindowManager;
 
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.net.NetworkPolicyManagerInternal;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,6 +77,7 @@ public class MockSystemServices {
     public final UserManager userManager;
     public final UserManagerInternal userManagerInternal;
     public final UsageStatsManagerInternal usageStatsManagerInternal;
+    public final NetworkPolicyManagerInternal networkPolicyManagerInternal;
     public final PackageManagerInternal packageManagerInternal;
     public final UserManagerForMock userManagerForMock;
     public final PowerManagerForMock powerManager;
@@ -113,6 +115,8 @@ public class MockSystemServices {
         userManager = mock(UserManager.class);
         userManagerInternal = mock(UserManagerInternal.class);
         usageStatsManagerInternal = mock(UsageStatsManagerInternal.class);
+        networkPolicyManagerInternal = mock(NetworkPolicyManagerInternal.class);
+
         userManagerForMock = mock(UserManagerForMock.class);
         packageManagerInternal = mock(PackageManagerInternal.class);
         powerManager = mock(PowerManagerForMock.class);

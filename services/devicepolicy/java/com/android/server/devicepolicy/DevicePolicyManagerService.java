@@ -198,8 +198,10 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
+import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 import com.android.server.devicepolicy.DevicePolicyManagerService.ActiveAdmin.TrustAgentInfo;
+import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.UserRestrictionsUtils;
 
 import com.google.android.collect.Sets;
@@ -511,7 +513,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         @Override
         public void onStart() {
             publishBinderService(Context.DEVICE_POLICY_SERVICE, mService);
-            mService.handleStart();
         }
 
         @Override
@@ -1743,6 +1744,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return LocalServices.getService(UsageStatsManagerInternal.class);
         }
 
+        NetworkPolicyManagerInternal getNetworkPolicyManagerInternal() {
+            return LocalServices.getService(NetworkPolicyManagerInternal.class);
+        }
+
         NotificationManager getNotificationManager() {
             return mContext.getSystemService(NotificationManager.class);
         }
@@ -1995,6 +2000,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         KeyChainConnection keyChainBindAsUser(UserHandle user) throws InterruptedException {
             return KeyChain.bindAsUser(mContext, user);
+        }
+
+        void postOnSystemServerInitThreadPool(Runnable runnable) {
+            SystemServerInitThreadPool.get().submit(runnable, LOG_TAG);
         }
     }
 
@@ -3239,6 +3248,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         switch (phase) {
             case SystemService.PHASE_LOCK_SETTINGS_READY:
                 onLockSettingsReady();
+                loadAdminDataAsync();
                 break;
             case SystemService.PHASE_BOOT_COMPLETED:
                 ensureDeviceOwnerUserStarted(); // TODO Consider better place to do this.
@@ -3304,11 +3314,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 Slog.w(LOG_TAG, "Exception starting user", e);
             }
         }
-    }
-
-    @Override
-    void handleStart() {
-        pushActiveAdminPackages();
     }
 
     @Override
@@ -3491,6 +3496,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
         }
+    }
+
+    private void loadAdminDataAsync() {
+        mInjector.postOnSystemServerInitThreadPool(() -> {
+            pushActiveAdminPackages();
+            mUsageStatsManagerInternal.onAdminDataAvailable();
+            mInjector.getNetworkPolicyManagerInternal().onAdminDataAvailable();
+        });
     }
 
     private void pushActiveAdminPackages() {

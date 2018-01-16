@@ -66,4 +66,9 @@ public abstract class NetworkPolicyManagerInternal {
      * given network.
      */
     public abstract long getSubscriptionOpportunisticQuota(Network network, int quotaType);
+
+    /**
+     * Informs that admin data is loaded and available.
+     */
+    public abstract void onAdminDataAvailable();
 }
