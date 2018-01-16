@@ -4581,51 +4581,67 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     /**
-     * Update the NetworkCapabilities for {@code networkAgent} to {@code networkCapabilities}
-     * augmented with any stateful capabilities implied from {@code networkAgent}
-     * (e.g., validated status and captive portal status).
-     *
-     * @param oldScore score of the network before any of the changes that prompted us
-     *                 to call this function.
-     * @param nai the network having its capabilities updated.
-     * @param networkCapabilities the new network capabilities.
+     * Augments the NetworkCapabilities passed in by a NetworkAgent with capabilities that are
+     * maintained here that the NetworkAgent is not aware of (e.g., validated, captive portal,
+     * and foreground status).
      */
-    private void updateCapabilities(
-            int oldScore, NetworkAgentInfo nai, NetworkCapabilities networkCapabilities) {
+    private NetworkCapabilities mixInCapabilities(NetworkAgentInfo nai, NetworkCapabilities nc) {
         // Once a NetworkAgent is connected, complain if some immutable capabilities are removed.
-        if (nai.everConnected && !nai.networkCapabilities.satisfiedByImmutableNetworkCapabilities(
-                networkCapabilities)) {
-            // TODO: consider not complaining when a network agent degrade its capabilities if this
+        if (nai.everConnected &&
+                !nai.networkCapabilities.satisfiedByImmutableNetworkCapabilities(nc)) {
+            // TODO: consider not complaining when a network agent degrades its capabilities if this
             // does not cause any request (that is not a listen) currently matching that agent to
             // stop being matched by the updated agent.
-            String diff = nai.networkCapabilities.describeImmutableDifferences(networkCapabilities);
+            String diff = nai.networkCapabilities.describeImmutableDifferences(nc);
             if (!TextUtils.isEmpty(diff)) {
                 Slog.wtf(TAG, "BUG: " + nai + " lost immutable capabilities:" + diff);
             }
         }
 
         // Don't modify caller's NetworkCapabilities.
-        networkCapabilities = new NetworkCapabilities(networkCapabilities);
+        NetworkCapabilities newNc = new NetworkCapabilities(nc);
         if (nai.lastValidated) {
-            networkCapabilities.addCapability(NET_CAPABILITY_VALIDATED);
+            newNc.addCapability(NET_CAPABILITY_VALIDATED);
         } else {
-            networkCapabilities.removeCapability(NET_CAPABILITY_VALIDATED);
+            newNc.removeCapability(NET_CAPABILITY_VALIDATED);
         }
         if (nai.lastCaptivePortalDetected) {
-            networkCapabilities.addCapability(NET_CAPABILITY_CAPTIVE_PORTAL);
+            newNc.addCapability(NET_CAPABILITY_CAPTIVE_PORTAL);
         } else {
-            networkCapabilities.removeCapability(NET_CAPABILITY_CAPTIVE_PORTAL);
+            newNc.removeCapability(NET_CAPABILITY_CAPTIVE_PORTAL);
         }
         if (nai.isBackgroundNetwork()) {
-            networkCapabilities.removeCapability(NET_CAPABILITY_FOREGROUND);
+            newNc.removeCapability(NET_CAPABILITY_FOREGROUND);
         } else {
-            networkCapabilities.addCapability(NET_CAPABILITY_FOREGROUND);
+            newNc.addCapability(NET_CAPABILITY_FOREGROUND);
         }
 
-        if (Objects.equals(nai.networkCapabilities, networkCapabilities)) return;
+        return newNc;
+    }
+
+    /**
+     * Update the NetworkCapabilities for {@code nai} to {@code nc}. Specifically:
+     *
+     * 1. Calls mixInCapabilities to merge the passed-in NetworkCapabilities {@code nc} with the
+     *    capabilities we manage and store in {@code nai}, such as validated status and captive
+     *    portal status)
+     * 2. Takes action on the result: changes network permissions, sends CAP_CHANGED callbacks, and
+     *    potentially triggers rematches.
+     * 3. Directly informs other network stack components (NetworkStatsService, VPNs, etc. of the
+     *    change.)
+     *
+     * @param oldScore score of the network before any of the changes that prompted us
+     *                 to call this function.
+     * @param nai the network having its capabilities updated.
+     * @param nc the new network capabilities.
+     */
+    private void updateCapabilities(int oldScore, NetworkAgentInfo nai, NetworkCapabilities nc) {
+        NetworkCapabilities newNc = mixInCapabilities(nai, nc);
+
+        if (Objects.equals(nai.networkCapabilities, newNc)) return;
 
         final String oldPermission = getNetworkPermission(nai.networkCapabilities);
-        final String newPermission = getNetworkPermission(networkCapabilities);
+        final String newPermission = getNetworkPermission(newNc);
         if (!Objects.equals(oldPermission, newPermission) && nai.created && !nai.isVPN()) {
             try {
                 mNetd.setNetworkPermission(nai.network.netId, newPermission);
@@ -4637,11 +4653,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final NetworkCapabilities prevNc;
         synchronized (nai) {
             prevNc = nai.networkCapabilities;
-            nai.networkCapabilities = networkCapabilities;
+            nai.networkCapabilities = newNc;
         }
 
-        if (nai.getCurrentScore() == oldScore &&
-                networkCapabilities.equalRequestableCapabilities(prevNc)) {
+        if (nai.getCurrentScore() == oldScore && newNc.equalRequestableCapabilities(prevNc)) {
             // If the requestable capabilities haven't changed, and the score hasn't changed, then
             // the change we're processing can't affect any requests, it can only affect the listens
             // on this network. We might have been called by rematchNetworkAndRequests when a
@@ -4657,15 +4672,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // Report changes that are interesting for network statistics tracking.
         if (prevNc != null) {
             final boolean meteredChanged = prevNc.hasCapability(NET_CAPABILITY_NOT_METERED) !=
-                    networkCapabilities.hasCapability(NET_CAPABILITY_NOT_METERED);
+                    newNc.hasCapability(NET_CAPABILITY_NOT_METERED);
             final boolean roamingChanged = prevNc.hasCapability(NET_CAPABILITY_NOT_ROAMING) !=
-                    networkCapabilities.hasCapability(NET_CAPABILITY_NOT_ROAMING);
+                    newNc.hasCapability(NET_CAPABILITY_NOT_ROAMING);
             if (meteredChanged || roamingChanged) {
                 notifyIfacesChangedForNetworkStats();
             }
         }
 
-        if (!networkCapabilities.hasTransport(TRANSPORT_VPN)) {
+        if (!newNc.hasTransport(TRANSPORT_VPN)) {
             // Tell VPNs about updated capabilities, since they may need to
             // bubble those changes through.
             synchronized (mVpns) {
