@@ -430,6 +430,7 @@ package android.app.backup {
     method public java.lang.String getCurrentTransport();
     method public boolean isAppEligibleForBackup(java.lang.String);
     method public boolean isBackupEnabled();
+    method public boolean isBackupServiceActive(android.os.UserHandle);
     method public java.lang.String[] listAllTransports();
     method public int requestBackup(java.lang.String[], android.app.backup.BackupObserver);
     method public int requestBackup(java.lang.String[], android.app.backup.BackupObserver, android.app.backup.BackupManagerMonitor, int);
