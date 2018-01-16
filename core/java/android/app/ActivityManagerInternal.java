@@ -334,4 +334,9 @@ public abstract class ActivityManagerInternal {
      * Sets the user switcher message for switching to {@link android.os.UserHandle#SYSTEM}.
      */
     public abstract void setSwitchingToSystemUserMessage(String switchingToSystemUserMessage);
+
+    /**
+     * Returns maximum number of users that can run simultaneously.
+     */
+    public abstract int getMaxRunningUsers();
 }
