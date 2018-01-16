@@ -22,6 +22,7 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.server.am.ActivityStack.ActivityState.INITIALIZING;
 import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
@@ -122,7 +123,15 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mActivity.makeVisibleIfNeeded(null /* starting */);
 
         assertEquals(mActivity.state, PAUSING);
+
         assertTrue(pauseFound.value);
+
+        // Make sure that the state does not change for current non-stopping states.
+        mActivity.state = INITIALIZING;
+
+        mActivity.makeVisibleIfNeeded(null /* starting */);
+
+        assertEquals(mActivity.state, INITIALIZING);
     }
 
     @Test
