@@ -373,7 +373,7 @@ public class PipMenuActivity extends Activity {
             if (menuState == MENU_STATE_FULL) {
                 mMenuContainerAnimator.playTogether(menuAnim, settingsAnim, dismissAnim);
             } else {
-                mMenuContainerAnimator.playTogether(settingsAnim, dismissAnim);
+                mMenuContainerAnimator.playTogether(dismissAnim);
             }
             mMenuContainerAnimator.setInterpolator(Interpolators.ALPHA_IN);
             mMenuContainerAnimator.setDuration(MENU_FADE_DURATION);
