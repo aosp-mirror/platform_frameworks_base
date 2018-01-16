@@ -57,7 +57,9 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.print.DualDumpOutputStream;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
 
@@ -670,37 +672,29 @@ public final class PrintManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 if (dumpAsProto) {
-                    dump(new ProtoOutputStream(fd), userStatesToDump);
+                    dump(new DualDumpOutputStream(new ProtoOutputStream(fd), null),
+                            userStatesToDump);
                 } else {
-                    dump(fd, pw, userStatesToDump);
+                    pw.println("PRINT MANAGER STATE (dumpsys print)");
+
+                    dump(new DualDumpOutputStream(null, new IndentingPrintWriter(pw, "  ")),
+                            userStatesToDump);
                 }
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
         }
 
-        private void dump(@NonNull ProtoOutputStream proto,
+        private void dump(@NonNull DualDumpOutputStream proto,
                 @NonNull ArrayList<UserState> userStatesToDump) {
             final int userStateCount = userStatesToDump.size();
             for (int i = 0; i < userStateCount; i++) {
-                long token = proto.start(PrintServiceDumpProto.USER_STATES);
+                long token = proto.start("user_states", PrintServiceDumpProto.USER_STATES);
                 userStatesToDump.get(i).dump(proto);
                 proto.end(token);
             }
 
             proto.flush();
-        }
-
-        private void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw,
-                @NonNull ArrayList<UserState> userStatesToDump) {
-            pw = Preconditions.checkNotNull(pw);
-
-            pw.println("PRINT MANAGER STATE (dumpsys print)");
-            final int userStateCount = userStatesToDump.size();
-            for (int i = 0; i < userStateCount; i++) {
-                userStatesToDump.get(i).dump(fd, pw, "");
-                pw.println();
-            }
         }
 
         private void registerContentObservers() {
