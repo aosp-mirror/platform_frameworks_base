@@ -7436,5 +7436,19 @@ public class WindowManagerService extends IWindowManager.Stub
         mH.obtainMessage(H.SET_RUNNING_REMOTE_ANIMATION, pid, runningRemoteAnimation ? 1 : 0)
                 .sendToTarget();
     }
-}
 
+    /**
+     * Called when the state of lock task mode changes. This should be used to disable immersive
+     * mode confirmation.
+     *
+     * @param lockTaskState the new lock task mode state. One of
+     *                      {@link ActivityManager#LOCK_TASK_MODE_NONE},
+     *                      {@link ActivityManager#LOCK_TASK_MODE_LOCKED},
+     *                      {@link ActivityManager#LOCK_TASK_MODE_PINNED}.
+     */
+    public void onLockTaskStateChanged(int lockTaskState) {
+        synchronized (mWindowMap) {
+            mPolicy.onLockTaskStateChangedLw(lockTaskState);
+        }
+    }
+}

@@ -8786,4 +8786,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return Integer.toString(behavior);
         }
     }
+
+    @Override
+    public void onLockTaskStateChangedLw(int lockTaskState) {
+        mImmersiveModeConfirmation.onLockTaskModeChangedLw(lockTaskState);
+    }
 }

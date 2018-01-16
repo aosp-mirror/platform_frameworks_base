@@ -656,4 +656,8 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     @Override
     public void requestUserActivityNotification() {
     }
+
+    @Override
+    public void onLockTaskStateChangedLw(int lockTaskState) {
+    }
 }
