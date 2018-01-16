@@ -372,6 +372,10 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
     }
 
+    String getLifecycleDescription(String reason) {
+        return "packageName=" + packageName + ", state=" + state + ", reason=" + reason;
+    }
+
     void dump(PrintWriter pw, String prefix) {
         final long now = SystemClock.uptimeMillis();
         pw.print(prefix); pw.print("packageName="); pw.print(packageName);
@@ -1611,12 +1615,16 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
             // If the activity is stopped or stopping, cycle to the paused state.
             if (state == STOPPED || state == STOPPING) {
+                // Capture reason before state change
+                final String reason = getLifecycleDescription("makeVisibleIfNeeded");
+
                 // An activity must be in the {@link PAUSING} state for the system to validate
                 // the move to {@link PAUSED}.
                 state = PAUSING;
                 service.mLifecycleManager.scheduleTransaction(app.thread, appToken,
                         PauseActivityItem.obtain(finishing, false /* userLeaving */,
-                                configChangeFlags, false /* dontReport */));
+                                configChangeFlags, false /* dontReport */)
+                                .setDescription(reason));
             }
         } catch (Exception e) {
             // Just skip on any failure; we'll make it visible when it next restarts.

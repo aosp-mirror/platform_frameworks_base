@@ -24,6 +24,7 @@ import android.os.IBinder;
 
 import com.android.internal.content.ReferrerIntent;
 
+import java.io.PrintWriter;
 import java.util.List;
 
 /**
@@ -121,4 +122,11 @@ public abstract class ClientTransactionHandler {
      * provided token.
      */
     public abstract ActivityThread.ActivityClientRecord getActivityClient(IBinder token);
+
+    /**
+     * Debugging output.
+     * @param pw {@link PrintWriter} to write logs to.
+     * @param prefix Prefix to prepend to output.
+     */
+    public abstract void dump(PrintWriter pw, String prefix);
 }
