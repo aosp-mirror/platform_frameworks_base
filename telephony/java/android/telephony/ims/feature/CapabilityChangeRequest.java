@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package android.telephony.ims.internal.feature;
+package android.telephony.ims.feature;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -182,7 +182,8 @@ public class CapabilityChangeRequest implements Parcelable {
         if (this == o) return true;
         if (!(o instanceof CapabilityChangeRequest)) return false;
 
-        CapabilityChangeRequest that = (CapabilityChangeRequest) o;
+        CapabilityChangeRequest
+                that = (CapabilityChangeRequest) o;
 
         if (!mCapabilitiesToEnable.equals(that.mCapabilitiesToEnable)) return false;
         return mCapabilitiesToDisable.equals(that.mCapabilitiesToDisable);

@@ -15,9 +15,9 @@
  */
 
 
-package android.telephony.ims.internal.aidl;
+package android.telephony.ims.aidl;
 
-import android.telephony.ims.internal.aidl.IImsConfigCallback;
+import android.telephony.ims.aidl.IImsConfigCallback;
 
 import com.android.ims.ImsConfigListener;
 
