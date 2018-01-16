@@ -80,7 +80,7 @@ public class WakeupStats {
                 break;
         }
 
-        switch (ev.dstHwAddr.addressType()) {
+        switch (ev.dstHwAddr.getAddressType()) {
             case MacAddress.TYPE_UNICAST:
                 l2UnicastCount++;
                 break;
