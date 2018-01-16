@@ -21,6 +21,19 @@ package android.app;
 option java_outer_classname = "AppProtoEnums";
 option java_multiple_files = true;
 
+// ActivityManagerInternal.java's APP_TRANSITION reasons.
+enum AppTransitionReasonEnum {
+    APP_TRANSITION_REASON_UNKNOWN = 0;
+    // The transition was started because we drew the splash screen.
+    APP_TRANSITION_SPLASH_SCREEN = 1;
+    // The transition was started because we all app windows were drawn.
+    APP_TRANSITION_WINDOWS_DRAWN = 2;
+    // The transition was started because of a timeout.
+    APP_TRANSITION_TIMEOUT = 3;
+    // The transition was started because of a we drew a task snapshot.
+    APP_TRANSITION_SNAPSHOT = 4;
+}
+
 // ActivityManager.java PROCESS_STATEs
 enum ProcessStateEnum {
     // Unlike the ActivityManager PROCESS_STATE values, the ordering and numerical values
