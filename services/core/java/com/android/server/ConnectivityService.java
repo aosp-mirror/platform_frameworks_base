@@ -105,6 +105,7 @@ import android.security.Credentials;
 import android.security.KeyStore;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.LocalLog;
 import android.util.LocalLog.ReadOnlyLocalLog;
 import android.util.Log;
@@ -174,6 +175,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -2048,24 +2050,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 case NetworkAgent.EVENT_NETWORK_SCORE_CHANGED: {
                     Integer score = (Integer) msg.obj;
                     if (score != null) updateNetworkScore(nai, score.intValue());
-                    break;
-                }
-                case NetworkAgent.EVENT_UID_RANGES_ADDED: {
-                    try {
-                        mNetd.addVpnUidRanges(nai.network.netId, (UidRange[])msg.obj);
-                    } catch (Exception e) {
-                        // Never crash!
-                        loge("Exception in addVpnUidRanges: " + e);
-                    }
-                    break;
-                }
-                case NetworkAgent.EVENT_UID_RANGES_REMOVED: {
-                    try {
-                        mNetd.removeVpnUidRanges(nai.network.netId, (UidRange[])msg.obj);
-                    } catch (Exception e) {
-                        // Never crash!
-                        loge("Exception in removeVpnUidRanges: " + e);
-                    }
                     break;
                 }
                 case NetworkAgent.EVENT_SET_EXPLICITLY_SELECTED: {
@@ -4514,6 +4498,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         NetworkInfo networkInfo = na.networkInfo;
         na.networkInfo = null;
         updateNetworkInfo(na, networkInfo);
+        updateUids(na, null, na.networkCapabilities);
     }
 
     private void updateLinkProperties(NetworkAgentInfo networkAgent, LinkProperties oldLp) {
@@ -4762,6 +4747,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             nai.networkCapabilities = newNc;
         }
 
+        updateUids(nai, prevNc, newNc);
+
         if (nai.getCurrentScore() == oldScore && newNc.equalRequestableCapabilities(prevNc)) {
             // If the requestable capabilities haven't changed, and the score hasn't changed, then
             // the change we're processing can't affect any requests, it can only affect the listens
@@ -4795,6 +4782,34 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     vpn.updateCapabilities();
                 }
             }
+        }
+    }
+
+    private void updateUids(NetworkAgentInfo nai, NetworkCapabilities prevNc,
+            NetworkCapabilities newNc) {
+        Set<UidRange> prevRanges = null == prevNc ? null : prevNc.getUids();
+        Set<UidRange> newRanges = null == newNc ? null : newNc.getUids();
+        if (null == prevRanges) prevRanges = new ArraySet<>();
+        if (null == newRanges) newRanges = new ArraySet<>();
+        final Set<UidRange> prevRangesCopy = new ArraySet<>(prevRanges);
+
+        prevRanges.removeAll(newRanges);
+        newRanges.removeAll(prevRangesCopy);
+
+        try {
+            if (!newRanges.isEmpty()) {
+                final UidRange[] addedRangesArray = new UidRange[newRanges.size()];
+                newRanges.toArray(addedRangesArray);
+                mNetd.addVpnUidRanges(nai.network.netId, addedRangesArray);
+            }
+            if (!prevRanges.isEmpty()) {
+                final UidRange[] removedRangesArray = new UidRange[prevRanges.size()];
+                prevRanges.toArray(removedRangesArray);
+                mNetd.removeVpnUidRanges(nai.network.netId, removedRangesArray);
+            }
+        } catch (Exception e) {
+            // Never crash!
+            loge("Exception in updateUids: " + e);
         }
     }
 
@@ -5413,6 +5428,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         }
                     }
                 }
+                updateUids(networkAgent, networkAgent.networkCapabilities, null);
             }
         } else if ((oldInfo != null && oldInfo.getState() == NetworkInfo.State.SUSPENDED) ||
                 state == NetworkInfo.State.SUSPENDED) {

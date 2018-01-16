@@ -1139,11 +1139,7 @@ public class Vpn {
                         addUserToRanges(existingRanges, userHandle, mConfig.allowedApplications,
                                 mConfig.disallowedApplications);
                         mNetworkCapabilities.setUids(existingRanges);
-                        if (mNetworkAgent != null) {
-                            final List<UidRange> ranges =
-                                uidRangesForUser(userHandle, mNetworkCapabilities.getUids());
-                            mNetworkAgent.addUidRanges(ranges.toArray(new UidRange[ranges.size()]));
-                        }
+                        updateCapabilities();
                     } catch (Exception e) {
                         Log.wtf(TAG, "Failed to add restricted user to owner", e);
                     }
@@ -1163,12 +1159,9 @@ public class Vpn {
                     try {
                         final List<UidRange> removedRanges =
                             uidRangesForUser(userHandle, existingRanges);
-                        if (mNetworkAgent != null) {
-                            mNetworkAgent.removeUidRanges(removedRanges.toArray(
-                                new UidRange[removedRanges.size()]));
-                        }
                         existingRanges.removeAll(removedRanges);
                         mNetworkCapabilities.setUids(existingRanges);
+                        updateCapabilities();
                     } catch (Exception e) {
                         Log.wtf(TAG, "Failed to remove restricted user to owner", e);
                     }
