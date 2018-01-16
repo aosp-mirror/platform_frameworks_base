@@ -14,16 +14,15 @@
  * limitations under the License
  */
 
-package android.telephony.ims.internal.stub;
+package android.telephony.ims.stub;
 
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.os.RemoteException;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
+import android.telephony.ims.aidl.IImsSmsListener;
 import android.util.Log;
-
-import com.android.ims.internal.IImsSmsListener;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -37,7 +36,7 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
-public class SmsImplBase {
+public class ImsSmsImplBase {
     private static final String LOG_TAG = "SmsImplBase";
 
     /** @hide */

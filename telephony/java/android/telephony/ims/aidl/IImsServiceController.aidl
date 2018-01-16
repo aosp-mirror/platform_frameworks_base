@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package android.telephony.ims.internal.aidl;
+package android.telephony.ims.aidl;
 
-import android.telephony.ims.internal.aidl.IImsMmTelFeature;
-import android.telephony.ims.internal.aidl.IImsRcsFeature;
-import android.telephony.ims.internal.aidl.IImsConfig;
-import android.telephony.ims.internal.aidl.IImsServiceControllerListener;
-import android.telephony.ims.internal.stub.ImsFeatureConfiguration;
+import android.telephony.ims.aidl.IImsMmTelFeature;
+import android.telephony.ims.aidl.IImsRcsFeature;
+import android.telephony.ims.aidl.IImsConfig;
+import android.telephony.ims.aidl.IImsRegistration;
+import android.telephony.ims.aidl.IImsServiceControllerListener;
+import android.telephony.ims.stub.ImsFeatureConfiguration;
 
 import com.android.ims.internal.IImsFeatureStatusCallback;
-import com.android.ims.internal.IImsRegistration;
 
 /**
  * See ImsService and MmTelFeature for more information.
@@ -41,4 +41,6 @@ interface IImsServiceController {
     void removeImsFeature(int slotId, int featureType, in IImsFeatureStatusCallback c);
     IImsConfig getConfig(int slotId);
     IImsRegistration getRegistration(int slotId);
+    oneway void enableIms(int slotId);
+    oneway void disableIms(int slotId);
 }

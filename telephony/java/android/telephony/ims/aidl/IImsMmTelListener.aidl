@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 The Android Open Source Project
+ * Copyright (c) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
+package android.telephony.ims.aidl;
 
-package com.android.ims.internal;
+import android.os.Bundle;
 
-import android.net.Uri;
-import android.telephony.ims.internal.stub.ImsFeatureConfiguration;
-
-import com.android.ims.ImsReasonInfo;
+import com.android.ims.internal.IImsCallSession;
 
 /**
- * See ImsRegistrationImplBase.Callback for more information.
- *
+ * See MmTelFeature#Listener for more information.
  * {@hide}
  */
-oneway interface IImsRegistrationCallback {
-   void onRegistered(int imsRadioTech);
-   void onRegistering(int imsRadioTech);
-   void onDeregistered(in ImsReasonInfo info);
-   void onTechnologyChangeFailed(int imsRadioTech, in ImsReasonInfo info);
-   void onSubscriberAssociatedUriChanged(in Uri[] uris);
+oneway interface IImsMmTelListener {
+    void onIncomingCall(IImsCallSession c, in Bundle extras);
+    void onVoiceMessageCountUpdate(int count);
 }

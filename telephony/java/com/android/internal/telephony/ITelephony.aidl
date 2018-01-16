@@ -38,9 +38,10 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyHistogram;
 import android.telephony.VisualVoicemailSmsFilterSettings;
-import com.android.ims.internal.IImsMMTelFeature;
-import com.android.ims.internal.IImsRcsFeature;
-import com.android.ims.internal.IImsRegistration;
+import android.telephony.ims.aidl.IImsConfig;
+import android.telephony.ims.aidl.IImsMmTelFeature;
+import android.telephony.ims.aidl.IImsRcsFeature;
+import android.telephony.ims.aidl.IImsRegistration;
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.OperatorInfo;
@@ -788,20 +789,21 @@ interface ITelephony {
     int getTetherApnRequired();
 
     /**
-     *  Get IImsMMTelFeature binder from ImsResolver that corresponds to the subId and MMTel feature
-     *  as well as registering the MMTelFeature for callbacks using the IImsServiceFeatureCallback
-     *  interface.
-     */
-    IImsMMTelFeature getMMTelFeatureAndListen(int slotId, in IImsServiceFeatureCallback callback);
+    * Enables framework IMS and triggers IMS Registration.
+    */
+    void enableIms(int slotId);
 
     /**
-     *  Get IImsMMTelFeature binder from ImsResolver that corresponds to the subId and MMTel feature
-     *  as well as registering the MMTelFeature for callbacks using the IImsServiceFeatureCallback
+    * Disables framework IMS and triggers IMS deregistration.
+    */
+    void disableIms(int slotId);
+
+    /**
+     *  Get IImsMmTelFeature binder from ImsResolver that corresponds to the subId and MMTel feature
+     *  as well as registering the MmTelFeature for callbacks using the IImsServiceFeatureCallback
      *  interface.
-     *  Used for emergency calling only.
      */
-    IImsMMTelFeature getEmergencyMMTelFeatureAndListen(int slotId,
-            in IImsServiceFeatureCallback callback);
+    IImsMmTelFeature getMmTelFeatureAndListen(int slotId, in IImsServiceFeatureCallback callback);
 
     /**
      *  Get IImsRcsFeature binder from ImsResolver that corresponds to the subId and RCS feature
@@ -814,6 +816,11 @@ interface ITelephony {
     * Returns the IImsRegistration associated with the slot and feature specified.
     */
     IImsRegistration getImsRegistration(int slotId, int feature);
+
+    /**
+    * Returns the IImsConfig associated with the slot and feature specified.
+    */
+    IImsConfig getImsConfig(int slotId, int feature);
 
     /**
      * Set the network selection mode to automatic.

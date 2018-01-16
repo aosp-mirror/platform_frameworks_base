@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.ims.internal;
+package android.telephony.ims.aidl;
 
 /**
- * See SmsImplBase for more information.
+ * See RcsFeature for more information.
  * {@hide}
  */
-interface IImsSmsListener {
-    void onSendSmsResult(int token, int messageRef, int status, int reason);
-    void onSmsStatusReportReceived(int token, int messageRef, in String format,
-            in byte[] pdu);
-    void onSmsReceived(int token, in String format, in byte[] pdu);
+interface IImsRcsFeature {
+    //Empty Default Implementation
 }

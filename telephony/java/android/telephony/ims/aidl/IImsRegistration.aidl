@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 The Android Open Source Project
+ * Copyright (c) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.ims.internal;
+
+package android.telephony.ims.aidl;
+
+import android.telephony.ims.aidl.IImsRegistrationCallback;
 
 /**
-*  Interface from ImsFeature in the ImsService to ImsServiceController.
+ * See ImsRegistration for more information.
+ *
  * {@hide}
  */
-oneway interface IImsFeatureStatusCallback {
-    void notifyImsFeatureStatus(int featureStatus);
+interface IImsRegistration {
+   int getRegistrationTechnology();
+   oneway void addRegistrationCallback(IImsRegistrationCallback c);
+   oneway void removeRegistrationCallback(IImsRegistrationCallback c);
 }
