@@ -54,14 +54,24 @@ public class ProfilerInfo implements Parcelable {
      */
     public final String agent;
 
+    /**
+     * Whether the {@link agent} should be attached early (before bind-application) or during
+     * bind-application. Agents attached prior to binding cannot be loaded from the app's APK
+     * directly and must be given as an absolute path (or available in the default LD_LIBRARY_PATH).
+     * Agents attached during bind-application will miss early setup (e.g., resource initialization
+     * and classloader generation), but are searched in the app's library search path.
+     */
+    public final boolean attachAgentDuringBind;
+
     public ProfilerInfo(String filename, ParcelFileDescriptor fd, int interval, boolean autoStop,
-            boolean streaming, String agent) {
+            boolean streaming, String agent, boolean attachAgentDuringBind) {
         profileFile = filename;
         profileFd = fd;
         samplingInterval = interval;
         autoStopProfiler = autoStop;
         streamingOutput = streaming;
         this.agent = agent;
+        this.attachAgentDuringBind = attachAgentDuringBind;
     }
 
     public ProfilerInfo(ProfilerInfo in) {
@@ -71,6 +81,7 @@ public class ProfilerInfo implements Parcelable {
         autoStopProfiler = in.autoStopProfiler;
         streamingOutput = in.streamingOutput;
         agent = in.agent;
+        attachAgentDuringBind = in.attachAgentDuringBind;
     }
 
     /**
@@ -109,6 +120,7 @@ public class ProfilerInfo implements Parcelable {
         out.writeInt(autoStopProfiler ? 1 : 0);
         out.writeInt(streamingOutput ? 1 : 0);
         out.writeString(agent);
+        out.writeBoolean(attachAgentDuringBind);
     }
 
     public static final Parcelable.Creator<ProfilerInfo> CREATOR =
@@ -131,5 +143,6 @@ public class ProfilerInfo implements Parcelable {
         autoStopProfiler = in.readInt() != 0;
         streamingOutput = in.readInt() != 0;
         agent = in.readString();
+        attachAgentDuringBind = in.readBoolean();
     }
 }
