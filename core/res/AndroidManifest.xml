@@ -2992,6 +2992,11 @@
     <permission android:name="android.permission.CONFIGURE_DISPLAY_BRIGHTNESS"
         android:protectionLevel="signature|privileged|development" />
 
+    <!-- Allows an application to control the system's display brightness
+         @hide -->
+    <permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS"
+        android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows an application to control VPN.
          <p>Not for use by third-party applications.</p>
          @hide -->

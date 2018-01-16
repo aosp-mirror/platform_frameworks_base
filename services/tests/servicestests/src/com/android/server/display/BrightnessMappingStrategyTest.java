@@ -281,6 +281,68 @@ public class BrightnessMappingStrategyTest {
         assertNull(physical);
     }
 
+    @Test
+    public void testStrategiesAdaptToUserDataPoint() {
+        Resources res = createResources(LUX_LEVELS, DISPLAY_LEVELS_NITS,
+                DISPLAY_RANGE_NITS, BACKLIGHT_RANGE);
+        assertStrategyAdaptsToUserDataPoints(BrightnessMappingStrategy.create(res));
+        res = createResources(LUX_LEVELS, DISPLAY_LEVELS_BACKLIGHT);
+        assertStrategyAdaptsToUserDataPoints(BrightnessMappingStrategy.create(res));
+    }
+
+    private static void assertStrategyAdaptsToUserDataPoints(BrightnessMappingStrategy strategy) {
+        // Save out all of the initial brightness data for comparison after reset.
+        float[] initialBrightnessLevels = new float[LUX_LEVELS.length];
+        for (int i = 0; i < LUX_LEVELS.length; i++) {
+            initialBrightnessLevels[i] = strategy.getBrightness(LUX_LEVELS[i]);
+        }
+
+        // Add a data point in the middle of the curve where the user has set the brightness max
+        final int idx = LUX_LEVELS.length / 2;
+        strategy.addUserDataPoint(LUX_LEVELS[idx], 1.0f);
+
+        // Then make sure that all control points after the middle lux level are also set to max...
+        for (int i = idx; i < LUX_LEVELS.length; i++) {
+            assertEquals(strategy.getBrightness(LUX_LEVELS[idx]), 1.0, 0.01 /*tolerance*/);
+        }
+
+        // ...and that all control points before the middle lux level are strictly less than the
+        // previous one still.
+        float prevBrightness = strategy.getBrightness(LUX_LEVELS[idx]);
+        for (int i = idx - 1; i >= 0; i--) {
+            float brightness = strategy.getBrightness(LUX_LEVELS[i]);
+            assertTrue("Brightness levels must be monotonic after adapting to user data",
+                    prevBrightness >= brightness);
+            prevBrightness = brightness;
+        }
+
+        // Now reset the curve and make sure we go back to the initial brightness levels recorded
+        // before adding the user data point.
+        strategy.clearUserDataPoints();
+        for (int i = 0; i < LUX_LEVELS.length; i++) {
+            assertEquals(initialBrightnessLevels[i], strategy.getBrightness(LUX_LEVELS[i]),
+                    0.01 /*tolerance*/);
+        }
+
+        // Now set the middle of the lux range to something just above the minimum.
+        final float minBrightness = strategy.getBrightness(LUX_LEVELS[0]);
+        strategy.addUserDataPoint(LUX_LEVELS[idx], minBrightness + 0.01f);
+
+        // Then make sure the curve is still monotonic.
+        prevBrightness = 0f;
+        for (float lux : LUX_LEVELS) {
+            float brightness = strategy.getBrightness(lux);
+            assertTrue("Brightness levels must be monotonic after adapting to user data",
+                    prevBrightness <= brightness);
+            prevBrightness = brightness;
+        }
+
+        // And that the lowest lux level still gives the absolute minimum brightness. This should
+        // be true assuming that there are more than two lux levels in the curve since we picked a
+        // brightness just barely above the minimum for the middle of the curve.
+        assertEquals(minBrightness, strategy.getBrightness(LUX_LEVELS[0]), 0.001 /*tolerance*/);
+    }
+
     private static float[] toFloatArray(int[] vals) {
         float[] newVals = new float[vals.length];
         for (int i = 0; i < vals.length; i++) {
