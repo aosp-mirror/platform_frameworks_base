@@ -6830,7 +6830,7 @@ public final class Settings {
          * @hide
          */
         public static final int SHOW_ROTATION_SUGGESTIONS_DEFAULT =
-                SHOW_ROTATION_SUGGESTIONS_DISABLED;
+                SHOW_ROTATION_SUGGESTIONS_ENABLED;
 
         /**
          * Read only list of the service components that the current user has explicitly allowed to
