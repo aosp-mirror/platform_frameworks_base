@@ -52,6 +52,9 @@ int register_android_server_SyntheticPasswordManager(JNIEnv* env);
 int register_android_server_GraphicsStatsService(JNIEnv* env);
 int register_android_hardware_display_DisplayViewport(JNIEnv* env);
 int register_android_server_net_NetworkStatsService(JNIEnv* env);
+#ifdef USE_ARC
+int register_android_server_ArcVideoService();
+#endif
 };
 
 using namespace android;
@@ -97,6 +100,8 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_GraphicsStatsService(env);
     register_android_hardware_display_DisplayViewport(env);
     register_android_server_net_NetworkStatsService(env);
-
+#ifdef USE_ARC
+    register_android_server_ArcVideoService();
+#endif
     return JNI_VERSION_1_4;
 }
