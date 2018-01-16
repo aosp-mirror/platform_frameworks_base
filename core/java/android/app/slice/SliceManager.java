@@ -31,12 +31,15 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -47,6 +50,8 @@ import java.util.concurrent.Executor;
  */
 @SystemService(Context.SLICE_SERVICE)
 public class SliceManager {
+
+    private static final String TAG = "SliceManager";
 
     private final ISliceManager mService;
     private final Context mContext;
@@ -230,6 +235,33 @@ public class SliceManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Obtains a list of slices that are descendants of the specified Uri.
+     * <p>
+     * Not all slice providers will implement this functionality, in which case,
+     * an empty collection will be returned.
+     *
+     * @param uri The uri to look for descendants under.
+     * @return All slices within the space.
+     * @see SliceProvider#onGetSliceDescendants(Uri)
+     */
+    public @NonNull Collection<Uri> getSliceDescendants(@NonNull Uri uri) {
+        ContentResolver resolver = mContext.getContentResolver();
+        IContentProvider provider = resolver.acquireProvider(uri);
+        try {
+            Bundle extras = new Bundle();
+            extras.putParcelable(SliceProvider.EXTRA_BIND_URI, uri);
+            final Bundle res = provider.call(resolver.getPackageName(),
+                    SliceProvider.METHOD_GET_DESCENDANTS, null, extras);
+            return res.getParcelableArrayList(SliceProvider.EXTRA_SLICE_DESCENDANTS);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to get slice descendants", e);
+        } finally {
+            resolver.releaseProvider(provider);
+        }
+        return Collections.emptyList();
     }
 
     /**
