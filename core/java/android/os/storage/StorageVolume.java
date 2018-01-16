@@ -394,4 +394,32 @@ public final class StorageVolume implements Parcelable {
         parcel.writeString(mFsUuid);
         parcel.writeString(mState);
     }
+
+    /** {@hide} */
+    public static final class ScopedAccessProviderContract {
+
+        private ScopedAccessProviderContract() {
+            throw new UnsupportedOperationException("contains constants only");
+        }
+
+        public static final String AUTHORITY = "com.android.documentsui.scopedAccess";
+
+        public static final String TABLE_PACKAGES = "packages";
+        public static final String TABLE_PERMISSIONS = "permissions";
+
+        public static final String COL_PACKAGE = "package_name";
+        public static final String COL_VOLUME_UUID = "volume_uuid";
+        public static final String COL_DIRECTORY = "directory";
+        public static final String COL_GRANTED = "granted";
+
+        public static final String[] TABLE_PACKAGES_COLUMNS = new String[] { COL_PACKAGE };
+        public static final String[] TABLE_PERMISSIONS_COLUMNS =
+                new String[] { COL_PACKAGE, COL_VOLUME_UUID, COL_DIRECTORY, COL_GRANTED };
+
+        public static final int TABLE_PACKAGES_COL_PACKAGE = 0;
+        public static final int TABLE_PERMISSIONS_COL_PACKAGE = 0;
+        public static final int TABLE_PERMISSIONS_COL_VOLUME_UUID = 1;
+        public static final int TABLE_PERMISSIONS_COL_DIRECTORY = 2;
+        public static final int TABLE_PERMISSIONS_COL_GRANTED = 3;
+    }
 }
