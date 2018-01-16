@@ -907,7 +907,15 @@ public class PerformBackupTask implements BackupRestoreTask {
                         backupData = ParcelFileDescriptor.open(mBackupDataName,
                                 ParcelFileDescriptor.MODE_READ_ONLY);
                         backupManagerService.addBackupTrace("sending data to transport");
-                        int flags = mUserInitiated ? BackupTransport.FLAG_USER_INITIATED : 0;
+
+                        int userInitiatedFlag =
+                                mUserInitiated ? BackupTransport.FLAG_USER_INITIATED : 0;
+                        int incrementalFlag =
+                                mSavedStateName.length() == 0
+                                    ? BackupTransport.FLAG_NON_INCREMENTAL
+                                    : BackupTransport.FLAG_INCREMENTAL;
+                        int flags = userInitiatedFlag | incrementalFlag;
+
                         mStatus = transport.performBackup(mCurrentPackage, backupData, flags);
                     }
 

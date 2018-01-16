@@ -55,6 +55,22 @@ public class BackupTransport {
     // Transport should ignore its own moratoriums for call with this flag set.
     public static final int FLAG_USER_INITIATED = 1;
 
+    /**
+     * For key value backup, indicates that the backup data is a diff from a previous backup. The
+     * transport must apply this diff to an existing backup to build the new backup set.
+     *
+     * @hide
+     */
+    public static final int FLAG_INCREMENTAL = 1 << 1;
+
+    /**
+     * For key value backup, indicates that the backup data is a complete set, not a diff from a
+     * previous backup. The transport should clear any previous backup when storing this backup.
+     *
+     * @hide
+     */
+    public static final int FLAG_NON_INCREMENTAL = 1 << 2;
+
     IBackupTransport mBinderImpl = new TransportImpl();
 
     public IBinder getBinder() {
@@ -231,12 +247,18 @@ public class BackupTransport {
      * {@link #TRANSPORT_OK}, {@link #finishBackup} will then be called to ensure the data
      * is sent and recorded successfully.
      *
+     * If the backup data is a diff against the previous backup then the flag {@link
+     * BackupTransport#FLAG_INCREMENTAL} will be set. Otherwise, if the data is a complete backup
+     * set then {@link BackupTransport#FLAG_NON_INCREMENTAL} will be set. Before P neither flag will
+     * be set regardless of whether the backup is incremental or not.
+     *
      * @param packageInfo The identity of the application whose data is being backed up.
      *   This specifically includes the signature list for the package.
      * @param inFd Descriptor of file with data that resulted from invoking the application's
      *   BackupService.doBackup() method.  This may be a pipe rather than a file on
      *   persistent media, so it may not be seekable.
-     * @param flags {@link BackupTransport#FLAG_USER_INITIATED} or 0.
+     * @param flags a combination of {@link BackupTransport#FLAG_USER_INITIATED}, {@link
+     *   BackupTransport#FLAG_NON_INCREMENTAL}, {@link BackupTransport#FLAG_INCREMENTAL}, or 0.
      * @return one of {@link BackupTransport#TRANSPORT_OK} (OK so far),
      *  {@link BackupTransport#TRANSPORT_PACKAGE_REJECTED} (to suppress backup of this
      *  specific package, but allow others to proceed),
