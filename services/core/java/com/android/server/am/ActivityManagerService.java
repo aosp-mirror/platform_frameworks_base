@@ -8599,6 +8599,16 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             return false;
         }
+
+        @Override
+        public int getPackageUid(String packageName, int flags) {
+            try {
+                return mActivityManagerService.mContext.getPackageManager()
+                        .getPackageUid(packageName, flags);
+            } catch (NameNotFoundException nnfe) {
+                return -1;
+            }
+        }
     }
 
     class IntentFirewallInterface implements IntentFirewall.AMSInterface {

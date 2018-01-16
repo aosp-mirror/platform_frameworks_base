@@ -62,6 +62,11 @@ public class ServiceManagerPermissionTests extends TestCase {
                 public boolean isRuntimePermission(String permission) {
                     return false;
                 }
+
+                @Override
+                public int getPackageUid(String packageName, int flags) {
+                    return -1;
+                }
             };
             ServiceManagerNative.asInterface(BinderInternal.getContextObject())
                     .setPermissionController(pc);
