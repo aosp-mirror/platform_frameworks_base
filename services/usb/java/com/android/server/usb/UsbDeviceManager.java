@@ -80,6 +80,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.adb.UsbDebuggingManager;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.File;

@@ -10,11 +10,11 @@
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions an
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
-package com.android.server.usb;
+package com.android.server.adb;
 
 import static com.android.internal.util.dump.DumpUtils.writeStringIfNotNull;
 
@@ -53,6 +53,10 @@ import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.util.Arrays;
 
+/**
+ * Provides communication to the Android Debug Bridge daemon to allow, deny, or clear public keysi
+ * that are authorized to connect to the ADB service itself.
+ */
 public class UsbDebuggingManager {
     private static final String TAG = "UsbDebuggingManager";
     private static final boolean DEBUG = false;
@@ -138,7 +142,8 @@ public class UsbDebuggingManager {
                     if (buffer[0] == 'P' && buffer[1] == 'K') {
                         String key = new String(Arrays.copyOfRange(buffer, 2, count));
                         Slog.d(TAG, "Received public key: " + key);
-                        Message msg = mHandler.obtainMessage(UsbDebuggingHandler.MESSAGE_ADB_CONFIRM);
+                        Message msg = mHandler.obtainMessage(
+                                UsbDebuggingHandler.MESSAGE_ADB_CONFIRM);
                         msg.obj = key;
                         mHandler.sendMessage(msg);
                     } else {
@@ -188,8 +193,7 @@ public class UsbDebuggingManager {
                 if (!mStopped && mOutputStream != null) {
                     try {
                         mOutputStream.write(msg.getBytes());
-                    }
-                    catch (IOException ex) {
+                    } catch (IOException ex) {
                         Slog.e(TAG, "Failed to write response:", ex);
                     }
                 }
@@ -205,15 +209,16 @@ public class UsbDebuggingManager {
         private static final int MESSAGE_ADB_CONFIRM = 5;
         private static final int MESSAGE_ADB_CLEAR = 6;
 
-        public UsbDebuggingHandler(Looper looper) {
+        UsbDebuggingHandler(Looper looper) {
             super(looper);
         }
 
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MESSAGE_ADB_ENABLED:
-                    if (mAdbEnabled)
+                    if (mAdbEnabled) {
                         break;
+                    }
 
                     mAdbEnabled = true;
 
@@ -223,8 +228,9 @@ public class UsbDebuggingManager {
                     break;
 
                 case MESSAGE_ADB_DISABLED:
-                    if (!mAdbEnabled)
+                    if (!mAdbEnabled) {
                         break;
+                    }
 
                     mAdbEnabled = false;
 
@@ -236,7 +242,7 @@ public class UsbDebuggingManager {
                     break;
 
                 case MESSAGE_ADB_ALLOW: {
-                    String key = (String)msg.obj;
+                    String key = (String) msg.obj;
                     String fingerprints = getFingerprints(key);
 
                     if (!fingerprints.equals(mFingerprints)) {
@@ -270,7 +276,7 @@ public class UsbDebuggingManager {
                         }
                         break;
                     }
-                    String key = (String)msg.obj;
+                    String key = (String) msg.obj;
                     String fingerprints = getFingerprints(key);
                     if ("".equals(fingerprints)) {
                         if (mThread != null) {
@@ -317,8 +323,9 @@ public class UsbDebuggingManager {
         for (int i = 0; i < digest.length; i++) {
             sb.append(hex.charAt((digest[i] >> 4) & 0xf));
             sb.append(hex.charAt(digest[i] & 0xf));
-            if (i < digest.length - 1)
+            if (i < digest.length - 1) {
                 sb.append(":");
+            }
         }
         return sb.toString();
     }
@@ -413,16 +420,14 @@ public class UsbDebuggingManager {
             if (!keyFile.exists()) {
                 keyFile.createNewFile();
                 FileUtils.setPermissions(keyFile.toString(),
-                    FileUtils.S_IRUSR | FileUtils.S_IWUSR |
-                    FileUtils.S_IRGRP, -1, -1);
+                        FileUtils.S_IRUSR | FileUtils.S_IWUSR | FileUtils.S_IRGRP, -1, -1);
             }
 
             FileOutputStream fo = new FileOutputStream(keyFile, true);
             fo.write(key.getBytes());
             fo.write('\n');
             fo.close();
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             Slog.e(TAG, "Error writing key:" + ex);
         }
     }
@@ -434,11 +439,20 @@ public class UsbDebuggingManager {
         }
     }
 
+    /**
+     * When {@code enabled} is {@code true}, this allows ADB debugging and starts the ADB hanler
+     * thread. When {@code enabled} is {@code false}, this disallows ADB debugging and shuts
+     * down the handler thread.
+     */
     public void setAdbEnabled(boolean enabled) {
         mHandler.sendEmptyMessage(enabled ? UsbDebuggingHandler.MESSAGE_ADB_ENABLED
                                           : UsbDebuggingHandler.MESSAGE_ADB_DISABLED);
     }
 
+    /**
+     * Allows the debugging from the endpoint identified by {@code publicKey} either once or
+     * always if {@code alwaysAllow} is {@code true}.
+     */
     public void allowUsbDebugging(boolean alwaysAllow, String publicKey) {
         Message msg = mHandler.obtainMessage(UsbDebuggingHandler.MESSAGE_ADB_ALLOW);
         msg.arg1 = alwaysAllow ? 1 : 0;
@@ -446,10 +460,17 @@ public class UsbDebuggingManager {
         mHandler.sendMessage(msg);
     }
 
+    /**
+     * Denies debugging connection from the device that last requested to connect.
+     */
     public void denyUsbDebugging() {
         mHandler.sendEmptyMessage(UsbDebuggingHandler.MESSAGE_ADB_DENY);
     }
 
+    /**
+     * Clears all previously accepted ADB debugging public keys. Any subsequent request will need
+     * to pass through {@link #allowUsbDebugging(boolean, String)} again.
+     */
     public void clearUsbDebuggingKeys() {
         mHandler.sendEmptyMessage(UsbDebuggingHandler.MESSAGE_ADB_CLEAR);
     }
