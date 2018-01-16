@@ -368,7 +368,7 @@
             android:excludeFromRecents="true">
         </activity>
 
-        <!-- started from UsbDebuggingManager -->
+        <!-- started from AdbDebuggingManager -->
         <activity android:name=".usb.UsbDebuggingActivity"
             android:permission="android.permission.MANAGE_USB"
             android:theme="@style/Theme.SystemUI.Dialog.Alert"

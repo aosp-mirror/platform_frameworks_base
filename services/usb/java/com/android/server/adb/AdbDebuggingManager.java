@@ -57,8 +57,8 @@ import java.util.Arrays;
  * Provides communication to the Android Debug Bridge daemon to allow, deny, or clear public keysi
  * that are authorized to connect to the ADB service itself.
  */
-public class UsbDebuggingManager {
-    private static final String TAG = "UsbDebuggingManager";
+public class AdbDebuggingManager {
+    private static final String TAG = "AdbDebuggingManager";
     private static final boolean DEBUG = false;
 
     private static final String ADBD_SOCKET = "adbd";
@@ -68,22 +68,22 @@ public class UsbDebuggingManager {
 
     private final Context mContext;
     private final Handler mHandler;
-    private UsbDebuggingThread mThread;
+    private AdbDebuggingThread mThread;
     private boolean mAdbEnabled = false;
     private String mFingerprints;
 
-    public UsbDebuggingManager(Context context) {
-        mHandler = new UsbDebuggingHandler(FgThread.get().getLooper());
+    public AdbDebuggingManager(Context context) {
+        mHandler = new AdbDebuggingHandler(FgThread.get().getLooper());
         mContext = context;
     }
 
-    class UsbDebuggingThread extends Thread {
+    class AdbDebuggingThread extends Thread {
         private boolean mStopped;
         private LocalSocket mSocket;
         private OutputStream mOutputStream;
         private InputStream mInputStream;
 
-        UsbDebuggingThread() {
+        AdbDebuggingThread() {
             super(TAG);
         }
 
@@ -143,7 +143,7 @@ public class UsbDebuggingManager {
                         String key = new String(Arrays.copyOfRange(buffer, 2, count));
                         Slog.d(TAG, "Received public key: " + key);
                         Message msg = mHandler.obtainMessage(
-                                UsbDebuggingHandler.MESSAGE_ADB_CONFIRM);
+                                AdbDebuggingHandler.MESSAGE_ADB_CONFIRM);
                         msg.obj = key;
                         mHandler.sendMessage(msg);
                     } else {
@@ -201,7 +201,7 @@ public class UsbDebuggingManager {
         }
     }
 
-    class UsbDebuggingHandler extends Handler {
+    class AdbDebuggingHandler extends Handler {
         private static final int MESSAGE_ADB_ENABLED = 1;
         private static final int MESSAGE_ADB_DISABLED = 2;
         private static final int MESSAGE_ADB_ALLOW = 3;
@@ -209,7 +209,7 @@ public class UsbDebuggingManager {
         private static final int MESSAGE_ADB_CONFIRM = 5;
         private static final int MESSAGE_ADB_CLEAR = 6;
 
-        UsbDebuggingHandler(Looper looper) {
+        AdbDebuggingHandler(Looper looper) {
             super(looper);
         }
 
@@ -222,7 +222,7 @@ public class UsbDebuggingManager {
 
                     mAdbEnabled = true;
 
-                    mThread = new UsbDebuggingThread();
+                    mThread = new AdbDebuggingThread();
                     mThread.start();
 
                     break;
@@ -445,8 +445,8 @@ public class UsbDebuggingManager {
      * down the handler thread.
      */
     public void setAdbEnabled(boolean enabled) {
-        mHandler.sendEmptyMessage(enabled ? UsbDebuggingHandler.MESSAGE_ADB_ENABLED
-                                          : UsbDebuggingHandler.MESSAGE_ADB_DISABLED);
+        mHandler.sendEmptyMessage(enabled ? AdbDebuggingHandler.MESSAGE_ADB_ENABLED
+                                          : AdbDebuggingHandler.MESSAGE_ADB_DISABLED);
     }
 
     /**
@@ -454,7 +454,7 @@ public class UsbDebuggingManager {
      * always if {@code alwaysAllow} is {@code true}.
      */
     public void allowUsbDebugging(boolean alwaysAllow, String publicKey) {
-        Message msg = mHandler.obtainMessage(UsbDebuggingHandler.MESSAGE_ADB_ALLOW);
+        Message msg = mHandler.obtainMessage(AdbDebuggingHandler.MESSAGE_ADB_ALLOW);
         msg.arg1 = alwaysAllow ? 1 : 0;
         msg.obj = publicKey;
         mHandler.sendMessage(msg);
@@ -464,7 +464,7 @@ public class UsbDebuggingManager {
      * Denies debugging connection from the device that last requested to connect.
      */
     public void denyUsbDebugging() {
-        mHandler.sendEmptyMessage(UsbDebuggingHandler.MESSAGE_ADB_DENY);
+        mHandler.sendEmptyMessage(AdbDebuggingHandler.MESSAGE_ADB_DENY);
     }
 
     /**
@@ -472,7 +472,7 @@ public class UsbDebuggingManager {
      * to pass through {@link #allowUsbDebugging(boolean, String)} again.
      */
     public void clearUsbDebuggingKeys() {
-        mHandler.sendEmptyMessage(UsbDebuggingHandler.MESSAGE_ADB_CLEAR);
+        mHandler.sendEmptyMessage(AdbDebuggingHandler.MESSAGE_ADB_CLEAR);
     }
 
     /**
