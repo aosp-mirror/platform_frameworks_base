@@ -23,6 +23,7 @@ option java_outer_classname = "AtomsProto";
 
 import "frameworks/base/core/proto/android/app/enums.proto";
 import "frameworks/base/core/proto/android/os/enums.proto";
+import "frameworks/base/core/proto/android/server/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
 
@@ -463,13 +464,7 @@ message BatterySaverModeStateChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message DeviceIdleModeStateChanged {
-    // TODO: Use the enum matching BatteryStats.DEVICE_IDLE_MODE_.
-    enum State {
-        DEVICE_IDLE_MODE_OFF = 0;
-        DEVICE_IDLE_MODE_LIGHT = 1;
-        DEVICE_IDLE_MODE_DEEP = 2;
-    }
-    optional State state = 1;
+    optional android.server.DeviceIdleModeEnum state = 1;
 }
 
 
@@ -480,13 +475,7 @@ message DeviceIdleModeStateChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message DeviceIdlingModeStateChanged {
-    // TODO: Use the enum matching BatteryStats.DEVICE_IDLE_MODE_.
-    enum State {
-        DEVICE_IDLE_MODE_OFF = 0;
-        DEVICE_IDLE_MODE_LIGHT = 1;
-        DEVICE_IDLE_MODE_DEEP = 2;
-    }
-    optional State state = 1;
+    optional android.server.DeviceIdleModeEnum state = 1;
 }
 
 /**
