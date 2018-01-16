@@ -30,6 +30,7 @@ import android.app.ActivityManager.RecentTaskInfo;
 import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IAssistDataReceiver;
+import android.app.WindowConfiguration.ActivityType;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -96,11 +97,14 @@ public class ActivityManagerWrapper {
      * @return the top running task (can be {@code null}).
      */
     public ActivityManager.RunningTaskInfo getRunningTask() {
+        return getRunningTask(ACTIVITY_TYPE_RECENTS /* ignoreActivityType */);
+    }
+
+    public ActivityManager.RunningTaskInfo getRunningTask(@ActivityType int ignoreActivityType) {
         // Note: The set of running tasks from the system is ordered by recency
         try {
             List<ActivityManager.RunningTaskInfo> tasks =
-                    ActivityManager.getService().getFilteredTasks(1,
-                            ACTIVITY_TYPE_RECENTS /* ignoreActivityType */,
+                    ActivityManager.getService().getFilteredTasks(1, ignoreActivityType,
                             WINDOWING_MODE_PINNED /* ignoreWindowingMode */);
             if (tasks.isEmpty()) {
                 return null;
