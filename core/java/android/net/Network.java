@@ -356,13 +356,13 @@ public class Network implements Parcelable {
         // Multiple Provisioning Domains API recommendations, as made by the
         // IETF mif working group.
         //
-        // The HANDLE_MAGIC value MUST be kept in sync with the corresponding
+        // The handleMagic value MUST be kept in sync with the corresponding
         // value in the native/android/net.c NDK implementation.
         if (netId == 0) {
             return 0L;  // make this zero condition obvious for debugging
         }
-        final long HANDLE_MAGIC = 0xfacade;
-        return (((long) netId) << 32) | HANDLE_MAGIC;
+        final long handleMagic = 0xcafed00dL;
+        return (((long) netId) << 32) | handleMagic;
     }
 
     // implement the Parcelable interface
