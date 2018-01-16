@@ -284,6 +284,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     @Override
     public void abortCurrentGesture() {
         setPressed(false);
+        mRipple.abortDelayedRipple();
         mGestureAborted = true;
     }
 
@@ -298,6 +299,11 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
             invalidate();
         }
         mRipple.setDarkIntensity(darkIntensity);
+    }
+
+    @Override
+    public void setDelayTouchFeedback(boolean shouldDelay) {
+        mRipple.setDelayTouchFeedback(shouldDelay);
     }
 
     @Override

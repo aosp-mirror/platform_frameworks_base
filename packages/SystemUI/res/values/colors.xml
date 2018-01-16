@@ -143,6 +143,9 @@
 
     <color name="remote_input_accent">#eeeeee</color>
 
+    <color name="quick_step_track_background_dark">#61000000</color>
+    <color name="quick_step_track_background_light">#4DFFFFFF</color>
+
     <!-- Keyboard shortcuts colors -->
     <color name="ksh_application_group_color">#fff44336</color>
     <color name="ksh_keyword_color">#d9000000</color>
