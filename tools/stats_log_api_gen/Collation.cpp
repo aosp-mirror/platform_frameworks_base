@@ -15,6 +15,7 @@
  */
 
 #include "Collation.h"
+#include "frameworks/base/cmds/statsd/src/atoms.pb.h"
 
 #include <stdio.h>
 #include <map>
@@ -137,6 +138,16 @@ java_type(const FieldDescriptor* field)
 }
 
 /**
+ * Gather the enums info.
+ */
+void collate_enums(const EnumDescriptor &enumDescriptor, AtomField *atomField) {
+    for (int i = 0; i < enumDescriptor.value_count(); i++) {
+        atomField->enumValues[enumDescriptor.value(i)->number()] =
+            enumDescriptor.value(i)->name().c_str();
+    }
+}
+
+/**
  * Gather the info about an atom proto.
  */
 int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
@@ -221,11 +232,7 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
     if (javaType == JAVA_TYPE_ENUM) {
       // All enums are treated as ints when it comes to function signatures.
       signature->push_back(JAVA_TYPE_INT);
-      const EnumDescriptor *enumDescriptor = field->enum_type();
-      for (int i = 0; i < enumDescriptor->value_count(); i++) {
-        atField.enumValues[enumDescriptor->value(i)->number()] =
-            enumDescriptor->value(i)->name().c_str();
-      }
+      collate_enums(*field->enum_type(), &atField);
     } else {
       signature->push_back(javaType);
     }
@@ -233,6 +240,53 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
   }
 
   return errorCount;
+}
+
+// This function flattens the fields of the AttributionNode proto in an Atom proto and generates
+// the corresponding atom decl and signature.
+bool get_non_chained_node(const Descriptor *atom, AtomDecl *atomDecl,
+                          vector<java_type_t> *signature) {
+    // Build a sorted list of the fields. Descriptor has them in source file
+    // order.
+    map<int, const FieldDescriptor *> fields;
+    for (int j = 0; j < atom->field_count(); j++) {
+        const FieldDescriptor *field = atom->field(j);
+        fields[field->number()] = field;
+    }
+
+    AtomDecl attributionDecl;
+    vector<java_type_t> attributionSignature;
+    collate_atom(android::os::statsd::AttributionNode::descriptor(),
+                 &attributionDecl, &attributionSignature);
+
+    // Build the type signature and the atom data.
+    bool has_attribution_node = false;
+    for (map<int, const FieldDescriptor *>::const_iterator it = fields.begin();
+        it != fields.end(); it++) {
+        const FieldDescriptor *field = it->second;
+        java_type_t javaType = java_type(field);
+        if (javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
+            atomDecl->fields.insert(
+                atomDecl->fields.end(),
+                attributionDecl.fields.begin(), attributionDecl.fields.end());
+            signature->insert(
+                signature->end(),
+                attributionSignature.begin(), attributionSignature.end());
+            has_attribution_node = true;
+
+        } else {
+            AtomField atField(field->name(), javaType);
+            if (javaType == JAVA_TYPE_ENUM) {
+                // All enums are treated as ints when it comes to function signatures.
+                signature->push_back(JAVA_TYPE_INT);
+                collate_enums(*field->enum_type(), &atField);
+            } else {
+                signature->push_back(javaType);
+            }
+            atomDecl->fields.push_back(atField);
+        }
+    }
+    return has_attribution_node;
 }
 
 /**
@@ -266,6 +320,13 @@ int collate_atoms(const Descriptor *descriptor, Atoms *atoms) {
     errorCount += collate_atom(atom, &atomDecl, &signature);
     atoms->signatures.insert(signature);
     atoms->decls.insert(atomDecl);
+
+    AtomDecl nonChainedAtomDecl(atomField->number(), atomField->name(), atom->name());
+    vector<java_type_t> nonChainedSignature;
+    if (get_non_chained_node(atom, &nonChainedAtomDecl, &nonChainedSignature)) {
+        atoms->non_chained_signatures.insert(nonChainedSignature);
+        atoms->non_chained_decls.insert(nonChainedAtomDecl);
+    }
   }
 
   if (dbg) {
