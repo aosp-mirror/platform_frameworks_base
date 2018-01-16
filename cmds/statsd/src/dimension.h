@@ -32,6 +32,10 @@ namespace statsd {
 const DimensionsValue* getSingleLeafValue(const DimensionsValue* value);
 DimensionsValue getSingleLeafValue(const DimensionsValue& value);
 
+// Appends the leaf node to the parent tree.
+void appendLeafNodeToParent(const Field& field, const DimensionsValue& value,
+                            DimensionsValue* parentValue);
+
 // Constructs the DimensionsValue protos from the FieldMatcher. Each DimensionsValue proto
 // represents a tree. When the input proto has repeated fields and the input "dimensions" wants
 // "ANY" locations, it will return multiple trees.

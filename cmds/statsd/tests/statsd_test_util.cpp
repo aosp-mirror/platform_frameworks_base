@@ -19,6 +19,14 @@ namespace android {
 namespace os {
 namespace statsd {
 
+AtomMatcher CreateSimpleAtomMatcher(const string& name, int atomId) {
+    AtomMatcher atom_matcher;
+    atom_matcher.set_id(StringToId(name));
+    auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
+    simple_atom_matcher->set_atom_id(atomId);
+    return atom_matcher;
+}
+
 AtomMatcher CreateWakelockStateChangedAtomMatcher(const string& name,
                                                   WakelockStateChanged::State state) {
     AtomMatcher atom_matcher;

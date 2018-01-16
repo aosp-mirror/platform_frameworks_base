@@ -43,6 +43,19 @@ int64_t TimeUnitToBucketSizeInMillis(TimeUnit unit);
 // Helper function to write PulledAtomStats to ProtoOutputStream
 void writePullerStatsToStream(const std::pair<int, StatsdStats::PulledAtomStats>& pair,
                               util::ProtoOutputStream* protoOutput);
+
+template<class T>
+bool parseProtoOutputStream(util::ProtoOutputStream& protoOutput, T* message) {
+    std::string pbBytes;
+    auto iter = protoOutput.data();
+    while (iter.readBuffer() != NULL) {
+        size_t toRead = iter.currentToRead();
+         pbBytes.append(reinterpret_cast<const char*>(iter.readBuffer()), toRead);
+        iter.rp()->move(toRead);
+    }
+    return message->ParseFromArray(pbBytes.c_str(), pbBytes.size());
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
