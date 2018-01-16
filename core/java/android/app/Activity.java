@@ -16,6 +16,7 @@
 
 package android.app;
 
+import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static java.lang.Character.MIN_VALUE;
 
 import android.annotation.CallSuper;
@@ -98,6 +99,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.RemoteAnimationDefinition;
 import android.view.SearchEvent;
 import android.view.View;
 import android.view.View.OnCreateContextMenuListener;
@@ -7656,6 +7658,22 @@ public class Activity extends ContextThemeWrapper
             ActivityManager.getService().setTurnScreenOn(mToken, turnScreenOn);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to call setTurnScreenOn", e);
+        }
+    }
+
+    /**
+     * Registers remote animations per transition type for this activity.
+     *
+     * @param definition The remote animation definition that defines which transition whould run
+     *                   which remote animation.
+     * @hide
+     */
+    @RequiresPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS)
+    public void registerRemoteAnimations(RemoteAnimationDefinition definition) {
+        try {
+            ActivityManager.getService().registerRemoteAnimations(mToken, definition);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to call registerRemoteAnimations", e);
         }
     }
 

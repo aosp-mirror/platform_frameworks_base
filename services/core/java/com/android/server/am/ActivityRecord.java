@@ -171,6 +171,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.AppTransitionAnimationSpec;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IApplicationToken;
+import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.R;
@@ -2780,6 +2781,10 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     boolean isTopRunningActivity() {
         return mStackSupervisor.topRunningActivityLocked() == this;
+    }
+
+    void registerRemoteAnimations(RemoteAnimationDefinition definition) {
+        mWindowContainerController.registerRemoteAnimations(definition);
     }
 
     @Override

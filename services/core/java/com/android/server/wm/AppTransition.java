@@ -16,6 +16,28 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams;
+import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
+import static android.view.WindowManager.TRANSIT_ACTIVITY_RELAUNCH;
+import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_OCCLUDE;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
+import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_TASK_OPEN;
+import static android.view.WindowManager.TRANSIT_TASK_OPEN_BEHIND;
+import static android.view.WindowManager.TRANSIT_TASK_TO_BACK;
+import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
+import static android.view.WindowManager.TRANSIT_UNSET;
+import static android.view.WindowManager.TRANSIT_WALLPAPER_CLOSE;
+import static android.view.WindowManager.TRANSIT_WALLPAPER_INTRA_CLOSE;
+import static android.view.WindowManager.TRANSIT_WALLPAPER_INTRA_OPEN;
+import static android.view.WindowManager.TRANSIT_WALLPAPER_OPEN;
 import static com.android.internal.R.styleable.WindowAnimation_activityCloseEnterAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_activityCloseExitAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_activityOpenEnterAnimation;
@@ -78,7 +100,8 @@ import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.RemoteAnimationAdapter;
 import android.view.RenderNode;
 import android.view.ThreadedRenderer;
-import android.view.WindowManager;
+import android.view.WindowManager.TransitionFlags;
+import android.view.WindowManager.TransitionType;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
@@ -110,63 +133,6 @@ public class AppTransition implements Dump {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "AppTransition" : TAG_WM;
     private static final int CLIP_REVEAL_TRANSLATION_Y_DP = 8;
 
-    /** Not set up for a transition. */
-    public static final int TRANSIT_UNSET = -1;
-    /** No animation for transition. */
-    public static final int TRANSIT_NONE = 0;
-    /** A window in a new activity is being opened on top of an existing one in the same task. */
-    public static final int TRANSIT_ACTIVITY_OPEN = 6;
-    /** The window in the top-most activity is being closed to reveal the
-     * previous activity in the same task. */
-    public static final int TRANSIT_ACTIVITY_CLOSE = 7;
-    /** A window in a new task is being opened on top of an existing one
-     * in another activity's task. */
-    public static final int TRANSIT_TASK_OPEN = 8;
-    /** A window in the top-most activity is being closed to reveal the
-     * previous activity in a different task. */
-    public static final int TRANSIT_TASK_CLOSE = 9;
-    /** A window in an existing task is being displayed on top of an existing one
-     * in another activity's task. */
-    public static final int TRANSIT_TASK_TO_FRONT = 10;
-    /** A window in an existing task is being put below all other tasks. */
-    public static final int TRANSIT_TASK_TO_BACK = 11;
-    /** A window in a new activity that doesn't have a wallpaper is being opened on top of one that
-     * does, effectively closing the wallpaper. */
-    public static final int TRANSIT_WALLPAPER_CLOSE = 12;
-    /** A window in a new activity that does have a wallpaper is being opened on one that didn't,
-     * effectively opening the wallpaper. */
-    public static final int TRANSIT_WALLPAPER_OPEN = 13;
-    /** A window in a new activity is being opened on top of an existing one, and both are on top
-     * of the wallpaper. */
-    public static final int TRANSIT_WALLPAPER_INTRA_OPEN = 14;
-    /** The window in the top-most activity is being closed to reveal the previous activity, and
-     * both are on top of the wallpaper. */
-    public static final int TRANSIT_WALLPAPER_INTRA_CLOSE = 15;
-    /** A window in a new task is being opened behind an existing one in another activity's task.
-     * The new window will show briefly and then be gone. */
-    public static final int TRANSIT_TASK_OPEN_BEHIND = 16;
-    /** A window in a task is being animated in-place. */
-    public static final int TRANSIT_TASK_IN_PLACE = 17;
-    /** An activity is being relaunched (e.g. due to configuration change). */
-    public static final int TRANSIT_ACTIVITY_RELAUNCH = 18;
-    /** A task is being docked from recents. */
-    public static final int TRANSIT_DOCK_TASK_FROM_RECENTS = 19;
-    /** Keyguard is going away */
-    public static final int TRANSIT_KEYGUARD_GOING_AWAY = 20;
-    /** Keyguard is going away with showing an activity behind that requests wallpaper */
-    public static final int TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER = 21;
-    /** Keyguard is being occluded */
-    public static final int TRANSIT_KEYGUARD_OCCLUDE = 22;
-    /** Keyguard is being unoccluded */
-    public static final int TRANSIT_KEYGUARD_UNOCCLUDE = 23;
-
-    /** Transition flag: Keyguard is going away, but keeping the notification shade open */
-    public static final int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE = 0x1;
-    /** Transition flag: Keyguard is going away, but doesn't want an animation for it */
-    public static final int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION = 0x2;
-    /** Transition flag: Keyguard is going away while it was showing the system wallpaper. */
-    public static final int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER = 0x4;
-
     /** Fraction of animation at which the recents thumbnail stays completely transparent */
     private static final float RECENTS_THUMBNAIL_FADEIN_FRACTION = 0.5f;
     /** Fraction of animation at which the recents thumbnail becomes completely transparent */
@@ -192,8 +158,8 @@ public class AppTransition implements Dump {
     private final Context mContext;
     private final WindowManagerService mService;
 
-    private int mNextAppTransition = TRANSIT_UNSET;
-    private int mNextAppTransitionFlags = 0;
+    private @TransitionType int mNextAppTransition = TRANSIT_UNSET;
+    private @TransitionFlags int mNextAppTransitionFlags = 0;
     private int mLastUsedAppTransition = TRANSIT_UNSET;
     private String mLastOpeningApp;
     private String mLastClosingApp;
@@ -326,11 +292,11 @@ public class AppTransition implements Dump {
         return mNextAppTransition != TRANSIT_UNSET;
     }
 
-    boolean isTransitionEqual(int transit) {
+    boolean isTransitionEqual(@TransitionType int transit) {
         return mNextAppTransition == transit;
     }
 
-    int getAppTransition() {
+    @TransitionType int getAppTransition() {
         return mNextAppTransition;
      }
 
@@ -485,7 +451,7 @@ public class AppTransition implements Dump {
 
     void freeze() {
         final int transit = mNextAppTransition;
-        setAppTransition(AppTransition.TRANSIT_UNSET, 0 /* flags */);
+        setAppTransition(TRANSIT_UNSET, 0 /* flags */);
         clear();
         setReady();
         notifyAppTransitionCancelledLocked(transit);
@@ -540,7 +506,7 @@ public class AppTransition implements Dump {
         return redoLayout;
     }
 
-    private AttributeCache.Entry getCachedAnimations(WindowManager.LayoutParams lp) {
+    private AttributeCache.Entry getCachedAnimations(LayoutParams lp) {
         if (DEBUG_ANIM) Slog.v(TAG, "Loading animations: layout params pkg="
                 + (lp != null ? lp.packageName : null)
                 + " resId=0x" + (lp != null ? Integer.toHexString(lp.windowAnimations) : null));
@@ -576,7 +542,7 @@ public class AppTransition implements Dump {
         return null;
     }
 
-    Animation loadAnimationAttr(WindowManager.LayoutParams lp, int animAttr) {
+    Animation loadAnimationAttr(LayoutParams lp, int animAttr) {
         int anim = 0;
         Context context = mContext;
         if (animAttr >= 0) {
@@ -592,7 +558,7 @@ public class AppTransition implements Dump {
         return null;
     }
 
-    Animation loadAnimationRes(WindowManager.LayoutParams lp, int resId) {
+    Animation loadAnimationRes(LayoutParams lp, int resId) {
         Context context = mContext;
         if (resId >= 0) {
             AttributeCache.Entry ent = getCachedAnimations(lp);
@@ -1585,7 +1551,7 @@ public class AppTransition implements Dump {
      *                      to the recents thumbnail and hence need to account for the surface being
      *                      bigger.
      */
-    Animation loadAnimation(WindowManager.LayoutParams lp, int transit, boolean enter, int uiMode,
+    Animation loadAnimation(LayoutParams lp, int transit, boolean enter, int uiMode,
             int orientation, Rect frame, Rect displayFrame, Rect insets,
             @Nullable Rect surfaceInsets, @Nullable Rect stableInsets, boolean isVoiceInteraction,
             boolean freeform, int taskId) {
@@ -2157,8 +2123,8 @@ public class AppTransition implements Dump {
      * @return true if transition is not running and should not be skipped, false if transition is
      *         already running
      */
-    boolean prepareAppTransitionLocked(int transit, boolean alwaysKeepCurrent, int flags,
-            boolean forceOverride) {
+    boolean prepareAppTransitionLocked(@TransitionType int transit, boolean alwaysKeepCurrent,
+            @TransitionFlags int flags, boolean forceOverride) {
         if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "Prepare app transition:"
                 + " transit=" + appTransitionToString(transit)
                 + " " + this

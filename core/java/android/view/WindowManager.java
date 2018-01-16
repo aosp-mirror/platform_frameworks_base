@@ -105,6 +105,191 @@ public interface WindowManager extends ViewManager {
     final static String INPUT_CONSUMER_WALLPAPER = "wallpaper_input_consumer";
 
     /**
+     * Not set up for a transition.
+     * @hide
+     */
+    int TRANSIT_UNSET = -1;
+
+    /**
+     * No animation for transition.
+     * @hide
+     */
+    int TRANSIT_NONE = 0;
+
+    /**
+     * A window in a new activity is being opened on top of an existing one in the same task.
+     * @hide
+     */
+    int TRANSIT_ACTIVITY_OPEN = 6;
+
+    /**
+     * The window in the top-most activity is being closed to reveal the previous activity in the
+     * same task.
+     * @hide
+     */
+    int TRANSIT_ACTIVITY_CLOSE = 7;
+
+    /**
+     * A window in a new task is being opened on top of an existing one in another activity's task.
+     * @hide
+     */
+    int TRANSIT_TASK_OPEN = 8;
+
+    /**
+     * A window in the top-most activity is being closed to reveal the previous activity in a
+     * different task.
+     * @hide
+     */
+    int TRANSIT_TASK_CLOSE = 9;
+
+    /**
+     * A window in an existing task is being displayed on top of an existing one in another
+     * activity's task.
+     * @hide
+     */
+    int TRANSIT_TASK_TO_FRONT = 10;
+
+    /**
+     * A window in an existing task is being put below all other tasks.
+     * @hide
+     */
+    int TRANSIT_TASK_TO_BACK = 11;
+
+    /**
+     * A window in a new activity that doesn't have a wallpaper is being opened on top of one that
+     * does, effectively closing the wallpaper.
+     * @hide
+     */
+    int TRANSIT_WALLPAPER_CLOSE = 12;
+
+    /**
+     * A window in a new activity that does have a wallpaper is being opened on one that didn't,
+     * effectively opening the wallpaper.
+     * @hide
+     */
+    int TRANSIT_WALLPAPER_OPEN = 13;
+
+    /**
+     * A window in a new activity is being opened on top of an existing one, and both are on top
+     * of the wallpaper.
+     * @hide
+     */
+    int TRANSIT_WALLPAPER_INTRA_OPEN = 14;
+
+    /**
+     * The window in the top-most activity is being closed to reveal the previous activity, and
+     * both are on top of the wallpaper.
+     * @hide
+     */
+    int TRANSIT_WALLPAPER_INTRA_CLOSE = 15;
+
+    /**
+     * A window in a new task is being opened behind an existing one in another activity's task.
+     * The new window will show briefly and then be gone.
+     * @hide
+     */
+    int TRANSIT_TASK_OPEN_BEHIND = 16;
+
+    /**
+     * A window in a task is being animated in-place.
+     * @hide
+     */
+    int TRANSIT_TASK_IN_PLACE = 17;
+
+    /**
+     * An activity is being relaunched (e.g. due to configuration change).
+     * @hide
+     */
+    int TRANSIT_ACTIVITY_RELAUNCH = 18;
+
+    /**
+     * A task is being docked from recents.
+     * @hide
+     */
+    int TRANSIT_DOCK_TASK_FROM_RECENTS = 19;
+
+    /**
+     * Keyguard is going away.
+     * @hide
+     */
+    int TRANSIT_KEYGUARD_GOING_AWAY = 20;
+
+    /**
+     * Keyguard is going away with showing an activity behind that requests wallpaper.
+     * @hide
+     */
+    int TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER = 21;
+
+    /**
+     * Keyguard is being occluded.
+     * @hide
+     */
+    int TRANSIT_KEYGUARD_OCCLUDE = 22;
+
+    /**
+     * Keyguard is being unoccluded.
+     * @hide
+     */
+    int TRANSIT_KEYGUARD_UNOCCLUDE = 23;
+
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "TRANSIT_" }, value = {
+            TRANSIT_UNSET,
+            TRANSIT_NONE,
+            TRANSIT_ACTIVITY_OPEN,
+            TRANSIT_ACTIVITY_CLOSE,
+            TRANSIT_TASK_OPEN,
+            TRANSIT_TASK_CLOSE,
+            TRANSIT_TASK_TO_FRONT,
+            TRANSIT_TASK_TO_BACK,
+            TRANSIT_WALLPAPER_CLOSE,
+            TRANSIT_WALLPAPER_OPEN,
+            TRANSIT_WALLPAPER_INTRA_OPEN,
+            TRANSIT_WALLPAPER_INTRA_CLOSE,
+            TRANSIT_TASK_OPEN_BEHIND,
+            TRANSIT_TASK_IN_PLACE,
+            TRANSIT_ACTIVITY_RELAUNCH,
+            TRANSIT_DOCK_TASK_FROM_RECENTS,
+            TRANSIT_KEYGUARD_GOING_AWAY,
+            TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER,
+            TRANSIT_KEYGUARD_OCCLUDE,
+            TRANSIT_KEYGUARD_UNOCCLUDE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface TransitionType {}
+
+    /**
+     * Transition flag: Keyguard is going away, but keeping the notification shade open
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE = 0x1;
+
+    /**
+     * Transition flag: Keyguard is going away, but doesn't want an animation for it
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION = 0x2;
+
+    /**
+     * Transition flag: Keyguard is going away while it was showing the system wallpaper.
+     * @hide
+     */
+    int TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER = 0x4;
+
+    /**
+     * @hide
+     */
+    @IntDef(flag = true, prefix = { "TRANSIT_FLAG_" }, value = {
+            TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE,
+            TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION,
+            TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface TransitionFlags {}
+
+    /**
      * Exception that is thrown when trying to add view whose
      * {@link LayoutParams} {@link LayoutParams#token}
      * is invalid.

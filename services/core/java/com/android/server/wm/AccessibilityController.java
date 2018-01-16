@@ -346,12 +346,12 @@ final class AccessibilityController {
             final boolean magnifying = mMagnifedViewport.isMagnifyingLocked();
             if (magnifying) {
                 switch (transition) {
-                    case AppTransition.TRANSIT_ACTIVITY_OPEN:
-                    case AppTransition.TRANSIT_TASK_OPEN:
-                    case AppTransition.TRANSIT_TASK_TO_FRONT:
-                    case AppTransition.TRANSIT_WALLPAPER_OPEN:
-                    case AppTransition.TRANSIT_WALLPAPER_CLOSE:
-                    case AppTransition.TRANSIT_WALLPAPER_INTRA_OPEN: {
+                    case WindowManager.TRANSIT_ACTIVITY_OPEN:
+                    case WindowManager.TRANSIT_TASK_OPEN:
+                    case WindowManager.TRANSIT_TASK_TO_FRONT:
+                    case WindowManager.TRANSIT_WALLPAPER_OPEN:
+                    case WindowManager.TRANSIT_WALLPAPER_CLOSE:
+                    case WindowManager.TRANSIT_WALLPAPER_INTRA_OPEN: {
                         mHandler.sendEmptyMessage(MyHandler.MESSAGE_NOTIFY_USER_CONTEXT_CHANGED);
                     }
                 }
