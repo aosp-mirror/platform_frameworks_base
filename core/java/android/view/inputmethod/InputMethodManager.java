@@ -1082,15 +1082,15 @@ public final class InputMethodManager {
     }
 
     /**
-     * Flag for {@link #hideSoftInputFromWindow} to indicate that the soft
-     * input window should only be hidden if it was not explicitly shown
+     * Flag for {@link #hideSoftInputFromWindow} and {@link InputMethodService#requestHideSelf(int)}
+     * to indicate that the soft input window should only be hidden if it was not explicitly shown
      * by the user.
      */
     public static final int HIDE_IMPLICIT_ONLY = 0x0001;
 
     /**
-     * Flag for {@link #hideSoftInputFromWindow} to indicate that the soft
-     * input window should normally be hidden, unless it was originally
+     * Flag for {@link #hideSoftInputFromWindow} and {@link InputMethodService#requestShowSelf(int)}
+     * to indicate that the soft input window should normally be hidden, unless it was originally
      * shown with {@link #SHOW_FORCED}.
      */
     public static final int HIDE_NOT_ALWAYS = 0x0002;
@@ -1869,9 +1869,9 @@ public final class InputMethodManager {
      * @param flags Provides additional operating flags.  Currently may be
      * 0 or have the {@link #HIDE_IMPLICIT_ONLY},
      * {@link #HIDE_NOT_ALWAYS} bit set.
-     * @deprecated Use {@link InputMethodService#hideSoftInputFromInputMethod(int)}
-     * instead. This method was intended for IME developers who should be accessing APIs through
-     * the service. APIs in this class are intended for app developers interacting with the IME.
+     * @deprecated Use {@link InputMethodService#requestHideSelf(int)} instead. This method was
+     * intended for IME developers who should be accessing APIs through the service. APIs in this
+     * class are intended for app developers interacting with the IME.
      */
     @Deprecated
     public void hideSoftInputFromInputMethod(IBinder token, int flags) {
@@ -1901,9 +1901,9 @@ public final class InputMethodManager {
      * @param flags Provides additional operating flags.  Currently may be
      * 0 or have the {@link #SHOW_IMPLICIT} or
      * {@link #SHOW_FORCED} bit set.
-     * @deprecated Use {@link InputMethodService#showSoftInputFromInputMethod(int)}
-     * instead. This method was intended for IME developers who should be accessing APIs through
-     * the service. APIs in this class are intended for app developers interacting with the IME.
+     * @deprecated Use {@link InputMethodService#requestShowSelf(int)} instead. This method was
+     * intended for IME developers who should be accessing APIs through the service. APIs in this
+     * class are intended for app developers interacting with the IME.
      */
     @Deprecated
     public void showSoftInputFromInputMethod(IBinder token, int flags) {
