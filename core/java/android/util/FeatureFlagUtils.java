@@ -38,7 +38,6 @@ public class FeatureFlagUtils {
     static {
         DEFAULT_FLAGS = new HashMap<>();
         DEFAULT_FLAGS.put("device_info_v2", "true");
-        DEFAULT_FLAGS.put("settings_search_v2", "true");
         DEFAULT_FLAGS.put("settings_app_info_v2", "true");
         DEFAULT_FLAGS.put("settings_connected_device_v2", "true");
         DEFAULT_FLAGS.put("settings_battery_v2", "false");
