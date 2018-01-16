@@ -114,6 +114,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private boolean mAutoStop;
     private boolean mStreaming;   // Streaming the profiling output to a file.
     private String mAgent;  // Agent to attach on startup.
+    private boolean mAttachAgentDuringBind;  // Whether agent should be attached late.
     private int mDisplayId;
     private int mStackId;
     private int mTaskId;
@@ -295,7 +296,21 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 } else if (opt.equals("--streaming")) {
                     mStreaming = true;
                 } else if (opt.equals("--attach-agent")) {
+                    if (mAgent != null) {
+                        cmd.getErrPrintWriter().println(
+                                "Multiple --attach-agent(-bind) not supported");
+                        return false;
+                    }
                     mAgent = getNextArgRequired();
+                    mAttachAgentDuringBind = false;
+                } else if (opt.equals("--attach-agent-bind")) {
+                    if (mAgent != null) {
+                        cmd.getErrPrintWriter().println(
+                                "Multiple --attach-agent(-bind) not supported");
+                        return false;
+                    }
+                    mAgent = getNextArgRequired();
+                    mAttachAgentDuringBind = true;
                 } else if (opt.equals("-R")) {
                     mRepeat = Integer.parseInt(getNextArgRequired());
                 } else if (opt.equals("-S")) {
@@ -381,7 +396,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     }
                 }
                 profilerInfo = new ProfilerInfo(mProfileFile, fd, mSamplingInterval, mAutoStop,
-                        mStreaming, mAgent);
+                        mStreaming, mAgent, mAttachAgentDuringBind);
             }
 
             pw.println("Starting: " + intent);
@@ -755,7 +770,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 return -1;
             }
             profilerInfo = new ProfilerInfo(profileFile, fd, mSamplingInterval, false, mStreaming,
-                    null);
+                    null, false);
         }
 
         try {
@@ -2679,6 +2694,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("          (use with --start-profiler)");
             pw.println("      -P <FILE>: like above, but profiling stops when app goes idle");
             pw.println("      --attach-agent <agent>: attach the given agent before binding");
+            pw.println("      --attach-agent-bind <agent>: attach the given agent during binding");
             pw.println("      -R: repeat the activity launch <COUNT> times.  Prior to each repeat,");
             pw.println("          the top activity will be finished.");
             pw.println("      -S: force stop the target app before starting the activity");
