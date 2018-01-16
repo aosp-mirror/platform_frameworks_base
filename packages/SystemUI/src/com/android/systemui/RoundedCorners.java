@@ -14,6 +14,8 @@
 
 package com.android.systemui;
 
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+
 import static com.android.systemui.tuner.TunablePadding.FLAG_START;
 import static com.android.systemui.tuner.TunablePadding.FLAG_END;
 
@@ -163,7 +165,7 @@ public class RoundedCorners extends SystemUI implements Tunable {
                 | WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
         lp.setTitle("RoundedOverlay");
         lp.gravity = Gravity.TOP;
-        lp.flags2 |= WindowManager.LayoutParams.FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA;
+        lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         return lp;
     }
 

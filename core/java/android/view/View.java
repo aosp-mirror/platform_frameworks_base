@@ -3387,6 +3387,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * decorations when they are shown.  You can perform layout of your inner
      * UI elements to account for non-fullscreen system UI through the
      * {@link #fitSystemWindows(Rect)} method.
+     *
+     * <p>Note: on displays that have a {@link DisplayCutout}, the window may still be placed
+     *  differently than if {@link #SYSTEM_UI_FLAG_FULLSCREEN} was set, if the
+     *  window's {@link WindowManager.LayoutParams#layoutInDisplayCutoutMode
+     *  layoutInDisplayCutoutMode} is
+     *  {@link WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
+     *  LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT}. To avoid this, use either of the other modes.
+     *
+     * @see WindowManager.LayoutParams#layoutInDisplayCutoutMode
+     * @see WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT
+     * @see WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+     * @see WindowManager.LayoutParams#LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
      */
     public static final int SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN = 0x00000400;
 
