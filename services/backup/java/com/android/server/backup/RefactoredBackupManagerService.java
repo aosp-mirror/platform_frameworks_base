@@ -38,6 +38,7 @@ import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.IBackupAgent;
 import android.app.PendingIntent;
+import android.app.admin.DevicePolicyManager;
 import android.app.backup.BackupManager;
 import android.app.backup.BackupManagerMonitor;
 import android.app.backup.FullBackup;
@@ -681,6 +682,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     @GuardedBy("mQueueLock")
     private ArrayList<FullBackupEntry> mFullBackupQueue;
 
+    private BackupPolicyEnforcer mBackupPolicyEnforcer;
+
     // Utility: build a new random integer token. The low bits are the ordinal of the
     // operation for near-time uniqueness, and the upper bits are random for app-
     // side unpredictability.
@@ -872,6 +875,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
         // Power management
         mWakelock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*backup*");
+
+        mBackupPolicyEnforcer = new BackupPolicyEnforcer(context);
     }
 
     private void initPackageTracking() {
@@ -2774,6 +2779,10 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     public void setBackupEnabled(boolean enable) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "setBackupEnabled");
+        if (!enable && mBackupPolicyEnforcer.getMandatoryBackupTransport() != null) {
+            Slog.w(TAG, "Cannot disable backups when the mandatory backups policy is active.");
+            return;
+        }
 
         Slog.i(TAG, "Backup enabled => " + enable);
 
@@ -3009,6 +3018,12 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BACKUP, "selectBackupTransport");
 
+        if (!isAllowedByMandatoryBackupTransportPolicy(transportName)) {
+            // Don't change the transport if it is not allowed.
+            Slog.w(TAG, "Failed to select transport - disallowed by device owner policy.");
+            return mTransportManager.getCurrentTransportName();
+        }
+
         final long oldId = Binder.clearCallingIdentity();
         try {
             String previousTransportName = mTransportManager.selectTransport(transportName);
@@ -3023,10 +3038,20 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
     @Override
     public void selectBackupTransportAsync(
-            ComponentName transportComponent, ISelectBackupTransportCallback listener) {
+            ComponentName transportComponent, @Nullable ISelectBackupTransportCallback listener) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BACKUP, "selectBackupTransportAsync");
-
+        if (!isAllowedByMandatoryBackupTransportPolicy(transportComponent)) {
+            try {
+                if (listener != null) {
+                    Slog.w(TAG, "Failed to select transport - disallowed by device owner policy.");
+                    listener.onFailure(BackupManager.ERROR_BACKUP_NOT_ALLOWED);
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "ISelectBackupTransportCallback listener not available");
+            }
+            return;
+        }
         final long oldId = Binder.clearCallingIdentity();
         try {
             String transportString = transportComponent.flattenToShortString();
@@ -3048,10 +3073,12 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                         }
 
                         try {
-                            if (transportName != null) {
-                                listener.onSuccess(transportName);
-                            } else {
-                                listener.onFailure(result);
+                            if (listener != null) {
+                                if (transportName != null) {
+                                    listener.onSuccess(transportName);
+                                } else {
+                                    listener.onFailure(result);
+                                }
                             }
                         } catch (RemoteException e) {
                             Slog.e(TAG, "ISelectBackupTransportCallback listener not available");
@@ -3060,6 +3087,38 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         } finally {
             Binder.restoreCallingIdentity(oldId);
         }
+    }
+
+    /**
+     * Returns if the specified transport can be set as the current transport without violating the
+     * mandatory backup transport policy.
+     */
+    private boolean isAllowedByMandatoryBackupTransportPolicy(String transportName) {
+        ComponentName mandatoryBackupTransport = mBackupPolicyEnforcer.getMandatoryBackupTransport();
+        if (mandatoryBackupTransport == null) {
+            return true;
+        }
+        final String mandatoryBackupTransportName;
+        try {
+            mandatoryBackupTransportName =
+                    mTransportManager.getTransportName(mandatoryBackupTransport);
+        } catch (TransportNotRegisteredException e) {
+            Slog.e(TAG, "mandatory backup transport not registered!");
+            return false;
+        }
+        return TextUtils.equals(mandatoryBackupTransportName, transportName);
+    }
+
+    /**
+     * Returns if the specified transport can be set as the current transport without violating the
+     * mandatory backup transport policy.
+     */
+    private boolean isAllowedByMandatoryBackupTransportPolicy(ComponentName transport) {
+        ComponentName mandatoryBackupTransport = mBackupPolicyEnforcer.getMandatoryBackupTransport();
+        if (mandatoryBackupTransport == null) {
+            return true;
+        }
+        return mandatoryBackupTransport.equals(transport);
     }
 
     private void updateStateForTransport(String newTransportName) {

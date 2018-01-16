@@ -8633,6 +8633,13 @@ public class DevicePolicyManager {
      *
      * <p> Backup service is off by default when device owner is present.
      *
+     * <p> If backups are made mandatory by specifying a non-null mandatory backup transport using
+     * the {@link DevicePolicyManager#setMandatoryBackupTransport} method, the backup service is
+     * automatically enabled.
+     *
+     * <p> If the backup service is disabled using this method after the mandatory backup transport
+     * has been set, the mandatory backup transport is cleared.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param enabled {@code true} to enable the backup service, {@code false} to disable it.
      * @throws SecurityException if {@code admin} is not a device owner.
@@ -8662,6 +8669,43 @@ public class DevicePolicyManager {
             throw re.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Makes backups mandatory and enforces the usage of the specified backup transport.
+     *
+     * <p>When a {@code null} backup transport is specified, backups are made optional again.
+     * <p>Only device owner can call this method.
+     * <p>If backups were disabled and a non-null backup transport {@link ComponentName} is
+     * specified, backups will be enabled.
+     *
+     * @param admin admin Which {@link DeviceAdminReceiver} this request is associated with.
+     * @param backupTransportComponent The backup transport layer to be used for mandatory backups.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     */
+    public void setMandatoryBackupTransport(
+            @NonNull ComponentName admin, @Nullable ComponentName backupTransportComponent) {
+        try {
+            mService.setMandatoryBackupTransport(admin, backupTransportComponent);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the backup transport which has to be used for backups if backups are mandatory or
+     * {@code null} if backups are not mandatory.
+     *
+     * @return a {@link ComponentName} of the backup transport layer to be used if backups are
+     *         mandatory or {@code null} if backups are not mandatory.
+     */
+    public ComponentName getMandatoryBackupTransport() {
+        try {
+            return mService.getMandatoryBackupTransport();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
 
     /**
      * Called by a device owner to control the network logging feature.

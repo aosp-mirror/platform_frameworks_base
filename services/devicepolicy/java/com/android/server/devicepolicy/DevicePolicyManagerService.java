@@ -226,6 +226,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -790,6 +791,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         private static final String ATTR_LAST_NETWORK_LOGGING_NOTIFICATION = "last-notification";
         private static final String ATTR_NUM_NETWORK_LOGGING_NOTIFICATIONS = "num-notifications";
         private static final String TAG_IS_LOGOUT_ENABLED = "is_logout_enabled";
+        private static final String TAG_MANDATORY_BACKUP_TRANSPORT = "mandatory_backup_transport";
 
         DeviceAdminInfo info;
 
@@ -905,6 +907,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         // The blacklist data is stored in a file whose name is stored in the XML
         String passwordBlacklistFile = null;
+
+        // The component name of the backup transport which has to be used if backups are mandatory
+        // or null if backups are not mandatory.
+        ComponentName mandatoryBackupTransport = null;
 
         ActiveAdmin(DeviceAdminInfo _info, boolean parent) {
             info = _info;
@@ -1169,6 +1175,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 out.attribute(null, ATTR_VALUE, Boolean.toString(isLogoutEnabled));
                 out.endTag(null, TAG_IS_LOGOUT_ENABLED);
             }
+            if (mandatoryBackupTransport != null) {
+                out.startTag(null, TAG_MANDATORY_BACKUP_TRANSPORT);
+                out.attribute(null, ATTR_VALUE, mandatoryBackupTransport.flattenToString());
+                out.endTag(null, TAG_MANDATORY_BACKUP_TRANSPORT);
+            }
         }
 
         void writePackageListToXml(XmlSerializer out, String outerTag,
@@ -1346,6 +1357,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     }
                 } else if (TAG_IS_LOGOUT_ENABLED.equals(tag)) {
                     isLogoutEnabled = Boolean.parseBoolean(
+                            parser.getAttributeValue(null, ATTR_VALUE));
+                } else if (TAG_MANDATORY_BACKUP_TRANSPORT.equals(tag)) {
+                    mandatoryBackupTransport = ComponentName.unflattenFromString(
                             parser.getAttributeValue(null, ATTR_VALUE));
                 } else {
                     Slog.w(LOG_TAG, "Unknown admin tag: " + tag);
@@ -11337,7 +11351,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Preconditions.checkNotNull(admin);
         synchronized (this) {
-            getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            ActiveAdmin activeAdmin = getActiveAdminForCallerLocked(
+                    admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            if (!enabled) {
+                activeAdmin.mandatoryBackupTransport = null;
+                saveSettingsLocked(UserHandle.USER_SYSTEM);
+            }
         }
 
         final long ident = mInjector.binderClearCallingIdentity();
@@ -11370,6 +11389,50 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
     }
+
+    @Override
+    public void setMandatoryBackupTransport(
+            ComponentName admin, ComponentName backupTransportComponent) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkNotNull(admin);
+        synchronized (this) {
+            ActiveAdmin activeAdmin =
+                    getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+            if (!Objects.equals(backupTransportComponent, activeAdmin.mandatoryBackupTransport)) {
+                activeAdmin.mandatoryBackupTransport = backupTransportComponent;
+                saveSettingsLocked(UserHandle.USER_SYSTEM);
+            }
+        }
+        final long identity = mInjector.binderClearCallingIdentity();
+        try {
+            IBackupManager ibm = mInjector.getIBackupManager();
+            if (ibm != null && backupTransportComponent != null) {
+                if (!ibm.isBackupServiceActive(UserHandle.USER_SYSTEM)) {
+                    ibm.setBackupServiceActive(UserHandle.USER_SYSTEM, true);
+                }
+                ibm.selectBackupTransportAsync(backupTransportComponent, null);
+                ibm.setBackupEnabled(true);
+            }
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Failed to set mandatory backup transport.", e);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public ComponentName getMandatoryBackupTransport() {
+        if (!mHasFeature) {
+            return null;
+        }
+        synchronized (this) {
+            ActiveAdmin activeAdmin = getDeviceOwnerAdminLocked();
+            return activeAdmin == null ? null : activeAdmin.mandatoryBackupTransport;
+        }
+    }
+
 
     @Override
     public boolean bindDeviceAdminServiceAsUser(
