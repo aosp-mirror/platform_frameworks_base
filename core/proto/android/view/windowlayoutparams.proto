@@ -58,7 +58,6 @@ message WindowLayoutParamsProto {
   optional NeedsMenuState needs_menu_key = 22;
   optional .android.view.DisplayProto.ColorMode color_mode = 23;
   optional uint32 flags = 24;
-  optional uint64 flags_extra = 25;
   optional uint32 private_flags = 26;
   optional uint32 system_ui_visibility_flags = 27;
   optional uint32 subtree_system_ui_visibility_flags = 28;
