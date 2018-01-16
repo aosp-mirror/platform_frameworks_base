@@ -40,6 +40,8 @@ import com.android.systemui.plugins.PluginDependencyProvider;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.PluginManagerImpl;
 import com.android.systemui.plugins.VolumeDialogController;
+import com.android.systemui.power.EnhancedEstimates;
+import com.android.systemui.power.EnhancedEstimatesImpl;
 import com.android.systemui.power.PowerNotificationWarnings;
 import com.android.systemui.power.PowerUI;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
@@ -309,6 +311,8 @@ public class Dependency extends SystemUI {
         mProviders.put(IWindowManager.class, () -> WindowManagerGlobal.getWindowManagerService());
 
         mProviders.put(OverviewProxyService.class, () -> new OverviewProxyService(mContext));
+
+        mProviders.put(EnhancedEstimates.class, () -> new EnhancedEstimatesImpl());
 
         // Put all dependencies above here so the factory can override them if it wants.
         SystemUIFactory.getInstance().injectDependencies(mProviders, mContext);

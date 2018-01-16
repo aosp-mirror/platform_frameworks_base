@@ -38,6 +38,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.NotificationChannels;
 
+import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,6 +47,9 @@ import org.mockito.ArgumentCaptor;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class PowerNotificationWarningsTest extends SysuiTestCase {
+
+    public static final String FORMATTED_45M = "0h 45m";
+    public static final String FORMATTED_HOUR = "1h 0m";
     private final NotificationManager mMockNotificationManager = mock(NotificationManager.class);
     private PowerNotificationWarnings mPowerNotificationWarnings;
 
@@ -146,5 +150,23 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
         mPowerNotificationWarnings.dismissThermalShutdownWarning();
         verify(mMockNotificationManager, times(1)).cancelAsUser(anyString(),
                 eq(SystemMessage.NOTE_THERMAL_SHUTDOWN), any());
+    }
+
+    @Test
+    public void testGetTimeRemainingFormatted_roundsDownTo15() {
+        mPowerNotificationWarnings.updateEstimate(
+                new Estimate(TimeUnit.MINUTES.toMillis(57), true));
+        String time = mPowerNotificationWarnings.getTimeRemainingFormatted();
+
+        assertTrue("time:" + time + ", expected: " + FORMATTED_45M, time.equals(FORMATTED_45M));
+    }
+
+    @Test
+    public void testGetTimeRemainingFormatted_keepsMinutesWhenZero() {
+        mPowerNotificationWarnings.updateEstimate(
+                new Estimate(TimeUnit.MINUTES.toMillis(65), true));
+        String time = mPowerNotificationWarnings.getTimeRemainingFormatted();
+
+        assertTrue("time:" + time + ", expected: " + FORMATTED_HOUR, time.equals(FORMATTED_HOUR));
     }
 }
