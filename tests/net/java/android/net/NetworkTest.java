@@ -147,9 +147,9 @@ public class NetworkTest {
 
         // Adjust as necessary to test an implementation's specific constants.
         // When running with runtest, "adb logcat -s TestRunner" can be useful.
-        assertEquals(4311403230L, one.getNetworkHandle());
-        assertEquals(8606370526L, two.getNetworkHandle());
-        assertEquals(12901337822L, three.getNetworkHandle());
+        assertEquals(7700664333L, one.getNetworkHandle());
+        assertEquals(11995631629L, two.getNetworkHandle());
+        assertEquals(16290598925L, three.getNetworkHandle());
     }
 
     private static <T> void assertNotEqual(T t1, T t2) {
