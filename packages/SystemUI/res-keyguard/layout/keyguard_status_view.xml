@@ -34,7 +34,6 @@
         android:orientation="vertical">
         <RelativeLayout
             android:id="@+id/keyguard_clock_container"
-            android:animateLayoutChanges="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|top">
