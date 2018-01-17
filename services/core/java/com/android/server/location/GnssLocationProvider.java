@@ -2628,6 +2628,10 @@ public class GnssLocationProvider implements LocationProviderInterface {
         s.append("  mStarted=").append(mStarted).append('\n');
         s.append("  mFixInterval=").append(mFixInterval).append('\n');
         s.append("  mLowPowerMode=").append(mLowPowerMode).append('\n');
+        s.append("  mGnssMeasurementsProvider.isRegistered()=")
+                .append(mGnssMeasurementsProvider.isRegistered()).append('\n');
+        s.append("  mGnssNavigationMessageProvider.isRegistered()=")
+                .append(mGnssNavigationMessageProvider.isRegistered()).append('\n');
         s.append("  mDisableGps (battery saver mode)=").append(mDisableGps).append('\n');
         s.append("  mEngineCapabilities=0x").append(Integer.toHexString(mEngineCapabilities));
         s.append(" ( ");
