@@ -96,7 +96,7 @@ public abstract class ImsFeature {
             new WeakHashMap<IImsFeatureStatusCallback, Boolean>());
     private @ImsState int mState = STATE_NOT_AVAILABLE;
     private int mSlotId = SubscriptionManager.INVALID_SIM_SLOT_INDEX;
-    private Context mContext;
+    protected Context mContext;
 
     public void setContext(Context context) {
         mContext = context;
