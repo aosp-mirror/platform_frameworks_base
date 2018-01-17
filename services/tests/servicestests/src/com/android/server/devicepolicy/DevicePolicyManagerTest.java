@@ -2119,8 +2119,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertEquals(UserManager.DISALLOW_ADJUST_VOLUME,
                 intent.getStringExtra(DevicePolicyManager.EXTRA_RESTRICTION));
 
-        // Try with POLICY_DISABLE_CAMERA and POLICY_DISABLE_SCREEN_CAPTURE, which are not
-        // user restrictions
+        // Try with POLICY_DISABLE_CAMERA, POLICY_DISABLE_SCREEN_CAPTURE and
+        // POLICY_MANDATORY_BACKUPS, which are not user restrictions
 
         // Camera is not disabled
         intent = dpm.createAdminSupportIntent(DevicePolicyManager.POLICY_DISABLE_CAMERA);
@@ -2142,6 +2142,19 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         intent = dpm.createAdminSupportIntent(DevicePolicyManager.POLICY_DISABLE_SCREEN_CAPTURE);
         assertNotNull(intent);
         assertEquals(DevicePolicyManager.POLICY_DISABLE_SCREEN_CAPTURE,
+                intent.getStringExtra(DevicePolicyManager.EXTRA_RESTRICTION));
+
+        // Backups are not mandatory
+        intent = dpm.createAdminSupportIntent(DevicePolicyManager.POLICY_MANDATORY_BACKUPS);
+        assertNull(intent);
+
+        // Backups are mandatory
+        ComponentName transportComponent = ComponentName.unflattenFromString(
+                "android/com.android.internal.backup.LocalTransport");
+        dpm.setMandatoryBackupTransport(admin1, transportComponent);
+        intent = dpm.createAdminSupportIntent(DevicePolicyManager.POLICY_MANDATORY_BACKUPS);
+        assertNotNull(intent);
+        assertEquals(DevicePolicyManager.POLICY_MANDATORY_BACKUPS,
                 intent.getStringExtra(DevicePolicyManager.EXTRA_RESTRICTION));
 
         // Same checks for different user
