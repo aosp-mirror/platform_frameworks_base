@@ -373,6 +373,7 @@ public final class Choreographer {
      * @see #removeCallbacks
      * @hide
      */
+    @TestApi
     public void postCallback(int callbackType, Runnable action, Object token) {
         postCallbackDelayed(callbackType, action, token, 0);
     }
@@ -391,6 +392,7 @@ public final class Choreographer {
      * @see #removeCallback
      * @hide
      */
+    @TestApi
     public void postCallbackDelayed(int callbackType,
             Runnable action, Object token, long delayMillis) {
         if (action == null) {
@@ -440,6 +442,7 @@ public final class Choreographer {
      * @see #postCallbackDelayed
      * @hide
      */
+    @TestApi
     public void removeCallbacks(int callbackType, Runnable action, Object token) {
         if (callbackType < 0 || callbackType > CALLBACK_LAST) {
             throw new IllegalArgumentException("callbackType is invalid");
