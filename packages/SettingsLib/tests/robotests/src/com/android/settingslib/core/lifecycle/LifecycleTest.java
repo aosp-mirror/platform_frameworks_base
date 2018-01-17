@@ -16,9 +16,9 @@
 package com.android.settingslib.core.lifecycle;
 
 import static android.arch.lifecycle.Lifecycle.Event.ON_START;
-
 import static com.google.common.truth.Truth.assertThat;
 
+import android.arch.lifecycle.LifecycleOwner;
 import android.content.Context;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -48,6 +48,7 @@ import org.robolectric.annotation.Config;
 @Config(manifest = TestConfig.MANIFEST_PATH, sdk = TestConfig.SDK_VERSION)
 public class LifecycleTest {
 
+    private LifecycleOwner mLifecycleOwner;
     private Lifecycle mLifecycle;
 
     public static class TestDialogFragment extends ObservableDialogFragment {
@@ -146,7 +147,8 @@ public class LifecycleTest {
 
     @Before
     public void setUp() {
-        mLifecycle = new Lifecycle(() -> mLifecycle);
+        mLifecycleOwner = () -> mLifecycle;
+        mLifecycle = new Lifecycle(mLifecycleOwner);
     }
 
     @Test
