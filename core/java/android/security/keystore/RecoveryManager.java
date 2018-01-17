@@ -99,11 +99,11 @@ public class RecoveryManager {
      * @return Data necessary to recover keystore.
      * @hide
      */
-    public @NonNull RecoveryData getRecoveryData(@NonNull byte[] account)
+    @NonNull public KeychainSnapshot getRecoveryData(@NonNull byte[] account)
             throws RecoveryManagerException {
         try {
-            RecoveryData recoveryData = mBinder.getRecoveryData(account);
-            return recoveryData;
+            KeychainSnapshot keychainSnapshot = mBinder.getRecoveryData(account);
+            return keychainSnapshot;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
@@ -136,7 +136,7 @@ public class RecoveryManager {
      * version. Version zero is used, if no snapshots were created for the account.
      *
      * @return Map from recovery agent accounts to snapshot versions.
-     * @see RecoveryData#getSnapshotVersion
+     * @see KeychainSnapshot#getSnapshotVersion
      * @hide
      */
     public @NonNull Map<byte[], Integer> getRecoverySnapshotVersions()
@@ -156,7 +156,7 @@ public class RecoveryManager {
 
     /**
      * Server parameters used to generate new recovery key blobs. This value will be included in
-     * {@code RecoveryData.getEncryptedRecoveryKeyBlob()}. The same value must be included
+     * {@code KeychainSnapshot.getEncryptedRecoveryKeyBlob()}. The same value must be included
      * in vaultParams {@link #startRecoverySession}
      *
      * @param serverParams included in recovery key blob.
@@ -230,11 +230,11 @@ public class RecoveryManager {
      * Specifies a set of secret types used for end-to-end keystore encryption. Knowing all of them
      * is necessary to recover data.
      *
-     * @param secretTypes {@link RecoveryMetadata#TYPE_LOCKSCREEN} or {@link
-     *     RecoveryMetadata#TYPE_CUSTOM_PASSWORD}
+     * @param secretTypes {@link KeychainProtectionParameter#TYPE_LOCKSCREEN} or {@link
+     *     KeychainProtectionParameter#TYPE_CUSTOM_PASSWORD}
      */
     public void setRecoverySecretTypes(
-            @NonNull @RecoveryMetadata.UserSecretType int[] secretTypes)
+            @NonNull @KeychainProtectionParameter.UserSecretType int[] secretTypes)
             throws RecoveryManagerException {
         try {
             mBinder.setRecoverySecretTypes(secretTypes);
@@ -247,12 +247,12 @@ public class RecoveryManager {
 
     /**
      * Defines a set of secret types used for end-to-end keystore encryption. Knowing all of them is
-     * necessary to generate RecoveryData.
+     * necessary to generate KeychainSnapshot.
      *
      * @return list of recovery secret types
-     * @see RecoveryData
+     * @see KeychainSnapshot
      */
-    public @NonNull @RecoveryMetadata.UserSecretType int[] getRecoverySecretTypes()
+    @NonNull public @KeychainProtectionParameter.UserSecretType int[] getRecoverySecretTypes()
             throws RecoveryManagerException {
         try {
             return mBinder.getRecoverySecretTypes();
@@ -271,7 +271,8 @@ public class RecoveryManager {
      * @return list of recovery secret types
      * @hide
      */
-    public @NonNull @RecoveryMetadata.UserSecretType int[] getPendingRecoverySecretTypes()
+    @NonNull
+    public @KeychainProtectionParameter.UserSecretType int[] getPendingRecoverySecretTypes()
             throws RecoveryManagerException {
         try {
             return mBinder.getPendingRecoverySecretTypes();
@@ -285,14 +286,14 @@ public class RecoveryManager {
     /**
      * Method notifies KeyStore that a user-generated secret is available. This method generates a
      * symmetric session key which a trusted remote device can use to return a recovery key. Caller
-     * should use {@link RecoveryMetadata#clearSecret} to override the secret value in
+     * should use {@link KeychainProtectionParameter#clearSecret} to override the secret value in
      * memory.
      *
      * @param recoverySecret user generated secret together with parameters necessary to regenerate
      *     it on a new device.
      * @hide
      */
-    public void recoverySecretAvailable(@NonNull RecoveryMetadata recoverySecret)
+    public void recoverySecretAvailable(@NonNull KeychainProtectionParameter recoverySecret)
             throws RecoveryManagerException {
         try {
             mBinder.recoverySecretAvailable(recoverySecret);
@@ -326,7 +327,7 @@ public class RecoveryManager {
             @NonNull byte[] verifierPublicKey,
             @NonNull byte[] vaultParams,
             @NonNull byte[] vaultChallenge,
-            @NonNull List<RecoveryMetadata> secrets)
+            @NonNull List<KeychainProtectionParameter> secrets)
             throws RecoveryManagerException {
         try {
             byte[] recoveryClaim =
@@ -352,13 +353,13 @@ public class RecoveryManager {
      * @param recoveryKeyBlob Recovery blob encrypted by symmetric key generated for this session.
      * @param applicationKeys Application keys. Key material can be decrypted using recoveryKeyBlob
      *     and session. KeyStore only uses package names from the application info in {@link
-     *     EntryRecoveryData}. Caller is responsibility to perform certificates check.
+     *     WrappedApplicationKey}. Caller is responsibility to perform certificates check.
      * @return Map from alias to raw key material.
      */
     public Map<String, byte[]> recoverKeys(
             @NonNull String sessionId,
             @NonNull byte[] recoveryKeyBlob,
-            @NonNull List<EntryRecoveryData> applicationKeys)
+            @NonNull List<WrappedApplicationKey> applicationKeys)
             throws RecoveryManagerException {
         try {
             return (Map<String, byte[]>) mBinder.recoverKeys(

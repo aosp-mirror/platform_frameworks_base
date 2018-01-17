@@ -34,9 +34,9 @@ import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 
-import android.security.keystore.EntryRecoveryData;
-import android.security.keystore.RecoveryData;
-import android.security.keystore.RecoveryMetadata;
+import android.security.keystore.KeychainProtectionParameter;
+import android.security.keystore.KeychainSnapshot;
+import android.security.keystore.WrappedApplicationKey;
 import android.security.keystore.RecoveryManager;
 import android.util.Log;
 
@@ -45,7 +45,6 @@ import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKe
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySessionStorage;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;
 
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
 import java.security.KeyFactory;
@@ -171,11 +170,12 @@ public class RecoverableKeyStoreManager {
      * @return recovery data
      * @hide
      */
-    public @NonNull RecoveryData getRecoveryData(@NonNull byte[] account)
+    public @NonNull
+    KeychainSnapshot getRecoveryData(@NonNull byte[] account)
             throws RemoteException {
         checkRecoverKeyStorePermission();
         int uid = Binder.getCallingUid();
-        RecoveryData snapshot = mSnapshotStorage.get(uid);
+        KeychainSnapshot snapshot = mSnapshotStorage.get(uid);
         if (snapshot == null) {
             throw new ServiceSpecificException(ERROR_NO_SNAPSHOT_PENDING);
         }
@@ -257,7 +257,7 @@ public class RecoverableKeyStoreManager {
      * @hide
      */
     public void setRecoverySecretTypes(
-            @NonNull @RecoveryMetadata.UserSecretType int[] secretTypes)
+            @NonNull @KeychainProtectionParameter.UserSecretType int[] secretTypes)
             throws RemoteException {
         checkRecoverKeyStorePermission();
         int userId = UserHandle.getCallingUserId();
@@ -292,9 +292,9 @@ public class RecoverableKeyStoreManager {
     }
 
     public void recoverySecretAvailable(
-            @NonNull RecoveryMetadata recoverySecret) throws RemoteException {
+            @NonNull KeychainProtectionParameter recoverySecret) throws RemoteException {
         int uid = Binder.getCallingUid();
-        if (recoverySecret.getLockScreenUiFormat() == RecoveryMetadata.TYPE_LOCKSCREEN) {
+        if (recoverySecret.getLockScreenUiFormat() == KeychainProtectionParameter.TYPE_LOCKSCREEN) {
             throw new SecurityException(
                     "Caller " + uid + " is not allowed to set lock screen secret");
         }
@@ -320,13 +320,13 @@ public class RecoverableKeyStoreManager {
             @NonNull byte[] verifierPublicKey,
             @NonNull byte[] vaultParams,
             @NonNull byte[] vaultChallenge,
-            @NonNull List<RecoveryMetadata> secrets)
+            @NonNull List<KeychainProtectionParameter> secrets)
             throws RemoteException {
         checkRecoverKeyStorePermission();
         int uid = Binder.getCallingUid();
 
         if (secrets.size() != 1) {
-            throw new UnsupportedOperationException("Only a single RecoveryMetadata is supported");
+            throw new UnsupportedOperationException("Only a single KeychainProtectionParameter is supported");
         }
 
         PublicKey publicKey;
@@ -384,7 +384,7 @@ public class RecoverableKeyStoreManager {
     public Map<String, byte[]> recoverKeys(
             @NonNull String sessionId,
             @NonNull byte[] encryptedRecoveryKey,
-            @NonNull List<EntryRecoveryData> applicationKeys)
+            @NonNull List<WrappedApplicationKey> applicationKeys)
             throws RemoteException {
         checkRecoverKeyStorePermission();
         int uid = Binder.getCallingUid();
@@ -474,9 +474,9 @@ public class RecoverableKeyStoreManager {
      */
     private Map<String, byte[]> recoverApplicationKeys(
             @NonNull byte[] recoveryKey,
-            @NonNull List<EntryRecoveryData> applicationKeys) throws RemoteException {
+            @NonNull List<WrappedApplicationKey> applicationKeys) throws RemoteException {
         HashMap<String, byte[]> keyMaterialByAlias = new HashMap<>();
-        for (EntryRecoveryData applicationKey : applicationKeys) {
+        for (WrappedApplicationKey applicationKey : applicationKeys) {
             String alias = applicationKey.getAlias();
             byte[] encryptedKeyMaterial = applicationKey.getEncryptedKeyMaterial();
 

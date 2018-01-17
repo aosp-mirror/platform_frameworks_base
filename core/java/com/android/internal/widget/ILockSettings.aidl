@@ -19,9 +19,9 @@ package com.android.internal.widget;
 import android.app.PendingIntent;
 import android.app.trust.IStrongAuthTracker;
 import android.os.Bundle;
-import android.security.keystore.EntryRecoveryData;
-import android.security.keystore.RecoveryData;
-import android.security.keystore.RecoveryMetadata;
+import android.security.keystore.WrappedApplicationKey;
+import android.security.keystore.KeychainSnapshot;
+import android.security.keystore.KeychainProtectionParameter;
 import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.VerifyCredentialResponse;
 
@@ -64,7 +64,7 @@ interface ILockSettings {
     // {@code ServiceSpecificException} may be thrown to signal an error, which caller can
     // convert to  {@code RecoveryManagerException}.
     void initRecoveryService(in String rootCertificateAlias, in byte[] signedPublicKeyList);
-    RecoveryData getRecoveryData(in byte[] account);
+    KeychainSnapshot getRecoveryData(in byte[] account);
     byte[] generateAndStoreKey(String alias);
     void removeKey(String alias);
     void setSnapshotCreatedPendingIntent(in PendingIntent intent);
@@ -75,10 +75,10 @@ interface ILockSettings {
     void setRecoverySecretTypes(in int[] secretTypes);
     int[] getRecoverySecretTypes();
     int[] getPendingRecoverySecretTypes();
-    void recoverySecretAvailable(in RecoveryMetadata recoverySecret);
+    void recoverySecretAvailable(in KeychainProtectionParameter recoverySecret);
     byte[] startRecoverySession(in String sessionId,
             in byte[] verifierPublicKey, in byte[] vaultParams, in byte[] vaultChallenge,
-            in List<RecoveryMetadata> secrets);
+            in List<KeychainProtectionParameter> secrets);
     Map/*<String, byte[]>*/ recoverKeys(in String sessionId, in byte[] recoveryKeyBlob,
-            in List<EntryRecoveryData> applicationKeys);
+            in List<WrappedApplicationKey> applicationKeys);
 }
