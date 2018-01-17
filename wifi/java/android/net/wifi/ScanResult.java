@@ -294,30 +294,12 @@ public class ScanResult implements Parcelable {
     }
 
     /**
-     * num IP configuration failures
-     * @hide
-     */
-    public int numIpConfigFailures;
-
-    /**
-     * @hide
-     * Last time we blacklisted the ScanResult
-     */
-    public long blackListTimestamp;
-
-    /**
      * Status indicating the scan result does not correspond to a user's saved configuration
      * @hide
      * @removed
      */
     @SystemApi
     public boolean untrusted;
-
-    /**
-     * Number of time we connected to it
-     * @hide
-     */
-    public int numConnection;
 
     /**
      * Number of time autojoin used it
@@ -431,12 +413,6 @@ public class ScanResult implements Parcelable {
      * anqp lines from supplicant BSS response
      */
     public List<String> anqpLines;
-
-    /**
-     *  @hide
-     * storing the raw bytes of full result IEs
-     **/
-    public byte[] bytes;
 
     /** information elements from beacon
      * @hide
@@ -612,9 +588,7 @@ public class ScanResult implements Parcelable {
             distanceSdCm = source.distanceSdCm;
             seen = source.seen;
             untrusted = source.untrusted;
-            numConnection = source.numConnection;
             numUsage = source.numUsage;
-            numIpConfigFailures = source.numIpConfigFailures;
             venueName = source.venueName;
             operatorFriendlyName = source.operatorFriendlyName;
             flags = source.flags;
@@ -697,9 +671,7 @@ public class ScanResult implements Parcelable {
         dest.writeInt(centerFreq1);
         dest.writeLong(seen);
         dest.writeInt(untrusted ? 1 : 0);
-        dest.writeInt(numConnection);
         dest.writeInt(numUsage);
-        dest.writeInt(numIpConfigFailures);
         dest.writeString((venueName != null) ? venueName.toString() : "");
         dest.writeString((operatorFriendlyName != null) ? operatorFriendlyName.toString() : "");
         dest.writeLong(this.flags);
@@ -779,9 +751,7 @@ public class ScanResult implements Parcelable {
 
                 sr.seen = in.readLong();
                 sr.untrusted = in.readInt() != 0;
-                sr.numConnection = in.readInt();
                 sr.numUsage = in.readInt();
-                sr.numIpConfigFailures = in.readInt();
                 sr.venueName = in.readString();
                 sr.operatorFriendlyName = in.readString();
                 sr.flags = in.readLong();
