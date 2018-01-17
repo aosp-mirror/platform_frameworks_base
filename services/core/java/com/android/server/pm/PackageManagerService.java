@@ -3849,10 +3849,6 @@ Slog.e("TODD",
         if (ps == null) {
             return null;
         }
-        PackageParser.Package p = ps.pkg;
-        if (p == null) {
-            return null;
-        }
         final int callingUid = Binder.getCallingUid();
         // Filter out ephemeral app metadata:
         //   * The system/shell/root can see metadata for any app
@@ -3864,32 +3860,58 @@ Slog.e("TODD",
             return null;
         }
 
-        final PermissionsState permissionsState = ps.getPermissionsState();
-
-        // Compute GIDs only if requested
-        final int[] gids = (flags & PackageManager.GET_GIDS) == 0
-                ? EMPTY_INT_ARRAY : permissionsState.computeGids(userId);
-        // Compute granted permissions only if package has requested permissions
-        final Set<String> permissions = ArrayUtils.isEmpty(p.requestedPermissions)
-                ? Collections.<String>emptySet() : permissionsState.getPermissions(userId);
-        final PackageUserState state = ps.readUserState(userId);
-
         if ((flags & MATCH_UNINSTALLED_PACKAGES) != 0
                 && ps.isSystem()) {
             flags |= MATCH_ANY_USER;
         }
 
-        PackageInfo packageInfo = PackageParser.generatePackageInfo(p, gids, flags,
-                ps.firstInstallTime, ps.lastUpdateTime, permissions, state, userId);
+        final PackageUserState state = ps.readUserState(userId);
+        PackageParser.Package p = ps.pkg;
+        if (p != null) {
+            final PermissionsState permissionsState = ps.getPermissionsState();
 
-        if (packageInfo == null) {
+            // Compute GIDs only if requested
+            final int[] gids = (flags & PackageManager.GET_GIDS) == 0
+                    ? EMPTY_INT_ARRAY : permissionsState.computeGids(userId);
+            // Compute granted permissions only if package has requested permissions
+            final Set<String> permissions = ArrayUtils.isEmpty(p.requestedPermissions)
+                    ? Collections.<String>emptySet() : permissionsState.getPermissions(userId);
+
+            PackageInfo packageInfo = PackageParser.generatePackageInfo(p, gids, flags,
+                    ps.firstInstallTime, ps.lastUpdateTime, permissions, state, userId);
+
+            if (packageInfo == null) {
+                return null;
+            }
+
+            packageInfo.packageName = packageInfo.applicationInfo.packageName =
+                    resolveExternalPackageNameLPr(p);
+
+            return packageInfo;
+        } else if ((flags & MATCH_UNINSTALLED_PACKAGES) != 0 && state.isAvailable(flags)) {
+            PackageInfo pi = new PackageInfo();
+            pi.packageName = ps.name;
+            pi.setLongVersionCode(ps.versionCode);
+            pi.sharedUserId = (ps.sharedUser != null) ? ps.sharedUser.name : null;
+            pi.firstInstallTime = ps.firstInstallTime;
+            pi.lastUpdateTime = ps.lastUpdateTime;
+
+            ApplicationInfo ai = new ApplicationInfo();
+            ai.packageName = ps.name;
+            ai.uid = UserHandle.getUid(userId, ps.appId);
+            ai.primaryCpuAbi = ps.primaryCpuAbiString;
+            ai.secondaryCpuAbi = ps.secondaryCpuAbiString;
+            ai.versionCode = ps.versionCode;
+            ai.flags = ps.pkgFlags;
+            ai.privateFlags = ps.pkgPrivateFlags;
+            pi.applicationInfo = PackageParser.generateApplicationInfo(ai, flags, state, userId);
+
+            if (DEBUG_PACKAGE_INFO) Log.v(TAG, "ps.pkg is n/a for ["
+                    + ps.name + "]. Provides a minimum info.");
+            return pi;
+        } else {
             return null;
         }
-
-        packageInfo.packageName = packageInfo.applicationInfo.packageName =
-                resolveExternalPackageNameLPr(p);
-
-        return packageInfo;
     }
 
     @Override
