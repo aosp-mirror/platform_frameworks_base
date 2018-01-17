@@ -29,4 +29,6 @@ interface ISliceManager {
     void unpinSlice(String pkg, in Uri uri);
     boolean hasSliceAccess(String pkg);
     SliceSpec[] getPinnedSpecs(in Uri uri, String pkg);
+    int checkSlicePermission(in Uri uri, String pkg, int pid, int uid);
+    void grantPermissionFromUser(in Uri uri, String pkg, String callingPkg, boolean allSlices);
 }

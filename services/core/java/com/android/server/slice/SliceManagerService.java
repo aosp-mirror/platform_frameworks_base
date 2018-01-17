@@ -23,10 +23,12 @@ import android.Manifest.permission;
 import android.app.AppOpsManager;
 import android.app.slice.ISliceListener;
 import android.app.slice.ISliceManager;
+import android.app.slice.SliceManager;
 import android.app.slice.SliceSpec;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
@@ -37,6 +39,7 @@ import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -63,6 +66,8 @@ public class SliceManagerService extends ISliceManager.Stub {
 
     @GuardedBy("mLock")
     private final ArrayMap<Uri, PinnedSliceState> mPinnedSlicesByUri = new ArrayMap<>();
+    @GuardedBy("mLock")
+    private final ArraySet<SliceGrant> mUserGrants = new ArraySet<>();
     private final Handler mHandler;
     private final ContentObserver mObserver;
 
@@ -111,7 +116,7 @@ public class SliceManagerService extends ISliceManager.Stub {
         verifyCaller(pkg);
         uri = maybeAddUserId(uri, Binder.getCallingUserHandle().getIdentifier());
         enforceAccess(pkg, uri);
-        getOrCreatePinnedSlice(uri).addSliceListener(listener, specs);
+        getOrCreatePinnedSlice(uri).addSliceListener(listener, pkg, specs);
     }
 
     @Override
@@ -154,6 +159,43 @@ public class SliceManagerService extends ISliceManager.Stub {
         verifyCaller(pkg);
         enforceAccess(pkg, uri);
         return getPinnedSlice(uri).getSpecs();
+    }
+
+    @Override
+    public int checkSlicePermission(Uri uri, String pkg, int pid, int uid) throws RemoteException {
+        if (mContext.checkUriPermission(uri, pid, uid, Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                == PackageManager.PERMISSION_GRANTED) {
+            return SliceManager.PERMISSION_GRANTED;
+        }
+        if (hasFullSliceAccess(pkg, uid)) {
+            return SliceManager.PERMISSION_GRANTED;
+        }
+        synchronized (mLock) {
+            if (mUserGrants.contains(new SliceGrant(uri, pkg))) {
+                return SliceManager.PERMISSION_USER_GRANTED;
+            }
+        }
+        return SliceManager.PERMISSION_DENIED;
+    }
+
+    @Override
+    public void grantPermissionFromUser(Uri uri, String pkg, String callingPkg, boolean allSlices) {
+        verifyCaller(callingPkg);
+        getContext().enforceCallingOrSelfPermission(permission.MANAGE_SLICE_PERMISSIONS,
+                "Slice granting requires MANAGE_SLICE_PERMISSIONS");
+        if (allSlices) {
+            // TODO: Manage full access grants.
+        } else {
+            synchronized (mLock) {
+                mUserGrants.add(new SliceGrant(uri, pkg));
+            }
+            long ident = Binder.clearCallingIdentity();
+            try {
+                mContext.getContentResolver().notifyChange(uri, null);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
     }
 
     ///  ----- internal code -----
@@ -203,10 +245,11 @@ public class SliceManagerService extends ISliceManager.Stub {
     }
 
     private void enforceAccess(String pkg, Uri uri) {
-        getContext().enforceUriPermission(uri, permission.BIND_SLICE,
-                permission.BIND_SLICE, Binder.getCallingPid(), Binder.getCallingUid(),
-                Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
-                "Slice binding requires the permission BIND_SLICE");
+        if (!hasFullSliceAccess(pkg, Binder.getCallingUid())) {
+            getContext().enforceUriPermission(uri, Binder.getCallingPid(), Binder.getCallingUid(),
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                    "Slice binding requires permission to the Uri");
+        }
         int user = Binder.getCallingUserHandle().getIdentifier();
         if (getUserIdFromUri(uri, user) != user) {
             getContext().enforceCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS_FULL,
@@ -230,8 +273,14 @@ public class SliceManagerService extends ISliceManager.Stub {
     }
 
     private boolean hasFullSliceAccess(String pkg, int userId) {
-        return isDefaultHomeApp(pkg, userId) || isAssistant(pkg, userId)
-                || isGrantedFullAccess(pkg, userId);
+        long ident = Binder.clearCallingIdentity();
+        try {
+            boolean ret = isDefaultHomeApp(pkg, userId) || isAssistant(pkg, userId)
+                    || isGrantedFullAccess(pkg, userId);
+            return ret;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
     }
 
     private boolean isAssistant(String pkg, int userId) {
@@ -259,7 +308,8 @@ public class SliceManagerService extends ISliceManager.Stub {
 
     private boolean isDefaultHomeApp(String pkg, int userId) {
         String defaultHome = getDefaultHome(userId);
-        return Objects.equals(pkg, defaultHome);
+
+        return pkg != null && Objects.equals(pkg, defaultHome);
     }
 
     // Based on getDefaultHome in ShortcutService.
@@ -301,7 +351,7 @@ public class SliceManagerService extends ISliceManager.Stub {
                     lastPriority = ri.priority;
                 }
             }
-            return detected.getPackageName();
+            return detected != null ? detected.getPackageName() : null;
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -347,6 +397,28 @@ public class SliceManagerService extends ISliceManager.Stub {
         @Override
         public void onStopUser(int userHandle) {
             mService.onStopUser(userHandle);
+        }
+    }
+
+    private class SliceGrant {
+        private final Uri mUri;
+        private final String mPkg;
+
+        public SliceGrant(Uri uri, String pkg) {
+            mUri = uri;
+            mPkg = pkg;
+        }
+
+        @Override
+        public int hashCode() {
+            return mUri.hashCode() + mPkg.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof SliceGrant)) return false;
+            SliceGrant other = (SliceGrant) obj;
+            return Objects.equals(other.mUri, mUri) && Objects.equals(other.mPkg, mPkg);
         }
     }
 }
