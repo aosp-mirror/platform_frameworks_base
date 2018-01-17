@@ -18,11 +18,10 @@ package com.android.internal.print;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.util.ArrayMap;
+import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.internal.util.Preconditions;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -36,6 +35,8 @@ import java.util.LinkedList;
  * <p>This mirrors the interface of {@link ProtoOutputStream}.
  */
 public class DualDumpOutputStream {
+    private static final String LOG_TAG = DualDumpOutputStream.class.getSimpleName();
+
     // When writing to a proto, the proto
     private final @Nullable ProtoOutputStream mProtoStream;
 
@@ -44,18 +45,18 @@ public class DualDumpOutputStream {
     // Temporary storage of data when printing to mIpw
     private final LinkedList<DumpObject> mDumpObjects = new LinkedList<>();
 
-    private static abstract class DumpAble {
+    private static abstract class Dumpable {
         final String name;
 
-        private DumpAble(String name) {
+        private Dumpable(String name) {
             this.name = name;
         }
 
         abstract void print(IndentingPrintWriter ipw, boolean printName);
     }
 
-    private static class DumpObject extends DumpAble {
-        private final LinkedHashMap<String, ArrayList<DumpAble>> mSubObjects = new LinkedHashMap<>();
+    private static class DumpObject extends Dumpable {
+        private final LinkedHashMap<String, ArrayList<Dumpable>> mSubObjects = new LinkedHashMap<>();
 
         private DumpObject(String name) {
             super(name);
@@ -70,7 +71,7 @@ public class DualDumpOutputStream {
             }
             ipw.increaseIndent();
 
-            for (ArrayList<DumpAble> subObject: mSubObjects.values()) {
+            for (ArrayList<Dumpable> subObject: mSubObjects.values()) {
                 int numDumpables = subObject.size();
 
                 if (numDumpables == 1) {
@@ -100,8 +101,8 @@ public class DualDumpOutputStream {
          * @param fieldName name of the field added
          * @param d The dumpable to add
          */
-        public void add(String fieldName, DumpAble d) {
-            ArrayList<DumpAble> l = mSubObjects.get(fieldName);
+        public void add(String fieldName, Dumpable d) {
+            ArrayList<Dumpable> l = mSubObjects.get(fieldName);
 
             if (l == null) {
                 l = new ArrayList<>(1);
@@ -112,7 +113,7 @@ public class DualDumpOutputStream {
         }
     }
 
-    private static class DumpField extends DumpAble {
+    private static class DumpField extends Dumpable {
         private final String mValue;
 
         private DumpField(String name, String value) {
@@ -139,7 +140,10 @@ public class DualDumpOutputStream {
      */
     public DualDumpOutputStream(@Nullable ProtoOutputStream proto,
             @Nullable IndentingPrintWriter ipw) {
-        Preconditions.checkArgument((proto == null) != (ipw == null));
+        if ((proto == null) == (ipw == null)) {
+            Log.e(LOG_TAG, "Cannot dump to clear text and proto at once. Ignoring proto");
+            proto = null;
+        }
 
         mProtoStream = proto;
         mIpw = ipw;
@@ -213,7 +217,7 @@ public class DualDumpOutputStream {
             DumpObject d = new DumpObject(fieldName);
             mDumpObjects.getLast().add(fieldName, d);
             mDumpObjects.addLast(d);
-            return 0;
+            return System.identityHashCode(d);
         }
     }
 
@@ -221,6 +225,10 @@ public class DualDumpOutputStream {
         if (mProtoStream != null) {
             mProtoStream.end(token);
         } else {
+            if (System.identityHashCode(mDumpObjects.getLast()) != token) {
+                Log.w(LOG_TAG, "Unexpected token for ending " + mDumpObjects.getLast().name
+                                + " at " + Arrays.toString(Thread.currentThread().getStackTrace()));
+            }
             mDumpObjects.removeLast();
         }
     }
@@ -250,7 +258,10 @@ public class DualDumpOutputStream {
      * @param nestedState The state of the dump
      */
     public void writeNested(@NonNull String fieldName, byte[] nestedState) {
-        Preconditions.checkNotNull(mIpw);
+        if (mIpw == null) {
+            Log.w(LOG_TAG, "writeNested does not work for proto logging");
+            return;
+        }
 
         mDumpObjects.getLast().add(fieldName,
                 new DumpField(fieldName, (new String(nestedState, StandardCharsets.UTF_8)).trim()));

@@ -815,61 +815,63 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
         mDestroyed = true;
     }
 
-    public void dump(@NonNull DualDumpOutputStream proto) {
+    public void dump(@NonNull DualDumpOutputStream dumpStream) {
         synchronized (mLock) {
-            proto.write("user_id", PrintUserStateProto.USER_ID, mUserId);
+            dumpStream.write("user_id", PrintUserStateProto.USER_ID, mUserId);
 
             final int installedServiceCount = mInstalledServices.size();
             for (int i = 0; i < installedServiceCount; i++) {
-                long token = proto.start("installed_services",
+                long token = dumpStream.start("installed_services",
                         PrintUserStateProto.INSTALLED_SERVICES);
                 PrintServiceInfo installedService = mInstalledServices.get(i);
 
                 ResolveInfo resolveInfo = installedService.getResolveInfo();
-                writeComponentName(proto, "component_name",
+                writeComponentName(dumpStream, "component_name",
                         InstalledPrintServiceProto.COMPONENT_NAME,
                         new ComponentName(resolveInfo.serviceInfo.packageName,
                                 resolveInfo.serviceInfo.name));
 
-                writeStringIfNotNull(proto, "settings_activity",
+                writeStringIfNotNull(dumpStream, "settings_activity",
                         InstalledPrintServiceProto.SETTINGS_ACTIVITY,
                         installedService.getSettingsActivityName());
-                writeStringIfNotNull(proto, "add_printers_activity",
+                writeStringIfNotNull(dumpStream, "add_printers_activity",
                         InstalledPrintServiceProto.ADD_PRINTERS_ACTIVITY,
                         installedService.getAddPrintersActivityName());
-                writeStringIfNotNull(proto, "advanced_options_activity",
+                writeStringIfNotNull(dumpStream, "advanced_options_activity",
                         InstalledPrintServiceProto.ADVANCED_OPTIONS_ACTIVITY,
                         installedService.getAdvancedOptionsActivityName());
 
-                proto.end(token);
+                dumpStream.end(token);
             }
 
             for (ComponentName disabledService : mDisabledServices) {
-                writeComponentName(proto, "disabled_services",
+                writeComponentName(dumpStream, "disabled_services",
                         PrintUserStateProto.DISABLED_SERVICES, disabledService);
             }
 
             final int activeServiceCount = mActiveServices.size();
             for (int i = 0; i < activeServiceCount; i++) {
-                long token = proto.start("actives_services", PrintUserStateProto.ACTIVE_SERVICES);
-                mActiveServices.valueAt(i).dump(proto);
-                proto.end(token);
+                long token = dumpStream.start("actives_services",
+                        PrintUserStateProto.ACTIVE_SERVICES);
+                mActiveServices.valueAt(i).dump(dumpStream);
+                dumpStream.end(token);
             }
 
-            mPrintJobForAppCache.dumpLocked(proto);
+            mPrintJobForAppCache.dumpLocked(dumpStream);
 
             if (mPrinterDiscoverySession != null) {
-                long token = proto.start("discovery_service",
+                long token = dumpStream.start("discovery_service",
                         PrintUserStateProto.DISCOVERY_SESSIONS);
-                mPrinterDiscoverySession.dumpLocked(proto);
-                proto.end(token);
+                mPrinterDiscoverySession.dumpLocked(dumpStream);
+                dumpStream.end(token);
             }
 
         }
 
-        long token = proto.start("print_spooler_state", PrintUserStateProto.PRINT_SPOOLER_STATE);
-        mSpooler.dump(proto);
-        proto.end(token);
+        long token = dumpStream.start("print_spooler_state",
+                PrintUserStateProto.PRINT_SPOOLER_STATE);
+        mSpooler.dump(dumpStream);
+        dumpStream.end(token);
     }
 
     private void readConfigurationLocked() {
@@ -1597,16 +1599,16 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
             }
         }
 
-        public void dumpLocked(@NonNull DualDumpOutputStream proto) {
-            proto.write("is_destroyed", PrinterDiscoverySessionProto.IS_DESTROYED, mDestroyed);
-            proto.write("is_printer_discovery_in_progress",
+        public void dumpLocked(@NonNull DualDumpOutputStream dumpStream) {
+            dumpStream.write("is_destroyed", PrinterDiscoverySessionProto.IS_DESTROYED, mDestroyed);
+            dumpStream.write("is_printer_discovery_in_progress",
                     PrinterDiscoverySessionProto.IS_PRINTER_DISCOVERY_IN_PROGRESS,
                     !mStartedPrinterDiscoveryTokens.isEmpty());
 
             final int observerCount = mDiscoveryObservers.beginBroadcast();
             for (int i = 0; i < observerCount; i++) {
                 IPrinterDiscoveryObserver observer = mDiscoveryObservers.getBroadcastItem(i);
-                proto.write("printer_discovery_observers",
+                dumpStream.write("printer_discovery_observers",
                         PrinterDiscoverySessionProto.PRINTER_DISCOVERY_OBSERVERS,
                         observer.toString());
             }
@@ -1615,21 +1617,21 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
             final int tokenCount = this.mStartedPrinterDiscoveryTokens.size();
             for (int i = 0; i < tokenCount; i++) {
                 IBinder token = mStartedPrinterDiscoveryTokens.get(i);
-                proto.write("discovery_requests",
+                dumpStream.write("discovery_requests",
                         PrinterDiscoverySessionProto.DISCOVERY_REQUESTS, token.toString());
             }
 
             final int trackedPrinters = mStateTrackedPrinters.size();
             for (int i = 0; i < trackedPrinters; i++) {
                 PrinterId printer = mStateTrackedPrinters.get(i);
-                writePrinterId(proto, "tracked_printer_requests",
+                writePrinterId(dumpStream, "tracked_printer_requests",
                         PrinterDiscoverySessionProto.TRACKED_PRINTER_REQUESTS, printer);
             }
 
             final int printerCount = mPrinters.size();
             for (int i = 0; i < printerCount; i++) {
                 PrinterInfo printer = mPrinters.valueAt(i);
-                writePrinterInfo(mContext, proto, "printer",
+                writePrinterInfo(mContext, dumpStream, "printer",
                         PrinterDiscoverySessionProto.PRINTER, printer);
             }
         }
@@ -1843,22 +1845,22 @@ final class UserState implements PrintSpoolerCallbacks, PrintServiceCallbacks,
             }
         }
 
-        public void dumpLocked(@NonNull DualDumpOutputStream proto) {
+        public void dumpLocked(@NonNull DualDumpOutputStream dumpStream) {
             final int bucketCount = mPrintJobsForRunningApp.size();
             for (int i = 0; i < bucketCount; i++) {
                 final int appId = mPrintJobsForRunningApp.keyAt(i);
                 List<PrintJobInfo> bucket = mPrintJobsForRunningApp.valueAt(i);
                 final int printJobCount = bucket.size();
                 for (int j = 0; j < printJobCount; j++) {
-                    long token = proto.start("cached_print_jobs",
+                    long token = dumpStream.start("cached_print_jobs",
                             PrintUserStateProto.CACHED_PRINT_JOBS);
 
-                    proto.write("app_id", CachedPrintJobProto.APP_ID, appId);
+                    dumpStream.write("app_id", CachedPrintJobProto.APP_ID, appId);
 
-                    writePrintJobInfo(mContext, proto, "print_job", CachedPrintJobProto.PRINT_JOB,
-                            bucket.get(j));
+                    writePrintJobInfo(mContext, dumpStream, "print_job",
+                            CachedPrintJobProto.PRINT_JOB, bucket.get(j));
 
-                    proto.end(token);
+                    dumpStream.end(token);
                 }
             }
         }

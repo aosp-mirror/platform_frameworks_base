@@ -556,18 +556,18 @@ final class RemotePrintSpooler {
         }
     }
 
-    public void dump(@NonNull DualDumpOutputStream proto) {
+    public void dump(@NonNull DualDumpOutputStream dumpStream) {
         synchronized (mLock) {
-            proto.write("is_destroyed", PrintSpoolerStateProto.IS_DESTROYED, mDestroyed);
-            proto.write("is_bound", PrintSpoolerStateProto.IS_BOUND, mRemoteInstance != null);
+            dumpStream.write("is_destroyed", PrintSpoolerStateProto.IS_DESTROYED, mDestroyed);
+            dumpStream.write("is_bound", PrintSpoolerStateProto.IS_BOUND, mRemoteInstance != null);
         }
 
         try {
-            if (proto.isProto()) {
-                proto.write(null, PrintSpoolerStateProto.INTERNAL_STATE,
+            if (dumpStream.isProto()) {
+                dumpStream.write(null, PrintSpoolerStateProto.INTERNAL_STATE,
                         TransferPipe.dumpAsync(getRemoteInstanceLazy().asBinder(), "--proto"));
             } else {
-                proto.writeNested("internal_state", TransferPipe.dumpAsync(
+                dumpStream.writeNested("internal_state", TransferPipe.dumpAsync(
                         getRemoteInstanceLazy().asBinder()));
             }
         } catch (IOException | TimeoutException | RemoteException | InterruptedException e) {
