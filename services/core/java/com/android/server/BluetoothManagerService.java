@@ -60,6 +60,7 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.util.DumpUtils;
 import com.android.server.pm.UserRestrictionsUtils;
 
@@ -415,9 +416,14 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
 
         int systemUiUid = -1;
         try {
-            systemUiUid = mContext.getPackageManager()
-                    .getPackageUidAsUser("com.android.systemui", PackageManager.MATCH_SYSTEM_ONLY,
-                            UserHandle.USER_SYSTEM);
+            // Check if device is configured with no home screen, which implies no SystemUI.
+            boolean noHome = mContext.getResources().getBoolean(R.bool.config_noHomeScreen);
+            if (!noHome) {
+                systemUiUid = mContext.getPackageManager()
+                        .getPackageUidAsUser("com.android.systemui", PackageManager.MATCH_SYSTEM_ONLY,
+                                UserHandle.USER_SYSTEM);
+            }
+            Slog.d(TAG, "Detected SystemUiUid: " + Integer.toString(systemUiUid));
         } catch (PackageManager.NameNotFoundException e) {
             // Some platforms, such as wearables do not have a system ui.
             Slog.w(TAG, "Unable to resolve SystemUI's UID.", e);
