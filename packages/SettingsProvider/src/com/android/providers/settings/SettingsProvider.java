@@ -2945,7 +2945,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 150;
+            private static final int SETTINGS_VERSION = 151;
 
             private final int mUserId;
 
@@ -3536,6 +3536,18 @@ public class SettingsProvider extends ContentProvider {
                     }
 
                     currentVersion = 150;
+                }
+
+                if (currentVersion == 150) {
+                    // Version 151: Reset rotate locked setting for upgrading users
+                    final SettingsState systemSettings = getSystemSettingsLocked(userId);
+                    systemSettings.insertSettingLocked(
+                            Settings.System.ACCELEROMETER_ROTATION,
+                            getContext().getResources().getBoolean(
+                                    R.bool.def_accelerometer_rotation) ? "1" : "0",
+                            null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+
+                    currentVersion = 151;
                 }
 
                 // vXXX: Add new settings above this point.
