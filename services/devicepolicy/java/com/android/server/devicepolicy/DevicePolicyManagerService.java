@@ -648,14 +648,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
 
             if (Intent.ACTION_USER_ADDED.equals(action)) {
-                sendUserAddedOrRemovedCommand(DeviceAdminReceiver.ACTION_USER_ADDED, userHandle);
+                sendDeviceOwnerUserCommand(DeviceAdminReceiver.ACTION_USER_ADDED, userHandle);
                 synchronized (DevicePolicyManagerService.this) {
                     // It might take a while for the user to become affiliated. Make security
                     // and network logging unavailable in the meantime.
                     maybePauseDeviceWideLoggingLocked();
                 }
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
-                sendUserAddedOrRemovedCommand(DeviceAdminReceiver.ACTION_USER_REMOVED, userHandle);
+                sendDeviceOwnerUserCommand(DeviceAdminReceiver.ACTION_USER_REMOVED, userHandle);
                 synchronized (DevicePolicyManagerService.this) {
                     // Check whether the user is affiliated, *before* removing its data.
                     boolean isRemovedUserAffiliated = isUserAffiliatedWithDeviceLocked(userHandle);
@@ -669,12 +669,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     }
                 }
             } else if (Intent.ACTION_USER_STARTED.equals(action)) {
+                sendDeviceOwnerUserCommand(DeviceAdminReceiver.ACTION_USER_STARTED, userHandle);
                 synchronized (DevicePolicyManagerService.this) {
                     maybeSendAdminEnabledBroadcastLocked(userHandle);
                     // Reset the policy data
                     mUserData.remove(userHandle);
                 }
                 handlePackagesChanged(null /* check all admins */, userHandle);
+            } else if (Intent.ACTION_USER_STOPPED.equals(action)) {
+                sendDeviceOwnerUserCommand(DeviceAdminReceiver.ACTION_USER_STOPPED, userHandle);
+            } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                sendDeviceOwnerUserCommand(DeviceAdminReceiver.ACTION_USER_SWITCHED, userHandle);
             } else if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
                 synchronized (DevicePolicyManagerService.this) {
                     maybeSendAdminEnabledBroadcastLocked(userHandle);
@@ -683,7 +688,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 handlePackagesChanged(null /* check all admins */, userHandle);
             } else if (Intent.ACTION_PACKAGE_CHANGED.equals(action)
                     || (Intent.ACTION_PACKAGE_ADDED.equals(action)
-                            && intent.getBooleanExtra(Intent.EXTRA_REPLACING, false))) {
+                    && intent.getBooleanExtra(Intent.EXTRA_REPLACING, false))) {
                 handlePackagesChanged(intent.getData().getSchemeSpecificPart(), userHandle);
             } else if (Intent.ACTION_PACKAGE_REMOVED.equals(action)
                     && !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
@@ -693,7 +698,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
 
-        private void sendUserAddedOrRemovedCommand(String action, int userHandle) {
+        private void sendDeviceOwnerUserCommand(String action, int userHandle) {
             synchronized (DevicePolicyManagerService.this) {
                 ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
                 if (deviceOwner != null) {
@@ -2041,6 +2046,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_STARTED);
+        filter.addAction(Intent.ACTION_USER_STOPPED);
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
         filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, mHandler);

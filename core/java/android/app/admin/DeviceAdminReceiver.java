@@ -339,12 +339,42 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     /**
      * Broadcast action: notify the device owner that a user or profile has been removed.
      * Carries an extra {@link Intent#EXTRA_USER} that has the {@link UserHandle} of
-     * the new user.
+     * the user.
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @BroadcastBehavior(explicitOnly = true)
     public static final String ACTION_USER_REMOVED = "android.app.action.USER_REMOVED";
+
+    /**
+     * Broadcast action: notify the device owner that a user or profile has been started.
+     * Carries an extra {@link Intent#EXTRA_USER} that has the {@link UserHandle} of
+     * the user.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
+    public static final String ACTION_USER_STARTED = "android.app.action.USER_STARTED";
+
+    /**
+     * Broadcast action: notify the device owner that a user or profile has been stopped.
+     * Carries an extra {@link Intent#EXTRA_USER} that has the {@link UserHandle} of
+     * the user.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
+    public static final String ACTION_USER_STOPPED = "android.app.action.USER_STOPPED";
+
+    /**
+     * Broadcast action: notify the device owner that a user or profile has been switched to.
+     * Carries an extra {@link Intent#EXTRA_USER} that has the {@link UserHandle} of
+     * the user.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @BroadcastBehavior(explicitOnly = true)
+    public static final String ACTION_USER_SWITCHED = "android.app.action.USER_SWITCHED";
 
     /**
      * A string containing the SHA-256 hash of the bugreport file.
@@ -914,6 +944,42 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
      }
 
     /**
+     * Called when a user or profile is started.
+     *
+     * <p>This callback is only applicable to device owners.
+     *
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @param startedUser The {@link UserHandle} of the user that has just been started.
+     */
+    public void onUserStarted(Context context, Intent intent, UserHandle startedUser) {
+    }
+
+    /**
+     * Called when a user or profile is stopped.
+     *
+     * <p>This callback is only applicable to device owners.
+     *
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @param stoppedUser The {@link UserHandle} of the user that has just been stopped.
+     */
+    public void onUserStopped(Context context, Intent intent, UserHandle stoppedUser) {
+    }
+
+    /**
+     * Called when a user or profile is switched to.
+     *
+     * <p>This callback is only applicable to device owners.
+     *
+     * @param context The running context as per {@link #onReceive}.
+     * @param intent The received intent as per {@link #onReceive}.
+     * @param switchedUser The {@link UserHandle} of the user that has just been switched to.
+     */
+    public void onUserSwitched(Context context, Intent intent, UserHandle switchedUser) {
+    }
+
+    /**
      * Called on the newly assigned owner (either device owner or profile owner) when the ownership
      * transfer has completed successfully.
      *
@@ -989,6 +1055,12 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             onUserAdded(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
         } else if (ACTION_USER_REMOVED.equals(action)) {
             onUserRemoved(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
+        } else if (ACTION_USER_STARTED.equals(action)) {
+            onUserStarted(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
+        } else if (ACTION_USER_STOPPED.equals(action)) {
+            onUserStopped(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
+        } else if (ACTION_USER_SWITCHED.equals(action)) {
+            onUserSwitched(context, intent, intent.getParcelableExtra(Intent.EXTRA_USER));
         } else if (ACTION_TRANSFER_OWNERSHIP_COMPLETE.equals(action)) {
             PersistableBundle bundle =
                     intent.getParcelableExtra(EXTRA_TRANSFER_OWNER_ADMIN_EXTRAS_BUNDLE);
