@@ -530,7 +530,7 @@ public final class ViewRootImpl implements ViewParent,
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
 
         if (!sCompatibilityDone) {
-            sAlwaysAssignFocus = true;
+            sAlwaysAssignFocus = mTargetSdkVersion < Build.VERSION_CODES.P;
 
             sCompatibilityDone = true;
         }
@@ -2337,7 +2337,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (mFirst) {
-            if (sAlwaysAssignFocus) {
+            if (sAlwaysAssignFocus || !isInTouchMode()) {
                 // handle first focus request
                 if (DEBUG_INPUT_RESIZE) {
                     Log.v(mTag, "First: mView.hasFocus()=" + mView.hasFocus());
@@ -3608,7 +3608,7 @@ public final class ViewRootImpl implements ViewParent,
         checkThread();
         if (mView != null) {
             if (!mView.hasFocus()) {
-                if (sAlwaysAssignFocus) {
+                if (sAlwaysAssignFocus || !isInTouchMode()) {
                     v.requestFocus();
                 }
             } else {
@@ -4211,10 +4211,7 @@ public final class ViewRootImpl implements ViewParent,
 
             // find the best view to give focus to in this brave new non-touch-mode
             // world
-            final View focused = focusSearch(null, View.FOCUS_DOWN);
-            if (focused != null) {
-                return focused.requestFocus(View.FOCUS_DOWN);
-            }
+            return mView.restoreDefaultFocus();
         }
         return false;
     }
