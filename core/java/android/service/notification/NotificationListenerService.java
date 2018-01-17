@@ -55,6 +55,7 @@ import android.util.Log;
 import android.widget.RemoteViews;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 
 import java.lang.annotation.Retention;
@@ -1543,7 +1544,11 @@ public abstract class NotificationListenerService extends Service {
             return mShowBadge;
         }
 
-        private void populate(String key, int rank, boolean matchesInterruptionFilter,
+        /**
+         * @hide
+         */
+        @VisibleForTesting
+        public void populate(String key, int rank, boolean matchesInterruptionFilter,
                 int visibilityOverride, int suppressedVisualEffects, int importance,
                 CharSequence explanation, String overrideGroupKey,
                 NotificationChannel channel, ArrayList<String> overridePeople,

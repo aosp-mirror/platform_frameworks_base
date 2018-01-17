@@ -86,6 +86,8 @@ public class NotificationData {
         public RemoteViews cachedAmbientContentView;
         public CharSequence remoteInputText;
         public List<SnoozeCriterion> snoozeCriteria;
+        public int userSentiment = Ranking.USER_SENTIMENT_NEUTRAL;
+
         private int mCachedContrastColor = COLOR_INVALID;
         private int mCachedContrastColorIsFor = COLOR_INVALID;
         private InflationTask mRunningTask = null;
@@ -463,6 +465,7 @@ public class NotificationData {
                     }
                     entry.channel = getChannel(entry.key);
                     entry.snoozeCriteria = getSnoozeCriteria(entry.key);
+                    entry.userSentiment = mTmpRanking.getUserSentiment();
                 }
             }
         }
