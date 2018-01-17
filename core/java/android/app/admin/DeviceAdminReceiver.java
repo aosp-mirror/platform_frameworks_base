@@ -483,6 +483,16 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             "android.app.action.TRANSFER_OWNERSHIP_COMPLETE";
 
     /**
+     * Broadcast action: notify the device owner that the ownership of one of its affiliated
+     * profiles is transferred.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_AFFILIATED_PROFILE_TRANSFER_OWNERSHIP_COMPLETE =
+            "android.app.action.AFFILIATED_PROFILE_TRANSFER_OWNERSHIP_COMPLETE";
+
+    /**
      * A {@link android.os.Parcelable} extra of type {@link android.os.PersistableBundle} that
      * allows a mobile device management application to pass data to the management application
      * instance after owner transfer.
@@ -993,6 +1003,26 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
     }
 
     /**
+     * Called on the device owner when the ownership of one of its affiliated profiles is
+     * transferred.
+     *
+     * <p>This can be used when transferring both device and profile ownership when using
+     * work profile on a fully managed device. The process would look like this:
+     * <ol>
+     * <li>Transfer profile ownership</li>
+     * <li>The device owner gets notified with this callback</li>
+     * <li>Transfer device ownership</li>
+     * <li>Both profile and device ownerships have been transferred</li>
+     * </ol>
+     *
+     * @param context the running context as per {@link #onReceive}
+     * @param user the {@link UserHandle} of the affiliated user
+     * @see DevicePolicyManager#transferOwnership(ComponentName, ComponentName, PersistableBundle)
+     */
+    public void onTransferAffiliatedProfileOwnershipComplete(Context context, UserHandle user) {
+    }
+
+    /**
      * Intercept standard device administrator broadcasts.  Implementations
      * should not override this method; it is better to implement the
      * convenience callbacks for each action.
@@ -1064,6 +1094,9 @@ public class DeviceAdminReceiver extends BroadcastReceiver {
             PersistableBundle bundle =
                     intent.getParcelableExtra(EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE);
             onTransferOwnershipComplete(context, bundle);
+        } else if (ACTION_AFFILIATED_PROFILE_TRANSFER_OWNERSHIP_COMPLETE.equals(action)) {
+            onTransferAffiliatedProfileOwnershipComplete(context,
+                    intent.getParcelableExtra(Intent.EXTRA_USER));
         }
     }
 }

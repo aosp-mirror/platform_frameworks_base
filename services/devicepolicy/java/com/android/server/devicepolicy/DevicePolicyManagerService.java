@@ -12396,6 +12396,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     sendProfileOwnerCommand(DeviceAdminReceiver.ACTION_TRANSFER_OWNERSHIP_COMPLETE,
                             getTransferOwnershipAdminExtras(bundle), callingUserId);
                     postTransfer(DevicePolicyManager.ACTION_PROFILE_OWNER_CHANGED, callingUserId);
+                    if (isUserAffiliatedWithDeviceLocked(callingUserId)) {
+                        notifyAffiliatedProfileTransferOwnershipComplete(callingUserId);
+                    }
                 } else if (isDeviceOwner(admin, callingUserId)) {
                     prepareTransfer(admin, target, bundle, callingUserId,
                             ADMIN_TYPE_DEVICE_OWNER);
@@ -12421,6 +12424,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private void postTransfer(String broadcast, int callingUserId) {
         deleteTransferOwnershipMetadataFileLocked();
         sendOwnerChangedBroadcast(broadcast, callingUserId);
+    }
+
+    private void notifyAffiliatedProfileTransferOwnershipComplete(int callingUserId) {
+        final Bundle extras = new Bundle();
+        extras.putParcelable(Intent.EXTRA_USER, UserHandle.of(callingUserId));
+        sendDeviceOwnerCommand(
+                DeviceAdminReceiver.ACTION_AFFILIATED_PROFILE_TRANSFER_OWNERSHIP_COMPLETE, extras);
     }
 
     /**
