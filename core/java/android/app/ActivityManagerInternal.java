@@ -324,4 +324,14 @@ public abstract class ActivityManagerInternal {
      * Returns if more users can be started without stopping currently running users.
      */
     public abstract boolean canStartMoreUsers();
+
+    /**
+     * Sets the user switcher message for switching from {@link android.os.UserHandle#SYSTEM}.
+     */
+    public abstract void setSwitchingFromSystemUserMessage(String switchingFromSystemUserMessage);
+
+    /**
+     * Sets the user switcher message for switching to {@link android.os.UserHandle#SYSTEM}.
+     */
+    public abstract void setSwitchingToSystemUserMessage(String switchingToSystemUserMessage);
 }

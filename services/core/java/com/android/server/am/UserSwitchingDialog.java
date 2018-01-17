@@ -53,7 +53,8 @@ final class UserSwitchingDialog extends AlertDialog
     private boolean mStartedUser;
 
     public UserSwitchingDialog(ActivityManagerService service, Context context, UserInfo oldUser,
-            UserInfo newUser, boolean aboveSystem) {
+            UserInfo newUser, boolean aboveSystem, String switchingFromSystemUserMessage,
+            String switchingToSystemUserMessage) {
         super(context);
 
         mService = service;
@@ -65,7 +66,7 @@ final class UserSwitchingDialog extends AlertDialog
         // Custom view due to alignment and font size requirements
         View view = LayoutInflater.from(getContext()).inflate(R.layout.user_switching_dialog, null);
 
-        String viewMessage;
+        String viewMessage = null;
         if (UserManager.isSplitSystemUser() && newUser.id == UserHandle.USER_SYSTEM) {
             viewMessage = res.getString(R.string.user_logging_out_message, oldUser.name);
         } else if (UserManager.isDeviceInDemoMode(context)) {
@@ -75,7 +76,17 @@ final class UserSwitchingDialog extends AlertDialog
                 viewMessage = res.getString(R.string.demo_starting_message);
             }
         } else {
-            viewMessage = res.getString(R.string.user_switching_message, newUser.name);
+            if (oldUser.id == UserHandle.USER_SYSTEM) {
+                viewMessage = switchingFromSystemUserMessage;
+            } else if (newUser.id == UserHandle.USER_SYSTEM) {
+                viewMessage = switchingToSystemUserMessage;
+            }
+
+            // If switchingFromSystemUserMessage or switchingToSystemUserMessage is null, fallback
+            // to system message.
+            if (viewMessage == null) {
+                viewMessage = res.getString(R.string.user_switching_message, newUser.name);
+            }
         }
         ((TextView) view.findViewById(R.id.message)).setText(viewMessage);
         setView(view);
