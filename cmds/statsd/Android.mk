@@ -199,6 +199,24 @@ LOCAL_PROTOC_OPTIMIZE_TYPE := lite
 
 include $(BUILD_NATIVE_TEST)
 
+##############################
+# stats proto static java lib
+##############################
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := statsdprotolite
+
+LOCAL_SRC_FILES := \
+    src/stats_log.proto \
+    src/statsd_config.proto \
+    src/atoms.proto
+
+LOCAL_PROTOC_OPTIMIZE_TYPE := lite
+
+LOCAL_STATIC_JAVA_LIBRARIES := \
+    platformprotoslite
+
+include $(BUILD_STATIC_JAVA_LIBRARY)
 
 statsd_common_src:=
 statsd_common_aidl_includes:=
