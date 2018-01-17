@@ -69,6 +69,9 @@ public final class Zygote {
 
     private Zygote() {}
 
+    /** Called for some security initialization before any fork. */
+    native static void nativeSecurityInit();
+
     /**
      * Forks a new VM instance.  The current VM must have been started
      * with the -Xzygote flag. <b>NOTE: new instance keeps all
