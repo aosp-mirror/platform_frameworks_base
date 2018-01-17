@@ -28,4 +28,33 @@ public class NavigationBarCompat {
     public static final int HIT_TARGET_NONE = 0;
     public static final int HIT_TARGET_BACK = 1;
     public static final int HIT_TARGET_HOME = 2;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({FLAG_DISABLE_SWIPE_UP,
+            FLAG_DISABLE_QUICK_SCRUB,
+            FLAG_SHOW_OVERVIEW_BUTTON,
+            FLAG_HIDE_BACK_BUTTON
+    })
+    public @interface InteractionType {}
+
+    /**
+     * Interaction type: whether the gesture to swipe up from the navigation bar will trigger
+     * launcher to show overview
+     */
+
+    public static final int FLAG_DISABLE_SWIPE_UP = 0x1;
+    /**
+     * Interaction type: enable quick scrub and switch interaction on the home button
+     */
+    public static final int FLAG_DISABLE_QUICK_SCRUB = 0x2;
+
+    /**
+     * Interaction type: show/hide the overview button while this service is connected to launcher
+     */
+    public static final int FLAG_SHOW_OVERVIEW_BUTTON = 0x4;
+
+    /**
+     * Interaction type: show/hide the back button while this service is connected to launcher
+     */
+    public static final int FLAG_HIDE_BACK_BUTTON = 0x8;
 }
