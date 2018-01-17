@@ -47,6 +47,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:spacing="@dimen/notification_messaging_spacing" />
+            <include layout="@layout/notification_template_smart_reply_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/notification_content_margin_bottom" />
         </LinearLayout>
     </LinearLayout>
     <include layout="@layout/notification_material_action_list" />

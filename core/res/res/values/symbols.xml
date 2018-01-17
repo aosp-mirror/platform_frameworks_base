@@ -2550,6 +2550,7 @@
   <java-symbol type="bool" name="config_mainBuiltInDisplayIsRound" />
 
   <java-symbol type="id" name="actions_container" />
+  <java-symbol type="id" name="smart_reply_container" />
   <java-symbol type="id" name="remote_input_tag" />
 
   <java-symbol type="attr" name="seekBarDialogPreferenceStyle" />
