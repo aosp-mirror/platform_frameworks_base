@@ -194,6 +194,10 @@
     <allow-in-power-save package="com.android.cellbroadcastreceiver" />
     <allow-in-power-save package="com.android.shell" />
 
+    <!-- Whitelist system providers -->
+    <allow-in-power-save-except-idle package="com.android.providers.calendar" />
+    <allow-in-power-save-except-idle package="com.android.providers.contacts" />
+
     <!-- These are the packages that are white-listed to be able to run as system user -->
     <system-user-whitelisted-app package="com.android.settings" />
 
