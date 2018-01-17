@@ -3249,4 +3249,7 @@
     <string name="config_fontFamilyButton">@string/font_family_button_material</string>
 
     <string translatable="false" name="config_batterySaverDeviceSpecificConfig"></string>
+
+    <!-- Package name that should be granted Notification Assistant access -->
+    <string name="config_defaultAssistantAccessPackage" translatable="false">android.ext.services</string>
 </resources>

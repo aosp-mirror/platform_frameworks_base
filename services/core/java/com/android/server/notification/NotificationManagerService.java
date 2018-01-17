@@ -434,6 +434,7 @@ public class NotificationManagerService extends SystemService {
                 }
             }
         }
+
         String defaultDndAccess = getContext().getResources().getString(
                 com.android.internal.R.string.config_defaultDndAccessPackages);
         if (defaultListenerAccess != null) {
@@ -441,6 +442,29 @@ public class NotificationManagerService extends SystemService {
                     defaultDndAccess.split(ManagedServices.ENABLED_SERVICES_SEPARATOR)) {
                 try {
                     getBinderService().setNotificationPolicyAccessGranted(whitelisted, true);
+                } catch (RemoteException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        readDefaultAssistant(userId);
+    }
+
+    protected void readDefaultAssistant(int userId) {
+        String defaultAssistantAccess = getContext().getResources().getString(
+                com.android.internal.R.string.config_defaultAssistantAccessPackage);
+        if (defaultAssistantAccess != null) {
+            // Gather all notification assistant components for candidate pkg. There should
+            // only be one
+            Set<ComponentName> approvedAssistants =
+                    mAssistants.queryPackageForServices(defaultAssistantAccess,
+                            PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, userId);
+            for (ComponentName cn : approvedAssistants) {
+                try {
+                    getBinderService().setNotificationAssistantAccessGrantedForUser(cn,
+                            userId, true);
                 } catch (RemoteException e) {
                     e.printStackTrace();
                 }
@@ -1155,6 +1179,7 @@ public class NotificationManagerService extends SystemService {
         }
     }
 
+    @VisibleForTesting
     void clearNotifications() {
         mEnqueuedNotifications.clear();
         mNotificationList.clear();
@@ -1374,7 +1399,8 @@ public class NotificationManagerService extends SystemService {
                 AppGlobals.getPackageManager(), getContext().getPackageManager(),
                 getLocalService(LightsManager.class),
                 new NotificationListeners(AppGlobals.getPackageManager()),
-                new NotificationAssistants(AppGlobals.getPackageManager()),
+                new NotificationAssistants(getContext(), mNotificationLock, mUserProfiles,
+                        AppGlobals.getPackageManager()),
                 new ConditionProviders(getContext(), mUserProfiles, AppGlobals.getPackageManager()),
                 null, snoozeHelper, new NotificationUsageStats(getContext()),
                 new AtomicFile(new File(systemDir, "notification_policy.xml")),
@@ -5553,8 +5579,9 @@ public class NotificationManagerService extends SystemService {
     public class NotificationAssistants extends ManagedServices {
         static final String TAG_ENABLED_NOTIFICATION_ASSISTANTS = "enabled_assistants";
 
-        public NotificationAssistants(IPackageManager pm) {
-            super(getContext(), mNotificationLock, mUserProfiles, pm);
+        public NotificationAssistants(Context context, Object lock, UserProfiles up,
+                IPackageManager pm) {
+            super(context, lock, up, pm);
         }
 
         @Override
@@ -5658,6 +5685,14 @@ public class NotificationManagerService extends SystemService {
 
         public boolean isEnabled() {
             return !getServices().isEmpty();
+        }
+
+        protected void upgradeXml(final int xmlVersion, final int userId) {
+            if (xmlVersion == 0) {
+                // one time approval of the OOB assistant
+                Slog.d(TAG, "Approving default notification assistant for user " + userId);
+                readDefaultAssistant(userId);
+            }
         }
     }
 
@@ -6072,7 +6107,7 @@ public class NotificationManagerService extends SystemService {
         public static final String USAGE = "help\n"
                 + "allow_listener COMPONENT [user_id]\n"
                 + "disallow_listener COMPONENT [user_id]\n"
-                + "set_assistant COMPONENT\n"
+                + "allow_assistant COMPONENT\n"
                 + "remove_assistant COMPONENT\n"
                 + "allow_dnd PACKAGE\n"
                 + "disallow_dnd PACKAGE";
