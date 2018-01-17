@@ -2009,5 +2009,14 @@ public final class DisplayManagerService extends SystemService {
                 mDisplayPowerController.persistBrightnessSliderEvents();
             }
         }
+
+        @Override
+        public void onOverlayChanged() {
+            synchronized (mSyncRoot) {
+                if (updateLogicalDisplaysLocked()) {
+                    scheduleTraversalLocked(false);
+                }
+            }
+        }
     }
 }
