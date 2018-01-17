@@ -25,6 +25,7 @@ import static android.system.OsConstants.SOCK_DGRAM;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.net.IIpSecService;
 import android.net.INetd;
 import android.net.IpSecAlgorithm;
@@ -62,7 +63,6 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import libcore.io.IoUtils;
 
@@ -83,7 +83,7 @@ public class IpSecService extends IIpSecService.Stub {
 
     private static final String NETD_SERVICE_NAME = "netd";
     private static final int[] DIRECTIONS =
-            new int[] {IpSecTransform.DIRECTION_OUT, IpSecTransform.DIRECTION_IN};
+            new int[] {IpSecManager.DIRECTION_OUT, IpSecManager.DIRECTION_IN};
 
     private static final int NETD_FETCH_TIMEOUT_MS = 5000; // ms
     private static final int MAX_PORT_BIND_ATTEMPTS = 10;
@@ -104,10 +104,10 @@ public class IpSecService extends IIpSecService.Stub {
     private final Context mContext;
 
     /**
-     * The next non-repeating global ID for tracking resources between users, this service,
-     * and kernel data structures. Accessing this variable is not thread safe, so it is
-     * only read or modified within blocks synchronized on IpSecService.this. We want to
-     * avoid -1 (INVALID_RESOURCE_ID) and 0 (we probably forgot to initialize it).
+     * The next non-repeating global ID for tracking resources between users, this service, and
+     * kernel data structures. Accessing this variable is not thread safe, so it is only read or
+     * modified within blocks synchronized on IpSecService.this. We want to avoid -1
+     * (INVALID_RESOURCE_ID) and 0 (we probably forgot to initialize it).
      */
     @GuardedBy("IpSecService.this")
     private int mNextResourceId = 1;
@@ -536,14 +536,14 @@ public class IpSecService extends IIpSecService.Stub {
 
     private final class TransformRecord extends KernelResourceRecord {
         private final IpSecConfig mConfig;
-        private final SpiRecord[] mSpis;
+        private final SpiRecord mSpi;
         private final EncapSocketRecord mSocket;
 
         TransformRecord(
-                int resourceId, IpSecConfig config, SpiRecord[] spis, EncapSocketRecord socket) {
+                int resourceId, IpSecConfig config, SpiRecord spi, EncapSocketRecord socket) {
             super(resourceId);
             mConfig = config;
-            mSpis = spis;
+            mSpi = spi;
             mSocket = socket;
         }
 
@@ -551,29 +551,26 @@ public class IpSecService extends IIpSecService.Stub {
             return mConfig;
         }
 
-        public SpiRecord getSpiRecord(int direction) {
-            return mSpis[direction];
+        public SpiRecord getSpiRecord() {
+            return mSpi;
         }
 
         /** always guarded by IpSecService#this */
         @Override
         public void freeUnderlyingResources() {
-            for (int direction : DIRECTIONS) {
-                int spi = mSpis[direction].getSpi();
-                try {
-                    mSrvConfig
-                            .getNetdInstance()
-                            .ipSecDeleteSecurityAssociation(
-                                    mResourceId,
-                                    direction,
-                                    mConfig.getLocalAddress(),
-                                    mConfig.getRemoteAddress(),
-                                    spi);
-                } catch (ServiceSpecificException e) {
-                    // FIXME: get the error code and throw is at an IOException from Errno Exception
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Failed to delete SA with ID: " + mResourceId);
-                }
+            int spi = mSpi.getSpi();
+            try {
+                mSrvConfig
+                        .getNetdInstance()
+                        .ipSecDeleteSecurityAssociation(
+                                mResourceId,
+                                mConfig.getSourceAddress(),
+                                mConfig.getDestinationAddress(),
+                                spi);
+            } catch (ServiceSpecificException e) {
+                // FIXME: get the error code and throw is at an IOException from Errno Exception
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to delete SA with ID: " + mResourceId);
             }
 
             getResourceTracker().give();
@@ -597,10 +594,8 @@ public class IpSecService extends IIpSecService.Stub {
                     .append(super.toString())
                     .append(", mSocket=")
                     .append(mSocket)
-                    .append(", mSpis[OUT].mResourceId=")
-                    .append(mSpis[IpSecTransform.DIRECTION_OUT].mResourceId)
-                    .append(", mSpis[IN].mResourceId=")
-                    .append(mSpis[IpSecTransform.DIRECTION_IN].mResourceId)
+                    .append(", mSpi.mResourceId=")
+                    .append(mSpi.mResourceId)
                     .append(", mConfig=")
                     .append(mConfig)
                     .append("}");
@@ -609,23 +604,16 @@ public class IpSecService extends IIpSecService.Stub {
     }
 
     private final class SpiRecord extends KernelResourceRecord {
-        private final int mDirection;
-        private final String mLocalAddress;
-        private final String mRemoteAddress;
+        private final String mSourceAddress;
+        private final String mDestinationAddress;
         private int mSpi;
 
         private boolean mOwnedByTransform = false;
 
-        SpiRecord(
-                int resourceId,
-                int direction,
-                String localAddress,
-                String remoteAddress,
-                int spi) {
+        SpiRecord(int resourceId, String sourceAddress, String destinationAddress, int spi) {
             super(resourceId);
-            mDirection = direction;
-            mLocalAddress = localAddress;
-            mRemoteAddress = remoteAddress;
+            mSourceAddress = sourceAddress;
+            mDestinationAddress = destinationAddress;
             mSpi = spi;
         }
 
@@ -646,7 +634,7 @@ public class IpSecService extends IIpSecService.Stub {
                 mSrvConfig
                         .getNetdInstance()
                         .ipSecDeleteSecurityAssociation(
-                                mResourceId, mDirection, mLocalAddress, mRemoteAddress, mSpi);
+                                mResourceId, mSourceAddress, mDestinationAddress, mSpi);
             } catch (ServiceSpecificException e) {
                 // FIXME: get the error code and throw is at an IOException from Errno Exception
             } catch (RemoteException e) {
@@ -660,6 +648,10 @@ public class IpSecService extends IIpSecService.Stub {
 
         public int getSpi() {
             return mSpi;
+        }
+
+        public String getDestinationAddress() {
+            return mDestinationAddress;
         }
 
         public void setOwnedByTransform() {
@@ -689,12 +681,10 @@ public class IpSecService extends IIpSecService.Stub {
                     .append(super.toString())
                     .append(", mSpi=")
                     .append(mSpi)
-                    .append(", mDirection=")
-                    .append(mDirection)
-                    .append(", mLocalAddress=")
-                    .append(mLocalAddress)
-                    .append(", mRemoteAddress=")
-                    .append(mRemoteAddress)
+                    .append(", mSourceAddress=")
+                    .append(mSourceAddress)
+                    .append(", mDestinationAddress=")
+                    .append(mDestinationAddress)
                     .append(", mOwnedByTransform=")
                     .append(mOwnedByTransform)
                     .append("}");
@@ -772,14 +762,17 @@ public class IpSecService extends IIpSecService.Stub {
     /** @hide */
     @VisibleForTesting
     public IpSecService(Context context, IpSecServiceConfiguration config) {
-        this(context, config, (fd, uid) ->  {
-            try{
-                TrafficStats.setThreadStatsUid(uid);
-                TrafficStats.tagFileDescriptor(fd);
-            } finally {
-                TrafficStats.clearThreadStatsUid();
-            }
-        });
+        this(
+                context,
+                config,
+                (fd, uid) -> {
+                    try {
+                        TrafficStats.setThreadStatsUid(uid);
+                        TrafficStats.tagFileDescriptor(fd);
+                    } finally {
+                        TrafficStats.clearThreadStatsUid();
+                    }
+                });
     }
 
     /** @hide */
@@ -845,8 +838,8 @@ public class IpSecService extends IIpSecService.Stub {
      */
     private static void checkDirection(int direction) {
         switch (direction) {
-            case IpSecTransform.DIRECTION_OUT:
-            case IpSecTransform.DIRECTION_IN:
+            case IpSecManager.DIRECTION_OUT:
+            case IpSecManager.DIRECTION_IN:
                 return;
         }
         throw new IllegalArgumentException("Invalid Direction: " + direction);
@@ -855,10 +848,8 @@ public class IpSecService extends IIpSecService.Stub {
     /** Get a new SPI and maintain the reservation in the system server */
     @Override
     public synchronized IpSecSpiResponse allocateSecurityParameterIndex(
-            int direction, String remoteAddress, int requestedSpi, IBinder binder)
-            throws RemoteException {
-        checkDirection(direction);
-        checkInetAddress(remoteAddress);
+            String destinationAddress, int requestedSpi, IBinder binder) throws RemoteException {
+        checkInetAddress(destinationAddress);
         /* requestedSpi can be anything in the int range, so no check is needed. */
         checkNotNull(binder, "Null Binder passed to allocateSecurityParameterIndex");
 
@@ -866,28 +857,21 @@ public class IpSecService extends IIpSecService.Stub {
         final int resourceId = mNextResourceId++;
 
         int spi = IpSecManager.INVALID_SECURITY_PARAMETER_INDEX;
-        String localAddress = "";
-
         try {
             if (!userRecord.mSpiQuotaTracker.isAvailable()) {
                 return new IpSecSpiResponse(
                         IpSecManager.Status.RESOURCE_UNAVAILABLE, INVALID_RESOURCE_ID, spi);
             }
+
             spi =
                     mSrvConfig
                             .getNetdInstance()
-                            .ipSecAllocateSpi(
-                                    resourceId,
-                                    direction,
-                                    localAddress,
-                                    remoteAddress,
-                                    requestedSpi);
+                            .ipSecAllocateSpi(resourceId, "", destinationAddress, requestedSpi);
             Log.d(TAG, "Allocated SPI " + spi);
             userRecord.mSpiRecords.put(
                     resourceId,
                     new RefcountedResource<SpiRecord>(
-                            new SpiRecord(resourceId, direction, localAddress, remoteAddress, spi),
-                            binder));
+                            new SpiRecord(resourceId, "", destinationAddress, spi), binder));
         } catch (ServiceSpecificException e) {
             // TODO: Add appropriate checks when other ServiceSpecificException types are supported
             return new IpSecSpiResponse(
@@ -1032,27 +1016,27 @@ public class IpSecService extends IIpSecService.Stub {
     }
 
     @VisibleForTesting
-    void validateAlgorithms(IpSecConfig config, int direction) throws IllegalArgumentException {
-            IpSecAlgorithm auth = config.getAuthentication(direction);
-            IpSecAlgorithm crypt = config.getEncryption(direction);
-            IpSecAlgorithm aead = config.getAuthenticatedEncryption(direction);
+    void validateAlgorithms(IpSecConfig config) throws IllegalArgumentException {
+        IpSecAlgorithm auth = config.getAuthentication();
+        IpSecAlgorithm crypt = config.getEncryption();
+        IpSecAlgorithm aead = config.getAuthenticatedEncryption();
 
-            // Validate the algorithm set
-            Preconditions.checkArgument(
-                    aead != null || crypt != null || auth != null,
-                    "No Encryption or Authentication algorithms specified");
-            Preconditions.checkArgument(
-                    auth == null || auth.isAuthentication(),
-                    "Unsupported algorithm for Authentication");
-            Preconditions.checkArgument(
+        // Validate the algorithm set
+        Preconditions.checkArgument(
+                aead != null || crypt != null || auth != null,
+                "No Encryption or Authentication algorithms specified");
+        Preconditions.checkArgument(
+                auth == null || auth.isAuthentication(),
+                "Unsupported algorithm for Authentication");
+        Preconditions.checkArgument(
                 crypt == null || crypt.isEncryption(), "Unsupported algorithm for Encryption");
-            Preconditions.checkArgument(
-                    aead == null || aead.isAead(),
-                    "Unsupported algorithm for Authenticated Encryption");
-            Preconditions.checkArgument(
-                    aead == null || (auth == null && crypt == null),
-                    "Authenticated Encryption is mutually exclusive with other Authentication "
-                                    + "or Encryption algorithms");
+        Preconditions.checkArgument(
+                aead == null || aead.isAead(),
+                "Unsupported algorithm for Authenticated Encryption");
+        Preconditions.checkArgument(
+                aead == null || (auth == null && crypt == null),
+                "Authenticated Encryption is mutually exclusive with other Authentication "
+                        + "or Encryption algorithms");
     }
 
     /**
@@ -1061,29 +1045,6 @@ public class IpSecService extends IIpSecService.Stub {
      */
     private void checkIpSecConfig(IpSecConfig config) {
         UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
-
-        if (config.getLocalAddress() == null) {
-            throw new IllegalArgumentException("Invalid null Local InetAddress");
-        }
-
-        if (config.getRemoteAddress() == null) {
-            throw new IllegalArgumentException("Invalid null Remote InetAddress");
-        }
-
-        switch (config.getMode()) {
-            case IpSecTransform.MODE_TRANSPORT:
-                if (!config.getLocalAddress().isEmpty()) {
-                    throw new IllegalArgumentException("Non-empty Local Address");
-                }
-                // Must be valid, and not a wildcard
-                checkInetAddress(config.getRemoteAddress());
-                break;
-            case IpSecTransform.MODE_TUNNEL:
-                break;
-            default:
-                throw new IllegalArgumentException(
-                        "Invalid IpSecTransform.mode: " + config.getMode());
-        }
 
         switch (config.getEncapType()) {
             case IpSecTransform.ENCAP_NONE:
@@ -1103,11 +1064,36 @@ public class IpSecService extends IIpSecService.Stub {
                 throw new IllegalArgumentException("Invalid Encap Type: " + config.getEncapType());
         }
 
-        for (int direction : DIRECTIONS) {
-            validateAlgorithms(config, direction);
+        validateAlgorithms(config);
 
-            // Retrieve SPI record; will throw IllegalArgumentException if not found
-            userRecord.mSpiRecords.getResourceOrThrow(config.getSpiResourceId(direction));
+        // Retrieve SPI record; will throw IllegalArgumentException if not found
+        SpiRecord s = userRecord.mSpiRecords.getResourceOrThrow(config.getSpiResourceId());
+
+        // If no remote address is supplied, then use one from the SPI.
+        if (TextUtils.isEmpty(config.getDestinationAddress())) {
+            config.setDestinationAddress(s.getDestinationAddress());
+        }
+
+        // All remote addresses must match
+        if (!config.getDestinationAddress().equals(s.getDestinationAddress())) {
+            throw new IllegalArgumentException("Mismatched remote addresseses.");
+        }
+
+        // This check is technically redundant due to the chain of custody between the SPI and
+        // the IpSecConfig, but in the future if the dest is allowed to be set explicitly in
+        // the transform, this will prevent us from messing up.
+        checkInetAddress(config.getDestinationAddress());
+
+        // Require a valid source address for all transforms.
+        checkInetAddress(config.getSourceAddress());
+
+        switch (config.getMode()) {
+            case IpSecTransform.MODE_TRANSPORT:
+            case IpSecTransform.MODE_TUNNEL:
+                break;
+            default:
+                throw new IllegalArgumentException(
+                        "Invalid IpSecTransform.mode: " + config.getMode());
         }
     }
 
@@ -1127,13 +1113,12 @@ public class IpSecService extends IIpSecService.Stub {
 
         UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
 
-        // Avoid resizing by creating a dependency array of min-size 3 (1 UDP encap + 2 SPIs)
-        List<RefcountedResource> dependencies = new ArrayList<>(3);
+        // Avoid resizing by creating a dependency array of min-size 2 (1 UDP encap + 1 SPI)
+        List<RefcountedResource> dependencies = new ArrayList<>(2);
 
         if (!userRecord.mTransformQuotaTracker.isAvailable()) {
             return new IpSecTransformResponse(IpSecManager.Status.RESOURCE_UNAVAILABLE);
         }
-        SpiRecord[] spis = new SpiRecord[DIRECTIONS.length];
 
         int encapType, encapLocalPort = 0, encapRemotePort = 0;
         EncapSocketRecord socketRecord = null;
@@ -1149,51 +1134,46 @@ public class IpSecService extends IIpSecService.Stub {
             encapRemotePort = c.getEncapRemotePort();
         }
 
-        for (int direction : DIRECTIONS) {
-            IpSecAlgorithm auth = c.getAuthentication(direction);
-            IpSecAlgorithm crypt = c.getEncryption(direction);
-            IpSecAlgorithm authCrypt = c.getAuthenticatedEncryption(direction);
+        IpSecAlgorithm auth = c.getAuthentication();
+        IpSecAlgorithm crypt = c.getEncryption();
+        IpSecAlgorithm authCrypt = c.getAuthenticatedEncryption();
 
-            RefcountedResource<SpiRecord> refcountedSpiRecord =
-                    userRecord.mSpiRecords.getRefcountedResourceOrThrow(
-                            c.getSpiResourceId(direction));
-            dependencies.add(refcountedSpiRecord);
+        RefcountedResource<SpiRecord> refcountedSpiRecord =
+                userRecord.mSpiRecords.getRefcountedResourceOrThrow(c.getSpiResourceId());
+        dependencies.add(refcountedSpiRecord);
+        SpiRecord spiRecord = refcountedSpiRecord.getResource();
 
-            spis[direction] = refcountedSpiRecord.getResource();
-            int spi = spis[direction].getSpi();
-            try {
-                mSrvConfig
-                        .getNetdInstance()
-                        .ipSecAddSecurityAssociation(
-                                resourceId,
-                                c.getMode(),
-                                direction,
-                                c.getLocalAddress(),
-                                c.getRemoteAddress(),
-                                (c.getNetwork() != null) ? c.getNetwork().getNetworkHandle() : 0,
-                                spi,
-                                (auth != null) ? auth.getName() : "",
-                                (auth != null) ? auth.getKey() : new byte[] {},
-                                (auth != null) ? auth.getTruncationLengthBits() : 0,
-                                (crypt != null) ? crypt.getName() : "",
-                                (crypt != null) ? crypt.getKey() : new byte[] {},
-                                (crypt != null) ? crypt.getTruncationLengthBits() : 0,
-                                (authCrypt != null) ? authCrypt.getName() : "",
-                                (authCrypt != null) ? authCrypt.getKey() : new byte[] {},
-                                (authCrypt != null) ? authCrypt.getTruncationLengthBits() : 0,
-                                encapType,
-                                encapLocalPort,
-                                encapRemotePort);
-            } catch (ServiceSpecificException e) {
-                // FIXME: get the error code and throw is at an IOException from Errno Exception
-                return new IpSecTransformResponse(IpSecManager.Status.RESOURCE_UNAVAILABLE);
-            }
+        try {
+            mSrvConfig
+                    .getNetdInstance()
+                    .ipSecAddSecurityAssociation(
+                            resourceId,
+                            c.getMode(),
+                            c.getSourceAddress(),
+                            c.getDestinationAddress(),
+                            (c.getNetwork() != null) ? c.getNetwork().netId : 0,
+                            spiRecord.getSpi(),
+                            (auth != null) ? auth.getName() : "",
+                            (auth != null) ? auth.getKey() : new byte[] {},
+                            (auth != null) ? auth.getTruncationLengthBits() : 0,
+                            (crypt != null) ? crypt.getName() : "",
+                            (crypt != null) ? crypt.getKey() : new byte[] {},
+                            (crypt != null) ? crypt.getTruncationLengthBits() : 0,
+                            (authCrypt != null) ? authCrypt.getName() : "",
+                            (authCrypt != null) ? authCrypt.getKey() : new byte[] {},
+                            (authCrypt != null) ? authCrypt.getTruncationLengthBits() : 0,
+                            encapType,
+                            encapLocalPort,
+                            encapRemotePort);
+        } catch (ServiceSpecificException e) {
+            // FIXME: get the error code and throw is at an IOException from Errno Exception
+            return new IpSecTransformResponse(IpSecManager.Status.RESOURCE_UNAVAILABLE);
         }
         // Both SAs were created successfully, time to construct a record and lock it away
         userRecord.mTransformRecords.put(
                 resourceId,
                 new RefcountedResource<TransformRecord>(
-                        new TransformRecord(resourceId, c, spis, socketRecord),
+                        new TransformRecord(resourceId, c, spiRecord, socketRecord),
                         binder,
                         dependencies.toArray(new RefcountedResource[dependencies.size()])));
         return new IpSecTransformResponse(IpSecManager.Status.OK, resourceId);
@@ -1217,9 +1197,9 @@ public class IpSecService extends IIpSecService.Stub {
      */
     @Override
     public synchronized void applyTransportModeTransform(
-            ParcelFileDescriptor socket, int resourceId) throws RemoteException {
+            ParcelFileDescriptor socket, int direction, int resourceId) throws RemoteException {
         UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
-
+        checkDirection(direction);
         // Get transform record; if no transform is found, will throw IllegalArgumentException
         TransformRecord info = userRecord.mTransformRecords.getResourceOrThrow(resourceId);
 
@@ -1230,17 +1210,15 @@ public class IpSecService extends IIpSecService.Stub {
 
         IpSecConfig c = info.getConfig();
         try {
-            for (int direction : DIRECTIONS) {
-                mSrvConfig
-                        .getNetdInstance()
-                        .ipSecApplyTransportModeTransform(
-                                socket.getFileDescriptor(),
-                                resourceId,
-                                direction,
-                                c.getLocalAddress(),
-                                c.getRemoteAddress(),
-                                info.getSpiRecord(direction).getSpi());
-            }
+            mSrvConfig
+                    .getNetdInstance()
+                    .ipSecApplyTransportModeTransform(
+                            socket.getFileDescriptor(),
+                            resourceId,
+                            direction,
+                            c.getSourceAddress(),
+                            c.getDestinationAddress(),
+                            info.getSpiRecord().getSpi());
         } catch (ServiceSpecificException e) {
             if (e.errorCode == EINVAL) {
                 throw new IllegalArgumentException(e.toString());
@@ -1251,14 +1229,14 @@ public class IpSecService extends IIpSecService.Stub {
     }
 
     /**
-     * Remove a transport mode transform from a socket, applying the default (empty) policy. This
-     * will ensure that NO IPsec policy is applied to the socket (would be the equivalent of
-     * applying a policy that performs no IPsec). Today the resourceId parameter is passed but not
-     * used: reserved for future improved input validation.
+     * Remove transport mode transforms from a socket, applying the default (empty) policy. This
+     * ensures that NO IPsec policy is applied to the socket (would be the equivalent of applying a
+     * policy that performs no IPsec). Today the resourceId parameter is passed but not used:
+     * reserved for future improved input validation.
      */
     @Override
-    public synchronized void removeTransportModeTransform(ParcelFileDescriptor socket, int resourceId)
-            throws RemoteException {
+    public synchronized void removeTransportModeTransforms(
+            ParcelFileDescriptor socket, int resourceId) throws RemoteException {
         try {
             mSrvConfig
                     .getNetdInstance()
