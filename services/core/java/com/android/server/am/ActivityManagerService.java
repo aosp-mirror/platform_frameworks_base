@@ -6243,7 +6243,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                     // Clear its pending alarms
                     AlarmManagerInternal ami = LocalServices.getService(AlarmManagerInternal.class);
-                    ami.removeAlarmsForUid(uid);
+                    ami.removeAlarmsForUid(appInfo.uid);
                 }
             } catch (RemoteException e) {
             }
