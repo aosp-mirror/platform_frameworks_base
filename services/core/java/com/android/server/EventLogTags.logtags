@@ -133,6 +133,7 @@ option java_package com.android.server
 2846 full_backup_cancelled (Package|3),(Message|3)
 
 2850 backup_transport_lifecycle (Transport|3),(Bound|1|1)
+2851 backup_transport_connection (Transport|3),(Connected|1|1)
 
 
 # ---------------------------

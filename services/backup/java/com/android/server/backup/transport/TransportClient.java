@@ -29,12 +29,14 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.EventLog;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.util.Preconditions;
+import com.android.server.EventLogTags;
 import com.android.server.backup.TransportManager;
 
 import java.lang.annotation.Retention;
@@ -419,8 +421,43 @@ public class TransportClient {
     @GuardedBy("mStateLock")
     private void setStateLocked(@State int state, @Nullable IBackupTransport transport) {
         log(Log.VERBOSE, "State: " + stateToString(mState) + " => " + stateToString(state));
+        onStateTransition(mState, state);
         mState = state;
         mTransport = transport;
+    }
+
+    private void onStateTransition(int oldState, int newState) {
+        String transport = mTransportComponent.flattenToShortString();
+        int bound = transitionThroughState(oldState, newState, State.BOUND_AND_CONNECTING);
+        int connected = transitionThroughState(oldState, newState, State.CONNECTED);
+        if (bound != Transition.NO_TRANSITION) {
+            int value = (bound == Transition.UP) ? 1 : 0; // 1 is bound, 0 is not bound
+            EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_LIFECYCLE, transport, value);
+        }
+        if (connected != Transition.NO_TRANSITION) {
+            int value = (connected == Transition.UP) ? 1 : 0; // 1 is connected, 0 is not connected
+            EventLog.writeEvent(EventLogTags.BACKUP_TRANSPORT_CONNECTION, transport, value);
+        }
+    }
+
+    /**
+     * Returns:
+     *
+     * <ul>
+     *   <li>{@link Transition#UP}, if oldState < stateReference <= newState
+     *   <li>{@link Transition#DOWN}, if oldState >= stateReference > newState
+     *   <li>{@link Transition#NO_TRANSITION}, otherwise
+     */
+    @Transition
+    private int transitionThroughState(
+            @State int oldState, @State int newState, @State int stateReference) {
+        if (oldState < stateReference && stateReference <= newState) {
+            return Transition.UP;
+        }
+        if (oldState >= stateReference && stateReference > newState) {
+            return Transition.DOWN;
+        }
+        return Transition.NO_TRANSITION;
     }
 
     @GuardedBy("mStateLock")
@@ -479,6 +516,14 @@ public class TransportClient {
         TransportUtils.log(priority, TAG, mPrefixForLog, caller, msg);
         // TODO(brufino): Log in internal list for dump
         // CharSequence time = DateFormat.format("yyyy-MM-dd HH:mm:ss", System.currentTimeMillis());
+    }
+
+    @IntDef({Transition.DOWN, Transition.NO_TRANSITION, Transition.UP})
+    @Retention(RetentionPolicy.SOURCE)
+    private @interface Transition {
+        int DOWN = -1;
+        int NO_TRANSITION = 0;
+        int UP = 1;
     }
 
     @IntDef({State.UNUSABLE, State.IDLE, State.BOUND_AND_CONNECTING, State.CONNECTED})
