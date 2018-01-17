@@ -1235,8 +1235,8 @@ public class IpSecService extends IIpSecService.Stub {
      * reserved for future improved input validation.
      */
     @Override
-    public synchronized void removeTransportModeTransforms(
-            ParcelFileDescriptor socket, int resourceId) throws RemoteException {
+    public synchronized void removeTransportModeTransforms(ParcelFileDescriptor socket)
+            throws RemoteException {
         try {
             mSrvConfig
                     .getNetdInstance()

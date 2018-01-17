@@ -45,5 +45,5 @@ interface IIpSecService
 
     void applyTransportModeTransform(in ParcelFileDescriptor socket, int direction, int transformId);
 
-    void removeTransportModeTransforms(in ParcelFileDescriptor socket, int transformId);
+    void removeTransportModeTransforms(in ParcelFileDescriptor socket);
 }

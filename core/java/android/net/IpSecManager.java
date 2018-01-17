@@ -405,62 +405,56 @@ public final class IpSecManager {
     /**
      * Remove an IPsec transform from a stream socket.
      *
-     * <p>Once removed, traffic on the socket will not be encrypted. This operation will succeed
-     * regardless of the state of the transform. Removing a transform from a socket allows the
-     * socket to be reused for communication in the clear.
+     * <p>Once removed, traffic on the socket will not be encrypted. Removing transforms from a
+     * socket allows the socket to be reused for communication in the clear.
      *
      * <p>If an {@code IpSecTransform} object applied to this socket was deallocated by calling
      * {@link IpSecTransform#close()}, then communication on the socket will fail until this method
      * is called.
      *
      * @param socket a socket that previously had a transform applied to it
-     * @param transform the IPsec Transform that was previously applied to the given socket
      * @throws IOException indicating that the transform could not be removed from the socket
      */
-    public void removeTransportModeTransforms(Socket socket, IpSecTransform transform)
+    public void removeTransportModeTransforms(Socket socket)
             throws IOException {
-        removeTransportModeTransforms(socket.getFileDescriptor$(), transform);
+        removeTransportModeTransforms(socket.getFileDescriptor$());
     }
 
     /**
      * Remove an IPsec transform from a datagram socket.
      *
-     * <p>Once removed, traffic on the socket will not be encrypted. This operation will succeed
-     * regardless of the state of the transform. Removing a transform from a socket allows the
-     * socket to be reused for communication in the clear.
+     * <p>Once removed, traffic on the socket will not be encrypted. Removing transforms from a
+     * socket allows the socket to be reused for communication in the clear.
      *
      * <p>If an {@code IpSecTransform} object applied to this socket was deallocated by calling
      * {@link IpSecTransform#close()}, then communication on the socket will fail until this method
      * is called.
      *
      * @param socket a socket that previously had a transform applied to it
-     * @param transform the IPsec Transform that was previously applied to the given socket
      * @throws IOException indicating that the transform could not be removed from the socket
      */
-    public void removeTransportModeTransforms(DatagramSocket socket, IpSecTransform transform)
+    public void removeTransportModeTransforms(DatagramSocket socket)
             throws IOException {
-        removeTransportModeTransforms(socket.getFileDescriptor$(), transform);
+        removeTransportModeTransforms(socket.getFileDescriptor$());
     }
 
     /**
      * Remove an IPsec transform from a socket.
      *
-     * <p>Once removed, traffic on the socket will not be encrypted. This operation will succeed
-     * regardless of the state of the transform. Removing a transform from a socket allows the
-     * socket to be reused for communication in the clear.
+     * <p>Once removed, traffic on the socket will not be encrypted. Removing transforms from a
+     * socket allows the socket to be reused for communication in the clear.
      *
      * <p>If an {@code IpSecTransform} object applied to this socket was deallocated by calling
      * {@link IpSecTransform#close()}, then communication on the socket will fail until this method
      * is called.
      *
      * @param socket a socket that previously had a transform applied to it
-     * @param transform the IPsec Transform that was previously applied to the given socket
      * @throws IOException indicating that the transform could not be removed from the socket
      */
-    public void removeTransportModeTransforms(FileDescriptor socket, IpSecTransform transform)
+    public void removeTransportModeTransforms(FileDescriptor socket)
             throws IOException {
         try (ParcelFileDescriptor pfd = ParcelFileDescriptor.dup(socket)) {
-            mService.removeTransportModeTransforms(pfd, transform.getResourceId());
+            mService.removeTransportModeTransforms(pfd);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
