@@ -274,7 +274,7 @@ public class PackageDexOptimizer {
             // primary dex files.
             mInstaller.dexopt(path, uid, pkg.packageName, isa, dexoptNeeded, oatDir, dexoptFlags,
                     compilerFilter, pkg.volumeUuid, classLoaderContext, pkg.applicationInfo.seInfo,
-                    false /* downgrade*/);
+                    false /* downgrade*/, pkg.applicationInfo.targetSdkVersion);
 
             if (packageStats != null) {
                 long endTime = System.currentTimeMillis();
@@ -395,7 +395,7 @@ public class PackageDexOptimizer {
                 mInstaller.dexopt(path, info.uid, info.packageName, isa, /*dexoptNeeded*/ 0,
                         /*oatDir*/ null, dexoptFlags,
                         compilerFilter, info.volumeUuid, classLoaderContext, info.seInfoUser,
-                        options.isDowngrade());
+                        options.isDowngrade(), info.targetSdkVersion);
             }
 
             return DEX_OPT_PERFORMED;
