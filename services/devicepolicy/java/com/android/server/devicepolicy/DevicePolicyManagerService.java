@@ -806,6 +806,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         private static final String TAG_MANDATORY_BACKUP_TRANSPORT = "mandatory_backup_transport";
         private static final String TAG_START_USER_SESSION_MESSAGE = "start_user_session_message";
         private static final String TAG_END_USER_SESSION_MESSAGE = "end_user_session_message";
+        private static final String TAG_METERED_DATA_DISABLED_PACKAGES
+                = "metered_data_disabled_packages";
 
         DeviceAdminInfo info;
 
@@ -871,6 +873,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 options = bundle;
             }
         }
+
+        // The list of packages which are not allowed to use metered data.
+        List<String> meteredDisabledPackages;
 
         final Set<String> accountTypesWithManagementDisabled = new ArraySet<>();
 
@@ -1153,6 +1158,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             writePackageListToXml(out, TAG_PERMITTED_NOTIFICATION_LISTENERS,
                     permittedNotificationListeners);
             writePackageListToXml(out, TAG_KEEP_UNINSTALLED_PACKAGES, keepUninstalledPackages);
+            writePackageListToXml(out, TAG_METERED_DATA_DISABLED_PACKAGES, meteredDisabledPackages);
             if (hasUserRestrictions()) {
                 UserRestrictionsUtils.writeRestrictions(
                         out, userRestrictions, TAG_USER_RESTRICTIONS);
@@ -1349,6 +1355,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     permittedNotificationListeners = readPackageList(parser, tag);
                 } else if (TAG_KEEP_UNINSTALLED_PACKAGES.equals(tag)) {
                     keepUninstalledPackages = readPackageList(parser, tag);
+                } else if (TAG_METERED_DATA_DISABLED_PACKAGES.equals(tag)) {
+                    meteredDisabledPackages = readPackageList(parser, tag);
                 } else if (TAG_USER_RESTRICTIONS.equals(tag)) {
                     userRestrictions = UserRestrictionsUtils.readRestrictions(parser);
                 } else if (TAG_DEFAULT_ENABLED_USER_RESTRICTIONS.equals(tag)) {
@@ -1647,6 +1655,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                             policy.mAdminList.remove(i);
                             policy.mAdminMap.remove(aa.info.getComponent());
                             pushActiveAdminPackagesLocked(userHandle);
+                            pushMeteredDisabledPackagesLocked(userHandle);
                         }
                     }
                 } catch (RemoteException re) {
@@ -3502,6 +3511,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mInjector.postOnSystemServerInitThreadPool(() -> {
             pushActiveAdminPackages();
             mUsageStatsManagerInternal.onAdminDataAvailable();
+            pushAllMeteredRestrictedPackages();
             mInjector.getNetworkPolicyManagerInternal().onAdminDataAvailable();
         });
     }
@@ -3513,6 +3523,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 final int userId = users.get(i).id;
                 mUsageStatsManagerInternal.setActiveAdminApps(
                         getActiveAdminPackagesLocked(userId), userId);
+            }
+        }
+    }
+
+    private void pushAllMeteredRestrictedPackages() {
+        synchronized (this) {
+            final List<UserInfo> users = mUserManager.getUsers();
+            for (int i = users.size() - 1; i >= 0; --i) {
+                final int userId = users.get(i).id;
+                mInjector.getNetworkPolicyManagerInternal().setMeteredRestrictedPackagesAsync(
+                        getMeteredDisabledPackagesLocked(userId), userId);
             }
         }
     }
@@ -11028,6 +11049,93 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
+    public List<String> setMeteredDataDisabled(ComponentName who, List<String> packageNames) {
+        Preconditions.checkNotNull(who);
+        Preconditions.checkNotNull(packageNames);
+
+        if (!mHasFeature) {
+            return packageNames;
+        }
+        synchronized (this) {
+            final ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            final int callingUserId = mInjector.userHandleGetCallingUserId();
+            final long identity = mInjector.binderClearCallingIdentity();
+            try {
+                final List<String> excludedPkgs
+                        = removeInvalidPkgsForMeteredDataRestriction(callingUserId, packageNames);
+                admin.meteredDisabledPackages = packageNames;
+                pushMeteredDisabledPackagesLocked(callingUserId);
+                saveSettingsLocked(callingUserId);
+                return excludedPkgs;
+            } finally {
+                mInjector.binderRestoreCallingIdentity(identity);
+            }
+        }
+    }
+
+    private List<String> removeInvalidPkgsForMeteredDataRestriction(
+            int userId, List<String> pkgNames) {
+        final Set<String> activeAdmins = getActiveAdminPackagesLocked(userId);
+        final List<String> excludedPkgs = new ArrayList<>();
+        for (int i = pkgNames.size() - 1; i >= 0; --i) {
+            final String pkgName = pkgNames.get(i);
+            // If the package is an active admin, don't restrict it.
+            if (activeAdmins.contains(pkgName)) {
+                excludedPkgs.add(pkgName);
+                continue;
+            }
+            // If the package doesn't exist, don't restrict it.
+            try {
+                if (!mInjector.getIPackageManager().isPackageAvailable(pkgName, userId)) {
+                    excludedPkgs.add(pkgName);
+                }
+            } catch (RemoteException e) {
+                // Should not happen
+            }
+        }
+        pkgNames.removeAll(excludedPkgs);
+        return excludedPkgs;
+    }
+
+    @Override
+    public List<String> getMeteredDataDisabled(ComponentName who) {
+        Preconditions.checkNotNull(who);
+
+        if (!mHasFeature) {
+            return new ArrayList<>();
+        }
+        synchronized (this) {
+            final ActiveAdmin admin = getActiveAdminForCallerLocked(who,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            return admin.meteredDisabledPackages == null
+                    ? new ArrayList<>() : admin.meteredDisabledPackages;
+        }
+    }
+
+    private void pushMeteredDisabledPackagesLocked(int userId) {
+        mInjector.getNetworkPolicyManagerInternal().setMeteredRestrictedPackages(
+                getMeteredDisabledPackagesLocked(userId), userId);
+    }
+
+    private Set<String> getMeteredDisabledPackagesLocked(int userId) {
+        final DevicePolicyData policy = getUserData(userId);
+        final Set<String> restrictedPkgs = new ArraySet<>();
+        for (int i = policy.mAdminList.size() - 1; i >= 0; --i) {
+            final ActiveAdmin admin = policy.mAdminList.get(i);
+            if (!isActiveAdminWithPolicyForUserLocked(admin,
+                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, userId)) {
+                // Not a profile or device owner, ignore
+                continue;
+            }
+            if (admin.meteredDisabledPackages != null) {
+                restrictedPkgs.addAll(admin.meteredDisabledPackages);
+            }
+        }
+        return restrictedPkgs;
+    }
+
+    @Override
     public void setAffiliationIds(ComponentName admin, List<String> ids) {
         if (!mHasFeature) {
             return;
@@ -11386,6 +11494,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 resetGlobalProxyLocked(policy);
             }
             pushActiveAdminPackagesLocked(userHandle);
+            pushMeteredDisabledPackagesLocked(userHandle);
             saveSettingsLocked(userHandle);
             updateMaximumTimeToLockLocked(userHandle);
             policy.mRemovingAdmins.remove(adminReceiver);

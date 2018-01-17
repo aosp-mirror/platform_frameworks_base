@@ -26,6 +26,7 @@ import android.security.keystore.ParcelableKeyGenParameterSpec;
 import com.android.internal.R;
 import com.android.server.SystemService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -134,5 +135,15 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     @Override
     public CharSequence getPrintingDisabledReason() {
         return null;
+    }
+
+    @Override
+    public List<String> setMeteredDataDisabled(ComponentName admin, List<String> packageNames) {
+        return packageNames;
+    }
+
+    @Override
+    public List<String> getMeteredDataDisabled(ComponentName admin) {
+        return new ArrayList<>();
     }
 }
