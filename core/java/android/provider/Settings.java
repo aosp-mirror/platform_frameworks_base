@@ -11309,6 +11309,13 @@ public final class Settings {
          */
         public static final String ZRAM_ENABLED =
                 "zram_enabled";
+
+        /**
+         * Whether smart replies in notifications are enabled.
+         * @hide
+         */
+        public static final String ENABLE_SMART_REPLIES_IN_NOTIFICATIONS =
+                "enable_smart_replies_in_notifications";
     }
 
     /**
