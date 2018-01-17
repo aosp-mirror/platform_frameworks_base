@@ -46,7 +46,8 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
 
     private final Map<IBinder, LinkedListener> mListenerMap = new HashMap<>();
 
-    private boolean mIsRegistered;  // must access only on handler thread
+    private volatile boolean mIsRegistered;  // must access only on handler thread, or read-only
+
     private boolean mHasIsSupported;
     private boolean mIsSupported;
 
@@ -56,6 +57,11 @@ abstract class RemoteListenerHelper<TListener extends IInterface> {
         Preconditions.checkNotNull(name);
         mHandler = handler;
         mTag = name;
+    }
+
+    // read-only access for a dump() thread assured via volatile
+    public boolean isRegistered() {
+        return mIsRegistered;
     }
 
     public boolean addListener(@NonNull TListener listener) {
