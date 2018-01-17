@@ -10764,6 +10764,26 @@ Slog.e("TODD",
                     }
                 }
             }
+
+            // Verify that packages sharing a user with a privileged app are marked as privileged.
+            if (!pkg.isPrivileged() && (pkg.mSharedUserId != null)) {
+                SharedUserSetting sharedUserSetting = null;
+                try {
+                    sharedUserSetting = mSettings.getSharedUserLPw(pkg.mSharedUserId, 0, 0, false);
+                } catch (PackageManagerException ignore) {}
+                if (sharedUserSetting != null && sharedUserSetting.isPrivileged()) {
+                    // Exempt SharedUsers signed with the platform key.
+                    PackageSetting platformPkgSetting = mSettings.mPackages.get("android");
+                    if ((platformPkgSetting.signatures.mSignatures != null) &&
+                            (compareSignatures(platformPkgSetting.signatures.mSignatures,
+                                pkg.mSigningDetails.signatures) != PackageManager.SIGNATURE_MATCH)) {
+                        throw new PackageManagerException("Apps that share a user with a " +
+                                "privileged app must themselves be marked as privileged. " +
+                                pkg.packageName + " shares privileged user " +
+                                pkg.mSharedUserId + ".");
+                    }
+                }
+            }
         }
     }
 
