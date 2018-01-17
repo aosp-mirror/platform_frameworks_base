@@ -4123,6 +4123,38 @@ package android.telephony.data {
     field public static final int TYPE_COMMON = 0; // 0x0
   }
 
+  public abstract class DataService extends android.app.Service {
+    method public abstract android.telephony.data.DataService.DataServiceProvider createDataServiceProvider(int);
+    field public static final java.lang.String DATA_SERVICE_EXTRA_SLOT_ID = "android.telephony.data.extra.SLOT_ID";
+    field public static final java.lang.String DATA_SERVICE_INTERFACE = "android.telephony.data.DataService";
+  }
+
+  public class DataService.DataServiceProvider {
+    ctor public DataService.DataServiceProvider(int);
+    method public void deactivateDataCall(int, boolean, boolean, android.telephony.data.DataServiceCallback);
+    method public void getDataCallList(android.telephony.data.DataServiceCallback);
+    method public final int getSlotId();
+    method public final void notifyDataCallListChanged(java.util.List<android.telephony.data.DataCallResponse>);
+    method protected void onDestroy();
+    method public void setDataProfile(java.util.List<android.telephony.data.DataProfile>, boolean, android.telephony.data.DataServiceCallback);
+    method public void setInitialAttachApn(android.telephony.data.DataProfile, boolean, android.telephony.data.DataServiceCallback);
+    method public void setupDataCall(int, android.telephony.data.DataProfile, boolean, boolean, boolean, android.net.LinkProperties, android.telephony.data.DataServiceCallback);
+  }
+
+  public class DataServiceCallback {
+    method public void onDataCallListChanged(java.util.List<android.telephony.data.DataCallResponse>);
+    method public void onDeactivateDataCallComplete(int);
+    method public void onGetDataCallListComplete(int, java.util.List<android.telephony.data.DataCallResponse>);
+    method public void onSetDataProfileComplete(int);
+    method public void onSetInitialAttachApnComplete(int);
+    method public void onSetupDataCallComplete(int, android.telephony.data.DataCallResponse);
+    field public static final int RESULT_ERROR_BUSY = 3; // 0x3
+    field public static final int RESULT_ERROR_ILLEGAL_STATE = 4; // 0x4
+    field public static final int RESULT_ERROR_INVALID_ARG = 2; // 0x2
+    field public static final int RESULT_ERROR_UNSUPPORTED = 1; // 0x1
+    field public static final int RESULT_SUCCESS = 0; // 0x0
+  }
+
 }
 
 package android.telephony.ims {
