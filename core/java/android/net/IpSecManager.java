@@ -17,6 +17,7 @@ package android.net;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -33,6 +34,8 @@ import dalvik.system.CloseGuard;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -51,6 +54,23 @@ import java.net.Socket;
 @SystemService(Context.IPSEC_SERVICE)
 public final class IpSecManager {
     private static final String TAG = "IpSecManager";
+
+    /**
+     * For direction-specific attributes of an {@link IpSecTransform}, indicates that an attribute
+     * applies to traffic towards the host.
+     */
+    public static final int DIRECTION_IN = 0;
+
+    /**
+     * For direction-specific attributes of an {@link IpSecTransform}, indicates that an attribute
+     * applies to traffic from the host.
+     */
+    public static final int DIRECTION_OUT = 1;
+
+    /** @hide */
+    @IntDef(value = {DIRECTION_IN, DIRECTION_OUT})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PolicyDirection {}
 
     /**
      * The Security Parameter Index (SPI) 0 indicates an unknown or invalid index.
@@ -125,7 +145,7 @@ public final class IpSecManager {
      */
     public static final class SecurityParameterIndex implements AutoCloseable {
         private final IIpSecService mService;
-        private final InetAddress mRemoteAddress;
+        private final InetAddress mDestinationAddress;
         private final CloseGuard mCloseGuard = CloseGuard.get();
         private int mSpi = INVALID_SECURITY_PARAMETER_INDEX;
         private int mResourceId = INVALID_RESOURCE_ID;
@@ -164,14 +184,14 @@ public final class IpSecManager {
         }
 
         private SecurityParameterIndex(
-                @NonNull IIpSecService service, int direction, InetAddress remoteAddress, int spi)
+                @NonNull IIpSecService service, InetAddress destinationAddress, int spi)
                 throws ResourceUnavailableException, SpiUnavailableException {
             mService = service;
-            mRemoteAddress = remoteAddress;
+            mDestinationAddress = destinationAddress;
             try {
                 IpSecSpiResponse result =
                         mService.allocateSecurityParameterIndex(
-                                direction, remoteAddress.getHostAddress(), spi, new Binder());
+                                destinationAddress.getHostAddress(), spi, new Binder());
 
                 if (result == null) {
                     throw new NullPointerException("Received null response from IpSecService");
@@ -216,25 +236,23 @@ public final class IpSecManager {
     }
 
     /**
-     * Reserve a random SPI for traffic bound to or from the specified remote address.
+     * Reserve a random SPI for traffic bound to or from the specified destination address.
      *
      * <p>If successful, this SPI is guaranteed available until released by a call to {@link
      * SecurityParameterIndex#close()}.
      *
-     * @param direction {@link IpSecTransform#DIRECTION_IN} or {@link IpSecTransform#DIRECTION_OUT}
-     * @param remoteAddress address of the remote. SPIs must be unique for each remoteAddress
+     * @param destinationAddress the destination address for traffic bearing the requested SPI.
+     *     For inbound traffic, the destination should be an address currently assigned on-device.
      * @return the reserved SecurityParameterIndex
-     * @throws ResourceUnavailableException indicating that too many SPIs are currently allocated
-     *     for this user
-     * @throws SpiUnavailableException indicating that a particular SPI cannot be reserved
+     * @throws {@link #ResourceUnavailableException} indicating that too many SPIs are
+     *     currently allocated for this user
      */
-    public SecurityParameterIndex allocateSecurityParameterIndex(
-            int direction, InetAddress remoteAddress) throws ResourceUnavailableException {
+    public SecurityParameterIndex allocateSecurityParameterIndex(InetAddress destinationAddress)
+            throws ResourceUnavailableException {
         try {
             return new SecurityParameterIndex(
                     mService,
-                    direction,
-                    remoteAddress,
+                    destinationAddress,
                     IpSecManager.INVALID_SECURITY_PARAMETER_INDEX);
         } catch (SpiUnavailableException unlikely) {
             throw new ResourceUnavailableException("No SPIs available");
@@ -242,26 +260,27 @@ public final class IpSecManager {
     }
 
     /**
-     * Reserve the requested SPI for traffic bound to or from the specified remote address.
+     * Reserve the requested SPI for traffic bound to or from the specified destination address.
      *
      * <p>If successful, this SPI is guaranteed available until released by a call to {@link
      * SecurityParameterIndex#close()}.
      *
-     * @param direction {@link IpSecTransform#DIRECTION_IN} or {@link IpSecTransform#DIRECTION_OUT}
-     * @param remoteAddress address of the remote. SPIs must be unique for each remoteAddress
+     * @param destinationAddress the destination address for traffic bearing the requested SPI.
+     *     For inbound traffic, the destination should be an address currently assigned on-device.
      * @param requestedSpi the requested SPI, or '0' to allocate a random SPI
      * @return the reserved SecurityParameterIndex
-     * @throws ResourceUnavailableException indicating that too many SPIs are currently allocated
-     *     for this user
-     * @throws SpiUnavailableException indicating that the requested SPI could not be reserved
+     * @throws {@link #ResourceUnavailableException} indicating that too many SPIs are
+     *     currently allocated for this user
+     * @throws {@link #SpiUnavailableException} indicating that the requested SPI could not be
+     *     reserved
      */
     public SecurityParameterIndex allocateSecurityParameterIndex(
-            int direction, InetAddress remoteAddress, int requestedSpi)
+            InetAddress destinationAddress, int requestedSpi)
             throws SpiUnavailableException, ResourceUnavailableException {
         if (requestedSpi == IpSecManager.INVALID_SECURITY_PARAMETER_INDEX) {
             throw new IllegalArgumentException("Requested SPI must be a valid (non-zero) SPI");
         }
-        return new SecurityParameterIndex(mService, direction, remoteAddress, requestedSpi);
+        return new SecurityParameterIndex(mService, destinationAddress, requestedSpi);
     }
 
     /**
@@ -269,14 +288,14 @@ public final class IpSecManager {
      *
      * <p>This applies transport mode encapsulation to the given socket. Once applied, I/O on the
      * socket will be encapsulated according to the parameters of the {@code IpSecTransform}. When
-     * the transform is removed from the socket by calling {@link #removeTransportModeTransform},
+     * the transform is removed from the socket by calling {@link #removeTransportModeTransforms},
      * unprotected traffic can resume on that socket.
      *
      * <p>For security reasons, the destination address of any traffic on the socket must match the
      * remote {@code InetAddress} of the {@code IpSecTransform}. Attempts to send traffic to any
      * other IP address will result in an IOException. In addition, reads and writes on the socket
      * will throw IOException if the user deactivates the transform (by calling {@link
-     * IpSecTransform#close()}) without calling {@link #removeTransportModeTransform}.
+     * IpSecTransform#close()}) without calling {@link #removeTransportModeTransforms}.
      *
      * <h4>Rekey Procedure</h4>
      *
@@ -287,14 +306,15 @@ public final class IpSecManager {
      * in-flight packets have been received.
      *
      * @param socket a stream socket
+     * @param direction the policy direction either {@link #DIRECTION_IN} or {@link #DIRECTION_OUT}
      * @param transform a transport mode {@code IpSecTransform}
      * @throws IOException indicating that the transform could not be applied
-     * @hide
      */
-    public void applyTransportModeTransform(Socket socket, IpSecTransform transform)
+    public void applyTransportModeTransform(
+            Socket socket, int direction, IpSecTransform transform)
             throws IOException {
         try (ParcelFileDescriptor pfd = ParcelFileDescriptor.fromSocket(socket)) {
-            applyTransportModeTransform(pfd, transform);
+            applyTransportModeTransform(pfd, direction, transform);
         }
     }
 
@@ -303,14 +323,14 @@ public final class IpSecManager {
      *
      * <p>This applies transport mode encapsulation to the given socket. Once applied, I/O on the
      * socket will be encapsulated according to the parameters of the {@code IpSecTransform}. When
-     * the transform is removed from the socket by calling {@link #removeTransportModeTransform},
+     * the transform is removed from the socket by calling {@link #removeTransportModeTransforms},
      * unprotected traffic can resume on that socket.
      *
      * <p>For security reasons, the destination address of any traffic on the socket must match the
      * remote {@code InetAddress} of the {@code IpSecTransform}. Attempts to send traffic to any
      * other IP address will result in an IOException. In addition, reads and writes on the socket
      * will throw IOException if the user deactivates the transform (by calling {@link
-     * IpSecTransform#close()}) without calling {@link #removeTransportModeTransform}.
+     * IpSecTransform#close()}) without calling {@link #removeTransportModeTransforms}.
      *
      * <h4>Rekey Procedure</h4>
      *
@@ -321,14 +341,14 @@ public final class IpSecManager {
      * in-flight packets have been received.
      *
      * @param socket a datagram socket
+     * @param direction the policy direction either DIRECTION_IN or DIRECTION_OUT
      * @param transform a transport mode {@code IpSecTransform}
      * @throws IOException indicating that the transform could not be applied
-     * @hide
      */
-    public void applyTransportModeTransform(DatagramSocket socket, IpSecTransform transform)
-            throws IOException {
+    public void applyTransportModeTransform(
+            DatagramSocket socket, int direction, IpSecTransform transform) throws IOException {
         try (ParcelFileDescriptor pfd = ParcelFileDescriptor.fromDatagramSocket(socket)) {
-            applyTransportModeTransform(pfd, transform);
+            applyTransportModeTransform(pfd, direction, transform);
         }
     }
 
@@ -337,14 +357,14 @@ public final class IpSecManager {
      *
      * <p>This applies transport mode encapsulation to the given socket. Once applied, I/O on the
      * socket will be encapsulated according to the parameters of the {@code IpSecTransform}. When
-     * the transform is removed from the socket by calling {@link #removeTransportModeTransform},
+     * the transform is removed from the socket by calling {@link #removeTransportModeTransforms},
      * unprotected traffic can resume on that socket.
      *
      * <p>For security reasons, the destination address of any traffic on the socket must match the
      * remote {@code InetAddress} of the {@code IpSecTransform}. Attempts to send traffic to any
      * other IP address will result in an IOException. In addition, reads and writes on the socket
      * will throw IOException if the user deactivates the transform (by calling {@link
-     * IpSecTransform#close()}) without calling {@link #removeTransportModeTransform}.
+     * IpSecTransform#close()}) without calling {@link #removeTransportModeTransforms}.
      *
      * <h4>Rekey Procedure</h4>
      *
@@ -355,24 +375,27 @@ public final class IpSecManager {
      * in-flight packets have been received.
      *
      * @param socket a socket file descriptor
+     * @param direction the policy direction either DIRECTION_IN or DIRECTION_OUT
      * @param transform a transport mode {@code IpSecTransform}
      * @throws IOException indicating that the transform could not be applied
      */
-    public void applyTransportModeTransform(FileDescriptor socket, IpSecTransform transform)
+    public void applyTransportModeTransform(
+            FileDescriptor socket, int direction, IpSecTransform transform)
             throws IOException {
         // We dup() the FileDescriptor here because if we don't, then the ParcelFileDescriptor()
         // constructor takes control and closes the user's FD when we exit the method
         // This is behaviorally the same as the other versions, but the PFD constructor does not
         // dup() automatically, whereas PFD.fromSocket() and PDF.fromDatagramSocket() do dup().
         try (ParcelFileDescriptor pfd = ParcelFileDescriptor.dup(socket)) {
-            applyTransportModeTransform(pfd, transform);
+            applyTransportModeTransform(pfd, direction, transform);
         }
     }
 
     /* Call down to activate a transform */
-    private void applyTransportModeTransform(ParcelFileDescriptor pfd, IpSecTransform transform) {
+    private void applyTransportModeTransform(
+            ParcelFileDescriptor pfd, int direction, IpSecTransform transform) throws IOException {
         try {
-            mService.applyTransportModeTransform(pfd, transform.getResourceId());
+            mService.applyTransportModeTransform(pfd, direction, transform.getResourceId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -407,12 +430,11 @@ public final class IpSecManager {
      * @param socket a socket that previously had a transform applied to it
      * @param transform the IPsec Transform that was previously applied to the given socket
      * @throws IOException indicating that the transform could not be removed from the socket
-     * @hide
      */
-    public void removeTransportModeTransform(Socket socket, IpSecTransform transform)
+    public void removeTransportModeTransforms(Socket socket, IpSecTransform transform)
             throws IOException {
         try (ParcelFileDescriptor pfd = ParcelFileDescriptor.fromSocket(socket)) {
-            removeTransportModeTransform(pfd, transform);
+            removeTransportModeTransforms(pfd, transform);
         }
     }
 
@@ -430,12 +452,11 @@ public final class IpSecManager {
      * @param socket a socket that previously had a transform applied to it
      * @param transform the IPsec Transform that was previously applied to the given socket
      * @throws IOException indicating that the transform could not be removed from the socket
-     * @hide
      */
-    public void removeTransportModeTransform(DatagramSocket socket, IpSecTransform transform)
+    public void removeTransportModeTransforms(DatagramSocket socket, IpSecTransform transform)
             throws IOException {
         try (ParcelFileDescriptor pfd = ParcelFileDescriptor.fromDatagramSocket(socket)) {
-            removeTransportModeTransform(pfd, transform);
+            removeTransportModeTransforms(pfd, transform);
         }
     }
 
@@ -454,17 +475,17 @@ public final class IpSecManager {
      * @param transform the IPsec Transform that was previously applied to the given socket
      * @throws IOException indicating that the transform could not be removed from the socket
      */
-    public void removeTransportModeTransform(FileDescriptor socket, IpSecTransform transform)
+    public void removeTransportModeTransforms(FileDescriptor socket, IpSecTransform transform)
             throws IOException {
         try (ParcelFileDescriptor pfd = ParcelFileDescriptor.dup(socket)) {
-            removeTransportModeTransform(pfd, transform);
+            removeTransportModeTransforms(pfd, transform);
         }
     }
 
     /* Call down to remove a transform */
-    private void removeTransportModeTransform(ParcelFileDescriptor pfd, IpSecTransform transform) {
+    private void removeTransportModeTransforms(ParcelFileDescriptor pfd, IpSecTransform transform) {
         try {
-            mService.removeTransportModeTransform(pfd, transform.getResourceId());
+            mService.removeTransportModeTransforms(pfd, transform.getResourceId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

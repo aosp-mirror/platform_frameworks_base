@@ -31,7 +31,7 @@ import android.os.ParcelFileDescriptor;
 interface IIpSecService
 {
     IpSecSpiResponse allocateSecurityParameterIndex(
-            int direction, in String remoteAddress, int requestedSpi, in IBinder binder);
+            in String destinationAddress, int requestedSpi, in IBinder binder);
 
     void releaseSecurityParameterIndex(int resourceId);
 
@@ -43,7 +43,7 @@ interface IIpSecService
 
     void deleteTransportModeTransform(int transformId);
 
-    void applyTransportModeTransform(in ParcelFileDescriptor socket, int transformId);
+    void applyTransportModeTransform(in ParcelFileDescriptor socket, int direction, int transformId);
 
-    void removeTransportModeTransform(in ParcelFileDescriptor socket, int transformId);
+    void removeTransportModeTransforms(in ParcelFileDescriptor socket, int transformId);
 }
