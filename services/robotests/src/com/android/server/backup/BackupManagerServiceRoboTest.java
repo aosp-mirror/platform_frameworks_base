@@ -46,7 +46,6 @@ import android.provider.Settings;
 import com.android.server.backup.testing.ShadowAppBackupUtils;
 import com.android.server.backup.testing.ShadowBackupPolicyEnforcer;
 import com.android.server.backup.testing.TransportData;
-import com.android.server.backup.testing.TransportTestUtils;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
 import com.android.server.backup.transport.TransportNotRegisteredException;
 import com.android.server.testing.FrameworkRobolectricTestRunner;
@@ -68,6 +67,7 @@ import org.robolectric.shadows.ShadowSystemClock;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RunWith(FrameworkRobolectricTestRunner.class)
@@ -255,17 +255,22 @@ public class BackupManagerServiceRoboTest {
 
     /* Tests for select transport */
 
-    private TransportData mNewTransport;
-    private TransportData mOldTransport;
     private ComponentName mNewTransportComponent;
+    private TransportData mNewTransport;
+    private TransportMock mNewTransportMock;
     private ComponentName mOldTransportComponent;
+    private TransportData mOldTransport;
+    private TransportMock mOldTransportMock;
 
     private void setUpForSelectTransport() throws Exception {
         mNewTransport = backupTransport();
         mNewTransportComponent = mNewTransport.getTransportComponent();
         mOldTransport = d2dTransport();
         mOldTransportComponent = mOldTransport.getTransportComponent();
-        setUpTransports(mTransportManager, mNewTransport, mOldTransport, localTransport());
+        List<TransportMock> transportMocks =
+                setUpTransports(mTransportManager, mNewTransport, mOldTransport, localTransport());
+        mNewTransportMock = transportMocks.get(0);
+        mOldTransportMock = transportMocks.get(1);
         when(mTransportManager.selectTransport(eq(mNewTransport.transportName)))
                 .thenReturn(mOldTransport.transportName);
     }
@@ -282,6 +287,8 @@ public class BackupManagerServiceRoboTest {
 
         assertThat(getSettingsTransport()).isEqualTo(mNewTransport.transportName);
         assertThat(oldTransport).isEqualTo(mOldTransport.transportName);
+        verify(mTransportManager)
+                .disposeOfTransportClient(eq(mNewTransportMock.transportClient), any());
     }
 
     @Test
@@ -311,6 +318,8 @@ public class BackupManagerServiceRoboTest {
         mShadowBackupLooper.runToEndOfTasks();
         assertThat(getSettingsTransport()).isEqualTo(mNewTransport.transportName);
         verify(callback).onSuccess(eq(mNewTransport.transportName));
+        verify(mTransportManager)
+                .disposeOfTransportClient(eq(mNewTransportMock.transportClient), any());
     }
 
     @Test
@@ -329,11 +338,12 @@ public class BackupManagerServiceRoboTest {
         mShadowBackupLooper.runToEndOfTasks();
         assertThat(getSettingsTransport()).isEqualTo(mNewTransport.transportName);
         verify(callback).onSuccess(eq(mNewTransport.transportName));
+        verify(mTransportManager)
+                .disposeOfTransportClient(eq(mNewTransportMock.transportClient), any());
     }
 
     @Test
-    public void testSelectBackupTransportAsync_whenOtherThanMandatoryTransport()
-            throws Exception {
+    public void testSelectBackupTransportAsync_whenOtherThanMandatoryTransport() throws Exception {
         setUpForSelectTransport();
         ShadowBackupPolicyEnforcer.setMandatoryBackupTransport(mOldTransportComponent);
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
