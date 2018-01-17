@@ -52,6 +52,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
+import android.service.autofill.AutofillFieldClassificationService.Scores;
 import android.service.autofill.FillEventHistory;
 import android.service.autofill.UserData;
 import android.util.LocalLog;
@@ -79,6 +80,7 @@ import com.android.server.autofill.ui.AutoFillUI;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -444,7 +446,17 @@ public final class AutofillManagerService extends SystemService {
         }
     }
 
-    // TODO(b/70291841): add command to get field classification score
+    // Called by Shell command.
+    public void getScore(@Nullable String algorithmName, @NonNull String value1,
+            @NonNull String value2, @NonNull RemoteCallback callback) {
+        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+
+        final FieldClassificationStrategy strategy =
+                new FieldClassificationStrategy(mContext, UserHandle.USER_CURRENT);
+
+        strategy.getScores(callback, algorithmName, null,
+                Arrays.asList(AutofillValue.forText(value1)), new String[] { value2 });
+    }
 
     private void setDebugLocked(boolean debug) {
         com.android.server.autofill.Helper.sDebug = debug;
