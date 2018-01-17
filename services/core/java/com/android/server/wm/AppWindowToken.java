@@ -378,7 +378,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         // Reset the state of mHiddenSetFromTransferredStartingWindow since visibility is actually
         // been set by the app now.
         mHiddenSetFromTransferredStartingWindow = false;
-        setClientHidden(!visible);
 
         // Allow for state changes and animation to be applied if:
         // * token is transitioning visibility state
@@ -461,6 +460,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 // We need to inform the client the enter animation was finished.
                 mEnteringAnimation = true;
                 mService.mActivityManagerAppTransitionNotifier.onAppTransitionFinishedLocked(token);
+            }
+
+            // Update the client visibility if we are not running an animation. Otherwise, we'll
+            // update client visibility state in onAnimationFinished.
+            if (!visible && !delayed) {
+                setClientHidden(true);
             }
 
             // If we are hidden but there is no delay needed we immediately
@@ -1611,27 +1616,37 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         // different animation is running.
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "AWT#applyAnimationLocked");
         if (okToAnimate()) {
-            final Animation a = loadAnimation(lp, transit, enter, isVoiceInteraction);
-            if (a != null) {
-                final TaskStack stack = getStack();
-                mTmpPoint.set(0, 0);
-                mTmpRect.setEmpty();
-                if (stack != null) {
-                    stack.getRelativePosition(mTmpPoint);
-                    stack.getBounds(mTmpRect);
-                    mTmpRect.offsetTo(0, 0);
+            final AnimationAdapter adapter;
+            final TaskStack stack = getStack();
+            mTmpPoint.set(0, 0);
+            mTmpRect.setEmpty();
+            if (stack != null) {
+                stack.getRelativePosition(mTmpPoint);
+                stack.getBounds(mTmpRect);
+                mTmpRect.offsetTo(0, 0);
+            }
+            if (mService.mAppTransition.getRemoteAnimationController() != null) {
+                adapter = mService.mAppTransition.getRemoteAnimationController()
+                        .createAnimationAdapter(this, mTmpPoint, mTmpRect);
+            } else {
+                final Animation a = loadAnimation(lp, transit, enter, isVoiceInteraction);
+                if (a != null) {
+                    adapter = new LocalAnimationAdapter(
+                            new WindowAnimationSpec(a, mTmpPoint, mTmpRect,
+                                    mService.mAppTransition.canSkipFirstFrame(),
+                                    mService.mAppTransition.getAppStackClipMode()),
+                            mService.mSurfaceAnimationRunner);
+                    if (a.getZAdjustment() == Animation.ZORDER_TOP) {
+                        mNeedsZBoost = true;
+                    }
+                    mTransit = transit;
+                    mTransitFlags = mService.mAppTransition.getTransitFlags();
+                } else {
+                    adapter = null;
                 }
-                final AnimationAdapter adapter = new LocalAnimationAdapter(
-                        new WindowAnimationSpec(a, mTmpPoint, mTmpRect,
-                                mService.mAppTransition.canSkipFirstFrame(),
-                                mService.mAppTransition.getAppStackClipMode()),
-                        mService.mSurfaceAnimationRunner);
-                if (a.getZAdjustment() == Animation.ZORDER_TOP) {
-                    mNeedsZBoost = true;
-                }
+            }
+            if (adapter != null) {
                 startAnimation(getPendingTransaction(), adapter, !isVisible());
-                mTransit = transit;
-                mTransitFlags = mService.mAppTransition.getTransitFlags();
             }
         } else {
             cancelAnimation();
@@ -1754,6 +1769,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 "AppWindowToken");
 
         clearThumbnail();
+        setClientHidden(isHidden());
 
         if (mService.mInputMethodTarget != null && mService.mInputMethodTarget.mAppToken == this) {
             getDisplayContent().computeImeTarget(true /* updateImeTarget */);

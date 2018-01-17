@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
@@ -210,6 +211,7 @@ import android.view.KeyEvent;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
 import android.view.PointerIcon;
+import android.view.RemoteAnimationAdapter;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Builder;
@@ -2620,6 +2622,18 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             mAppTransition.overridePendingAppTransitionMultiThumbFuture(specsFuture, callback,
                     scaleUp);
+        }
+    }
+
+    @Override
+    public void overridePendingAppTransitionRemote(RemoteAnimationAdapter remoteAnimationAdapter) {
+        if (!checkCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
+                "overridePendingAppTransitionRemote()")) {
+            throw new SecurityException(
+                    "Requires CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS permission");
+        }
+        synchronized (mWindowMap) {
+            mAppTransition.overridePendingAppTransitionRemote(remoteAnimationAdapter);
         }
     }
 
