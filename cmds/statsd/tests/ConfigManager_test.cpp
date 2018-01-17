@@ -91,7 +91,7 @@ TEST(ConfigManagerTest, TestAddUpdateRemove) {
     {
         InSequence s;
 
-        manager->Startup();
+        manager->StartupForTest();
 
         // Add another one
         EXPECT_CALL(*(listener.get()), OnConfigUpdated(ConfigKeyEq(1, StringToId("zzz")),
