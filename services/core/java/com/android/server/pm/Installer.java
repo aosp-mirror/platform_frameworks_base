@@ -281,13 +281,14 @@ public class Installer extends SystemService {
     public void dexopt(String apkPath, int uid, @Nullable String pkgName, String instructionSet,
             int dexoptNeeded, @Nullable String outputPath, int dexFlags,
             String compilerFilter, @Nullable String volumeUuid, @Nullable String sharedLibraries,
-            @Nullable String seInfo, boolean downgrade)
+            @Nullable String seInfo, boolean downgrade, int targetSdkVersion)
             throws InstallerException {
         assertValidInstructionSet(instructionSet);
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.dexopt(apkPath, uid, pkgName, instructionSet, dexoptNeeded, outputPath,
-                    dexFlags, compilerFilter, volumeUuid, sharedLibraries, seInfo, downgrade);
+                    dexFlags, compilerFilter, volumeUuid, sharedLibraries, seInfo, downgrade,
+                    targetSdkVersion);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
