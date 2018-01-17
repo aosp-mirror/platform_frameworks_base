@@ -45,8 +45,18 @@ ClassDefinition::Result ClassDefinition::AddMember(std::unique_ptr<ClassMember> 
   Result result = Result::kAdded;
   auto iter = indexed_members_.find(member->GetName());
   if (iter != indexed_members_.end()) {
-    // Overwrite the entry.
-    ordered_members_[iter->second].reset();
+    // Overwrite the entry. Be careful, as the key in indexed_members_ is actually memory owned
+    // by the value at ordered_members_[index]. Since overwriting a value for a key doesn't replace
+    // the key (the initial key inserted into the unordered_map is kept), we must erase and then
+    // insert a new key, whose memory is being kept around. We do all this to avoid using more
+    // memory for each key.
+    size_t index = iter->second;
+
+    // Erase the key + value from the map.
+    indexed_members_.erase(iter);
+
+    // Now clear the memory that was backing the key (now erased).
+    ordered_members_[index].reset();
     result = Result::kOverridden;
   }
 
