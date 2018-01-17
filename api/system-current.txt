@@ -4647,9 +4647,12 @@ package android.util {
   }
 
   public final class StatsManager {
+    method public boolean addConfiguration(java.lang.String, byte[], java.lang.String, java.lang.String);
     method public boolean addConfiguration(long, byte[], java.lang.String, java.lang.String);
+    method public byte[] getData(java.lang.String);
     method public byte[] getData(long);
     method public byte[] getMetadata();
+    method public boolean removeConfiguration(java.lang.String);
     method public boolean removeConfiguration(long);
   }
 
