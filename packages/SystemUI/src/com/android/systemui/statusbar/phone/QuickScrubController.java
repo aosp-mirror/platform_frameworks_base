@@ -207,20 +207,30 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
                     int y = (int) event.getY();
                     int xDiff = Math.abs(x - mTouchDownX);
                     int yDiff = Math.abs(y - mTouchDownY);
-                    boolean exceededTouchSlop;
+                    boolean exceededTouchSlopX = xDiff > mScrollTouchSlop && xDiff > yDiff;
+                    boolean exceededTouchSlopY = yDiff > mScrollTouchSlop && yDiff > xDiff;
+                    boolean exceededTouchSlop, exceededPerpendicularTouchSlop;
                     int pos, touchDown, offset, trackSize;
+
                     if (mIsVertical) {
-                        exceededTouchSlop = yDiff > mScrollTouchSlop && yDiff > xDiff;
+                        exceededTouchSlop = exceededTouchSlopY;
+                        exceededPerpendicularTouchSlop = exceededTouchSlopX;
                         pos = y;
                         touchDown = mTouchDownY;
                         offset = pos - mTrackRect.top;
                         trackSize = mTrackRect.height();
                     } else {
-                        exceededTouchSlop = xDiff > mScrollTouchSlop && xDiff > yDiff;
+                        exceededTouchSlop = exceededTouchSlopX;
+                        exceededPerpendicularTouchSlop = exceededTouchSlopY;
                         pos = x;
                         touchDown = mTouchDownX;
                         offset = pos - mTrackRect.left;
                         trackSize = mTrackRect.width();
+                    }
+                    // Do not start scrubbing when dragging in the perpendicular direction
+                    if (!mDraggingActive && exceededPerpendicularTouchSlop) {
+                        mHandler.removeCallbacksAndMessages(null);
+                        return false;
                     }
                     if (!mDragPositive) {
                         offset -= mIsVertical ? mTrackRect.height() : mTrackRect.width();
