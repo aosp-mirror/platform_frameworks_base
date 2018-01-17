@@ -353,7 +353,7 @@ public class IpSecServiceParameterizedTest {
     @Test
     public void testRemoveTransportModeTransform() throws Exception {
         ParcelFileDescriptor pfd = ParcelFileDescriptor.fromSocket(new Socket());
-        mIpSecService.removeTransportModeTransforms(pfd, 1);
+        mIpSecService.removeTransportModeTransforms(pfd);
 
         verify(mMockNetd).ipSecRemoveTransportModeTransform(pfd.getFileDescriptor());
     }
