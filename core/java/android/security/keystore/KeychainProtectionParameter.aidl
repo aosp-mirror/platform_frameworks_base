@@ -17,4 +17,4 @@
 package android.security.keystore;
 
 /* @hide */
-parcelable RecoveryData;
+parcelable KeychainProtectionParameter;

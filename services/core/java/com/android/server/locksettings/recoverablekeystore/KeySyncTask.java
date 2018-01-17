@@ -16,15 +16,14 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import static android.security.keystore.RecoveryMetadata.TYPE_LOCKSCREEN;
+import static android.security.keystore.KeychainProtectionParameter.TYPE_LOCKSCREEN;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.security.keystore.KeyDerivationParams;
-import android.security.keystore.EntryRecoveryData;
-import android.security.keystore.RecoveryData;
-import android.security.keystore.RecoveryMetadata;
+import android.security.keystore.KeychainProtectionParameter;
+import android.security.keystore.KeychainSnapshot;
+import android.security.keystore.WrappedApplicationKey;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -251,12 +250,12 @@ public class KeySyncTask implements Runnable {
         }
         // TODO: store raw data in RecoveryServiceMetadataEntry and generate Parcelables later
         // TODO: use Builder.
-        RecoveryMetadata metadata = new RecoveryMetadata(
+        KeychainProtectionParameter metadata = new KeychainProtectionParameter(
                 /*userSecretType=*/ TYPE_LOCKSCREEN,
                 /*lockScreenUiFormat=*/ getUiFormat(mCredentialType, mCredential),
                 /*keyDerivationParams=*/ KeyDerivationParams.createSha256Params(salt),
                 /*secret=*/ new byte[0]);
-        ArrayList<RecoveryMetadata> metadataList = new ArrayList<>();
+        ArrayList<KeychainProtectionParameter> metadataList = new ArrayList<>();
         metadataList.add(metadata);
 
         int snapshotVersion = incrementSnapshotVersion(recoveryAgentUid);
@@ -265,7 +264,7 @@ public class KeySyncTask implements Runnable {
         mRecoverableKeyStoreDb.setShouldCreateSnapshot(mUserId, recoveryAgentUid, false);
 
         // TODO: use Builder.
-        mRecoverySnapshotStorage.put(recoveryAgentUid, new RecoveryData(
+        mRecoverySnapshotStorage.put(recoveryAgentUid, new KeychainSnapshot(
                 snapshotVersion,
                 /*recoveryMetadata=*/ metadataList,
                 /*applicationKeyBlobs=*/ createApplicationKeyEntries(encryptedApplicationKeys),
@@ -308,7 +307,7 @@ public class KeySyncTask implements Runnable {
      */
     private boolean shoudCreateSnapshot(int recoveryAgentUid) {
         int[] types = mRecoverableKeyStoreDb.getRecoverySecretTypes(mUserId, recoveryAgentUid);
-        if (!ArrayUtils.contains(types, RecoveryMetadata.TYPE_LOCKSCREEN)) {
+        if (!ArrayUtils.contains(types, KeychainProtectionParameter.TYPE_LOCKSCREEN)) {
             // Only lockscreen type is supported.
             // We will need to pass extra argument to KeySyncTask to support custom pass phrase.
             return false;
@@ -331,14 +330,14 @@ public class KeySyncTask implements Runnable {
      * @return The format - either pattern, pin, or password.
      */
     @VisibleForTesting
-    @RecoveryMetadata.LockScreenUiFormat static int getUiFormat(
+    @KeychainProtectionParameter.LockScreenUiFormat static int getUiFormat(
             int credentialType, String credential) {
         if (credentialType == LockPatternUtils.CREDENTIAL_TYPE_PATTERN) {
-            return RecoveryMetadata.TYPE_PATTERN;
+            return KeychainProtectionParameter.TYPE_PATTERN;
         } else if (isPin(credential)) {
-            return RecoveryMetadata.TYPE_PIN;
+            return KeychainProtectionParameter.TYPE_PIN;
         } else {
-            return RecoveryMetadata.TYPE_PASSWORD;
+            return KeychainProtectionParameter.TYPE_PASSWORD;
         }
     }
 
@@ -401,12 +400,12 @@ public class KeySyncTask implements Runnable {
         return keyGenerator.generateKey();
     }
 
-    private static List<EntryRecoveryData> createApplicationKeyEntries(
+    private static List<WrappedApplicationKey> createApplicationKeyEntries(
             Map<String, byte[]> encryptedApplicationKeys) {
-        ArrayList<EntryRecoveryData> keyEntries = new ArrayList<>();
+        ArrayList<WrappedApplicationKey> keyEntries = new ArrayList<>();
         for (String alias : encryptedApplicationKeys.keySet()) {
             keyEntries.add(
-                    new EntryRecoveryData(
+                    new WrappedApplicationKey(
                             alias,
                             encryptedApplicationKeys.get(alias)));
         }

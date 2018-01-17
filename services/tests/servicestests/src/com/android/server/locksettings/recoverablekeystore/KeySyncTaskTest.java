@@ -16,11 +16,11 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import static android.security.keystore.RecoveryMetadata.TYPE_LOCKSCREEN;
+import static android.security.keystore.KeychainProtectionParameter.TYPE_LOCKSCREEN;
 
-import static android.security.keystore.RecoveryMetadata.TYPE_PASSWORD;
-import static android.security.keystore.RecoveryMetadata.TYPE_PATTERN;
-import static android.security.keystore.RecoveryMetadata.TYPE_PIN;
+import static android.security.keystore.KeychainProtectionParameter.TYPE_PASSWORD;
+import static android.security.keystore.KeychainProtectionParameter.TYPE_PATTERN;
+import static android.security.keystore.KeychainProtectionParameter.TYPE_PIN;
 
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
@@ -41,8 +41,8 @@ import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyDerivationParams;
-import android.security.keystore.EntryRecoveryData;
-import android.security.keystore.RecoveryData;
+import android.security.keystore.KeychainSnapshot;
+import android.security.keystore.WrappedApplicationKey;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -283,9 +283,9 @@ public class KeySyncTaskTest {
                 addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
         mKeySyncTask.run();
 
-        RecoveryData recoveryData = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
+        KeychainSnapshot keychainSnapshot = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
         KeyDerivationParams KeyDerivationParams =
-                recoveryData.getRecoveryMetadata().get(0).getKeyDerivationParams();
+                keychainSnapshot.getKeychainProtectionParams().get(0).getKeyDerivationParams();
         assertThat(KeyDerivationParams.getAlgorithm()).isEqualTo(
                 KeyDerivationParams.ALGORITHM_SHA256);
         verify(mSnapshotListenersStorage).recoverySnapshotAvailable(TEST_RECOVERY_AGENT_UID);
@@ -296,15 +296,15 @@ public class KeySyncTaskTest {
         assertThat(counterId).isNotNull();
         byte[] recoveryKey = decryptThmEncryptedKey(
                 lockScreenHash,
-                recoveryData.getEncryptedRecoveryKeyBlob(),
+                keychainSnapshot.getEncryptedRecoveryKeyBlob(),
                 /*vaultParams=*/ KeySyncUtils.packVaultParams(
                         mKeyPair.getPublic(),
                         counterId,
                         TEST_DEVICE_ID,
                         /*maxAttempts=*/ 10));
-        List<EntryRecoveryData> applicationKeys = recoveryData.getEntryRecoveryData();
+        List<WrappedApplicationKey> applicationKeys = keychainSnapshot.getWrappedApplicationKeys();
         assertThat(applicationKeys).hasSize(1);
-        EntryRecoveryData keyData = applicationKeys.get(0);
+        WrappedApplicationKey keyData = applicationKeys.get(0);
         assertEquals(TEST_APP_KEY_ALIAS, keyData.getAlias());
         assertThat(keyData.getAlias()).isEqualTo(keyData.getAlias());
         byte[] appKey = KeySyncUtils.decryptApplicationKey(
@@ -322,14 +322,14 @@ public class KeySyncTaskTest {
 
         mKeySyncTask.run();
 
-        RecoveryData recoveryData = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
-        assertThat(recoveryData.getSnapshotVersion()).isEqualTo(1); // default value;
+        KeychainSnapshot keychainSnapshot = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
+        assertThat(keychainSnapshot.getSnapshotVersion()).isEqualTo(1); // default value;
         mRecoverableKeyStoreDb.setShouldCreateSnapshot(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, true);
 
         mKeySyncTask.run();
 
-        recoveryData = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
-        assertThat(recoveryData.getSnapshotVersion()).isEqualTo(2); // Updated
+        keychainSnapshot = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
+        assertThat(keychainSnapshot.getSnapshotVersion()).isEqualTo(2); // Updated
     }
 
     @Test
@@ -352,9 +352,9 @@ public class KeySyncTaskTest {
 
         mKeySyncTask.run();
 
-        RecoveryData recoveryData = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
-        assertThat(recoveryData.getRecoveryMetadata()).hasSize(1);
-        assertThat(recoveryData.getRecoveryMetadata().get(0).getLockScreenUiFormat()).
+        KeychainSnapshot keychainSnapshot = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
+        assertThat(keychainSnapshot.getKeychainProtectionParams()).hasSize(1);
+        assertThat(keychainSnapshot.getKeychainProtectionParams().get(0).getLockScreenUiFormat()).
                 isEqualTo(TYPE_PASSWORD);
     }
 
@@ -378,10 +378,10 @@ public class KeySyncTaskTest {
 
         mKeySyncTask.run();
 
-        RecoveryData recoveryData = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
-        assertThat(recoveryData.getRecoveryMetadata()).hasSize(1);
+        KeychainSnapshot keychainSnapshot = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
+        assertThat(keychainSnapshot.getKeychainProtectionParams()).hasSize(1);
         // Password with only digits is changed to pin.
-        assertThat(recoveryData.getRecoveryMetadata().get(0).getLockScreenUiFormat()).
+        assertThat(keychainSnapshot.getKeychainProtectionParams().get(0).getLockScreenUiFormat()).
                 isEqualTo(TYPE_PIN);
     }
 
@@ -405,9 +405,9 @@ public class KeySyncTaskTest {
 
         mKeySyncTask.run();
 
-        RecoveryData recoveryData = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
-        assertThat(recoveryData.getRecoveryMetadata()).hasSize(1);
-        assertThat(recoveryData.getRecoveryMetadata().get(0).getLockScreenUiFormat()).
+        KeychainSnapshot keychainSnapshot = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
+        assertThat(keychainSnapshot.getKeychainProtectionParams()).hasSize(1);
+        assertThat(keychainSnapshot.getKeychainProtectionParams().get(0).getLockScreenUiFormat()).
                 isEqualTo(TYPE_PATTERN);
     }
 

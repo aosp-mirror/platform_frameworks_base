@@ -63,7 +63,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
-import android.os.ServiceSpecificException;
 import android.os.ShellCallback;
 import android.os.StrictMode;
 import android.os.SystemProperties;
@@ -78,11 +77,10 @@ import android.security.KeyStore;
 import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
+import android.security.keystore.KeychainProtectionParameter;
 import android.security.keystore.UserNotAuthenticatedException;
-import android.security.keystore.EntryRecoveryData;
-import android.security.keystore.RecoveryData;
-import android.security.keystore.RecoveryMetadata;
-import android.security.keystore.RecoveryManagerException;
+import android.security.keystore.WrappedApplicationKey;
+import android.security.keystore.KeychainSnapshot;
 import android.service.gatekeeper.GateKeeperResponse;
 import android.service.gatekeeper.IGateKeeperService;
 import android.text.TextUtils;
@@ -1968,7 +1966,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public RecoveryData getRecoveryData(@NonNull byte[] account) throws RemoteException {
+    public KeychainSnapshot getRecoveryData(@NonNull byte[] account) throws RemoteException {
         return mRecoverableKeyStoreManager.getRecoveryData(account);
     }
 
@@ -1997,7 +1995,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public void setRecoverySecretTypes(@NonNull @RecoveryMetadata.UserSecretType
+    public void setRecoverySecretTypes(@NonNull @KeychainProtectionParameter.UserSecretType
             int[] secretTypes) throws RemoteException {
         mRecoverableKeyStoreManager.setRecoverySecretTypes(secretTypes);
     }
@@ -2014,7 +2012,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public void recoverySecretAvailable(@NonNull RecoveryMetadata recoverySecret)
+    public void recoverySecretAvailable(@NonNull KeychainProtectionParameter recoverySecret)
             throws RemoteException {
         mRecoverableKeyStoreManager.recoverySecretAvailable(recoverySecret);
     }
@@ -2022,7 +2020,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public byte[] startRecoverySession(@NonNull String sessionId,
             @NonNull byte[] verifierPublicKey, @NonNull byte[] vaultParams,
-            @NonNull byte[] vaultChallenge, @NonNull List<RecoveryMetadata> secrets)
+            @NonNull byte[] vaultChallenge, @NonNull List<KeychainProtectionParameter> secrets)
             throws RemoteException {
         return mRecoverableKeyStoreManager.startRecoverySession(sessionId, verifierPublicKey,
                 vaultParams, vaultChallenge, secrets);
@@ -2030,7 +2028,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public Map<String, byte[]> recoverKeys(@NonNull String sessionId,
-            @NonNull byte[] recoveryKeyBlob, @NonNull List<EntryRecoveryData> applicationKeys)
+            @NonNull byte[] recoveryKeyBlob, @NonNull List<WrappedApplicationKey> applicationKeys)
             throws RemoteException {
         return mRecoverableKeyStoreManager.recoverKeys(
                 sessionId, recoveryKeyBlob, applicationKeys);

@@ -25,42 +25,48 @@ import com.android.internal.util.Preconditions;
 import java.util.List;
 
 /**
- * Helper class which returns data necessary to recover keys.
- * Contains
+ * A snapshot of a version of the keystore. Two events can trigger the generation of a new snapshot:
  *
  * <ul>
- * <li>Snapshot version.
- * <li>Recovery metadata with UI and key derivation parameters.
- * <li>List of application keys encrypted by recovery key.
- * <li>Encrypted recovery key.
+ *     <li>The user's lock screen changes. (A key derived from the user's lock screen is used to
+ *         protected the keychain, which is why this forces a new snapshot.)
+ *     <li>A key is added to or removed from the recoverable keychain.
  * </ul>
+ *
+ * <p>The snapshot data is also encrypted with the remote trusted hardware's public key, so even
+ * the recovery agent itself should not be able to decipher the data. The recovery agent sends an
+ * instance of this to the remote trusted hardware whenever a new snapshot is generated. During a
+ * recovery flow, the recovery agent retrieves a snapshot from the remote trusted hardware. It then
+ * sends it to the framework, where it is decrypted using the user's lock screen from their previous
+ * device.
  *
  * @hide
  */
-public final class RecoveryData implements Parcelable {
+public final class KeychainSnapshot implements Parcelable {
     private int mSnapshotVersion;
-    private List<RecoveryMetadata> mRecoveryMetadata;
-    private List<EntryRecoveryData> mEntryRecoveryData;
+    private List<KeychainProtectionParameter> mKeychainProtectionParams;
+    private List<WrappedApplicationKey> mEntryRecoveryData;
     private byte[] mEncryptedRecoveryKeyBlob;
 
     /**
      * @hide
      * Deprecated, consider using builder.
      */
-    public RecoveryData(
+    public KeychainSnapshot(
             int snapshotVersion,
-            @NonNull List<RecoveryMetadata> recoveryMetadata,
-            @NonNull List<EntryRecoveryData> entryRecoveryData,
+            @NonNull List<KeychainProtectionParameter> keychainProtectionParams,
+            @NonNull List<WrappedApplicationKey> wrappedApplicationKeys,
             @NonNull byte[] encryptedRecoveryKeyBlob) {
         mSnapshotVersion = snapshotVersion;
-        mRecoveryMetadata =
-                Preconditions.checkCollectionElementsNotNull(recoveryMetadata, "recoveryMetadata");
-        mEntryRecoveryData = Preconditions.checkCollectionElementsNotNull(entryRecoveryData,
-                "entryRecoveryData");
+        mKeychainProtectionParams =
+                Preconditions.checkCollectionElementsNotNull(keychainProtectionParams,
+                        "keychainProtectionParams");
+        mEntryRecoveryData = Preconditions.checkCollectionElementsNotNull(wrappedApplicationKeys,
+                "wrappedApplicationKeys");
         mEncryptedRecoveryKeyBlob = Preconditions.checkNotNull(encryptedRecoveryKeyBlob);
     }
 
-    private RecoveryData() {
+    private KeychainSnapshot() {
 
     }
 
@@ -75,15 +81,15 @@ public final class RecoveryData implements Parcelable {
     /**
      * UI and key derivation parameters. Note that combination of secrets may be used.
      */
-    public @NonNull List<RecoveryMetadata> getRecoveryMetadata() {
-        return mRecoveryMetadata;
+    public @NonNull List<KeychainProtectionParameter> getKeychainProtectionParams() {
+        return mKeychainProtectionParams;
     }
 
     /**
      * List of application keys, with key material encrypted by
      * the recovery key ({@link #getEncryptedRecoveryKeyBlob}).
      */
-    public @NonNull List<EntryRecoveryData> getEntryRecoveryData() {
+    public @NonNull List<WrappedApplicationKey> getWrappedApplicationKeys() {
         return mEntryRecoveryData;
     }
 
@@ -94,22 +100,22 @@ public final class RecoveryData implements Parcelable {
         return mEncryptedRecoveryKeyBlob;
     }
 
-    public static final Parcelable.Creator<RecoveryData> CREATOR =
-            new Parcelable.Creator<RecoveryData>() {
-        public RecoveryData createFromParcel(Parcel in) {
-            return new RecoveryData(in);
+    public static final Parcelable.Creator<KeychainSnapshot> CREATOR =
+            new Parcelable.Creator<KeychainSnapshot>() {
+        public KeychainSnapshot createFromParcel(Parcel in) {
+            return new KeychainSnapshot(in);
         }
 
-        public RecoveryData[] newArray(int length) {
-            return new RecoveryData[length];
+        public KeychainSnapshot[] newArray(int length) {
+            return new KeychainSnapshot[length];
         }
     };
 
     /**
-     * Builder for creating {@link RecoveryData}.
+     * Builder for creating {@link KeychainSnapshot}.
      */
     public static class Builder {
-        private RecoveryData mInstance = new RecoveryData();
+        private KeychainSnapshot mInstance = new KeychainSnapshot();
 
         /**
          * Snapshot version for given account.
@@ -128,8 +134,9 @@ public final class RecoveryData implements Parcelable {
          * @param recoveryMetadata The UI and key derivation parameters
          * @return This builder.
          */
-        public Builder setRecoveryMetadata(@NonNull List<RecoveryMetadata> recoveryMetadata) {
-            mInstance.mRecoveryMetadata = recoveryMetadata;
+        public Builder setKeychainProtectionParams(
+                @NonNull List<KeychainProtectionParameter> recoveryMetadata) {
+            mInstance.mKeychainProtectionParams = recoveryMetadata;
             return this;
         }
 
@@ -139,7 +146,7 @@ public final class RecoveryData implements Parcelable {
          * @param entryRecoveryData List of application keys
          * @return This builder.
          */
-        public Builder setEntryRecoveryData(List<EntryRecoveryData> entryRecoveryData) {
+        public Builder setWrappedApplicationKeys(List<WrappedApplicationKey> entryRecoveryData) {
             mInstance.mEntryRecoveryData = entryRecoveryData;
             return this;
         }
@@ -157,13 +164,13 @@ public final class RecoveryData implements Parcelable {
 
 
         /**
-         * Creates a new {@link RecoveryData} instance.
+         * Creates a new {@link KeychainSnapshot} instance.
          *
          * @return new instance
          * @throws NullPointerException if some required fields were not set.
          */
-        public @NonNull RecoveryData build() {
-            Preconditions.checkCollectionElementsNotNull(mInstance.mRecoveryMetadata,
+        @NonNull public KeychainSnapshot build() {
+            Preconditions.checkCollectionElementsNotNull(mInstance.mKeychainProtectionParams,
                     "recoveryMetadata");
             Preconditions.checkCollectionElementsNotNull(mInstance.mEntryRecoveryData,
                     "entryRecoveryData");
@@ -178,7 +185,7 @@ public final class RecoveryData implements Parcelable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mSnapshotVersion);
-        out.writeTypedList(mRecoveryMetadata);
+        out.writeTypedList(mKeychainProtectionParams);
         out.writeByteArray(mEncryptedRecoveryKeyBlob);
         out.writeTypedList(mEntryRecoveryData);
     }
@@ -186,11 +193,11 @@ public final class RecoveryData implements Parcelable {
     /**
      * @hide
      */
-    protected RecoveryData(Parcel in) {
+    protected KeychainSnapshot(Parcel in) {
         mSnapshotVersion = in.readInt();
-        mRecoveryMetadata = in.createTypedArrayList(RecoveryMetadata.CREATOR);
+        mKeychainProtectionParams = in.createTypedArrayList(KeychainProtectionParameter.CREATOR);
         mEncryptedRecoveryKeyBlob = in.createByteArray();
-        mEntryRecoveryData = in.createTypedArrayList(EntryRecoveryData.CREATOR);
+        mEntryRecoveryData = in.createTypedArrayList(WrappedApplicationKey.CREATOR);
     }
 
     @Override

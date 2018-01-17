@@ -35,16 +35,16 @@ import com.android.internal.util.Preconditions;
  *
  * @hide
  */
-public final class EntryRecoveryData implements Parcelable {
+public final class WrappedApplicationKey implements Parcelable {
     private String mAlias;
     // The only supported format is AES-256 symmetric key.
     private byte[] mEncryptedKeyMaterial;
 
     /**
-     * Builder for creating {@link EntryRecoveryData}.
+     * Builder for creating {@link WrappedApplicationKey}.
      */
     public static class Builder {
-        private EntryRecoveryData mInstance = new EntryRecoveryData();
+        private WrappedApplicationKey mInstance = new WrappedApplicationKey();
 
         /**
          * Sets Application-specific alias of the key.
@@ -70,19 +70,19 @@ public final class EntryRecoveryData implements Parcelable {
         }
 
         /**
-         * Creates a new {@link EntryRecoveryData} instance.
+         * Creates a new {@link WrappedApplicationKey} instance.
          *
          * @return new instance
          * @throws NullPointerException if some required fields were not set.
          */
-        public @NonNull EntryRecoveryData build() {
+        @NonNull public WrappedApplicationKey build() {
             Preconditions.checkNotNull(mInstance.mAlias);
             Preconditions.checkNotNull(mInstance.mEncryptedKeyMaterial);
             return mInstance;
         }
     }
 
-    private EntryRecoveryData() {
+    private WrappedApplicationKey() {
 
     }
 
@@ -90,7 +90,7 @@ public final class EntryRecoveryData implements Parcelable {
      * Deprecated - consider using Builder.
      * @hide
      */
-    public EntryRecoveryData(@NonNull String alias, @NonNull byte[] encryptedKeyMaterial) {
+    public WrappedApplicationKey(@NonNull String alias, @NonNull byte[] encryptedKeyMaterial) {
         mAlias = Preconditions.checkNotNull(alias);
         mEncryptedKeyMaterial = Preconditions.checkNotNull(encryptedKeyMaterial);
     }
@@ -109,14 +109,14 @@ public final class EntryRecoveryData implements Parcelable {
         return mEncryptedKeyMaterial;
     }
 
-    public static final Parcelable.Creator<EntryRecoveryData> CREATOR =
-            new Parcelable.Creator<EntryRecoveryData>() {
-                public EntryRecoveryData createFromParcel(Parcel in) {
-                    return new EntryRecoveryData(in);
+    public static final Parcelable.Creator<WrappedApplicationKey> CREATOR =
+            new Parcelable.Creator<WrappedApplicationKey>() {
+                public WrappedApplicationKey createFromParcel(Parcel in) {
+                    return new WrappedApplicationKey(in);
                 }
 
-                public EntryRecoveryData[] newArray(int length) {
-                    return new EntryRecoveryData[length];
+                public WrappedApplicationKey[] newArray(int length) {
+                    return new WrappedApplicationKey[length];
                 }
             };
 
@@ -132,7 +132,7 @@ public final class EntryRecoveryData implements Parcelable {
     /**
      * @hide
      */
-    protected EntryRecoveryData(Parcel in) {
+    protected WrappedApplicationKey(Parcel in) {
         mAlias = in.readString();
         mEncryptedKeyMaterial = in.createByteArray();
     }
