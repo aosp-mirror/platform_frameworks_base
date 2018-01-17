@@ -21,14 +21,12 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.SurfaceControl.Transaction;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
-import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_VISIBLE;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
-import static android.view.WindowManager.LayoutParams.FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA;
 import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
@@ -43,6 +41,8 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FORMAT_CHANGED;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
 import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
@@ -2994,16 +2994,19 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // No cutout, no letterbox.
             return false;
         }
-        if ((mAttrs.flags2 & FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA) != 0) {
+        if (mAttrs.layoutInDisplayCutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS) {
             // Layout in cutout, no letterbox.
             return false;
         }
         // TODO: handle dialogs and other non-filling windows
+        if (mAttrs.layoutInDisplayCutoutMode == LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER) {
+            // Never layout in cutout, always letterbox.
+            return true;
+        }
         // Letterbox if any fullscreen mode is set.
         final int fl = mAttrs.flags;
         final int sysui = mSystemUiVisibility;
-        return (fl & FLAG_FULLSCREEN) != 0
-                || (sysui & (SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | SYSTEM_UI_FLAG_FULLSCREEN)) != 0;
+        return (fl & FLAG_FULLSCREEN) != 0 || (sysui & (SYSTEM_UI_FLAG_FULLSCREEN)) != 0;
     }
 
     boolean isDragResizeChanged() {

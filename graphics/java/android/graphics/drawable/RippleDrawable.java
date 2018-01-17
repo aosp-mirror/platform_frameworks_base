@@ -264,8 +264,8 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         setRippleActive(enabled && pressed);
-
         setBackgroundActive(hovered, focused);
+
         return changed;
     }
 
@@ -879,22 +879,18 @@ public class RippleDrawable extends LayerDrawable {
         // Grab the color for the current state and cut the alpha channel in
         // half so that the ripple and background together yield full alpha.
         final int color = mState.mColor.getColorForState(getState(), Color.BLACK);
-        final int halfAlpha = (Color.alpha(color) / 2) << 24;
         final Paint p = mRipplePaint;
 
         if (mMaskColorFilter != null) {
             // The ripple timing depends on the paint's alpha value, so we need
             // to push just the alpha channel into the paint and let the filter
             // handle the full-alpha color.
-            final int fullAlphaColor = color | (0xFF << 24);
-            mMaskColorFilter.setColor(fullAlphaColor);
-
-            p.setColor(halfAlpha);
+            mMaskColorFilter.setColor(color | 0xFF000000);
+            p.setColor(color & 0xFF000000);
             p.setColorFilter(mMaskColorFilter);
             p.setShader(mMaskShader);
         } else {
-            final int halfAlphaColor = (color & 0xFFFFFF) | halfAlpha;
-            p.setColor(halfAlphaColor);
+            p.setColor(color);
             p.setColorFilter(null);
             p.setShader(null);
         }

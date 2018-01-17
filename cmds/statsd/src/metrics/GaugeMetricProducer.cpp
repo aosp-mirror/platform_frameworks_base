@@ -114,6 +114,9 @@ GaugeMetricProducer::~GaugeMetricProducer() {
 
 void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs, StatsLogReport* report) {
     flushIfNeededLocked(dumpTimeNs);
+    ProtoOutputStream pbOutput;
+    onDumpReportLocked(dumpTimeNs, &pbOutput);
+    parseProtoOutputStream(pbOutput, report);
 }
 
 void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,

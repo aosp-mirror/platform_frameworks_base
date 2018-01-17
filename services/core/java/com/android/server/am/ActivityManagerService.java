@@ -7260,15 +7260,22 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             ProfilerInfo profilerInfo = null;
-            String agent = null;
+            String preBindAgent = null;
             if (mProfileApp != null && mProfileApp.equals(processName)) {
                 mProfileProc = app;
-                profilerInfo = (mProfilerInfo != null && mProfilerInfo.profileFile != null) ?
-                        new ProfilerInfo(mProfilerInfo) : null;
-                agent = mProfilerInfo != null ? mProfilerInfo.agent : null;
+                if (mProfilerInfo != null) {
+                    // Send a profiler info object to the app if either a file is given, or
+                    // an agent should be loaded at bind-time.
+                    boolean needsInfo = mProfilerInfo.profileFile != null
+                            || mProfilerInfo.attachAgentDuringBind;
+                    profilerInfo = needsInfo ? new ProfilerInfo(mProfilerInfo) : null;
+                    if (!mProfilerInfo.attachAgentDuringBind) {
+                        preBindAgent = mProfilerInfo.agent;
+                    }
+                }
             } else if (app.instr != null && app.instr.mProfileFile != null) {
                 profilerInfo = new ProfilerInfo(app.instr.mProfileFile, null, 0, false, false,
-                        null);
+                        null, false);
             }
 
             boolean enableTrackAllocation = false;
@@ -7337,8 +7344,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             // If we were asked to attach an agent on startup, do so now, before we're binding
             // application code.
-            if (agent != null) {
-                thread.attachAgent(agent);
+            if (preBindAgent != null) {
+                thread.attachAgent(preBindAgent);
             }
 
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");

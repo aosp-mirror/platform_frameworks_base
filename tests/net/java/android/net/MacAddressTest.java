@@ -67,7 +67,7 @@ public class MacAddressTest {
             assertEquals(msg, t.expectedType, got);
 
             if (got != MacAddress.TYPE_UNKNOWN) {
-                assertEquals(got, MacAddress.fromBytes(t.addr).addressType());
+                assertEquals(got, MacAddress.fromBytes(t.addr).getAddressType());
             }
         }
     }
@@ -191,7 +191,7 @@ public class MacAddressTest {
 
             assertTrue(stringRepr + " expected to be a locally assigned address",
                     mac.isLocallyAssigned());
-            assertEquals(MacAddress.TYPE_UNICAST, mac.addressType());
+            assertEquals(MacAddress.TYPE_UNICAST, mac.getAddressType());
             assertTrue(stringRepr + " expected to begin with " + expectedLocalOui,
                     stringRepr.startsWith(expectedLocalOui));
         }

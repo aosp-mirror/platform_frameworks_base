@@ -96,7 +96,7 @@ public final class DnsEvent extends NetworkEvent implements Parcelable {
 
     @Override
     public String toString() {
-        return String.format("DnsEvent(%s, %s, %d, %d, %s)", mHostname,
+        return String.format("DnsEvent(%d, %s, %s, %d, %d, %s)", mId, mHostname,
                 (mIpAddresses == null) ? "NONE" : String.join(" ", mIpAddresses),
                 mIpAddressesCount, mTimestamp, mPackageName);
     }

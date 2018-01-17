@@ -16,15 +16,16 @@
 
 package com.android.server.policy;
 
-import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
+import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
-import static android.view.WindowManager.LayoutParams.FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
@@ -34,7 +35,6 @@ import android.graphics.PixelFormat;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.view.Surface;
 import android.view.WindowManager;
 
 import org.junit.Before;
@@ -128,10 +128,42 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
     }
 
     @Test
-    public void layoutWindowLw_withDisplayCutout_fullscreen() {
+    public void layoutWindowLw_withhDisplayCutout_never() {
+        addDisplayCutout();
+
+        mAppWindow.attrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
+        mPolicy.addWindow(mAppWindow);
+
+        mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mPolicy.layoutWindowLw(mAppWindow, null, mFrames);
+
+        assertInsetByTopBottom(mAppWindow.parentFrame, STATUS_BAR_HEIGHT, 0);
+        assertInsetByTopBottom(mAppWindow.stableFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.contentFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.decorFrame, 0, 0);
+    }
+
+    @Test
+    public void layoutWindowLw_withDisplayCutout_layoutFullscreen() {
         addDisplayCutout();
 
         mAppWindow.attrs.subtreeSystemUiVisibility |= SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
+        mPolicy.addWindow(mAppWindow);
+
+        mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+        mPolicy.layoutWindowLw(mAppWindow, null, mFrames);
+
+        assertInsetByTopBottom(mAppWindow.parentFrame, 0, 0);
+        assertInsetByTopBottom(mAppWindow.stableFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.contentFrame, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
+        assertInsetByTopBottom(mAppWindow.decorFrame, 0, 0);
+    }
+
+    @Test
+    public void layoutWindowLw_withDisplayCutout_fullscreen() {
+        addDisplayCutout();
+
+        mAppWindow.attrs.subtreeSystemUiVisibility |= SYSTEM_UI_FLAG_FULLSCREEN;
         mPolicy.addWindow(mAppWindow);
 
         mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
@@ -147,8 +179,8 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
     public void layoutWindowLw_withDisplayCutout_fullscreenInCutout() {
         addDisplayCutout();
 
-        mAppWindow.attrs.subtreeSystemUiVisibility |= SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
-        mAppWindow.attrs.flags2 |= FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA;
+        mAppWindow.attrs.subtreeSystemUiVisibility |= SYSTEM_UI_FLAG_FULLSCREEN;
+        mAppWindow.attrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         mPolicy.addWindow(mAppWindow);
 
         mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
@@ -217,7 +249,7 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
         setRotation(ROTATION_90);
 
         mAppWindow.attrs.subtreeSystemUiVisibility |= SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
-        mAppWindow.attrs.flags2 |= FLAG2_LAYOUT_IN_DISPLAY_CUTOUT_AREA;
+        mAppWindow.attrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         mPolicy.addWindow(mAppWindow);
 
         mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);

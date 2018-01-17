@@ -40,6 +40,7 @@ import android.telephony.TelephonyHistogram;
 import android.telephony.VisualVoicemailSmsFilterSettings;
 import com.android.ims.internal.IImsMMTelFeature;
 import com.android.ims.internal.IImsRcsFeature;
+import com.android.ims.internal.IImsRegistration;
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.OperatorInfo;
@@ -806,6 +807,11 @@ interface ITelephony {
      *  interface.
      */
     IImsRcsFeature getRcsFeatureAndListen(int slotId, in IImsServiceFeatureCallback callback);
+
+    /**
+    * Returns the IImsRegistration associated with the slot and feature specified.
+    */
+    IImsRegistration getImsRegistration(int slotId, int feature);
 
     /**
      * Set the network selection mode to automatic.

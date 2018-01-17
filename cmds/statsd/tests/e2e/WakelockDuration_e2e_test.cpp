@@ -26,6 +26,8 @@ namespace statsd {
 
 #ifdef __ANDROID__
 
+namespace {
+
 StatsdConfig CreateStatsdConfig(DurationMetric::AggregationType aggregationType) {
     StatsdConfig config;
     *config.add_atom_matcher() = CreateScreenTurnedOnAtomMatcher();
@@ -55,6 +57,8 @@ StatsdConfig CreateStatsdConfig(DurationMetric::AggregationType aggregationType)
     durationMetric->set_bucket(ONE_MINUTE);
     return config;
 }
+
+}  // namespace
 
 TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensions) {
     ConfigKey cfgKey;
@@ -94,6 +98,7 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensions) {
         auto releaseEvent2 = CreateReleaseWakelockEvent(
             attributions2, "wl2", bucketStartTimeNs + 2 * bucketSizeNs - 15);
 
+
         std::vector<std::unique_ptr<LogEvent>> events;
 
         events.push_back(std::move(screenTurnedOnEvent));
@@ -119,18 +124,8 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensions) {
 
         auto data = reports.reports(0).metrics(0).duration_metrics().data(0);
         // Validate dimension value.
-        EXPECT_EQ(data.dimension().field(),
-                  android::util::WAKELOCK_STATE_CHANGED);
-        EXPECT_EQ(data.dimension().value_tuple().dimensions_value_size(), 1);
-        // Attribution field.
-        EXPECT_EQ(data.dimension().value_tuple().dimensions_value(0).field(), 1);
-        // Uid only.
-        EXPECT_EQ(data.dimension().value_tuple().dimensions_value(0)
-            .value_tuple().dimensions_value_size(), 1);
-        EXPECT_EQ(data.dimension().value_tuple().dimensions_value(0)
-            .value_tuple().dimensions_value(0).field(), 1);
-        EXPECT_EQ(data.dimension().value_tuple().dimensions_value(0)
-            .value_tuple().dimensions_value(0).value_int(), 111);
+        ValidateAttributionUidDimension(
+            data.dimension(), android::util::WAKELOCK_STATE_CHANGED, 111);
         // Validate bucket info.
         EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data(0).bucket_info_size(), 1);
         data = reports.reports(0).metrics(0).duration_metrics().data(0);
@@ -147,18 +142,8 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensions) {
         EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data(0).bucket_info_size(), 2);
         data = reports.reports(0).metrics(0).duration_metrics().data(0);
         // Validate dimension value.
-        EXPECT_EQ(data.dimension().field(),
-                  android::util::WAKELOCK_STATE_CHANGED);
-        EXPECT_EQ(data.dimension().value_tuple().dimensions_value_size(), 1);
-        // Attribution field.
-        EXPECT_EQ(data.dimension().value_tuple().dimensions_value(0).field(), 1);
-        // Uid only.
-        EXPECT_EQ(data.dimension().value_tuple().dimensions_value(0)
-            .value_tuple().dimensions_value_size(), 1);
-        EXPECT_EQ(data.dimension().value_tuple().dimensions_value(0)
-            .value_tuple().dimensions_value(0).field(), 1);
-        EXPECT_EQ(data.dimension().value_tuple().dimensions_value(0)
-            .value_tuple().dimensions_value(0).value_int(), 111);
+        ValidateAttributionUidDimension(
+            data.dimension(), android::util::WAKELOCK_STATE_CHANGED, 111);
         // Two output buckets.
         // The wakelock holding interval in the 1st bucket starts from the screen off event and to
         // the end of the 1st bucket.
@@ -167,6 +152,32 @@ TEST(WakelockDurationE2eTest, TestAggregatedPredicateDimensions) {
         // The wakelock holding interval in the 2nd bucket starts at the beginning of the bucket and
         // ends at the second screen on event.
         EXPECT_EQ((unsigned long long)data.bucket_info(1).duration_nanos(), 500UL);
+
+        events.clear();
+        events.push_back(CreateScreenStateChangedEvent(
+            ScreenStateChanged::STATE_OFF, bucketStartTimeNs + 2 * bucketSizeNs + 90));
+        events.push_back(CreateAcquireWakelockEvent(
+            attributions1, "wl3", bucketStartTimeNs + 2 * bucketSizeNs + 100));
+        events.push_back(CreateReleaseWakelockEvent(
+            attributions1, "wl3", bucketStartTimeNs + 5 * bucketSizeNs + 100));
+        sortLogEventsByTimestamp(&events);
+        for (const auto& event : events) {
+            processor->OnLogEvent(event.get());
+        }
+        reports.Clear();
+        processor->onDumpReport(cfgKey, bucketStartTimeNs + 6 * bucketSizeNs + 1, &reports);
+        EXPECT_EQ(reports.reports_size(), 1);
+        EXPECT_EQ(reports.reports(0).metrics_size(), 1);
+        EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data_size(), 1);
+        EXPECT_EQ(reports.reports(0).metrics(0).duration_metrics().data(0).bucket_info_size(), 6);
+        data = reports.reports(0).metrics(0).duration_metrics().data(0);
+        ValidateAttributionUidDimension(
+            data.dimension(), android::util::WAKELOCK_STATE_CHANGED, 111);
+        // The last wakelock holding spans 4 buckets.
+        EXPECT_EQ((unsigned long long)data.bucket_info(2).duration_nanos(), bucketSizeNs - 100);
+        EXPECT_EQ((unsigned long long)data.bucket_info(3).duration_nanos(), bucketSizeNs);
+        EXPECT_EQ((unsigned long long)data.bucket_info(4).duration_nanos(), bucketSizeNs);
+        EXPECT_EQ((unsigned long long)data.bucket_info(5).duration_nanos(), 100UL);
     }
 }
 

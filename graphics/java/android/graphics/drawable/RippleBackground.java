@@ -16,17 +16,12 @@
 
 package android.graphics.drawable;
 
-import android.animation.Animator;
-import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.graphics.Canvas;
-import android.graphics.CanvasProperty;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.FloatProperty;
-import android.view.DisplayListCanvas;
-import android.view.RenderNodeAnimator;
 import android.view.animation.LinearInterpolator;
 
 /**
@@ -78,8 +73,8 @@ class RippleBackground extends RippleComponent {
 
     private void onStateChanged(boolean animateChanged) {
         float newOpacity = 0.0f;
-        if (mHovered) newOpacity += 1.0f;
-        if (mFocused) newOpacity += 1.0f;
+        if (mHovered) newOpacity += .25f;
+        if (mFocused) newOpacity += .75f;
         if (mAnimator != null) {
             mAnimator.cancel();
             mAnimator = null;

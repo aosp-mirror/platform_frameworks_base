@@ -111,6 +111,7 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
 
         final long ident = mInjector.clearCallingIdentity();
         try {
+            launchIntent.setPackage(null);
             launchIntent.setComponent(component);
             mContext.startActivityAsUser(launchIntent,
                     ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle(), user);

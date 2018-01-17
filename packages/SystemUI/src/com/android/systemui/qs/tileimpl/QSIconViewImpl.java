@@ -103,7 +103,7 @@ public class QSIconViewImpl extends QSIconView {
 
             if (iv instanceof SlashImageView) {
                 ((SlashImageView) iv).setAnimationEnabled(shouldAnimate);
-                ((SlashImageView) iv).setState(state.slash, d);
+                ((SlashImageView) iv).setState(null, d);
             } else {
                 iv.setImageDrawable(d);
             }

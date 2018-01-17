@@ -236,7 +236,7 @@ public class TransportClient {
                                     mBindIntent,
                                     mConnection,
                                     Context.BIND_AUTO_CREATE,
-                                    TransportManager.createSystemUserHandle());
+                                    UserHandle.SYSTEM);
                     if (hasBound) {
                         // We don't need to set a time-out because we are guaranteed to get a call
                         // back in ServiceConnection, either an onServiceConnected() or

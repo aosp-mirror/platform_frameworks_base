@@ -652,6 +652,7 @@ public class LauncherAppsService extends SystemService {
                             activityInfo.name.equals(component.getClassName())) {
                         // Found an activity with category launcher that matches
                         // this component so ok to launch.
+                        launchIntent.setPackage(null);
                         launchIntent.setComponent(component);
                         mContext.startActivityAsUser(launchIntent, opts, user);
                         return;

@@ -138,6 +138,7 @@ public final class NavigationBarTransitions extends BarTransitions {
         if (mAutoDim) {
             applyLightsOut(false, true);
         }
+        mView.onDarkIntensityChange(darkIntensity);
     }
 
     private final View.OnTouchListener mLightsOutListener = new View.OnTouchListener() {

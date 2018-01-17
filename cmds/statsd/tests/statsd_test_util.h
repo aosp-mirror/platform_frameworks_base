@@ -23,6 +23,9 @@ namespace android {
 namespace os {
 namespace statsd {
 
+// Create AtomMatcher proto to simply match a specific atom type.
+AtomMatcher CreateSimpleAtomMatcher(const string& name, int atomId);
+
 // Create AtomMatcher proto for acquiring wakelock.
 AtomMatcher CreateAcquireWakelockAtomMatcher();
 

@@ -2917,12 +2917,34 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        /**
+         * Sets the notification policy.  Apps that target API levels below
+         * {@link android.os.Build.VERSION_CODES#P} cannot make DND silence
+         * {@link Policy#PRIORITY_CATEGORY_ALARMS} or
+         * {@link Policy#PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER}
+         */
         @Override
         public void setNotificationPolicy(String pkg, Policy policy) {
             enforcePolicyAccess(pkg, "setNotificationPolicy");
             final long identity = Binder.clearCallingIdentity();
             try {
+                final ApplicationInfo applicationInfo = mPackageManager.getApplicationInfo(pkg,
+                        0, UserHandle.getUserId(MY_UID));
+
+                if (applicationInfo.targetSdkVersion <= Build.VERSION_CODES.O_MR1) {
+                    Policy currPolicy = mZenModeHelper.getNotificationPolicy();
+
+                    int priorityCategories = policy.priorityCategories
+                            | (currPolicy.priorityCategories & Policy.PRIORITY_CATEGORY_ALARMS)
+                            | (currPolicy.priorityCategories &
+                            Policy.PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER);
+                    policy = new Policy(priorityCategories,
+                            policy.priorityCallSenders, policy.priorityMessageSenders,
+                            policy.suppressedVisualEffects);
+                }
+
                 mZenModeHelper.setNotificationPolicy(policy);
+            } catch (RemoteException e) {
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }

@@ -96,7 +96,7 @@ public class BackupManagerServiceTest {
         createBackupManagerService();
 
         verify(mTransportManager)
-                .setTransportBoundListener(any(TransportManager.TransportBoundListener.class));
+                .setOnTransportRegisteredListener(any());
     }
 
     @Test

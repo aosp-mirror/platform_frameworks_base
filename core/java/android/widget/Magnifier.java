@@ -32,6 +32,7 @@ import android.view.PixelCopy;
 import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewParent;
 
 import com.android.internal.util.Preconditions;
 
@@ -44,6 +45,8 @@ public final class Magnifier {
     private static final int NONEXISTENT_PREVIOUS_CONFIG_VALUE = -1;
     // The view to which this magnifier is attached.
     private final View mView;
+    // The coordinates of the view in the surface.
+    private final int[] mViewCoordinatesInSurface;
     // The window containing the magnifier.
     private final PopupWindow mWindow;
     // The center coordinates of the window containing the magnifier.
@@ -87,6 +90,8 @@ public final class Magnifier {
                 com.android.internal.R.dimen.magnifier_height);
         mZoomScale = context.getResources().getFloat(
                 com.android.internal.R.dimen.magnifier_zoom_scale);
+        // The view's surface coordinates will not be updated until the magnifier is first shown.
+        mViewCoordinatesInSurface = new int[2];
 
         mWindow = new PopupWindow(context);
         mWindow.setContentView(content);
@@ -120,9 +125,34 @@ public final class Magnifier {
         configureCoordinates(xPosInView, yPosInView);
 
         // Clamp startX value to avoid distorting the rendering of the magnifier content.
-        final int startX = Math.max(0, Math.min(
+        // For this, we compute:
+        // - zeroScrollXInSurface: this is the start x of mView, where this is not masked by a
+        //                         potential scrolling container. For example, if mView is a
+        //                         TextView contained in a HorizontalScrollView,
+        //                         mViewCoordinatesInSurface will reflect the surface position of
+        //                         the first text character, rather than the position of the first
+        //                         visible one. Therefore, we need to add back the amount of
+        //                         scrolling from the parent containers.
+        // - actualWidth: similarly, the width of a View will be larger than its actually visible
+        //                width when it is contained in a scrolling container. We need to use
+        //                the minimum width of a scrolling container which contains this view.
+        int zeroScrollXInSurface = mViewCoordinatesInSurface[0];
+        int actualWidth = mView.getWidth();
+        ViewParent viewParent = mView.getParent();
+        while (viewParent instanceof View) {
+            final View container = (View) viewParent;
+            if (container.canScrollHorizontally(-1 /* left scroll */)
+                    || container.canScrollHorizontally(1 /* right scroll */)) {
+                zeroScrollXInSurface += container.getScrollX();
+                actualWidth = Math.min(actualWidth, container.getWidth()
+                        - container.getPaddingLeft() - container.getPaddingRight());
+            }
+            viewParent = viewParent.getParent();
+        }
+
+        final int startX = Math.max(zeroScrollXInSurface, Math.min(
                 mCenterZoomCoords.x - mBitmap.getWidth() / 2,
-                mView.getWidth() - mBitmap.getWidth()));
+                zeroScrollXInSurface + actualWidth - mBitmap.getWidth()));
         final int startY = mCenterZoomCoords.y - mBitmap.getHeight() / 2;
 
         if (xPosInView != mPrevPosInView.x || yPosInView != mPrevPosInView.y) {
@@ -169,10 +199,9 @@ public final class Magnifier {
             posX = xPosInView;
             posY = yPosInView;
         } else {
-            final int[] coordinatesInSurface = new int[2];
-            mView.getLocationInSurface(coordinatesInSurface);
-            posX = xPosInView + coordinatesInSurface[0];
-            posY = yPosInView + coordinatesInSurface[1];
+            mView.getLocationInSurface(mViewCoordinatesInSurface);
+            posX = xPosInView + mViewCoordinatesInSurface[0];
+            posY = yPosInView + mViewCoordinatesInSurface[1];
         }
 
         mCenterZoomCoords.x = Math.round(posX);

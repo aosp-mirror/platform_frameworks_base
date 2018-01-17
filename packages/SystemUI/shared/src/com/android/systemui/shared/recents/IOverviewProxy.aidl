@@ -22,4 +22,8 @@ import com.android.systemui.shared.recents.ISystemUiProxy;
 oneway interface IOverviewProxy {
     void onBind(in ISystemUiProxy sysUiProxy);
     void onMotionEvent(in MotionEvent event);
+    void onQuickSwitch();
+    void onQuickScrubStart();
+    void onQuickScrubEnd();
+    void onQuickScrubProgress(float progress);
 }

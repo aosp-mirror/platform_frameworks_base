@@ -27,7 +27,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.StrictMode;
 import android.os.Trace;
 import android.util.AndroidRuntimeException;
 import android.util.ArraySet;
@@ -251,7 +250,6 @@ public final class WebViewFactory {
                         "WebView.disableWebView() was called: WebView is disabled");
             }
 
-            StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
             Trace.traceBegin(Trace.TRACE_TAG_WEBVIEW, "WebViewFactory.getProvider()");
             try {
                 Class<WebViewFactoryProvider> providerClass = getProviderClass();
@@ -279,7 +277,6 @@ public final class WebViewFactory {
                 }
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_WEBVIEW);
-                StrictMode.setThreadPolicy(oldPolicy);
             }
         }
     }

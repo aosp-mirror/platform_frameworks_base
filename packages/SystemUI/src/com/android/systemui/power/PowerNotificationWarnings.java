@@ -17,40 +17,40 @@
 package com.android.systemui.power;
 
 import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.icu.text.MeasureFormat;
+import android.icu.text.MeasureFormat.FormatWidth;
+import android.icu.util.Measure;
+import android.icu.util.MeasureUnit;
 import android.media.AudioAttributes;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
-import android.os.SystemClock;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.support.annotation.VisibleForTesting;
+import android.text.format.DateUtils;
 import android.util.Slog;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
-import com.android.internal.notification.SystemNotificationChannels;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
-import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.NotificationChannels;
 
 import java.io.PrintWriter;
 import java.text.NumberFormat;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private static final String TAG = PowerUI.TAG + ".Notification";
@@ -96,8 +96,9 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private long mScreenOffTime;
     private int mShowing;
 
-    private long mBucketDroppedNegativeTimeMs;
+    private long mWarningTriggerTimeMs;
 
+    private Estimate mEstimate;
     private boolean mWarning;
     private boolean mPlaySound;
     private boolean mInvalidCharger;
@@ -130,12 +131,20 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     public void update(int batteryLevel, int bucket, long screenOffTime) {
         mBatteryLevel = batteryLevel;
         if (bucket >= 0) {
-            mBucketDroppedNegativeTimeMs = 0;
+            mWarningTriggerTimeMs = 0;
         } else if (bucket < mBucket) {
-            mBucketDroppedNegativeTimeMs = System.currentTimeMillis();
+            mWarningTriggerTimeMs = System.currentTimeMillis();
         }
         mBucket = bucket;
         mScreenOffTime = screenOffTime;
+    }
+
+    @Override
+    public void updateEstimate(Estimate estimate) {
+        mEstimate = estimate;
+        if (estimate.estimateMillis <= PowerUI.THREE_HOURS_IN_MILLIS) {
+            mWarningTriggerTimeMs = System.currentTimeMillis();
+        }
     }
 
     private void updateNotification() {
@@ -171,24 +180,42 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         mNoMan.notifyAsUser(TAG_BATTERY, SystemMessage.NOTE_BAD_CHARGER, n, UserHandle.ALL);
     }
 
-    private void showWarningNotification() {
-        final int textRes = R.string.battery_low_percent_format;
+    protected void showWarningNotification() {
         final String percentage = NumberFormat.getPercentInstance().format((double) mBatteryLevel / 100.0);
+
+        // get standard notification copy
+        String title = mContext.getString(R.string.battery_low_title);
+        String contentText = mContext.getString(R.string.battery_low_percent_format, percentage);
+
+        // override notification copy if hybrid notification enabled
+        if (mEstimate != null) {
+            title = mContext.getString(R.string.battery_low_title_hybrid);
+            contentText = mContext.getString(
+                    mEstimate.isBasedOnUsage
+                            ? R.string.battery_low_percent_format_hybrid
+                            : R.string.battery_low_percent_format_hybrid_short,
+                    percentage,
+                    getTimeRemainingFormatted());
+        }
 
         final Notification.Builder nb =
                 new Notification.Builder(mContext, NotificationChannels.BATTERY)
                         .setSmallIcon(R.drawable.ic_power_low)
                         // Bump the notification when the bucket dropped.
-                        .setWhen(mBucketDroppedNegativeTimeMs)
+                        .setWhen(mWarningTriggerTimeMs)
                         .setShowWhen(false)
-                        .setContentTitle(mContext.getString(R.string.battery_low_title))
-                        .setContentText(mContext.getString(textRes, percentage))
+                        .setContentTitle(title)
+                        .setContentText(contentText)
                         .setOnlyAlertOnce(true)
                         .setDeleteIntent(pendingBroadcast(ACTION_DISMISSED_WARNING))
-                        .setVisibility(Notification.VISIBILITY_PUBLIC)
-                        .setColor(Utils.getColorAttr(mContext, android.R.attr.colorError));
+                        .setVisibility(Notification.VISIBILITY_PUBLIC);
         if (hasBatterySettings()) {
             nb.setContentIntent(pendingBroadcast(ACTION_SHOW_BATTERY_SETTINGS));
+        }
+        // Make the notification red if the percentage goes below a certain amount or the time
+        // remaining estimate is disabled
+        if (mEstimate == null || mBucket < 0) {
+            nb.setColor(Utils.getColorAttr(mContext, android.R.attr.colorError));
         }
         nb.addAction(0,
                 mContext.getString(R.string.battery_saver_start_action),
@@ -199,6 +226,23 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         final Notification n = nb.build();
         mNoMan.cancelAsUser(TAG_BATTERY, SystemMessage.NOTE_BAD_CHARGER, UserHandle.ALL);
         mNoMan.notifyAsUser(TAG_BATTERY, SystemMessage.NOTE_POWER_LOW, n, UserHandle.ALL);
+    }
+
+    @VisibleForTesting
+    String getTimeRemainingFormatted() {
+        final Locale currentLocale = mContext.getResources().getConfiguration().getLocales().get(0);
+        MeasureFormat frmt = MeasureFormat.getInstance(currentLocale, FormatWidth.NARROW);
+
+        final long remainder = mEstimate.estimateMillis % DateUtils.HOUR_IN_MILLIS;
+        final long hours = TimeUnit.MILLISECONDS.toHours(
+                mEstimate.estimateMillis - remainder);
+        // round down to the nearest 15 min for now to not appear overly precise
+        final long minutes = TimeUnit.MILLISECONDS.toMinutes(
+                remainder - (remainder % TimeUnit.MINUTES.toMillis(15)));
+        final Measure hoursMeasure = new Measure(hours, MeasureUnit.HOUR);
+        final Measure minutesMeasure = new Measure(minutes, MeasureUnit.MINUTE);
+
+        return frmt.formatMeasures(hoursMeasure, minutesMeasure);
     }
 
     private PendingIntent pendingBroadcast(String action) {

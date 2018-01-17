@@ -52,6 +52,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 public class PowerUI extends SystemUI {
     static final String TAG = "PowerUI";
@@ -59,6 +60,7 @@ public class PowerUI extends SystemUI {
     private static final long TEMPERATURE_INTERVAL = 30 * DateUtils.SECOND_IN_MILLIS;
     private static final long TEMPERATURE_LOGGING_INTERVAL = DateUtils.HOUR_IN_MILLIS;
     private static final int MAX_RECENT_TEMPS = 125; // TEMPERATURE_LOGGING_INTERVAL plus a buffer
+    static final long THREE_HOURS_IN_MILLIS = DateUtils.HOUR_IN_MILLIS * 3;
 
     private final Handler mHandler = new Handler();
     private final Receiver mReceiver = new Receiver();
@@ -68,9 +70,11 @@ public class PowerUI extends SystemUI {
     private WarningsUI mWarnings;
     private final Configuration mLastConfiguration = new Configuration();
     private int mBatteryLevel = 100;
+    private long mTimeRemaining = Long.MAX_VALUE;
     private int mBatteryStatus = BatteryManager.BATTERY_STATUS_UNKNOWN;
     private int mPlugType = 0;
     private int mInvalidCharger = 0;
+    private EnhancedEstimates mEnhancedEstimates;
 
     private int mLowBatteryAlertCloseLevel;
     private final int[] mLowBatteryReminderLevels = new int[2];
@@ -83,8 +87,8 @@ public class PowerUI extends SystemUI {
     private long mNextLogTime;
     private IThermalService mThermalService;
 
-    // We create a method reference here so that we are guaranteed that we can remove a callback
     // by using the same instance (method references are not guaranteed to be the same object
+    // We create a method reference here so that we are guaranteed that we can remove a callback
     // each time they are created).
     private final Runnable mUpdateTempCallback = this::updateTemperatureWarning;
 
@@ -94,6 +98,7 @@ public class PowerUI extends SystemUI {
                 mContext.getSystemService(Context.HARDWARE_PROPERTIES_SERVICE);
         mScreenOffTime = mPowerManager.isScreenOn() ? -1 : SystemClock.elapsedRealtime();
         mWarnings = Dependency.get(WarningsUI.class);
+        mEnhancedEstimates = Dependency.get(EnhancedEstimates.class);
         mLastConfiguration.setTo(mContext.getResources().getConfiguration());
 
         ContentObserver obs = new ContentObserver(mHandler) {
@@ -236,21 +241,9 @@ public class PowerUI extends SystemUI {
                     return;
                 }
 
-                boolean isPowerSaver = mPowerManager.isPowerSaveMode();
-                if (!plugged
-                        && !isPowerSaver
-                        && (bucket < oldBucket || oldPlugged)
-                        && mBatteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN
-                        && bucket < 0) {
+                // Show the correct version of low battery warning if needed
+                maybeShowBatteryWarning(plugged, oldPlugged, oldBucket, bucket);
 
-                    // only play SFX when the dialog comes up or the bucket changes
-                    final boolean playSound = bucket != oldBucket || oldPlugged;
-                    mWarnings.showLowBatteryWarning(playSound);
-                } else if (isPowerSaver || plugged || (bucket > oldBucket && bucket > 0)) {
-                    mWarnings.dismissLowBatteryWarning();
-                } else {
-                    mWarnings.updateLowBatteryWarning();
-                }
             } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 mScreenOffTime = SystemClock.elapsedRealtime();
             } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
@@ -261,7 +254,65 @@ public class PowerUI extends SystemUI {
                 Slog.w(TAG, "unknown intent: " + intent);
             }
         }
-    };
+    }
+
+    protected void maybeShowBatteryWarning(boolean plugged, boolean oldPlugged, int oldBucket,
+        int bucket) {
+        boolean isPowerSaver = mPowerManager.isPowerSaveMode();
+        // only play SFX when the dialog comes up or the bucket changes
+        final boolean playSound = bucket != oldBucket || oldPlugged;
+        long oldTimeRemaining = mTimeRemaining;
+        if (mEnhancedEstimates.isHybridNotificationEnabled()) {
+            final Estimate estimate = mEnhancedEstimates.getEstimate();
+            // Turbo is not always booted once SysUI is running so we have ot make sure we actually
+            // get data back
+            if (estimate != null) {
+                mTimeRemaining = estimate.estimateMillis;
+                mWarnings.updateEstimate(estimate);
+            }
+        }
+
+        if (shouldShowLowBatteryWarning(plugged, oldPlugged, oldBucket, bucket, oldTimeRemaining,
+                mTimeRemaining,
+                isPowerSaver, mBatteryStatus)) {
+            mWarnings.showLowBatteryWarning(playSound);
+        } else if (shouldDismissLowBatteryWarning(plugged, oldBucket, bucket, mTimeRemaining,
+                isPowerSaver)) {
+            mWarnings.dismissLowBatteryWarning();
+        } else {
+            mWarnings.updateLowBatteryWarning();
+        }
+    }
+
+    @VisibleForTesting
+    boolean shouldShowLowBatteryWarning(boolean plugged, boolean oldPlugged, int oldBucket,
+            int bucket, long oldTimeRemaining, long timeRemaining,
+            boolean isPowerSaver, int mBatteryStatus) {
+        return !plugged
+                && !isPowerSaver
+                && (((bucket < oldBucket || oldPlugged) && bucket < 0)
+                        || (mEnhancedEstimates.isHybridNotificationEnabled()
+                                && timeRemaining < THREE_HOURS_IN_MILLIS
+                                && isHourLess(oldTimeRemaining, timeRemaining)))
+                && mBatteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN;
+    }
+
+    private boolean isHourLess(long oldTimeRemaining, long timeRemaining) {
+        final long dif = oldTimeRemaining - timeRemaining;
+        return dif >= TimeUnit.HOURS.toMillis(1);
+    }
+
+    @VisibleForTesting
+    boolean shouldDismissLowBatteryWarning(boolean plugged, int oldBucket, int bucket,
+            long timeRemaining, boolean isPowerSaver) {
+        final boolean hybridWouldDismiss = mEnhancedEstimates.isHybridNotificationEnabled()
+                && timeRemaining > THREE_HOURS_IN_MILLIS;
+        final boolean standardWouldDismiss = (bucket > oldBucket && bucket > 0);
+        return isPowerSaver
+                || plugged
+                || (standardWouldDismiss && (!mEnhancedEstimates.isHybridNotificationEnabled()
+                        || hybridWouldDismiss));
+    }
 
     private void initTemperatureWarning() {
         ContentResolver resolver = mContext.getContentResolver();
@@ -433,6 +484,7 @@ public class PowerUI extends SystemUI {
 
     public interface WarningsUI {
         void update(int batteryLevel, int bucket, long screenOffTime);
+        void updateEstimate(Estimate estimate);
         void dismissLowBatteryWarning();
         void showLowBatteryWarning(boolean playSound);
         void dismissInvalidChargerWarning();

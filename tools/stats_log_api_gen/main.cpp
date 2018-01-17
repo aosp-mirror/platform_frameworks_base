@@ -195,6 +195,47 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
         fprintf(out, "\n");
     }
 
+    for (set<vector<java_type_t>>::const_iterator signature = atoms.non_chained_signatures.begin();
+        signature != atoms.non_chained_signatures.end(); signature++) {
+        int argIndex;
+
+        fprintf(out, "void\n");
+        fprintf(out, "stats_write_non_chained(int32_t code");
+        argIndex = 1;
+        for (vector<java_type_t>::const_iterator arg = signature->begin();
+            arg != signature->end(); arg++) {
+            fprintf(out, ", %s arg%d", cpp_type_name(*arg), argIndex);
+            argIndex++;
+        }
+        fprintf(out, ")\n");
+
+        fprintf(out, "{\n");
+        argIndex = 1;
+        fprintf(out, "    android_log_event_list event(kStatsEventTag);\n");
+        fprintf(out, "    event << code;\n\n");
+        for (vector<java_type_t>::const_iterator arg = signature->begin();
+            arg != signature->end(); arg++) {
+            if (argIndex == 1) {
+                fprintf(out, "    event.begin();\n\n");
+                fprintf(out, "    event.begin();\n");
+            }
+            if (*arg == JAVA_TYPE_STRING) {
+                fprintf(out, "    if (arg%d == NULL) {\n", argIndex);
+                fprintf(out, "        arg%d = \"\";\n", argIndex);
+                fprintf(out, "    }\n");
+            }
+            fprintf(out, "    event << arg%d;\n", argIndex);
+            if (argIndex == 2) {
+                fprintf(out, "    event.end();\n\n");
+                fprintf(out, "    event.end();\n\n");
+            }
+            argIndex++;
+        }
+
+        fprintf(out, "    event.write(LOG_ID_STATS);\n");
+        fprintf(out, "}\n");
+        fprintf(out, "\n");
+    }
     // Print footer
     fprintf(out, "\n");
     fprintf(out, "} // namespace util\n");
@@ -203,6 +244,68 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
     return 0;
 }
 
+void build_non_chained_decl_map(const Atoms& atoms,
+                                std::map<int, set<AtomDecl>::const_iterator>* decl_map){
+    for (set<AtomDecl>::const_iterator atom = atoms.non_chained_decls.begin();
+        atom != atoms.non_chained_decls.end(); atom++) {
+        decl_map->insert(std::make_pair(atom->code, atom));
+    }
+}
+
+static void write_cpp_usage(
+    FILE* out, const string& method_name, const string& atom_code_name,
+    const AtomDecl& atom, const AtomDecl &attributionDecl) {
+    fprintf(out, "     * Usage: %s(StatsLog.%s", method_name.c_str(), atom_code_name.c_str());
+    for (vector<AtomField>::const_iterator field = atom.fields.begin();
+            field != atom.fields.end(); field++) {
+        if (field->javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
+            for (auto chainField : attributionDecl.fields) {
+                if (chainField.javaType == JAVA_TYPE_STRING) {
+                    fprintf(out, ", const std::vector<%s>& %s",
+                         cpp_type_name(chainField.javaType),
+                         chainField.name.c_str());
+                } else {
+                    fprintf(out, ", const %s* %s, size_t %s_length",
+                         cpp_type_name(chainField.javaType),
+                         chainField.name.c_str(), chainField.name.c_str());
+                }
+            }
+        } else {
+            fprintf(out, ", %s %s", cpp_type_name(field->javaType), field->name.c_str());
+        }
+    }
+    fprintf(out, ");\n");
+}
+
+static void write_cpp_method_header(
+    FILE* out, const string& method_name, const set<vector<java_type_t>>& signatures,
+    const AtomDecl &attributionDecl) {
+    for (set<vector<java_type_t>>::const_iterator signature = signatures.begin();
+            signature != signatures.end(); signature++) {
+        fprintf(out, "void %s(int32_t code ", method_name.c_str());
+        int argIndex = 1;
+        for (vector<java_type_t>::const_iterator arg = signature->begin();
+            arg != signature->end(); arg++) {
+            if (*arg == JAVA_TYPE_ATTRIBUTION_CHAIN) {
+                for (auto chainField : attributionDecl.fields) {
+                    if (chainField.javaType == JAVA_TYPE_STRING) {
+                        fprintf(out, ", const std::vector<%s>& %s",
+                            cpp_type_name(chainField.javaType), chainField.name.c_str());
+                    } else {
+                        fprintf(out, ", const %s* %s, size_t %s_length",
+                            cpp_type_name(chainField.javaType),
+                            chainField.name.c_str(), chainField.name.c_str());
+                    }
+                }
+            } else {
+                fprintf(out, ", %s arg%d", cpp_type_name(*arg), argIndex);
+            }
+            argIndex++;
+        }
+        fprintf(out, ");\n");
+
+    }
+}
 
 static int
 write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributionDecl)
@@ -228,6 +331,9 @@ write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributio
     fprintf(out, " */\n");
     fprintf(out, "enum {\n");
 
+    std::map<int, set<AtomDecl>::const_iterator> atom_code_to_non_chained_decl_map;
+    build_non_chained_decl_map(atoms, &atom_code_to_non_chained_decl_map);
+
     size_t i = 0;
     // Print constants
     for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
@@ -236,26 +342,13 @@ write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributio
         fprintf(out, "\n");
         fprintf(out, "    /**\n");
         fprintf(out, "     * %s %s\n", atom->message.c_str(), atom->name.c_str());
-        fprintf(out, "     * Usage: stats_write(StatsLog.%s", constant.c_str());
-        for (vector<AtomField>::const_iterator field = atom->fields.begin();
-                field != atom->fields.end(); field++) {
-            if (field->javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-                for (auto chainField : attributionDecl.fields) {
-                    if (chainField.javaType == JAVA_TYPE_STRING) {
-                        fprintf(out, ", const std::vector<%s>& %s",
-                             cpp_type_name(chainField.javaType),
-                             chainField.name.c_str());
-                    } else {
-                        fprintf(out, ", const %s* %s, size_t %s_length",
-                             cpp_type_name(chainField.javaType),
-                             chainField.name.c_str(), chainField.name.c_str());
-                    }
-                }
-            } else {
-                fprintf(out, ", %s %s", cpp_type_name(field->javaType), field->name.c_str());
-            }
+        write_cpp_usage(out, "stats_write", constant, *atom, attributionDecl);
+
+        auto non_chained_decl = atom_code_to_non_chained_decl_map.find(atom->code);
+        if (non_chained_decl != atom_code_to_non_chained_decl_map.end()) {
+            write_cpp_usage(out, "stats_write_non_chained", constant, *non_chained_decl->second,
+                attributionDecl);
         }
-        fprintf(out, ");\n");
         fprintf(out, "     */\n");
         char const* const comma = (i == atoms.decls.size() - 1) ? "" : ",";
         fprintf(out, "    %s = %d%s\n", constant.c_str(), atom->code, comma);
@@ -274,30 +367,13 @@ write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributio
     fprintf(out, "//\n");
     fprintf(out, "// Write methods\n");
     fprintf(out, "//\n");
-    for (set<vector<java_type_t>>::const_iterator signature = atoms.signatures.begin();
-            signature != atoms.signatures.end(); signature++) {
-        fprintf(out, "void stats_write(int32_t code ");
-        int argIndex = 1;
-        for (vector<java_type_t>::const_iterator arg = signature->begin();
-            arg != signature->end(); arg++) {
-            if (*arg == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-                for (auto chainField : attributionDecl.fields) {
-                    if (chainField.javaType == JAVA_TYPE_STRING) {
-                        fprintf(out, ", const std::vector<%s>& %s",
-                            cpp_type_name(chainField.javaType), chainField.name.c_str());
-                    } else {
-                        fprintf(out, ", const %s* %s, size_t %s_length",
-                            cpp_type_name(chainField.javaType),
-                            chainField.name.c_str(), chainField.name.c_str());
-                    }
-                }
-            } else {
-                fprintf(out, ", %s arg%d", cpp_type_name(*arg), argIndex);
-            }
-            argIndex++;
-        }
-        fprintf(out, ");\n");
-    }
+    write_cpp_method_header(out, "stats_write", atoms.signatures, attributionDecl);
+
+    fprintf(out, "//\n");
+    fprintf(out, "// Write flattened methods\n");
+    fprintf(out, "//\n");
+    write_cpp_method_header(out, "stats_write_non_chained", atoms.non_chained_signatures,
+        attributionDecl);
 
     fprintf(out, "\n");
     fprintf(out, "} // namespace util\n");
@@ -305,6 +381,49 @@ write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributio
 
     return 0;
 }
+
+static void write_java_usage(
+    FILE* out, const string& method_name, const string& atom_code_name,
+    const AtomDecl& atom, const AtomDecl &attributionDecl) {
+    fprintf(out, "     * Usage: StatsLog.%s(StatsLog.%s",
+        method_name.c_str(), atom_code_name.c_str());
+    for (vector<AtomField>::const_iterator field = atom.fields.begin();
+        field != atom.fields.end(); field++) {
+        if (field->javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
+            for (auto chainField : attributionDecl.fields) {
+                fprintf(out, ", %s[] %s",
+                    java_type_name(chainField.javaType), chainField.name.c_str());
+            }
+        } else {
+            fprintf(out, ", %s %s", java_type_name(field->javaType), field->name.c_str());
+        }
+    }
+    fprintf(out, ");\n");
+}
+
+static void write_java_method(
+    FILE* out, const string& method_name, const set<vector<java_type_t>>& signatures,
+    const AtomDecl &attributionDecl) {
+    for (set<vector<java_type_t>>::const_iterator signature = signatures.begin();
+        signature != signatures.end(); signature++) {
+        fprintf(out, "    public static native void %s(int code", method_name.c_str());
+        int argIndex = 1;
+        for (vector<java_type_t>::const_iterator arg = signature->begin();
+            arg != signature->end(); arg++) {
+            if (*arg == JAVA_TYPE_ATTRIBUTION_CHAIN) {
+                for (auto chainField : attributionDecl.fields) {
+                    fprintf(out, ", %s[] %s",
+                        java_type_name(chainField.javaType), chainField.name.c_str());
+                }
+            } else {
+                fprintf(out, ", %s arg%d", java_type_name(*arg), argIndex);
+            }
+            argIndex++;
+        }
+        fprintf(out, ");\n");
+    }
+}
+
 
 static int
 write_stats_log_java(FILE* out, const Atoms& atoms, const AtomDecl &attributionDecl)
@@ -322,6 +441,9 @@ write_stats_log_java(FILE* out, const Atoms& atoms, const AtomDecl &attributionD
     fprintf(out, "public class StatsLogInternal {\n");
     fprintf(out, "    // Constants for atom codes.\n");
 
+    std::map<int, set<AtomDecl>::const_iterator> atom_code_to_non_chained_decl_map;
+    build_non_chained_decl_map(atoms, &atom_code_to_non_chained_decl_map);
+
     // Print constants for the atom codes.
     for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
             atom != atoms.decls.end(); atom++) {
@@ -329,19 +451,12 @@ write_stats_log_java(FILE* out, const Atoms& atoms, const AtomDecl &attributionD
         fprintf(out, "\n");
         fprintf(out, "    /**\n");
         fprintf(out, "     * %s %s\n", atom->message.c_str(), atom->name.c_str());
-        fprintf(out, "     * Usage: StatsLog.write(StatsLog.%s", constant.c_str());
-        for (vector<AtomField>::const_iterator field = atom->fields.begin();
-            field != atom->fields.end(); field++) {
-            if (field->javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-                for (auto chainField : attributionDecl.fields) {
-                    fprintf(out, ", %s[] %s",
-                        java_type_name(chainField.javaType), chainField.name.c_str());
-                }
-            } else {
-                fprintf(out, ", %s %s", java_type_name(field->javaType), field->name.c_str());
-            }
+        write_java_usage(out, "write", constant, *atom, attributionDecl);
+        auto non_chained_decl = atom_code_to_non_chained_decl_map.find(atom->code);
+        if (non_chained_decl != atom_code_to_non_chained_decl_map.end()) {
+            write_java_usage(out, "write_non_chained", constant, *non_chained_decl->second,
+             attributionDecl);
         }
-        fprintf(out, ");\n");
         fprintf(out, "     */\n");
         fprintf(out, "    public static final int %s = %d;\n", constant.c_str(), atom->code);
     }
@@ -371,24 +486,8 @@ write_stats_log_java(FILE* out, const Atoms& atoms, const AtomDecl &attributionD
 
     // Print write methods
     fprintf(out, "    // Write methods\n");
-    for (set<vector<java_type_t>>::const_iterator signature = atoms.signatures.begin();
-        signature != atoms.signatures.end(); signature++) {
-        fprintf(out, "    public static native void write(int code");
-        int argIndex = 1;
-        for (vector<java_type_t>::const_iterator arg = signature->begin();
-            arg != signature->end(); arg++) {
-            if (*arg == JAVA_TYPE_ATTRIBUTION_CHAIN) {
-                for (auto chainField : attributionDecl.fields) {
-                    fprintf(out, ", %s[] %s",
-                        java_type_name(chainField.javaType), chainField.name.c_str());
-                }
-            } else {
-                fprintf(out, ", %s arg%d", java_type_name(*arg), argIndex);
-            }
-            argIndex++;
-        }
-        fprintf(out, ");\n");
-    }
+    write_java_method(out, "write", atoms.signatures, attributionDecl);
+    write_java_method(out, "write_non_chained", atoms.non_chained_signatures, attributionDecl);
 
     fprintf(out, "}\n");
 
@@ -431,9 +530,9 @@ jni_array_type_name(java_type_t type)
 }
 
 static string
-jni_function_name(const vector<java_type_t>& signature)
+jni_function_name(const string& method_name, const vector<java_type_t>& signature)
 {
-    string result("StatsLog_write");
+    string result("StatsLog_" + method_name);
     for (vector<java_type_t>::const_iterator arg = signature.begin();
         arg != signature.end(); arg++) {
         switch (*arg) {
@@ -509,34 +608,17 @@ jni_function_signature(const vector<java_type_t>& signature, const AtomDecl &att
 }
 
 static int
-write_stats_log_jni(FILE* out, const Atoms& atoms, const AtomDecl &attributionDecl)
+write_stats_log_jni(FILE* out, const string& java_method_name, const string& cpp_method_name,
+    const set<vector<java_type_t>>& signatures, const AtomDecl &attributionDecl)
 {
-    // Print prelude
-    fprintf(out, "// This file is autogenerated\n");
-    fprintf(out, "\n");
-
-    fprintf(out, "#include <statslog.h>\n");
-    fprintf(out, "\n");
-    fprintf(out, "#include <nativehelper/JNIHelp.h>\n");
-    fprintf(out, "#include <nativehelper/ScopedUtfChars.h>\n");
-    fprintf(out, "#include <utils/Vector.h>\n");
-    fprintf(out, "#include \"core_jni_helpers.h\"\n");
-    fprintf(out, "#include \"jni.h\"\n");
-    fprintf(out, "\n");
-    fprintf(out, "#define UNUSED  __attribute__((__unused__))\n");
-    fprintf(out, "\n");
-
-    fprintf(out, "namespace android {\n");
-    fprintf(out, "\n");
-
     // Print write methods
-    for (set<vector<java_type_t>>::const_iterator signature = atoms.signatures.begin();
-        signature != atoms.signatures.end(); signature++) {
+    for (set<vector<java_type_t>>::const_iterator signature = signatures.begin();
+        signature != signatures.end(); signature++) {
         int argIndex;
 
         fprintf(out, "static void\n");
         fprintf(out, "%s(JNIEnv* env, jobject clazz UNUSED, jint code",
-                jni_function_name(*signature).c_str());
+                jni_function_name(java_method_name, *signature).c_str());
         argIndex = 1;
         for (vector<java_type_t>::const_iterator arg = signature->begin();
                 arg != signature->end(); arg++) {
@@ -624,7 +706,7 @@ write_stats_log_jni(FILE* out, const Atoms& atoms, const AtomDecl &attributionDe
 
         // stats_write call
         argIndex = 1;
-        fprintf(out, "    android::util::stats_write(code");
+        fprintf(out, "    android::util::%s(code", cpp_method_name.c_str());
         for (vector<java_type_t>::const_iterator arg = signature->begin();
                 arg != signature->end(); arg++) {
             if (*arg == JAVA_TYPE_ATTRIBUTION_CHAIN) {
@@ -675,17 +757,53 @@ write_stats_log_jni(FILE* out, const Atoms& atoms, const AtomDecl &attributionDe
         fprintf(out, "\n");
     }
 
+
+    return 0;
+}
+
+void write_jni_registration(FILE* out, const string& java_method_name,
+    const set<vector<java_type_t>>& signatures, const AtomDecl &attributionDecl) {
+    for (set<vector<java_type_t>>::const_iterator signature = signatures.begin();
+            signature != signatures.end(); signature++) {
+        fprintf(out, "    { \"%s\", \"%s\", (void*)%s },\n",
+            java_method_name.c_str(),
+            jni_function_signature(*signature, attributionDecl).c_str(),
+            jni_function_name(java_method_name, *signature).c_str());
+    }
+}
+
+static int
+write_stats_log_jni(FILE* out, const Atoms& atoms, const AtomDecl &attributionDecl)
+{
+    // Print prelude
+    fprintf(out, "// This file is autogenerated\n");
+    fprintf(out, "\n");
+
+    fprintf(out, "#include <statslog.h>\n");
+    fprintf(out, "\n");
+    fprintf(out, "#include <nativehelper/JNIHelp.h>\n");
+    fprintf(out, "#include <nativehelper/ScopedUtfChars.h>\n");
+    fprintf(out, "#include <utils/Vector.h>\n");
+    fprintf(out, "#include \"core_jni_helpers.h\"\n");
+    fprintf(out, "#include \"jni.h\"\n");
+    fprintf(out, "\n");
+    fprintf(out, "#define UNUSED  __attribute__((__unused__))\n");
+    fprintf(out, "\n");
+
+    fprintf(out, "namespace android {\n");
+    fprintf(out, "\n");
+
+    write_stats_log_jni(out, "write", "stats_write", atoms.signatures, attributionDecl);
+    write_stats_log_jni(out, "write_non_chained", "stats_write_non_chained",
+        atoms.non_chained_signatures, attributionDecl);
+
     // Print registration function table
     fprintf(out, "/*\n");
     fprintf(out, " * JNI registration.\n");
     fprintf(out, " */\n");
     fprintf(out, "static const JNINativeMethod gRegisterMethods[] = {\n");
-    for (set<vector<java_type_t>>::const_iterator signature = atoms.signatures.begin();
-            signature != atoms.signatures.end(); signature++) {
-        fprintf(out, "    { \"write\", \"%s\", (void*)%s },\n",
-            jni_function_signature(*signature, attributionDecl).c_str(),
-            jni_function_name(*signature).c_str());
-    }
+    write_jni_registration(out, "write", atoms.signatures, attributionDecl);
+    write_jni_registration(out, "write_non_chained", atoms.non_chained_signatures, attributionDecl);
     fprintf(out, "};\n");
     fprintf(out, "\n");
 
@@ -699,10 +817,8 @@ write_stats_log_jni(FILE* out, const Atoms& atoms, const AtomDecl &attributionDe
 
     fprintf(out, "\n");
     fprintf(out, "} // namespace android\n");
-
     return 0;
 }
-
 
 static void
 print_usage()

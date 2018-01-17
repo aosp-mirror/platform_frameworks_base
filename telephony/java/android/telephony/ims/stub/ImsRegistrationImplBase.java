@@ -14,16 +14,19 @@
  * limitations under the License
  */
 
-package android.telephony.ims.internal.stub;
+package android.telephony.ims.stub;
 
 import android.annotation.IntDef;
+import android.net.Uri;
+import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.telephony.ims.internal.aidl.IImsRegistration;
-import android.telephony.ims.internal.aidl.IImsRegistrationCallback;
 import android.util.Log;
 
 import com.android.ims.ImsReasonInfo;
+import com.android.ims.internal.IImsRegistration;
+import com.android.ims.internal.IImsRegistrationCallback;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -62,23 +65,25 @@ public class ImsRegistrationImplBase {
 
     // Registration states, used to notify new ImsRegistrationImplBase#Callbacks of the current
     // state.
+    // The unknown state is set as the initialization state. This is so that we do not call back
+    // with NOT_REGISTERED in the case where the ImsService has not updated the registration state
+    // yet.
+    private static final int REGISTRATION_STATE_UNKNOWN = -1;
     private static final int REGISTRATION_STATE_NOT_REGISTERED = 0;
     private static final int REGISTRATION_STATE_REGISTERING = 1;
     private static final int REGISTRATION_STATE_REGISTERED = 2;
 
-
     /**
      * Callback class for receiving Registration callback events.
+     * @hide
      */
-    public static class Callback extends IImsRegistrationCallback.Stub {
-
+    public static class Callback {
         /**
          * Notifies the framework when the IMS Provider is connected to the IMS network.
          *
          * @param imsRadioTech the radio access technology. Valid values are defined in
          * {@link ImsRegistrationTech}.
          */
-        @Override
         public void onRegistered(@ImsRegistrationTech int imsRadioTech) {
         }
 
@@ -88,7 +93,6 @@ public class ImsRegistrationImplBase {
          * @param imsRadioTech the radio access technology. Valid values are defined in
          * {@link ImsRegistrationTech}.
          */
-        @Override
         public void onRegistering(@ImsRegistrationTech int imsRadioTech) {
         }
 
@@ -97,7 +101,6 @@ public class ImsRegistrationImplBase {
          *
          * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
          */
-        @Override
         public void onDeregistered(ImsReasonInfo info) {
         }
 
@@ -108,9 +111,18 @@ public class ImsRegistrationImplBase {
          * @param imsRadioTech The {@link ImsRegistrationTech} type that has failed
          * @param info A {@link ImsReasonInfo} that identifies the reason for failure.
          */
-        @Override
         public void onTechnologyChangeFailed(@ImsRegistrationTech int imsRadioTech,
                 ImsReasonInfo info) {
+        }
+
+        /**
+         * Returns a list of subscriber {@link Uri}s associated with this IMS subscription when
+         * it changes.
+         * @param uris new array of subscriber {@link Uri}s that are associated with this IMS
+         *         subscription.
+         */
+        public void onSubscriberAssociatedUriChanged(Uri[] uris) {
+
         }
     }
 
@@ -139,9 +151,9 @@ public class ImsRegistrationImplBase {
     private @ImsRegistrationTech
     int mConnectionType = REGISTRATION_TECH_NONE;
     // Locked on mLock
-    private int mRegistrationState = REGISTRATION_STATE_NOT_REGISTERED;
-    // Locked on mLock
-    private ImsReasonInfo mLastDisconnectCause;
+    private int mRegistrationState = REGISTRATION_STATE_UNKNOWN;
+    // Locked on mLock, create unspecified disconnect cause.
+    private ImsReasonInfo mLastDisconnectCause = new ImsReasonInfo();
 
     public final IImsRegistration getBinder() {
         return mBinder;
@@ -221,6 +233,17 @@ public class ImsRegistrationImplBase {
         });
     }
 
+    public final void onSubscriberAssociatedUriChanged(Uri[] uris) {
+        mCallbacks.broadcast((c) -> {
+            try {
+                c.onSubscriberAssociatedUriChanged(uris);
+            } catch (RemoteException e) {
+                Log.w(LOG_TAG, e + " " + "onSubscriberAssociatedUriChanged() - Skipping " +
+                        "callback.");
+            }
+        });
+    }
+
     private void updateToState(@ImsRegistrationTech int connType, int newState) {
         synchronized (mLock) {
             mConnectionType = connType;
@@ -241,7 +264,8 @@ public class ImsRegistrationImplBase {
         }
     }
 
-    private @ImsRegistrationTech int getConnectionType() {
+    @VisibleForTesting
+    public final @ImsRegistrationTech int getConnectionType() {
         synchronized (mLock) {
             return mConnectionType;
         }
@@ -269,6 +293,10 @@ public class ImsRegistrationImplBase {
             }
             case REGISTRATION_STATE_REGISTERED: {
                 c.onRegistered(getConnectionType());
+                break;
+            }
+            case REGISTRATION_STATE_UNKNOWN: {
+                // Do not callback if the state has not been updated yet by the ImsService.
                 break;
             }
         }

@@ -14,7 +14,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.graphics.drawable.Drawable;
 import android.view.View;
 
 import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider.ButtonInterface;
@@ -39,6 +38,7 @@ public class ButtonDispatcher {
     private Integer mAlpha;
     private Float mDarkIntensity;
     private Integer mVisibility = -1;
+    private Boolean mDelayTouchFeedback;
     private KeyButtonDrawable mImageDrawable;
     private View mCurrentView;
     private boolean mVertical;
@@ -71,10 +71,10 @@ public class ButtonDispatcher {
         if (mImageDrawable != null) {
             ((ButtonInterface) view).setImageDrawable(mImageDrawable);
         }
-
-        if (view instanceof  ButtonInterface) {
-            ((ButtonInterface) view).setVertical(mVertical);
+        if (mDelayTouchFeedback != null) {
+            ((ButtonInterface) view).setDelayTouchFeedback(mDelayTouchFeedback);
         }
+        ((ButtonInterface) view).setVertical(mVertical);
     }
 
     public int getId() {
@@ -134,6 +134,14 @@ public class ButtonDispatcher {
         }
     }
 
+    public void setDelayTouchFeedback(boolean delay) {
+        mDelayTouchFeedback = delay;
+        final int N = mViews.size();
+        for (int i = 0; i < N; i++) {
+            ((ButtonInterface) mViews.get(i)).setDelayTouchFeedback(delay);
+        }
+    }
+
     public void setOnClickListener(View.OnClickListener clickListener) {
         mClickListener = clickListener;
         final int N = mViews.size();
@@ -163,6 +171,14 @@ public class ButtonDispatcher {
         final int N = mViews.size();
         for (int i = 0; i < N; i++) {
             mViews.get(i).setOnLongClickListener(mLongClickListener);
+        }
+    }
+
+    public void setClickable(boolean clickable) {
+        abortCurrentGesture();
+        final int N = mViews.size();
+        for (int i = 0; i < N; i++) {
+            mViews.get(i).setClickable(clickable);
         }
     }
 

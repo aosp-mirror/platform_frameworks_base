@@ -14,22 +14,18 @@
  * limitations under the License
  */
 
-package com.android.server.backup.testing;
+package com.android.server.testing.shadows;
 
 import android.app.ApplicationPackageManager;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
-
+import java.util.List;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowApplicationPackageManager;
 
-import java.util.List;
-
-/**
- * Implementation of PackageManager for Robolectric which handles queryIntentServicesAsUser().
- */
+/** Extension of ShadowApplicationPackageManager */
 @Implements(value = ApplicationPackageManager.class, inheritImplementationMethods = true)
-public class ShadowPackageManagerForBackup extends ShadowApplicationPackageManager {
+public class FrameworkShadowPackageManager extends ShadowApplicationPackageManager {
     @Override
     public List<ResolveInfo> queryIntentServicesAsUser(Intent intent, int flags, int userId) {
         return queryIntentServices(intent, flags);
