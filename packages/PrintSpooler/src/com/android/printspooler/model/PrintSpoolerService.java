@@ -161,11 +161,11 @@ public final class PrintSpoolerService extends Service {
         return new PrintSpooler();
     }
 
-    private void dumpLocked(@NonNull DualDumpOutputStream proto) {
+    private void dumpLocked(@NonNull DualDumpOutputStream dumpStream) {
         int numPrintJobs = mPrintJobs.size();
         for (int i = 0; i < numPrintJobs; i++) {
-            writePrintJobInfo(this, proto, "print_jobs", PrintSpoolerInternalStateProto.PRINT_JOBS,
-                    mPrintJobs.get(i));
+            writePrintJobInfo(this, dumpStream, "print_jobs",
+                    PrintSpoolerInternalStateProto.PRINT_JOBS, mPrintJobs.get(i));
         }
 
         File[] files = getFilesDir().listFiles();
@@ -173,8 +173,8 @@ public final class PrintSpoolerService extends Service {
             for (int i = 0; i < files.length; i++) {
                 File file = files[i];
                 if (file.isFile() && file.getName().startsWith(PRINT_JOB_FILE_PREFIX)) {
-                    proto.write("print_job_files", PrintSpoolerInternalStateProto.PRINT_JOB_FILES,
-                            file.getName());
+                    dumpStream.write("print_job_files",
+                            PrintSpoolerInternalStateProto.PRINT_JOB_FILES, file.getName());
                 }
             }
         }
@@ -184,13 +184,13 @@ public final class PrintSpoolerService extends Service {
             for (String approvedService : approvedPrintServices) {
                 ComponentName componentName = ComponentName.unflattenFromString(approvedService);
                 if (componentName != null) {
-                    writeComponentName(proto, "approved_services",
+                    writeComponentName(dumpStream, "approved_services",
                             PrintSpoolerInternalStateProto.APPROVED_SERVICES, componentName);
                 }
             }
         }
 
-        proto.flush();
+        dumpStream.flush();
     }
 
     @Override

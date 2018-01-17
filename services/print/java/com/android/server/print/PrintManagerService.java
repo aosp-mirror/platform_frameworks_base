@@ -685,16 +685,16 @@ public final class PrintManagerService extends SystemService {
             }
         }
 
-        private void dump(@NonNull DualDumpOutputStream proto,
+        private void dump(@NonNull DualDumpOutputStream dumpStream,
                 @NonNull ArrayList<UserState> userStatesToDump) {
             final int userStateCount = userStatesToDump.size();
             for (int i = 0; i < userStateCount; i++) {
-                long token = proto.start("user_states", PrintServiceDumpProto.USER_STATES);
-                userStatesToDump.get(i).dump(proto);
-                proto.end(token);
+                long token = dumpStream.start("user_states", PrintServiceDumpProto.USER_STATES);
+                userStatesToDump.get(i).dump(dumpStream);
+                dumpStream.end(token);
             }
 
-            proto.flush();
+            dumpStream.flush();
         }
 
         private void registerContentObservers() {
