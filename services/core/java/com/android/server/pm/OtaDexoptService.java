@@ -260,12 +260,13 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
             public void dexopt(String apkPath, int uid, @Nullable String pkgName,
                     String instructionSet, int dexoptNeeded, @Nullable String outputPath,
                     int dexFlags, String compilerFilter, @Nullable String volumeUuid,
-                    @Nullable String sharedLibraries, @Nullable String seInfo, boolean downgrade)
+                    @Nullable String sharedLibraries, @Nullable String seInfo, boolean downgrade,
+                    int targetSdkVersion)
                     throws InstallerException {
                 final StringBuilder builder = new StringBuilder();
 
-                // The version. Right now it's 3.
-                builder.append("3 ");
+                // The version. Right now it's 4.
+                builder.append("4 ");
 
                 builder.append("dexopt");
 
@@ -281,6 +282,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 encodeParameter(builder, sharedLibraries);
                 encodeParameter(builder, seInfo);
                 encodeParameter(builder, downgrade);
+                encodeParameter(builder, targetSdkVersion);
 
                 commands.add(builder.toString());
             }

@@ -572,10 +572,12 @@ public class ZygoteInit {
                 final String seInfo = null;
                 final String classLoaderContext =
                         getSystemServerClassLoaderContext(classPathForElement);
+                final int targetSdkVersion = 0;  // SystemServer targets the system's SDK version
                 try {
                     installd.dexopt(classPathElement, Process.SYSTEM_UID, packageName,
                             instructionSet, dexoptNeeded, outputPath, dexFlags, compilerFilter,
-                            uuid, classLoaderContext, seInfo, false /* downgrade */);
+                            uuid, classLoaderContext, seInfo, false /* downgrade */,
+                            targetSdkVersion);
                 } catch (RemoteException | ServiceSpecificException e) {
                     // Ignore (but log), we need this on the classpath for fallback mode.
                     Log.w(TAG, "Failed compiling classpath element for system server: "
