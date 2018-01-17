@@ -42,6 +42,7 @@ import com.android.server.backup.transport.TransportConnectionListener;
 import com.android.server.backup.transport.TransportNotAvailableException;
 import com.android.server.backup.transport.TransportNotRegisteredException;
 
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -630,6 +631,10 @@ public class TransportManager {
     private void checkCanUseTransport() {
         Preconditions.checkState(
                 !Thread.holdsLock(mTransportLock), "Can't call transport with transport lock held");
+    }
+
+    public void dump(PrintWriter pw) {
+        mTransportClientManager.dump(pw);
     }
 
     private static Predicate<ComponentName> fromPackageFilter(String packageName) {
