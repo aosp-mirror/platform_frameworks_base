@@ -19,127 +19,142 @@ package android.widget;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.graphics.Canvas;
 import android.media.session.MediaController;
 import android.media.update.ApiLoader;
-import android.media.update.MediaController2Provider;
+import android.media.update.MediaControlView2Provider;
 import android.media.update.ViewProvider;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.View;
-import android.view.View.OnClickListener;
 
 /**
  * TODO PUBLIC API
  * @hide
  */
-public class MediaController2 extends FrameLayout {
-    private final MediaController2Provider mProvider;
+public class MediaControlView2 extends FrameLayout {
+    private final MediaControlView2Provider mProvider;
 
-    public MediaController2(@NonNull Context context) {
+    public MediaControlView2(@NonNull Context context) {
         this(context, null);
     }
 
-    public MediaController2(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public MediaControlView2(@NonNull Context context, @Nullable AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public MediaController2(@NonNull Context context, @Nullable AttributeSet attrs,
+    public MediaControlView2(@NonNull Context context, @Nullable AttributeSet attrs,
                             int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
-    public MediaController2(@NonNull Context context, @Nullable AttributeSet attrs,
+    public MediaControlView2(@NonNull Context context, @Nullable AttributeSet attrs,
                             int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
         mProvider = ApiLoader.getProvider(context)
-                .createMediaController2(this, new SuperProvider());
+                .createMediaControlView2(this, new SuperProvider());
     }
 
+    public MediaControlView2Provider getProvider() {
+        return mProvider;
+    }
+
+    /**
+     * TODO: add docs
+     */
     public void setController(MediaController controller) {
         mProvider.setController_impl(controller);
     }
 
-    public void setAnchorView(View view) {
-        mProvider.setAnchorView_impl(view);
-    }
-
+    /**
+     * TODO: add docs
+     */
     public void show() {
         mProvider.show_impl();
     }
 
+    /**
+     * TODO: add docs
+     */
     public void show(int timeout) {
         mProvider.show_impl(timeout);
     }
 
+    /**
+     * TODO: add docs
+     */
     public boolean isShowing() {
         return mProvider.isShowing_impl();
     }
 
+    /**
+     * TODO: add docs
+     */
     public void hide() {
         mProvider.hide_impl();
     }
 
-    public void setPrevNextListeners(OnClickListener next, OnClickListener prev) {
-        mProvider.setPrevNextListeners_impl(next, prev);
-    }
-
+    /**
+     * TODO: add docs
+     */
     public void showCCButton() {
         mProvider.showCCButton_impl();
     }
 
+    /**
+     * TODO: add docs
+     */
     public boolean isPlaying() {
         return mProvider.isPlaying_impl();
     }
 
+    /**
+     * TODO: add docs
+     */
     public int getCurrentPosition() {
         return mProvider.getCurrentPosition_impl();
     }
 
+    /**
+     * TODO: add docs
+     */
     public int getBufferPercentage() {
         return mProvider.getBufferPercentage_impl();
     }
 
+    /**
+     * TODO: add docs
+     */
     public boolean canPause() {
         return mProvider.canPause_impl();
     }
 
+    /**
+     * TODO: add docs
+     */
     public boolean canSeekBackward() {
         return mProvider.canSeekBackward_impl();
     }
 
+    /**
+     * TODO: add docs
+     */
     public boolean canSeekForward() {
         return mProvider.canSeekForward_impl();
     }
 
+    /**
+     * TODO: add docs
+     */
     public void showSubtitle() {
         mProvider.showSubtitle_impl();
     }
 
+    /**
+     * TODO: add docs
+     */
     public void hideSubtitle() {
         mProvider.hideSubtitle_impl();
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        mProvider.onAttachedToWindow_impl();
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        mProvider.onDetachedFromWindow_impl();
-    }
-
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        mProvider.onLayout_impl(changed, left, top, right, bottom);
-    }
-
-    @Override
-    public void draw(Canvas canvas) {
-        mProvider.draw_impl(canvas);
     }
 
     @Override
@@ -179,58 +194,38 @@ public class MediaController2 extends FrameLayout {
 
     private class SuperProvider implements ViewProvider {
         @Override
-        public void onAttachedToWindow_impl() {
-            MediaController2.super.onAttachedToWindow();
-        }
-
-        @Override
-        public void onDetachedFromWindow_impl() {
-            MediaController2.super.onDetachedFromWindow();
-        }
-
-        @Override
-        public void onLayout_impl(boolean changed, int left, int top, int right, int bottom) {
-            MediaController2.super.onLayout(changed, left, top, right, bottom);
-        }
-
-        @Override
-        public void draw_impl(Canvas canvas) {
-            MediaController2.super.draw(canvas);
-        }
-
-        @Override
         public CharSequence getAccessibilityClassName_impl() {
-            return MediaController2.super.getAccessibilityClassName();
+            return MediaControlView2.super.getAccessibilityClassName();
         }
 
         @Override
         public boolean onTouchEvent_impl(MotionEvent ev) {
-            return MediaController2.super.onTouchEvent(ev);
+            return MediaControlView2.super.onTouchEvent(ev);
         }
 
         @Override
         public boolean onTrackballEvent_impl(MotionEvent ev) {
-            return MediaController2.super.onTrackballEvent(ev);
+            return MediaControlView2.super.onTrackballEvent(ev);
         }
 
         @Override
         public boolean onKeyDown_impl(int keyCode, KeyEvent event) {
-            return MediaController2.super.onKeyDown(keyCode, event);
+            return MediaControlView2.super.onKeyDown(keyCode, event);
         }
 
         @Override
         public void onFinishInflate_impl() {
-            MediaController2.super.onFinishInflate();
+            MediaControlView2.super.onFinishInflate();
         }
 
         @Override
         public boolean dispatchKeyEvent_impl(KeyEvent event) {
-            return MediaController2.super.dispatchKeyEvent(event);
+            return MediaControlView2.super.dispatchKeyEvent(event);
         }
 
         @Override
         public void setEnabled_impl(boolean enabled) {
-            MediaController2.super.setEnabled(enabled);
+            MediaControlView2.super.setEnabled(enabled);
         }
     }
 }

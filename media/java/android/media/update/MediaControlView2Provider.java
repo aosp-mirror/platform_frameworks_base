@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package android.media.update;
 import android.annotation.SystemApi;
 import android.media.session.MediaController;
 import android.view.View;
-import android.view.View.OnClickListener;
 
 /**
  * Interface for connecting the public API to an updatable implementation.
@@ -30,19 +29,17 @@ import android.view.View.OnClickListener;
  *
  * All methods behave as per their namesake in the public API.
  *
- * @see android.widget.MediaController2
+ * @see android.widget.MediaControlView2
  *
  * @hide
  */
 // TODO @SystemApi
-public interface MediaController2Provider extends ViewProvider {
+public interface MediaControlView2Provider extends ViewProvider {
     void setController_impl(MediaController controller);
-    void setAnchorView_impl(View view);
     void show_impl();
     void show_impl(int timeout);
     boolean isShowing_impl();
     void hide_impl();
-    void setPrevNextListeners_impl(OnClickListener next, OnClickListener prev);
     void showCCButton_impl();
     boolean isPlaying_impl();
     int getCurrentPosition_impl();
