@@ -178,11 +178,13 @@ message CountMetric {
 
     optional int64 condition = 3;
 
-    optional FieldMatcher dimensions = 4;
+    optional FieldMatcher dimensions_in_what = 4;
 
-    optional TimeUnit bucket = 5;
+    optional FieldMatcher dimensions_in_condition = 5;
 
-    repeated MetricConditionLink links = 6;
+    optional TimeUnit bucket = 6;
+
+    repeated MetricConditionLink links = 7;
 }
 
 message DurationMetric {
@@ -201,9 +203,11 @@ message DurationMetric {
     }
     optional AggregationType aggregation_type = 5 [default = SUM];
 
-    optional FieldMatcher dimensions = 6;
+    optional FieldMatcher dimensions_in_what = 6;
 
-    optional TimeUnit bucket = 7;
+    optional FieldMatcher dimensions_in_condition = 7;
+
+    optional TimeUnit bucket = 8;
 }
 
 message GaugeMetric {
@@ -215,11 +219,13 @@ message GaugeMetric {
 
     optional int64 condition = 4;
 
-    optional FieldMatcher dimensions = 5;
+    optional FieldMatcher dimensions_in_what = 5;
 
-    optional TimeUnit bucket = 6;
+    optional FieldMatcher dimensions_in_condition = 6;
 
-    repeated MetricConditionLink links = 7;
+    optional TimeUnit bucket = 7;
+
+    repeated MetricConditionLink links = 8;
 }
 
 message ValueMetric {
@@ -231,14 +237,16 @@ message ValueMetric {
 
     optional int64 condition = 4;
 
-    optional FieldMatcher dimensions = 5;
+    optional FieldMatcher dimensions_in_what = 5;
 
-    optional TimeUnit bucket = 6;
+    optional FieldMatcher dimensions_in_condition = 6;
 
-    repeated MetricConditionLink links = 7;
+    optional TimeUnit bucket = 7;
+
+    repeated MetricConditionLink links = 8;
 
     enum AggregationType { SUM = 1; }
-    optional AggregationType aggregation_type = 8 [default = SUM];
+    optional AggregationType aggregation_type = 9 [default = SUM];
 }
 
 message Alert {

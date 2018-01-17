@@ -227,7 +227,8 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const long ti
         int metricIndex = allMetricProducers.size();
         metricMap.insert({metric.id(), metricIndex});
         int trackerIndex;
-        if (!handleMetricWithLogTrackers(metric.what(), metricIndex, metric.has_dimensions(),
+        if (!handleMetricWithLogTrackers(metric.what(), metricIndex,
+                                         metric.has_dimensions_in_what(),
                                          allAtomMatchers, logTrackerMap, trackerToMetricMap,
                                          trackerIndex)) {
             return false;
@@ -279,7 +280,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const long ti
         int trackerIndices[3] = {-1, -1, -1};
         if (!simplePredicate.has_start() ||
             !handleMetricWithLogTrackers(simplePredicate.start(), metricIndex,
-                                         metric.has_dimensions(), allAtomMatchers,
+                                         metric.has_dimensions_in_what(), allAtomMatchers,
                                          logTrackerMap, trackerToMetricMap, trackerIndices[0])) {
             ALOGE("Duration metrics must specify a valid the start event matcher");
             return false;
@@ -287,14 +288,14 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const long ti
 
         if (simplePredicate.has_stop() &&
             !handleMetricWithLogTrackers(simplePredicate.stop(), metricIndex,
-                                         metric.has_dimensions(), allAtomMatchers,
+                                         metric.has_dimensions_in_what(), allAtomMatchers,
                                          logTrackerMap, trackerToMetricMap, trackerIndices[1])) {
             return false;
         }
 
         if (simplePredicate.has_stop_all() &&
             !handleMetricWithLogTrackers(simplePredicate.stop_all(), metricIndex,
-                                         metric.has_dimensions(), allAtomMatchers,
+                                         metric.has_dimensions_in_what(), allAtomMatchers,
                                          logTrackerMap, trackerToMetricMap, trackerIndices[2])) {
             return false;
         }
@@ -371,7 +372,8 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const long ti
         int metricIndex = allMetricProducers.size();
         metricMap.insert({metric.id(), metricIndex});
         int trackerIndex;
-        if (!handleMetricWithLogTrackers(metric.what(), metricIndex, metric.has_dimensions(),
+        if (!handleMetricWithLogTrackers(metric.what(), metricIndex,
+                                         metric.has_dimensions_in_what(),
                                          allAtomMatchers, logTrackerMap, trackerToMetricMap,
                                          trackerIndex)) {
             return false;
@@ -429,7 +431,8 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const long ti
         int metricIndex = allMetricProducers.size();
         metricMap.insert({metric.id(), metricIndex});
         int trackerIndex;
-        if (!handleMetricWithLogTrackers(metric.what(), metricIndex, metric.has_dimensions(),
+        if (!handleMetricWithLogTrackers(metric.what(), metricIndex,
+                                         metric.has_dimensions_in_what(),
                                          allAtomMatchers, logTrackerMap, trackerToMetricMap,
                                          trackerIndex)) {
             return false;

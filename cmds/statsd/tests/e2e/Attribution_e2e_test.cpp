@@ -44,7 +44,7 @@ StatsdConfig CreateStatsdConfig() {
     auto countMetric = config.add_count_metric();
     countMetric->set_id(123456);
     countMetric->set_what(wakelockAcquireMatcher.id());
-    *countMetric->mutable_dimensions() =
+    *countMetric->mutable_dimensions_in_what() =
         CreateAttributionUidAndTagDimensions(
             android::util::WAKELOCK_STATE_CHANGED, {Position::FIRST});
     countMetric->set_bucket(ONE_MINUTE);
@@ -155,7 +155,8 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSlice) {
 
     auto data = countMetrics.data(0);
     ValidateAttributionUidAndTagDimension(
-        data.dimension(), android::util::WAKELOCK_STATE_CHANGED, 111, "App1");
+        data.dimensions_in_what(), android::util::WAKELOCK_STATE_CHANGED, 111,
+            "App1");
     EXPECT_EQ(data.bucket_info_size(), 2);
     EXPECT_EQ(data.bucket_info(0).count(), 2);
     EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
@@ -166,7 +167,8 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSlice) {
 
     data = countMetrics.data(1);
     ValidateAttributionUidAndTagDimension(
-        data.dimension(), android::util::WAKELOCK_STATE_CHANGED, 222, "GMSCoreModule1");
+        data.dimensions_in_what(), android::util::WAKELOCK_STATE_CHANGED, 222,
+            "GMSCoreModule1");
     EXPECT_EQ(data.bucket_info_size(), 2);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
     EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
@@ -177,7 +179,8 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSlice) {
 
     data = countMetrics.data(2);
     ValidateAttributionUidAndTagDimension(
-        data.dimension(), android::util::WAKELOCK_STATE_CHANGED, 222, "GMSCoreModule3");
+        data.dimensions_in_what(), android::util::WAKELOCK_STATE_CHANGED, 222,
+            "GMSCoreModule3");
     EXPECT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
     EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs + 3 * bucketSizeNs);
@@ -185,7 +188,8 @@ TEST(AttributionE2eTest, TestAttributionMatchAndSlice) {
 
     data = countMetrics.data(3);
     ValidateAttributionUidAndTagDimension(
-        data.dimension(), android::util::WAKELOCK_STATE_CHANGED, 444, "GMSCoreModule2");
+        data.dimensions_in_what(), android::util::WAKELOCK_STATE_CHANGED, 444,
+            "GMSCoreModule2");
     EXPECT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).count(), 1);
     EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);

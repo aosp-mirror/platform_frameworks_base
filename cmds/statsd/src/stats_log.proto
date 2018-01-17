@@ -56,7 +56,9 @@ message CountBucketInfo {
 }
 
 message CountMetricData {
-  optional DimensionsValue dimension = 1;
+  optional DimensionsValue dimensions_in_what = 1;
+
+  optional DimensionsValue dimensions_in_condition = 3;
 
   repeated CountBucketInfo bucket_info = 2;
 }
@@ -70,7 +72,9 @@ message DurationBucketInfo {
 }
 
 message DurationMetricData {
-  optional DimensionsValue dimension = 1;
+  optional DimensionsValue dimensions_in_what = 1;
+
+  optional DimensionsValue dimensions_in_condition = 3;
 
   repeated DurationBucketInfo bucket_info = 2;
 }
@@ -84,7 +88,9 @@ message ValueBucketInfo {
 }
 
 message ValueMetricData {
-  optional DimensionsValue dimension = 1;
+  optional DimensionsValue dimensions_in_what = 1;
+
+  optional DimensionsValue dimensions_in_condition = 3;
 
   repeated ValueBucketInfo bucket_info = 2;
 }
@@ -98,7 +104,9 @@ message GaugeBucketInfo {
 }
 
 message GaugeMetricData {
-  optional DimensionsValue dimension = 1;
+  optional DimensionsValue dimensions_in_what = 1;
+
+  optional DimensionsValue dimensions_in_condition = 3;
 
   repeated GaugeBucketInfo bucket_info = 2;
 }

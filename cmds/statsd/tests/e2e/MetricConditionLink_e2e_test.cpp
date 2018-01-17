@@ -68,7 +68,7 @@ StatsdConfig CreateStatsdConfig() {
     countMetric->set_what(appCrashMatcher.id());
     countMetric->set_condition(combinationPredicate->id());
     // The metric is dimensioning by uid only.
-    *countMetric->mutable_dimensions() =
+    *countMetric->mutable_dimensions_in_what() =
         CreateDimensions(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED, {1});
     countMetric->set_bucket(ONE_MINUTE);
 
@@ -199,12 +199,11 @@ TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks) {
     EXPECT_EQ(reports.reports(0).metrics(0).count_metrics().data(0).bucket_info(0).count(), 1);
     auto data = reports.reports(0).metrics(0).count_metrics().data(0);
     // Validate dimension value.
-    EXPECT_EQ(data.dimension().field(),
-              android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
-    EXPECT_EQ(data.dimension().value_tuple().dimensions_value_size(), 1);
+    EXPECT_EQ(data.dimensions_in_what().field(), android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
+    EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
     // Uid field.
-    EXPECT_EQ(data.dimension().value_tuple().dimensions_value(0).field(), 1);
-    EXPECT_EQ(data.dimension().value_tuple().dimensions_value(0).value_int(), appUid);
+    EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
+    EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).value_int(), appUid);
 
     reports.Clear();
     processor->onDumpReport(cfgKey, bucketStartTimeNs + 2 * bucketSizeNs + 1, &reports);
@@ -216,12 +215,12 @@ TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks) {
     EXPECT_EQ(reports.reports(0).metrics(0).count_metrics().data(0).bucket_info(1).count(), 3);
     data = reports.reports(0).metrics(0).count_metrics().data(0);
     // Validate dimension value.
-    EXPECT_EQ(data.dimension().field(),
+    EXPECT_EQ(data.dimensions_in_what().field(),
               android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
-    EXPECT_EQ(data.dimension().value_tuple().dimensions_value_size(), 1);
+    EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
     // Uid field.
-    EXPECT_EQ(data.dimension().value_tuple().dimensions_value(0).field(), 1);
-    EXPECT_EQ(data.dimension().value_tuple().dimensions_value(0).value_int(), appUid);
+    EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1);
+    EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).value_int(), appUid);
 }
 
 #else

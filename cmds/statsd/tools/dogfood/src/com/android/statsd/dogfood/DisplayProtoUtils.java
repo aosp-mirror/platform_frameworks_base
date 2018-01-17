@@ -97,9 +97,14 @@ public class DisplayProtoUtils {
                 = log.getDurationMetrics();
         sb.append("Dimension size: ").append(durationMetricDataWrapper.getDataCount()).append("\n");
         for (StatsLog.DurationMetricData duration : durationMetricDataWrapper.getDataList()) {
-            sb.append("dimension: ");
-            displayDimension(sb, duration.getDimension());
+            sb.append("dimension_in_what: ");
+            displayDimension(sb, duration.getDimensionsInWhat());
             sb.append("\n");
+            if (duration.hasDimensionsInCondition()) {
+                sb.append("dimension_in_condition: ");
+                displayDimension(sb, duration.getDimensionsInCondition());
+                sb.append("\n");
+            }
 
             for (StatsLog.DurationBucketInfo info : duration.getBucketInfoList())  {
                 sb.append("\t[").append(getDateStr(info.getStartBucketNanos())).append("-")
@@ -124,9 +129,14 @@ public class DisplayProtoUtils {
                 = log.getCountMetrics();
         sb.append("Dimension size: ").append(countMetricDataWrapper.getDataCount()).append("\n");
         for (StatsLog.CountMetricData count : countMetricDataWrapper.getDataList()) {
-            sb.append("dimension: ");
-            displayDimension(sb, count.getDimension());
+            sb.append("dimension_in_what: ");
+            displayDimension(sb, count.getDimensionsInWhat());
             sb.append("\n");
+            if (count.hasDimensionsInCondition()) {
+                sb.append("dimension_in_condition: ");
+                displayDimension(sb, count.getDimensionsInCondition());
+                sb.append("\n");
+            }
 
             for (StatsLog.CountBucketInfo info : count.getBucketInfoList())  {
                 sb.append("\t[").append(getDateStr(info.getStartBucketNanos())).append("-")

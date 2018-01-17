@@ -81,8 +81,8 @@ StatsdConfig buildGoodConfig() {
     metric->set_id(3);
     metric->set_what(StringToId("SCREEN_IS_ON"));
     metric->set_bucket(ONE_MINUTE);
-    metric->mutable_dimensions()->set_field(2 /*SCREEN_STATE_CHANGE*/);
-    metric->mutable_dimensions()->add_child()->set_field(1);
+    metric->mutable_dimensions_in_what()->set_field(2 /*SCREEN_STATE_CHANGE*/);
+    metric->mutable_dimensions_in_what()->add_child()->set_field(1);
 
     config.add_no_report_metric(3);
 
@@ -132,8 +132,8 @@ StatsdConfig buildAlertWithUnknownMetric() {
     metric->set_id(3);
     metric->set_what(StringToId("SCREEN_IS_ON"));
     metric->set_bucket(ONE_MINUTE);
-    metric->mutable_dimensions()->set_field(2 /*SCREEN_STATE_CHANGE*/);
-    metric->mutable_dimensions()->add_child()->set_field(1);
+    metric->mutable_dimensions_in_what()->set_field(2 /*SCREEN_STATE_CHANGE*/);
+    metric->mutable_dimensions_in_what()->add_child()->set_field(1);
 
     auto alert = config.add_alert();
     alert->set_id(3);
@@ -217,7 +217,7 @@ StatsdConfig buildDimensionMetricsWithMultiTags() {
     metric->set_what(StringToId("BATTERY_LOW"));
     metric->set_bucket(ONE_MINUTE);
     // This case is interesting. We want to dimension across two atoms.
-    metric->mutable_dimensions()->add_child()->set_field(1);
+    metric->mutable_dimensions_in_what()->add_child()->set_field(1);
 
     auto alert = config.add_alert();
     alert->set_id(103);

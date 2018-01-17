@@ -255,7 +255,7 @@ StatsdConfig build_fake_config() {
     metric->set_id(2);  // "METRIC_2"
     metric->set_what(104);
     metric->set_bucket(ONE_MINUTE);
-    FieldMatcher* dimensions = metric->mutable_dimensions();
+    FieldMatcher* dimensions = metric->mutable_dimensions_in_what();
     dimensions->set_field(UID_PROCESS_STATE_TAG_ID);
     dimensions->add_child()->set_field(UID_PROCESS_STATE_UID_KEY);
 
@@ -278,7 +278,7 @@ StatsdConfig build_fake_config() {
     metric->set_what(104);
     metric->set_bucket(ONE_MINUTE);
 
-    dimensions = metric->mutable_dimensions();
+    dimensions = metric->mutable_dimensions_in_what();
     dimensions->set_field(UID_PROCESS_STATE_TAG_ID);
     dimensions->add_child()->set_field(UID_PROCESS_STATE_UID_KEY);
     metric->set_condition(202);
@@ -288,7 +288,7 @@ StatsdConfig build_fake_config() {
     metric->set_id(4);
     metric->set_what(107);
     metric->set_bucket(ONE_MINUTE);
-    dimensions = metric->mutable_dimensions();
+    dimensions = metric->mutable_dimensions_in_what();
     dimensions->set_field(WAKE_LOCK_TAG_ID);
     dimensions->add_child()->set_field(WAKE_LOCK_UID_KEY_ID);
 
@@ -306,7 +306,7 @@ StatsdConfig build_fake_config() {
     durationMetric->set_id(5);
     durationMetric->set_bucket(ONE_MINUTE);
     durationMetric->set_aggregation_type(DurationMetric_AggregationType_SUM);
-    dimensions = durationMetric->mutable_dimensions();
+    dimensions = durationMetric->mutable_dimensions_in_what();
     dimensions->set_field(WAKE_LOCK_TAG_ID);
     dimensions->add_child()->set_field(WAKE_LOCK_UID_KEY_ID);
     durationMetric->set_what(205);
@@ -323,7 +323,7 @@ StatsdConfig build_fake_config() {
     durationMetric->set_id(6);
     durationMetric->set_bucket(ONE_MINUTE);
     durationMetric->set_aggregation_type(DurationMetric_AggregationType_MAX_SPARSE);
-    dimensions = durationMetric->mutable_dimensions();
+    dimensions = durationMetric->mutable_dimensions_in_what();
     dimensions->set_field(WAKE_LOCK_TAG_ID);
     dimensions->add_child()->set_field(WAKE_LOCK_UID_KEY_ID);
     durationMetric->set_what(205);
@@ -376,7 +376,7 @@ StatsdConfig build_fake_config() {
     valueMetric->mutable_value_field()->set_field(KERNEL_WAKELOCK_TAG_ID);
     valueMetric->mutable_value_field()->add_child()->set_field(KERNEL_WAKELOCK_COUNT_KEY);
     valueMetric->set_condition(201);
-    dimensions = valueMetric->mutable_dimensions();
+    dimensions = valueMetric->mutable_dimensions_in_what();
     dimensions->set_field(KERNEL_WAKELOCK_TAG_ID);
     dimensions->add_child()->set_field(KERNEL_WAKELOCK_NAME_KEY);
     // This is for testing easier. We should never set bucket size this small.
