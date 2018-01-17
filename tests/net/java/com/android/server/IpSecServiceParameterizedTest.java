@@ -56,10 +56,11 @@ public class IpSecServiceParameterizedTest {
     private static final int TEST_SPI = 0xD1201D;
 
     private final String mDestinationAddr;
+    private final String mSourceAddr;
 
     @Parameterized.Parameters
     public static Collection ipSecConfigs() {
-        return Arrays.asList(new Object[][] {{"8.8.4.4"}, {"2601::10"}});
+        return Arrays.asList(new Object[][] {{"1.2.3.4", "8.8.4.4"}, {"2601::2", "2601::10"}});
     }
 
     private static final byte[] AEAD_KEY = {
@@ -94,8 +95,9 @@ public class IpSecServiceParameterizedTest {
     private static final IpSecAlgorithm AEAD_ALGO =
             new IpSecAlgorithm(IpSecAlgorithm.AUTH_CRYPT_AES_GCM, AEAD_KEY, 128);
 
-    public IpSecServiceParameterizedTest(String remoteAddr) {
-        mDestinationAddr = remoteAddr;
+    public IpSecServiceParameterizedTest(String sourceAddr, String destAddr) {
+        mSourceAddr = sourceAddr;
+        mDestinationAddr = destAddr;
     }
 
     @Before
@@ -192,6 +194,7 @@ public class IpSecServiceParameterizedTest {
 
     private void addDefaultSpisAndRemoteAddrToIpSecConfig(IpSecConfig config) throws Exception {
         config.setSpiResourceId(getNewSpiResourceId(mDestinationAddr, TEST_SPI));
+        config.setSourceAddress(mSourceAddr);
         config.setDestinationAddress(mDestinationAddr);
     }
 
