@@ -1317,6 +1317,34 @@ interface ITelephony {
      */
     List<CarrierIdentifier> getAllowedCarriers(int slotIndex);
 
+   /**
+     * Returns carrier id of the given subscription.
+     * <p>To recognize carrier as a first class identity, assign each carrier with a canonical
+     * integer a.k.a carrier id.
+     *
+     * @param subId The subscription id
+     * @return Carrier id of given subscription id. return {@link #UNKNOWN_CARRIER_ID} if
+     * subscription is unavailable or carrier cannot be identified.
+     * @throws IllegalStateException if telephony service is unavailable.
+     * @hide
+     */
+    int getSubscriptionCarrierId(int subId);
+
+    /**
+     * Returns carrier name of the given subscription.
+     * <p>Carrier name is a user-facing name of carrier id {@link #getSubscriptionCarrierId(int)},
+     * usually the brand name of the subsidiary (e.g. T-Mobile). Each carrier could configure
+     * multiple {@link #getSimOperatorName() SPN} but should have a single carrier name.
+     * Carrier name is not canonical identity, use {@link #getSubscriptionCarrierId(int)} instead.
+     * <p>Returned carrier name is unlocalized.
+     *
+     * @return Carrier name of given subscription id. return {@code null} if subscription is
+     * unavailable or carrier cannot be identified.
+     * @throws IllegalStateException if telephony service is unavailable.
+     * @hide
+     */
+    String getSubscriptionCarrierName(int subId);
+
     /**
      * Action set from carrier signalling broadcast receivers to enable/disable metered apns
      * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
