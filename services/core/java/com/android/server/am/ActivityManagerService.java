@@ -39,6 +39,7 @@ import static android.app.ActivityManagerInternal.ASSIST_KEY_STRUCTURE;
 import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
 import static android.app.AppOpsManager.OP_ASSIST_STRUCTURE;
 import static android.app.AppOpsManager.OP_NONE;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
@@ -376,6 +377,7 @@ import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
 import android.view.Gravity;
+import android.view.IRecentsAnimationRunner;
 import android.view.LayoutInflater;
 import android.view.RemoteAnimationDefinition;
 import android.view.View;
@@ -449,6 +451,7 @@ import com.android.server.pm.Installer.InstallerException;
 import com.android.server.utils.PriorityDump;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.PinnedStackWindowController;
+import com.android.server.wm.RecentsAnimationController;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
@@ -5089,23 +5092,16 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public int startRecentsActivity(IAssistDataReceiver assistDataReceiver, Bundle options,
-            Bundle activityOptions, int userId) {
-        if (!mRecentTasks.isCallerRecents(Binder.getCallingUid())) {
-            String msg = "Permission Denial: startRecentsActivity() from pid="
-                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid()
-                    + " not recent tasks package";
-            Slog.w(TAG, msg);
-            throw new SecurityException(msg);
-        }
-
-        final SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(options);
-        final int recentsUid = mRecentTasks.getRecentsComponentUid();
-        final ComponentName recentsComponent = mRecentTasks.getRecentsComponent();
-        final String recentsPackage = recentsComponent.getPackageName();
+    public void startRecentsActivity(Intent intent, IAssistDataReceiver assistDataReceiver,
+                IRecentsAnimationRunner recentsAnimationRunner) {
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "startRecentsActivity()");
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
+                final int recentsUid = mRecentTasks.getRecentsComponentUid();
+                final ComponentName recentsComponent = mRecentTasks.getRecentsComponent();
+                final String recentsPackage = recentsComponent.getPackageName();
+
                 // If provided, kick off the request for the assist data in the background before
                 // starting the activity
                 if (assistDataReceiver != null) {
@@ -5122,17 +5118,24 @@ public class ActivityManagerService extends IActivityManager.Stub
                             recentsUid, recentsPackage);
                 }
 
-                final Intent intent = new Intent();
-                intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
-                intent.setComponent(recentsComponent);
-                intent.putExtras(options);
+                // Start a new recents animation
+                final RecentsAnimation anim = new RecentsAnimation(this, mStackSupervisor,
+                        mActivityStartController, mWindowManager, mUserController);
+                anim.startRecentsActivity(intent, recentsAnimationRunner, recentsComponent,
+                        recentsUid);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
 
-                return mActivityStartController.obtainStarter(intent, "startRecentsActivity")
-                        .setCallingUid(recentsUid)
-                        .setCallingPackage(recentsPackage)
-                        .setActivityOptions(safeOptions)
-                        .setMayWait(userId)
-                        .execute();
+    @Override
+    public void cancelRecentsAnimation() {
+        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS, "cancelRecentsAnimation()");
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (this) {
+                mWindowManager.cancelRecentsAnimation();
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

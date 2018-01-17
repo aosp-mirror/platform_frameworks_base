@@ -330,6 +330,8 @@ java_library {
         "core/java/android/view/IPinnedStackController.aidl",
         "core/java/android/view/IPinnedStackListener.aidl",
         "core/java/android/view/IRemoteAnimationRunner.aidl",
+        "core/java/android/view/IRecentsAnimationController.aidl",
+        "core/java/android/view/IRecentsAnimationRunner.aidl",
         "core/java/android/view/IRemoteAnimationFinishedCallback.aidl",
         "core/java/android/view/IRotationWatcher.aidl",
         "core/java/android/view/IWallpaperVisibilityListener.aidl",
