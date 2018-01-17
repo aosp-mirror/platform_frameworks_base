@@ -15,14 +15,31 @@
  */
 package android.telephony.euicc;
 
+import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.service.euicc.EuiccProfileInfo;
 import android.util.Log;
 
+import com.android.internal.telephony.euicc.IAuthenticateServerCallback;
+import com.android.internal.telephony.euicc.ICancelSessionCallback;
 import com.android.internal.telephony.euicc.IEuiccCardController;
 import com.android.internal.telephony.euicc.IGetAllProfilesCallback;
+import com.android.internal.telephony.euicc.IGetEuiccChallengeCallback;
+import com.android.internal.telephony.euicc.IGetEuiccInfo1Callback;
+import com.android.internal.telephony.euicc.IGetEuiccInfo2Callback;
+import com.android.internal.telephony.euicc.IGetRulesAuthTableCallback;
+import com.android.internal.telephony.euicc.IListNotificationsCallback;
+import com.android.internal.telephony.euicc.ILoadBoundProfilePackageCallback;
+import com.android.internal.telephony.euicc.IPrepareDownloadCallback;
+import com.android.internal.telephony.euicc.IRemoveNotificationFromListCallback;
+import com.android.internal.telephony.euicc.IRetrieveNotificationCallback;
+import com.android.internal.telephony.euicc.IRetrieveNotificationListCallback;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * EuiccCardManager is the application interface to an eSIM card.
@@ -33,6 +50,35 @@ import com.android.internal.telephony.euicc.IGetAllProfilesCallback;
  */
 public class EuiccCardManager {
     private static final String TAG = "EuiccCardManager";
+
+    /** Reason for canceling a profile download session */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "CANCEL_REASON_" }, value = {
+            CANCEL_REASON_END_USER_REJECTED,
+            CANCEL_REASON_POSTPONED,
+            CANCEL_REASON_TIMEOUT,
+            CANCEL_REASON_PPR_NOT_ALLOWED
+    })
+    public @interface CancelReason {}
+
+    /**
+     * The end user has rejected the download. The profile will be put into the error state and
+     * cannot be downloaded again without the operator's change.
+     */
+    public static final int CANCEL_REASON_END_USER_REJECTED = 0;
+
+    /** The download has been postponed and can be restarted later. */
+    public static final int CANCEL_REASON_POSTPONED = 1;
+
+    /** The download has been timed out and can be restarted later. */
+    public static final int CANCEL_REASON_TIMEOUT = 2;
+
+    /**
+     * The profile to be downloaded cannot be installed due to its policy rule is not allowed by
+     * the RAT (Rules Authorisation Table) on the eUICC or by other installed profiles. The
+     * download can be restarted later.
+     */
+    public static final int CANCEL_REASON_PPR_NOT_ALLOWED = 3;
 
     /** Result code of execution with no error. */
     public static final int RESULT_OK = 0;
@@ -82,6 +128,300 @@ public class EuiccCardManager {
                     });
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling getAllProfiles", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets Rules Authorisation Table.
+     *
+     * @param callback the callback to get the result code and the rule authorisation table.
+     */
+    public void getRulesAuthTable(ResultCallback<EuiccRulesAuthTable> callback) {
+        try {
+            getIEuiccCardController().getRulesAuthTable(mContext.getOpPackageName(),
+                    new IGetRulesAuthTableCallback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode, EuiccRulesAuthTable rat) {
+                            callback.onComplete(resultCode, rat);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling getRulesAuthTable", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the eUICC challenge for new profile downloading.
+     *
+     * @param callback the callback to get the result code and the challenge.
+     */
+    public void getEuiccChallenge(ResultCallback<byte[]> callback) {
+        try {
+            getIEuiccCardController().getEuiccChallenge(mContext.getOpPackageName(),
+                    new IGetEuiccChallengeCallback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode, byte[] challenge) {
+                            callback.onComplete(resultCode, challenge);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling getEuiccChallenge", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the eUICC info1 defined in GSMA RSP v2.0+ for new profile downloading.
+     *
+     * @param callback the callback to get the result code and the info1.
+     */
+    public void getEuiccInfo1(ResultCallback<byte[]> callback) {
+        try {
+            getIEuiccCardController().getEuiccInfo1(mContext.getOpPackageName(),
+                    new IGetEuiccInfo1Callback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode, byte[] info) {
+                            callback.onComplete(resultCode, info);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling getEuiccInfo1", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the eUICC info2 defined in GSMA RSP v2.0+ for new profile downloading.
+     *
+     * @param callback the callback to get the result code and the info2.
+     */
+    public void getEuiccInfo2(ResultCallback<byte[]> callback) {
+        try {
+            getIEuiccCardController().getEuiccInfo2(mContext.getOpPackageName(),
+                    new IGetEuiccInfo2Callback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode, byte[] info) {
+                            callback.onComplete(resultCode, info);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling getEuiccInfo2", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Authenticates the SM-DP+ server by the eUICC.
+     *
+     * @param matchingId the activation code token defined in GSMA RSP v2.0+ or empty when it is not
+     *     required.
+     * @param serverSigned1 ASN.1 data in byte array signed and returned by the SM-DP+ server.
+     * @param serverSignature1 ASN.1 data in byte array indicating a SM-DP+ signature which is
+     *     returned by SM-DP+ server.
+     * @param euiccCiPkIdToBeUsed ASN.1 data in byte array indicating CI Public Key Identifier to be
+     *     used by the eUICC for signature which is returned by SM-DP+ server. This is defined in
+     *     GSMA RSP v2.0+.
+     * @param serverCertificate ASN.1 data in byte array indicating SM-DP+ Certificate returned by
+     *     SM-DP+ server.
+     * @param callback the callback to get the result code and a byte array which represents a
+     *     {@code AuthenticateServerResponse} defined in GSMA RSP v2.0+.
+     */
+    public void authenticateServer(String matchingId, byte[] serverSigned1,
+            byte[] serverSignature1, byte[] euiccCiPkIdToBeUsed, byte[] serverCertificate,
+            ResultCallback<byte[]> callback) {
+        try {
+            getIEuiccCardController().authenticateServer(
+                    mContext.getOpPackageName(),
+                    matchingId,
+                    serverSigned1,
+                    serverSignature1,
+                    euiccCiPkIdToBeUsed,
+                    serverCertificate,
+                    new IAuthenticateServerCallback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode, byte[] response) {
+                            callback.onComplete(resultCode, response);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling authenticateServer", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Prepares the profile download request sent to SM-DP+.
+     *
+     * @param hashCc the hash of confirmation code. It can be null if there is no confirmation code
+     *     required.
+     * @param smdpSigned2 ASN.1 data in byte array indicating the data to be signed by the SM-DP+
+     *     returned by SM-DP+ server.
+     * @param smdpSignature2 ASN.1 data in byte array indicating the SM-DP+ signature returned by
+     *     SM-DP+ server.
+     * @param smdpCertificate ASN.1 data in byte array indicating the SM-DP+ Certificate returned
+     *     by SM-DP+ server.
+     * @param callback the callback to get the result code and a byte array which represents a
+     *     {@code PrepareDownloadResponse} defined in GSMA RSP v2.0+
+     */
+    public void prepareDownload(@Nullable byte[] hashCc, byte[] smdpSigned2,
+            byte[] smdpSignature2, byte[] smdpCertificate, ResultCallback<byte[]> callback) {
+        try {
+            getIEuiccCardController().prepareDownload(
+                    mContext.getOpPackageName(),
+                    hashCc,
+                    smdpSigned2,
+                    smdpSignature2,
+                    smdpCertificate,
+                    new IPrepareDownloadCallback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode, byte[] response) {
+                            callback.onComplete(resultCode, response);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling prepareDownload", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Loads a downloaded bound profile package onto the eUICC.
+     *
+     * @param boundProfilePackage the Bound Profile Package data returned by SM-DP+ server.
+     * @param callback the callback to get the result code and a byte array which represents a
+     *     {@code LoadBoundProfilePackageResponse} defined in GSMA RSP v2.0+.
+     */
+    public void loadBoundProfilePackage(byte[] boundProfilePackage,
+            ResultCallback<byte[]> callback) {
+        try {
+            getIEuiccCardController().loadBoundProfilePackage(
+                    mContext.getOpPackageName(),
+                    boundProfilePackage,
+                    new ILoadBoundProfilePackageCallback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode, byte[] response) {
+                            callback.onComplete(resultCode, response);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling loadBoundProfilePackage", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Cancels the current profile download session.
+     *
+     * @param transactionId the transaction ID returned by SM-DP+ server.
+     * @param reason the cancel reason.
+     * @param callback the callback to get the result code and an byte[] which represents a
+     *     {@code CancelSessionResponse} defined in GSMA RSP v2.0+.
+     */
+    public void cancelSession(byte[] transactionId, @CancelReason int reason,
+            ResultCallback<byte[]> callback) {
+        try {
+            getIEuiccCardController().cancelSession(
+                    mContext.getOpPackageName(),
+                    transactionId,
+                    reason,
+                    new ICancelSessionCallback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode, byte[] response) {
+                            callback.onComplete(resultCode, response);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling cancelSession", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Lists all notifications of the given {@code notificationEvents}.
+     *
+     * @param events bits of the event types ({@link EuiccNotification.Event}) to list.
+     * @param callback the callback to get the result code and the list of notifications.
+     */
+    public void listNotifications(@EuiccNotification.Event int events,
+            ResultCallback<EuiccNotification[]> callback) {
+        try {
+            getIEuiccCardController().listNotifications(mContext.getOpPackageName(), events,
+                    new IListNotificationsCallback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode, EuiccNotification[] notifications) {
+                            callback.onComplete(resultCode, notifications);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling listNotifications", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Retrieves contents of all notification of the given {@code events}.
+     *
+     * @param events bits of the event types ({@link EuiccNotification.Event}) to list.
+     * @param callback the callback to get the result code and the list of notifications.
+     */
+    public void retrieveNotificationList(@EuiccNotification.Event int events,
+            ResultCallback<EuiccNotification[]> callback) {
+        try {
+            getIEuiccCardController().retrieveNotificationList(mContext.getOpPackageName(), events,
+                    new IRetrieveNotificationListCallback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode, EuiccNotification[] notifications) {
+                            callback.onComplete(resultCode, notifications);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling retrieveNotificationList", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Retrieves the content of a notification of the given {@code seqNumber}.
+     *
+     * @param seqNumber the sequence number of the notification.
+     * @param callback the callback to get the result code and the notification.
+     */
+    public void retrieveNotification(int seqNumber, ResultCallback<EuiccNotification> callback) {
+        try {
+            getIEuiccCardController().retrieveNotification(mContext.getOpPackageName(), seqNumber,
+                    new IRetrieveNotificationCallback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode, EuiccNotification notification) {
+                            callback.onComplete(resultCode, notification);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling retrieveNotification", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Removes a notification from eUICC.
+     *
+     * @param seqNumber the sequence number of the notification.
+     * @param callback the callback to get the result code.
+     */
+    public void removeNotificationFromList(int seqNumber, ResultCallback<Void> callback) {
+        try {
+            getIEuiccCardController().removeNotificationFromList(
+                    mContext.getOpPackageName(),
+                    seqNumber,
+                    new IRemoveNotificationFromListCallback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode) {
+                            callback.onComplete(resultCode, null);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling removeNotificationFromList", e);
             throw e.rethrowFromSystemServer();
         }
     }
