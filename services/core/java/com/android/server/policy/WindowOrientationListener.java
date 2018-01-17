@@ -32,6 +32,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Surface;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * A special helper class used by the WindowManager
@@ -90,7 +91,28 @@ public abstract class WindowOrientationListener {
         mHandler = handler;
         mSensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
         mRate = rate;
-        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_DEVICE_ORIENTATION);
+        List<Sensor> l = mSensorManager.getSensorList(Sensor.TYPE_DEVICE_ORIENTATION);
+        Sensor wakeUpDeviceOrientationSensor = null;
+        Sensor nonWakeUpDeviceOrientationSensor = null;
+        /**
+         *  Prefer the wakeup form of the sensor if implemented.
+         *  It's OK to look for just two types of this sensor and use
+         *  the last found. Typical devices will only have one sensor of
+         *  this type.
+         */
+        for (Sensor s : l) {
+            if (s.isWakeUpSensor()) {
+                wakeUpDeviceOrientationSensor = s;
+            } else {
+                nonWakeUpDeviceOrientationSensor = s;
+            }
+        }
+
+        if (wakeUpDeviceOrientationSensor != null) {
+            mSensor = wakeUpDeviceOrientationSensor;
+        } else {
+            mSensor = nonWakeUpDeviceOrientationSensor;
+        }
 
         if (mSensor != null) {
             mOrientationJudge = new OrientationSensorJudge();
