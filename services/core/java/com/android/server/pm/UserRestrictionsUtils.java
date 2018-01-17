@@ -119,7 +119,8 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_AIRPLANE_MODE,
             UserManager.DISALLOW_CONFIG_BRIGHTNESS,
             UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE,
-            UserManager.DISALLOW_AMBIENT_DISPLAY
+            UserManager.DISALLOW_AMBIENT_DISPLAY,
+            UserManager.DISALLOW_CONFIG_SCREEN_TIMEOUT
     });
 
     /**
