@@ -47,11 +47,10 @@ import android.printservice.IPrintService;
 import android.printservice.IPrintServiceClient;
 import android.service.print.ActivePrintServiceProto;
 import android.util.Slog;
-import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.print.DualDumpOutputStream;
 
-import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -532,46 +531,27 @@ final class RemotePrintService implements DeathRecipient {
         }
     }
 
-    public void dump(@NonNull ProtoOutputStream proto) {
-        writeComponentName(proto, ActivePrintServiceProto.COMPONENT_NAME, mComponentName);
+    public void dump(@NonNull DualDumpOutputStream proto) {
+        writeComponentName(proto, "component_name", ActivePrintServiceProto.COMPONENT_NAME,
+                mComponentName);
 
-        proto.write(ActivePrintServiceProto.IS_DESTROYED, mDestroyed);
-        proto.write(ActivePrintServiceProto.IS_BOUND, isBound());
-        proto.write(ActivePrintServiceProto.HAS_DISCOVERY_SESSION, mHasPrinterDiscoverySession);
-        proto.write(ActivePrintServiceProto.HAS_ACTIVE_PRINT_JOBS, mHasActivePrintJobs);
-        proto.write(ActivePrintServiceProto.IS_DISCOVERING_PRINTERS,
+        proto.write("is_destroyed", ActivePrintServiceProto.IS_DESTROYED, mDestroyed);
+        proto.write("is_bound", ActivePrintServiceProto.IS_BOUND, isBound());
+        proto.write("has_discovery_session", ActivePrintServiceProto.HAS_DISCOVERY_SESSION,
+                mHasPrinterDiscoverySession);
+        proto.write("has_active_print_jobs", ActivePrintServiceProto.HAS_ACTIVE_PRINT_JOBS,
+                mHasActivePrintJobs);
+        proto.write("is_discovering_printers", ActivePrintServiceProto.IS_DISCOVERING_PRINTERS,
                 mDiscoveryPriorityList != null);
 
         synchronized (mLock) {
             if (mTrackedPrinterList != null) {
                 int numTrackedPrinters = mTrackedPrinterList.size();
                 for (int i = 0; i < numTrackedPrinters; i++) {
-                    writePrinterId(proto, ActivePrintServiceProto.TRACKED_PRINTERS,
-                            mTrackedPrinterList.get(i));
+                    writePrinterId(proto, "tracked_printers",
+                            ActivePrintServiceProto.TRACKED_PRINTERS, mTrackedPrinterList.get(i));
                 }
             }
-        }
-    }
-
-    public void dump(PrintWriter pw, String prefix) {
-        String tab = "  ";
-        pw.append(prefix).append("service:").println();
-        pw.append(prefix).append(tab).append("componentName=")
-                .append(mComponentName.flattenToString()).println();
-        pw.append(prefix).append(tab).append("destroyed=")
-                .append(String.valueOf(mDestroyed)).println();
-        pw.append(prefix).append(tab).append("bound=")
-                .append(String.valueOf(isBound())).println();
-        pw.append(prefix).append(tab).append("hasDicoverySession=")
-                .append(String.valueOf(mHasPrinterDiscoverySession)).println();
-        pw.append(prefix).append(tab).append("hasActivePrintJobs=")
-                .append(String.valueOf(mHasActivePrintJobs)).println();
-        pw.append(prefix).append(tab).append("isDiscoveringPrinters=")
-                .append(String.valueOf(mDiscoveryPriorityList != null)).println();
-
-        synchronized (mLock) {
-            pw.append(prefix).append(tab).append("trackedPrinters=").append(
-                    (mTrackedPrinterList != null) ? mTrackedPrinterList.toString() : "null");
         }
     }
 

@@ -43,16 +43,14 @@ import android.printservice.PrintService;
 import android.service.print.PrintSpoolerStateProto;
 import android.util.Slog;
 import android.util.TimedRemoteCaller;
-import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.TransferPipe;
+import com.android.internal.print.DualDumpOutputStream;
 
 import libcore.io.IoUtils;
 
-import java.io.FileDescriptor;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
@@ -558,34 +556,22 @@ final class RemotePrintSpooler {
         }
     }
 
-    public void dump(@NonNull ProtoOutputStream proto) {
+    public void dump(@NonNull DualDumpOutputStream proto) {
         synchronized (mLock) {
-            proto.write(PrintSpoolerStateProto.IS_DESTROYED, mDestroyed);
-            proto.write(PrintSpoolerStateProto.IS_BOUND, mRemoteInstance != null);
+            proto.write("is_destroyed", PrintSpoolerStateProto.IS_DESTROYED, mDestroyed);
+            proto.write("is_bound", PrintSpoolerStateProto.IS_BOUND, mRemoteInstance != null);
         }
 
         try {
-            proto.write(PrintSpoolerStateProto.INTERNAL_STATE,
-                    TransferPipe.dumpAsync(getRemoteInstanceLazy().asBinder(), "--proto"));
+            if (proto.isProto()) {
+                proto.write(null, PrintSpoolerStateProto.INTERNAL_STATE,
+                        TransferPipe.dumpAsync(getRemoteInstanceLazy().asBinder(), "--proto"));
+            } else {
+                proto.writeNested("internal_state", TransferPipe.dumpAsync(
+                        getRemoteInstanceLazy().asBinder()));
+            }
         } catch (IOException | TimeoutException | RemoteException | InterruptedException e) {
             Slog.e(LOG_TAG, "Failed to dump remote instance", e);
-        }
-    }
-
-    public void dump(FileDescriptor fd, PrintWriter pw, String prefix) {
-        synchronized (mLock) {
-            pw.append(prefix).append("destroyed=")
-                    .append(String.valueOf(mDestroyed)).println();
-            pw.append(prefix).append("bound=")
-                    .append((mRemoteInstance != null) ? "true" : "false").println();
-
-            pw.flush();
-            try {
-                TransferPipe.dumpAsync(getRemoteInstanceLazy().asBinder(), fd,
-                        new String[] { prefix });
-            } catch (IOException | TimeoutException | RemoteException | InterruptedException e) {
-                pw.println("Failed to dump remote instance: " + e);
-            }
         }
     }
 

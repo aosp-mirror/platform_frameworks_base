@@ -39,7 +39,6 @@ import android.service.print.PrinterCapabilitiesProto;
 import android.service.print.PrinterIdProto;
 import android.service.print.PrinterInfoProto;
 import android.service.print.ResolutionProto;
-import android.util.proto.ProtoOutputStream;
 
 /**
  * Utilities for dumping print related proto buffer
@@ -49,13 +48,14 @@ public class DumpUtils {
      * Write a string to a proto if the string is not {@code null}.
      *
      * @param proto The proto to write to
+     * @param idName Clear text name of the proto-id
      * @param id The proto-id of the string
      * @param string The string to write
      */
-    public static void writeStringIfNotNull(@NonNull ProtoOutputStream proto, long id,
-            @Nullable String string) {
+    public static void writeStringIfNotNull(@NonNull DualDumpOutputStream proto, String idName,
+            long id, @Nullable String string) {
         if (string != null) {
-            proto.write(id, string);
+            proto.write(idName, id, string);
         }
     }
 
@@ -63,14 +63,15 @@ public class DumpUtils {
      * Write a {@link ComponentName} to a proto.
      *
      * @param proto The proto to write to
+     * @param idName Clear text name of the proto-id
      * @param id The proto-id of the component name
      * @param component The component name to write
      */
-    public static void writeComponentName(@NonNull ProtoOutputStream proto, long id,
-            @NonNull ComponentName component) {
-        long token = proto.start(id);
-        proto.write(ComponentNameProto.PACKAGE_NAME, component.getPackageName());
-        proto.write(ComponentNameProto.CLASS_NAME, component.getClassName());
+    public static void writeComponentName(@NonNull DualDumpOutputStream proto, String idName,
+            long id, @NonNull ComponentName component) {
+        long token = proto.start(idName, id);
+        proto.write("package_name", ComponentNameProto.PACKAGE_NAME, component.getPackageName());
+        proto.write("class_name", ComponentNameProto.CLASS_NAME, component.getClassName());
         proto.end(token);
     }
 
@@ -78,14 +79,16 @@ public class DumpUtils {
      * Write a {@link PrinterId} to a proto.
      *
      * @param proto The proto to write to
+     * @param idName Clear text name of the proto-id
      * @param id The proto-id of the component name
      * @param printerId The printer id to write
      */
-    public static void writePrinterId(@NonNull ProtoOutputStream proto, long id,
+    public static void writePrinterId(@NonNull DualDumpOutputStream proto, String idName, long id,
             @NonNull PrinterId printerId) {
-        long token = proto.start(id);
-        writeComponentName(proto, PrinterIdProto.SERVICE_NAME, printerId.getServiceName());
-        proto.write(PrinterIdProto.LOCAL_ID, printerId.getLocalId());
+        long token = proto.start(idName, id);
+        writeComponentName(proto, "service_name", PrinterIdProto.SERVICE_NAME,
+                printerId.getServiceName());
+        proto.write("local_id", PrinterIdProto.LOCAL_ID, printerId.getLocalId());
         proto.end(token);
     }
 
@@ -93,71 +96,76 @@ public class DumpUtils {
      * Write a {@link PrinterCapabilitiesInfo} to a proto.
      *
      * @param proto The proto to write to
+     * @param idName Clear text name of the proto-id
      * @param id The proto-id of the component name
      * @param cap The capabilities to write
      */
     public static void writePrinterCapabilities(@NonNull Context context,
-            @NonNull ProtoOutputStream proto, long id, @NonNull PrinterCapabilitiesInfo cap) {
-        long token = proto.start(id);
-        writeMargins(proto, PrinterCapabilitiesProto.MIN_MARGINS, cap.getMinMargins());
+            @NonNull DualDumpOutputStream proto, String idName, long id,
+            @NonNull PrinterCapabilitiesInfo cap) {
+        long token = proto.start(idName, id);
+        writeMargins(proto, "min_margins", PrinterCapabilitiesProto.MIN_MARGINS,
+                cap.getMinMargins());
 
         int numMediaSizes = cap.getMediaSizes().size();
         for (int i = 0; i < numMediaSizes; i++) {
-            writeMediaSize(context, proto, PrinterCapabilitiesProto.MEDIA_SIZES,
+            writeMediaSize(context, proto, "media_sizes", PrinterCapabilitiesProto.MEDIA_SIZES,
                     cap.getMediaSizes().get(i));
         }
 
         int numResolutions = cap.getResolutions().size();
         for (int i = 0; i < numResolutions; i++) {
-            writeResolution(proto, PrinterCapabilitiesProto.RESOLUTIONS,
+            writeResolution(proto, "resolutions", PrinterCapabilitiesProto.RESOLUTIONS,
                     cap.getResolutions().get(i));
         }
 
         if ((cap.getColorModes() & PrintAttributes.COLOR_MODE_MONOCHROME) != 0) {
-            proto.write(PrinterCapabilitiesProto.COLOR_MODES,
+            proto.write("color_modes", PrinterCapabilitiesProto.COLOR_MODES,
                     PrintAttributesProto.COLOR_MODE_MONOCHROME);
         }
         if ((cap.getColorModes() & PrintAttributes.COLOR_MODE_COLOR) != 0) {
-            proto.write(PrinterCapabilitiesProto.COLOR_MODES,
+            proto.write("color_modes", PrinterCapabilitiesProto.COLOR_MODES,
                     PrintAttributesProto.COLOR_MODE_COLOR);
         }
 
         if ((cap.getDuplexModes() & PrintAttributes.DUPLEX_MODE_NONE) != 0) {
-            proto.write(PrinterCapabilitiesProto.DUPLEX_MODES,
+            proto.write("duplex_modes", PrinterCapabilitiesProto.DUPLEX_MODES,
                     PrintAttributesProto.DUPLEX_MODE_NONE);
         }
         if ((cap.getDuplexModes() & PrintAttributes.DUPLEX_MODE_LONG_EDGE) != 0) {
-            proto.write(PrinterCapabilitiesProto.DUPLEX_MODES,
+            proto.write("duplex_modes", PrinterCapabilitiesProto.DUPLEX_MODES,
                     PrintAttributesProto.DUPLEX_MODE_LONG_EDGE);
         }
         if ((cap.getDuplexModes() & PrintAttributes.DUPLEX_MODE_SHORT_EDGE) != 0) {
-            proto.write(PrinterCapabilitiesProto.DUPLEX_MODES,
+            proto.write("duplex_modes", PrinterCapabilitiesProto.DUPLEX_MODES,
                     PrintAttributesProto.DUPLEX_MODE_SHORT_EDGE);
         }
 
         proto.end(token);
     }
 
-
     /**
      * Write a {@link PrinterInfo} to a proto.
      *
      * @param context The context used to resolve resources
      * @param proto The proto to write to
+     * @param idName Clear text name of the proto-id
      * @param id The proto-id of the component name
      * @param info The printer info to write
      */
-    public static void writePrinterInfo(@NonNull Context context, @NonNull ProtoOutputStream proto,
-            long id, @NonNull PrinterInfo info) {
-        long token = proto.start(id);
-        writePrinterId(proto, PrinterInfoProto.ID, info.getId());
-        proto.write(PrinterInfoProto.NAME, info.getName());
-        proto.write(PrinterInfoProto.STATUS, info.getStatus());
-        proto.write(PrinterInfoProto.DESCRIPTION, info.getDescription());
+    public static void writePrinterInfo(@NonNull Context context,
+            @NonNull DualDumpOutputStream proto, String idName, long id,
+            @NonNull PrinterInfo info) {
+        long token = proto.start(idName, id);
+        writePrinterId(proto, "id", PrinterInfoProto.ID, info.getId());
+        proto.write("name", PrinterInfoProto.NAME, info.getName());
+        proto.write("status", PrinterInfoProto.STATUS, info.getStatus());
+        proto.write("description", PrinterInfoProto.DESCRIPTION, info.getDescription());
 
         PrinterCapabilitiesInfo cap = info.getCapabilities();
         if (cap != null) {
-            writePrinterCapabilities(context, proto, PrinterInfoProto.CAPABILITIES, cap);
+            writePrinterCapabilities(context, proto, "capabilities", PrinterInfoProto.CAPABILITIES,
+                    cap);
         }
 
         proto.end(token);
@@ -168,16 +176,17 @@ public class DumpUtils {
      *
      * @param context The context used to resolve resources
      * @param proto The proto to write to
+     * @param idName Clear text name of the proto-id
      * @param id The proto-id of the component name
      * @param mediaSize The media size to write
      */
-    public static void writeMediaSize(@NonNull Context context, @NonNull ProtoOutputStream proto,
-            long id, @NonNull PrintAttributes.MediaSize mediaSize) {
-        long token = proto.start(id);
-        proto.write(MediaSizeProto.ID, mediaSize.getId());
-        proto.write(MediaSizeProto.LABEL, mediaSize.getLabel(context.getPackageManager()));
-        proto.write(MediaSizeProto.HEIGHT_MILS, mediaSize.getHeightMils());
-        proto.write(MediaSizeProto.WIDTH_MILS, mediaSize.getWidthMils());
+    public static void writeMediaSize(@NonNull Context context, @NonNull DualDumpOutputStream proto,
+            String idName, long id, @NonNull PrintAttributes.MediaSize mediaSize) {
+        long token = proto.start(idName, id);
+        proto.write("id", MediaSizeProto.ID, mediaSize.getId());
+        proto.write("label", MediaSizeProto.LABEL, mediaSize.getLabel(context.getPackageManager()));
+        proto.write("height_mils", MediaSizeProto.HEIGHT_MILS, mediaSize.getHeightMils());
+        proto.write("width_mils", MediaSizeProto.WIDTH_MILS, mediaSize.getWidthMils());
         proto.end(token);
     }
 
@@ -185,16 +194,17 @@ public class DumpUtils {
      * Write a {@link PrintAttributes.Resolution} to a proto.
      *
      * @param proto The proto to write to
+     * @param idName Clear text name of the proto-id
      * @param id The proto-id of the component name
      * @param res The resolution to write
      */
-    public static void writeResolution(@NonNull ProtoOutputStream proto, long id,
+    public static void writeResolution(@NonNull DualDumpOutputStream proto, String idName, long id,
             @NonNull PrintAttributes.Resolution res) {
-        long token = proto.start(id);
-        proto.write(ResolutionProto.ID, res.getId());
-        proto.write(ResolutionProto.LABEL, res.getLabel());
-        proto.write(ResolutionProto.HORIZONTAL_DPI, res.getHorizontalDpi());
-        proto.write(ResolutionProto.VERTICAL_DPI, res.getVerticalDpi());
+        long token = proto.start(idName, id);
+        proto.write("id", ResolutionProto.ID, res.getId());
+        proto.write("label", ResolutionProto.LABEL, res.getLabel());
+        proto.write("horizontal_DPI", ResolutionProto.HORIZONTAL_DPI, res.getHorizontalDpi());
+        proto.write("veritical_DPI", ResolutionProto.VERTICAL_DPI, res.getVerticalDpi());
         proto.end(token);
     }
 
@@ -202,16 +212,17 @@ public class DumpUtils {
      * Write a {@link PrintAttributes.Margins} to a proto.
      *
      * @param proto The proto to write to
+     * @param idName Clear text name of the proto-id
      * @param id The proto-id of the component name
      * @param margins The margins to write
      */
-    public static void writeMargins(@NonNull ProtoOutputStream proto, long id,
+    public static void writeMargins(@NonNull DualDumpOutputStream proto, String idName, long id,
             @NonNull PrintAttributes.Margins margins) {
-        long token = proto.start(id);
-        proto.write(MarginsProto.TOP_MILS, margins.getTopMils());
-        proto.write(MarginsProto.LEFT_MILS, margins.getLeftMils());
-        proto.write(MarginsProto.RIGHT_MILS, margins.getRightMils());
-        proto.write(MarginsProto.BOTTOM_MILS, margins.getBottomMils());
+        long token = proto.start(idName, id);
+        proto.write("top_mils", MarginsProto.TOP_MILS, margins.getTopMils());
+        proto.write("left_mils", MarginsProto.LEFT_MILS, margins.getLeftMils());
+        proto.write("right_mils", MarginsProto.RIGHT_MILS, margins.getRightMils());
+        proto.write("bottom_mils", MarginsProto.BOTTOM_MILS, margins.getBottomMils());
         proto.end(token);
     }
 
@@ -220,32 +231,34 @@ public class DumpUtils {
      *
      * @param context The context used to resolve resources
      * @param proto The proto to write to
+     * @param idName Clear text name of the proto-id
      * @param id The proto-id of the component name
      * @param attributes The attributes to write
      */
     public static void writePrintAttributes(@NonNull Context context,
-            @NonNull ProtoOutputStream proto, long id, @NonNull PrintAttributes attributes) {
-        long token = proto.start(id);
+            @NonNull DualDumpOutputStream proto, String idName, long id,
+            @NonNull PrintAttributes attributes) {
+        long token = proto.start(idName, id);
 
         PrintAttributes.MediaSize mediaSize = attributes.getMediaSize();
         if (mediaSize != null) {
-            writeMediaSize(context, proto, PrintAttributesProto.MEDIA_SIZE, mediaSize);
+            writeMediaSize(context, proto, "media_size", PrintAttributesProto.MEDIA_SIZE, mediaSize);
         }
 
-        proto.write(PrintAttributesProto.IS_PORTRAIT, attributes.isPortrait());
+        proto.write("is_portrait", PrintAttributesProto.IS_PORTRAIT, attributes.isPortrait());
 
         PrintAttributes.Resolution res = attributes.getResolution();
         if (res != null) {
-            writeResolution(proto, PrintAttributesProto.RESOLUTION, res);
+            writeResolution(proto, "resolution", PrintAttributesProto.RESOLUTION, res);
         }
 
         PrintAttributes.Margins minMargins = attributes.getMinMargins();
         if (minMargins != null) {
-            writeMargins(proto, PrintAttributesProto.MIN_MARGINS, minMargins);
+            writeMargins(proto, "min_margings", PrintAttributesProto.MIN_MARGINS, minMargins);
         }
 
-        proto.write(PrintAttributesProto.COLOR_MODE, attributes.getColorMode());
-        proto.write(PrintAttributesProto.DUPLEX_MODE, attributes.getDuplexMode());
+        proto.write("color_mode", PrintAttributesProto.COLOR_MODE, attributes.getColorMode());
+        proto.write("duplex_mode", PrintAttributesProto.DUPLEX_MODE, attributes.getDuplexMode());
         proto.end(token);
     }
 
@@ -253,21 +266,22 @@ public class DumpUtils {
      * Write a {@link PrintDocumentInfo} to a proto.
      *
      * @param proto The proto to write to
+     * @param idName Clear text name of the proto-id
      * @param id The proto-id of the component name
      * @param info The info to write
      */
-    public static void writePrintDocumentInfo(@NonNull ProtoOutputStream proto, long id,
-            @NonNull PrintDocumentInfo info) {
-        long token = proto.start(id);
-        proto.write(PrintDocumentInfoProto.NAME, info.getName());
+    public static void writePrintDocumentInfo(@NonNull DualDumpOutputStream proto, String idName,
+            long id, @NonNull PrintDocumentInfo info) {
+        long token = proto.start(idName, id);
+        proto.write("name", PrintDocumentInfoProto.NAME, info.getName());
 
         int pageCount = info.getPageCount();
         if (pageCount != PrintDocumentInfo.PAGE_COUNT_UNKNOWN) {
-            proto.write(PrintDocumentInfoProto.PAGE_COUNT, pageCount);
+            proto.write("page_count", PrintDocumentInfoProto.PAGE_COUNT, pageCount);
         }
 
-        proto.write(PrintDocumentInfoProto.CONTENT_TYPE, info.getContentType());
-        proto.write(PrintDocumentInfoProto.DATA_SIZE, info.getDataSize());
+        proto.write("content_type", PrintDocumentInfoProto.CONTENT_TYPE, info.getContentType());
+        proto.write("data_size", PrintDocumentInfoProto.DATA_SIZE, info.getDataSize());
         proto.end(token);
     }
 
@@ -275,14 +289,15 @@ public class DumpUtils {
      * Write a {@link PageRange} to a proto.
      *
      * @param proto The proto to write to
+     * @param idName Clear text name of the proto-id
      * @param id The proto-id of the component name
      * @param range The range to write
      */
-    public static void writePageRange(@NonNull ProtoOutputStream proto, long id,
+    public static void writePageRange(@NonNull DualDumpOutputStream proto, String idName, long id,
             @NonNull PageRange range) {
-        long token = proto.start(id);
-        proto.write(PageRangeProto.START, range.getStart());
-        proto.write(PageRangeProto.END, range.getEnd());
+        long token = proto.start(idName, id);
+        proto.write("start", PageRangeProto.START, range.getStart());
+        proto.write("end", PageRangeProto.END, range.getEnd());
         proto.end(token);
     }
 
@@ -291,64 +306,70 @@ public class DumpUtils {
      *
      * @param context The context used to resolve resources
      * @param proto The proto to write to
+     * @param idName Clear text name of the proto-id
      * @param id The proto-id of the component name
      * @param printJobInfo The print job info to write
      */
-    public static void writePrintJobInfo(@NonNull Context context, @NonNull ProtoOutputStream proto,
-            long id, @NonNull PrintJobInfo printJobInfo) {
-        long token = proto.start(id);
-        proto.write(PrintJobInfoProto.LABEL, printJobInfo.getLabel());
+    public static void writePrintJobInfo(@NonNull Context context,
+            @NonNull DualDumpOutputStream proto, String idName, long id,
+            @NonNull PrintJobInfo printJobInfo) {
+        long token = proto.start(idName, id);
+        proto.write("label", PrintJobInfoProto.LABEL, printJobInfo.getLabel());
 
         PrintJobId printJobId = printJobInfo.getId();
         if (printJobId != null) {
-            proto.write(PrintJobInfoProto.PRINT_JOB_ID, printJobId.flattenToString());
+            proto.write("print_job_id", PrintJobInfoProto.PRINT_JOB_ID,
+                    printJobId.flattenToString());
         }
 
         int state = printJobInfo.getState();
         if (state >= PrintJobInfoProto.STATE_CREATED && state <= PrintJobInfoProto.STATE_CANCELED) {
-            proto.write(PrintJobInfoProto.STATE, state);
+            proto.write("state", PrintJobInfoProto.STATE, state);
         } else {
-            proto.write(PrintJobInfoProto.STATE, PrintJobInfoProto.STATE_UNKNOWN);
+            proto.write("state", PrintJobInfoProto.STATE, PrintJobInfoProto.STATE_UNKNOWN);
         }
 
         PrinterId printer = printJobInfo.getPrinterId();
         if (printer != null) {
-            writePrinterId(proto, PrintJobInfoProto.PRINTER, printer);
+            writePrinterId(proto, "printer", PrintJobInfoProto.PRINTER, printer);
         }
 
         String tag = printJobInfo.getTag();
         if (tag != null) {
-            proto.write(PrintJobInfoProto.TAG, tag);
+            proto.write("tag", PrintJobInfoProto.TAG, tag);
         }
 
-        proto.write(PrintJobInfoProto.CREATION_TIME, printJobInfo.getCreationTime());
+        proto.write("creation_time", PrintJobInfoProto.CREATION_TIME,
+                printJobInfo.getCreationTime());
 
         PrintAttributes attributes = printJobInfo.getAttributes();
         if (attributes != null) {
-            writePrintAttributes(context, proto, PrintJobInfoProto.ATTRIBUTES, attributes);
+            writePrintAttributes(context, proto, "attributes", PrintJobInfoProto.ATTRIBUTES,
+                    attributes);
         }
 
         PrintDocumentInfo docInfo = printJobInfo.getDocumentInfo();
         if (docInfo != null) {
-            writePrintDocumentInfo(proto, PrintJobInfoProto.DOCUMENT_INFO, docInfo);
+            writePrintDocumentInfo(proto, "document_info", PrintJobInfoProto.DOCUMENT_INFO,
+                    docInfo);
         }
 
-        proto.write(PrintJobInfoProto.IS_CANCELING, printJobInfo.isCancelling());
+        proto.write("is_canceling", PrintJobInfoProto.IS_CANCELING, printJobInfo.isCancelling());
 
         PageRange[] pages = printJobInfo.getPages();
         if (pages != null) {
             for (int i = 0; i < pages.length; i++) {
-                writePageRange(proto, PrintJobInfoProto.PAGES, pages[i]);
+                writePageRange(proto, "pages", PrintJobInfoProto.PAGES, pages[i]);
             }
         }
 
-        proto.write(PrintJobInfoProto.HAS_ADVANCED_OPTIONS,
+        proto.write("has_advanced_options", PrintJobInfoProto.HAS_ADVANCED_OPTIONS,
                 printJobInfo.getAdvancedOptions() != null);
-        proto.write(PrintJobInfoProto.PROGRESS, printJobInfo.getProgress());
+        proto.write("progress", PrintJobInfoProto.PROGRESS, printJobInfo.getProgress());
 
         CharSequence status = printJobInfo.getStatus(context.getPackageManager());
         if (status != null) {
-            proto.write(PrintJobInfoProto.STATUS, status.toString());
+            proto.write("status", PrintJobInfoProto.STATUS, status.toString());
         }
 
         proto.end(token);

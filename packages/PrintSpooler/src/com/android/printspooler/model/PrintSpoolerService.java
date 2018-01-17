@@ -59,7 +59,9 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.HandlerCaller;
+import com.android.internal.print.DualDumpOutputStream;
 import com.android.internal.util.FastXmlSerializer;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.printspooler.R;
 import com.android.printspooler.util.ApprovedPrintServices;
@@ -159,43 +161,10 @@ public final class PrintSpoolerService extends Service {
         return new PrintSpooler();
     }
 
-    private void dumpLocked(PrintWriter pw, String[] args) {
-        String prefix = (args.length > 0) ? args[0] : "";
-        String tab = "  ";
-
-        pw.append(prefix).append("print jobs:").println();
-        final int printJobCount = mPrintJobs.size();
-        for (int i = 0; i < printJobCount; i++) {
-            PrintJobInfo printJob = mPrintJobs.get(i);
-            pw.append(prefix).append(tab).append(printJob.toString());
-            pw.println();
-        }
-
-        pw.append(prefix).append("print job files:").println();
-        File[] files = getFilesDir().listFiles();
-        if (files != null) {
-            final int fileCount = files.length;
-            for (int i = 0; i < fileCount; i++) {
-                File file = files[i];
-                if (file.isFile() && file.getName().startsWith(PRINT_JOB_FILE_PREFIX)) {
-                    pw.append(prefix).append(tab).append(file.getName()).println();
-                }
-            }
-        }
-
-        pw.append(prefix).append("approved print services:").println();
-        Set<String> approvedPrintServices = (new ApprovedPrintServices(this)).getApprovedServices();
-        if (approvedPrintServices != null) {
-            for (String approvedService : approvedPrintServices) {
-                pw.append(prefix).append(tab).append(approvedService).println();
-            }
-        }
-    }
-
-    private void dumpLocked(@NonNull ProtoOutputStream proto) {
+    private void dumpLocked(@NonNull DualDumpOutputStream proto) {
         int numPrintJobs = mPrintJobs.size();
         for (int i = 0; i < numPrintJobs; i++) {
-            writePrintJobInfo(this, proto, PrintSpoolerInternalStateProto.PRINT_JOBS,
+            writePrintJobInfo(this, proto, "print_jobs", PrintSpoolerInternalStateProto.PRINT_JOBS,
                     mPrintJobs.get(i));
         }
 
@@ -204,7 +173,8 @@ public final class PrintSpoolerService extends Service {
             for (int i = 0; i < files.length; i++) {
                 File file = files[i];
                 if (file.isFile() && file.getName().startsWith(PRINT_JOB_FILE_PREFIX)) {
-                    proto.write(PrintSpoolerInternalStateProto.PRINT_JOB_FILES, file.getName());
+                    proto.write("print_job_files", PrintSpoolerInternalStateProto.PRINT_JOB_FILES,
+                            file.getName());
                 }
             }
         }
@@ -214,8 +184,8 @@ public final class PrintSpoolerService extends Service {
             for (String approvedService : approvedPrintServices) {
                 ComponentName componentName = ComponentName.unflattenFromString(approvedService);
                 if (componentName != null) {
-                    writeComponentName(proto, PrintSpoolerInternalStateProto.APPROVED_SERVICES,
-                            componentName);
+                    writeComponentName(proto, "approved_services",
+                            PrintSpoolerInternalStateProto.APPROVED_SERVICES, componentName);
                 }
             }
         }
@@ -244,9 +214,15 @@ public final class PrintSpoolerService extends Service {
         try {
             synchronized (mLock) {
                 if (dumpAsProto) {
-                    dumpLocked(new ProtoOutputStream(fd));
+                    dumpLocked(new DualDumpOutputStream(new ProtoOutputStream(fd), null));
                 } else {
-                    dumpLocked(pw, args);
+                    try (FileOutputStream out = new FileOutputStream(fd)) {
+                        try (PrintWriter w = new PrintWriter(out)) {
+                            dumpLocked(new DualDumpOutputStream(null, new IndentingPrintWriter(w,
+                                    "  ")));
+                        }
+                    } catch (IOException ignored) {
+                    }
                 }
             }
         } finally {
