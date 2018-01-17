@@ -146,11 +146,6 @@ public final class Slice implements Parcelable {
      */
     public static final String HINT_PARTIAL     = "partial";
     /**
-     * A hint representing that this item is the max value possible for the slice containing this.
-     * Used to indicate the maximum integer value for a {@link #SUBTYPE_SLIDER}.
-     */
-    public static final String HINT_MAX = "max";
-    /**
      * A hint representing that this item should be used to indicate that there's more
      * content associated with this slice.
      */
@@ -168,6 +163,10 @@ public final class Slice implements Parcelable {
      */
     public static final String EXTRA_TOGGLE_STATE = "android.app.slice.extra.TOGGLE_STATE";
     /**
+     * Key to retrieve an extra added to an intent when the value of a slider is changed.
+     */
+    public static final String EXTRA_SLIDER_VALUE = "android.app.slice.extra.SLIDER_VALUE";
+    /**
      * Subtype to indicate that this is a message as part of a communication
      * sequence in this slice.
      */
@@ -181,9 +180,17 @@ public final class Slice implements Parcelable {
      */
     public static final String SUBTYPE_COLOR = "color";
     /**
-     * Subtype to tag an item represents a slider.
+     * Subtype to tag an item as representing a slider.
      */
     public static final String SUBTYPE_SLIDER = "slider";
+    /**
+     * Subtype to tag an item as representing the max int value for a {@link #SUBTYPE_SLIDER}.
+     */
+    public static final String SUBTYPE_MAX = "max";
+    /**
+     * Subtype to tag an item as representing the current int value for a {@link #SUBTYPE_SLIDER}.
+     */
+    public static final String SUBTYPE_VALUE = "value";
     /**
      * Subtype to indicate that this content has a toggle action associated with it. To indicate
      * that the toggle is on, use {@link #HINT_SELECTED}. When the toggle state changes, the
