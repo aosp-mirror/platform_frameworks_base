@@ -286,13 +286,13 @@ public class RecoveryManager {
      * Specifies a set of secret types used for end-to-end keystore encryption. Knowing all of them
      * is necessary to recover data.
      *
-     * @param secretTypes {@link KeychainProtectionParameter#TYPE_LOCKSCREEN} or {@link
-     *     KeychainProtectionParameter#TYPE_CUSTOM_PASSWORD}
+     * @param secretTypes {@link KeychainProtectionParams#TYPE_LOCKSCREEN} or {@link
+     *     KeychainProtectionParams#TYPE_CUSTOM_PASSWORD}
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
      */
     public void setRecoverySecretTypes(
-            @NonNull @KeychainProtectionParameter.UserSecretType int[] secretTypes)
+            @NonNull @KeychainProtectionParams.UserSecretType int[] secretTypes)
             throws InternalRecoveryServiceException {
         try {
             mBinder.setRecoverySecretTypes(secretTypes);
@@ -312,7 +312,7 @@ public class RecoveryManager {
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
      */
-    public @NonNull @KeychainProtectionParameter.UserSecretType int[] getRecoverySecretTypes()
+    public @NonNull @KeychainProtectionParams.UserSecretType int[] getRecoverySecretTypes()
             throws InternalRecoveryServiceException {
         try {
             return mBinder.getRecoverySecretTypes();
@@ -333,7 +333,7 @@ public class RecoveryManager {
      *     service.
      */
     @NonNull
-    public @KeychainProtectionParameter.UserSecretType int[] getPendingRecoverySecretTypes()
+    public @KeychainProtectionParams.UserSecretType int[] getPendingRecoverySecretTypes()
             throws InternalRecoveryServiceException {
         try {
             return mBinder.getPendingRecoverySecretTypes();
@@ -347,7 +347,7 @@ public class RecoveryManager {
     /**
      * Method notifies KeyStore that a user-generated secret is available. This method generates a
      * symmetric session key which a trusted remote device can use to return a recovery key. Caller
-     * should use {@link KeychainProtectionParameter#clearSecret} to override the secret value in
+     * should use {@link KeychainProtectionParams#clearSecret} to override the secret value in
      * memory.
      *
      * @param recoverySecret user generated secret together with parameters necessary to regenerate
@@ -355,7 +355,7 @@ public class RecoveryManager {
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
      */
-    public void recoverySecretAvailable(@NonNull KeychainProtectionParameter recoverySecret)
+    public void recoverySecretAvailable(@NonNull KeychainProtectionParams recoverySecret)
             throws InternalRecoveryServiceException {
         try {
             mBinder.recoverySecretAvailable(recoverySecret);
@@ -393,7 +393,7 @@ public class RecoveryManager {
             @NonNull byte[] verifierPublicKey,
             @NonNull byte[] vaultParams,
             @NonNull byte[] vaultChallenge,
-            @NonNull List<KeychainProtectionParameter> secrets)
+            @NonNull List<KeychainProtectionParams> secrets)
             throws BadCertificateFormatException, InternalRecoveryServiceException {
         try {
             byte[] recoveryClaim =

@@ -77,7 +77,7 @@ import android.security.KeyStore;
 import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
-import android.security.keystore.KeychainProtectionParameter;
+import android.security.keystore.KeychainProtectionParams;
 import android.security.keystore.UserNotAuthenticatedException;
 import android.security.keystore.WrappedApplicationKey;
 import android.security.keystore.KeychainSnapshot;
@@ -1997,7 +1997,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public void setRecoverySecretTypes(@NonNull @KeychainProtectionParameter.UserSecretType
+    public void setRecoverySecretTypes(@NonNull @KeychainProtectionParams.UserSecretType
             int[] secretTypes) throws RemoteException {
         mRecoverableKeyStoreManager.setRecoverySecretTypes(secretTypes);
     }
@@ -2014,7 +2014,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public void recoverySecretAvailable(@NonNull KeychainProtectionParameter recoverySecret)
+    public void recoverySecretAvailable(@NonNull KeychainProtectionParams recoverySecret)
             throws RemoteException {
         mRecoverableKeyStoreManager.recoverySecretAvailable(recoverySecret);
     }
@@ -2022,7 +2022,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public byte[] startRecoverySession(@NonNull String sessionId,
             @NonNull byte[] verifierPublicKey, @NonNull byte[] vaultParams,
-            @NonNull byte[] vaultChallenge, @NonNull List<KeychainProtectionParameter> secrets)
+            @NonNull byte[] vaultChallenge, @NonNull List<KeychainProtectionParams> secrets)
             throws RemoteException {
         return mRecoverableKeyStoreManager.startRecoverySession(sessionId, verifierPublicKey,
                 vaultParams, vaultChallenge, secrets);

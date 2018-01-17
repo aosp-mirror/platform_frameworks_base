@@ -16,11 +16,11 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import static android.security.keystore.KeychainProtectionParameter.TYPE_LOCKSCREEN;
+import static android.security.keystore.KeychainProtectionParams.TYPE_LOCKSCREEN;
 
-import static android.security.keystore.KeychainProtectionParameter.TYPE_PASSWORD;
-import static android.security.keystore.KeychainProtectionParameter.TYPE_PATTERN;
-import static android.security.keystore.KeychainProtectionParameter.TYPE_PIN;
+import static android.security.keystore.KeychainProtectionParams.TYPE_PASSWORD;
+import static android.security.keystore.KeychainProtectionParams.TYPE_PATTERN;
+import static android.security.keystore.KeychainProtectionParams.TYPE_PIN;
 
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;

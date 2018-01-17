@@ -33,7 +33,7 @@ import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 
-import android.security.keystore.KeychainProtectionParameter;
+import android.security.keystore.KeychainProtectionParams;
 import android.security.keystore.KeychainSnapshot;
 import android.security.keystore.WrappedApplicationKey;
 import android.security.keystore.RecoveryManager;
@@ -256,7 +256,7 @@ public class RecoverableKeyStoreManager {
      * @hide
      */
     public void setRecoverySecretTypes(
-            @NonNull @KeychainProtectionParameter.UserSecretType int[] secretTypes)
+            @NonNull @KeychainProtectionParams.UserSecretType int[] secretTypes)
             throws RemoteException {
         checkRecoverKeyStorePermission();
         int userId = UserHandle.getCallingUserId();
@@ -291,9 +291,9 @@ public class RecoverableKeyStoreManager {
     }
 
     public void recoverySecretAvailable(
-            @NonNull KeychainProtectionParameter recoverySecret) throws RemoteException {
+            @NonNull KeychainProtectionParams recoverySecret) throws RemoteException {
         int uid = Binder.getCallingUid();
-        if (recoverySecret.getLockScreenUiFormat() == KeychainProtectionParameter.TYPE_LOCKSCREEN) {
+        if (recoverySecret.getLockScreenUiFormat() == KeychainProtectionParams.TYPE_LOCKSCREEN) {
             throw new SecurityException(
                     "Caller " + uid + " is not allowed to set lock screen secret");
         }
@@ -319,13 +319,14 @@ public class RecoverableKeyStoreManager {
             @NonNull byte[] verifierPublicKey,
             @NonNull byte[] vaultParams,
             @NonNull byte[] vaultChallenge,
-            @NonNull List<KeychainProtectionParameter> secrets)
+            @NonNull List<KeychainProtectionParams> secrets)
             throws RemoteException {
         checkRecoverKeyStorePermission();
         int uid = Binder.getCallingUid();
 
         if (secrets.size() != 1) {
-            throw new UnsupportedOperationException("Only a single KeychainProtectionParameter is supported");
+            throw new UnsupportedOperationException(
+                    "Only a single KeychainProtectionParams is supported");
         }
 
         PublicKey publicKey;
