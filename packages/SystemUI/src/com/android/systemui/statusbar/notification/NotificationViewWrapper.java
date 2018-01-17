@@ -195,7 +195,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
         return 0;
     }
 
-    public boolean shouldClipToRounding() {
+    public boolean shouldClipToRounding(boolean topRounded, boolean bottomRounded) {
         return false;
     }
 }

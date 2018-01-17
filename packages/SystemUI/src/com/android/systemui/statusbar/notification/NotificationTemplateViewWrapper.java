@@ -265,6 +265,15 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
         updateActionOffset();
     }
 
+    @Override
+    public boolean shouldClipToRounding(boolean topRounded, boolean bottomRounded) {
+        if (super.shouldClipToRounding(topRounded, bottomRounded)) {
+            return true;
+        }
+        return bottomRounded && mActionsContainer != null
+                && mActionsContainer.getVisibility() != View.GONE;
+    }
+
     private void updateActionOffset() {
         if (mActionsContainer != null) {
             // We should never push the actions higher than they are in the headsup view.

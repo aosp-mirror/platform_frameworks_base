@@ -2377,7 +2377,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             NotificationContentView contentView = (NotificationContentView) child;
             if (isClippingNeeded()) {
                 return true;
-            } else if (!hasNoRounding() && contentView.shouldClipToRounding()) {
+            } else if (!hasNoRounding()
+                    && contentView.shouldClipToRounding(getCurrentTopRoundness() != 0.0f,
+                    getCurrentBottomRoundness() != 0.0f)) {
                 return true;
             }
         } else if (child == mChildrenContainer) {
