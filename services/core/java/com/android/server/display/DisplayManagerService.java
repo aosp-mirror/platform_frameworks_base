@@ -2013,8 +2013,8 @@ public final class DisplayManagerService extends SystemService {
         @Override
         public void onOverlayChanged() {
             synchronized (mSyncRoot) {
-                if (updateLogicalDisplaysLocked()) {
-                    scheduleTraversalLocked(false);
+                for (int i = 0; i < mDisplayDevices.size(); i++) {
+                    mDisplayDevices.get(i).onOverlayChangedLocked();
                 }
             }
         }

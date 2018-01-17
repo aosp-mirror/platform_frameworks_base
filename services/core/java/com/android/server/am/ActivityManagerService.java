@@ -293,6 +293,7 @@ import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManagerInternal;
 import android.location.LocationManager;
 import android.media.audiofx.AudioEffect;
 import android.metrics.LogMaker;
@@ -472,6 +473,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -25343,9 +25345,18 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         }
-        if (updateFrameworkRes && mWindowManager != null) {
-            ActivityThread.currentActivityThread().getExecutor().execute(
-                    mWindowManager::onOverlayChanged);
+        if (updateFrameworkRes) {
+            // Update system server components that need to know about changed overlays. Because the
+            // overlay is applied in ActivityThread, we need to serialize through its thread too.
+            final Executor executor = ActivityThread.currentActivityThread().getExecutor();
+            final DisplayManagerInternal display =
+                    LocalServices.getService(DisplayManagerInternal.class);
+            if (display != null) {
+                executor.execute(display::onOverlayChanged);
+            }
+            if (mWindowManager != null) {
+                executor.execute(mWindowManager::onOverlayChanged);
+            }
         }
     }
 
