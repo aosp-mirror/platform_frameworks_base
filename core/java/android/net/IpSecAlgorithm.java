@@ -256,13 +256,19 @@ public final class IpSecAlgorithm implements Parcelable {
         return getName().equals(AUTH_CRYPT_AES_GCM);
     }
 
+    // Because encryption keys are sensitive and userdebug builds are used by large user pools
+    // such as beta testers, we only allow sensitive info such as keys on eng builds.
+    private static boolean isUnsafeBuild() {
+        return Build.IS_DEBUGGABLE && Build.IS_ENG;
+    }
+
     @Override
     public String toString() {
         return new StringBuilder()
                 .append("{mName=")
                 .append(mName)
                 .append(", mKey=")
-                .append(Build.IS_DEBUGGABLE ? HexDump.toHexString(mKey) : "<hidden>")
+                .append(isUnsafeBuild() ? HexDump.toHexString(mKey) : "<hidden>")
                 .append(", mTruncLenBits=")
                 .append(mTruncLenBits)
                 .append("}")

@@ -32,59 +32,29 @@ public final class IpSecConfig implements Parcelable {
     // MODE_TRANSPORT or MODE_TUNNEL
     private int mMode = IpSecTransform.MODE_TRANSPORT;
 
-    // Needs to be valid only for tunnel mode
     // Preventing this from being null simplifies Java->Native binder
-    private String mLocalAddress = "";
+    private String mSourceAddress = "";
 
     // Preventing this from being null simplifies Java->Native binder
-    private String mRemoteAddress = "";
+    private String mDestinationAddress = "";
 
     // The underlying Network that represents the "gateway" Network
     // for outbound packets. It may also be used to select packets.
     private Network mNetwork;
 
-    /**
-     * This class captures the parameters that specifically apply to inbound or outbound traffic.
-     */
-    public static class Flow {
-        // Minimum requirements for identifying a transform
-        // SPI identifying the IPsec flow in packet processing
-        // and a remote IP address
-        private int mSpiResourceId = IpSecManager.INVALID_RESOURCE_ID;
+    // Minimum requirements for identifying a transform
+    // SPI identifying the IPsec SA in packet processing
+    // and a destination IP address
+    private int mSpiResourceId = IpSecManager.INVALID_RESOURCE_ID;
 
-        // Encryption Algorithm
-        private IpSecAlgorithm mEncryption;
+    // Encryption Algorithm
+    private IpSecAlgorithm mEncryption;
 
-        // Authentication Algorithm
-        private IpSecAlgorithm mAuthentication;
+    // Authentication Algorithm
+    private IpSecAlgorithm mAuthentication;
 
-        // Authenticated Encryption Algorithm
-        private IpSecAlgorithm mAuthenticatedEncryption;
-
-        @Override
-        public String toString() {
-            return new StringBuilder()
-                    .append("{mSpiResourceId=")
-                    .append(mSpiResourceId)
-                    .append(", mEncryption=")
-                    .append(mEncryption)
-                    .append(", mAuthentication=")
-                    .append(mAuthentication)
-                    .append(", mAuthenticatedEncryption=")
-                    .append(mAuthenticatedEncryption)
-                    .append("}")
-                    .toString();
-        }
-
-        static boolean equals(IpSecConfig.Flow lhs, IpSecConfig.Flow rhs) {
-            if (lhs == null || rhs == null) return (lhs == rhs);
-            return (lhs.mSpiResourceId == rhs.mSpiResourceId
-                    && IpSecAlgorithm.equals(lhs.mEncryption, rhs.mEncryption)
-                    && IpSecAlgorithm.equals(lhs.mAuthentication, rhs.mAuthentication));
-        }
-    }
-
-    private final Flow[] mFlow = new Flow[] {new Flow(), new Flow()};
+    // Authenticated Encryption Algorithm
+    private IpSecAlgorithm mAuthenticatedEncryption;
 
     // For tunnel mode IPv4 UDP Encapsulation
     // IpSecTransform#ENCAP_ESP_*, such as ENCAP_ESP_OVER_UDP_IKE
@@ -100,36 +70,37 @@ public final class IpSecConfig implements Parcelable {
         mMode = mode;
     }
 
-    /** Set the local IP address for Tunnel mode */
-    public void setLocalAddress(String localAddress) {
-        mLocalAddress = localAddress;
+    /** Set the source IP addres for this IPsec transform */
+    public void setSourceAddress(String sourceAddress) {
+        mSourceAddress = sourceAddress;
     }
 
-    /** Set the remote IP address for this IPsec transform */
-    public void setRemoteAddress(String remoteAddress) {
-        mRemoteAddress = remoteAddress;
+    /** Set the destination IP address for this IPsec transform */
+    public void setDestinationAddress(String destinationAddress) {
+        mDestinationAddress = destinationAddress;
     }
 
-    /** Set the SPI for a given direction by resource ID */
-    public void setSpiResourceId(int direction, int resourceId) {
-        mFlow[direction].mSpiResourceId = resourceId;
+    /** Set the SPI by resource ID */
+    public void setSpiResourceId(int resourceId) {
+        mSpiResourceId = resourceId;
     }
 
-    /** Set the encryption algorithm for a given direction */
-    public void setEncryption(int direction, IpSecAlgorithm encryption) {
-        mFlow[direction].mEncryption = encryption;
+    /** Set the encryption algorithm */
+    public void setEncryption(IpSecAlgorithm encryption) {
+        mEncryption = encryption;
     }
 
-    /** Set the authentication algorithm for a given direction */
-    public void setAuthentication(int direction, IpSecAlgorithm authentication) {
-        mFlow[direction].mAuthentication = authentication;
+    /** Set the authentication algorithm */
+    public void setAuthentication(IpSecAlgorithm authentication) {
+        mAuthentication = authentication;
     }
 
-    /** Set the authenticated encryption algorithm for a given direction */
-    public void setAuthenticatedEncryption(int direction, IpSecAlgorithm authenticatedEncryption) {
-        mFlow[direction].mAuthenticatedEncryption = authenticatedEncryption;
+    /** Set the authenticated encryption algorithm */
+    public void setAuthenticatedEncryption(IpSecAlgorithm authenticatedEncryption) {
+        mAuthenticatedEncryption = authenticatedEncryption;
     }
 
+    /** Set the underlying network that will carry traffic for this transform */
     public void setNetwork(Network network) {
         mNetwork = network;
     }
@@ -155,28 +126,28 @@ public final class IpSecConfig implements Parcelable {
         return mMode;
     }
 
-    public String getLocalAddress() {
-        return mLocalAddress;
+    public String getSourceAddress() {
+        return mSourceAddress;
     }
 
-    public int getSpiResourceId(int direction) {
-        return mFlow[direction].mSpiResourceId;
+    public int getSpiResourceId() {
+        return mSpiResourceId;
     }
 
-    public String getRemoteAddress() {
-        return mRemoteAddress;
+    public String getDestinationAddress() {
+        return mDestinationAddress;
     }
 
-    public IpSecAlgorithm getEncryption(int direction) {
-        return mFlow[direction].mEncryption;
+    public IpSecAlgorithm getEncryption() {
+        return mEncryption;
     }
 
-    public IpSecAlgorithm getAuthentication(int direction) {
-        return mFlow[direction].mAuthentication;
+    public IpSecAlgorithm getAuthentication() {
+        return mAuthentication;
     }
 
-    public IpSecAlgorithm getAuthenticatedEncryption(int direction) {
-        return mFlow[direction].mAuthenticatedEncryption;
+    public IpSecAlgorithm getAuthenticatedEncryption() {
+        return mAuthenticatedEncryption;
     }
 
     public Network getNetwork() {
@@ -209,17 +180,13 @@ public final class IpSecConfig implements Parcelable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mMode);
-        out.writeString(mLocalAddress);
-        out.writeString(mRemoteAddress);
+        out.writeString(mSourceAddress);
+        out.writeString(mDestinationAddress);
         out.writeParcelable(mNetwork, flags);
-        out.writeInt(mFlow[IpSecTransform.DIRECTION_IN].mSpiResourceId);
-        out.writeParcelable(mFlow[IpSecTransform.DIRECTION_IN].mEncryption, flags);
-        out.writeParcelable(mFlow[IpSecTransform.DIRECTION_IN].mAuthentication, flags);
-        out.writeParcelable(mFlow[IpSecTransform.DIRECTION_IN].mAuthenticatedEncryption, flags);
-        out.writeInt(mFlow[IpSecTransform.DIRECTION_OUT].mSpiResourceId);
-        out.writeParcelable(mFlow[IpSecTransform.DIRECTION_OUT].mEncryption, flags);
-        out.writeParcelable(mFlow[IpSecTransform.DIRECTION_OUT].mAuthentication, flags);
-        out.writeParcelable(mFlow[IpSecTransform.DIRECTION_OUT].mAuthenticatedEncryption, flags);
+        out.writeInt(mSpiResourceId);
+        out.writeParcelable(mEncryption, flags);
+        out.writeParcelable(mAuthentication, flags);
+        out.writeParcelable(mAuthenticatedEncryption, flags);
         out.writeInt(mEncapType);
         out.writeInt(mEncapSocketResourceId);
         out.writeInt(mEncapRemotePort);
@@ -231,22 +198,15 @@ public final class IpSecConfig implements Parcelable {
 
     private IpSecConfig(Parcel in) {
         mMode = in.readInt();
-        mLocalAddress = in.readString();
-        mRemoteAddress = in.readString();
+        mSourceAddress = in.readString();
+        mDestinationAddress = in.readString();
         mNetwork = (Network) in.readParcelable(Network.class.getClassLoader());
-        mFlow[IpSecTransform.DIRECTION_IN].mSpiResourceId = in.readInt();
-        mFlow[IpSecTransform.DIRECTION_IN].mEncryption =
+        mSpiResourceId = in.readInt();
+        mEncryption =
                 (IpSecAlgorithm) in.readParcelable(IpSecAlgorithm.class.getClassLoader());
-        mFlow[IpSecTransform.DIRECTION_IN].mAuthentication =
+        mAuthentication =
                 (IpSecAlgorithm) in.readParcelable(IpSecAlgorithm.class.getClassLoader());
-        mFlow[IpSecTransform.DIRECTION_IN].mAuthenticatedEncryption =
-                (IpSecAlgorithm) in.readParcelable(IpSecAlgorithm.class.getClassLoader());
-        mFlow[IpSecTransform.DIRECTION_OUT].mSpiResourceId = in.readInt();
-        mFlow[IpSecTransform.DIRECTION_OUT].mEncryption =
-                (IpSecAlgorithm) in.readParcelable(IpSecAlgorithm.class.getClassLoader());
-        mFlow[IpSecTransform.DIRECTION_OUT].mAuthentication =
-                (IpSecAlgorithm) in.readParcelable(IpSecAlgorithm.class.getClassLoader());
-        mFlow[IpSecTransform.DIRECTION_OUT].mAuthenticatedEncryption =
+        mAuthenticatedEncryption =
                 (IpSecAlgorithm) in.readParcelable(IpSecAlgorithm.class.getClassLoader());
         mEncapType = in.readInt();
         mEncapSocketResourceId = in.readInt();
@@ -260,10 +220,10 @@ public final class IpSecConfig implements Parcelable {
         strBuilder
                 .append("{mMode=")
                 .append(mMode == IpSecTransform.MODE_TUNNEL ? "TUNNEL" : "TRANSPORT")
-                .append(", mLocalAddress=")
-                .append(mLocalAddress)
-                .append(", mRemoteAddress=")
-                .append(mRemoteAddress)
+                .append(", mSourceAddress=")
+                .append(mSourceAddress)
+                .append(", mDestinationAddress=")
+                .append(mDestinationAddress)
                 .append(", mNetwork=")
                 .append(mNetwork)
                 .append(", mEncapType=")
@@ -274,10 +234,14 @@ public final class IpSecConfig implements Parcelable {
                 .append(mEncapRemotePort)
                 .append(", mNattKeepaliveInterval=")
                 .append(mNattKeepaliveInterval)
-                .append(", mFlow[OUT]=")
-                .append(mFlow[IpSecTransform.DIRECTION_OUT])
-                .append(", mFlow[IN]=")
-                .append(mFlow[IpSecTransform.DIRECTION_IN])
+                .append("{mSpiResourceId=")
+                .append(mSpiResourceId)
+                .append(", mEncryption=")
+                .append(mEncryption)
+                .append(", mAuthentication=")
+                .append(mAuthentication)
+                .append(", mAuthenticatedEncryption=")
+                .append(mAuthenticatedEncryption)
                 .append("}");
 
         return strBuilder.toString();
@@ -299,17 +263,18 @@ public final class IpSecConfig implements Parcelable {
     public static boolean equals(IpSecConfig lhs, IpSecConfig rhs) {
         if (lhs == null || rhs == null) return (lhs == rhs);
         return (lhs.mMode == rhs.mMode
-                && lhs.mLocalAddress.equals(rhs.mLocalAddress)
-                && lhs.mRemoteAddress.equals(rhs.mRemoteAddress)
+                && lhs.mSourceAddress.equals(rhs.mSourceAddress)
+                && lhs.mDestinationAddress.equals(rhs.mDestinationAddress)
                 && ((lhs.mNetwork != null && lhs.mNetwork.equals(rhs.mNetwork))
                         || (lhs.mNetwork == rhs.mNetwork))
                 && lhs.mEncapType == rhs.mEncapType
                 && lhs.mEncapSocketResourceId == rhs.mEncapSocketResourceId
                 && lhs.mEncapRemotePort == rhs.mEncapRemotePort
                 && lhs.mNattKeepaliveInterval == rhs.mNattKeepaliveInterval
-                && IpSecConfig.Flow.equals(lhs.mFlow[IpSecTransform.DIRECTION_OUT],
-                        rhs.mFlow[IpSecTransform.DIRECTION_OUT])
-                && IpSecConfig.Flow.equals(lhs.mFlow[IpSecTransform.DIRECTION_IN],
-                        rhs.mFlow[IpSecTransform.DIRECTION_IN]));
+                && lhs.mSpiResourceId == rhs.mSpiResourceId
+                && IpSecAlgorithm.equals(lhs.mEncryption, rhs.mEncryption)
+                && IpSecAlgorithm.equals(
+                        lhs.mAuthenticatedEncryption, rhs.mAuthenticatedEncryption)
+                && IpSecAlgorithm.equals(lhs.mAuthentication, rhs.mAuthentication));
     }
 }
