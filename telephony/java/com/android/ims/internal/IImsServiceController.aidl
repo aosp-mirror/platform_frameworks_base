@@ -18,6 +18,7 @@ package com.android.ims.internal;
 
 import com.android.ims.internal.IImsFeatureStatusCallback;
 import com.android.ims.internal.IImsMMTelFeature;
+import com.android.ims.internal.IImsRegistration;
 import com.android.ims.internal.IImsRcsFeature;
 
 /**
@@ -29,4 +30,5 @@ interface IImsServiceController {
     IImsMMTelFeature createMMTelFeature(int slotId, in IImsFeatureStatusCallback c);
     IImsRcsFeature createRcsFeature(int slotId, in IImsFeatureStatusCallback c);
     void removeImsFeature(int slotId, int featureType, in IImsFeatureStatusCallback c);
+    IImsRegistration getRegistration(int slotId);
 }

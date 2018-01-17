@@ -18,12 +18,12 @@ package android.telephony.ims.internal.aidl;
 
 import android.telephony.ims.internal.aidl.IImsMmTelFeature;
 import android.telephony.ims.internal.aidl.IImsRcsFeature;
-import android.telephony.ims.internal.aidl.IImsRegistration;
 import android.telephony.ims.internal.aidl.IImsConfig;
 import android.telephony.ims.internal.aidl.IImsServiceControllerListener;
 import android.telephony.ims.internal.stub.ImsFeatureConfiguration;
 
 import com.android.ims.internal.IImsFeatureStatusCallback;
+import com.android.ims.internal.IImsRegistration;
 
 /**
  * See ImsService and MmTelFeature for more information.

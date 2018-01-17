@@ -18,7 +18,7 @@ package android.telephony.ims.internal.feature;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telephony.ims.internal.stub.ImsRegistrationImplBase;
+import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.util.ArraySet;
 
 import java.util.ArrayList;
