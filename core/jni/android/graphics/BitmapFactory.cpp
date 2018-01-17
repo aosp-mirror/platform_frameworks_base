@@ -237,10 +237,22 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
 
     // Create the codec.
     NinePatchPeeker peeker;
-    std::unique_ptr<SkAndroidCodec> codec = SkAndroidCodec::MakeFromStream(
-            std::move(stream), &peeker);
-    if (!codec.get()) {
-        return nullObjectReturn("SkAndroidCodec::MakeFromStream returned null");
+    std::unique_ptr<SkAndroidCodec> codec;
+    {
+        SkCodec::Result result;
+        std::unique_ptr<SkCodec> c = SkCodec::MakeFromStream(std::move(stream), &result,
+                                                             &peeker);
+        if (!c) {
+            SkString msg;
+            msg.printf("Failed to create image decoder with message '%s'",
+                       SkCodec::ResultToString(result));
+            return nullObjectReturn(msg.c_str());
+        }
+
+        codec = SkAndroidCodec::MakeFromCodec(std::move(c));
+        if (!codec) {
+            return nullObjectReturn("SkAndroidCodec::MakeFromCodec returned null");
+        }
     }
 
     // Do not allow ninepatch decodes to 565.  In the past, decodes to 565
