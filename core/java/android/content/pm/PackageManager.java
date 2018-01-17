@@ -2535,31 +2535,22 @@ public abstract class PackageManager {
      * Devices declaring this feature must include an application implementing a
      * {@link android.service.vr.VrListenerService} that can be targeted by VR applications via
      * {@link android.app.Activity#setVrModeEnabled}.
+     * @deprecated use {@link #FEATURE_VR_MODE_HIGH_PERFORMANCE} instead.
      */
+    @Deprecated
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_VR_MODE = "android.software.vr.mode";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
-     * The device implements {@link #FEATURE_VR_MODE} but additionally meets extra CDD requirements
-     * to provide a high-quality VR experience.  In general, devices declaring this feature will
-     * additionally:
-     * <ul>
-     *   <li>Deliver consistent performance at a high framerate over an extended period of time
-     *   for typical VR application CPU/GPU workloads with a minimal number of frame drops for VR
-     *   applications that have called
-     *   {@link android.view.Window#setSustainedPerformanceMode}.</li>
-     *   <li>Implement {@link #FEATURE_HIFI_SENSORS} and have a low sensor latency.</li>
-     *   <li>Include optimizations to lower display persistence while running VR applications.</li>
-     *   <li>Implement an optimized render path to minimize latency to draw to the device's main
-     *   display.</li>
-     *   <li>Include the following EGL extensions: EGL_ANDROID_create_native_client_buffer,
-     *   EGL_ANDROID_front_buffer_auto_refresh, EGL_EXT_protected_content,
-     *   EGL_KHR_mutable_render_buffer, EGL_KHR_reusable_sync, and EGL_KHR_wait_sync.</li>
-     *   <li>Provide at least one CPU core that is reserved for use solely by the top, foreground
-     *   VR application process for critical render threads while such an application is
-     *   running.</li>
-     * </ul>
+     * The device implements an optimized mode for virtual reality (VR) applications that handles
+     * stereoscopic rendering of notifications, disables most monocular system UI components
+     * while a VR application has user focus and meets extra CDD requirements to provide a
+     * high-quality VR experience.
+     * Devices declaring this feature must include an application implementing a
+     * {@link android.service.vr.VrListenerService} that can be targeted by VR applications via
+     * {@link android.app.Activity#setVrModeEnabled}.
+     * and must meet CDD requirements to provide a high-quality VR experience.
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_VR_MODE_HIGH_PERFORMANCE

@@ -13674,7 +13674,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      * not.
      */
     private void enforceSystemHasVrFeature() {
-        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_VR_MODE)) {
+        if (!mContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_VR_MODE_HIGH_PERFORMANCE)) {
             throw new UnsupportedOperationException("VR mode not supported on this device!");
         }
     }
@@ -13733,9 +13734,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public int setVrMode(IBinder token, boolean enabled, ComponentName packageName) {
-        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_VR_MODE)) {
-            throw new UnsupportedOperationException("VR mode not supported on this device!");
-        }
+        enforceSystemHasVrFeature();
 
         final VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
 
@@ -13767,9 +13766,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public boolean isVrModePackageEnabled(ComponentName packageName) {
-        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_VR_MODE)) {
-            throw new UnsupportedOperationException("VR mode not supported on this device!");
-        }
+        enforceSystemHasVrFeature();
 
         final VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
 

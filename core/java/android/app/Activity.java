@@ -6616,7 +6616,6 @@ public class Activity extends ContextThemeWrapper
      *    to run as a {@link android.service.vr.VrListenerService} is not installed, or has
      *    not been enabled in user settings.
      *
-     * @see android.content.pm.PackageManager#FEATURE_VR_MODE
      * @see android.content.pm.PackageManager#FEATURE_VR_MODE_HIGH_PERFORMANCE
      * @see android.service.vr.VrListenerService
      * @see android.provider.Settings#ACTION_VR_LISTENER_SETTINGS
