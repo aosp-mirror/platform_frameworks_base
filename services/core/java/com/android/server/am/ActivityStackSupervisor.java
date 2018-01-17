@@ -1424,7 +1424,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem;
                 if (andResume) {
-                    lifecycleItem = ResumeActivityItem.obtain(mService.isNextTransitionForward());
+                    lifecycleItem = ResumeActivityItem.obtain(mService.isNextTransitionForward())
+                            .setDescription(r.getLifecycleDescription("realStartActivityLocked"));
                 } else {
                     lifecycleItem = PauseActivityItem.obtain();
                 }

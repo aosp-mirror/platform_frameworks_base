@@ -114,6 +114,7 @@ public class PauseActivityItem extends ActivityLifecycleItem {
     /** Write to Parcel. */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        super.writeToParcel(dest, flags);
         dest.writeBoolean(mFinished);
         dest.writeBoolean(mUserLeaving);
         dest.writeInt(mConfigChanges);
@@ -122,6 +123,7 @@ public class PauseActivityItem extends ActivityLifecycleItem {
 
     /** Read from Parcel. */
     private PauseActivityItem(Parcel in) {
+        super(in);
         mFinished = in.readBoolean();
         mUserLeaving = in.readBoolean();
         mConfigChanges = in.readInt();

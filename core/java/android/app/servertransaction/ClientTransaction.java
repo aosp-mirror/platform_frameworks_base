@@ -26,6 +26,7 @@ import android.os.RemoteException;
 
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -236,5 +237,13 @@ public class ClientTransaction implements Parcelable, ObjectPoolItem {
         result = 31 * result + Objects.hashCode(mActivityCallbacks);
         result = 31 * result + Objects.hashCode(mLifecycleStateRequest);
         return result;
+    }
+
+    void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + "mActivityToken:" + mActivityToken.hashCode());
+        pw.println(prefix + "mLifecycleStateRequest:");
+        if (mLifecycleStateRequest != null) {
+            mLifecycleStateRequest.dump(pw, prefix + "  ");
+        }
     }
 }
