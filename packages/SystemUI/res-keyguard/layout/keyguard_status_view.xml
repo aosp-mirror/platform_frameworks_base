@@ -50,16 +50,6 @@
                 android:format12Hour="@string/keyguard_widget_12_hours_format"
                 android:format24Hour="@string/keyguard_widget_24_hours_format"
                 android:layout_marginBottom="@dimen/bottom_text_spacing_digital" />
-            <com.android.systemui.ChargingView
-                android:id="@+id/battery_doze"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@id/clock_view"
-                android:layout_alignBottom="@id/clock_view"
-                android:layout_toEndOf="@id/clock_view"
-                android:visibility="invisible"
-                android:src="@drawable/ic_aod_charging_24dp"
-                android:contentDescription="@string/accessibility_ambient_display_charging" />
             <View
                 android:id="@+id/clock_separator"
                 android:layout_width="16dp"

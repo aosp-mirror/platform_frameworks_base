@@ -16,7 +16,6 @@
 
 package com.android.keyguard;
 
-import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -40,7 +39,6 @@ import android.widget.TextClock;
 import android.widget.TextView;
 
 import com.android.internal.widget.LockPatternUtils;
-import com.android.systemui.ChargingView;
 
 import com.google.android.collect.Sets;
 
@@ -60,7 +58,6 @@ public class KeyguardStatusView extends GridLayout {
     private View mClockSeparator;
     private TextView mOwnerInfo;
     private ViewGroup mClockContainer;
-    private ChargingView mBatteryDoze;
     private KeyguardSliceView mKeyguardSlice;
     private Runnable mPendingMarqueeStart;
     private Handler mHandler;
@@ -155,11 +152,9 @@ public class KeyguardStatusView extends GridLayout {
             mClockView.setAccessibilityDelegate(new KeyguardClockAccessibilityDelegate(mContext));
         }
         mOwnerInfo = findViewById(R.id.owner_info);
-        mBatteryDoze = findViewById(R.id.battery_doze);
         mKeyguardSlice = findViewById(R.id.keyguard_status_area);
         mClockSeparator = findViewById(R.id.clock_separator);
-        mVisibleInDoze = Sets.newArraySet(mBatteryDoze, mClockView, mKeyguardSlice,
-                mClockSeparator);
+        mVisibleInDoze = Sets.newArraySet(mClockView, mKeyguardSlice, mClockSeparator);
         mTextColor = mClockView.getCurrentTextColor();
 
         mKeyguardSlice.setListener(this::onSliceContentChanged);
@@ -184,10 +179,6 @@ public class KeyguardStatusView extends GridLayout {
         mClockView.setTranslationY(translation);
         mClockView.setScaleX(clockScale);
         mClockView.setScaleY(clockScale);
-        final float batteryTranslation =
-                -(mClockView.getWidth() - (mClockView.getWidth() * clockScale)) / 2;
-        mBatteryDoze.setTranslationX(batteryTranslation);
-        mBatteryDoze.setTranslationY(translation);
         mClockSeparator.setVisibility(hasHeader ? VISIBLE : GONE);
     }
 
@@ -310,7 +301,7 @@ public class KeyguardStatusView extends GridLayout {
         }
     }
 
-    public void setDark(float darkAmount) {
+    public void setDarkAmount(float darkAmount) {
         if (mDarkAmount == darkAmount) {
             return;
         }
@@ -331,7 +322,6 @@ public class KeyguardStatusView extends GridLayout {
 
         final int blendedTextColor = ColorUtils.blendARGB(mTextColor, Color.WHITE, darkAmount);
         updateDozeVisibleViews();
-        mBatteryDoze.setDark(dark);
         mKeyguardSlice.setDark(darkAmount);
         mClockView.setTextColor(blendedTextColor);
         mClockSeparator.setBackgroundColor(blendedTextColor);

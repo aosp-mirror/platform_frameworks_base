@@ -4645,7 +4645,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         @Override
         public void dozeTimeTick() {
-            mNotificationPanel.refreshTime();
+            mNotificationPanel.dozeTimeTick();
         }
 
         @Override
