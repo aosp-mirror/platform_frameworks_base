@@ -35,6 +35,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.ArraySet;
@@ -401,7 +402,6 @@ public abstract class Connection extends Conferenceable {
 
     /**
      * Set by the framework to indicate that a connection is using assisted dialing.
-     * @hide
      */
     public static final int PROPERTY_ASSISTED_DIALING_USED = 1 << 9;
 
@@ -2534,6 +2534,19 @@ public abstract class Connection extends Conferenceable {
     public final void putExtra(String key, String value) {
         Bundle newExtras = new Bundle();
         newExtras.putString(key, value);
+        putExtras(newExtras);
+    }
+
+    /**
+     * Adds a parcelable extra to this {@code Connection}.
+     *
+     * @param key The extra key.
+     * @param value The value.
+     * @hide
+     */
+    public final void putExtra(@NonNull String key, @NonNull Parcelable value) {
+        Bundle newExtras = new Bundle();
+        newExtras.putParcelable(key, value);
         putExtras(newExtras);
     }
 
