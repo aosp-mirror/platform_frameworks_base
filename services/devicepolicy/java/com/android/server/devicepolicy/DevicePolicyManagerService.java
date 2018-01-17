@@ -4517,6 +4517,28 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private boolean canPOorDOCallResetPassword(ActiveAdmin admin, @UserIdInt int userId) {
+        // Only if the admins targets a pre-O SDK
+        return getTargetSdk(admin.info.getPackageName(), userId) < Build.VERSION_CODES.O;
+    }
+
+    /* PO or DO could do an untrusted reset in certain conditions. */
+    private boolean canUserHaveUntrustedCredentialReset(@UserIdInt int userId) {
+        synchronized (this) {
+            // An active DO or PO might be able to fo an untrusted credential reset
+            for (final ActiveAdmin admin : getUserData(userId).mAdminList) {
+                if (!isActiveAdminWithPolicyForUserLocked(admin,
+                          DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, userId)) {
+                    continue;
+                }
+                if (canPOorDOCallResetPassword(admin, userId)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
     @Override
     public boolean resetPassword(String passwordOrNull, int flags) throws RemoteException {
         final int callingUid = mInjector.binderGetCallingUid();
@@ -4535,12 +4557,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     null, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, callingUid);
             final boolean preN;
             if (admin != null) {
-                final int targetSdk = getTargetSdk(admin.info.getPackageName(), userHandle);
-                if (targetSdk >= Build.VERSION_CODES.O) {
+                if (!canPOorDOCallResetPassword(admin, userHandle)) {
                     throw new SecurityException("resetPassword() is deprecated for DPC targeting O"
                             + " or later");
                 }
-                preN = targetSdk <= android.os.Build.VERSION_CODES.M;
+                preN = getTargetSdk(admin.info.getPackageName(),
+                        userHandle) <= android.os.Build.VERSION_CODES.M;
             } else {
                 // Otherwise, make sure the caller has any active admin with the right policy.
                 admin = getActiveAdminForCallerLocked(null,
@@ -10110,6 +10132,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             synchronized (DevicePolicyManagerService.this) {
                 updateMaximumTimeToLockLocked(userId);
             }
+        }
+
+        @Override
+        public boolean canUserHaveUntrustedCredentialReset(@UserIdInt int userId) {
+            return DevicePolicyManagerService.this.canUserHaveUntrustedCredentialReset(userId);
         }
     }
 
