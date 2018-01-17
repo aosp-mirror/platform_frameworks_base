@@ -99,6 +99,21 @@ public:
      */
     virtual Status removeConfiguration(int64_t key, bool* success) override;
 
+    /**
+     * Binder call to associate the given config's subscriberId with the given intentSender.
+     * intentSender must be convertible into an IntentSender (in Java) using IntentSender(IBinder).
+     */
+    virtual Status setBroadcastSubscriber(int64_t configId,
+                                          int64_t subscriberId,
+                                          const sp<android::IBinder>& intentSender,
+                                          bool* success) override;
+
+    /**
+     * Binder call to unassociate the given config's subscriberId with any intentSender.
+     */
+    virtual Status unsetBroadcastSubscriber(int64_t configId, int64_t subscriberId,
+                                            bool* success) override;
+
     // TODO: public for testing since statsd doesn't run when system starts. Change to private
     // later.
     /** Inform statsCompanion that statsd is ready. */

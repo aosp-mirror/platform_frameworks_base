@@ -24,6 +24,7 @@
 #include "guardrail/MemoryLeakTrackUtil.h"
 #include "guardrail/StatsdStats.h"
 #include "storage/StorageManager.h"
+#include "subscriber/SubscriberReporter.h"
 
 #include <android-base/file.h>
 #include <binder/IPCThreadState.h>
@@ -67,6 +68,7 @@ CompanionDeathRecipient::CompanionDeathRecipient(const sp<AnomalyMonitor>& anoma
 void CompanionDeathRecipient::binderDied(const wp<IBinder>& who) {
     ALOGW("statscompanion service died");
     mAnomalyMonitor->setStatsCompanionService(nullptr);
+    SubscriberReporter::getInstance().setStatsCompanionService(nullptr);
 }
 
 // ======================================================================
@@ -681,6 +683,7 @@ Status StatsService::statsCompanionReady() {
     VLOG("StatsService::statsCompanionReady linking to statsCompanion.");
     IInterface::asBinder(statsCompanion)->linkToDeath(new CompanionDeathRecipient(mAnomalyMonitor));
     mAnomalyMonitor->setStatsCompanionService(statsCompanion);
+    SubscriberReporter::getInstance().setStatsCompanionService(statsCompanion);
 
     return Status::ok();
 }
@@ -743,7 +746,9 @@ Status StatsService::addConfiguration(int64_t key,
 Status StatsService::removeConfiguration(int64_t key, bool* success) {
     IPCThreadState* ipc = IPCThreadState::self();
     if (checkCallingPermission(String16(kPermissionDump))) {
-        mConfigManager->RemoveConfig(ConfigKey(ipc->getCallingUid(), key));
+        ConfigKey configKey(ipc->getCallingUid(), key);
+        mConfigManager->RemoveConfig(configKey);
+        SubscriberReporter::getInstance().removeConfig(configKey);
         *success = true;
         return Status::ok();
     } else {
@@ -751,6 +756,42 @@ Status StatsService::removeConfiguration(int64_t key, bool* success) {
         return Status::fromExceptionCode(binder::Status::EX_SECURITY);
     }
 }
+
+Status StatsService::setBroadcastSubscriber(int64_t configId,
+                                            int64_t subscriberId,
+                                            const sp<android::IBinder>& intentSender,
+                                            bool* success) {
+    VLOG("StatsService::setBroadcastSubscriber called.");
+    IPCThreadState* ipc = IPCThreadState::self();
+    if (checkCallingPermission(String16(kPermissionDump))) {
+        ConfigKey configKey(ipc->getCallingUid(), configId);
+        SubscriberReporter::getInstance()
+                .setBroadcastSubscriber(configKey, subscriberId, intentSender);
+        *success = true;
+        return Status::ok();
+    } else {
+        *success = false;
+        return Status::fromExceptionCode(binder::Status::EX_SECURITY);
+    }
+}
+
+Status StatsService::unsetBroadcastSubscriber(int64_t configId,
+                                              int64_t subscriberId,
+                                              bool* success) {
+    VLOG("StatsService::unsetBroadcastSubscriber called.");
+    IPCThreadState* ipc = IPCThreadState::self();
+    if (checkCallingPermission(String16(kPermissionDump))) {
+        ConfigKey configKey(ipc->getCallingUid(), configId);
+        SubscriberReporter::getInstance()
+                .unsetBroadcastSubscriber(configKey, subscriberId);
+        *success = true;
+        return Status::ok();
+    } else {
+        *success = false;
+        return Status::fromExceptionCode(binder::Status::EX_SECURITY);
+    }
+}
+
 
 void StatsService::binderDied(const wp <IBinder>& who) {
 }

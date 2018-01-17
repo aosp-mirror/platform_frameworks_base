@@ -354,6 +354,19 @@ package android.app {
     method public org.json.JSONObject toJson() throws org.json.JSONException;
   }
 
+  public final class StatsManager {
+    method public boolean addConfiguration(long, byte[], java.lang.String, java.lang.String);
+    method public byte[] getData(long);
+    method public byte[] getMetadata();
+    method public boolean removeConfiguration(long);
+    method public boolean setBroadcastSubscriber(long, long, android.app.PendingIntent);
+    field public static final java.lang.String EXTRA_STATS_CONFIG_KEY = "android.app.extra.STATS_CONFIG_KEY";
+    field public static final java.lang.String EXTRA_STATS_CONFIG_UID = "android.app.extra.STATS_CONFIG_UID";
+    field public static final java.lang.String EXTRA_STATS_DIMENSIONS_VALUE = "android.app.extra.STATS_DIMENSIONS_VALUE";
+    field public static final java.lang.String EXTRA_STATS_SUBSCRIPTION_ID = "android.app.extra.STATS_SUBSCRIPTION_ID";
+    field public static final java.lang.String EXTRA_STATS_SUBSCRIPTION_RULE_ID = "android.app.extra.STATS_SUBSCRIPTION_RULE_ID";
+  }
+
   public class VrManager {
     method public void setAndBindVrCompositor(android.content.ComponentName);
     method public void setPersistentVrModeEnabled(boolean);
@@ -3538,6 +3551,27 @@ package android.os {
     method public abstract void onResult(android.os.Bundle);
   }
 
+  public final class StatsDimensionsValue implements android.os.Parcelable {
+    method public int describeContents();
+    method public boolean getBooleanValue();
+    method public int getField();
+    method public float getFloatValue();
+    method public int getIntValue();
+    method public long getLongValue();
+    method public java.lang.String getStringValue();
+    method public java.util.List<android.os.StatsDimensionsValue> getTupleValueList();
+    method public int getValueType();
+    method public boolean isValueType(int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int BOOLEAN_VALUE_TYPE = 5; // 0x5
+    field public static final android.os.Parcelable.Creator<android.os.StatsDimensionsValue> CREATOR;
+    field public static final int FLOAT_VALUE_TYPE = 6; // 0x6
+    field public static final int INT_VALUE_TYPE = 3; // 0x3
+    field public static final int LONG_VALUE_TYPE = 4; // 0x4
+    field public static final int STRING_VALUE_TYPE = 2; // 0x2
+    field public static final int TUPLE_VALUE_TYPE = 7; // 0x7
+  }
+
   public class SystemProperties {
     method public static java.lang.String get(java.lang.String);
     method public static java.lang.String get(java.lang.String, java.lang.String);
@@ -4898,16 +4932,6 @@ package android.util {
 
   public static final class EventLog.Event {
     method public int getUid();
-  }
-
-  public final class StatsManager {
-    method public boolean addConfiguration(java.lang.String, byte[], java.lang.String, java.lang.String);
-    method public boolean addConfiguration(long, byte[], java.lang.String, java.lang.String);
-    method public byte[] getData(java.lang.String);
-    method public byte[] getData(long);
-    method public byte[] getMetadata();
-    method public boolean removeConfiguration(java.lang.String);
-    method public boolean removeConfiguration(long);
   }
 
 }

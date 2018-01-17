@@ -51,10 +51,8 @@ public:
 
     // Declares an anomaly for each alarm in firedAlarms that belongs to this DurationAnomalyTracker
     // and removes it from firedAlarms.
-    // TODO: This will actually be called from a different thread, so make it thread-safe!
-    //          This means that almost every function in DurationAnomalyTracker needs to be locked.
-    //          But this should be done at the level of StatsLogProcessor, which needs to lock
-    //          mMetricsMangers anyway.
+    // Note that this will generally be called from a different thread from the other functions;
+    // the caller is responsible for thread safety.
     void informAlarmsFired(const uint64_t& timestampNs,
             unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>>& firedAlarms) override;
 

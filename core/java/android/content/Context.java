@@ -4121,7 +4121,7 @@ public abstract class Context {
     public static final String STATS_COMPANION_SERVICE = "statscompanion";
 
     /**
-     * Use with {@link #getSystemService(String)} to retrieve an {@link android.stats.StatsManager}.
+     * Use with {@link #getSystemService(String)} to retrieve an {@link android.app.StatsManager}.
      * @hide
      */
     @SystemApi

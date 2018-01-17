@@ -81,7 +81,7 @@ interface IStatsManager {
     /**
      * Sets a configuration with the specified config key and subscribes to updates for this
      * configuration key. Broadcasts will be sent if this configuration needs to be collected.
-     * The configuration must be a wire-encoded StatsDConfig. The caller specifies the name of the
+     * The configuration must be a wire-encoded StatsdConfig. The caller specifies the name of the
      * package and class that should receive these broadcasts.
      *
      * Returns if this configuration was correctly registered.
@@ -95,4 +95,33 @@ interface IStatsManager {
      * Returns if this configuration key was removed.
      */
     boolean removeConfiguration(in long configKey);
+
+    /**
+     * Set the IIntentSender (i.e. PendingIntent) to be used when broadcasting subscriber
+     * information to the given subscriberId within the given config.
+     *
+     * Suppose that the calling uid has added a config with key configKey, and that in this config
+     * it is specified that when a particular anomaly is detected, a broadcast should be sent to
+     * a BroadcastSubscriber with id subscriberId. This function links the given intentSender with
+     * that subscriberId (for that config), so that this intentSender is used to send the broadcast
+     * when the anomaly is detected.
+     *
+     * This function can only be called by the owner (uid) of the config. It must be called each
+     * time statsd starts. Later calls overwrite previous calls; only one intentSender is stored.
+     *
+     * intentSender must be convertible into an IntentSender using IntentSender(IBinder)
+     * and cannot be null.
+     *
+     * Returns true if successful.
+     */
+    boolean setBroadcastSubscriber(long configKey, long subscriberId, in IBinder intentSender);
+
+    /**
+     * Undoes setBroadcastSubscriber() for the (configKey, subscriberId) pair.
+     * Any broadcasts associated with subscriberId will henceforth not be sent.
+     * No-op if this (configKey, subsriberId) pair was not associated with an IntentSender.
+     *
+     * Returns true if successful.
+     */
+    boolean unsetBroadcastSubscriber(long configKey, long subscriberId);
 }
