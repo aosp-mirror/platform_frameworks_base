@@ -27,8 +27,6 @@ import java.util.List;
  * @hide
  */
 oneway interface IAutofillFieldClassificationService {
-    void getAvailableAlgorithms(in RemoteCallback callback);
-    void getDefaultAlgorithm(in RemoteCallback callback);
     void getScores(in RemoteCallback callback, String algorithmName, in Bundle algorithmArgs,
-                  in List<AutofillValue> actualValues, in String[] userDataValues);
+                   in List<AutofillValue> actualValues, in String[] userDataValues);
 }

@@ -1153,22 +1153,22 @@ final class AutofillManagerServiceImpl {
         return mFieldClassificationStrategy;
     }
 
-    void getAvailableFieldClassificationAlgorithms(int callingUid, RemoteCallback callback) {
+    String[] getAvailableFieldClassificationAlgorithms(int callingUid) {
         synchronized (mLock) {
             if (!isCalledByServiceLocked("getFCAlgorithms()", callingUid)) {
-                return;
+                return null;
             }
         }
-        mFieldClassificationStrategy.getAvailableAlgorithms(callback);
+        return mFieldClassificationStrategy.getAvailableAlgorithms();
     }
 
-    void getDefaultFieldClassificationAlgorithm(int callingUid, RemoteCallback callback) {
+    String getDefaultFieldClassificationAlgorithm(int callingUid) {
         synchronized (mLock) {
             if (!isCalledByServiceLocked("getDefaultFCAlgorithm()", callingUid)) {
-                return;
+                return null;
             }
         }
-        mFieldClassificationStrategy.getDefaultAlgorithm(callback);
+        return mFieldClassificationStrategy.getDefaultAlgorithm();
     }
 
     @Override

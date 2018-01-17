@@ -3862,8 +3862,6 @@ package android.service.autofill {
 
   public abstract class AutofillFieldClassificationService extends android.app.Service {
     method public android.os.IBinder onBind(android.content.Intent);
-    method public java.util.List<java.lang.String> onGetAvailableAlgorithms();
-    method public java.lang.String onGetDefaultAlgorithm();
     method public android.service.autofill.AutofillFieldClassificationService.Scores onGetScores(java.lang.String, android.os.Bundle, java.util.List<android.view.autofill.AutofillValue>, java.util.List<java.lang.String>);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.autofill.AutofillFieldClassificationService";
   }

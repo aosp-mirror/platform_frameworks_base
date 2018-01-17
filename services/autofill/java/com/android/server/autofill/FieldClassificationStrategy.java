@@ -15,8 +15,6 @@
  */
 package com.android.server.autofill;
 
-import static android.view.autofill.AutofillManager.EXTRA_AVAILABLE_ALGORITHMS;
-import static android.view.autofill.AutofillManager.EXTRA_DEFAULT_ALGORITHM;
 import static android.view.autofill.AutofillManager.FC_SERVICE_TIMEOUT;
 
 import static com.android.server.autofill.Helper.sDebug;
@@ -33,6 +31,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -49,6 +48,7 @@ import com.android.internal.annotations.GuardedBy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -61,6 +61,11 @@ import java.util.concurrent.TimeUnit;
 final class FieldClassificationStrategy {
 
     private static final String TAG = "FieldClassificationStrategy";
+
+    private static final String METADATA_KEY_DEFAULT_ALGORITHM =
+            "android.autofill.field_classification.default_algorithm";
+    private static final String METADATA_KEY_AVAILABLE_ALGORITHMS =
+            "android.autofill.field_classification.available_algorithms";
 
     private final Context mContext;
     private final Object mLock = new Object();
@@ -80,7 +85,8 @@ final class FieldClassificationStrategy {
         mUserId = userId;
     }
 
-    private ComponentName getServiceComponentName() {
+    @Nullable
+    private ServiceInfo getServiceInfo() {
         final String packageName =
                 mContext.getPackageManager().getServicesSystemSharedLibraryPackageName();
         if (packageName == null) {
@@ -96,9 +102,15 @@ final class FieldClassificationStrategy {
             Slog.w(TAG, "No valid components found.");
             return null;
         }
-        final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
-        final ComponentName name = new ComponentName(serviceInfo.packageName, serviceInfo.name);
+        return resolveInfo.serviceInfo;
+    }
 
+    @Nullable
+    private ComponentName getServiceComponentName() {
+        final ServiceInfo serviceInfo = getServiceInfo();
+        if (serviceInfo == null) return null;
+
+        final ComponentName name = new ComponentName(serviceInfo.packageName, serviceInfo.name);
         if (!Manifest.permission.BIND_AUTOFILL_FIELD_CLASSIFICATION_SERVICE
                 .equals(serviceInfo.permission)) {
             Slog.w(TAG, name.flattenToShortString() + " does not require permission "
@@ -204,12 +216,40 @@ final class FieldClassificationStrategy {
         }
     }
 
-    void getAvailableAlgorithms(RemoteCallback callback) {
-        connectAndRun((service) -> service.getAvailableAlgorithms(callback));
+    /**
+     * Gets the name of all available algorithms.
+     */
+    @Nullable
+    String[] getAvailableAlgorithms() {
+        return getMetadataValue(METADATA_KEY_AVAILABLE_ALGORITHMS,
+                (res, id) -> res.getStringArray(id));
     }
 
-    void getDefaultAlgorithm(RemoteCallback callback) {
-        connectAndRun((service) -> service.getDefaultAlgorithm(callback));
+    /**
+     * Gets the default algorithm that's used when an algorithm is not specified or is invalid.
+     */
+    @Nullable
+    String getDefaultAlgorithm() {
+        return getMetadataValue(METADATA_KEY_DEFAULT_ALGORITHM, (res, id) -> res.getString(id));
+    }
+
+    @Nullable
+    private <T> T getMetadataValue(String field, MetadataParser<T> parser) {
+        final ServiceInfo serviceInfo = getServiceInfo();
+        if (serviceInfo == null) return null;
+
+        final PackageManager pm = mContext.getPackageManager();
+
+        final Resources res;
+        try {
+            res = pm.getResourcesForApplication(serviceInfo.applicationInfo);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Error getting application resources for " + serviceInfo, e);
+            return null;
+        }
+
+        final int resourceId = serviceInfo.metaData.getInt(field);
+        return parser.get(res, resourceId);
     }
 
     //TODO(b/70291841): rename this method (and all others in the chain) to something like
@@ -237,43 +277,16 @@ final class FieldClassificationStrategy {
         }
         pw.println(impl.flattenToShortString());
 
-        final CountDownLatch latch = new CountDownLatch(2);
-
-        // Lock used to make sure lines don't overlap
-        final Object lock = latch;
-
-        connectAndRun((service) -> service.getAvailableAlgorithms(new RemoteCallback((bundle) -> {
-            synchronized (lock) {
-                pw.print(prefix); pw.print("Available algorithms: ");
-                pw.println(bundle.getStringArrayList(EXTRA_AVAILABLE_ALGORITHMS));
-            }
-            latch.countDown();
-        })));
-
-        connectAndRun((service) -> service.getDefaultAlgorithm(new RemoteCallback((bundle) -> {
-            synchronized (lock) {
-                pw.print(prefix); pw.print("Default algorithm: ");
-                pw.println(bundle.getString(EXTRA_DEFAULT_ALGORITHM));
-            }
-            latch.countDown();
-        })));
-
-        try {
-            if (!latch.await(FC_SERVICE_TIMEOUT, TimeUnit.MILLISECONDS)) {
-                synchronized (lock) {
-                    pw.print(prefix); pw.print("timeout ("); pw.print(FC_SERVICE_TIMEOUT);
-                    pw.println("ms) waiting for service");
-                }
-            }
-        } catch (InterruptedException e) {
-            synchronized (lock) {
-                pw.print(prefix); pw.println("interrupted while waiting for service");
-            }
-            Thread.currentThread().interrupt();
-        }
+        pw.print(prefix); pw.print("Available algorithms: ");
+        pw.println(Arrays.toString(getAvailableAlgorithms()));
+        pw.print(prefix); pw.print("Default algorithm: "); pw.println(getDefaultAlgorithm());
     }
 
-    private interface Command {
+    private static interface Command {
         void run(IAutofillFieldClassificationService service) throws RemoteException;
+    }
+
+    private static interface MetadataParser<T> {
+        T get(Resources res, int resId);
     }
 }

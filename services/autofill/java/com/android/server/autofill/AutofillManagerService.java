@@ -646,37 +646,35 @@ public final class AutofillManagerService extends SystemService {
         }
 
         @Override
-        public void getDefaultFieldClassificationAlgorithm(RemoteCallback callback)
-                throws RemoteException {
+        public String getDefaultFieldClassificationAlgorithm() throws RemoteException {
             final int userId = UserHandle.getCallingUserId();
 
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
-                    service.getDefaultFieldClassificationAlgorithm(getCallingUid(), callback);
+                    return service.getDefaultFieldClassificationAlgorithm(getCallingUid());
                 } else {
                     if (sVerbose) {
                         Slog.v(TAG, "getDefaultFcAlgorithm(): no service for " + userId);
                     }
-                    callback.sendResult(null);
-                }
+                    return null;
+               }
             }
         }
 
         @Override
-        public void getAvailableFieldClassificationAlgorithms(RemoteCallback callback)
-                throws RemoteException {
+        public String[] getAvailableFieldClassificationAlgorithms() throws RemoteException {
             final int userId = UserHandle.getCallingUserId();
 
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
-                    service.getAvailableFieldClassificationAlgorithms(getCallingUid(), callback);
+                    return service.getAvailableFieldClassificationAlgorithms(getCallingUid());
                 } else {
                     if (sVerbose) {
                         Slog.v(TAG, "getAvailableFcAlgorithms(): no service for " + userId);
                     }
-                    callback.sendResult(null);
+                    return null;
                 }
             }
         }
