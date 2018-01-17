@@ -176,11 +176,6 @@ static jobject ImageDecoder_nCreateByteArray(JNIEnv* env, jobject /*clazz*/, jby
     return native_create(env, std::move(stream));
 }
 
-static bool supports_any_down_scale(const SkAndroidCodec* codec) {
-    return codec->getEncodedFormat() == SkEncodedImageFormat::kWEBP;
-}
-
-// This method should never return null. Instead, it should throw an exception.
 static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong nativePtr,
                                           jobject jcallback, jobject jpostProcess,
                                           jint desiredWidth, jint desiredHeight, jobject jsubset,
@@ -189,33 +184,14 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
                                           jboolean asAlphaMask) {
     auto* decoder = reinterpret_cast<ImageDecoder*>(nativePtr);
     SkAndroidCodec* codec = decoder->mCodec.get();
-    SkImageInfo decodeInfo = codec->getInfo();
-    bool scale = false;
-    int sampleSize = 1;
-    if (desiredWidth != decodeInfo.width() || desiredHeight != decodeInfo.height()) {
-        bool match = false;
-        if (desiredWidth < decodeInfo.width() && desiredHeight < decodeInfo.height()) {
-            if (supports_any_down_scale(codec)) {
-                match = true;
-                decodeInfo = decodeInfo.makeWH(desiredWidth, desiredHeight);
-            } else {
-                int sampleX = decodeInfo.width()  / desiredWidth;
-                int sampleY = decodeInfo.height() / desiredHeight;
-                sampleSize = std::min(sampleX, sampleY);
-                SkISize sampledSize = codec->getSampledDimensions(sampleSize);
-                decodeInfo = decodeInfo.makeWH(sampledSize.width(), sampledSize.height());
-                if (decodeInfo.width() == desiredWidth && decodeInfo.height() == desiredHeight) {
-                    match = true;
-                }
-            }
-        }
-        if (!match) {
-            scale = true;
-            if (requireUnpremul && kOpaque_SkAlphaType != decodeInfo.alphaType()) {
-                doThrowISE(env, "Cannot scale unpremultiplied pixels!");
-                return nullptr;
-            }
-        }
+    const SkISize desiredSize = SkISize::Make(desiredWidth, desiredHeight);
+    SkISize decodeSize = desiredSize;
+    const int sampleSize = codec->computeSampleSize(&decodeSize);
+    const bool scale = desiredSize != decodeSize;
+    SkImageInfo decodeInfo = codec->getInfo().makeWH(decodeSize.width(), decodeSize.height());
+    if (scale && requireUnpremul && kOpaque_SkAlphaType != decodeInfo.alphaType()) {
+        doThrowISE(env, "Cannot scale unpremultiplied pixels!");
+        return nullptr;
     }
 
     switch (decodeInfo.alphaType()) {
