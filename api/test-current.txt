@@ -320,9 +320,9 @@ package android.hardware.display {
   }
 
   public static class BrightnessConfiguration.Builder {
-    ctor public BrightnessConfiguration.Builder();
+    ctor public BrightnessConfiguration.Builder(float[], float[]);
     method public android.hardware.display.BrightnessConfiguration build();
-    method public android.hardware.display.BrightnessConfiguration.Builder setCurve(float[], float[]);
+    method public android.hardware.display.BrightnessConfiguration.Builder setDescription(java.lang.String);
   }
 
   public final class DisplayManager {

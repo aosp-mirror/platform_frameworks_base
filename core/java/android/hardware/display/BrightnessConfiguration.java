@@ -16,6 +16,7 @@
 
 package android.hardware.display;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -25,6 +26,7 @@ import android.util.Pair;
 import com.android.internal.util.Preconditions;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /** @hide */
 @SystemApi
@@ -32,10 +34,12 @@ import java.util.Arrays;
 public final class BrightnessConfiguration implements Parcelable {
     private final float[] mLux;
     private final float[] mNits;
+    private final String mDescription;
 
-    private BrightnessConfiguration(float[] lux, float[] nits) {
+    private BrightnessConfiguration(float[] lux, float[] nits, String description) {
         mLux = lux;
         mNits = nits;
+        mDescription = description;
     }
 
     /**
@@ -51,10 +55,19 @@ public final class BrightnessConfiguration implements Parcelable {
         return Pair.create(Arrays.copyOf(mLux, mLux.length), Arrays.copyOf(mNits, mNits.length));
     }
 
+    /**
+     * Returns description string.
+     * @hide
+     */
+    public String getDescription() {
+        return mDescription;
+    }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeFloatArray(mLux);
         dest.writeFloatArray(mNits);
+        dest.writeString(mDescription);
     }
 
     @Override
@@ -72,7 +85,9 @@ public final class BrightnessConfiguration implements Parcelable {
             }
             sb.append("(").append(mLux[i]).append(", ").append(mNits[i]).append(")");
         }
-        sb.append("]}");
+        sb.append("], '");
+        sb.append(mDescription);
+        sb.append("'}");
         return sb.toString();
     }
 
@@ -81,6 +96,7 @@ public final class BrightnessConfiguration implements Parcelable {
         int result = 1;
         result = result * 31 + Arrays.hashCode(mLux);
         result = result * 31 + Arrays.hashCode(mNits);
+        result = result * 31 + mDescription.hashCode();
         return result;
     }
 
@@ -93,16 +109,17 @@ public final class BrightnessConfiguration implements Parcelable {
             return false;
         }
         final BrightnessConfiguration other = (BrightnessConfiguration) o;
-        return Arrays.equals(mLux, other.mLux) && Arrays.equals(mNits, other.mNits);
+        return Arrays.equals(mLux, other.mLux) && Arrays.equals(mNits, other.mNits)
+                && Objects.equals(mDescription, other.mDescription);
     }
 
     public static final Creator<BrightnessConfiguration> CREATOR =
             new Creator<BrightnessConfiguration>() {
         public BrightnessConfiguration createFromParcel(Parcel in) {
-            Builder builder = new Builder();
             float[] lux = in.createFloatArray();
             float[] nits = in.createFloatArray();
-            builder.setCurve(lux, nits);
+            Builder builder = new Builder(lux, nits);
+            builder.setDescription(in.readString());
             return builder.build();
         }
 
@@ -117,6 +134,29 @@ public final class BrightnessConfiguration implements Parcelable {
     public static class Builder {
         private float[] mCurveLux;
         private float[] mCurveNits;
+        private String mDescription;
+
+        /**
+         * STOPSHIP remove when app has stopped using this.
+         * @hide
+         */
+        public Builder() {
+        }
+
+        /**
+         * Constructs the builder with the control points for the brightness curve.
+         *
+         * Brightness curves must have strictly increasing ambient brightness values in lux and
+         * monotonically increasing display brightness values in nits. In addition, the initial
+         * control point must be 0 lux.
+         *
+         * @throws IllegalArgumentException if the initial control point is not at 0 lux.
+         * @throws IllegalArgumentException if the lux levels are not strictly increasing.
+         * @throws IllegalArgumentException if the nit levels are not monotonically increasing.
+         */
+        public Builder(float[] lux, float[] nits) {
+            setCurve(lux, nits);
+        }
 
         /**
          * Sets the control points for the brightness curve.
@@ -128,6 +168,9 @@ public final class BrightnessConfiguration implements Parcelable {
          * @throws IllegalArgumentException if the initial control point is not at 0 lux.
          * @throws IllegalArgumentException if the lux levels are not strictly increasing.
          * @throws IllegalArgumentException if the nit levels are not monotonically increasing.
+         *
+         * STOPSHIP remove when app has stopped using this.
+         * @hide
          */
         public Builder setCurve(float[] lux, float[] nits) {
             Preconditions.checkNotNull(lux);
@@ -151,6 +194,17 @@ public final class BrightnessConfiguration implements Parcelable {
         }
 
         /**
+         * Set description of the brightness curve.
+         *
+         * @param description brief text describing the curve pushed. It maybe truncated
+         *                    and will not be displayed in the UI
+         */
+        public Builder setDescription(@Nullable String description) {
+            mDescription = description;
+            return this;
+        }
+
+        /**
          * Builds the {@link BrightnessConfiguration}.
          *
          * A brightness curve <b>must</b> be set before calling this.
@@ -159,7 +213,7 @@ public final class BrightnessConfiguration implements Parcelable {
             if (mCurveLux == null || mCurveNits == null) {
                 throw new IllegalStateException("A curve must be set!");
             }
-            return new BrightnessConfiguration(mCurveLux, mCurveNits);
+            return new BrightnessConfiguration(mCurveLux, mCurveNits, mDescription);
         }
 
         private static void checkMonotonic(float[] vals, boolean strictlyIncreasing, String name) {

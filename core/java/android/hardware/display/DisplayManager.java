@@ -639,7 +639,7 @@ public final class DisplayManager {
     @TestApi
     @RequiresPermission(Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS)
     public void setBrightnessConfiguration(BrightnessConfiguration c) {
-        setBrightnessConfigurationForUser(c, UserHandle.myUserId());
+        setBrightnessConfigurationForUser(c, UserHandle.myUserId(), mContext.getPackageName());
     }
 
     /**
@@ -650,8 +650,9 @@ public final class DisplayManager {
      *
      * @hide
      */
-    public void setBrightnessConfigurationForUser(BrightnessConfiguration c, int userId) {
-        mGlobal.setBrightnessConfigurationForUser(c, userId);
+    public void setBrightnessConfigurationForUser(BrightnessConfiguration c, int userId,
+            String packageName) {
+        mGlobal.setBrightnessConfigurationForUser(c, userId, packageName);
     }
 
     /**
