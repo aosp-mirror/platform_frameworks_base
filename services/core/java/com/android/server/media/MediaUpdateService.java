@@ -53,8 +53,13 @@ public class MediaUpdateService extends SystemService {
 
     @Override
     public void onStart() {
-        connect();
-        registerBroadcastReceiver();
+        // TODO: Uncomment below once sepolicy change is landed.
+        /*
+        if ("userdebug".equals(android.os.Build.TYPE) || "eng".equals(android.os.Build.TYPE)) {
+            connect();
+            registerBroadcastReceiver();
+        }
+        */
     }
 
     private void connect() {
