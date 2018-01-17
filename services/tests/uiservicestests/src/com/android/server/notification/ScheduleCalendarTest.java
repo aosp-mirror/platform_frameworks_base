@@ -48,7 +48,6 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
         mScheduleCalendar = new ScheduleCalendar();
         mScheduleInfo = new ZenModeConfig.ScheduleInfo();
         mScheduleInfo.days = new int[] {1, 2, 3, 4, 5};
-        mScheduleCalendar.setSchedule(mScheduleInfo);
     }
 
     @Test
@@ -100,6 +99,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
         mScheduleInfo.startMinute = 15;
         mScheduleInfo.endMinute = 15;
         mScheduleInfo.exitAtAlarm = false;
+        mScheduleCalendar.setSchedule(mScheduleInfo);
 
         Calendar expected = new GregorianCalendar();
         expected.setTimeInMillis(cal.getTimeInMillis());
@@ -126,6 +126,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
         mScheduleInfo.startMinute = 15;
         mScheduleInfo.endMinute = 15;
         mScheduleInfo.exitAtAlarm = false;
+        mScheduleCalendar.setSchedule(mScheduleInfo);
 
         Calendar expected = new GregorianCalendar();
         expected.setTimeInMillis(cal.getTimeInMillis());
@@ -153,6 +154,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
         mScheduleInfo.startMinute = 15;
         mScheduleInfo.endMinute = 15;
         mScheduleInfo.exitAtAlarm = false;
+        mScheduleCalendar.setSchedule(mScheduleInfo);
 
         Calendar expected = new GregorianCalendar();
         expected.setTimeInMillis(cal.getTimeInMillis());
@@ -171,6 +173,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
     public void testShouldExitForAlarm_settingOff() {
         mScheduleInfo.exitAtAlarm = false;
         mScheduleInfo.nextAlarm = 1000;
+        mScheduleCalendar.setSchedule(mScheduleInfo);
 
         assertFalse(mScheduleCalendar.shouldExitForAlarm(1000));
     }
@@ -179,6 +182,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
     public void testShouldExitForAlarm_beforeAlarm() {
         mScheduleInfo.exitAtAlarm = true;
         mScheduleInfo.nextAlarm = 1000;
+        mScheduleCalendar.setSchedule(mScheduleInfo);
 
         assertFalse(mScheduleCalendar.shouldExitForAlarm(999));
     }
@@ -187,6 +191,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
     public void testShouldExitForAlarm_noAlarm() {
         mScheduleInfo.exitAtAlarm = true;
         mScheduleInfo.nextAlarm = 0;
+        mScheduleCalendar.setSchedule(mScheduleInfo);
 
         assertFalse(mScheduleCalendar.shouldExitForAlarm(999));
     }
@@ -195,6 +200,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
     public void testShouldExitForAlarm() {
         mScheduleInfo.exitAtAlarm = true;
         mScheduleInfo.nextAlarm = 1000;
+        mScheduleCalendar.setSchedule(mScheduleInfo);
 
         assertTrue(mScheduleCalendar.shouldExitForAlarm(1000));
     }
@@ -203,6 +209,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
     public void testMaybeSetNextAlarm_settingOff() {
         mScheduleInfo.exitAtAlarm = false;
         mScheduleInfo.nextAlarm = 0;
+        mScheduleCalendar.setSchedule(mScheduleInfo);
 
         mScheduleCalendar.maybeSetNextAlarm(1000, 2000);
 
@@ -213,6 +220,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
     public void testMaybeSetNextAlarm_settingOn() {
         mScheduleInfo.exitAtAlarm = true;
         mScheduleInfo.nextAlarm = 0;
+        mScheduleCalendar.setSchedule(mScheduleInfo);
 
         mScheduleCalendar.maybeSetNextAlarm(1000, 2000);
 
@@ -223,6 +231,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
     public void testMaybeSetNextAlarm_alarmCanceled() {
         mScheduleInfo.exitAtAlarm = true;
         mScheduleInfo.nextAlarm = 10000;
+        mScheduleCalendar.setSchedule(mScheduleInfo);
 
         mScheduleCalendar.maybeSetNextAlarm(1000, 0);
 
@@ -233,6 +242,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
     public void testMaybeSetNextAlarm_earlierAlarm() {
         mScheduleInfo.exitAtAlarm = true;
         mScheduleInfo.nextAlarm = 2000;
+        mScheduleCalendar.setSchedule(mScheduleInfo);
 
         mScheduleCalendar.maybeSetNextAlarm(1000, 1500);
 
@@ -242,6 +252,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
     @Test
     public void testMaybeSetNextAlarm_laterAlarm() {
         mScheduleInfo.exitAtAlarm = true;
+        mScheduleCalendar.setSchedule(mScheduleInfo);
         mScheduleInfo.nextAlarm = 2000;
 
         mScheduleCalendar.maybeSetNextAlarm(1000, 3000);
@@ -253,6 +264,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
     public void testMaybeSetNextAlarm_expiredAlarm() {
         mScheduleInfo.exitAtAlarm = true;
         mScheduleInfo.nextAlarm = 998;
+        mScheduleCalendar.setSchedule(mScheduleInfo);
 
         mScheduleCalendar.maybeSetNextAlarm(1000, 999);
 
@@ -272,6 +284,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
         mScheduleInfo.endHour = 3;
         mScheduleInfo.startMinute = 15;
         mScheduleInfo.endMinute = 15;
+        mScheduleCalendar.setSchedule(mScheduleInfo);
 
         assertTrue(mScheduleCalendar.isInSchedule(cal.getTimeInMillis()));
     }
@@ -289,6 +302,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
         mScheduleInfo.endHour = 3;
         mScheduleInfo.startMinute = 16;
         mScheduleInfo.endMinute = 15;
+        mScheduleCalendar.setSchedule(mScheduleInfo);
 
         assertTrue(mScheduleCalendar.isInSchedule(cal.getTimeInMillis()));
     }
@@ -306,6 +320,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
         mScheduleInfo.startMinute = 16;
         mScheduleInfo.endHour = 15;
         mScheduleInfo.endMinute = 15;
+        mScheduleCalendar.setSchedule(mScheduleInfo);
 
         assertFalse(mScheduleCalendar.isInSchedule(cal.getTimeInMillis()));
     }
@@ -322,6 +337,7 @@ public class ScheduleCalendarTest extends UiServiceTestCase {
         mScheduleInfo.endHour = 3;
         mScheduleInfo.startMinute = 16;
         mScheduleInfo.endMinute = 15;
+        mScheduleCalendar.setSchedule(mScheduleInfo);
 
         assertFalse(mScheduleCalendar.isInSchedule(cal.getTimeInMillis()));
     }
