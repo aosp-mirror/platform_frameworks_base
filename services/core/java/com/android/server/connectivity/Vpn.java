@@ -18,6 +18,7 @@ package com.android.server.connectivity;
 
 import static android.Manifest.permission.BIND_VPN_SERVICE;
 import static android.net.ConnectivityManager.NETID_UNSET;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.RouteInfo.RTN_THROW;
@@ -297,11 +298,13 @@ public class Vpn {
         int upKbps = NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
         boolean metered = false;
         boolean roaming = false;
+        boolean congested = false;
 
         if (ArrayUtils.isEmpty(underlyingNetworks)) {
             // No idea what the underlying networks are; assume sane defaults
             metered = true;
             roaming = false;
+            congested = false;
         } else {
             for (Network underlying : underlyingNetworks) {
                 final NetworkCapabilities underlyingCaps = cm.getNetworkCapabilities(underlying);
@@ -317,22 +320,16 @@ public class Vpn {
                         underlyingCaps.getLinkUpstreamBandwidthKbps());
                 metered |= !underlyingCaps.hasCapability(NET_CAPABILITY_NOT_METERED);
                 roaming |= !underlyingCaps.hasCapability(NET_CAPABILITY_NOT_ROAMING);
+                congested |= !underlyingCaps.hasCapability(NET_CAPABILITY_NOT_CONGESTED);
             }
         }
 
         caps.setTransportTypes(transportTypes);
         caps.setLinkDownstreamBandwidthKbps(downKbps);
         caps.setLinkUpstreamBandwidthKbps(upKbps);
-        if (metered) {
-            caps.removeCapability(NET_CAPABILITY_NOT_METERED);
-        } else {
-            caps.addCapability(NET_CAPABILITY_NOT_METERED);
-        }
-        if (roaming) {
-            caps.removeCapability(NET_CAPABILITY_NOT_ROAMING);
-        } else {
-            caps.addCapability(NET_CAPABILITY_NOT_ROAMING);
-        }
+        caps.setCapability(NET_CAPABILITY_NOT_METERED, !metered);
+        caps.setCapability(NET_CAPABILITY_NOT_ROAMING, !roaming);
+        caps.setCapability(NET_CAPABILITY_NOT_CONGESTED, !congested);
     }
 
     /**
