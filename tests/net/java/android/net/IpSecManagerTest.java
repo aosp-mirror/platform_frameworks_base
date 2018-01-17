@@ -81,15 +81,13 @@ public class IpSecManagerTest {
         IpSecSpiResponse spiResp =
                 new IpSecSpiResponse(IpSecManager.Status.OK, resourceId, DROID_SPI);
         when(mMockIpSecService.allocateSecurityParameterIndex(
-                        eq(IpSecTransform.DIRECTION_IN),
                         eq(GOOGLE_DNS_4.getHostAddress()),
                         eq(DROID_SPI),
                         anyObject()))
                 .thenReturn(spiResp);
 
         IpSecManager.SecurityParameterIndex droidSpi =
-                mIpSecManager.allocateSecurityParameterIndex(
-                        IpSecTransform.DIRECTION_IN, GOOGLE_DNS_4, DROID_SPI);
+                mIpSecManager.allocateSecurityParameterIndex(GOOGLE_DNS_4, DROID_SPI);
         assertEquals(DROID_SPI, droidSpi.getSpi());
 
         droidSpi.close();
@@ -103,15 +101,13 @@ public class IpSecManagerTest {
         IpSecSpiResponse spiResp =
                 new IpSecSpiResponse(IpSecManager.Status.OK, resourceId, DROID_SPI);
         when(mMockIpSecService.allocateSecurityParameterIndex(
-                        eq(IpSecTransform.DIRECTION_OUT),
                         eq(GOOGLE_DNS_4.getHostAddress()),
                         eq(IpSecManager.INVALID_SECURITY_PARAMETER_INDEX),
                         anyObject()))
                 .thenReturn(spiResp);
 
         IpSecManager.SecurityParameterIndex randomSpi =
-                mIpSecManager.allocateSecurityParameterIndex(
-                        IpSecTransform.DIRECTION_OUT, GOOGLE_DNS_4);
+                mIpSecManager.allocateSecurityParameterIndex(GOOGLE_DNS_4);
 
         assertEquals(DROID_SPI, randomSpi.getSpi());
 
@@ -124,16 +120,15 @@ public class IpSecManagerTest {
      * Throws resource unavailable exception
      */
     @Test
-    public void testAllocSpiResUnavaiableExeption() throws Exception {
+    public void testAllocSpiResUnavailableException() throws Exception {
         IpSecSpiResponse spiResp =
                 new IpSecSpiResponse(IpSecManager.Status.RESOURCE_UNAVAILABLE, 0, 0);
         when(mMockIpSecService.allocateSecurityParameterIndex(
-                        anyInt(), anyString(), anyInt(), anyObject()))
+                        anyString(), anyInt(), anyObject()))
                 .thenReturn(spiResp);
 
         try {
-            mIpSecManager.allocateSecurityParameterIndex(
-                    IpSecTransform.DIRECTION_OUT, GOOGLE_DNS_4);
+            mIpSecManager.allocateSecurityParameterIndex(GOOGLE_DNS_4);
             fail("ResourceUnavailableException was not thrown");
         } catch (IpSecManager.ResourceUnavailableException e) {
         }
@@ -143,15 +138,14 @@ public class IpSecManagerTest {
      * Throws spi unavailable exception
      */
     @Test
-    public void testAllocSpiSpiUnavaiableExeption() throws Exception {
+    public void testAllocSpiSpiUnavailableException() throws Exception {
         IpSecSpiResponse spiResp = new IpSecSpiResponse(IpSecManager.Status.SPI_UNAVAILABLE, 0, 0);
         when(mMockIpSecService.allocateSecurityParameterIndex(
-                        anyInt(), anyString(), anyInt(), anyObject()))
+                        anyString(), anyInt(), anyObject()))
                 .thenReturn(spiResp);
 
         try {
-            mIpSecManager.allocateSecurityParameterIndex(
-                    IpSecTransform.DIRECTION_OUT, GOOGLE_DNS_4);
+            mIpSecManager.allocateSecurityParameterIndex(GOOGLE_DNS_4);
             fail("ResourceUnavailableException was not thrown");
         } catch (IpSecManager.ResourceUnavailableException e) {
         }
@@ -163,8 +157,7 @@ public class IpSecManagerTest {
     @Test
     public void testRequestAllocInvalidSpi() throws Exception {
         try {
-            mIpSecManager.allocateSecurityParameterIndex(
-                    IpSecTransform.DIRECTION_OUT, GOOGLE_DNS_4, 0);
+            mIpSecManager.allocateSecurityParameterIndex(GOOGLE_DNS_4, 0);
             fail("Able to allocate invalid spi");
         } catch (IllegalArgumentException e) {
         }
