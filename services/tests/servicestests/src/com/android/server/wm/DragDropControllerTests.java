@@ -16,27 +16,38 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import android.content.ClipData;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.UserHandle;
+import android.os.UserManagerInternal;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.InputChannel;
 import android.view.Surface;
 import android.view.SurfaceSession;
+import android.view.View;
+import com.android.internal.annotations.GuardedBy;
+import com.android.server.LocalServices;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 /**
  * Tests for the {@link DragDropController} class.
  *
@@ -46,36 +57,92 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 @Presubmit
 public class DragDropControllerTests extends WindowTestsBase {
-    private static final int TIMEOUT_MS = 1000;
-    private DragDropController mTarget;
+    private static final int TIMEOUT_MS = 3000;
+    private TestDragDropController mTarget;
     private WindowState mWindow;
     private IBinder mToken;
 
+    static class TestDragDropController extends DragDropController {
+        @GuardedBy("sWm.mWindowMap")
+        private Runnable mCloseCallback;
+
+        TestDragDropController(WindowManagerService service, Looper looper) {
+            super(service, looper);
+        }
+
+        void setOnClosedCallbackLocked(Runnable runnable) {
+            assertTrue(dragDropActiveLocked());
+            mCloseCallback = runnable;
+        }
+
+        @Override
+        void onDragStateClosedLocked(DragState dragState) {
+            super.onDragStateClosedLocked(dragState);
+            if (mCloseCallback != null) {
+                mCloseCallback.run();
+                mCloseCallback = null;
+            }
+        }
+    }
+
+    /**
+     * Creates a window state which can be used as a drop target.
+     */
+    private WindowState createDropTargetWindow(String name, int ownerId) {
+        final WindowTestUtils.TestAppWindowToken token = new WindowTestUtils.TestAppWindowToken(
+                mDisplayContent);
+        final TaskStack stack = createStackControllerOnStackOnDisplay(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, mDisplayContent).mContainer;
+        final Task task = createTaskInStack(stack, ownerId);
+        task.addChild(token, 0);
+
+        final WindowState window = createWindow(
+                null, TYPE_BASE_APPLICATION, token, name, ownerId, false);
+        window.mInputChannel = new InputChannel();
+        window.mHasSurface = true;
+        return window;
+    }
+
     @Before
     public void setUp() throws Exception {
+        final UserManagerInternal userManager = mock(UserManagerInternal.class);
+        LocalServices.addService(UserManagerInternal.class, userManager);
+
         super.setUp();
-        assertNotNull(sWm.mDragDropController);
-        mTarget = sWm.mDragDropController;
-        mWindow = createWindow(null, TYPE_BASE_APPLICATION, "window");
+
+        mTarget = new TestDragDropController(sWm, sWm.mH.getLooper());
+        mDisplayContent = spy(mDisplayContent);
+        mWindow = createDropTargetWindow("Drag test window", 0);
+        when(mDisplayContent.getTouchableWinAtPointLocked(0, 0)).thenReturn(mWindow);
+        when(sWm.mInputManager.transferTouchFocus(any(), any())).thenReturn(true);
+
         synchronized (sWm.mWindowMap) {
-            // Because sWm is a static object, the previous operation may remain.
-            assertFalse(mTarget.dragDropActiveLocked());
+            sWm.mWindowMap.put(mWindow.mClient.asBinder(), mWindow);
         }
     }
 
     @After
-    public void tearDown() {
-        if (mToken != null) {
-            mTarget.cancelDragAndDrop(mToken);
+    public void tearDown() throws Exception {
+        LocalServices.removeServiceForTest(UserManagerInternal.class);
+        final CountDownLatch latch;
+        synchronized (sWm.mWindowMap) {
+            if (!mTarget.dragDropActiveLocked()) {
+                return;
+            }
+            if (mToken != null) {
+                mTarget.cancelDragAndDrop(mToken);
+            }
+            latch = new CountDownLatch(1);
+            mTarget.setOnClosedCallbackLocked(() -> {
+                latch.countDown();
+            });
         }
+        assertTrue(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
     }
 
     @Test
-    public void testPrepareDrag() throws Exception {
-        final Surface surface = new Surface();
-        mToken = mTarget.prepareDrag(
-                new SurfaceSession(), 0, 0, mWindow.mClient, 0, 100, 100, surface);
-        assertNotNull(mToken);
+    public void testDragFlow() throws Exception {
+        dragFlow(0, ClipData.newPlainText("label", "Test"), 0, 0);
     }
 
     @Test
@@ -84,5 +151,34 @@ public class DragDropControllerTests extends WindowTestsBase {
         mToken = mTarget.prepareDrag(
                 new SurfaceSession(), 0, 0, mWindow.mClient, 0, 0, 0, surface);
         assertNull(mToken);
+    }
+
+    @Test
+    public void testPerformDrag_NullDataWithGrantUri() throws Exception {
+        dragFlow(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ, null, 0, 0);
+    }
+
+    @Test
+    public void testPerformDrag_NullDataToOtherUser() throws Exception {
+        final WindowState otherUsersWindow =
+                createDropTargetWindow("Other user's window", 1 * UserHandle.PER_USER_RANGE);
+        when(mDisplayContent.getTouchableWinAtPointLocked(10, 10))
+                .thenReturn(otherUsersWindow);
+
+        dragFlow(0, null, 10, 10);
+    }
+
+    private void dragFlow(int flag, ClipData data, float dropX, float dropY) {
+        final Surface surface = new Surface();
+        mToken = mTarget.prepareDrag(
+                new SurfaceSession(), 0, 0, mWindow.mClient, flag, 100, 100, surface);
+        assertNotNull(mToken);
+
+        assertTrue(sWm.mInputManager.transferTouchFocus(null, null));
+        assertTrue(mTarget.performDrag(
+                mWindow.mClient, mToken, 0, 0, 0, 0, 0, data));
+
+        mTarget.handleMotionEvent(false, dropX, dropY);
+        mToken = mWindow.mClient.asBinder();
     }
 }
