@@ -91,6 +91,16 @@ public class RecoverySessionStorage implements Destroyable {
     }
 
     /**
+     * Deletes the session with {@code sessionId} created by app with {@code uid}.
+     */
+    public void remove(int uid, String sessionId) {
+        if (mSessionsByUid.get(uid) == null) {
+            return;
+        }
+        mSessionsByUid.get(uid).removeIf(session -> session.mSessionId.equals(sessionId));
+    }
+
+    /**
      * Returns the total count of pending sessions.
      *
      * @hide

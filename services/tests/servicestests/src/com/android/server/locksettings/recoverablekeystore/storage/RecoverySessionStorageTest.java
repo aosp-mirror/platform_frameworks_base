@@ -19,6 +19,8 @@ package com.android.server.locksettings.recoverablekeystore.storage;
 import static junit.framework.Assert.fail;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -85,6 +87,45 @@ public class RecoverySessionStorageTest {
         storage.remove(TEST_USER_ID);
 
         assertZeroedOut(entry.getKeyClaimant());
+    }
+
+    @Test
+    public void remove_deletesSpecificSession() {
+        RecoverySessionStorage storage = new RecoverySessionStorage();
+        storage.add(TEST_USER_ID, new RecoverySessionStorage.Entry(
+                TEST_SESSION_ID,
+                lskfHashFixture(),
+                keyClaimantFixture(),
+                vaultParamsFixture()));
+        storage.add(TEST_USER_ID, new RecoverySessionStorage.Entry(
+                "some other session",
+                lskfHashFixture(),
+                keyClaimantFixture(),
+                vaultParamsFixture()));
+
+        storage.remove(TEST_USER_ID, TEST_SESSION_ID);
+
+        assertNull(storage.get(TEST_USER_ID, TEST_SESSION_ID));
+    }
+
+    @Test
+    public void remove_doesNotDeleteOtherSessions() {
+        String otherSessionId = "some other session";
+        RecoverySessionStorage storage = new RecoverySessionStorage();
+        storage.add(TEST_USER_ID, new RecoverySessionStorage.Entry(
+                TEST_SESSION_ID,
+                lskfHashFixture(),
+                keyClaimantFixture(),
+                vaultParamsFixture()));
+        storage.add(TEST_USER_ID, new RecoverySessionStorage.Entry(
+                otherSessionId,
+                lskfHashFixture(),
+                keyClaimantFixture(),
+                vaultParamsFixture()));
+
+        storage.remove(TEST_USER_ID, TEST_SESSION_ID);
+
+        assertNotNull(storage.get(TEST_USER_ID, TEST_SESSION_ID));
     }
 
     @Test

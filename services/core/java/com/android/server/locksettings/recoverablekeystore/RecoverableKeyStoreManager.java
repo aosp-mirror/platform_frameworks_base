@@ -434,6 +434,13 @@ public class RecoverableKeyStoreManager {
         }
     }
 
+    /**
+     * Destroys the session with the given {@code sessionId}.
+     */
+    public void closeSession(@NonNull String sessionId) throws RemoteException {
+        mRecoverySessionStorage.remove(Binder.getCallingUid(), sessionId);
+    }
+
     public void removeKey(@NonNull String alias) throws RemoteException {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();

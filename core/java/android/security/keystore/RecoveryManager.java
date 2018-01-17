@@ -23,6 +23,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
+import android.util.Log;
 
 import com.android.internal.widget.ILockSettings;
 
@@ -36,6 +37,7 @@ import java.util.Map;
  * @hide
  */
 public class RecoveryManager {
+    private static final String TAG = "RecoveryController";
 
     /** Key has been successfully synced. */
     public static final int RECOVERY_STATUS_SYNCED = 0;
@@ -371,7 +373,6 @@ public class RecoveryManager {
      * The method generates symmetric key for a session, which trusted remote device can use to
      * return recovery key.
      *
-     * @param sessionId ID for recovery session.
      * @param verifierPublicKey Encoded {@code java.security.cert.X509Certificate} with Public key
      * used to create the recovery blob on the source device.
      * Keystore will verify the certificate using root of trust.
@@ -380,30 +381,31 @@ public class RecoveryManager {
      * @param vaultChallenge Data passed from server for this recovery session and used to prevent
      *     replay attacks
      * @param secrets Secrets provided by user, the method only uses type and secret fields.
-     * @return Binary blob with recovery claim. It is encrypted with verifierPublicKey and contains
-     *     a proof of user secrets, session symmetric key and parameters necessary to identify the
-     *     counter with the number of failed recovery attempts.
+     * @return The recovery claim. Claim provides a binary blob with recovery claim. It is
+     *     encrypted with verifierPublicKey and contains a proof of user secrets, session symmetric
+     *     key and parameters necessary to identify the counter with the number of failed recovery
+     *     attempts.
      * @throws BadCertificateFormatException if the {@code verifierPublicKey} is in an incorrect
      *     format.
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
      */
-    public @NonNull byte[] startRecoverySession(
-            @NonNull String sessionId,
+    @NonNull public RecoveryClaim startRecoverySession(
             @NonNull byte[] verifierPublicKey,
             @NonNull byte[] vaultParams,
             @NonNull byte[] vaultChallenge,
             @NonNull List<KeychainProtectionParameter> secrets)
             throws BadCertificateFormatException, InternalRecoveryServiceException {
         try {
+            RecoverySession recoverySession = RecoverySession.newInstance(this);
             byte[] recoveryClaim =
                     mBinder.startRecoverySession(
-                            sessionId,
+                            recoverySession.getSessionId(),
                             verifierPublicKey,
                             vaultParams,
                             vaultChallenge,
                             secrets);
-            return recoveryClaim;
+            return new RecoveryClaim(recoverySession, recoveryClaim);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
@@ -417,8 +419,8 @@ public class RecoveryManager {
     /**
      * Imports keys.
      *
-     * @param sessionId Id for recovery session, same as in
-     *     {@link #startRecoverySession(String, byte[], byte[], byte[], List)}.
+     * @param session Related recovery session, as originally created by invoking
+     *        {@link #startRecoverySession(byte[], byte[], byte[], List)}.
      * @param recoveryKeyBlob Recovery blob encrypted by symmetric key generated for this session.
      * @param applicationKeys Application keys. Key material can be decrypted using recoveryKeyBlob
      *     and session. KeyStore only uses package names from the application info in {@link
@@ -429,14 +431,14 @@ public class RecoveryManager {
      * @throws InternalRecoveryServiceException if an error occurs internal to the recovery service.
      */
     public Map<String, byte[]> recoverKeys(
-            @NonNull String sessionId,
+            @NonNull RecoverySession session,
             @NonNull byte[] recoveryKeyBlob,
             @NonNull List<WrappedApplicationKey> applicationKeys)
             throws SessionExpiredException, DecryptionFailedException,
             InternalRecoveryServiceException {
         try {
             return (Map<String, byte[]>) mBinder.recoverKeys(
-                    sessionId, recoveryKeyBlob, applicationKeys);
+                    session.getSessionId(), recoveryKeyBlob, applicationKeys);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
@@ -447,6 +449,20 @@ public class RecoveryManager {
                 throw new SessionExpiredException(e.getMessage());
             }
             throw wrapUnexpectedServiceSpecificException(e);
+        }
+    }
+
+    /**
+     * Deletes all data associated with {@code session}. Should not be invoked directly but via
+     * {@link RecoverySession#close()}.
+     *
+     * @hide
+     */
+    void closeSession(RecoverySession session) {
+        try {
+            mBinder.closeSession(session.getSessionId());
+        } catch (RemoteException | ServiceSpecificException e) {
+            Log.e(TAG, "Unexpected error trying to close session", e);
         }
     }
 
