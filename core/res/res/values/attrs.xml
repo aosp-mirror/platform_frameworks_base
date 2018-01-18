@@ -6336,6 +6336,17 @@
         <attr name="toAlpha" format="float" />
     </declare-styleable>
 
+    <declare-styleable name="ClipRectAnimation">
+        <attr name="fromLeft" format="fraction" />
+        <attr name="fromTop" format="fraction" />
+        <attr name="fromRight" format="fraction" />
+        <attr name="fromBottom" format="fraction" />
+        <attr name="toLeft" format="fraction" />
+        <attr name="toTop" format="fraction" />
+        <attr name="toRight" format="fraction" />
+        <attr name="toBottom" format="fraction" />
+    </declare-styleable>
+
     <declare-styleable name="LayoutAnimation">
         <!-- Fraction of the animation duration used to delay the beginning of
          the animation of each child. -->
