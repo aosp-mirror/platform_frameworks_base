@@ -26,12 +26,14 @@ import static com.android.server.autofill.Helper.sVerbose;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -43,6 +45,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.service.autofill.AutofillService;
@@ -67,6 +70,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.HandlerCaller;
+import com.android.server.LocalServices;
 import com.android.server.autofill.ui.AutoFillUI;
 
 import java.io.PrintWriter;
@@ -279,7 +283,7 @@ final class AutofillManagerServiceImpl {
     int startSessionLocked(@NonNull IBinder activityToken, int uid,
             @NonNull IBinder appCallbackToken, @NonNull AutofillId autofillId,
             @NonNull Rect virtualBounds, @Nullable AutofillValue value, boolean hasCallback,
-            int flags, @NonNull String packageName) {
+            int flags, @NonNull ComponentName componentName) {
         if (!isEnabled()) {
             return 0;
         }
@@ -289,7 +293,7 @@ final class AutofillManagerServiceImpl {
         pruneAbandonedSessionsLocked();
 
         final Session newSession = createSessionByTokenLocked(activityToken, uid, appCallbackToken,
-                hasCallback, packageName);
+                hasCallback, componentName);
         if (newSession == null) {
             return NO_SESSION;
         }
@@ -386,7 +390,8 @@ final class AutofillManagerServiceImpl {
     }
 
     private Session createSessionByTokenLocked(@NonNull IBinder activityToken, int uid,
-            @NonNull IBinder appCallbackToken, boolean hasCallback, @NonNull String packageName) {
+            @NonNull IBinder appCallbackToken, boolean hasCallback,
+            @NonNull ComponentName componentName) {
         // use random ids so that one app cannot know that another app creates sessions
         int sessionId;
         int tries = 0;
@@ -400,12 +405,42 @@ final class AutofillManagerServiceImpl {
             sessionId = sRandom.nextInt();
         } while (sessionId == NO_SESSION || mSessions.indexOfKey(sessionId) >= 0);
 
+        assertCallerLocked(componentName);
+
         final Session newSession = new Session(this, mUi, mContext, mHandlerCaller, mUserId, mLock,
                 sessionId, uid, activityToken, appCallbackToken, hasCallback,
-                mUiLatencyHistory, mInfo.getServiceInfo().getComponentName(), packageName);
+                mUiLatencyHistory, mInfo.getServiceInfo().getComponentName(), componentName);
         mSessions.put(newSession.id, newSession);
 
         return newSession;
+    }
+
+    /**
+     * Asserts the component is owned by the caller.
+     */
+    private void assertCallerLocked(@NonNull ComponentName componentName) {
+        final String packageName = componentName.getPackageName();
+        final PackageManager pm = mContext.getPackageManager();
+        final int callingUid = Binder.getCallingUid();
+        final int packageUid;
+        try {
+            packageUid = pm.getPackageUidAsUser(packageName, UserHandle.getCallingUserId());
+        } catch (NameNotFoundException e) {
+            throw new SecurityException("Could not verify UID for " + componentName);
+        }
+        if (callingUid != packageUid && !LocalServices.getService(ActivityManagerInternal.class)
+                .hasRunningActivity(callingUid, packageName)) {
+            final String[] packages = pm.getPackagesForUid(callingUid);
+            final String callingPackage = packages != null ? packages[0] : "uid-" + callingUid;
+            Slog.w(TAG, "App (package=" + callingPackage + ", UID=" + callingUid
+                    + ") passed component (" + componentName + ") owned by UID " + packageUid);
+            mMetricsLogger.write(new LogMaker(MetricsEvent.AUTOFILL_FORGED_COMPONENT_ATTEMPT)
+                    .setPackageName(callingPackage)
+                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, getServicePackageName())
+                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_FORGED_COMPONENT_NAME,
+                            componentName == null ? "null" : componentName.flattenToShortString()));
+            throw new SecurityException("Invalid component: " + componentName);
+        }
     }
 
     /**

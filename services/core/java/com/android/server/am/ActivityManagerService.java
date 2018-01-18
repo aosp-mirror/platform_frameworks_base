@@ -24248,6 +24248,26 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         }
+
+        @Override
+        public boolean hasRunningActivity(int uid, @Nullable String packageName) {
+            if (packageName == null) return false;
+
+            synchronized (ActivityManagerService.this) {
+                for (int i = 0; i < mLruProcesses.size(); i++) {
+                    final ProcessRecord processRecord = mLruProcesses.get(i);
+                    if (processRecord.uid == uid) {
+                        for (int j = 0; j < processRecord.activities.size(); j++) {
+                            final ActivityRecord activityRecord = processRecord.activities.get(j);
+                            if (packageName.equals(activityRecord.packageName)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
     }
 
     /**

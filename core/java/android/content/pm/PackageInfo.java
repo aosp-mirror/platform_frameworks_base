@@ -286,8 +286,26 @@ public class PackageInfo implements Parcelable {
     /** @hide */
     public int overlayPriority;
 
-    /** @hide */
-    public boolean isStaticOverlay;
+
+    /**
+     * Flag for use with {@link #overlayFlags}. Marks the overlay as static, meaning it cannot
+     * be enabled/disabled at runtime.
+     * @hide
+     */
+    public static final int FLAG_OVERLAY_STATIC = 1 << 1;
+
+    /**
+     * Flag for use with {@link #overlayFlags}. Marks the overlay as trusted (not 3rd party).
+     * @hide
+     */
+    public static final int FLAG_OVERLAY_TRUSTED = 1 << 2;
+
+    /**
+     * Modifiers that affect the state of this overlay. See {@link #FLAG_OVERLAY_STATIC},
+     * {@link #FLAG_OVERLAY_TRUSTED}.
+     * @hide
+     */
+    public int overlayFlags;
 
     public PackageInfo() {
     }
@@ -342,8 +360,8 @@ public class PackageInfo implements Parcelable {
         dest.writeString(restrictedAccountType);
         dest.writeString(requiredAccountType);
         dest.writeString(overlayTarget);
-        dest.writeInt(isStaticOverlay ? 1 : 0);
         dest.writeInt(overlayPriority);
+        dest.writeInt(overlayFlags);
     }
 
     public static final Parcelable.Creator<PackageInfo> CREATOR
@@ -394,8 +412,8 @@ public class PackageInfo implements Parcelable {
         restrictedAccountType = source.readString();
         requiredAccountType = source.readString();
         overlayTarget = source.readString();
-        isStaticOverlay = source.readInt() != 0;
         overlayPriority = source.readInt();
+        overlayFlags = source.readInt();
 
         // The component lists were flattened with the redundant ApplicationInfo
         // instances omitted.  Distribute the canonical one here as appropriate.
