@@ -5655,11 +5655,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public boolean allowAppAnimationsLw() {
-        if (mShowingDream) {
-            // If keyguard or dreams is currently visible, no reason to animate behind it.
-            return false;
-        }
-        return true;
+        return !mShowingDream;
     }
 
     @Override

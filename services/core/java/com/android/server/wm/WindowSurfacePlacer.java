@@ -23,23 +23,23 @@ import static android.app.ActivityManagerInternal.APP_TRANSITION_WINDOWS_DRAWN;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
-import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_CLOSE;
-import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
-import static com.android.server.wm.AppTransition.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
-import static com.android.server.wm.AppTransition.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
-import static com.android.server.wm.AppTransition.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
-import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_GOING_AWAY;
-import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
-import static com.android.server.wm.AppTransition.TRANSIT_NONE;
-import static com.android.server.wm.AppTransition.TRANSIT_TASK_CLOSE;
-import static com.android.server.wm.AppTransition.TRANSIT_TASK_IN_PLACE;
-import static com.android.server.wm.AppTransition.TRANSIT_TASK_OPEN;
-import static com.android.server.wm.AppTransition.TRANSIT_TASK_TO_BACK;
-import static com.android.server.wm.AppTransition.TRANSIT_TASK_TO_FRONT;
-import static com.android.server.wm.AppTransition.TRANSIT_WALLPAPER_CLOSE;
-import static com.android.server.wm.AppTransition.TRANSIT_WALLPAPER_INTRA_CLOSE;
-import static com.android.server.wm.AppTransition.TRANSIT_WALLPAPER_INTRA_OPEN;
-import static com.android.server.wm.AppTransition.TRANSIT_WALLPAPER_OPEN;
+import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY_ON_WALLPAPER;
+import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_TASK_IN_PLACE;
+import static android.view.WindowManager.TRANSIT_TASK_OPEN;
+import static android.view.WindowManager.TRANSIT_TASK_TO_BACK;
+import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
+import static android.view.WindowManager.TRANSIT_WALLPAPER_CLOSE;
+import static android.view.WindowManager.TRANSIT_WALLPAPER_INTRA_CLOSE;
+import static android.view.WindowManager.TRANSIT_WALLPAPER_INTRA_OPEN;
+import static android.view.WindowManager.TRANSIT_WALLPAPER_OPEN;
 import static com.android.server.wm.AppTransition.isKeyguardGoingAwayTransit;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
@@ -57,14 +57,19 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseIntArray;
 import android.view.Display;
+import android.view.RemoteAnimationAdapter;
+import android.view.RemoteAnimationDefinition;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.WindowManager.TransitionType;
 import android.view.animation.Animation;
 
 import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.function.Predicate;
 
 /**
  * Positions windows and their surfaces.
@@ -247,7 +252,7 @@ class WindowSurfacePlacer {
         if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "**** GOOD TO GO");
         int transit = mService.mAppTransition.getAppTransition();
         if (mService.mSkipAppTransitionAnimation && !isKeyguardGoingAwayTransit(transit)) {
-            transit = AppTransition.TRANSIT_UNSET;
+            transit = WindowManager.TRANSIT_UNSET;
         }
         mService.mSkipAppTransitionAnimation = false;
         mService.mNoAnimationNotifyOnTransitionFinished.clear();
@@ -255,16 +260,8 @@ class WindowSurfacePlacer {
         mService.mH.removeMessages(H.APP_TRANSITION_TIMEOUT);
 
         final DisplayContent displayContent = mService.getDefaultDisplayContentLocked();
-        // TODO: Don't believe this is really needed...
-        //mService.mWindowsChanged = true;
 
         mService.mRoot.mWallpaperMayChange = false;
-
-        // The top-most window will supply the layout params, and we will determine it below.
-        LayoutParams animLp = null;
-        int bestAnimLayer = -1;
-        boolean fullscreenAnim = false;
-        boolean voiceInteraction = false;
 
         int i;
         for (i = 0; i < appsCount; i++) {
@@ -274,7 +271,6 @@ class WindowSurfacePlacer {
             // visibility. We need to clear it *before* maybeUpdateTransitToWallpaper() as the
             // transition selection depends on wallpaper target visibility.
             wtoken.clearAnimatingFlags();
-
         }
 
         // Adjust wallpaper before we pull the lower/upper target, since pending changes
@@ -283,62 +279,30 @@ class WindowSurfacePlacer {
         mWallpaperControllerLocked.adjustWallpaperWindowsForAppTransitionIfNeeded(displayContent,
                 mService.mOpeningApps);
 
-        final WindowState wallpaperTarget = mWallpaperControllerLocked.getWallpaperTarget();
-        boolean openingAppHasWallpaper = false;
-        boolean closingAppHasWallpaper = false;
-
-        // Do a first pass through the tokens for two things:
-        // (1) Determine if both the closing and opening app token sets are wallpaper targets, in
-        // which case special animations are needed (since the wallpaper needs to stay static behind
-        // them).
-        // (2) Find the layout params of the top-most application window in the tokens, which is
-        // what will control the animation theme.
-        final int closingAppsCount = mService.mClosingApps.size();
-        appsCount = closingAppsCount + mService.mOpeningApps.size();
-        for (i = 0; i < appsCount; i++) {
-            final AppWindowToken wtoken;
-            if (i < closingAppsCount) {
-                wtoken = mService.mClosingApps.valueAt(i);
-                if (wallpaperTarget != null && wtoken.windowsCanBeWallpaperTarget()) {
-                    closingAppHasWallpaper = true;
-                }
-            } else {
-                wtoken = mService.mOpeningApps.valueAt(i - closingAppsCount);
-                if (wallpaperTarget != null && wtoken.windowsCanBeWallpaperTarget()) {
-                    openingAppHasWallpaper = true;
-                }
-            }
-
-            voiceInteraction |= wtoken.mVoiceInteraction;
-
-            if (wtoken.fillsParent()) {
-                final WindowState ws = wtoken.findMainWindow();
-                if (ws != null) {
-                    animLp = ws.mAttrs;
-                    bestAnimLayer = ws.mLayer;
-                    fullscreenAnim = true;
-                }
-            } else if (!fullscreenAnim) {
-                final WindowState ws = wtoken.findMainWindow();
-                if (ws != null) {
-                    if (ws.mLayer > bestAnimLayer) {
-                        animLp = ws.mAttrs;
-                        bestAnimLayer = ws.mLayer;
-                    }
-                }
-            }
-        }
+        // Determine if closing and opening app token sets are wallpaper targets, in which case
+        // special animations are needed.
+        final boolean hasWallpaperTarget = mWallpaperControllerLocked.getWallpaperTarget() != null;
+        final boolean openingAppHasWallpaper = canBeWallpaperTarget(mService.mOpeningApps)
+                && hasWallpaperTarget;
+        final boolean closingAppHasWallpaper = canBeWallpaperTarget(mService.mClosingApps)
+                && hasWallpaperTarget;
 
         transit = maybeUpdateTransitToWallpaper(transit, openingAppHasWallpaper,
                 closingAppHasWallpaper);
 
-        // If all closing windows are obscured, then there is no need to do an animation. This is
-        // the case, for example, when this transition is being done behind the lock screen.
-        if (!mService.mPolicy.allowAppAnimationsLw()) {
-            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG,
-                    "Animations disallowed by keyguard or dream.");
-            animLp = null;
-        }
+        // Find the layout params of the top-most application window in the tokens, which is
+        // what will control the animation theme. If all closing windows are obscured, then there is
+        // no need to do an animation. This is the case, for example, when this transition is being
+        // done behind a dream window.
+        final AppWindowToken animLpToken = mService.mPolicy.allowAppAnimationsLw()
+                ? findAnimLayoutParamsToken(transit)
+                : null;
+
+        final LayoutParams animLp = getAnimLp(animLpToken);
+        overrideWithRemoteAnimationIfSet(animLpToken, transit);
+
+        final boolean voiceInteraction = containsVoiceInteraction(mService.mOpeningApps)
+                || containsVoiceInteraction(mService.mOpeningApps);
 
         final int layoutRedo;
         mService.mSurfaceAnimationRunner.deferStartingAnimations();
@@ -386,6 +350,81 @@ class WindowSurfacePlacer {
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
 
         return layoutRedo | FINISH_LAYOUT_REDO_LAYOUT | FINISH_LAYOUT_REDO_CONFIG;
+    }
+
+    private static LayoutParams getAnimLp(AppWindowToken wtoken) {
+        final WindowState mainWindow = wtoken != null ? wtoken.findMainWindow() : null;
+        return mainWindow != null ? mainWindow.mAttrs : null;
+    }
+
+    /**
+     * Overrides the pending transition with the remote animation defined for the transition in the
+     * set of defined remote animations in the app window token.
+     */
+    private void overrideWithRemoteAnimationIfSet(AppWindowToken animLpToken, int transit) {
+        if (animLpToken == null) {
+            return;
+        }
+        final RemoteAnimationDefinition definition = animLpToken.getRemoteAnimationDefinition();
+        if (definition != null) {
+            final RemoteAnimationAdapter adapter = definition.getAdapter(transit);
+            if (adapter != null) {
+                mService.mAppTransition.overridePendingAppTransitionRemote(adapter);
+            }
+        }
+    }
+
+    /**
+     * @return The window token that determines the animation theme.
+     */
+    private AppWindowToken findAnimLayoutParamsToken(@TransitionType int transit) {
+        AppWindowToken result;
+
+        // Remote animations always win, but fullscreen tokens override non-fullscreen tokens.
+        result = lookForHighestTokenWithFilter(mService.mClosingApps, mService.mOpeningApps,
+                w -> w.getRemoteAnimationDefinition() != null
+                        && w.getRemoteAnimationDefinition().hasTransition(transit));
+        if (result != null) {
+            return result;
+        }
+        result = lookForHighestTokenWithFilter(mService.mClosingApps, mService.mOpeningApps,
+                w -> w.fillsParent() && w.findMainWindow() != null);
+        if (result != null) {
+            return result;
+        }
+        return lookForHighestTokenWithFilter(mService.mClosingApps, mService.mOpeningApps,
+                w -> w.findMainWindow() != null);
+    }
+
+    private AppWindowToken lookForHighestTokenWithFilter(ArraySet<AppWindowToken> array1,
+            ArraySet<AppWindowToken> array2, Predicate<AppWindowToken> filter) {
+        final int array1count = array1.size();
+        final int count = array1count + array2.size();
+        int bestPrefixOrderIndex = Integer.MIN_VALUE;
+        AppWindowToken bestToken = null;
+        for (int i = 0; i < count; i++) {
+            final AppWindowToken wtoken;
+            if (i < array1count) {
+                wtoken = array1.valueAt(i);
+            } else {
+                wtoken = array2.valueAt(i - array1count);
+            }
+            final int prefixOrderIndex = wtoken.getPrefixOrderIndex();
+            if (filter.test(wtoken) && prefixOrderIndex > bestPrefixOrderIndex) {
+                bestPrefixOrderIndex = prefixOrderIndex;
+                bestToken = wtoken;
+            }
+        }
+        return bestToken;
+    }
+
+    private boolean containsVoiceInteraction(ArraySet<AppWindowToken> apps) {
+        for (int i = apps.size() - 1; i >= 0; i--) {
+            if (apps.valueAt(i).mVoiceInteraction) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private AppWindowToken handleOpeningApps(int transit, LayoutParams animLp,

@@ -1206,12 +1206,11 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
 
     /**
      * Return true if it is okay to perform animations for an app transition
-     * that is about to occur.  You may return false for this if, for example,
-     * the lock screen is currently displayed so the switch should happen
+     * that is about to occur. You may return false for this if, for example,
+     * the dream window is currently displayed so the switch should happen
      * immediately.
      */
     public boolean allowAppAnimationsLw();
-
 
     /**
      * A new window has been focused.

@@ -88,7 +88,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TASK_POSITIONING;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_MOVEMENT;
@@ -214,15 +213,15 @@ import android.view.PointerIcon;
 import android.view.RemoteAnimationAdapter;
 import android.view.Surface;
 import android.view.SurfaceControl;
-import android.view.SurfaceControl.Builder;
 import android.view.SurfaceSession;
 import android.view.View;
 import android.view.WindowContentFrameStats;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.WindowManager.TransitionFlags;
+import android.view.WindowManager.TransitionType;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
-import android.view.animation.Animation;
 import android.view.inputmethod.InputMethodManagerInternal;
 
 import com.android.internal.R;
@@ -1542,7 +1541,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // We treat this as if this activity was opening, so we can trigger the app transition
         // animation and piggy-back on existing transition animation infrastructure.
         mOpeningApps.add(atoken);
-        prepareAppTransition(AppTransition.TRANSIT_ACTIVITY_RELAUNCH, ALWAYS_KEEP_CURRENT);
+        prepareAppTransition(WindowManager.TRANSIT_ACTIVITY_RELAUNCH, ALWAYS_KEEP_CURRENT);
         mAppTransition.overridePendingAppTransitionClipReveal(frame.left, frame.top,
                 frame.width(), frame.height());
         executeAppTransition();
@@ -1556,7 +1555,7 @@ public class WindowManagerService extends IWindowManager.Stub
         // we don't set up the transition anymore and just let it go.
         if (mDisplayFrozen && !mOpeningApps.contains(atoken) && atoken.isRelaunching()) {
             mOpeningApps.add(atoken);
-            prepareAppTransition(AppTransition.TRANSIT_NONE, !ALWAYS_KEEP_CURRENT);
+            prepareAppTransition(WindowManager.TRANSIT_NONE, !ALWAYS_KEEP_CURRENT);
             executeAppTransition();
         }
     }
@@ -2511,7 +2510,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void prepareAppTransition(int transit, boolean alwaysKeepCurrent) {
+    public void prepareAppTransition(@TransitionType int transit, boolean alwaysKeepCurrent) {
         prepareAppTransition(transit, alwaysKeepCurrent, 0 /* flags */, false /* forceOverride */);
     }
 
@@ -2524,8 +2523,8 @@ public class WindowManagerService extends IWindowManager.Stub
      *              AppTransition.TRANSIT_FLAG_*.
      * @param forceOverride Always override the transit, not matter what was set previously.
      */
-    public void prepareAppTransition(int transit, boolean alwaysKeepCurrent, int flags,
-            boolean forceOverride) {
+    public void prepareAppTransition(@TransitionType int transit, boolean alwaysKeepCurrent,
+            @TransitionFlags int flags, boolean forceOverride) {
         if (!checkCallingPermission(MANAGE_APP_TOKENS, "prepareAppTransition()")) {
             throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
         }
@@ -2541,7 +2540,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public int getPendingAppTransition() {
+    public @TransitionType int getPendingAppTransition() {
         return mAppTransition.getAppTransition();
     }
 
