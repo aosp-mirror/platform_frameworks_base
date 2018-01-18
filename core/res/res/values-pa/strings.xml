@@ -217,6 +217,8 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"ਸੰਕਟਕਾਲ"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"ਬਗ ਰਿਪੋਰਟ"</string>
     <string name="global_action_logout" msgid="935179188218826050">"ਸੈਸ਼ਨ ਸਮਾਪਤ ਕਰੋ"</string>
+    <!-- no translation found for global_action_screenshot (8329831278085426283) -->
+    <skip />
     <string name="bugreport_title" msgid="2667494803742548533">"ਬਗ ਰਿਪੋਰਟ ਲਓ"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ਇਹ ਇੱਕ ਈਮੇਲ ਸੁਨੇਹਾ ਭੇਜਣ ਲਈ, ਤੁਹਾਡੇ ਵਰਤਮਾਨ ਡੀਵਾਈਸ ਬਾਰੇ ਜਾਣਕਾਰੀ ਇਕੱਠੀ ਕਰੇਗਾ। ਬੱਗ ਰਿਪੋਰਟ ਸ਼ੁਰੂ ਕਰਨ ਵਿੱਚ ਥੋੜ੍ਹਾ ਸਮਾਂ ਲੱਗੇਗਾ ਜਦੋਂ ਤੱਕ ਇਹ ਭੇਜੇ ਜਾਣ ਲਈ ਤਿਆਰ ਨਾ ਹੋਵੇ, ਕਿਰਪਾ ਕਰਕੇ ਧੀਰਜ ਰੱਖੋ।"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ਅੰਤਰਕਿਰਿਆਤਮਕ ਰਿਪੋਰਟ"</string>
@@ -1123,6 +1125,10 @@
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"ਵਾਈ‑ਫਾਈ ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ ਚੱਲ ਪਵੇਗਾ"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"ਜਦੋਂ ਤੁਸੀਂ ਕਿਸੇ ਰੱਖਿਅਤ ਕੀਤੇ ਉੱਚ-ਗੁਣਵੱਤਾ ਵਾਲੇ ਨੈੱਟਵਰਕ ਦੇ ਨੇੜੇ ਹੋਵੋ"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"ਵਾਪਸ ਚਾਲੂ ਨਾ ਕਰੋ"</string>
+    <!-- no translation found for wifi_wakeup_enabled_title (6534603733173085309) -->
+    <skip />
+    <!-- no translation found for wifi_wakeup_enabled_content (189330154407990583) -->
+    <skip />
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ \'ਤੇ ਸਾਈਨ-ਇਨ ਕਰੋ"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ਨੈੱਟਵਰਕ \'ਤੇ ਸਾਈਨ-ਇਨ ਕਰੋ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1808,6 +1814,11 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"ਸ਼ਾਰਟਕੱਟ ਮੁੜ-ਬਹਾਲ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ ਕਿਉਂਕਿ ਐਪ \'ਬੈਕਅੱਪ ਅਤੇ ਮੁੜ-ਬਹਾਲੀ\' ਨਾਲ ਕੰਮ ਨਹੀਂ ਕਰਦੀ"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"ਐਪ ਹਸਤਾਖਰ ਦਾ ਮੇਲ ਨਾ ਹੋਣ ਕਾਰਨ ਸ਼ਾਰਟਕੱਟ ਮੁੜ-ਬਹਾਲ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"ਸ਼ਾਰਟਕੱਟ ਮੁੜ-ਬਹਾਲ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ"</string>
-    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"ਸ਼ਾਰਟਕੱਟ ਬੰਦ ਕੀਤਾ ਹੋਇਆ ਹੈ"</string>
+    <!-- no translation found for harmful_app_warning_uninstall (3846265696369136266) -->
+    <skip />
+    <!-- no translation found for harmful_app_warning_launch_anyway (5784428382367400530) -->
+    <skip />
+    <!-- no translation found for harmful_app_warning_title (2229996292333310435) -->
     <skip />
 </resources>

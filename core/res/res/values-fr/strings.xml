@@ -217,6 +217,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"Urgences"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Rapport de bug"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Fermer la session"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Capture d\'écran"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Créer un rapport de bug"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Cela permet de recueillir des informations concernant l\'état actuel de votre appareil. Ces informations sont ensuite envoyées sous forme d\'e-mail. Merci de patienter pendant la préparation du rapport de bug. Cette opération peut prendre quelques instants."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Rapport interactif"</string>
@@ -1123,6 +1124,8 @@
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Le Wi-Fi sera activé automatiquement"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Lorsque vous êtes à proximité d\'un réseau enregistré de haute qualité"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Ne pas réactiver"</string>
+    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi-Fi activé automatiquement"</string>
+    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Vous vous trouvez à proximité d\'un réseau enregistré : <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Connectez-vous au réseau Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Se connecter au réseau"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1807,6 +1810,8 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Le raccourci ne peut pas être restauré car l\'application n\'accepte pas la sauvegarde et la restauration"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Le raccourci ne peut pas être restauré car la signature de l\'application est différente"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Impossible de restaurer le raccourci"</string>
-    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
-    <skip />
+    <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"Le raccourci est désactivé"</string>
+    <string name="harmful_app_warning_uninstall" msgid="3846265696369136266">"Désinstaller"</string>
+    <string name="harmful_app_warning_launch_anyway" msgid="5784428382367400530">"Lancer quand même"</string>
+    <string name="harmful_app_warning_title" msgid="2229996292333310435">"Désinstaller l\'application malveillante ?"</string>
 </resources>

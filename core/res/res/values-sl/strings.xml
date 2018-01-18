@@ -221,6 +221,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"Klic v sili"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Poročilo o napakah"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Končaj sejo"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Posnetek zaslona"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Ustvari poročilo o napakah"</string>
     <string name="bugreport_message" msgid="398447048750350456">"S tem bodo zbrani podatki o trenutnem stanju naprave, ki bodo poslani v e-poštnem sporočilu. Izvedba poročila o napakah in priprava trajata nekaj časa, zato bodite potrpežljivi."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktivno poročilo"</string>
@@ -1167,6 +1168,8 @@
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Povezava Wi‑Fi se bo samodejno vklopila"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Ko ste v bližini zanesljivega shranjenega omrežja"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Ne vklopi znova"</string>
+    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi‑Fi je bil vklopljen samodejno"</string>
+    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Ste v bližini shranjenega omrežja: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Prijavite se v omrežje Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Prijava v omrežje"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1877,6 +1880,8 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Bližnjice ni bilo mogoče obnoviti, ker aplikacija ne podpira varnostnega kopiranja in obnavljanja"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Bližnjice ni bilo mogoče obnoviti zaradi neujemanja podpisa aplikacije"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Bližnjice ni bilo mogoče obnoviti"</string>
-    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
-    <skip />
+    <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"Bližnjica je onemogočena"</string>
+    <string name="harmful_app_warning_uninstall" msgid="3846265696369136266">"Odstrani"</string>
+    <string name="harmful_app_warning_launch_anyway" msgid="5784428382367400530">"Vseeno zaženi"</string>
+    <string name="harmful_app_warning_title" msgid="2229996292333310435">"Želite odstraniti škodljivo aplikacijo?"</string>
 </resources>

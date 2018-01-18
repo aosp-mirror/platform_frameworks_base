@@ -217,6 +217,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"හදිසි"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"දෝෂ වර්තාව"</string>
     <string name="global_action_logout" msgid="935179188218826050">"සැසිය අවසන් කරන්න"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"තිර රුව"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"දෝෂ වාර්තාවක් ගන්න"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ඊ-තැපැල් පණිවිඩයක් ලෙස යැවීමට මෙය ඔබගේ වත්මන් උපාංග තත්වය ගැන තොරතුරු එකතු කරනු ඇත. දෝෂ වාර්තාව ආරම්භ කර එය යැවීමට සූදානම් කරන තෙක් එයට කිසියම් කාලයක් ගතවනු ඇත; කරුණාකර ඉවසන්න."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"අන්තර්ක්‍රියා වාර්."</string>
@@ -1125,6 +1126,8 @@
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi ස්වයංක්‍රියව ක්‍රියාත්මක වනු ඇත"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"ඔබ උසස් තත්ත්වයේ සුරැකි ජාලයක් අවට සිටින විට"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"නැවත ක්‍රියාත්මක නොකරන්න"</string>
+    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi‑Fi ස්වයංක්‍රියව ක්‍රියාත්මක කරන ලදි"</string>
+    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"ඔබ සුරැකි ජාලයක් අවට සිටී: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi ජාලයට පුරනය වන්න"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ජාලයට පුරනය වන්න"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1809,6 +1812,8 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"යෙදුම උපස්ථ සහ ප්‍රතිසාධනය සඳහා සහාය නොදක්වන බැවින් කෙටි මග ප්‍රතිසාධනය කළ නොහැකි විය"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"යෙදුම් අත්සන නොගැළපෙන බැවින් කෙටි මග ප්‍රතිසාධනය කළ නොහැකි විය"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"කෙටි මග ප්‍රතිසාධනය කළ නොහැකි විය"</string>
-    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
-    <skip />
+    <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"කෙටි මග අබල කර ඇත"</string>
+    <string name="harmful_app_warning_uninstall" msgid="3846265696369136266">"අස්ථාපනය කරන්න"</string>
+    <string name="harmful_app_warning_launch_anyway" msgid="5784428382367400530">"කෙසේ වුවත් ආරම්භ කරන්න"</string>
+    <string name="harmful_app_warning_title" msgid="2229996292333310435">"හානිකර යෙදුම අස්ථාපනය කරන්නද?"</string>
 </resources>

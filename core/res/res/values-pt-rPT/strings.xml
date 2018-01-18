@@ -217,6 +217,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"Emergência"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Relatório de erros"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Terminar sessão"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Captura de ecrã"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Criar relatório de erros"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Será recolhida informação sobre o estado atual do seu dispositivo a enviar através de uma mensagem de email. Demorará algum tempo até que o relatório de erro esteja pronto para ser enviado. Aguarde um pouco."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Relatório interativo"</string>
@@ -804,8 +805,8 @@
     <string name="granularity_label_link" msgid="5815508880782488267">"link"</string>
     <string name="granularity_label_line" msgid="5764267235026120888">"linha"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"O teste de fábrica falhou"</string>
-    <string name="factorytest_not_system" msgid="4435201656767276723">"A acção FACTORY_TEST apenas é suportada para pacotes instalados em /system/app."</string>
-    <string name="factorytest_no_action" msgid="872991874799998561">"Não foi localizado qualquer pacote que forneça a acção FACTORY_TEST."</string>
+    <string name="factorytest_not_system" msgid="4435201656767276723">"A ação FACTORY_TEST apenas é suportada para pacotes instalados em /system/app."</string>
+    <string name="factorytest_no_action" msgid="872991874799998561">"Não foi localizado qualquer pacote que forneça a ação FACTORY_TEST."</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"Reiniciar"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"A página em \"<xliff:g id="TITLE">%s</xliff:g>\" indica:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
@@ -1023,7 +1024,7 @@
     <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Capturar imagem com"</string>
     <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"Capturar imagem com o %1$s"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Capturar imagem"</string>
-    <string name="alwaysUse" msgid="4583018368000610438">"Utilizar por predefinição para esta acção."</string>
+    <string name="alwaysUse" msgid="4583018368000610438">"Utilizar por predefinição para esta ação."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Utilizar outra aplicação"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Limpar a predefinição nas Definições do Sistema &gt; Aplicações &gt; Transferidas."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Escolha uma ação"</string>
@@ -1123,6 +1124,8 @@
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"O Wi‑Fi será ativado automaticamente"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Quando estiver próximo de uma rede de alta qualidade guardada."</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Não reativar"</string>
+    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi‑Fi ativado automaticamente"</string>
+    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Está perto de uma rede guardada: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>."</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Iniciar sessão na rede Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Início de sessão na rede"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1807,6 +1810,8 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Não foi possível restaurar o atalho porque a aplicação não é compatível com a funcionalidade de cópia de segurança e restauro."</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Não foi possível restaurar o atalho devido a uma falha de correspondência entre as assinaturas das aplicações."</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Não foi possível restaurar o atalho."</string>
-    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
-    <skip />
+    <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"O atalho está desativado."</string>
+    <string name="harmful_app_warning_uninstall" msgid="3846265696369136266">"Desinstalar"</string>
+    <string name="harmful_app_warning_launch_anyway" msgid="5784428382367400530">"Iniciar mesmo assim"</string>
+    <string name="harmful_app_warning_title" msgid="2229996292333310435">"Pretende desinstalar a aplicação prejudicial?"</string>
 </resources>

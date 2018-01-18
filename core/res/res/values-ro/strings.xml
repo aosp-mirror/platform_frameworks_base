@@ -219,6 +219,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"Urgență"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Raport despre erori"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Încheiați sesiunea"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Captură de ecran"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Executați un raport despre erori"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Acest raport va colecta informații despre starea actuală a dispozitivului, pentru a le trimite într-un e-mail. Aveți răbdare după pornirea raportului despre erori până când va fi gata de trimis."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Raport interactiv"</string>
@@ -1145,6 +1146,8 @@
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi se va activa automat"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Când vă aflați lângă o rețea salvată, de înaltă calitate"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Nu reactivați"</string>
+    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi-Fi s-a activat automat"</string>
+    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Vă aflați lângă o rețea salvată: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Conectați-vă la rețeaua Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Conectați-vă la rețea"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1842,6 +1845,8 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Nu s-a putut restabili comanda rapidă deoarece aplicația nu acceptă backupul și restabilirea"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Nu s-a putut restabili comanda rapidă din cauza nepotrivirii semnăturii aplicației"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Nu s-a putut restabili comanda rapidă"</string>
-    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
-    <skip />
+    <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"Comanda rapidă este dezactivată"</string>
+    <string name="harmful_app_warning_uninstall" msgid="3846265696369136266">"Dezinstalați"</string>
+    <string name="harmful_app_warning_launch_anyway" msgid="5784428382367400530">"Lansați oricum"</string>
+    <string name="harmful_app_warning_title" msgid="2229996292333310435">"Dezinstalați aplicația dăunătoare?"</string>
 </resources>
