@@ -600,6 +600,11 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             }
         }
 
+        @Override
+        public void onOverlayChangedLocked() {
+            updateDeviceInfoLocked();
+        }
+
         public boolean requestModeInTransactionLocked(int modeId) {
             if (modeId == 0) {
                 modeId = mDefaultModeId;

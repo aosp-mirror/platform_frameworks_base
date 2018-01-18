@@ -6613,7 +6613,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public void onOverlayChanged() {
         synchronized (mWindowMap) {
             mPolicy.onOverlayChangedLw();
-            mDisplayManagerInternal.onOverlayChanged();
+            getDefaultDisplayContentLocked().updateDisplayInfo();
             requestTraversal();
         }
     }

@@ -143,6 +143,9 @@ abstract class DisplayDevice {
     public void requestDisplayModesInTransactionLocked(int colorMode, int modeId) {
     }
 
+    public void onOverlayChangedLocked() {
+    }
+
     /**
      * Sets the display layer stack while in a transaction.
      */
