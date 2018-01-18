@@ -16,6 +16,12 @@
 
 package android.provider;
 
+import static android.provider.SettingsValidators.BOOLEAN_VALIDATOR;
+import static android.provider.SettingsValidators.COMPONENT_NAME_VALIDATOR;
+import static android.provider.SettingsValidators.LENIENT_IP_ADDRESS_VALIDATOR;
+import static android.provider.SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR;
+import static android.provider.SettingsValidators.URI_VALIDATOR;
+
 import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -65,6 +71,8 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.provider.SettingsValidators;
+import android.provider.SettingsValidators.Validator;
 import android.speech.tts.TextToSpeech;
 import android.telephony.SubscriptionManager;
 import android.text.TextUtils;
@@ -76,7 +84,6 @@ import android.util.MemoryIntArray;
 import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.widget.ILockSettings;
 
 import java.io.IOException;
@@ -2119,11 +2126,6 @@ public final class Settings {
 
         private static final float DEFAULT_FONT_SCALE = 1.0f;
 
-        /** @hide */
-        public static interface Validator {
-            public boolean validate(String value);
-        }
-
         /**
          * The content:// style URL for this table
          */
@@ -2227,41 +2229,6 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.CERT_PIN_UPDATE_CONTENT_URL);
             MOVED_TO_GLOBAL.add(Settings.Global.CERT_PIN_UPDATE_METADATA_URL);
         }
-
-        private static final Validator sBooleanValidator =
-                new DiscreteValueValidator(new String[] {"0", "1"});
-
-        private static final Validator sNonNegativeIntegerValidator = new Validator() {
-            @Override
-            public boolean validate(String value) {
-                try {
-                    return Integer.parseInt(value) >= 0;
-                } catch (NumberFormatException e) {
-                    return false;
-                }
-            }
-        };
-
-        private static final Validator sUriValidator = new Validator() {
-            @Override
-            public boolean validate(String value) {
-                try {
-                    Uri.decode(value);
-                    return true;
-                } catch (IllegalArgumentException e) {
-                    return false;
-                }
-            }
-        };
-
-        private static final Validator sLenientIpAddressValidator = new Validator() {
-            private static final int MAX_IPV6_LENGTH = 45;
-
-            @Override
-            public boolean validate(String value) {
-                return value.length() <= MAX_IPV6_LENGTH;
-            }
-        };
 
         /** @hide */
         public static void getMovedToGlobalSettings(Set<String> outKeySet) {
@@ -2730,64 +2697,35 @@ public final class Settings {
             putIntForUser(cr, SHOW_GTALK_SERVICE_STATUS, flag ? 1 : 0, userHandle);
         }
 
-        private static final class DiscreteValueValidator implements Validator {
-            private final String[] mValues;
-
-            public DiscreteValueValidator(String[] values) {
-                mValues = values;
-            }
-
-            @Override
-            public boolean validate(String value) {
-                return ArrayUtils.contains(mValues, value);
-            }
-        }
-
-        private static final class InclusiveIntegerRangeValidator implements Validator {
-            private final int mMin;
-            private final int mMax;
-
-            public InclusiveIntegerRangeValidator(int min, int max) {
-                mMin = min;
-                mMax = max;
-            }
-
-            @Override
-            public boolean validate(String value) {
-                try {
-                    final int intValue = Integer.parseInt(value);
-                    return intValue >= mMin && intValue <= mMax;
-                } catch (NumberFormatException e) {
-                    return false;
-                }
-            }
-        }
-
-        private static final class InclusiveFloatRangeValidator implements Validator {
-            private final float mMin;
-            private final float mMax;
-
-            public InclusiveFloatRangeValidator(float min, float max) {
-                mMin = min;
-                mMax = max;
-            }
-
-            @Override
-            public boolean validate(String value) {
-                try {
-                    final float floatValue = Float.parseFloat(value);
-                    return floatValue >= mMin && floatValue <= mMax;
-                } catch (NumberFormatException e) {
-                    return false;
-                }
-            }
-        }
-
         /**
          * @deprecated Use {@link android.provider.Settings.Global#STAY_ON_WHILE_PLUGGED_IN} instead
          */
         @Deprecated
         public static final String STAY_ON_WHILE_PLUGGED_IN = Global.STAY_ON_WHILE_PLUGGED_IN;
+
+        private static final Validator STAY_ON_WHILE_PLUGGED_IN_VALIDATOR = new Validator() {
+            @Override
+            public boolean validate(String value) {
+                try {
+                    int val = Integer.parseInt(value);
+                    return (val == 0)
+                            || (val == BatteryManager.BATTERY_PLUGGED_AC)
+                            || (val == BatteryManager.BATTERY_PLUGGED_USB)
+                            || (val == BatteryManager.BATTERY_PLUGGED_WIRELESS)
+                            || (val == (BatteryManager.BATTERY_PLUGGED_AC
+                                    | BatteryManager.BATTERY_PLUGGED_USB))
+                            || (val == (BatteryManager.BATTERY_PLUGGED_AC
+                                    | BatteryManager.BATTERY_PLUGGED_WIRELESS))
+                            || (val == (BatteryManager.BATTERY_PLUGGED_USB
+                                    | BatteryManager.BATTERY_PLUGGED_WIRELESS))
+                            || (val == (BatteryManager.BATTERY_PLUGGED_AC
+                                    | BatteryManager.BATTERY_PLUGGED_USB
+                                    | BatteryManager.BATTERY_PLUGGED_WIRELESS));
+                } catch (NumberFormatException e) {
+                    return false;
+                }
+            }
+        };
 
         /**
          * What happens when the user presses the end call button if they're not
@@ -2802,7 +2740,7 @@ public final class Settings {
         public static final String END_BUTTON_BEHAVIOR = "end_button_behavior";
 
         private static final Validator END_BUTTON_BEHAVIOR_VALIDATOR =
-                new InclusiveIntegerRangeValidator(0, 3);
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 3);
 
         /**
          * END_BUTTON_BEHAVIOR value for "go home".
@@ -2828,7 +2766,7 @@ public final class Settings {
          */
         public static final String ADVANCED_SETTINGS = "advanced_settings";
 
-        private static final Validator ADVANCED_SETTINGS_VALIDATOR = sBooleanValidator;
+        private static final Validator ADVANCED_SETTINGS_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * ADVANCED_SETTINGS default value.
@@ -2929,7 +2867,7 @@ public final class Settings {
         @Deprecated
         public static final String WIFI_USE_STATIC_IP = "wifi_use_static_ip";
 
-        private static final Validator WIFI_USE_STATIC_IP_VALIDATOR = sBooleanValidator;
+        private static final Validator WIFI_USE_STATIC_IP_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * The static IP address.
@@ -2941,7 +2879,7 @@ public final class Settings {
         @Deprecated
         public static final String WIFI_STATIC_IP = "wifi_static_ip";
 
-        private static final Validator WIFI_STATIC_IP_VALIDATOR = sLenientIpAddressValidator;
+        private static final Validator WIFI_STATIC_IP_VALIDATOR = LENIENT_IP_ADDRESS_VALIDATOR;
 
         /**
          * If using static IP, the gateway's IP address.
@@ -2953,7 +2891,7 @@ public final class Settings {
         @Deprecated
         public static final String WIFI_STATIC_GATEWAY = "wifi_static_gateway";
 
-        private static final Validator WIFI_STATIC_GATEWAY_VALIDATOR = sLenientIpAddressValidator;
+        private static final Validator WIFI_STATIC_GATEWAY_VALIDATOR = LENIENT_IP_ADDRESS_VALIDATOR;
 
         /**
          * If using static IP, the net mask.
@@ -2965,7 +2903,7 @@ public final class Settings {
         @Deprecated
         public static final String WIFI_STATIC_NETMASK = "wifi_static_netmask";
 
-        private static final Validator WIFI_STATIC_NETMASK_VALIDATOR = sLenientIpAddressValidator;
+        private static final Validator WIFI_STATIC_NETMASK_VALIDATOR = LENIENT_IP_ADDRESS_VALIDATOR;
 
         /**
          * If using static IP, the primary DNS's IP address.
@@ -2977,7 +2915,7 @@ public final class Settings {
         @Deprecated
         public static final String WIFI_STATIC_DNS1 = "wifi_static_dns1";
 
-        private static final Validator WIFI_STATIC_DNS1_VALIDATOR = sLenientIpAddressValidator;
+        private static final Validator WIFI_STATIC_DNS1_VALIDATOR = LENIENT_IP_ADDRESS_VALIDATOR;
 
         /**
          * If using static IP, the secondary DNS's IP address.
@@ -2989,7 +2927,7 @@ public final class Settings {
         @Deprecated
         public static final String WIFI_STATIC_DNS2 = "wifi_static_dns2";
 
-        private static final Validator WIFI_STATIC_DNS2_VALIDATOR = sLenientIpAddressValidator;
+        private static final Validator WIFI_STATIC_DNS2_VALIDATOR = LENIENT_IP_ADDRESS_VALIDATOR;
 
         /**
          * Determines whether remote devices may discover and/or connect to
@@ -3003,7 +2941,7 @@ public final class Settings {
             "bluetooth_discoverability";
 
         private static final Validator BLUETOOTH_DISCOVERABILITY_VALIDATOR =
-                new InclusiveIntegerRangeValidator(0, 2);
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 2);
 
         /**
          * Bluetooth discoverability timeout.  If this value is nonzero, then
@@ -3014,7 +2952,7 @@ public final class Settings {
             "bluetooth_discoverability_timeout";
 
         private static final Validator BLUETOOTH_DISCOVERABILITY_TIMEOUT_VALIDATOR =
-                sNonNegativeIntegerValidator;
+                NON_NEGATIVE_INTEGER_VALIDATOR;
 
         /**
          * @deprecated Use {@link android.provider.Settings.Secure#LOCK_PATTERN_ENABLED}
@@ -3110,7 +3048,7 @@ public final class Settings {
         @Deprecated
         public static final String DIM_SCREEN = "dim_screen";
 
-        private static final Validator DIM_SCREEN_VALIDATOR = sBooleanValidator;
+        private static final Validator DIM_SCREEN_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * The display color mode.
@@ -3130,7 +3068,8 @@ public final class Settings {
          */
         public static final String SCREEN_OFF_TIMEOUT = "screen_off_timeout";
 
-        private static final Validator SCREEN_OFF_TIMEOUT_VALIDATOR = sNonNegativeIntegerValidator;
+        private static final Validator SCREEN_OFF_TIMEOUT_VALIDATOR =
+                NON_NEGATIVE_INTEGER_VALIDATOR;
 
         /**
          * The screen backlight brightness between 0 and 255.
@@ -3138,7 +3077,7 @@ public final class Settings {
         public static final String SCREEN_BRIGHTNESS = "screen_brightness";
 
         private static final Validator SCREEN_BRIGHTNESS_VALIDATOR =
-                new InclusiveIntegerRangeValidator(0, 255);
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 255);
 
         /**
          * The screen backlight brightness between 0 and 255.
@@ -3147,14 +3086,14 @@ public final class Settings {
         public static final String SCREEN_BRIGHTNESS_FOR_VR = "screen_brightness_for_vr";
 
         private static final Validator SCREEN_BRIGHTNESS_FOR_VR_VALIDATOR =
-                new InclusiveIntegerRangeValidator(0, 255);
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 255);
 
         /**
          * Control whether to enable automatic brightness mode.
          */
         public static final String SCREEN_BRIGHTNESS_MODE = "screen_brightness_mode";
 
-        private static final Validator SCREEN_BRIGHTNESS_MODE_VALIDATOR = sBooleanValidator;
+        private static final Validator SCREEN_BRIGHTNESS_MODE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Adjustment to auto-brightness to make it generally more (>0.0 <1.0)
@@ -3164,7 +3103,7 @@ public final class Settings {
         public static final String SCREEN_AUTO_BRIGHTNESS_ADJ = "screen_auto_brightness_adj";
 
         private static final Validator SCREEN_AUTO_BRIGHTNESS_ADJ_VALIDATOR =
-                new InclusiveFloatRangeValidator(-1, 1);
+                new SettingsValidators.InclusiveFloatRangeValidator(-1, 1);
 
         /**
          * SCREEN_BRIGHTNESS_MODE value for manual mode.
@@ -3203,7 +3142,7 @@ public final class Settings {
         public static final String MODE_RINGER_STREAMS_AFFECTED = "mode_ringer_streams_affected";
 
         private static final Validator MODE_RINGER_STREAMS_AFFECTED_VALIDATOR =
-                sNonNegativeIntegerValidator;
+                NON_NEGATIVE_INTEGER_VALIDATOR;
 
         /**
           * Determines which streams are affected by mute. The
@@ -3213,7 +3152,7 @@ public final class Settings {
         public static final String MUTE_STREAMS_AFFECTED = "mute_streams_affected";
 
         private static final Validator MUTE_STREAMS_AFFECTED_VALIDATOR =
-                sNonNegativeIntegerValidator;
+                NON_NEGATIVE_INTEGER_VALIDATOR;
 
         /**
          * Whether vibrate is on for different events. This is used internally,
@@ -3221,7 +3160,7 @@ public final class Settings {
          */
         public static final String VIBRATE_ON = "vibrate_on";
 
-        private static final Validator VIBRATE_ON_VALIDATOR = sBooleanValidator;
+        private static final Validator VIBRATE_ON_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * If 1, redirects the system vibrator to all currently attached input devices
@@ -3237,7 +3176,7 @@ public final class Settings {
          */
         public static final String VIBRATE_INPUT_DEVICES = "vibrate_input_devices";
 
-        private static final Validator VIBRATE_INPUT_DEVICES_VALIDATOR = sBooleanValidator;
+        private static final Validator VIBRATE_INPUT_DEVICES_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Ringer volume. This is used internally, changing this value will not
@@ -3316,7 +3255,7 @@ public final class Settings {
          */
         public static final String MASTER_MONO = "master_mono";
 
-        private static final Validator MASTER_MONO_VALIDATOR = sBooleanValidator;
+        private static final Validator MASTER_MONO_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Whether the notifications should use the ring volume (value of 1) or
@@ -3336,7 +3275,7 @@ public final class Settings {
         public static final String NOTIFICATIONS_USE_RING_VOLUME =
             "notifications_use_ring_volume";
 
-        private static final Validator NOTIFICATIONS_USE_RING_VOLUME_VALIDATOR = sBooleanValidator;
+        private static final Validator NOTIFICATIONS_USE_RING_VOLUME_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Whether silent mode should allow vibration feedback. This is used
@@ -3352,7 +3291,7 @@ public final class Settings {
          */
         public static final String VIBRATE_IN_SILENT = "vibrate_in_silent";
 
-        private static final Validator VIBRATE_IN_SILENT_VALIDATOR = sBooleanValidator;
+        private static final Validator VIBRATE_IN_SILENT_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * The mapping of stream type (integer) to its setting.
@@ -3400,7 +3339,7 @@ public final class Settings {
          */
         public static final String RINGTONE = "ringtone";
 
-        private static final Validator RINGTONE_VALIDATOR = sUriValidator;
+        private static final Validator RINGTONE_VALIDATOR = URI_VALIDATOR;
 
         /**
          * A {@link Uri} that will point to the current default ringtone at any
@@ -3425,7 +3364,7 @@ public final class Settings {
          */
         public static final String NOTIFICATION_SOUND = "notification_sound";
 
-        private static final Validator NOTIFICATION_SOUND_VALIDATOR = sUriValidator;
+        private static final Validator NOTIFICATION_SOUND_VALIDATOR = URI_VALIDATOR;
 
         /**
          * A {@link Uri} that will point to the current default notification
@@ -3448,7 +3387,7 @@ public final class Settings {
          */
         public static final String ALARM_ALERT = "alarm_alert";
 
-        private static final Validator ALARM_ALERT_VALIDATOR = sUriValidator;
+        private static final Validator ALARM_ALERT_VALIDATOR = URI_VALIDATOR;
 
         /**
          * A {@link Uri} that will point to the current default alarm alert at
@@ -3470,31 +3409,21 @@ public final class Settings {
          */
         public static final String MEDIA_BUTTON_RECEIVER = "media_button_receiver";
 
-        private static final Validator MEDIA_BUTTON_RECEIVER_VALIDATOR = new Validator() {
-            @Override
-            public boolean validate(String value) {
-                try {
-                    ComponentName.unflattenFromString(value);
-                    return true;
-                } catch (NullPointerException e) {
-                    return false;
-                }
-            }
-        };
+        private static final Validator MEDIA_BUTTON_RECEIVER_VALIDATOR = COMPONENT_NAME_VALIDATOR;
 
         /**
          * Setting to enable Auto Replace (AutoText) in text editors. 1 = On, 0 = Off
          */
         public static final String TEXT_AUTO_REPLACE = "auto_replace";
 
-        private static final Validator TEXT_AUTO_REPLACE_VALIDATOR = sBooleanValidator;
+        private static final Validator TEXT_AUTO_REPLACE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Setting to enable Auto Caps in text editors. 1 = On, 0 = Off
          */
         public static final String TEXT_AUTO_CAPS = "auto_caps";
 
-        private static final Validator TEXT_AUTO_CAPS_VALIDATOR = sBooleanValidator;
+        private static final Validator TEXT_AUTO_CAPS_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Setting to enable Auto Punctuate in text editors. 1 = On, 0 = Off. This
@@ -3502,19 +3431,19 @@ public final class Settings {
          */
         public static final String TEXT_AUTO_PUNCTUATE = "auto_punctuate";
 
-        private static final Validator TEXT_AUTO_PUNCTUATE_VALIDATOR = sBooleanValidator;
+        private static final Validator TEXT_AUTO_PUNCTUATE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Setting to showing password characters in text editors. 1 = On, 0 = Off
          */
         public static final String TEXT_SHOW_PASSWORD = "show_password";
 
-        private static final Validator TEXT_SHOW_PASSWORD_VALIDATOR = sBooleanValidator;
+        private static final Validator TEXT_SHOW_PASSWORD_VALIDATOR = BOOLEAN_VALIDATOR;
 
         public static final String SHOW_GTALK_SERVICE_STATUS =
                 "SHOW_GTALK_SERVICE_STATUS";
 
-        private static final Validator SHOW_GTALK_SERVICE_STATUS_VALIDATOR = sBooleanValidator;
+        private static final Validator SHOW_GTALK_SERVICE_STATUS_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Name of activity to use for wallpaper on the home screen.
@@ -3543,12 +3472,16 @@ public final class Settings {
         @Deprecated
         public static final String AUTO_TIME = Global.AUTO_TIME;
 
+        private static final Validator AUTO_TIME_VALIDATOR = BOOLEAN_VALIDATOR;
+
         /**
          * @deprecated Use {@link android.provider.Settings.Global#AUTO_TIME_ZONE}
          * instead
          */
         @Deprecated
         public static final String AUTO_TIME_ZONE = Global.AUTO_TIME_ZONE;
+
+        private static final Validator AUTO_TIME_ZONE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Display times as 12 or 24 hours
@@ -3559,7 +3492,7 @@ public final class Settings {
 
         /** @hide */
         public static final Validator TIME_12_24_VALIDATOR =
-                new DiscreteValueValidator(new String[] {"12", "24", null});
+                new SettingsValidators.DiscreteValueValidator(new String[] {"12", "24", null});
 
         /**
          * Date format string
@@ -3592,7 +3525,7 @@ public final class Settings {
         public static final String SETUP_WIZARD_HAS_RUN = "setup_wizard_has_run";
 
         /** @hide */
-        public static final Validator SETUP_WIZARD_HAS_RUN_VALIDATOR = sBooleanValidator;
+        public static final Validator SETUP_WIZARD_HAS_RUN_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Scaling factor for normal window animations. Setting to 0 will disable window
@@ -3631,7 +3564,7 @@ public final class Settings {
         public static final String ACCELEROMETER_ROTATION = "accelerometer_rotation";
 
         /** @hide */
-        public static final Validator ACCELEROMETER_ROTATION_VALIDATOR = sBooleanValidator;
+        public static final Validator ACCELEROMETER_ROTATION_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Default screen rotation when no other policy applies.
@@ -3645,7 +3578,7 @@ public final class Settings {
 
         /** @hide */
         public static final Validator USER_ROTATION_VALIDATOR =
-                new InclusiveIntegerRangeValidator(0, 3);
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 3);
 
         /**
          * Control whether the rotation lock toggle in the System UI should be hidden.
@@ -3663,7 +3596,7 @@ public final class Settings {
 
         /** @hide */
         public static final Validator HIDE_ROTATION_LOCK_TOGGLE_FOR_ACCESSIBILITY_VALIDATOR =
-                sBooleanValidator;
+                BOOLEAN_VALIDATOR;
 
         /**
          * Whether the phone vibrates when it is ringing due to an incoming call. This will
@@ -3678,7 +3611,7 @@ public final class Settings {
         public static final String VIBRATE_WHEN_RINGING = "vibrate_when_ringing";
 
         /** @hide */
-        public static final Validator VIBRATE_WHEN_RINGING_VALIDATOR = sBooleanValidator;
+        public static final Validator VIBRATE_WHEN_RINGING_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Whether the audible DTMF tones are played by the dialer when dialing. The value is
@@ -3687,7 +3620,7 @@ public final class Settings {
         public static final String DTMF_TONE_WHEN_DIALING = "dtmf_tone";
 
         /** @hide */
-        public static final Validator DTMF_TONE_WHEN_DIALING_VALIDATOR = sBooleanValidator;
+        public static final Validator DTMF_TONE_WHEN_DIALING_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * CDMA only settings
@@ -3698,7 +3631,7 @@ public final class Settings {
         public static final String DTMF_TONE_TYPE_WHEN_DIALING = "dtmf_tone_type";
 
         /** @hide */
-        public static final Validator DTMF_TONE_TYPE_WHEN_DIALING_VALIDATOR = sBooleanValidator;
+        public static final Validator DTMF_TONE_TYPE_WHEN_DIALING_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Whether the hearing aid is enabled. The value is
@@ -3708,7 +3641,7 @@ public final class Settings {
         public static final String HEARING_AID = "hearing_aid";
 
         /** @hide */
-        public static final Validator HEARING_AID_VALIDATOR = sBooleanValidator;
+        public static final Validator HEARING_AID_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * CDMA only settings
@@ -3722,7 +3655,8 @@ public final class Settings {
         public static final String TTY_MODE = "tty_mode";
 
         /** @hide */
-        public static final Validator TTY_MODE_VALIDATOR = new InclusiveIntegerRangeValidator(0, 3);
+        public static final Validator TTY_MODE_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 3);
 
         /**
          * Whether the sounds effects (key clicks, lid open ...) are enabled. The value is
@@ -3731,7 +3665,7 @@ public final class Settings {
         public static final String SOUND_EFFECTS_ENABLED = "sound_effects_enabled";
 
         /** @hide */
-        public static final Validator SOUND_EFFECTS_ENABLED_VALIDATOR = sBooleanValidator;
+        public static final Validator SOUND_EFFECTS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Whether the haptic feedback (long presses, ...) are enabled. The value is
@@ -3740,7 +3674,7 @@ public final class Settings {
         public static final String HAPTIC_FEEDBACK_ENABLED = "haptic_feedback_enabled";
 
         /** @hide */
-        public static final Validator HAPTIC_FEEDBACK_ENABLED_VALIDATOR = sBooleanValidator;
+        public static final Validator HAPTIC_FEEDBACK_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * @deprecated Each application that shows web suggestions should have its own
@@ -3750,7 +3684,7 @@ public final class Settings {
         public static final String SHOW_WEB_SUGGESTIONS = "show_web_suggestions";
 
         /** @hide */
-        public static final Validator SHOW_WEB_SUGGESTIONS_VALIDATOR = sBooleanValidator;
+        public static final Validator SHOW_WEB_SUGGESTIONS_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Whether the notification LED should repeatedly flash when a notification is
@@ -3760,7 +3694,7 @@ public final class Settings {
         public static final String NOTIFICATION_LIGHT_PULSE = "notification_light_pulse";
 
         /** @hide */
-        public static final Validator NOTIFICATION_LIGHT_PULSE_VALIDATOR = sBooleanValidator;
+        public static final Validator NOTIFICATION_LIGHT_PULSE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Show pointer location on screen?
@@ -3771,7 +3705,7 @@ public final class Settings {
         public static final String POINTER_LOCATION = "pointer_location";
 
         /** @hide */
-        public static final Validator POINTER_LOCATION_VALIDATOR = sBooleanValidator;
+        public static final Validator POINTER_LOCATION_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Show touch positions on screen?
@@ -3782,7 +3716,7 @@ public final class Settings {
         public static final String SHOW_TOUCHES = "show_touches";
 
         /** @hide */
-        public static final Validator SHOW_TOUCHES_VALIDATOR = sBooleanValidator;
+        public static final Validator SHOW_TOUCHES_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Log raw orientation data from
@@ -3796,7 +3730,7 @@ public final class Settings {
                 "window_orientation_listener_log";
 
         /** @hide */
-        public static final Validator WINDOW_ORIENTATION_LISTENER_LOG_VALIDATOR = sBooleanValidator;
+        public static final Validator WINDOW_ORIENTATION_LISTENER_LOG_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#POWER_SOUNDS_ENABLED}
@@ -3806,6 +3740,8 @@ public final class Settings {
         @Deprecated
         public static final String POWER_SOUNDS_ENABLED = Global.POWER_SOUNDS_ENABLED;
 
+        private static final Validator POWER_SOUNDS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
+
         /**
          * @deprecated Use {@link android.provider.Settings.Global#DOCK_SOUNDS_ENABLED}
          * instead
@@ -3814,6 +3750,8 @@ public final class Settings {
         @Deprecated
         public static final String DOCK_SOUNDS_ENABLED = Global.DOCK_SOUNDS_ENABLED;
 
+        private static final Validator DOCK_SOUNDS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
+
         /**
          * Whether to play sounds when the keyguard is shown and dismissed.
          * @hide
@@ -3821,7 +3759,7 @@ public final class Settings {
         public static final String LOCKSCREEN_SOUNDS_ENABLED = "lockscreen_sounds_enabled";
 
         /** @hide */
-        public static final Validator LOCKSCREEN_SOUNDS_ENABLED_VALIDATOR = sBooleanValidator;
+        public static final Validator LOCKSCREEN_SOUNDS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Whether the lockscreen should be completely disabled.
@@ -3830,7 +3768,7 @@ public final class Settings {
         public static final String LOCKSCREEN_DISABLED = "lockscreen.disabled";
 
         /** @hide */
-        public static final Validator LOCKSCREEN_DISABLED_VALIDATOR = sBooleanValidator;
+        public static final Validator LOCKSCREEN_DISABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#LOW_BATTERY_SOUND}
@@ -3897,7 +3835,7 @@ public final class Settings {
         public static final String SIP_RECEIVE_CALLS = "sip_receive_calls";
 
         /** @hide */
-        public static final Validator SIP_RECEIVE_CALLS_VALIDATOR = sBooleanValidator;
+        public static final Validator SIP_RECEIVE_CALLS_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Call Preference String.
@@ -3908,8 +3846,9 @@ public final class Settings {
         public static final String SIP_CALL_OPTIONS = "sip_call_options";
 
         /** @hide */
-        public static final Validator SIP_CALL_OPTIONS_VALIDATOR = new DiscreteValueValidator(
-                new String[] {"SIP_ALWAYS", "SIP_ADDRESS_ONLY"});
+        public static final Validator SIP_CALL_OPTIONS_VALIDATOR =
+                new SettingsValidators.DiscreteValueValidator(
+                        new String[] {"SIP_ALWAYS", "SIP_ADDRESS_ONLY"});
 
         /**
          * One of the sip call options: Always use SIP with network access.
@@ -3918,7 +3857,7 @@ public final class Settings {
         public static final String SIP_ALWAYS = "SIP_ALWAYS";
 
         /** @hide */
-        public static final Validator SIP_ALWAYS_VALIDATOR = sBooleanValidator;
+        public static final Validator SIP_ALWAYS_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * One of the sip call options: Only if destination is a SIP address.
@@ -3927,7 +3866,7 @@ public final class Settings {
         public static final String SIP_ADDRESS_ONLY = "SIP_ADDRESS_ONLY";
 
         /** @hide */
-        public static final Validator SIP_ADDRESS_ONLY_VALIDATOR = sBooleanValidator;
+        public static final Validator SIP_ADDRESS_ONLY_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * @deprecated Use SIP_ALWAYS or SIP_ADDRESS_ONLY instead.  Formerly used to indicate that
@@ -3940,7 +3879,7 @@ public final class Settings {
         public static final String SIP_ASK_ME_EACH_TIME = "SIP_ASK_ME_EACH_TIME";
 
         /** @hide */
-        public static final Validator SIP_ASK_ME_EACH_TIME_VALIDATOR = sBooleanValidator;
+        public static final Validator SIP_ASK_ME_EACH_TIME_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Pointer speed setting.
@@ -3954,7 +3893,7 @@ public final class Settings {
 
         /** @hide */
         public static final Validator POINTER_SPEED_VALIDATOR =
-                new InclusiveFloatRangeValidator(-7, 7);
+                new SettingsValidators.InclusiveFloatRangeValidator(-7, 7);
 
         /**
          * Whether lock-to-app will be triggered by long-press on recents.
@@ -3963,7 +3902,7 @@ public final class Settings {
         public static final String LOCK_TO_APP_ENABLED = "lock_to_app_enabled";
 
         /** @hide */
-        public static final Validator LOCK_TO_APP_ENABLED_VALIDATOR = sBooleanValidator;
+        public static final Validator LOCK_TO_APP_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * I am the lolrus.
@@ -3995,7 +3934,7 @@ public final class Settings {
         public static final String SHOW_BATTERY_PERCENT = "status_bar_show_battery_percent";
 
         /** @hide */
-        private static final Validator SHOW_BATTERY_PERCENT_VALIDATOR = sBooleanValidator;
+        private static final Validator SHOW_BATTERY_PERCENT_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * IMPORTANT: If you add a new public settings you also have to add it to
@@ -4179,7 +4118,8 @@ public final class Settings {
          */
         public static final Map<String, Validator> VALIDATORS = new ArrayMap<>();
         static {
-            VALIDATORS.put(END_BUTTON_BEHAVIOR,END_BUTTON_BEHAVIOR_VALIDATOR);
+            VALIDATORS.put(STAY_ON_WHILE_PLUGGED_IN, STAY_ON_WHILE_PLUGGED_IN_VALIDATOR);
+            VALIDATORS.put(END_BUTTON_BEHAVIOR, END_BUTTON_BEHAVIOR_VALIDATOR);
             VALIDATORS.put(WIFI_USE_STATIC_IP, WIFI_USE_STATIC_IP_VALIDATOR);
             VALIDATORS.put(BLUETOOTH_DISCOVERABILITY, BLUETOOTH_DISCOVERABILITY_VALIDATOR);
             VALIDATORS.put(BLUETOOTH_DISCOVERABILITY_TIMEOUT,
@@ -4201,6 +4141,8 @@ public final class Settings {
             VALIDATORS.put(TEXT_AUTO_CAPS, TEXT_AUTO_CAPS_VALIDATOR);
             VALIDATORS.put(TEXT_AUTO_PUNCTUATE, TEXT_AUTO_PUNCTUATE_VALIDATOR);
             VALIDATORS.put(TEXT_SHOW_PASSWORD, TEXT_SHOW_PASSWORD_VALIDATOR);
+            VALIDATORS.put(AUTO_TIME, AUTO_TIME_VALIDATOR);
+            VALIDATORS.put(AUTO_TIME_ZONE, AUTO_TIME_ZONE_VALIDATOR);
             VALIDATORS.put(SHOW_GTALK_SERVICE_STATUS, SHOW_GTALK_SERVICE_STATUS_VALIDATOR);
             VALIDATORS.put(WALLPAPER_ACTIVITY, WALLPAPER_ACTIVITY_VALIDATOR);
             VALIDATORS.put(TIME_12_24, TIME_12_24_VALIDATOR);
@@ -4211,6 +4153,8 @@ public final class Settings {
             VALIDATORS.put(DTMF_TONE_WHEN_DIALING, DTMF_TONE_WHEN_DIALING_VALIDATOR);
             VALIDATORS.put(SOUND_EFFECTS_ENABLED, SOUND_EFFECTS_ENABLED_VALIDATOR);
             VALIDATORS.put(HAPTIC_FEEDBACK_ENABLED, HAPTIC_FEEDBACK_ENABLED_VALIDATOR);
+            VALIDATORS.put(POWER_SOUNDS_ENABLED, POWER_SOUNDS_ENABLED_VALIDATOR);
+            VALIDATORS.put(DOCK_SOUNDS_ENABLED, DOCK_SOUNDS_ENABLED_VALIDATOR);
             VALIDATORS.put(SHOW_WEB_SUGGESTIONS, SHOW_WEB_SUGGESTIONS_VALIDATOR);
             VALIDATORS.put(WIFI_USE_STATIC_IP, WIFI_USE_STATIC_IP_VALIDATOR);
             VALIDATORS.put(END_BUTTON_BEHAVIOR, END_BUTTON_BEHAVIOR_VALIDATOR);
@@ -7796,11 +7740,15 @@ public final class Settings {
          */
         public static final String AUTO_TIME = "auto_time";
 
+        private static final Validator AUTO_TIME_VALIDATOR = BOOLEAN_VALIDATOR;
+
         /**
          * Value to specify if the user prefers the time zone
          * to be automatically fetched from the network (NITZ). 1=yes, 0=no
          */
         public static final String AUTO_TIME_ZONE = "auto_time_zone";
+
+        private static final Validator AUTO_TIME_ZONE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * URI for the car dock "in" event sound.
@@ -7831,6 +7779,8 @@ public final class Settings {
          * @hide
          */
         public static final String DOCK_SOUNDS_ENABLED = "dock_sounds_enabled";
+
+        private static final Validator DOCK_SOUNDS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Whether to play a sound for dock events, only when an accessibility service is on.
@@ -7869,6 +7819,8 @@ public final class Settings {
          */
         public static final String POWER_SOUNDS_ENABLED = "power_sounds_enabled";
 
+        private static final Validator POWER_SOUNDS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
+
         /**
          * URI for the "wireless charging started" sound.
          * @hide
@@ -7894,6 +7846,30 @@ public final class Settings {
          * These values can be OR-ed together.
          */
         public static final String STAY_ON_WHILE_PLUGGED_IN = "stay_on_while_plugged_in";
+
+        private static final Validator STAY_ON_WHILE_PLUGGED_IN_VALIDATOR = new Validator() {
+            @Override
+            public boolean validate(String value) {
+                try {
+                    int val = Integer.parseInt(value);
+                    return (val == 0)
+                            || (val == BatteryManager.BATTERY_PLUGGED_AC)
+                            || (val == BatteryManager.BATTERY_PLUGGED_USB)
+                            || (val == BatteryManager.BATTERY_PLUGGED_WIRELESS)
+                            || (val == (BatteryManager.BATTERY_PLUGGED_AC
+                                    | BatteryManager.BATTERY_PLUGGED_USB))
+                            || (val == (BatteryManager.BATTERY_PLUGGED_AC
+                                    | BatteryManager.BATTERY_PLUGGED_WIRELESS))
+                            || (val == (BatteryManager.BATTERY_PLUGGED_USB
+                                    | BatteryManager.BATTERY_PLUGGED_WIRELESS))
+                            || (val == (BatteryManager.BATTERY_PLUGGED_AC
+                                    | BatteryManager.BATTERY_PLUGGED_USB
+                                    | BatteryManager.BATTERY_PLUGGED_WIRELESS));
+                } catch (NumberFormatException e) {
+                    return false;
+                }
+            }
+        };
 
         /**
          * When the user has enable the option to have a "bug report" command
