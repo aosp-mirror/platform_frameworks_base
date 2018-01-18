@@ -277,8 +277,8 @@ public interface TextClassifier {
     /**
      * Returns a {@link Collection} of the entity types in the specified preset.
      *
-     * @see #ENTITIES_ALL
-     * @see #ENTITIES_NONE
+     * @see #ENTITY_PRESET_ALL
+     * @see #ENTITY_PRESET_NONE
      */
     default Collection<String> getEntitiesForPreset(@EntityPreset int entityPreset) {
         return Collections.EMPTY_LIST;
