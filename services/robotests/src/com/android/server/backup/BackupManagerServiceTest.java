@@ -75,7 +75,7 @@ import org.robolectric.shadows.ShadowSystemClock;
 )
 @SystemLoaderClasses({RefactoredBackupManagerService.class, TransportManager.class})
 @Presubmit
-public class BackupManagerServiceRoboTest {
+public class BackupManagerServiceTest {
     private static final String TAG = "BMSTest";
 
     @Mock private TransportManager mTransportManager;
