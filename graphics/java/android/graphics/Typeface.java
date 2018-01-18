@@ -1025,6 +1025,10 @@ public class Typeface {
                         xmlFamily.getName(), fallback, languageTags, variant, cache, fontDir);
                 if (family != null) {
                     fallbackMap.valueAt(i).add(family);
+                } else if (defaultFamily != null) {
+                    fallbackMap.valueAt(i).add(defaultFamily);
+                } else {
+                    // There is no valid for for default fallback. Ignore.
                 }
             }
         }
