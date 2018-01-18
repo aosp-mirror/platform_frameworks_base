@@ -185,6 +185,7 @@ status_t StatsService::dump(int fd, const Vector<String16>& args) {
  */
 void StatsService::dump_impl(FILE* out) {
     mConfigManager->Dump(out);
+    StatsdStats::getInstance().dumpStats(out);
 }
 
 /**
@@ -296,9 +297,8 @@ void StatsService::print_cmd_help(FILE* out) {
     fprintf(out, "  NAME          The name of the configuration\n");
     fprintf(out, "\n");
     fprintf(out, "\n");
-    fprintf(out, "usage: adb shell cmd stats print-stats [reset]\n");
+    fprintf(out, "usage: adb shell cmd stats print-stats\n");
     fprintf(out, "  Prints some basic stats.\n");
-    fprintf(out, "  reset: 1 to reset the statsd stats. default=0.\n");
 }
 
 status_t StatsService::cmd_trigger_broadcast(FILE* out, Vector<String8>& args) {
@@ -487,14 +487,8 @@ status_t StatsService::cmd_print_stats(FILE* out, const Vector<String8>& args) {
         fprintf(out, "Config %s uses %zu bytes\n", key.ToString().c_str(),
                 mProcessor->GetMetricsSize(key));
     }
-    fprintf(out, "Detailed statsd stats in logcat...\n");
     StatsdStats& statsdStats = StatsdStats::getInstance();
-    bool reset = false;
-    if (args.size() > 1) {
-        reset = strtol(args[1].string(), NULL, 10);
-    }
-    vector<uint8_t> output;
-    statsdStats.dumpStats(&output, reset);
+    statsdStats.dumpStats(out);
     return NO_ERROR;
 }
 
