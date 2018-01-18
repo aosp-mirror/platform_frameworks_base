@@ -49,6 +49,8 @@ import com.android.systemui.shared.recents.utilities.Utilities;
 
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_BOTTOM;
+import static com.android.systemui.OverviewProxyService.DEBUG_OVERVIEW_PROXY;
+import static com.android.systemui.OverviewProxyService.TAG_OPS;
 
 /**
  * Class to detect gestures on the navigation bar and implement quick scrub and switch.
@@ -144,6 +146,9 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
                     try {
                         final IOverviewProxy overviewProxy = mOverviewEventSender.getProxy();
                         overviewProxy.onQuickSwitch();
+                        if (DEBUG_OVERVIEW_PROXY) {
+                            Log.d(TAG_OPS, "Quick Switch");
+                        }
                     } catch (RemoteException e) {
                         Log.e(TAG, "Failed to send start of quick switch.", e);
                     }
@@ -256,6 +261,9 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
                         if (mQuickScrubActive) {
                             try {
                                 overviewProxy.onQuickScrubProgress(scrubFraction);
+                                if (DEBUG_OVERVIEW_PROXY) {
+                                    Log.d(TAG_OPS, "Quick Scrub Progress:" + scrubFraction);
+                                }
                             } catch (RemoteException e) {
                                 Log.e(TAG, "Failed to send progress of quick scrub.", e);
                             }
@@ -355,6 +363,9 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
             mTrackAnimator.start();
             try {
                 mOverviewEventSender.getProxy().onQuickScrubStart();
+                if (DEBUG_OVERVIEW_PROXY) {
+                    Log.d(TAG_OPS, "Quick Scrub Start");
+                }
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to send start of quick scrub.", e);
             }
@@ -369,6 +380,9 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
             mQuickScrubEndAnimator.start();
             try {
                 mOverviewEventSender.getProxy().onQuickScrubEnd();
+                if (DEBUG_OVERVIEW_PROXY) {
+                    Log.d(TAG_OPS, "Quick Scrub End");
+                }
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to send end of quick scrub.", e);
             }
