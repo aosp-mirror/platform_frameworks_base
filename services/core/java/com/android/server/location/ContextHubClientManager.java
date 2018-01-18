@@ -113,9 +113,7 @@ import java.util.function.Consumer;
         NanoAppMessage clientMessage = ContextHubServiceUtil.createNanoAppMessage(message);
 
         if (DEBUG_LOG_ENABLED) {
-            String targetAudience = clientMessage.isBroadcastMessage() ? "broadcast" : "unicast";
-            Log.v(TAG, "Received a " + targetAudience + " message from nanoapp 0x"
-                    + Long.toHexString(clientMessage.getNanoAppId()));
+            Log.v(TAG, "Received " + clientMessage);
         }
 
         if (clientMessage.isBroadcastMessage()) {

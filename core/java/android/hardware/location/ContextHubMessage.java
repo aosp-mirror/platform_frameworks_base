@@ -34,11 +34,10 @@ import java.util.Arrays;
 @SystemApi
 @Deprecated
 public class ContextHubMessage {
+    private static final int DEBUG_LOG_NUM_BYTES = 16;
     private int mType;
     private int mVersion;
     private byte[]mData;
-
-    private static final String TAG = "ContextHubMessage";
 
     /**
      * Get the message type
@@ -136,4 +135,28 @@ public class ContextHubMessage {
             return new ContextHubMessage[size];
         }
     };
+
+    @Override
+    public String toString() {
+        int length = mData.length;
+
+        String ret =
+                "ContextHubMessage[type = " + mType + ", length = " + mData.length + " bytes](";
+        if (length > 0) {
+            ret += "data = 0x";
+        }
+        for (int i = 0; i < Math.min(length, DEBUG_LOG_NUM_BYTES); i++) {
+            ret += Byte.toHexString(mData[i], true /* upperCase */);
+
+            if ((i + 1) % 4 == 0) {
+                ret += " ";
+            }
+        }
+        if (length > DEBUG_LOG_NUM_BYTES) {
+            ret += "...";
+        }
+        ret += ")";
+
+        return ret;
+    }
 }

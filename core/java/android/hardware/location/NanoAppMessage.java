@@ -28,6 +28,7 @@ import android.os.Parcelable;
  */
 @SystemApi
 public final class NanoAppMessage implements Parcelable {
+    private static final int DEBUG_LOG_NUM_BYTES = 16;
     private long mNanoAppId;
     private int mMessageType;
     private byte[] mMessageBody;
@@ -142,4 +143,29 @@ public final class NanoAppMessage implements Parcelable {
                     return new NanoAppMessage[size];
                 }
             };
+
+    @Override
+    public String toString() {
+        int length = mMessageBody.length;
+
+        String ret = "NanoAppMessage[type = " + mMessageType + ", length = " + mMessageBody.length
+                + " bytes, " + (mIsBroadcasted ? "broadcast" : "unicast") + ", nanoapp = 0x"
+                + Long.toHexString(mNanoAppId) + "](";
+        if (length > 0) {
+            ret += "data = 0x";
+        }
+        for (int i = 0; i < Math.min(length, DEBUG_LOG_NUM_BYTES); i++) {
+            ret += Byte.toHexString(mMessageBody[i], true /* upperCase */);
+
+            if ((i + 1) % 4 == 0) {
+                ret += " ";
+            }
+        }
+        if (length > DEBUG_LOG_NUM_BYTES) {
+            ret += "...";
+        }
+        ret += ")";
+
+        return ret;
+    }
 }
