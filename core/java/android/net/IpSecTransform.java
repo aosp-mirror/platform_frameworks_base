@@ -124,8 +124,7 @@ public final class IpSecTransform implements AutoCloseable {
         synchronized (this) {
             try {
                 IIpSecService svc = getIpSecService();
-                IpSecTransformResponse result =
-                        svc.createTransportModeTransform(mConfig, new Binder());
+                IpSecTransformResponse result = svc.createTransform(mConfig, new Binder());
                 int status = result.status;
                 checkResultStatus(status);
                 mResourceId = result.resourceId;
@@ -170,7 +169,7 @@ public final class IpSecTransform implements AutoCloseable {
              * still want to clear out the transform.
              */
             IIpSecService svc = getIpSecService();
-            svc.deleteTransportModeTransform(mResourceId);
+            svc.deleteTransform(mResourceId);
             stopKeepalive();
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
