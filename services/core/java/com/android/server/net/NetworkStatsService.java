@@ -1061,7 +1061,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         for (NetworkState state : states) {
             if (state.networkInfo.isConnected()) {
                 final boolean isMobile = isNetworkTypeMobile(state.networkInfo.getType());
-                final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, state);
+                final boolean isDefault = ArrayUtils.contains(mDefaultNetworks, state.network);
+                final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, state,
+                        isDefault);
 
                 // Traffic occurring on the base interface is always counted for
                 // both total usage and UID details.
@@ -1081,7 +1083,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                         // Copy the identify from IMS one but mark it as metered.
                         NetworkIdentity vtIdent = new NetworkIdentity(ident.getType(),
                                 ident.getSubType(), ident.getSubscriberId(), ident.getNetworkId(),
-                                ident.getRoaming(), true);
+                                ident.getRoaming(), true /* metered */,
+                                true /* onDefaultNetwork */);
                         findOrCreateNetworkIdentitySet(mActiveIfaces, VT_INTERFACE).add(vtIdent);
                         findOrCreateNetworkIdentitySet(mActiveUidIfaces, VT_INTERFACE).add(vtIdent);
                     }

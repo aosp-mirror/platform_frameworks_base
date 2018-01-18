@@ -226,6 +226,15 @@ public class NetworkStatsObserversTest {
         Mockito.verifyZeroInteractions(mockBinder);
     }
 
+    private NetworkIdentitySet makeTestIdentSet() {
+        NetworkIdentitySet identSet = new NetworkIdentitySet();
+        identSet.add(new NetworkIdentity(
+                TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
+                IMSI_1, null /* networkId */, false /* roaming */, true /* metered */,
+                true /* defaultNetwork */));
+        return identSet;
+    }
+
     @Test
     public void testUpdateStats_initialSample_doesNotNotify() throws Exception {
         DataUsageRequest inputRequest = new DataUsageRequest(
@@ -237,10 +246,7 @@ public class NetworkStatsObserversTest {
         assertTrue(Objects.equals(sTemplateImsi1, request.template));
         assertEquals(THRESHOLD_BYTES, request.thresholdInBytes);
 
-        NetworkIdentitySet identSet = new NetworkIdentitySet();
-        identSet.add(new NetworkIdentity(
-                TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                IMSI_1, null /* networkId */, false /* roaming */, true /* metered */));
+        NetworkIdentitySet identSet = makeTestIdentSet();
         mActiveIfaces.put(TEST_IFACE, identSet);
 
         // Baseline
@@ -265,10 +271,7 @@ public class NetworkStatsObserversTest {
         assertTrue(Objects.equals(sTemplateImsi1, request.template));
         assertEquals(THRESHOLD_BYTES, request.thresholdInBytes);
 
-        NetworkIdentitySet identSet = new NetworkIdentitySet();
-        identSet.add(new NetworkIdentity(
-                TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                IMSI_1, null /* networkId */, false /* roaming */, true /* metered */));
+        NetworkIdentitySet identSet = makeTestIdentSet();
         mActiveIfaces.put(TEST_IFACE, identSet);
 
         // Baseline
@@ -300,10 +303,7 @@ public class NetworkStatsObserversTest {
         assertTrue(Objects.equals(sTemplateImsi1, request.template));
         assertEquals(THRESHOLD_BYTES, request.thresholdInBytes);
 
-        NetworkIdentitySet identSet = new NetworkIdentitySet();
-        identSet.add(new NetworkIdentity(
-                TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                IMSI_1, null /* networkId */, false /* roaming */, true /* metered */));
+        NetworkIdentitySet identSet = makeTestIdentSet();
         mActiveIfaces.put(TEST_IFACE, identSet);
 
         // Baseline
@@ -336,10 +336,7 @@ public class NetworkStatsObserversTest {
         assertTrue(Objects.equals(sTemplateImsi1, request.template));
         assertEquals(THRESHOLD_BYTES, request.thresholdInBytes);
 
-        NetworkIdentitySet identSet = new NetworkIdentitySet();
-        identSet.add(new NetworkIdentity(
-                TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                IMSI_1, null /* networkId */, false /* roaming */, true /* metered */));
+        NetworkIdentitySet identSet = makeTestIdentSet();
         mActiveUidIfaces.put(TEST_IFACE, identSet);
 
         // Baseline
@@ -374,10 +371,7 @@ public class NetworkStatsObserversTest {
         assertTrue(Objects.equals(sTemplateImsi1, request.template));
         assertEquals(THRESHOLD_BYTES, request.thresholdInBytes);
 
-        NetworkIdentitySet identSet = new NetworkIdentitySet();
-        identSet.add(new NetworkIdentity(
-                TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                IMSI_1, null /* networkId */, false /* roaming */, true /* metered */));
+        NetworkIdentitySet identSet = makeTestIdentSet();
         mActiveUidIfaces.put(TEST_IFACE, identSet);
 
         // Baseline
@@ -411,10 +405,7 @@ public class NetworkStatsObserversTest {
         assertTrue(Objects.equals(sTemplateImsi1, request.template));
         assertEquals(THRESHOLD_BYTES, request.thresholdInBytes);
 
-        NetworkIdentitySet identSet = new NetworkIdentitySet();
-        identSet.add(new NetworkIdentity(
-                TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                IMSI_1, null /* networkId */, false /* roaming */, true /* metered */));
+        NetworkIdentitySet identSet = makeTestIdentSet();
         mActiveUidIfaces.put(TEST_IFACE, identSet);
 
         // Baseline
@@ -449,10 +440,7 @@ public class NetworkStatsObserversTest {
         assertTrue(Objects.equals(sTemplateImsi1, request.template));
         assertEquals(THRESHOLD_BYTES, request.thresholdInBytes);
 
-        NetworkIdentitySet identSet = new NetworkIdentitySet();
-        identSet.add(new NetworkIdentity(
-                TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                IMSI_1, null /* networkId */, false /* roaming */, true /* metered */));
+        NetworkIdentitySet identSet = makeTestIdentSet();
         mActiveUidIfaces.put(TEST_IFACE, identSet);
 
         // Baseline

@@ -195,7 +195,7 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
         final NetworkStats.Entry entry = new NetworkStats.Entry();
         final NetworkIdentitySet identSet = new NetworkIdentitySet();
         identSet.add(new NetworkIdentity(TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                TEST_IMSI, null, false, true));
+                TEST_IMSI, null, false, true, true));
 
         int myUid = Process.myUid();
         int otherUidInSameUser = Process.myUid() + 1;
@@ -447,7 +447,7 @@ public class NetworkStatsCollectionTest extends AndroidTestCase {
         final NetworkStatsCollection large = new NetworkStatsCollection(HOUR_IN_MILLIS);
         final NetworkIdentitySet ident = new NetworkIdentitySet();
         ident.add(new NetworkIdentity(ConnectivityManager.TYPE_MOBILE, -1, TEST_IMSI, null,
-                false, true));
+                false, true, true));
         large.recordData(ident, UID_ALL, SET_ALL, TAG_NONE, TIME_A, TIME_B,
                 new NetworkStats.Entry(12_730_893_164L, 1, 0, 0, 0));
 
