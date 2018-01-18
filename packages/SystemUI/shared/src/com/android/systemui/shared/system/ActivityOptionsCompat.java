@@ -38,4 +38,9 @@ public abstract class ActivityOptionsCompat {
                 : SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT);
         return options;
     }
+
+    public static ActivityOptions makeRemoteAnimation(
+            RemoteAnimationAdapterCompat remoteAnimationAdapter) {
+        return ActivityOptions.makeRemoteAnimation(remoteAnimationAdapter.getWrapped());
+    }
 }
