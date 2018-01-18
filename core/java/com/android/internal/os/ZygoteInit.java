@@ -30,7 +30,6 @@ import android.os.IInstalld;
 import android.os.Environment;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.Seccomp;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.os.SystemClock;
@@ -781,11 +780,10 @@ public class ZygoteInit {
             // Zygote.
             Trace.setTracingEnabled(false, 0);
 
+            Zygote.nativeSecurityInit();
+
             // Zygote process unmounts root storage spaces.
             Zygote.nativeUnmountStorageOnInit();
-
-            // Set seccomp policy
-            Seccomp.setPolicy();
 
             ZygoteHooks.stopZygoteNoThreadCreation();
 
