@@ -106,6 +106,10 @@ public class EditText extends TextView {
     @Override
     public Editable getText() {
         CharSequence text = super.getText();
+        // This can only happen during construction.
+        if (text == null) {
+            return null;
+        }
         if (text instanceof Editable) {
             return (Editable) super.getText();
         }
