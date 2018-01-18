@@ -25142,6 +25142,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void setSwitchingToSystemUserMessage(String switchingToSystemUserMessage) {
             mUserController.setSwitchingToSystemUserMessage(switchingToSystemUserMessage);
         }
+
+        @Override
+        public int getMaxRunningUsers() {
+            return mUserController.mMaxRunningUsers;
+        }
     }
 
     /**

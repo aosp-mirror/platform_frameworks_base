@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import android.accounts.IAccountManager;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -72,6 +73,7 @@ import android.util.PrintWriterPrinter;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.SizedInputStream;
+import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 
 import dalvik.system.DexFile;
@@ -222,6 +224,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runSetUserRestriction();
                 case "get-max-users":
                     return runGetMaxUsers();
+                case "get-max-running-users":
+                    return runGetMaxRunningUsers();
                 case "set-home-activity":
                     return runSetHomeActivity();
                 case "set-installer":
@@ -1883,6 +1887,14 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    public int runGetMaxRunningUsers() {
+        ActivityManagerInternal activityManagerInternal =
+                LocalServices.getService(ActivityManagerInternal.class);
+        getOutPrintWriter().println("Maximum supported running users: "
+                + activityManagerInternal.getMaxRunningUsers());
+        return 0;
+    }
+
     private static class InstallParams {
         SessionParams sessionParams;
         String installerPackageName;
@@ -2606,6 +2618,8 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("  set-user-restriction [--user USER_ID] RESTRICTION VALUE");
         pw.println("");
         pw.println("  get-max-users");
+        pw.println("");
+        pw.println("  get-max-running-users");
         pw.println("");
         pw.println("  compile [-m MODE | -r REASON] [-f] [-c] [--split SPLIT_NAME]");
         pw.println("          [--reset] [--check-prof (true | false)] (-a | TARGET-PACKAGE)");
