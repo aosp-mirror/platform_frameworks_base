@@ -51,7 +51,7 @@ public class KeySyncUtilsTest {
     private static final int THM_KF_HASH_SIZE = 256;
     private static final int KEY_CLAIMANT_LENGTH_BYTES = 16;
     private static final byte[] TEST_VAULT_HANDLE =
-            new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 14, 15, 16, 17};
+            new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
     private static final String SHA_256_ALGORITHM = "SHA-256";
     private static final String APPLICATION_KEY_ALGORITHM = "AES";
     private static final byte[] LOCK_SCREEN_HASH_1 =
@@ -417,8 +417,7 @@ public class KeySyncUtilsTest {
         byteBuffer.position(PUBLIC_KEY_LENGTH_BYTES + Long.BYTES + Integer.BYTES);
         byte[] vaultHandle = new byte[VAULT_HANDLE_LENGTH_BYTES];
         byteBuffer.get(vaultHandle);
-        // TODO: Fix this once we fix the code in the KeySyncUtils class
-        assertArrayEquals(new byte[VAULT_HANDLE_LENGTH_BYTES], vaultHandle);
+        assertArrayEquals(TEST_VAULT_HANDLE, vaultHandle);
     }
 
     private static byte[] randomBytes(int n) {
