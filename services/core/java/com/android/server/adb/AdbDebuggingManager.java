@@ -37,7 +37,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.service.usb.UsbDebuggingManagerProto;
+import android.service.adb.AdbDebuggingManagerProto;
 import android.util.Base64;
 import android.util.Slog;
 
@@ -481,19 +481,19 @@ public class AdbDebuggingManager {
     public void dump(DualDumpOutputStream dump, String idName, long id) {
         long token = dump.start(idName, id);
 
-        dump.write("connected_to_adb", UsbDebuggingManagerProto.CONNECTED_TO_ADB, mThread != null);
-        writeStringIfNotNull(dump, "last_key_received", UsbDebuggingManagerProto.LAST_KEY_RECEIVED,
+        dump.write("connected_to_adb", AdbDebuggingManagerProto.CONNECTED_TO_ADB, mThread != null);
+        writeStringIfNotNull(dump, "last_key_received", AdbDebuggingManagerProto.LAST_KEY_RECEVIED,
                 mFingerprints);
 
         try {
-            dump.write("user_keys", UsbDebuggingManagerProto.USER_KEYS,
+            dump.write("user_keys", AdbDebuggingManagerProto.USER_KEYS,
                     FileUtils.readTextFile(new File("/data/misc/adb/adb_keys"), 0, null));
         } catch (IOException e) {
             Slog.e(TAG, "Cannot read user keys", e);
         }
 
         try {
-            dump.write("system_keys", UsbDebuggingManagerProto.SYSTEM_KEYS,
+            dump.write("system_keys", AdbDebuggingManagerProto.SYSTEM_KEYS,
                     FileUtils.readTextFile(new File("/adb_keys"), 0, null));
         } catch (IOException e) {
             Slog.e(TAG, "Cannot read system keys", e);

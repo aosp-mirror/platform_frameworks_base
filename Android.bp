@@ -150,6 +150,7 @@ java_defaults {
         "core/java/android/content/pm/dex/ISnapshotRuntimeProfileCallback.aidl",
         "core/java/android/content/pm/permission/IRuntimePermissionPresenter.aidl",
         "core/java/android/database/IContentObserver.aidl",
+        "core/java/android/debug/IAdbManager.aidl",
         ":libcamera_client_aidl",
         ":libcamera_client_framework_aidl",
         "core/java/android/hardware/IConsumerIrService.aidl",
