@@ -424,15 +424,6 @@ public class KeyStore {
         return getmtime(key, UID_SELF);
     }
 
-    public boolean duplicate(String srcKey, int srcUid, String destKey, int destUid) {
-        try {
-            return mBinder.duplicate(srcKey, srcUid, destKey, destUid) == NO_ERROR;
-        } catch (RemoteException e) {
-            Log.w(TAG, "Cannot connect to keystore", e);
-            return false;
-        }
-    }
-
     // TODO: remove this when it's removed from Settings
     public boolean isHardwareBacked() {
         return isHardwareBacked("RSA");
