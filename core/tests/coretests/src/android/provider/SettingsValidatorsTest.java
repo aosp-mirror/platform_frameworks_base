@@ -19,11 +19,14 @@ package android.provider;
 import static org.junit.Assert.fail;
 
 import android.platform.test.annotations.Presubmit;
+import android.provider.SettingsValidators.Validator;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Map;
 
 /** Tests that ensure all backed up settings have non-null validators. */
 @Presubmit
@@ -33,18 +36,34 @@ public class SettingsValidatorsTest {
 
     @Test
     public void ensureAllBackedUpSystemSettingsHaveValidators() {
+        String offenders = getOffenders(Settings.System.SETTINGS_TO_BACKUP,
+                Settings.System.VALIDATORS);
+
+        failIfOffendersPresent(offenders, "Settings.System");
+    }
+
+    @Test
+    public void ensureAllBackedUpGlobalSettingsHaveValidators() {
+        String offenders = getOffenders(Settings.Global.SETTINGS_TO_BACKUP,
+                Settings.Global.VALIDATORS);
+
+        failIfOffendersPresent(offenders, "Settings.Global");
+    }
+
+    private void failIfOffendersPresent(String offenders, String settingsType) {
+        if (offenders.length() > 0) {
+            fail("All " + settingsType + " settings that are backed up have to have a non-null"
+                    + " validator, but those don't: " + offenders);
+        }
+    }
+
+    private String getOffenders(String[] settingsToBackup, Map<String, Validator> validators) {
         StringBuilder offenders = new StringBuilder();
-        for (String setting : Settings.System.SETTINGS_TO_BACKUP) {
-            if (Settings.System.VALIDATORS.get(setting) == null) {
+        for (String setting : settingsToBackup) {
+            if (validators.get(setting) == null) {
                 offenders.append(setting).append(" ");
             }
         }
-
-        // if there're any offenders fail the test and report them
-        String offendersStr = offenders.toString();
-        if (offendersStr.length() > 0) {
-            fail("All Settings.System settings that are backed up have to have a non-null"
-                    + " validator, but those don't: " + offendersStr);
-        }
+        return offenders.toString();
     }
 }
