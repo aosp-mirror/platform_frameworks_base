@@ -17,9 +17,13 @@
 package com.android.server.pm.dex;
 
 import android.Manifest;
+import android.annotation.UserIdInt;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageParser;
 import android.content.pm.dex.ArtManager;
+import android.content.pm.dex.DexMetadataHelper;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
@@ -29,10 +33,12 @@ import android.content.pm.IPackageManager;
 import android.content.pm.dex.ISnapshotRuntimeProfileCallback;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
@@ -229,5 +235,53 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         } catch (RemoteException e) {
             // Should not happen.
         }
+    }
+
+    /**
+     * Prepare the application profiles.
+     * For all code paths:
+     *   - create the current primary profile to save time at app startup time.
+     *   - copy the profiles from the associated dex metadata file to the reference profile.
+     */
+    public void prepareAppProfiles(PackageParser.Package pkg, @UserIdInt int user) {
+        final int appId = UserHandle.getAppId(pkg.applicationInfo.uid);
+        try {
+            ArrayMap<String, String> codePathsProfileNames = getPackageProfileNames(pkg);
+            for (int i = codePathsProfileNames.size() - 1; i >= 0; i--) {
+                String codePath = codePathsProfileNames.keyAt(i);
+                String profileName = codePathsProfileNames.valueAt(i);
+                File dexMetadata = DexMetadataHelper.findDexMetadataForFile(new File(codePath));
+                String dexMetadataPath = dexMetadata == null ? null : dexMetadata.getAbsolutePath();
+                synchronized (mInstaller) {
+                    boolean result = mInstaller.prepareAppProfile(pkg.packageName, user, appId,
+                            profileName, codePath, dexMetadataPath);
+                    if (!result) {
+                        Slog.e(TAG, "Failed to prepare profile for " +
+                                pkg.packageName + ":" + codePath);
+                    }
+                }
+            }
+        } catch (InstallerException e) {
+            Slog.e(TAG, "Failed to prepare profile for " + pkg.packageName, e);
+        }
+    }
+
+    /**
+     * Build the profiles names for all the package code paths (excluding resource only paths).
+     * Return the map [code path -> profile name].
+     */
+    private ArrayMap<String, String> getPackageProfileNames(PackageParser.Package pkg) {
+        ArrayMap<String, String> result = new ArrayMap<>();
+        if ((pkg.applicationInfo.flags & ApplicationInfo.FLAG_HAS_CODE) != 0) {
+            result.put(pkg.baseCodePath, ArtManager.getProfileName(null));
+        }
+        if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
+            for (int i = 0; i < pkg.splitCodePaths.length; i++) {
+                if ((pkg.splitFlags[i] & ApplicationInfo.FLAG_HAS_CODE) != 0) {
+                    result.put(pkg.splitCodePaths[i], ArtManager.getProfileName(pkg.splitNames[i]));
+                }
+            }
+        }
+        return result;
     }
 }

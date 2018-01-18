@@ -16,7 +16,9 @@
 
 package com.android.server.pm;
 
+import android.annotation.AppIdInt;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.PackageStats;
 import android.os.Build;
@@ -532,6 +534,17 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return false;
         try {
             return mInstalld.isQuotaSupported(volumeUuid);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    public boolean prepareAppProfile(String pkg, @UserIdInt int userId, @AppIdInt int appId,
+            String profileName, String codePath, String dexMetadataPath) throws InstallerException {
+        if (!checkBeforeRemote()) return false;
+        try {
+            return mInstalld.prepareAppProfile(pkg, userId, appId, profileName, codePath,
+                    dexMetadataPath);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }

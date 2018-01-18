@@ -153,4 +153,14 @@ public class ArtManager {
             return true;
         }
     }
+
+    /**
+     * Return the profile name for the given split. If {@code splitName} is null the
+     * method returns the profile name for the base apk.
+     *
+     * @hide
+     */
+    public static String getProfileName(String splitName) {
+        return splitName == null ? "primary.prof" : splitName + ".split.prof";
+    }
 }

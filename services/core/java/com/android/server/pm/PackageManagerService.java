@@ -2468,6 +2468,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 installer, mInstallLock);
         mDexManager = new DexManager(this, mPackageDexOptimizer, installer, mInstallLock,
                 dexManagerListener);
+        mArtManagerService = new ArtManagerService(this, installer, mInstallLock);
         mMoveCallbacks = new MoveCallbacks(FgThread.get().getLooper());
 
         mOnPermissionChangeListeners = new OnPermissionChangeListeners(
@@ -3065,7 +3066,6 @@ public class PackageManagerService extends IPackageManager.Stub
             }
 
             mInstallerService = new PackageInstallerService(context, this);
-            mArtManagerService = new ArtManagerService(this, mInstaller, mInstallLock);
             final Pair<ComponentName, String> instantAppResolverComponent =
                     getInstantAppResolverLPr();
             if (instantAppResolverComponent != null) {
@@ -18845,6 +18845,11 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
+        // Prepare the application profiles for the new code paths.
+        // This needs to be done before invoking dexopt so that any install-time profile
+        // can be used for optimizations.
+        mArtManagerService.prepareAppProfiles(pkg, args.user.getIdentifier());
+
         // Check whether we need to dexopt the app.
         //
         // NOTE: it is IMPORTANT to call dexopt:
@@ -24219,6 +24224,8 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                 Slog.e(TAG, "Failed to create app data for " + packageName + ": " + e);
             }
         }
+        // Prepare the application profiles.
+        mArtManagerService.prepareAppProfiles(pkg, userId);
 
         if ((flags & StorageManager.FLAG_STORAGE_CE) != 0 && ceDataInode != -1) {
             // TODO: mark this structure as dirty so we persist it!
