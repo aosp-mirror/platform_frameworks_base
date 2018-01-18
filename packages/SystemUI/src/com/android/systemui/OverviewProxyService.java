@@ -51,7 +51,8 @@ import java.util.List;
  */
 public class OverviewProxyService implements CallbackController<OverviewProxyListener>, Dumpable {
 
-    private static final String TAG = "OverviewProxyService";
+    public static final String TAG_OPS = "OverviewProxyService";
+    public static final boolean DEBUG_OVERVIEW_PROXY = false;
     private static final long BACKOFF_MILLIS = 5000;
 
     private final Context mContext;
@@ -96,12 +97,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 try {
                     service.linkToDeath(mOverviewServiceDeathRcpt, 0);
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Lost connection to launcher service", e);
+                    Log.e(TAG_OPS, "Lost connection to launcher service", e);
                 }
                 try {
                     mOverviewProxy.onBind(mSysUiProxy);
                 } catch (RemoteException e) {
-                    Log.e(TAG, "Failed to call onBind()", e);
+                    Log.e(TAG_OPS, "Failed to call onBind()", e);
                 }
                 notifyConnectionChanged();
             }
@@ -211,7 +212,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println(TAG + " state:");
+        pw.println(TAG_OPS + " state:");
         pw.print("  mConnectionBackoffAttempts="); pw.println(mConnectionBackoffAttempts);
         pw.print("  isCurrentUserSetup="); pw.println(mDeviceProvisionedController
                 .isCurrentUserSetup());

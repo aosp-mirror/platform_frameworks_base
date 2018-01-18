@@ -43,6 +43,8 @@ import com.android.systemui.tuner.TunerService;
 import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_TOP;
+import static com.android.systemui.OverviewProxyService.DEBUG_OVERVIEW_PROXY;
+import static com.android.systemui.OverviewProxyService.TAG_OPS;
 
 /**
  * Class to detect gestures on the navigation bar.
@@ -118,6 +120,9 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
             event.transform(mTransformGlobalMatrix);
             try {
                 overviewProxy.onMotionEvent(event);
+                if (DEBUG_OVERVIEW_PROXY) {
+                    Log.d(TAG_OPS, "Send MotionEvent: " + event.toString());
+                }
                 return true;
             } catch (RemoteException e) {
                 Log.e(TAG, "Callback failed", e);
