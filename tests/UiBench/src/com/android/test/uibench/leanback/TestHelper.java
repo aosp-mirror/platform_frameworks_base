@@ -40,6 +40,7 @@ public class TestHelper {
     public static final String EXTRA_CARD_ROUND_RECT = "extra_card_round_rect";
     public static final String EXTRA_ENTRANCE_TRANSITION = "extra_entrance_transition";
     public static final String EXTRA_BITMAP_UPLOAD = "extra_bitmap_upload";
+    public static final String EXTRA_SHOW_FAST_LANE = "extra_show_fast_lane";
 
     /**
      * Dont change the default values, they gave baseline for measuring the performance
@@ -53,6 +54,7 @@ public class TestHelper {
     static final boolean DEFAULT_CARD_SHADOW = true;
     static final boolean DEFAULT_CARD_ROUND_RECT = true;
     static final boolean DEFAULT_BITMAP_UPLOAD = true;
+    static final boolean DEFAULT_SHOW_FAST_LANE = true;
 
     static long sCardIdSeed = 0;
     static long sRowIdSeed = 0;
@@ -233,6 +235,13 @@ public class TestHelper {
             canvas.drawARGB(255, 128, 128, 128);
             canvas.setBitmap(null);
             manager.setBitmap(bitmap);
+        }
+    }
+
+    public static void initHeaderState(BrowseFragment fragment) {
+        if (!fragment.getActivity().getIntent()
+                .getBooleanExtra(EXTRA_SHOW_FAST_LANE, DEFAULT_SHOW_FAST_LANE)) {
+            fragment.setHeadersState(BrowseFragment.HEADERS_HIDDEN);
         }
     }
 }
