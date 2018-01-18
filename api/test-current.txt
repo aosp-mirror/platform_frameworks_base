@@ -563,11 +563,6 @@ package android.service.autofill {
     method public void apply(android.service.autofill.ValueFinder, android.widget.RemoteViews, int) throws java.lang.Exception;
   }
 
-  public final class EditDistanceScorer {
-    method public static android.service.autofill.EditDistanceScorer getInstance();
-    method public float getScore(android.view.autofill.AutofillValue, java.lang.String);
-  }
-
   public final class FillResponse implements android.os.Parcelable {
     method public int getFlags();
   }

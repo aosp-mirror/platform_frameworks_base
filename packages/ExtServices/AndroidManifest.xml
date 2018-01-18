@@ -51,6 +51,13 @@
             </intent-filter>
         </service>
 
+        <service android:name=".autofill.AutofillFieldClassificationServiceImpl"
+             android:permission="android.permission.BIND_AUTOFILL_FIELD_CLASSIFICATION_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.autofill.AutofillFieldClassificationService" />
+            </intent-filter>
+        </service>
+
         <library android:name="android.ext.services"/>
     </application>
 

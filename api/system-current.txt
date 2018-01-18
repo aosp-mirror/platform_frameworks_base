@@ -3856,6 +3856,28 @@ package android.security.keystore {
 
 }
 
+package android.service.autofill {
+
+  public abstract class AutofillFieldClassificationService extends android.app.Service {
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public java.util.List<java.lang.String> onGetAvailableAlgorithms();
+    method public java.lang.String onGetDefaultAlgorithm();
+    method public android.service.autofill.AutofillFieldClassificationService.Scores onGetScores(java.lang.String, android.os.Bundle, java.util.List<android.view.autofill.AutofillValue>, java.util.List<java.lang.String>);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.autofill.AutofillFieldClassificationService";
+  }
+
+  public static final class AutofillFieldClassificationService.Scores implements android.os.Parcelable {
+    ctor public AutofillFieldClassificationService.Scores(java.lang.String, int, int);
+    ctor public AutofillFieldClassificationService.Scores(android.os.Parcel);
+    method public int describeContents();
+    method public java.lang.String getAlgorithm();
+    method public float[][] getScores();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.autofill.AutofillFieldClassificationService.Scores> CREATOR;
+  }
+
+}
+
 package android.service.notification {
 
   public final class Adjustment implements android.os.Parcelable {

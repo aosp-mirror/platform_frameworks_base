@@ -554,8 +554,6 @@
     <protected-broadcast android:name="android.intent.action.DEVICE_LOCKED_CHANGED" />
 
     <!-- Added in O -->
-    <!-- TODO: temporary broadcast used by AutoFillManagerServiceImpl; will be removed -->
-    <protected-broadcast android:name="com.android.internal.autofill.action.REQUEST_AUTOFILL" />
     <protected-broadcast android:name="android.app.action.APPLICATION_DELEGATION_SCOPES_CHANGED" />
     <protected-broadcast android:name="com.android.server.wm.ACTION_REVOKE_SYSTEM_ALERT_WINDOW_PERMISSION" />
     <protected-broadcast android:name="android.media.tv.action.PARENTAL_CONTROLS_ENABLED_CHANGED" />
@@ -2683,6 +2681,13 @@
     -->
     <permission android:name="android.permission.BIND_AUTOFILL_SERVICE"
         android:protectionLevel="signature" />
+
+    <!-- Must be required by an {@link android.service.autofill.AutofillFieldClassificationService}
+         to ensure that only the system can bind to it.
+         @hide This is not a third-party API (intended for OEMs and system apps).
+    -->
+    <permission android:name="android.permission.BIND_AUTOFILL_FIELD_CLASSIFICATION_SERVICE"
+                android:protectionLevel="signature" />
 
     <!-- Must be required by hotword enrollment application,
          to ensure that only the system can interact with it.
