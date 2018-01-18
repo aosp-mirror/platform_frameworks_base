@@ -103,7 +103,6 @@ public class VolumeDialogImpl implements VolumeDialog {
     private ViewGroup mDialogView;
     private ViewGroup mDialogRowsView;
     private ImageButton mRingerIcon;
-    private ImageButton mOutputChooser;
     private TextView mRingerStatus;
     private final List<VolumeRow> mRows = new ArrayList<>();
     private ConfigurableTexts mConfigurableTexts;
@@ -225,9 +224,6 @@ public class VolumeDialogImpl implements VolumeDialog {
             addExistingRows();
         }
 
-        mOutputChooser = mDialogView.findViewById(R.id.output_chooser);
-        mOutputChooser.setOnClickListener(mClickOutputChooser);
-
         updateRowsH(getActiveRow());
         initRingerH();
     }
@@ -334,6 +330,9 @@ public class VolumeDialogImpl implements VolumeDialog {
         row.slider =  row.view.findViewById(R.id.volume_row_slider);
         row.slider.setOnSeekBarChangeListener(new VolumeSeekBarChangeListener(row));
         row.anim = null;
+
+        ImageButton outputChooser = row.view.findViewById(R.id.output_chooser);
+        outputChooser.setOnClickListener(mClickOutputChooser);
 
         // forward events above the slider into the slider
         row.view.setOnTouchListener(new OnTouchListener() {
