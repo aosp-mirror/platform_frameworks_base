@@ -65,6 +65,7 @@ public final class SelectionActionModeHelper {
 
     private static final String LOG_TAG = "SelectActionModeHelper";
 
+    // TODO: Make this a configurable flag.
     private static final boolean SMART_SELECT_ANIMATION_ENABLED = true;
 
     private final Editor mEditor;

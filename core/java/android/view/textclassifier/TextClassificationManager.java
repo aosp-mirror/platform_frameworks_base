@@ -19,6 +19,8 @@ package android.view.textclassifier;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.content.Context;
+import android.os.ServiceManager;
+import android.service.textclassifier.TextClassifierService;
 
 import com.android.internal.util.Preconditions;
 
@@ -28,10 +30,16 @@ import com.android.internal.util.Preconditions;
 @SystemService(Context.TEXT_CLASSIFICATION_SERVICE)
 public final class TextClassificationManager {
 
-    private final Object mTextClassifierLock = new Object();
+    // TODO: Make this a configurable flag.
+    private static final boolean SYSTEM_TEXT_CLASSIFIER_ENABLED = true;
+
+    private static final String LOG_TAG = "TextClassificationManager";
+
+    private final Object mLock = new Object();
 
     private final Context mContext;
     private TextClassifier mTextClassifier;
+    private TextClassifier mSystemTextClassifier;
 
     /** @hide */
     public TextClassificationManager(Context context) {
@@ -39,12 +47,39 @@ public final class TextClassificationManager {
     }
 
     /**
+     * Returns the system's default TextClassifier.
+     * @hide
+     */
+    // TODO: Unhide when this is ready.
+    public TextClassifier getSystemDefaultTextClassifier() {
+        synchronized (mLock) {
+            if (mSystemTextClassifier == null && isSystemTextClassifierEnabled()) {
+                try {
+                    Log.d(LOG_TAG, "Initialized SystemTextClassifier");
+                    mSystemTextClassifier = new SystemTextClassifier(mContext);
+                } catch (ServiceManager.ServiceNotFoundException e) {
+                    Log.e(LOG_TAG, "Could not initialize SystemTextClassifier", e);
+                }
+            }
+            if (mSystemTextClassifier == null) {
+                Log.d(LOG_TAG, "Using an in-process TextClassifier as the system default");
+                mSystemTextClassifier = new TextClassifierImpl(mContext);
+            }
+        }
+        return mSystemTextClassifier;
+    }
+
+    /**
      * Returns the text classifier.
      */
     public TextClassifier getTextClassifier() {
-        synchronized (mTextClassifierLock) {
+        synchronized (mLock) {
             if (mTextClassifier == null) {
-                mTextClassifier = new TextClassifierImpl(mContext);
+                if (isSystemTextClassifierEnabled()) {
+                    mTextClassifier = getSystemDefaultTextClassifier();
+                } else {
+                    mTextClassifier = new TextClassifierImpl(mContext);
+                }
             }
             return mTextClassifier;
         }
@@ -56,8 +91,13 @@ public final class TextClassificationManager {
      * Set to {@link TextClassifier#NO_OP} to disable text classifier features.
      */
     public void setTextClassifier(@Nullable TextClassifier textClassifier) {
-        synchronized (mTextClassifierLock) {
+        synchronized (mLock) {
             mTextClassifier = textClassifier;
         }
+    }
+
+    private boolean isSystemTextClassifierEnabled() {
+        return SYSTEM_TEXT_CLASSIFIER_ENABLED
+                && TextClassifierService.getServiceComponentName(mContext) != null;
     }
 }

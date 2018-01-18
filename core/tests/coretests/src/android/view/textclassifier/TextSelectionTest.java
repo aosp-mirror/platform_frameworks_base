@@ -45,15 +45,11 @@ public class TextSelectionTest {
                 .setSignature(signature)
                 .build();
 
-        // Parcel and unparcel using ParcelableWrapper.
-        final TextSelection.ParcelableWrapper parcelableReference = new TextSelection
-                .ParcelableWrapper(reference);
+        // Parcel and unparcel
         final Parcel parcel = Parcel.obtain();
-        parcelableReference.writeToParcel(parcel, parcelableReference.describeContents());
+        reference.writeToParcel(parcel, reference.describeContents());
         parcel.setDataPosition(0);
-        final TextSelection result =
-                TextSelection.ParcelableWrapper.CREATOR.createFromParcel(
-                        parcel).getTextSelection();
+        final TextSelection result = TextSelection.CREATOR.createFromParcel(parcel);
 
         assertEquals(startIndex, result.getSelectionStartIndex());
         assertEquals(endIndex, result.getSelectionEndIndex());

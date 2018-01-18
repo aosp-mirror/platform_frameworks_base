@@ -66,7 +66,7 @@ import java.util.regex.Pattern;
  *
  * @hide
  */
-final class TextClassifierImpl implements TextClassifier {
+public final class TextClassifierImpl implements TextClassifier {
 
     private static final String LOG_TAG = DEFAULT_LOG_TAG;
     private static final String MODEL_DIR = "/etc/textclassifier/";
@@ -90,30 +90,33 @@ final class TextClassifierImpl implements TextClassifier {
                     TextClassifier.TYPE_URL));
 
     private final Context mContext;
+    private final TextClassifier mFallback;
 
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
-    private final Object mSmartSelectionLock = new Object();
-    @GuardedBy("mSmartSelectionLock") // Do not access outside this lock.
+    private final Object mLock = new Object();
+    @GuardedBy("mLock") // Do not access outside this lock.
     private Map<Locale, String> mModelFilePaths;
-    @GuardedBy("mSmartSelectionLock") // Do not access outside this lock.
+    @GuardedBy("mLock") // Do not access outside this lock.
     private Locale mLocale;
-    @GuardedBy("mSmartSelectionLock") // Do not access outside this lock.
+    @GuardedBy("mLock") // Do not access outside this lock.
     private int mVersion;
-    @GuardedBy("mSmartSelectionLock") // Do not access outside this lock.
+    @GuardedBy("mLock") // Do not access outside this lock.
     private SmartSelection mSmartSelection;
 
     private TextClassifierConstants mSettings;
 
-    TextClassifierImpl(Context context) {
+    public TextClassifierImpl(Context context) {
         mContext = Preconditions.checkNotNull(context);
+        mFallback = TextClassifier.NO_OP;
     }
 
+    /** @inheritDoc */
     @Override
     public TextSelection suggestSelection(
             @NonNull CharSequence text, int selectionStartIndex, int selectionEndIndex,
             @Nullable TextSelection.Options options) {
-        Utils.validateInput(text, selectionStartIndex, selectionEndIndex);
+        Utils.validate(text, selectionStartIndex, selectionEndIndex, false /* allowInMainThread */);
         try {
             if (text.length() > 0) {
                 final LocaleList locales = (options == null) ? null : options.getDefaultLocales();
@@ -159,15 +162,16 @@ final class TextClassifierImpl implements TextClassifier {
                     t);
         }
         // Getting here means something went wrong, return a NO_OP result.
-        return TextClassifier.NO_OP.suggestSelection(
+        return mFallback.suggestSelection(
                 text, selectionStartIndex, selectionEndIndex, options);
     }
 
+    /** @inheritDoc */
     @Override
     public TextClassification classifyText(
             @NonNull CharSequence text, int startIndex, int endIndex,
             @Nullable TextClassification.Options options) {
-        Utils.validateInput(text, startIndex, endIndex);
+        Utils.validate(text, startIndex, endIndex, false /* allowInMainThread */);
         try {
             if (text.length() > 0) {
                 final String string = text.toString();
@@ -186,13 +190,14 @@ final class TextClassifierImpl implements TextClassifier {
             Log.e(LOG_TAG, "Error getting text classification info.", t);
         }
         // Getting here means something went wrong, return a NO_OP result.
-        return TextClassifier.NO_OP.classifyText(text, startIndex, endIndex, options);
+        return mFallback.classifyText(text, startIndex, endIndex, options);
     }
 
+    /** @inheritDoc */
     @Override
     public TextLinks generateLinks(
             @NonNull CharSequence text, @Nullable TextLinks.Options options) {
-        Utils.validateInput(text);
+        Utils.validate(text, false /* allowInMainThread */);
         final String textString = text.toString();
         final TextLinks.Builder builder = new TextLinks.Builder(textString);
 
@@ -223,7 +228,7 @@ final class TextClassifierImpl implements TextClassifier {
             // Avoid throwing from this method. Log the error.
             Log.e(LOG_TAG, "Error getting links info.", t);
         }
-        return builder.build();
+        return mFallback.generateLinks(text, options);
     }
 
     @Override
@@ -240,6 +245,7 @@ final class TextClassifierImpl implements TextClassifier {
         }
     }
 
+    /** @hide */
     @Override
     public void logEvent(String source, String event) {
         if (LOG_TAG.equals(source)) {
@@ -247,6 +253,7 @@ final class TextClassifierImpl implements TextClassifier {
         }
     }
 
+    /** @hide */
     @Override
     public TextClassifierConstants getSettings() {
         if (mSettings == null) {
@@ -257,7 +264,7 @@ final class TextClassifierImpl implements TextClassifier {
     }
 
     private SmartSelection getSmartSelection(LocaleList localeList) throws FileNotFoundException {
-        synchronized (mSmartSelectionLock) {
+        synchronized (mLock) {
             localeList = localeList == null ? LocaleList.getEmptyLocaleList() : localeList;
             final Locale locale = findBestSupportedLocaleLocked(localeList);
             if (locale == null) {
@@ -277,7 +284,7 @@ final class TextClassifierImpl implements TextClassifier {
     }
 
     private String getSignature(String text, int start, int end) {
-        synchronized (mSmartSelectionLock) {
+        synchronized (mLock) {
             final String versionInfo = (mLocale != null)
                     ? String.format(Locale.US, "%s_v%d", mLocale.toLanguageTag(), mVersion)
                     : "";
@@ -286,7 +293,7 @@ final class TextClassifierImpl implements TextClassifier {
         }
     }
 
-    @GuardedBy("mSmartSelectionLock") // Do not call outside this lock.
+    @GuardedBy("mLock") // Do not call outside this lock.
     private ParcelFileDescriptor getFdLocked(Locale locale) throws FileNotFoundException {
         ParcelFileDescriptor updateFd;
         int updateVersion = -1;
@@ -353,7 +360,7 @@ final class TextClassifierImpl implements TextClassifier {
         }
     }
 
-    @GuardedBy("mSmartSelectionLock") // Do not call outside this lock.
+    @GuardedBy("mLock") // Do not call outside this lock.
     private void destroySmartSelectionIfExistsLocked() {
         if (mSmartSelection != null) {
             mSmartSelection.close();
@@ -361,7 +368,7 @@ final class TextClassifierImpl implements TextClassifier {
         }
     }
 
-    @GuardedBy("mSmartSelectionLock") // Do not call outside this lock.
+    @GuardedBy("mLock") // Do not call outside this lock.
     @Nullable
     private Locale findBestSupportedLocaleLocked(LocaleList localeList) {
         // Specified localeList takes priority over the system default, so it is listed first.
@@ -379,7 +386,7 @@ final class TextClassifierImpl implements TextClassifier {
         return Locale.lookup(languageRangeList, supportedLocales);
     }
 
-    @GuardedBy("mSmartSelectionLock") // Do not call outside this lock.
+    @GuardedBy("mLock") // Do not call outside this lock.
     private Map<Locale, String> getFactoryModelFilePathsLocked() {
         if (mModelFilePaths == null) {
             final Map<Locale, String> modelFilePaths = new HashMap<>();

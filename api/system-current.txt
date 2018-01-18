@@ -29,6 +29,7 @@ package android {
     field public static final java.lang.String BIND_RESOLVER_RANKER_SERVICE = "android.permission.BIND_RESOLVER_RANKER_SERVICE";
     field public static final java.lang.String BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE = "android.permission.BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE";
     field public static final java.lang.String BIND_SETTINGS_SUGGESTIONS_SERVICE = "android.permission.BIND_SETTINGS_SUGGESTIONS_SERVICE";
+    field public static final java.lang.String BIND_TEXTCLASSIFIER_SERVICE = "android.permission.BIND_TEXTCLASSIFIER_SERVICE";
     field public static final java.lang.String BIND_TRUST_AGENT = "android.permission.BIND_TRUST_AGENT";
     field public static final java.lang.String BIND_TV_REMOTE_SERVICE = "android.permission.BIND_TV_REMOTE_SERVICE";
     field public static final java.lang.String BLUETOOTH_PRIVILEGED = "android.permission.BLUETOOTH_PRIVILEGED";
@@ -4434,6 +4435,24 @@ package android.service.settings.suggestions {
     method public abstract java.util.List<android.service.settings.suggestions.Suggestion> onGetSuggestions();
     method public abstract void onSuggestionDismissed(android.service.settings.suggestions.Suggestion);
     method public abstract void onSuggestionLaunched(android.service.settings.suggestions.Suggestion);
+  }
+
+}
+
+package android.service.textclassifier {
+
+  public abstract class TextClassifierService extends android.app.Service {
+    ctor public TextClassifierService();
+    method public final android.os.IBinder onBind(android.content.Intent);
+    method public abstract void onClassifyText(java.lang.CharSequence, int, int, android.view.textclassifier.TextClassification.Options, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextClassification>);
+    method public abstract void onGenerateLinks(java.lang.CharSequence, android.view.textclassifier.TextLinks.Options, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextLinks>);
+    method public abstract void onSuggestSelection(java.lang.CharSequence, int, int, android.view.textclassifier.TextSelection.Options, android.os.CancellationSignal, android.service.textclassifier.TextClassifierService.Callback<android.view.textclassifier.TextSelection>);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.textclassifier.TextClassifierService";
+  }
+
+  public static abstract interface TextClassifierService.Callback<T> {
+    method public abstract void onFailure(java.lang.CharSequence);
+    method public abstract void onSuccess(T);
   }
 
 }
