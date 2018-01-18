@@ -30,6 +30,7 @@ import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
 
+import com.android.server.wm.DisplayWindowController;
 import org.mockito.invocation.InvocationOnMock;
 
 import android.app.IApplicationThread;
@@ -345,7 +346,7 @@ public class ActivityTestsBase {
         }
     }
 
-    private static class TestActivityDisplay extends ActivityDisplay {
+    protected static class TestActivityDisplay extends ActivityDisplay {
 
         private final ActivityStackSupervisor mSupervisor;
         TestActivityDisplay(ActivityStackSupervisor supervisor, int displayId) {
@@ -373,6 +374,11 @@ public class ActivityTestsBase {
                 return (T) new TestActivityStack(
                         this, stackId, mSupervisor, windowingMode, activityType, onTop);
             }
+        }
+
+        @Override
+        protected DisplayWindowController createWindowContainerController() {
+            return mock(DisplayWindowController.class);
         }
     }
 

@@ -50,7 +50,9 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.ConfigurationContainer;
+import com.android.server.wm.DisplayWindowController;
 
+import com.android.server.wm.WindowContainerListener;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -58,7 +60,8 @@ import java.util.ArrayList;
  * Exactly one of these classes per Display in the system. Capable of holding zero or more
  * attached {@link ActivityStack}s.
  */
-class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
+class ActivityDisplay extends ConfigurationContainer<ActivityStack>
+        implements WindowContainerListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityDisplay" : TAG_AM;
     private static final String TAG_STACK = TAG + POSTFIX_STACK;
 
@@ -100,6 +103,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
     // Used in updating the display size
     private Point mTmpDisplaySize = new Point();
 
+    private DisplayWindowController mWindowContainerController;
+
     ActivityDisplay(ActivityStackSupervisor supervisor, int displayId) {
         mSupervisor = supervisor;
         mDisplayId = displayId;
@@ -108,8 +113,13 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
             throw new IllegalStateException("Display does not exist displayId=" + displayId);
         }
         mDisplay = display;
+        mWindowContainerController = createWindowContainerController();
 
         updateBounds();
+    }
+
+    protected DisplayWindowController createWindowContainerController() {
+        return new DisplayWindowController(mDisplayId, this);
     }
 
     void updateBounds() {
@@ -148,7 +158,10 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
 
     private void positionChildAt(ActivityStack stack, int position) {
         mStacks.remove(stack);
-        mStacks.add(getTopInsertPosition(stack, position), stack);
+        final int insertPosition = getTopInsertPosition(stack, position);
+        mStacks.add(insertPosition, stack);
+        mWindowContainerController.positionChildAt(stack.getWindowContainerController(),
+                insertPosition);
     }
 
     private int getTopInsertPosition(ActivityStack stack, int candidatePosition) {

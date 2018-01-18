@@ -1802,6 +1802,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         getParent().positionChildAt(position, this, includingParents);
     }
 
+    void positionStackAt(int position, TaskStack child) {
+        mTaskStackContainers.positionChildAt(position, child, false /* includingParents */);
+        layoutAndAssignWindowLayersIfNeeded();
+    }
+
     int taskIdFromPoint(int x, int y) {
         for (int stackNdx = mTaskStackContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
             final TaskStack stack = mTaskStackContainers.getChildAt(stackNdx);
