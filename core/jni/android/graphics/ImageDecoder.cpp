@@ -393,7 +393,7 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
         canvas.drawBitmap(bm, 0.0f, 0.0f, &paint);
 
         bm.swap(scaledBm);
-        nativeBitmap = scaledPixelRef;
+        nativeBitmap = std::move(scaledPixelRef);
     }
 
     if (jpostProcess) {
