@@ -622,7 +622,7 @@ void util_multiplyMV(JNIEnv *env, jclass clazz,
 
 // ---------------------------------------------------------------------------
 
-static int checkFormat(SkColorType colorType, int format, int type)
+static int checkInternalFormat(SkColorType colorType, int format, int type)
 {
     switch(colorType) {
         case kN32_SkColorType:
@@ -649,6 +649,20 @@ static int checkFormat(SkColorType colorType, int format, int type)
             break;
     }
     return -1;
+}
+
+// The internal format is no longer the same as pixel format, per Table 2 in
+// https://www.khronos.org/registry/OpenGL-Refpages/es3.1/html/glTexImage2D.xhtml
+static int getPixelFormatFromInternalFormat(uint32_t internalFormat) {
+    switch (internalFormat) {
+        // For sized internal format.
+        case GL_RGBA16F:
+            return GL_RGBA;
+        // Base internal formats and pixel formats are still the same, see Table 1 in
+        // https://www.khronos.org/registry/OpenGL-Refpages/es3.1/html/glTexImage2D.xhtml
+        default:
+            return internalFormat;
+    }
 }
 
 static int getInternalFormat(SkColorType colorType)
@@ -716,7 +730,7 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz,
     if (type < 0) {
         type = getType(colorType);
     }
-    int err = checkFormat(colorType, internalformat, type);
+    int err = checkInternalFormat(colorType, internalformat, type);
     if (err)
         return err;
     const int w = bitmap.width();
@@ -725,7 +739,8 @@ static jint util_texImage2D(JNIEnv *env, jclass clazz,
     if (internalformat == GL_PALETTE8_RGBA8_OES) {
         err = -1;
     } else {
-        glTexImage2D(target, level, internalformat, w, h, border, internalformat, type, p);
+        glTexImage2D(target, level, internalformat, w, h, border,
+                     getPixelFormatFromInternalFormat(internalformat), type, p);
     }
     return err;
 }
@@ -737,12 +752,13 @@ static jint util_texSubImage2D(JNIEnv *env, jclass clazz,
     SkBitmap bitmap;
     GraphicsJNI::getSkBitmap(env, jbitmap, &bitmap);
     SkColorType colorType = bitmap.colorType();
+    int internalFormat = getInternalFormat(colorType);
     if (format < 0) {
-        format = getInternalFormat(colorType);
+        format = getPixelFormatFromInternalFormat(internalFormat);
         if (format == GL_PALETTE8_RGBA8_OES)
             return -1; // glCompressedTexSubImage2D() not supported
     }
-    int err = checkFormat(colorType, format, type);
+    int err = checkInternalFormat(colorType, internalFormat, type);
     if (err)
         return err;
     const int w = bitmap.width();
