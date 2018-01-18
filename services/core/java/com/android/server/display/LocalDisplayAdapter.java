@@ -404,7 +404,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                             && SystemProperties.getBoolean(PROPERTY_EMULATOR_CIRCULAR, false))) {
                         mInfo.flags |= DisplayDeviceInfo.FLAG_ROUND;
                     }
-                    mInfo.displayCutout = parseDefaultDisplayCutout(res);
+                    mInfo.displayCutout = DisplayCutout.fromResources(res, mInfo.width);
                     mInfo.type = Display.TYPE_BUILT_IN;
                     mInfo.densityDpi = (int)(phys.density * 160 + 0.5f);
                     mInfo.xDpi = phys.xDpi;
@@ -438,15 +438,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 }
             }
             return mInfo;
-        }
-
-        private DisplayCutout parseDefaultDisplayCutout(Resources res) {
-            String cutoutString = res.getString(
-                    com.android.internal.R.string.config_mainBuiltInDisplayCutout);
-            if (TextUtils.isEmpty(cutoutString)) {
-                return null;
-            }
-            return DisplayCutout.fromBounds(PathParser.createPathFromPathData(cutoutString));
         }
 
         @Override
