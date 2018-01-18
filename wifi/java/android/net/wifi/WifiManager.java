@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -55,6 +56,8 @@ import com.android.server.net.NetworkPinner;
 
 import dalvik.system.CloseGuard;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import java.util.Collections;
@@ -432,6 +435,17 @@ public class WifiManager {
      */
     public static final String EXTRA_WIFI_AP_MODE = "wifi_ap_mode";
 
+    /** @hide */
+    @IntDef(flag = false, prefix = { "WIFI_AP_STATE_" }, value = {
+        WIFI_AP_STATE_DISABLING,
+        WIFI_AP_STATE_DISABLED,
+        WIFI_AP_STATE_ENABLING,
+        WIFI_AP_STATE_ENABLED,
+        WIFI_AP_STATE_FAILED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface WifiApState {}
+
     /**
      * Wi-Fi AP is currently being disabled. The state will change to
      * {@link #WIFI_AP_STATE_DISABLED} if it finishes successfully.
@@ -485,6 +499,14 @@ public class WifiManager {
      */
     @SystemApi
     public static final int WIFI_AP_STATE_FAILED = 14;
+
+    /** @hide */
+    @IntDef(flag = false, prefix = { "SAP_START_FAILURE_" }, value = {
+        SAP_START_FAILURE_GENERAL,
+        SAP_START_FAILURE_NO_CHANNEL,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SapStartFailure {}
 
     /**
      *  If WIFI AP start failed, this reason code means there is no legal channel exists on
@@ -2321,6 +2343,119 @@ public class WifiManager {
          * {@link #ERROR}, {@link #IN_PROGRESS} or {@link #BUSY}
          */
         public void onFailure(int reason);
+    }
+
+    /**
+     * Base class for soft AP callback. Should be extended by applications and set when calling
+     * {@link WifiManager#registerSoftApCallback(SoftApCallback, Handler)}.
+     *
+     * @hide
+     */
+    public interface SoftApCallback {
+        /**
+         * Called when soft AP state changes.
+         *
+         * @param state new new AP state. One of {@link #WIFI_AP_STATE_DISABLED},
+         *        {@link #WIFI_AP_STATE_DISABLING}, {@link #WIFI_AP_STATE_ENABLED},
+         *        {@link #WIFI_AP_STATE_ENABLING}, {@link #WIFI_AP_STATE_FAILED}
+         * @param failureReason reason when in failed state. One of
+         *        {@link #SAP_START_FAILURE_GENERAL}, {@link #SAP_START_FAILURE_NO_CHANNEL}
+         */
+        public abstract void onStateChanged(@WifiApState int state,
+                @SapStartFailure int failureReason);
+
+        /**
+         * Called when number of connected clients to soft AP changes.
+         *
+         * @param numClients number of connected clients
+         */
+        public abstract void onNumClientsChanged(int numClients);
+    }
+
+    /**
+     * Callback proxy for SoftApCallback objects.
+     *
+     * @hide
+     */
+    private static class SoftApCallbackProxy extends ISoftApCallback.Stub {
+        private final Handler mHandler;
+        private final SoftApCallback mCallback;
+
+        SoftApCallbackProxy(Looper looper, SoftApCallback callback) {
+            mHandler = new Handler(looper);
+            mCallback = callback;
+        }
+
+        @Override
+        public void onStateChanged(int state, int failureReason) throws RemoteException {
+            Log.v(TAG, "SoftApCallbackProxy: onStateChanged: state=" + state + ", failureReason=" +
+                    failureReason);
+            mHandler.post(() -> {
+                mCallback.onStateChanged(state, failureReason);
+            });
+        }
+
+        @Override
+        public void onNumClientsChanged(int numClients) throws RemoteException {
+            Log.v(TAG, "SoftApCallbackProxy: onNumClientsChanged: numClients=" + numClients);
+            mHandler.post(() -> {
+                mCallback.onNumClientsChanged(numClients);
+            });
+        }
+    }
+
+    /**
+     * Registers a callback for Soft AP. See {@link SoftApCallback}. Caller will receive the current
+     * soft AP state and number of connected devices immediately after a successful call to this API
+     * via callback. Note that receiving an immediate WIFI_AP_STATE_FAILED value for soft AP state
+     * indicates that the latest attempt to start soft AP has failed. Caller can unregister a
+     * previously registered callback using {@link unregisterSoftApCallback}
+     * <p>
+     * Applications should have the
+     * {@link android.Manifest.permission#NETWORK_SETTINGS NETWORK_SETTINGS} permission. Callers
+     * without the permission will trigger a {@link java.lang.SecurityException}.
+     * <p>
+     *
+     * @param callback Callback for soft AP events
+     * @param handler  The Handler on whose thread to execute the callbacks of the {@code callback}
+     *                 object. If null, then the application's main thread will be used.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void registerSoftApCallback(@NonNull SoftApCallback callback,
+                                       @Nullable Handler handler) {
+        if (callback == null) throw new IllegalArgumentException("callback cannot be null");
+        Log.v(TAG, "registerSoftApCallback: callback=" + callback + ", handler=" + handler);
+
+        Looper looper = (handler == null) ? mContext.getMainLooper() : handler.getLooper();
+        Binder binder = new Binder();
+        try {
+            mService.registerSoftApCallback(binder, new SoftApCallbackProxy(looper, callback),
+                    callback.hashCode());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Allow callers to unregister a previously registered callback. After calling this method,
+     * applications will no longer receive soft AP events.
+     *
+     * @param callback Callback to unregister for soft AP events
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void unregisterSoftApCallback(@NonNull SoftApCallback callback) {
+        if (callback == null) throw new IllegalArgumentException("callback cannot be null");
+        Log.v(TAG, "unregisterSoftApCallback: callback=" + callback);
+
+        try {
+            mService.unregisterSoftApCallback(callback.hashCode());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
