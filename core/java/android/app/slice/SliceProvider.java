@@ -36,6 +36,9 @@ import android.os.StrictMode.ThreadPolicy;
 import android.os.UserHandle;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -113,11 +116,19 @@ public abstract class SliceProvider extends ContentProvider {
     /**
      * @hide
      */
+    public static final String METHOD_GET_DESCENDANTS = "get_descendants";
+    /**
+     * @hide
+     */
     public static final String EXTRA_INTENT = "slice_intent";
     /**
      * @hide
      */
     public static final String EXTRA_SLICE = "slice";
+    /**
+     * @hide
+     */
+    public static final String EXTRA_SLICE_DESCENDANTS = "slice_descendants";
 
     private static final boolean DEBUG = false;
 
@@ -139,14 +150,6 @@ public abstract class SliceProvider extends ContentProvider {
      * @see {@link Slice#HINT_PARTIAL}
      */
     public Slice onBindSlice(Uri sliceUri, List<SliceSpec> supportedSpecs) {
-        return onBindSlice(sliceUri);
-    }
-
-    /**
-     * @deprecated migrating to {@link #onBindSlice(Uri, List)}
-     */
-    @Deprecated
-    public Slice onBindSlice(Uri sliceUri) {
         return null;
     }
 
@@ -180,6 +183,20 @@ public abstract class SliceProvider extends ContentProvider {
      * @see #onSlicePinned(Uri)
      */
     public void onSliceUnpinned(Uri sliceUri) {
+    }
+
+    /**
+     * Obtains a list of slices that are descendants of the specified Uri.
+     * <p>
+     * Implementing this is optional for a SliceProvider, but does provide a good
+     * discovery mechanism for finding slice Uris.
+     *
+     * @param uri The uri to look for descendants under.
+     * @return All slices within the space.
+     * @see SliceManager#getSliceDescendants(Uri)
+     */
+    public @NonNull Collection<Uri> onGetSliceDescendants(@NonNull Uri uri) {
+        return Collections.emptyList();
     }
 
     /**
@@ -290,8 +307,33 @@ public abstract class SliceProvider extends ContentProvider {
                         "Slice binding requires the permission BIND_SLICE");
             }
             handleUnpinSlice(uri);
+        } else if (method.equals(METHOD_GET_DESCENDANTS)) {
+            Uri uri = extras.getParcelable(EXTRA_BIND_URI);
+            Bundle b = new Bundle();
+            b.putParcelableArrayList(EXTRA_SLICE_DESCENDANTS,
+                    new ArrayList<>(handleGetDescendants(uri)));
+            return b;
         }
         return super.call(method, arg, extras);
+    }
+
+    private Collection<Uri> handleGetDescendants(Uri uri) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            return onGetSliceDescendants(uri);
+        } else {
+            CountDownLatch latch = new CountDownLatch(1);
+            Collection<Uri>[] output = new Collection[1];
+            Handler.getMain().post(() -> {
+                output[0] = onGetSliceDescendants(uri);
+                latch.countDown();
+            });
+            try {
+                latch.await();
+                return output[0];
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     private void handlePinSlice(Uri sliceUri) {

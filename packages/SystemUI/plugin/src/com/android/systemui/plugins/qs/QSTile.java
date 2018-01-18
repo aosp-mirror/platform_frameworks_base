@@ -108,6 +108,7 @@ public interface QSTile {
         public Supplier<Icon> iconSupplier;
         public int state = Tile.STATE_ACTIVE;
         public CharSequence label;
+        public CharSequence secondaryLabel;
         public CharSequence contentDescription;
         public CharSequence dualLabelContentDescription;
         public boolean disabledByPolicy;
@@ -122,6 +123,7 @@ public interface QSTile {
             final boolean changed = !Objects.equals(other.icon, icon)
                     || !Objects.equals(other.iconSupplier, iconSupplier)
                     || !Objects.equals(other.label, label)
+                    || !Objects.equals(other.secondaryLabel, secondaryLabel)
                     || !Objects.equals(other.contentDescription, contentDescription)
                     || !Objects.equals(other.dualLabelContentDescription,
                             dualLabelContentDescription)
@@ -135,6 +137,7 @@ public interface QSTile {
             other.icon = icon;
             other.iconSupplier = iconSupplier;
             other.label = label;
+            other.secondaryLabel = secondaryLabel;
             other.contentDescription = contentDescription;
             other.dualLabelContentDescription = dualLabelContentDescription;
             other.expandedAccessibilityClassName = expandedAccessibilityClassName;
@@ -156,6 +159,7 @@ public interface QSTile {
             sb.append(",icon=").append(icon);
             sb.append(",iconSupplier=").append(iconSupplier);
             sb.append(",label=").append(label);
+            sb.append(",secondaryLabel=").append(secondaryLabel);
             sb.append(",contentDescription=").append(contentDescription);
             sb.append(",dualLabelContentDescription=").append(dualLabelContentDescription);
             sb.append(",expandedAccessibilityClassName=").append(expandedAccessibilityClassName);

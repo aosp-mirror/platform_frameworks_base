@@ -179,6 +179,11 @@ public abstract class DisplayManagerInternal {
     public abstract void persistBrightnessSliderEvents();
 
     /**
+     * Notifies the display manager that resource overlays have changed.
+     */
+    public abstract void onOverlayChanged();
+
+    /**
      * Describes the requested power state of the display.
      *
      * This object is intended to describe the general characteristics of the

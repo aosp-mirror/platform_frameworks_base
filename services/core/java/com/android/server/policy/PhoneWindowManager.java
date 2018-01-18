@@ -269,6 +269,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
+import com.android.internal.policy.KeyguardDismissCallback;
 import com.android.internal.policy.PhoneWindow;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ArrayUtils;
@@ -4211,20 +4212,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (isKeyguardShowingAndNotOccluded()) {
                 // don't launch home if keyguard showing
                 return;
-            }
-
-            if (!mKeyguardOccluded && mKeyguardDelegate.isInputRestricted()) {
+            } else if (mKeyguardOccluded && mKeyguardDelegate.isShowing()) {
+                mKeyguardDelegate.dismiss(new KeyguardDismissCallback() {
+                    @Override
+                    public void onDismissSucceeded() throws RemoteException {
+                        mHandler.post(() -> {
+                            startDockOrHome(true /*fromHomeKey*/, awakenFromDreams);
+                        });
+                    }
+                }, null /* message */);
+                return;
+            } else if (!mKeyguardOccluded && mKeyguardDelegate.isInputRestricted()) {
                 // when in keyguard restricted mode, must first verify unlock
                 // before launching home
                 mKeyguardDelegate.verifyUnlock(new OnKeyguardExitResult() {
                     @Override
                     public void onKeyguardExitResult(boolean success) {
                         if (success) {
-                            try {
-                                ActivityManager.getService().stopAppSwitches();
-                            } catch (RemoteException e) {
-                            }
-                            sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
                             startDockOrHome(true /*fromHomeKey*/, awakenFromDreams);
                         }
                     }
@@ -4234,11 +4238,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         // no keyguard stuff to worry about, just launch home!
-        try {
-            ActivityManager.getService().stopAppSwitches();
-        } catch (RemoteException e) {
-        }
         if (mRecentsVisible) {
+            try {
+                ActivityManager.getService().stopAppSwitches();
+            } catch (RemoteException e) {}
+
             // Hide Recents and notify it to launch Home
             if (awakenFromDreams) {
                 awakenDreams();
@@ -4246,7 +4250,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             hideRecentApps(false, true);
         } else {
             // Otherwise, just launch Home
-            sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
             startDockOrHome(true /*fromHomeKey*/, awakenFromDreams);
         }
     }
@@ -5652,11 +5655,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public boolean allowAppAnimationsLw() {
-        if (mShowingDream) {
-            // If keyguard or dreams is currently visible, no reason to animate behind it.
-            return false;
-        }
-        return true;
+        return !mShowingDream;
     }
 
     @Override
@@ -7633,6 +7632,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     void startDockOrHome(boolean fromHomeKey, boolean awakenFromDreams) {
+        try {
+            ActivityManager.getService().stopAppSwitches();
+        } catch (RemoteException e) {}
+        sendCloseSystemWindows(SYSTEM_DIALOG_REASON_HOME_KEY);
+
         if (awakenFromDreams) {
             awakenDreams();
         }
@@ -7672,11 +7676,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         if (false) {
             // This code always brings home to the front.
-            try {
-                ActivityManager.getService().stopAppSwitches();
-            } catch (RemoteException e) {
-            }
-            sendCloseSystemWindows();
             startDockOrHome(false /*fromHomeKey*/, true /* awakenFromDreams */);
         } else {
             // This code brings home to the front or, if it is already

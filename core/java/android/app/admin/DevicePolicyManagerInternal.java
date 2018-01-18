@@ -123,4 +123,13 @@ public abstract class DevicePolicyManagerInternal {
      * @param userId User ID of the profile.
      */
     public abstract void reportSeparateProfileChallengeChanged(@UserIdInt int userId);
+
+    /**
+     * Check whether the user could have their password reset in an untrusted manor due to there
+     * being an admin which can call {@link #resetPassword} to reset the password without knowledge
+     * of the previous password.
+     *
+     * @param userId The user in question
+     */
+    public abstract boolean canUserHaveUntrustedCredentialReset(@UserIdInt int userId);
 }

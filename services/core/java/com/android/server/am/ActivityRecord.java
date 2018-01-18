@@ -21,6 +21,7 @@ import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.ActivityManager.TaskDescription.ATTR_TASKDESCRIPTION_PREFIX;
 import static android.app.ActivityOptions.ANIM_CLIP_REVEAL;
 import static android.app.ActivityOptions.ANIM_CUSTOM;
+import static android.app.ActivityOptions.ANIM_REMOTE_ANIMATION;
 import static android.app.ActivityOptions.ANIM_SCALE_UP;
 import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
 import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
@@ -170,6 +171,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.AppTransitionAnimationSpec;
 import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IApplicationToken;
+import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.R;
@@ -370,6 +372,10 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             default:
                 return "unknown state=" + state;
         }
+    }
+
+    String getLifecycleDescription(String reason) {
+        return "packageName=" + packageName + ", state=" + state + ", reason=" + reason;
     }
 
     void dump(PrintWriter pw, String prefix) {
@@ -1481,6 +1487,10 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                 case ANIM_OPEN_CROSS_PROFILE_APPS:
                     service.mWindowManager.overridePendingAppTransitionStartCrossProfileApps();
                     break;
+                case ANIM_REMOTE_ANIMATION:
+                    service.mWindowManager.overridePendingAppTransitionRemote(
+                            pendingOptions.getRemoteAnimationAdapter());
+                    break;
                 default:
                     Slog.e(TAG, "applyOptionsLocked: Unknown animationType=" + animationType);
                     break;
@@ -1611,12 +1621,16 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
             // If the activity is stopped or stopping, cycle to the paused state.
             if (state == STOPPED || state == STOPPING) {
+                // Capture reason before state change
+                final String reason = getLifecycleDescription("makeVisibleIfNeeded");
+
                 // An activity must be in the {@link PAUSING} state for the system to validate
                 // the move to {@link PAUSED}.
                 state = PAUSING;
                 service.mLifecycleManager.scheduleTransaction(app.thread, appToken,
                         PauseActivityItem.obtain(finishing, false /* userLeaving */,
-                                configChangeFlags, false /* dontReport */));
+                                configChangeFlags, false /* dontReport */)
+                                .setDescription(reason));
             }
         } catch (Exception e) {
             // Just skip on any failure; we'll make it visible when it next restarts.
@@ -2775,6 +2789,10 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     boolean isTopRunningActivity() {
         return mStackSupervisor.topRunningActivityLocked() == this;
+    }
+
+    void registerRemoteAnimations(RemoteAnimationDefinition definition) {
+        mWindowContainerController.registerRemoteAnimations(definition);
     }
 
     @Override

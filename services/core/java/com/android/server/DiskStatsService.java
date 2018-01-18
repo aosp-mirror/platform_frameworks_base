@@ -19,6 +19,10 @@ package com.android.server;
 import android.content.Context;
 import android.os.Binder;
 import android.os.Environment;
+import android.os.IBinder;
+import android.os.IStoraged;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.StatFs;
 import android.os.SystemClock;
 import android.os.storage.StorageManager;
@@ -107,6 +111,12 @@ public class DiskStatsService extends Binder {
                 pw.print(after - before);
                 pw.println("ms [512B Data Write]");
             }
+        }
+
+        if (protoFormat) {
+            reportDiskWriteSpeedProto(proto);
+        } else {
+            reportDiskWriteSpeed(pw);
         }
 
         reportFreeSpace(Environment.getDataDirectory(), "Data", pw, proto,
@@ -283,6 +293,43 @@ public class DiskStatsService extends Binder {
             proto.end(cachedValuesToken);
         } catch (IOException | JSONException e) {
             Log.w(TAG, "exception reading diskstats cache file", e);
+        }
+    }
+
+    private int getRecentPerf() throws RemoteException, IllegalStateException {
+        IBinder binder = ServiceManager.getService("storaged");
+        if (binder == null) throw new IllegalStateException("storaged not found");
+        IStoraged storaged = IStoraged.Stub.asInterface(binder);
+        return storaged.getRecentPerf();
+    }
+
+    // Keep reportDiskWriteSpeed and reportDiskWriteSpeedProto in sync
+    private void reportDiskWriteSpeed(PrintWriter pw) {
+        try {
+            long perf = getRecentPerf();
+            if (perf != 0) {
+                pw.print("Recent Disk Write Speed (kB/s) = ");
+                pw.println(perf);
+            } else {
+                pw.println("Recent Disk Write Speed data unavailable");
+                Log.w(TAG, "Recent Disk Write Speed data unavailable!");
+            }
+        } catch (RemoteException | IllegalStateException e) {
+            pw.println(e.toString());
+            Log.e(TAG, e.toString());
+        }
+    }
+
+    private void reportDiskWriteSpeedProto(ProtoOutputStream proto) {
+        try {
+            long perf = getRecentPerf();
+            if (perf != 0) {
+                proto.write(DiskStatsServiceDumpProto.BENCHMARKED_WRITE_SPEED_KBPS, perf);
+            } else {
+                Log.w(TAG, "Recent Disk Write Speed data unavailable!");
+            }
+        } catch (RemoteException | IllegalStateException e) {
+            Log.e(TAG, e.toString());
         }
     }
 }

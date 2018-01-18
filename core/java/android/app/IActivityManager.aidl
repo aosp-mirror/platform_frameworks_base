@@ -65,6 +65,7 @@ import android.os.PersistableBundle;
 import android.os.StrictMode;
 import android.os.WorkSource;
 import android.service.voice.IVoiceInteractionSession;
+import android.view.RemoteAnimationDefinition;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -672,4 +673,9 @@ interface IActivityManager {
       *  user unlock progress.
       */
      boolean startUserInBackgroundWithListener(int userid, IProgressListener unlockProgressListener);
+
+     /**
+      * Registers remote animations for a specific activity.
+      */
+     void registerRemoteAnimations(in IBinder token, in RemoteAnimationDefinition definition);
 }

@@ -430,6 +430,7 @@ package android.app.backup {
     method public java.lang.String getCurrentTransport();
     method public boolean isAppEligibleForBackup(java.lang.String);
     method public boolean isBackupEnabled();
+    method public boolean isBackupServiceActive(android.os.UserHandle);
     method public java.lang.String[] listAllTransports();
     method public int requestBackup(java.lang.String[], android.app.backup.BackupObserver);
     method public int requestBackup(java.lang.String[], android.app.backup.BackupObserver, android.app.backup.BackupManagerMonitor, int);
@@ -4454,6 +4455,8 @@ package android.telephony {
     method public deprecated void setDataEnabled(int, boolean);
     method public boolean setRadio(boolean);
     method public boolean setRadioPower(boolean);
+    method public void setSimPowerState(int);
+    method public void setSimPowerStateForSlot(int, int);
     method public deprecated void setVisualVoicemailEnabled(android.telecom.PhoneAccountHandle, boolean);
     method public void setVoiceActivationState(int);
     method public deprecated void silenceRinger();
@@ -4463,8 +4466,6 @@ package android.telephony {
     method public int[] supplyPukReportResult(java.lang.String, java.lang.String);
     method public void toggleRadioOnOff();
     method public void updateServiceLocation();
-    method public void setSimPowerState(int);
-    method public void setSimPowerStateForSlot(int, int);
     field public static final int CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES = -2; // 0xfffffffe
     field public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1; // 0x1
     field public static final int CARRIER_PRIVILEGE_STATUS_NO_ACCESS = 0; // 0x0
@@ -4533,6 +4534,38 @@ package android.telephony.data {
     field public static final int TYPE_3GPP = 1; // 0x1
     field public static final int TYPE_3GPP2 = 2; // 0x2
     field public static final int TYPE_COMMON = 0; // 0x0
+  }
+
+  public abstract class DataService extends android.app.Service {
+    method public abstract android.telephony.data.DataService.DataServiceProvider createDataServiceProvider(int);
+    field public static final java.lang.String DATA_SERVICE_EXTRA_SLOT_ID = "android.telephony.data.extra.SLOT_ID";
+    field public static final java.lang.String DATA_SERVICE_INTERFACE = "android.telephony.data.DataService";
+  }
+
+  public class DataService.DataServiceProvider {
+    ctor public DataService.DataServiceProvider(int);
+    method public void deactivateDataCall(int, boolean, boolean, android.telephony.data.DataServiceCallback);
+    method public void getDataCallList(android.telephony.data.DataServiceCallback);
+    method public final int getSlotId();
+    method public final void notifyDataCallListChanged(java.util.List<android.telephony.data.DataCallResponse>);
+    method protected void onDestroy();
+    method public void setDataProfile(java.util.List<android.telephony.data.DataProfile>, boolean, android.telephony.data.DataServiceCallback);
+    method public void setInitialAttachApn(android.telephony.data.DataProfile, boolean, android.telephony.data.DataServiceCallback);
+    method public void setupDataCall(int, android.telephony.data.DataProfile, boolean, boolean, boolean, android.net.LinkProperties, android.telephony.data.DataServiceCallback);
+  }
+
+  public class DataServiceCallback {
+    method public void onDataCallListChanged(java.util.List<android.telephony.data.DataCallResponse>);
+    method public void onDeactivateDataCallComplete(int);
+    method public void onGetDataCallListComplete(int, java.util.List<android.telephony.data.DataCallResponse>);
+    method public void onSetDataProfileComplete(int);
+    method public void onSetInitialAttachApnComplete(int);
+    method public void onSetupDataCallComplete(int, android.telephony.data.DataCallResponse);
+    field public static final int RESULT_ERROR_BUSY = 3; // 0x3
+    field public static final int RESULT_ERROR_ILLEGAL_STATE = 4; // 0x4
+    field public static final int RESULT_ERROR_INVALID_ARG = 2; // 0x2
+    field public static final int RESULT_ERROR_UNSUPPORTED = 1; // 0x1
+    field public static final int RESULT_SUCCESS = 0; // 0x0
   }
 
 }
@@ -4647,9 +4680,12 @@ package android.util {
   }
 
   public final class StatsManager {
+    method public boolean addConfiguration(java.lang.String, byte[], java.lang.String, java.lang.String);
     method public boolean addConfiguration(long, byte[], java.lang.String, java.lang.String);
+    method public byte[] getData(java.lang.String);
     method public byte[] getData(long);
     method public byte[] getMetadata();
+    method public boolean removeConfiguration(java.lang.String);
     method public boolean removeConfiguration(long);
   }
 

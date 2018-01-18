@@ -18,7 +18,6 @@ package android.app.admin;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
-import android.annotation.Condemned;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -50,8 +49,6 @@ import android.graphics.Bitmap;
 import android.net.ProxyInfo;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.Process;
@@ -8983,15 +8980,6 @@ public class DevicePolicyManager {
         }
     }
 
-    /** {@hide} */
-    @Condemned
-    @Deprecated
-    public boolean clearApplicationUserData(@NonNull ComponentName admin,
-            @NonNull String packageName, @NonNull OnClearApplicationUserDataListener listener,
-            @NonNull Handler handler) {
-        return clearApplicationUserData(admin, packageName, listener, new HandlerExecutor(handler));
-    }
-
     /**
      * Called by the device owner or profile owner to clear application user data of a given
      * package. The behaviour of this is equivalent to the target application calling
@@ -9002,14 +8990,14 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageName The name of the package which will have its user data wiped.
-     * @param listener A callback object that will inform the caller when the clearing is done.
      * @param executor The executor through which the listener should be invoked.
+     * @param listener A callback object that will inform the caller when the clearing is done.
      * @throws SecurityException if the caller is not the device owner/profile owner.
      * @return whether the clearing succeeded.
      */
     public boolean clearApplicationUserData(@NonNull ComponentName admin,
-            @NonNull String packageName, @NonNull OnClearApplicationUserDataListener listener,
-            @NonNull @CallbackExecutor Executor executor) {
+            @NonNull String packageName, @NonNull @CallbackExecutor Executor executor,
+            @NonNull OnClearApplicationUserDataListener listener) {
         throwIfParentInstance("clearAppData");
         Preconditions.checkNotNull(executor);
         try {
@@ -9108,6 +9096,11 @@ public class DevicePolicyManager {
      * will be received in the
      * {@link DeviceAdminReceiver#onTransferOwnershipComplete(Context, PersistableBundle)} callback.
      *
+     * <p>The incoming target administrator must have the
+     * {@link DeviceAdminReceiver#SUPPORT_TRANSFER_OWNERSHIP_META_DATA} <code>meta-data</code> tag
+     * included in its corresponding <code>receiver</code> component with a value of {@code true}.
+     * Otherwise an {@link IllegalArgumentException} will be thrown.
+     *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
      * @param target which {@link DeviceAdminReceiver} we want the new administrator to be
      * @param bundle data to be sent to the new administrator
@@ -9120,6 +9113,86 @@ public class DevicePolicyManager {
         throwIfParentInstance("transferOwnership");
         try {
             mService.transferOwnership(admin, target, bundle);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Called by a device owner to specify the user session start message. This may be displayed
+     * during a user switch.
+     * <p>
+     * The message should be limited to a short statement or it may be truncated.
+     * <p>
+     * If the message needs to be localized, it is the responsibility of the
+     * {@link DeviceAdminReceiver} to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast
+     * and set a new version of this message accordingly.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
+     * @param startUserSessionMessage message for starting user session, or {@code null} to use
+     * system default message.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     */
+    public void setStartUserSessionMessage(
+            @NonNull ComponentName admin, @Nullable CharSequence startUserSessionMessage) {
+        throwIfParentInstance("setStartUserSessionMessage");
+        try {
+            mService.setStartUserSessionMessage(admin, startUserSessionMessage);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Called by a device owner to specify the user session end message. This may be displayed
+     * during a user switch.
+     * <p>
+     * The message should be limited to a short statement or it may be truncated.
+     * <p>
+     * If the message needs to be localized, it is the responsibility of the
+     * {@link DeviceAdminReceiver} to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast
+     * and set a new version of this message accordingly.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
+     * @param endUserSessionMessage message for ending user session, or {@code null} to use system
+     * default message.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     */
+    public void setEndUserSessionMessage(
+            @NonNull ComponentName admin, @Nullable CharSequence endUserSessionMessage) {
+        throwIfParentInstance("setEndUserSessionMessage");
+        try {
+            mService.setEndUserSessionMessage(admin, endUserSessionMessage);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the user session start message.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     */
+    public CharSequence getStartUserSessionMessage(@NonNull ComponentName admin) {
+        throwIfParentInstance("getStartUserSessionMessage");
+        try {
+            return mService.getStartUserSessionMessage(admin);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Returns the user session end message.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
+     * @throws SecurityException if {@code admin} is not a device owner.
+     */
+    public CharSequence getEndUserSessionMessage(@NonNull ComponentName admin) {
+        throwIfParentInstance("getEndUserSessionMessage");
+        try {
+            return mService.getEndUserSessionMessage(admin);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

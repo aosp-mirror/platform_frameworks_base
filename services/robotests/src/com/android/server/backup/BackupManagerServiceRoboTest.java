@@ -21,9 +21,7 @@ import static com.android.server.backup.testing.TransportData.d2dTransport;
 import static com.android.server.backup.testing.TransportData.localTransport;
 import static com.android.server.backup.testing.TransportTestUtils.setUpCurrentTransport;
 import static com.android.server.backup.testing.TransportTestUtils.setUpTransports;
-
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -39,19 +37,21 @@ import android.app.backup.ISelectBackupTransportCallback;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.Intent;
 import android.os.HandlerThread;
 import android.platform.test.annotations.Presubmit;
 import android.provider.Settings;
-
 import com.android.server.backup.testing.ShadowAppBackupUtils;
 import com.android.server.backup.testing.ShadowBackupPolicyEnforcer;
 import com.android.server.backup.testing.TransportData;
-import com.android.server.backup.testing.TransportTestUtils;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
 import com.android.server.backup.transport.TransportNotRegisteredException;
 import com.android.server.testing.FrameworkRobolectricTestRunner;
 import com.android.server.testing.SystemLoaderClasses;
-
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,12 +63,9 @@ import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowContextWrapper;
 import org.robolectric.shadows.ShadowLog;
 import org.robolectric.shadows.ShadowLooper;
+import org.robolectric.shadows.ShadowPackageManager;
 import org.robolectric.shadows.ShadowSettings;
 import org.robolectric.shadows.ShadowSystemClock;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 @RunWith(FrameworkRobolectricTestRunner.class)
 @Config(
@@ -255,17 +252,22 @@ public class BackupManagerServiceRoboTest {
 
     /* Tests for select transport */
 
-    private TransportData mNewTransport;
-    private TransportData mOldTransport;
     private ComponentName mNewTransportComponent;
+    private TransportData mNewTransport;
+    private TransportMock mNewTransportMock;
     private ComponentName mOldTransportComponent;
+    private TransportData mOldTransport;
+    private TransportMock mOldTransportMock;
 
     private void setUpForSelectTransport() throws Exception {
         mNewTransport = backupTransport();
         mNewTransportComponent = mNewTransport.getTransportComponent();
         mOldTransport = d2dTransport();
         mOldTransportComponent = mOldTransport.getTransportComponent();
-        setUpTransports(mTransportManager, mNewTransport, mOldTransport, localTransport());
+        List<TransportMock> transportMocks =
+                setUpTransports(mTransportManager, mNewTransport, mOldTransport, localTransport());
+        mNewTransportMock = transportMocks.get(0);
+        mOldTransportMock = transportMocks.get(1);
         when(mTransportManager.selectTransport(eq(mNewTransport.transportName)))
                 .thenReturn(mOldTransport.transportName);
     }
@@ -282,6 +284,8 @@ public class BackupManagerServiceRoboTest {
 
         assertThat(getSettingsTransport()).isEqualTo(mNewTransport.transportName);
         assertThat(oldTransport).isEqualTo(mOldTransport.transportName);
+        verify(mTransportManager)
+                .disposeOfTransportClient(eq(mNewTransportMock.transportClient), any());
     }
 
     @Test
@@ -311,6 +315,8 @@ public class BackupManagerServiceRoboTest {
         mShadowBackupLooper.runToEndOfTasks();
         assertThat(getSettingsTransport()).isEqualTo(mNewTransport.transportName);
         verify(callback).onSuccess(eq(mNewTransport.transportName));
+        verify(mTransportManager)
+                .disposeOfTransportClient(eq(mNewTransportMock.transportClient), any());
     }
 
     @Test
@@ -329,11 +335,12 @@ public class BackupManagerServiceRoboTest {
         mShadowBackupLooper.runToEndOfTasks();
         assertThat(getSettingsTransport()).isEqualTo(mNewTransport.transportName);
         verify(callback).onSuccess(eq(mNewTransport.transportName));
+        verify(mTransportManager)
+                .disposeOfTransportClient(eq(mNewTransportMock.transportClient), any());
     }
 
     @Test
-    public void testSelectBackupTransportAsync_whenOtherThanMandatoryTransport()
-            throws Exception {
+    public void testSelectBackupTransportAsync_whenOtherThanMandatoryTransport() throws Exception {
         setUpForSelectTransport();
         ShadowBackupPolicyEnforcer.setMandatoryBackupTransport(mOldTransportComponent);
         mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
@@ -403,6 +410,220 @@ public class BackupManagerServiceRoboTest {
     private String getSettingsTransport() {
         return ShadowSettings.ShadowSecure.getString(
                 mContext.getContentResolver(), Settings.Secure.BACKUP_TRANSPORT);
+    }
+
+    /* Tests for updating transport attributes */
+
+    private static final int PACKAGE_UID = 10;
+    private ComponentName mTransportComponent;
+    private int mTransportUid;
+
+    private void setUpForUpdateTransportAttributes() throws Exception {
+        mTransportComponent = mTransport.getTransportComponent();
+        String transportPackage = mTransportComponent.getPackageName();
+
+        ShadowPackageManager shadowPackageManager = shadowOf(mContext.getPackageManager());
+        shadowPackageManager.addPackage(transportPackage);
+        shadowPackageManager.setPackagesForUid(PACKAGE_UID, transportPackage);
+
+        mTransportUid = mContext.getPackageManager().getPackageUid(transportPackage, 0);
+    }
+
+    @Test
+    public void
+            testUpdateTransportAttributes_whenTransportUidEqualsToCallingUid_callsThroughToTransportManager()
+                    throws Exception {
+        setUpForUpdateTransportAttributes();
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+        Intent configurationIntent = new Intent();
+        Intent dataManagementIntent = new Intent();
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
+
+        backupManagerService.updateTransportAttributes(
+                mTransportUid,
+                mTransportComponent,
+                mTransportName,
+                configurationIntent,
+                "currentDestinationString",
+                dataManagementIntent,
+                "dataManagementLabel");
+
+        verify(mTransportManager)
+                .updateTransportAttributes(
+                        eq(mTransportComponent),
+                        eq(mTransportName),
+                        eq(configurationIntent),
+                        eq("currentDestinationString"),
+                        eq(dataManagementIntent),
+                        eq("dataManagementLabel"));
+    }
+
+    @Test
+    public void testUpdateTransportAttributes_whenTransportUidNotEqualToCallingUid_throwsException()
+            throws Exception {
+        setUpForUpdateTransportAttributes();
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
+
+        expectThrows(
+                SecurityException.class,
+                () ->
+                        backupManagerService.updateTransportAttributes(
+                                mTransportUid + 1,
+                                mTransportComponent,
+                                mTransportName,
+                                new Intent(),
+                                "currentDestinationString",
+                                new Intent(),
+                                "dataManagementLabel"));
+    }
+
+    @Test
+    public void testUpdateTransportAttributes_whenTransportComponentNull_throwsException()
+            throws Exception {
+        setUpForUpdateTransportAttributes();
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
+
+        expectThrows(
+                RuntimeException.class,
+                () ->
+                        backupManagerService.updateTransportAttributes(
+                                mTransportUid,
+                                null,
+                                mTransportName,
+                                new Intent(),
+                                "currentDestinationString",
+                                new Intent(),
+                                "dataManagementLabel"));
+    }
+
+    @Test
+    public void testUpdateTransportAttributes_whenNameNull_throwsException() throws Exception {
+        setUpForUpdateTransportAttributes();
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
+
+        expectThrows(
+                RuntimeException.class,
+                () ->
+                        backupManagerService.updateTransportAttributes(
+                                mTransportUid,
+                                mTransportComponent,
+                                null,
+                                new Intent(),
+                                "currentDestinationString",
+                                new Intent(),
+                                "dataManagementLabel"));
+    }
+
+    @Test
+    public void testUpdateTransportAttributes_whenCurrentDestinationStringNull_throwsException()
+            throws Exception {
+        setUpForUpdateTransportAttributes();
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
+
+        expectThrows(
+                RuntimeException.class,
+                () ->
+                        backupManagerService.updateTransportAttributes(
+                                mTransportUid,
+                                mTransportComponent,
+                                mTransportName,
+                                new Intent(),
+                                null,
+                                new Intent(),
+                                "dataManagementLabel"));
+    }
+
+    @Test
+    public void
+            testUpdateTransportAttributes_whenDataManagementArgumentsNullityDontMatch_throwsException()
+                    throws Exception {
+        setUpForUpdateTransportAttributes();
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
+
+        expectThrows(
+                RuntimeException.class,
+                () ->
+                        backupManagerService.updateTransportAttributes(
+                                mTransportUid,
+                                mTransportComponent,
+                                mTransportName,
+                                new Intent(),
+                                "currentDestinationString",
+                                null,
+                                "dataManagementLabel"));
+
+        expectThrows(
+                RuntimeException.class,
+                () ->
+                        backupManagerService.updateTransportAttributes(
+                                mTransportUid,
+                                mTransportComponent,
+                                mTransportName,
+                                new Intent(),
+                                "currentDestinationString",
+                                new Intent(),
+                                null));
+    }
+
+    @Test
+    public void testUpdateTransportAttributes_whenPermissionGranted_callsThroughToTransportManager()
+            throws Exception {
+        setUpForUpdateTransportAttributes();
+        mShadowContext.grantPermissions(android.Manifest.permission.BACKUP);
+        Intent configurationIntent = new Intent();
+        Intent dataManagementIntent = new Intent();
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
+
+        backupManagerService.updateTransportAttributes(
+                mTransportUid,
+                mTransportComponent,
+                mTransportName,
+                configurationIntent,
+                "currentDestinationString",
+                dataManagementIntent,
+                "dataManagementLabel");
+
+        verify(mTransportManager)
+                .updateTransportAttributes(
+                        eq(mTransportComponent),
+                        eq(mTransportName),
+                        eq(configurationIntent),
+                        eq("currentDestinationString"),
+                        eq(dataManagementIntent),
+                        eq("dataManagementLabel"));
+    }
+
+    @Test
+    public void testUpdateTransportAttributes_whenPermissionDenied_throwsSecurityException()
+            throws Exception {
+        setUpForUpdateTransportAttributes();
+        mShadowContext.denyPermissions(android.Manifest.permission.BACKUP);
+        RefactoredBackupManagerService backupManagerService =
+                createInitializedBackupManagerService();
+
+        expectThrows(
+                SecurityException.class,
+                () ->
+                        backupManagerService.updateTransportAttributes(
+                                mTransportUid,
+                                mTransportComponent,
+                                mTransportName,
+                                new Intent(),
+                                "currentDestinationString",
+                                new Intent(),
+                                "dataManagementLabel"));
     }
 
     /* Miscellaneous tests */

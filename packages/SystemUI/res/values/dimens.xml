@@ -264,7 +264,7 @@
     <!-- The width of the panel that holds the quick settings. -->
     <dimen name="qs_panel_width">@dimen/notification_panel_width</dimen>
 
-    <dimen name="volume_dialog_panel_width">315dp</dimen>
+    <dimen name="volume_dialog_panel_width">120dp</dimen>
 
     <!-- Gravity for the notification panel -->
     <integer name="notification_panel_layout_gravity">0x31</integer><!-- center_horizontal|top -->
@@ -579,6 +579,7 @@
     <dimen name="keyguard_affordance_icon_width">24dp</dimen>
 
     <dimen name="keyguard_indication_margin_bottom">65dp</dimen>
+    <dimen name="keyguard_indication_margin_bottom_ambient">30dp</dimen>
 
     <!-- The text size for battery level -->
     <dimen name="battery_level_text_size">12sp</dimen>
@@ -881,4 +882,9 @@
     <!-- Home button padding for sizing -->
     <dimen name="home_padding">15dp</dimen>
 
+    <!-- Smart reply button -->
+    <dimen name="smart_reply_button_corner_radius">24dip</dimen>
+    <dimen name="smart_reply_button_spacing">8dp</dimen>
+    <dimen name="smart_reply_button_padding_vertical">4dp</dimen>
+    <dimen name="smart_reply_button_font_size">14sp</dimen>
 </resources>

@@ -16,13 +16,12 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import static android.security.keystore.RecoveryManagerException.ERROR_BAD_X509_CERTIFICATE;
-import static android.security.keystore.RecoveryManagerException.ERROR_DATABASE_ERROR;
-import static android.security.keystore.RecoveryManagerException.ERROR_DECRYPTION_FAILED;
-import static android.security.keystore.RecoveryManagerException.ERROR_INSECURE_USER;
-import static android.security.keystore.RecoveryManagerException.ERROR_KEYSTORE_INTERNAL_ERROR;
-import static android.security.keystore.RecoveryManagerException.ERROR_UNEXPECTED_MISSING_ALGORITHM;
-import static android.security.keystore.RecoveryManagerException.ERROR_NO_SNAPSHOT_PENDING;
+import static android.security.keystore.RecoveryManager.ERROR_BAD_CERTIFICATE_FORMAT;
+import static android.security.keystore.RecoveryManager.ERROR_DECRYPTION_FAILED;
+import static android.security.keystore.RecoveryManager.ERROR_INSECURE_USER;
+import static android.security.keystore.RecoveryManager.ERROR_NO_SNAPSHOT_PENDING;
+import static android.security.keystore.RecoveryManager.ERROR_SERVICE_INTERNAL_ERROR;
+import static android.security.keystore.RecoveryManager.ERROR_SESSION_EXPIRED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -34,9 +33,9 @@ import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 
-import android.security.keystore.EntryRecoveryData;
-import android.security.keystore.RecoveryData;
-import android.security.keystore.RecoveryMetadata;
+import android.security.keystore.KeychainProtectionParameter;
+import android.security.keystore.KeychainSnapshot;
+import android.security.keystore.WrappedApplicationKey;
 import android.security.keystore.RecoveryManager;
 import android.util.Log;
 
@@ -45,7 +44,6 @@ import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKe
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySessionStorage;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;
 
-import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
 import java.security.KeyFactory;
@@ -99,7 +97,7 @@ public class RecoverableKeyStoreManager {
                 // Impossible: all algorithms must be supported by AOSP
                 throw new RuntimeException(e);
             } catch (KeyStoreException e) {
-                throw new ServiceSpecificException(ERROR_KEYSTORE_INTERNAL_ERROR, e.getMessage());
+                throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
             }
 
             mInstance = new RecoverableKeyStoreManager(
@@ -135,7 +133,7 @@ public class RecoverableKeyStoreManager {
             mRecoverableKeyGenerator = RecoverableKeyGenerator.newInstance(mDatabase);
         } catch (NoSuchAlgorithmException e) {
             Log.wtf(TAG, "AES keygen algorithm not available. AOSP must support this.", e);
-            throw new ServiceSpecificException(ERROR_UNEXPECTED_MISSING_ALGORITHM, e.getMessage());
+            throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
         }
     }
 
@@ -154,10 +152,10 @@ public class RecoverableKeyStoreManager {
             publicKey = kf.generatePublic(pkSpec);
         } catch (NoSuchAlgorithmException e) {
             Log.wtf(TAG, "EC algorithm not available. AOSP must support this.", e);
-            throw new ServiceSpecificException(ERROR_UNEXPECTED_MISSING_ALGORITHM, e.getMessage());
+            throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
         } catch (InvalidKeySpecException e) {
             throw new ServiceSpecificException(
-                    ERROR_BAD_X509_CERTIFICATE, "Not a valid X509 certificate.");
+                    ERROR_BAD_CERTIFICATE_FORMAT, "Not a valid X509 certificate.");
         }
         long updatedRows = mDatabase.setRecoveryServicePublicKey(userId, uid, publicKey);
         if (updatedRows > 0) {
@@ -171,11 +169,12 @@ public class RecoverableKeyStoreManager {
      * @return recovery data
      * @hide
      */
-    public @NonNull RecoveryData getRecoveryData(@NonNull byte[] account)
+    public @NonNull
+    KeychainSnapshot getRecoveryData(@NonNull byte[] account)
             throws RemoteException {
         checkRecoverKeyStorePermission();
         int uid = Binder.getCallingUid();
-        RecoveryData snapshot = mSnapshotStorage.get(uid);
+        KeychainSnapshot snapshot = mSnapshotStorage.get(uid);
         if (snapshot == null) {
             throw new ServiceSpecificException(ERROR_NO_SNAPSHOT_PENDING);
         }
@@ -257,7 +256,7 @@ public class RecoverableKeyStoreManager {
      * @hide
      */
     public void setRecoverySecretTypes(
-            @NonNull @RecoveryMetadata.UserSecretType int[] secretTypes)
+            @NonNull @KeychainProtectionParameter.UserSecretType int[] secretTypes)
             throws RemoteException {
         checkRecoverKeyStorePermission();
         int userId = UserHandle.getCallingUserId();
@@ -292,9 +291,9 @@ public class RecoverableKeyStoreManager {
     }
 
     public void recoverySecretAvailable(
-            @NonNull RecoveryMetadata recoverySecret) throws RemoteException {
+            @NonNull KeychainProtectionParameter recoverySecret) throws RemoteException {
         int uid = Binder.getCallingUid();
-        if (recoverySecret.getLockScreenUiFormat() == RecoveryMetadata.TYPE_LOCKSCREEN) {
+        if (recoverySecret.getLockScreenUiFormat() == KeychainProtectionParameter.TYPE_LOCKSCREEN) {
             throw new SecurityException(
                     "Caller " + uid + " is not allowed to set lock screen secret");
         }
@@ -320,13 +319,13 @@ public class RecoverableKeyStoreManager {
             @NonNull byte[] verifierPublicKey,
             @NonNull byte[] vaultParams,
             @NonNull byte[] vaultChallenge,
-            @NonNull List<RecoveryMetadata> secrets)
+            @NonNull List<KeychainProtectionParameter> secrets)
             throws RemoteException {
         checkRecoverKeyStorePermission();
         int uid = Binder.getCallingUid();
 
         if (secrets.size() != 1) {
-            throw new UnsupportedOperationException("Only a single RecoveryMetadata is supported");
+            throw new UnsupportedOperationException("Only a single KeychainProtectionParameter is supported");
         }
 
         PublicKey publicKey;
@@ -336,13 +335,13 @@ public class RecoverableKeyStoreManager {
             // Should never happen
             throw new RuntimeException(e);
         } catch (InvalidKeySpecException e) {
-            throw new ServiceSpecificException(ERROR_BAD_X509_CERTIFICATE, "Not a valid X509 key");
+            throw new ServiceSpecificException(ERROR_BAD_CERTIFICATE_FORMAT, "Not a valid X509 key");
         }
         // The raw public key bytes contained in vaultParams must match the ones given in
         // verifierPublicKey; otherwise, the user secret may be decrypted by a key that is not owned
         // by the original recovery service.
         if (!publicKeysMatch(publicKey, vaultParams)) {
-            throw new ServiceSpecificException(ERROR_BAD_X509_CERTIFICATE,
+            throw new ServiceSpecificException(ERROR_BAD_CERTIFICATE_FORMAT,
                     "The public keys given in verifierPublicKey and vaultParams do not match.");
         }
 
@@ -362,9 +361,9 @@ public class RecoverableKeyStoreManager {
                     keyClaimant);
         } catch (NoSuchAlgorithmException e) {
             Log.wtf(TAG, "SecureBox algorithm missing. AOSP must support this.", e);
-            throw new ServiceSpecificException(ERROR_UNEXPECTED_MISSING_ALGORITHM, e.getMessage());
+            throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
         } catch (InvalidKeyException e) {
-            throw new ServiceSpecificException(ERROR_BAD_X509_CERTIFICATE, e.getMessage());
+            throw new ServiceSpecificException(ERROR_BAD_CERTIFICATE_FORMAT, e.getMessage());
         }
     }
 
@@ -384,13 +383,13 @@ public class RecoverableKeyStoreManager {
     public Map<String, byte[]> recoverKeys(
             @NonNull String sessionId,
             @NonNull byte[] encryptedRecoveryKey,
-            @NonNull List<EntryRecoveryData> applicationKeys)
+            @NonNull List<WrappedApplicationKey> applicationKeys)
             throws RemoteException {
         checkRecoverKeyStorePermission();
         int uid = Binder.getCallingUid();
         RecoverySessionStorage.Entry sessionEntry = mRecoverySessionStorage.get(uid, sessionId);
         if (sessionEntry == null) {
-            throw new ServiceSpecificException(ERROR_KEYSTORE_INTERNAL_ERROR,
+            throw new ServiceSpecificException(ERROR_SESSION_EXPIRED,
                     String.format(Locale.US,
                     "Application uid=%d does not have pending session '%s'", uid, sessionId));
         }
@@ -423,17 +422,15 @@ public class RecoverableKeyStoreManager {
             // Impossible: all algorithms must be supported by AOSP
             throw new RuntimeException(e);
         } catch (KeyStoreException | UnrecoverableKeyException e) {
-            throw new ServiceSpecificException(ERROR_KEYSTORE_INTERNAL_ERROR, e.getMessage());
+            throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
         } catch (InsecureUserException e) {
             throw new ServiceSpecificException(ERROR_INSECURE_USER, e.getMessage());
         }
 
         try {
             return mRecoverableKeyGenerator.generateAndStoreKey(encryptionKey, userId, uid, alias);
-        } catch (KeyStoreException | InvalidKeyException e) {
-            throw new ServiceSpecificException(ERROR_KEYSTORE_INTERNAL_ERROR, e.getMessage());
-        } catch (RecoverableKeyStorageException e) {
-            throw new ServiceSpecificException(ERROR_DATABASE_ERROR, e.getMessage());
+        } catch (KeyStoreException | InvalidKeyException | RecoverableKeyStorageException e) {
+            throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
         }
     }
 
@@ -457,12 +454,12 @@ public class RecoverableKeyStoreManager {
                     encryptedClaimResponse);
             return KeySyncUtils.decryptRecoveryKey(sessionEntry.getLskfHash(), locallyEncryptedKey);
         } catch (InvalidKeyException | AEADBadTagException e) {
-            throw new ServiceSpecificException(ERROR_KEYSTORE_INTERNAL_ERROR,
+            throw new ServiceSpecificException(ERROR_DECRYPTION_FAILED,
                     "Failed to decrypt recovery key " + e.getMessage());
 
         } catch (NoSuchAlgorithmException e) {
             // Should never happen: all the algorithms used are required by AOSP implementations
-            throw new ServiceSpecificException(ERROR_KEYSTORE_INTERNAL_ERROR, e.getMessage());
+            throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
         }
     }
 
@@ -474,9 +471,9 @@ public class RecoverableKeyStoreManager {
      */
     private Map<String, byte[]> recoverApplicationKeys(
             @NonNull byte[] recoveryKey,
-            @NonNull List<EntryRecoveryData> applicationKeys) throws RemoteException {
+            @NonNull List<WrappedApplicationKey> applicationKeys) throws RemoteException {
         HashMap<String, byte[]> keyMaterialByAlias = new HashMap<>();
-        for (EntryRecoveryData applicationKey : applicationKeys) {
+        for (WrappedApplicationKey applicationKey : applicationKeys) {
             String alias = applicationKey.getAlias();
             byte[] encryptedKeyMaterial = applicationKey.getEncryptedKeyMaterial();
 
@@ -487,7 +484,7 @@ public class RecoverableKeyStoreManager {
             } catch (NoSuchAlgorithmException e) {
                 Log.wtf(TAG, "Missing SecureBox algorithm. AOSP required to support this.", e);
                 throw new ServiceSpecificException(
-                        ERROR_UNEXPECTED_MISSING_ALGORITHM, e.getMessage());
+                        ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
             } catch (InvalidKeyException | AEADBadTagException e) {
                 throw new ServiceSpecificException(ERROR_DECRYPTION_FAILED,
                         "Failed to recover key with alias '" + alias + "': " + e.getMessage());

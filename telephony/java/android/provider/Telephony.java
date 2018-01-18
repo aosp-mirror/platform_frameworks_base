@@ -2564,6 +2564,35 @@ public final class Telephony {
         public static final Uri CONTENT_URI = Uri.parse("content://telephony/carriers");
 
         /**
+         * The {@code content://} style URL to be called from DevicePolicyManagerService,
+         * can manage DPC-owned APNs.
+         * @hide
+         */
+        public static final Uri DPC_URI = Uri.parse("content://telephony/carriers/dpc");
+
+        /**
+         * The {@code content://} style URL to be called from Telephony to query APNs.
+         * When DPC-owned APNs are enforced, only DPC-owned APNs are returned, otherwise only
+         * non-DPC-owned APNs are returned.
+         * @hide
+         */
+        public static final Uri FILTERED_URI = Uri.parse("content://telephony/carriers/filtered");
+
+        /**
+         * The {@code content://} style URL to be called from DevicePolicyManagerService
+         * or Telephony to manage whether DPC-owned APNs are enforced.
+         * @hide
+         */
+        public static final Uri ENFORCE_MANAGED_URI = Uri.parse(
+                "content://telephony/carriers/enforce_managed");
+
+        /**
+         * The column name for ENFORCE_MANAGED_URI, indicates whether DPC-owned APNs are enforced.
+         * @hide
+         */
+        public static final String ENFORCE_KEY = "enforced";
+
+        /**
          * The default sort order for this table.
          */
         public static final String DEFAULT_SORT_ORDER = "name ASC";

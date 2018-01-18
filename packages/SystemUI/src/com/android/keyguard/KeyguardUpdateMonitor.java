@@ -1613,11 +1613,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         }
     }
 
-    private static boolean isBatteryUpdateInteresting(BatteryStatus old, BatteryStatus current) {
+    private boolean isBatteryUpdateInteresting(BatteryStatus old, BatteryStatus current) {
         final boolean nowPluggedIn = current.isPluggedIn();
         final boolean wasPluggedIn = old.isPluggedIn();
-        final boolean stateChangedWhilePluggedIn =
-            wasPluggedIn == true && nowPluggedIn == true
+        final boolean stateChangedWhilePluggedIn = wasPluggedIn && nowPluggedIn
             && (old.status != current.status);
 
         // change in plug state is always interesting
@@ -1627,6 +1626,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
 
         // change in battery level while plugged in
         if (nowPluggedIn && old.level != current.level) {
+            return true;
+        }
+
+        // change in battery level while keyguard visible
+        if (mKeyguardIsVisible && old.level != current.level) {
             return true;
         }
 

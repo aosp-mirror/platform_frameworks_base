@@ -109,4 +109,21 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     public boolean startUserInBackground(ComponentName who, UserHandle userHandle) {
         return false;
     }
+
+    @Override
+    public void setStartUserSessionMessage(
+            ComponentName admin, CharSequence startUserSessionMessage) {}
+
+    @Override
+    public void setEndUserSessionMessage(ComponentName admin, CharSequence endUserSessionMessage) {}
+
+    @Override
+    public String getStartUserSessionMessage(ComponentName admin) {
+        return null;
+    }
+
+    @Override
+    public String getEndUserSessionMessage(ComponentName admin) {
+        return null;
+    }
 }

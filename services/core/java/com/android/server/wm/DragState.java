@@ -42,6 +42,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.IUserManager;
+import android.os.UserManagerInternal;
 import android.util.Slog;
 import android.view.Display;
 import android.view.DragEvent;
@@ -55,6 +56,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 
 import com.android.internal.view.IDragAndDropPermissions;
+import com.android.server.LocalServices;
 import com.android.server.input.InputApplicationHandle;
 import com.android.server.input.InputWindowHandle;
 
@@ -116,10 +118,10 @@ class DragState {
     private final Interpolator mCubicEaseOutInterpolator = new DecelerateInterpolator(1.5f);
     private Point mDisplaySize = new Point();
 
-    DragState(WindowManagerService service, IBinder token, SurfaceControl surface,
-            int flags, IBinder localWin) {
+    DragState(WindowManagerService service, DragDropController controller, IBinder token,
+            SurfaceControl surface, int flags, IBinder localWin) {
         mService = service;
-        mDragDropController = service.mDragDropController;
+        mDragDropController = controller;
         mToken = token;
         mSurfaceControl = surface;
         mFlags = flags;
@@ -318,15 +320,9 @@ class DragState {
 
         mSourceUserId = UserHandle.getUserId(mUid);
 
-        final IUserManager userManager =
-                (IUserManager) ServiceManager.getService(Context.USER_SERVICE);
-        try {
-            mCrossProfileCopyAllowed = !userManager.getUserRestrictions(mSourceUserId).getBoolean(
-                    UserManager.DISALLOW_CROSS_PROFILE_COPY_PASTE);
-        } catch (RemoteException e) {
-            Slog.e(TAG_WM, "Remote Exception calling UserManager: " + e);
-            mCrossProfileCopyAllowed = false;
-        }
+        final UserManagerInternal userManager = LocalServices.getService(UserManagerInternal.class);
+        mCrossProfileCopyAllowed = !userManager.getUserRestriction(
+                mSourceUserId, UserManager.DISALLOW_CROSS_PROFILE_COPY_PASTE);
 
         if (DEBUG_DRAG) {
             Slog.d(TAG_WM, "broadcasting DRAG_STARTED at (" + touchX + ", " + touchY + ")");
@@ -534,7 +530,8 @@ class DragState {
         final int targetUserId = UserHandle.getUserId(touchedWin.getOwningUid());
 
         final DragAndDropPermissionsHandler dragAndDropPermissions;
-        if ((mFlags & View.DRAG_FLAG_GLOBAL) != 0 && (mFlags & DRAG_FLAGS_URI_ACCESS) != 0) {
+        if ((mFlags & View.DRAG_FLAG_GLOBAL) != 0 && (mFlags & DRAG_FLAGS_URI_ACCESS) != 0
+                && mData != null) {
             dragAndDropPermissions = new DragAndDropPermissionsHandler(
                     mData,
                     mUid,
@@ -546,7 +543,9 @@ class DragState {
             dragAndDropPermissions = null;
         }
         if (mSourceUserId != targetUserId){
-            mData.fixUris(mSourceUserId);
+            if (mData != null) {
+                mData.fixUris(mSourceUserId);
+            }
         }
         final int myPid = Process.myPid();
         final IBinder token = touchedWin.mClient.asBinder();

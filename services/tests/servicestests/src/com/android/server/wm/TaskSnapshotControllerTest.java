@@ -18,7 +18,7 @@ package com.android.server.wm;
 
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
-import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
+import static android.view.WindowManager.TRANSIT_UNSET;
 import static com.android.server.wm.TaskSnapshotController.*;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;

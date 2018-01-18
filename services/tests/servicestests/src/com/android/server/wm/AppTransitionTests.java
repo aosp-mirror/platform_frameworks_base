@@ -16,9 +16,9 @@
 
 package com.android.server.wm;
 
-import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
-import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_GOING_AWAY;
-import static com.android.server.wm.AppTransition.TRANSIT_KEYGUARD_UNOCCLUDE;
+import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static org.junit.Assert.assertEquals;
 
 import android.content.Context;

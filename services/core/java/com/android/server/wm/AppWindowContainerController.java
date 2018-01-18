@@ -19,8 +19,8 @@ package com.android.server.wm;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
-import static com.android.server.wm.AppTransition.TRANSIT_DOCK_TASK_FROM_RECENTS;
-import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
+import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
+import static android.view.WindowManager.TRANSIT_UNSET;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
@@ -32,7 +32,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.app.ActivityManager.TaskSnapshot;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
-import android.graphics.Rect;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
@@ -40,6 +39,8 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Slog;
 import android.view.IApplicationToken;
+import android.view.RemoteAnimationDefinition;
+import android.view.WindowManager;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.AttributeCache;
@@ -393,7 +394,7 @@ public class AppWindowContainerController
                     wtoken.mEnteringAnimation = false;
                 }
                 if (mService.mAppTransition.getAppTransition()
-                        == AppTransition.TRANSIT_TASK_OPEN_BEHIND) {
+                        == WindowManager.TRANSIT_TASK_OPEN_BEHIND) {
                     // We're launchingBehind, add the launching activity to mOpeningApps.
                     final WindowState win =
                             mService.getDefaultDisplayContentLocked().findFocusedWindow();
@@ -692,6 +693,17 @@ public class AppWindowContainerController
             if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Clear freezing of " + mToken + ": hidden="
                     + mContainer.isHidden() + " freezing=" + mContainer.isFreezingScreen());
             mContainer.stopFreezingScreen(true, force);
+        }
+    }
+
+    public void registerRemoteAnimations(RemoteAnimationDefinition definition) {
+        synchronized (mWindowMap) {
+            if (mContainer == null) {
+                Slog.w(TAG_WM, "Attempted to register remote animations with non-existing app"
+                        + " token: " + mToken);
+                return;
+            }
+            mContainer.registerRemoteAnimations(definition);
         }
     }
 

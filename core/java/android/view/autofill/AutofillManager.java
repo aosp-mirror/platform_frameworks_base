@@ -341,6 +341,10 @@ public final class AutofillManager {
     @GuardedBy("mLock")
     @Nullable private AutofillId mSaveTriggerId;
 
+    /** set to true when onInvisibleForAutofill is called, used by onAuthenticationResult */
+    @GuardedBy("mLock")
+    private boolean mOnInvisibleCalled;
+
     /** If set, session is commited when the activity is finished; otherwise session is canceled. */
     @GuardedBy("mLock")
     private boolean mSaveOnFinish;
@@ -395,6 +399,11 @@ public final class AutofillManager {
          * @return {@code true} if the client is currently visible
          */
         boolean isVisibleForAutofill();
+
+        /**
+         * Client might disable enter/exit event e.g. when activity is paused.
+         */
+        boolean isDisablingEnterExitEventForAutofill();
 
         /**
          * Finds views by traversing the hierarchies of the client.
@@ -495,6 +504,19 @@ public final class AutofillManager {
             if (mEnabled && isActiveLocked() && mTrackedViews != null) {
                 mTrackedViews.onVisibleForAutofillLocked();
             }
+        }
+    }
+
+    /**
+     * Called once the client becomes invisible.
+     *
+     * @see AutofillClient#isVisibleForAutofill()
+     *
+     * {@hide}
+     */
+    public void onInvisibleForAutofill() {
+        synchronized (mLock) {
+            mOnInvisibleCalled = true;
         }
     }
 
@@ -623,21 +645,45 @@ public final class AutofillManager {
         return false;
     }
 
+    private boolean isClientVisibleForAutofillLocked() {
+        final AutofillClient client = getClient();
+        return client != null && client.isVisibleForAutofill();
+    }
+
+    private boolean isClientDisablingEnterExitEvent() {
+        final AutofillClient client = getClient();
+        return client != null && client.isDisablingEnterExitEventForAutofill();
+    }
+
     private void notifyViewEntered(@NonNull View view, int flags) {
         if (!hasAutofillFeature()) {
             return;
         }
-        AutofillCallback callback = null;
+        AutofillCallback callback;
         synchronized (mLock) {
-            if (shouldIgnoreViewEnteredLocked(view, flags)) return;
+            callback = notifyViewEnteredLocked(view, flags);
+        }
 
-            ensureServiceClientAddedIfNeededLocked();
+        if (callback != null) {
+            mCallback.onAutofillEvent(view, AutofillCallback.EVENT_INPUT_UNAVAILABLE);
+        }
+    }
 
-            if (!mEnabled) {
-                if (mCallback != null) {
-                    callback = mCallback;
-                }
-            } else {
+    /** Returns AutofillCallback if need fire EVENT_INPUT_UNAVAILABLE */
+    private AutofillCallback notifyViewEnteredLocked(@NonNull View view, int flags) {
+        if (shouldIgnoreViewEnteredLocked(view, flags)) return null;
+
+        AutofillCallback callback = null;
+
+        ensureServiceClientAddedIfNeededLocked();
+
+        if (!mEnabled) {
+            if (mCallback != null) {
+                callback = mCallback;
+            }
+        } else {
+            // don't notify entered when Activity is already in background
+            if (!isClientDisablingEnterExitEvent()) {
                 final AutofillId id = getAutofillId(view);
                 final AutofillValue value = view.getAutofillValue();
 
@@ -650,10 +696,7 @@ public final class AutofillManager {
                 }
             }
         }
-
-        if (callback != null) {
-            mCallback.onAutofillEvent(view, AutofillCallback.EVENT_INPUT_UNAVAILABLE);
-        }
+        return callback;
     }
 
     /**
@@ -666,9 +709,16 @@ public final class AutofillManager {
             return;
         }
         synchronized (mLock) {
-            ensureServiceClientAddedIfNeededLocked();
+            notifyViewExitedLocked(view);
+        }
+    }
 
-            if (mEnabled && isActiveLocked()) {
+    void notifyViewExitedLocked(@NonNull View view) {
+        ensureServiceClientAddedIfNeededLocked();
+
+        if (mEnabled && isActiveLocked()) {
+            // dont notify exited when Activity is already in background
+            if (!isClientDisablingEnterExitEvent()) {
                 final AutofillId id = getAutofillId(view);
 
                 // Update focus on existing session.
@@ -719,7 +769,7 @@ public final class AutofillManager {
                     }
                 }
                 if (mTrackedViews != null) {
-                    mTrackedViews.notifyViewVisibilityChanged(id, isVisible);
+                    mTrackedViews.notifyViewVisibilityChangedLocked(id, isVisible);
                 }
             }
         }
@@ -752,17 +802,32 @@ public final class AutofillManager {
         if (!hasAutofillFeature()) {
             return;
         }
-        AutofillCallback callback = null;
+        AutofillCallback callback;
         synchronized (mLock) {
-            if (shouldIgnoreViewEnteredLocked(view, flags)) return;
+            callback = notifyViewEnteredLocked(view, virtualId, bounds, flags);
+        }
 
-            ensureServiceClientAddedIfNeededLocked();
+        if (callback != null) {
+            callback.onAutofillEvent(view, virtualId,
+                    AutofillCallback.EVENT_INPUT_UNAVAILABLE);
+        }
+    }
 
-            if (!mEnabled) {
-                if (mCallback != null) {
-                    callback = mCallback;
-                }
-            } else {
+    /** Returns AutofillCallback if need fire EVENT_INPUT_UNAVAILABLE */
+    private AutofillCallback notifyViewEnteredLocked(View view, int virtualId, Rect bounds,
+                                                     int flags) {
+        AutofillCallback callback = null;
+        if (shouldIgnoreViewEnteredLocked(view, flags)) return callback;
+
+        ensureServiceClientAddedIfNeededLocked();
+
+        if (!mEnabled) {
+            if (mCallback != null) {
+                callback = mCallback;
+            }
+        } else {
+            // don't notify entered when Activity is already in background
+            if (!isClientDisablingEnterExitEvent()) {
                 final AutofillId id = getAutofillId(view, virtualId);
 
                 if (!isActiveLocked()) {
@@ -774,11 +839,7 @@ public final class AutofillManager {
                 }
             }
         }
-
-        if (callback != null) {
-            callback.onAutofillEvent(view, virtualId,
-                    AutofillCallback.EVENT_INPUT_UNAVAILABLE);
-        }
+        return callback;
     }
 
     /**
@@ -792,9 +853,16 @@ public final class AutofillManager {
             return;
         }
         synchronized (mLock) {
-            ensureServiceClientAddedIfNeededLocked();
+            notifyViewExitedLocked(view, virtualId);
+        }
+    }
 
-            if (mEnabled && isActiveLocked()) {
+    private void notifyViewExitedLocked(@NonNull View view, int virtualId) {
+        ensureServiceClientAddedIfNeededLocked();
+
+        if (mEnabled && isActiveLocked()) {
+            // don't notify exited when Activity is already in background
+            if (!isClientDisablingEnterExitEvent()) {
                 final AutofillId id = getAutofillId(view, virtualId);
 
                 // Update focus on existing session.
@@ -1155,7 +1223,7 @@ public final class AutofillManager {
     }
 
     /** @hide */
-    public void onAuthenticationResult(int authenticationId, Intent data) {
+    public void onAuthenticationResult(int authenticationId, Intent data, View focusView) {
         if (!hasAutofillFeature()) {
             return;
         }
@@ -1167,9 +1235,24 @@ public final class AutofillManager {
         if (sDebug) Log.d(TAG, "onAuthenticationResult(): d=" + data);
 
         synchronized (mLock) {
-            if (!isActiveLocked() || data == null) {
+            if (!isActiveLocked()) {
                 return;
             }
+            // If authenticate activity closes itself during onCreate(), there is no onStop/onStart
+            // of app activity.  We enforce enter event to re-show fill ui in such case.
+            // CTS example:
+            //     LoginActivityTest#testDatasetAuthTwoFieldsUserCancelsFirstAttempt
+            //     LoginActivityTest#testFillResponseAuthBothFieldsUserCancelsFirstAttempt
+            if (!mOnInvisibleCalled && focusView != null
+                    && focusView.canNotifyAutofillEnterExitEvent()) {
+                notifyViewExitedLocked(focusView);
+                notifyViewEnteredLocked(focusView, 0);
+            }
+            if (data == null) {
+                // data is set to null when result is not RESULT_OK
+                return;
+            }
+
             final Parcelable result = data.getParcelableExtra(EXTRA_AUTHENTICATION_RESULT);
             final Bundle responseData = new Bundle();
             responseData.putParcelable(EXTRA_AUTHENTICATION_RESULT, result);
@@ -1402,6 +1485,9 @@ public final class AutofillManager {
             if (sessionId == mSessionId) {
                 final AutofillClient client = getClient();
                 if (client != null) {
+                    // clear mOnInvisibleCalled and we will see if receive onInvisibleForAutofill()
+                    // before onAuthenticationResult()
+                    mOnInvisibleCalled = false;
                     client.autofillCallbackAuthenticate(authenticationId, intent, fillInIntent);
                 }
             }
@@ -1767,6 +1853,7 @@ public final class AutofillManager {
         pw.print(pfx); pw.print("enabled: "); pw.println(mEnabled);
         pw.print(pfx); pw.print("hasService: "); pw.println(mService != null);
         pw.print(pfx); pw.print("hasCallback: "); pw.println(mCallback != null);
+        pw.print(pfx); pw.print("onInvisibleCalled "); pw.println(mOnInvisibleCalled);
         pw.print(pfx); pw.print("last autofilled data: "); pw.println(mLastAutofilledData);
         pw.print(pfx); pw.print("tracked views: ");
         if (mTrackedViews == null) {
@@ -1937,15 +2024,13 @@ public final class AutofillManager {
          * @param id the id of the view/virtual view whose visibility changed.
          * @param isVisible visible if the view is visible in the view hierarchy.
          */
-        void notifyViewVisibilityChanged(@NonNull AutofillId id, boolean isVisible) {
-            AutofillClient client = getClient();
-
+        void notifyViewVisibilityChangedLocked(@NonNull AutofillId id, boolean isVisible) {
             if (sDebug) {
                 Log.d(TAG, "notifyViewVisibilityChanged(): id=" + id + " isVisible="
                         + isVisible);
             }
 
-            if (client != null && client.isVisibleForAutofill()) {
+            if (isClientVisibleForAutofillLocked()) {
                 if (isVisible) {
                     if (isInSet(mInvisibleTrackedIds, id)) {
                         mInvisibleTrackedIds = removeFromSet(mInvisibleTrackedIds, id);

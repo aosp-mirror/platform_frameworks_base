@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.Manifest.permission.ACTIVITY_EMBEDDING;
+import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.START_ANY_ACTIVITY;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
@@ -93,7 +94,7 @@ import static com.android.server.am.proto.ActivityStackSupervisorProto.DISPLAYS;
 import static com.android.server.am.proto.ActivityStackSupervisorProto.FOCUSED_STACK_ID;
 import static com.android.server.am.proto.ActivityStackSupervisorProto.KEYGUARD_CONTROLLER;
 import static com.android.server.am.proto.ActivityStackSupervisorProto.RESUMED_ACTIVITY;
-import static com.android.server.wm.AppTransition.TRANSIT_DOCK_TASK_FROM_RECENTS;
+import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 
 import static java.lang.Integer.MAX_VALUE;
 
@@ -162,6 +163,7 @@ import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
+import android.view.RemoteAnimationAdapter;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
@@ -1422,7 +1424,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem;
                 if (andResume) {
-                    lifecycleItem = ResumeActivityItem.obtain(mService.isNextTransitionForward());
+                    lifecycleItem = ResumeActivityItem.obtain(mService.isNextTransitionForward())
+                            .setDescription(r.getLifecycleDescription("realStartActivityLocked"));
                 } else {
                     lifecycleItem = PauseActivityItem.obtain();
                 }
@@ -1677,6 +1680,18 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 final String msg = "Permission Denial: starting " + intent.toString()
                         + " from " + callerApp + " (pid=" + callingPid
                         + ", uid=" + callingUid + ") with lockTaskMode=true";
+                Slog.w(TAG, msg);
+                throw new SecurityException(msg);
+            }
+
+            // Check permission for remote animations
+            final RemoteAnimationAdapter adapter = options.getRemoteAnimationAdapter();
+            if (adapter != null && mService.checkPermission(
+                    CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS, callingPid, callingUid)
+                            != PERMISSION_GRANTED) {
+                final String msg = "Permission Denial: starting " + intent.toString()
+                        + " from " + callerApp + " (pid=" + callingPid
+                        + ", uid=" + callingUid + ") with remoteAnimationAdapter";
                 Slog.w(TAG, msg);
                 throw new SecurityException(msg);
             }

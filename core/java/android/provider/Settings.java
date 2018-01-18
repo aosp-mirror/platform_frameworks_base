@@ -6830,7 +6830,7 @@ public final class Settings {
          * @hide
          */
         public static final int SHOW_ROTATION_SUGGESTIONS_DEFAULT =
-                SHOW_ROTATION_SUGGESTIONS_DISABLED;
+                SHOW_ROTATION_SUGGESTIONS_ENABLED;
 
         /**
          * Read only list of the service components that the current user has explicitly allowed to
@@ -9852,6 +9852,15 @@ public final class Settings {
         public static final String FORCED_APP_STANDBY_ENABLED = "forced_app_standby_enabled";
 
         /**
+         * Whether or not to enable Forced App Standby on small battery devices.
+         * Type: int (0 for false, 1 for true)
+         * Default: 0
+         * @hide
+         */
+        public static final String FORCED_APP_STANDBY_FOR_SMALL_BATTERY_ENABLED
+                = "forced_app_standby_for_small_battery_enabled";
+
+        /**
          * Whether or not Network Watchlist feature is enabled.
          * Type: int (0 for false, 1 for true)
          * Default: 0
@@ -11300,6 +11309,13 @@ public final class Settings {
          */
         public static final String ZRAM_ENABLED =
                 "zram_enabled";
+
+        /**
+         * Whether smart replies in notifications are enabled.
+         * @hide
+         */
+        public static final String ENABLE_SMART_REPLIES_IN_NOTIFICATIONS =
+                "enable_smart_replies_in_notifications";
     }
 
     /**

@@ -3,7 +3,7 @@ package com.android.server.locksettings.recoverablekeystore.storage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import android.security.keystore.RecoveryData;
+import android.security.keystore.KeychainSnapshot;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -26,25 +26,25 @@ public class RecoverySnapshotStorageTest {
     @Test
     public void get_returnsSetSnapshot() {
         int userId = 1000;
-        RecoveryData recoveryData = new RecoveryData(
+        KeychainSnapshot keychainSnapshot = new KeychainSnapshot(
                 /*snapshotVersion=*/ 1,
                 new ArrayList<>(),
                 new ArrayList<>(),
                 new byte[0]);
-        mRecoverySnapshotStorage.put(userId, recoveryData);
+        mRecoverySnapshotStorage.put(userId, keychainSnapshot);
 
-        assertEquals(recoveryData, mRecoverySnapshotStorage.get(userId));
+        assertEquals(keychainSnapshot, mRecoverySnapshotStorage.get(userId));
     }
 
     @Test
     public void remove_removesSnapshots() {
         int userId = 1000;
-        RecoveryData recoveryData = new RecoveryData(
+        KeychainSnapshot keychainSnapshot = new KeychainSnapshot(
                 /*snapshotVersion=*/ 1,
                 new ArrayList<>(),
                 new ArrayList<>(),
                 new byte[0]);
-        mRecoverySnapshotStorage.put(userId, recoveryData);
+        mRecoverySnapshotStorage.put(userId, keychainSnapshot);
 
         mRecoverySnapshotStorage.remove(userId);
 

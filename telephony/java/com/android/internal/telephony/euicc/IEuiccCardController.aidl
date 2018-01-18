@@ -17,8 +17,66 @@
 package com.android.internal.telephony.euicc;
 
 import com.android.internal.telephony.euicc.IGetAllProfilesCallback;
+import com.android.internal.telephony.euicc.IGetProfileCallback;
+import com.android.internal.telephony.euicc.IDisableProfileCallback;
+import com.android.internal.telephony.euicc.ISwitchToProfileCallback;
+import com.android.internal.telephony.euicc.ISetNicknameCallback;
+import com.android.internal.telephony.euicc.IDeleteProfileCallback;
+import com.android.internal.telephony.euicc.IResetMemoryCallback;
+import com.android.internal.telephony.euicc.IGetDefaultSmdpAddressCallback;
+import com.android.internal.telephony.euicc.IGetSmdsAddressCallback;
+import com.android.internal.telephony.euicc.ISetDefaultSmdpAddressCallback;
+import com.android.internal.telephony.euicc.IAuthenticateServerCallback;
+import com.android.internal.telephony.euicc.ICancelSessionCallback;
+import com.android.internal.telephony.euicc.IGetEuiccChallengeCallback;
+import com.android.internal.telephony.euicc.IGetEuiccInfo1Callback;
+import com.android.internal.telephony.euicc.IGetEuiccInfo2Callback;
+import com.android.internal.telephony.euicc.IGetRulesAuthTableCallback;
+import com.android.internal.telephony.euicc.IListNotificationsCallback;
+import com.android.internal.telephony.euicc.ILoadBoundProfilePackageCallback;
+import com.android.internal.telephony.euicc.IPrepareDownloadCallback;
+import com.android.internal.telephony.euicc.IRemoveNotificationFromListCallback;
+import com.android.internal.telephony.euicc.IRetrieveNotificationCallback;
+import com.android.internal.telephony.euicc.IRetrieveNotificationListCallback;
 
 /** @hide */
 interface IEuiccCardController {
     oneway void getAllProfiles(String callingPackage, in IGetAllProfilesCallback callback);
+    oneway void getProfile(String callingPackage, String iccid, in IGetProfileCallback callback);
+    oneway void disableProfile(String callingPackage, String iccid, boolean refresh,
+        in IDisableProfileCallback callback);
+    oneway void switchToProfile(String callingPackage, String iccid, boolean refresh,
+        in ISwitchToProfileCallback callback);
+    String getEid();
+    oneway void setNickname(String callingPackage, String iccid, String nickname,
+        in ISetNicknameCallback callback);
+    oneway void deleteProfile(String callingPackage, String iccid,
+        in IDeleteProfileCallback callback);
+    oneway void resetMemory(String callingPackage, int options, in IResetMemoryCallback callback);
+    oneway void getDefaultSmdpAddress(String callingPackage,
+        in IGetDefaultSmdpAddressCallback callback);
+    oneway void getSmdsAddress(String callingPackage, in IGetSmdsAddressCallback callback);
+    oneway void setDefaultSmdpAddress(String callingPackage, String address,
+        in ISetDefaultSmdpAddressCallback callback);
+    oneway void getRulesAuthTable(String callingPackage, in IGetRulesAuthTableCallback callback);
+    oneway void getEuiccChallenge(String callingPackage, in IGetEuiccChallengeCallback callback);
+    oneway void getEuiccInfo1(String callingPackage, in IGetEuiccInfo1Callback callback);
+    oneway void getEuiccInfo2(String callingPackage, in IGetEuiccInfo2Callback callback);
+    oneway void authenticateServer(String callingPackage, String matchingId,
+        in byte[] serverSigned1, in byte[] serverSignature1, in byte[] euiccCiPkIdToBeUsed,
+        in byte[] serverCertificatein, in IAuthenticateServerCallback callback);
+    oneway void prepareDownload(String callingPackage, in byte[] hashCc, in byte[] smdpSigned2,
+        in byte[] smdpSignature2, in byte[] smdpCertificate, in IPrepareDownloadCallback callback);
+    oneway void loadBoundProfilePackage(String callingPackage, in byte[] boundProfilePackage,
+        in ILoadBoundProfilePackageCallback callback);
+    oneway void cancelSession(String callingPackage, in byte[] transactionId, int reason,
+        in ICancelSessionCallback callback);
+    oneway void listNotifications(String callingPackage, int events,
+        in IListNotificationsCallback callback);
+    oneway void retrieveNotificationList(String callingPackage, int events,
+        in IRetrieveNotificationListCallback callback);
+    oneway void retrieveNotification(String callingPackage, int seqNumber,
+        in IRetrieveNotificationCallback callback);
+    oneway void removeNotificationFromList(String callingPackage, int seqNumber,
+            in IRemoveNotificationFromListCallback callback);
 }

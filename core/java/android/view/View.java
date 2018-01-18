@@ -3226,6 +3226,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private static final int PFLAG3_SCREEN_READER_FOCUSABLE = 0x10000000;
 
+    /**
+     * The last aggregated visibility. Used to detect when it truly changes.
+     */
+    private static final int PFLAG3_AGGREGATED_VISIBLE = 0x20000000;
+
     /* End of masks for mPrivateFlags3 */
 
     /**
@@ -4205,6 +4210,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private static boolean sCanFocusZeroSized;
 
+    /**
+     * Always assign focus if a focusable View is available.
+     */
+    private static boolean sAlwaysAssignFocus;
+
     private String mTransitionName;
 
     static class TintInfo {
@@ -4821,6 +4831,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             sThrowOnInvalidFloatProperties = targetSdkVersion >= Build.VERSION_CODES.P;
 
             sCanFocusZeroSized = targetSdkVersion < Build.VERSION_CODES.P;
+
+            sAlwaysAssignFocus = targetSdkVersion < Build.VERSION_CODES.P;
 
             sCompatibilityDone = true;
         }
@@ -7012,8 +7024,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Called when this view wants to give up focus. If focus is cleared
      * {@link #onFocusChanged(boolean, int, android.graphics.Rect)} is called.
      * <p>
-     * <strong>Note:</strong> When a View clears focus the framework is trying
-     * to give focus to the first focusable View from the top. Hence, if this
+     * <strong>Note:</strong> When not in touch-mode, the framework will try to give focus
+     * to the first focusable View from the top after focus is cleared. Hence, if this
      * View is the first from the top that can take focus, then all callbacks
      * related to clearing focus will be invoked after which the framework will
      * give focus to this view.
@@ -7024,7 +7036,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             System.out.println(this + " clearFocus()");
         }
 
-        clearFocusInternal(null, true, true);
+        final boolean refocus = sAlwaysAssignFocus || !isInTouchMode();
+        clearFocusInternal(null, true, refocus);
     }
 
     /**
@@ -7219,20 +7232,24 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         notifyEnterOrExitForAutoFillIfNeeded(gainFocus);
     }
 
-    private void notifyEnterOrExitForAutoFillIfNeeded(boolean enter) {
-        if (isAutofillable() && isAttachedToWindow()) {
+    /** @hide */
+    public void notifyEnterOrExitForAutoFillIfNeeded(boolean enter) {
+        if (canNotifyAutofillEnterExitEvent()) {
             AutofillManager afm = getAutofillManager();
             if (afm != null) {
-                if (enter && hasWindowFocus() && isFocused()) {
+                if (enter && isFocused()) {
                     // We have not been laid out yet, hence cannot evaluate
                     // whether this view is visible to the user, we will do
                     // the evaluation once layout is complete.
                     if (!isLaidOut()) {
                         mPrivateFlags3 |= PFLAG3_NOTIFY_AUTOFILL_ENTER_ON_LAYOUT;
                     } else if (isVisibleToUser()) {
+                        // TODO This is a potential problem that View gets focus before it's visible
+                        // to User. Ideally View should handle the event when isVisibleToUser()
+                        // becomes true where it should issue notifyViewEntered().
                         afm.notifyViewEntered(this);
                     }
-                } else if (!hasWindowFocus() || !isFocused()) {
+                } else if (!isFocused()) {
                     afm.notifyViewExited(this);
                 }
             }
@@ -7366,7 +7383,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void sendAccessibilityEventUncheckedInternal(AccessibilityEvent event) {
-        if (!isShown()) {
+        // Panes disappearing are relevant even if though the view is no longer visible.
+        boolean isWindowStateChanged =
+                (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+        boolean isWindowDisappearedEvent = isWindowStateChanged && ((event.getContentChangeTypes()
+                & AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_DISAPPEARED) != 0);
+        if (!isShown() && !isWindowDisappearedEvent) {
             return;
         }
         onInitializeAccessibilityEvent(event);
@@ -7474,6 +7496,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @hide
      */
     public void onPopulateAccessibilityEventInternal(AccessibilityEvent event) {
+        if ((event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED)
+                && !TextUtils.isEmpty(getAccessibilityPaneTitle())) {
+            event.getText().add(getAccessibilityPaneTitle());
+        }
     }
 
     /**
@@ -8293,6 +8319,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     private boolean isAutofillable() {
         return getAutofillType() != AUTOFILL_TYPE_NONE && isImportantForAutofill()
                 && getAutofillViewId() > LAST_APP_AUTOFILL_ID;
+    }
+
+    /** @hide */
+    public boolean canNotifyAutofillEnterExitEvent() {
+        return isAutofillable() && isAttachedToWindow();
     }
 
     private void populateVirtualStructure(ViewStructure structure,
@@ -11599,6 +11630,23 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (!AccessibilityManager.getInstance(mContext).isEnabled() || mAttachInfo == null) {
             return;
         }
+        // Changes to views with a pane title count as window state changes, as the pane title
+        // marks them as significant parts of the UI.
+        if (!TextUtils.isEmpty(getAccessibilityPaneTitle())) {
+            final AccessibilityEvent event = AccessibilityEvent.obtain();
+            event.setEventType(AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
+            event.setContentChangeTypes(changeType);
+            onPopulateAccessibilityEvent(event);
+            if (mParent != null) {
+                try {
+                    mParent.requestSendAccessibilityEvent(this, event);
+                } catch (AbstractMethodError e) {
+                    Log.e(VIEW_LOG_TAG, mParent.getClass().getSimpleName()
+                            + " does not fully implement ViewParent", e);
+                }
+            }
+        }
+
         if (mParent != null) {
             try {
                 mParent.notifySubtreeAccessibilityStateChanged(this, source, changeType);
@@ -12412,8 +12460,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             imm.focusIn(this);
         }
 
-        notifyEnterOrExitForAutoFillIfNeeded(hasWindowFocus);
-
         refreshDrawableState();
     }
 
@@ -12532,6 +12578,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     @CallSuper
     public void onVisibilityAggregated(boolean isVisible) {
+        // Update our internal visibility tracking so we can detect changes
+        boolean oldVisible = (mPrivateFlags3 & PFLAG3_AGGREGATED_VISIBLE) != 0;
+        mPrivateFlags3 = isVisible ? (mPrivateFlags3 | PFLAG3_AGGREGATED_VISIBLE)
+                : (mPrivateFlags3 & ~PFLAG3_AGGREGATED_VISIBLE);
         if (isVisible && mAttachInfo != null) {
             initialAwakenScrollBars();
         }
@@ -12570,6 +12620,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     // finish before checking state
                     mVisibilityChangeForAutofillHandler.obtainMessage(0, this).sendToTarget();
                 }
+            }
+        }
+        if (!TextUtils.isEmpty(getAccessibilityPaneTitle())) {
+            if (isVisible != oldVisible) {
+                notifyAccessibilityStateChanged(isVisible
+                        ? AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_APPEARED
+                        : AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_DISAPPEARED);
             }
         }
     }

@@ -84,14 +84,14 @@ import static com.android.server.am.proto.ActivityStackProto.FULLSCREEN;
 import static com.android.server.am.proto.ActivityStackProto.ID;
 import static com.android.server.am.proto.ActivityStackProto.RESUMED_ACTIVITY;
 import static com.android.server.am.proto.ActivityStackProto.TASKS;
-import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_CLOSE;
-import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
-import static com.android.server.wm.AppTransition.TRANSIT_NONE;
-import static com.android.server.wm.AppTransition.TRANSIT_TASK_CLOSE;
-import static com.android.server.wm.AppTransition.TRANSIT_TASK_OPEN;
-import static com.android.server.wm.AppTransition.TRANSIT_TASK_OPEN_BEHIND;
-import static com.android.server.wm.AppTransition.TRANSIT_TASK_TO_BACK;
-import static com.android.server.wm.AppTransition.TRANSIT_TASK_TO_FRONT;
+import static android.view.WindowManager.TRANSIT_ACTIVITY_CLOSE;
+import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
+import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_TASK_CLOSE;
+import static android.view.WindowManager.TRANSIT_TASK_OPEN;
+import static android.view.WindowManager.TRANSIT_TASK_OPEN_BEHIND;
+import static android.view.WindowManager.TRANSIT_TASK_TO_BACK;
+import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
 
 import static java.lang.Integer.MAX_VALUE;
 
@@ -2639,7 +2639,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     next.clearOptionsLocked();
                     mService.mLifecycleManager.scheduleTransaction(next.app.thread, next.appToken,
                             ResumeActivityItem.obtain(next.app.repProcState,
-                                    mService.isNextTransitionForward()));
+                                    mService.isNextTransitionForward())
+                                    .setDescription(next.getLifecycleDescription(
+                                            "resumeTopActivityInnerLocked")));
 
                     if (DEBUG_STATES) Slog.d(TAG_STATES, "resumeTopActivityLocked: Resumed "
                             + next);
@@ -3419,7 +3421,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 EventLogTags.writeAmStopActivity(
                         r.userId, System.identityHashCode(r), r.shortComponentName);
                 mService.mLifecycleManager.scheduleTransaction(r.app.thread, r.appToken,
-                        StopActivityItem.obtain(r.visible, r.configChangeFlags));
+                        StopActivityItem.obtain(r.visible, r.configChangeFlags)
+                                .setDescription(r.getLifecycleDescription("stopActivityLocked")));
                 if (shouldSleepOrShutDownActivities()) {
                     r.setSleeping(true);
                 }
@@ -4225,7 +4228,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             try {
                 if (DEBUG_SWITCH) Slog.i(TAG_SWITCH, "Destroying: " + r);
                 mService.mLifecycleManager.scheduleTransaction(r.app.thread, r.appToken,
-                        DestroyActivityItem.obtain(r.finishing, r.configChangeFlags));
+                        DestroyActivityItem.obtain(r.finishing, r.configChangeFlags)
+                            .setDescription(r.getLifecycleDescription("destroyActivityLocked")));
             } catch (Exception e) {
                 // We can just ignore exceptions here...  if the process
                 // has crashed, our death notification will clean things

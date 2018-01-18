@@ -192,9 +192,11 @@ import java.util.List;
  * <b>TRANSITION TYPES</b></br>
  * </p>
  * <p>
- * <b>Window state changed</b> - represents the event of opening a
- * {@link android.widget.PopupWindow}, {@link android.view.Menu},
- * {@link android.app.Dialog}, etc.</br>
+ * <b>Window state changed</b> - represents the event of a change to a section of
+ * the user interface that is visually distinct. Should be sent from either the
+ * root view of a window or from a view that is marked as a pane
+ * {@link android.view.View#setAccessibilityPaneTitle(CharSequence)}. Not that changes
+ * to true windows are represented by {@link #TYPE_WINDOWS_CHANGED}.</br>
  * <em>Type:</em> {@link #TYPE_WINDOW_STATE_CHANGED}</br>
  * <em>Properties:</em></br>
  * <ul>
@@ -203,7 +205,7 @@ import java.util.List;
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
- *   <li>{@link #getText()} - The text of the source's sub-tree.</li>
+ *   <li>{@link #getText()} - The text of the source's sub-tree, including the pane titles.</li>
  * </ul>
  * </p>
  * <p>
@@ -436,8 +438,10 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPE_VIEW_TEXT_CHANGED = 0x00000010;
 
     /**
-     * Represents the event of opening a {@link android.widget.PopupWindow},
-     * {@link android.view.Menu}, {@link android.app.Dialog}, etc.
+     * Represents the event of a change to a visually distinct section of the user interface.
+     * These events should only be dispatched from {@link android.view.View}s that have
+     * accessibility pane titles, and replaces {@link #TYPE_WINDOW_CONTENT_CHANGED} for those
+     * sources. Details about the change are available from {@link #getContentChangeTypes()}.
      */
     public static final int TYPE_WINDOW_STATE_CHANGED = 0x00000020;
 
@@ -565,10 +569,28 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION = 0x00000004;
 
     /**
-     * Change type for {@link #TYPE_WINDOW_CONTENT_CHANGED} event:
+     * Change type for {@link #TYPE_WINDOW_STATE_CHANGED} event:
      * The node's pane title changed.
      */
     public static final int CONTENT_CHANGE_TYPE_PANE_TITLE = 0x00000008;
+
+    /**
+     * Change type for {@link #TYPE_WINDOW_STATE_CHANGED} event:
+     * The node has a pane title, and either just appeared or just was assigned a title when it
+     * had none before.
+     */
+    public static final int CONTENT_CHANGE_TYPE_PANE_APPEARED = 0x00000010;
+
+    /**
+     * Change type for {@link #TYPE_WINDOW_STATE_CHANGED} event:
+     * Can mean one of two slightly different things. The primary meaning is that the node has
+     * a pane title, and was removed from the node hierarchy. It will also be sent if the pane
+     * title is set to {@code null} after it contained a title.
+     * No source will be returned if the node is no longer on the screen. To make the change more
+     * clear for the user, the first entry in {@link #getText()} will return the value that would
+     * have been returned by {@code getSource().getPaneTitle()}.
+     */
+    public static final int CONTENT_CHANGE_TYPE_PANE_DISAPPEARED = 0x00000020;
 
     /**
      * Change type for {@link #TYPE_WINDOWS_CHANGED} event:

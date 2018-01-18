@@ -18,6 +18,7 @@ package android.media.update;
 
 import android.annotation.SystemApi;
 import android.widget.MediaController2;
+import android.widget.VideoView2;
 
 /**
  * Interface for connecting the public API to an updatable implementation.
@@ -31,4 +32,5 @@ import android.widget.MediaController2;
 public interface StaticProvider {
     MediaController2Provider createMediaController2(
             MediaController2 instance, ViewProvider superProvider);
+    VideoView2Provider createVideoView2(VideoView2 instance, ViewProvider superProvider);
 }

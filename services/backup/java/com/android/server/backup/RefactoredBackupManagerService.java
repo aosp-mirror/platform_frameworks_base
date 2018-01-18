@@ -3140,6 +3140,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                 mCurrentToken = 0;
                 Slog.w(TAG, "Transport " + newTransportName + " not available: current token = 0");
             }
+            mTransportManager.disposeOfTransportClient(transportClient, callerLogString);
         } else {
             Slog.w(TAG, "Transport " + newTransportName + " not registered: current token = 0");
             // The named transport isn't registered, so we can't know what its current dataset token

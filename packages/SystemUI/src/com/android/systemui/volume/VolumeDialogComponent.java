@@ -52,7 +52,7 @@ public class VolumeDialogComponent implements VolumeComponent, TunerService.Tuna
     public static final String VOLUME_UP_SILENT = "sysui_volume_up_silent";
     public static final String VOLUME_SILENT_DO_NOT_DISTURB = "sysui_do_not_disturb";
 
-    public static final boolean DEFAULT_VOLUME_DOWN_TO_ENTER_SILENT = true;
+    public static final boolean DEFAULT_VOLUME_DOWN_TO_ENTER_SILENT = false;
     public static final boolean DEFAULT_VOLUME_UP_TO_EXIT_SILENT = true;
     public static final boolean DEFAULT_DO_NOT_DISTURB_WHEN_SILENT = true;
 

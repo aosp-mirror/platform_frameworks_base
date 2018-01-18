@@ -33,6 +33,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
@@ -173,6 +174,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private FalsingManager mFalsingManager;
     private AboveShelfChangedListener mAboveShelfChangedListener;
     private HeadsUpManager mHeadsUpManager;
+    private View mHelperButton;
 
     private boolean mJustClicked;
     private boolean mIconAnimationRunning;
@@ -387,6 +389,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         updateLimits();
         updateIconVisibilities();
         updateShelfIconColor();
+
+        showBlockingHelper(mEntry.userSentiment ==
+                NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE);
     }
 
     @VisibleForTesting
@@ -1318,12 +1323,22 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         requestLayout();
     }
 
+    public void showBlockingHelper(boolean show) {
+        mHelperButton.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
         mPublicLayout = (NotificationContentView) findViewById(R.id.expandedPublic);
         mPrivateLayout = (NotificationContentView) findViewById(R.id.expanded);
         mLayouts = new NotificationContentView[] {mPrivateLayout, mPublicLayout};
+
+        final NotificationGutsManager gutsMan = Dependency.get(NotificationGutsManager.class);
+        mHelperButton = findViewById(R.id.helper);
+        mHelperButton.setOnClickListener(view -> {
+            doLongClickCallback();
+        });
 
         for (NotificationContentView l : mLayouts) {
             l.setExpandClickListener(mExpandClickListener);

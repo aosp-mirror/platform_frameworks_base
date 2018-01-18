@@ -27,6 +27,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.util.Log;
 import android.util.Pair;
 
@@ -379,6 +380,29 @@ public class BackupManager {
         if (sService != null) {
             try {
                 return sService.isBackupEnabled();
+            } catch (RemoteException e) {
+                Log.e(TAG, "isBackupEnabled() couldn't connect");
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Report whether the backup mechanism is currently active.
+     * When it is inactive, the device will not perform any backup operations, nor will it
+     * deliver data for restore, although clients can still safely call BackupManager methods.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.BACKUP)
+    public boolean isBackupServiceActive(UserHandle user) {
+        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
+                "isBackupServiceActive");
+        checkServiceBinder();
+        if (sService != null) {
+            try {
+                return sService.isBackupServiceActive(user.getIdentifier());
             } catch (RemoteException e) {
                 Log.e(TAG, "isBackupEnabled() couldn't connect");
             }

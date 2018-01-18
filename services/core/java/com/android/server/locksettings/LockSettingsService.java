@@ -63,7 +63,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
-import android.os.ServiceSpecificException;
 import android.os.ShellCallback;
 import android.os.StrictMode;
 import android.os.SystemProperties;
@@ -78,11 +77,10 @@ import android.security.KeyStore;
 import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
+import android.security.keystore.KeychainProtectionParameter;
 import android.security.keystore.UserNotAuthenticatedException;
-import android.security.keystore.EntryRecoveryData;
-import android.security.keystore.RecoveryData;
-import android.security.keystore.RecoveryMetadata;
-import android.security.keystore.RecoveryManagerException;
+import android.security.keystore.WrappedApplicationKey;
+import android.security.keystore.KeychainSnapshot;
 import android.service.gatekeeper.GateKeeperResponse;
 import android.service.gatekeeper.IGateKeeperService;
 import android.text.TextUtils;
@@ -90,6 +88,7 @@ import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -1874,6 +1873,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mSpManager.removeUser(userId);
         mStorage.removeUser(userId);
         mStrongAuth.removeUser(userId);
+        cleanSpCache();
 
         final KeyStore ks = KeyStore.getInstance();
         ks.onUserRemoved(userId);
@@ -1968,7 +1968,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public RecoveryData getRecoveryData(@NonNull byte[] account) throws RemoteException {
+    public KeychainSnapshot getRecoveryData(@NonNull byte[] account) throws RemoteException {
         return mRecoverableKeyStoreManager.getRecoveryData(account);
     }
 
@@ -1997,7 +1997,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public void setRecoverySecretTypes(@NonNull @RecoveryMetadata.UserSecretType
+    public void setRecoverySecretTypes(@NonNull @KeychainProtectionParameter.UserSecretType
             int[] secretTypes) throws RemoteException {
         mRecoverableKeyStoreManager.setRecoverySecretTypes(secretTypes);
     }
@@ -2014,7 +2014,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public void recoverySecretAvailable(@NonNull RecoveryMetadata recoverySecret)
+    public void recoverySecretAvailable(@NonNull KeychainProtectionParameter recoverySecret)
             throws RemoteException {
         mRecoverableKeyStoreManager.recoverySecretAvailable(recoverySecret);
     }
@@ -2022,7 +2022,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public byte[] startRecoverySession(@NonNull String sessionId,
             @NonNull byte[] verifierPublicKey, @NonNull byte[] vaultParams,
-            @NonNull byte[] vaultChallenge, @NonNull List<RecoveryMetadata> secrets)
+            @NonNull byte[] vaultChallenge, @NonNull List<KeychainProtectionParameter> secrets)
             throws RemoteException {
         return mRecoverableKeyStoreManager.startRecoverySession(sessionId, verifierPublicKey,
                 vaultParams, vaultChallenge, secrets);
@@ -2030,7 +2030,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     @Override
     public Map<String, byte[]> recoverKeys(@NonNull String sessionId,
-            @NonNull byte[] recoveryKeyBlob, @NonNull List<EntryRecoveryData> applicationKeys)
+            @NonNull byte[] recoveryKeyBlob, @NonNull List<WrappedApplicationKey> applicationKeys)
             throws RemoteException {
         return mRecoverableKeyStoreManager.recoverKeys(
                 sessionId, recoveryKeyBlob, applicationKeys);
@@ -2112,6 +2112,63 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     /**
+     * A user's synthetic password does not change so it must be cached in certain circumstances to
+     * enable untrusted credential reset.
+     *
+     * Untrusted credential reset will be removed in a future version (b/68036371) at which point
+     * this cache is no longer needed as the SP will always be known when changing the user's
+     * credential.
+     */
+    @GuardedBy("mSpManager")
+    private SparseArray<AuthenticationToken> mSpCache = new SparseArray();
+
+    private void onAuthTokenKnownForUser(@UserIdInt int userId, AuthenticationToken auth) {
+        // Update the SP cache, removing the entry when allowed
+        synchronized (mSpManager) {
+            if (shouldCacheSpForUser(userId)) {
+                Slog.i(TAG, "Caching SP for user " + userId);
+                mSpCache.put(userId, auth);
+            } else {
+                Slog.i(TAG, "Not caching SP for user " + userId);
+                mSpCache.delete(userId);
+            }
+        }
+    }
+
+    /** Clean up the SP cache by removing unneeded entries. */
+    private void cleanSpCache() {
+        synchronized (mSpManager) {
+            // Preserve indicies after removal by iterating backwards
+            for (int i = mSpCache.size() - 1; i >= 0; --i) {
+                final int userId = mSpCache.keyAt(i);
+                if (!shouldCacheSpForUser(userId)) {
+                    Slog.i(TAG, "Uncaching SP for user " + userId);
+                    mSpCache.removeAt(i);
+                }
+            }
+        }
+    }
+
+    private boolean shouldCacheSpForUser(@UserIdInt int userId) {
+        // Before the user setup has completed, an admin could be installed that requires the SP to
+        // be cached (see below).
+        if (Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                    Settings.Secure.USER_SETUP_COMPLETE, 0, userId) == 0) {
+            return true;
+        }
+
+        // If the user has an admin which can perform an untrusted credential reset, the SP needs to
+        // be cached. If there isn't a DevicePolicyManager then there can't be an admin in the first
+        // place so caching is not necessary.
+        final DevicePolicyManagerInternal dpmi = LocalServices.getService(
+                DevicePolicyManagerInternal.class);
+        if (dpmi == null) {
+            return false;
+        }
+        return dpmi.canUserHaveUntrustedCredentialReset(userId);
+    }
+
+    /**
      * Precondition: vold and keystore unlocked.
      *
      * Create new synthetic password, set up synthetic password blob protected by the supplied
@@ -2126,9 +2183,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      * 3. Once a user is migrated to have synthetic password, its value will never change, no matter
      *     whether the user changes his lockscreen PIN or clear/reset it. When the user clears its
      *     lockscreen PIN, we still maintain the existing synthetic password in a password blob
-     *     protected by a default PIN. The only exception is when the DPC performs an untrusted
-     *     credential change, in which case we have no way to derive the existing synthetic password
-     *     and has to create a new one.
+     *     protected by a default PIN.
      * 4. The user SID is linked with synthetic password, but its cleared/re-created when the user
      *     clears/re-creates his lockscreen PIN.
      *
@@ -2148,13 +2203,23 @@ public class LockSettingsService extends ILockSettings.Stub {
      *     This is the untrusted credential reset, OR the user sets a new lockscreen password
      *     FOR THE FIRST TIME on a SP-enabled device. New credential and new SID will be created
      */
+    @GuardedBy("mSpManager")
     @VisibleForTesting
     protected AuthenticationToken initializeSyntheticPasswordLocked(byte[] credentialHash,
             String credential, int credentialType, int requestedQuality,
             int userId) throws RemoteException {
         Slog.i(TAG, "Initialize SyntheticPassword for user: " + userId);
-        AuthenticationToken auth = mSpManager.newSyntheticPasswordAndSid(getGateKeeperService(),
-                credentialHash, credential, userId);
+        // Load from the cache or a make a new one
+        AuthenticationToken auth = mSpCache.get(userId);
+        if (auth != null) {
+            // If the synthetic password has been cached, we can only be in case 3., described
+            // above, for an untrusted credential reset so a new SID is still needed.
+            mSpManager.newSidForUser(getGateKeeperService(), auth, userId);
+        } else {
+            auth = mSpManager.newSyntheticPasswordAndSid(getGateKeeperService(),
+                      credentialHash, credential, userId);
+        }
+        onAuthTokenKnownForUser(userId, auth);
         if (auth == null) {
             Slog.wtf(TAG, "initializeSyntheticPasswordLocked returns null auth token");
             return null;
@@ -2269,6 +2334,8 @@ public class LockSettingsService extends ILockSettings.Stub {
                 trustManager.setDeviceLockedForUser(userId, false);
             }
             mStrongAuth.reportSuccessfulStrongAuthUnlock(userId);
+
+            onAuthTokenKnownForUser(userId, authResult.authToken);
         } else if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_RETRY) {
             if (response.getTimeout() > 0) {
                 requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_LOCKOUT, userId);
@@ -2287,6 +2354,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      * SID is gone. We also clear password from (software-based) keystore and vold, which will be
      * added back when new password is set in future.
      */
+    @GuardedBy("mSpManager")
     private long setLockCredentialWithAuthTokenLocked(String credential, int credentialType,
             AuthenticationToken auth, int requestedQuality, int userId) throws RemoteException {
         if (DEBUG) Slog.d(TAG, "setLockCredentialWithAuthTokenLocked: user=" + userId);
@@ -2334,6 +2402,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         return newHandle;
     }
 
+    @GuardedBy("mSpManager")
     private void spBasedSetLockCredentialInternalLocked(String credential, int credentialType,
             String savedCredential, int requestedQuality, int userId) throws RemoteException {
         if (DEBUG) Slog.d(TAG, "spBasedSetLockCredentialInternalLocked: user=" + userId);
@@ -2369,13 +2438,19 @@ public class LockSettingsService extends ILockSettings.Stub {
             setLockCredentialWithAuthTokenLocked(credential, credentialType, auth, requestedQuality,
                     userId);
             mSpManager.destroyPasswordBasedSyntheticPassword(handle, userId);
+            onAuthTokenKnownForUser(userId, auth);
         } else if (response != null
-                && response.getResponseCode() == VerifyCredentialResponse.RESPONSE_ERROR){
+                && response.getResponseCode() == VerifyCredentialResponse.RESPONSE_ERROR) {
             // We are performing an untrusted credential change i.e. by DevicePolicyManager.
             // So provision a new SP and SID. This would invalidate existing escrow tokens.
             // Still support this for now but this flow will be removed in the next release.
-
             Slog.w(TAG, "Untrusted credential change invoked");
+
+            if (mSpCache.get(userId) == null) {
+                throw new IllegalStateException(
+                        "Untrusted credential reset not possible without cached SP");
+            }
+
             initializeSyntheticPasswordLocked(null, credential, credentialType, requestedQuality,
                     userId);
             synchronizeUnifiedWorkChallengeForProfiles(userId, null);
@@ -2486,8 +2561,9 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private boolean setLockCredentialWithTokenInternal(String credential, int type,
             long tokenHandle, byte[] token, int requestedQuality, int userId) throws RemoteException {
+        final AuthenticationResult result;
         synchronized (mSpManager) {
-            AuthenticationResult result = mSpManager.unwrapTokenBasedSyntheticPassword(
+            result = mSpManager.unwrapTokenBasedSyntheticPassword(
                     getGateKeeperService(), tokenHandle, token, userId);
             if (result.authToken == null) {
                 Slog.w(TAG, "Invalid escrow token supplied");
@@ -2508,8 +2584,9 @@ public class LockSettingsService extends ILockSettings.Stub {
             setLockCredentialWithAuthTokenLocked(credential, type, result.authToken,
                     requestedQuality, userId);
             mSpManager.destroyPasswordBasedSyntheticPassword(oldHandle, userId);
-            return true;
         }
+        onAuthTokenKnownForUser(userId, result.authToken);
+        return true;
     }
 
     @Override
@@ -2529,6 +2606,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
         unlockUser(userId, null, authResult.authToken.deriveDiskEncryptionKey());
+        onAuthTokenKnownForUser(userId, authResult.authToken);
     }
 
     @Override
@@ -2610,6 +2688,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     private class DeviceProvisionedObserver extends ContentObserver {
         private final Uri mDeviceProvisionedUri = Settings.Global.getUriFor(
                 Settings.Global.DEVICE_PROVISIONED);
+        private final Uri mUserSetupCompleteUri = Settings.Secure.getUriFor(
+                Settings.Secure.USER_SETUP_COMPLETE);
 
         private boolean mRegistered;
 
@@ -2627,6 +2707,8 @@ public class LockSettingsService extends ILockSettings.Stub {
                     reportDeviceSetupComplete();
                     clearFrpCredentialIfOwnerNotSecure();
                 }
+            } else if (mUserSetupCompleteUri.equals(uri)) {
+                cleanSpCache();
             }
         }
 
@@ -2678,6 +2760,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             if (register) {
                 mContext.getContentResolver().registerContentObserver(mDeviceProvisionedUri,
                         false, this);
+                mContext.getContentResolver().registerContentObserver(mUserSetupCompleteUri,
+                        false, this, UserHandle.USER_ALL);
             } else {
                 mContext.getContentResolver().unregisterContentObserver(this);
             }

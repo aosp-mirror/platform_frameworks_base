@@ -294,12 +294,14 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
 
         // Get the touch rect of the home button location
         View homeView = mNavigationBarView.getHomeButton().getCurrentView();
-        int[] globalHomePos = homeView.getLocationOnScreen();
-        int[] globalNavBarPos = mNavigationBarView.getLocationOnScreen();
-        int homeX = globalHomePos[0] - globalNavBarPos[0];
-        int homeY = globalHomePos[1] - globalNavBarPos[1];
-        mHomeButtonRect.set(homeX, homeY, homeX + homeView.getMeasuredWidth(),
-                homeY + homeView.getMeasuredHeight());
+        if (homeView != null) {
+            int[] globalHomePos = homeView.getLocationOnScreen();
+            int[] globalNavBarPos = mNavigationBarView.getLocationOnScreen();
+            int homeX = globalHomePos[0] - globalNavBarPos[0];
+            int homeY = globalHomePos[1] - globalNavBarPos[1];
+            mHomeButtonRect.set(homeX, homeY, homeX + homeView.getMeasuredWidth(),
+                    homeY + homeView.getMeasuredHeight());
+        }
     }
 
     @Override

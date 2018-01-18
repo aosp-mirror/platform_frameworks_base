@@ -34,7 +34,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
-import static com.android.server.wm.AppTransition.TRANSIT_UNSET;
+import static android.view.WindowManager.TRANSIT_UNSET;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_APP_TRANSITIONS;
@@ -91,6 +91,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.IApplicationToken;
+import android.view.RemoteAnimationDefinition;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager;
@@ -106,7 +107,6 @@ import com.android.server.wm.WindowManagerService.H;
 import java.io.PrintWriter;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 class AppTokenList extends ArrayList<AppWindowToken> {
 }
@@ -250,6 +250,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
     private final Point mTmpPoint = new Point();
     private final Rect mTmpRect = new Rect();
+    private RemoteAnimationDefinition mRemoteAnimationDefinition;
 
     AppWindowToken(WindowManagerService service, IApplicationToken token, boolean voiceInteraction,
             DisplayContent dc, long inputDispatchingTimeoutNanos, boolean fullscreen,
@@ -378,7 +379,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         // Reset the state of mHiddenSetFromTransferredStartingWindow since visibility is actually
         // been set by the app now.
         mHiddenSetFromTransferredStartingWindow = false;
-        setClientHidden(!visible);
 
         // Allow for state changes and animation to be applied if:
         // * token is transitioning visibility state
@@ -394,7 +394,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
 
             boolean runningAppAnimation = false;
 
-            if (transit != AppTransition.TRANSIT_UNSET) {
+            if (transit != WindowManager.TRANSIT_UNSET) {
                 if (applyAnimationLocked(lp, transit, visible, isVoiceInteraction)) {
                     delayed = runningAppAnimation = true;
                 }
@@ -461,6 +461,12 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 // We need to inform the client the enter animation was finished.
                 mEnteringAnimation = true;
                 mService.mActivityManagerAppTransitionNotifier.onAppTransitionFinishedLocked(token);
+            }
+
+            // Update the client visibility if we are not running an animation. Otherwise, we'll
+            // update client visibility state in onAnimationFinished.
+            if (!visible && !delayed) {
+                setClientHidden(true);
             }
 
             // If we are hidden but there is no delay needed we immediately
@@ -1611,27 +1617,37 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         // different animation is running.
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "AWT#applyAnimationLocked");
         if (okToAnimate()) {
-            final Animation a = loadAnimation(lp, transit, enter, isVoiceInteraction);
-            if (a != null) {
-                final TaskStack stack = getStack();
-                mTmpPoint.set(0, 0);
-                mTmpRect.setEmpty();
-                if (stack != null) {
-                    stack.getRelativePosition(mTmpPoint);
-                    stack.getBounds(mTmpRect);
-                    mTmpRect.offsetTo(0, 0);
+            final AnimationAdapter adapter;
+            final TaskStack stack = getStack();
+            mTmpPoint.set(0, 0);
+            mTmpRect.setEmpty();
+            if (stack != null) {
+                stack.getRelativePosition(mTmpPoint);
+                stack.getBounds(mTmpRect);
+                mTmpRect.offsetTo(0, 0);
+            }
+            if (mService.mAppTransition.getRemoteAnimationController() != null) {
+                adapter = mService.mAppTransition.getRemoteAnimationController()
+                        .createAnimationAdapter(this, mTmpPoint, mTmpRect);
+            } else {
+                final Animation a = loadAnimation(lp, transit, enter, isVoiceInteraction);
+                if (a != null) {
+                    adapter = new LocalAnimationAdapter(
+                            new WindowAnimationSpec(a, mTmpPoint, mTmpRect,
+                                    mService.mAppTransition.canSkipFirstFrame(),
+                                    mService.mAppTransition.getAppStackClipMode()),
+                            mService.mSurfaceAnimationRunner);
+                    if (a.getZAdjustment() == Animation.ZORDER_TOP) {
+                        mNeedsZBoost = true;
+                    }
+                    mTransit = transit;
+                    mTransitFlags = mService.mAppTransition.getTransitFlags();
+                } else {
+                    adapter = null;
                 }
-                final AnimationAdapter adapter = new LocalAnimationAdapter(
-                        new WindowAnimationSpec(a, mTmpPoint, mTmpRect,
-                                mService.mAppTransition.canSkipFirstFrame(),
-                                mService.mAppTransition.getAppStackClipMode()),
-                        mService.mSurfaceAnimationRunner);
-                if (a.getZAdjustment() == Animation.ZORDER_TOP) {
-                    mNeedsZBoost = true;
-                }
+            }
+            if (adapter != null) {
                 startAnimation(getPendingTransaction(), adapter, !isVisible());
-                mTransit = transit;
-                mTransitFlags = mService.mAppTransition.getTransitFlags();
             }
         } else {
             cancelAnimation();
@@ -1754,6 +1770,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 "AppWindowToken");
 
         clearThumbnail();
+        setClientHidden(isHidden());
 
         if (mService.mInputMethodTarget != null && mService.mInputMethodTarget.mAppToken == this) {
             getDisplayContent().computeImeTarget(true /* updateImeTarget */);
@@ -1882,6 +1899,14 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         }
         mThumbnail.destroy();
         mThumbnail = null;
+    }
+
+    void registerRemoteAnimations(RemoteAnimationDefinition definition) {
+        mRemoteAnimationDefinition = definition;
+    }
+
+    RemoteAnimationDefinition getRemoteAnimationDefinition() {
+        return mRemoteAnimationDefinition;
     }
 
     @Override

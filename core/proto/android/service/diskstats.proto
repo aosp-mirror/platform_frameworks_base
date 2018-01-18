@@ -43,6 +43,8 @@ message DiskStatsServiceDumpProto {
     optional EncryptionType encryption = 5;
     // Cached values of folder sizes, etc.
     optional DiskStatsCachedValuesProto cached_folder_sizes = 6;
+    // Average write speed of storaged benchmark for last 24 hours
+    optional int32 benchmarked_write_speed_kbps = 7;
 }
 
 message DiskStatsCachedValuesProto {

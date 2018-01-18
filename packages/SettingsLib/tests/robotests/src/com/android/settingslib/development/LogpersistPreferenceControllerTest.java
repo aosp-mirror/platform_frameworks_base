@@ -17,11 +17,11 @@
 package com.android.settingslib.development;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
+import android.arch.lifecycle.LifecycleOwner;
 import android.os.SystemProperties;
 import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.Preference;
@@ -44,6 +44,7 @@ import org.robolectric.annotation.Config;
         shadows = SystemPropertiesTestImpl.class)
 public class LogpersistPreferenceControllerTest {
 
+    private LifecycleOwner mLifecycleOwner;
     private Lifecycle mLifecycle;
 
     @Mock
@@ -57,7 +58,8 @@ public class LogpersistPreferenceControllerTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         SystemProperties.set("ro.debuggable", "1");
-        mLifecycle = new Lifecycle(() -> mLifecycle);
+        mLifecycleOwner = () -> mLifecycle;
+        mLifecycle = new Lifecycle(mLifecycleOwner);
         mController = new AbstractLogpersistPreferenceController(RuntimeEnvironment.application,
                 mLifecycle) {
             @Override

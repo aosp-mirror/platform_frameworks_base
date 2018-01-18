@@ -30,7 +30,6 @@ import android.os.IInstalld;
 import android.os.Environment;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.Seccomp;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.os.SystemClock;
@@ -572,10 +571,12 @@ public class ZygoteInit {
                 final String seInfo = null;
                 final String classLoaderContext =
                         getSystemServerClassLoaderContext(classPathForElement);
+                final int targetSdkVersion = 0;  // SystemServer targets the system's SDK version
                 try {
                     installd.dexopt(classPathElement, Process.SYSTEM_UID, packageName,
                             instructionSet, dexoptNeeded, outputPath, dexFlags, compilerFilter,
-                            uuid, classLoaderContext, seInfo, false /* downgrade */);
+                            uuid, classLoaderContext, seInfo, false /* downgrade */,
+                            targetSdkVersion);
                 } catch (RemoteException | ServiceSpecificException e) {
                     // Ignore (but log), we need this on the classpath for fallback mode.
                     Log.w(TAG, "Failed compiling classpath element for system server: "
@@ -779,11 +780,10 @@ public class ZygoteInit {
             // Zygote.
             Trace.setTracingEnabled(false, 0);
 
+            Zygote.nativeSecurityInit();
+
             // Zygote process unmounts root storage spaces.
             Zygote.nativeUnmountStorageOnInit();
-
-            // Set seccomp policy
-            Seccomp.setPolicy();
 
             ZygoteHooks.stopZygoteNoThreadCreation();
 

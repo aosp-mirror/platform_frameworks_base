@@ -217,6 +217,18 @@ class UserController implements Handler.Callback {
     private volatile ArraySet<String> mCurWaitingUserSwitchCallbacks;
 
     /**
+     * Messages for for switching from {@link android.os.UserHandle#SYSTEM}.
+     */
+    @GuardedBy("mLock")
+    private String mSwitchingFromSystemUserMessage;
+
+    /**
+     * Messages for for switching to {@link android.os.UserHandle#SYSTEM}.
+     */
+    @GuardedBy("mLock")
+    private String mSwitchingToSystemUserMessage;
+
+    /**
      * Callbacks that are still active after {@link #USER_SWITCH_TIMEOUT_MS}
      */
     @GuardedBy("mLock")
@@ -1189,7 +1201,8 @@ class UserController implements Handler.Callback {
 
     private void showUserSwitchDialog(Pair<UserInfo, UserInfo> fromToUserPair) {
         // The dialog will show and then initiate the user switch by calling startUserInForeground
-        mInjector.showUserSwitchingDialog(fromToUserPair.first, fromToUserPair.second);
+        mInjector.showUserSwitchingDialog(fromToUserPair.first, fromToUserPair.second,
+                getSwitchingFromSystemUserMessage(), getSwitchingToSystemUserMessage());
     }
 
     private void dispatchForegroundProfileChanged(int userId) {
@@ -1799,6 +1812,30 @@ class UserController implements Handler.Callback {
         return mLockPatternUtils.isLockScreenDisabled(userId);
     }
 
+    void setSwitchingFromSystemUserMessage(String switchingFromSystemUserMessage) {
+        synchronized (mLock) {
+            mSwitchingFromSystemUserMessage = switchingFromSystemUserMessage;
+        }
+    }
+
+    void setSwitchingToSystemUserMessage(String switchingToSystemUserMessage) {
+        synchronized (mLock) {
+            mSwitchingToSystemUserMessage = switchingToSystemUserMessage;
+        }
+    }
+
+    private String getSwitchingFromSystemUserMessage() {
+        synchronized (mLock) {
+            return mSwitchingFromSystemUserMessage;
+        }
+    }
+
+    private String getSwitchingToSystemUserMessage() {
+        synchronized (mLock) {
+            return mSwitchingToSystemUserMessage;
+        }
+    }
+
     void dump(PrintWriter pw, boolean dumpAll) {
         synchronized (mLock) {
             pw.println("  mStartedUsers:");
@@ -2079,9 +2116,11 @@ class UserController implements Handler.Callback {
             mService.installEncryptionUnawareProviders(userId);
         }
 
-        void showUserSwitchingDialog(UserInfo fromUser, UserInfo toUser) {
+        void showUserSwitchingDialog(UserInfo fromUser, UserInfo toUser,
+                String switchingFromSystemUserMessage, String switchingToSystemUserMessage) {
             Dialog d = new UserSwitchingDialog(mService, mService.mContext, fromUser, toUser,
-                    true /* above system */);
+                    true /* above system */, switchingFromSystemUserMessage,
+                    switchingToSystemUserMessage);
             d.show();
         }
 

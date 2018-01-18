@@ -16,12 +16,14 @@
 
 package android.app;
 
+import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.INVALID_DISPLAY;
 
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
@@ -44,6 +46,7 @@ import android.util.Pair;
 import android.util.Slog;
 import android.view.AppTransitionAnimationSpec;
 import android.view.IAppTransitionAnimationSpecsFuture;
+import android.view.RemoteAnimationAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -241,6 +244,8 @@ public class ActivityOptions {
     private static final String KEY_INSTANT_APP_VERIFICATION_BUNDLE
             = "android:instantapps.installerbundle";
     private static final String KEY_SPECS_FUTURE = "android:activity.specsFuture";
+    private static final String KEY_REMOTE_ANIMATION_ADAPTER
+            = "android:activity.remoteAnimationAdapter";
 
     /** @hide */
     public static final int ANIM_NONE = 0;
@@ -268,6 +273,8 @@ public class ActivityOptions {
     public static final int ANIM_CLIP_REVEAL = 11;
     /** @hide */
     public static final int ANIM_OPEN_CROSS_PROFILE_APPS = 12;
+    /** @hide */
+    public static final int ANIM_REMOTE_ANIMATION = 13;
 
     private String mPackageName;
     private Rect mLaunchBounds;
@@ -304,6 +311,7 @@ public class ActivityOptions {
     private int mRotationAnimationHint = -1;
     private Bundle mAppVerificationBundle;
     private IAppTransitionAnimationSpecsFuture mSpecsFuture;
+    private RemoteAnimationAdapter mRemoteAnimationAdapter;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -826,6 +834,20 @@ public class ActivityOptions {
         return opts;
     }
 
+    /**
+     * Create an {@link ActivityOptions} instance that lets the application control the entire
+     * animation using a {@link RemoteAnimationAdapter}.
+     * @hide
+     */
+    @RequiresPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS)
+    public static ActivityOptions makeRemoteAnimation(
+            RemoteAnimationAdapter remoteAnimationAdapter) {
+        final ActivityOptions opts = new ActivityOptions();
+        opts.mRemoteAnimationAdapter = remoteAnimationAdapter;
+        opts.mAnimationType = ANIM_REMOTE_ANIMATION;
+        return opts;
+    }
+
     /** @hide */
     public boolean getLaunchTaskBehind() {
         return mAnimationType == ANIM_LAUNCH_TASK_BEHIND;
@@ -922,6 +944,7 @@ public class ActivityOptions {
             mSpecsFuture = IAppTransitionAnimationSpecsFuture.Stub.asInterface(opts.getBinder(
                     KEY_SPECS_FUTURE));
         }
+        mRemoteAnimationAdapter = opts.getParcelable(KEY_REMOTE_ANIMATION_ADAPTER);
     }
 
     /**
@@ -1067,6 +1090,11 @@ public class ActivityOptions {
     /** @hide */
     public IAppTransitionAnimationSpecsFuture getSpecsFuture() {
         return mSpecsFuture;
+    }
+
+    /** @hide */
+    public RemoteAnimationAdapter getRemoteAnimationAdapter() {
+        return mRemoteAnimationAdapter;
     }
 
     /** @hide */
@@ -1309,6 +1337,7 @@ public class ActivityOptions {
         mAnimSpecs = otherOptions.mAnimSpecs;
         mAnimationFinishedListener = otherOptions.mAnimationFinishedListener;
         mSpecsFuture = otherOptions.mSpecsFuture;
+        mRemoteAnimationAdapter = otherOptions.mRemoteAnimationAdapter;
     }
 
     /**
@@ -1403,7 +1432,9 @@ public class ActivityOptions {
         if (mAppVerificationBundle != null) {
             b.putBundle(KEY_INSTANT_APP_VERIFICATION_BUNDLE, mAppVerificationBundle);
         }
-
+        if (mRemoteAnimationAdapter != null) {
+            b.putParcelable(KEY_REMOTE_ANIMATION_ADAPTER, mRemoteAnimationAdapter);
+        }
         return b;
     }
 

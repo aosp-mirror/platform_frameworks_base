@@ -478,6 +478,7 @@ public class NotificationPanelView extends PanelView implements
         }
         mNotificationStackScroller.setIntrinsicPadding(stackScrollerPadding);
         mNotificationStackScroller.setDarkShelfOffsetX(mClockPositionResult.clockX);
+        mKeyguardBottomArea.setBurnInXOffset(mClockPositionResult.clockX);
         requestScrollerTopPaddingUpdate(animate);
     }
 
@@ -2608,7 +2609,8 @@ public class NotificationPanelView extends PanelView implements
 
     private void setDarkAmount(float amount) {
         mDarkAmount = amount;
-        mKeyguardStatusView.setDark(mDarkAmount);
+        mKeyguardStatusView.setDarkAmount(mDarkAmount);
+        mKeyguardBottomArea.setDarkAmount(mDarkAmount);
         positionClockAndNotifications();
     }
 
@@ -2630,8 +2632,9 @@ public class NotificationPanelView extends PanelView implements
         }
     }
 
-    public void refreshTime() {
+    public void dozeTimeTick() {
         mKeyguardStatusView.refreshTime();
+        mKeyguardBottomArea.dozeTimeTick();
         if (mDarkAmount > 0) {
             positionClockAndNotifications();
         }

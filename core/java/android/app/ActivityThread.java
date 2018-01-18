@@ -166,6 +166,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.text.DateFormat;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -220,6 +221,9 @@ public final class ActivityThread extends ClientTransactionHandler {
     // Whether to invoke an activity callback after delivering new configuration.
     private static final boolean REPORT_TO_ACTIVITY = true;
 
+    // Maximum number of recent tokens to maintain for debugging purposes
+    private static final int MAX_RECENT_TOKENS = 10;
+
     /**
      * Denotes an invalid sequence number corresponding to a process state change.
      */
@@ -252,6 +256,8 @@ public final class ActivityThread extends ClientTransactionHandler {
     final H mH = new H();
     final Executor mExecutor = new HandlerExecutor(mH);
     final ArrayMap<IBinder, ActivityClientRecord> mActivities = new ArrayMap<>();
+    final ArrayDeque<Integer> mRecentTokens = new ArrayDeque<>();
+
     // List of new activities (via ActivityRecord.nextIdle) that should
     // be reported when next we idle.
     ActivityClientRecord mNewActivities = null;
@@ -2168,6 +2174,18 @@ public final class ActivityThread extends ClientTransactionHandler {
         pw.println(String.format(format, objs));
     }
 
+    @Override
+    public void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + "mActivities:");
+
+        for (ArrayMap.Entry<IBinder, ActivityClientRecord> entry : mActivities.entrySet()) {
+            pw.println(prefix + "  [token:" + entry.getKey().hashCode() + " record:"
+                    + entry.getValue().toString() + "]");
+        }
+
+        pw.println(prefix + "mRecentTokens:" + mRecentTokens);
+    }
+
     public static void dumpMemInfoTable(PrintWriter pw, Debug.MemoryInfo memInfo, boolean checkin,
             boolean dumpFullInfo, boolean dumpDalvik, boolean dumpSummaryOnly,
             int pid, String processName,
@@ -2852,6 +2870,11 @@ public final class ActivityThread extends ClientTransactionHandler {
             r.setState(ON_CREATE);
 
             mActivities.put(r.token, r);
+            mRecentTokens.push(r.token.hashCode());
+
+            if (mRecentTokens.size() > MAX_RECENT_TOKENS) {
+                mRecentTokens.removeLast();
+            }
 
         } catch (SuperNotCalledException e) {
             throw e;
@@ -3073,7 +3096,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         checkAndBlockForNetworkAccess();
         deliverNewIntents(r, intents);
         if (resumed) {
-            r.activity.performResume();
+            r.activity.performResume(false);
             r.activity.mTemporaryPause = false;
         }
 
@@ -3695,7 +3718,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                     deliverResults(r, r.pendingResults);
                     r.pendingResults = null;
                 }
-                r.activity.performResume();
+                r.activity.performResume(r.startsNotResumed);
 
                 synchronized (mResourcesManager) {
                     // If there is a pending local relaunch that was requested when the activity was
@@ -4414,7 +4437,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             checkAndBlockForNetworkAccess();
             deliverResults(r, results);
             if (resumed) {
-                r.activity.performResume();
+                r.activity.performResume(false);
                 r.activity.mTemporaryPause = false;
             }
         }

@@ -29,6 +29,8 @@ import android.text.TextUtils;
 public class ExtractedText implements Parcelable {
     /**
      * The text that has been extracted.
+     *
+     * @see android.widget.TextView#getText()
      */
     public CharSequence text;
 
@@ -88,6 +90,8 @@ public class ExtractedText implements Parcelable {
 
     /**
      * The hint that has been extracted.
+     *
+     * @see android.widget.TextView#getHint()
      */
     public CharSequence hint;
 

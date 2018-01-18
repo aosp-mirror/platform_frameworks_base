@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.Manifest.permission.BIND_VOICE_INTERACTION;
 import static android.Manifest.permission.CHANGE_CONFIGURATION;
 import static android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST;
+import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
@@ -192,11 +193,11 @@ import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.am.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
-import static com.android.server.wm.AppTransition.TRANSIT_ACTIVITY_OPEN;
-import static com.android.server.wm.AppTransition.TRANSIT_NONE;
-import static com.android.server.wm.AppTransition.TRANSIT_TASK_IN_PLACE;
-import static com.android.server.wm.AppTransition.TRANSIT_TASK_OPEN;
-import static com.android.server.wm.AppTransition.TRANSIT_TASK_TO_FRONT;
+import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
+import static android.view.WindowManager.TRANSIT_NONE;
+import static android.view.WindowManager.TRANSIT_TASK_IN_PLACE;
+import static android.view.WindowManager.TRANSIT_TASK_OPEN;
+import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
@@ -370,6 +371,7 @@ import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.RemoteAnimationDefinition;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -397,6 +399,7 @@ import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.os.Zygote;
 import com.android.internal.policy.IKeyguardDismissCallback;
+import com.android.internal.policy.KeyguardDismissCallback;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
@@ -8393,20 +8396,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     // entering picture-in-picture (this will prompt the user to authenticate if the
                     // device is currently locked).
                     try {
-                        dismissKeyguard(token, new IKeyguardDismissCallback.Stub() {
-                            @Override
-                            public void onDismissError() throws RemoteException {
-                                // Do nothing
-                            }
-
+                        dismissKeyguard(token, new KeyguardDismissCallback() {
                             @Override
                             public void onDismissSucceeded() throws RemoteException {
                                 mHandler.post(enterPipRunnable);
-                            }
-
-                            @Override
-                            public void onDismissCancelled() throws RemoteException {
-                                // Do nothing
                             }
                         }, null /* message */);
                     } catch (RemoteException e) {
@@ -13683,7 +13676,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      * not.
      */
     private void enforceSystemHasVrFeature() {
-        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_VR_MODE)) {
+        if (!mContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_VR_MODE_HIGH_PERFORMANCE)) {
             throw new UnsupportedOperationException("VR mode not supported on this device!");
         }
     }
@@ -13742,9 +13736,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public int setVrMode(IBinder token, boolean enabled, ComponentName packageName) {
-        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_VR_MODE)) {
-            throw new UnsupportedOperationException("VR mode not supported on this device!");
-        }
+        enforceSystemHasVrFeature();
 
         final VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
 
@@ -13776,9 +13768,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public boolean isVrModePackageEnabled(ComponentName packageName) {
-        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_VR_MODE)) {
-            throw new UnsupportedOperationException("VR mode not supported on this device!");
-        }
+        enforceSystemHasVrFeature();
 
         final VrManagerInternal vrService = LocalServices.getService(VrManagerInternal.class);
 
@@ -25142,6 +25132,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         public boolean canStartMoreUsers() {
             return mUserController.canStartMoreUsers();
         }
+
+        @Override
+        public void setSwitchingFromSystemUserMessage(String switchingFromSystemUserMessage) {
+            mUserController.setSwitchingFromSystemUserMessage(switchingFromSystemUserMessage);
+        }
+
+        @Override
+        public void setSwitchingToSystemUserMessage(String switchingToSystemUserMessage) {
+            mUserController.setSwitchingToSystemUserMessage(switchingToSystemUserMessage);
+        }
     }
 
     /**
@@ -25441,6 +25441,25 @@ public class ActivityManagerService extends IActivityManager.Stub
             final long origId = Binder.clearCallingIdentity();
             try {
                 r.setTurnScreenOn(turnScreenOn);
+            } finally {
+                Binder.restoreCallingIdentity(origId);
+            }
+        }
+    }
+
+    @Override
+    public void registerRemoteAnimations(IBinder token, RemoteAnimationDefinition definition)
+            throws RemoteException {
+        enforceCallingPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS,
+                "registerRemoteAnimations");
+        synchronized (this) {
+            final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            if (r == null) {
+                return;
+            }
+            final long origId = Binder.clearCallingIdentity();
+            try {
+                r.registerRemoteAnimations(definition);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }

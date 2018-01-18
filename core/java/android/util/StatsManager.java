@@ -42,6 +42,16 @@ public final class StatsManager {
     }
 
     /**
+     * Temporary to prevent build failures. Will be deleted.
+     */
+    @RequiresPermission(Manifest.permission.DUMP)
+    public boolean addConfiguration(String configKey, byte[] config, String pkg, String cls) {
+        // To prevent breakages of dependencies on old API.
+
+        return false;
+    }
+
+    /**
      * Clients can send a configuration and simultaneously registers the name of a broadcast
      * receiver that listens for when it should request data.
      *
@@ -70,6 +80,15 @@ public final class StatsManager {
     }
 
     /**
+     * Temporary to prevent build failures. Will be deleted.
+     */
+    @RequiresPermission(Manifest.permission.DUMP)
+    public boolean removeConfiguration(String configKey) {
+        // To prevent breakages of old dependencies.
+        return false;
+    }
+
+    /**
      * Remove a configuration from logging.
      *
      * @param configKey Configuration key to remove.
@@ -90,6 +109,16 @@ public final class StatsManager {
                 return false;
             }
         }
+    }
+
+    /**
+     * Temporary to prevent build failures. Will be deleted.
+     */
+    @RequiresPermission(Manifest.permission.DUMP)
+    public byte[] getData(String configKey) {
+        // TODO: remove this and all other methods with String-based config keys.
+        // To prevent build breakages of dependencies.
+        return null;
     }
 
     /**

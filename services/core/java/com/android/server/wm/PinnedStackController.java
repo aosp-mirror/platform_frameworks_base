@@ -360,14 +360,19 @@ class PinnedStackController {
      * Sets the Ime state and height.
      */
     void setAdjustedForIme(boolean adjustedForIme, int imeHeight) {
-        // Return early if there is no state change
-        if (mIsImeShowing == adjustedForIme && mImeHeight == imeHeight) {
+        // Due to the order of callbacks from the system, we may receive an ime height even when
+        // {@param adjustedForIme} is false, and also a zero height when {@param adjustedForIme}
+        // is true.  Instead, ensure that the ime state changes with the height and if the ime is
+        // showing, then the height is non-zero.
+        final boolean imeShowing = adjustedForIme && imeHeight > 0;
+        imeHeight = imeShowing ? imeHeight : 0;
+        if (imeShowing == mIsImeShowing && imeHeight == mImeHeight) {
             return;
         }
 
-        mIsImeShowing = adjustedForIme;
+        mIsImeShowing = imeShowing;
         mImeHeight = imeHeight;
-        notifyImeVisibilityChanged(adjustedForIme, imeHeight);
+        notifyImeVisibilityChanged(imeShowing, imeHeight);
         notifyMovementBoundsChanged(true /* fromImeAdjustment */);
     }
 

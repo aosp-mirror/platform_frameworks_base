@@ -18,6 +18,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.service.quicksettings.Tile;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -28,6 +29,7 @@ import android.widget.TextView;
 
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.R;
+import com.android.systemui.R.id;
 import com.android.systemui.plugins.qs.QSIconView;
 import com.android.systemui.plugins.qs.QSTile;
 
@@ -36,8 +38,10 @@ import libcore.util.Objects;
 /** View that represents a standard quick settings tile. **/
 public class QSTileView extends QSTileBaseView {
 
+    private static final boolean DUAL_TARGET_ALLOWED = false;
     private View mDivider;
     protected TextView mLabel;
+    private TextView mSecondLine;
     private ImageView mPadLock;
     private int mState;
     private ViewGroup mLabelContainer;
@@ -86,6 +90,8 @@ public class QSTileView extends QSTileBaseView {
         mDivider = mLabelContainer.findViewById(R.id.underline);
         mExpandIndicator = mLabelContainer.findViewById(R.id.expand_indicator);
         mExpandSpace = mLabelContainer.findViewById(R.id.expand_space);
+        mSecondLine = mLabelContainer.findViewById(R.id.app_label);
+        mSecondLine.setAlpha(.6f);
 
         addView(mLabelContainer);
     }
@@ -103,14 +109,20 @@ public class QSTileView extends QSTileBaseView {
             mState = state.state;
             mLabel.setText(state.label);
         }
-        mExpandIndicator.setVisibility(state.dualTarget ? View.VISIBLE : View.GONE);
-        mExpandSpace.setVisibility(state.dualTarget ? View.VISIBLE : View.GONE);
-        mLabelContainer.setContentDescription(state.dualTarget ? state.dualLabelContentDescription
+        if (!Objects.equal(mSecondLine.getText(), state.secondaryLabel)) {
+            mSecondLine.setText(state.secondaryLabel);
+            mSecondLine.setVisibility(TextUtils.isEmpty(state.secondaryLabel) ? View.GONE
+                    : View.VISIBLE);
+        }
+        boolean dualTarget = DUAL_TARGET_ALLOWED && state.dualTarget;
+        mExpandIndicator.setVisibility(dualTarget ? View.VISIBLE : View.GONE);
+        mExpandSpace.setVisibility(dualTarget ? View.VISIBLE : View.GONE);
+        mLabelContainer.setContentDescription(dualTarget ? state.dualLabelContentDescription
                 : null);
-        if (state.dualTarget != mLabelContainer.isClickable()) {
-            mLabelContainer.setClickable(state.dualTarget);
-            mLabelContainer.setLongClickable(state.dualTarget);
-            mLabelContainer.setBackground(state.dualTarget ? newTileBackground() : null);
+        if (dualTarget != mLabelContainer.isClickable()) {
+            mLabelContainer.setClickable(dualTarget);
+            mLabelContainer.setLongClickable(dualTarget);
+            mLabelContainer.setBackground(dualTarget ? newTileBackground() : null);
         }
         mLabel.setEnabled(!state.disabledByPolicy);
         mPadLock.setVisibility(state.disabledByPolicy ? View.VISIBLE : View.GONE);

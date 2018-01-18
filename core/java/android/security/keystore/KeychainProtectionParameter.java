@@ -28,12 +28,26 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
 /**
- * Helper class with data necessary to recover Keystore on a new device.
- * It defines UI shown to the user and a way to derive a cryptographic key from user output.
+ * A {@link KeychainSnapshot} is protected with a key derived from the user's lock screen. This
+ * class wraps all the data necessary to derive the same key on a recovering device:
+ *
+ * <ul>
+ *     <li>UI parameters for the user's lock screen - so that if e.g., the user was using a pattern,
+ *         the recovering device can display the pattern UI to the user when asking them to enter
+ *         the lock screen from their previous device.
+ *     <li>The algorithm used to derive a key from the user's lock screen, e.g. SHA-256 with a salt.
+ * </ul>
+ *
+ * <p>As such, this data is sent along with the {@link KeychainSnapshot} when syncing the current
+ * version of the keychain.
+ *
+ * <p>For now, the recoverable keychain only supports a single layer of protection, which is the
+ * user's lock screen. In the future, the keychain will support multiple layers of protection
+ * (e.g. an additional keychain password, along with the lock screen).
  *
  * @hide
  */
-public final class RecoveryMetadata implements Parcelable {
+public final class KeychainProtectionParameter implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({TYPE_LOCKSCREEN, TYPE_CUSTOM_PASSWORD})
@@ -88,7 +102,7 @@ public final class RecoveryMetadata implements Parcelable {
      * @link {#clearSecret} to overwrite its value in memory.
      * @hide
      */
-    public RecoveryMetadata(@UserSecretType int userSecretType,
+    public KeychainProtectionParameter(@UserSecretType int userSecretType,
             @LockScreenUiFormat int lockScreenUiFormat,
             @NonNull KeyDerivationParams keyDerivationParams,
             @NonNull byte[] secret) {
@@ -98,7 +112,7 @@ public final class RecoveryMetadata implements Parcelable {
         mSecret = Preconditions.checkNotNull(secret);
     }
 
-    private RecoveryMetadata() {
+    private KeychainProtectionParameter() {
 
     }
 
@@ -141,10 +155,10 @@ public final class RecoveryMetadata implements Parcelable {
     }
 
     /**
-     * Builder for creating {@link RecoveryMetadata}.
+     * Builder for creating {@link KeychainProtectionParameter}.
      */
     public static class Builder {
-        private RecoveryMetadata mInstance = new RecoveryMetadata();
+        private KeychainProtectionParameter mInstance = new KeychainProtectionParameter();
 
         /**
          * Sets user secret type.
@@ -198,14 +212,14 @@ public final class RecoveryMetadata implements Parcelable {
 
 
         /**
-         * Creates a new {@link RecoveryMetadata} instance.
+         * Creates a new {@link KeychainProtectionParameter} instance.
          * The instance will include default values, if {@link setSecret}
          * or {@link setUserSecretType} were not called.
          *
          * @return new instance
          * @throws NullPointerException if some required fields were not set.
          */
-        public @NonNull RecoveryMetadata build() {
+        @NonNull public KeychainProtectionParameter build() {
             if (mInstance.mUserSecretType == null) {
                 mInstance.mUserSecretType = TYPE_LOCKSCREEN;
             }
@@ -235,14 +249,14 @@ public final class RecoveryMetadata implements Parcelable {
         Arrays.fill(mSecret, (byte) 0);
     }
 
-    public static final Parcelable.Creator<RecoveryMetadata> CREATOR =
-            new Parcelable.Creator<RecoveryMetadata>() {
-        public RecoveryMetadata createFromParcel(Parcel in) {
-            return new RecoveryMetadata(in);
+    public static final Parcelable.Creator<KeychainProtectionParameter> CREATOR =
+            new Parcelable.Creator<KeychainProtectionParameter>() {
+        public KeychainProtectionParameter createFromParcel(Parcel in) {
+            return new KeychainProtectionParameter(in);
         }
 
-        public RecoveryMetadata[] newArray(int length) {
-            return new RecoveryMetadata[length];
+        public KeychainProtectionParameter[] newArray(int length) {
+            return new KeychainProtectionParameter[length];
         }
     };
 
@@ -260,7 +274,7 @@ public final class RecoveryMetadata implements Parcelable {
     /**
      * @hide
      */
-    protected RecoveryMetadata(Parcel in) {
+    protected KeychainProtectionParameter(Parcel in) {
         mUserSecretType = in.readInt();
         mLockScreenUiFormat = in.readInt();
         mKeyDerivationParams = in.readTypedObject(KeyDerivationParams.CREATOR);

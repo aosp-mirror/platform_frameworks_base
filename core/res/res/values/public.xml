@@ -2862,6 +2862,9 @@
       <public name="appComponentFactory" />
       <public name="fallbackLineSpacing" />
       <public name="accessibilityPaneTitle" />
+      <public name="firstBaselineToTopHeight" />
+      <public name="lastBaselineToBottomHeight" />
+      <public name="lineHeight" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
