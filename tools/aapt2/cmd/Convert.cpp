@@ -47,7 +47,7 @@ class IApkSerializer {
   virtual bool SerializeXml(const xml::XmlResource* xml, const std::string& path, bool utf16,
                             IArchiveWriter* writer) = 0;
   virtual bool SerializeTable(ResourceTable* table, IArchiveWriter* writer) = 0;
-  virtual bool SerializeFile(const FileReference* file, IArchiveWriter* writer) = 0;
+  virtual bool SerializeFile(FileReference* file, IArchiveWriter* writer) = 0;
 
   virtual ~IApkSerializer() = default;
 
@@ -65,19 +65,15 @@ bool ConvertApk(IAaptContext* context, unique_ptr<LoadedApk> apk, IApkSerializer
   }
 
   if (apk->GetResourceTable() != nullptr) {
-    // Resource table
-    if (!serializer->SerializeTable(apk->GetResourceTable(), writer)) {
-      context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
-                                       << "failed to serialize the resource table");
-      return false;
-    }
+    // The table might be modified by below code.
+    auto converted_table = apk->GetResourceTable();
 
     // Resources
-    for (const auto& package : apk->GetResourceTable()->packages) {
+    for (const auto& package : converted_table->packages) {
       for (const auto& type : package->types) {
         for (const auto& entry : type->entries) {
           for (const auto& config_value : entry->values) {
-            const FileReference* file = ValueCast<FileReference>(config_value->value.get());
+            FileReference* file = ValueCast<FileReference>(config_value->value.get());
             if (file != nullptr) {
               if (file->file == nullptr) {
                 context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
@@ -95,6 +91,13 @@ bool ConvertApk(IAaptContext* context, unique_ptr<LoadedApk> apk, IApkSerializer
         } // entry
       } // type
     } // package
+
+    // Converted resource table
+    if (!serializer->SerializeTable(converted_table, writer)) {
+      context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
+                                       << "failed to serialize the resource table");
+      return false;
+    }
   }
 
   // Other files
@@ -158,7 +161,7 @@ class BinaryApkSerializer : public IApkSerializer {
                                         ArchiveEntry::kAlign, writer);
   }
 
-  bool SerializeFile(const FileReference* file, IArchiveWriter* writer) override {
+  bool SerializeFile(FileReference* file, IArchiveWriter* writer) override {
     if (file->type == ResourceFile::Type::kProtoXml) {
       unique_ptr<io::InputStream> in = file->file->OpenInputStream();
       if (in == nullptr) {
@@ -189,6 +192,8 @@ class BinaryApkSerializer : public IApkSerializer {
                                           << "failed to serialize to binary XML: " << *file->path);
         return false;
       }
+
+      file->type = ResourceFile::Type::kBinaryXml;
     } else {
       if (!io::CopyFileToArchivePreserveCompression(context_, file->file, *file->path, writer)) {
         context_->GetDiagnostics()->Error(DiagMessage(source_)
@@ -225,7 +230,7 @@ class ProtoApkSerializer : public IApkSerializer {
                                   ArchiveEntry::kCompress, writer);
   }
 
-  bool SerializeFile(const FileReference* file, IArchiveWriter* writer) override {
+  bool SerializeFile(FileReference* file, IArchiveWriter* writer) override {
     if (file->type == ResourceFile::Type::kBinaryXml) {
       std::unique_ptr<io::IData> data = file->file->OpenAsData();
       if (!data) {
@@ -247,6 +252,8 @@ class ProtoApkSerializer : public IApkSerializer {
                                           << "failed to serialize to proto XML: " << *file->path);
         return false;
       }
+
+      file->type = ResourceFile::Type::kProtoXml;
     } else {
       if (!io::CopyFileToArchivePreserveCompression(context_, file->file, *file->path, writer)) {
         context_->GetDiagnostics()->Error(DiagMessage(source_)
