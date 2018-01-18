@@ -60,7 +60,7 @@ interface ILockSettings {
             in byte[] token, int requestedQuality, int userId);
     void unlockUserWithToken(long tokenHandle, in byte[] token, int userId);
 
-    // Keystore RecoveryManager methods.
+    // Keystore RecoveryController methods.
     // {@code ServiceSpecificException} may be thrown to signal an error, which caller can
     // convert to  {@code RecoveryManagerException}.
     void initRecoveryService(in String rootCertificateAlias, in byte[] signedPublicKeyList);

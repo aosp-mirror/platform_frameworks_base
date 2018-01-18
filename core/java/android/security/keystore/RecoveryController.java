@@ -31,12 +31,25 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A wrapper around KeyStore which lets key be exported to trusted hardware on server side and
- * recovered later.
+ * An assistant for generating {@link javax.crypto.SecretKey} instances that can be recovered by
+ * other Android devices belonging to the user. The exported keychain is protected by the user's
+ * lock screen.
+ *
+ * <p>The RecoveryController must be paired with a recovery agent. The recovery agent is responsible
+ * for transporting the keychain to remote trusted hardware. This hardware must prevent brute force
+ * attempts against the user's lock screen by limiting the number of allowed guesses (to, e.g., 10).
+ * After  that number of incorrect guesses, the trusted hardware no longer allows access to the
+ * key chain.
+ *
+ * <p>For now only the recovery agent itself is able to create keys, so it is expected that the
+ * recovery agent is itself the system app.
+ *
+ * <p>A recovery agent requires the privileged permission
+ * {@code android.Manifest.permission#RECOVER_KEYSTORE}.
  *
  * @hide
  */
-public class RecoveryManager {
+public class RecoveryController {
     private static final String TAG = "RecoveryController";
 
     /** Key has been successfully synced. */
@@ -96,28 +109,28 @@ public class RecoveryManager {
 
     private final ILockSettings mBinder;
 
-    private RecoveryManager(ILockSettings binder) {
+    private RecoveryController(ILockSettings binder) {
         mBinder = binder;
     }
 
     /**
      * Gets a new instance of the class.
      */
-    public static RecoveryManager getInstance() {
+    public static RecoveryController getInstance() {
         ILockSettings lockSettings =
                 ILockSettings.Stub.asInterface(ServiceManager.getService("lock_settings"));
-        return new RecoveryManager(lockSettings);
+        return new RecoveryController(lockSettings);
     }
 
     /**
-     * Initializes key recovery service for the calling application. RecoveryManager
+     * Initializes key recovery service for the calling application. RecoveryController
      * randomly chooses one of the keys from the list and keeps it to use for future key export
      * operations. Collection of all keys in the list must be signed by the provided {@code
      * rootCertificateAlias}, which must also be present in the list of root certificates
-     * preinstalled on the device. The random selection allows RecoveryManager to select
+     * preinstalled on the device. The random selection allows RecoveryController to select
      * which of a set of remote recovery service devices will be used.
      *
-     * <p>In addition, RecoveryManager enforces a delay of three months between
+     * <p>In addition, RecoveryController enforces a delay of three months between
      * consecutive initialization attempts, to limit the ability of an attacker to often switch
      * remote recovery devices and significantly increase number of recovery attempts.
      *
@@ -373,7 +386,6 @@ public class RecoveryManager {
      * The method generates symmetric key for a session, which trusted remote device can use to
      * return recovery key.
      *
-     * @param sessionId ID for recovery session.
      * @param verifierPublicKey Encoded {@code java.security.cert.X509Certificate} with Public key
      * used to create the recovery blob on the source device.
      * Keystore will verify the certificate using root of trust.

@@ -29,18 +29,18 @@ public class RecoverySession implements AutoCloseable {
     private static final int SESSION_ID_LENGTH_BYTES = 16;
 
     private final String mSessionId;
-    private final RecoveryManager mRecoveryManager;
+    private final RecoveryController mRecoveryController;
 
-    private RecoverySession(RecoveryManager recoveryManager, String sessionId) {
-        mRecoveryManager = recoveryManager;
+    private RecoverySession(RecoveryController recoveryController, String sessionId) {
+        mRecoveryController = recoveryController;
         mSessionId = sessionId;
     }
 
     /**
      * A new session, started by {@code recoveryManager}.
      */
-    static RecoverySession newInstance(RecoveryManager recoveryManager) {
-        return new RecoverySession(recoveryManager, newSessionId());
+    static RecoverySession newInstance(RecoveryController recoveryController) {
+        return new RecoverySession(recoveryController, newSessionId());
     }
 
     /**
@@ -66,6 +66,6 @@ public class RecoverySession implements AutoCloseable {
 
     @Override
     public void close() {
-        mRecoveryManager.closeSession(this);
+        mRecoveryController.closeSession(this);
     }
 }
