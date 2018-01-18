@@ -25,18 +25,27 @@ import android.util.Log;
 
 import com.android.internal.telephony.euicc.IAuthenticateServerCallback;
 import com.android.internal.telephony.euicc.ICancelSessionCallback;
+import com.android.internal.telephony.euicc.IDeleteProfileCallback;
+import com.android.internal.telephony.euicc.IDisableProfileCallback;
 import com.android.internal.telephony.euicc.IEuiccCardController;
 import com.android.internal.telephony.euicc.IGetAllProfilesCallback;
+import com.android.internal.telephony.euicc.IGetDefaultSmdpAddressCallback;
 import com.android.internal.telephony.euicc.IGetEuiccChallengeCallback;
 import com.android.internal.telephony.euicc.IGetEuiccInfo1Callback;
 import com.android.internal.telephony.euicc.IGetEuiccInfo2Callback;
+import com.android.internal.telephony.euicc.IGetProfileCallback;
 import com.android.internal.telephony.euicc.IGetRulesAuthTableCallback;
+import com.android.internal.telephony.euicc.IGetSmdsAddressCallback;
 import com.android.internal.telephony.euicc.IListNotificationsCallback;
 import com.android.internal.telephony.euicc.ILoadBoundProfilePackageCallback;
 import com.android.internal.telephony.euicc.IPrepareDownloadCallback;
 import com.android.internal.telephony.euicc.IRemoveNotificationFromListCallback;
+import com.android.internal.telephony.euicc.IResetMemoryCallback;
 import com.android.internal.telephony.euicc.IRetrieveNotificationCallback;
 import com.android.internal.telephony.euicc.IRetrieveNotificationListCallback;
+import com.android.internal.telephony.euicc.ISetDefaultSmdpAddressCallback;
+import com.android.internal.telephony.euicc.ISetNicknameCallback;
+import com.android.internal.telephony.euicc.ISwitchToProfileCallback;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -80,6 +89,24 @@ public class EuiccCardManager {
      */
     public static final int CANCEL_REASON_PPR_NOT_ALLOWED = 3;
 
+    /** Options for resetting eUICC memory */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "RESET_OPTION_" }, value = {
+            RESET_OPTION_DELETE_OPERATIONAL_PROFILES,
+            RESET_OPTION_DELETE_FIELD_LOADED_TEST_PROFILES,
+            RESET_OPTION_RESET_DEFAULT_SMDP_ADDRESS
+    })
+    public @interface ResetOption {}
+
+    /** Deletes all operational profiles. */
+    public static final int RESET_OPTION_DELETE_OPERATIONAL_PROFILES = 1;
+
+    /** Deletes all field-loaded testing profiles. */
+    public static final int RESET_OPTION_DELETE_FIELD_LOADED_TEST_PROFILES = 1 << 1;
+
+    /** Resets the default SM-DP+ address. */
+    public static final int RESET_OPTION_RESET_DEFAULT_SMDP_ADDRESS = 1 << 2;
+
     /** Result code of execution with no error. */
     public static final int RESULT_OK = 0;
 
@@ -115,7 +142,7 @@ public class EuiccCardManager {
     /**
      * Gets all the profiles on eUicc.
      *
-     * @param callback the callback to get the result code and all the profiles.
+     * @param callback The callback to get the result code and all the profiles.
      */
     public void getAllProfiles(ResultCallback<EuiccProfileInfo[]> callback) {
         try {
@@ -128,6 +155,214 @@ public class EuiccCardManager {
                     });
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling getAllProfiles", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the profile of the given iccid.
+     *
+     * @param iccid The iccid of the profile.
+     * @param callback The callback to get the result code and profile.
+     */
+    public void getProfile(String iccid, ResultCallback<EuiccProfileInfo> callback) {
+        try {
+            getIEuiccCardController().getProfile(mContext.getOpPackageName(), iccid,
+                    new IGetProfileCallback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode, EuiccProfileInfo profile) {
+                            callback.onComplete(resultCode, profile);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling getProfile", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Disables the profile of the given iccid.
+     *
+     * @param iccid The iccid of the profile.
+     * @param refresh Whether sending the REFRESH command to modem.
+     * @param callback The callback to get the result code.
+     */
+    public void disableProfile(String iccid, boolean refresh, ResultCallback<Void> callback) {
+        try {
+            getIEuiccCardController().disableProfile(mContext.getOpPackageName(), iccid, refresh,
+                    new IDisableProfileCallback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode) {
+                            callback.onComplete(resultCode, null);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling disableProfile", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Switches from the current profile to another profile. The current profile will be disabled
+     * and the specified profile will be enabled.
+     *
+     * @param iccid The iccid of the profile to switch to.
+     * @param refresh Whether sending the REFRESH command to modem.
+     * @param callback The callback to get the result code and the EuiccProfileInfo enabled.
+     */
+    public void switchToProfile(String iccid, boolean refresh,
+            ResultCallback<EuiccProfileInfo> callback) {
+        try {
+            getIEuiccCardController().switchToProfile(mContext.getOpPackageName(), iccid, refresh,
+                    new ISwitchToProfileCallback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode, EuiccProfileInfo profile) {
+                            callback.onComplete(resultCode, profile);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling switchToProfile", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the EID of the eUICC.
+     *
+     * @return The EID.
+     */
+    public String getEid() {
+        try {
+            return getIEuiccCardController().getEid();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling getEid", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the nickname of the profile of the given iccid.
+     *
+     * @param iccid The iccid of the profile.
+     * @param nickname The nickname of the profile.
+     * @param callback The callback to get the result code.
+     */
+    public void setNickname(String iccid, String nickname, ResultCallback<Void> callback) {
+        try {
+            getIEuiccCardController().setNickname(mContext.getOpPackageName(), iccid, nickname,
+                    new ISetNicknameCallback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode) {
+                            callback.onComplete(resultCode, null);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling setNickname", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Deletes the profile of the given iccid from eUICC.
+     *
+     * @param iccid The iccid of the profile.
+     * @param callback The callback to get the result code.
+     */
+    public void deleteProfile(String iccid, ResultCallback<Void> callback) {
+        try {
+            getIEuiccCardController().deleteProfile(mContext.getOpPackageName(), iccid,
+                    new IDeleteProfileCallback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode) {
+                            callback.onComplete(resultCode, null);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling deleteProfile", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Resets the eUICC memory.
+     *
+     * @param options Bits of the options of resetting which parts of the eUICC memory. See
+     *     EuiccCard for details.
+     * @param callback The callback to get the result code.
+     */
+    public void resetMemory(@ResetOption int options, ResultCallback<Void> callback) {
+        try {
+            getIEuiccCardController().resetMemory(mContext.getOpPackageName(), options,
+                    new IResetMemoryCallback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode) {
+                            callback.onComplete(resultCode, null);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling resetMemory", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the default SM-DP+ address from eUICC.
+     *
+     * @param callback The callback to get the result code and the default SM-DP+ address.
+     */
+    public void getDefaultSmdpAddress(ResultCallback<String> callback) {
+        try {
+            getIEuiccCardController().getDefaultSmdpAddress(mContext.getOpPackageName(),
+                    new IGetDefaultSmdpAddressCallback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode, String address) {
+                            callback.onComplete(resultCode, address);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling getDefaultSmdpAddress", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the SM-DS address from eUICC.
+     *
+     * @param callback The callback to get the result code and the SM-DS address.
+     */
+    public void getSmdsAddress(ResultCallback<String> callback) {
+        try {
+            getIEuiccCardController().getSmdsAddress(mContext.getOpPackageName(),
+                    new IGetSmdsAddressCallback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode, String address) {
+                            callback.onComplete(resultCode, address);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling getSmdsAddress", e);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Sets the default SM-DP+ address of eUICC.
+     *
+     * @param defaultSmdpAddress The default SM-DP+ address to set.
+     * @param callback The callback to get the result code.
+     */
+    public void setDefaultSmdpAddress(String defaultSmdpAddress, ResultCallback<Void> callback) {
+        try {
+            getIEuiccCardController().setDefaultSmdpAddress(mContext.getOpPackageName(),
+                    defaultSmdpAddress,
+                    new ISetDefaultSmdpAddressCallback.Stub() {
+                        @Override
+                        public void onComplete(int resultCode) {
+                            callback.onComplete(resultCode, null);
+                        }
+                    });
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling setDefaultSmdpAddress", e);
             throw e.rethrowFromSystemServer();
         }
     }
