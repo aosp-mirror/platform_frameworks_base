@@ -40,6 +40,7 @@ import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprintClient
 import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
+import android.hardware.fingerprint.IFingerprintDialogReceiver;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.fingerprint.IFingerprintServiceLockoutResetCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
@@ -55,6 +56,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
 import android.os.SELinux;
+import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -66,6 +68,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
@@ -131,6 +134,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
     private SparseIntArray mFailedAttempts;
     @GuardedBy("this")
     private IBiometricsFingerprint mDaemon;
+    private IStatusBarService mStatusBarService;
     private final PowerManager mPowerManager;
     private final AlarmManager mAlarmManager;
     private final UserManager mUserManager;
@@ -222,6 +226,8 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         mUserManager = UserManager.get(mContext);
         mTimedLockoutCleared = new SparseBooleanArray();
         mFailedAttempts = new SparseIntArray();
+        mStatusBarService = IStatusBarService.Stub.asInterface(
+                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
     }
 
     @Override
@@ -808,13 +814,14 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
 
     private void startAuthentication(IBinder token, long opId, int callingUserId, int groupId,
                 IFingerprintServiceReceiver receiver, int flags, boolean restricted,
-                String opPackageName) {
+                String opPackageName, Bundle bundle, IFingerprintDialogReceiver dialogReceiver) {
         updateActiveGroup(groupId, opPackageName);
 
         if (DEBUG) Slog.v(TAG, "startAuthentication(" + opPackageName + ")");
 
         AuthenticationClient client = new AuthenticationClient(getContext(), mHalDeviceId, token,
-                receiver, mCurrentUserId, groupId, opId, restricted, opPackageName) {
+                receiver, mCurrentUserId, groupId, opId, restricted, opPackageName, bundle,
+                dialogReceiver, mStatusBarService) {
             @Override
             public int handleFailedAttempt() {
                 final int currentUser = ActivityManager.getCurrentUser();
@@ -1037,7 +1044,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 final IFingerprintServiceReceiver receiver, final int flags,
                 final String opPackageName) {
             checkPermission(MANAGE_FINGERPRINT);
-            final int limit =  mContext.getResources().getInteger(
+            final int limit = mContext.getResources().getInteger(
                     com.android.internal.R.integer.config_fingerprintMaxTemplatesPerUser);
 
             final int enrolled = FingerprintService.this.getEnrolledFingerprints(userId).size();
@@ -1085,7 +1092,8 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         @Override // Binder call
         public void authenticate(final IBinder token, final long opId, final int groupId,
                 final IFingerprintServiceReceiver receiver, final int flags,
-                final String opPackageName) {
+                final String opPackageName, final Bundle bundle,
+                final IFingerprintDialogReceiver dialogReceiver) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final int callingUserId = UserHandle.getCallingUserId();
@@ -1113,7 +1121,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                     mPerformanceStats = stats;
 
                     startAuthentication(token, opId, callingUserId, groupId, receiver,
-                            flags, restricted, opPackageName);
+                            flags, restricted, opPackageName, bundle, dialogReceiver);
                 }
             });
         }

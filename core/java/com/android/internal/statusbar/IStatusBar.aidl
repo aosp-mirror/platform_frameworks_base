@@ -18,6 +18,7 @@ package com.android.internal.statusbar;
 
 import android.content.ComponentName;
 import android.graphics.Rect;
+import android.hardware.fingerprint.IFingerprintDialogReceiver;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 
@@ -130,4 +131,15 @@ oneway interface IStatusBar
     void handleSystemKey(in int key);
 
     void showShutdownUi(boolean isReboot, String reason);
+
+    // Used to show the dialog when FingerprintService starts authentication
+    void showFingerprintDialog(in Bundle bundle, IFingerprintDialogReceiver receiver);
+    // Used to hide the dialog when a finger is authenticated
+    void onFingerprintAuthenticated();
+    // Used to set a temporary message, e.g. fingerprint not recognized, finger moved too fast, etc
+    void onFingerprintHelp(String message);
+    // Used to set a message - the dialog will dismiss after a certain amount of time
+    void onFingerprintError(String error);
+    // Used to hide the fingerprint dialog when the authenticationclient is stopped
+    void hideFingerprintDialog();
 }

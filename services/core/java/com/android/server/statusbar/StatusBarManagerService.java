@@ -23,6 +23,7 @@ import android.app.StatusBarManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Rect;
+import android.hardware.fingerprint.IFingerprintDialogReceiver;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -508,6 +509,56 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         if (mBar != null) {
             try {
                 mBar.handleSystemKey(key);
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    @Override
+    public void showFingerprintDialog(Bundle bundle, IFingerprintDialogReceiver receiver) {
+        if (mBar != null) {
+            try {
+                mBar.showFingerprintDialog(bundle, receiver);
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    @Override
+    public void onFingerprintAuthenticated() {
+        if (mBar != null) {
+            try {
+                mBar.onFingerprintAuthenticated();
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    @Override
+    public void onFingerprintHelp(String message) {
+        if (mBar != null) {
+            try {
+                mBar.onFingerprintHelp(message);
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    @Override
+    public void onFingerprintError(String error) {
+        if (mBar != null) {
+            try {
+                mBar.onFingerprintError(error);
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    @Override
+    public void hideFingerprintDialog() {
+        if (mBar != null) {
+            try {
+                mBar.hideFingerprintDialog();
             } catch (RemoteException ex) {
             }
         }
