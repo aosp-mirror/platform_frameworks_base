@@ -33,7 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Hali bajarilmagan"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Eslatmalar"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Batareya quvvati kam qoldi"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"Batareya quvvati kam qoldi. Quvvat tejash rejimini yoqing."</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> qoldi"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> (joriy holatda taxminan <xliff:g id="TIME">%s</xliff:g> qoldi)"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> (taxminan <xliff:g id="TIME">%s</xliff:g> qoldi)"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> qoldi. Quvvat tejash rejimi yoniq."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB orqali zaryadlab bo‘lmaydi.\nFaqat taklif qilingan zaryadlagichdan foydalaning."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB orqali quvvat oldirish qo‘llab-quvvatlanmaydi."</string>
@@ -67,14 +70,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Ayni paytda ushbu qurilmaga o‘z hisobi bilan kirgan foydalanuvchi USB orqali nosozliklarni tuzatish funksiyasini yoqa olmaydi. Bu funksiyadan foydalanish uchun asosiy foydalanuvchi profiliga o‘ting."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Ekranga moslashtirish"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Ekran hajmida cho‘zish"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Skrinshot"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Skrinshot saqlanmoqda…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Skrinshot saqlanmoqda…"</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"Skrinshot saqlanmoqda."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Skrinshot saqlandi."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Skrinshotni ko‘rish uchun bosing."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Skrinshot saqlanmadi."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Skrinshotni saqlashda muammo yuz berdi."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Xotirada joy kamligi uchun skrinshotni saqlab bo‘lmadi."</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"Skrinshot saqlanmoqda"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"Skrinshot saqlandi"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"Skrinshotni ko‘rish uchun bosing"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"Skrinshot saqlanmadi"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"Skrinshotni saqlashda muammo yuz berdi"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Xotirada joy kamligi uchun skrinshot saqlanmadi"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Ilova yoki tashkilotingiz skrinshot olishni taqiqlagan"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB fayl ko‘chirish moslamalari"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Media pleyer sifatida ulash (MTP)"</string>
@@ -559,26 +563,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"O‘chiq"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Bildirishnomalar uchun kengaytirilgan boshqaruv yordamida ilova bildirishnomalarining muhimlik darajasini (0-5) sozlash mumkin. \n\n"<b>"5-daraja"</b>" \n- Bildirishnomani ro‘yxatning boshida ko‘rsatish \n- To‘liq ekranli bildirishnomalarni ko‘rsatish \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatish \n\n"<b>"4-daraja"</b>" \n- To‘liq ekranli bildirishnomalarni ko‘rsatmaslik \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatish \n\n"<b>"3-daraja"</b>" \n- To‘liq ekranli bildirishnomalarni ko‘rsatmaslik \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatmaslik \n\n"<b>"2-daraja"</b>" \n- To‘liq ekranli bildirishnomalarni ko‘rsatmaslik \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatmaslik \n- Ovoz va tebranishdan foydalanmaslik \n\n"<b>"1-daraja"</b>" \n- To‘liq ekranli bildirishnomalarni ko‘rsatmaslik \n- Qalqib chiquvchi bildirishnomalarni ko‘rsatmaslik \n- Ovoz va tebranishdan foydalanmaslik \n- Ekran qulfi va holat qatorida ko‘rsatmaslik \n- Bildirishnomani ro‘yxatning oxirida ko‘rsatish \n\n"<b>"0-daraja"</b>" \n- Ilovadan keladigan barcha bildirishnomalarni bloklash"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Bildirishnomalar"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"Ushbu bildirishnomalar endi ko‘rsatilmaydi"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> ta bildirishnoma turkumi"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"Bu ilovada bildirishnomalar turkumi yo‘q"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Bu ilova bildirishnomalarini o‘chirib bo‘lmaydi"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">Bu ilovadagi <xliff:g id="NUMBER_1">%s</xliff:g> ta bildirishnomalar turkumidan 1 tasi</item>
-      <item quantity="one">Bu ilovadagi <xliff:g id="NUMBER_0">%s</xliff:g> ta bildirishnomalar turkumidan 1 tasi</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> va yana <xliff:g id="NUMBER_5">%3$d</xliff:g> ta</item>
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> va yana <xliff:g id="NUMBER_2">%3$d</xliff:g> ta</item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Ushbu bildirishnomalar endi ko‘rsatilmaydi"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"Mazkur bildirishnomalar ko‘rsatishda davom etilsinmi?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"Bildirishnomalarni to‘xtatish"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"Ko‘rsatilsin"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"Bu ilovadan keladigan bildirishnomalar ko‘rsatishda davom etilsinmi?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"Ushbu bildirishnomalarni o‘chirib bo‘lmaydi"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> uchun bildirishnoma sozlamalari ochildi"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> uchun bildirishnoma sozlamalari yopildi"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Bu kanaldan keladigan bildirishnomalarga ruxsat berish"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"Barcha turkumlar"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Boshqa sozlamalar"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"<xliff:g id="SUB_CATEGORY">%1$s</xliff:g>: sozlash"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"Moslash"</string>
     <string name="notification_done" msgid="5279426047273930175">"Tayyor"</string>
+    <string name="inline_undo" msgid="558916737624706010">"Qaytarish"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"bildirishnoma sozlamalari"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"bildirishnomalarni kechiktirish parametrlari"</string>
@@ -733,8 +730,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Yoyish"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Yig‘ish"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Yopish"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"Sozlamalar"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Yopish uchun pastga torting"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Menyu"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> tasvir ustida tasvir rejimida"</string>

@@ -35,7 +35,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Trenutno"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Obvestila"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Akumulator je skoraj izpraznjen"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"Akumulator je skoraj izpraznjen. Vklopite varčevanje z energijo akumulatorja"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Še <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Še <xliff:g id="PERCENTAGE">%s</xliff:g>, glede na način uporabe imate na voljo še približno <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Še <xliff:g id="PERCENTAGE">%s</xliff:g>, na voljo imate še približno <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Še <xliff:g id="PERCENTAGE">%s</xliff:g>. Vklopljeno je varčevanje z energijo akumulatorja."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Polnjenje po povezavi USB ni podprto.\nUporabite priloženi polnilnik."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Polnjenje prek USB-ja ni podprto."</string>
@@ -69,14 +72,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Uporabnik, trenutno prijavljen v napravo, ne more vklopiti odpravljanja napak s povezavo USB. Če želite uporabljati to funkcijo, preklopite na primarnega uporabnika."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Povečava čez cel zaslon"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Raztegnitev čez zaslon"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Posnetek zaslona"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Shranjev. posnetka zaslona ..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Shranjevanje posnetka zaslona ..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"Shranjevanje posnetka zaslona."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Posnetek zaslona je shranjen."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Dotaknite se, če si želite ogledati posnetek zaslona."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Posnetka zaslona ni bilo mogoče shraniti."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Pri shranjevanju posnetka zaslona je prišlo do težave."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Shranjevanje posnetka zaslona ni mogoče zaradi omejenega prostora za shranjevanje."</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"Shranjevanje posnetka zaslona"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"Posnetek zaslona je shranjen"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"Dotaknite se, če si želite ogledati posnetek zaslona"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"Posnetka zaslona ni bilo mogoče shraniti"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"Pri shranjevanju posnetka zaslona je prišlo do težave"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Shranjevanje posnetka zaslona ni mogoče zaradi omejenega prostora za shranjevanje"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Aplikacija ali vaša organizacija ne dovoljuje posnetkov zaslona"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Možnosti prenosa datotek prek USB-ja"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Vpni kot predvajalnik (MTP)"</string>
@@ -563,30 +567,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Izklopljeno"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"S kontrolniki za pomebnost obvestila je mogoče za obvestila aplikacije nastaviti stopnjo pomembnosti od 0 do 5. \n\n"<b>"Stopnja 5"</b>" \n– Prikaz na vrhu seznama obvestil \n– Omogočanje prekinitev v celozaslonskem načinu \n– Vedno prikaži hitre predoglede \n\n"<b>"Stopnja 4"</b>" \n– Preprečevanje prekinitev v celozaslonskem načinu \n– Vedno prikaži hitre predoglede \n\n"<b>"Stopnja 3"</b>" \n– Preprečevanje prekinitev v celozaslonskem načinu \n– Nikoli ne prikaži hitrih predogledov \n\n"<b>"Stopnja 2"</b>" \n– Preprečevanje prekinitev v celozaslonskem načinu \n– Nikoli ne prikaži hitrih predogledov \n– Nikoli ne uporabi zvoka in vibriranja \n\n"<b>"Stopnja 1"</b>" \n– Preprečevanje prekinitev v celozaslonskem načinu \n– Nikoli ne prikaži hitrih predogledov \n– Nikoli ne uporabi zvoka in vibriranja \n– Skrivanje na zaklenjenem zaslonu in v vrstici stanja \n– Prikaz na dnu seznama obvestil \n\n"<b>"Stopnja 0"</b>" \n– Blokiranje vseh obvestil aplikacije"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Obvestila"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"Teh obvestil ne boste več prejemali"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"Št. kategorij obvestil: <xliff:g id="NUMBER">%d</xliff:g>"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"Ta aplikacija nima kategorij obvestil"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Obvestil te aplikacije ni mogoče izklopiti"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="one">1 od <xliff:g id="NUMBER_1">%s</xliff:g> kategorije obvestil iz te aplikacije</item>
-      <item quantity="two">1 od <xliff:g id="NUMBER_1">%s</xliff:g> kategorij obvestil iz te aplikacije</item>
-      <item quantity="few">1 od <xliff:g id="NUMBER_1">%s</xliff:g> kategorij obvestil iz te aplikacije</item>
-      <item quantity="other">1 od <xliff:g id="NUMBER_1">%s</xliff:g> kategorij obvestil iz te aplikacije</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> in <xliff:g id="NUMBER_5">%3$d</xliff:g> drug</item>
-      <item quantity="two"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> in <xliff:g id="NUMBER_5">%3$d</xliff:g> druga</item>
-      <item quantity="few"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> in <xliff:g id="NUMBER_5">%3$d</xliff:g> drugi</item>
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> in <xliff:g id="NUMBER_5">%3$d</xliff:g> drugih</item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Ta obvestila ne bodo več prikazana"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"Želite, da so ta obvestila še naprej prikazana?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"Ustavi prikazovanje obvestil"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"Prikazuj še naprej"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"Želite, da so obvestila te aplikacije še naprej prikazana?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"Teh obvestil ni mogoče izklopiti"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Kontrolniki obvestil za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g> so odprti"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Kontrolniki obvestil za aplikacijo <xliff:g id="APP_NAME">%1$s</xliff:g> so zaprti"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Dovoli obvestila iz tega kanala"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"Vse kategorije"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Več nastavitev"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"Prilagodi: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"Prilagodi"</string>
     <string name="notification_done" msgid="5279426047273930175">"Dokončano"</string>
+    <string name="inline_undo" msgid="558916737624706010">"Razveljavi"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"kontrolniki obvestil"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"možnosti preložitve obvestil"</string>

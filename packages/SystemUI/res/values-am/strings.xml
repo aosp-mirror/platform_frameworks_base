@@ -33,7 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"በመካሄድ ላይ ያለ"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"ማሳወቂያዎች"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"የባትሪ ኃይል አነስተኛ ነው"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"ባትሪ ዝቅተኛ ነው። የባትሪ ቆጣቢን ያብሩ"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> ይቀራል"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> ይቀራል፣ በእርስዎ አጠቃቀም ላይ በመመረት <xliff:g id="TIME">%s</xliff:g> ገደማ ይቀራል"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> ይቀራል፣ <xliff:g id="TIME">%s</xliff:g> ገደማ ይቀራል"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> ይቀራል። ባትሪ ቆጣቢ በርቷል።"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB ኃይል መሙያ አይታገዝም።\n የቀረበውን ኃይል መሙያ ብቻ ተጠቀም።"</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"የUSB ኃይል መሙላት አይደገፍም።"</string>
@@ -67,14 +70,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"አሁን ወደዚህ መሣሪያ የገባው ተጠቃሚ የዩኤስቢ እርማትን ማብራት አይችልም። ይህን ባህሪ ለመጠቀም ወደ ዋና ተጠቃሚ ይቀይሩ።"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ማያ እንዲሞላ አጉላ"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ማያ ለመሙለት ሳብ"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"ቅጽበታዊ ገጽ እይታ"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"ቅጽበታዊ ገጽ እይታ በማስቀመጥ ላይ..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"ቅጽበታዊ ገጽ እይታ በማስቀመጥ ላይ..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"ቅጽበታዊ ገጽ እይታ እየተቀመጠ ነው::"</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"ቅጽበታዊ ገጽ እይታ ተቀርጿል"</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"የእርስዎን ቅጽበታዊ ገጽ እይታ ለማየት መታ ያድርጉ።"</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"ቅጽበታዊ ገጽ እይታ መቅረጽ አልተቻለም::"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"ቅጽበታዊ ገጽ ዕይታን በማስቀመጥ ጊዜ ችግር አጋጥሟል።"</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"ባለው የተገደበ የማከማቻ ቦታ ምክንያት ቅጽበታዊ ገጽ ዕይታን ማስቀመጥ አይችልም።"</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"ቅጽበታዊ ገጽ እይታ እየተቀመጠ ነው"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"ቅጽበታዊ ገጽ እይታ ተቀምጧል"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"የእርስዎን ቅጽበታዊ ገጽ እይታ ለማየት መታ ያድርጉ"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"ቅጽበታዊ ገጽ እይታን ማንሳት አልተቻለም"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"ቅጽበታዊ ገጽ ዕይታን በማስቀመጥ ላይ ሳለ ችግር አጋጥሟል"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"ባለው ውሱን የማከማቻ ቦታ ምክንያት ቅጽበታዊ ገጽ ዕይታን ማስቀመጥ አይችልም"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"ቅጽበታዊ ገጽ እይታዎችን ማንሳት በመተግበሪያው ወይም በእርስዎ ድርጅት አይፈቀድም"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"የUSB ፋይል ሰደዳ አማራጮች"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"እንደ ማህደረ አጫዋች (MTP) ሰካ"</string>
@@ -557,26 +561,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ጠፍቷል"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"በኃይል ማሳወቂያ መቆጣጠሪያዎች አማካኝነት የአንድ መተግበሪያ ማሳወቂያዎች የአስፈላጊነት ደረጃ ከ0 እስከ 5 ድረስ ማዘጋጀት ይችላሉ። \n\n"<b>"ደረጃ 5"</b>" \n- በማሳወቂያ ዝርዝሩ አናት ላይ አሳይ \n- የሙሉ ማያ ገጽ ማቋረጥን ፍቀድ \n- ሁልጊዜ አጮልቀው ይመልከቱ \n\n"<b>"ደረጃ 4"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ከልክል \n- ሁልጊዜ አጮልቀው ይመልከቱ \n\n"<b>"ደረጃ 3"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ከልክል \n- በፍጹም አጮልቀው አይምልከቱ \n\n"<b>"ደረጃ 2"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ይከልክሉ \n- በፍጹም አጮልቀው አይመልከቱ \n- ድምፅ እና ንዝረትን በፍጹም አይኑር \n\n"<b>"ደረጃ 1"</b>" \n- የሙሉ ማያ ገጽ ማቋረጥን ይከልክሉ \n- በፍጹም አጮልቀው አይመልከቱ \n- ድምፅ ወይም ንዝረትን በፍጹም አያደርጉ \n- ከመቆለፊያ ገጽ እና የሁኔታ አሞሌ ይደብቁ \n- በማሳወቂያ ዝርዝር ግርጌ ላይ አሳይ \n\n"<b>"ደረጃ 0"</b>" \n- ሁሉንም የመተግበሪያው ማሳወቂያዎች ያግዱ"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"ማሳወቂያዎች"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"እነዚህን ማሳወቂያዎች ከእንግዲህ አያገኟቸውም"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> የማሳወቂያ ምድቦች"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"ይህ መተግበሪያ የማሳወቂያ ምድቦች የሉትም"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"ከዚህ መተግበሪያ የሚመጡ ማሳወቂያዎች ሊጠፉ አይችሉም"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="one">1 ከ<xliff:g id="NUMBER_1">%s</xliff:g> የማሳወቂያ ምድቦች ከዚህ መተግበሪያ</item>
-      <item quantity="other">1 <xliff:g id="NUMBER_1">%s</xliff:g> የማሳወቂያ ምድቦች ከዚህ መተግበሪያ</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>፣ <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>፣ <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> እና <xliff:g id="NUMBER_5">%3$d</xliff:g> ሌሎች</item>
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>፣ <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> እና <xliff:g id="NUMBER_5">%3$d</xliff:g> ሌሎች</item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"እነዚህን ማሳወቂያዎችን ከእንግዲህ አይመለከቷቸውም"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"እነዚህን ማሳወቂያዎች ማሳየት ይቀጥሉ?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"ማሳወቂያዎችን አስቁም"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"ማሳየትን ቀጥል"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"ከዚህ መተግበሪያ ማሳወቂያዎችን ማሳየት ይቀጥል?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"እነዚህ ማሳወቂያዎች ሊጠፉ አይችሉም"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"የ<xliff:g id="APP_NAME">%1$s</xliff:g> ማሳወቂያ መቆጣጠሪያዎች ተከፍተዋል"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"የ<xliff:g id="APP_NAME">%1$s</xliff:g> ማሳወቂያ መቆጣጠሪያዎች ተዘግተዋል"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"ከዚህ ሰርጥ የመጡ ሁሉንም ማሳወቂያች ፍቀድ"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"ሁሉም ምድቦች"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"ተጨማሪ ቅንብሮች"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"ያብጁ፦ <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"አብጅ"</string>
     <string name="notification_done" msgid="5279426047273930175">"ተከናውኗል"</string>
+    <string name="inline_undo" msgid="558916737624706010">"ቀልብስ"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"የማሳወቂያ መቆጣጠሪያዎች"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"የማሳወቂያ ማሸለቢያ አማራጮች"</string>
@@ -731,8 +728,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"ዘርጋ"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"አሳንስ"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"ዝጋ"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"ቅንብሮች"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"ለማሰናበት ወደ ታች ይጎትቱ"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"ምናሌ"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> በስዕል-ላይ-ስዕል ውስጥ ነው"</string>

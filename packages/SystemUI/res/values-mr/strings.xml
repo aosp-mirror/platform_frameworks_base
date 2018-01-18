@@ -33,7 +33,13 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"सुरु असलेले"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"सूचना"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"बॅटरी कमी आहे"</string>
+    <!-- no translation found for battery_low_title_hybrid (6268991275887381595) -->
+    <skip />
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> शिल्लक"</string>
+    <!-- no translation found for battery_low_percent_format_hybrid (6838677459286775617) -->
+    <skip />
+    <!-- no translation found for battery_low_percent_format_hybrid_short (9025795469949145586) -->
+    <skip />
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> शिल्लक. बॅटरी सेव्‍हर चालू आहे."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB चार्जिंग समर्थित नाही.\nफक्त पुरवठा केलेले चार्जर वापरा."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB चार्जिंग समर्थित नाही."</string>
@@ -67,14 +73,22 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"सध्‍या या डीव्हाइसमध्‍ये साइन इन केलेला वापरकर्ता USB डीबग करणे चालू करू शकत नाही. हे वैशिष्‍ट्य वापरण्‍यासाठी, प्राथमिक वापरकर्त्‍यावर स्विच करा."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"स्क्रीन भरण्यासाठी झूम करा"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"स्क्रीन भरण्यासाठी ताणा"</string>
+    <!-- no translation found for global_action_screenshot (8329831278085426283) -->
+    <skip />
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"स्क्रीनशॉट जतन करत आहे…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"स्क्रीनशॉट जतन करत आहे…"</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"स्क्रीनशॉट जतन केला जात आहे."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"स्क्रीनशॉट कॅप्चर केला."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"आपला स्क्रीनशॉट पाहण्यासाठी टॅप करा."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"स्क्रीनशॉट कॅप्चर करू शकलो नाही."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"स्क्रीनशॉट जतन करताना समस्या आली."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"मर्यादित संचय जागेमुळे स्क्रीनशॉट जतन करू शकत नाही."</string>
+    <!-- no translation found for screenshot_saving_text (2545047868936087248) -->
+    <skip />
+    <!-- no translation found for screenshot_saved_title (5637073968117370753) -->
+    <skip />
+    <!-- no translation found for screenshot_saved_text (7574667448002050363) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_title (9096484883063264803) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_to_save_unknown_text (8844781948876286488) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_to_save_text (3041612585107107310) -->
+    <skip />
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"अ‍ॅप किंवा आपल्या संस्थेद्वारे स्क्रीनशॉट घेण्याची अनुमती नाही"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB फाईल स्थानांतरण पर्याय"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"मीडिया प्लेअर म्हणून माउंट करा (MTP)"</string>
@@ -557,26 +571,27 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"बंद"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"पॉवर सूचना नियंत्रणांच्या साहाय्याने तुम्ही अॅप सूचनांसाठी 0 ते 5 असे महत्त्व स्तर सेट करू शकता. \n\n"<b>"स्तर 5"</b>" \n- सूचना सूचीच्या शीर्षस्थानी दाखवा \n- पूर्ण स्क्रीन व्यत्ययास अनुमती द्या \n- नेहमी डोकावून पहा \n\n"<b>"स्तर 4"</b>\n" - पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- नेहमी डोकावून पहा \n\n"<b>"स्तर 3"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n\n"<b>"स्तर 2"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n- कधीही ध्वनी किंवा कंपन करू नका \n\n"<b>"स्तर 1"</b>\n"- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n- कधीही ध्वनी किंवा कंपन करू नका \n- लॉक स्क्रीन आणि स्टेटस बार मधून लपवा \n- सूचना सूचीच्या तळाशी दर्शवा \n\n"<b>"स्तर 0"</b>" \n- अॅपमधील सर्व सूचना ब्लॉक करा"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"सूचना"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"तुम्हाला यापुढे या सूचना प्राप्त होणार नाहीत"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> सूचना श्रेण्या"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"या अ‍ॅपला सूचना श्रेण्या नाहीत"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"या अ‍ॅपकडून येणार्‍या सूचना बंद ठेवता येणार नाहीत"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="one">या अॅपकडील <xliff:g id="NUMBER_1">%s</xliff:g> पैकी 1 सूचना श्रेणी</item>
-      <item quantity="other">या अॅपकडील <xliff:g id="NUMBER_1">%s</xliff:g> पैकी 1 सूचना श्रेणी</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g>, आणि <xliff:g id="NUMBER_5">%3$d</xliff:g> इतर</item>
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g>, आणि <xliff:g id="NUMBER_5">%3$d</xliff:g> इतर</item>
-    </plurals>
+    <!-- no translation found for notification_channel_disabled (344536703863700565) -->
+    <skip />
+    <!-- no translation found for inline_keep_showing (8945102997083836858) -->
+    <skip />
+    <!-- no translation found for inline_stop_button (4172980096860941033) -->
+    <skip />
+    <!-- no translation found for inline_keep_button (6665940297019018232) -->
+    <skip />
+    <!-- no translation found for inline_keep_showing_app (1723113469580031041) -->
+    <skip />
+    <!-- no translation found for notification_unblockable_desc (1037434112919403708) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> साठी सूचना नियंत्रणे खुली आहेत"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> साठी सूचना नियंत्रणे बंद आहेत"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"या चॅनेलकडील सूचनांना मान्यता द्या"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"सर्व श्रेण्या"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"अधिक सेटिंग्ज"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"सानुकूल करा: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <!-- no translation found for notification_app_settings (420348114670768449) -->
+    <skip />
     <string name="notification_done" msgid="5279426047273930175">"पूर्ण झाले"</string>
+    <!-- no translation found for inline_undo (558916737624706010) -->
+    <skip />
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"सूचना नियंत्रणे"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"सूचना स्नूझ पर्याय"</string>
@@ -731,8 +746,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"विस्तृत करा"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"लहान करा"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"बंद करा"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"सेटिंग्ज"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"डिसमिस करण्यासाठी खाली ड्रॅग करा"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"मेनू"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> चित्रामध्ये चित्र मध्ये आहे"</string>
