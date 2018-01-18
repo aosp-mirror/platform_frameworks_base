@@ -9861,15 +9861,6 @@ public final class Settings {
         public static final String FORCED_APP_STANDBY_ENABLED = "forced_app_standby_enabled";
 
         /**
-         * Whether or not to enable Forced App Standby on small battery devices.
-         * Type: int (0 for false, 1 for true)
-         * Default: 0
-         * @hide
-         */
-        public static final String FORCED_APP_STANDBY_FOR_SMALL_BATTERY_ENABLED
-                = "forced_app_standby_for_small_battery_enabled";
-
-        /**
          * Whether or not Network Watchlist feature is enabled.
          * Type: int (0 for false, 1 for true)
          * Default: 0
