@@ -1921,4 +1921,75 @@ public final class BluetoothDevice implements Parcelable {
         }
         return null;
     }
+
+    /**
+     * Create a Bluetooth L2CAP Connection-oriented Channel (CoC) {@link BluetoothSocket} that can
+     * be used to start a secure outgoing connection to the remote device with the same dynamic
+     * protocol/service multiplexer (PSM) value.
+     * <p>This is designed to be used with {@link BluetoothAdapter#listenUsingL2capCoc(int)} for
+     * peer-peer Bluetooth applications.
+     * <p>Use {@link BluetoothSocket#connect} to initiate the outgoing connection.
+     * <p>Application using this API is responsible for obtaining PSM value from remote device.
+     * <p>The remote device will be authenticated and communication on this socket will be
+     * encrypted.
+     * <p> Use this socket if an authenticated socket link is possible. Authentication refers
+     * to the authentication of the link key to prevent man-in-the-middle type of attacks. When a
+     * secure socket connection is not possible, use {#link createInsecureLeL2capCocSocket(int,
+     * int)}.
+     *
+     * @param transport Bluetooth transport to use, must be {@link #TRANSPORT_LE}
+     * @param psm dynamic PSM value from remote device
+     * @return a CoC #BluetoothSocket ready for an outgoing connection
+     * @throws IOException on error, for example Bluetooth not available, or insufficient
+     * permissions
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    public BluetoothSocket createL2capCocSocket(int transport, int psm) throws IOException {
+        if (!isBluetoothEnabled()) {
+            Log.e(TAG, "createL2capCocSocket: Bluetooth is not enabled");
+            throw new IOException();
+        }
+        if (transport != BluetoothDevice.TRANSPORT_LE) {
+            throw new IllegalArgumentException("Unsupported transport: " + transport);
+        }
+        if (DBG) Log.d(TAG, "createL2capCocSocket: transport=" + transport + ", psm=" + psm);
+        return new BluetoothSocket(BluetoothSocket.TYPE_L2CAP_LE, -1, true, true, this, psm,
+                null);
+    }
+
+    /**
+     * Create a Bluetooth L2CAP Connection-oriented Channel (CoC) {@link BluetoothSocket} that can
+     * be used to start a secure outgoing connection to the remote device with the same dynamic
+     * protocol/service multiplexer (PSM) value.
+     * <p>This is designed to be used with {@link BluetoothAdapter#listenUsingInsecureL2capCoc(int)}
+     * for peer-peer Bluetooth applications.
+     * <p>Use {@link BluetoothSocket#connect} to initiate the outgoing connection.
+     * <p>Application using this API is responsible for obtaining PSM value from remote device.
+     * <p> The communication channel may not have an authenticated link key, i.e. it may be subject
+     * to man-in-the-middle attacks. Use {@link #createL2capCocSocket(int, int)} if an encrypted and
+     * authenticated communication channel is possible.
+     *
+     * @param transport Bluetooth transport to use, must be {@link #TRANSPORT_LE}
+     * @param psm dynamic PSM value from remote device
+     * @return a CoC #BluetoothSocket ready for an outgoing connection
+     * @throws IOException on error, for example Bluetooth not available, or insufficient
+     * permissions
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    public BluetoothSocket createInsecureL2capCocSocket(int transport, int psm) throws IOException {
+        if (!isBluetoothEnabled()) {
+            Log.e(TAG, "createInsecureL2capCocSocket: Bluetooth is not enabled");
+            throw new IOException();
+        }
+        if (transport != BluetoothDevice.TRANSPORT_LE) {
+            throw new IllegalArgumentException("Unsupported transport: " + transport);
+        }
+        if (DBG) {
+            Log.d(TAG, "createInsecureL2capCocSocket: transport=" + transport + ", psm=" + psm);
+        }
+        return new BluetoothSocket(BluetoothSocket.TYPE_L2CAP_LE, -1, false, false, this, psm,
+                null);
+    }
 }
