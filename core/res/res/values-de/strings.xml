@@ -217,6 +217,8 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"Notfall"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Fehlerbericht"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Sitzung beenden"</string>
+    <!-- no translation found for global_action_screenshot (8329831278085426283) -->
+    <skip />
     <string name="bugreport_title" msgid="2667494803742548533">"Fehlerbericht abrufen"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Bei diesem Fehlerbericht werden Daten zum aktuellen Status deines Geräts erfasst und als E-Mail versandt. Vom Start des Berichts bis zu seinem Versand kann es eine Weile dauern. Bitte habe etwas Geduld."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interaktiver Bericht"</string>
@@ -379,7 +381,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Ermöglicht der App, die Anrufliste deines Tablets zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so deine Anrufliste löschen oder ändern."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Ermöglicht der App, die Anrufliste deines Fernsehers zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so deine Anrufliste löschen oder ändern."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Ermöglicht der App, die Anrufliste deines Telefons zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so deine Anrufliste löschen oder ändern."</string>
-    <string name="permlab_bodySensors" msgid="4683341291818520277">"Auf Körpersensoren wie z. B. Herzfrequenzmesser zugreifen"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"Auf Körpersensoren wie z. B. Pulsmesser zugreifen"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Ermöglicht der App, auf Daten von Sensoren zuzugreifen, die deine körperliche Verfassung überwachen, beispielsweise deinen Puls"</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Kalendertermine und Details lesen"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Diese App kann alle auf deinem Tablet gespeicherten Kalendertermine lesen und deine Kalenderdaten teilen oder speichern."</string>
@@ -1123,6 +1125,10 @@
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"WLAN wird automatisch aktiviert"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Wenn du in der Nähe eines sicheren gespeicherten Netzwerks bist"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Nicht wieder aktivieren"</string>
+    <!-- no translation found for wifi_wakeup_enabled_title (6534603733173085309) -->
+    <skip />
+    <!-- no translation found for wifi_wakeup_enabled_content (189330154407990583) -->
+    <skip />
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"In WLAN anmelden"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Im Netzwerk anmelden"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1807,6 +1813,11 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Verknüpfung konnte nicht wiederhergestellt werden, weil die App keine Sicherung und keine Wiederherstellung unterstützt"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Verknüpfung konnte nicht wiederhergestellt werden, weil die App-Signatur nicht übereinstimmt"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Verknüpfung konnte nicht wiederhergestellt werden"</string>
-    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"Verknüpfung ist deaktiviert"</string>
+    <!-- no translation found for harmful_app_warning_uninstall (3846265696369136266) -->
+    <skip />
+    <!-- no translation found for harmful_app_warning_launch_anyway (5784428382367400530) -->
+    <skip />
+    <!-- no translation found for harmful_app_warning_title (2229996292333310435) -->
     <skip />
 </resources>

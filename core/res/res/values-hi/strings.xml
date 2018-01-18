@@ -217,6 +217,8 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"आपातकाल"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"गड़बड़ी की रिपोर्ट"</string>
     <string name="global_action_logout" msgid="935179188218826050">"सत्र खत्म करें"</string>
+    <!-- no translation found for global_action_screenshot (8329831278085426283) -->
+    <skip />
     <string name="bugreport_title" msgid="2667494803742548533">"गड़बड़ी की रिपोर्ट लें"</string>
     <string name="bugreport_message" msgid="398447048750350456">"इससे ईमेल भेजने के लिए, आपके डिवाइस की मौजूदा स्थिति से जुड़ी जानकारी इकट्ठा की जाएगी. गड़बड़ी की रिपोर्ट बनना शुरू होने से लेकर भेजने के लिए तैयार होने तक कुछ समय लगेगा; कृपया इंतज़ार करें."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"सहभागी रिपोर्ट"</string>
@@ -1123,6 +1125,10 @@
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"वाई-फ़ाई अपने आप चालू हो जाएगा"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"जब आप किसी अच्छी क्वालिटी वाले सेव किए गए नेटवर्क के पास हों"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"वापस चालू न करें"</string>
+    <!-- no translation found for wifi_wakeup_enabled_title (6534603733173085309) -->
+    <skip />
+    <!-- no translation found for wifi_wakeup_enabled_content (189330154407990583) -->
+    <skip />
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"वाई-फ़ाई  नेटवर्क में साइन इन करें"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"नेटवर्क में साइन इन करें"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1807,6 +1813,11 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"शॉर्टकट बहाल नहीं किया जा सका क्योंकि इस ऐप में बैकअप लेने और उसे बहाल करने की सुविधा नहीं है"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"ऐप सिग्नेचर अलग होने के कारण शॉर्टकट बहाल नहीं किया जा सका"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"शॉर्टकट बहाल नहीं किया जा सका"</string>
-    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"शॉर्टकट बंद है"</string>
+    <!-- no translation found for harmful_app_warning_uninstall (3846265696369136266) -->
+    <skip />
+    <!-- no translation found for harmful_app_warning_launch_anyway (5784428382367400530) -->
+    <skip />
+    <!-- no translation found for harmful_app_warning_title (2229996292333310435) -->
     <skip />
 </resources>

@@ -217,6 +217,8 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"అత్యవసరం"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"బగ్ నివేదిక"</string>
     <string name="global_action_logout" msgid="935179188218826050">"సెషన్‌ను ముగించు"</string>
+    <!-- no translation found for global_action_screenshot (8329831278085426283) -->
+    <skip />
     <string name="bugreport_title" msgid="2667494803742548533">"బగ్ నివేదికను సిద్ధం చేయి"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ఇది ఇ-మెయిల్ సందేశం రూపంలో పంపడానికి మీ ప్రస్తుత పరికర స్థితి గురించి సమాచారాన్ని సేకరిస్తుంది. బగ్ నివేదికను ప్రారంభించడం మొదలుకొని పంపడానికి సిద్ధం చేసే వరకు ఇందుకు కొంత సమయం పడుతుంది; దయచేసి ఓపిక పట్టండి."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ప్రభావశీల నివేదిక"</string>
@@ -1123,6 +1125,10 @@
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi స్వయంచాలకంగా ఆన్ అవుతుంది"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"మీరు అధిక నాణ్యత గల సేవ్ చేసిన నెట్‌వర్క్‌కు సమీపంగా ఉన్నప్పుడు"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"తిరిగి ఆన్ చేయవద్దు"</string>
+    <!-- no translation found for wifi_wakeup_enabled_title (6534603733173085309) -->
+    <skip />
+    <!-- no translation found for wifi_wakeup_enabled_content (189330154407990583) -->
+    <skip />
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi నెట్‌వర్క్‌కి సైన్ ఇన్ చేయండి"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"నెట్‌వర్క్‌కి సైన్ ఇన్ చేయండి"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1808,6 +1814,11 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"బ్యాకప్ మరియు పునరుద్ధరణకు యాప్ మద్దతు ఇవ్వని కారణంగా సత్వరమార్గాన్ని పునరుద్ధరించడం సాధ్యపడలేదు"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"యాప్ సంతకం సరిపోలని కారణంగా సత్వరమార్గాన్ని పునరుద్ధరించడం సాధ్యపడలేదు"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"సత్వరమార్గాన్ని పునరుద్ధరించడం సాధ్యపడలేదు"</string>
-    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"షార్ట్‌కట్ నిలిపివేయబడింది"</string>
+    <!-- no translation found for harmful_app_warning_uninstall (3846265696369136266) -->
+    <skip />
+    <!-- no translation found for harmful_app_warning_launch_anyway (5784428382367400530) -->
+    <skip />
+    <!-- no translation found for harmful_app_warning_title (2229996292333310435) -->
     <skip />
 </resources>
