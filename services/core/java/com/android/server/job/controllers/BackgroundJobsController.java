@@ -17,14 +17,11 @@
 package com.android.server.job.controllers;
 
 import android.content.Context;
-import android.os.IDeviceIdleController;
-import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.util.ArrayUtils;
 import com.android.server.ForceAppStandbyTracker;
 import com.android.server.ForceAppStandbyTracker.Listener;
 import com.android.server.job.JobSchedulerService;
@@ -44,7 +41,6 @@ public final class BackgroundJobsController extends StateController {
     private static volatile BackgroundJobsController sController;
 
     private final JobSchedulerService mJobSchedulerService;
-    private final IDeviceIdleController mDeviceIdleController;
 
     private final ForceAppStandbyTracker mForceAppStandbyTracker;
 
@@ -62,8 +58,6 @@ public final class BackgroundJobsController extends StateController {
     private BackgroundJobsController(JobSchedulerService service, Context context, Object lock) {
         super(service, context, lock);
         mJobSchedulerService = service;
-        mDeviceIdleController = IDeviceIdleController.Stub.asInterface(
-                ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
 
         mForceAppStandbyTracker = ForceAppStandbyTracker.getInstance(context);
 
@@ -235,17 +229,23 @@ public final class BackgroundJobsController extends StateController {
     private final Listener mForceAppStandbyListener = new Listener() {
         @Override
         public void updateAllJobs() {
-            updateAllJobRestrictionsLocked();
+            synchronized (mLock) {
+                updateAllJobRestrictionsLocked();
+            }
         }
 
         @Override
         public void updateJobsForUid(int uid) {
-            updateJobRestrictionsForUidLocked(uid);
+            synchronized (mLock) {
+                updateJobRestrictionsForUidLocked(uid);
+            }
         }
 
         @Override
         public void updateJobsForUidPackage(int uid, String packageName) {
-            updateJobRestrictionsForUidLocked(uid);
+            synchronized (mLock) {
+                updateJobRestrictionsForUidLocked(uid);
+            }
         }
     };
 }
