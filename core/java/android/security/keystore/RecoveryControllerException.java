@@ -19,7 +19,7 @@ package android.security.keystore;
 import java.security.GeneralSecurityException;
 
 /**
- * Base exception for errors thrown by {@link RecoveryManager}.
+ * Base exception for errors thrown by {@link RecoveryController}.
  *
  * @hide
  */

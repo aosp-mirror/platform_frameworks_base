@@ -16,12 +16,12 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import static android.security.keystore.RecoveryManager.ERROR_BAD_CERTIFICATE_FORMAT;
-import static android.security.keystore.RecoveryManager.ERROR_DECRYPTION_FAILED;
-import static android.security.keystore.RecoveryManager.ERROR_INSECURE_USER;
-import static android.security.keystore.RecoveryManager.ERROR_NO_SNAPSHOT_PENDING;
-import static android.security.keystore.RecoveryManager.ERROR_SERVICE_INTERNAL_ERROR;
-import static android.security.keystore.RecoveryManager.ERROR_SESSION_EXPIRED;
+import static android.security.keystore.RecoveryController.ERROR_BAD_CERTIFICATE_FORMAT;
+import static android.security.keystore.RecoveryController.ERROR_DECRYPTION_FAILED;
+import static android.security.keystore.RecoveryController.ERROR_INSECURE_USER;
+import static android.security.keystore.RecoveryController.ERROR_NO_SNAPSHOT_PENDING;
+import static android.security.keystore.RecoveryController.ERROR_SERVICE_INTERNAL_ERROR;
+import static android.security.keystore.RecoveryController.ERROR_SESSION_EXPIRED;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -35,8 +35,8 @@ import android.os.UserHandle;
 
 import android.security.keystore.KeychainProtectionParams;
 import android.security.keystore.KeychainSnapshot;
+import android.security.keystore.RecoveryController;
 import android.security.keystore.WrappedApplicationKey;
-import android.security.keystore.RecoveryManager;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -63,7 +63,7 @@ import java.util.concurrent.Executors;
 import javax.crypto.AEADBadTagException;
 
 /**
- * Class with {@link RecoveryManager} API implementation and internal methods to interact
+ * Class with {@link RecoveryController} API implementation and internal methods to interact
  * with {@code LockSettingsService}.
  *
  * @hide
