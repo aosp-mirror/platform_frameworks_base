@@ -380,7 +380,8 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
 
   std::map<ResourceId, ResourceNameRef> id_index;
 
-  ResourceTablePackage* pkg = out_table->CreatePackage(pb_package.package_name(), id);
+  ResourceTablePackage* pkg =
+      out_table->CreatePackageAllowingDuplicateNames(pb_package.package_name(), id);
   for (const pb::Type& pb_type : pb_package.type()) {
     const ResourceType* res_type = ParseResourceType(pb_type.name());
     if (res_type == nullptr) {
