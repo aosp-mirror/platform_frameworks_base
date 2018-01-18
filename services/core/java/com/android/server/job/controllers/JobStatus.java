@@ -24,6 +24,7 @@ import android.app.job.JobInfo;
 import android.app.job.JobWorkItem;
 import android.content.ClipData;
 import android.content.ComponentName;
+import android.content.pm.PackageManagerInternal;
 import android.net.Network;
 import android.net.Uri;
 import android.os.RemoteException;
@@ -96,6 +97,7 @@ public final class JobStatus {
     final JobInfo job;
     /** Uid of the package requesting this job. */
     final int callingUid;
+    final int targetSdkVersion;
     final String batteryName;
 
     final String sourcePackageName;
@@ -243,12 +245,13 @@ public final class JobStatus {
         return callingUid;
     }
 
-    private JobStatus(JobInfo job, int callingUid, String sourcePackageName,
+    private JobStatus(JobInfo job, int callingUid, int targetSdkVersion, String sourcePackageName,
             int sourceUserId, int standbyBucket, long heartbeat, String tag, int numFailures,
             long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
             long lastSuccessfulRunTime, long lastFailedRunTime) {
         this.job = job;
         this.callingUid = callingUid;
+        this.targetSdkVersion = targetSdkVersion;
         this.standbyBucket = standbyBucket;
         this.baseHeartbeat = heartbeat;
 
@@ -307,7 +310,7 @@ public final class JobStatus {
     /** Copy constructor: used specifically when cloning JobStatus objects for persistence,
      *   so we preserve RTC window bounds if the source object has them. */
     public JobStatus(JobStatus jobStatus) {
-        this(jobStatus.getJob(), jobStatus.getUid(),
+        this(jobStatus.getJob(), jobStatus.getUid(), jobStatus.targetSdkVersion,
                 jobStatus.getSourcePackageName(), jobStatus.getSourceUserId(),
                 jobStatus.getStandbyBucket(), jobStatus.getBaseHeartbeat(),
                 jobStatus.getSourceTag(), jobStatus.getNumFailures(),
@@ -334,7 +337,7 @@ public final class JobStatus {
             long earliestRunTimeElapsedMillis, long latestRunTimeElapsedMillis,
             long lastSuccessfulRunTime, long lastFailedRunTime,
             Pair<Long, Long> persistedExecutionTimesUTC) {
-        this(job, callingUid, sourcePkgName, sourceUserId,
+        this(job, callingUid, resolveTargetSdkVersion(job), sourcePkgName, sourceUserId,
                 standbyBucket, baseHeartbeat,
                 sourceTag, 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
@@ -357,7 +360,7 @@ public final class JobStatus {
             long newEarliestRuntimeElapsedMillis,
             long newLatestRuntimeElapsedMillis, int backoffAttempt,
             long lastSuccessfulRunTime, long lastFailedRunTime) {
-        this(rescheduling.job, rescheduling.getUid(),
+        this(rescheduling.job, rescheduling.getUid(), resolveTargetSdkVersion(rescheduling.job),
                 rescheduling.getSourcePackageName(), rescheduling.getSourceUserId(),
                 rescheduling.getStandbyBucket(), newBaseHeartbeat,
                 rescheduling.getSourceTag(), backoffAttempt, newEarliestRuntimeElapsedMillis,
@@ -394,7 +397,7 @@ public final class JobStatus {
         long currentHeartbeat = js != null
                 ? js.baseHeartbeatForApp(jobPackage, sourceUserId, standbyBucket)
                 : 0;
-        return new JobStatus(job, callingUid, sourcePkg, sourceUserId,
+        return new JobStatus(job, callingUid, resolveTargetSdkVersion(job), sourcePkg, sourceUserId,
                 standbyBucket, currentHeartbeat, tag, 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
                 0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */);
@@ -539,6 +542,10 @@ public final class JobStatus {
 
     public int getJobId() {
         return job.getId();
+    }
+
+    public int getTargetSdkVersion() {
+        return targetSdkVersion;
     }
 
     public void printUniqueId(PrintWriter pw) {
@@ -713,6 +720,37 @@ public final class JobStatus {
 
     public long getLatestRunTimeElapsed() {
         return latestRunTimeElapsedMillis;
+    }
+
+    /**
+     * Return the fractional position of "now" within the "run time" window of
+     * this job.
+     * <p>
+     * For example, if the earliest run time was 10 minutes ago, and the latest
+     * run time is 30 minutes from now, this would return 0.25.
+     * <p>
+     * If the job has no window defined, returns 1. When only an earliest or
+     * latest time is defined, it's treated as an infinitely small window at
+     * that time.
+     */
+    public float getFractionRunTime() {
+        final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
+        if (earliestRunTimeElapsedMillis == 0 && latestRunTimeElapsedMillis == Long.MAX_VALUE) {
+            return 1;
+        } else if (earliestRunTimeElapsedMillis == 0) {
+            return now >= latestRunTimeElapsedMillis ? 1 : 0;
+        } else if (latestRunTimeElapsedMillis == Long.MAX_VALUE) {
+            return now >= earliestRunTimeElapsedMillis ? 1 : 0;
+        } else {
+            if (now <= earliestRunTimeElapsedMillis) {
+                return 0;
+            } else if (now >= latestRunTimeElapsedMillis) {
+                return 1;
+            } else {
+                return (float) (now - earliestRunTimeElapsedMillis)
+                        / (float) (latestRunTimeElapsedMillis - earliestRunTimeElapsedMillis);
+            }
+        }
     }
 
     public Pair<Long, Long> getPersistedUtcTimes() {
@@ -1091,6 +1129,11 @@ public final class JobStatus {
             default:
                 return "Unknown: " + bucket;
         }
+    }
+
+    private static int resolveTargetSdkVersion(JobInfo job) {
+        return LocalServices.getService(PackageManagerInternal.class)
+                .getPackageTargetSdkVersion(job.getService().getPackageName());
     }
 
     // Dumpsys infrastructure

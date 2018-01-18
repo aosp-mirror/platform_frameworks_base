@@ -16,6 +16,10 @@
 
 package com.android.server.job.controllers;
 
+import static android.net.NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
+
 import android.app.job.JobInfo;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -35,6 +39,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobServiceContext;
 import com.android.server.job.StateChangedListener;
@@ -62,15 +67,15 @@ public final class ConnectivityController extends StateController implements
     private final ArraySet<JobStatus> mTrackedJobs = new ArraySet<>();
 
     /** Singleton. */
-    private static ConnectivityController mSingleton;
+    private static ConnectivityController sSingleton;
     private static Object sCreationLock = new Object();
 
     public static ConnectivityController get(JobSchedulerService jms) {
         synchronized (sCreationLock) {
-            if (mSingleton == null) {
-                mSingleton = new ConnectivityController(jms, jms.getContext(), jms.getLock());
+            if (sSingleton == null) {
+                sSingleton = new ConnectivityController(jms, jms.getContext(), jms.getLock());
             }
-            return mSingleton;
+            return sSingleton;
         }
     }
 
@@ -105,37 +110,29 @@ public final class ConnectivityController extends StateController implements
     }
 
     /**
-     * Test to see if running the given job on the given network is sane.
+     * Test to see if running the given job on the given network is insane.
      * <p>
      * For example, if a job is trying to send 10MB over a 128Kbps EDGE
      * connection, it would take 10.4 minutes, and has no chance of succeeding
      * before the job times out, so we'd be insane to try running it.
      */
-    private boolean isSane(JobStatus jobStatus, NetworkCapabilities capabilities) {
+    @SuppressWarnings("unused")
+    private static boolean isInsane(JobStatus jobStatus, Network network,
+            NetworkCapabilities capabilities) {
         final long estimatedBytes = jobStatus.getEstimatedNetworkBytes();
         if (estimatedBytes == JobInfo.NETWORK_BYTES_UNKNOWN) {
             // We don't know how large the job is; cross our fingers!
-            return true;
-        }
-        if (capabilities == null) {
-            // We don't know what the network is like; cross our fingers!
-            return true;
+            return false;
         }
 
         // We don't ask developers to differentiate between upstream/downstream
         // in their size estimates, so test against the slowest link direction.
-        final long downstream = capabilities.getLinkDownstreamBandwidthKbps();
-        final long upstream = capabilities.getLinkUpstreamBandwidthKbps();
-        final long slowest;
-        if (downstream > 0 && upstream > 0) {
-            slowest = Math.min(downstream, upstream);
-        } else if (downstream > 0) {
-            slowest = downstream;
-        } else if (upstream > 0) {
-            slowest = upstream;
-        } else {
+        final long slowest = NetworkCapabilities.minBandwidth(
+                capabilities.getLinkDownstreamBandwidthKbps(),
+                capabilities.getLinkUpstreamBandwidthKbps());
+        if (slowest == LINK_BANDWIDTH_UNSPECIFIED) {
             // We don't know what the network is like; cross our fingers!
-            return true;
+            return false;
         }
 
         final long estimatedMillis = ((estimatedBytes * DateUtils.SECOND_IN_MILLIS)
@@ -144,10 +141,70 @@ public final class ConnectivityController extends StateController implements
             // If we'd never finish before the timeout, we'd be insane!
             Slog.w(TAG, "Estimated " + estimatedBytes + " bytes over " + slowest
                     + " kbps network would take " + estimatedMillis + "ms; that's insane!");
-            return false;
-        } else {
             return true;
+        } else {
+            return false;
         }
+    }
+
+    @SuppressWarnings("unused")
+    private static boolean isCongestionDelayed(JobStatus jobStatus, Network network,
+            NetworkCapabilities capabilities) {
+        // If network is congested, and job is less than 50% through the
+        // developer-requested window, then we're okay delaying the job.
+        if (!capabilities.hasCapability(NET_CAPABILITY_NOT_CONGESTED)) {
+            return jobStatus.getFractionRunTime() < 0.5;
+        } else {
+            return false;
+        }
+    }
+
+    @SuppressWarnings("unused")
+    private static boolean isStrictSatisfied(JobStatus jobStatus, Network network,
+            NetworkCapabilities capabilities) {
+        return jobStatus.getJob().getRequiredNetwork().networkCapabilities
+                .satisfiedByNetworkCapabilities(capabilities);
+    }
+
+    @SuppressWarnings("unused")
+    private static boolean isRelaxedSatisfied(JobStatus jobStatus, Network network,
+            NetworkCapabilities capabilities) {
+        // Only consider doing this for prefetching jobs
+        if ((jobStatus.getJob().getFlags() & JobInfo.FLAG_IS_PREFETCH) == 0) {
+            return false;
+        }
+
+        // See if we match after relaxing any unmetered request
+        final NetworkCapabilities relaxed = new NetworkCapabilities(
+                jobStatus.getJob().getRequiredNetwork().networkCapabilities)
+                        .removeCapability(NET_CAPABILITY_NOT_METERED);
+        if (relaxed.satisfiedByNetworkCapabilities(capabilities)) {
+            // TODO: treat this as "maybe" response; need to check quotas
+            return jobStatus.getFractionRunTime() > 0.5;
+        } else {
+            return false;
+        }
+    }
+
+    @VisibleForTesting
+    static boolean isSatisfied(JobStatus jobStatus, Network network,
+            NetworkCapabilities capabilities) {
+        // Zeroth, we gotta have a network to think about being satisfied
+        if (network == null || capabilities == null) return false;
+
+        // First, are we insane?
+        if (isInsane(jobStatus, network, capabilities)) return false;
+
+        // Second, is the network congested?
+        if (isCongestionDelayed(jobStatus, network, capabilities)) return false;
+
+        // Third, is the network a strict match?
+        if (isStrictSatisfied(jobStatus, network, capabilities)) return true;
+
+        // Third, is the network a relaxed match?
+        if (isRelaxedSatisfied(jobStatus, network, capabilities)) return true;
+
+        return false;
     }
 
     private boolean updateConstraintsSatisfied(JobStatus jobStatus) {
@@ -155,17 +212,16 @@ public final class ConnectivityController extends StateController implements
 
         final int jobUid = jobStatus.getSourceUid();
         final boolean ignoreBlocked = (jobStatus.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0;
+
         final Network network = mConnManager.getActiveNetworkForUid(jobUid, ignoreBlocked);
         final NetworkInfo info = mConnManager.getNetworkInfoForUid(network, jobUid, ignoreBlocked);
         final NetworkCapabilities capabilities = mConnManager.getNetworkCapabilities(network);
 
         final boolean connected = (info != null) && info.isConnected();
-        final boolean satisfied = jobStatus.getJob().getRequiredNetwork().networkCapabilities
-                .satisfiedByNetworkCapabilities(capabilities);
-        final boolean sane = isSane(jobStatus, capabilities);
+        final boolean satisfied = isSatisfied(jobStatus, network, capabilities);
 
         final boolean changed = jobStatus
-                .setConnectivityConstraintSatisfied(connected && satisfied && sane);
+                .setConnectivityConstraintSatisfied(connected && satisfied);
 
         // Pass along the evaluated network for job to use; prevents race
         // conditions as default routes change over time, and opens the door to
@@ -181,8 +237,7 @@ public final class ConnectivityController extends StateController implements
         if (DEBUG) {
             Slog.i(TAG, "Connectivity " + (changed ? "CHANGED" : "unchanged")
                     + " for " + jobStatus + ": connected=" + connected
-                    + " satisfied=" + satisfied
-                    + " sane=" + sane);
+                    + " satisfied=" + satisfied);
         }
         return changed;
     }
