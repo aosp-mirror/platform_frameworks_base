@@ -498,6 +498,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                     sbn.getId(), sbn.getTag(), sbn.getUid(), sbn.getInitialPid(),
                     newNotification, sbn.getUser(), sbn.getOverrideGroupKey(), sbn.getPostTime());
             boolean updated = false;
+            entry.onRemoteInputInserted();
             try {
                 updateNotificationInternal(newSbn, null);
                 updated = true;

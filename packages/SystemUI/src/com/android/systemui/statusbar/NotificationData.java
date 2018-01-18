@@ -272,6 +272,11 @@ public class NotificationData {
         public Throwable getDebugThrowable() {
             return mDebugThrowable;
         }
+
+        public void onRemoteInputInserted() {
+            lastRemoteInputSent = NOT_LAUNCHED_YET;
+            remoteInputTextWhenReset = null;
+        }
     }
 
     private final ArrayMap<String, Entry> mEntries = new ArrayMap<>();
