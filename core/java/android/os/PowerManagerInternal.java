@@ -206,4 +206,10 @@ public abstract class PowerManagerInternal {
 
     /** Returns information about the last wakeup event. */
     public abstract PowerManager.WakeData getLastWakeup();
+
+    public abstract boolean setPowerSaveMode(boolean mode);
+
+    public abstract void setFeature(int featureId, int data);
+
+    public abstract int getFeature(int featureId);
 }

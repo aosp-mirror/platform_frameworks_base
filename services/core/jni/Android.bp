@@ -134,6 +134,7 @@ cc_defaults {
         "android.frameworks.sensorservice@1.0",
         "android.system.suspend@1.0",
         "suspend_control_aidl_interface-cpp",
+        "vendor.lineage.power@1.0",
     ],
 
     static_libs: [
