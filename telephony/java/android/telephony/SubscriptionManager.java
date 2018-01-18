@@ -499,7 +499,7 @@ public class SubscriptionManager {
     public static final String EXTRA_SUBSCRIPTION_INDEX = "android.telephony.extra.SUBSCRIPTION_INDEX";
 
     private final Context mContext;
-    private final INetworkPolicyManager mNetworkPolicy;
+    private INetworkPolicyManager mNetworkPolicy;
 
     /**
      * A listener class for monitoring changes to {@link SubscriptionInfo} records.
@@ -572,11 +572,9 @@ public class SubscriptionManager {
     }
 
     /** @hide */
-    public SubscriptionManager(Context context) throws ServiceNotFoundException {
+    public SubscriptionManager(Context context) {
         if (DBG) logd("SubscriptionManager created");
         mContext = context;
-        mNetworkPolicy = INetworkPolicyManager.Stub
-                .asInterface(ServiceManager.getServiceOrThrow(Context.NETWORK_POLICY_SERVICE));
     }
 
     /**
@@ -587,6 +585,14 @@ public class SubscriptionManager {
     public static SubscriptionManager from(Context context) {
         return (SubscriptionManager) context
                 .getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
+    }
+
+    private final INetworkPolicyManager getNetworkPolicy() {
+        if (mNetworkPolicy == null) {
+            mNetworkPolicy = INetworkPolicyManager.Stub
+                    .asInterface(ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
+        }
+        return mNetworkPolicy;
     }
 
     /**
@@ -1686,7 +1692,7 @@ public class SubscriptionManager {
     public @NonNull List<SubscriptionPlan> getSubscriptionPlans(int subId) {
         try {
             SubscriptionPlan[] subscriptionPlans =
-                    mNetworkPolicy.getSubscriptionPlans(subId, mContext.getOpPackageName());
+                    getNetworkPolicy().getSubscriptionPlans(subId, mContext.getOpPackageName());
             return subscriptionPlans == null
                     ? Collections.emptyList() : Arrays.asList(subscriptionPlans);
         } catch (RemoteException e) {
@@ -1715,7 +1721,7 @@ public class SubscriptionManager {
     @SystemApi
     public void setSubscriptionPlans(int subId, @NonNull List<SubscriptionPlan> plans) {
         try {
-            mNetworkPolicy.setSubscriptionPlans(subId,
+            getNetworkPolicy().setSubscriptionPlans(subId,
                     plans.toArray(new SubscriptionPlan[plans.size()]), mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1725,7 +1731,7 @@ public class SubscriptionManager {
     /** @hide */
     private String getSubscriptionPlansOwner(int subId) {
         try {
-            return mNetworkPolicy.getSubscriptionPlansOwner(subId);
+            return getNetworkPolicy().getSubscriptionPlansOwner(subId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
