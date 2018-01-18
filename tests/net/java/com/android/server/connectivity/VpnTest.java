@@ -22,6 +22,7 @@ import static android.content.pm.UserInfo.FLAG_PRIMARY;
 import static android.content.pm.UserInfo.FLAG_RESTRICTED;
 import static android.net.NetworkCapabilities.LINK_BANDWIDTH_UNSPECIFIED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
@@ -436,11 +437,13 @@ public class VpnTest {
                 .addTransportType(TRANSPORT_CELLULAR)
                 .addCapability(NET_CAPABILITY_INTERNET)
                 .addCapability(NET_CAPABILITY_NOT_METERED)
+                .addCapability(NET_CAPABILITY_NOT_CONGESTED)
                 .setLinkDownstreamBandwidthKbps(10));
         networks.put(wifi, new NetworkCapabilities()
                 .addTransportType(TRANSPORT_WIFI)
                 .addCapability(NET_CAPABILITY_INTERNET)
                 .addCapability(NET_CAPABILITY_NOT_ROAMING)
+                .addCapability(NET_CAPABILITY_NOT_CONGESTED)
                 .setLinkUpstreamBandwidthKbps(20));
         setMockedNetworks(networks);
 
@@ -454,6 +457,7 @@ public class VpnTest {
         assertEquals(LINK_BANDWIDTH_UNSPECIFIED, caps.getLinkUpstreamBandwidthKbps());
         assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
 
         Vpn.updateCapabilities(mConnectivityManager, new Network[] { mobile }, caps);
         assertTrue(caps.hasTransport(TRANSPORT_VPN));
@@ -463,6 +467,7 @@ public class VpnTest {
         assertEquals(LINK_BANDWIDTH_UNSPECIFIED, caps.getLinkUpstreamBandwidthKbps());
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
         assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
 
         Vpn.updateCapabilities(mConnectivityManager, new Network[] { wifi }, caps);
         assertTrue(caps.hasTransport(TRANSPORT_VPN));
@@ -472,6 +477,7 @@ public class VpnTest {
         assertEquals(20, caps.getLinkUpstreamBandwidthKbps());
         assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
 
         Vpn.updateCapabilities(mConnectivityManager, new Network[] { mobile, wifi }, caps);
         assertTrue(caps.hasTransport(TRANSPORT_VPN));
@@ -481,6 +487,7 @@ public class VpnTest {
         assertEquals(20, caps.getLinkUpstreamBandwidthKbps());
         assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
         assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
     }
 
     /**
