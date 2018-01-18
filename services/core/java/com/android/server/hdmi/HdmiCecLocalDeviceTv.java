@@ -1018,6 +1018,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void changeVolume(int curVolume, int delta, int maxVolume) {
         assertRunOnServiceThread();
+        if (getAvrDeviceInfo() == null) {
+            // On initialization process, getAvrDeviceInfo() may return null and cause exception
+            return;
+        }
         if (delta == 0 || !isSystemAudioActivated()) {
             return;
         }
@@ -1047,6 +1051,10 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void changeMute(boolean mute) {
         assertRunOnServiceThread();
+        if (getAvrDeviceInfo() == null) {
+            // On initialization process, getAvrDeviceInfo() may return null and cause exception
+            return;
+        }
         HdmiLogger.debug("[A]:Change mute:%b", mute);
         synchronized (mLock) {
             if (mSystemAudioMute == mute) {
