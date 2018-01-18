@@ -383,16 +383,16 @@ public final class BatteryService extends SystemService {
         }
     }
 
-    private void update(HealthInfo info) {
+    private void update(android.hardware.health.V2_0.HealthInfo info) {
         traceBegin("HealthInfoUpdate");
         synchronized (mLock) {
             if (!mUpdatesStopped) {
-                mHealthInfo = info;
+                mHealthInfo = info.legacy;
                 // Process the new values.
                 processValuesLocked(false);
                 mLock.notifyAll(); // for any waiters on new info
             } else {
-                copy(mLastHealthInfo, info);
+                copy(mLastHealthInfo, info.legacy);
             }
         }
         traceEnd();
@@ -1010,7 +1010,7 @@ public final class BatteryService extends SystemService {
 
     private final class HealthHalCallback extends IHealthInfoCallback.Stub
             implements HealthServiceWrapper.Callback {
-        @Override public void healthInfoChanged(HealthInfo props) {
+        @Override public void healthInfoChanged(android.hardware.health.V2_0.HealthInfo props) {
             BatteryService.this.update(props);
         }
         // on new service registered
