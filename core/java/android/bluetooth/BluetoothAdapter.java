@@ -1671,6 +1671,27 @@ public final class BluetoothAdapter {
     }
 
     /**
+     * Get the maximum number of connected audio devices.
+     *
+     * @return the maximum number of connected audio devices
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    public int getMaxConnectedAudioDevices() {
+        try {
+            mServiceLock.readLock().lock();
+            if (mService != null) {
+                return mService.getMaxConnectedAudioDevices();
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to get getMaxConnectedAudioDevices, error: ", e);
+        } finally {
+            mServiceLock.readLock().unlock();
+        }
+        return 1;
+    }
+
+    /**
      * Return true if hardware has entries available for matching beacons
      *
      * @return true if there are hw entries available for matching beacons
