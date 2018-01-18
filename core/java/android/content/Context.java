@@ -4146,7 +4146,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.content.pm.crossprofile.CrossProfileApps} for cross profile operations.
+     * {@link android.content.pm.CrossProfileApps} for cross profile operations.
      *
      * @see #getSystemService(String)
      */

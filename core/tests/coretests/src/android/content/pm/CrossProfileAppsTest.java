@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.content.pm.crossprofile;
+package android.content.pm;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -42,7 +42,7 @@ import java.util.List;
 
 /**
  * Build/Install/Run:
- * bit FrameworksCoreTests:android.content.pm.crossprofile.CrossProfileAppsTest
+ * atest frameworks/base/core/tests/coretests/src/android/content/pm/CrossProfileAppsTest.java
  */
 @Presubmit
 @RunWith(MockitoJUnitRunner.class)
@@ -118,7 +118,7 @@ public class CrossProfileAppsTest {
     public void getProfileSwitchingIcon_managedProfile() {
         setValidTargetProfile(MANAGED_PROFILE);
 
-        mCrossProfileApps.getProfileSwitchingIcon(MANAGED_PROFILE);
+        mCrossProfileApps.getProfileSwitchingIconDrawable(MANAGED_PROFILE);
         verify(mResources).getDrawable(R.drawable.ic_corp_badge, null);
     }
 
@@ -126,13 +126,13 @@ public class CrossProfileAppsTest {
     public void getProfileSwitchingIcon_personalProfile() {
         setValidTargetProfile(PERSONAL_PROFILE);
 
-        mCrossProfileApps.getProfileSwitchingIcon(PERSONAL_PROFILE);
+        mCrossProfileApps.getProfileSwitchingIconDrawable(PERSONAL_PROFILE);
         verify(mResources).getDrawable(R.drawable.ic_account_circle, null);
     }
 
     @Test(expected = SecurityException.class)
     public void getProfileSwitchingIcon_securityException() {
-        mCrossProfileApps.getProfileSwitchingIcon(PERSONAL_PROFILE);
+        mCrossProfileApps.getProfileSwitchingIconDrawable(PERSONAL_PROFILE);
     }
 
     private void setValidTargetProfile(UserHandle userHandle) {

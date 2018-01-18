@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.content.pm.crossprofile;
+package android.content.pm;
 
 import android.annotation.NonNull;
 import android.content.ComponentName;
@@ -57,13 +57,14 @@ public class CrossProfileApps {
      *        action {@link android.content.Intent#ACTION_MAIN}, category
      *        {@link android.content.Intent#CATEGORY_LAUNCHER}. Otherwise, SecurityException will
      *        be thrown.
-     * @param user The UserHandle of the profile, must be one of the users returned by
+     * @param targetUser The UserHandle of the profile, must be one of the users returned by
      *        {@link #getTargetUserProfiles()}, otherwise a {@link SecurityException} will
      *        be thrown.
      */
-    public void startMainActivity(@NonNull ComponentName component, @NonNull UserHandle user) {
+    public void startMainActivity(@NonNull ComponentName component,
+            @NonNull UserHandle targetUser) {
         try {
-            mService.startActivityAsUser(mContext.getPackageName(), component, user);
+            mService.startActivityAsUser(mContext.getPackageName(), component, targetUser);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
@@ -114,7 +115,7 @@ public class CrossProfileApps {
     }
 
     /**
-     * Return an icon that calling app can show to user for the semantic of profile switching --
+     * Return a drawable that calling app can show to user for the semantic of profile switching --
      * launching its own activity in specified user profile. For example, it may return a briefcase
      * icon if the given user handle is the managed profile one.
      *
@@ -124,9 +125,9 @@ public class CrossProfileApps {
      * @return an icon that calling app can show user for the semantic of launching its own
      *         activity in specified user profile.
      *
-     * @see #startMainActivity(ComponentName, UserHandle, Rect, Bundle)
+     * @see #startMainActivity(ComponentName, UserHandle)
      */
-    public @NonNull Drawable getProfileSwitchingIcon(@NonNull UserHandle userHandle) {
+    public @NonNull Drawable getProfileSwitchingIconDrawable(@NonNull UserHandle userHandle) {
         verifyCanAccessUser(userHandle);
 
         final boolean isManagedProfile =
