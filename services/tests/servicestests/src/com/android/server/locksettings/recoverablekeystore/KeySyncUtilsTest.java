@@ -50,8 +50,8 @@ public class KeySyncUtilsTest {
     private static final int RECOVERY_KEY_LENGTH_BITS = 256;
     private static final int THM_KF_HASH_SIZE = 256;
     private static final int KEY_CLAIMANT_LENGTH_BYTES = 16;
-    private static final byte[] TEST_DEVICE_ID =
-            new byte[]{1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2};
+    private static final byte[] TEST_VAULT_HANDLE =
+            new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 14, 15, 16, 17};
     private static final String SHA_256_ALGORITHM = "SHA-256";
     private static final String APPLICATION_KEY_ALGORITHM = "AES";
     private static final byte[] LOCK_SCREEN_HASH_1 =
@@ -63,7 +63,8 @@ public class KeySyncUtilsTest {
     private static final byte[] RECOVERY_RESPONSE_HEADER =
             "V1 reencrypted_recovery_key".getBytes(StandardCharsets.UTF_8);
     private static final int PUBLIC_KEY_LENGTH_BYTES = 65;
-    private static final int VAULT_PARAMS_LENGTH_BYTES = 85;
+    private static final int VAULT_PARAMS_LENGTH_BYTES = 94;
+    private static final int VAULT_HANDLE_LENGTH_BYTES = 17;
 
     @Test
     public void calculateThmKfHash_isShaOfLockScreenHashWithPrefix() throws Exception {
@@ -344,14 +345,14 @@ public class KeySyncUtilsTest {
     }
 
     @Test
-    public void packVaultParams_returns85Bytes() throws Exception {
+    public void packVaultParams_returns94Bytes() throws Exception {
         PublicKey thmPublicKey = SecureBox.genKeyPair().getPublic();
 
         byte[] packedForm = KeySyncUtils.packVaultParams(
                 thmPublicKey,
                 /*counterId=*/ 1001L,
-                TEST_DEVICE_ID,
-                /*maxAttempts=*/ 10);
+                /*maxAttempts=*/ 10,
+                TEST_VAULT_HANDLE);
 
         assertEquals(VAULT_PARAMS_LENGTH_BYTES, packedForm.length);
     }
@@ -363,8 +364,8 @@ public class KeySyncUtilsTest {
         byte[] packedForm = KeySyncUtils.packVaultParams(
                 thmPublicKey,
                 /*counterId=*/ 1001L,
-                TEST_DEVICE_ID,
-                /*maxAttempts=*/ 10);
+                /*maxAttempts=*/ 10,
+                TEST_VAULT_HANDLE);
 
         assertArrayEquals(
                 SecureBox.encodePublicKey(thmPublicKey),
@@ -378,8 +379,8 @@ public class KeySyncUtilsTest {
         byte[] packedForm = KeySyncUtils.packVaultParams(
                 SecureBox.genKeyPair().getPublic(),
                 counterId,
-                TEST_DEVICE_ID,
-                /*maxAttempts=*/ 10);
+                /*maxAttempts=*/ 10,
+                TEST_VAULT_HANDLE);
 
         ByteBuffer byteBuffer = ByteBuffer.wrap(packedForm)
                 .order(ByteOrder.LITTLE_ENDIAN);
@@ -388,37 +389,37 @@ public class KeySyncUtilsTest {
     }
 
     @Test
-    public void packVaultParams_encodesDeviceIdAsThirdParam() throws Exception {
-
-        byte[] packedForm = KeySyncUtils.packVaultParams(
-                SecureBox.genKeyPair().getPublic(),
-                /*counterId=*/ 10021L,
-                TEST_DEVICE_ID,
-                /*maxAttempts=*/ 10);
-
-        ByteBuffer byteBuffer = ByteBuffer.wrap(packedForm)
-                .order(ByteOrder.LITTLE_ENDIAN);
-        byteBuffer.position(PUBLIC_KEY_LENGTH_BYTES + Long.BYTES);
-        assertEquals(/* default value*/0, byteBuffer.getLong());
-    }
-
-    @Test
-    public void packVaultParams_encodesMaxAttemptsAsLastParam() throws Exception {
+    public void packVaultParams_encodesMaxAttemptsAsThirdParam() throws Exception {
         int maxAttempts = 10;
 
         byte[] packedForm = KeySyncUtils.packVaultParams(
                 SecureBox.genKeyPair().getPublic(),
                 /*counterId=*/ 1001L,
-                TEST_DEVICE_ID,
-                maxAttempts);
+                maxAttempts,
+                TEST_VAULT_HANDLE);
 
         ByteBuffer byteBuffer = ByteBuffer.wrap(packedForm)
                 .order(ByteOrder.LITTLE_ENDIAN);
-        // TODO: update position.
-        byteBuffer.position(PUBLIC_KEY_LENGTH_BYTES + 2 * Long.BYTES);
+        byteBuffer.position(PUBLIC_KEY_LENGTH_BYTES + Long.BYTES);
         assertEquals(maxAttempts, byteBuffer.getInt());
     }
 
+    @Test
+    public void packVaultParams_encodesVaultHandleAsLastParam() throws Exception {
+        byte[] packedForm = KeySyncUtils.packVaultParams(
+                SecureBox.genKeyPair().getPublic(),
+                /*counterId=*/ 10021L,
+                /*maxAttempts=*/ 10,
+                TEST_VAULT_HANDLE);
+
+        ByteBuffer byteBuffer = ByteBuffer.wrap(packedForm)
+                .order(ByteOrder.LITTLE_ENDIAN);
+        byteBuffer.position(PUBLIC_KEY_LENGTH_BYTES + Long.BYTES + Integer.BYTES);
+        byte[] vaultHandle = new byte[VAULT_HANDLE_LENGTH_BYTES];
+        byteBuffer.get(vaultHandle);
+        // TODO: Fix this once we fix the code in the KeySyncUtils class
+        assertArrayEquals(new byte[VAULT_HANDLE_LENGTH_BYTES], vaultHandle);
+    }
 
     private static byte[] randomBytes(int n) {
         byte[] bytes = new byte[n];
