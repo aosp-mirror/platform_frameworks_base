@@ -28,6 +28,8 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Message;
 import android.os.Trace;
 import android.util.ArraySet;
 import android.util.IntProperty;
@@ -313,5 +315,13 @@ public class Utilities {
             return "N:0,0-0,0";
         }
         return r.left + "," + r.top + "-" + r.right + "," + r.bottom;
+    }
+
+    /**
+     * Posts a runnable on a handler at the front of the queue ignoring any sync barriers.
+     */
+    public static void postAtFrontOfQueueAsynchronously(Handler h, Runnable r) {
+        Message msg = h.obtainMessage().setCallback(r);
+        h.sendMessageAtFrontOfQueue(msg);
     }
 }
