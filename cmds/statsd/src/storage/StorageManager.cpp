@@ -111,20 +111,21 @@ void StorageManager::sendBroadcast(const char* path,
 
         int index = 0;
         int uid = 0;
-        string configName;
+        int64_t configID = 0;
         char* substr = strtok(name, "-");
         // Timestamp lives at index 2 but we skip parsing it as it's not needed.
         while (substr != nullptr && index < 2) {
-            if (index) {
+            if (index == 0) {
                 uid = atoi(substr);
-            } else {
-                configName = substr;
+            } else if (index == 1) {
+                configID = StrToInt64(substr);
             }
             index++;
+            substr = strtok(nullptr, "-");
         }
         if (index < 2) continue;
 
-        sendBroadcast(ConfigKey(uid, StrToInt64(configName)));
+        sendBroadcast(ConfigKey(uid, configID));
     }
 }
 
@@ -143,19 +144,23 @@ void StorageManager::appendConfigMetricsReport(const char* path, ProtoOutputStre
 
         int index = 0;
         int uid = 0;
-        string configName;
+        int64_t configID = 0;
+        int64_t timestamp = 0;
         char* substr = strtok(name, "-");
-        // Timestamp lives at index 2 but we skip parsing it as it's not needed.
-        while (substr != nullptr && index < 2) {
-            if (index) {
+        while (substr != nullptr && index < 3) {
+            if (index == 0) {
                 uid = atoi(substr);
-            } else {
-                configName = substr;
+            } else if (index == 1) {
+                configID = StrToInt64(substr);
+            } else if (index == 2) {
+                timestamp = atoi(substr);
             }
             index++;
+            substr = strtok(nullptr, "-");
         }
-        if (index < 2) continue;
-        string file_name = StringPrintf("%s/%s", path, name);
+        if (index < 3) continue;
+        string file_name = StringPrintf("%s/%d-%lld-%lld", STATS_SERVICE_DIR, uid,
+                                        (long long)configID, (long long)timestamp);
         int fd = open(file_name.c_str(), O_RDONLY | O_CLOEXEC);
         if (fd != -1) {
             string content;
@@ -186,29 +191,32 @@ void StorageManager::readConfigFromDisk(map<ConfigKey, StatsdConfig>& configsMap
 
         int index = 0;
         int uid = 0;
-        string configName;
+        int64_t configID = 0;
+        int64_t timestamp = 0;
         char* substr = strtok(name, "-");
-        // Timestamp lives at index 2 but we skip parsing it as it's not needed.
-        while (substr != nullptr && index < 2) {
-            if (index) {
+        while (substr != nullptr && index < 3) {
+            if (index == 0) {
                 uid = atoi(substr);
-            } else {
-                configName = substr;
+            } else if (index == 1) {
+                configID = StrToInt64(substr);
+            } else if (index == 2) {
+                timestamp = atoi(substr);
             }
             index++;
+            substr = strtok(nullptr, "-");
         }
-        if (index < 2) continue;
+        if (index < 3) continue;
 
-        string file_name = StringPrintf("%s/%s", STATS_SERVICE_DIR, name);
-        VLOG("full file %s", file_name.c_str());
+        string file_name = StringPrintf("%s/%d-%lld-%lld", STATS_SERVICE_DIR, uid,
+                                        (long long)configID, (long long)timestamp);
         int fd = open(file_name.c_str(), O_RDONLY | O_CLOEXEC);
         if (fd != -1) {
             string content;
             if (android::base::ReadFdToString(fd, &content)) {
                 StatsdConfig config;
                 if (config.ParseFromString(content)) {
-                    configsMap[ConfigKey(uid, StrToInt64(configName))] = config;
-                    VLOG("map key uid=%d|name=%s", uid, name);
+                    configsMap[ConfigKey(uid, configID)] = config;
+                    VLOG("map key uid=%d|configID=%lld", uid, (long long)configID);
                 }
             }
             close(fd);
