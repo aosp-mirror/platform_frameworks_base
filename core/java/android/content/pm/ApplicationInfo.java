@@ -1458,6 +1458,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /**
      * @hide
      */
+    public boolean isAllowedToUseHiddenApi() {
+        return isSystemApp();
+    }
+
+    /**
+     * @hide
+     */
     public boolean isForwardLocked() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0;
     }
