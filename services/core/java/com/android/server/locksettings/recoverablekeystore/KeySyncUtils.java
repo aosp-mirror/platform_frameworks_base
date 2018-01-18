@@ -61,7 +61,8 @@ public class KeySyncUtils {
     private static final byte[] THM_KF_HASH_PREFIX = "THM_KF_hash".getBytes(StandardCharsets.UTF_8);
 
     private static final int KEY_CLAIMANT_LENGTH_BYTES = 16;
-    private static final int VAULT_PARAMS_LENGTH_BYTES = 85;
+    private static final int VAULT_PARAMS_LENGTH_BYTES = 94;
+    private static final int VAULT_HANDLE_LENGTH_BYTES = 17;
 
     /**
      * Encrypts the recovery key using both the lock screen hash and the remote storage's public
@@ -287,18 +288,19 @@ public class KeySyncUtils {
      *
      * @param thmPublicKey Public key of the trusted hardware module.
      * @param counterId ID referring to the specific counter in the hardware module.
-     * @param deviceId ID of the device.
      * @param maxAttempts Maximum allowed guesses before trusted hardware wipes key.
+     * @param vaultHandle Handle of the Vault.
      * @return The binary vault params, ready for sync.
      */
     public static byte[] packVaultParams(
-            PublicKey thmPublicKey, long counterId, byte[] deviceId, int maxAttempts) {
+            PublicKey thmPublicKey, long counterId, int maxAttempts, byte[] vaultHandle) {
+        // TODO: Check if vaultHandle has exactly the length of VAULT_HANDLE_LENGTH_BYTES somewhere
         return ByteBuffer.allocate(VAULT_PARAMS_LENGTH_BYTES)
                 .order(ByteOrder.LITTLE_ENDIAN)
                 .put(SecureBox.encodePublicKey(thmPublicKey))
                 .putLong(counterId)
-                .putLong(0L) // TODO: replace with device Id.
                 .putInt(maxAttempts)
+                .put(new byte[VAULT_HANDLE_LENGTH_BYTES]) // TODO: replace with real vaultHandle
                 .array();
     }
 

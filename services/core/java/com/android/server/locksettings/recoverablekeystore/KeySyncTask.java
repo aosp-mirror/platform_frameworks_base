@@ -174,8 +174,8 @@ public class KeySyncTask implements Runnable {
             return;
         }
 
-        byte[] deviceId = mRecoverableKeyStoreDb.getServerParams(mUserId, recoveryAgentUid);
-        if (deviceId == null) {
+        byte[] vaultHandle = mRecoverableKeyStoreDb.getServerParams(mUserId, recoveryAgentUid);
+        if (vaultHandle == null) {
             Log.w(TAG, "No device ID set for user " + mUserId);
             return;
         }
@@ -231,8 +231,8 @@ public class KeySyncTask implements Runnable {
         byte[] vaultParams = KeySyncUtils.packVaultParams(
                 publicKey,
                 counterId,
-                deviceId,
-                TRUSTED_HARDWARE_MAX_ATTEMPTS);
+                TRUSTED_HARDWARE_MAX_ATTEMPTS,
+                vaultHandle);
 
         byte[] encryptedRecoveryKey;
         try {
