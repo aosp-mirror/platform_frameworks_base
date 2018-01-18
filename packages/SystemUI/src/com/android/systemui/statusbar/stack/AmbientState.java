@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.stack;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.view.View;
 
@@ -236,6 +237,7 @@ public class AmbientState {
         mShelf = shelf;
     }
 
+    @Nullable
     public NotificationShelf getShelf() {
         return mShelf;
     }
