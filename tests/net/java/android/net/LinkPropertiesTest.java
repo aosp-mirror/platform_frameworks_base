@@ -79,6 +79,9 @@ public class LinkPropertiesTest {
         assertTrue(source.isIdenticalDnses(target));
         assertTrue(target.isIdenticalDnses(source));
 
+        assertTrue(source.isIdenticalPrivateDns(target));
+        assertTrue(target.isIdenticalPrivateDns(source));
+
         assertTrue(source.isIdenticalRoutes(target));
         assertTrue(target.isIdenticalRoutes(source));
 
@@ -90,6 +93,9 @@ public class LinkPropertiesTest {
 
         assertTrue(source.isIdenticalMtu(target));
         assertTrue(target.isIdenticalMtu(source));
+
+        assertTrue(source.isIdenticalTcpBufferSizes(target));
+        assertTrue(target.isIdenticalTcpBufferSizes(source));
 
         // Check result of equals().
         assertTrue(source.equals(target));
