@@ -33,6 +33,7 @@ import static com.android.server.wm.WindowManagerService.dipToPixel;
 import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_HEIGHT_IN_DP;
 import static com.android.server.wm.WindowState.MINIMUM_VISIBLE_WIDTH_IN_DP;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -57,6 +58,9 @@ public class TaskPositionerTests extends WindowTestsBase {
     @Before
     public void setUp() throws Exception {
         super.setUp();
+
+        TaskPositioner.setFactory(null);
+
         final Display display = mDisplayContent.getDisplay();
         final DisplayMetrics dm = new DisplayMetrics();
         display.getMetrics(dm);
@@ -65,8 +69,24 @@ public class TaskPositionerTests extends WindowTestsBase {
         mMinVisibleWidth = dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, dm);
         mMinVisibleHeight = dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, dm);
 
-        mPositioner = new TaskPositioner(sWm);
+        mPositioner = TaskPositioner.create(sWm);
         mPositioner.register(mDisplayContent);
+    }
+
+    @Test
+    public void testOverrideFactory() throws Exception {
+        final boolean[] created = new boolean[1];
+        created[0] = false;
+        TaskPositioner.setFactory(new TaskPositioner.Factory() {
+            @Override
+            public TaskPositioner create(WindowManagerService service) {
+                created[0] = true;
+                return null;
+            }
+        });
+
+        assertNull(TaskPositioner.create(sWm));
+        assertTrue(created[0]);
     }
 
     /**
