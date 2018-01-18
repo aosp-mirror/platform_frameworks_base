@@ -51,15 +51,6 @@
       <value>0.1</value> <!-- ~1mA -->
   </array>
 
-
-  <!-- Radio related values. For modems WITH energy reporting support in firmware, use
-       modem.controller.idle, modem.controller.tx, modem.controller.rx, modem.controller.voltage.
-       -->
-  <item name="modem.controller.idle">0</item>
-  <item name="modem.controller.rx">0</item>
-  <item name="modem.controller.tx">0</item>
-  <item name="modem.controller.voltage">0</item>
-
   <!-- A list of heterogeneous CPU clusters, where the value for each cluster represents the
        number of CPU cores for that cluster.
 
@@ -122,5 +113,18 @@
     <value>.2</value>    <!-- 513-4,096/hr -->
     <value>2</value>    <!-- 4097-/hr -->
   </array>
+
+  <!-- Cellular modem related values. Default is 0.-->
+  <item name="modem.controller.sleep">0</item>
+  <item name="modem.controller.idle">0</item>
+  <item name="modem.controller.rx">0</item>
+  <array name="modem.controller.tx"> <!-- Strength 0 to 4 -->
+    <value>0</value>
+    <value>0</value>
+    <value>0</value>
+    <value>0</value>
+    <value>0</value>
+  </array>
+  <item name="modem.controller.voltage">0</item>
 
 </device>

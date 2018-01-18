@@ -11098,6 +11098,39 @@ public class BatteryStatsImpl extends BatteryStats {
                 return;
             }
 
+            if (activityInfo != null) {
+                mHasModemReporting = true;
+                mModemActivity.getIdleTimeCounter().addCountLocked(
+                    activityInfo.getIdleTimeMillis());
+                mModemActivity.getRxTimeCounter().addCountLocked(activityInfo.getRxTimeMillis());
+                for (int lvl = 0; lvl < ModemActivityInfo.TX_POWER_LEVELS; lvl++) {
+                    mModemActivity.getTxTimeCounters()[lvl]
+                        .addCountLocked(activityInfo.getTxTimeMillis()[lvl]);
+                }
+
+                // POWER_MODEM_CONTROLLER_OPERATING_VOLTAGE is measured in mV, so convert to V.
+                final double opVolt = mPowerProfile.getAveragePower(
+                    PowerProfile.POWER_MODEM_CONTROLLER_OPERATING_VOLTAGE) / 1000.0;
+                if (opVolt != 0) {
+                    double energyUsed =
+                        activityInfo.getSleepTimeMillis() *
+                            mPowerProfile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_SLEEP)
+                            + activityInfo.getIdleTimeMillis() *
+                            mPowerProfile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_IDLE)
+                            + activityInfo.getRxTimeMillis() *
+                            mPowerProfile.getAveragePower(PowerProfile.POWER_MODEM_CONTROLLER_RX);
+                    int[] txCurrentMa = activityInfo.getTxTimeMillis();
+                    for (int i = 0; i < Math.min(txCurrentMa.length,
+                        SignalStrength.NUM_SIGNAL_STRENGTH_BINS); i++) {
+                        energyUsed += txCurrentMa[i] * mPowerProfile.getAveragePower(
+                            PowerProfile.POWER_MODEM_CONTROLLER_TX, i);
+                    }
+
+                    // We store the power drain as mAms.
+                    mModemActivity.getPowerCounter().addCountLocked((long) energyUsed);
+                }
+            }
+
             final long elapsedRealtimeMs = mClocks.elapsedRealtime();
             long radioTime = mMobileRadioActivePerAppTimer.getTimeSinceMarkLocked(
                     elapsedRealtimeMs * 1000);
@@ -11195,26 +11228,6 @@ public class BatteryStatsImpl extends BatteryStats {
 
                 mNetworkStatsPool.release(delta);
                 delta = null;
-            }
-
-            if (activityInfo != null) {
-                mHasModemReporting = true;
-                mModemActivity.getIdleTimeCounter().addCountLocked(
-                        activityInfo.getIdleTimeMillis());
-                mModemActivity.getRxTimeCounter().addCountLocked(activityInfo.getRxTimeMillis());
-                for (int lvl = 0; lvl < ModemActivityInfo.TX_POWER_LEVELS; lvl++) {
-                    mModemActivity.getTxTimeCounters()[lvl]
-                            .addCountLocked(activityInfo.getTxTimeMillis()[lvl]);
-                }
-
-                // POWER_MODEM_CONTROLLER_OPERATING_VOLTAGE is measured in mV, so convert to V.
-                final double opVolt = mPowerProfile.getAveragePower(
-                        PowerProfile.POWER_MODEM_CONTROLLER_OPERATING_VOLTAGE) / 1000.0;
-                if (opVolt != 0) {
-                    // We store the power drain as mAms.
-                    mModemActivity.getPowerCounter().addCountLocked(
-                            (long) (activityInfo.getEnergyUsed() / opVolt));
-                }
             }
         }
     }
