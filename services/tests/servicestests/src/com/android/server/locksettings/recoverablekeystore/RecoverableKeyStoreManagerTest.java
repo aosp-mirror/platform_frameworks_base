@@ -283,6 +283,44 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
+    public void closeSession_closesASession() throws Exception {
+        mRecoverableKeyStoreManager.startRecoverySession(
+                TEST_SESSION_ID,
+                TEST_PUBLIC_KEY,
+                TEST_VAULT_PARAMS,
+                TEST_VAULT_CHALLENGE,
+                ImmutableList.of(
+                        new KeychainProtectionParameter(
+                                TYPE_LOCKSCREEN,
+                                TYPE_PASSWORD,
+                                KeyDerivationParams.createSha256Params(TEST_SALT),
+                                TEST_SECRET)));
+
+        mRecoverableKeyStoreManager.closeSession(TEST_SESSION_ID);
+
+        assertEquals(0, mRecoverySessionStorage.size());
+    }
+
+    @Test
+    public void closeSession_doesNotCloseUnrelatedSessions() throws Exception {
+        mRecoverableKeyStoreManager.startRecoverySession(
+                TEST_SESSION_ID,
+                TEST_PUBLIC_KEY,
+                TEST_VAULT_PARAMS,
+                TEST_VAULT_CHALLENGE,
+                ImmutableList.of(
+                        new KeychainProtectionParameter(
+                                TYPE_LOCKSCREEN,
+                                TYPE_PASSWORD,
+                                KeyDerivationParams.createSha256Params(TEST_SALT),
+                                TEST_SECRET)));
+
+        mRecoverableKeyStoreManager.closeSession("some random session");
+
+        assertEquals(1, mRecoverySessionStorage.size());
+    }
+
+    @Test
     public void startRecoverySession_throwsIfBadNumberOfSecrets() throws Exception {
         try {
             mRecoverableKeyStoreManager.startRecoverySession(

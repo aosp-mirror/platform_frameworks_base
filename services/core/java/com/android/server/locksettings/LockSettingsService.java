@@ -2029,6 +2029,11 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
+    public void closeSession(@NonNull String sessionId) throws RemoteException {
+        mRecoverableKeyStoreManager.closeSession(sessionId);
+    }
+
+    @Override
     public Map<String, byte[]> recoverKeys(@NonNull String sessionId,
             @NonNull byte[] recoveryKeyBlob, @NonNull List<WrappedApplicationKey> applicationKeys)
             throws RemoteException {
