@@ -41,13 +41,4 @@ message ForceAppStandbyTrackerProto {
 
   // Packages that are disallowed OP_RUN_ANY_IN_BACKGROUND.
   repeated RunAnyInBackgroundRestrictedPackages run_any_in_background_restricted_packages = 5;
-
-  // Whether device is a small battery device
-  optional bool is_small_battery_device = 6;
-
-  // Whether force app standby for small battery device setting is enabled
-  optional bool force_all_apps_standby_for_small_battery = 7;
-
-  // Whether device is charging
-  optional bool is_charging = 8;
 }
