@@ -138,7 +138,7 @@ template <typename T>
 void sortMetricDataByDimensionsValue(const T& metricData, T* sortedMetricData) {
     std::map<HashableDimensionKey, int> dimensionIndexMap;
     for (int i = 0; i < metricData.data_size(); ++i) {
-        dimensionIndexMap.insert(std::make_pair(metricData.data(i).dimension(), i));
+        dimensionIndexMap.insert(std::make_pair(metricData.data(i).dimensions_in_what(), i));
     }
     for (const auto& itr : dimensionIndexMap) {
         *sortedMetricData->add_data() = metricData.data(itr.second);
