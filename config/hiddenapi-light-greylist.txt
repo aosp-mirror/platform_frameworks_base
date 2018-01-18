@@ -43,7 +43,6 @@ Landroid/app/ActivityThread$H;->BIND_SERVICE:I
 Landroid/app/ActivityThread$H;->CREATE_SERVICE:I
 Landroid/app/ActivityThread$H;->EXIT_APPLICATION:I
 Landroid/app/ActivityThread$H;->RECEIVER:I
-Landroid/app/ActivityThread$H;->RELAUNCH_ACTIVITY:I
 Landroid/app/ActivityThread$H;->REMOVE_PROVIDER:I
 Landroid/app/ActivityThread$H;->SERVICE_ARGS:I
 Landroid/app/ActivityThread$H;->STOP_SERVICE:I

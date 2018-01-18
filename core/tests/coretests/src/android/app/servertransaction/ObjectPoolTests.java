@@ -17,6 +17,7 @@
 package android.app.servertransaction;
 
 import static android.app.servertransaction.TestUtils.config;
+import static android.app.servertransaction.TestUtils.mergedConfig;
 import static android.app.servertransaction.TestUtils.referrerIntentList;
 import static android.app.servertransaction.TestUtils.resultInfoList;
 
@@ -146,6 +147,25 @@ public class ObjectPoolTests {
                 config(), overrideConfig, compat, referrer, null /* voiceInteractor */,
                 procState, bundle, persistableBundle, resultInfoList(), referrerIntentList(),
                 true /* isForward */, null /* profilerInfo */);
+        assertSame(item, item2);
+        assertFalse(item2.equals(emptyItem));
+    }
+
+    @Test
+    public void testRecycleActivityRelaunchItem() {
+        ActivityRelaunchItem emptyItem = ActivityRelaunchItem.obtain(null, null, 0, null, false);
+        Configuration overrideConfig = new Configuration();
+        overrideConfig.assetsSeq = 5;
+        ActivityRelaunchItem item = ActivityRelaunchItem.obtain(resultInfoList(),
+                referrerIntentList(), 42, mergedConfig(), true);
+        assertNotSame(item, emptyItem);
+        assertFalse(item.equals(emptyItem));
+
+        item.recycle();
+        assertEquals(item, emptyItem);
+
+        ActivityRelaunchItem item2 = ActivityRelaunchItem.obtain(resultInfoList(),
+                referrerIntentList(), 42, mergedConfig(), true);
         assertSame(item, item2);
         assertFalse(item2.equals(emptyItem));
     }
