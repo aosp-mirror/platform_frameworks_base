@@ -27,12 +27,11 @@ import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.media.update.ApiLoader;
+import android.media.update.FrameLayoutHelper;
 import android.media.update.VideoView2Provider;
-import android.media.update.ViewProvider;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.view.View;
 
 import java.lang.annotation.Retention;
@@ -102,7 +101,7 @@ import java.util.concurrent.Executor;
  *
  * @hide
  */
-public class VideoView2 extends FrameLayout {
+public class VideoView2 extends FrameLayoutHelper<VideoView2Provider> {
     /** @hide */
     @IntDef({
             VIEW_TYPE_TEXTUREVIEW,
@@ -125,8 +124,6 @@ public class VideoView2 extends FrameLayout {
      */
     public static final int VIEW_TYPE_TEXTUREVIEW = 2;
 
-    private final VideoView2Provider mProvider;
-
     public VideoView2(@NonNull Context context) {
         this(context, null);
     }
@@ -142,17 +139,10 @@ public class VideoView2 extends FrameLayout {
     public VideoView2(
             @NonNull Context context, @Nullable AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-
-        mProvider = ApiLoader.getProvider(context).createVideoView2(this, new SuperProvider(),
-                attrs, defStyleAttr, defStyleRes);
-    }
-
-    /**
-     * @hide
-     */
-    public VideoView2Provider getProvider() {
-        return mProvider;
+        super((instance, superProvider) ->
+                ApiLoader.getProvider(context).createVideoView2(
+                        (VideoView2) instance, superProvider, attrs, defStyleAttr, defStyleRes),
+                context, attrs, defStyleAttr, defStyleRes);
     }
 
     /**
@@ -496,77 +486,5 @@ public class VideoView2 extends FrameLayout {
          * @param extras Optional extras.
          */
         void onCustomAction(String action, Bundle extras);
-    }
-
-    @Override
-    protected void onAttachedToWindow() {
-        mProvider.onAttachedToWindow_impl();
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        mProvider.onDetachedFromWindow_impl();
-    }
-
-    @Override
-    public CharSequence getAccessibilityClassName() {
-        return mProvider.getAccessibilityClassName_impl();
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        return mProvider.onTouchEvent_impl(ev);
-    }
-
-    @Override
-    public boolean onTrackballEvent(MotionEvent ev) {
-        return mProvider.onTrackballEvent_impl(ev);
-    }
-
-    @Override
-    public void onFinishInflate() {
-        mProvider.onFinishInflate_impl();
-    }
-
-    @Override
-    public void setEnabled(boolean enabled) {
-        mProvider.setEnabled_impl(enabled);
-    }
-
-    private class SuperProvider implements ViewProvider {
-        @Override
-        public void onAttachedToWindow_impl() {
-            VideoView2.super.onAttachedToWindow();
-        }
-
-        @Override
-        public void onDetachedFromWindow_impl() {
-            VideoView2.super.onDetachedFromWindow();
-        }
-
-        @Override
-        public CharSequence getAccessibilityClassName_impl() {
-            return VideoView2.super.getAccessibilityClassName();
-        }
-
-        @Override
-        public boolean onTouchEvent_impl(MotionEvent ev) {
-            return VideoView2.super.onTouchEvent(ev);
-        }
-
-        @Override
-        public boolean onTrackballEvent_impl(MotionEvent ev) {
-            return VideoView2.super.onTrackballEvent(ev);
-        }
-
-        @Override
-        public void onFinishInflate_impl() {
-            VideoView2.super.onFinishInflate();
-        }
-
-        @Override
-        public void setEnabled_impl(boolean enabled) {
-            VideoView2.super.setEnabled(enabled);
-        }
     }
 }
