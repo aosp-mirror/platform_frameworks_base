@@ -200,6 +200,10 @@ message SystemMessage {
     // Package: android
     NOTE_CARRIER_NETWORK_AVAILABLE = 46;
 
+    // Inform that USB is configured for Tethering
+    // Package: android
+    NOTE_USB_TETHER = 47;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release

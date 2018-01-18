@@ -1072,6 +1072,8 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
             int id = 0;
             int titleRes = 0;
             Resources r = mContext.getResources();
+            CharSequence message = r.getText(
+                    com.android.internal.R.string.usb_notification_message);
             if (mAudioAccessoryConnected && !mAudioAccessorySupported) {
                 titleRes = com.android.internal.R.string.usb_unsupported_audio_accessory_title;
                 id = SystemMessage.NOTE_USB_AUDIO_ACCESSORY_NOT_SUPPORTED;
@@ -1085,13 +1087,22 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
                 } else if (mCurrentFunctions == UsbManager.FUNCTION_MIDI) {
                     titleRes = com.android.internal.R.string.usb_midi_notification_title;
                     id = SystemMessage.NOTE_USB_MIDI;
+                } else if (mCurrentFunctions == UsbManager.FUNCTION_RNDIS) {
+                    titleRes = com.android.internal.R.string.usb_tether_notification_title;
+                    id = SystemMessage.NOTE_USB_TETHER;
                 } else if (mCurrentFunctions == UsbManager.FUNCTION_ACCESSORY) {
                     titleRes = com.android.internal.R.string.usb_accessory_notification_title;
                     id = SystemMessage.NOTE_USB_ACCESSORY;
-                } else if (mSourcePower) {
-                    titleRes = com.android.internal.R.string.usb_supplying_notification_title;
-                    id = SystemMessage.NOTE_USB_SUPPLYING;
-                } else {
+                }
+                if (mSourcePower) {
+                    if (titleRes != 0) {
+                        message = r.getText(
+                                com.android.internal.R.string.usb_power_notification_message);
+                    } else {
+                        titleRes = com.android.internal.R.string.usb_supplying_notification_title;
+                        id = SystemMessage.NOTE_USB_SUPPLYING;
+                    }
+                } else if (titleRes == 0) {
                     titleRes = com.android.internal.R.string.usb_charging_notification_title;
                     id = SystemMessage.NOTE_USB_CHARGING;
                 }
@@ -1111,7 +1122,6 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
                     mUsbNotificationId = 0;
                 }
                 if (id != 0) {
-                    CharSequence message;
                     CharSequence title = r.getText(titleRes);
                     PendingIntent pi;
                     String channel;
@@ -1121,12 +1131,10 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
                             .usb_unsupported_audio_accessory_title) {
                         Intent intent = Intent.makeRestartActivityTask(
                                 new ComponentName("com.android.settings",
-                                        "com.android.settings.deviceinfo.UsbModeChooserActivity"));
+                                        "com.android.settings.Settings$UsbDetailsActivity"));
                         pi = PendingIntent.getActivityAsUser(mContext, 0,
                                 intent, 0, null, UserHandle.CURRENT);
                         channel = SystemNotificationChannels.USB;
-                        message = r.getText(
-                                com.android.internal.R.string.usb_notification_message);
                     } else {
                         final Intent intent = new Intent();
                         intent.setClassName("com.android.settings",
