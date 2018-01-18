@@ -81,5 +81,4 @@ interface ILockSettings {
             in List<KeychainProtectionParameter> secrets);
     Map/*<String, byte[]>*/ recoverKeys(in String sessionId, in byte[] recoveryKeyBlob,
             in List<WrappedApplicationKey> applicationKeys);
-     void closeSession(in String sessionId);
 }
