@@ -17,7 +17,6 @@
 package android.telephony.ims.internal;
 
 import android.annotation.IntDef;
-import android.annotation.SystemApi;
 import android.os.RemoteException;
 import android.telephony.SmsManager;
 import android.telephony.SmsMessage;
@@ -37,6 +36,7 @@ import java.lang.annotation.RetentionPolicy;
 public class SmsImplBase {
   private static final String LOG_TAG = "SmsImplBase";
 
+  /** @hide */
   @IntDef({
           SEND_STATUS_OK,
           SEND_STATUS_ERROR,
@@ -68,6 +68,7 @@ public class SmsImplBase {
    */
   public static final int SEND_STATUS_ERROR_FALLBACK = 4;
 
+  /** @hide */
   @IntDef({
           DELIVER_STATUS_OK,
           DELIVER_STATUS_ERROR
@@ -84,6 +85,7 @@ public class SmsImplBase {
    */
   public static final int DELIVER_STATUS_ERROR = 2;
 
+  /** @hide */
   @IntDef({
           STATUS_REPORT_STATUS_OK,
           STATUS_REPORT_STATUS_ERROR
@@ -114,9 +116,9 @@ public class SmsImplBase {
    * @hide
    */
   public final void registerSmsListener(IImsSmsListener listener) {
-    synchronized (mLock) {
-      mListener = listener;
-    }
+      synchronized (mLock) {
+          mListener = listener;
+      }
   }
 
   /**
@@ -128,8 +130,8 @@ public class SmsImplBase {
    *             callbacks for this specific message.
    * @param messageRef the message reference.
    * @param format the format of the message. Valid values are {@link SmsMessage#FORMAT_3GPP} and
+   *               {@link SmsMessage#FORMAT_3GPP2}.
    * @param smsc the Short Message Service Center address.
-   * {@link SmsMessage#FORMAT_3GPP2}.
    * @param isRetry whether it is a retry of an already attempted message or not.
    * @param pdu PDUs representing the contents of the message.
    */
@@ -154,7 +156,7 @@ public class SmsImplBase {
    * @param messageRef the message reference
    */
   public void acknowledgeSms(int token, int messageRef, @DeliverStatusResult int result) {
-
+    Log.e(LOG_TAG, "acknowledgeSms() not implemented.");
   }
 
   /**
@@ -168,7 +170,7 @@ public class SmsImplBase {
    * @param messageRef the message reference
    */
   public void acknowledgeSmsReport(int token, int messageRef, @StatusReportResult int result) {
-
+    Log.e(LOG_TAG, "acknowledgeSmsReport() not implemented.");
   }
 
   /**
@@ -193,7 +195,6 @@ public class SmsImplBase {
       }
       try {
         mListener.onSmsReceived(token, format, pdu);
-        acknowledgeSms(token, 0, DELIVER_STATUS_OK);
       } catch (RemoteException e) {
         Log.e(LOG_TAG, "Can not deliver sms: " + e.getMessage());
         acknowledgeSms(token, 0, DELIVER_STATUS_ERROR);

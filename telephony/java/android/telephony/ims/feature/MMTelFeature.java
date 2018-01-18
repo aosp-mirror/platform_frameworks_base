@@ -19,6 +19,7 @@ package android.telephony.ims.feature;
 import android.app.PendingIntent;
 import android.os.Message;
 import android.os.RemoteException;
+import android.telephony.ims.internal.stub.SmsImplBase;
 
 import com.android.ims.ImsCallProfile;
 import com.android.ims.internal.IImsCallSession;
@@ -28,6 +29,7 @@ import com.android.ims.internal.IImsEcbm;
 import com.android.ims.internal.IImsMMTelFeature;
 import com.android.ims.internal.IImsMultiEndpoint;
 import com.android.ims.internal.IImsRegistrationListener;
+import com.android.ims.internal.IImsSmsListener;
 import com.android.ims.internal.IImsUt;
 import com.android.ims.internal.ImsCallSession;
 
@@ -169,6 +171,42 @@ public class MMTelFeature extends ImsFeature {
         public IImsMultiEndpoint getMultiEndpointInterface() throws RemoteException {
             synchronized (mLock) {
                 return MMTelFeature.this.getMultiEndpointInterface();
+            }
+        }
+
+        @Override
+        public void setSmsListener(IImsSmsListener l) throws RemoteException {
+            synchronized (mLock) {
+                MMTelFeature.this.setSmsListener(l);
+            }
+        }
+
+        @Override
+        public void sendSms(int token, int messageRef, String format, String smsc, boolean retry,
+                byte[] pdu) {
+            synchronized (mLock) {
+                MMTelFeature.this.sendSms(token, messageRef, format, smsc, retry, pdu);
+            }
+        }
+
+        @Override
+        public void acknowledgeSms(int token, int messageRef, int result) {
+            synchronized (mLock) {
+                MMTelFeature.this.acknowledgeSms(token, messageRef, result);
+            }
+        }
+
+        @Override
+        public void acknowledgeSmsReport(int token, int messageRef, int result) {
+            synchronized (mLock) {
+                MMTelFeature.this.acknowledgeSmsReport(token, messageRef, result);
+            }
+        }
+
+        @Override
+        public String getSmsFormat() {
+            synchronized (mLock) {
+                return MMTelFeature.this.getSmsFormat();
             }
         }
     };
@@ -344,6 +382,39 @@ public class MMTelFeature extends ImsFeature {
      */
     public IImsMultiEndpoint getMultiEndpointInterface() {
         return null;
+    }
+
+    public void setSmsListener(IImsSmsListener listener) {
+        getSmsImplementation().registerSmsListener(listener);
+    }
+
+    public void sendSms(int token, int messageRef, String format, String smsc, boolean isRetry,
+            byte[] pdu) {
+        getSmsImplementation().sendSms(token, messageRef, format, smsc, isRetry, pdu);
+    }
+
+    public void acknowledgeSms(int token, int messageRef,
+            @SmsImplBase.DeliverStatusResult int result) {
+        getSmsImplementation().acknowledgeSms(token, messageRef, result);
+    }
+
+    public void acknowledgeSmsReport(int token, int messageRef,
+            @SmsImplBase.StatusReportResult int result) {
+        getSmsImplementation().acknowledgeSmsReport(token, messageRef, result);
+    }
+
+    /**
+     * Must be overridden by IMS Provider to be able to support SMS over IMS. Otherwise a default
+     * non-functional implementation is returned.
+     *
+     * @return an instance of {@link SmsImplBase} which should be implemented by the IMS Provider.
+     */
+    protected SmsImplBase getSmsImplementation() {
+        return new SmsImplBase();
+    }
+
+    public String getSmsFormat() {
+        return getSmsImplementation().getSmsFormat();
     }
 
     @Override
