@@ -327,21 +327,24 @@ import java.util.Map;
  * <h3>Safe Browsing</h3>
  *
  * <p>
- * If Safe Browsing is enabled, WebView will block malicious URLs and present a warning UI to the
- * user to allow them to navigate back safely or proceed to the malicious page.
+ * With Safe Browsing, WebView will block malicious URLs and present a warning UI to the user to
+ * allow them to navigate back safely or proceed to the malicious page.
  * <p>
- * The recommended way for apps to enable the feature is putting the following tag in the manifest's
- * {@code <application>} element:
+ * Safe Browsing is enabled by default on devices which support it. If your app needs to disable
+ * Safe Browsing for all WebViews, it can do so in the manifest's {@code <application>} element:
  * <p>
  * <pre>
  * &lt;manifest&gt;
  *     &lt;application&gt;
  *         ...
  *         &lt;meta-data android:name=&quot;android.webkit.WebView.EnableSafeBrowsing&quot;
- *             android:value=&quot;true&quot; /&gt;
+ *             android:value=&quot;false&quot; /&gt;
  *     &lt;/application&gt;
  * &lt;/manifest&gt;
  * </pre>
+ *
+ * <p>
+ * Otherwise, see {@link WebSettings#setSafeBrowsingEnabled}.
  *
  */
 // Implementation notes.
@@ -1666,9 +1669,8 @@ public class WebView extends AbsoluteLayout
      * invoked with {@code true}. Safe Browsing is not fully supported on all devices. For those
      * devices {@code callback} will receive {@code false}.
      * <p>
-     * This does not enable the Safe Browsing feature itself, and should only be called if Safe
-     * Browsing is enabled by the manifest tag or {@link WebSettings#setSafeBrowsingEnabled}. This
-     * prepares resources used for Safe Browsing.
+     * This should not be called if Safe Browsing has been disabled by manifest tag or {@link
+     * WebSettings#setSafeBrowsingEnabled}. This prepares resources used for Safe Browsing.
      * <p>
      * This should be called with the Application Context (and will always use the Application
      * context to do its work regardless).
