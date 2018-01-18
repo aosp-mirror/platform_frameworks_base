@@ -4532,7 +4532,8 @@ message MetricsEvent {
     // OS: O MR
     AUTOFILL_SERVICE_DISABLED_SELF = 1135;
 
-    // Counter showing how long it took (in ms) to show the autofill UI after a field was focused
+    // Reports how long it took to show the autofill UI after a field was focused
+    // Tag FIELD_AUTOFILL_DURATION: Duration in ms
     // Tag FIELD_AUTOFILL_SERVICE: Package of service that processed the request
     // Package: Package of the autofill service
     // OS: O MR
@@ -4570,6 +4571,9 @@ message MetricsEvent {
     // Enclosing category for group of APP_TRANSITION_FOO events,
     // logged when we cancel an app transition.
     APP_TRANSITION_CANCELLED = 1144;
+
+    // Tag of a field representing a duration on autofill-related metrics.
+    FIELD_AUTOFILL_DURATION = 1145;
 
     // ---- End O-MR1 Constants, all O-MR1 constants go above this line ----
 
