@@ -27,8 +27,10 @@ import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.Px;
 import android.annotation.Size;
 import android.annotation.StringRes;
 import android.annotation.StyleRes;
@@ -52,6 +54,7 @@ import android.graphics.BaseCanvas;
 import android.graphics.Canvas;
 import android.graphics.Insets;
 import android.graphics.Paint;
+import android.graphics.Paint.FontMetricsInt;
 import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
@@ -924,6 +927,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int inputType = EditorInfo.TYPE_NULL;
         a = theme.obtainStyledAttributes(
                     attrs, com.android.internal.R.styleable.TextView, defStyleAttr, defStyleRes);
+        int firstBaselineToTopHeight = -1;
+        int lastBaselineToBottomHeight = -1;
+        int lineHeight = -1;
 
         readTextAppearance(context, a, attributes, true /* styleArray */);
 
@@ -1249,6 +1255,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 case com.android.internal.R.styleable.TextView_justificationMode:
                     mJustificationMode = a.getInt(attr, Layout.JUSTIFICATION_MODE_NONE);
                     break;
+
+                case com.android.internal.R.styleable.TextView_firstBaselineToTopHeight:
+                    firstBaselineToTopHeight = a.getDimensionPixelSize(attr, -1);
+                    break;
+
+                case com.android.internal.R.styleable.TextView_lastBaselineToBottomHeight:
+                    lastBaselineToBottomHeight = a.getDimensionPixelSize(attr, -1);
+                    break;
+
+                case com.android.internal.R.styleable.TextView_lineHeight:
+                    lineHeight = a.getDimensionPixelSize(attr, -1);
+                    break;
             }
         }
 
@@ -1562,6 +1580,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         } else {
             mAutoSizeTextType = AUTO_SIZE_TEXT_TYPE_NONE;
+        }
+
+        if (firstBaselineToTopHeight >= 0) {
+            setFirstBaselineToTopHeight(firstBaselineToTopHeight);
+        }
+        if (lastBaselineToBottomHeight >= 0) {
+            setLastBaselineToBottomHeight(lastBaselineToBottomHeight);
+        }
+        if (lineHeight >= 0) {
+            setLineHeight(lineHeight);
         }
     }
 
@@ -3165,6 +3193,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
+    /**
+     * @inheritDoc
+     *
+     * @see #setFirstBaselineToTopHeight(int)
+     * @see #setLastBaselineToBottomHeight(int)
+     */
     @Override
     public void setPadding(int left, int top, int right, int bottom) {
         if (left != mPaddingLeft
@@ -3179,6 +3213,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         invalidate();
     }
 
+    /**
+     * @inheritDoc
+     *
+     * @see #setFirstBaselineToTopHeight(int)
+     * @see #setLastBaselineToBottomHeight(int)
+     */
     @Override
     public void setPaddingRelative(int start, int top, int end, int bottom) {
         if (start != getPaddingStart()
@@ -3191,6 +3231,97 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // the super call will requestLayout()
         super.setPaddingRelative(start, top, end, bottom);
         invalidate();
+    }
+
+    /**
+     * Updates the top padding of the TextView so that {@code firstBaselineToTopHeight} is
+     * equal to the distance between the firt text baseline and the top of this TextView.
+     * <strong>Note</strong> that if {@code FontMetrics.top} or {@code FontMetrics.ascent} was
+     * already greater than {@code firstBaselineToTopHeight}, the top padding is not updated.
+     *
+     * @param firstBaselineToTopHeight distance between first baseline to top of the container
+     *      in pixels
+     *
+     * @see #getFirstBaselineToTopHeight()
+     * @see #setPadding(int, int, int, int)
+     * @see #setPaddingRelative(int, int, int, int)
+     *
+     * @attr ref android.R.styleable#TextView_firstBaselineToTopHeight
+     */
+    public void setFirstBaselineToTopHeight(@Px @IntRange(from = 0) int firstBaselineToTopHeight) {
+        Preconditions.checkArgumentNonnegative(firstBaselineToTopHeight);
+
+        final FontMetricsInt fontMetrics = getPaint().getFontMetricsInt();
+        final int fontMetricsTop;
+        if (getIncludeFontPadding()) {
+            fontMetricsTop = fontMetrics.top;
+        } else {
+            fontMetricsTop = fontMetrics.ascent;
+        }
+
+        // TODO: Decide if we want to ignore density ratio (i.e. when the user changes font size
+        // in settings). At the moment, we don't.
+
+        if (firstBaselineToTopHeight > Math.abs(fontMetricsTop)) {
+            final int paddingTop = firstBaselineToTopHeight - (-fontMetricsTop);
+            setPadding(getPaddingLeft(), paddingTop, getPaddingRight(), getPaddingBottom());
+        }
+    }
+
+    /**
+     * Updates the bottom padding of the TextView so that {@code lastBaselineToBottomHeight} is
+     * equal to the distance between the last text baseline and the bottom of this TextView.
+     * <strong>Note</strong> that if {@code FontMetrics.bottom} or {@code FontMetrics.descent} was
+     * already greater than {@code lastBaselineToBottomHeight}, the bottom padding is not updated.
+     *
+     * @param lastBaselineToBottomHeight distance between last baseline to bottom of the container
+     *      in pixels
+     *
+     * @see #getLastBaselineToBottomHeight()
+     * @see #setPadding(int, int, int, int)
+     * @see #setPaddingRelative(int, int, int, int)
+     *
+     * @attr ref android.R.styleable#TextView_lastBaselineToBottomHeight
+     */
+    public void setLastBaselineToBottomHeight(
+            @Px @IntRange(from = 0) int lastBaselineToBottomHeight) {
+        Preconditions.checkArgumentNonnegative(lastBaselineToBottomHeight);
+
+        final FontMetricsInt fontMetrics = getPaint().getFontMetricsInt();
+        final int fontMetricsBottom;
+        if (getIncludeFontPadding()) {
+            fontMetricsBottom = fontMetrics.bottom;
+        } else {
+            fontMetricsBottom = fontMetrics.descent;
+        }
+
+        // TODO: Decide if we want to ignore density ratio (i.e. when the user changes font size
+        // in settings). At the moment, we don't.
+
+        if (lastBaselineToBottomHeight > Math.abs(fontMetricsBottom)) {
+            final int paddingBottom = lastBaselineToBottomHeight - fontMetricsBottom;
+            setPadding(getPaddingLeft(), getPaddingTop(), getPaddingRight(), paddingBottom);
+        }
+    }
+
+    /**
+     * Returns the distance between the first text baseline and the top of this TextView.
+     *
+     * @see #setFirstBaselineToTopHeight(int)
+     * @attr ref android.R.styleable#TextView_firstBaselineToTopHeight
+     */
+    public int getFirstBaselineToTopHeight() {
+        return getPaddingTop() - getPaint().getFontMetricsInt().top;
+    }
+
+    /**
+     * Returns the distance between the last text baseline and the bottom of this TextView.
+     *
+     * @see #setLastBaselineToBottomHeight(int)
+     * @attr ref android.R.styleable#TextView_lastBaselineToBottomHeight
+     */
+    public int getLastBaselineToBottomHeight() {
+        return getPaddingBottom() + getPaint().getFontMetricsInt().bottom;
     }
 
     /**
@@ -4972,6 +5103,28 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public float getLineSpacingExtra() {
         return mSpacingAdd;
+    }
+
+    /**
+     * Sets an explicit line height for this TextView. This is equivalent to the vertical distance
+     * between subsequent baselines in the TextView.
+     *
+     * @param lineHeight the line height in pixels
+     *
+     * @see #setLineSpacing(float, float)
+     * @see #getLineSpacing()
+     *
+     * @attr ref android.R.styleable#TextView_lineHeight
+     */
+    public void setLineHeight(@Px @IntRange(from = 0) int lineHeight) {
+        Preconditions.checkArgumentNonnegative(lineHeight);
+
+        final int fontHeight = getPaint().getFontMetricsInt(null);
+        // Make sure we don't setLineSpacing if it's not needed to avoid unnecessary redraw.
+        if (lineHeight != fontHeight) {
+            // Set lineSpacingExtra by the difference of lineSpacing with lineHeight
+            setLineSpacing(lineHeight - fontHeight, 1f);
+        }
     }
 
     /**
