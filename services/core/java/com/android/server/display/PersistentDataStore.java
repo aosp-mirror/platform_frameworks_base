@@ -23,6 +23,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.annotation.Nullable;
 import android.graphics.Point;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.WifiDisplay;
@@ -30,6 +31,8 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Pair;
+import android.util.SparseLongArray;
+import android.util.TimeUtils;
 import android.util.Xml;
 import android.view.Display;
 
@@ -73,8 +76,8 @@ import libcore.util.Objects;
  *      &lt;stable-display-width>1080&lt;/stable-display-width>
  *  &lt;/stable-device-values>
  *  &lt;brightness-configurations>
- *      &lt;brightness-configuration user-id="0">
- *          &lt;brightness-curve>
+ *      &lt;brightness-configuration user-serial="0" package-name="com.example" timestamp="1234">
+ *          &lt;brightness-curve description="some text">
  *              &lt;brightness-point lux="0" nits="13.25"/>
  *              &lt;brightness-point lux="20" nits="35.94"/>
  *          &lt;/brightness-curve>
@@ -110,8 +113,11 @@ final class PersistentDataStore {
     private static final String TAG_BRIGHTNESS_CURVE = "brightness-curve";
     private static final String TAG_BRIGHTNESS_POINT = "brightness-point";
     private static final String ATTR_USER_SERIAL = "user-serial";
+    private static final String ATTR_PACKAGE_NAME = "package-name";
+    private static final String ATTR_TIME_STAMP = "timestamp";
     private static final String ATTR_LUX = "lux";
     private static final String ATTR_NITS = "nits";
+    private static final String ATTR_DESCRIPTION = "description";
 
     // Remembered Wifi display devices.
     private ArrayList<WifiDisplay> mRememberedWifiDisplays = new ArrayList<WifiDisplay>();
@@ -273,9 +279,11 @@ final class PersistentDataStore {
 		}
 	}
 
-    public void setBrightnessConfigurationForUser(BrightnessConfiguration c, int userSerial) {
+    public void setBrightnessConfigurationForUser(BrightnessConfiguration c, int userSerial,
+            @Nullable String packageName) {
         loadIfNeeded();
-        if (mBrightnessConfigurations.setBrightnessConfigurationForUser(c, userSerial)) {
+        if (mBrightnessConfigurations.setBrightnessConfigurationForUser(c, userSerial,
+                packageName)) {
             setDirty();
         }
     }
@@ -576,15 +584,27 @@ final class PersistentDataStore {
     private static final class BrightnessConfigurations {
         // Maps from a user ID to the users' given brightness configuration
         private SparseArray<BrightnessConfiguration> mConfigurations;
+        // Timestamp of time the configuration was set.
+        private SparseLongArray mTimeStamps;
+        // Package that set the configuration.
+        private SparseArray<String> mPackageNames;
 
         public BrightnessConfigurations() {
             mConfigurations = new SparseArray<>();
+            mTimeStamps = new SparseLongArray();
+            mPackageNames = new SparseArray<>();
         }
 
         private boolean setBrightnessConfigurationForUser(BrightnessConfiguration c,
-                int userSerial) {
+                int userSerial, String packageName) {
             BrightnessConfiguration currentConfig = mConfigurations.get(userSerial);
             if (currentConfig == null || !currentConfig.equals(c)) {
+                if (packageName == null) {
+                    mPackageNames.remove(userSerial);
+                } else {
+                    mPackageNames.put(userSerial, packageName);
+                }
+                mTimeStamps.put(userSerial, System.currentTimeMillis());
                 mConfigurations.put(userSerial, c);
                 return true;
             }
@@ -604,14 +624,31 @@ final class PersistentDataStore {
                         userSerial = Integer.parseInt(
                                 parser.getAttributeValue(null, ATTR_USER_SERIAL));
                     } catch (NumberFormatException nfe) {
-                        userSerial= -1;
+                        userSerial = -1;
                         Slog.e(TAG, "Failed to read in brightness configuration", nfe);
+                    }
+
+                    String packageName = parser.getAttributeValue(null, ATTR_PACKAGE_NAME);
+                    String timeStampString = parser.getAttributeValue(null, ATTR_TIME_STAMP);
+                    long timeStamp = -1;
+                    if (timeStampString != null) {
+                        try {
+                            timeStamp = Long.parseLong(timeStampString);
+                        } catch (NumberFormatException nfe) {
+                            // Ignore we will just not restore the timestamp.
+                        }
                     }
 
                     try {
                         BrightnessConfiguration config = loadConfigurationFromXml(parser);
-                        if (userSerial>= 0 && config != null) {
+                        if (userSerial >= 0 && config != null) {
                             mConfigurations.put(userSerial, config);
+                            if (timeStamp != -1) {
+                                mTimeStamps.put(userSerial, timeStamp);
+                            }
+                            if (packageName != null) {
+                                mPackageNames.put(userSerial, packageName);
+                            }
                         }
                     } catch (IllegalArgumentException iae) {
                         Slog.e(TAG, "Failed to load brightness configuration!", iae);
@@ -623,18 +660,24 @@ final class PersistentDataStore {
         private static BrightnessConfiguration loadConfigurationFromXml(XmlPullParser parser)
                 throws IOException, XmlPullParserException {
             final int outerDepth = parser.getDepth();
-            final BrightnessConfiguration.Builder builder = new BrightnessConfiguration.Builder();
+            String description = null;
+            Pair<float[], float[]> curve = null;
             while (XmlUtils.nextElementWithin(parser, outerDepth)) {
                 if (TAG_BRIGHTNESS_CURVE.equals(parser.getName())) {
-                    Pair<float[], float[]> curve = loadCurveFromXml(parser, builder);
-                    builder.setCurve(curve.first /*lux*/, curve.second /*nits*/);
+                    description = parser.getAttributeValue(null, ATTR_DESCRIPTION);
+                    curve = loadCurveFromXml(parser);
                 }
             }
+            if (curve == null) {
+                return null;
+            }
+            final BrightnessConfiguration.Builder builder = new BrightnessConfiguration.Builder(
+                    curve.first, curve.second);
+            builder.setDescription(description);
             return builder.build();
         }
 
-        private static Pair<float[], float[]> loadCurveFromXml(XmlPullParser parser,
-                BrightnessConfiguration.Builder builder)
+        private static Pair<float[], float[]> loadCurveFromXml(XmlPullParser parser)
                 throws IOException, XmlPullParserException {
             final int outerDepth = parser.getDepth();
             List<Float> luxLevels = new ArrayList<>();
@@ -666,11 +709,19 @@ final class PersistentDataStore {
 
         public void saveToXml(XmlSerializer serializer) throws IOException {
             for (int i = 0; i < mConfigurations.size(); i++) {
-                final int userSerial= mConfigurations.keyAt(i);
+                final int userSerial = mConfigurations.keyAt(i);
                 final BrightnessConfiguration config = mConfigurations.valueAt(i);
 
                 serializer.startTag(null, TAG_BRIGHTNESS_CONFIGURATION);
                 serializer.attribute(null, ATTR_USER_SERIAL, Integer.toString(userSerial));
+                String packageName = mPackageNames.get(userSerial);
+                if (packageName != null) {
+                    serializer.attribute(null, ATTR_PACKAGE_NAME, packageName);
+                }
+                long timestamp = mTimeStamps.get(userSerial, -1);
+                if (timestamp != -1) {
+                    serializer.attribute(null, ATTR_TIME_STAMP, Long.toString(timestamp));
+                }
                 saveConfigurationToXml(serializer, config);
                 serializer.endTag(null, TAG_BRIGHTNESS_CONFIGURATION);
             }
@@ -679,6 +730,9 @@ final class PersistentDataStore {
         private static void saveConfigurationToXml(XmlSerializer serializer,
                 BrightnessConfiguration config) throws IOException {
             serializer.startTag(null, TAG_BRIGHTNESS_CURVE);
+            if (config.getDescription() != null) {
+                serializer.attribute(null, ATTR_DESCRIPTION, config.getDescription());
+            }
             final Pair<float[], float[]> curve = config.getCurve();
             for (int i = 0; i < curve.first.length; i++) {
                 serializer.startTag(null, TAG_BRIGHTNESS_POINT);
@@ -691,8 +745,16 @@ final class PersistentDataStore {
 
         public void dump(final PrintWriter pw, final String prefix) {
             for (int i = 0; i < mConfigurations.size(); i++) {
-                final int userSerial= mConfigurations.keyAt(i);
+                final int userSerial = mConfigurations.keyAt(i);
+                long time = mTimeStamps.get(userSerial, -1);
+                String packageName = mPackageNames.get(userSerial);
                 pw.println(prefix + "User " + userSerial + ":");
+                if (time != -1) {
+                    pw.println(prefix + "  set at: " + TimeUtils.formatForLogging(time));
+                }
+                if (packageName != null) {
+                    pw.println(prefix + "  set by: " + packageName);
+                }
                 pw.println(prefix + "  " + mConfigurations.valueAt(i));
             }
         }

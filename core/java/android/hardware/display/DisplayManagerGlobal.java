@@ -480,9 +480,10 @@ public final class DisplayManagerGlobal {
      *
      * @hide
      */
-    public void setBrightnessConfigurationForUser(BrightnessConfiguration c, int userId) {
+    public void setBrightnessConfigurationForUser(BrightnessConfiguration c, int userId,
+            String packageName) {
         try {
-            mDm.setBrightnessConfigurationForUser(c, userId);
+            mDm.setBrightnessConfigurationForUser(c, userId, packageName);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }

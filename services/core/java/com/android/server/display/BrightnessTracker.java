@@ -521,6 +521,7 @@ public class BrightnessTracker {
     public void dump(PrintWriter pw) {
         pw.println("BrightnessTracker state:");
         synchronized (mDataCollectionLock) {
+            pw.println("  mStarted=" + mStarted);
             pw.println("  mLastSensorReadings.size=" + mLastSensorReadings.size());
             if (!mLastSensorReadings.isEmpty()) {
                 pw.println("  mLastSensorReadings time span "
