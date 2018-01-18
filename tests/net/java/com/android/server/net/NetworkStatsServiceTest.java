@@ -67,6 +67,7 @@ import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkStatsSession;
 import android.net.LinkProperties;
+import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
@@ -135,6 +136,12 @@ public class NetworkStatsServiceTest {
     private static final int UID_RED = 1001;
     private static final int UID_BLUE = 1002;
     private static final int UID_GREEN = 1003;
+
+
+    private static final Network WIFI_NETWORK =  new Network(100);
+    private static final Network MOBILE_NETWORK =  new Network(101);
+    private static final Network[] NETWORKS_WIFI = new Network[]{ WIFI_NETWORK };
+    private static final Network[] NETWORKS_MOBILE = new Network[]{ MOBILE_NETWORK };
 
     private static final long WAIT_TIMEOUT = 2 * 1000;  // 2 secs
     private static final int INVALID_TYPE = -1;
@@ -231,7 +238,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_WIFI);
 
         // verify service has empty history for wifi
         assertNetworkTotal(sTemplateWifi, 0L, 0L, 0L, 0L, 0);
@@ -278,7 +285,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_WIFI);
 
         // verify service has empty history for wifi
         assertNetworkTotal(sTemplateWifi, 0L, 0L, 0L, 0L, 0);
@@ -356,7 +363,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_WIFI);
 
 
         // modify some number on wifi, and trigger poll event
@@ -401,7 +408,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_MOBILE);
 
 
         // create some traffic on first network
@@ -439,7 +446,7 @@ public class NetworkStatsServiceTest {
                 .addValues(TEST_IFACE, UID_BLUE, SET_DEFAULT, TAG_NONE, 512L, 4L, 0L, 0L, 0L));
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_MOBILE);
         forcePollAndWaitForIdle();
 
 
@@ -481,7 +488,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_WIFI);
 
 
         // create some traffic
@@ -543,7 +550,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_MOBILE);
 
 
         // create some traffic
@@ -573,7 +580,7 @@ public class NetworkStatsServiceTest {
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 512L, 4L, 512L, 4L, 0L));
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_MOBILE);
         forcePollAndWaitForIdle();
 
 
@@ -605,7 +612,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_WIFI);
 
 
         // create some traffic for two apps
@@ -667,7 +674,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_WIFI);
 
 
         // create some initial traffic
@@ -728,7 +735,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_WIFI);
 
 
         // create some initial traffic
@@ -770,7 +777,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_MOBILE);
 
 
         // Create some traffic
@@ -811,7 +818,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_MOBILE);
 
 
         // create some tethering traffic
@@ -856,7 +863,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_WIFI);
 
         // verify service has empty history for wifi
         assertNetworkTotal(sTemplateWifi, 0L, 0L, 0L, 0L, 0);
@@ -1161,7 +1168,7 @@ public class NetworkStatsServiceTest {
         final NetworkCapabilities capabilities = new NetworkCapabilities();
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED, !isMetered);
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING, true);
-        return new NetworkState(info, prop, capabilities, null, null, TEST_SSID);
+        return new NetworkState(info, prop, capabilities, WIFI_NETWORK, null, TEST_SSID);
     }
 
     private static NetworkState buildMobile3gState(String subscriberId) {
@@ -1178,7 +1185,7 @@ public class NetworkStatsServiceTest {
         final NetworkCapabilities capabilities = new NetworkCapabilities();
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED, false);
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING, !isRoaming);
-        return new NetworkState(info, prop, capabilities, null, subscriberId, null);
+        return new NetworkState(info, prop, capabilities, MOBILE_NETWORK, subscriberId, null);
     }
 
     private static NetworkState buildMobile4gState(String iface) {
@@ -1189,7 +1196,7 @@ public class NetworkStatsServiceTest {
         final NetworkCapabilities capabilities = new NetworkCapabilities();
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED, false);
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING, true);
-        return new NetworkState(info, prop, capabilities, null, null, null);
+        return new NetworkState(info, prop, capabilities, MOBILE_NETWORK, null, null);
     }
 
     private NetworkStats buildEmptyStats() {
