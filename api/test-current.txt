@@ -961,6 +961,9 @@ package android.view {
 
   public final class Choreographer {
     method public static long getFrameDelay();
+    method public void postCallback(int, java.lang.Runnable, java.lang.Object);
+    method public void postCallbackDelayed(int, java.lang.Runnable, java.lang.Object, long);
+    method public void removeCallbacks(int, java.lang.Runnable, java.lang.Object);
     method public static void setFrameDelay(long);
     field public static final int CALLBACK_ANIMATION = 1; // 0x1
   }
