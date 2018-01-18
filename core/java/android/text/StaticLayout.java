@@ -653,26 +653,40 @@ public class StaticLayout extends Layout {
 
         MeasuredText measured = null;
         final Spanned spanned;
+        final boolean canUseMeasuredText;
         if (source instanceof MeasuredText) {
             measured = (MeasuredText) source;
 
-            final CharSequence original = measured.getText();
-            spanned = (original instanceof Spanned) ? (Spanned) original : null;
-
             if (bufStart != measured.getStart() || bufEnd != measured.getEnd()) {
                 // The buffer position has changed. Re-measure here.
-                measured = MeasuredText.build(original, paint, textDir, bufStart, bufEnd);
+                canUseMeasuredText = false;
+            } else if (b.mBreakStrategy != measured.getBreakStrategy()
+                    || b.mHyphenationFrequency != measured.getHyphenationFrequency()) {
+                // The computed hyphenation pieces may not be able to used. Re-measure it.
+                canUseMeasuredText = false;
             } else {
                 // We can use measured information.
-
-                // Overwrite with the one when emeasured.
-                // TODO: Give an option for developer not to overwrite and measure again here?
-                textDir = measured.getTextDir();
-                paint = measured.getPaint();
+                canUseMeasuredText = true;
             }
         } else {
-            measured = MeasuredText.build(source, paint, textDir, bufStart, bufEnd);
+            canUseMeasuredText = false;
+        }
+
+        if (!canUseMeasuredText) {
+            measured = new MeasuredText.Builder(source, paint)
+                    .setRange(bufStart, bufEnd)
+                    .setTextDirection(textDir)
+                    .setBreakStrategy(b.mBreakStrategy)
+                    .setHyphenationFrequency(b.mHyphenationFrequency)
+                    .build();
             spanned = (source instanceof Spanned) ? (Spanned) source : null;
+        } else {
+            final CharSequence original = measured.getText();
+            spanned = (original instanceof Spanned) ? (Spanned) original : null;
+            // Overwrite with the one when measured.
+            // TODO: Give an option for developer not to overwrite and measure again here?
+            textDir = measured.getTextDir();
+            paint = measured.getPaint();
         }
 
         try {

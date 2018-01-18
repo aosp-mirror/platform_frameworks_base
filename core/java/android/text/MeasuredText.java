@@ -52,70 +52,147 @@ public class MeasuredText implements Spanned {
     // The sorted paragraph end offsets.
     private final @NonNull int[] mParagraphBreakPoints;
 
-    /**
-     * Build MeasuredText from the text.
-     *
-     * @param text The text to be measured.
-     * @param paint The paint to be used for drawing.
-     * @param textDir The text direction.
-     * @return The measured text.
-     */
-    public static @NonNull MeasuredText build(@NonNull CharSequence text,
-                                              @NonNull TextPaint paint,
-                                              @NonNull TextDirectionHeuristic textDir) {
-        return MeasuredText.build(text, paint, textDir, 0, text.length());
-    }
+    // The break strategy for this measured text.
+    private final @Layout.BreakStrategy int mBreakStrategy;
+
+    // The hyphenation frequency for this measured text.
+    private final @Layout.HyphenationFrequency int mHyphenationFrequency;
 
     /**
-     * Build MeasuredText from the specific range of the text..
-     *
-     * @param text The text to be measured.
-     * @param paint The paint to be used for drawing.
-     * @param textDir The text direction.
-     * @param start The inclusive start offset of the text.
-     * @param end The exclusive start offset of the text.
-     * @return The measured text.
+     * A Builder for MeasuredText
      */
-    public static @NonNull MeasuredText build(@NonNull CharSequence text,
-                                              @NonNull TextPaint paint,
-                                              @NonNull TextDirectionHeuristic textDir,
-                                              @IntRange(from = 0) int start,
-                                              @IntRange(from = 0) int end) {
-        Preconditions.checkNotNull(text);
-        Preconditions.checkNotNull(paint);
-        Preconditions.checkNotNull(textDir);
-        Preconditions.checkArgumentInRange(start, 0, text.length(), "start");
-        Preconditions.checkArgumentInRange(end, 0, text.length(), "end");
+    public static final class Builder {
+        // Mandatory parameters.
+        private final @NonNull CharSequence mText;
+        private final @NonNull TextPaint mPaint;
 
-        final IntArray paragraphEnds = new IntArray();
-        final ArrayList<MeasuredParagraph> measuredTexts = new ArrayList<>();
+        // Members to be updated by setters.
+        private @IntRange(from = 0) int mStart;
+        private @IntRange(from = 0) int mEnd;
+        private TextDirectionHeuristic mTextDir = TextDirectionHeuristics.FIRSTSTRONG_LTR;
+        private @Layout.BreakStrategy int mBreakStrategy = Layout.BREAK_STRATEGY_HIGH_QUALITY;
+        private @Layout.HyphenationFrequency int mHyphenationFrequency =
+                Layout.HYPHENATION_FREQUENCY_NORMAL;
 
-        int paraEnd = 0;
-        for (int paraStart = start; paraStart < end; paraStart = paraEnd) {
-            paraEnd = TextUtils.indexOf(text, LINE_FEED, paraStart, end);
-            if (paraEnd < 0) {
-                // No LINE_FEED(U+000A) character found. Use end of the text as the paragraph end.
-                paraEnd = end;
-            } else {
-                paraEnd++;  // Includes LINE_FEED(U+000A) to the prev paragraph.
-            }
 
-            paragraphEnds.add(paraEnd);
-            measuredTexts.add(MeasuredParagraph.buildForStaticLayout(
-                    paint, text, paraStart, paraEnd, textDir, null /* no recycle */));
+        /**
+         * Builder constructor
+         *
+         * @param text The text to be measured.
+         * @param paint The paint to be used for drawing.
+         */
+        public Builder(@NonNull CharSequence text, @NonNull TextPaint paint) {
+            Preconditions.checkNotNull(text);
+            Preconditions.checkNotNull(paint);
+
+            mText = text;
+            mPaint = paint;
+            mStart = 0;
+            mEnd = text.length();
         }
 
-        return new MeasuredText(text, start, end, paint, textDir,
-                                measuredTexts.toArray(new MeasuredParagraph[measuredTexts.size()]),
-                                paragraphEnds.toArray());
-    }
+        /**
+         * Set the range of measuring target.
+         *
+         * @param start The measuring target start offset in the text.
+         * @param end The measuring target end offset in the text.
+         */
+        public @NonNull Builder setRange(@IntRange(from = 0) int start,
+                                         @IntRange(from = 0) int end) {
+            Preconditions.checkArgumentInRange(start, 0, mText.length(), "start");
+            Preconditions.checkArgumentInRange(end, 0, mText.length(), "end");
+            Preconditions.checkArgument(start <= end, "The range is reversed.");
 
-    // Use MeasuredText.build instead.
+            mStart = start;
+            mEnd = end;
+            return this;
+        }
+
+        /**
+         * Set the text direction heuristic
+         *
+         * The default value is {@link TextDirectionHeuristics#FIRSTSTRONG_LTR}.
+         *
+         * @param textDir The text direction heuristic for resolving bidi behavior.
+         * @return this builder, useful for chaining.
+         */
+        public @NonNull Builder setTextDirection(@NonNull TextDirectionHeuristic textDir) {
+            Preconditions.checkNotNull(textDir);
+            mTextDir = textDir;
+            return this;
+        }
+
+        /**
+         * Set the break strategy
+         *
+         * The default value is {@link Layout#BREAK_STRATEGY_HIGH_QUALITY}.
+         *
+         * @param breakStrategy The break strategy.
+         * @return this builder, useful for chaining.
+         */
+        public @NonNull Builder setBreakStrategy(@Layout.BreakStrategy int breakStrategy) {
+            mBreakStrategy = breakStrategy;
+            return this;
+        }
+
+        /**
+         * Set the hyphenation frequency
+         *
+         * The default value is {@link Layout#HYPHENATION_FREQUENCY_NORMAL}.
+         *
+         * @param hyphenationFrequency The hyphenation frequency.
+         * @return this builder, useful for chaining.
+         */
+        public @NonNull Builder setHyphenationFrequency(
+                @Layout.HyphenationFrequency int hyphenationFrequency) {
+            mHyphenationFrequency = hyphenationFrequency;
+            return this;
+        }
+
+        /**
+         * Build the measured text
+         *
+         * @return the measured text.
+         */
+        public @NonNull MeasuredText build() {
+            final boolean needHyphenation = mBreakStrategy != Layout.BREAK_STRATEGY_SIMPLE
+                    && mHyphenationFrequency != Layout.HYPHENATION_FREQUENCY_NONE;
+
+            final IntArray paragraphEnds = new IntArray();
+            final ArrayList<MeasuredParagraph> measuredTexts = new ArrayList<>();
+
+            int paraEnd = 0;
+            for (int paraStart = mStart; paraStart < mEnd; paraStart = paraEnd) {
+                paraEnd = TextUtils.indexOf(mText, LINE_FEED, paraStart, mEnd);
+                if (paraEnd < 0) {
+                    // No LINE_FEED(U+000A) character found. Use end of the text as the paragraph
+                    // end.
+                    paraEnd = mEnd;
+                } else {
+                    paraEnd++;  // Includes LINE_FEED(U+000A) to the prev paragraph.
+                }
+
+                paragraphEnds.add(paraEnd);
+                measuredTexts.add(MeasuredParagraph.buildForStaticLayout(
+                        mPaint, mText, paraStart, paraEnd, mTextDir, needHyphenation,
+                        null /* no recycle */));
+            }
+
+            return new MeasuredText(mText, mStart, mEnd, mPaint, mTextDir, mBreakStrategy,
+                                    mHyphenationFrequency, measuredTexts.toArray(
+                                            new MeasuredParagraph[measuredTexts.size()]),
+                                    paragraphEnds.toArray());
+        }
+    };
+
+    // Use MeasuredText.Builder instead.
     private MeasuredText(@NonNull CharSequence text,
                          @IntRange(from = 0) int start,
                          @IntRange(from = 0) int end,
                          @NonNull TextPaint paint,
                          @NonNull TextDirectionHeuristic textDir,
+                         @Layout.BreakStrategy int breakStrategy,
+                         @Layout.HyphenationFrequency int frequency,
                          @NonNull MeasuredParagraph[] measuredTexts,
                          @NonNull int[] paragraphBreakPoints) {
         mText = text;
@@ -125,6 +202,8 @@ public class MeasuredText implements Spanned {
         mMeasuredParagraphs = measuredTexts;
         mParagraphBreakPoints = paragraphBreakPoints;
         mTextDir = textDir;
+        mBreakStrategy = breakStrategy;
+        mHyphenationFrequency = frequency;
     }
 
     /**
@@ -188,6 +267,20 @@ public class MeasuredText implements Spanned {
     /** @hide */
     public @NonNull MeasuredParagraph getMeasuredParagraph(@IntRange(from = 0) int paraIndex) {
         return mMeasuredParagraphs[paraIndex];
+    }
+
+    /**
+     * Returns the break strategy for this text.
+     */
+    public @Layout.BreakStrategy int getBreakStrategy() {
+        return mBreakStrategy;
+    }
+
+    /**
+     * Returns the hyphenation frequency for this text.
+     */
+    public @Layout.HyphenationFrequency int getHyphenationFrequency() {
+        return mHyphenationFrequency;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
