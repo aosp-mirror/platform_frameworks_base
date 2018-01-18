@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.pip.phone;
+package com.android.systemui.shared.system;
 
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
+import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
 
 import android.os.Binder;
 import android.os.IBinder;
@@ -29,11 +30,12 @@ import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
+import android.view.WindowManagerGlobal;
 
 import java.io.PrintWriter;
 
 /**
- * Manages the input consumer that allows the SystemUI to control the PiP.
+ * Manages the input consumer that allows the SystemUI to directly receive touch input.
  */
 public class InputConsumerController {
 
@@ -55,12 +57,12 @@ public class InputConsumerController {
     }
 
     /**
-     * Input handler used for the PiP input consumer. Input events are batched and consumed with the
+     * Input handler used for the input consumer. Input events are batched and consumed with the
      * SurfaceFlinger vsync.
      */
-    private final class PipInputEventReceiver extends BatchedInputEventReceiver {
+    private final class InputEventReceiver extends BatchedInputEventReceiver {
 
-        public PipInputEventReceiver(InputChannel inputChannel, Looper looper) {
+        public InputEventReceiver(InputChannel inputChannel, Looper looper) {
             super(inputChannel, looper, Choreographer.getSfInstance());
         }
 
@@ -68,7 +70,6 @@ public class InputConsumerController {
         public void onInputEvent(InputEvent event, int displayId) {
             boolean handled = true;
             try {
-                // To be implemented for input handling over Pip windows
                 if (mListener != null && event instanceof MotionEvent) {
                     MotionEvent ev = (MotionEvent) event;
                     handled = mListener.onTouchEvent(ev);
@@ -81,15 +82,35 @@ public class InputConsumerController {
 
     private final IWindowManager mWindowManager;
     private final IBinder mToken;
+    private final String mName;
 
-    private PipInputEventReceiver mInputEventReceiver;
+    private InputEventReceiver mInputEventReceiver;
     private TouchListener mListener;
     private RegistrationListener mRegistrationListener;
 
-    public InputConsumerController(IWindowManager windowManager) {
+    /**
+     * @param name the name corresponding to the input consumer that is defined in the system.
+     */
+    public InputConsumerController(IWindowManager windowManager, String name) {
         mWindowManager = windowManager;
         mToken = new Binder();
-        registerInputConsumer();
+        mName = name;
+    }
+
+    /**
+     * @return A controller for the pip input consumer.
+     */
+    public static InputConsumerController getPipInputConsumer() {
+        return new InputConsumerController(WindowManagerGlobal.getWindowManagerService(),
+                INPUT_CONSUMER_PIP);
+    }
+
+    /**
+     * @return A controller for the recents animation input consumer.
+     */
+    public static InputConsumerController getRecentsAnimationInputConsumer() {
+        return new InputConsumerController(WindowManagerGlobal.getWindowManagerService(),
+                INPUT_CONSUMER_RECENTS_ANIMATION);
     }
 
     /**
@@ -125,12 +146,12 @@ public class InputConsumerController {
         if (mInputEventReceiver == null) {
             final InputChannel inputChannel = new InputChannel();
             try {
-                mWindowManager.destroyInputConsumer(INPUT_CONSUMER_PIP);
-                mWindowManager.createInputConsumer(mToken, INPUT_CONSUMER_PIP, inputChannel);
+                mWindowManager.destroyInputConsumer(mName);
+                mWindowManager.createInputConsumer(mToken, mName, inputChannel);
             } catch (RemoteException e) {
-                Log.e(TAG, "Failed to create PIP input consumer", e);
+                Log.e(TAG, "Failed to create input consumer", e);
             }
-            mInputEventReceiver = new PipInputEventReceiver(inputChannel, Looper.myLooper());
+            mInputEventReceiver = new InputEventReceiver(inputChannel, Looper.myLooper());
             if (mRegistrationListener != null) {
                 mRegistrationListener.onRegistrationChanged(true /* isRegistered */);
             }
@@ -143,9 +164,9 @@ public class InputConsumerController {
     public void unregisterInputConsumer() {
         if (mInputEventReceiver != null) {
             try {
-                mWindowManager.destroyInputConsumer(INPUT_CONSUMER_PIP);
+                mWindowManager.destroyInputConsumer(mName);
             } catch (RemoteException e) {
-                Log.e(TAG, "Failed to destroy PIP input consumer", e);
+                Log.e(TAG, "Failed to destroy input consumer", e);
             }
             mInputEventReceiver.dispose();
             mInputEventReceiver = null;
