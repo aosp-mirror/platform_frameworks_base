@@ -85,6 +85,8 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.setMargins(0, padding, 0, padding);
         mIconFrame.addView(mIcon, params);
+        mIconFrame.setClipChildren(false);
+        mIconFrame.setClipToPadding(false);
 
         mTileBackground = newTileBackground();
         if (mTileBackground instanceof RippleDrawable) {
