@@ -44,7 +44,7 @@ import java.util.List;
  */
 public final class KeychainSnapshot implements Parcelable {
     private int mSnapshotVersion;
-    private List<KeychainProtectionParameter> mKeychainProtectionParams;
+    private List<KeychainProtectionParams> mKeychainProtectionParams;
     private List<WrappedApplicationKey> mEntryRecoveryData;
     private byte[] mEncryptedRecoveryKeyBlob;
 
@@ -54,7 +54,7 @@ public final class KeychainSnapshot implements Parcelable {
      */
     public KeychainSnapshot(
             int snapshotVersion,
-            @NonNull List<KeychainProtectionParameter> keychainProtectionParams,
+            @NonNull List<KeychainProtectionParams> keychainProtectionParams,
             @NonNull List<WrappedApplicationKey> wrappedApplicationKeys,
             @NonNull byte[] encryptedRecoveryKeyBlob) {
         mSnapshotVersion = snapshotVersion;
@@ -81,7 +81,7 @@ public final class KeychainSnapshot implements Parcelable {
     /**
      * UI and key derivation parameters. Note that combination of secrets may be used.
      */
-    public @NonNull List<KeychainProtectionParameter> getKeychainProtectionParams() {
+    public @NonNull List<KeychainProtectionParams> getKeychainProtectionParams() {
         return mKeychainProtectionParams;
     }
 
@@ -135,7 +135,7 @@ public final class KeychainSnapshot implements Parcelable {
          * @return This builder.
          */
         public Builder setKeychainProtectionParams(
-                @NonNull List<KeychainProtectionParameter> recoveryMetadata) {
+                @NonNull List<KeychainProtectionParams> recoveryMetadata) {
             mInstance.mKeychainProtectionParams = recoveryMetadata;
             return this;
         }
@@ -195,7 +195,7 @@ public final class KeychainSnapshot implements Parcelable {
      */
     protected KeychainSnapshot(Parcel in) {
         mSnapshotVersion = in.readInt();
-        mKeychainProtectionParams = in.createTypedArrayList(KeychainProtectionParameter.CREATOR);
+        mKeychainProtectionParams = in.createTypedArrayList(KeychainProtectionParams.CREATOR);
         mEncryptedRecoveryKeyBlob = in.createByteArray();
         mEntryRecoveryData = in.createTypedArrayList(WrappedApplicationKey.CREATOR);
     }

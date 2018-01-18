@@ -47,7 +47,7 @@ import java.util.Arrays;
  *
  * @hide
  */
-public final class KeychainProtectionParameter implements Parcelable {
+public final class KeychainProtectionParams implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({TYPE_LOCKSCREEN, TYPE_CUSTOM_PASSWORD})
@@ -102,7 +102,7 @@ public final class KeychainProtectionParameter implements Parcelable {
      * @link {#clearSecret} to overwrite its value in memory.
      * @hide
      */
-    public KeychainProtectionParameter(@UserSecretType int userSecretType,
+    public KeychainProtectionParams(@UserSecretType int userSecretType,
             @LockScreenUiFormat int lockScreenUiFormat,
             @NonNull KeyDerivationParams keyDerivationParams,
             @NonNull byte[] secret) {
@@ -112,7 +112,7 @@ public final class KeychainProtectionParameter implements Parcelable {
         mSecret = Preconditions.checkNotNull(secret);
     }
 
-    private KeychainProtectionParameter() {
+    private KeychainProtectionParams() {
 
     }
 
@@ -155,10 +155,10 @@ public final class KeychainProtectionParameter implements Parcelable {
     }
 
     /**
-     * Builder for creating {@link KeychainProtectionParameter}.
+     * Builder for creating {@link KeychainProtectionParams}.
      */
     public static class Builder {
-        private KeychainProtectionParameter mInstance = new KeychainProtectionParameter();
+        private KeychainProtectionParams mInstance = new KeychainProtectionParams();
 
         /**
          * Sets user secret type.
@@ -212,14 +212,14 @@ public final class KeychainProtectionParameter implements Parcelable {
 
 
         /**
-         * Creates a new {@link KeychainProtectionParameter} instance.
+         * Creates a new {@link KeychainProtectionParams} instance.
          * The instance will include default values, if {@link setSecret}
          * or {@link setUserSecretType} were not called.
          *
          * @return new instance
          * @throws NullPointerException if some required fields were not set.
          */
-        @NonNull public KeychainProtectionParameter build() {
+        @NonNull public KeychainProtectionParams build() {
             if (mInstance.mUserSecretType == null) {
                 mInstance.mUserSecretType = TYPE_LOCKSCREEN;
             }
@@ -249,14 +249,14 @@ public final class KeychainProtectionParameter implements Parcelable {
         Arrays.fill(mSecret, (byte) 0);
     }
 
-    public static final Parcelable.Creator<KeychainProtectionParameter> CREATOR =
-            new Parcelable.Creator<KeychainProtectionParameter>() {
-        public KeychainProtectionParameter createFromParcel(Parcel in) {
-            return new KeychainProtectionParameter(in);
+    public static final Parcelable.Creator<KeychainProtectionParams> CREATOR =
+            new Parcelable.Creator<KeychainProtectionParams>() {
+        public KeychainProtectionParams createFromParcel(Parcel in) {
+            return new KeychainProtectionParams(in);
         }
 
-        public KeychainProtectionParameter[] newArray(int length) {
-            return new KeychainProtectionParameter[length];
+        public KeychainProtectionParams[] newArray(int length) {
+            return new KeychainProtectionParams[length];
         }
     };
 
@@ -274,7 +274,7 @@ public final class KeychainProtectionParameter implements Parcelable {
     /**
      * @hide
      */
-    protected KeychainProtectionParameter(Parcel in) {
+    protected KeychainProtectionParams(Parcel in) {
         mUserSecretType = in.readInt();
         mLockScreenUiFormat = in.readInt();
         mKeyDerivationParams = in.readTypedObject(KeyDerivationParams.CREATOR);
