@@ -2577,9 +2577,18 @@ package android.net {
     method public void onTetheringStarted();
   }
 
+  public final class IpSecManager {
+    method public android.net.IpSecManager.IpSecTunnelInterface createIpSecTunnelInterface(java.net.InetAddress, java.net.InetAddress, android.net.Network) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException;
+  }
+
+  public static final class IpSecManager.IpSecTunnelInterface implements java.lang.AutoCloseable {
+    method public void close();
+    method public java.lang.String getInterfaceName();
+  }
+
   public static class IpSecTransform.Builder {
+    method public android.net.IpSecTransform buildTunnelModeTransform(java.net.InetAddress, android.net.IpSecManager.SecurityParameterIndex) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException, android.net.IpSecManager.SpiUnavailableException;
     method public android.net.IpSecTransform.Builder setNattKeepalive(int);
-    method public android.net.IpSecTransform.Builder setUnderlyingNetwork(android.net.Network);
   }
 
   public class NetworkKey implements android.os.Parcelable {
