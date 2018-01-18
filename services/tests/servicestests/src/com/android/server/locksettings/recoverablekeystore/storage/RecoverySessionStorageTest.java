@@ -125,7 +125,7 @@ public class RecoverySessionStorageTest {
 
         storage.remove(TEST_USER_ID, TEST_SESSION_ID);
 
-        assertNotNull(storage.get(TEST_USER_ID, TEST_SESSION_ID));
+        assertNotNull(storage.get(TEST_USER_ID, otherSessionId));
     }
 
     @Test
