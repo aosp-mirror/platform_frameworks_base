@@ -84,6 +84,7 @@ message Atom {
         AppStartChanged app_start_changed = 48;
         AppStartCancelChanged app_start_cancel_changed = 49;
         AppStartFullyDrawnChanged app_start_fully_drawn_changed = 50;
+        LmkEventOccurred lmk_event_occurred = 51;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
@@ -101,6 +102,7 @@ message Atom {
         CpuTimePerUidFreq cpu_time_per_uid_freq = 10010;
         WifiActivityEnergyInfo wifi_activity_energy_info = 10011;
         ModemActivityInfo modem_activity_info = 10012;
+        MemoryStat memory_stat = 10013;
     }
 }
 
@@ -1176,4 +1178,48 @@ message ModemActivityInfo {
     optional uint64 controller_rx_time_ms = 9;
     // product of current(mA), voltage(V) and time(ms)
     optional uint64 energy_used = 10;
+}
+
+/*
+ * Logs the memory stats for a process
+ */
+message MemoryStat {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1;
+
+    // The app package name.
+    optional string pkg_name = 2;
+
+    // # of page-faults
+    optional int64 pgfault = 3;
+
+    // # of major page-faults
+    optional int64 pgmajfault = 4;
+
+    // RSS+CACHE(+SWAP)
+    optional int64 usage_in_bytes = 5;
+}
+
+/*
+ * Logs the event when LMKD kills a process to reduce memory pressure
+ * Logged from:
+ *      system/core/lmkd/lmkd.c
+ */
+message LmkEventOccurred {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1;
+
+    // The app package name.
+    optional string pkg_name = 2;
+
+    // oom adj score.
+    optional int32 oom_score = 3;
+
+    // Used as start/stop boundaries for the event
+    enum State {
+        UNKNOWN = 0;
+        START = 1;
+        END = 2;
+    }
+    optional State state = 4;
 }
