@@ -66,7 +66,7 @@ public abstract class SQLiteOpenHelper {
      * created or opened until one of {@link #getWritableDatabase} or
      * {@link #getReadableDatabase} is called.
      *
-     * @param context to use to open or create the database
+     * @param context to use for locating paths to the the database
      * @param name of the database file, or null for an in-memory database
      * @param factory to use for creating cursor objects, or null for the default
      * @param version number of the database (starting at 1); if the database is older,
@@ -86,7 +86,7 @@ public abstract class SQLiteOpenHelper {
      * <p>Accepts input param: a concrete instance of {@link DatabaseErrorHandler} to be
      * used to handle corruption when sqlite reports database corruption.</p>
      *
-     * @param context to use to open or create the database
+     * @param context to use for locating paths to the the database
      * @param name of the database file, or null for an in-memory database
      * @param factory to use for creating cursor objects, or null for the default
      * @param version number of the database (starting at 1); if the database is older,
@@ -107,7 +107,7 @@ public abstract class SQLiteOpenHelper {
      * created or opened until one of {@link #getWritableDatabase} or
      * {@link #getReadableDatabase} is called.
      *
-     * @param context to use to open or create the database
+     * @param context to use for locating paths to the the database
      * @param name of the database file, or null for an in-memory database
      * @param version number of the database (starting at 1); if the database is older,
      *     {@link #onUpgrade} will be used to upgrade the database; if the database is
@@ -128,7 +128,7 @@ public abstract class SQLiteOpenHelper {
      * minimumSupportedVersion is found, it is simply deleted and a new database is created with the
      * given name and version
      *
-     * @param context to use to open or create the database
+     * @param context to use for locating paths to the the database
      * @param name the name of the database file, null for a temporary in-memory database
      * @param factory to use for creating cursor objects, null for default
      * @param version the required version of the database
