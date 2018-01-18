@@ -19,6 +19,8 @@ import static android.view.autofill.AutofillManager.FC_SERVICE_TIMEOUT;
 
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sVerbose;
+import static android.service.autofill.AutofillFieldClassificationService.SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS;
+import static android.service.autofill.AutofillFieldClassificationService.SERVICE_META_DATA_KEY_DEFAULT_ALGORITHM;
 
 import android.Manifest;
 import android.annotation.MainThread;
@@ -61,11 +63,6 @@ import java.util.concurrent.TimeUnit;
 final class FieldClassificationStrategy {
 
     private static final String TAG = "FieldClassificationStrategy";
-
-    private static final String METADATA_KEY_DEFAULT_ALGORITHM =
-            "android.autofill.field_classification.default_algorithm";
-    private static final String METADATA_KEY_AVAILABLE_ALGORITHMS =
-            "android.autofill.field_classification.available_algorithms";
 
     private final Context mContext;
     private final Object mLock = new Object();
@@ -221,7 +218,7 @@ final class FieldClassificationStrategy {
      */
     @Nullable
     String[] getAvailableAlgorithms() {
-        return getMetadataValue(METADATA_KEY_AVAILABLE_ALGORITHMS,
+        return getMetadataValue(SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS,
                 (res, id) -> res.getStringArray(id));
     }
 
@@ -230,7 +227,7 @@ final class FieldClassificationStrategy {
      */
     @Nullable
     String getDefaultAlgorithm() {
-        return getMetadataValue(METADATA_KEY_DEFAULT_ALGORITHM, (res, id) -> res.getString(id));
+        return getMetadataValue(SERVICE_META_DATA_KEY_DEFAULT_ALGORITHM, (res, id) -> res.getString(id));
     }
 
     @Nullable

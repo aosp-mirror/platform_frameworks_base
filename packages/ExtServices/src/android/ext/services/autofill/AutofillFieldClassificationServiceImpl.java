@@ -34,7 +34,7 @@ public class AutofillFieldClassificationServiceImpl extends AutofillFieldClassif
 
     @Nullable
     @Override
-    public Scores onGetScores(@Nullable String algorithmName,
+    public float[][] onGetScores(@Nullable String algorithmName,
             @Nullable Bundle algorithmArgs, @NonNull List<AutofillValue> actualValues,
             @NonNull List<String> userDataValues) {
         if (ArrayUtils.isEmpty(actualValues) || ArrayUtils.isEmpty(userDataValues)) {
@@ -55,14 +55,13 @@ public class AutofillFieldClassificationServiceImpl extends AutofillFieldClassif
             Log.d(TAG, "getScores() will return a " + actualValuesSize + "x"
                     + userDataValuesSize + " matrix for " + actualAlgorithmName);
         }
-        final Scores scores = new Scores(actualAlgorithmName, actualValuesSize, userDataValuesSize);
-        final float[][] scoresMatrix = scores.getScores();
+        final float[][] scores = new float[actualValuesSize][userDataValuesSize];
 
         final EditDistanceScorer algorithm = EditDistanceScorer.getInstance();
         for (int i = 0; i < actualValuesSize; i++) {
             for (int j = 0; j < userDataValuesSize; j++) {
                 final float score = algorithm.getScore(actualValues.get(i), userDataValues.get(j));
-                scoresMatrix[i][j] = score;
+                scores[i][j] = score;
             }
         }
         return scores;
