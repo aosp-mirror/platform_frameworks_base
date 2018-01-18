@@ -3116,4 +3116,6 @@
     <!-- Decide whether to display 'No service' on status bar instead of 'Emergency calls only'
          when SIM is unready. -->
     <bool name="config_display_no_service_when_sim_unready">false</bool>
+
+    <bool name="config_supportBluetoothPersistedState">true</bool>
 </resources>
