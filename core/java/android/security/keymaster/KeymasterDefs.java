@@ -73,6 +73,7 @@ public final class KeymasterDefs {
     public static final int KM_TAG_USER_AUTH_TYPE = KM_ENUM | 504;
     public static final int KM_TAG_AUTH_TIMEOUT = KM_UINT | 505;
     public static final int KM_TAG_ALLOW_WHILE_ON_BODY = KM_BOOL | 506;
+    public static final int KM_TAG_TRUSTED_USER_PRESENCE_REQUIRED = KM_BOOL | 507;
 
     public static final int KM_TAG_ALL_APPLICATIONS = KM_BOOL | 600;
     public static final int KM_TAG_APPLICATION_ID = KM_BYTES | 601;
