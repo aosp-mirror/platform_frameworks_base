@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.server.pm.crossprofile;
+package com.android.server.pm;
 
 import android.content.Context;
 

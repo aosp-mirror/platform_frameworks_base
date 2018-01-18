@@ -1,8 +1,6 @@
-package com.android.server.pm.crossprofile;
+package com.android.server.pm;
 
 import static com.google.common.truth.Truth.assertThat;
-
-import static junit.framework.Assert.assertEquals;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -34,7 +32,6 @@ import android.util.SparseArray;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -44,7 +41,7 @@ import java.util.List;
 
 /**
  * Build/Install/Run:
- * bit FrameworksServicesTests:com.android.server.pm.crossprofile.CrossProfileAppsServiceImplTest
+ * atest FrameworksServicesTests:com.android.server.pm.CrossProfileAppsServiceImplTest
  */
 @Presubmit
 @RunWith(MockitoJUnitRunner.class)

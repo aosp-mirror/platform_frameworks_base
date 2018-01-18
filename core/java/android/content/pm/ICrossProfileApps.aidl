@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.content.pm.crossprofile;
+package android.content.pm;
 
 import android.content.ComponentName;
 import android.content.Intent;

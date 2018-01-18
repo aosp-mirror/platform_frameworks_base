@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.server.pm.crossprofile;
+package com.android.server.pm;
 
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
@@ -25,14 +25,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ICrossProfileApps;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
-import android.content.pm.crossprofile.ICrossProfileApps;
-import android.graphics.Rect;
 import android.os.Binder;
-import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
