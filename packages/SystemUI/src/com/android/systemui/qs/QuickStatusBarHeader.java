@@ -38,6 +38,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSDetail.Callback;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.SignalClusterView;
+import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 
 public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue.Callbacks {
@@ -69,15 +70,13 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
 
         updateResources();
 
-        // Set the light/dark theming on the header status UI to match the current theme.
+        // Set light text on the header icons because they will always be on a black background
         int colorForeground = Utils.getColorAttr(getContext(), android.R.attr.colorForeground);
-        float intensity = colorForeground == Color.WHITE ? 0 : 1;
         Rect tintArea = new Rect(0, 0, 0, 0);
-
-        applyDarkness(R.id.battery, tintArea, intensity, colorForeground);
-        applyDarkness(R.id.clock, tintArea, intensity, colorForeground);
+        applyDarkness(R.id.clock, tintArea, 0, DarkIconDispatcher.DEFAULT_ICON_TINT);
 
         BatteryMeterView battery = findViewById(R.id.battery);
+        battery.setFillColor(Color.WHITE);
         battery.setForceShowPercent(true);
 
         mActivityStarter = Dependency.get(ActivityStarter.class);

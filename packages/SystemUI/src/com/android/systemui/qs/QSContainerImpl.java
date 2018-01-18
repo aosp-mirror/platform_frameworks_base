@@ -45,8 +45,9 @@ public class QSContainerImpl extends FrameLayout {
     protected float mQsExpansion;
     private QSCustomizer mQSCustomizer;
     private View mQSFooter;
-    private float mFullElevation;
+    private View mBackground;
     private float mRadius;
+    private int mSideMargins;
 
     public QSContainerImpl(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -60,12 +61,14 @@ public class QSContainerImpl extends FrameLayout {
         mHeader = findViewById(R.id.header);
         mQSCustomizer = findViewById(R.id.qs_customize);
         mQSFooter = findViewById(R.id.qs_footer);
-        mFullElevation = mQSPanel.getElevation();
+        mBackground = findViewById(R.id.quick_settings_background);
         mRadius = getResources().getDimensionPixelSize(
                 Utils.getThemeAttr(mContext, android.R.attr.dialogCornerRadius));
+        mSideMargins = getResources().getDimensionPixelSize(R.dimen.notification_side_paddings);
 
         setClickable(true);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+        setMargins();
     }
 
     @Override
@@ -131,6 +134,8 @@ public class QSContainerImpl extends FrameLayout {
         mQSDetail.setBottom(getTop() + height);
         // Pin QS Footer to the bottom of the panel.
         mQSFooter.setTranslationY(height - mQSFooter.getHeight());
+        mBackground.setTop(mQSPanel.getTop());
+        mBackground.setBottom(height);
 
         ExpandableOutlineView.getRoundedRectPath(0, 0, getWidth(), height, mRadius,
                 mRadius,
@@ -147,5 +152,20 @@ public class QSContainerImpl extends FrameLayout {
     public void setExpansion(float expansion) {
         mQsExpansion = expansion;
         updateExpansion();
+    }
+
+    private void setMargins() {
+        setMargins(mQSDetail);
+        setMargins(mBackground);
+        setMargins(mQSFooter);
+        setMargins(mQSPanel);
+        setMargins(mHeader);
+        setMargins(mQSCustomizer);
+    }
+
+    private void setMargins(View view) {
+        FrameLayout.LayoutParams lp = (LayoutParams) view.getLayoutParams();
+        lp.rightMargin = mSideMargins;
+        lp.leftMargin = mSideMargins;
     }
 }

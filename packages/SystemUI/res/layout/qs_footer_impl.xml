@@ -21,6 +21,7 @@
     android:id="@+id/qs_footer"
     android:layout_width="match_parent"
     android:layout_height="48dp"
+    android:elevation="4dp"
     android:baselineAligned="false"
     android:clickable="false"
     android:clipChildren="false"
@@ -105,17 +106,6 @@
                 android:visibility="invisible"/>
 
         </com.android.systemui.statusbar.AlphaOptimizedFrameLayout>
-
-        <com.android.systemui.statusbar.phone.ExpandableIndicator
-            android:id="@+id/expand_indicator"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:clipToPadding="false"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/accessibility_quick_settings_expand"
-            android:padding="14dp" />
     </LinearLayout>
 
 </com.android.systemui.qs.QSFooterImpl>

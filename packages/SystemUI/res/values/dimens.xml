@@ -215,7 +215,7 @@
     <dimen name="close_handle_underlap">32dp</dimen>
 
     <!-- Height of the status bar header bar -->
-    <dimen name="status_bar_header_height">124dp</dimen>
+    <dimen name="status_bar_header_height">178dp</dimen>
 
     <!-- Height of the status bar header bar in the car setting. -->
     <dimen name="car_status_bar_header_height">128dp</dimen>
@@ -223,8 +223,9 @@
     <!-- The bottom padding of the status bar header. -->
     <dimen name="status_bar_header_padding_bottom">48dp</dimen>
 
-    <!-- The height of the container that holds the system icons in the quick settings header. -->
-    <dimen name="qs_header_system_icons_area_height">40dp</dimen>
+    <!-- The height of the container that holds the battery and time in the quick settings header.
+         -->
+    <dimen name="qs_header_system_icons_area_height">48dp</dimen>
 
     <!-- The height of the container that holds the system icons in the quick settings header in the
          car setting. -->
