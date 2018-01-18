@@ -26,9 +26,7 @@ import com.android.internal.widget.MessagingLayout;
 import com.android.internal.widget.MessagingLinearLayout;
 import com.android.internal.widget.MessagingMessage;
 import com.android.internal.widget.MessagingPropertyAnimator;
-import com.android.internal.widget.ViewClippingUtil;
 import com.android.systemui.Interpolators;
-import com.android.systemui.statusbar.ExpandableNotificationRow;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -157,8 +155,8 @@ public class MessagingLayoutTransformState extends TransformState {
             setClippingDeactivated(child, true);
         }
         appear(ownGroup.getAvatar(), transformationAmount);
-        appear(ownGroup.getSender(), transformationAmount);
-        setClippingDeactivated(ownGroup.getSender(), true);
+        appear(ownGroup.getSenderView(), transformationAmount);
+        setClippingDeactivated(ownGroup.getSenderView(), true);
         setClippingDeactivated(ownGroup.getAvatar(), true);
     }
 
@@ -170,7 +168,7 @@ public class MessagingLayoutTransformState extends TransformState {
         } else {
             relativeOffset = (1.0f - transformationAmount) * mRelativeTranslationOffset;
         }
-        if (ownGroup.getSender().getVisibility() != View.GONE) {
+        if (ownGroup.getSenderView().getVisibility() != View.GONE) {
             relativeOffset *= 0.5f;
         }
         ownGroup.getMessageContainer().setTranslationY(relativeOffset);
@@ -188,8 +186,8 @@ public class MessagingLayoutTransformState extends TransformState {
             setClippingDeactivated(child, true);
         }
         disappear(ownGroup.getAvatar(), transformationAmount);
-        disappear(ownGroup.getSender(), transformationAmount);
-        setClippingDeactivated(ownGroup.getSender(), true);
+        disappear(ownGroup.getSenderView(), transformationAmount);
+        setClippingDeactivated(ownGroup.getSenderView(), true);
         setClippingDeactivated(ownGroup.getAvatar(), true);
     }
 
@@ -226,7 +224,7 @@ public class MessagingLayoutTransformState extends TransformState {
 
     private void transformGroups(MessagingGroup ownGroup, MessagingGroup otherGroup,
             float transformationAmount, boolean to) {
-        transformView(transformationAmount, to, ownGroup.getSender(), otherGroup.getSender(),
+        transformView(transformationAmount, to, ownGroup.getSenderView(), otherGroup.getSenderView(),
                 true /* sameAsAny */);
         transformView(transformationAmount, to, ownGroup.getAvatar(), otherGroup.getAvatar(),
                 true /* sameAsAny */);
@@ -345,7 +343,7 @@ public class MessagingLayoutTransformState extends TransformState {
                     setVisible(child, visible, force);
                 }
                 setVisible(ownGroup.getAvatar(), visible, force);
-                setVisible(ownGroup.getSender(), visible, force);
+                setVisible(ownGroup.getSenderView(), visible, force);
             }
         }
     }
@@ -376,9 +374,9 @@ public class MessagingLayoutTransformState extends TransformState {
                     setClippingDeactivated(child, false);
                 }
                 resetTransformedView(ownGroup.getAvatar());
-                resetTransformedView(ownGroup.getSender());
+                resetTransformedView(ownGroup.getSenderView());
                 setClippingDeactivated(ownGroup.getAvatar(), false);
-                setClippingDeactivated(ownGroup.getSender(), false);
+                setClippingDeactivated(ownGroup.getSenderView(), false);
                 ownGroup.setTranslationY(0);
                 ownGroup.getMessageContainer().setTranslationY(0);
             }

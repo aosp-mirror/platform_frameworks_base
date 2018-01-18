@@ -4931,18 +4931,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                     // system process is dead if we're here.
                 }
                 if (parentToCancelFinal != null) {
-                    // We have to post it to the UI thread for synchronization
-                    mHandler.post(() -> {
-                        Runnable removeRunnable =
-                                () -> mEntryManager.performRemoveNotification(parentToCancelFinal);
-                        if (isCollapsing()) {
-                            // To avoid lags we're only performing the remove
-                            // after the shade was collapsed
-                            addPostCollapseAction(removeRunnable);
-                        } else {
-                            removeRunnable.run();
-                        }
-                    });
+                    removeNotification(parentToCancelFinal);
+                }
+                if (shouldAutoCancel(sbn)) {
+                    // Automatically remove all notifications that we may have kept around longer
+                    removeNotification(sbn);
                 }
             };
 
@@ -4964,6 +4957,21 @@ public class StatusBar extends SystemUI implements DemoMode,
                 return false;
             }
         }, afterKeyguardGone);
+    }
+
+    private void removeNotification(StatusBarNotification notification) {
+        // We have to post it to the UI thread for synchronization
+        mHandler.post(() -> {
+            Runnable removeRunnable =
+                    () -> mEntryManager.performRemoveNotification(notification);
+            if (isCollapsing()) {
+                // To avoid lags we're only performing the remove
+                // after the shade was collapsed
+                addPostCollapseAction(removeRunnable);
+            } else {
+                removeRunnable.run();
+            }
+        });
     }
 
     protected NotificationListener mNotificationListener;

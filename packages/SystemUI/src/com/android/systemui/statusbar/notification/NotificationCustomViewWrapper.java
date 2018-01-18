@@ -21,7 +21,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
-import android.os.Build;
 import android.view.View;
 
 import com.android.systemui.R;
@@ -118,7 +117,7 @@ public class NotificationCustomViewWrapper extends NotificationViewWrapper {
     }
 
     @Override
-    public boolean shouldClipToRounding() {
+    public boolean shouldClipToRounding(boolean topRounded, boolean bottomRounded) {
         return true;
     }
 }
