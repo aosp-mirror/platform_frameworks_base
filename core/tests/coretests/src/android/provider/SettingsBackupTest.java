@@ -331,6 +331,7 @@ public class SettingsBackupTest {
                     Settings.Global.SETUP_PREPAID_DETECTION_REDIR_HOST,
                     Settings.Global.SETUP_PREPAID_DETECTION_TARGET_URL,
                     Settings.Global.SHORTCUT_MANAGER_CONSTANTS,
+                    Settings.Global.SHOW_FIRST_CRASH_DIALOG,
                     Settings.Global.SHOW_NOTIFICATION_CHANNEL_WARNINGS,
                     Settings.Global.SHOW_TEMPERATURE_WARNING,
                     Settings.Global.SMART_SELECTION_UPDATE_CONTENT_URL,

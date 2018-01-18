@@ -738,9 +738,18 @@ class AppErrors {
                 }
                 return;
             }
+            final boolean showFirstCrash = Settings.Global.getInt(
+                    mContext.getContentResolver(),
+                    Settings.Global.SHOW_FIRST_CRASH_DIALOG, 0) != 0;
+            final boolean showFirstCrashDevOption = Settings.Secure.getIntForUser(
+                    mContext.getContentResolver(),
+                    Settings.Secure.SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
+                    0,
+                    UserHandle.USER_CURRENT) != 0;
             final boolean crashSilenced = mAppsNotReportingCrashes != null &&
                     mAppsNotReportingCrashes.contains(proc.info.packageName);
-            if ((mService.canShowErrorDialogs() || showBackground) && !crashSilenced) {
+            if ((mService.canShowErrorDialogs() || showBackground) && !crashSilenced
+                    && (showFirstCrash || showFirstCrashDevOption || data.repeating)) {
                 proc.crashDialog = new AppErrorDialog(mContext, mService, data);
             } else {
                 // The device is asleep, so just pretend that the user
