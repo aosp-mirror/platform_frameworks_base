@@ -50,11 +50,9 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_INSTALL_L
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_REPLACE_COULDNT_DELETE;
-import static android.content.pm.PackageManager.INSTALL_FAILED_SANDBOX_VERSION_DOWNGRADE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_TEST_ONLY;
 import static android.content.pm.PackageManager.INSTALL_FAILED_UPDATE_INCOMPATIBLE;
-import static android.content.pm.PackageManager.INSTALL_FAILED_USER_RESTRICTED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
 import static android.content.pm.PackageManager.INSTALL_INTERNAL;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES;
@@ -446,7 +444,6 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int SCAN_NEW_INSTALL = 1<<2;
     static final int SCAN_UPDATE_TIME = 1<<3;
     static final int SCAN_BOOTING = 1<<4;
-    static final int SCAN_TRUSTED_OVERLAY = 1<<5;
     static final int SCAN_DELETE_DATA_ON_FAILURES = 1<<6;
     static final int SCAN_REQUIRE_KNOWN = 1<<7;
     static final int SCAN_MOVE = 1<<8;
@@ -469,7 +466,6 @@ public class PackageManagerService extends IPackageManager.Stub
             SCAN_NEW_INSTALL,
             SCAN_UPDATE_TIME,
             SCAN_BOOTING,
-            SCAN_TRUSTED_OVERLAY,
             SCAN_DELETE_DATA_ON_FAILURES,
             SCAN_REQUIRE_KNOWN,
             SCAN_MOVE,
@@ -772,7 +768,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 Collection<PackageParser.Package> allPackages, String targetPackageName) {
             List<PackageParser.Package> overlayPackages = null;
             for (PackageParser.Package p : allPackages) {
-                if (targetPackageName.equals(p.mOverlayTarget) && p.mIsStaticOverlay) {
+                if (targetPackageName.equals(p.mOverlayTarget) && p.mOverlayIsStatic) {
                     if (overlayPackages == null) {
                         overlayPackages = new ArrayList<PackageParser.Package>();
                     }
@@ -856,7 +852,7 @@ public class PackageManagerService extends IPackageManager.Stub
         void findStaticOverlayPackages() {
             synchronized (mPackages) {
                 for (PackageParser.Package p : mPackages.values()) {
-                    if (p.mIsStaticOverlay) {
+                    if (p.mOverlayIsStatic) {
                         if (mOverlayPackages == null) {
                             mOverlayPackages = new ArrayList<PackageParser.Package>();
                         }
@@ -2556,7 +2552,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     | PackageParser.PARSE_IS_SYSTEM_DIR,
                     scanFlags
                     | SCAN_AS_SYSTEM
-                    | SCAN_TRUSTED_OVERLAY,
+                    | SCAN_AS_VENDOR,
                     0);
 
             mParallelPackageParserCallback.findStaticOverlayPackages();
@@ -10520,7 +10516,6 @@ Slog.e("TODD",
                 }
             }
         }
-        pkg.mTrustedOverlay = (scanFlags & SCAN_TRUSTED_OVERLAY) != 0;
 
         if ((scanFlags & SCAN_AS_PRIVILEGED) != 0) {
             pkg.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
@@ -10540,6 +10535,14 @@ Slog.e("TODD",
             pkg.mRealPackage = null;
             pkg.mAdoptPermissions = null;
         }
+    }
+
+    private static @NonNull <T> T assertNotNull(@Nullable T object, String message)
+            throws PackageManagerException {
+        if (object == null) {
+            throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR, message);
+        }
+        return object;
     }
 
     /**
@@ -10812,6 +10815,50 @@ Slog.e("TODD",
                                 "privileged app must themselves be marked as privileged. " +
                                 pkg.packageName + " shares privileged user " +
                                 pkg.mSharedUserId + ".");
+                    }
+                }
+            }
+
+            // Apply policies specific for runtime resource overlays (RROs).
+            if (pkg.mOverlayTarget != null) {
+                // System overlays have some restrictions on their use of the 'static' state.
+                if ((scanFlags & SCAN_AS_SYSTEM) != 0) {
+                    // We are scanning a system overlay. This can be the first scan of the
+                    // system/vendor/oem partition, or an update to the system overlay.
+                    if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
+                        // This must be an update to a system overlay.
+                        final PackageSetting previousPkg = assertNotNull(
+                                mSettings.getPackageLPr(pkg.packageName),
+                                "previous package state not present");
+
+                        // Static overlays cannot be updated.
+                        if (previousPkg.pkg.mOverlayIsStatic) {
+                            throw new PackageManagerException("Overlay " + pkg.packageName +
+                                    " is static and cannot be upgraded.");
+                        // Non-static overlays cannot be converted to static overlays.
+                        } else if (pkg.mOverlayIsStatic) {
+                            throw new PackageManagerException("Overlay " + pkg.packageName +
+                                    " cannot be upgraded into a static overlay.");
+                        }
+                    }
+                } else {
+                    // The overlay is a non-system overlay. Non-system overlays cannot be static.
+                    if (pkg.mOverlayIsStatic) {
+                        throw new PackageManagerException("Overlay " + pkg.packageName +
+                                " is static but not pre-installed.");
+                    }
+
+                    // The only case where we allow installation of a non-system overlay is when
+                    // its signature is signed with the platform certificate.
+                    PackageSetting platformPkgSetting = mSettings.getPackageLPr("android");
+                    if ((platformPkgSetting.signatures.mSigningDetails
+                            != PackageParser.SigningDetails.UNKNOWN)
+                            && (compareSignatures(
+                                    platformPkgSetting.signatures.mSigningDetails.signatures,
+                                    pkg.mSigningDetails.signatures)
+                                            != PackageManager.SIGNATURE_MATCH)) {
+                        throw new PackageManagerException("Overlay " + pkg.packageName +
+                                " must be signed with the platform certificate.");
                     }
                 }
             }
