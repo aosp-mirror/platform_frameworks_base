@@ -418,13 +418,12 @@
     <!-- The fraction of the screen height where the clock on the Keyguard has its center. The
          max value is used when no notifications are displaying, and the min value is when the
          highest possible number of notifications are showing. -->
-    <fraction name="keyguard_clock_y_fraction_max">32.5%</fraction>
+    <fraction name="keyguard_clock_y_fraction_max">45%</fraction>
     <fraction name="keyguard_clock_y_fraction_min">19.8%</fraction>
 
     <!-- The margin between the clock and the notifications on Keyguard. See
          keyguard_clock_height_fraction_* for the difference between min and max.-->
-    <dimen name="keyguard_clock_notifications_margin_min">30dp</dimen>
-    <dimen name="keyguard_clock_notifications_margin_max">42dp</dimen>
+    <dimen name="keyguard_clock_notifications_margin">30dp</dimen>
     <dimen name="heads_up_scrim_height">250dp</dimen>
 
     <item name="scrim_behind_alpha" format="float" type="dimen">0.62</item>
@@ -863,7 +862,7 @@
     <dimen name="burn_in_prevention_offset_y">50dp</dimen>
 
     <!-- padding between the notification stack and the keyguard status view when dozing -->
-    <dimen name="dozing_stack_padding">10dp</dimen>
+    <dimen name="dozing_stack_padding">30dp</dimen>
 
     <dimen name="corner_size">16dp</dimen>
     <dimen name="top_padding">0dp</dimen>
