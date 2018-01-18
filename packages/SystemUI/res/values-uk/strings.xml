@@ -35,7 +35,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Поточні"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Сповіщення"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Низький рівень заряду акумулятора"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"Акумулятор майже розрядився. Увімкніть режим економії заряду акумулятора"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Залишилося <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"На основі використання залишилося <xliff:g id="PERCENTAGE">%s</xliff:g> – близько <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Залишилося <xliff:g id="PERCENTAGE">%s</xliff:g> – близько <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Залишилося <xliff:g id="PERCENTAGE">%s</xliff:g>. Увімкнено режим економії заряду акумулятора."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Заряджання USB не підтримується.\nВикористовуйте лише наданий у комплекті зарядний пристрій."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Заряджання через USB не підтримується."</string>
@@ -69,14 +72,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Користувач поточного облікового запису не може вмикати налагодження USB. Щоб увімкнути цю функцію, увійдіть в обліковий запис основного користувача."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Масштабув. на весь екран"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Розтягнути на весь екран"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Знімок екрана"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Збереження знімка екрана..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Збереження знімка екрана..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"Зберігається знімок екрана."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Знімок екрана зроблено."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Торкніться, щоб переглянути знімок екрана."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Не вдалося зробити знімок екрана."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Не вдалося зберегти знімок екрана."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Не вдалося зберегти знімок екрана через обмежений обсяг пам’яті."</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"Знімок екрана зберігається"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"Знімок екрана збережено"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"Торкніться, щоб переглянути знімок екрана"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"Не вдалося зробити знімок екрана"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"Не вдалося зберегти знімок екрана"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Не вдалося зберегти знімок екрана через обмежений обсяг пам’яті"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Додаток або адміністратор вашої організації не дозволяють робити знімки екрана"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Парам.передав.файлів через USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Підключити як медіапрогравач (MTP)"</string>
@@ -563,30 +567,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Вимк."</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"За допомогою елементів керування сповіщеннями ви можете налаштувати пріоритет сповіщень додатка – від 0 до 5 рівня. \n\n"<b>"Рівень 5"</b>\n"- Показувати сповіщення вгорі списку \n- Виводити на весь екран \n- Завжди показувати короткі сповіщення \n\n"<b>"Рівень 4"</b>\n"- Не виводити на весь екран \n- Завжди показувати короткі сповіщення \n\n"<b>"Рівень 3"</b>\n"- Не виводити на весь екран \n- Не показувати короткі сповіщення \n\n"<b>"Рівень 2"</b>\n"- Не виводити на весь екран \n- Не показувати короткі сповіщення \n- Вимкнути звук і вібросигнал \n\n"<b>"Рівень 1"</b>\n"- Не виводити на весь екран \n- Не показувати короткі сповіщення \n- Вимкнути звук і вібросигнал \n- Не показувати на заблокованому екрані та в рядку стану \n- Показувати сповіщення внизу списку \n\n"<b>"Рівень 0"</b>\n"- Блокувати всі сповіщення з додатка"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Сповіщення"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"Ви більше не отримуватимете ці сповіщення"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"Категорії сповіщень (<xliff:g id="NUMBER">%d</xliff:g>)"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"У цьому додатку немає категорій сповіщень"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Сповіщення з цього додатка не можна вимкнути"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="one">1 з <xliff:g id="NUMBER_1">%s</xliff:g> категорії сповіщень із цього додатка</item>
-      <item quantity="few">1 з <xliff:g id="NUMBER_1">%s</xliff:g> категорій сповіщень із цього додатка</item>
-      <item quantity="many">1 з <xliff:g id="NUMBER_1">%s</xliff:g> категорій сповіщень із цього додатка</item>
-      <item quantity="other">1 з <xliff:g id="NUMBER_1">%s</xliff:g> категорії сповіщень із цього додатка</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> і ще <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
-      <item quantity="few"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> і ще <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
-      <item quantity="many"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> і ще <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> і ще <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Ви більше не бачитимете цих сповіщень"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"Чи показувати ці сповіщення надалі?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"Не показувати сповіщення"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"Показувати надалі"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"Чи показувати сповіщення з цього додатка надалі?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"Ці сповіщення не можна вимкнути"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Елементи керування сповіщеннями для додатка <xliff:g id="APP_NAME">%1$s</xliff:g> відкрито"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Елементи керування сповіщеннями для додатка <xliff:g id="APP_NAME">%1$s</xliff:g> закрито"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Дозволити сповіщення з цього каналу"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"Усі категорії"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Більше налаштувань"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"Налаштувати: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"Налаштувати"</string>
     <string name="notification_done" msgid="5279426047273930175">"Готово"</string>
+    <string name="inline_undo" msgid="558916737624706010">"Відмінити"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"елементи керування сповіщеннями"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"параметри відкладення сповіщень"</string>
@@ -745,8 +738,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Розгорнути"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Згорнути"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Закрити"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"Налаштування"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Перетягніть униз, щоб закрити"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Меню"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"У додатку <xliff:g id="NAME">%s</xliff:g> є функція \"Картинка в картинці\""</string>

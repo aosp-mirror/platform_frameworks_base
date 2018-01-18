@@ -33,7 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"දැනට පවතින"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"දැනුම්දීම්"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"බැටරිය අඩුය"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"බැටරිය අඩුයි. බැටරි සුරැකුම ක්‍රියාත්මක කරන්න"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> ඉතිරිව තිබේ"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> ඉතිරිව ඇත, ඔබගේ භාවිතය මත පදනම්ව <xliff:g id="TIME">%s</xliff:g> පමණ"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> ඉතිරිව ඇත, <xliff:g id="TIME">%s</xliff:g> පමණ ඇත"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> ඉතිරිව ඇත. බැටරි සුරැකුම ක්‍රියාත්මකයි."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB ආරෝපණය සහය නොදක්වයි.\nසපයන ලද ආරෝපකය පමණක් භාවිතා කරන්න."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB ආරෝපණය කිරීම සහාය නොදක්වයි."</string>
@@ -67,14 +70,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"දැනට මෙම උපාංගයට පුරා ඇති පරිශීලකයාට USB නිදොස්කරණය ක්‍රියාත්මක කළ නොහැක. මෙම විශේෂාංගය භාවිතා කිරීම සඳහා, මූලික පරිශීලකයා වෙත මාරු වෙන්න."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"තිරය පිරවීමට විශාලනය කරන්න"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"තිරය පිරවීමට අදින්න"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"තිර රුව"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"තිර රුව සුරකිමින්…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"තිර රුව සුරැකෙමින් පවතී…"</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"තිර රුව සුරැකෙමින් පවතී."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"තිර රුව ග්‍රහණය කරන ලදි."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"ඔබගේ තිර රුව බැලීමට තට්ටු කරන්න."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"තිර රුව ග්‍රහණය කිරීමට නොහැකි විය."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"තිර රුව සුරකින අතරතුර ගැටලුවක් ඇති විය."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"සීමිත ගබඩා ඉඩ නිසා තිර රුව සුරැකිය නොහැකිය."</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"තිර රුව සුරකිමින් පවතී"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"තිර රුව සුරකින ලදී"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"ඔබගේ තිර රුව බැලීමට තට්ටු කරන්න"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"තිර රුව ග්‍රහණය කිරීමට නොහැකි විය"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"තිර රුව සුරකින අතරතුර ගැටලුවක් ඇති විය"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"සීමිත ගබඩා ඉඩ නිසා තිර රුව සුරැකිය නොහැකිය"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"තිර රූ ගැනීමට යෙදුම හෝ ඔබගේ සංවිධානය ඉඩ නොදේ"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ගොනු හුවමාරු විකල්ප"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"මධ්‍ය ධාවකයක් (MTP) ලෙස සවි කරන්න"</string>
@@ -557,26 +561,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ක්‍රියාවිරහිතයි"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"බල දැනුම්දීම් පාලන සමගින්, ඔබට යෙදුමක දැනුම්දීම් සඳහා වැදගත්කම 0 සිට 5 දක්වා සැකසිය හැකිය. \n\n"<b>"5 මට්ටම"</b>" \n- දැනුම්දීම් ලැයිස්තුවේ ඉහළින්ම පෙන්වන්න \n- පූර්ණ තිර බාධාවට ඉඩ දෙන්න \n- සැම විට එබී බලන්න \n\n"<b>"4 මට්ටම"</b>" \n- පූර්ණ තිර බාධාව වළක්වන්න \n- සැම විට එබී බලන්න \n\n"<b>"3 මට්ටම"</b>" \n- පූර්ණ තිර බාධාව වළක්වන්න \n- කිසි විටක එබී නොබලන්න \n\n"<b>"2 මට්ටම"</b>" \n- පූර්ණ තිර බාධාව වළක්වන්න \n- කිසි විටක එබී නොබලන්න \n- කිසි විටක හඬ සහ කම්පනය සිදු නොකරන්න \n\n"<b>"1 මට්ටම"</b>" \n- පූර්ණ තිර බාධාව වළක්වන්න \n- කිසි විටක එබී නොබලන්න \n- කිසි විටක හඬ සහ කම්පනය සිදු නොකරන්න \n- අගුලු තිරය සහ තත්ත්ව තීරුව වෙතින් සඟවන්න \n- දැනුම්දීම් ලැයිස්තුවේ පහළින්ම පෙන්වන්න \n\n"<b>"0 මට්ටම"</b>" \n- යෙදුම වෙතින් වන සියලු දැනුම් දීම් සඟවන්න."</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"දැනුම් දීම්"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"ඔබට තවදුරටත් මෙම දැනුම්දීම් නොලැබෙනු ඇත"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"දැනුම්දීම් කාණ්ඩ <xliff:g id="NUMBER">%d</xliff:g>ක්"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"මෙම යෙදුම හට දැනුම්දීම් ප්‍රවර්ග නොමැත"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"මෙම යෙදුම වෙතින් වන දැනුම්දීම් ක්‍රියාවිරහිත කළ නොහැකිය"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="one">මෙම යෙදුමෙන් දැනුම්දීම් ප්‍රවර්ග <xliff:g id="NUMBER_1">%s</xliff:g>න් 1ක්</item>
-      <item quantity="other">මෙම යෙදුමෙන් දැනුම්දීම් ප්‍රවර්ග <xliff:g id="NUMBER_1">%s</xliff:g>න් 1ක්</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g>, සහ තවත් <xliff:g id="NUMBER_5">%3$d</xliff:g>ක්</item>
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g>, සහ තවත් <xliff:g id="NUMBER_5">%3$d</xliff:g>ක්</item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"ඔබට තවදුරටත් මෙම දැනුම්දීම් නොදකිනු ඇත"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"මෙම දැනුම්දීම් පෙන්වමින් තබන්නද?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"දැනුම්දීම් නවත්වන්න"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"පෙන්වමින් තබන්න"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"මෙම යෙදුම වෙතින් දැනුම්දීම් පෙන්වමින් තබන්නද?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"මෙම දැනුම්දීම් ක්‍රියාවිරහිත කළ නොහැකිය"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා දැනුම්දීම් පාලන විවෘත කරන ලදී"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> සඳහා දැනුම්දීම් පාලන වසන ලදී"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"මෙම නාලිකාව වෙතින් දැනුම්දීම් සඳහා ඉඩ දෙන්න"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"සියලු ප්‍රවර්ග"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"තව සැකසීම්"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"අභිමත කරන්න: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"අභිරුචිකරණය"</string>
     <string name="notification_done" msgid="5279426047273930175">"නිමයි"</string>
+    <string name="inline_undo" msgid="558916737624706010">"පසුගමනය කරන්න"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"දැනුම්දීම් පාලන"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"දැනුම්දීම් මදක් නතර කිරීමේ විකල්ප"</string>
