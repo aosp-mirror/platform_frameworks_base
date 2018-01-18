@@ -25,6 +25,7 @@ import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_UID;
 import static android.net.ConnectivityManager.ACTION_TETHER_STATE_CHANGED;
 import static android.net.ConnectivityManager.isNetworkTypeMobile;
+import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.METERED_ALL;
 import static android.net.NetworkStats.ROAMING_ALL;
@@ -677,9 +678,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final NetworkStatsHistory.Entry entry = history.getValues(start, end, now, null);
 
         final NetworkStats stats = new NetworkStats(end - start, 1);
-        stats.addValues(new NetworkStats.Entry(IFACE_ALL, UID_ALL, SET_ALL, TAG_NONE, METERED_ALL,
-                ROAMING_ALL, entry.rxBytes, entry.rxPackets, entry.txBytes, entry.txPackets,
-                entry.operations));
+        stats.addValues(new NetworkStats.Entry(IFACE_ALL, UID_ALL, SET_ALL, TAG_NONE,
+                METERED_ALL, ROAMING_ALL, DEFAULT_NETWORK_ALL, entry.rxBytes, entry.rxPackets,
+                entry.txBytes, entry.txPackets, entry.operations));
         return stats;
     }
 

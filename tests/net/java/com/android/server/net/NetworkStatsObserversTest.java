@@ -18,6 +18,8 @@ package com.android.server.net;
 
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
+import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
+import static android.net.NetworkStats.DEFAULT_NETWORK_YES;
 import static android.net.NetworkStats.METERED_NO;
 import static android.net.NetworkStats.ROAMING_NO;
 import static android.net.NetworkStats.SET_DEFAULT;
@@ -344,7 +346,7 @@ public class NetworkStatsObserversTest {
         NetworkStats xtSnapshot = null;
         NetworkStats uidSnapshot = new NetworkStats(TEST_START, 2 /* initialSize */)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                        BASE_BYTES, 2L, BASE_BYTES, 2L, 0L);
+                        DEFAULT_NETWORK_YES, BASE_BYTES, 2L, BASE_BYTES, 2L, 0L);
         mStatsObservers.updateStats(
                 xtSnapshot, uidSnapshot, mActiveIfaces, mActiveUidIfaces,
                 VPN_INFO, TEST_START);
@@ -352,7 +354,8 @@ public class NetworkStatsObserversTest {
         // Delta
         uidSnapshot = new NetworkStats(TEST_START + 2 * MINUTE_IN_MILLIS, 2 /* initialSize */)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                        BASE_BYTES + THRESHOLD_BYTES, 2L, BASE_BYTES + THRESHOLD_BYTES, 2L, 0L);
+                        DEFAULT_NETWORK_NO, BASE_BYTES + THRESHOLD_BYTES, 2L,
+                        BASE_BYTES + THRESHOLD_BYTES, 2L, 0L);
         mStatsObservers.updateStats(
                 xtSnapshot, uidSnapshot, mActiveIfaces, mActiveUidIfaces,
                 VPN_INFO, TEST_START);
@@ -381,7 +384,7 @@ public class NetworkStatsObserversTest {
         NetworkStats xtSnapshot = null;
         NetworkStats uidSnapshot = new NetworkStats(TEST_START, 2 /* initialSize */)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                        BASE_BYTES, 2L, BASE_BYTES, 2L, 0L);
+                        DEFAULT_NETWORK_NO, BASE_BYTES, 2L, BASE_BYTES, 2L, 0L);
         mStatsObservers.updateStats(
                 xtSnapshot, uidSnapshot, mActiveIfaces, mActiveUidIfaces,
                 VPN_INFO, TEST_START);
@@ -389,7 +392,8 @@ public class NetworkStatsObserversTest {
         // Delta
         uidSnapshot = new NetworkStats(TEST_START + 2 * MINUTE_IN_MILLIS, 2 /* initialSize */)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                        BASE_BYTES + THRESHOLD_BYTES, 2L, BASE_BYTES + THRESHOLD_BYTES, 2L, 0L);
+                        DEFAULT_NETWORK_NO, BASE_BYTES + THRESHOLD_BYTES, 2L,
+                        BASE_BYTES + THRESHOLD_BYTES, 2L, 0L);
         mStatsObservers.updateStats(
                 xtSnapshot, uidSnapshot, mActiveIfaces, mActiveUidIfaces,
                 VPN_INFO, TEST_START);
@@ -417,7 +421,7 @@ public class NetworkStatsObserversTest {
         NetworkStats xtSnapshot = null;
         NetworkStats uidSnapshot = new NetworkStats(TEST_START, 2 /* initialSize */)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                        BASE_BYTES, 2L, BASE_BYTES, 2L, 0L);
+                        DEFAULT_NETWORK_YES, BASE_BYTES, 2L, BASE_BYTES, 2L, 0L);
         mStatsObservers.updateStats(
                 xtSnapshot, uidSnapshot, mActiveIfaces, mActiveUidIfaces,
                 VPN_INFO, TEST_START);
@@ -425,7 +429,8 @@ public class NetworkStatsObserversTest {
         // Delta
         uidSnapshot = new NetworkStats(TEST_START + 2 * MINUTE_IN_MILLIS, 2 /* initialSize */)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                        BASE_BYTES + THRESHOLD_BYTES, 2L, BASE_BYTES + THRESHOLD_BYTES, 2L, 0L);
+                        DEFAULT_NETWORK_YES, BASE_BYTES + THRESHOLD_BYTES, 2L,
+                        BASE_BYTES + THRESHOLD_BYTES, 2L, 0L);
         mStatsObservers.updateStats(
                 xtSnapshot, uidSnapshot, mActiveIfaces, mActiveUidIfaces,
                 VPN_INFO, TEST_START);
@@ -454,7 +459,7 @@ public class NetworkStatsObserversTest {
         NetworkStats xtSnapshot = null;
         NetworkStats uidSnapshot = new NetworkStats(TEST_START, 2 /* initialSize */)
                 .addValues(TEST_IFACE, UID_ANOTHER_USER, SET_DEFAULT, TAG_NONE, METERED_NO,
-                        ROAMING_NO, BASE_BYTES, 2L, BASE_BYTES, 2L, 0L);
+                        ROAMING_NO, DEFAULT_NETWORK_YES, BASE_BYTES, 2L, BASE_BYTES, 2L, 0L);
         mStatsObservers.updateStats(
                 xtSnapshot, uidSnapshot, mActiveIfaces, mActiveUidIfaces,
                 VPN_INFO, TEST_START);
@@ -462,8 +467,8 @@ public class NetworkStatsObserversTest {
         // Delta
         uidSnapshot = new NetworkStats(TEST_START + 2 * MINUTE_IN_MILLIS, 2 /* initialSize */)
                 .addValues(TEST_IFACE, UID_ANOTHER_USER, SET_DEFAULT, TAG_NONE, METERED_NO,
-                        ROAMING_NO, BASE_BYTES + THRESHOLD_BYTES, 2L, BASE_BYTES + THRESHOLD_BYTES,
-                        2L, 0L);
+                        ROAMING_NO, DEFAULT_NETWORK_NO, BASE_BYTES + THRESHOLD_BYTES, 2L,
+                        BASE_BYTES + THRESHOLD_BYTES, 2L, 0L);
         mStatsObservers.updateStats(
                 xtSnapshot, uidSnapshot, mActiveIfaces, mActiveUidIfaces,
                 VPN_INFO, TEST_START);
