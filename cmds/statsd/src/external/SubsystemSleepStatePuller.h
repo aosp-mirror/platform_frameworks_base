@@ -26,9 +26,9 @@ namespace statsd {
 /**
  * Reads hal for sleep states
  */
-class ResourcePowerManagerPuller : public StatsPuller {
+class SubsystemSleepStatePuller : public StatsPuller {
 public:
-    ResourcePowerManagerPuller(int tagId);
+    SubsystemSleepStatePuller();
     bool PullInternal(vector<std::shared_ptr<LogEvent>>* data) override;
 };
 

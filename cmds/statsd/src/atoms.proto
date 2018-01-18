@@ -94,9 +94,8 @@ message Atom {
         MobileBytesTransfer mobile_bytes_transfer = 10002;
         MobileBytesTransferByFgBg mobile_bytes_transfer_by_fg_bg = 10003;
         KernelWakelock kernel_wakelock = 10004;
-        PlatformSleepState platform_sleep_state = 10005;
-        SleepStateVoter sleep_state_voter = 10006;
-        SubsystemSleepState subsystem_sleep_state = 10007;
+        SubsystemSleepState subsystem_sleep_state = 10005;
+        // 10006 and 10007 are free to use.
         CpuTimePerFreq cpu_time_per_freq = 10008;
         CpuTimePerUid cpu_time_per_uid = 10009;
         CpuTimePerUidFreq cpu_time_per_uid_freq = 10010;
@@ -1027,44 +1026,21 @@ message KernelWakelock {
 }
 
 /**
- * Pulls PowerStatePlatformSleepState.
- *
- * Definition here:
+ * Pulls low power state information. This includes platform and subsystem sleep state information,
+ * PowerStatePlatformSleepState, PowerStateVoter or PowerStateSubsystemSleepState as defined in
  *   hardware/interfaces/power/1.0/types.hal
- */
-message PlatformSleepState {
-    optional string name = 1;
-    optional uint64 residency_in_msec_since_boot = 2;
-    optional uint64 total_transitions = 3;
-    optional bool supported_only_in_suspend = 4;
-}
-
-/**
- * Pulls PowerStateVoter.
- *
- * Definition here:
- *   hardware/interfaces/power/1.0/types.hal
- */
-message SleepStateVoter {
-    optional string platform_sleep_state_name = 1;
-    optional string voter_name = 2;
-    optional uint64 total_time_in_msec_voted_for_since_boot = 3;
-    optional uint64 total_number_of_times_voted_since_boot = 4;
-}
-
-/**
- * Pulls PowerStateSubsystemSleepState.
- *
- * Definition here:
  *   hardware/interfaces/power/1.1/types.hal
  */
 message SubsystemSleepState {
-    optional string subsystem_name = 1;
-    optional string subsystem_sleep_state_name = 2;
-    optional uint64 residency_in_msec_since_boot = 3;
-    optional uint64 total_transitions = 4;
-    optional uint64 last_entry_timestamp_ms = 5;
-    optional bool supported_only_in_suspend = 6;
+    // Name should be in the format of XXX.YYY where XXX is subsystem name,
+    // YYY is corresponding voter name.
+    // If there are no voters, the format should just be XXX (with no dot).
+    // XXX and YYY should not contain a "." in it.
+    optional string name = 1;
+    // The number of times it entered, or voted for entering the sleep state
+    optional uint64 count = 2;
+    // The length of time spent in, or spent voting for, the sleep state
+    optional uint64 timeMs = 3;
 }
 
 /**

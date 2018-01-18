@@ -66,8 +66,6 @@ std::map<int, long> StatsdStats::kPullerCooldownMap = {
         {android::util::MOBILE_BYTES_TRANSFER, 1},
         {android::util::WIFI_BYTES_TRANSFER_BY_FG_BG, 1},
         {android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG, 1},
-        {android::util::PLATFORM_SLEEP_STATE, 1},
-        {android::util::SLEEP_STATE_VOTER, 1},
         {android::util::SUBSYSTEM_SLEEP_STATE, 1},
         {android::util::CPU_TIME_PER_FREQ, 1},
         {android::util::CPU_TIME_PER_UID, 1},
