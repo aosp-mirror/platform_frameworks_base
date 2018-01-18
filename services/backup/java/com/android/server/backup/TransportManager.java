@@ -62,8 +62,16 @@ public class TransportManager {
     private final PackageManager mPackageManager;
     private final Set<ComponentName> mTransportWhitelist;
     private final TransportClientManager mTransportClientManager;
-    private final Object mTransportLock = new Object();
     private OnTransportRegisteredListener mOnTransportRegisteredListener = (c, n) -> {};
+
+    /**
+     * Lock for registered transports and currently selected transport.
+     *
+     * <p><b>Warning:</b> No calls to {@link IBackupTransport} or calls that result in transport
+     * code being executed such as {@link TransportClient#connect(String)}} and its variants should
+     * be made with this lock held, risk of deadlock.
+     */
+    private final Object mTransportLock = new Object();
 
     /** @see #getRegisteredTransportNames() */
     @GuardedBy("mTransportLock")
@@ -109,15 +117,16 @@ public class TransportManager {
 
     @WorkerThread
     void onPackageChanged(String packageName, String... components) {
+        // Unfortunately this can't be atomic because we risk a deadlock if
+        // registerTransportsFromPackage() is put inside the synchronized block
+        Set<ComponentName> transportComponents =
+                Stream.of(components)
+                        .map(component -> new ComponentName(packageName, component))
+                        .collect(Collectors.toSet());
         synchronized (mTransportLock) {
-            Set<ComponentName> transportComponents =
-                    Stream.of(components)
-                            .map(component -> new ComponentName(packageName, component))
-                            .collect(Collectors.toSet());
-
             mRegisteredTransportsDescriptionMap.keySet().removeIf(transportComponents::contains);
-            registerTransportsFromPackage(packageName, transportComponents::contains);
         }
+        registerTransportsFromPackage(packageName, transportComponents::contains);
     }
 
     /**
@@ -263,6 +272,9 @@ public class TransportManager {
      * This is called with an internal lock held, ensuring that the transport will remain registered
      * while {@code transportConsumer} is being executed. Don't do heavy operations in {@code
      * transportConsumer}.
+     *
+     * <p><b>Warning:</b> Do NOT make any calls to {@link IBackupTransport} or call any variants of
+     * {@link TransportClient#connect(String)} here, otherwise you risk deadlock.
      */
     public void forEachRegisteredTransport(Consumer<String> transportConsumer) {
         synchronized (mTransportLock) {
@@ -465,20 +477,27 @@ public class TransportManager {
      */
     @WorkerThread
     public int registerAndSelectTransport(ComponentName transportComponent) {
+        // If it's already registered we select and return
         synchronized (mTransportLock) {
-            if (!mRegisteredTransportsDescriptionMap.containsKey(transportComponent)) {
-                int result = registerTransport(transportComponent);
-                if (result != BackupManager.SUCCESS) {
-                    return result;
-                }
-            }
-
             try {
                 selectTransport(getTransportName(transportComponent));
                 return BackupManager.SUCCESS;
             } catch (TransportNotRegisteredException e) {
-                // Shouldn't happen because we are holding the lock
-                Slog.wtf(TAG, "Transport unexpectedly not registered");
+                // Fall through and release lock
+            }
+        }
+
+        // We can't call registerTransport() with the transport lock held
+        int result = registerTransport(transportComponent);
+        if (result != BackupManager.SUCCESS) {
+            return result;
+        }
+        synchronized (mTransportLock) {
+            try {
+                selectTransport(getTransportName(transportComponent));
+                return BackupManager.SUCCESS;
+            } catch (TransportNotRegisteredException e) {
+                Slog.wtf(TAG, "Transport got unregistered");
                 return BackupManager.ERROR_TRANSPORT_UNAVAILABLE;
             }
         }
@@ -512,13 +531,11 @@ public class TransportManager {
         if (hosts == null) {
             return;
         }
-        synchronized (mTransportLock) {
-            for (ResolveInfo host : hosts) {
-                ComponentName transportComponent = host.serviceInfo.getComponentName();
-                if (transportComponentFilter.test(transportComponent)
-                        && isTransportTrusted(transportComponent)) {
-                    registerTransport(transportComponent);
-                }
+        for (ResolveInfo host : hosts) {
+            ComponentName transportComponent = host.serviceInfo.getComponentName();
+            if (transportComponentFilter.test(transportComponent)
+                    && isTransportTrusted(transportComponent)) {
+                registerTransport(transportComponent);
             }
         }
     }
@@ -547,22 +564,24 @@ public class TransportManager {
     /**
      * Tries to register transport represented by {@code transportComponent}.
      *
+     * <p><b>Warning:</b> Don't call this with the transport lock held.
+     *
      * @param transportComponent Host of the transport that we want to register.
      * @return One of {@link BackupManager#SUCCESS}, {@link BackupManager#ERROR_TRANSPORT_INVALID}
      *     or {@link BackupManager#ERROR_TRANSPORT_UNAVAILABLE}.
      */
     @WorkerThread
     private int registerTransport(ComponentName transportComponent) {
+        checkCanUseTransport();
+
         if (!isTransportTrusted(transportComponent)) {
             return BackupManager.ERROR_TRANSPORT_INVALID;
         }
 
         String transportString = transportComponent.flattenToShortString();
-
         String callerLogString = "TransportManager.registerTransport()";
         TransportClient transportClient =
                 mTransportClientManager.getTransportClient(transportComponent, callerLogString);
-
         final IBackupTransport transport;
         try {
             transport = transportClient.connectOrThrow(callerLogString);
@@ -593,18 +612,24 @@ public class TransportManager {
     /** If {@link RemoteException} is thrown the transport is guaranteed to not be registered. */
     private void registerTransport(ComponentName transportComponent, IBackupTransport transport)
             throws RemoteException {
+        checkCanUseTransport();
+
+        TransportDescription description =
+                new TransportDescription(
+                        transport.name(),
+                        transport.transportDirName(),
+                        transport.configurationIntent(),
+                        transport.currentDestinationString(),
+                        transport.dataManagementIntent(),
+                        transport.dataManagementLabel());
         synchronized (mTransportLock) {
-            String name = transport.name();
-            TransportDescription description =
-                    new TransportDescription(
-                            name,
-                            transport.transportDirName(),
-                            transport.configurationIntent(),
-                            transport.currentDestinationString(),
-                            transport.dataManagementIntent(),
-                            transport.dataManagementLabel());
             mRegisteredTransportsDescriptionMap.put(transportComponent, description);
         }
+    }
+
+    private void checkCanUseTransport() {
+        Preconditions.checkState(
+                !Thread.holdsLock(mTransportLock), "Can't call transport with transport lock held");
     }
 
     private static Predicate<ComponentName> fromPackageFilter(String packageName) {

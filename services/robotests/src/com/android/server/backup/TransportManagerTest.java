@@ -19,9 +19,13 @@ package com.android.server.backup;
 import static com.android.server.backup.testing.TransportData.genericTransport;
 import static com.android.server.backup.testing.TransportTestUtils.mockTransport;
 import static com.android.server.backup.testing.TransportTestUtils.setUpTransportsForTransportManager;
-
 import static com.google.common.truth.Truth.assertThat;
-
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Stream.concat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -31,23 +35,15 @@ import static org.mockito.Mockito.when;
 import static org.robolectric.shadow.api.Shadow.extract;
 import static org.testng.Assert.expectThrows;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-import static java.util.stream.Stream.concat;
-
 import android.annotation.Nullable;
+import android.app.backup.BackupManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.platform.test.annotations.Presubmit;
-
 import com.android.server.backup.testing.ShadowContextImplForBackup;
-import com.android.server.testing.shadows.FrameworkShadowPackageManager;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
 import com.android.server.backup.transport.OnTransportRegisteredListener;
@@ -57,7 +53,12 @@ import com.android.server.backup.transport.TransportNotRegisteredException;
 import com.android.server.testing.FrameworkRobolectricTestRunner;
 import com.android.server.testing.SystemLoaderClasses;
 import com.android.server.testing.shadows.FrameworkShadowContextImpl;
-
+import com.android.server.testing.shadows.FrameworkShadowPackageManager;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Stream;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,12 +68,6 @@ import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowPackageManager;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Stream;
 
 @RunWith(FrameworkRobolectricTestRunner.class)
 @Config(
@@ -305,6 +300,43 @@ public class TransportManagerTest {
                 .onTransportRegistered(mTransportA1.transportName, mTransportA1.transportDirName);
         verify(mListener)
                 .onTransportRegistered(mTransportA2.transportName, mTransportA2.transportDirName);
+    }
+
+    @Test
+    public void testRegisterAndSelectTransport_whenTransportRegistered() throws Exception {
+        setUpPackage(PACKAGE_A, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
+        setUpTransports(mTransportA1);
+        TransportManager transportManager = createTransportManager(null, mTransportA1);
+        transportManager.registerTransports();
+        ComponentName transportComponent = mTransportA1.getTransportComponent();
+
+        int result = transportManager.registerAndSelectTransport(transportComponent);
+
+        assertThat(result).isEqualTo(BackupManager.SUCCESS);
+        assertThat(transportManager.getRegisteredTransportComponents())
+                .asList()
+                .contains(transportComponent);
+        assertThat(transportManager.getCurrentTransportName())
+                .isEqualTo(mTransportA1.transportName);
+    }
+
+    @Test
+    public void testRegisterAndSelectTransport_whenTransportNotRegistered() throws Exception {
+        setUpPackage(PACKAGE_A, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
+        setUpTransports(mTransportA1);
+        TransportManager transportManager = createTransportManager(null, mTransportA1);
+        ComponentName transportComponent = mTransportA1.getTransportComponent();
+
+        int result = transportManager.registerAndSelectTransport(transportComponent);
+
+        assertThat(result).isEqualTo(BackupManager.SUCCESS);
+        assertThat(transportManager.getRegisteredTransportComponents())
+                .asList()
+                .contains(transportComponent);
+        assertThat(transportManager.getTransportDirName(mTransportA1.transportName))
+                .isEqualTo(mTransportA1.transportDirName);
+        assertThat(transportManager.getCurrentTransportName())
+                .isEqualTo(mTransportA1.transportName);
     }
 
     @Test
