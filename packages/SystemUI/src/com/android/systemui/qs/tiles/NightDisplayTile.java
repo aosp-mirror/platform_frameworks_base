@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.Intent;
 import android.provider.Settings;
@@ -29,8 +30,16 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
+import java.time.format.DateTimeFormatter;
+
 public class NightDisplayTile extends QSTileImpl<BooleanState>
         implements ColorDisplayController.Callback {
+
+    /**
+     * Pattern for {@link java.time.format.DateTimeFormatter} used to approximate the time to the
+     * nearest hour and add on the AM/PM indicator.
+     */
+    private static final String APPROXIMATE_HOUR_DATE_TIME_PATTERN = "H a";
 
     private ColorDisplayController mController;
     private boolean mIsListening;
@@ -74,13 +83,49 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
 
     @Override
     protected void handleUpdateState(BooleanState state, Object arg) {
-        final boolean isActivated = mController.isActivated();
-        state.value = isActivated;
+        state.value = mController.isActivated();
         state.label = state.contentDescription =
                 mContext.getString(R.string.quick_settings_night_display_label);
         state.icon = ResourceIcon.get(R.drawable.ic_qs_night_display_on);
         state.expandedAccessibilityClassName = Switch.class.getName();
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
+        state.secondaryLabel = getSecondaryLabel(state.value);
+    }
+
+    /**
+     * Returns a {@link String} for the secondary label that reflects when the light will be turned
+     * on or off based on the current auto mode and night light activated status.
+     */
+    @Nullable
+    private String getSecondaryLabel(boolean isNightLightActivated) {
+        switch(mController.getAutoMode()) {
+            case ColorDisplayController.AUTO_MODE_TWILIGHT:
+                // Auto mode related to sunrise & sunset. If the light is on, it's guaranteed to be
+                // turned off at sunrise. If it's off, it's guaranteed to be turned on at sunset.
+                return isNightLightActivated
+                        ? mContext.getString(
+                                R.string.quick_settings_night_secondary_label_until_sunrise)
+                        : mContext.getString(
+                                R.string.quick_settings_night_secondary_label_on_at_sunset);
+
+            case ColorDisplayController.AUTO_MODE_CUSTOM:
+                // User-specified time, approximated to the nearest hour.
+                return isNightLightActivated
+                        ? mContext.getString(
+                                R.string.quick_settings_night_secondary_label_until,
+                                mController.getCustomEndTime().format(
+                                        DateTimeFormatter.ofPattern(
+                                                APPROXIMATE_HOUR_DATE_TIME_PATTERN)))
+                        : mContext.getString(
+                                R.string.quick_settings_night_secondary_label_on_at,
+                                mController.getCustomStartTime().format(
+                                        DateTimeFormatter.ofPattern(
+                                                APPROXIMATE_HOUR_DATE_TIME_PATTERN)));
+
+            default:
+                // No secondary label when auto mode is disabled.
+                return null;
+        }
     }
 
     @Override
