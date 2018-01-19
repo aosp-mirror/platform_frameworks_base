@@ -9700,6 +9700,14 @@ public final class Settings {
         public static final String SYS_VDSO = "sys_vdso";
 
         /**
+         * An integer to reduce the FPS by this factor. Only for experiments. Need to reboot the
+         * device for this setting to take full effect.
+         *
+         * @hide
+         */
+        public static final String FPS_DEVISOR = "fps_divisor";
+
+        /**
          * App standby (app idle) specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          * <p>

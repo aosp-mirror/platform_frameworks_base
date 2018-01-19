@@ -23,6 +23,7 @@ import android.os.SystemProperties;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
+import android.view.ThreadedRenderer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
@@ -39,6 +40,7 @@ class GlobalSettingsToPropertiesMapper {
     //  List mapping entries in the following format:
     //  {Settings.Global.SETTING_NAME, "system_property_name"},
         {Settings.Global.SYS_VDSO, "sys.vdso"},
+        {Settings.Global.FPS_DEVISOR, ThreadedRenderer.DEBUG_FPS_DIVISOR},
     };
 
 
