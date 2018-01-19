@@ -58,26 +58,9 @@ create_directory(const char* directory)
                 goto done;
             }
         } else {
-            if (mkdir(dir, 0770)) {
-                ALOGE("No incident reports today. "
-                        "Unable to create incident report dir %s: %s", dir,
-                        strerror(errno));
-                err = -errno;
-                goto done;
-            }
-            if (chmod(dir, 0770)) {
-                ALOGE("No incident reports today. "
-                        "Unable to set permissions for incident report dir %s: %s", dir,
-                        strerror(errno));
-                err = -errno;
-                goto done;
-            }
-            if (chown(dir, AID_SYSTEM, AID_SYSTEM)) {
-                ALOGE("No incident reports today. Unable to change ownership of dir %s: %s\n",
-                        dir, strerror(errno));
-                err = -errno;
-                goto done;
-            }
+            ALOGE("No such directory %s, something wrong.", dir);
+            err = -1;
+            goto done;
         }
         if (!last) {
             *d++ = '/';
@@ -97,8 +80,7 @@ create_directory(const char* directory)
         err = BAD_VALUE;
         goto done;
     }
-    if ((st.st_uid != AID_SYSTEM && st.st_uid != AID_ROOT) ||
-        (st.st_gid != AID_SYSTEM && st.st_gid != AID_ROOT)) {
+    if (st.st_uid != AID_INCIDENTD || st.st_gid != AID_INCIDENTD) {
         ALOGE("No incident reports today. Owner is %d and group is %d on report directory %s",
                 st.st_uid, st.st_gid, directory);
         err = BAD_VALUE;

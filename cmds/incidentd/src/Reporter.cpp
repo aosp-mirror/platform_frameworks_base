@@ -251,7 +251,7 @@ Reporter::create_file(int* fd)
     // Override umask. Not super critical. If it fails go on with life.
     chmod(filename, 0660);
 
-    if (chown(filename, AID_SYSTEM, AID_SYSTEM)) {
+    if (chown(filename, AID_INCIDENTD, AID_INCIDENTD)) {
         ALOGE("Unable to change ownership of incident file %s: %s\n", filename, strerror(errno));
         status_t err = -errno;
         unlink(mFilename.c_str());

@@ -102,6 +102,7 @@ public final class DumpUtils {
             case android.os.Process.ROOT_UID:
             case android.os.Process.SYSTEM_UID:
             case android.os.Process.SHELL_UID:
+            case android.os.Process.INCIDENTD_UID:
                 return true;
         }
 

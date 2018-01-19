@@ -63,12 +63,14 @@ FdBuffer::read(int fd, int64_t timeout)
 
         int64_t remainingTime = (mStartTime + timeout) - uptimeMillis();
         if (remainingTime <= 0) {
+            if (DEBUG) ALOGD("timed out due to long read");
             mTimedOut = true;
             break;
         }
 
         int count = poll(&pfds, 1, remainingTime);
         if (count == 0) {
+            if (DEBUG) ALOGD("timed out due to block calling poll");
             mTimedOut = true;
             break;
         } else if (count < 0) {
@@ -129,6 +131,7 @@ FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeou
 
         int64_t remainingTime = (mStartTime + timeoutMs) - uptimeMillis();
         if (remainingTime <= 0) {
+            if (DEBUG) ALOGD("timed out due to long read");
             mTimedOut = true;
             break;
         }
@@ -136,6 +139,7 @@ FdBuffer::readProcessedDataInStream(int fd, int toFd, int fromFd, int64_t timeou
         // wait for any pfds to be ready to perform IO
         int count = poll(pfds, 3, remainingTime);
         if (count == 0) {
+            if (DEBUG) ALOGD("timed out due to block calling poll");
             mTimedOut = true;
             break;
         } else if (count < 0) {
