@@ -391,7 +391,9 @@ public final class JobStatus {
         int standbyBucket = JobSchedulerService.standbyBucketForPackage(jobPackage,
                 sourceUserId, elapsedNow);
         JobSchedulerInternal js = LocalServices.getService(JobSchedulerInternal.class);
-        long currentHeartbeat = js != null ? js.currentHeartbeat() : 0;
+        long currentHeartbeat = js != null
+                ? js.baseHeartbeatForApp(jobPackage, sourceUserId, standbyBucket)
+                : 0;
         return new JobStatus(job, callingUid, sourcePkg, sourceUserId,
                 standbyBucket, currentHeartbeat, tag, 0,
                 earliestRunTimeElapsedMillis, latestRunTimeElapsedMillis,
