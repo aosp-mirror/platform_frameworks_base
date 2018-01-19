@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2018 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License
+  -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="bottom"
+    android:background="@color/fingerprint_dialog_dim_color"
+    android:orientation="vertical">
+
+    <!-- This is not a Space since Spaces cannot be clicked -->
+    <View
+        android:id="@+id/space"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
+    <LinearLayout
+        android:id="@+id/dialog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:elevation="2dp"
+        android:background="@drawable/fingerprint_dialog_bg">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:elevation="2dp">
+
+            <ImageView
+                android:id="@+id/icon"
+                android:layout_width="@dimen/fingerprint_dialog_icon_size"
+                android:layout_height="@dimen/fingerprint_dialog_icon_size"
+                android:layout_marginTop="16dp"
+                android:layout_marginStart="16dp"
+                android:scaleType="centerInside" />
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/icon"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:textSize="20sp"
+                android:maxLines="1"
+                android:singleLine="true"
+                android:ellipsize="marquee"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:textColor="@color/fingerprint_dialog_text_color"/>
+
+            <TextView
+                android:id="@+id/subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/icon"
+                android:layout_below="@+id/title"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="4dp"
+                android:textSize="12sp"
+                android:maxLines="2"
+                android:textColor="@color/fingerprint_dialog_text_color"/>
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginStart="16dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="20dp"
+            android:textSize="16sp"
+            android:maxLines="4"
+            android:textColor="@color/fingerprint_dialog_text_color"/>
+
+        <ImageView
+            android:id="@+id/fingerprint_icon"
+            android:layout_width="@dimen/fingerprint_dialog_fp_icon_size"
+            android:layout_height="@dimen/fingerprint_dialog_fp_icon_size"
+            android:layout_gravity="center_horizontal"
+            android:scaleType="centerInside"
+            android:src="@drawable/fingerprint_icon"/>
+
+        <TextView
+            android:id="@+id/error"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd = "16dp"
+            android:layout_marginStart="16dp"
+            android:paddingTop="16dp"
+            android:paddingBottom="60dp"
+            android:textSize="12sp"
+            android:visibility="invisible"
+            android:gravity="center_horizontal"
+            android:textColor="@color/fingerprint_error_message_color"/>
+
+        <LinearLayout android:id="@+id/buttonPanel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="54dip"
+            android:orientation="vertical" >
+            <LinearLayout
+                style="?android:attr/buttonBarStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="4dip"
+                android:paddingStart="2dip"
+                android:paddingEnd="2dip"
+                android:measureWithLargestChild="true">
+                <LinearLayout android:id="@+id/leftSpacer"
+                    android:layout_weight="0.25"
+                    android:layout_width="0dip"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:visibility="gone" />
+                <!-- Positive Button -->
+                <Button android:id="@+id/button1"
+                    android:layout_width="0dip"
+                    android:layout_gravity="start"
+                    android:layout_weight="1"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:maxLines="2"
+                    android:layout_height="wrap_content"/>
+                <!-- Negative Button -->
+                <Button android:id="@+id/button2"
+                    android:layout_width="0dip"
+                    android:layout_gravity="end"
+                    android:layout_weight="1"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:maxLines="2"
+                    android:layout_height="wrap_content" />
+                <LinearLayout android:id="@+id/rightSpacer"
+                    android:layout_width="0dip"
+                    android:layout_weight="0.25"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
