@@ -270,6 +270,9 @@ def parse_fonts_xml(fonts_xml_path):
             if index:
                 index = int(index)
 
+            if not path.exists(path.join(_fonts_dir, font_file)):
+                continue # Missing font is a valid case. Just ignore the missing font files.
+
             record = FontRecord(
                 name,
                 frozenset(scripts),
