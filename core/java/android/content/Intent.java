@@ -3511,10 +3511,81 @@ public class Intent implements Parcelable, Cloneable {
      * For more details see TelephonyIntents.ACTION_SIM_STATE_CHANGED. This is here
      * because TelephonyIntents is an internal class.
      * @hide
+     * @deprecated Use {@link #ACTION_SIM_CARD_STATE_CHANGED} or
+     * {@link #ACTION_SIM_APPLICATION_STATE_CHANGED}
      */
+    @Deprecated
     @SystemApi
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SIM_STATE_CHANGED = "android.intent.action.SIM_STATE_CHANGED";
+
+    /**
+     * Broadcast Action: The sim card state has changed.
+     * The intent will have the following extra values:</p>
+     * <dl>
+     *   <dt>{@link android.telephony.TelephonyManager.EXTRA_SIM_STATE}</dt>
+     *   <dd>The sim card state. One of:
+     *     <dl>
+     *       <dt>{@link android.telephony.TelephonyManager.SIM_STATE_ABSENT}</dt>
+     *       <dd>SIM card not found</dd>
+     *       <dt>{@link android.telephony.TelephonyManager.SIM_STATE_CARD_IO_ERROR}</dt>
+     *       <dd>SIM card IO error</dd>
+     *       <dt>{@link android.telephony.TelephonyManager.SIM_STATE_CARD_RESTRICTED}</dt>
+     *       <dd>SIM card is restricted</dd>
+     *       <dt>{@link android.telephony.TelephonyManager.SIM_STATE_PRESENT}</dt>
+     *       <dd>SIM card is present</dd>
+     *     </dl>
+     *   </dd>
+     * </dl>
+     *
+     * <p class="note">Requires the READ_PRIVILEGED_PHONE_STATE permission.
+     *
+     * <p class="note">The current state can also be queried using
+     * {@link android.telephony.TelephonyManager.getSimCardState()}
+     *
+     * <p class="note">This is a protected intent that can only be sent by the system.
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SIM_CARD_STATE_CHANGED =
+            "android.intent.action.SIM_CARD_STATE_CHANGED";
+
+    /**
+     * Broadcast Action: The sim application state has changed.
+     * The intent will have the following extra values:</p>
+     * <dl>
+     *   <dt>{@link android.telephony.TelephonyManager.EXTRA_SIM_STATE}</dt>
+     *   <dd>The sim application state. One of:
+     *     <dl>
+     *       <dt>{@link android.telephony.TelephonyManager.SIM_STATE_NOT_READY}</dt>
+     *       <dd>SIM card applications not ready</dd>
+     *       <dt>{@link android.telephony.TelephonyManager.SIM_STATE_PIN_REQUIRED}</dt>
+     *       <dd>SIM card PIN locked</dd>
+     *       <dt>{@link android.telephony.TelephonyManager.SIM_STATE_PUK_REQUIRED}</dt>
+     *       <dd>SIM card PUK locked</dd>
+     *       <dt>{@link android.telephony.TelephonyManager.SIM_STATE_NETWORK_LOCKED}</dt>
+     *       <dd>SIM card network locked</dd>
+     *       <dt>{@link android.telephony.TelephonyManager.SIM_STATE_PERM_DISABLED}</dt>
+     *       <dd>SIM card permanently disabled due to PUK failures</dd>
+     *       <dt>{@link android.telephony.TelephonyManager.SIM_STATE_LOADED}</dt>
+     *       <dd>SIM card data loaded</dd>
+     *     </dl>
+     *   </dd>
+     * </dl>
+     *
+     * <p class="note">Requires the READ_PRIVILEGED_PHONE_STATE permission.
+     *
+     * <p class="note">The current state can also be queried using
+     * {@link android.telephony.TelephonyManager.getSimApplicationState()}
+     *
+     * <p class="note">This is a protected intent that can only be sent by the system.
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SIM_APPLICATION_STATE_CHANGED =
+            "android.intent.action.SIM_APPLICATION_STATE_CHANGED";
 
     /**
      * Broadcast Action: indicate that the phone service state has changed.
