@@ -16,6 +16,7 @@ service statsd /system/bin/statsd
     class main
     user statsd
     group statsd log
+    writepid /dev/cpuset/system-background/tasks
 
 on post-fs-data
     # Create directory for statsd
