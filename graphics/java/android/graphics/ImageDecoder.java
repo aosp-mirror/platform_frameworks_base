@@ -33,6 +33,8 @@ import android.graphics.drawable.NinePatchDrawable;
 import android.net.Uri;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.util.DisplayMetrics;
+import android.util.TypedValue;
 
 import libcore.io.IoUtils;
 import dalvik.system.CloseGuard;
@@ -62,6 +64,19 @@ public final class ImageDecoder implements AutoCloseable {
     public static abstract class Source {
         /* @hide */
         Resources getResources() { return null; }
+
+        /* @hide */
+        int getDensity() { return Bitmap.DENSITY_NONE; }
+
+        /* @hide */
+        int computeDstDensity() {
+            Resources res = getResources();
+            if (res == null) {
+                return Bitmap.getDefaultDensity();
+            }
+
+            return res.getDisplayMetrics().densityDpi;
+        }
 
         /* @hide */
         abstract ImageDecoder createImageDecoder() throws IOException;
@@ -170,17 +185,56 @@ public final class ImageDecoder implements AutoCloseable {
         return decoder;
     }
 
+    private static class InputStreamSource extends Source {
+        InputStreamSource(Resources res, InputStream is, int inputDensity) {
+            if (is == null) {
+                throw new IllegalArgumentException("The InputStream cannot be null");
+            }
+            mResources = res;
+            mInputStream = is;
+            mInputDensity = res != null ? inputDensity : Bitmap.DENSITY_NONE;
+        }
+
+        final Resources mResources;
+        InputStream mInputStream;
+        final int mInputDensity;
+
+        @Override
+        public Resources getResources() { return mResources; }
+
+        @Override
+        public int getDensity() { return mInputDensity; }
+
+        @Override
+        public ImageDecoder createImageDecoder() throws IOException {
+
+            synchronized (this) {
+                if (mInputStream == null) {
+                    throw new IOException("Cannot reuse InputStreamSource");
+                }
+                InputStream is = mInputStream;
+                mInputStream = null;
+                return createFromStream(is);
+            }
+        }
+    }
+
     private static class ResourceSource extends Source {
         ResourceSource(Resources res, int resId) {
             mResources = res;
             mResId = resId;
+            mResDensity = Bitmap.DENSITY_NONE;
         }
 
         final Resources mResources;
         final int       mResId;
+        int             mResDensity;
 
         @Override
         public Resources getResources() { return mResources; }
+
+        @Override
+        public int getDensity() { return mResDensity; }
 
         @Override
         public ImageDecoder createImageDecoder() throws IOException {
@@ -188,8 +242,16 @@ public final class ImageDecoder implements AutoCloseable {
             // keep it alive. FIXME: Can we skip creating this object?
             InputStream is = null;
             ImageDecoder decoder = null;
+            TypedValue value = new TypedValue();
             try {
-                is = mResources.openRawResource(mResId);
+                is = mResources.openRawResource(mResId, value);
+
+                if (value.density == TypedValue.DENSITY_DEFAULT) {
+                    mResDensity = DisplayMetrics.DENSITY_DEFAULT;
+                } else if (value.density != TypedValue.DENSITY_NONE) {
+                    mResDensity = value.density;
+                }
+
                 if (!(is instanceof AssetManager.AssetInputStream)) {
                     // This should never happen.
                     throw new RuntimeException("Resource is not an asset?");
@@ -421,6 +483,22 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     /**
+     * Internal API used to generate bitmaps for use by Drawables (i.e. BitmapDrawable)
+     * @hide
+     */
+    public static Source createSource(Resources res, InputStream is) {
+        return new InputStreamSource(res, is, Bitmap.getDefaultDensity());
+    }
+
+    /**
+     * Internal API used to generate bitmaps for use by Drawables (i.e. BitmapDrawable)
+     * @hide
+     */
+    public static Source createSource(Resources res, InputStream is, int density) {
+        return new InputStreamSource(res, is, density);
+    }
+
+    /**
      *  Return the width and height of a given sample size.
      *
      *  This takes an input that functions like
@@ -474,6 +552,10 @@ public final class ImageDecoder implements AutoCloseable {
     public void resize(int sampleSize) {
         Point dimensions = this.getSampledSize(sampleSize);
         this.resize(dimensions.x, dimensions.y);
+    }
+
+    private boolean requestedResize() {
+        return mWidth != mDesiredWidth || mHeight != mDesiredHeight;
     }
 
     // These need to stay in sync with ImageDecoder.cpp's Allocator enum.
@@ -730,6 +812,9 @@ public final class ImageDecoder implements AutoCloseable {
                                                 "Drawable!");
             }
 
+            // this call potentially manipulates the decoder so it must be performed prior to
+            // decoding the bitmap and after decode set the density on the resulting bitmap
+            final int srcDensity = computeDensity(src, decoder);
             if (decoder.mAnimated) {
                 // AnimatedImageDrawable calls postProcessAndRelease only if
                 // mPostProcess exists.
@@ -737,7 +822,8 @@ public final class ImageDecoder implements AutoCloseable {
                         null : decoder;
                 Drawable d = new AnimatedImageDrawable(decoder.mNativePtr,
                         postProcessPtr, decoder.mDesiredWidth,
-                        decoder.mDesiredHeight, decoder.mCropRect,
+                        decoder.mDesiredHeight, srcDensity,
+                        src.computeDstDensity(), decoder.mCropRect,
                         decoder.mInputStream, decoder.mAssetFd);
                 // d has taken ownership of these objects.
                 decoder.mInputStream = null;
@@ -746,13 +832,15 @@ public final class ImageDecoder implements AutoCloseable {
             }
 
             Bitmap bm = decoder.decodeBitmap();
-            Resources res = src.getResources();
-            if (res == null) {
-                bm.setDensity(Bitmap.DENSITY_NONE);
-            }
+            bm.setDensity(srcDensity);
 
+            Resources res = src.getResources();
             byte[] np = bm.getNinePatchChunk();
             if (np != null && NinePatch.isNinePatchChunk(np)) {
+                if (res != null) {
+                    bm.setDensity(res.getDisplayMetrics().densityDpi);
+                }
+
                 Rect opticalInsets = new Rect();
                 bm.getOpticalInsets(opticalInsets);
                 Rect padding = new Rect();
@@ -799,8 +887,46 @@ public final class ImageDecoder implements AutoCloseable {
                 }
             }
 
-            return decoder.decodeBitmap();
+            // this call potentially manipulates the decoder so it must be performed prior to
+            // decoding the bitmap
+            final int srcDensity = computeDensity(src, decoder);
+            Bitmap bm = decoder.decodeBitmap();
+            bm.setDensity(srcDensity);
+            return bm;
         }
+    }
+
+    // This method may modify the decoder so it must be called prior to performing the decode
+    private static int computeDensity(@NonNull Source src, @NonNull ImageDecoder decoder) {
+        // if the caller changed the size then we treat the density as unknown
+        if (decoder.requestedResize()) {
+            return Bitmap.DENSITY_NONE;
+        }
+
+        // Special stuff for compatibility mode: if the target density is not
+        // the same as the display density, but the resource -is- the same as
+        // the display density, then don't scale it down to the target density.
+        // This allows us to load the system's density-correct resources into
+        // an application in compatibility mode, without scaling those down
+        // to the compatibility density only to have them scaled back up when
+        // drawn to the screen.
+        Resources res = src.getResources();
+        final int srcDensity = src.getDensity();
+        if (res != null && res.getDisplayMetrics().noncompatDensityDpi == srcDensity) {
+            return srcDensity;
+        }
+
+        // downscale the bitmap if the asset has a higher density than the default
+        final int dstDensity = src.computeDstDensity();
+        if (srcDensity != Bitmap.DENSITY_NONE && srcDensity > dstDensity) {
+            float scale = (float) dstDensity / srcDensity;
+            int scaledWidth = (int) (decoder.mWidth * scale + 0.5f);
+            int scaledHeight = (int) (decoder.mHeight * scale + 0.5f);
+            decoder.resize(scaledWidth, scaledHeight);
+            return dstDensity;
+        }
+
+        return srcDensity;
     }
 
     private String getMimeType() {
