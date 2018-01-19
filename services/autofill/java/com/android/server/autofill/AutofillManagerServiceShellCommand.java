@@ -192,7 +192,7 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
                 pw.println("no score");
             } else {
                 pw.print("algorithm: ");
-                pw.print(scores.getAlgorithmName());
+                pw.print(scores.getAlgorithm());
                 pw.print(" score: ");
                 pw.println(scores.getScores()[0][0]);
             }
