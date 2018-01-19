@@ -46,7 +46,7 @@ StatsdConfig CreateStatsdConfig() {
     auto isSyncingPredicate = CreateIsSyncingPredicate();
     *isSyncingPredicate.mutable_simple_predicate()->mutable_dimensions() =
         CreateDimensions(
-            android::util::SYNC_STATE_CHANGED, {1 /* uid field */});
+            android::util::SYNC_STATE_CHANGED, {1 /* uid field */, 2 /* name field*/});
 
     auto isInBackgroundPredicate = CreateIsInBackgroundPredicate();
     *isInBackgroundPredicate.mutable_simple_predicate()->mutable_dimensions() =
