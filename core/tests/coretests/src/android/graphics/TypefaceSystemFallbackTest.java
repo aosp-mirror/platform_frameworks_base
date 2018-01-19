@@ -505,4 +505,84 @@ public class TypefaceSystemFallbackTest {
         assertEquals(GLYPH_3EM_WIDTH, paint.measureText("b"), 0.0f);
         assertEquals(GLYPH_1EM_WIDTH, paint.measureText("c"), 0.0f);
     }
+
+    @Test
+    public void testBuildSystemFallback_ElegantFallback_customFallback_missingFile() {
+        final String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<familyset>"
+                + "  <family name='sans-serif'>"
+                + "    <font weight='400' style='normal'>no_coverage.ttf</font>"
+                + "  </family>"
+                + "  <family name='serif'>"
+                + "    <font weight='400' style='normal'>no_coverage.ttf</font>"
+                + "  </family>"
+                + "  <family>"
+                + "    <font weight='400' style='normal'>a3em.ttf</font>"
+                + "    <font weight='400' style='normal' fallbackFor='serif'>NoSuchFont.ttf</font>"
+                + "  </family>"
+                + "  <family>"
+                + "    <font weight='400' style='normal'>b3em.ttf</font>"
+                + "  </family>"
+                + "</familyset>";
+        final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
+        final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
+
+        buildSystemFallback(xml, fontMap, fallbackMap);
+
+        final Paint paint = new Paint();
+
+        Typeface testTypeface = fontMap.get("serif");
+        assertNotNull(testTypeface);
+        paint.setTypeface(testTypeface);
+        assertEquals(GLYPH_3EM_WIDTH, paint.measureText("a"), 0.0f);
+        assertEquals(GLYPH_1EM_WIDTH, paint.measureText("b"), 0.0f);
+        assertEquals(GLYPH_1EM_WIDTH, paint.measureText("c"), 0.0f);
+
+        testTypeface = fontMap.get("sans-serif");
+        assertNotNull(testTypeface);
+        paint.setTypeface(testTypeface);
+        assertEquals(GLYPH_3EM_WIDTH, paint.measureText("a"), 0.0f);
+        assertEquals(GLYPH_1EM_WIDTH, paint.measureText("b"), 0.0f);
+        assertEquals(GLYPH_1EM_WIDTH, paint.measureText("c"), 0.0f);
+    }
+
+    @Test
+    public void testBuildSystemFallback_ElegantFallback_customFallback_missingFile2() {
+        final String xml = "<?xml version='1.0' encoding='UTF-8'?>"
+                + "<familyset>"
+                + "  <family name='sans-serif'>"
+                + "    <font weight='400' style='normal'>no_coverage.ttf</font>"
+                + "  </family>"
+                + "  <family name='serif'>"
+                + "    <font weight='400' style='normal'>no_coverage.ttf</font>"
+                + "  </family>"
+                + "  <family>"
+                + "    <font weight='400' style='normal' fallbackFor='serif'>NoSuchFont.ttf</font>"
+                + "  </family>"
+                + "  <family>"
+                + "    <font weight='400' style='normal'>a3em.ttf</font>"
+                + "  </family>"
+                + "</familyset>";
+        final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
+        final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
+
+        buildSystemFallback(xml, fontMap, fallbackMap);
+
+        final Paint paint = new Paint();
+
+        Typeface testTypeface = fontMap.get("serif");
+        assertNotNull(testTypeface);
+        paint.setTypeface(testTypeface);
+        assertEquals(GLYPH_3EM_WIDTH, paint.measureText("a"), 0.0f);
+        assertEquals(GLYPH_1EM_WIDTH, paint.measureText("b"), 0.0f);
+        assertEquals(GLYPH_1EM_WIDTH, paint.measureText("c"), 0.0f);
+
+        testTypeface = fontMap.get("sans-serif");
+        assertNotNull(testTypeface);
+        paint.setTypeface(testTypeface);
+        assertEquals(GLYPH_3EM_WIDTH, paint.measureText("a"), 0.0f);
+        assertEquals(GLYPH_1EM_WIDTH, paint.measureText("b"), 0.0f);
+        assertEquals(GLYPH_1EM_WIDTH, paint.measureText("c"), 0.0f);
+    }
+
 }
