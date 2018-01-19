@@ -319,6 +319,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   manifest_action["original-package"];
   manifest_action["overlay"];
   manifest_action["protected-broadcast"];
+  manifest_action["adopt-permissions"];
   manifest_action["uses-permission"];
   manifest_action["uses-permission-sdk-23"];
   manifest_action["permission"];
