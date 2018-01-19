@@ -181,8 +181,6 @@ public final class RangingResult implements Parcelable {
      * <p>
      * Note: the information is NOT validated - use with caution. Consider validating it with
      * other sources of information before using it.
-     *
-     * @hide PLANNED_API
      */
     @Nullable
     public LocationConfigurationInformation getReportedLocationConfigurationInformation() {
@@ -199,8 +197,6 @@ public final class RangingResult implements Parcelable {
      * <p>
      * Note: the information is NOT validated - use with caution. Consider validating it with
      * other sources of information before using it.
-     *
-     * @hide PLANNED_API
      */
     @Nullable
     public LocationCivic getReportedLocationCivic() {

@@ -36,8 +36,6 @@ import java.util.Objects;
  * returns an instance of this class) it is possibly Self Reported (by the peer). In such a case
  * the information is NOT validated - use with caution. Consider validating it with other sources
  * of information before using it.
- *
- * @hide PLANNED_API
  */
 public final class LocationConfigurationInformation implements Parcelable {
     /** @hide */
@@ -214,7 +212,6 @@ public final class LocationConfigurationInformation implements Parcelable {
         dest.writeDouble(mAltitudeUncertainty);
     }
 
-    /** @hide */
     public static final Creator<LocationConfigurationInformation> CREATOR =
             new Creator<LocationConfigurationInformation>() {
         @Override
