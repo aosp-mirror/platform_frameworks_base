@@ -3514,6 +3514,9 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                     } else if ("agents".startsWith(arg)) {
                         dumpAgents(pw);
                         return;
+                    } else if ("transportclients".equals(arg.toLowerCase())) {
+                        mTransportManager.dump(pw);
+                        return;
                     }
                 }
             }
@@ -3575,6 +3578,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                     }
                 }
             }
+
+            mTransportManager.dump(pw);
 
             pw.println("Pending init: " + mPendingInits.size());
             for (String s : mPendingInits) {
