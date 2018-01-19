@@ -795,11 +795,13 @@ class UserController implements Handler.Callback {
      */
     private void stopGuestOrEphemeralUserIfBackground(int oldUserId) {
         if (DEBUG_MU) Slog.i(TAG, "Stop guest or ephemeral user if background: " + oldUserId);
-        UserState oldUss = mStartedUsers.get(oldUserId);
-        if (oldUserId == UserHandle.USER_SYSTEM || oldUserId == mCurrentUserId
-                || oldUss.state == UserState.STATE_STOPPING
-                || oldUss.state == UserState.STATE_SHUTDOWN) {
-            return;
+        synchronized(mLock) {
+            UserState oldUss = mStartedUsers.get(oldUserId);
+            if (oldUserId == UserHandle.USER_SYSTEM || oldUserId == mCurrentUserId || oldUss == null
+                    || oldUss.state == UserState.STATE_STOPPING
+                    || oldUss.state == UserState.STATE_SHUTDOWN) {
+                return;
+            }
         }
 
         UserInfo userInfo = getUserInfo(oldUserId);
