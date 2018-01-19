@@ -21,6 +21,8 @@ import android.net.Uri;
 
 import com.android.internal.util.ArrayUtils;
 
+import java.util.Locale;
+
 /**
  * This class provides both interface for validation and common validators
  * used to ensure Settings have meaningful values.
@@ -44,6 +46,18 @@ public class SettingsValidators {
         public boolean validate(String value) {
             try {
                 return Integer.parseInt(value) >= 0;
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+    };
+
+    public static final Validator ANY_INTEGER_VALIDATOR = new Validator() {
+        @Override
+        public boolean validate(String value) {
+            try {
+                Integer.parseInt(value);
+                return true;
             } catch (NumberFormatException e) {
                 return false;
             }
@@ -80,6 +94,9 @@ public class SettingsValidators {
             // and underscores ('_'). However, individual package name parts may only
             // start with letters.
             // (https://developer.android.com/guide/topics/manifest/manifest-element.html#package)
+            if (value == null) {
+                return false;
+            }
             String[] subparts = value.split(".");
             boolean isValidPackageName = true;
             for (String subpart : subparts) {
@@ -106,7 +123,26 @@ public class SettingsValidators {
 
         @Override
         public boolean validate(String value) {
+            if (value == null) {
+                return false;
+            }
             return value.length() <= MAX_IPV6_LENGTH;
+        }
+    };
+
+    public static final Validator LOCALE_VALIDATOR = new Validator() {
+        @Override
+        public boolean validate(String value) {
+            if (value == null) {
+                return false;
+            }
+            Locale[] validLocales = Locale.getAvailableLocales();
+            for (Locale locale : validLocales) {
+                if (value.equals(locale.toString())) {
+                    return true;
+                }
+            }
+            return false;
         }
     };
 
@@ -164,6 +200,50 @@ public class SettingsValidators {
             } catch (NumberFormatException e) {
                 return false;
             }
+        }
+    }
+
+    public static final class ComponentNameListValidator implements Validator {
+        private final String mSeparator;
+
+        public ComponentNameListValidator(String separator) {
+            mSeparator = separator;
+        }
+
+        @Override
+        public boolean validate(String value) {
+            if (value == null) {
+                return false;
+            }
+            String[] elements = value.split(mSeparator);
+            for (String element : elements) {
+                if (!COMPONENT_NAME_VALIDATOR.validate(element)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+
+    public static final class PackageNameListValidator implements Validator {
+        private final String mSeparator;
+
+        public PackageNameListValidator(String separator) {
+            mSeparator = separator;
+        }
+
+        @Override
+        public boolean validate(String value) {
+            if (value == null) {
+                return false;
+            }
+            String[] elements = value.split(mSeparator);
+            for (String element : elements) {
+                if (!PACKAGE_NAME_VALIDATOR.validate(element)) {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

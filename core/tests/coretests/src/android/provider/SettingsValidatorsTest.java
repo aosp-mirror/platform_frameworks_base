@@ -36,18 +36,26 @@ public class SettingsValidatorsTest {
 
     @Test
     public void ensureAllBackedUpSystemSettingsHaveValidators() {
-        String offenders = getOffenders(Settings.System.SETTINGS_TO_BACKUP,
-                Settings.System.VALIDATORS);
+        String offenders = getOffenders(concat(Settings.System.SETTINGS_TO_BACKUP,
+                Settings.System.LEGACY_RESTORE_SETTINGS), Settings.System.VALIDATORS);
 
         failIfOffendersPresent(offenders, "Settings.System");
     }
 
     @Test
     public void ensureAllBackedUpGlobalSettingsHaveValidators() {
-        String offenders = getOffenders(Settings.Global.SETTINGS_TO_BACKUP,
-                Settings.Global.VALIDATORS);
+        String offenders = getOffenders(concat(Settings.Global.SETTINGS_TO_BACKUP,
+                Settings.Global.LEGACY_RESTORE_SETTINGS), Settings.Global.VALIDATORS);
 
         failIfOffendersPresent(offenders, "Settings.Global");
+    }
+
+    @Test
+    public void ensureAllBackedUpSecureSettingsHaveValidators() {
+        String offenders = getOffenders(concat(Settings.Secure.SETTINGS_TO_BACKUP,
+                Settings.Secure.LEGACY_RESTORE_SETTINGS), Settings.Secure.VALIDATORS);
+
+        failIfOffendersPresent(offenders, "Settings.Secure");
     }
 
     private void failIfOffendersPresent(String offenders, String settingsType) {
@@ -65,5 +73,17 @@ public class SettingsValidatorsTest {
             }
         }
         return offenders.toString();
+    }
+
+    private String[] concat(String[] first, String[] second) {
+        if (second == null || second.length == 0) {
+            return first;
+        }
+        final int firstLen = first.length;
+        final int secondLen = second.length;
+        String[] both = new String[firstLen + secondLen];
+        System.arraycopy(first, 0, both, 0, firstLen);
+        System.arraycopy(second, 0, both, firstLen, secondLen);
+        return both;
     }
 }
