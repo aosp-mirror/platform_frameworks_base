@@ -80,6 +80,7 @@ public class MessagingLayout extends FrameLayout {
     private boolean mIsOneToOne;
     private ArrayList<MessagingGroup> mAddedGroups = new ArrayList<>();
     private Notification.Person mUser;
+    private CharSequence mNameReplacement;
 
     public MessagingLayout(@NonNull Context context) {
         super(context);
@@ -118,6 +119,11 @@ public class MessagingLayout extends FrameLayout {
     @RemotableViewMethod
     public void setLargeIcon(Icon icon) {
         mLargeIcon = icon;
+    }
+
+    @RemotableViewMethod
+    public void setNameReplacement(CharSequence nameReplacement) {
+        mNameReplacement = nameReplacement;
     }
 
     @RemotableViewMethod
@@ -326,7 +332,12 @@ public class MessagingLayout extends FrameLayout {
                 mAddedGroups.add(newGroup);
             }
             newGroup.setLayoutColor(mLayoutColor);
-            newGroup.setSender(senders.get(groupIndex));
+            Notification.Person sender = senders.get(groupIndex);
+            CharSequence nameOverride = null;
+            if (sender != mUser && mNameReplacement != null) {
+                nameOverride = mNameReplacement;
+            }
+            newGroup.setSender(sender, nameOverride);
             mGroups.add(newGroup);
 
             if (mMessagingLinearLayout.indexOfChild(newGroup) != groupIndex) {

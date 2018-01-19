@@ -6469,8 +6469,11 @@ public class Notification implements Parcelable
                     ? super.mBigContentTitle
                     : mConversationTitle;
             boolean isOneToOne = TextUtils.isEmpty(conversationTitle);
+            CharSequence nameReplacement = null;
             if (hasOnlyWhiteSpaceSenders()) {
                 isOneToOne = true;
+                nameReplacement = conversationTitle;
+                conversationTitle = null;
             }
             RemoteViews contentView = mBuilder.applyStandardTemplateWithActions(
                     mBuilder.getMessagingLayoutResource(),
@@ -6489,6 +6492,8 @@ public class Notification implements Parcelable
                     mBuilder.resolveContrastColor());
             contentView.setIcon(R.id.status_bar_latest_event_content, "setLargeIcon",
                     mBuilder.mN.mLargeIcon);
+            contentView.setCharSequence(R.id.status_bar_latest_event_content, "setNameReplacement",
+                    nameReplacement);
             contentView.setBoolean(R.id.status_bar_latest_event_content, "setIsOneToOne",
                     isOneToOne);
             contentView.setBundle(R.id.status_bar_latest_event_content, "setData",
