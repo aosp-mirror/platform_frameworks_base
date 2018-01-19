@@ -17,9 +17,8 @@
 package android.media.update;
 
 import android.media.AudioAttributes;
-import android.media.MediaPlayer;
 import android.net.Uri;
-import android.widget.MediaController2;
+import android.widget.MediaControlView2;
 import android.widget.VideoView2;
 
 import java.util.Map;
@@ -39,6 +38,8 @@ import java.util.Map;
  */
 // TODO @SystemApi
 public interface VideoView2Provider extends ViewProvider {
+    void setMediaControlView2_impl(MediaControlView2 mediaControlView);
+    MediaControlView2 getMediaControlView2_impl();
     void start_impl();
     void pause_impl();
     int getDuration_impl();
@@ -49,18 +50,19 @@ public interface VideoView2Provider extends ViewProvider {
     int getAudioSessionId_impl();
     void showSubtitle_impl();
     void hideSubtitle_impl();
+    void setSpeed_impl(float speed);
+    float getSpeed_impl();
     void setAudioFocusRequest_impl(int focusGain);
     void setAudioAttributes_impl(AudioAttributes attributes);
     void setVideoPath_impl(String path);
     void setVideoURI_impl(Uri uri);
     void setVideoURI_impl(Uri uri, Map<String, String> headers);
-    void setMediaController2_impl(MediaController2 controllerView);
     void setViewType_impl(int viewType);
     int getViewType_impl();
     void stopPlayback_impl();
-    void setOnPreparedListener_impl(MediaPlayer.OnPreparedListener l);
-    void setOnCompletionListener_impl(MediaPlayer.OnCompletionListener l);
-    void setOnErrorListener_impl(MediaPlayer.OnErrorListener l);
-    void setOnInfoListener_impl(MediaPlayer.OnInfoListener l);
+    void setOnPreparedListener_impl(VideoView2.OnPreparedListener l);
+    void setOnCompletionListener_impl(VideoView2.OnCompletionListener l);
+    void setOnErrorListener_impl(VideoView2.OnErrorListener l);
+    void setOnInfoListener_impl(VideoView2.OnInfoListener l);
     void setOnViewTypeChangedListener_impl(VideoView2.OnViewTypeChangedListener l);
 }

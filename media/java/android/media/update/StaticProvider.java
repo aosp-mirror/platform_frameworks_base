@@ -16,8 +16,10 @@
 
 package android.media.update;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.widget.MediaController2;
+import android.util.AttributeSet;
+import android.widget.MediaControlView2;
 import android.widget.VideoView2;
 
 /**
@@ -30,7 +32,9 @@ import android.widget.VideoView2;
  */
 // TODO @SystemApi
 public interface StaticProvider {
-    MediaController2Provider createMediaController2(
-            MediaController2 instance, ViewProvider superProvider);
-    VideoView2Provider createVideoView2(VideoView2 instance, ViewProvider superProvider);
+    MediaControlView2Provider createMediaControlView2(
+            MediaControlView2 instance, ViewProvider superProvider);
+    VideoView2Provider createVideoView2(
+            VideoView2 instance, ViewProvider superProvider,
+            @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes);
 }

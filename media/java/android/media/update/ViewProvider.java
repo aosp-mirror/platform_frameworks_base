@@ -37,10 +37,6 @@ import android.view.MotionEvent;
 // TODO @SystemApi
 public interface ViewProvider {
     // TODO Add more (all?) methods from View
-    void onAttachedToWindow_impl();
-    void onDetachedFromWindow_impl();
-    void onLayout_impl(boolean changed, int left, int top, int right, int bottom);
-    void draw_impl(Canvas canvas);
     CharSequence getAccessibilityClassName_impl();
     boolean onTouchEvent_impl(MotionEvent ev);
     boolean onTrackballEvent_impl(MotionEvent ev);
