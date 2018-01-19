@@ -300,7 +300,7 @@ public class KeySyncUtils {
                 .put(SecureBox.encodePublicKey(thmPublicKey))
                 .putLong(counterId)
                 .putInt(maxAttempts)
-                .put(new byte[VAULT_HANDLE_LENGTH_BYTES]) // TODO: replace with real vaultHandle
+                .put(vaultHandle)
                 .array();
     }
 
