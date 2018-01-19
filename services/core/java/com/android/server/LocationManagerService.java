@@ -232,10 +232,9 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private final ArraySet<String> mBackgroundThrottlePackageWhitelist = new ArraySet<>();
 
-    private final ArrayMap<IGnssMeasurementsListener, Identity> mGnssMeasurementsListeners =
-            new ArrayMap<>();
+    private final ArrayMap<IBinder, Identity> mGnssMeasurementsListeners = new ArrayMap<>();
 
-    private final ArrayMap<IGnssNavigationMessageListener, Identity>
+    private final ArrayMap<IBinder, Identity>
             mGnssNavigationMessageListeners = new ArrayMap<>();
 
     // current active user on the device - other users are denied location data
@@ -438,23 +437,23 @@ public class LocationManagerService extends ILocationManager.Stub {
                 applyRequirementsLocked(provider);
             }
 
-            for (Entry<IGnssMeasurementsListener, Identity> entry
-                    : mGnssMeasurementsListeners.entrySet()) {
+            for (Entry<IBinder, Identity> entry : mGnssMeasurementsListeners.entrySet()) {
                 if (entry.getValue().mUid == uid) {
                     if (D) {
                         Log.d(TAG, "gnss measurements listener from uid " + uid
                                 + " is now " + (foreground ? "foreground" : "background)"));
                     }
                     if (foreground || isThrottlingExemptLocked(entry.getValue())) {
-                        mGnssMeasurementsProvider.addListener(entry.getKey());
+                        mGnssMeasurementsProvider.addListener(
+                                IGnssMeasurementsListener.Stub.asInterface(entry.getKey()));
                     } else {
-                        mGnssMeasurementsProvider.removeListener(entry.getKey());
+                        mGnssMeasurementsProvider.removeListener(
+                                IGnssMeasurementsListener.Stub.asInterface(entry.getKey()));
                     }
                 }
             }
 
-            for (Entry<IGnssNavigationMessageListener, Identity> entry
-                    : mGnssNavigationMessageListeners.entrySet()) {
+            for (Entry<IBinder, Identity> entry : mGnssNavigationMessageListeners.entrySet()) {
                 if (entry.getValue().mUid == uid) {
                     if (D) {
                         Log.d(TAG, "gnss navigation message listener from uid "
@@ -462,9 +461,11 @@ public class LocationManagerService extends ILocationManager.Stub {
                                 + (foreground ? "foreground" : "background)"));
                     }
                     if (foreground || isThrottlingExemptLocked(entry.getValue())) {
-                        mGnssNavigationMessageProvider.addListener(entry.getKey());
+                        mGnssNavigationMessageProvider.addListener(
+                                IGnssNavigationMessageListener.Stub.asInterface(entry.getKey()));
                     } else {
-                        mGnssNavigationMessageProvider.removeListener(entry.getKey());
+                        mGnssNavigationMessageProvider.removeListener(
+                                IGnssNavigationMessageListener.Stub.asInterface(entry.getKey()));
                     }
                 }
             }
@@ -2401,7 +2402,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         synchronized (mLock) {
             Identity callerIdentity
                     = new Identity(Binder.getCallingUid(), Binder.getCallingPid(), packageName);
-            mGnssMeasurementsListeners.put(listener, callerIdentity);
+            mGnssMeasurementsListeners.put(listener.asBinder(), callerIdentity);
             long identity = Binder.clearCallingIdentity();
             try {
                 if (isThrottlingExemptLocked(callerIdentity)
@@ -2421,7 +2422,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     public void removeGnssMeasurementsListener(IGnssMeasurementsListener listener) {
         if (mGnssMeasurementsProvider != null) {
             synchronized (mLock) {
-                mGnssMeasurementsListeners.remove(listener);
+                mGnssMeasurementsListeners.remove(listener.asBinder());
                 mGnssMeasurementsProvider.removeListener(listener);
             }
         }
@@ -2438,7 +2439,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         synchronized (mLock) {
             Identity callerIdentity
                     = new Identity(Binder.getCallingUid(), Binder.getCallingPid(), packageName);
-            mGnssNavigationMessageListeners.put(listener, callerIdentity);
+            mGnssNavigationMessageListeners.put(listener.asBinder(), callerIdentity);
             long identity = Binder.clearCallingIdentity();
             try {
                 if (isThrottlingExemptLocked(callerIdentity)
@@ -2458,7 +2459,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     public void removeGnssNavigationMessageListener(IGnssNavigationMessageListener listener) {
         if (mGnssNavigationMessageProvider != null) {
             synchronized (mLock) {
-                mGnssNavigationMessageListeners.remove(listener);
+                mGnssNavigationMessageListeners.remove(listener.asBinder());
                 mGnssNavigationMessageProvider.removeListener(listener);
             }
         }
@@ -3179,6 +3180,16 @@ public class LocationManagerService extends ILocationManager.Stub {
                 for (UpdateRecord record : entry.getValue()) {
                     pw.println("      " + record);
                 }
+            }
+            pw.println("  Active GnssMeasurement Listeners:");
+            for (Identity identity : mGnssMeasurementsListeners.values()) {
+                pw.println("    " + identity.mPid + " " + identity.mUid + " "
+                        + identity.mPackageName + ": " + isThrottlingExemptLocked(identity));
+            }
+            pw.println("  Active GnssNavigationMessage Listeners:");
+            for (Identity identity : mGnssNavigationMessageListeners.values()) {
+                pw.println("    " + identity.mPid + " " + identity.mUid + " "
+                        + identity.mPackageName + ": " + isThrottlingExemptLocked(identity));
             }
             pw.println("  Overlay Provider Packages:");
             for (LocationProviderInterface provider : mProviders) {
