@@ -532,6 +532,46 @@ public class TransportManagerTest {
                 () -> transportManager.getTransportDirName(mTransportA2.transportName));
     }
 
+    @Test
+    public void testGetRegisteredTransportNames() throws Exception {
+        setUpPackage(PACKAGE_A, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
+        setUpPackage(PACKAGE_B, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
+        TransportData[] transportsData = {mTransportA1, mTransportA2, mTransportB1};
+        setUpTransports(transportsData);
+        TransportManager transportManager =
+                createTransportManager(mTransportA1, mTransportA2, mTransportB1);
+        transportManager.registerTransports();
+
+        String[] transportNames = transportManager.getRegisteredTransportNames();
+
+        assertThat(transportNames)
+                .asList()
+                .containsExactlyElementsIn(
+                        Stream.of(transportsData)
+                                .map(transportData -> transportData.transportName)
+                                .collect(toList()));
+    }
+
+    @Test
+    public void testGetRegisteredTransportComponents() throws Exception {
+        setUpPackage(PACKAGE_A, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
+        setUpPackage(PACKAGE_B, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
+        TransportData[] transportsData = {mTransportA1, mTransportA2, mTransportB1};
+        setUpTransports(transportsData);
+        TransportManager transportManager =
+                createTransportManager(mTransportA1, mTransportA2, mTransportB1);
+        transportManager.registerTransports();
+
+        ComponentName[] transportNames = transportManager.getRegisteredTransportComponents();
+
+        assertThat(transportNames)
+                .asList()
+                .containsExactlyElementsIn(
+                        Stream.of(transportsData)
+                                .map(TransportData::getTransportComponent)
+                                .collect(toList()));
+    }
+
     private List<TransportMock> setUpTransports(TransportData... transports) throws Exception {
         setUpTransportsForTransportManager(mShadowPackageManager, transports);
         List<TransportMock> transportMocks = new ArrayList<>(transports.length);
