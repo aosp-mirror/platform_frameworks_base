@@ -16,6 +16,7 @@
 
 package com.android.internal.net;
 
+import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
 import static android.net.NetworkStats.METERED_NO;
 import static android.net.NetworkStats.ROAMING_NO;
 import static android.net.NetworkStats.SET_ALL;
@@ -240,7 +241,8 @@ public class NetworkStatsFactoryTest {
 
     private static void assertStatsEntry(NetworkStats stats, String iface, int uid, int set,
             int tag, long rxBytes, long txBytes) {
-        final int i = stats.findIndex(iface, uid, set, tag, METERED_NO, ROAMING_NO);
+        final int i = stats.findIndex(iface, uid, set, tag, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO);
         if (i < 0) {
             fail(String.format("no NetworkStats for (iface: %s, uid: %d, set: %d, tag: %d)",
                     iface, uid, set, tag));
@@ -252,7 +254,8 @@ public class NetworkStatsFactoryTest {
 
     private static void assertStatsEntry(NetworkStats stats, String iface, int uid, int set,
             int tag, long rxBytes, long rxPackets, long txBytes, long txPackets) {
-        final int i = stats.findIndex(iface, uid, set, tag, METERED_NO, ROAMING_NO);
+        final int i = stats.findIndex(iface, uid, set, tag, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO);
         if (i < 0) {
             fail(String.format("no NetworkStats for (iface: %s, uid: %d, set: %d, tag: %d)",
                     iface, uid, set, tag));

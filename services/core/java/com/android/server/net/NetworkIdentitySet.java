@@ -39,6 +39,7 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
     private static final int VERSION_ADD_ROAMING = 2;
     private static final int VERSION_ADD_NETWORK_ID = 3;
     private static final int VERSION_ADD_METERED = 4;
+    private static final int VERSION_ADD_DEFAULT_NETWORK = 5;
 
     public NetworkIdentitySet() {
     }
@@ -76,12 +77,20 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
                 metered = (type == TYPE_MOBILE);
             }
 
-            add(new NetworkIdentity(type, subType, subscriberId, networkId, roaming, metered));
+            final boolean defaultNetwork;
+            if (version >= VERSION_ADD_DEFAULT_NETWORK) {
+                defaultNetwork = in.readBoolean();
+            } else {
+                defaultNetwork = true;
+            }
+
+            add(new NetworkIdentity(type, subType, subscriberId, networkId, roaming, metered,
+                    defaultNetwork));
         }
     }
 
     public void writeToStream(DataOutputStream out) throws IOException {
-        out.writeInt(VERSION_ADD_METERED);
+        out.writeInt(VERSION_ADD_DEFAULT_NETWORK);
         out.writeInt(size());
         for (NetworkIdentity ident : this) {
             out.writeInt(ident.getType());
@@ -90,6 +99,7 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
             writeOptionalString(out, ident.getNetworkId());
             out.writeBoolean(ident.getRoaming());
             out.writeBoolean(ident.getMetered());
+            out.writeBoolean(ident.getDefaultNetwork());
         }
     }
 
@@ -117,6 +127,20 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> implements
             }
         }
         return false;
+    }
+
+    /** @return whether any {@link NetworkIdentity} in this set is considered on the default
+            network. */
+    public boolean areAllMembersOnDefaultNetwork() {
+        if (isEmpty()) {
+            return true;
+        }
+        for (NetworkIdentity ident : this) {
+            if (!ident.getDefaultNetwork()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static void writeOptionalString(DataOutputStream out, String value) throws IOException {

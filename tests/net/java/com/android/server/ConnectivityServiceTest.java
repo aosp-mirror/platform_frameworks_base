@@ -3501,34 +3501,50 @@ public class ConnectivityServiceTest {
     @Test
     public void testStatsIfacesChanged() throws Exception {
         mCellNetworkAgent = new MockNetworkAgent(TRANSPORT_CELLULAR);
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+
+        Network[] onlyCell = new Network[]{mCellNetworkAgent.getNetwork()};
+        Network[] onlyWifi = new Network[]{mWiFiNetworkAgent.getNetwork()};
 
         // Simple connection should have updated ifaces
         mCellNetworkAgent.connect(false);
         waitForIdle();
-        verify(mStatsService, atLeastOnce()).forceUpdateIfaces();
+        verify(mStatsService, atLeastOnce()).forceUpdateIfaces(onlyCell);
+        reset(mStatsService);
+
+        // Default network switch should update ifaces.
+        mWiFiNetworkAgent.connect(false);
+        waitForIdle();
+        verify(mStatsService, atLeastOnce()).forceUpdateIfaces(onlyWifi);
+        reset(mStatsService);
+
+        // Disconnect should update ifaces.
+        mWiFiNetworkAgent.disconnect();
+        waitForIdle();
+        verify(mStatsService, atLeastOnce()).forceUpdateIfaces(onlyCell);
         reset(mStatsService);
 
         // Metered change should update ifaces
         mCellNetworkAgent.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
         waitForIdle();
-        verify(mStatsService, atLeastOnce()).forceUpdateIfaces();
+        verify(mStatsService, atLeastOnce()).forceUpdateIfaces(onlyCell);
         reset(mStatsService);
 
         mCellNetworkAgent.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED);
         waitForIdle();
-        verify(mStatsService, atLeastOnce()).forceUpdateIfaces();
+        verify(mStatsService, atLeastOnce()).forceUpdateIfaces(onlyCell);
         reset(mStatsService);
 
         // Captive portal change shouldn't update ifaces
         mCellNetworkAgent.addCapability(NetworkCapabilities.NET_CAPABILITY_CAPTIVE_PORTAL);
         waitForIdle();
-        verify(mStatsService, never()).forceUpdateIfaces();
+        verify(mStatsService, never()).forceUpdateIfaces(onlyCell);
         reset(mStatsService);
 
         // Roaming change should update ifaces
         mCellNetworkAgent.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING);
         waitForIdle();
-        verify(mStatsService, atLeastOnce()).forceUpdateIfaces();
+        verify(mStatsService, atLeastOnce()).forceUpdateIfaces(onlyCell);
         reset(mStatsService);
     }
 
