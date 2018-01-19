@@ -43,7 +43,14 @@ import java.util.List;
  * @hide
  */
 public final class KeychainSnapshot implements Parcelable {
+    private static final int DEFAULT_MAX_ATTEMPTS = 10;
+    private static final long DEFAULT_COUNTER_ID = 1L;
+
     private int mSnapshotVersion;
+    private int mMaxAttempts = DEFAULT_MAX_ATTEMPTS;
+    private long mCounterId = DEFAULT_COUNTER_ID;
+    private byte[] mServerParams;
+    private byte[] mPublicKey;
     private List<KeychainProtectionParams> mKeychainProtectionParams;
     private List<WrappedApplicationKey> mEntryRecoveryData;
     private byte[] mEncryptedRecoveryKeyBlob;
@@ -76,6 +83,37 @@ public final class KeychainSnapshot implements Parcelable {
      */
     public int getSnapshotVersion() {
         return mSnapshotVersion;
+    }
+
+    /**
+     * Number of user secret guesses allowed during Keychain recovery.
+     */
+    public int getMaxAttempts() {
+        return mMaxAttempts;
+    }
+
+    /**
+     * CounterId which is rotated together with user secret.
+     */
+    public long getCounterId() {
+        return mCounterId;
+    }
+
+    /**
+     * Server parameters.
+     */
+    public @NonNull byte[] getServerParams() {
+        return mServerParams;
+    }
+
+    /**
+     * Public key used to encrypt {@code encryptedRecoveryKeyBlob}.
+     *
+     * See implementation for binary key format
+     */
+    // TODO: document key format.
+    public @NonNull byte[] getTrustedHardwarePublicKey() {
+        return mPublicKey;
     }
 
     /**
@@ -129,6 +167,50 @@ public final class KeychainSnapshot implements Parcelable {
         }
 
         /**
+         * Sets the number of user secret guesses allowed during Keychain recovery.
+         *
+         * @param maxAttempts The maximum number of guesses.
+         * @return This builder.
+         */
+        public Builder setMaxAttempts(int maxAttempts) {
+            mInstance.mMaxAttempts = maxAttempts;
+            return this;
+        }
+
+        /**
+         * Sets counter id.
+         *
+         * @param counterId The counter id.
+         * @return This builder.
+         */
+        public Builder setCounterId(long counterId) {
+            mInstance.mCounterId = counterId;
+            return this;
+        }
+
+        /**
+         * Sets server parameters.
+         *
+         * @param serverParams The server parameters
+         * @return This builder.
+         */
+        public Builder setServerParams(byte[] serverParams) {
+            mInstance.mServerParams = serverParams;
+            return this;
+        }
+
+        /**
+         * Sets public key used to encrypt recovery blob.
+         *
+         * @param publicKey The public key
+         * @return This builder.
+         */
+        public Builder setTrustedHardwarePublicKey(byte[] publicKey) {
+            mInstance.mPublicKey = publicKey;
+            return this;
+        }
+
+        /**
          * Sets UI and key derivation parameters
          *
          * @param recoveryMetadata The UI and key derivation parameters
@@ -175,6 +257,8 @@ public final class KeychainSnapshot implements Parcelable {
             Preconditions.checkCollectionElementsNotNull(mInstance.mEntryRecoveryData,
                     "entryRecoveryData");
             Preconditions.checkNotNull(mInstance.mEncryptedRecoveryKeyBlob);
+            Preconditions.checkNotNull(mInstance.mServerParams);
+            Preconditions.checkNotNull(mInstance.mPublicKey);
             return mInstance;
         }
     }

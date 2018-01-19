@@ -263,12 +263,16 @@ public class KeySyncTask implements Runnable {
         // If application keys are not updated, snapshot will not be created on next unlock.
         mRecoverableKeyStoreDb.setShouldCreateSnapshot(mUserId, recoveryAgentUid, false);
 
-        // TODO: use Builder.
-        mRecoverySnapshotStorage.put(recoveryAgentUid, new KeychainSnapshot(
-                snapshotVersion,
-                /*recoveryMetadata=*/ metadataList,
-                /*applicationKeyBlobs=*/ createApplicationKeyEntries(encryptedApplicationKeys),
-                /*encryptedRecoveryKeyblob=*/ encryptedRecoveryKey));
+        mRecoverySnapshotStorage.put(recoveryAgentUid, new KeychainSnapshot.Builder()
+                .setSnapshotVersion(snapshotVersion)
+                .setMaxAttempts(TRUSTED_HARDWARE_MAX_ATTEMPTS)
+                .setCounterId(counterId)
+                .setTrustedHardwarePublicKey(SecureBox.encodePublicKey(publicKey))
+                .setServerParams(vaultHandle)
+                .setKeychainProtectionParams(metadataList)
+                .setWrappedApplicationKeys(createApplicationKeyEntries(encryptedApplicationKeys))
+                .setEncryptedRecoveryKeyBlob(encryptedRecoveryKey)
+                .build());
 
         mSnapshotListenersStorage.recoverySnapshotAvailable(recoveryAgentUid);
     }

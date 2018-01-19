@@ -278,9 +278,13 @@ public class KeySyncTaskTest {
     public void run_sendsEncryptedKeysIfAvailableToSync() throws Exception {
         mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());
+
+        mRecoverableKeyStoreDb.setServerParams(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_VAULT_HANDLE);
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
         SecretKey applicationKey =
                 addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
+
         mKeySyncTask.run();
 
         KeychainSnapshot keychainSnapshot = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
@@ -304,6 +308,11 @@ public class KeySyncTaskTest {
                         TEST_VAULT_HANDLE));
         List<WrappedApplicationKey> applicationKeys = keychainSnapshot.getWrappedApplicationKeys();
         assertThat(applicationKeys).hasSize(1);
+        assertThat(keychainSnapshot.getCounterId()).isEqualTo(counterId);
+        assertThat(keychainSnapshot.getMaxAttempts()).isEqualTo(10);
+        assertThat(keychainSnapshot.getTrustedHardwarePublicKey())
+                .isEqualTo(SecureBox.encodePublicKey(mKeyPair.getPublic()));
+        assertThat(keychainSnapshot.getServerParams()).isEqualTo(TEST_VAULT_HANDLE);
         WrappedApplicationKey keyData = applicationKeys.get(0);
         assertEquals(TEST_APP_KEY_ALIAS, keyData.getAlias());
         assertThat(keyData.getAlias()).isEqualTo(keyData.getAlias());
