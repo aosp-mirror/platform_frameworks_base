@@ -219,7 +219,7 @@ public class NetworkStatsFactory {
             }
 
             NetworkStats.Entry adjust =
-                    new NetworkStats.Entry(baseIface, 0, 0, 0, 0L, 0L, 0L, 0L, 0L);
+                    new NetworkStats.Entry(baseIface, 0, 0, 0, 0, 0, 0, 0L, 0L, 0L, 0L, 0L);
             // Subtract any 464lat traffic seen for the root UID on the current base interface.
             adjust.rxBytes -= (entry.rxBytes + entry.rxPackets * IPV4V6_HEADER_DELTA);
             adjust.txBytes -= (entry.txBytes + entry.txPackets * IPV4V6_HEADER_DELTA);

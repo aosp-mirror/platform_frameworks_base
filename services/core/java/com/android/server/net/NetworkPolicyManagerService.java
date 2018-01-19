@@ -1117,7 +1117,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             for (int subId : subIds) {
                 final String subscriberId = tele.getSubscriberId(subId);
                 final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
-                        TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true);
+                        TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true,
+                        true);
                 if (template.matches(probeIdent)) {
                     return true;
                 }
@@ -1338,7 +1339,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // find and update the mobile NetworkPolicy for this subscriber id
         final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true);
+                TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true, true);
         for (int i = mNetworkPolicy.size() - 1; i >= 0; i--) {
             final NetworkTemplate template = mNetworkPolicy.keyAt(i);
             if (template.matches(probeIdent)) {
@@ -1545,7 +1546,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             for (int subId : subIds) {
                 final String subscriberId = tm.getSubscriberId(subId);
                 final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
-                        TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true);
+                        TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true,
+                        true);
                 // Template is matched when subscriber id matches.
                 if (template.matches(probeIdent)) {
                     tm.setPolicyDataEnabled(enabled, subId);
@@ -1595,7 +1597,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 mNetIdToSubId.put(state.network.netId, parseSubId(state));
             }
             if (state.networkInfo != null && state.networkInfo.isConnected()) {
-                final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, state);
+                final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, state,
+                        true);
                 identified.put(state, ident);
             }
         }
@@ -1766,7 +1769,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private boolean ensureActiveMobilePolicyAL(int subId, String subscriberId) {
         // Poke around to see if we already have a policy
         final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true);
+                TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, null, false, true, true);
         for (int i = mNetworkPolicy.size() - 1; i >= 0; i--) {
             final NetworkTemplate template = mNetworkPolicy.keyAt(i);
             if (template.matches(probeIdent)) {
