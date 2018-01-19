@@ -4503,27 +4503,30 @@ public class AudioService extends IAudioService.Stub
             if (mStreamType == srcStream.mStreamType) {
                 return;
             }
-            synchronized (VolumeStreamState.class) {
-                int srcStreamType = srcStream.getStreamType();
-                // apply default device volume from source stream to all devices first in case
-                // some devices are present in this stream state but not in source stream state
-                int index = srcStream.getIndex(AudioSystem.DEVICE_OUT_DEFAULT);
-                index = rescaleIndex(index, srcStreamType, mStreamType);
-                for (int i = 0; i < mIndexMap.size(); i++) {
-                    mIndexMap.put(mIndexMap.keyAt(i), index);
-                }
-                // Now apply actual volume for devices in source stream state
-                SparseIntArray srcMap = srcStream.mIndexMap;
-                for (int i = 0; i < srcMap.size(); i++) {
-                    int device = srcMap.keyAt(i);
-                    index = srcMap.valueAt(i);
+            synchronized (mSettingsLock) {
+                synchronized (VolumeStreamState.class) {
+                    int srcStreamType = srcStream.getStreamType();
+                    // apply default device volume from source stream to all devices first in case
+                    // some devices are present in this stream state but not in source stream state
+                    int index = srcStream.getIndex(AudioSystem.DEVICE_OUT_DEFAULT);
                     index = rescaleIndex(index, srcStreamType, mStreamType);
+                    for (int i = 0; i < mIndexMap.size(); i++) {
+                        mIndexMap.put(mIndexMap.keyAt(i), index);
+                    }
+                    // Now apply actual volume for devices in source stream state
+                    SparseIntArray srcMap = srcStream.mIndexMap;
+                    for (int i = 0; i < srcMap.size(); i++) {
+                        int device = srcMap.keyAt(i);
+                        index = srcMap.valueAt(i);
+                        index = rescaleIndex(index, srcStreamType, mStreamType);
 
-                    setIndex(index, device, caller);
+                        setIndex(index, device, caller);
+                    }
                 }
             }
         }
 
+        @GuardedBy("mSettingsLock")
         public void setAllIndexesToMax() {
             synchronized (VolumeStreamState.class) {
                 for (int i = 0; i < mIndexMap.size(); i++) {
