@@ -1047,9 +1047,11 @@ public class AudioService extends IAudioService.Stub
 
     private void checkMuteAffectedStreams() {
         // any stream with a min level > 0 is not muteable by definition
+        // STREAM_VOICE_CALL can be muted by applications that has the the MODIFY_PHONE_STATE permission.
         for (int i = 0; i < mStreamStates.length; i++) {
             final VolumeStreamState vss = mStreamStates[i];
-            if (vss.mIndexMin > 0) {
+            if (vss.mIndexMin > 0 &&
+                vss.mStreamType != AudioSystem.STREAM_VOICE_CALL) {
                 mMuteAffectedStreams &= ~(1 << vss.mStreamType);
             }
         }
@@ -1412,6 +1414,18 @@ public class AudioService extends IAudioService.Stub
             return;
         }
 
+        // If adjust is mute and the stream is STREAM_VOICE_CALL, make sure
+        // that the calling app have the MODIFY_PHONE_STATE permission.
+        if (isMuteAdjust &&
+            streamType == AudioSystem.STREAM_VOICE_CALL &&
+            mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.MODIFY_PHONE_STATE)
+                    != PackageManager.PERMISSION_GRANTED) {
+            Log.w(TAG, "MODIFY_PHONE_STATE Permission Denial: adjustStreamVolume from pid="
+                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
+            return;
+        }
+
         // use stream type alias here so that streams with same alias have the same behavior,
         // including with regard to silent mode control (e.g the use of STREAM_RING below and in
         // checkForRingerModeChange() in place of STREAM_RING or STREAM_NOTIFICATION)
@@ -1710,6 +1724,15 @@ public class AudioService extends IAudioService.Stub
         if ((streamType == AudioManager.STREAM_ACCESSIBILITY) && !canChangeAccessibilityVolume()) {
             Log.w(TAG, "Trying to call setStreamVolume() for a11y without"
                     + " CHANGE_ACCESSIBILITY_VOLUME  callingPackage=" + callingPackage);
+            return;
+        }
+        if ((streamType == AudioManager.STREAM_VOICE_CALL) &&
+                (index == 0) &&
+                (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.MODIFY_PHONE_STATE)
+                    != PackageManager.PERMISSION_GRANTED)) {
+            Log.w(TAG, "Trying to call setStreamVolume() for STREAM_VOICE_CALL and index 0 without"
+                    + " MODIFY_PHONE_STATE  callingPackage=" + callingPackage);
             return;
         }
         mVolumeLogger.log(new VolumeEvent(VolumeEvent.VOL_SET_STREAM_VOL, streamType,
