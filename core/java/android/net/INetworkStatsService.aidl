@@ -18,6 +18,7 @@ package android.net;
 
 import android.net.DataUsageRequest;
 import android.net.INetworkStatsSession;
+import android.net.Network;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
@@ -53,7 +54,7 @@ interface INetworkStatsService {
     void setUidForeground(int uid, boolean uidForeground);
 
     /** Force update of ifaces. */
-    void forceUpdateIfaces();
+    void forceUpdateIfaces(in Network[] defaultNetworks);
     /** Force update of statistics. */
     void forceUpdate();
 
