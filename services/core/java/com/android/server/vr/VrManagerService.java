@@ -185,6 +185,14 @@ public class VrManagerService extends SystemService
             ComponentName component = null;
             synchronized (mLock) {
                 component = ((mCurrentVrService == null) ? null : mCurrentVrService.getComponent());
+
+                // If the VrCore main service was disconnected or the binding died we'll rebind
+                // automatically. Call focusedActivityChanged() once we rebind.
+                if (component != null && component.equals(event.component) &&
+                        (event.event == LogEvent.EVENT_DISCONNECTED ||
+                         event.event == LogEvent.EVENT_BINDING_DIED)) {
+                    callFocusedActivityChangedLocked();
+                }
             }
 
             // If not on an AIO device and we permanently stopped trying to connect to the
@@ -980,16 +988,7 @@ public class VrManagerService extends SystemService
                     oldVrServicePackage, oldUserId);
 
             if (mCurrentVrService != null && sendUpdatedCaller) {
-                final ComponentName c = mCurrentVrModeComponent;
-                final boolean b = running2dInVr;
-                final int pid = processId;
-                mCurrentVrService.sendEvent(new PendingEvent() {
-                    @Override
-                    public void runEvent(IInterface service) throws RemoteException {
-                        IVrListener l = (IVrListener) service;
-                        l.focusedActivityChanged(c, b, pid);
-                    }
-                });
+                callFocusedActivityChangedLocked();
             }
 
             if (!nothingChanged) {
@@ -1000,6 +999,23 @@ public class VrManagerService extends SystemService
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    private void callFocusedActivityChangedLocked() {
+        final ComponentName c = mCurrentVrModeComponent;
+        final boolean b = mRunning2dInVr;
+        final int pid = mVrAppProcessId;
+        mCurrentVrService.sendEvent(new PendingEvent() {
+            @Override
+            public void runEvent(IInterface service) throws RemoteException {
+                // Under specific (and unlikely) timing scenarios, when VrCore
+                // crashes and is rebound, focusedActivityChanged() may be
+                // called a 2nd time with the same arguments. IVrListeners
+                // should make sure to handle that scenario gracefully.
+                IVrListener l = (IVrListener) service;
+                l.focusedActivityChanged(c, b, pid);
+            }
+        });
     }
 
     private boolean isDefaultAllowed(String packageName) {
