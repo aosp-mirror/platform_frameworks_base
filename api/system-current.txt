@@ -1777,9 +1777,9 @@ package android.hardware.radio {
     method public android.hardware.radio.ProgramSelector.Identifier[] getAllIds(int);
     method public long getFirstId(int);
     method public android.hardware.radio.ProgramSelector.Identifier getPrimaryId();
-    method public int getProgramType();
+    method public deprecated int getProgramType();
     method public android.hardware.radio.ProgramSelector.Identifier[] getSecondaryIds();
-    method public long[] getVendorIds();
+    method public deprecated long[] getVendorIds();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.hardware.radio.ProgramSelector> CREATOR;
     field public static final int IDENTIFIER_TYPE_AMFM_FREQUENCY = 1; // 0x1
@@ -1787,27 +1787,31 @@ package android.hardware.radio {
     field public static final int IDENTIFIER_TYPE_DAB_FREQUENCY = 8; // 0x8
     field public static final int IDENTIFIER_TYPE_DAB_SCID = 7; // 0x7
     field public static final int IDENTIFIER_TYPE_DAB_SIDECC = 5; // 0x5
+    field public static final int IDENTIFIER_TYPE_DAB_SID_EXT = 5; // 0x5
     field public static final int IDENTIFIER_TYPE_DRMO_FREQUENCY = 10; // 0xa
-    field public static final int IDENTIFIER_TYPE_DRMO_MODULATION = 11; // 0xb
+    field public static final deprecated int IDENTIFIER_TYPE_DRMO_MODULATION = 11; // 0xb
     field public static final int IDENTIFIER_TYPE_DRMO_SERVICE_ID = 9; // 0x9
     field public static final int IDENTIFIER_TYPE_HD_STATION_ID_EXT = 3; // 0x3
-    field public static final int IDENTIFIER_TYPE_HD_SUBCHANNEL = 4; // 0x4
+    field public static final int IDENTIFIER_TYPE_HD_STATION_NAME = 10004; // 0x2714
+    field public static final deprecated int IDENTIFIER_TYPE_HD_SUBCHANNEL = 4; // 0x4
     field public static final int IDENTIFIER_TYPE_INVALID = 0; // 0x0
     field public static final int IDENTIFIER_TYPE_RDS_PI = 2; // 0x2
     field public static final int IDENTIFIER_TYPE_SXM_CHANNEL = 13; // 0xd
     field public static final int IDENTIFIER_TYPE_SXM_SERVICE_ID = 12; // 0xc
-    field public static final int IDENTIFIER_TYPE_VENDOR_PRIMARY_END = 1999; // 0x7cf
-    field public static final int IDENTIFIER_TYPE_VENDOR_PRIMARY_START = 1000; // 0x3e8
-    field public static final int PROGRAM_TYPE_AM = 1; // 0x1
-    field public static final int PROGRAM_TYPE_AM_HD = 3; // 0x3
-    field public static final int PROGRAM_TYPE_DAB = 5; // 0x5
-    field public static final int PROGRAM_TYPE_DRMO = 6; // 0x6
-    field public static final int PROGRAM_TYPE_FM = 2; // 0x2
-    field public static final int PROGRAM_TYPE_FM_HD = 4; // 0x4
-    field public static final int PROGRAM_TYPE_INVALID = 0; // 0x0
-    field public static final int PROGRAM_TYPE_SXM = 7; // 0x7
-    field public static final int PROGRAM_TYPE_VENDOR_END = 1999; // 0x7cf
-    field public static final int PROGRAM_TYPE_VENDOR_START = 1000; // 0x3e8
+    field public static final int IDENTIFIER_TYPE_VENDOR_END = 1999; // 0x7cf
+    field public static final deprecated int IDENTIFIER_TYPE_VENDOR_PRIMARY_END = 1999; // 0x7cf
+    field public static final deprecated int IDENTIFIER_TYPE_VENDOR_PRIMARY_START = 1000; // 0x3e8
+    field public static final int IDENTIFIER_TYPE_VENDOR_START = 1000; // 0x3e8
+    field public static final deprecated int PROGRAM_TYPE_AM = 1; // 0x1
+    field public static final deprecated int PROGRAM_TYPE_AM_HD = 3; // 0x3
+    field public static final deprecated int PROGRAM_TYPE_DAB = 5; // 0x5
+    field public static final deprecated int PROGRAM_TYPE_DRMO = 6; // 0x6
+    field public static final deprecated int PROGRAM_TYPE_FM = 2; // 0x2
+    field public static final deprecated int PROGRAM_TYPE_FM_HD = 4; // 0x4
+    field public static final deprecated int PROGRAM_TYPE_INVALID = 0; // 0x0
+    field public static final deprecated int PROGRAM_TYPE_SXM = 7; // 0x7
+    field public static final deprecated int PROGRAM_TYPE_VENDOR_END = 1999; // 0x7cf
+    field public static final deprecated int PROGRAM_TYPE_VENDOR_START = 1000; // 0x3e8
   }
 
   public static final class ProgramSelector.Identifier implements android.os.Parcelable {
@@ -1822,7 +1826,7 @@ package android.hardware.radio {
   public static abstract class ProgramSelector.IdentifierType implements java.lang.annotation.Annotation {
   }
 
-  public static abstract class ProgramSelector.ProgramType implements java.lang.annotation.Annotation {
+  public static abstract deprecated class ProgramSelector.ProgramType implements java.lang.annotation.Annotation {
   }
 
   public class RadioManager {
