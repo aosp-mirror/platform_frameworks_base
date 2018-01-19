@@ -126,4 +126,19 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     public String getEndUserSessionMessage(ComponentName admin) {
         return null;
     }
+
+    @Override
+    public void setPrintingEnabled(ComponentName admin, boolean enabled) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isPrintingEnabled() {
+        return true;
+    }
+
+    @Override
+    public CharSequence getPrintingDisabledReason() {
+        return null;
+    }
 }

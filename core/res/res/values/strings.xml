@@ -379,6 +379,9 @@
     <string name="factory_reset_message">The admin app can\'t be used. Your device will now be
         erased.\n\nIf you have questions, contact your organization's admin.</string>
 
+    <!-- A toast message displayed when printing is attempted but disabled by policy. -->
+    <string name="printing_disabled_by">Printing disabled by <xliff:g id="owner_app">%s</xliff:g>.</string>
+
     <!-- Display name for any time a piece of data refers to the owner of the phone. For example, this could be used in place of the phone's phone number. -->
     <string name="me">Me</string>
 
