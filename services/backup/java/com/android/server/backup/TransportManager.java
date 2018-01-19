@@ -29,6 +29,7 @@ import android.content.pm.ResolveInfo;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -47,8 +48,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /** Handles in-memory bookkeeping of all BackupTransport objects. */
 public class TransportManager {
@@ -119,10 +118,10 @@ public class TransportManager {
     void onPackageChanged(String packageName, String... components) {
         // Unfortunately this can't be atomic because we risk a deadlock if
         // registerTransportsFromPackage() is put inside the synchronized block
-        Set<ComponentName> transportComponents =
-                Stream.of(components)
-                        .map(component -> new ComponentName(packageName, component))
-                        .collect(Collectors.toSet());
+        Set<ComponentName> transportComponents = new ArraySet<>(components.length);
+        for (String componentName : components) {
+            transportComponents.add(new ComponentName(packageName, componentName));
+        }
         synchronized (mTransportLock) {
             mRegisteredTransportsDescriptionMap.keySet().removeIf(transportComponents::contains);
         }
@@ -151,11 +150,13 @@ public class TransportManager {
      */
     String[] getRegisteredTransportNames() {
         synchronized (mTransportLock) {
-            return mRegisteredTransportsDescriptionMap
-                    .values()
-                    .stream()
-                    .map(transportDescription -> transportDescription.name)
-                    .toArray(String[]::new);
+            String[] transportNames = new String[mRegisteredTransportsDescriptionMap.size()];
+            int i = 0;
+            for (TransportDescription description : mRegisteredTransportsDescriptionMap.values()) {
+                transportNames[i] = description.name;
+                i++;
+            }
+            return transportNames;
         }
     }
 
