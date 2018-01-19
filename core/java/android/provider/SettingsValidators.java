@@ -32,6 +32,13 @@ public class SettingsValidators {
     public static final Validator BOOLEAN_VALIDATOR =
             new DiscreteValueValidator(new String[] {"0", "1"});
 
+    public static final Validator ANY_STRING_VALIDATOR = new Validator() {
+        @Override
+        public boolean validate(String value) {
+            return true;
+        }
+    };
+
     public static final Validator NON_NEGATIVE_INTEGER_VALIDATOR = new Validator() {
         @Override
         public boolean validate(String value) {
@@ -59,6 +66,38 @@ public class SettingsValidators {
         @Override
         public boolean validate(String value) {
             return ComponentName.unflattenFromString(value) != null;
+        }
+    };
+
+    public static final Validator PACKAGE_NAME_VALIDATOR = new Validator() {
+        @Override
+        public boolean validate(String value) {
+            return value != null && isStringPackageName(value);
+        }
+
+        private boolean isStringPackageName(String value) {
+            // The name may contain uppercase or lowercase letters ('A' through 'Z'), numbers,
+            // and underscores ('_'). However, individual package name parts may only
+            // start with letters.
+            // (https://developer.android.com/guide/topics/manifest/manifest-element.html#package)
+            String[] subparts = value.split(".");
+            boolean isValidPackageName = true;
+            for (String subpart : subparts) {
+                isValidPackageName |= isSubpartValidForPackageName(subpart);
+                if (!isValidPackageName) break;
+            }
+            return isValidPackageName;
+        }
+
+        private boolean isSubpartValidForPackageName(String subpart) {
+            if (subpart.length() == 0) return false;
+            boolean isValidSubpart = Character.isLetter(subpart.charAt(0));
+            for (int i = 1; i < subpart.length(); i++) {
+                isValidSubpart |= (Character.isLetterOrDigit(subpart.charAt(i))
+                                || (subpart.charAt(i) == '_'));
+                if (!isValidSubpart) break;
+            }
+            return isValidSubpart;
         }
     };
 

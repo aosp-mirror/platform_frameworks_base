@@ -16,10 +16,12 @@
 
 package android.provider;
 
+import static android.provider.SettingsValidators.ANY_STRING_VALIDATOR;
 import static android.provider.SettingsValidators.BOOLEAN_VALIDATOR;
 import static android.provider.SettingsValidators.COMPONENT_NAME_VALIDATOR;
 import static android.provider.SettingsValidators.LENIENT_IP_ADDRESS_VALIDATOR;
 import static android.provider.SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR;
+import static android.provider.SettingsValidators.PACKAGE_NAME_VALIDATOR;
 import static android.provider.SettingsValidators.URI_VALIDATOR;
 
 import android.Manifest;
@@ -4279,6 +4281,8 @@ public final class Settings {
         @Deprecated
         public static final String BLUETOOTH_ON = Global.BLUETOOTH_ON;
 
+        private static final Validator BLUETOOTH_ON_VALIDATOR = BOOLEAN_VALIDATOR;
+
         /**
          * @deprecated Use {@link android.provider.Settings.Global#DATA_ROAMING} instead
          */
@@ -4356,6 +4360,8 @@ public final class Settings {
         @Deprecated
         public static final String USB_MASS_STORAGE_ENABLED = Global.USB_MASS_STORAGE_ENABLED;
 
+        private static final Validator USB_MASS_STORAGE_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
+
         /**
          * @deprecated Use {@link android.provider.Settings.Global#USE_GOOGLE_MAIL} instead
          */
@@ -4384,6 +4390,9 @@ public final class Settings {
         @Deprecated
         public static final String WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON =
                 Global.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON;
+
+       private static final Validator WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON_VALIDATOR =
+               BOOLEAN_VALIDATOR;
 
         /**
          * @deprecated Use
@@ -5162,6 +5171,8 @@ public final class Settings {
         @Deprecated
         public static final String BUGREPORT_IN_POWER_MENU = "bugreport_in_power_menu";
 
+        private static final Validator BUGREPORT_IN_POWER_MENU_VALIDATOR = BOOLEAN_VALIDATOR;
+
         /**
          * @deprecated Use {@link android.provider.Settings.Global#ADB_ENABLED} instead
          */
@@ -5223,6 +5234,8 @@ public final class Settings {
          */
         @Deprecated
         public static final String BLUETOOTH_ON = Global.BLUETOOTH_ON;
+
+        private static final Validator BLUETOOTH_ON_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#DATA_ROAMING} instead
@@ -5650,6 +5663,8 @@ public final class Settings {
          */
         @Deprecated
         public static final String USB_MASS_STORAGE_ENABLED = Global.USB_MASS_STORAGE_ENABLED;
+
+        private static final Validator USB_MASS_STORAGE_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#USE_GOOGLE_MAIL} instead
@@ -6117,6 +6132,9 @@ public final class Settings {
         @Deprecated
         public static final String WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON =
                 Global.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON;
+
+       private static final Validator WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON_VALIDATOR =
+               BOOLEAN_VALIDATOR;
 
         /**
          * @deprecated Use {@link android.provider.Settings.Global#WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY}
@@ -7843,6 +7861,8 @@ public final class Settings {
          */
         public static final String CHARGING_SOUNDS_ENABLED = "charging_sounds_enabled";
 
+        private static final Validator CHARGING_SOUNDS_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
+
         /**
          * Whether we keep the device on while the device is plugged in.
          * Supported values are:
@@ -7887,6 +7907,8 @@ public final class Settings {
          */
         public static final String BUGREPORT_IN_POWER_MENU = "bugreport_in_power_menu";
 
+        private static final Validator BUGREPORT_IN_POWER_MENU_VALIDATOR = BOOLEAN_VALIDATOR;
+
         /**
          * Whether ADB is enabled.
          */
@@ -7909,6 +7931,8 @@ public final class Settings {
          * 0=disabled. 1=enabled.
          */
         public static final String BLUETOOTH_ON = "bluetooth_on";
+
+        private static final Validator BLUETOOTH_ON_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * CDMA Cell Broadcast SMS
@@ -8528,6 +8552,8 @@ public final class Settings {
         */
        public static final String USB_MASS_STORAGE_ENABLED = "usb_mass_storage_enabled";
 
+       private static final Validator USB_MASS_STORAGE_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
+
        /**
         * If this setting is set (to anything), then all references
         * to Gmail on the device must change to Google Mail.
@@ -8664,6 +8690,9 @@ public final class Settings {
        public static final String WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON =
                "wifi_networks_available_notification_on";
 
+       private static final Validator WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON_VALIDATOR =
+               BOOLEAN_VALIDATOR;
+
        /**
         * {@hide}
         */
@@ -8726,6 +8755,8 @@ public final class Settings {
          */
         public static final String SOFT_AP_TIMEOUT_ENABLED = "soft_ap_timeout_enabled";
 
+        private static final Validator SOFT_AP_TIMEOUT_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
+
         /**
          * Value to specify if Wi-Fi Wakeup feature is enabled.
          *
@@ -8734,6 +8765,8 @@ public final class Settings {
          */
         @SystemApi
         public static final String WIFI_WAKEUP_ENABLED = "wifi_wakeup_enabled";
+
+        private static final Validator WIFI_WAKEUP_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Value to specify if Wi-Fi Wakeup is available.
@@ -8781,6 +8814,9 @@ public final class Settings {
         public static final String NETWORK_RECOMMENDATIONS_ENABLED =
                 "network_recommendations_enabled";
 
+        private static final Validator NETWORK_RECOMMENDATIONS_ENABLED_VALIDATOR =
+                new SettingsValidators.DiscreteValueValidator(new String[] {"-1", "0", "1"});
+
         /**
          * Which package name to use for network recommendations. If null, network recommendations
          * will neither be requested nor accepted.
@@ -8803,6 +8839,13 @@ public final class Settings {
          */
         @TestApi
         public static final String USE_OPEN_WIFI_PACKAGE = "use_open_wifi_package";
+
+        private static final Validator USE_OPEN_WIFI_PACKAGE_VALIDATOR = new Validator() {
+            @Override
+            public boolean validate(String value) {
+                return (value == null) || PACKAGE_NAME_VALIDATOR.validate(value);
+            }
+        };
 
         /**
          * The number of milliseconds the {@link com.android.server.NetworkScoreService}
@@ -8882,6 +8925,9 @@ public final class Settings {
         */
        public static final String WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED =
                "wifi_watchdog_poor_network_test_enabled";
+
+       private static final Validator WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED_VALIDATOR =
+               ANY_STRING_VALIDATOR;
 
        /**
         * Setting to turn on suspend optimizations at screen off on Wi-Fi. Enabled by default and
@@ -9418,10 +9464,15 @@ public final class Settings {
          * @hide
          */
         public static final String PRIVATE_DNS_MODE = "private_dns_mode";
+
+        private static final Validator PRIVATE_DNS_MODE_VALIDATOR = ANY_STRING_VALIDATOR;
+
         /**
          * @hide
          */
         public static final String PRIVATE_DNS_SPECIFIER = "private_dns_specifier";
+
+        private static final Validator PRIVATE_DNS_SPECIFIER_VALIDATOR = ANY_STRING_VALIDATOR;
 
         /** {@hide} */
         public static final String
@@ -9987,6 +10038,9 @@ public final class Settings {
          */
         public static final String EMERGENCY_TONE = "emergency_tone";
 
+        private static final Validator EMERGENCY_TONE_VALIDATOR =
+                new SettingsValidators.DiscreteValueValidator(new String[] {"0", "1", "2"});
+
         /**
          * CDMA only settings
          * Whether the auto retry is enabled. The value is
@@ -9994,6 +10048,8 @@ public final class Settings {
          * @hide
          */
         public static final String CALL_AUTO_RETRY = "call_auto_retry";
+
+        private static final Validator CALL_AUTO_RETRY_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * A setting that can be read whether the emergency affordance is currently needed.
@@ -10064,6 +10120,9 @@ public final class Settings {
          */
         public static final String LOW_POWER_MODE_TRIGGER_LEVEL = "low_power_trigger_level";
 
+        private static final Validator LOW_POWER_MODE_TRIGGER_LEVEL_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 99);
+
          /**
          * If not 0, the activity manager will aggressively finish activities and
          * processes as soon as they are no longer needed.  If 0, the normal
@@ -10078,6 +10137,8 @@ public final class Settings {
          * @hide
          */
         public static final String DOCK_AUDIO_MEDIA_ENABLED = "dock_audio_media_enabled";
+
+        private static final Validator DOCK_AUDIO_MEDIA_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * The surround sound formats AC3, DTS or IEC61937 are
@@ -10124,6 +10185,9 @@ public final class Settings {
          * @hide
          */
         public static final String ENCODED_SURROUND_OUTPUT = "encoded_surround_output";
+
+        private static final Validator ENCODED_SURROUND_OUTPUT_VALIDATOR =
+                new SettingsValidators.DiscreteValueValidator(new String[] {"0", "1", "2"});
 
         /**
          * Persisted safe headphone volume management state by AudioService
@@ -10663,6 +10727,41 @@ public final class Settings {
             PRIVATE_DNS_SPECIFIER,
             SOFT_AP_TIMEOUT_ENABLED
         };
+
+        /**
+         * All settings in {@link SETTINGS_TO_BACKUP} array *must* have a non-null validator,
+         * otherwise they won't be restored.
+         *
+         * @hide
+         */
+        public static final Map<String, Validator> VALIDATORS = new ArrayMap<>();
+        static {
+            VALIDATORS.put(BUGREPORT_IN_POWER_MENU, BUGREPORT_IN_POWER_MENU_VALIDATOR);
+            VALIDATORS.put(STAY_ON_WHILE_PLUGGED_IN, STAY_ON_WHILE_PLUGGED_IN_VALIDATOR);
+            VALIDATORS.put(AUTO_TIME, AUTO_TIME_VALIDATOR);
+            VALIDATORS.put(AUTO_TIME_ZONE, AUTO_TIME_ZONE_VALIDATOR);
+            VALIDATORS.put(POWER_SOUNDS_ENABLED, POWER_SOUNDS_ENABLED_VALIDATOR);
+            VALIDATORS.put(DOCK_SOUNDS_ENABLED, DOCK_SOUNDS_ENABLED_VALIDATOR);
+            VALIDATORS.put(CHARGING_SOUNDS_ENABLED, CHARGING_SOUNDS_ENABLED_VALIDATOR);
+            VALIDATORS.put(USB_MASS_STORAGE_ENABLED, USB_MASS_STORAGE_ENABLED_VALIDATOR);
+            VALIDATORS.put(NETWORK_RECOMMENDATIONS_ENABLED,
+                    NETWORK_RECOMMENDATIONS_ENABLED_VALIDATOR);
+            VALIDATORS.put(WIFI_WAKEUP_ENABLED, WIFI_WAKEUP_ENABLED_VALIDATOR);
+            VALIDATORS.put(WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
+                    WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON_VALIDATOR);
+            VALIDATORS.put(USE_OPEN_WIFI_PACKAGE, USE_OPEN_WIFI_PACKAGE_VALIDATOR);
+            VALIDATORS.put(WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED,
+                    WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED_VALIDATOR);
+            VALIDATORS.put(EMERGENCY_TONE, EMERGENCY_TONE_VALIDATOR);
+            VALIDATORS.put(CALL_AUTO_RETRY, CALL_AUTO_RETRY_VALIDATOR);
+            VALIDATORS.put(DOCK_AUDIO_MEDIA_ENABLED, DOCK_AUDIO_MEDIA_ENABLED_VALIDATOR);
+            VALIDATORS.put(ENCODED_SURROUND_OUTPUT, ENCODED_SURROUND_OUTPUT_VALIDATOR);
+            VALIDATORS.put(LOW_POWER_MODE_TRIGGER_LEVEL, LOW_POWER_MODE_TRIGGER_LEVEL_VALIDATOR);
+            VALIDATORS.put(BLUETOOTH_ON, BLUETOOTH_ON_VALIDATOR);
+            VALIDATORS.put(PRIVATE_DNS_MODE, PRIVATE_DNS_MODE_VALIDATOR);
+            VALIDATORS.put(PRIVATE_DNS_SPECIFIER, PRIVATE_DNS_SPECIFIER_VALIDATOR);
+            VALIDATORS.put(SOFT_AP_TIMEOUT_ENABLED, SOFT_AP_TIMEOUT_ENABLED_VALIDATOR);
+        }
 
         /**
          * Global settings that shouldn't be persisted.

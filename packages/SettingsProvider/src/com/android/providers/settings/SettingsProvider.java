@@ -301,6 +301,7 @@ public class SettingsProvider extends ContentProvider {
 
         // fail to boot if there're any backed up settings that don't have a non-null validator
         ensureAllBackedUpSystemSettingsHaveValidators();
+        ensureAllBackedUpGlobalSettingsHaveValidators();
 
         synchronized (mLock) {
             mUserManager = UserManager.get(getContext());
@@ -320,18 +321,35 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private void ensureAllBackedUpSystemSettingsHaveValidators() {
+        String offenders = getOffenders(Settings.System.SETTINGS_TO_BACKUP,
+                Settings.System.VALIDATORS);
+
+        failToBootIfOffendersPresent(offenders, "Settings.System");
+    }
+
+    private void ensureAllBackedUpGlobalSettingsHaveValidators() {
+        String offenders = getOffenders(Settings.Global.SETTINGS_TO_BACKUP,
+                Settings.Global.VALIDATORS);
+
+        failToBootIfOffendersPresent(offenders, "Settings.Global");
+    }
+
+    private void failToBootIfOffendersPresent(String offenders, String settingsType) {
+        if (offenders.length() > 0) {
+            throw new RuntimeException("All " + settingsType + " settings that are backed up"
+                    + " have to have a non-null validator, but those don't: " + offenders);
+        }
+    }
+
+    private String getOffenders(String[] settingsToBackup, Map<String,
+            SettingsValidators.Validator> validators) {
         StringBuilder offenders = new StringBuilder();
-        for (String setting : Settings.System.SETTINGS_TO_BACKUP) {
-            if (Settings.System.VALIDATORS.get(setting) == null) {
+        for (String setting : settingsToBackup) {
+            if (validators.get(setting) == null) {
                 offenders.append(setting).append(" ");
             }
         }
-
-        String offendersStr = offenders.toString();
-        if (offendersStr.length() > 0) {
-            throw new RuntimeException("All Settings.System settings that are backed up must"
-                    + " have a non-null validator, but those don't: " + offendersStr);
-        }
+        return offenders.toString();
     }
 
     @Override
