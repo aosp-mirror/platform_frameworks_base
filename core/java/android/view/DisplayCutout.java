@@ -23,6 +23,8 @@ import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
+import android.content.res.Resources;
+import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -30,8 +32,12 @@ import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
+import android.util.Log;
+import android.util.PathParser;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
@@ -42,6 +48,9 @@ import java.util.List;
  * <p>{@code DisplayCutout} is immutable.
  */
 public final class DisplayCutout {
+
+    private static final String TAG = "DisplayCutout";
+    private static final String DP_MARKER = "@dp";
 
     private static final Rect ZERO_RECT = new Rect();
     private static final Region EMPTY_REGION = new Region();
@@ -309,6 +318,40 @@ public final class DisplayCutout {
         bounds.setPath(path, clipRegion);
         clipRegion.recycle();
         return new DisplayCutout(ZERO_RECT, bounds);
+    }
+
+    /**
+     * Creates an instance according to @android:string/config_mainBuiltInDisplayCutout.
+     *
+     * @hide
+     */
+    public static DisplayCutout fromResources(Resources res, int displayWidth) {
+        String spec = res.getString(R.string.config_mainBuiltInDisplayCutout);
+        if (TextUtils.isEmpty(spec)) {
+            return null;
+        }
+        spec = spec.trim();
+        final boolean inDp = spec.endsWith(DP_MARKER);
+        if (inDp) {
+            spec = spec.substring(0, spec.length() - DP_MARKER.length());
+        }
+
+        Path p;
+        try {
+            p = PathParser.createPathFromPathData(spec);
+        } catch (Throwable e) {
+            Log.wtf(TAG, "Could not inflate cutout: ", e);
+            return null;
+        }
+
+        final Matrix m = new Matrix();
+        if (inDp) {
+            final float dpToPx = res.getDisplayMetrics().density;
+            m.postScale(dpToPx, dpToPx);
+        }
+        m.postTranslate(displayWidth / 2f, 0);
+        p.transform(m);
+        return fromBounds(p);
     }
 
     /**
