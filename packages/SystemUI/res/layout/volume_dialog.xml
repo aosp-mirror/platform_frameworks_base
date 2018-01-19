@@ -34,7 +34,7 @@
 
         <LinearLayout
             android:id="@+id/volume_dialog_rows"
-            android:layout_width="@dimen/volume_dialog_panel_width"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:clipChildren="false"
             android:clipToPadding="false"
@@ -56,6 +56,7 @@
             android:layout_below="@id/volume_dialog_rows"
             android:background="@drawable/rounded_bg_full"
             android:gravity="center"
+            android:layout_gravity="end"
             android:orientation="vertical" >
 
             <TextView
