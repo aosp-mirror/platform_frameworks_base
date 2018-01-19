@@ -35,6 +35,7 @@ import android.text.TextUtils;
 import android.util.AtomicFile;
 import android.util.EventLog;
 import android.util.Slog;
+import android.util.StatsLog;
 import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -112,6 +113,8 @@ public class BootReceiver extends BroadcastReceiver {
     private static final String SHUTDOWN_METRICS_FILE = "/data/system/shutdown-metrics.txt";
 
     private static final String SHUTDOWN_TRON_METRICS_PREFIX = "shutdown_";
+    private static final String METRIC_SYSTEM_SERVER = "shutdown_system_server";
+    private static final String METRIC_SHUTDOWN_TIME_START = "begin_shutdown";
 
     @Override
     public void onReceive(final Context context, Intent intent) {
@@ -401,6 +404,10 @@ public class BootReceiver extends BroadcastReceiver {
             }
         }
         if (!TextUtils.isEmpty(metricsStr)) {
+            String reboot = null;
+            String reason = null;
+            String start_time = null;
+            String duration = null;
             String[] array = metricsStr.split(",");
             for (String keyValueStr : array) {
                 String[] keyValue = keyValueStr.split(":");
@@ -411,8 +418,19 @@ public class BootReceiver extends BroadcastReceiver {
                 // Ignore keys that are not indended for tron
                 if (keyValue[0].startsWith(SHUTDOWN_TRON_METRICS_PREFIX)) {
                     logTronShutdownMetric(keyValue[0], keyValue[1]);
+                    if (keyValue[0].equals(METRIC_SYSTEM_SERVER)) {
+                        duration = keyValue[1];
+                    }
+                }
+                if (keyValue[0].equals("reboot")) {
+                    reboot = keyValue[1];
+                } else if (keyValue[0].equals("reason")) {
+                    reason = keyValue[1];
+                } else if (keyValue[0].equals(METRIC_SHUTDOWN_TIME_START)) {
+                    start_time = keyValue[1];
                 }
             }
+            logStatsdShutdownAtom(reboot, reason, start_time, duration);
         }
         metricsFile.delete();
     }
@@ -428,6 +446,52 @@ public class BootReceiver extends BroadcastReceiver {
         if (value >= 0) {
             MetricsLogger.histogram(null, metricName, value);
         }
+    }
+
+    private static void logStatsdShutdownAtom(
+            String rebootStr, String reasonStr, String startStr, String durationStr) {
+        boolean reboot = false;
+        String reason = "<EMPTY>";
+        long start = 0;
+        long duration = 0;
+
+        if (rebootStr != null) {
+            if (rebootStr.equals("y")) {
+                reboot = true;
+            } else if (!rebootStr.equals("n")) {
+                Slog.e(TAG, "Unexpected value for reboot : " + rebootStr);
+            }
+        } else {
+            Slog.e(TAG, "No value received for reboot");
+        }
+
+        if (reasonStr != null) {
+            reason = reasonStr;
+        } else {
+            Slog.e(TAG, "No value received for shutdown reason");
+        }
+
+        if (startStr != null) {
+            try {
+                start = Long.parseLong(startStr);
+            } catch (NumberFormatException e) {
+                Slog.e(TAG, "Cannot parse shutdown start time: " + startStr);
+            }
+        } else {
+            Slog.e(TAG, "No value received for shutdown start time");
+        }
+
+        if (durationStr != null) {
+            try {
+                duration = Long.parseLong(durationStr);
+            } catch (NumberFormatException e) {
+                Slog.e(TAG, "Cannot parse shutdown duration: " + startStr);
+            }
+        } else {
+            Slog.e(TAG, "No value received for shutdown duration");
+        }
+
+        StatsLog.write(StatsLog.SHUTDOWN_SEQUENCE_REPORTED, reboot, reason, start, duration);
     }
 
     private static void logFsShutdownTime() {
