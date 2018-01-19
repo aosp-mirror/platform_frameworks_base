@@ -33,7 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Në vazhdim"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Njoftimet"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Niveli i baterisë është i ulët"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"Niveli i baterisë është i ulët. Aktivizo \"Kursyesin e baterisë\""</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Ka mbetur edhe <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> të mbetura, rreth <xliff:g id="TIME">%s</xliff:g> të mbetura bazuar në përdorimin tënd"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> të mbetura, rreth <xliff:g id="TIME">%s</xliff:g> të mbetura"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Ka mbetur edhe <xliff:g id="PERCENTAGE">%s</xliff:g>. \"Kursyesi i baterisë\" është i aktivizuar."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Ngarkuesi USB nuk mbështetet.\nPërdor vetëm ngarkuesin e dhënë."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Ngarkimi i USB-së nuk mbështetet."</string>
@@ -67,14 +70,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Përdoruesi i identifikuar aktualisht në këtë pajisje nuk mund ta aktivizojë korrigjimin e USB-së. Për ta përdorur këtë funksion, kalo te përdoruesi parësor."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zmadho për të mbushur ekranin"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Shtrije për të mbushur ekranin"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Pamja e ekranit"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Po ruan pamjen e ekranit..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Po ruan pamjen e ekranit…"</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"Pamja e ekranit po ruhet."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Pamja e ekranit u kap."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Trokit për të parë pamjen e ekranit."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Nuk mundi të kapte pamjen e ekranit."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"U has problem gjatë ruajtjes së pamjes së ekranit."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Pamja e ekranit nuk mund të ruhet për shkak të hapësirës ruajtëse të kufizuar."</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"Pamja e ekranit po ruhet"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"Pamja e ekranit u ruajt"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"Trokit për të parë pamjen e ekranit"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"Pamja e ekranit nuk mund të regjistrohej"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"U ndesh një problem gjatë ruajtjes së pamjes së ekranit"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Pamja e ekranit nuk mund të ruhet për shkak të hapësirës ruajtëse të kufizuar"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Nxjerrja e pamjeve të ekranit nuk lejohet nga aplikacioni ose organizata jote."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opsionet e transferimit të dosjeve të USB-së"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Lidh si një lexues \"media\" (MTP)"</string>
@@ -557,26 +561,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Joaktiv"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Me kontrollet e njoftimit të energjisë, mund të caktosh një nivel rëndësie nga 0 në 5 për njoftimet e një aplikacioni. \n\n"<b>"Niveli 5"</b>" \n- Shfaq në krye të listës së njoftimeve \n- Lejo ndërprerjen e ekranit të plotë \n- Gjithmonë shfaq shpejt \n\n"<b>"Niveli 4"</b>" \n- Parandalo ndërprerjen e ekranit të plotë \n- Gijthmonë shfaq shpejt \n\n"<b>"Niveli 3"</b>" \n- Parandalo ndërprerjen e ekranit të plotë \n- Asnjëherë mos shfaq shpejt \n\n"<b>"Niveli 2"</b>" \n- Parandalo ndërprerjen e ekranit të plotë \n- Asnjëherë mos shfaq shpejt \n- Asnjëherë mos lësho tingull dhe dridhje \n\n"<b>"Niveli 1"</b>" \n- Parandalo ndërprerjen e ekranit të plotë \n- Asnjëherë mos shfaq shpejt \n- Asnjëherë mos lësho tingull ose dridhje \n- Fshih nga ekrani i kyçjes dhe shiriti i statusit \n- Shfaq në fund të listës së njoftimeve \n\n"<b>"Niveli 0"</b>" \n- Blloko të gjitha njoftimet nga aplikacioni"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Njoftime"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"Këto njoftime nuk do t\'i marrësh më"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> kategori njoftimesh"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"Ky aplikacion nuk ka kategori njoftimesh"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Njoftimet nga ky aplikacion nuk mund të çaktivizohen"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">1 nga <xliff:g id="NUMBER_1">%s</xliff:g> kategori njoftimi nga ky aplikacion</item>
-      <item quantity="one">1 nga <xliff:g id="NUMBER_0">%s</xliff:g> kategori njoftimi nga ky aplikacion</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> dhe <xliff:g id="NUMBER_5">%3$d</xliff:g> të tjerë</item>
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> dhe <xliff:g id="NUMBER_2">%3$d</xliff:g> të tjerë</item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Nuk do t\'i shikosh më këto njoftime"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"Do të vazhdosh t\'i shfaqësh këto njoftime?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"Ndalo njoftimet"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"Vazhdo të shfaqësh"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"Do të vazhdosh t\'i shfaqësh njoftimet nga ky aplikacion?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"Këto njoftime nuk mund të çaktivizohen"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Kontrollet e njoftimeve për <xliff:g id="APP_NAME">%1$s</xliff:g> janë hapur"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Kontrollet e njoftimeve për <xliff:g id="APP_NAME">%1$s</xliff:g> janë mbyllur"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Lejo njoftimet nga ky kanal"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"Të gjitha kategoritë"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Cilësime të tjera"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"Peresonalizoje: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"Personalizo"</string>
     <string name="notification_done" msgid="5279426047273930175">"U krye"</string>
+    <string name="inline_undo" msgid="558916737624706010">"Zhbëj"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"kontrollet e njoftimit"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"opsionet e shtyrjes së njoftimit"</string>
@@ -731,8 +728,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Zgjero"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizo"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Mbyll"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"Cilësimet"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Zvarrit poshtë për të larguar"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Menyja"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> është në figurë brenda figurës"</string>

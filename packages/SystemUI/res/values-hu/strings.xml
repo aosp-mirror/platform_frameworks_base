@@ -33,7 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Folyamatban van"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Értesítések"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Alacsony az energiaszint"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"Az akkumulátor szintje alacsony. Kapcsolja be az akkumulátorkímélő módot."</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> maradt"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> maradt, körülbelül <xliff:g id="TIME">%s</xliff:g> van hátra a használat alapján"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> maradt, körülbelül <xliff:g id="TIME">%s</xliff:g> van hátra"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> maradt. Az Akkumulátorkímélő mód be van kapcsolva."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Az USB-n keresztüli töltés nincs támogatva.\nHasználja a kapott töltőt."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Az USB-n keresztüli töltés nem támogatott."</string>
@@ -67,14 +70,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Az eszközre jelenleg bejelentkezett felhasználó nem engedélyezheti az USB-hibakeresést. A funkció használatához váltson az elsődleges felhasználóra."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Nagyítás a kitöltéshez"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Nyújtás kitöltéshez"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Képernyőkép"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Képernyőkép mentése..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Képernyőkép mentése..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"Képernyőkép mentése."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Képernyőkép rögzítve."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Koppintson a képernyőkép megtekintéséhez."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Nem sikerült rögzíteni a képernyőképet."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Hiba történt a képernyőkép mentése során."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Nem menthet képernyőképet, mert kevés a tárhely."</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"Képernyőkép mentése…"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"A képernyőkép mentése sikerült"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"Koppintson a képernyőkép megtekintéséhez"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"Nem sikerült rögzíteni a képernyőképet"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"Hiba történt a képernyőkép mentése során"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Nem menthet képernyőképet, mert kevés a tárhely"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Az alkalmazás vagy az Ön szervezete nem engedélyezi képernyőkép készítését"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB-fájlátvitel beállításai"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Csatlakoztatás médialejátszóként (MTP)"</string>
@@ -557,26 +561,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Kikapcsolva"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Az értesítési beállítások révén 0-tól 5-ig állíthatja be a fontossági szintet az alkalmazás értesítéseinél. \n\n"<b>"5. szint"</b>" \n– Megjelenítés az értesítési lista tetején \n– Teljes képernyő megszakításának engedélyezése \n– Mindig felugrik \n\n"<b>"4. szint"</b>" \n– Teljes képernyő megszakításának megakadályozása \n– Mindig felugrik \n\n"<b>"3. szint"</b>" \n– Teljes képernyő megszakításának megakadályozása \n– Soha nem ugrik fel \n\n"<b>"2. szint"</b>" \n– Teljes képernyő megszakításának megakadályozása \n– Soha nem ugrik fel \n– Soha nincs hangjelzés és rezgés \n\n"<b>"1. szint"</b>" \n– Teljes képernyő megszakításának megakadályozása \n– Soha nem ugrik fel \n– Soha nincs hangjelzés vagy rezgés \n– Elrejtés a lezárási képernyőről és az állapotsávról \n– Megjelenítés az értesítési lista alján \n\n"<b>"0. szint"</b>" \n– Az alkalmazás összes értesítésének letiltása"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Értesítések"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"Többé nem jelennek meg ezek az értesítések"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> értesítéskategória"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"Az alkalmazás nem rendelkezik értesítési kategóriákkal"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Az alkalmazástól érkező értesítések nem kapcsolhatók ki"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g>/1 értesítési kategória az alkalmazásból</item>
-      <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g>/1 értesítési kategória az alkalmazásból</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> és <xliff:g id="NUMBER_5">%3$d</xliff:g> másik</item>
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> és <xliff:g id="NUMBER_2">%3$d</xliff:g> másik</item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Többé nem jelennek meg ezek az értesítések"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"Továbbra is megjelenjenek ezek az értesítések?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"Értesítések letiltása"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"Megjelenítés továbbra is"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"Továbbra is megjelenjenek az alkalmazás értesítései?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"Ezeket az értesítéseket nem lehet kikapcsolni"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> értesítésvezérlői megnyitva"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"A(z) <xliff:g id="APP_NAME">%1$s</xliff:g> értesítésvezérlői kikapcsolva"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Értesítések engedélyezése erről a csatornáról"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"Minden kategória"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"További beállítások"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"Személyre szabás: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"Személyre szabás"</string>
     <string name="notification_done" msgid="5279426047273930175">"Kész"</string>
+    <string name="inline_undo" msgid="558916737624706010">"Visszavonás"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> – <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"értesítésvezérlők"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"értesítések halasztási beállításai"</string>
@@ -731,8 +728,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Kibontás"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Kis méret"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Bezárás"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"Beállítások"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Elvetéshez húzza lefelé"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Menü"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"A(z) <xliff:g id="NAME">%s</xliff:g> kép a képben funkciót használ"</string>

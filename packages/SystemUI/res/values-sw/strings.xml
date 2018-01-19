@@ -35,8 +35,8 @@
     <string name="battery_low_title" msgid="6456385927409742437">"Betri inaisha"</string>
     <string name="battery_low_title_hybrid" msgid="6268991275887381595">"Chaji imepungua. Washa Kiokoa Betri"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Imebakisha <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
-    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Imesalia <xliff:g id="PERCENTAGE">%s</xliff:g>, zimesalia takribani <xliff:g id="TIME">%s</xliff:g> kulingana na jinsi unavyotumia"</string>
-    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Imesalia <xliff:g id="PERCENTAGE">%s</xliff:g>, zimesalia takribani <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Imesalia <xliff:g id="PERCENTAGE">%s</xliff:g>, itadumu takribani <xliff:g id="TIME">%s</xliff:g> kulingana na jinsi unavyotumia"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Imesalia <xliff:g id="PERCENTAGE">%s</xliff:g>, itadumu takribani <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Imesalia <xliff:g id="PERCENTAGE">%s</xliff:g>. Umewasha Kiokoa Betri."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Chaji ya USB haihamiliwi.\n Tumia chaka iliyopeanwa."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Kuchaji kwa kutumia USB hakutumiki."</string>

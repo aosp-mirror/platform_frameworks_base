@@ -33,13 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Aktiviteter"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Varsler"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Batterikapasiteten er lav"</string>
-    <!-- no translation found for battery_low_title_hybrid (6268991275887381595) -->
-    <skip />
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"Du har lite batteri. Slå på batterisparing"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> gjenstår"</string>
-    <!-- no translation found for battery_low_percent_format_hybrid (6838677459286775617) -->
-    <skip />
-    <!-- no translation found for battery_low_percent_format_hybrid_short (9025795469949145586) -->
-    <skip />
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> gjenstår, omtrent <xliff:g id="TIME">%s</xliff:g> igjen basert på bruken din"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> gjenstår, omtrent <xliff:g id="TIME">%s</xliff:g> igjen"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> gjenstår. Batterisparing er på."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB-lading støttes ikke.\nBruk kun den medfølgende laderen."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Lading via USB støttes ikke."</string>
@@ -73,22 +70,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Brukeren som for øyeblikket er logget på denne enheten, kan ikke slå på USB-feilsøking. For å bruke denne funksjonen, bytt til hovedbrukeren."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom for å fylle skjermen"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Strekk for å fylle skjerm"</string>
-    <!-- no translation found for global_action_screenshot (8329831278085426283) -->
-    <skip />
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Skjermdump"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Lagrer skjermdumpen …"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Lagrer skjermdumpen …"</string>
-    <!-- no translation found for screenshot_saving_text (2545047868936087248) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_title (5637073968117370753) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_text (7574667448002050363) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_title (9096484883063264803) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_to_save_unknown_text (8844781948876286488) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_to_save_text (3041612585107107310) -->
-    <skip />
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"Skjermdumpen lagres"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"Skjermdumpen er lagret"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"Trykk for å se skjermdumpen"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"Kan ikke lagre skjermdumpen"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"Det oppsto et problem under lagring av skjermdumpen"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Kan ikke lagre skjermdumpen på grunn av begrenset lagringsplass"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Appen eller organisasjonen din tillater ikke at du tar skjermdumper"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Altern. for USB-filoverføring"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Sett inn som mediespiller (MTP)"</string>
@@ -571,27 +561,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Av"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Med effektive varselinnstillinger kan du angi viktighetsnivåer fra 0 til 5 for appvarsler. \n\n"<b>"Nivå 5"</b>" \n– Vis øverst på varsellisten \n– Tillat forstyrrelser ved fullskjermmodus \n– Vis alltid raskt \n\n"<b>"Nivå 4"</b>" \n– Forhindre forstyrrelser ved fullskjermmodus \n– Vis alltid raskt \n\n"<b>"Nivå 3"</b>" \n– Forhindre forstyrrelser ved fullskjermmodus \n– Vis aldri raskt \n\n"<b>"Nivå 2"</b>" \n– Forhindre forstyrrelser ved fullskjermmodus \n– Vis aldri fort \n– Tillat aldri lyder eller vibrering \n\n"<b>"Nivå 1"</b>" \n– Forhindre forstyrrelser ved fullskjermmodus \n– Vis aldri raskt \n– Tillat aldri lyder eller vibrering \n– Skjul fra låseskjermen og statusfeltet \n– Vis nederst på varsellisten \n\n"<b>"Nivå 0"</b>" \n– Blokkér alle varsler fra appen"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Varsler"</string>
-    <!-- no translation found for notification_channel_disabled (344536703863700565) -->
-    <skip />
-    <!-- no translation found for inline_keep_showing (8945102997083836858) -->
-    <skip />
-    <!-- no translation found for inline_stop_button (4172980096860941033) -->
-    <skip />
-    <!-- no translation found for inline_keep_button (6665940297019018232) -->
-    <skip />
-    <!-- no translation found for inline_keep_showing_app (1723113469580031041) -->
-    <skip />
-    <!-- no translation found for notification_unblockable_desc (1037434112919403708) -->
-    <skip />
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Du ser ikke disse varslene lenger"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"Vil du fortsette å vise disse varslene?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"Stopp varsler"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"Fortsett å vise"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"Vil du fortsette å vise varsler fra denne appen?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"Du kan ikke slå av disse varslene"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Varselinnstillingene for <xliff:g id="APP_NAME">%1$s</xliff:g> er åpnet"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Varselinnstillingene for <xliff:g id="APP_NAME">%1$s</xliff:g> er lukket"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Tillat varsler fra denne kanalen"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Flere innstillinger"</string>
-    <!-- no translation found for notification_app_settings (420348114670768449) -->
-    <skip />
+    <string name="notification_app_settings" msgid="420348114670768449">"Tilpass"</string>
     <string name="notification_done" msgid="5279426047273930175">"Ferdig"</string>
-    <!-- no translation found for inline_undo (558916737624706010) -->
-    <skip />
+    <string name="inline_undo" msgid="558916737624706010">"Angre"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"varselinnstillinger"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"slumrealternativer for varsler"</string>

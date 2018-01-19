@@ -33,7 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Continuo"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificaciones"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Batería baja"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"Queda poca batería. Activa el Ahorro de batería"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Queda un <xliff:g id="PERCENTAGE">%s</xliff:g> de batería."</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Batería: <xliff:g id="PERCENTAGE">%s</xliff:g> (tiempo restante aproximado según tu uso: <xliff:g id="TIME">%s</xliff:g>)"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Batería: <xliff:g id="PERCENTAGE">%s</xliff:g> (tiempo restante aproximado: <xliff:g id="TIME">%s</xliff:g>)"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Queda <xliff:g id="PERCENTAGE">%s</xliff:g> de batería. El Ahorro de batería está activado."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"No admite la carga USB.\nUsa sólo el cargador provisto."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"No se admite la carga por USB."</string>
@@ -67,14 +70,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"El usuario al que accediste en este dispositivo no puede activar la depuración por USB. Para usar esta función, debes cambiar al usuario principal."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom para ocupar la pantalla"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Estirar p/ ocupar la pantalla"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Captura de pantalla"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Guardando captura de pantalla"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Guardando la captura de pantalla..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"La captura de pantalla se está guardando."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Se guardó la captura de pantalla."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Presiona para ver tu captura de pantalla."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"No se pudo guardar la captura de pantalla."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Se produjo un error al guardar la captura de pantalla."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"No se puede guardar la captura de pantalla debido al almacenamiento limitado."</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"Se está guardando la captura de pantalla"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"Se guardó la captura de pantalla"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"Presiona para ver la captura de pantalla"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"No se pudo tomar la captura de pantalla"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"Se produjo un error al guardar la captura de pantalla"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"No se puede guardar la captura de pantalla debido a que no hay suficiente espacio de almacenamiento"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"La app o tu organización no permiten las capturas de pantalla"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opciones de transferencia de archivos por USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Activar como reproductor de medios (MTP)"</string>
@@ -559,26 +563,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Desactivado"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Con los controles de activación de notificaciones, puedes establecer un nivel de importancia para las notificaciones de una app. \n\n"<b>"Nivel 5"</b>" \n- Mostrar en la parte superior de la lista de notificaciones. \n- Permitir interrupción en la pantalla completa. \n- Mostrar siempre. \n\n"<b>"Nivel 4"</b>" \n- No permitir interrupción en la pantalla completa. \n- Mostrar siempre. \n\n"<b>"Nivel 3"</b>" \n- No permitir interrupción en la pantalla completa. \n- No mostrar. \n\n"<b>"Nivel 2"</b>" \n- No permitir interrupción en la pantalla completa. \n- No mostrar. \n- No sonar ni vibrar. \n\n"<b>"Nivel 1"</b>" \n- No permitir interrupción en la pantalla completa. \n- No mostrar. \n- No sonar ni vibrar. \n- Ocultar de la pantalla bloqueada y la barra de estado. \n- Mostrar al final de la lista de notificaciones. \n\n"<b>"Nivel 0"</b>" \n- Bloquear todas las notificaciones de la app."</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Notificaciones"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"Ya no recibirás estas notificaciones"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> categorías de notificaciones"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"Esta app no tiene categorías de notificación"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"No es posible desactivar las notificaciones de esta app"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">1 de <xliff:g id="NUMBER_1">%s</xliff:g> categorías de notificación de esta app</item>
-      <item quantity="one">1 de <xliff:g id="NUMBER_0">%s</xliff:g> categoría de notificación de esta app</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> y <xliff:g id="NUMBER_5">%3$d</xliff:g> más</item>
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> y <xliff:g id="NUMBER_2">%3$d</xliff:g> más</item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Ya no verás estas notificaciones"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"¿Quieres seguir viendo estas notificaciones?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"Detener notificaciones"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"Seguir viendo"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"¿Quieres seguir viendo las notificaciones de esta app?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"No se pueden desactivar estas notificaciones"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Se abrieron los controles de notificaciones de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Se cerraron los controles de notificaciones de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Permitir las notificaciones de este canal"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"Todas las categorías"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Más opciones de configuración"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"Personalizar: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"Personalizar"</string>
     <string name="notification_done" msgid="5279426047273930175">"Listo"</string>
+    <string name="inline_undo" msgid="558916737624706010">"Deshacer"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g> de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"controles de notificación"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"opciones para posponer notificaciones"</string>
@@ -733,8 +730,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Expandir"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizar"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Cerrar"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"Configuración"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Arrastra hacia abajo para descartar"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Menú"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> está en modo de imagen en imagen"</string>

@@ -31,7 +31,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Гарсан"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Мэдэгдэл"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Батерей дуусаж байна"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"Батерей бага байна. Тэжээл хэмнэгчийг асаана уу"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> үлдсэн"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> үлдсэн байна. Таны хэрэглээнд тулгуурлан ойролцоогоор <xliff:g id="TIME">%s</xliff:g>-н хугацаа үлдсэн"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> үлдсэн байна. Ойролцоогоор <xliff:g id="TIME">%s</xliff:g>-н хугацаа үлдсэн"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> үлдсэн. Тэжээл хэмнэгч асаалттай байна."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB цэнэглэлт дэмжигдэхгүй байна.\nЗөвхөн нийлүүлэгдсэн цэнэглэгчийг ашиглана уу."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB-р цэнэглэх дэмжигддэггүй."</string>
@@ -65,14 +68,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Энэ төхөөрөмжид нэвтэрсэн хэрэглэгч USB дебаг хийх онцлогийг асаах боломжгүй байна. Энэ онцлогийг ашиглахын тулд үндсэн хэрэглэгч рүү сэлгэнэ үү."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Дэлгэц дүүргэх бол өсгөнө үү"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Дэлгэц дүүргэх бол татна уу"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Дэлгэцийн зураг дарах"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Дэлгэцийн агшинг хадгалж байна…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Дэлгэцийн агшинг хадгалж байна…"</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"Дэлгэцийн агшин хадгалагдав."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Дэлгэцийн агшинг авсан."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Дэлгэцийн агшингаа харахын тулд дарна уу."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Дэлгэцийн агшинг авч чадсангүй."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Дэлгэцийн агшинг хадгалахад алдаа гарлаа."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Хадгалах сангийн багтаамж бага байгаа тул дэлгэцийн авсан зургийг хадгалах боломжгүй байна."</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"Дэлгэцээс дарсан зургийг хадгалж байна"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"Дэлгэцээс дарсан зургийг хадгалсан"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"Дэлгэцээс дарсан зургийг харах бол товшино уу"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"Дэлгэцийн зургийг дарж чадсангүй"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"Дэлгэцээс дарсан зургийг хадгалахад алдаа гарлаа"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Сангийн багтаамж бага байгаа тул дэлгэцээс дарсан зургийг хадгалах боломжгүй байна"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Таны апп, байгууллагад дэлгэцийн зураг авахыг зөвшөөрдөггүй"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB файл шилжүүлэх сонголт"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Медиа тоглуулагч(MTP) болгон залгах"</string>
@@ -557,26 +561,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Идэвхгүй"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Тэжээлийн мэдэгдлийн удирдлагын тусламжтайгаар та апп-н мэдэгдэлд 0-5 хүртэлх ач холбогдлын түвшин тогтоох боломжтой. \n\n"<b>"5-р түвшин"</b>" \n- Мэдэгдлийн жагсаалтын хамгийн дээр харуулна \n- Бүтэн дэлгэцэд саад болно \n- Дэлгэцэд тогтмол гарч ирнэ \n\n"<b>"4-р түвшин"</b>" \n- Бүтэн дэлгэцэд саад болохоос сэргийлнэ \n- Дэлгэцэд тогтмол гарч ирнэ \n\n"<b>"3-р түвшин"</b>" \n- Бүтэн дэлгэцэд саад болохоос сэргийлнэ \n- Дэлгэцэд хэзээ ч гарч ирэхгүй \n\n"<b>"2-р түвшин"</b>" \n- Бүтэн дэлгэцэд саад болохоос сэргийлнэ \n- Дэлгэцэд хэзээ ч гарч ирэхгүй \n- Дуу болон чичиргээ хэзээ ч гаргахгүй \n\n"<b>"1-р түвшин"</b>" \n- Бүтэн дэлгэцэд саад болохоос сэргийлнэ \n- Дэлгэцэд хэзээ ч гарч ирэхгүй \n- Дуу болон чичиргээ хэзээ ч гаргахгүй \n- Түгжигдсэн дэлгэц болон статусын самбараас нууна \n- Мэдэгдлийн жагсаалтын доор харуулна \n\n"<b>"0-р түвшин"</b>" \n- Энэ апп-н бүх мэдэгдлийг блоклоно"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Мэдэгдэл"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"Ta цаашид эдгээр мэдэгдлийг авахгүй"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> мэдэгдлийн ангилал"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"Энэ апп-д мэдэгдлийн категори алга"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Энэ аппын мэдэгдлийг унтраах боломжгүй"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">Энэ аппын <xliff:g id="NUMBER_1">%s</xliff:g> мэдэгдлийн категорийн 1</item>
-      <item quantity="one">Энэ аппын <xliff:g id="NUMBER_0">%s</xliff:g> мэдэгдлийн категорийн 1</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g>, бусад <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g>, бусад <xliff:g id="NUMBER_2">%3$d</xliff:g></item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Та эдгээр мэдэгдлийг цаашид харахгүй"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"Эдгээр мэдэгдлийг харуулсан хэвээр байх уу?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"Мэдэгдлийг зогсоох"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"Харуулсан хэвээр байх"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"Энэ аппаас мэдэгдэл харуулсан хэвээр байх уу?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"Эдгээр мэдэгдлийг унтраах боломжгүй"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g>-н мэдэгдлийн хяналтыг нээсэн"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g>-н мэдэгдлийн хяналтыг хаасан"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Энэ сувгийн мэдэгдлийг зөвшөөрөх"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"Бүх ангилал"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Бусад тохиргоо"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"Өөрчлөх: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"Тохируулах"</string>
     <string name="notification_done" msgid="5279426047273930175">"Дууссан"</string>
+    <string name="inline_undo" msgid="558916737624706010">"Болих"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"мэдэгдлийн удирдлага"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"мэдэгдэл түр хойшлуулагчийн сонголт"</string>
@@ -731,8 +728,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Дэлгэх"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Багасгах"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Хаах"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"Тохиргоо"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Хаахын тулд доош чирэх"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Цэс"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> дэлгэцэн доторх дэлгэцэд байна"</string>

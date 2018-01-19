@@ -33,7 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ดำเนินอยู่"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"การแจ้งเตือน"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"แบตเตอรี่เหลือน้อย"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"แบตเตอรี่เหลือน้อย โปรดเปิดโหมดประหยัดแบตเตอรี่"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"เหลืออีก <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"เหลือ <xliff:g id="PERCENTAGE">%s</xliff:g> หรืออีกราว <xliff:g id="TIME">%s</xliff:g> ขึ้นอยู่กับการใช้งานของคุณ"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"เหลือ <xliff:g id="PERCENTAGE">%s</xliff:g> หรืออีกราว <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"แบตเตอรี่เหลือ <xliff:g id="PERCENTAGE">%s</xliff:g> เปิดโหมดประหยัดแบตเตอรี่อยู่"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"ไม่สนับสนุนการชาร์จแบบ USB\nใช้เฉพาะที่ชาร์จที่ให้มาเท่านั้น"</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"ไม่รองรับการชาร์จผ่าน USB"</string>
@@ -67,14 +70,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"ผู้ใช้ที่ลงชื่อเข้าใช้อุปกรณ์อยู่ในขณะนี้ไม่สามารถเปิดการแก้ไขข้อบกพร่องผ่าน USB ได้ หากต้องการใช้ฟีเจอร์นี้ ให้เปลี่ยนไปเป็นผู้ใช้หลัก"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ขยายจนเต็มหน้าจอ"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ยืดจนเต็มหน้าจอ"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"ภาพหน้าจอ"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"กำลังบันทึกภาพหน้าจอ..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"กำลังบันทึกภาพหน้าจอ..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"กำลังบันทึกภาพหน้าจอ"</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"จับภาพหน้าจอแล้ว"</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"แตะเพื่อดูภาพหน้าจอของคุณ"</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"ไม่สามารถจับภาพหน้าจอ"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"พบปัญหาขณะกำลังบันทึกภาพหน้าจอ"</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"ไม่สามารถบันทึกภาพหน้าจอเนื่องจากพื้นที่เก็บข้อมูลมีจำกัด"</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"กำลังบันทึกภาพหน้าจอ"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"บันทึกภาพหน้าจอแล้ว"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"แตะเพื่อดูภาพหน้าจอ"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"จับภาพหน้าจอไม่ได้"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"พบปัญหาขณะบันทึกภาพหน้าจอ"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"บันทึกภาพหน้าจอไม่ได้เนื่องจากพื้นที่เก็บข้อมูลมีจำกัด"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"แอปหรือองค์กรของคุณไม่อนุญาตให้จับภาพหน้าจอ"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"ตัวเลือกการถ่ายโอนไฟล์ USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"ต่อเชื่อมเป็นโปรแกรมเล่นสื่อ (MTP)"</string>
@@ -557,26 +561,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ปิด"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"ส่วนควบคุมการแจ้งเตือนแบบเปิด/ปิดช่วยให้คุณตั้งค่าระดับความสำคัญสำหรับการแจ้งเตือนของแอปได้ตั้งแต่ระดับ 0-5 \n\n"<b>"ระดับ 5"</b>" \n- แสดงที่ด้านบนของรายการแจ้งเตือน \n- อนุญาตให้รบกวนแบบเต็มหน้าจอ \n- อนุญาตให้แสดงชั่วครู่ \n\n"<b>"ระดับ 4"</b>" \n- ป้องกันการรบกวนแบบเต็มหน้าจอ \n- แสดงชั่วครู่เสมอ \n\n"<b>"ระดับ 3"</b>" \n- ป้องกันการรบกวนแบบเต็มหน้าจอ \n- ไม่แสดงชั่วครู่เลย \n\n"<b>"ระดับ 2"</b>" \n- ป้องกันการรบกวนแบบเต็มหน้าจอ \n- ไม่แสดงชั่วครู่เลย \n- ไม่ส่งเสียงหรือสั่นเลย \n\n"<b>"ระดับ 1"</b>" \n- ป้องกันการรบกวนแบบเต็มหน้าจอ \n- ไม่แสดงชั่วครู่เลย \n- ไม่ส่งเสียงหรือสั่นเลย \n- ซ่อนจากหน้าจอล็อกและแถบสถานะ \n- แสดงที่ด้านล่างของรายการแจ้งเตือน \n\n"<b>"ระดับ 0"</b>" \n- บล็อกการแจ้งเตือนทั้งหมดจากแอป"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"การแจ้งเตือน"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"คุณจะไม่ได้รับการแจ้งเตือนเหล่านี้อีก"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"หมวดหมู่การแจ้งเตือน <xliff:g id="NUMBER">%d</xliff:g> หมวด"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"แอปนี้ไม่มีหมวดหมู่การแจ้งเตือน"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"ไม่สามารถปิดการแจ้งเตือนจากแอปนี้"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">การแจ้งเตือน 1 ใน <xliff:g id="NUMBER_1">%s</xliff:g> หมวดหมู่จากแอปนี้</item>
-      <item quantity="one">การแจ้งเตือน 1 ใน <xliff:g id="NUMBER_0">%s</xliff:g> หมวดหมู่จากแอปนี้</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> และอีก <xliff:g id="NUMBER_5">%3$d</xliff:g> ช่องทาง</item>
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> และอีก <xliff:g id="NUMBER_2">%3$d</xliff:g> ช่องทาง</item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"คุณจะไม่เห็นการแจ้งเตือนเหล่านี้อีก"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"แสดงการแจ้งเตือนเหล่านี้ต่อไปไหม"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"ปิดการแจ้งเตือน"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"แสดงต่อไป"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"แสดงการแจ้งเตือนจากแอปนี้ต่อไปไหม"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"ปิดการแจ้งเตือนเหล่านี้ไม่ได้"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"ส่วนควบคุมการแจ้งเตือนของ <xliff:g id="APP_NAME">%1$s</xliff:g> เปิดอยู่"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"ส่วนควบคุมการแจ้งเตือนของ <xliff:g id="APP_NAME">%1$s</xliff:g> ปิดอยู่"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"อนุญาตการแจ้งเตือนจากช่องนี้"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"ทุกหมวดหมู่"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"การตั้งค่าเพิ่มเติม"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"ปรับแต่ง: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"ปรับแต่ง"</string>
     <string name="notification_done" msgid="5279426047273930175">"เสร็จสิ้น"</string>
+    <string name="inline_undo" msgid="558916737624706010">"เลิกทำ"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"ส่วนควบคุมการแจ้งเตือน"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"ตัวเลือกการปิดเสียงแจ้งเตือนชั่วคราว"</string>
@@ -731,8 +728,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"ขยาย"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"ย่อเล็กสุด"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"ปิด"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"การตั้งค่า"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"ลากลงเพื่อปิด"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"เมนู"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ใช้การแสดงภาพซ้อนภาพ"</string>

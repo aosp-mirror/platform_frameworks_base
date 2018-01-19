@@ -33,7 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"진행 중"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"알림"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"배터리 부족"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"배터리가 부족합니다. 배터리 세이버를 사용 설정하세요"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> 남았습니다."</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> 남음, 내 사용량을 기준으로 약 <xliff:g id="TIME">%s</xliff:g> 남음"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> 남음, 약 <xliff:g id="TIME">%s</xliff:g> 남음"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> 남았습니다. 배터리 세이버를 사용 중입니다."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB 충전이 지원되지 않습니다.\n제공된 충전기만 사용하세요."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB 충전은 지원되지 않습니다."</string>
@@ -67,14 +70,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"현재 이 기기에 로그인한 사용자는 USB 디버깅을 사용 설정할 수 없습니다. 이 기능을 사용하려면 기본 사용자로 전환하세요."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"전체화면 모드로 확대"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"전체화면 모드로 확대"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"스크린샷"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"캡쳐화면 저장 중..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"캡쳐화면 저장 중..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"캡쳐화면을 저장하는 중입니다."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"캡쳐화면 저장됨"</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"스크린샷을 확인하려면 탭하세요."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"캡쳐화면을 캡쳐하지 못했습니다."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"스크린샷을 저장하는 중 문제가 발생했습니다."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"저장용량이 부족하여 스크린샷을 저장할 수 없습니다."</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"스크린샷을 저장하는 중입니다"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"스크린샷 저장됨"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"스크린샷을 확인하려면 탭하세요"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"스크린샷을 캡쳐하지 못함"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"스크린샷을 저장하는 중 문제가 발생했습니다"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"저장용량이 부족하여 스크린샷을 저장할 수 없습니다"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"앱이나 조직에서 스크린샷 촬영을 허용하지 않습니다."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB 파일 전송 옵션"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"미디어 플레이어로 마운트(MTP)"</string>
@@ -559,26 +563,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"사용 안함"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"전원 알림 컨트롤을 사용하면 앱 알림 관련 중요도를 0부터 5까지로 설정할 수 있습니다. \n\n"<b>"레벨 5"</b>" \n- 알림 목록 상단에 표시 \n- 전체 화면일 경우 알림 표시 허용 \n- 항상 엿보기 표시 \n\n"<b>"레벨 4"</b>" \n- 전체 화면에 알림 표시 금지 \n- 항상 엿보기 표시 \n\n"<b>"레벨 3"</b>" \n- 전체 화면에 알림 표시 금지 \n- 엿보기 표시 안함 \n\n"<b>"레벨 2"</b>" \n- 전체 화면에 알림 표시 금지 \n- 엿보기 표시 안함 \n- 소리나 진동으로 알리지 않음 \n\n"<b>"레벨 1"</b>" \n- 전체 화면에 알림 표시 금지 \n- 엿보기 표시 안함 \n- 소리나 진동으로 알리지 않음 \n- 잠금 화면 및 상태 표시줄에서 숨김 \n- 알림 목록 하단에 표시 \n\n"<b>"레벨 0"</b>" \n- 앱의 모든 알림 차단"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"알림"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"더 이상 다음의 알림을 받지 않습니다."</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"알림 카테고리 <xliff:g id="NUMBER">%d</xliff:g>개"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"이 앱에는 알림 카테고리가 없습니다."</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"이 앱의 알림을 사용 중지할 수 없습니다."</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">이 앱에서 <xliff:g id="NUMBER_1">%s</xliff:g>개의 알림 카테고리 중 1개가 정의됨</item>
-      <item quantity="one">이 앱에서 <xliff:g id="NUMBER_0">%s</xliff:g>개의 알림 카테고리 중 1개가 정의됨</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> 외 <xliff:g id="NUMBER_5">%3$d</xliff:g>개</item>
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> 외 <xliff:g id="NUMBER_2">%3$d</xliff:g>개</item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"더 이상 다음의 알림을 받지 않습니다"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"이 알림을 계속 표시하시겠습니까?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"알림 중지"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"계속 표시하기"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"이 앱의 알림을 계속 표시하시겠습니까?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"이 알림은 끌 수 없습니다"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> 알림 컨트롤을 열었습니다."</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> 알림 컨트롤을 닫았습니다."</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"이 채널의 알림을 허용합니다."</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"전체 카테고리"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"설정 더보기"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"맞춤설정: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"맞춤설정"</string>
     <string name="notification_done" msgid="5279426047273930175">"완료"</string>
+    <string name="inline_undo" msgid="558916737624706010">"실행취소"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"알림 관리"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"알림 일시 중지 옵션"</string>
@@ -733,8 +730,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"펼치기"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"최소화"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"닫기"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"설정"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"아래로 드래그하여 닫기"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"메뉴"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g>에서 PIP 사용 중"</string>

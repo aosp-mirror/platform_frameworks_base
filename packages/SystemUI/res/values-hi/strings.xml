@@ -33,13 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ऑनगोइंग"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"सूचनाएं"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"बैटरी कम है"</string>
-    <!-- no translation found for battery_low_title_hybrid (6268991275887381595) -->
-    <skip />
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"बैटरी कम बची है. बैटरी सेवर चालू करें"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> शेष"</string>
-    <!-- no translation found for battery_low_percent_format_hybrid (6838677459286775617) -->
-    <skip />
-    <!-- no translation found for battery_low_percent_format_hybrid_short (9025795469949145586) -->
-    <skip />
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> बची है, आपके इस्तेमाल करने के तरीके के हिसाब से बैटरी लगभग <xliff:g id="TIME">%s</xliff:g> चलेगी"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> बची है, बैटरी लगभग <xliff:g id="TIME">%s</xliff:g> चलेगी"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> बैटरी बची है. बैटरी सेवर चालू है."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB चार्जिंग समर्थित नहीं है.\nकेवल आपूर्ति किए गए चार्जर का उपयोग करें."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB चार्जिंग समर्थित नहीं है."</string>
@@ -73,22 +70,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"अभी इस डिवाइस में जिस उपयोगकर्ता ने साइन इन किया है, वो USB डीबगिंग चालू नहीं कर सकता. इस सुविधा का इस्तेमाल करने के लिए, प्राथमिक उपयोगकर्ता में बदलें."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"स्‍क्रीन भरने के लिए ज़ूम करें"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"स्‍क्रीन भरने के लिए खींचें"</string>
-    <!-- no translation found for global_action_screenshot (8329831278085426283) -->
-    <skip />
+    <string name="global_action_screenshot" msgid="8329831278085426283">"स्क्रीनशॉट"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"स्क्रीनशॉट सहेजा जा रहा है..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"स्क्रीनशॉट सहेजा जा रहा है..."</string>
-    <!-- no translation found for screenshot_saving_text (2545047868936087248) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_title (5637073968117370753) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_text (7574667448002050363) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_title (9096484883063264803) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_to_save_unknown_text (8844781948876286488) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_to_save_text (3041612585107107310) -->
-    <skip />
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"स्क्रीनशॉट सेव किया जा रहा है"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"स्क्रीनशॉट सेव किया गया"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"अपना स्क्रीनशॉट देखने के लिए टैप करें"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"स्क्रीनशॉट नहीं लिया जा सका"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"स्क्रीनशॉट सेव करते समय एक समस्या आई"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"मेमोरी कम होने की वजह से स्क्रीनशॉट सेव नहीं किया जा सका"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"ऐप्लिकेशन या आपका संगठन स्क्रीनशॉट लेने की अनुमति नहीं देता"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB फ़ाइल स्थानांतरण विकल्प"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"मीडिया प्लेयर के रूप में माउंट करें (MTP)"</string>
@@ -571,27 +561,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"बंद"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"पावर सूचना नियंत्रण के ज़रिये, आप किसी ऐप की सूचना को उसकी अहमियत के हिसाब से 0 से 5 के लेवल पर सेट कर सकते हैं.\n\n"<b>"लेवल 5"</b>" \n- सूचना सूची में सबसे ऊपर दिखाएं \n- पूरे स्क्रीन को ढंकने की अनुमति दें \n- लगातार देखते रहें \n\n"<b>" लेवल 4"</b>" \n- पूरे स्क्रीन को ढंकें \n- लगातार देखते रहें \n\n"<b>"लेवल 3"</b>" \n- पूरे स्क्रीन को ढंकने से रोकें \n-कभी भी न देखें \n\n"<b>"लेवल 2"</b>" \n- पूरे स्क्रीन को ढंकने से रोकें \n- कभी भी देखें \n- कभी भी आवाज़ या कंपन (वाइब्रेशन) न करें \n\n"<b>"लेवल 1"</b>" \n- पूरे स्क्रीन को ढंकने से रोकें \n- कभी भी न देखें \n- कभी भी आवाज़ या कंपन (वाइब्रेशन) न करें \n- लॉक स्क्रीन और स्टेटस बार से छिपाएं \n- सूचना सूची के नीचे दिखाएं \n\n"<b>"लेवल 0"</b>" \n- ऐप्लिकेशन की सभी सूचनाएं रोक दें"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"सूचना"</string>
-    <!-- no translation found for notification_channel_disabled (344536703863700565) -->
-    <skip />
-    <!-- no translation found for inline_keep_showing (8945102997083836858) -->
-    <skip />
-    <!-- no translation found for inline_stop_button (4172980096860941033) -->
-    <skip />
-    <!-- no translation found for inline_keep_button (6665940297019018232) -->
-    <skip />
-    <!-- no translation found for inline_keep_showing_app (1723113469580031041) -->
-    <skip />
-    <!-- no translation found for notification_unblockable_desc (1037434112919403708) -->
-    <skip />
+    <string name="notification_channel_disabled" msgid="344536703863700565">"अब आपको ये सूचनाएं दिखाई नहीं देंगी"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"ये सूचनाएं दिखाना जारी रखें?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"सूचनाएं दिखाना बंद करें"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"दिखाना जारी रखें"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"इस ऐप्लिकेशन से जुड़ी सूचनाएं दिखाना जारी रखें?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"ये सूचनाएं दिखाया जाना बंद नहीं किया जा सकता"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> के लिए सूचना नियंत्रण चालू हैं"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> के लिए सूचना नियंत्रण बंद हैं"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"इस चैनल से सूचना की पाने की मंज़ूरी दें"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"और सेटिंग"</string>
-    <!-- no translation found for notification_app_settings (420348114670768449) -->
-    <skip />
+    <string name="notification_app_settings" msgid="420348114670768449">"पसंद के मुताबिक बनाएं"</string>
     <string name="notification_done" msgid="5279426047273930175">"हो गया"</string>
-    <!-- no translation found for inline_undo (558916737624706010) -->
-    <skip />
+    <string name="inline_undo" msgid="558916737624706010">"पहले जैसा करें"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"सूचना नियंत्रण"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"सूचना को स्नूज़ (थोड़ी देर के लिए चुप करना) करने के विकल्प"</string>

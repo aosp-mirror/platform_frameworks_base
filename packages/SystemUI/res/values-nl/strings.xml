@@ -33,7 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Actief"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Meldingen"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Batterij is bijna leeg"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"De batterij is bijna leeg. Schakel Batterijbesparing in."</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend, nog ongeveer <xliff:g id="TIME">%s</xliff:g> over op basis van je gebruik"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend, nog ongeveer <xliff:g id="TIME">%s</xliff:g> over"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> resterend. Batterijbesparing is ingeschakeld."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Opladen via USB niet ondersteund.\nGebruik alleen de bijgeleverde oplader."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Opladen via USB wordt niet ondersteund."</string>
@@ -67,14 +70,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"De gebruiker die momenteel is ingelogd op dit apparaat, kan USB-foutopsporing niet inschakelen. Als je deze functie wilt gebruiken, schakel je naar de primaire gebruiker."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoom om scherm te vullen"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Rek uit v. schermvulling"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Screenshot"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Screenshot opslaan..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Screenshot opslaan..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"Screenshot wordt opgeslagen."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Screenshot gemaakt."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Tik om je screenshot te bekijken."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Screenshot is niet gemaakt."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Er is een probleem opgetreden bij het opslaan van het screenshot."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Kan screenshot niet opslaan vanwege beperkte opslagruimte."</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"Screenshot wordt opgeslagen"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"Screenshot opgeslagen"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"Tik om je screenshot te bekijken"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"Kan geen screenshot maken"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"Er is een probleem opgetreden bij het opslaan van het screenshot"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Kan screenshot niet opslaan vanwege beperkte opslagruimte"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Het maken van screenshots wordt niet toegestaan door de app of je organisatie"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opties voor USB-bestandsoverdracht"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Koppelen als mediaspeler (MTP)"</string>
@@ -557,26 +561,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Uit"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Met beheeropties voor meldingen met betrekking tot stroomverbruik kun je een belangrijkheidsniveau van 0 tot 5 instellen voor de meldingen van een app. \n\n"<b>"Niveau 5"</b>" \n- Boven aan de lijst met meldingen weergeven \n- Onderbreking op volledig scherm toestaan \n- Altijd korte weergave \n\n"<b>"Niveau 4"</b>" \n- Geen onderbreking op volledig scherm \n- Altijd korte weergave \n\n"<b>"Niveau 3"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n\n"<b>"Niveau 2"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n- Nooit geluid laten horen of trillen \n\n"<b>"Niveau 1"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n- Nooit geluid laten horen of trillen \n- Verbergen op vergrendelingsscherm en statusbalk \n- Onder aan de lijst met meldingen weergeven \n\n"<b>"Niveau 0"</b>" \n- Alle meldingen van de app blokkeren"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Meldingen"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"Je ontvangt deze meldingen niet meer"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> meldingscategorieën"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"Deze app heeft geen meldingscategorieën"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Meldingen van deze app kunnen niet worden uitgeschakeld"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">1 van <xliff:g id="NUMBER_1">%s</xliff:g> meldingscategorieën van deze app</item>
-      <item quantity="one">1 van <xliff:g id="NUMBER_0">%s</xliff:g> meldingscategorie van deze app</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> en <xliff:g id="NUMBER_5">%3$d</xliff:g> andere</item>
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> en <xliff:g id="NUMBER_2">%3$d</xliff:g> andere</item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Deze meldingen worden niet meer weergegeven"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"Deze meldingen blijven weergeven?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"Meldingen stoppen"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"Blijven weergeven"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"Meldingen van deze app blijven weergeven?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"Deze meldingen kunnen niet worden uitgeschakeld"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Beheeropties voor meldingen voor <xliff:g id="APP_NAME">%1$s</xliff:g> geopend"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Beheeropties voor meldingen voor <xliff:g id="APP_NAME">%1$s</xliff:g> gesloten"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Meldingen van dit kanaal toestaan"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"Alle categorieën"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Meer instellingen"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"Aanpassen: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"Aanpassen"</string>
     <string name="notification_done" msgid="5279426047273930175">"Gereed"</string>
+    <string name="inline_undo" msgid="558916737624706010">"Ongedaan maken"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"beheeropties voor meldingen"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"snooze-opties voor meldingen"</string>
@@ -731,8 +728,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Uitvouwen"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimaliseren"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Sluiten"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"Instellingen"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Sleep omlaag om te sluiten"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Menu"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> is in scherm-in-scherm"</string>
