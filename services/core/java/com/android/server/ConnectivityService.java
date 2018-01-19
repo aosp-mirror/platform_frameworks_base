@@ -63,6 +63,7 @@ import android.net.NetworkConfig;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkMisc;
+import android.net.NetworkPolicyManager;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
@@ -1501,13 +1502,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return true;
     }
 
-    private final INetworkPolicyListener mPolicyListener = new INetworkPolicyListener.Stub() {
+    private final INetworkPolicyListener mPolicyListener = new NetworkPolicyManager.Listener() {
         @Override
         public void onUidRulesChanged(int uid, int uidRules) {
             // TODO: notify UID when it has requested targeted updates
-        }
-        @Override
-        public void onMeteredIfacesChanged(String[] meteredIfaces) {
         }
         @Override
         public void onRestrictBackgroundChanged(boolean restrictBackground) {
@@ -1516,9 +1514,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 log("onRestrictBackgroundChanged(true): disabling tethering");
                 mTethering.untetherAll();
             }
-        }
-        @Override
-        public void onUidPoliciesChanged(int uid, int uidPolicies) {
         }
     };
 

@@ -244,18 +244,13 @@ public final class ConnectivityController extends StateController implements
         }
     };
 
-    private final INetworkPolicyListener mNetPolicyListener = new INetworkPolicyListener.Stub() {
+    private final INetworkPolicyListener mNetPolicyListener = new NetworkPolicyManager.Listener() {
         @Override
         public void onUidRulesChanged(int uid, int uidRules) {
             if (DEBUG) {
                 Slog.v(TAG, "Uid rules changed for " + uid);
             }
             updateTrackedJobs(uid);
-        }
-
-        @Override
-        public void onMeteredIfacesChanged(String[] meteredIfaces) {
-            // We track this via our NetworkCallback
         }
 
         @Override
