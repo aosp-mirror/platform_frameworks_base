@@ -749,12 +749,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
         supervisor.handleNonResizableTaskIfNeeded(this, preferredStack.getWindowingMode(),
                 DEFAULT_DISPLAY, toStack);
 
-        boolean successful = (preferredStack == toStack);
-        if (successful && toStack.getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-            // If task moved to docked stack - show recents if needed.
-            mService.mWindowManager.showRecentApps(false /* fromHome */);
-        }
-        return successful;
+        return (preferredStack == toStack);
     }
 
     /**

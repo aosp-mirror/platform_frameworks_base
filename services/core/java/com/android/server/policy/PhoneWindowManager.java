@@ -850,7 +850,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     dispatchMediaKeyRepeatWithWakeLock((KeyEvent)msg.obj);
                     break;
                 case MSG_DISPATCH_SHOW_RECENTS:
-                    showRecentApps(false, msg.arg1 != 0);
+                    showRecentApps(false);
                     break;
                 case MSG_DISPATCH_SHOW_GLOBAL_ACTIONS:
                     showGlobalActionsInternal();
@@ -3817,7 +3817,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 final int shiftlessModifiers = event.getModifiers() & ~KeyEvent.META_SHIFT_MASK;
                 if (KeyEvent.metaStateHasModifiers(shiftlessModifiers, KeyEvent.META_ALT_ON)) {
                     mRecentAppsHeldModifiers = shiftlessModifiers;
-                    showRecentApps(true, false);
+                    showRecentApps(true);
                     return -1;
                 }
             }
@@ -4164,16 +4164,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void showRecentApps(boolean fromHome) {
+    public void showRecentApps() {
         mHandler.removeMessages(MSG_DISPATCH_SHOW_RECENTS);
-        mHandler.obtainMessage(MSG_DISPATCH_SHOW_RECENTS, fromHome ? 1 : 0, 0).sendToTarget();
+        mHandler.obtainMessage(MSG_DISPATCH_SHOW_RECENTS).sendToTarget();
     }
 
-    private void showRecentApps(boolean triggeredFromAltTab, boolean fromHome) {
+    private void showRecentApps(boolean triggeredFromAltTab) {
         mPreloadedRecentApps = false; // preloading no longer needs to be canceled
         StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
         if (statusbar != null) {
-            statusbar.showRecentApps(triggeredFromAltTab, fromHome);
+            statusbar.showRecentApps(triggeredFromAltTab);
         }
     }
 

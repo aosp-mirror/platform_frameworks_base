@@ -356,14 +356,14 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         registerReceiver(mSystemBroadcastReceiver, filter);
 
         getWindow().addPrivateFlags(LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION);
-
-        // Reload the stack view
-        reloadStackView();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+
+        // Reload the stack view whenever we are made visible again
+        reloadStackView();
 
         // Notify that recents is now visible
         EventBus.getDefault().send(new RecentsVisibilityChangedEvent(this, true));
@@ -409,14 +409,6 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
             }
             mRecentsView.setScrimColors(colors, true /* animated */);
         }
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-
-        // Reload the stack view
-        reloadStackView();
     }
 
     /**
@@ -530,7 +522,11 @@ public class RecentsActivity extends Activity implements ViewTreeObserver.OnPreD
         // Set the window background
         mRecentsView.updateBackgroundScrim(getWindow(), isInMultiWindowMode);
 
-        reloadTaskStack(isInMultiWindowMode, true /* sendConfigChangedEvent */);
+        // Reload the task stack view if we are still visible to pick up the change in tasks that
+        // result from entering/exiting multi-window
+        if (mIsVisible) {
+            reloadTaskStack(isInMultiWindowMode, true /* sendConfigChangedEvent */);
+        }
     }
 
     @Override

@@ -210,7 +210,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     private boolean mStackActionButtonVisible;
 
     // Percentage of last ScrollP from the min to max scrollP that lives after configuration changes
-    private float mLastScrollPPercent;
+    private float mLastScrollPPercent = -1;
 
     // We keep track of the task view focused by user interaction and draw a frame around it in the
     // grid layout.
@@ -647,14 +647,12 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
      * an animation provided in {@param animationOverrides}, that will be used instead.
      */
     private void relayoutTaskViews(AnimationProps animation,
-            ArrayMap<Task, AnimationProps> animationOverrides,
-            boolean ignoreTaskOverrides) {
+            ArrayMap<Task, AnimationProps> animationOverrides, boolean ignoreTaskOverrides) {
         // If we had a deferred animation, cancel that
         cancelDeferredTaskViewLayoutAnimation();
 
         // Synchronize the current set of TaskViews
-        bindVisibleTaskViews(mStackScroller.getStackScroll(),
-                ignoreTaskOverrides /* ignoreTaskOverrides */);
+        bindVisibleTaskViews(mStackScroller.getStackScroll(), ignoreTaskOverrides);
 
         // Animate them to their final transforms with the given animation
         List<TaskView> taskViews = getTaskViews();
@@ -2067,8 +2065,11 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
         // Update the Clear All button in case we're switching in or out of grid layout.
         updateStackActionButtonVisibility();
 
-        // Trigger a new layout and update to the initial state if necessary
-        if (event.fromMultiWindow) {
+        // Trigger a new layout and update to the initial state if necessary. When entering split
+        // screen, the multi-window configuration change event can happen after the stack is already
+        // reloaded (but pending measure/layout), in this case, do not override the intiial state
+        // and just wait for the upcoming measure/layout pass.
+        if (event.fromMultiWindow && mInitialState == INITIAL_STATE_UPDATE_NONE) {
             mInitialState = INITIAL_STATE_UPDATE_LAYOUT_ONLY;
             requestLayout();
         } else if (event.fromDeviceOrientationChange) {

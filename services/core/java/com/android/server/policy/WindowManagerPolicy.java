@@ -1571,7 +1571,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * Show the recents task list app.
      * @hide
      */
-    public void showRecentApps(boolean fromHome);
+    public void showRecentApps();
 
     /**
      * Show the global actions dialog.
