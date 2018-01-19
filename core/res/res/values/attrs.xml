@@ -4876,6 +4876,8 @@
             <!-- Justification by stretching word spacing. -->
             <enum name="inter_word" value = "1" />
         </attr>
+        <!-- Whether or not this view is a heading for accessibility purposes. -->
+        <attr name="accessibilityHeading" format="boolean"/>
     </declare-styleable>
     <declare-styleable name="TextViewAppearance">
         <!-- Base text color, typeface, size, and style. -->

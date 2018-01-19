@@ -2865,6 +2865,7 @@
       <public name="firstBaselineToTopHeight" />
       <public name="lastBaselineToBottomHeight" />
       <public name="lineHeight" />
+      <public name="accessibilityHeading" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">
