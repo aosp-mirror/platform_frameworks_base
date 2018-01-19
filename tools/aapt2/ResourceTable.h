@@ -229,6 +229,11 @@ class ResourceTable {
 
   ResourceTablePackage* CreatePackage(const android::StringPiece& name, Maybe<uint8_t> id = {});
 
+  // Attempts to find a package having the specified name and ID. If not found, a new package
+  // of the specified parameters is created and returned.
+  ResourceTablePackage* CreatePackageAllowingDuplicateNames(const android::StringPiece& name,
+                                                            const Maybe<uint8_t> id);
+
   std::unique_ptr<ResourceTable> Clone() const;
 
   // The string pool used by this resource table. Values that reference strings must use
@@ -239,7 +244,8 @@ class ResourceTable {
   // destroyed.
   StringPool string_pool;
 
-  // The list of packages in this table, sorted alphabetically by package name.
+  // The list of packages in this table, sorted alphabetically by package name and increasing
+  // package ID (missing ID being the lowest).
   std::vector<std::unique_ptr<ResourceTablePackage>> packages;
 
   // Set of dynamic packages that this table may reference. Their package names get encoded
