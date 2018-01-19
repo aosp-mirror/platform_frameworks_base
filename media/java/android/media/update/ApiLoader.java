@@ -16,6 +16,8 @@
 
 package android.media.update;
 
+import android.content.res.Resources;
+import android.content.res.Resources.Theme;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 
@@ -49,8 +51,8 @@ public final class ApiLoader {
                 Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
         sMediaLibrary = libContext.getClassLoader()
                 .loadClass(UPDATE_CLASS)
-                .getMethod(UPDATE_METHOD, Context.class, Context.class)
-                .invoke(null, appContext, libContext);
+                .getMethod(UPDATE_METHOD, Resources.class, Theme.class)
+                .invoke(null, libContext.getResources(), libContext.getTheme());
         return sMediaLibrary;
     }
 }
