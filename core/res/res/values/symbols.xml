@@ -1973,6 +1973,8 @@
   <java-symbol type="string" name="data_usage_warning_title" />
   <java-symbol type="string" name="data_usage_wifi_limit_snoozed_title" />
   <java-symbol type="string" name="data_usage_wifi_limit_title" />
+  <java-symbol type="string" name="data_usage_rapid_title" />
+  <java-symbol type="string" name="data_usage_rapid_body" />
   <java-symbol type="string" name="default_wallpaper_component" />
   <java-symbol type="string" name="device_storage_monitor_notification_channel" />
   <java-symbol type="string" name="dlg_ok" />

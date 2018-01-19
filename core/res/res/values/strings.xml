@@ -3754,6 +3754,11 @@
     <!-- Notification body when background data usage is limited. -->
     <string name="data_usage_restricted_body">Tap to remove restriction.</string>
 
+    <!-- Notification title when there has been recent excessive data usage. [CHAR LIMIT=32] -->
+    <string name="data_usage_rapid_title">Large data usage</string>
+    <!-- Notification body when there has been recent excessive data usage. [CHAR LIMIT=128] -->
+    <string name="data_usage_rapid_body">Your data usage over the last few days is larger than normal. Tap to view usage and settings.</string>
+
     <!-- SSL Certificate dialogs -->
     <!-- Title for an SSL Certificate dialog -->
     <string name="ssl_certificate">Security certificate</string>

@@ -99,6 +99,7 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
 import android.Manifest;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -206,8 +207,10 @@ import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
+import com.android.server.SystemService;
 
 import libcore.io.IoUtils;
+import libcore.util.EmptyArray;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
@@ -283,6 +286,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public static final int TYPE_LIMIT = SystemMessage.NOTE_NET_LIMIT;
     @VisibleForTesting
     public static final int TYPE_LIMIT_SNOOZED = SystemMessage.NOTE_NET_LIMIT_SNOOZED;
+    @VisibleForTesting
+    public static final int TYPE_RAPID = SystemMessage.NOTE_NET_RAPID;
 
     private static final String TAG_POLICY_LIST = "policy-list";
     private static final String TAG_NETWORK_POLICY = "network-policy";
@@ -998,6 +1003,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     };
 
+    @VisibleForTesting
+    public void updateNotifications() {
+        synchronized (mNetworkPoliciesSecondLock) {
+            updateNotificationsNL();
+        }
+    }
+
     /**
      * Check {@link NetworkPolicy} against current {@link INetworkStatsService}
      * to show visible notifications as needed.
@@ -1042,6 +1054,44 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
         }
 
+        // Alert the user about heavy recent data usage that might result in
+        // going over their carrier limit.
+        for (int i = 0; i < mNetIdToSubId.size(); i++) {
+            final int subId = mNetIdToSubId.valueAt(i);
+            final SubscriptionPlan plan = getPrimarySubscriptionPlanLocked(subId);
+            if (plan == null) continue;
+
+            final long limitBytes = plan.getDataLimitBytes();
+            if (limitBytes == SubscriptionPlan.BYTES_UNKNOWN) {
+                // Ignore missing limits
+            } else if (limitBytes == SubscriptionPlan.BYTES_UNLIMITED) {
+                // Unlimited data; no rapid usage alerting
+            } else {
+                // Warn if average usage over last 4 days is on track to blow
+                // pretty far past the plan limits.
+                final long recentDuration = TimeUnit.DAYS.toMillis(4);
+                final long end = RecurrenceRule.sClock.millis();
+                final long start = end - recentDuration;
+
+                final NetworkTemplate template = NetworkTemplate.buildTemplateMobileAll(
+                        mContext.getSystemService(TelephonyManager.class).getSubscriberId(subId));
+                final long recentBytes = getTotalBytes(template, start, end);
+
+                final Pair<ZonedDateTime, ZonedDateTime> cycle = plan.cycleIterator().next();
+                final long cycleDuration = cycle.second.toInstant().toEpochMilli()
+                        - cycle.first.toInstant().toEpochMilli();
+
+                final long projectedBytes = (recentBytes * cycleDuration) / recentDuration;
+                final long alertBytes = (limitBytes * 3) / 2;
+                if (projectedBytes > alertBytes) {
+                    final NetworkPolicy policy = new NetworkPolicy(template, plan.getCycleRule(),
+                            NetworkPolicy.WARNING_DISABLED, NetworkPolicy.LIMIT_DISABLED,
+                            NetworkPolicy.SNOOZE_NEVER, NetworkPolicy.SNOOZE_NEVER, true, true);
+                    enqueueNotification(policy, TYPE_RAPID, 0);
+                }
+            }
+        }
+
         // cancel stale notifications that we didn't renew above
         for (int i = beforeNotifs.size()-1; i >= 0; i--) {
             final NotificationId notificationId = beforeNotifs.valueAt(i);
@@ -1063,7 +1113,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final SubscriptionManager sub = SubscriptionManager.from(mContext);
 
             // Mobile template is relevant when any active subscriber matches
-            final int[] subIds = sub.getActiveSubscriptionIdList();
+            final int[] subIds = ArrayUtils.defeatNullable(sub.getActiveSubscriptionIdList());
             for (int subId : subIds) {
                 final String subscriberId = tele.getSubscriberId(subId);
                 final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
@@ -1200,6 +1250,21 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
                 break;
             }
+            case TYPE_RAPID: {
+                final CharSequence title = res.getText(R.string.data_usage_rapid_title);
+                body = res.getText(R.string.data_usage_rapid_body);
+
+                builder.setOngoing(true);
+                builder.setSmallIcon(R.drawable.stat_notify_error);
+                builder.setTicker(title);
+                builder.setContentTitle(title);
+                builder.setContentText(body);
+
+                final Intent intent = buildViewDataUsageIntent(res, policy.template);
+                builder.setContentIntent(PendingIntent.getActivity(
+                        mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
+                break;
+            }
         }
 
         // TODO: move to NotificationManager once we can mock it
@@ -1252,6 +1317,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
         }
     };
+
+    @VisibleForTesting
+    public void updateNetworks() {
+        mConnReceiver.onReceive(null, null);
+    }
 
     /**
      * Update mobile policies with data cycle information from {@link CarrierConfigManager}
@@ -1471,7 +1541,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final SubscriptionManager sm = SubscriptionManager.from(mContext);
             final TelephonyManager tm = TelephonyManager.from(mContext);
 
-            final int[] subIds = sm.getActiveSubscriptionIdList();
+            final int[] subIds = ArrayUtils.defeatNullable(sm.getActiveSubscriptionIdList());
             for (int subId : subIds) {
                 final String subscriberId = tm.getSubscriberId(subId);
                 final NetworkIdentity probeIdent = new NetworkIdentity(TYPE_MOBILE,
@@ -1510,7 +1580,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         final NetworkState[] states;
         try {
-            states = mConnManager.getAllNetworkState();
+            states = defeatNullable(mConnManager.getAllNetworkState());
         } catch (RemoteException e) {
             // ignored; service lives in system_server
             return;
@@ -1521,7 +1591,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mNetIdToSubId.clear();
         final ArrayMap<NetworkState, NetworkIdentity> identified = new ArrayMap<>();
         for (NetworkState state : states) {
-            mNetIdToSubId.put(state.network.netId, parseSubId(state));
+            if (state.network != null) {
+                mNetIdToSubId.put(state.network.netId, parseSubId(state));
+            }
             if (state.networkInfo != null && state.networkInfo.isConnected()) {
                 final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, state);
                 identified.put(state, ident);
@@ -1627,23 +1699,23 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // TODO: add experiments support to disable or tweak ratios
         mSubscriptionOpportunisticQuota.clear();
         for (NetworkState state : states) {
+            if (state.network == null) continue;
             final int subId = getSubIdLocked(state.network);
-            final SubscriptionPlan[] plans = mSubscriptionPlans.get(subId);
-            final SubscriptionPlan plan = ArrayUtils.isEmpty(plans) ? null : plans[0];
+            final SubscriptionPlan plan = getPrimarySubscriptionPlanLocked(subId);
             if (plan == null) continue;
 
             // By default assume we have no quota
-            long limitBytes = plan.getDataLimitBytes();
             long quotaBytes = 0;
 
+            final long limitBytes = plan.getDataLimitBytes();
             if (limitBytes == SubscriptionPlan.BYTES_UNKNOWN) {
                 // Ignore missing limits
-            } else if (plan.getDataLimitBytes() == SubscriptionPlan.BYTES_UNLIMITED) {
+            } else if (limitBytes == SubscriptionPlan.BYTES_UNLIMITED) {
                 // Unlimited data; let's use 20MiB/day (600MiB/month)
                 quotaBytes = DataUnit.MEBIBYTES.toBytes(20);
             } else {
                 // Limited data; let's only use 10% of remaining budget
-                final Pair<ZonedDateTime, ZonedDateTime> cycle = plans[0].cycleIterator().next();
+                final Pair<ZonedDateTime, ZonedDateTime> cycle = plan.cycleIterator().next();
                 final long start = cycle.first.toInstant().toEpochMilli();
                 final long end = cycle.second.toInstant().toEpochMilli();
                 final long totalBytes = getTotalBytes(
@@ -1676,7 +1748,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final TelephonyManager tele = TelephonyManager.from(mContext);
         final SubscriptionManager sub = SubscriptionManager.from(mContext);
 
-        final int[] subIds = sub.getActiveSubscriptionIdList();
+        final int[] subIds = ArrayUtils.defeatNullable(sub.getActiveSubscriptionIdList());
         for (int subId : subIds) {
             final String subscriberId = tele.getSubscriberId(subId);
             ensureActiveMobilePolicyAL(subId, subscriberId);
@@ -4503,8 +4575,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         @Override
         public SubscriptionPlan getSubscriptionPlan(Network network) {
             synchronized (mNetworkPoliciesSecondLock) {
-                final SubscriptionPlan[] plans = mSubscriptionPlans.get(getSubIdLocked(network));
-                return ArrayUtils.isEmpty(plans) ? null : plans[0];
+                final int subId = getSubIdLocked(network);
+                return getPrimarySubscriptionPlanLocked(subId);
             }
         }
 
@@ -4537,8 +4609,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         return mNetIdToSubId.get(network.netId, INVALID_SUBSCRIPTION_ID);
     }
 
+    private SubscriptionPlan getPrimarySubscriptionPlanLocked(int subId) {
+        final SubscriptionPlan[] plans = mSubscriptionPlans.get(subId);
+        return ArrayUtils.isEmpty(plans) ? null : plans[0];
+    }
+
     private static boolean hasRule(int uidRules, int rule) {
         return (uidRules & rule) != 0;
+    }
+
+    private static @NonNull NetworkState[] defeatNullable(@Nullable NetworkState[] val) {
+        return (val != null) ? val : new NetworkState[0];
     }
 
     private class NotificationId {

@@ -193,6 +193,9 @@ message SystemMessage {
     // Inform the user that Wifi Wake has automatically re-enabled Wifi
     NOTE_WIFI_WAKE_TURNED_BACK_ON = 44;
 
+    // Inform the user that unexpectedly rapid network usage is happening
+    NOTE_NET_RAPID = 45;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release
