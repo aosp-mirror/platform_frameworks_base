@@ -302,6 +302,7 @@ public class SettingsProvider extends ContentProvider {
         // fail to boot if there're any backed up settings that don't have a non-null validator
         ensureAllBackedUpSystemSettingsHaveValidators();
         ensureAllBackedUpGlobalSettingsHaveValidators();
+        ensureAllBackedUpSecureSettingsHaveValidators();
 
         synchronized (mLock) {
             mUserManager = UserManager.get(getContext());
@@ -321,17 +322,24 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private void ensureAllBackedUpSystemSettingsHaveValidators() {
-        String offenders = getOffenders(Settings.System.SETTINGS_TO_BACKUP,
-                Settings.System.VALIDATORS);
+        String offenders = getOffenders(concat(Settings.System.SETTINGS_TO_BACKUP,
+                Settings.System.LEGACY_RESTORE_SETTINGS), Settings.System.VALIDATORS);
 
         failToBootIfOffendersPresent(offenders, "Settings.System");
     }
 
     private void ensureAllBackedUpGlobalSettingsHaveValidators() {
-        String offenders = getOffenders(Settings.Global.SETTINGS_TO_BACKUP,
-                Settings.Global.VALIDATORS);
+        String offenders = getOffenders(concat(Settings.Global.SETTINGS_TO_BACKUP,
+                Settings.Global.LEGACY_RESTORE_SETTINGS), Settings.Global.VALIDATORS);
 
         failToBootIfOffendersPresent(offenders, "Settings.Global");
+    }
+
+    private void ensureAllBackedUpSecureSettingsHaveValidators() {
+        String offenders = getOffenders(concat(Settings.Secure.SETTINGS_TO_BACKUP,
+                Settings.Secure.LEGACY_RESTORE_SETTINGS), Settings.Secure.VALIDATORS);
+
+        failToBootIfOffendersPresent(offenders, "Settings.Secure");
     }
 
     private void failToBootIfOffendersPresent(String offenders, String settingsType) {
@@ -350,6 +358,18 @@ public class SettingsProvider extends ContentProvider {
             }
         }
         return offenders.toString();
+    }
+
+    private final String[] concat(String[] first, String[] second) {
+        if (second == null || second.length == 0) {
+            return first;
+        }
+        final int firstLen = first.length;
+        final int secondLen = second.length;
+        String[] both = new String[firstLen + secondLen];
+        System.arraycopy(first, 0, both, 0, firstLen);
+        System.arraycopy(second, 0, both, firstLen, secondLen);
+        return both;
     }
 
     @Override
