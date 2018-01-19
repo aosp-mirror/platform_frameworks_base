@@ -339,6 +339,16 @@ public final class ImageDecoder implements AutoCloseable {
         public String getMimeType() {
             return mDecoder.getMimeType();
         }
+
+        /**
+         * Whether the image is animated.
+         *
+         * <p>Calling {@link #decodeDrawable} will return an
+         * {@link AnimatedImageDrawable}.</p>
+         */
+        public boolean isAnimated() {
+            return mDecoder.mAnimated;
+        }
     };
 
     /**
@@ -453,6 +463,10 @@ public final class ImageDecoder implements AutoCloseable {
             if (mCloseGuard != null) {
                 mCloseGuard.warnIfOpen();
             }
+
+            // Avoid closing these in finalizer.
+            mInputStream = null;
+            mAssetFd = null;
 
             close();
         } finally {

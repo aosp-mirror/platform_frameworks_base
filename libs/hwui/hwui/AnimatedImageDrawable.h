@@ -33,6 +33,13 @@ namespace uirenderer {
 class TaskManager;
 }
 
+class OnAnimationEndListener {
+public:
+    virtual ~OnAnimationEndListener() {}
+
+    virtual void onAnimationEnd() = 0;
+};
+
 /**
  * Native component of android.graphics.drawable.AnimatedImageDrawables.java.  This class can be
  * drawn into Canvas.h and maintains the state needed to drive the animation from the RenderThread.
@@ -62,6 +69,13 @@ public:
     bool start();
     void stop();
     bool isRunning();
+    void setRepetitionCount(int count) {
+        mSkAnimatedImage->setRepetitionCount(count);
+    }
+
+    void setOnAnimationEndListener(std::unique_ptr<OnAnimationEndListener> listener) {
+        mEndListener = std::move(listener);
+    }
 
     void scheduleUpdate(uirenderer::TaskManager* taskManager);
 
@@ -87,6 +101,8 @@ private:
     class AnimatedImageTaskProcessor;
     sp<AnimatedImageTask> mDecodeTask;
     sp<AnimatedImageTaskProcessor> mDecodeTaskProcessor;
+
+    std::unique_ptr<OnAnimationEndListener> mEndListener;
 };
 
 };  // namespace android

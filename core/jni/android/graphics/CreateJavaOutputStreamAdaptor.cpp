@@ -12,15 +12,6 @@
 static jmethodID    gInputStream_readMethodID;
 static jmethodID    gInputStream_skipMethodID;
 
-// FIXME: Share with ByteBufferStreamAdaptor.cpp?
-static JNIEnv* get_env_or_die(JavaVM* jvm) {
-    JNIEnv* env;
-    if (jvm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
-        LOG_ALWAYS_FATAL("Failed to get JNIEnv for JavaVM: %p", jvm);
-    }
-    return env;
-}
-
 /**
  *  Wrapper for a Java InputStream.
  */
@@ -57,13 +48,13 @@ public:
     }
 
     ~JavaInputStreamAdaptor() override {
-        auto* env = get_env_or_die(fJvm);
+        auto* env = android::get_env_or_die(fJvm);
         env->DeleteGlobalRef(fJavaInputStream);
         env->DeleteGlobalRef(fJavaByteArray);
     }
 
     size_t read(void* buffer, size_t size) override {
-        auto* env = get_env_or_die(fJvm);
+        auto* env = android::get_env_or_die(fJvm);
         if (!fSwallowExceptions && checkException(env)) {
             // Just in case the caller did not clear from a previous exception.
             return 0;

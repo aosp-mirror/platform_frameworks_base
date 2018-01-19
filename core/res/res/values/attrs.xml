@@ -5878,6 +5878,13 @@
         <attr name="insetBottom" format="fraction|dimension" />
     </declare-styleable>
 
+    <!-- Drawable used to draw animated images (gif) -->
+    <declare-styleable name="AnimatedImageDrawable">
+        <!-- Identifier of the image file. This attribute is mandatory.
+             It must be an image file with multiple frames, e.g. gif or webp -->
+        <attr name="src" />
+    </declare-styleable>
+
     <!-- Drawable used to draw bitmaps. -->
     <declare-styleable name="BitmapDrawable">
         <!-- Identifier of the bitmap file. This attribute is mandatory. -->
