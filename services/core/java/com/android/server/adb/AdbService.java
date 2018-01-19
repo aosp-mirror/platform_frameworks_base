@@ -63,12 +63,19 @@ public class AdbService extends IAdbManager.Stub {
         public void unregisterTransport(IAdbTransport transport) {
             mTransports.remove(transport.asBinder());
         }
+
+        @Override
+        public boolean isAdbEnabled() {
+            return mAdbEnabled;
+        }
     }
 
     private static final String TAG = "AdbService";
 
     private final Context mContext;
     private final ArrayMap<IBinder, IAdbTransport> mTransports = new ArrayMap<>();
+
+    private boolean mAdbEnabled;
 
     private AdbService(Context context) {
         mContext = context;

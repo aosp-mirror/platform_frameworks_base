@@ -36,4 +36,9 @@ public abstract class AdbManagerInternal {
      * @param transport previously-added ADB transport interface to be removed
      */
     public abstract void unregisterTransport(IAdbTransport transport);
+
+    /**
+     * Returns {@code true} if ADB debugging is enabled.
+     */
+    public abstract boolean isAdbEnabled();
 }
