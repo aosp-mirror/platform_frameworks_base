@@ -4707,7 +4707,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 .setRequestCode(requestCode)
                 .setStartFlags(startFlags)
                 .setProfilerInfo(profilerInfo)
-                .setMayWait(bOptions, userId)
+                .setActivityOptions(bOptions)
+                .setMayWait(userId)
                 .execute();
 
     }
@@ -4778,7 +4779,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     .setResultWho(resultWho)
                     .setRequestCode(requestCode)
                     .setStartFlags(startFlags)
-                    .setMayWait(bOptions, userId)
+                    .setActivityOptions(bOptions)
+                    .setMayWait(userId)
                     .setIgnoreTargetSecurity(ignoreTargetSecurity)
                     .execute();
         } catch (SecurityException e) {
@@ -4814,7 +4816,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 .setResultWho(resultWho)
                 .setRequestCode(requestCode)
                 .setStartFlags(startFlags)
-                .setMayWait(bOptions, userId)
+                .setActivityOptions(bOptions)
+                .setMayWait(userId)
                 .setProfilerInfo(profilerInfo)
                 .setWaitResult(res)
                 .execute();
@@ -4838,7 +4841,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 .setRequestCode(requestCode)
                 .setStartFlags(startFlags)
                 .setGlobalConfiguration(config)
-                .setMayWait(bOptions, userId)
+                .setActivityOptions(bOptions)
+                .setMayWait(userId)
                 .execute();
     }
 
@@ -4893,7 +4897,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 .setVoiceInteractor(interactor)
                 .setStartFlags(startFlags)
                 .setProfilerInfo(profilerInfo)
-                .setMayWait(bOptions, userId)
+                .setActivityOptions(bOptions)
+                .setMayWait(userId)
                 .execute();
     }
 
@@ -4908,7 +4913,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 .setCallingUid(callingUid)
                 .setCallingPackage(callingPackage)
                 .setResolvedType(resolvedType)
-                .setMayWait(bOptions, userId)
+                .setActivityOptions(bOptions)
+                .setMayWait(userId)
                 .execute();
     }
 
@@ -4923,6 +4929,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             throw new SecurityException(msg);
         }
 
+        final SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(options);
         final int recentsUid = mRecentTasks.getRecentsComponentUid();
         final ComponentName recentsComponent = mRecentTasks.getRecentsComponent();
         final String recentsPackage = recentsComponent.getPackageName();
@@ -4953,7 +4960,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return mActivityStartController.obtainStarter(intent, "startRecentsActivity")
                         .setCallingUid(recentsUid)
                         .setCallingPackage(recentsPackage)
-                        .setMayWait(activityOptions, userId)
+                        .setActivityOptions(safeOptions)
+                        .setMayWait(userId)
                         .execute();
             }
         } finally {
@@ -5041,17 +5049,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (intent != null && intent.hasFileDescriptors() == true) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
-        ActivityOptions options = ActivityOptions.fromBundle(bOptions);
+        SafeActivityOptions options = SafeActivityOptions.fromBundle(bOptions);
 
         synchronized (this) {
             final ActivityRecord r = ActivityRecord.isInStackLocked(callingActivity);
             if (r == null) {
-                ActivityOptions.abort(options);
+                SafeActivityOptions.abort(options);
                 return false;
             }
             if (r.app == null || r.app.thread == null) {
                 // The caller is not running...  d'oh!
-                ActivityOptions.abort(options);
+                SafeActivityOptions.abort(options);
                 return false;
             }
             intent = new Intent(intent);
@@ -5096,7 +5104,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             if (aInfo == null) {
                 // Nobody who is next!
-                ActivityOptions.abort(options);
+                SafeActivityOptions.abort(options);
                 if (debug) Slog.d(TAG, "Next matching activity: nothing found");
                 return false;
             }
@@ -5158,10 +5166,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         enforceCallerIsRecentsOrHasPermission(START_TASKS_FROM_RECENTS,
                 "startActivityFromRecents()");
 
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                return mStackSupervisor.startActivityFromRecents(taskId, bOptions);
+                return mStackSupervisor.startActivityFromRecents(callingPid, callingUid, taskId,
+                        SafeActivityOptions.fromBundle(bOptions));
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -5178,7 +5189,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 userId, false, ALLOW_FULL_ONLY, reason, null);
         // TODO: Switch to user app stacks here.
         int ret = mActivityStartController.startActivities(caller, -1, callingPackage,
-                intents, resolvedTypes, resultTo, bOptions, userId, reason);
+                intents, resolvedTypes, resultTo, SafeActivityOptions.fromBundle(bOptions), userId,
+                reason);
         return ret;
     }
 
@@ -7937,9 +7949,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         flags &= ~(PendingIntent.FLAG_NO_CREATE|PendingIntent.FLAG_CANCEL_CURRENT
                 |PendingIntent.FLAG_UPDATE_CURRENT);
 
-        PendingIntentRecord.Key key = new PendingIntentRecord.Key(
-                type, packageName, activity, resultWho,
-                requestCode, intents, resolvedTypes, flags, bOptions, userId);
+        PendingIntentRecord.Key key = new PendingIntentRecord.Key(type, packageName, activity,
+                resultWho, requestCode, intents, resolvedTypes, flags,
+                SafeActivityOptions.fromBundle(bOptions), userId);
         WeakReference<PendingIntentRecord> ref;
         ref = mIntentSenderRecords.get(key);
         PendingIntentRecord rec = ref != null ? ref.get() : null;
@@ -10422,9 +10434,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public void startInPlaceAnimationOnFrontMostApplication(Bundle opts)
             throws RemoteException {
-        final ActivityOptions activityOptions = ActivityOptions.fromBundle(opts);
-        if (activityOptions.getAnimationType() != ActivityOptions.ANIM_CUSTOM_IN_PLACE ||
-                activityOptions.getCustomInPlaceResId() == 0) {
+        final SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(opts);
+        final ActivityOptions activityOptions = safeOptions != null
+                ? safeOptions.getOptions(mStackSupervisor)
+                : null;
+        if (activityOptions == null
+                || activityOptions.getAnimationType() != ActivityOptions.ANIM_CUSTOM_IN_PLACE
+                || activityOptions.getCustomInPlaceResId() == 0) {
             throw new IllegalArgumentException("Expected in-place ActivityOption " +
                     "with valid animation");
         }
@@ -10527,16 +10543,17 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (DEBUG_STACK) Slog.d(TAG_STACK, "moveTaskToFront: moving taskId=" + taskId);
         synchronized(this) {
-            moveTaskToFrontLocked(taskId, flags, bOptions, false /* fromRecents */);
+            moveTaskToFrontLocked(taskId, flags, SafeActivityOptions.fromBundle(bOptions),
+                    false /* fromRecents */);
         }
     }
 
-    void moveTaskToFrontLocked(int taskId, int flags, Bundle bOptions, boolean fromRecents) {
-        ActivityOptions options = ActivityOptions.fromBundle(bOptions);
+    void moveTaskToFrontLocked(int taskId, int flags, SafeActivityOptions options,
+            boolean fromRecents) {
 
         if (!checkAppSwitchAllowedLocked(Binder.getCallingPid(),
                 Binder.getCallingUid(), -1, -1, "Task to front")) {
-            ActivityOptions.abort(options);
+            SafeActivityOptions.abort(options);
             return;
         }
         final long origId = Binder.clearCallingIdentity();
@@ -10550,7 +10567,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Slog.e(TAG, "moveTaskToFront: Attempt to violate Lock Task Mode");
                 return;
             }
-            mStackSupervisor.findTaskToMoveToFront(task, flags, options, "moveTaskToFront",
+            ActivityOptions realOptions = options != null
+                    ? options.getOptions(mStackSupervisor)
+                    : null;
+            mStackSupervisor.findTaskToMoveToFront(task, flags, realOptions, "moveTaskToFront",
                     false /* forceNonResizable */);
 
             final ActivityRecord topActivity = task.getTopActivity();
@@ -10564,7 +10584,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
-        ActivityOptions.abort(options);
+        SafeActivityOptions.abort(options);
     }
 
     /**
@@ -13522,6 +13542,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public boolean convertToTranslucent(IBinder token, Bundle options) {
+        SafeActivityOptions safeOptions = SafeActivityOptions.fromBundle(options);
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
@@ -13533,7 +13554,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 int index = task.mActivities.lastIndexOf(r);
                 if (index > 0) {
                     ActivityRecord under = task.mActivities.get(index - 1);
-                    under.returningOptions = ActivityOptions.fromBundle(options);
+                    under.returningOptions = safeOptions.getOptions(r);
                 }
                 final boolean translucentChanged = r.changeWindowTranslucency(false);
                 if (translucentChanged) {
@@ -24886,7 +24907,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             synchronized (ActivityManagerService.this) {
                 return mActivityStartController.startActivitiesInPackage(packageUid, packageName,
-                        intents, resolvedTypes, /*resultTo*/ null, bOptions, userId);
+                        intents, resolvedTypes, null /* resultTo */,
+                        SafeActivityOptions.fromBundle(bOptions), userId);
             }
         }
 
