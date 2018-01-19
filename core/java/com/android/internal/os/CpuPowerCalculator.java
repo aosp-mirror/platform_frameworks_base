@@ -31,8 +31,7 @@ public class CpuPowerCalculator extends PowerCalculator {
 
     @Override
     public void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
-                             long rawUptimeUs, int statsType) {
-
+            long rawUptimeUs, int statsType) {
         app.cpuTimeMs = (u.getUserCpuTimeUs(statsType) + u.getSystemCpuTimeUs(statsType)) / 1000;
         final int numClusters = mProfile.getNumCpuClusters();
 
@@ -42,13 +41,32 @@ public class CpuPowerCalculator extends PowerCalculator {
             for (int speed = 0; speed < speedsForCluster; speed++) {
                 final long timeUs = u.getTimeAtCpuSpeed(cluster, speed, statsType);
                 final double cpuSpeedStepPower = timeUs *
-                        mProfile.getAveragePowerForCpu(cluster, speed);
+                        mProfile.getAveragePowerForCpuCore(cluster, speed);
                 if (DEBUG) {
                     Log.d(TAG, "UID " + u.getUid() + ": CPU cluster #" + cluster + " step #"
                             + speed + " timeUs=" + timeUs + " power="
                             + BatteryStatsHelper.makemAh(cpuSpeedStepPower / MICROSEC_IN_HR));
                 }
                 cpuPowerMaUs += cpuSpeedStepPower;
+            }
+        }
+        cpuPowerMaUs += u.getCpuActiveTime() * mProfile.getAveragePower(
+                PowerProfile.POWER_CPU_ACTIVE);
+        long[] cpuClusterTimes = u.getCpuClusterTimes();
+        if (cpuClusterTimes != null) {
+            if (cpuClusterTimes.length == numClusters) {
+                for (int i = 0; i < numClusters; i++) {
+                    double power = cpuClusterTimes[i] * mProfile.getAveragePowerForCpuCluster(i);
+                    cpuPowerMaUs += power;
+                    if (DEBUG) {
+                        Log.d(TAG, "UID " + u.getUid() + ": CPU cluster #" + i + " clusterTimeUs="
+                                + cpuClusterTimes[i] + " power="
+                                + BatteryStatsHelper.makemAh(power / MICROSEC_IN_HR));
+                    }
+                }
+            } else {
+                Log.w(TAG, "UID " + u.getUid() + " CPU cluster # mismatch: Power Profile # "
+                        + numClusters + " actual # " + cpuClusterTimes.length);
             }
         }
         app.cpuPowerMah = cpuPowerMaUs / MICROSEC_IN_HR;

@@ -62,9 +62,9 @@ import java.util.Arrays;
  *
  * Build: m FrameworksCoreTests
  * Install: adb install -r \
- *     ${ANDROID_PRODUCT_OUT}/data/app/FrameworksCoreTests/FrameworksCoreTests.apk
+ * ${ANDROID_PRODUCT_OUT}/data/app/FrameworksCoreTests/FrameworksCoreTests.apk
  * Run: adb shell am instrument -e class com.android.internal.os.BatteryStatsCpuTimesTest -w \
- *     com.android.frameworks.coretests/android.support.test.runner.AndroidJUnitRunner
+ * com.android.frameworks.coretests/android.support.test.runner.AndroidJUnitRunner
  *
  * or
  *
@@ -73,10 +73,18 @@ import java.util.Arrays;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class BatteryStatsCpuTimesTest {
-    @Mock KernelUidCpuTimeReader mKernelUidCpuTimeReader;
-    @Mock KernelUidCpuFreqTimeReader mKernelUidCpuFreqTimeReader;
-    @Mock BatteryStatsImpl.UserInfoProvider mUserInfoProvider;
-    @Mock PowerProfile mPowerProfile;
+    @Mock
+    KernelUidCpuTimeReader mKernelUidCpuTimeReader;
+    @Mock
+    KernelUidCpuFreqTimeReader mKernelUidCpuFreqTimeReader;
+    @Mock
+    KernelUidCpuActiveTimeReader mKernelUidCpuActiveTimeReader;
+    @Mock
+    KernelUidCpuClusterTimeReader mKernelUidCpuClusterTimeReader;
+    @Mock
+    BatteryStatsImpl.UserInfoProvider mUserInfoProvider;
+    @Mock
+    PowerProfile mPowerProfile;
 
     private MockClocks mClocks;
     private MockBatteryStatsImpl mBatteryStatsImpl;
@@ -90,6 +98,8 @@ public class BatteryStatsCpuTimesTest {
         mBatteryStatsImpl = new MockBatteryStatsImpl(mClocks)
                 .setKernelUidCpuTimeReader(mKernelUidCpuTimeReader)
                 .setKernelUidCpuFreqTimeReader(mKernelUidCpuFreqTimeReader)
+                .setKernelUidCpuActiveTimeReader(mKernelUidCpuActiveTimeReader)
+                .setKernelUidCpuClusterTimeReader(mKernelUidCpuClusterTimeReader)
                 .setUserInfoProvider(mUserInfoProvider);
     }
 
@@ -134,6 +144,10 @@ public class BatteryStatsCpuTimesTest {
         verify(mKernelUidCpuFreqTimeReader, times(2)).perClusterTimesAvailable();
         verify(mKernelUidCpuFreqTimeReader).readDelta(
                 any(KernelUidCpuFreqTimeReader.Callback.class));
+        verify(mKernelUidCpuActiveTimeReader).readDelta(
+                any(KernelUidCpuActiveTimeReader.Callback.class));
+        verify(mKernelUidCpuClusterTimeReader).readDelta(
+                any(KernelUidCpuClusterTimeReader.Callback.class));
         verifyNoMoreInteractions(mKernelUidCpuFreqTimeReader);
         for (int i = 0; i < numClusters; ++i) {
             verify(mKernelCpuSpeedReaders[i]).readDelta();
@@ -228,7 +242,7 @@ public class BatteryStatsCpuTimesTest {
         updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
         final int testUserId = 11;
         when(mUserInfoProvider.exists(testUserId)).thenReturn(true);
-        final int[] testUids = getUids(testUserId, new int[] {
+        final int[] testUids = getUids(testUserId, new int[]{
                 FIRST_APPLICATION_UID + 22,
                 FIRST_APPLICATION_UID + 27,
                 FIRST_APPLICATION_UID + 33
@@ -301,7 +315,7 @@ public class BatteryStatsCpuTimesTest {
         when(mUserInfoProvider.exists(testUserId)).thenReturn(true);
         final int isolatedAppId = FIRST_ISOLATED_UID + 27;
         final int isolatedUid = UserHandle.getUid(testUserId, isolatedAppId);
-        final int[] testUids = getUids(testUserId, new int[] {
+        final int[] testUids = getUids(testUserId, new int[]{
                 FIRST_APPLICATION_UID + 22,
                 isolatedAppId,
                 FIRST_APPLICATION_UID + 33
@@ -389,7 +403,7 @@ public class BatteryStatsCpuTimesTest {
         final int invalidUid = UserHandle.getUid(invalidUserId, FIRST_APPLICATION_UID + 99);
         when(mUserInfoProvider.exists(testUserId)).thenReturn(true);
         when(mUserInfoProvider.exists(invalidUserId)).thenReturn(false);
-        final int[] testUids = getUids(testUserId, new int[] {
+        final int[] testUids = getUids(testUserId, new int[]{
                 FIRST_APPLICATION_UID + 22,
                 FIRST_APPLICATION_UID + 27,
                 FIRST_APPLICATION_UID + 33
@@ -431,7 +445,7 @@ public class BatteryStatsCpuTimesTest {
         updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
         final int testUserId = 11;
         when(mUserInfoProvider.exists(testUserId)).thenReturn(true);
-        final int[] testUids = getUids(testUserId, new int[] {
+        final int[] testUids = getUids(testUserId, new int[]{
                 FIRST_APPLICATION_UID + 22,
                 FIRST_APPLICATION_UID + 27,
                 FIRST_APPLICATION_UID + 33
@@ -514,10 +528,10 @@ public class BatteryStatsCpuTimesTest {
 
         final int testUserId = 11;
         when(mUserInfoProvider.exists(testUserId)).thenReturn(true);
-        final int[] testUids = getUids(testUserId, new int[] {
-            FIRST_APPLICATION_UID + 22,
-            FIRST_APPLICATION_UID + 27,
-            FIRST_APPLICATION_UID + 33
+        final int[] testUids = getUids(testUserId, new int[]{
+                FIRST_APPLICATION_UID + 22,
+                FIRST_APPLICATION_UID + 27,
+                FIRST_APPLICATION_UID + 33
         });
         final long[][] uidTimesMs = {
                 {4, 10, 5, 9, 4},
@@ -589,7 +603,7 @@ public class BatteryStatsCpuTimesTest {
 
         final int testUserId = 11;
         when(mUserInfoProvider.exists(testUserId)).thenReturn(true);
-        final int[] testUids = getUids(testUserId, new int[] {
+        final int[] testUids = getUids(testUserId, new int[]{
                 FIRST_APPLICATION_UID + 22,
                 FIRST_APPLICATION_UID + 27,
                 FIRST_APPLICATION_UID + 33
@@ -693,7 +707,7 @@ public class BatteryStatsCpuTimesTest {
 
         final int testUserId = 11;
         when(mUserInfoProvider.exists(testUserId)).thenReturn(true);
-        final int[] testUids = getUids(testUserId, new int[] {
+        final int[] testUids = getUids(testUserId, new int[]{
                 FIRST_APPLICATION_UID + 22,
                 FIRST_APPLICATION_UID + 27,
                 FIRST_APPLICATION_UID + 33
@@ -782,7 +796,7 @@ public class BatteryStatsCpuTimesTest {
             }
         }
         for (int cluster = 0; cluster < clusterFreqs.length; ++cluster) {
-            for (int speed = 0 ; speed < clusterFreqs[cluster]; ++speed) {
+            for (int speed = 0; speed < clusterFreqs[cluster]; ++speed) {
                 assertEquals("There shouldn't be any left-overs: "
                                 + Arrays.deepToString(expectedWakeLockUidTimesUs),
                         0, expectedWakeLockUidTimesUs[cluster][speed]);
@@ -797,7 +811,7 @@ public class BatteryStatsCpuTimesTest {
 
         final int testUserId = 11;
         when(mUserInfoProvider.exists(testUserId)).thenReturn(true);
-        final int[] testUids = getUids(testUserId, new int[] {
+        final int[] testUids = getUids(testUserId, new int[]{
                 FIRST_APPLICATION_UID + 22,
                 FIRST_APPLICATION_UID + 27,
                 FIRST_APPLICATION_UID + 33
@@ -874,7 +888,7 @@ public class BatteryStatsCpuTimesTest {
         when(mUserInfoProvider.exists(testUserId)).thenReturn(true);
         final int isolatedAppId = FIRST_ISOLATED_UID + 27;
         final int isolatedUid = UserHandle.getUid(testUserId, isolatedAppId);
-        final int[] testUids = getUids(testUserId, new int[] {
+        final int[] testUids = getUids(testUserId, new int[]{
                 FIRST_APPLICATION_UID + 22,
                 isolatedAppId,
                 FIRST_APPLICATION_UID + 33
@@ -969,7 +983,7 @@ public class BatteryStatsCpuTimesTest {
         final int invalidUid = UserHandle.getUid(invalidUserId, FIRST_APPLICATION_UID + 99);
         when(mUserInfoProvider.exists(testUserId)).thenReturn(true);
         when(mUserInfoProvider.exists(invalidUserId)).thenReturn(false);
-        final int[] testUids = getUids(testUserId, new int[] {
+        final int[] testUids = getUids(testUserId, new int[]{
                 FIRST_APPLICATION_UID + 22,
                 FIRST_APPLICATION_UID + 27,
                 FIRST_APPLICATION_UID + 33
@@ -986,7 +1000,7 @@ public class BatteryStatsCpuTimesTest {
                 callback.onUidCpuFreqTime(testUids[i], uidTimesMs[i]);
             }
             // And one for the invalid uid
-            callback.onUidCpuFreqTime(invalidUid, new long[] {12, 839, 32, 34, 21});
+            callback.onUidCpuFreqTime(invalidUid, new long[]{12, 839, 32, 34, 21});
             return null;
         }).when(mKernelUidCpuFreqTimeReader).readDelta(
                 any(KernelUidCpuFreqTimeReader.Callback.class));
@@ -1007,6 +1021,136 @@ public class BatteryStatsCpuTimesTest {
         assertNull("There shouldn't be an entry for invalid uid=" + invalidUid,
                 mBatteryStatsImpl.getUidStats().get(invalidUid));
         verify(mKernelUidCpuFreqTimeReader).removeUid(invalidUid);
+    }
+
+    @Test
+    public void testReadKernelUidCpuActiveTimesLocked() {
+        // PRECONDITIONS
+        updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
+
+        final int testUserId = 11;
+        when(mUserInfoProvider.exists(testUserId)).thenReturn(true);
+        final int[] testUids = getUids(testUserId, new int[]{
+                FIRST_APPLICATION_UID + 22,
+                FIRST_APPLICATION_UID + 27,
+                FIRST_APPLICATION_UID + 33
+        });
+        final long[] uidTimesMs = {8000, 25000, 3000, 0, 42000};
+        doAnswer(invocation -> {
+            final KernelUidCpuActiveTimeReader.Callback callback =
+                    (KernelUidCpuActiveTimeReader.Callback) invocation.getArguments()[0];
+            for (int i = 0; i < testUids.length; ++i) {
+                callback.onUidCpuActiveTime(testUids[i], uidTimesMs[i]);
+            }
+            return null;
+        }).when(mKernelUidCpuActiveTimeReader).readDelta(
+                any(KernelUidCpuActiveTimeReader.Callback.class));
+
+        // RUN
+        mBatteryStatsImpl.readKernelUidCpuActiveTimesLocked();
+
+        // VERIFY
+        for (int i = 0; i < testUids.length; ++i) {
+            final BatteryStats.Uid u = mBatteryStatsImpl.getUidStats().get(testUids[i]);
+            assertNotNull("No entry for uid=" + testUids[i], u);
+            assertEquals("Unexpected cpu active time for uid=" + testUids[i], uidTimesMs[i],
+                    u.getCpuActiveTime());
+        }
+
+        // Repeat the test when the screen is off.
+
+        // PRECONDITIONS
+        updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+        final long[] deltasMs = {43000, 3345000, 2143000, 123000, 4554000};
+        doAnswer(invocation -> {
+            final KernelUidCpuActiveTimeReader.Callback callback =
+                    (KernelUidCpuActiveTimeReader.Callback) invocation.getArguments()[0];
+            for (int i = 0; i < testUids.length; ++i) {
+                callback.onUidCpuActiveTime(testUids[i], deltasMs[i]);
+            }
+            return null;
+        }).when(mKernelUidCpuActiveTimeReader).readDelta(
+                any(KernelUidCpuActiveTimeReader.Callback.class));
+
+        // RUN
+        mBatteryStatsImpl.readKernelUidCpuActiveTimesLocked();
+
+        // VERIFY
+        for (int i = 0; i < testUids.length; ++i) {
+            final BatteryStats.Uid u = mBatteryStatsImpl.getUidStats().get(testUids[i]);
+            assertNotNull("No entry for uid=" + testUids[i], u);
+            assertEquals("Unexpected cpu active time for uid=" + testUids[i],
+                    uidTimesMs[i] + deltasMs[i], u.getCpuActiveTime());
+        }
+    }
+
+    @Test
+    public void testReadKernelUidCpuClusterTimesLocked() {
+        // PRECONDITIONS
+        updateTimeBasesLocked(true, Display.STATE_ON, 0, 0);
+
+        final int testUserId = 11;
+        when(mUserInfoProvider.exists(testUserId)).thenReturn(true);
+        final int[] testUids = getUids(testUserId, new int[]{
+                FIRST_APPLICATION_UID + 22,
+                FIRST_APPLICATION_UID + 27,
+                FIRST_APPLICATION_UID + 33
+        });
+        final long[][] uidTimesMs = {
+                {4000, 10000},
+                {5000, 1000},
+                {8000, 0}
+        };
+        doAnswer(invocation -> {
+            final KernelUidCpuClusterTimeReader.Callback callback =
+                    (KernelUidCpuClusterTimeReader.Callback) invocation.getArguments()[0];
+            for (int i = 0; i < testUids.length; ++i) {
+                callback.onUidCpuPolicyTime(testUids[i], uidTimesMs[i]);
+            }
+            return null;
+        }).when(mKernelUidCpuClusterTimeReader).readDelta(
+                any(KernelUidCpuClusterTimeReader.Callback.class));
+
+        // RUN
+        mBatteryStatsImpl.readKernelUidCpuClusterTimesLocked();
+
+        // VERIFY
+        for (int i = 0; i < testUids.length; ++i) {
+            final BatteryStats.Uid u = mBatteryStatsImpl.getUidStats().get(testUids[i]);
+            assertNotNull("No entry for uid=" + testUids[i], u);
+            assertArrayEquals("Unexpected cpu cluster time for uid=" + testUids[i], uidTimesMs[i],
+                    u.getCpuClusterTimes());
+        }
+
+        // Repeat the test when the screen is off.
+
+        // PRECONDITIONS
+        updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
+        final long[][] deltasMs = {
+                {3000, 12000},
+                {3248327490475L, 0},
+                {43000, 3345000}
+        };
+        doAnswer(invocation -> {
+            final KernelUidCpuClusterTimeReader.Callback callback =
+                    (KernelUidCpuClusterTimeReader.Callback) invocation.getArguments()[0];
+            for (int i = 0; i < testUids.length; ++i) {
+                callback.onUidCpuPolicyTime(testUids[i], deltasMs[i]);
+            }
+            return null;
+        }).when(mKernelUidCpuClusterTimeReader).readDelta(
+                any(KernelUidCpuClusterTimeReader.Callback.class));
+
+        // RUN
+        mBatteryStatsImpl.readKernelUidCpuClusterTimesLocked();
+
+        // VERIFY
+        for (int i = 0; i < testUids.length; ++i) {
+            final BatteryStats.Uid u = mBatteryStatsImpl.getUidStats().get(testUids[i]);
+            assertNotNull("No entry for uid=" + testUids[i], u);
+            assertArrayEquals("Unexpected cpu cluster time for uid=" + testUids[i], sum(uidTimesMs[i], deltasMs[i]),
+                    u.getCpuClusterTimes());
+        }
     }
 
     private void updateTimeBasesLocked(boolean unplugged, int screenState,
