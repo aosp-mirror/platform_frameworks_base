@@ -167,10 +167,11 @@ public class KeyguardManager {
      *                             clicking this button, the activity returns
      *                             {@link #RESULT_ALTERNATE}
      *
-     * @return  the intent for launching the activity or null if the credential of the previous
-     * owner can not be verified (e.g. because there was none, or the device does not support
-     * verifying credentials after a factory reset, or device setup has already been completed).
-     *
+     * @return the intent for launching the activity or null if the previous owner of the device
+     *         did not set a credential.
+     * @throws UnsupportedOperationException if the device does not support factory reset
+     *                                       credentials
+     * @throws IllegalStateException if the device has already been provisioned
      * @hide
      */
     @SystemApi
@@ -178,14 +179,14 @@ public class KeyguardManager {
             CharSequence title, CharSequence description, CharSequence alternateButtonLabel) {
         if (!LockPatternUtils.frpCredentialEnabled(mContext)) {
             Log.w(TAG, "Factory reset credentials not supported.");
-            return null;
+            throw new UnsupportedOperationException("not supported on this device");
         }
 
         // Cannot verify credential if the device is provisioned
         if (Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.DEVICE_PROVISIONED, 0) != 0) {
             Log.e(TAG, "Factory reset credential cannot be verified after provisioning.");
-            return null;
+            throw new IllegalStateException("must not be provisioned yet");
         }
 
         // Make sure we have a credential
@@ -194,8 +195,10 @@ public class KeyguardManager {
                     ServiceManager.getService(Context.PERSISTENT_DATA_BLOCK_SERVICE));
             if (pdb == null) {
                 Log.e(TAG, "No persistent data block service");
-                return null;
+                throw new UnsupportedOperationException("not supported on this device");
             }
+            // The following will throw an UnsupportedOperationException if the device does not
+            // support factory reset credentials (or something went wrong retrieving it).
             if (!pdb.hasFrpCredentialHandle()) {
                 Log.i(TAG, "The persistent data block does not have a factory reset credential.");
                 return null;
