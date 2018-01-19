@@ -4820,12 +4820,12 @@
     <!--Battery saver warning. STOPSHIP: Remove it eventually. -->
     <string name="battery_saver_warning_title" translatable="false">Extreme battery saver</string>
 
-    <!-- Label for the uninstall button on the harmful app warning dialog. -->
-    <string name="harmful_app_warning_uninstall">Uninstall</string>
-    <!-- Label for the launch anyway button on the harmful app warning dialog. -->
-    <string name="harmful_app_warning_launch_anyway">Launch anyway</string>
-    <!-- Title for the harmful app warning dialog. -->
-    <string name="harmful_app_warning_title">Uninstall harmful app?</string>
+    <!-- Label for the uninstall button on the harmful app warning dialog. [CHAR LIMIT=20] -->
+    <string name="harmful_app_warning_uninstall">UNINSTALL</string>
+    <!-- Label for the open anyway button on the harmful app warning dialog. [CHAR LIMIT=20] -->
+    <string name="harmful_app_warning_open_anyway">OPEN ANYWAY</string>
+    <!-- Title for the harmful app warning dialog. [CHAR LIMIT=40] -->
+    <string name="harmful_app_warning_title">Harmful app detected</string>
 
     <!-- Text describing a permission request for one app to show another app's
          slices [CHAR LIMIT=NONE] -->

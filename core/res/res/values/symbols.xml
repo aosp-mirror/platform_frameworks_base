@@ -3221,8 +3221,9 @@
   <java-symbol type="string" name="shortcut_disabled_reason_unknown" />
 
   <java-symbol type="string" name="harmful_app_warning_uninstall" />
-  <java-symbol type="string" name="harmful_app_warning_launch_anyway" />
+  <java-symbol type="string" name="harmful_app_warning_open_anyway" />
   <java-symbol type="string" name="harmful_app_warning_title" />
+  <java-symbol type="layout" name="harmful_app_warning_dialog" />
 
   <java-symbol type="string" name="config_defaultAssistantAccessPackage" />
 

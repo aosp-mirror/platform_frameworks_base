@@ -3958,6 +3958,7 @@
                   android:theme="@style/Theme.DeviceDefault.Light.Dialog.Alert"
                   android:excludeFromRecents="true"
                   android:process=":ui"
+                  android:label="@string/harmful_app_warning_title"
                   android:exported="false">
         </activity>
 
