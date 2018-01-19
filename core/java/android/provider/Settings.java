@@ -11175,6 +11175,15 @@ public final class Settings {
                 "location_global_kill_switch";
 
         /**
+         * If set to 1, SettingsProvider's restoreAnyVersion="true" attribute will be ignored
+         * and restoring to lower version of platform API will be skipped.
+         *
+         * @hide
+         */
+        public static final String OVERRIDE_SETTINGS_PROVIDER_RESTORE_ANY_VERSION =
+                "override_settings_provider_restore_any_version";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
