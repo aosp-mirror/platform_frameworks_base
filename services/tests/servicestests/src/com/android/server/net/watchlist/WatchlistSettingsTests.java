@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 
 package com.android.server.net.watchlist;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -36,7 +36,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 
 /**
  * runtest frameworks-services -c com.android.server.net.watchlist.WatchlistSettingsTests
@@ -46,24 +45,9 @@ import java.util.Arrays;
 public class WatchlistSettingsTests {
 
     private static final String TEST_XML_1 = "NetworkWatchlistTest/watchlist_settings_test1.xml";
-    private static final String TEST_CC_DOMAIN = "test-cc-domain.com";
-    private static final String TEST_CC_IP = "127.0.0.2";
-    private static final String TEST_NOT_EXIST_CC_DOMAIN = "test-not-exist-cc-domain.com";
-    private static final String TEST_NOT_EXIST_CC_IP = "1.2.3.4";
-    private static final String TEST_SHA256_ONLY_DOMAIN = "test-cc-match-sha256-only.com";
-    private static final String TEST_SHA256_ONLY_IP = "127.0.0.3";
-    private static final String TEST_CRC32_ONLY_DOMAIN = "test-cc-match-crc32-only.com";
-    private static final String TEST_CRC32_ONLY_IP = "127.0.0.4";
-
-    private static final String TEST_NEW_CC_DOMAIN = "test-new-cc-domain.com";
-    private static final byte[] TEST_NEW_CC_DOMAIN_SHA256 = HexDump.hexStringToByteArray(
-            "B86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB43");
-    private static final byte[] TEST_NEW_CC_DOMAIN_CRC32 = HexDump.hexStringToByteArray("76795BD3");
-
-    private static final String TEST_NEW_CC_IP = "1.1.1.2";
-    private static final byte[] TEST_NEW_CC_IP_SHA256 = HexDump.hexStringToByteArray(
-            "721BAB5E313CF0CC76B10F9592F18B9D1B8996497501A3306A55B3AE9F1CC87C");
-    private static final byte[] TEST_NEW_CC_IP_CRC32 = HexDump.hexStringToByteArray("940B8BEE");
+    private static final String TEST_XML_2 = "NetworkWatchlistTest/watchlist_settings_test2.xml";
+    private static final String HARD_CODED_SECRET_KEY = "1234567890ABCDEF1234567890ABCDEF"
+            + "1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF";
 
     private Context mContext;
     private File mTestXmlFile;
@@ -71,7 +55,7 @@ public class WatchlistSettingsTests {
     @Before
     public void setUp() throws Exception {
         mContext = InstrumentationRegistry.getContext();
-        mTestXmlFile =  new File(mContext.getFilesDir(), "test_watchlist_settings.xml");
+        mTestXmlFile = new File(mContext.getFilesDir(), "test_settings_config.xml");
         mTestXmlFile.delete();
     }
 
@@ -84,55 +68,48 @@ public class WatchlistSettingsTests {
     public void testWatchlistSettings_parsing() throws Exception {
         copyWatchlistSettingsXml(mContext, TEST_XML_1, mTestXmlFile);
         WatchlistSettings settings = new WatchlistSettings(mTestXmlFile);
-        assertTrue(settings.containsDomain(TEST_CC_DOMAIN));
-        assertTrue(settings.containsIp(TEST_CC_IP));
-        assertFalse(settings.containsDomain(TEST_NOT_EXIST_CC_DOMAIN));
-        assertFalse(settings.containsIp(TEST_NOT_EXIST_CC_IP));
-        assertFalse(settings.containsDomain(TEST_SHA256_ONLY_DOMAIN));
-        assertFalse(settings.containsIp(TEST_SHA256_ONLY_IP));
-        assertFalse(settings.containsDomain(TEST_CRC32_ONLY_DOMAIN));
-        assertFalse(settings.containsIp(TEST_CRC32_ONLY_IP));
+        assertEquals(HARD_CODED_SECRET_KEY, HexDump.toHexString(settings.getPrivacySecretKey()));
+        // Try again.
+        assertEquals(HARD_CODED_SECRET_KEY, HexDump.toHexString(settings.getPrivacySecretKey()));
     }
 
     @Test
-    public void testWatchlistSettings_writeSettingsToMemory() throws Exception {
-        copyWatchlistSettingsXml(mContext, TEST_XML_1, mTestXmlFile);
+    public void testWatchlistSettings_parsingWithoutKey() throws Exception {
+        copyWatchlistSettingsXml(mContext, TEST_XML_2, mTestXmlFile);
         WatchlistSettings settings = new WatchlistSettings(mTestXmlFile);
-        settings.writeSettingsToMemory(Arrays.asList(TEST_NEW_CC_DOMAIN_CRC32),
-                Arrays.asList(TEST_NEW_CC_DOMAIN_SHA256), Arrays.asList(TEST_NEW_CC_IP_CRC32),
-                Arrays.asList(TEST_NEW_CC_IP_SHA256));
-        // Ensure old watchlist is not in memory
-        assertFalse(settings.containsDomain(TEST_CC_DOMAIN));
-        assertFalse(settings.containsIp(TEST_CC_IP));
-        assertFalse(settings.containsDomain(TEST_NOT_EXIST_CC_DOMAIN));
-        assertFalse(settings.containsIp(TEST_NOT_EXIST_CC_IP));
-        assertFalse(settings.containsDomain(TEST_SHA256_ONLY_DOMAIN));
-        assertFalse(settings.containsIp(TEST_SHA256_ONLY_IP));
-        assertFalse(settings.containsDomain(TEST_CRC32_ONLY_DOMAIN));
-        assertFalse(settings.containsIp(TEST_CRC32_ONLY_IP));
-        // Ensure new watchlist is in memory
-        assertTrue(settings.containsDomain(TEST_NEW_CC_DOMAIN));
-        assertTrue(settings.containsIp(TEST_NEW_CC_IP));
-        // Reload settings from disk and test again
+        final String tmpKey1 = HexDump.toHexString(settings.getPrivacySecretKey());
+        assertNotEquals(HARD_CODED_SECRET_KEY, tmpKey1);
+        assertEquals(96, tmpKey1.length());
+        // Try again to make sure it's the same.
+        assertEquals(tmpKey1, HexDump.toHexString(settings.getPrivacySecretKey()));
+        // Create new settings object again to make sure it can get the new saved key.
         settings = new WatchlistSettings(mTestXmlFile);
-        // Ensure old watchlist is in memory
-        assertTrue(settings.containsDomain(TEST_CC_DOMAIN));
-        assertTrue(settings.containsIp(TEST_CC_IP));
-        assertFalse(settings.containsDomain(TEST_NOT_EXIST_CC_DOMAIN));
-        assertFalse(settings.containsIp(TEST_NOT_EXIST_CC_IP));
-        assertFalse(settings.containsDomain(TEST_SHA256_ONLY_DOMAIN));
-        assertFalse(settings.containsIp(TEST_SHA256_ONLY_IP));
-        assertFalse(settings.containsDomain(TEST_CRC32_ONLY_DOMAIN));
-        assertFalse(settings.containsIp(TEST_CRC32_ONLY_IP));
-        // Ensure new watchlist is not in memory
-        assertFalse(settings.containsDomain(TEST_NEW_CC_DOMAIN));
-        assertFalse(settings.containsIp(TEST_NEW_CC_IP));;
+        assertEquals(tmpKey1, HexDump.toHexString(settings.getPrivacySecretKey()));
+    }
+
+    @Test
+    public void testWatchlistSettings_noExistingXml() throws Exception {
+        WatchlistSettings settings = new WatchlistSettings(mTestXmlFile);
+        final String tmpKey1 = HexDump.toHexString(settings.getPrivacySecretKey());
+        assertNotEquals(HARD_CODED_SECRET_KEY, tmpKey1);
+        assertEquals(96, tmpKey1.length());
+        // Try again to make sure it's the same.
+        assertEquals(tmpKey1, HexDump.toHexString(settings.getPrivacySecretKey()));
+        // Create new settings object again to make sure it can get the new saved key.
+        settings = new WatchlistSettings(mTestXmlFile);
+        assertEquals(tmpKey1, HexDump.toHexString(settings.getPrivacySecretKey()));
+        // Delete xml and generate key again, to make sure key is randomly generated.
+        mTestXmlFile.delete();
+        settings = new WatchlistSettings(mTestXmlFile);
+        final String tmpKey2 = HexDump.toHexString(settings.getPrivacySecretKey());
+        assertNotEquals(HARD_CODED_SECRET_KEY, tmpKey2);
+        assertNotEquals(tmpKey1, tmpKey2);
+        assertEquals(96, tmpKey2.length());
     }
 
     private static void copyWatchlistSettingsXml(Context context, String xmlAsset, File outFile)
             throws IOException {
         writeToFile(outFile, readAsset(context, xmlAsset));
-
     }
 
     private static String readAsset(Context context, String assetPath) throws IOException {
