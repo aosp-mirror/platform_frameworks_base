@@ -293,6 +293,7 @@ public class KeySyncTaskTest {
                 KeyDerivationParams.getSalt(),
                 TEST_CREDENTIAL);
         Long counterId = mRecoverableKeyStoreDb.getCounterId(TEST_USER_ID, TEST_RECOVERY_AGENT_UID);
+        counterId = 1L; // TODO: use value from the database.
         assertThat(counterId).isNotNull();
         byte[] recoveryKey = decryptThmEncryptedKey(
                 lockScreenHash,
