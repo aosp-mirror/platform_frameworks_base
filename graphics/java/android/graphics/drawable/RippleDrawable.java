@@ -264,7 +264,7 @@ public class RippleDrawable extends LayerDrawable {
         }
 
         setRippleActive(enabled && pressed);
-        setBackgroundActive(hovered, focused);
+        setBackgroundActive(hovered, focused, pressed);
 
         return changed;
     }
@@ -280,13 +280,13 @@ public class RippleDrawable extends LayerDrawable {
         }
     }
 
-    private void setBackgroundActive(boolean hovered, boolean focused) {
+    private void setBackgroundActive(boolean hovered, boolean focused, boolean pressed) {
         if (mBackground == null && (hovered || focused)) {
             mBackground = new RippleBackground(this, mHotspotBounds, isBounded());
             mBackground.setup(mState.mMaxRadius, mDensity);
         }
         if (mBackground != null) {
-            mBackground.setState(focused, hovered, true);
+            mBackground.setState(focused, hovered, pressed);
         }
     }
 
@@ -878,7 +878,10 @@ public class RippleDrawable extends LayerDrawable {
 
         // Grab the color for the current state and cut the alpha channel in
         // half so that the ripple and background together yield full alpha.
-        final int color = mState.mColor.getColorForState(getState(), Color.BLACK);
+        int color = mState.mColor.getColorForState(getState(), Color.BLACK);
+        if (Color.alpha(color) > 128) {
+            color = (color & 0x00FFFFFF) | 0x80000000;
+        }
         final Paint p = mRipplePaint;
 
         if (mMaskColorFilter != null) {

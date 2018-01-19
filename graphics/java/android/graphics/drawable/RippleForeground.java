@@ -289,6 +289,7 @@ class RippleForeground extends RippleComponent {
         opacity.setInterpolator(LINEAR_INTERPOLATOR);
         opacity.addListener(mAnimationListener);
         opacity.setStartDelay(computeFadeOutDelay());
+        opacity.setStartValue(mOwner.getRipplePaint().getAlpha());
         mPendingHwAnimators.add(opacity);
         invalidateSelf();
     }
