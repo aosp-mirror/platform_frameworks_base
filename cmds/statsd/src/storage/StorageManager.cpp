@@ -17,11 +17,15 @@
 #define DEBUG true  // STOPSHIP if true
 #include "Log.h"
 
-#include "storage/StorageManager.h"
 #include "android-base/stringprintf.h"
+#include "guardrail/StatsdStats.h"
+#include "storage/StorageManager.h"
 
 #include <android-base/file.h>
 #include <dirent.h>
+#include <private/android_filesystem_config.h>
+#include <fstream>
+#include <iostream>
 
 namespace android {
 namespace os {
@@ -31,6 +35,7 @@ using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_MESSAGE;
 using std::map;
 
+#define STATS_DATA_DIR "/data/misc/stats-data"
 #define STATS_SERVICE_DIR "/data/misc/stats-service"
 
 // for ConfigMetricsReportList
@@ -39,12 +44,37 @@ const int FIELD_ID_REPORTS = 2;
 using android::base::StringPrintf;
 using std::unique_ptr;
 
+// Returns array of int64_t which contains timestamp in seconds, uid, and
+// configID.
+static void parseFileName(char* name, int64_t* result) {
+    int index = 0;
+    char* substr = strtok(name, "_");
+    while (substr != nullptr && index < 3) {
+        result[index] = StrToInt64(substr);
+        index++;
+        substr = strtok(nullptr, "_");
+    }
+    // When index ends before hitting 3, file name is corrupted. We
+    // intentionally put -1 at index 0 to indicate the error to caller.
+    // TODO: consider removing files with unexpected name format.
+    if (index < 3) {
+        result[0] = -1;
+    }
+}
+
+static string getFilePath(const char* path, int64_t timestamp, int64_t uid, int64_t configID) {
+    return StringPrintf("%s/%lld-%d-%lld", path, (long long)timestamp, (int)uid,
+                        (long long)configID);
+}
+
 void StorageManager::writeFile(const char* file, const void* buffer, int numBytes) {
     int fd = open(file, O_WRONLY | O_CREAT | O_CLOEXEC, S_IRUSR | S_IWUSR);
     if (fd == -1) {
         VLOG("Attempt to access %s but failed", file);
         return;
     }
+    trimToFit(STATS_SERVICE_DIR);
+    trimToFit(STATS_DATA_DIR);
 
     int result = write(fd, buffer, numBytes);
     if (result == numBytes) {
@@ -52,6 +82,12 @@ void StorageManager::writeFile(const char* file, const void* buffer, int numByte
     } else {
         VLOG("Failed to write %s", file);
     }
+
+    result = fchown(fd, AID_STATSD, AID_STATSD);
+    if (result) {
+        VLOG("Failed to chown %s to statsd", file);
+    }
+
     close(fd);
 }
 
@@ -109,30 +145,20 @@ void StorageManager::sendBroadcast(const char* path,
         if (name[0] == '.') continue;
         VLOG("file %s", name);
 
-        int index = 0;
-        int uid = 0;
-        int64_t configID = 0;
-        char* substr = strtok(name, "-");
-        // Timestamp lives at index 2 but we skip parsing it as it's not needed.
-        while (substr != nullptr && index < 2) {
-            if (index == 0) {
-                uid = atoi(substr);
-            } else if (index == 1) {
-                configID = StrToInt64(substr);
-            }
-            index++;
-            substr = strtok(nullptr, "-");
-        }
-        if (index < 2) continue;
+        int64_t result[3];
+        parseFileName(name, result);
+        if (result[0] == -1) continue;
+        int64_t uid = result[1];
+        int64_t configID = result[2];
 
-        sendBroadcast(ConfigKey(uid, configID));
+        sendBroadcast(ConfigKey((int)uid, configID));
     }
 }
 
-void StorageManager::appendConfigMetricsReport(const char* path, ProtoOutputStream& proto) {
-    unique_ptr<DIR, decltype(&closedir)> dir(opendir(path), closedir);
+void StorageManager::appendConfigMetricsReport(ProtoOutputStream& proto) {
+    unique_ptr<DIR, decltype(&closedir)> dir(opendir(STATS_DATA_DIR), closedir);
     if (dir == NULL) {
-        VLOG("Path %s does not exist", path);
+        VLOG("Path %s does not exist", STATS_DATA_DIR);
         return;
     }
 
@@ -142,25 +168,13 @@ void StorageManager::appendConfigMetricsReport(const char* path, ProtoOutputStre
         if (name[0] == '.') continue;
         VLOG("file %s", name);
 
-        int index = 0;
-        int uid = 0;
-        int64_t configID = 0;
-        int64_t timestamp = 0;
-        char* substr = strtok(name, "-");
-        while (substr != nullptr && index < 3) {
-            if (index == 0) {
-                uid = atoi(substr);
-            } else if (index == 1) {
-                configID = StrToInt64(substr);
-            } else if (index == 2) {
-                timestamp = atoi(substr);
-            }
-            index++;
-            substr = strtok(nullptr, "-");
-        }
-        if (index < 3) continue;
-        string file_name = StringPrintf("%s/%d-%lld-%lld", STATS_SERVICE_DIR, uid,
-                                        (long long)configID, (long long)timestamp);
+        int64_t result[3];
+        parseFileName(name, result);
+        if (result[0] == -1) continue;
+        int64_t timestamp = result[0];
+        int64_t uid = result[1];
+        int64_t configID = result[2];
+        string file_name = getFilePath(STATS_DATA_DIR, timestamp, uid, configID);
         int fd = open(file_name.c_str(), O_RDONLY | O_CLOEXEC);
         if (fd != -1) {
             string content;
@@ -182,6 +196,7 @@ void StorageManager::readConfigFromDisk(map<ConfigKey, StatsdConfig>& configsMap
         VLOG("no default config on disk");
         return;
     }
+    trimToFit(STATS_SERVICE_DIR);
 
     dirent* de;
     while ((de = readdir(dir.get()))) {
@@ -189,26 +204,13 @@ void StorageManager::readConfigFromDisk(map<ConfigKey, StatsdConfig>& configsMap
         if (name[0] == '.') continue;
         VLOG("file %s", name);
 
-        int index = 0;
-        int uid = 0;
-        int64_t configID = 0;
-        int64_t timestamp = 0;
-        char* substr = strtok(name, "-");
-        while (substr != nullptr && index < 3) {
-            if (index == 0) {
-                uid = atoi(substr);
-            } else if (index == 1) {
-                configID = StrToInt64(substr);
-            } else if (index == 2) {
-                timestamp = atoi(substr);
-            }
-            index++;
-            substr = strtok(nullptr, "-");
-        }
-        if (index < 3) continue;
-
-        string file_name = StringPrintf("%s/%d-%lld-%lld", STATS_SERVICE_DIR, uid,
-                                        (long long)configID, (long long)timestamp);
+        int64_t result[3];
+        parseFileName(name, result);
+        if (result[0] == -1) continue;
+        int64_t timestamp = result[0];
+        int64_t uid = result[1];
+        int64_t configID = result[2];
+        string file_name = getFilePath(STATS_SERVICE_DIR, timestamp, uid, configID);
         int fd = open(file_name.c_str(), O_RDONLY | O_CLOEXEC);
         if (fd != -1) {
             string content;
@@ -216,11 +218,72 @@ void StorageManager::readConfigFromDisk(map<ConfigKey, StatsdConfig>& configsMap
                 StatsdConfig config;
                 if (config.ParseFromString(content)) {
                     configsMap[ConfigKey(uid, configID)] = config;
-                    VLOG("map key uid=%d|configID=%lld", uid, (long long)configID);
+                    VLOG("map key uid=%lld|configID=%lld", (long long)uid, (long long)configID);
                 }
             }
             close(fd);
         }
+    }
+}
+
+void StorageManager::trimToFit(const char* path) {
+    unique_ptr<DIR, decltype(&closedir)> dir(opendir(path), closedir);
+    if (dir == NULL) {
+        VLOG("Path %s does not exist", path);
+        return;
+    }
+    dirent* de;
+    int totalFileSize = 0;
+    vector<string> fileNames;
+    while ((de = readdir(dir.get()))) {
+        char* name = de->d_name;
+        if (name[0] == '.') continue;
+
+        int64_t result[3];
+        parseFileName(name, result);
+        if (result[0] == -1) continue;
+        int64_t timestamp = result[0];
+        int64_t uid = result[1];
+        int64_t configID = result[2];
+        string file_name = getFilePath(path, timestamp, uid, configID);
+
+        // Check for timestamp and delete if it's too old.
+        long fileAge = time(nullptr) - timestamp;
+        if (fileAge > StatsdStats::kMaxAgeSecond) {
+            deleteFile(file_name.c_str());
+        }
+
+        fileNames.push_back(file_name);
+        ifstream file(file_name.c_str(), ifstream::in | ifstream::binary);
+        if (file.is_open()) {
+            file.seekg(0, ios::end);
+            int fileSize = file.tellg();
+            file.close();
+            totalFileSize += fileSize;
+        }
+    }
+
+    if (fileNames.size() > StatsdStats::kMaxFileNumber ||
+        totalFileSize > StatsdStats::kMaxFileSize) {
+        // Reverse sort to effectively remove from the back (oldest entries).
+        // This will sort files in reverse-chronological order.
+        sort(fileNames.begin(), fileNames.end(), std::greater<std::string>());
+    }
+
+    // Start removing files from oldest to be under the limit.
+    while (fileNames.size() > 0 && (fileNames.size() > StatsdStats::kMaxFileNumber ||
+                                    totalFileSize > StatsdStats::kMaxFileSize)) {
+        string file_name = fileNames.at(fileNames.size() - 1);
+        ifstream file(file_name.c_str(), ifstream::in | ifstream::binary);
+        if (file.is_open()) {
+            file.seekg(0, ios::end);
+            int fileSize = file.tellg();
+            file.close();
+            totalFileSize -= fileSize;
+        }
+
+        deleteFile(file_name.c_str());
+        fileNames.pop_back();
     }
 }
 

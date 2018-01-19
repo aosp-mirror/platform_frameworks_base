@@ -134,7 +134,7 @@ LOCAL_SHARED_LIBRARIES := $(statsd_common_shared_libraries) \
 
 LOCAL_MODULE_CLASS := EXECUTABLES
 
-#LOCAL_INIT_RC := statsd.rc
+LOCAL_INIT_RC := statsd.rc
 
 include $(BUILD_EXECUTABLE)
 

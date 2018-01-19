@@ -185,8 +185,8 @@ void ConfigManager::update_saved_configs(const ConfigKey& key, const StatsdConfi
     remove_saved_configs(key);
 
     // Then we save the latest config.
-    string file_name = StringPrintf("%s/%d-%lld-%ld", STATS_SERVICE_DIR, key.GetUid(),
-                                    (long long)key.GetId(), time(nullptr));
+    string file_name = StringPrintf("%s/%ld_%d_%lld", STATS_SERVICE_DIR, time(nullptr),
+                                    key.GetUid(), (long long)key.GetId());
     const int numBytes = config.ByteSize();
     vector<uint8_t> buffer(numBytes);
     config.SerializeToArray(&buffer[0], numBytes);
