@@ -18900,6 +18900,14 @@ Slog.e("TODD",
         return Build.VERSION_CODES.CUR_DEVELOPMENT;
     }
 
+    private int getPackageTargetSdkVersionLockedLPr(String packageName) {
+        final PackageParser.Package p = mPackages.get(packageName);
+        if (p != null) {
+            return p.applicationInfo.targetSdkVersion;
+        }
+        return Build.VERSION_CODES.CUR_DEVELOPMENT;
+    }
+
     @Override
     public void addPreferredActivity(IntentFilter filter, int match,
             ComponentName[] set, ComponentName activity, int userId) {
@@ -23415,6 +23423,13 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         public int getUidTargetSdkVersion(int uid) {
             synchronized (mPackages) {
                 return getUidTargetSdkVersionLockedLPr(uid);
+            }
+        }
+
+        @Override
+        public int getPackageTargetSdkVersion(String packageName) {
+            synchronized (mPackages) {
+                return getPackageTargetSdkVersionLockedLPr(packageName);
             }
         }
 
