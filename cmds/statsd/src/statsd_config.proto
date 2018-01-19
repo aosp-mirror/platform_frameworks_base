@@ -151,9 +151,9 @@ message Bucket {
 message MetricConditionLink {
     optional int64 condition = 1;
 
-    optional FieldMatcher dimensions_in_what = 2;
+    optional FieldMatcher fields_in_what = 2;
 
-    optional FieldMatcher dimensions_in_condition = 3;
+    optional FieldMatcher fields_in_condition = 3;
 }
 
 message FieldFilter {

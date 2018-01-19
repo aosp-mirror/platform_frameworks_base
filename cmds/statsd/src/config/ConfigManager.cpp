@@ -296,10 +296,10 @@ StatsdConfig build_fake_config() {
     metric->set_condition(204);
     MetricConditionLink* link = metric->add_links();
     link->set_condition(203);
-    link->mutable_dimensions_in_what()->set_field(WAKE_LOCK_TAG_ID);
-    link->mutable_dimensions_in_what()->add_child()->set_field(WAKE_LOCK_UID_KEY_ID);
-    link->mutable_dimensions_in_condition()->set_field(APP_USAGE_TAG_ID);
-    link->mutable_dimensions_in_condition()->add_child()->set_field(APP_USAGE_UID_KEY_ID);
+    link->mutable_fields_in_what()->set_field(WAKE_LOCK_TAG_ID);
+    link->mutable_fields_in_what()->add_child()->set_field(WAKE_LOCK_UID_KEY_ID);
+    link->mutable_fields_in_condition()->set_field(APP_USAGE_TAG_ID);
+    link->mutable_fields_in_condition()->add_child()->set_field(APP_USAGE_UID_KEY_ID);
 
     // Duration of an app holding any wl, while screen on and app in background, slice by uid
     DurationMetric* durationMetric = config.add_duration_metric();
@@ -313,10 +313,10 @@ StatsdConfig build_fake_config() {
     durationMetric->set_condition(204);
     link = durationMetric->add_links();
     link->set_condition(203);
-    link->mutable_dimensions_in_what()->set_field(WAKE_LOCK_TAG_ID);
-    link->mutable_dimensions_in_what()->add_child()->set_field(WAKE_LOCK_UID_KEY_ID);
-    link->mutable_dimensions_in_condition()->set_field(APP_USAGE_TAG_ID);
-    link->mutable_dimensions_in_condition()->add_child()->set_field(APP_USAGE_UID_KEY_ID);
+    link->mutable_fields_in_what()->set_field(WAKE_LOCK_TAG_ID);
+    link->mutable_fields_in_what()->add_child()->set_field(WAKE_LOCK_UID_KEY_ID);
+    link->mutable_fields_in_condition()->set_field(APP_USAGE_TAG_ID);
+    link->mutable_fields_in_condition()->add_child()->set_field(APP_USAGE_UID_KEY_ID);
 
     // max Duration of an app holding any wl, while screen on and app in background, slice by uid
     durationMetric = config.add_duration_metric();
@@ -330,10 +330,10 @@ StatsdConfig build_fake_config() {
     durationMetric->set_condition(204);
     link = durationMetric->add_links();
     link->set_condition(203);
-    link->mutable_dimensions_in_what()->set_field(WAKE_LOCK_TAG_ID);
-    link->mutable_dimensions_in_what()->add_child()->set_field(WAKE_LOCK_UID_KEY_ID);
-    link->mutable_dimensions_in_condition()->set_field(APP_USAGE_TAG_ID);
-    link->mutable_dimensions_in_condition()->add_child()->set_field(APP_USAGE_UID_KEY_ID);
+    link->mutable_fields_in_what()->set_field(WAKE_LOCK_TAG_ID);
+    link->mutable_fields_in_what()->add_child()->set_field(WAKE_LOCK_UID_KEY_ID);
+    link->mutable_fields_in_condition()->set_field(APP_USAGE_TAG_ID);
+    link->mutable_fields_in_condition()->add_child()->set_field(APP_USAGE_UID_KEY_ID);
 
     // Duration of an app holding any wl, while screen on and app in background
     durationMetric = config.add_duration_metric();
@@ -344,10 +344,10 @@ StatsdConfig build_fake_config() {
     durationMetric->set_condition(204);
     link = durationMetric->add_links();
     link->set_condition(203);
-    link->mutable_dimensions_in_what()->set_field(WAKE_LOCK_TAG_ID);
-    link->mutable_dimensions_in_what()->add_child()->set_field(WAKE_LOCK_UID_KEY_ID);
-    link->mutable_dimensions_in_condition()->set_field(APP_USAGE_TAG_ID);
-    link->mutable_dimensions_in_condition()->add_child()->set_field(APP_USAGE_UID_KEY_ID);
+    link->mutable_fields_in_what()->set_field(WAKE_LOCK_TAG_ID);
+    link->mutable_fields_in_what()->add_child()->set_field(WAKE_LOCK_UID_KEY_ID);
+    link->mutable_fields_in_condition()->set_field(APP_USAGE_TAG_ID);
+    link->mutable_fields_in_condition()->add_child()->set_field(APP_USAGE_UID_KEY_ID);
 
 
     // Duration of screen on time.
