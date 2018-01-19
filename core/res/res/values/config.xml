@@ -3252,4 +3252,6 @@
 
     <!-- Package name that should be granted Notification Assistant access -->
     <string name="config_defaultAssistantAccessPackage" translatable="false">android.ext.services</string>
+
+    <bool name="config_supportBluetoothPersistedState">true</bool>
 </resources>

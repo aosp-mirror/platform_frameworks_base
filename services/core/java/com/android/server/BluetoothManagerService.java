@@ -439,10 +439,17 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 Settings.Global.AIRPLANE_MODE_ON, 0) == 1;
     }
 
+    private boolean supportBluetoothPersistedState() {
+        return mContext.getResources().getBoolean(R.bool.config_supportBluetoothPersistedState);
+    }
+
     /**
      *  Returns true if the Bluetooth saved state is "on"
      */
     private boolean isBluetoothPersistedStateOn() {
+        if (!supportBluetoothPersistedState()) {
+            return false;
+        }
         int state = Settings.Global.getInt(mContentResolver, Settings.Global.BLUETOOTH_ON, -1);
         if (DBG) {
             Slog.d(TAG, "Bluetooth persisted state: " + state);
@@ -454,6 +461,9 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
      *  Returns true if the Bluetooth saved state is BLUETOOTH_ON_BLUETOOTH
      */
     private boolean isBluetoothPersistedStateOnBluetooth() {
+        if (!supportBluetoothPersistedState()) {
+            return false;
+        }
         return Settings.Global.getInt(mContentResolver, Settings.Global.BLUETOOTH_ON,
                 BLUETOOTH_ON_BLUETOOTH) == BLUETOOTH_ON_BLUETOOTH;
     }
