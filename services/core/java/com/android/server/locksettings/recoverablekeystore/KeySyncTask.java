@@ -229,6 +229,9 @@ public class KeySyncTask implements Runnable {
             }
         }
 
+        // TODO: make sure the same counter id is used during recovery and remove temporary fix.
+        counterId = 1L;
+
         byte[] vaultParams = KeySyncUtils.packVaultParams(
                 publicKey,
                 counterId,
