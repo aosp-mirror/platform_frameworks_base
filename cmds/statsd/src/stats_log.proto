@@ -58,9 +58,9 @@ message CountBucketInfo {
 message CountMetricData {
   optional DimensionsValue dimensions_in_what = 1;
 
-  optional DimensionsValue dimensions_in_condition = 3;
+  optional DimensionsValue dimensions_in_condition = 2;
 
-  repeated CountBucketInfo bucket_info = 2;
+  repeated CountBucketInfo bucket_info = 3;
 }
 
 message DurationBucketInfo {
@@ -74,9 +74,9 @@ message DurationBucketInfo {
 message DurationMetricData {
   optional DimensionsValue dimensions_in_what = 1;
 
-  optional DimensionsValue dimensions_in_condition = 3;
+  optional DimensionsValue dimensions_in_condition = 2;
 
-  repeated DurationBucketInfo bucket_info = 2;
+  repeated DurationBucketInfo bucket_info = 3;
 }
 
 message ValueBucketInfo {
@@ -90,9 +90,9 @@ message ValueBucketInfo {
 message ValueMetricData {
   optional DimensionsValue dimensions_in_what = 1;
 
-  optional DimensionsValue dimensions_in_condition = 3;
+  optional DimensionsValue dimensions_in_condition = 2;
 
-  repeated ValueBucketInfo bucket_info = 2;
+  repeated ValueBucketInfo bucket_info = 3;
 }
 
 message GaugeBucketInfo {
@@ -106,9 +106,9 @@ message GaugeBucketInfo {
 message GaugeMetricData {
   optional DimensionsValue dimensions_in_what = 1;
 
-  optional DimensionsValue dimensions_in_condition = 3;
+  optional DimensionsValue dimensions_in_condition = 2;
 
-  repeated GaugeBucketInfo bucket_info = 2;
+  repeated GaugeBucketInfo bucket_info = 3;
 }
 
 message UidMapping {
