@@ -514,6 +514,7 @@ package android.app.backup {
     field public static final int LOG_EVENT_ID_SIGNATURE_MISMATCH = 29; // 0x1d
     field public static final int LOG_EVENT_ID_SYSTEM_APP_NO_AGENT = 38; // 0x26
     field public static final int LOG_EVENT_ID_TRANSPORT_IS_NULL = 50; // 0x32
+    field public static final int LOG_EVENT_ID_TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED = 51; // 0x33
     field public static final int LOG_EVENT_ID_UNKNOWN_VERSION = 44; // 0x2c
     field public static final int LOG_EVENT_ID_VERSIONS_MATCH = 35; // 0x23
     field public static final int LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER = 36; // 0x24
@@ -570,9 +571,12 @@ package android.app.backup {
     method public java.lang.String transportDirName();
     field public static final int AGENT_ERROR = -1003; // 0xfffffc15
     field public static final int AGENT_UNKNOWN = -1004; // 0xfffffc14
+    field public static final int FLAG_INCREMENTAL = 2; // 0x2
+    field public static final int FLAG_NON_INCREMENTAL = 4; // 0x4
     field public static final int FLAG_USER_INITIATED = 1; // 0x1
     field public static final int NO_MORE_DATA = -1; // 0xffffffff
     field public static final int TRANSPORT_ERROR = -1000; // 0xfffffc18
+    field public static final int TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED = -1006; // 0xfffffc12
     field public static final int TRANSPORT_NOT_INITIALIZED = -1001; // 0xfffffc17
     field public static final int TRANSPORT_OK = 0; // 0x0
     field public static final int TRANSPORT_PACKAGE_REJECTED = -1002; // 0xfffffc16
