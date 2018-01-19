@@ -115,7 +115,7 @@ oneway interface IStatusBar
     /**
      * Notifies the status bar that a new rotation suggestion is available.
      */
-    void onProposedRotationChanged(int rotation);
+    void onProposedRotationChanged(int rotation, boolean isValid);
 
     /**
      * Set whether the top app currently hides the statusbar.

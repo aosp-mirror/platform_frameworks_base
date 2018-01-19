@@ -408,10 +408,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
 
         @Override
-        public void onProposedRotationChanged(int rotation) {
+        public void onProposedRotationChanged(int rotation, boolean isValid) {
             if (mBar != null){
                 try {
-                    mBar.onProposedRotationChanged(rotation);
+                    mBar.onProposedRotationChanged(rotation, isValid);
                 } catch (RemoteException ex) {}
             }
         }
