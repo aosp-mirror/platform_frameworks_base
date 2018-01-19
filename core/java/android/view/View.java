@@ -23562,15 +23562,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             data.prepareToLeaveProcess((flags & View.DRAG_FLAG_GLOBAL) != 0);
         }
 
-        boolean okay = false;
-
         Point shadowSize = new Point();
         Point shadowTouchPoint = new Point();
         shadowBuilder.onProvideShadowMetrics(shadowSize, shadowTouchPoint);
 
-        if ((shadowSize.x < 0) || (shadowSize.y < 0) ||
-                (shadowTouchPoint.x < 0) || (shadowTouchPoint.y < 0)) {
-            throw new IllegalStateException("Drag shadow dimensions must not be negative");
+        if ((shadowSize.x <= 0) || (shadowSize.y <= 0)
+                || (shadowTouchPoint.x < 0) || (shadowTouchPoint.y < 0)) {
+            throw new IllegalStateException("Drag shadow dimensions must be positive");
         }
 
         if (ViewDebug.DEBUG_DRAG) {
@@ -23581,40 +23579,50 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mAttachInfo.mDragSurface.release();
         }
         mAttachInfo.mDragSurface = new Surface();
+        mAttachInfo.mDragToken = null;
+
+        final ViewRootImpl root = mAttachInfo.mViewRootImpl;
+        final SurfaceSession session = new SurfaceSession(root.mSurface);
+        final SurfaceControl surface = new SurfaceControl.Builder(session)
+                .setName("drag surface")
+                .setSize(shadowSize.x, shadowSize.y)
+                .setFormat(PixelFormat.TRANSLUCENT)
+                .build();
         try {
-            mAttachInfo.mDragToken = mAttachInfo.mSession.prepareDrag(mAttachInfo.mWindow,
-                    flags, shadowSize.x, shadowSize.y, mAttachInfo.mDragSurface);
-            if (ViewDebug.DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "prepareDrag returned token="
-                    + mAttachInfo.mDragToken + " surface=" + mAttachInfo.mDragSurface);
-            if (mAttachInfo.mDragToken != null) {
-                Canvas canvas = mAttachInfo.mDragSurface.lockCanvas(null);
-                try {
-                    canvas.drawColor(0, PorterDuff.Mode.CLEAR);
-                    shadowBuilder.onDrawShadow(canvas);
-                } finally {
-                    mAttachInfo.mDragSurface.unlockCanvasAndPost(canvas);
-                }
-
-                final ViewRootImpl root = getViewRootImpl();
-
-                // Cache the local state object for delivery with DragEvents
-                root.setLocalDragState(myLocalState);
-
-                // repurpose 'shadowSize' for the last touch point
-                root.getLastTouchPoint(shadowSize);
-
-                okay = mAttachInfo.mSession.performDrag(mAttachInfo.mWindow, mAttachInfo.mDragToken,
-                        root.getLastTouchSource(), shadowSize.x, shadowSize.y,
-                        shadowTouchPoint.x, shadowTouchPoint.y, data);
-                if (ViewDebug.DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "performDrag returned " + okay);
+            mAttachInfo.mDragSurface.copyFrom(surface);
+            final Canvas canvas = mAttachInfo.mDragSurface.lockCanvas(null);
+            try {
+                canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+                shadowBuilder.onDrawShadow(canvas);
+            } finally {
+                mAttachInfo.mDragSurface.unlockCanvasAndPost(canvas);
             }
+
+            // Cache the local state object for delivery with DragEvents
+            root.setLocalDragState(myLocalState);
+
+            // repurpose 'shadowSize' for the last touch point
+            root.getLastTouchPoint(shadowSize);
+
+            mAttachInfo.mDragToken = mAttachInfo.mSession.performDrag(
+                    mAttachInfo.mWindow, flags, surface, root.getLastTouchSource(),
+                    shadowSize.x, shadowSize.y, shadowTouchPoint.x, shadowTouchPoint.y, data);
+            if (ViewDebug.DEBUG_DRAG) {
+                Log.d(VIEW_LOG_TAG, "performDrag returned " + mAttachInfo.mDragToken);
+            }
+
+            return mAttachInfo.mDragToken != null;
         } catch (Exception e) {
             Log.e(VIEW_LOG_TAG, "Unable to initiate drag", e);
-            mAttachInfo.mDragSurface.destroy();
-            mAttachInfo.mDragSurface = null;
+            return false;
+        } finally {
+            if (mAttachInfo.mDragToken == null) {
+                mAttachInfo.mDragSurface.destroy();
+                mAttachInfo.mDragSurface = null;
+                root.setLocalDragState(null);
+            }
+            session.kill();
         }
-
-        return okay;
     }
 
     /**

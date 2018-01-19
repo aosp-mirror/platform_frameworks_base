@@ -29,6 +29,7 @@ import android.view.IWindowId;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.view.Surface;
+import android.view.SurfaceControl;
 
 /**
  * System private per-application interface to the window manager.
@@ -150,25 +151,32 @@ interface IWindowSession {
     boolean performHapticFeedback(IWindow window, int effectId, boolean always);
 
     /**
-     * Allocate the drag's thumbnail surface.  Also assigns a token that identifies
-     * the drag to the OS and passes that as the return value.  A return value of
-     * null indicates failure.
-     */
-    IBinder prepareDrag(IWindow window, int flags,
-            int thumbnailWidth, int thumbnailHeight, out Surface outSurface);
-
-    /**
      * Initiate the drag operation itself
+     *
+     * @param window Window which initiates drag operation.
+     * @param flags See {@code View#startDragAndDrop}
+     * @param surface Surface containing drag shadow image
+     * @param touchSource See {@code InputDevice#getSource()}
+     * @param touchX TODO (b/72072998): Fix the issue that the system server misuse the arguments as
+     *         initial touch point while the framework passes drag shadow size.
+     * @param touchY TODO (b/72072998): Fix the issue that the system server misuse the arguments as
+     *         initial touch point while the framework passes drag shadow size.
+     * @param thumbCenterX X coordinate for the position within the shadow image that should be
+     *         underneath the touch point during the drag and drop operation.
+     * @param thumbCenterY Y coordinate for the position within the shadow image that should be
+     *         underneath the touch point during the drag and drop operation.
+     * @param data Data transferred by drag and drop
+     * @return Token of drag operation which will be passed to cancelDragAndDrop.
      */
-    boolean performDrag(IWindow window, IBinder dragToken, int touchSource,
+    IBinder performDrag(IWindow window, int flags, in SurfaceControl surface, int touchSource,
             float touchX, float touchY, float thumbCenterX, float thumbCenterY, in ClipData data);
 
-   /**
+    /**
      * Report the result of a drop action targeted to the given window.
      * consumed is 'true' when the drop was accepted by a valid recipient,
      * 'false' otherwise.
      */
-	void reportDropResult(IWindow window, boolean consumed);
+    void reportDropResult(IWindow window, boolean consumed);
 
     /**
      * Cancel the current drag operation.
