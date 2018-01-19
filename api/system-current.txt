@@ -4963,6 +4963,7 @@ package android.webkit {
     method public abstract android.webkit.TracingController getTracingController();
     method public abstract android.webkit.WebIconDatabase getWebIconDatabase();
     method public abstract android.webkit.WebStorage getWebStorage();
+    method public abstract java.lang.ClassLoader getWebViewClassLoader();
     method public abstract android.webkit.WebViewDatabase getWebViewDatabase(android.content.Context);
   }
 
