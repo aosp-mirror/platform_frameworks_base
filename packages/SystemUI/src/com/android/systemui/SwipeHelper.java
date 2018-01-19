@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.RectF;
@@ -316,10 +317,12 @@ public class SwipeHelper implements Gefingerpoken {
                     float deltaPerpendicular = perpendicularPos - mPerpendicularInitialTouchPos;
                     if (Math.abs(delta) > mPagingTouchSlop
                             && Math.abs(delta) > Math.abs(deltaPerpendicular)) {
-                        mCallback.onBeginDrag(mCurrView);
-                        mDragging = true;
-                        mInitialTouchPos = getPos(ev);
-                        mTranslation = getTranslation(mCurrView);
+                        if (mCallback.canChildBeDragged(mCurrView)) {
+                            mCallback.onBeginDrag(mCurrView);
+                            mDragging = true;
+                            mInitialTouchPos = getPos(ev);
+                            mTranslation = getTranslation(mCurrView);
+                        }
                         cancelLongPress();
                     }
                 }
@@ -722,5 +725,10 @@ public class SwipeHelper implements Gefingerpoken {
          * @return The factor the falsing threshold should be multiplied with
          */
         float getFalsingThresholdFactor();
+
+        /**
+         * @return If true, the given view is draggable.
+         */
+        default boolean canChildBeDragged(@NonNull View animView) { return true; }
     }
 }
