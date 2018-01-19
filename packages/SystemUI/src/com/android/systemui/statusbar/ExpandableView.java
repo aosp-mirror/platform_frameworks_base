@@ -151,6 +151,10 @@ public abstract class ExpandableView extends FrameLayout {
         return mActualHeight;
     }
 
+    public boolean isExpandAnimationRunning() {
+        return false;
+    }
+
     /**
      * @return The maximum height of this notification.
      */
@@ -375,8 +379,8 @@ public abstract class ExpandableView extends FrameLayout {
         return false;
     }
 
-    private void updateClipping() {
-        if (mClipToActualHeight) {
+    protected void updateClipping() {
+        if (mClipToActualHeight && shouldClipToActualHeight()) {
             int top = getClipTopAmount();
             mClipRect.set(0, top, getWidth(), Math.max(getActualHeight() + getExtraBottomPadding()
                     - mClipBottomAmount, top));
@@ -384,6 +388,10 @@ public abstract class ExpandableView extends FrameLayout {
         } else {
             setClipBounds(null);
         }
+    }
+
+    protected boolean shouldClipToActualHeight() {
+        return true;
     }
 
     public void setClipToActualHeight(boolean clipToActualHeight) {

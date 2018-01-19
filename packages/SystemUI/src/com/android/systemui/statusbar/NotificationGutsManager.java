@@ -41,7 +41,6 @@ import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -133,14 +132,14 @@ public class NotificationGutsManager implements Dumpable {
      * channel.
      */
     private void startAppNotificationSettingsActivity(String packageName, final int appUid,
-            final NotificationChannel channel) {
+            final NotificationChannel channel, ExpandableNotificationRow row) {
         final Intent intent = new Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS);
         intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName);
         intent.putExtra(Settings.EXTRA_APP_UID, appUid);
         if (channel != null) {
             intent.putExtra(EXTRA_FRAGMENT_ARG_KEY, channel.getId());
         }
-        mPresenter.startNotificationGutsIntent(intent, appUid);
+        mPresenter.startNotificationGutsIntent(intent, appUid, row);
     }
 
     public void bindGuts(final ExpandableNotificationRow row) {
@@ -198,14 +197,14 @@ public class NotificationGutsManager implements Dumpable {
                     mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_NOTE_INFO);
                     guts.resetFalsingCheck();
                     mOnSettingsClickListener.onClick(sbn.getKey());
-                    startAppNotificationSettingsActivity(pkg, appUid, channel);
+                    startAppNotificationSettingsActivity(pkg, appUid, channel, row);
                 };
             }
             final NotificationInfo.OnAppSettingsClickListener onAppSettingsClick = (View v,
                     Intent intent) -> {
                 mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_APP_NOTE_SETTINGS);
                 guts.resetFalsingCheck();
-                mPresenter.startNotificationGutsIntent(intent, sbn.getUid());
+                mPresenter.startNotificationGutsIntent(intent, sbn.getUid(), row);
             };
             final View.OnClickListener onDoneClick = (View v) -> {
                 saveAndCloseNotificationMenu(row, guts, v);

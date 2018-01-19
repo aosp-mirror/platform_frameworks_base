@@ -467,4 +467,21 @@ public class ExpandableViewState extends ViewState {
             return getChildTag(view, TAG_END_HEIGHT);
         }
     }
+
+    @Override
+    public void cancelAnimations(View view) {
+        super.cancelAnimations(view);
+        Animator animator = getChildTag(view, TAG_ANIMATOR_HEIGHT);
+        if (animator != null) {
+            animator.cancel();
+        }
+        animator = getChildTag(view, TAG_ANIMATOR_SHADOW_ALPHA);
+        if (animator != null) {
+            animator.cancel();
+        }
+        animator = getChildTag(view, TAG_ANIMATOR_TOP_INSET);
+        if (animator != null) {
+            animator.cancel();
+        }
+    }
 }

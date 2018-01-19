@@ -51,6 +51,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     public static final String TAG = "CollapsedStatusBarFragment";
     private static final String EXTRA_PANEL_STATE = "panel_state";
+    public static final int FADE_IN_DURATION = 320;
+    public static final int FADE_IN_DELAY = 50;
     private PhoneStatusBarView mStatusBar;
     private KeyguardMonitor mKeyguardMonitor;
     private NetworkController mNetworkController;
@@ -257,9 +259,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         }
         v.animate()
                 .alpha(1f)
-                .setDuration(320)
+                .setDuration(FADE_IN_DURATION)
                 .setInterpolator(Interpolators.ALPHA_IN)
-                .setStartDelay(50)
+                .setStartDelay(FADE_IN_DELAY)
 
                 // We need to clean up any pending end action from animateHide if we call
                 // both hide and show in the same frame before the animation actually gets started.

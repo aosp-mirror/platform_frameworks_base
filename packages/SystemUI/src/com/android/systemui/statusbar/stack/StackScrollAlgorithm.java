@@ -130,7 +130,8 @@ public class StackScrollAlgorithm {
     private void updateClipping(StackScrollState resultState,
             StackScrollAlgorithmState algorithmState, AmbientState ambientState) {
         float drawStart = !ambientState.isOnKeyguard() ? ambientState.getTopPadding()
-                + ambientState.getStackTranslation() : 0;
+                + ambientState.getStackTranslation() + ambientState.getExpandAnimationTopChange()
+                : 0;
         float previousNotificationEnd = 0;
         float previousNotificationStart = 0;
         int childCount = algorithmState.visibleChildren.size();
@@ -320,6 +321,10 @@ public class StackScrollAlgorithm {
                 lastView = v;
             }
         }
+        ExpandableNotificationRow expandingNotification = ambientState.getExpandingNotification();
+        state.indexOfExpandingNotification = expandingNotification != null
+                ? state.visibleChildren.indexOf(expandingNotification)
+                : -1;
     }
 
     private float getPaddingForValue(Float increasedPadding) {
@@ -381,6 +386,9 @@ public class StackScrollAlgorithm {
 
         childViewState.location = ExpandableViewState.LOCATION_MAIN_AREA;
         float inset = ambientState.getTopPadding() + ambientState.getStackTranslation();
+        if (i < algorithmState.getIndexOfExpandingNotification()) {
+            inset += ambientState.getExpandAnimationTopChange();
+        }
         if (child.mustStayOnScreen() && childViewState.yTranslation >= 0) {
             // Even if we're not scrolled away we're in view and we're also not in the
             // shelf. We can relax the constraints and let us scroll off the top!
@@ -394,7 +402,7 @@ public class StackScrollAlgorithm {
             childViewState.yTranslation = ambientState.getInnerHeight() - childHeight
                     + ambientState.getStackTranslation() * 0.25f;
         } else {
-            clampPositionToShelf(childViewState, ambientState);
+            clampPositionToShelf(child, childViewState, ambientState);
         }
 
         currentYPosition = childViewState.yTranslation + childHeight + paddingAfterChild;
@@ -492,10 +500,12 @@ public class StackScrollAlgorithm {
      * Clamp the height of the child down such that its end is at most on the beginning of
      * the shelf.
      *
+     * @param child
      * @param childViewState the view state of the child
      * @param ambientState the ambient state
      */
-    private void clampPositionToShelf(ExpandableViewState childViewState,
+    private void clampPositionToShelf(ExpandableView child,
+            ExpandableViewState childViewState,
             AmbientState ambientState) {
         if (ambientState.getShelf() == null) {
             return;
@@ -505,7 +515,7 @@ public class StackScrollAlgorithm {
                 - ambientState.getShelf().getIntrinsicHeight();
         childViewState.yTranslation = Math.min(childViewState.yTranslation, shelfStart);
         if (childViewState.yTranslation >= shelfStart) {
-            childViewState.hidden = true;
+            childViewState.hidden = !child.isExpandAnimationRunning();
             childViewState.inShelf = true;
             childViewState.headsUpIsVisible = false;
         }
@@ -602,6 +612,7 @@ public class StackScrollAlgorithm {
          * The padding after each child measured in pixels.
          */
         public final HashMap<ExpandableView, Float> paddingMap = new HashMap<>();
+        private int indexOfExpandingNotification;
 
         public int getPaddingAfterChild(ExpandableView child) {
             Float padding = paddingMap.get(child);
@@ -610,6 +621,10 @@ public class StackScrollAlgorithm {
                 return mPaddingBetweenElements;
             }
             return (int) padding.floatValue();
+        }
+
+        public int getIndexOfExpandingNotification() {
+            return indexOfExpandingNotification;
         }
     }
 

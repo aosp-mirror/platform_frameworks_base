@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -65,6 +67,7 @@ import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
@@ -241,6 +244,8 @@ public class NotificationPanelView extends PanelView implements
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private boolean mUserSetupComplete;
     private int mQsNotificationTopPadding;
+    private float mExpandOffset;
+    private boolean mHideIconsDuringNotificationLaunch = true;
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -1675,8 +1680,9 @@ public class NotificationPanelView extends PanelView implements
         if (mStatusBar.getBarState() == StatusBarState.KEYGUARD) {
             return 0;
         }
-        float translation = NotificationUtils.interpolate(-mQsMinExpansionHeight, 0,
-                mNotificationStackScroller.getAppearFraction(mExpandedHeight));
+        float translation = MathUtils.lerp(-mQsMinExpansionHeight, 0,
+                Math.min(1.0f, mNotificationStackScroller.getAppearFraction(mExpandedHeight)))
+                + mExpandOffset;
         return Math.min(0, translation);
     }
 
@@ -2540,6 +2546,9 @@ public class NotificationPanelView extends PanelView implements
     }
 
     public boolean hideStatusBarIconsWhenExpanded() {
+        if (mLaunchingNotification) {
+            return mHideIconsDuringNotificationLaunch;
+        }
         return !isFullWidth() || !mShowIconsWhenExpanded;
     }
 
@@ -2664,5 +2673,20 @@ public class NotificationPanelView extends PanelView implements
 
     public LockIcon getLockIcon() {
         return mKeyguardBottomArea.getLockIcon();
+    }
+
+    public void applyExpandAnimationParams(ExpandAnimationParameters params) {
+        mExpandOffset = params != null ? params.getTopChange() : 0;
+        updateQsExpansion();
+        if (params != null) {
+            boolean hideIcons = params.getProgress(
+                    ActivityLaunchAnimator.ANIMATION_DELAY_ICON_FADE_IN, 100) == 0.0f;
+            if (hideIcons != mHideIconsDuringNotificationLaunch) {
+                mHideIconsDuringNotificationLaunch = hideIcons;
+                if (!hideIcons) {
+                    mStatusBar.recomputeDisableFlags(true /* animate */);
+                }
+            }
+        }
     }
 }
