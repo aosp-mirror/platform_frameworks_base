@@ -673,6 +673,15 @@
     <string name="quick_settings_bluetooth_off_label">Bluetooth Off</string>
     <!-- QuickSettings: Bluetooth detail panel, text when there are no items [CHAR LIMIT=NONE] -->
     <string name="quick_settings_bluetooth_detail_empty_text">No paired devices available</string>
+    <!-- QuickSettings: Bluetooth secondary label for the battery level of a connected device [CHAR LIMIT=20]-->
+    <string name="quick_settings_bluetooth_secondary_label_battery_level"><xliff:g id="battery_level_as_percentage">%s</xliff:g> battery</string>
+    <!-- QuickSettings: Bluetooth secondary label for an audio device being connected [CHAR LIMIT=20]-->
+    <string name="quick_settings_bluetooth_secondary_label_audio">Audio</string>
+    <!-- QuickSettings: Bluetooth secondary label for a headset being connected [CHAR LIMIT=20]-->
+    <string name="quick_settings_bluetooth_secondary_label_headset">Headset</string>
+    <!-- QuickSettings: Bluetooth secondary label for an input/IO device being connected [CHAR LIMIT=20]-->
+    <string name="quick_settings_bluetooth_secondary_label_input">Input</string>
+
     <!-- QuickSettings: Brightness [CHAR LIMIT=NONE] -->
     <string name="quick_settings_brightness_label">Brightness</string>
     <!-- QuickSettings: Rotation Unlocked [CHAR LIMIT=NONE] -->
