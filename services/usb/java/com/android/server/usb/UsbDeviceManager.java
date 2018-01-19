@@ -35,6 +35,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.debug.AdbManagerInternal;
+import android.debug.IAdbTransport;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbConfiguration;
 import android.hardware.usb.UsbConstants;
@@ -800,6 +802,14 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
             setEnabledFunctions(mScreenUnlockedFunctions, false);
         }
 
+        private static class AdbTransport extends IAdbTransport.Stub {
+            private final UsbHandler mHandler;
+
+            AdbTransport(UsbHandler handler) {
+                mHandler = handler;
+            }
+        }
+
         /**
          * Returns the functions that are passed down to the low level driver once adb and
          * charging are accounted for.
@@ -964,6 +974,9 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 case MSG_SYSTEM_READY:
                     mNotificationManager = (NotificationManager)
                             mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+
+                    LocalServices.getService(
+                            AdbManagerInternal.class).registerTransport(new AdbTransport(this));
 
                     // Ensure that the notification channels are set up
                     if (isTv()) {
