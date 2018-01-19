@@ -33,7 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"持續進行"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"通知"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"電量低"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"電量不足。請開啟省電模式"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"剩餘 <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"電量剩餘 <xliff:g id="PERCENTAGE">%s</xliff:g>，根據您的使用情況，剩餘時間大約 <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"電量剩餘 <xliff:g id="PERCENTAGE">%s</xliff:g>，剩餘時間大約 <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"剩餘 <xliff:g id="PERCENTAGE">%s</xliff:g>。省電模式已開啟。"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"不支援 USB 充電。\n僅能使用隨附的充電器。"</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"不支援 USB 充電功能。"</string>
@@ -67,14 +70,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"目前登入此裝置的使用者無法啟用 USB 偵錯功能。如要使用此功能，請切換至主要使用者。"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"放大為全螢幕"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"放大為全螢幕"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"擷取螢幕畫面"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"正在儲存螢幕擷取畫面..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"正在儲存螢幕擷取畫面..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"正在儲存螢幕擷取畫面。"</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"已擷取螢幕畫面。"</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"輕按即可查看螢幕擷圖。"</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"無法擷取螢幕畫面。"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"儲存螢幕擷圖時發生問題。"</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"由於儲存空間有限，因此無法儲存螢幕擷取畫面。"</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"正在儲存螢幕擷取畫面"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"螢幕擷取畫面已儲存"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"輕按即可查看螢幕擷取畫面"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"無法擷取螢幕畫面"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"儲存螢幕擷取畫面時發生問題"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"由於儲存空間有限，因此無法儲存螢幕擷取畫面"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"應用程式或您的機構不允許擷取螢幕畫面"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB 檔案傳輸選項"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"掛接為媒體播放器 (MTP)"</string>
@@ -559,26 +563,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"關閉"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"通知控制項讓您設定應用程式通知的重要性 (0 至 5 級)。\n\n"<b>"第 5 級"</b>" \n- 在通知清單頂部顯示 \n- 允許全螢幕騷擾 \n- 一律顯示通知 \n\n"<b>"第 4 級"</b>" \n- 阻止全螢幕騷擾 \n- 一律顯示通知 \n\n"<b>"第 3 級"</b>" \n- 阻止全螢幕騷擾 \n- 永不顯示通知 \n\n"<b>"第 2 級"</b>" \n- 阻止全螢幕騷擾 \n- 永不顯示通知 \n- 永不發出聲響和震動 \n\n"<b>"第 1 級"</b>" \n- 阻止全螢幕騷擾 \n- 永不顯示通知 \n- 永不發出聲響和震動 \n- 從上鎖畫面和狀態列中隱藏 \n- 在通知清單底部顯示 \n\n"<b>"第 0 級"</b>" \n- 封鎖所有應用程式通知"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"通知"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"您不會再收到這些通知"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> 個通知類別"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"此應用程式沒有通知類別"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"無法關閉此應用程式的通知"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">此應用程式的 1 個通知類別 (共 <xliff:g id="NUMBER_1">%s</xliff:g> 個)</item>
-      <item quantity="one">此應用程式的 1 個通知類別 (共 <xliff:g id="NUMBER_0">%s</xliff:g> 個)</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>、<xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>、<xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g>和另外 <xliff:g id="NUMBER_5">%3$d</xliff:g> 個頻道</item>
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>、<xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g>和另外 <xliff:g id="NUMBER_2">%3$d</xliff:g> 個頻道</item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"您不會再看到這些通知"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"要繼續顯示這些通知嗎？"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"停止通知"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"繼續顯示"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"要繼續顯示此應用程式的通知嗎？"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"無法關閉這些通知"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"開咗「<xliff:g id="APP_NAME">%1$s</xliff:g>」嘅通知控制項"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"閂咗「<xliff:g id="APP_NAME">%1$s</xliff:g>」嘅通知控制項"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"允許收到呢個頻道嘅通知"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"所有類別"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"更多設定"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"自訂：<xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"自訂"</string>
     <string name="notification_done" msgid="5279426047273930175">"完成"</string>
+    <string name="inline_undo" msgid="558916737624706010">"復原"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"通知控制項"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"通知延後選項"</string>
@@ -733,8 +730,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"展開"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"最小化"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"關閉"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"設定"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"向下拖曳即可關閉"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"選單"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"「<xliff:g id="NAME">%s</xliff:g>」目前在畫中畫模式"</string>

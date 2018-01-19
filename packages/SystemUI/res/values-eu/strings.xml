@@ -33,13 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Abian"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Jakinarazpenak"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Bateria agortzen ari da"</string>
-    <!-- no translation found for battery_low_title_hybrid (6268991275887381595) -->
-    <skip />
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"Bateria gutxi gelditzen da. Aktibatu Bateria-aurrezlea."</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> gelditzen da"</string>
-    <!-- no translation found for battery_low_percent_format_hybrid (6838677459286775617) -->
-    <skip />
-    <!-- no translation found for battery_low_percent_format_hybrid_short (9025795469949145586) -->
-    <skip />
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> gelditzen da; <xliff:g id="TIME">%s</xliff:g> inguru gelditzen dira, erabileraren arabera"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> gelditzen da; <xliff:g id="TIME">%s</xliff:g> inguru gelditzen dira"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> gelditzen da. Bateria-aurrezlea aktibatuta dago."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Ez da USB bidez kargatzea onartzen.\nErabili hornitu zaizun kargagailua soilik."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Ez da USB bidez kargatzea onartzen."</string>
@@ -73,22 +70,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Gailu honetan saioa hasita duen erabiltzaileak ezin du aktibatu USB arazketa. Eginbide hori erabiltzeko, aldatu erabiltzaile nagusira."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Handiagotu pantaila betetzeko"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Luzatu pantaila betetzeko"</string>
-    <!-- no translation found for global_action_screenshot (8329831278085426283) -->
-    <skip />
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Pantaila-argazkia"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Pantaila-argazkia gordetzen…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Pantaila-argazkia gordetzen…"</string>
-    <!-- no translation found for screenshot_saving_text (2545047868936087248) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_title (5637073968117370753) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_text (7574667448002050363) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_title (9096484883063264803) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_to_save_unknown_text (8844781948876286488) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_to_save_text (3041612585107107310) -->
-    <skip />
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"Pantaila-argazkia gordetzen ari da"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"Gorde da pantaila-argazkia"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"Sakatu pantaila-argazkia ikusteko"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"Ezin izan da atera pantaila-argazkia"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"Arazo bat izan da pantaila-argazkia gordetzean"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Ezin da atera pantaila-argazkia ez delako gelditzen tokirik"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Aplikazioak edo erakundeak ez du onartzen pantaila-argazkiak ateratzea"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB fitxategiak transferitzeko aukerak"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Muntatu multimedia-erreproduzigailu gisa (MTP)"</string>
@@ -573,27 +563,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Desaktibatuta"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Bateria-mailaren arabera jakinarazpenak kontrolatzeko aukerekin, 0 eta 5 bitarteko garrantzi-mailetan sailka ditzakezu aplikazioen jakinarazpenak. \n\n"<b>"5. maila"</b>" \n- Erakutsi jakinarazpenen zerrendaren goialdean. \n- Baimendu etetea pantaila osoko moduan zaudenean. \n- Agerrarazi beti jakinarazpenak. \n\n"<b>"4. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Agerrarazi beti jakinarazpenak. \n\n"<b>"3. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n\n"<b>"2. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n- Ez egin soinurik edo dardararik inoiz. \n\n"<b>"1. maila"</b>" \n- Galarazi etetea pantaila osoko moduan zaudenean. \n- Ez agerrarazi jakinarazpenik inoiz. \n- Ez egin soinurik edo dardararik inoiz. \n- Ezkutatu pantaila blokeatutik eta egoera-barratik. \n- Erakutsi jakinarazpenen zerrendaren behealdean. \n\n"<b>"0. maila"</b>" \n- Blokeatu aplikazioaren jakinarazpen guztiak."</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Jakinarazpenak"</string>
-    <!-- no translation found for notification_channel_disabled (344536703863700565) -->
-    <skip />
-    <!-- no translation found for inline_keep_showing (8945102997083836858) -->
-    <skip />
-    <!-- no translation found for inline_stop_button (4172980096860941033) -->
-    <skip />
-    <!-- no translation found for inline_keep_button (6665940297019018232) -->
-    <skip />
-    <!-- no translation found for inline_keep_showing_app (1723113469580031041) -->
-    <skip />
-    <!-- no translation found for notification_unblockable_desc (1037434112919403708) -->
-    <skip />
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Aurrerantzean ez duzu ikusiko horrelako jakinarazpenik"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"Jakinarazpenak erakusten jarraitzea nahi duzu?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"Blokeatu jakinarazpenak"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"Jarraitu erakusten"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"Aplikazio honen jakinarazpenak erakusten jarraitzea nahi duzu?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"Jakinarazpen hauek ezin dira desaktibatu"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Ireki dira <xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren jakinarazpenak kontrolatzeko aukerak"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Itxi dira <xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren jakinarazpenak kontrolatzeko aukerak"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Onartu kanal honen jakinarazpenak"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Ezarpen gehiago"</string>
-    <!-- no translation found for notification_app_settings (420348114670768449) -->
-    <skip />
+    <string name="notification_app_settings" msgid="420348114670768449">"Pertsonalizatu"</string>
     <string name="notification_done" msgid="5279426047273930175">"Eginda"</string>
-    <!-- no translation found for inline_undo (558916737624706010) -->
-    <skip />
+    <string name="inline_undo" msgid="558916737624706010">"Desegin"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"jakinarazpena kontrolatzeko aukerak"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"jakinarazpena atzeratzeko aukerak"</string>

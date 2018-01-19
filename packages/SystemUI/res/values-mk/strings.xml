@@ -33,7 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Во тек"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Известувања"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Батеријата е слаба"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"Батеријата е слаба. Вклучете го штедачот на батерија"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Преостануваат <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Преостануваат <xliff:g id="PERCENTAGE">%s</xliff:g>, уште околу <xliff:g id="TIME">%s</xliff:g> според користењето"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Преостануваат <xliff:g id="PERCENTAGE">%s</xliff:g>, уште околу <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Преостануваат <xliff:g id="PERCENTAGE">%s</xliff:g>. Штедачот на батерија е вклучен."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Полначот на USB меморијата не е поддржан.\nКористете го само полначот доставен со уредот."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Полнењето преку USB не е поддржано."</string>
@@ -67,14 +70,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Корисникот што моментално е најавен на уредов не може да вклучи отстранување грешки на USB. За да ја користите функцијава, префрлете се на примарниот корисник."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Зумирај да се исполни екранот"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Растегни да се исполни екранот"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Слика од екранот"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Сликата на екранот се зачувува..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Сликата на екранот се зачувува..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"Сликата на екранот се зачувува."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Сликата на екранот е снимена."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Допрете за да ја видите сликата на екранот."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Сликата на екранот не можеше да се сними."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Се појави проблем при зачувување на сликата од екранот."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Сликата од екранот не може да се зачува поради ограничена меморија."</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"Сликата од екранот се зачувува"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"Сликата од екранот е зачувана"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"Допрете за да ја видите сликата од екранот"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"Сликата од екранот не можеше да се сними"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"Проблем при зачувувањето слика од екранот"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Сликата од екранот не може да се зачува поради ограничена меморија"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Апликацијата или вашата организација не дозволува снимање слики од екранот"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Пренос на датотека со USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Монтирај како мултимедијален плеер (MTP)"</string>
@@ -557,26 +561,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Исклучено"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Со контролите за известувањата за напојување, може да поставите ниво на важност од 0 до 5 за известувањата на која било апликација. \n\n"<b>"Ниво 5"</b>" \n- Прикажувај на врвот на списокот со известувања \n- Дозволи прекин во цел екран \n- Секогаш користи појавување \n\n"<b>"Ниво 4"</b>" \n- Спречи прекин во цел екран \n- Секогаш користи појавување \n\n"<b>"Ниво 3"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n\n"<b>"Ниво 2"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n- Без звук и вибрации \n\n"<b>"Ниво 1"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n- Без звук и вибрации \n- Сокриј од заклучен екран и статусна лента \n- Прикажувај на дното на списокот со известувања \n\n"<b>"Ниво 0"</b>" \n- Блокирај ги сите известувања од апликацијата"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Известувања"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"Веќе нема да ги добивате овие известувања"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> категории известувања"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"Апликацијава нема катерии известувања"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Известувањата од апликацијава не може да се исклучат"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="one">1 од <xliff:g id="NUMBER_1">%s</xliff:g> категорија известувања од апликацијава</item>
-      <item quantity="other">1 од <xliff:g id="NUMBER_1">%s</xliff:g> категории известувања од апликацијава</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> и уште <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> и уште <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Веќе нема да ги гледате овие известувања"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"Дали да продолжат да се прикажуваат известувањава?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"Запри ги известувањата"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"Продолжи да ги прикажуваш"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"Дали да продолжат да се прикажуваат известувања од апликацијава?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"Известувањава не може да се исклучат"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Контролите за известувањата за <xliff:g id="APP_NAME">%1$s</xliff:g> се отворија"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Контролите за известувањата за <xliff:g id="APP_NAME">%1$s</xliff:g> се затворија"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Дозволете известувања од овој канал"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"Сите категории"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Повеќе поставки"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"Приспособи: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"Приспособете"</string>
     <string name="notification_done" msgid="5279426047273930175">"Готово"</string>
+    <string name="inline_undo" msgid="558916737624706010">"Врати"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"контроли за известувањето"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"опции за одложување на известувањето"</string>
@@ -731,8 +728,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Проширете"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Минимизирај"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Затвори"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"Поставки"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Повлечете надолу за да отфрлите"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Мени"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> е во слика во слика"</string>

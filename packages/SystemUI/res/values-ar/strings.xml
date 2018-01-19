@@ -37,7 +37,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"مستمر"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"الإشعارات"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"البطارية منخفضة"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"طاقة البطارية منخفضة، لذا يُرجى تفعيل الوضع \"توفير شحن البطارية\"."</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"متبقي <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"طاقة البطارية المتبقية <xliff:g id="PERCENTAGE">%s</xliff:g> ويتبقى على نفادها <xliff:g id="TIME">%s</xliff:g> تقريبًا بناءً على استخدامك."</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"طاقة البطارية المتبقية <xliff:g id="PERCENTAGE">%s</xliff:g> ويتبقى على نفادها <xliff:g id="TIME">%s</xliff:g> تقريبًا."</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"يتبقى <xliff:g id="PERCENTAGE">%s</xliff:g>. تم تفعيل ميزة توفير شحن البطارية."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"‏شحن USB غير معتمد.\nاستخدم الشاحن الموفر فقط."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"‏لا يمكن إجراء الشحن عبر USB."</string>
@@ -71,14 +74,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"‏لا يمكن للمستخدم الذي يسجّل دخوله حاليًا إلى هذا الجهاز تشغيل تصحيح أخطاء USB. لاستخدام هذه الميزة، يمكنك التبديل إلى المستخدم الأساسي."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"تكبير/تصغير لملء الشاشة"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"توسيع بملء الشاشة"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"لقطة شاشة"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"جارٍ حفظ لقطة الشاشة..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"جارٍ حفظ لقطة الشاشة..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"يتم حفظ لقطة."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"تم التقاط لقطة الشاشة"</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"انقر لعرض لقطة الشاشة"</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"تعذر التقاط لقطة الشاشة."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"حدثت مشكلة أثناء حفظ لقطة الشاشة."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"يتعذر حفظ لقطة الشاشة نظرًا لأن مساحة التخزين المتاحة محدودة."</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"جارٍ حفظ لقطة الشاشة."</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"تم حفظ لقطة الشاشة."</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"انقر لعرض لقطة الشاشة."</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"تعذَّر الحصول على لقطة شاشة"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"حدثت مشكلة أثناء حفظ لقطة الشاشة."</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"يتعذر حفظ لقطة الشاشة لأن مساحة التخزين المتاحة محدودة."</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"يحظر التطبيق أو تحظر مؤسستك التقاط لقطات شاشة"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"‏خيارات نقل الملفات عبر USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"‏تحميل كمشغل وسائط (MTP)"</string>
@@ -565,34 +569,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"إيقاف"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"باستخدام عناصر التحكم في إشعار التشغيل، يمكنك تعيين مستوى الأهمية من 0 إلى 5 لإشعارات التطبيق. \n\n"<b>"المستوى 5"</b>" \n- العرض أعلى قائمة الإشعارات \n- يسمح بمقاطعة ملء الشاشة \n- الظهور الخاطف دائمًا \n\n"<b>"المستوى 4"</b>" \n- منع مقاطعة ملء الشاشة \n- الظهور الخاطف دائمًا \n\n"<b>"المستوى 3"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n\n"<b>"المستوى 2"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n- عدم إصدار أصوات واهتزاز \n\n"<b>"المستوى 1"</b>" \n- منع مقاطعة ملء الشاشة \n- عدم الظهور الخاطف أبدًا \n- عدم إصدار أصوات أو اهتزاز أبدًا \n- الإخفاء من شاشة التأمين وشريط الحالة \n- العرض أسفل قائمة الإشعارات \n\n"<b>"المستوى 0"</b>" \n- حظر جميع الإشعارات من التطبيق"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"الإشعارات"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"لن تتلقى هذه الإشعارات بعد الآن."</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> فئة إشعار"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"لا يحتوي هذا التطبيق على فئات إشعار"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"لا يمكن إيقاف الإشعارات من هذا التطبيق"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="zero">1 من إجمالي <xliff:g id="NUMBER_1">%s</xliff:g> فئة إشعار من هذا التطبيق</item>
-      <item quantity="two">1 من إجمالي فئتي إشعار (<xliff:g id="NUMBER_1">%s</xliff:g>) من هذا التطبيق</item>
-      <item quantity="few">1 من إجمالي <xliff:g id="NUMBER_1">%s</xliff:g> فئات إشعار من هذا التطبيق</item>
-      <item quantity="many">1 من إجمالي <xliff:g id="NUMBER_1">%s</xliff:g> فئة إشعار من هذا التطبيق</item>
-      <item quantity="other">1 من إجمالي <xliff:g id="NUMBER_1">%s</xliff:g> فئة إشعار من هذا التطبيق</item>
-      <item quantity="one">1 من إجمالي <xliff:g id="NUMBER_0">%s</xliff:g> فئة إشعار من هذا التطبيق</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>، <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="zero"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g> و<xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> و<xliff:g id="NUMBER_5">%3$d</xliff:g> أيضًا</item>
-      <item quantity="two"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g> و<xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> و<xliff:g id="NUMBER_5">%3$d</xliff:g> أيضًا</item>
-      <item quantity="few"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g> و<xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> و<xliff:g id="NUMBER_5">%3$d</xliff:g> أيضًا</item>
-      <item quantity="many"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g> و<xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> و<xliff:g id="NUMBER_5">%3$d</xliff:g> أيضًا</item>
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g> و<xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> و<xliff:g id="NUMBER_5">%3$d</xliff:g> أيضًا</item>
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g> و<xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> و<xliff:g id="NUMBER_2">%3$d</xliff:g> أيضًا</item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"لن تتلقى هذه الإشعارات بعد الآن."</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"هل تريد الاستمرار في تلقي هذه الإشعارات؟"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"إيقاف الإشعارات"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"الاستمرار في تلقّي الإشعارات"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"هل تريد الاستمرار في تلقي إشعارات من هذا التطبيق؟"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"يتعذَّر إيقاف هذه الإشعارات."</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"تم فتح عناصر التحكم في الإشعارات لتطبيق <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"تم إغلاق عناصر التحكم في الإشعارات لتطبيق <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"السماح بالإشعارات من هذه القناة"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"كل الفئات"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"المزيد من الإعدادات"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"تخصيص: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"تخصيص"</string>
     <string name="notification_done" msgid="5279426047273930175">"تم"</string>
+    <string name="inline_undo" msgid="558916737624706010">"تراجع"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"عناصر التحكم في الإشعارات"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"خيارات تأجيل الإشعارات"</string>
@@ -755,8 +744,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"توسيع"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"تصغير"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"إغلاق"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"الإعدادات"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"اسحب لأسفل للإلغاء"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"القائمة"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> يظهر في صورة داخل صورة"</string>

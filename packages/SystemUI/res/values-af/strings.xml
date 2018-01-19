@@ -33,7 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Voortdurend"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Kennisgewings"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Battery is amper pap"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"Battery is amper pap. Skakel Batterybespaarder aan"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> oor"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> oor; ongeveer <xliff:g id="TIME">%s</xliff:g> oor op grond van jou gebruik"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> oor; ongeveer <xliff:g id="TIME">%s</xliff:g> oor"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> oor. Batterybespaarder is aan."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB-laaiery nie ondersteun nie.\nGebruik net die laaier wat verskaf is."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Laai met USB word nie gesteun nie."</string>
@@ -67,14 +70,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Die gebruiker wat tans by hierdie toestel aangemeld is, kan nie USB-ontfouting aanskakel nie. Skakel na die primêre gebruiker toe oor om hierdie kenmerk te gebruik."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Zoem om skerm te vul"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Strek om skerm te vul"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Skermkiekie"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Stoor tans skermkiekie..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Stoor tans skermkiekie..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"Skermkiekie word tans gestoor."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Skermkiekie geneem."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Tik om jou skermkiekie te sien."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Kon nie skermkiekie neem nie."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Kon nie skermkiekie stoor nie."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Kan weens beperkte bergingspasie nie skermkiekie stoor nie."</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"Skermkiekie word tans gestoor"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"Skermkiekie is gestoor"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"Tik om jou skermkiekie te bekyk"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"Kon nie skermkiekie neem nie"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"Kon nie skermkiekie stoor nie"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Kan weens beperkte bergingspasie nie skermkiekie stoor nie"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Die program of jou organisasie laat nie toe dat skermkiekies geneem word nie"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB-lêeroordrag-opsies"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Heg as \'n mediaspeler (MTP)"</string>
@@ -557,26 +561,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Af"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Met kragkennisgewingkontroles kan jy \'n belangrikheidvlak van 0 tot 5 vir \'n program se kennisgewings stel. \n\n"<b>"Vlak 5"</b>" \n- Wys aan die bokant van die kennisgewinglys \n- Laat volskermonderbreking toe \n- Wys altyd opspringkennisgewings \n\n"<b>"Vlak 4"</b>" \n- Verhoed volskermonderbreking \n- Wys altyd opspringkennisgewings \n\n"<b>"Vlak 3"</b>" \n- Verhoed volskermonderbreking \n- Verhoed opspringkennisgewings \n\n"<b>"Vlak 2"</b>" \n- Verhoed volskermonderbreking \n- Verhoed opspringkennisgewings \n- Moet nooit \'n klank maak of vibreer nie \n\n"<b>"Vlak 1"</b>" \n- Verhoed volskermonderbreking \n- Verhoed opspringkennisgewings \n- Moet nooit \'n klank maak of vibreer nie \n- Versteek van sluitskerm en statusbalk \n- Wys aan die onderkant van die kennisgewinglys \n\n"<b>"Vlak 0"</b>" \n- Blokkeer alle kennisgewings van die program af"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Kennisgewings"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"Jy sal nie meer hierdie kennisgewings kry nie"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> kennisgewingkategorieë"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"Hierdie program het nie kennisgewingkategorieë nie"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Kennisgewings van hierdie program af kan nie afgeskakel word nie"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">1 uit <xliff:g id="NUMBER_1">%s</xliff:g> kennisgewingkategorieë van hierdie program</item>
-      <item quantity="one">1 uit <xliff:g id="NUMBER_0">%s</xliff:g> kennisgewingkategorie van hierdie program</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> en <xliff:g id="NUMBER_5">%3$d</xliff:g> ander kanale</item>
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> en <xliff:g id="NUMBER_2">%3$d</xliff:g> ander kanaal</item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Jy sal nie meer hierdie kennisgewings sien nie"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"Hou aan om hierdie kennisgewings te wys?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"Stop kennisgewings"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"Hou aan wys"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"Hou aan om kennisgewings van hierdie program af te wys?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"Hierdie kennisgewings kan nie afgeskakel word nie"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Kennisgewingkontroles vir <xliff:g id="APP_NAME">%1$s</xliff:g> is oopgemaak"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Kennisgewingkontroles vir <xliff:g id="APP_NAME">%1$s</xliff:g> is toegemaak"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Laat kennisgewings van hierdie kanaal af toe"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"Alle kategorieë"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Meer instellings"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"Pasmaak: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"Pasmaak"</string>
     <string name="notification_done" msgid="5279426047273930175">"Klaar"</string>
+    <string name="inline_undo" msgid="558916737624706010">"Ontdoen"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"kennisgewingkontroles"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"kennisgewing-sluimeropsies"</string>
@@ -731,8 +728,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Vou uit"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimeer"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Maak toe"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"Instellings"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Sleep af om toe te maak"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Kieslys"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> is in beeld-in-beeld"</string>

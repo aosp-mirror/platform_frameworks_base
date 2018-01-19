@@ -33,7 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Учурдагы"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Эскертмелер"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Батареянын кубаты аз"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"Батарея аз калды. Батареяны үнөмдөгүчтү күйгүзүңүз"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> калды"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> калды, колдонушуңузга караганда болжол менен дагы <xliff:g id="TIME">%s</xliff:g> бар"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> калды, болжол менен дагы <xliff:g id="TIME">%s</xliff:g> бар"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> калды. Батареяны үнөмдөгүч режими күйүк."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB менен кубаттоо колдоого алынбайт.\nБерилген заряддагычты гана колдонуңуз."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB аркылуу кубаттоого болбойт."</string>
@@ -67,14 +70,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Учурда бул түзмөккө каттоо эсеби менен кирген колдонуучу USB мүчүлүштүктөрүн оңдоо функциясын күйгүзө албай жатат. Бул функцияны колдонуу үчүн негизги колдонуучунун каттоо эсебине которулуңуз."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Экрнд тлтр ү. чен өлч өзг"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Экранды толтуруу ү-н чоюу"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Скриншот"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Скриншот сакталууда…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Скриншот сакталууда..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"Скриншот сакталууда."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Скриншот тартылды."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Скриншотуңузду көрүү үчүн таптап коюңуз."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Скриншот кылынбай жатат."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Скриншотту сактоо учурунда көйгөй пайда болду."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Сактагычта бош орун аз болгондуктан скриншот сакталбай жатат."</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"Скриншот сакталууда"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"Скриншот сакталды"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"Скриншотуңузду көрүү үчүн таптап коюңуз"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"Скриншот тартылбай жатат"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"Скриншотту сактоо учурунда көйгөй пайда болду"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Сактагычта бош орун аз болгондуктан скриншот сакталбай жатат"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Скриншот тартууга колдонмо же ишканаңыз тыюу салган."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB менен файл өткөрүү мүмкүнчүлүктөрү"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Медиа ойноткуч катары кошуу (MTP)"</string>
@@ -557,26 +561,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Өчүк"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Бул функциянын жардамы менен ар бир колдонмо үчүн эскертменин маанилүүлүк деңгээлин 0дон 5ке чейин койсоңуз болот. \n\n"<b>"5-деңгээл"</b>" \n- Эскертмелер тизмесинин башында көрсөтүлсүн \n- Эскертмелер толук экранда көрсөтүлсүн \n- Калкып чыгуучу эскертмелерге уруксат берилсин \n\n"<b>"4-деңгээл"</b>" \n- Эскертмелер толук экранда көрсөтүлбөсүн \n- Калкып чыгуучу эскертмелерге уруксат берилсин \n\n"<b>"3-деңгээл"</b>" \n- Эскертмелер толук экранда көрсөтүлбөсүн \n- Калкып чыгуучу эскертмелерге тыюу салынсын \n\n"<b>"2-деңгээл"</b>" \n- Эскертмелер толук экранда көрсөтүлбөсүн \n- Калкып чыгуучу эскертмелерге тыюу салынсын \n- Эч качан добуш чыгып же дирилдебесин \n\n"<b>"1-деңгээл"</b>" \n- Эскертмелер толук экранда көрсөтүлбөсүн \n- Калкып чыгуучу эскертмелерге тыюу салынсын \n- Эч качан добуш чыгып же дирилдебесин \n- Кулпуланган экрандан жана абал тилкесинен жашырылсын \n- Эскертмелер тизмесинин аягында көрсөтүлсүн \n\n"<b>"0-деңгээл"</b>" \n- Колдонмодон алынган бардык эскертмелер бөгөттөлсүн"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Эскертмелер"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"Мындан ары бул эскертмелер сизге жөнөтүлбөйт"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"Эскертмелердин <xliff:g id="NUMBER">%d</xliff:g> категориясы"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"Бул колдонмонун эскертме категориялары жок"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Бул колдонмонун эскертмелерин өчүрүүгө болбойт"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">Бул колдонмодогу <xliff:g id="NUMBER_1">%s</xliff:g> эскертме категориянын ичинен 1 категория</item>
-      <item quantity="one">Бул колдонмодогу <xliff:g id="NUMBER_0">%s</xliff:g> эскертме категориянын ичинен 1 категория</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> жана дагы <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> жана дагы <xliff:g id="NUMBER_2">%3$d</xliff:g></item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Мындан ары бул эскертмелер сизге көрсөтүлбөйт"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"Бул эскертмелер көрсөтүлө берсинби?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"Эскертмелерди токтотуу"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"Көрсөтүлө берсин"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"Бул колдонмонун эскертмелери көрсөтүлө берсинби?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"Бул эскертмелерди өчүрүүгө болбойт"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу үчүн эскертмени көзөмөлдөө функциялары ачылды"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу үчүн эскертмени көзөмөлдөө функциялары жабылды"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Бул каналдан келген эскертмелерге уруксат берүү"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"Бардык категориялар"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Дагы жөндөөлөр"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"Ыңгайлаштыруу: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"Ыңгайлаштыруу"</string>
     <string name="notification_done" msgid="5279426047273930175">"Бүттү"</string>
+    <string name="inline_undo" msgid="558916737624706010">"Кайтаруу"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"эскертмелерди башкаруу каражаттары"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"эскертмени тындыруу опциялары"</string>
@@ -731,8 +728,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Жайып көрсөтүү"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Кичирейтүү"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Жабуу"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"Жөндөөлөр"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Четке кагуу үчүн төмөн сүйрөңүз"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Меню"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> – сүрөт ичиндеги сүрөт"</string>
