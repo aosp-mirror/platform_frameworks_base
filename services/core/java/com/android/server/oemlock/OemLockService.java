@@ -31,10 +31,10 @@ import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.service.oemlock.IOemLockService;
-import android.service.persistentdata.PersistentDataBlockManager;
 import android.util.Slog;
 
 import com.android.server.LocalServices;
+import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.SystemService;
 import com.android.server.pm.UserRestrictionsUtils;
 
@@ -217,13 +217,12 @@ public class OemLockService extends SystemService {
      * is used to erase FRP information on a unlockable device.
      */
     private void setPersistentDataBlockOemUnlockAllowedBit(boolean allowed) {
-        final PersistentDataBlockManager pdbm = (PersistentDataBlockManager)
-                mContext.getSystemService(Context.PERSISTENT_DATA_BLOCK_SERVICE);
+        final PersistentDataBlockManagerInternal pdbmi
+                = LocalServices.getService(PersistentDataBlockManagerInternal.class);
         // if mOemLock is PersistentDataBlockLock, then the bit should have already been set
-        if (pdbm != null && !(mOemLock instanceof PersistentDataBlockLock)
-                && pdbm.getOemUnlockEnabled() != allowed) {
+        if (pdbmi != null && !(mOemLock instanceof PersistentDataBlockLock)) {
             Slog.i(TAG, "Update OEM Unlock bit in pst partition to " + allowed);
-            pdbm.setOemUnlockEnabled(allowed);
+            pdbmi.forceOemUnlockEnabled(allowed);
         }
     }
 
