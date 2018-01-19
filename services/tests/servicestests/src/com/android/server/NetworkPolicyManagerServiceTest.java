@@ -18,6 +18,7 @@ package com.android.server;
 
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_WIFI;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
@@ -34,6 +35,7 @@ import static android.telephony.CarrierConfigManager.DATA_CYCLE_USE_PLATFORM_DEF
 import static android.telephony.CarrierConfigManager.KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG;
 import static android.telephony.CarrierConfigManager.KEY_DATA_WARNING_THRESHOLD_BYTES_LONG;
 import static android.telephony.CarrierConfigManager.KEY_MONTHLY_DATA_CYCLE_DAY_INT;
+import static android.telephony.SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static android.text.format.Time.TIMEZONE_UTC;
 
@@ -62,6 +64,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -86,13 +89,16 @@ import android.net.INetworkManagementEventObserver;
 import android.net.INetworkPolicyListener;
 import android.net.INetworkStatsService;
 import android.net.LinkProperties;
+import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkPolicy;
 import android.net.NetworkState;
 import android.net.NetworkStats;
+import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
+import android.net.StringNetworkSpecifier;
 import android.os.Binder;
 import android.os.INetworkManagementService;
 import android.os.PersistableBundle;
@@ -105,9 +111,11 @@ import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
+import android.telephony.SubscriptionPlan;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.text.format.Time;
+import android.util.DataUnit;
 import android.util.Log;
 import android.util.Pair;
 import android.util.RecurrenceRule;
@@ -186,6 +194,7 @@ public class NetworkPolicyManagerServiceTest {
     private static final long TEST_START = 1194220800000L;
     private static final String TEST_IFACE = "test0";
     private static final String TEST_SSID = "AndroidAP";
+    private static final String TEST_IMSI = "310210";
 
     private static NetworkTemplate sTemplateWifi = NetworkTemplate.buildTemplateWifi(TEST_SSID);
 
@@ -308,6 +317,11 @@ public class NetworkPolicyManagerServiceTest {
                     default:
                         return super.getSystemService(name);
                 }
+            }
+
+            @Override
+            public void enforceCallingOrSelfPermission(String permission, String message) {
+                // Assume that we're AID_SYSTEM
             }
         };
 
@@ -1061,6 +1075,67 @@ public class NetworkPolicyManagerServiceTest {
             verifyRemoveInterfaceQuota(TEST_IFACE);
             verifySetInterfaceQuota(TEST_IFACE, Long.MAX_VALUE);
             verifyPolicyDataEnable(TYPE_WIFI, true);
+        }
+    }
+
+    @Test
+    public void testRapidNotification() throws Exception {
+        // Create a place to store fake usage
+        final NetworkStatsHistory history = new NetworkStatsHistory(TimeUnit.HOURS.toMillis(1));
+        when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
+                .thenAnswer(new Answer<Long>() {
+                    @Override
+                    public Long answer(InvocationOnMock invocation) throws Throwable {
+                        final NetworkStatsHistory.Entry entry = history.getValues(
+                                invocation.getArgument(1), invocation.getArgument(2), null);
+                        return entry.rxBytes + entry.txBytes;
+                    }
+                });
+
+        // Define simple data plan which gives us effectively 60MB/day
+        final SubscriptionPlan plan = SubscriptionPlan.Builder
+                .createRecurringMonthly(ZonedDateTime.parse("2015-11-01T00:00:00.00Z"))
+                .setDataLimit(DataUnit.MEGABYTES.toBytes(1800), LIMIT_BEHAVIOR_THROTTLED)
+                .build();
+        mService.setSubscriptionPlans(42, new SubscriptionPlan[] { plan },
+                mServiceContext.getOpPackageName());
+
+        // And get that active network in place
+        when(mConnManager.getAllNetworkState()).thenReturn(new NetworkState[] {
+                new NetworkState(null, new LinkProperties(),
+                        new NetworkCapabilities().addTransportType(TRANSPORT_CELLULAR)
+                                .setNetworkSpecifier(new StringNetworkSpecifier("42")),
+                        new Network(42), TEST_IMSI, null)
+        });
+        mService.updateNetworks();
+
+        // We're 20% through the month (6 days)
+        final long start = parseTime("2015-11-01T00:00Z");
+        final long end = parseTime("2015-11-07T00:00Z");
+        setCurrentTimeMillis(end);
+
+        // Using 20% of data in 20% is normal
+        {
+            history.removeBucketsBefore(Long.MAX_VALUE);
+            history.recordData(start, end,
+                    new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(360), 0L, 0L, 0L, 0));
+
+            reset(mNotifManager);
+            mService.updateNotifications();
+            verify(mNotifManager, never()).enqueueNotificationWithTag(any(), any(), any(),
+                    anyInt(), any(), anyInt());
+        }
+
+        // Using 80% data in 20% time is alarming
+        {
+            history.removeBucketsBefore(Long.MAX_VALUE);
+            history.recordData(start, end,
+                    new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1440), 0L, 0L, 0L, 0));
+
+            reset(mNotifManager);
+            mService.updateNotifications();
+            verify(mNotifManager, atLeastOnce()).enqueueNotificationWithTag(any(), any(), any(),
+                    anyInt(), any(), anyInt());
         }
     }
 
