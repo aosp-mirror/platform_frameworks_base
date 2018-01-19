@@ -196,7 +196,6 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Mạng"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Chứng nhận hiển thị không dây"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Bật ghi nhật ký chi tiết Wi‑Fi"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Chuyển vùng Wi‑Fi tích cực sang mạng DĐ"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Luôn cho phép quét chuyển vùng Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Dữ liệu di động luôn hiện hoạt"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Tăng tốc phần cứng cho chia sẻ kết nối"</string>
@@ -223,7 +222,6 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Nhập tên máy chủ của nhà cung cấp DNS"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Hiển thị tùy chọn chứng nhận hiển thị không dây"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Tăng mức ghi nhật ký Wi‑Fi, hiển thị mỗi SSID RSSI trong bộ chọn Wi‑Fi"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Khi được bật, Wi‑Fi sẽ tích cực hơn trong việc chuyển vùng kết nối dữ liệu sang mạng di động khi tín hiệu Wi‑Fi yếu"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Cho phép/Không cho phép quét chuyển vùng Wi‑Fi dựa trên lưu lượng truy cập dữ liệu có tại giao diện"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Kích cỡ tải trình ghi"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Chọn kích thước Trình ghi/lần tải nhật ký"</string>

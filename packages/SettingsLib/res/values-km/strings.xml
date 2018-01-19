@@ -196,7 +196,6 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"ការភ្ជាប់បណ្ដាញ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"បង្ហាញ​ការ​កំណត់​រចនាសម្ព័ន្ធ​ឥត​ខ្សែ"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"បើក​កំណត់ហេតុ​រៀបរាប់​វ៉ាយហ្វាយ"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"ប្តូរទៅប្រើបណ្តាញចល័តពេល Wi‑Fi មានរលកសញ្ញាខ្លាំងពេក"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"តែងតែ​អនុញ្ញាត​​​ការវិភាគ​រ៉ូម​វ៉ាយហ្វាយ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ទិន្នន័យទូរសព្ទចល័តដំណើរការជានិច្ច"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ការ​បង្កើនល្បឿន​ផ្នែករឹងសម្រាប់​ការភ្ជាប់"</string>
@@ -223,7 +222,6 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"បញ្ចូលឈ្មោះម៉ាស៊ីនរបស់ក្រុមហ៊ុនផ្ដល់សេវា DNS"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"បង្ហាញ​ជម្រើស​សម្រាប់​វិញ្ញាបនបត្រ​បង្ហាញ​ឥត​ខ្សែ"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"បង្កើនកម្រិតកំណត់ហេតុវ៉ាយហ្វាយបង្ហាញក្នុង SSID RSSI ក្នុងកម្មវិធីជ្រើស​វ៉ាយហ្វាយ"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"នៅពេលដែលបើក នោះ Wi‑Fi នឹងផ្តល់ការតភ្ជាប់ទិន្នន័យយ៉ាងគំហុកទៅបណ្តាញទូរសព្ទចល័ត នៅពេលរលកសញ្ញា Wi‑Fi ចុះខ្សោយ។"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"អនុញ្ញាត/មិន​អនុញ្ញាត​ការ​វិភាគ​រ៉ូម​​វ៉ាយហ្វាយ​ផ្អែក​លើ​​​ចំនួន​ការ​បង្ហាញ​ចរាចរណ៍​ទិន្នន័យ​​នៅ​ចំណុច​ប្រទាក់"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ទំហំ buffer របស់ Logger"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ជ្រើស​ទំហំ Logger per log buffer"</string>

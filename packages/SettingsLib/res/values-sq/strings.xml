@@ -196,7 +196,6 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Rrjetet"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certifikimi i ekranit valor"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Aktivizo hyrjen Wi-Fi Verbose"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Dorëzimi agresiv i Wi‑Fi te rrjeti celular"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Lejo gjithmonë skanimet për Wi-Fi edhe kur je në lëvizje"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Të dhënat celulare gjithmonë aktive"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Përshpejtimi i harduerit për ndarjen"</string>
@@ -223,7 +222,6 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Fut emrin e pritësit të ofruesit të DNS-së"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Shfaq opsionet për certifikimin e ekranit valor"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Rrit nivelin regjistrues të Wi‑Fi duke shfaqur SSID RSSI-në te Zgjedhësi i Wi‑Fi"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Kur ky funksion aktivizohet, Wi‑Fi bëhet më agresiv në kalimin e lidhjes së të dhënave te rrjeti celular, në rastet kur sinjali Wi‑Fi është i dobët"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Lejo/Ndalo skanimet për Wi‑Fi në roaming, bazuar në sasinë e trafikut të të dhënave të pranishme në ndërfaqe"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Madhësitë e regjistruesit"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Përzgjidh madhësitë e regjistruesit"</string>

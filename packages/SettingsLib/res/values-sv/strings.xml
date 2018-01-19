@@ -196,7 +196,6 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Nätverk"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certifiering för Wi-Fi-skärmdelning"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Aktivera utförlig loggning för Wi-Fi"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Aggressiv överlämning fr. Wi-Fi t. mobil"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Tillåt alltid sökning efter Wi-Fi-roaming"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobildata alltid aktiverad"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Maskinvaruacceleration för internetdelning"</string>
@@ -223,7 +222,6 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Ange värdnamn för DNS-leverantör"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Visa certifieringsalternativ för Wi-Fi-skärmdelning"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Öka loggningsnivån för Wi-Fi, visa per SSID RSSI i Wi‑Fi Picker"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"När funktionen har aktiverats kommer dataanslutningen lämnas över från Wi-Fi till mobilen på ett aggressivare sätt när Wi-Fi-signalen är svag"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Tillåt/tillåt inte sökning efter Wi-Fi-roaming utifrån mängden datatrafik i gränssnittet"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Buffertstorlekar för logg"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Välj loggstorlekar per loggbuffert"</string>

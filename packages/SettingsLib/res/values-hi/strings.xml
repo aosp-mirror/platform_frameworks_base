@@ -196,7 +196,6 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"नेटवर्किंग"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"वायरलेस दिखाई देने के लिए प्रमाणन"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"वाई-फ़ाई वर्बोस लॉगिंग चालू करें"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"वाई-फ़ाई से मोबाइल पर ज़्यादा तेज़ी से हैंडओवर"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"हमेशा वाई-फ़ाई रोम स्कैन करने दें"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"मोबाइल डेटा हमेशा सक्रिय"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"हार्डवेयर से तेज़ी लाने के लिए टेदर करें"</string>
@@ -223,7 +222,6 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS सेवा देने वाले का होस्टनाम डालें"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"वायरलेस दिखाई देने के लिए प्रमाणन विकल्प दिखाएं"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"वाई-फ़ाई प्रवेश स्तर बढ़ाएं, वाई-फ़ाई पिकर में प्रति SSID RSSI दिखाएं"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"इसके सक्षम होने पर, जब वाई-फ़ाई संकेत कमज़ोर हों तो वाई-फ़ाई, डेटा कनेक्शन को मोबाइल पर ज़्यादा तेज़ी से भेजेगा"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"इंटरफ़ेस पर वर्तमान में मौजूद डेटा ट्रैफ़िक के आधार पर वाई-फ़ाई रोम स्कैन करने देता/नहीं देता है"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"लॉगर बफ़र आकार"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"प्रति लॉग बफ़र लॉगर आकार चुनें"</string>

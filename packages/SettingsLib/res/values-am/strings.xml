@@ -196,7 +196,6 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"አውታረ መረብ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"የገመድ አልባ ማሳያ እውቅና ማረጋገጫ"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"የWi‑Fi ተጨማሪ ቃላት ምዝግብ ማስታወሻ መያዝ"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"አስገዳጅ ከWi‑Fi ወደ ሞባይል ማቀበል"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ሁልጊዜ የWi‑Fi ማንቀሳቀስ ቅኝቶችን ይፍቀዱ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"የተንቀሳቃሽ ስልክ ውሂብ ሁልጊዜ ገቢር ነው"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"የሃርድዌር ማቀላጠፊያን በማስተሳሰር ላይ"</string>
@@ -223,7 +222,6 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"የዲኤንኤስ አቅራቢ አስተናጋጅ ስም ያስገቡ"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"የገመድ አልባ ማሳያ እውቅና ማረጋገጫ አማራጮችን አሳይ"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"የWi‑Fi ምዝግብ ማስታወሻ አያያዝ ደረጃ ጨምር፣ በWi‑Fi መምረጫ ውስጥ በአንድ SSID RSSI አሳይ"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"ሲነቃ የWi‑Fi ምልክት ዝቅተኛ ሲሆን Wi‑Fi የውሂብ ግንኙነት ለሞባይል ማስረከብ ላይ ይበልጥ አስገዳጅ ይሆናል"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"በበይነገጹ ላይ ባለው የውሂብ ትራፊክ መጠን ላይ ተመስርተው የWi‑Fi ማንቀሳቀስ ቅኝቶችን ይፍቀዱ/ይከልክሉ"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"የምዝግብ ማስታወሻ ያዥ መጠኖች"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"በአንድ ምዝግብ ማስታወሻ ቋጥ የሚኖረው የምዝግብ ማስታወሻ ያዥ መጠኖች ይምረጡ"</string>

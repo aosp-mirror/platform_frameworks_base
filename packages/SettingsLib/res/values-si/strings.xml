@@ -196,7 +196,6 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"ජාලකරණය"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"නොරැහැන් සංදර්ශක සහතිකය"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"විස්තරාත්මක Wi‑Fi ලොග් කිරීම සබල කරන්න"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"ආක්‍රමණික Wi‑Fi සිට ජංගම බාර දීම"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi රෝම් පරිලෝකන වෙතට සැමවිට අවසර දෙන්න"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ජංගම දත්ත සැමවිට ක්‍රියාකාරීය"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ටෙදරින් දෘඪාංග ත්වරණය"</string>
@@ -223,7 +222,6 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS සැපයුම්කරුගේ සත්කාරක නම ඇතුළු කරන්න"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"නොරැහැන් සංදර්ශක සහතිකය සඳහා විකල්ප පෙන්වන්න"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi ලොග් මට්ටම වැඩි කරන්න, Wi‑Fi තෝරනයෙහි SSID RSSI අනුව පෙන්වන්න"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"සබල විට Wi‑Fi සිග්නලය අඩු විට Wi‑Fi දත්ත සම්බන්ධතාවය ජංගම වෙත භාර දීමට වඩා ආක්‍රමණික වේ"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"අතුරු මුහුණතෙහි ඇති දත්ත තදබදය අනුව Wi‑Fi රෝම් පරිලෝකන වෙත ඉඩ දෙන්න/නොදෙන්න"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ලෝගයේ අන්තරාවක ප්‍රමාණය"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ලොග අන්තරාවකට ලෝගයේ ප්‍රමාණය තෝරන්න"</string>

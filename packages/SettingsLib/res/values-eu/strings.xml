@@ -196,7 +196,6 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Sareak"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Hari gabeko bistaratze-egiaztatzea"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Gaitu Wi-Fi sareetan saioa hasteko modu xehatua"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Behartu Wi-Fi konexiotik datuenera aldatzera"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Onartu beti ibiltaritzan Wi-Fi sareak bilatzea"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Datu mugikorrak beti aktibo"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Konexioa partekatzeko hardwarearen azelerazioa"</string>
@@ -223,7 +222,6 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Idatzi DNS hornitzailearen ostalari-izena"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Erakutsi hari gabeko bistaratze-egiaztapenaren aukerak"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Erakutsi datu gehiago Wi-Fi sareetan saioa hasterakoan. Erakutsi sarearen identifikatzailea eta seinalearen indarra Wi‑Fi sareen hautagailuan."</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Aukera hori gaituz gero, gailua nahitaez aldatuko da datu mugikorren konexiora Wi-Fi seinalea ahultzen dela nabaritutakoan"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Onartu edo debekatu ibiltaritzan Wi-Fi sareak bilatzea, interfazeko datu-trafikoaren arabera"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Erregistroen buffer-tamainak"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Hautatu erregistroen buffer-tamainak"</string>

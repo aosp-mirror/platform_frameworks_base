@@ -196,7 +196,6 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Nettverk"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Trådløs skjermsertifisering"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Aktiver detaljert Wi-Fi-loggføring"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Aggressiv overføring fra Wi-Fi til mobil"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Tillat alltid skanning for Wi-Fi-roaming"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobildata er alltid aktiv"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Maskinvareakselerasjon for internettdeling"</string>
@@ -223,7 +222,6 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Skriv inn vertsnavnet til DNS-leverandøren"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Vis alternativer for sertifisering av trådløs skjerm"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Øk Wi-Fi-loggenivå – vis per SSID RSSI i Wi-Fi-velgeren"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Hvis dette slås på, overfører Wi-Fi-nettverket datatilkoblingen til mobil mer aggressivt når Wi-Fi-signalet er svakt"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Tillat / ikke tillat skanning for Wi-Fi-roaming basert på mengden datatrafikk til stede i grensesnittet"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Bufferstørrelser for logg"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Velg loggstørrelse per loggbuffer"</string>
