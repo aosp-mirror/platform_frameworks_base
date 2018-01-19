@@ -330,7 +330,7 @@ public class RecoverableKeyStoreManagerTest {
                     TEST_VAULT_CHALLENGE,
                     ImmutableList.of());
             fail("should have thrown");
-        } catch (ServiceSpecificException e) {
+        } catch (UnsupportedOperationException e) {
             assertThat(e.getMessage()).startsWith(
                     "Only a single KeychainProtectionParams is supported");
         }

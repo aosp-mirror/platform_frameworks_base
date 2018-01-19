@@ -228,6 +228,7 @@ public class KeySyncTask implements Runnable {
                 counterId = generateAndStoreCounterId(recoveryAgentUid);
             }
         }
+
         byte[] vaultParams = KeySyncUtils.packVaultParams(
                 publicKey,
                 counterId,
