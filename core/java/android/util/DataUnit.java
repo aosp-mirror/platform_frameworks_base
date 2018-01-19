@@ -20,12 +20,15 @@ import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Constants for common byte-related units. Note that both SI and IEC units are
- * supported, and you'll need to pick the correct one for your use-case.
+ * A {@code DataUnit} represents data sizes at a given unit of granularity and
+ * provides utility methods to convert across units.
+ * <p>
+ * Note that both SI units (powers of 10) and IEC units (powers of 2) are
+ * supported, and you'll need to pick the correct one for your use-case. For
+ * example, Wikipedia defines a "kilobyte" as an SI unit of 1000 bytes, and a
+ * "kibibyte" as an IEC unit of 1024 bytes.
  * <p>
  * This design is mirrored after {@link TimeUnit} and {@link ChronoUnit}.
- *
- * @hide
  */
 public enum DataUnit {
     KILOBYTES { @Override public long toBytes(long v) { return v * 1_000; } },
