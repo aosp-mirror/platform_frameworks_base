@@ -164,11 +164,11 @@ abstract class ApkVerityBuilder {
         }
 
         private void fillUpLastOutputChunk() {
-            int extra = (int) (BUFFER_SIZE - mOutput.position() % BUFFER_SIZE);
-            if (extra == 0) {
+            int lastBlockSize = (int) (mOutput.position() % BUFFER_SIZE);
+            if (lastBlockSize == 0) {
                 return;
             }
-            mOutput.put(ByteBuffer.allocate(extra));
+            mOutput.put(ByteBuffer.allocate(BUFFER_SIZE - lastBlockSize));
         }
     }
 
