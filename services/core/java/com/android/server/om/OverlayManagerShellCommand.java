@@ -56,6 +56,8 @@ final class OverlayManagerShellCommand extends ShellCommand {
                     return runEnableDisable(true);
                 case "disable":
                     return runEnableDisable(false);
+                case "enable-exclusive":
+                    return runEnableExclusive();
                 case "set-priority":
                     return runSetPriority();
                 default:
@@ -86,6 +88,10 @@ final class OverlayManagerShellCommand extends ShellCommand {
         out.println("    Enable overlay package PACKAGE.");
         out.println("  disable [--user USER_ID] PACKAGE");
         out.println("    Disable overlay package PACKAGE.");
+        out.println("  enable-exclusive [--user USER_ID] [--category] PACKAGE");
+        out.println("    Enable overlay package PACKAGE and disable all other overlays for");
+        out.println("    its target package. If the --category option is given, only disables");
+        out.println("    other overlays in the same category.");
         out.println("  set-priority [--user USER_ID] PACKAGE PARENT|lowest|highest");
         out.println("    Change the priority of the overlay PACKAGE to be just higher than");
         out.println("    the priority of PACKAGE_PARENT If PARENT is the special keyword");
@@ -155,6 +161,33 @@ final class OverlayManagerShellCommand extends ShellCommand {
 
         final String packageName = getNextArgRequired();
         return mInterface.setEnabled(packageName, enable, userId) ? 0 : 1;
+    }
+
+    private int runEnableExclusive() throws RemoteException {
+        final PrintWriter err = getErrPrintWriter();
+
+        int userId = UserHandle.USER_SYSTEM;
+        boolean inCategory = false;
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--user":
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+                case "--category":
+                    inCategory = true;
+                    break;
+                default:
+                    err.println("Error: Unknown option: " + opt);
+                    return 1;
+            }
+        }
+        final String overlay = getNextArgRequired();
+        if (inCategory) {
+            return mInterface.setEnabledExclusiveInCategory(overlay, userId) ? 0 : 1;
+        } else {
+            return mInterface.setEnabledExclusive(overlay, true, userId) ? 0 : 1;
+        }
     }
 
     private int runSetPriority() throws RemoteException {

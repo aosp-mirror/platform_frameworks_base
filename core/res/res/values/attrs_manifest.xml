@@ -2558,6 +2558,9 @@
         <!-- Package name of base package whose resources will be overlaid. -->
         <attr name="targetPackage" />
 
+        <!-- Category of the resource overlay. -->
+        <attr name="category" format="string"/>
+
         <!-- Load order of overlay package. -->
         <attr name="priority" />
 

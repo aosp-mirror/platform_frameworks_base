@@ -52,6 +52,16 @@ public final class DisplayCutout {
     private static final String TAG = "DisplayCutout";
     private static final String DP_MARKER = "@dp";
 
+    /**
+     * Category for overlays that allow emulating a display cutout on devices that don't have
+     * one.
+     *
+     * @see android.content.om.IOverlayManager
+     * @hide
+     */
+    public static final String EMULATION_OVERLAY_CATEGORY =
+            "com.android.internal.display_cutout_emulation";
+
     private static final Rect ZERO_RECT = new Rect();
     private static final Region EMPTY_REGION = new Region();
 
