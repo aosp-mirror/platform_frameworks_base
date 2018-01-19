@@ -497,7 +497,9 @@ public class PackageParserTest {
                 new PackageParser.SigningDetails(
                         new Signature[] { new Signature(new byte[16]) },
                         2,
-                        new ArraySet<>());
+                        new ArraySet<>(),
+                        null,
+                        null);
         pkg.mExtras = new Bundle();
         pkg.mRestrictedAccountType = "foo19";
         pkg.mRequiredAccountType = "foo20";

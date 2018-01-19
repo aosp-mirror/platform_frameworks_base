@@ -509,7 +509,7 @@ public class PackageManagerServiceUtils {
     private static boolean matchSignaturesCompat(String packageName,
             PackageSignatures packageSignatures, PackageParser.SigningDetails parsedSignatures) {
         ArraySet<Signature> existingSet = new ArraySet<Signature>();
-        for (Signature sig : packageSignatures.mSignatures) {
+        for (Signature sig : packageSignatures.mSigningDetails.signatures) {
             existingSet.add(sig);
         }
         ArraySet<Signature> scannedCompatSet = new ArraySet<Signature>();
@@ -526,7 +526,7 @@ public class PackageManagerServiceUtils {
         // make sure the expanded scanned set contains all signatures in the existing one
         if (scannedCompatSet.equals(existingSet)) {
             // migrate the old signatures to the new scheme
-            packageSignatures.assignSignatures(parsedSignatures);
+            packageSignatures.mSigningDetails = parsedSignatures;
             return true;
         }
         return false;
@@ -561,8 +561,8 @@ public class PackageManagerServiceUtils {
         try {
             PackageParser.collectCertificates(disabledPkgSetting.pkg,
                     PackageParser.PARSE_IS_SYSTEM_DIR);
-            if (compareSignatures(pkgSetting.signatures.mSignatures,
-                        disabledPkgSetting.signatures.mSignatures)
+            if (compareSignatures(pkgSetting.signatures.mSigningDetails.signatures,
+                        disabledPkgSetting.signatures.mSigningDetails.signatures)
                     != PackageManager.SIGNATURE_MATCH) {
                 logCriticalInfo(Log.ERROR, "Updated system app mismatches cert on /system: " +
                         pkgSetting.name);
@@ -593,9 +593,9 @@ public class PackageManagerServiceUtils {
             throws PackageManagerException {
         final String packageName = pkgSetting.name;
         boolean compatMatch = false;
-        if (pkgSetting.signatures.mSignatures != null) {
+        if (pkgSetting.signatures.mSigningDetails.signatures != null) {
             // Already existing package. Make sure signatures match
-            boolean match = compareSignatures(pkgSetting.signatures.mSignatures,
+            boolean match = compareSignatures(pkgSetting.signatures.mSigningDetails.signatures,
                     parsedSignatures.signatures)
                     == PackageManager.SIGNATURE_MATCH;
             if (!match && compareCompat) {
@@ -605,7 +605,7 @@ public class PackageManagerServiceUtils {
             }
             if (!match && compareRecover) {
                 match = matchSignaturesRecover(
-                        packageName, pkgSetting.signatures.mSignatures,
+                        packageName, pkgSetting.signatures.mSigningDetails.signatures,
                         parsedSignatures.signatures);
             }
 
@@ -620,17 +620,21 @@ public class PackageManagerServiceUtils {
             }
         }
         // Check for shared user signatures
-        if (pkgSetting.sharedUser != null && pkgSetting.sharedUser.signatures.mSignatures != null) {
+        if (pkgSetting.sharedUser != null
+                && pkgSetting.sharedUser.signatures.mSigningDetails.signatures != null) {
             // Already existing package. Make sure signatures match
-            boolean match = compareSignatures(pkgSetting.sharedUser.signatures.mSignatures,
-                    parsedSignatures.signatures) == PackageManager.SIGNATURE_MATCH;
+            boolean match =
+                    compareSignatures(
+                            pkgSetting.sharedUser.signatures.mSigningDetails.signatures,
+                            parsedSignatures.signatures) == PackageManager.SIGNATURE_MATCH;
             if (!match && compareCompat) {
                 match = matchSignaturesCompat(
                         packageName, pkgSetting.sharedUser.signatures, parsedSignatures);
             }
             if (!match && compareRecover) {
                 match = matchSignaturesRecover(packageName,
-                        pkgSetting.sharedUser.signatures.mSignatures, parsedSignatures.signatures);
+                        pkgSetting.sharedUser.signatures.mSigningDetails.signatures,
+                        parsedSignatures.signatures);
                 compatMatch |= match;
             }
             if (!match) {

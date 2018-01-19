@@ -233,7 +233,7 @@ public abstract class PackageSettingBase extends SettingBase {
     }
 
     public Signature[] getSignatures() {
-        return signatures.mSignatures;
+        return signatures.mSigningDetails.signatures;
     }
 
     /**
