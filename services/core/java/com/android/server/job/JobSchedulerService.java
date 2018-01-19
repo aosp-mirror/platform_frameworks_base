@@ -21,6 +21,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
 import android.app.job.IJobScheduler;
@@ -72,8 +73,10 @@ import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.Preconditions;
 import com.android.server.DeviceIdleController;
 import com.android.server.FgThread;
+import com.android.server.ForceAppStandbyTracker;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerServiceDumpProto.ActiveJob;
 import com.android.server.job.JobSchedulerServiceDumpProto.PendingJob;
@@ -101,6 +104,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Responsible for taking jobs representing work to be performed by a client app, and determining
@@ -174,8 +178,10 @@ public final class JobSchedulerService extends com.android.server.SystemService
     final JobSchedulerStub mJobSchedulerStub;
 
     PackageManagerInternal mLocalPM;
+    ActivityManagerInternal mActivityManagerInternal;
     IBatteryStats mBatteryStats;
     DeviceIdleController.LocalService mLocalDeviceIdleController;
+    final ForceAppStandbyTracker mForceAppStandbyTracker;
 
     /**
      * Set to true once we are allowed to run third party apps.
@@ -777,6 +783,22 @@ public final class JobSchedulerService extends com.android.server.SystemService
         mStartedUsers = ArrayUtils.removeInt(mStartedUsers, userHandle);
     }
 
+    /**
+     * Return whether an UID is in the foreground or not.
+     */
+    private boolean isUidInForeground(int uid) {
+        synchronized (mLock) {
+            if (mUidPriorityOverride.get(uid, 0) > 0) {
+                return true;
+            }
+        }
+        // Note UID observer may not be called in time, so we always check with the AM.
+        return mActivityManagerInternal.getUidProcessState(uid)
+                <= ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+    }
+
+    private final Predicate<Integer> mIsUidInForegroundPredicate = this::isUidInForeground;
+
     public int scheduleAsPackage(JobInfo job, JobWorkItem work, int uId, String packageName,
             int userId, String tag) {
         try {
@@ -796,12 +818,25 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 // Fast path: we are adding work to an existing job, and the JobInfo is not
                 // changing.  We can just directly enqueue this work in to the job.
                 if (toCancel.getJob().equals(job)) {
+
                     toCancel.enqueueWorkLocked(ActivityManager.getService(), work);
+
+                    // If any of work item is enqueued when the source is in the foreground,
+                    // exempt the entire job.
+                    toCancel.maybeAddForegroundExemption(mIsUidInForegroundPredicate);
+
                     return JobScheduler.RESULT_SUCCESS;
                 }
             }
 
             JobStatus jobStatus = JobStatus.createFromJobInfo(job, uId, packageName, userId, tag);
+
+            // Give exemption if the source is in the foreground just now.
+            // Note if it's a sync job, this method is called on the handler so it's not exactly
+            // the state when requestSync() was called, but that should be fine because of the
+            // 1 minute foreground grace period.
+            jobStatus.maybeAddForegroundExemption(mIsUidInForegroundPredicate);
+
             if (DEBUG) Slog.d(TAG, "SCHEDULE: " + jobStatus.toShortString());
             // Jobs on behalf of others don't apply to the per-app job cap
             if (ENFORCE_MAX_JOBS && packageName == null) {
@@ -1044,6 +1079,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
         super(context);
 
         mLocalPM = LocalServices.getService(PackageManagerInternal.class);
+        mActivityManagerInternal = Preconditions.checkNotNull(
+                LocalServices.getService(ActivityManagerInternal.class));
 
         mHandler = new JobHandler(context.getMainLooper());
         mConstants = new Constants(mHandler);
@@ -1074,6 +1111,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
         mControllers.add(ContentObserverController.get(this));
         mDeviceIdleJobsController = DeviceIdleJobsController.get(this);
         mControllers.add(mDeviceIdleJobsController);
+
+        mForceAppStandbyTracker = ForceAppStandbyTracker.getInstance(context);
 
         // If the job store determined that it can't yet reschedule persisted jobs,
         // we need to start watching the clock.
@@ -1134,6 +1173,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
     public void onBootPhase(int phase) {
         if (PHASE_SYSTEM_SERVICES_READY == phase) {
             mConstants.start(getContext().getContentResolver());
+
+            mForceAppStandbyTracker.start();
+
             // Register br for package removals and user removals.
             final IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_PACKAGE_REMOVED);

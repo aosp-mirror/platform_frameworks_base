@@ -17,6 +17,7 @@ package com.android.server;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.PackageOps;
 import android.app.IActivityManager;
@@ -825,9 +826,10 @@ public class ForceAppStandbyTracker {
     /**
      * @return whether jobs should be restricted for a UID package-name.
      */
-    public boolean areJobsRestricted(int uid, @NonNull String packageName) {
+    public boolean areJobsRestricted(int uid, @NonNull String packageName,
+            boolean hasForegroundExemption) {
         return isRestricted(uid, packageName, /*useTempWhitelistToo=*/ true,
-                /* exemptOnBatterySaver =*/ false);
+                hasForegroundExemption);
     }
 
     /**
@@ -861,7 +863,9 @@ public class ForceAppStandbyTracker {
     /**
      * @return whether a UID is in the foreground or not.
      *
-     * Note clients normally shouldn't need to access it. It's only for dumpsys.
+     * Note this information is based on the UID proc state callback, meaning it's updated
+     * asynchronously and may subtly be stale. If the fresh data is needed, use
+     * {@link ActivityManagerInternal#getUidProcessState} instead.
      */
     public boolean isInForeground(int uid) {
         if (!UserHandle.isApp(uid)) {

@@ -71,6 +71,6 @@ public class JobStatusTest {
         final JobInfo job = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY).build();
         return new JobStatus(job, 0, null, -1, 0, 0, null, earliestRunTimeElapsedMillis,
-                latestRunTimeElapsedMillis, 0, 0, null);
+                latestRunTimeElapsedMillis, 0, 0, null, 0);
     }
 }

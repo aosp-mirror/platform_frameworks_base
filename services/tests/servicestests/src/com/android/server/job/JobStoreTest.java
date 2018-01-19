@@ -47,6 +47,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Test reading and writing correctly from file.
+ *
+ * atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/servicestests/src/com/android/server/job/JobStoreTest.java
  */
 @RunWith(AndroidJUnit4.class)
 public class JobStoreTest {
@@ -116,6 +118,7 @@ public class JobStoreTest {
                 .setPersisted(true)
                 .build();
         final JobStatus ts = JobStatus.createFromJobInfo(task, SOME_UID, null, -1, null);
+        ts.addInternalFlags(JobStatus.INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION);
         mTaskStoreUnderTest.add(ts);
         waitForPendingIo();
 
@@ -128,6 +131,8 @@ public class JobStoreTest {
         assertTasksEqual(task, loadedTaskStatus.getJob());
         assertTrue("JobStore#contains invalid.", mTaskStoreUnderTest.containsJob(ts));
         assertEquals("Different uids.", SOME_UID, loadedTaskStatus.getUid());
+        assertEquals(JobStatus.INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION,
+                loadedTaskStatus.getInternalFlags());
         compareTimestampsSubjectToIoLatency("Early run-times not the same after read.",
                 ts.getEarliestRunTime(), loadedTaskStatus.getEarliestRunTime());
         compareTimestampsSubjectToIoLatency("Late run-times not the same after read.",
@@ -272,7 +277,7 @@ public class JobStoreTest {
                 0 /* sourceUserId */, 0, 0, "someTag",
                 invalidEarlyRuntimeElapsedMillis, invalidLateRuntimeElapsedMillis,
                 0 /* lastSuccessfulRunTime */, 0 /* lastFailedRunTime */,
-                persistedExecutionTimesUTC);
+                persistedExecutionTimesUTC, 0 /* innerFlagg */);
 
         mTaskStoreUnderTest.add(js);
         waitForPendingIo();

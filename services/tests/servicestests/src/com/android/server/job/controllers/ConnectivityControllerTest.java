@@ -164,6 +164,6 @@ public class ConnectivityControllerTest {
     private static JobStatus createJobStatus(JobInfo.Builder job, long earliestRunTimeElapsedMillis,
             long latestRunTimeElapsedMillis) {
         return new JobStatus(job.build(), 0, null, -1, 0, 0, null, earliestRunTimeElapsedMillis,
-                latestRunTimeElapsedMillis, 0, 0, null);
+                latestRunTimeElapsedMillis, 0, 0, null, 0);
     }
 }

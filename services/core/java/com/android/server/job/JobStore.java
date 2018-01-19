@@ -72,6 +72,9 @@ import java.util.Set;
  *      This is important b/c {@link com.android.server.job.JobStore.WriteJobsMapToDiskRunnable}
  *      and {@link com.android.server.job.JobStore.ReadJobMapFromDiskRunnable} lock on that
  *      object.
+ *
+ * Test:
+ * atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/servicestests/src/com/android/server/job/JobStoreTest.java
  */
 public final class JobStore {
     private static final String TAG = "JobStore";
@@ -427,6 +430,9 @@ public final class JobStore {
             out.attribute(null, "uid", Integer.toString(jobStatus.getUid()));
             out.attribute(null, "priority", String.valueOf(jobStatus.getPriority()));
             out.attribute(null, "flags", String.valueOf(jobStatus.getFlags()));
+            if (jobStatus.getInternalFlags() != 0) {
+                out.attribute(null, "internalFlags", String.valueOf(jobStatus.getInternalFlags()));
+            }
 
             out.attribute(null, "lastSuccessfulRunTime",
                     String.valueOf(jobStatus.getLastSuccessfulRunTime()));
@@ -689,6 +695,7 @@ public final class JobStore {
             int uid, sourceUserId;
             long lastSuccessfulRunTime;
             long lastFailedRunTime;
+            int internalFlags = 0;
 
             // Read out job identifier attributes and priority.
             try {
@@ -704,6 +711,10 @@ public final class JobStore {
                 if (val != null) {
                     jobBuilder.setFlags(Integer.parseInt(val));
                 }
+                val = parser.getAttributeValue(null, "internalFlags");
+                if (val != null) {
+                    internalFlags = Integer.parseInt(val);
+                }
                 val = parser.getAttributeValue(null, "sourceUserId");
                 sourceUserId = val == null ? -1 : Integer.parseInt(val);
 
@@ -718,7 +729,6 @@ public final class JobStore {
             }
 
             String sourcePackageName = parser.getAttributeValue(null, "sourcePackageName");
-
             final String sourceTag = parser.getAttributeValue(null, "sourceTag");
 
             int eventType;
@@ -857,7 +867,7 @@ public final class JobStore {
                     appBucket, currentHeartbeat, sourceTag,
                     elapsedRuntimes.first, elapsedRuntimes.second,
                     lastSuccessfulRunTime, lastFailedRunTime,
-                    (rtcIsGood) ? null : rtcRuntimes);
+                    (rtcIsGood) ? null : rtcRuntimes, internalFlags);
             return js;
         }
 

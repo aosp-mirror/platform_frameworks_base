@@ -15,6 +15,8 @@
  */
 package com.android.server;
 
+import static android.app.ActivityManager.PROCESS_STATE_CACHED_EMPTY;
+
 import static com.android.server.ForceAppStandbyTracker.TARGET_OP;
 
 import static org.junit.Assert.assertEquals;
@@ -33,6 +35,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.OpEntry;
 import android.app.AppOpsManager.PackageOps;
@@ -259,11 +262,17 @@ public class ForceAppStandbyTrackerTest {
     private static final int JOBS_AND_ALARMS = ALARMS_ONLY | JOBS_ONLY;
 
     private void areRestricted(ForceAppStandbyTrackerTestable instance, int uid, String packageName,
-            int restrictionTypes) {
+            int restrictionTypes, boolean exemptFromBatterySaver) {
         assertEquals(((restrictionTypes & JOBS_ONLY) != 0),
-                instance.areJobsRestricted(uid, packageName));
+                instance.areJobsRestricted(uid, packageName, exemptFromBatterySaver));
         assertEquals(((restrictionTypes & ALARMS_ONLY) != 0),
                 instance.areAlarmsRestricted(uid, packageName));
+    }
+
+    private void areRestricted(ForceAppStandbyTrackerTestable instance, int uid, String packageName,
+            int restrictionTypes) {
+        areRestricted(instance, uid, packageName, restrictionTypes,
+                /*exemptFromBatterySaver=*/ false);
     }
 
     @Test
