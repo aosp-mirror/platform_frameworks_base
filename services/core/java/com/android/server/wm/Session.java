@@ -467,6 +467,17 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         }
     }
 
+    @Override
+    public void updateTapExcludeRegion(IWindow window, int regionId, int left, int top, int width,
+            int height) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mService.updateTapExcludeRegion(window, regionId, left, top, width, height);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
     void windowAddedLocked(String packageName) {
         mPackageName = packageName;
         mRelayoutTag = "relayoutWindow: " + mPackageName;

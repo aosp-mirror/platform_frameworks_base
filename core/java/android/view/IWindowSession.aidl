@@ -236,4 +236,12 @@ interface IWindowSession {
     boolean startMovingTask(IWindow window, float startX, float startY);
 
     void updatePointerIcon(IWindow window);
+
+    /**
+     * Update a tap exclude region with a rectangular area identified by provided id in the window.
+     * Touches on this region will not switch focus to this window. Passing an empty rect will
+     * remove the area from the exclude region of this window.
+     */
+    void updateTapExcludeRegion(IWindow window, int regionId, int left, int top, int width,
+            int height);
 }

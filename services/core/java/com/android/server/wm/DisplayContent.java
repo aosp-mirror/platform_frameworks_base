@@ -134,6 +134,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.MutableBoolean;
 import android.util.Slog;
@@ -330,6 +331,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     final PinnedStackController mPinnedStackControllerLocked;
 
     final ArrayList<WindowState> mTapExcludedWindows = new ArrayList<>();
+    /** A collection of windows that provide tap exclude regions inside of them. */
+    final ArraySet<WindowState> mTapExcludeProvidingWindows = new ArraySet<>();
 
     private boolean mHaveBootMsg = false;
     private boolean mHaveApp = false;
@@ -1866,9 +1869,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
         for (int i = mTapExcludedWindows.size() - 1; i >= 0; i--) {
-            WindowState win = mTapExcludedWindows.get(i);
+            final WindowState win = mTapExcludedWindows.get(i);
             win.getTouchableRegion(mTmpRegion);
             mTouchExcludeRegion.op(mTmpRegion, Region.Op.UNION);
+        }
+        for (int i = mTapExcludeProvidingWindows.size() - 1; i >= 0; i--) {
+            final WindowState win = mTapExcludeProvidingWindows.valueAt(i);
+            win.amendTapExcludeRegion(mTouchExcludeRegion);
         }
         // TODO(multi-display): Support docked stacks on secondary displays.
         if (mDisplayId == DEFAULT_DISPLAY && getSplitScreenPrimaryStack() != null) {
