@@ -60,6 +60,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
+import android.provider.SettingsValidators;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
 import android.text.TextUtils;
@@ -297,6 +298,10 @@ public class SettingsProvider extends ContentProvider {
     @Override
     public boolean onCreate() {
         Settings.setInSystemServer();
+
+        // fail to boot if there're any backed up settings that don't have a non-null validator
+        ensureAllBackedUpSystemSettingsHaveValidators();
+
         synchronized (mLock) {
             mUserManager = UserManager.get(getContext());
             mPackageManager = AppGlobals.getPackageManager();
@@ -312,6 +317,21 @@ public class SettingsProvider extends ContentProvider {
         });
         ServiceManager.addService("settings", new SettingsService(this));
         return true;
+    }
+
+    private void ensureAllBackedUpSystemSettingsHaveValidators() {
+        StringBuilder offenders = new StringBuilder();
+        for (String setting : Settings.System.SETTINGS_TO_BACKUP) {
+            if (Settings.System.VALIDATORS.get(setting) == null) {
+                offenders.append(setting).append(" ");
+            }
+        }
+
+        String offendersStr = offenders.toString();
+        if (offendersStr.length() > 0) {
+            throw new RuntimeException("All Settings.System settings that are backed up must"
+                    + " have a non-null validator, but those don't: " + offendersStr);
+        }
     }
 
     @Override
@@ -1472,7 +1492,7 @@ public class SettingsProvider extends ContentProvider {
     }
 
     private void validateSystemSettingValue(String name, String value) {
-        Settings.System.Validator validator = Settings.System.VALIDATORS.get(name);
+        SettingsValidators.Validator validator = Settings.System.VALIDATORS.get(name);
         if (validator != null && !validator.validate(value)) {
             throw new IllegalArgumentException("Invalid value: " + value
                     + " for setting: " + name);
