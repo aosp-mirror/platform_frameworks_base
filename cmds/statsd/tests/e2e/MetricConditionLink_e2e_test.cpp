@@ -75,20 +75,20 @@ StatsdConfig CreateStatsdConfig() {
     // Links between crash atom and condition of app is in syncing.
     auto links = countMetric->add_links();
     links->set_condition(isSyncingPredicate.id());
-    auto dimensionWhat = links->mutable_dimensions_in_what();
+    auto dimensionWhat = links->mutable_fields_in_what();
     dimensionWhat->set_field(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
     dimensionWhat->add_child()->set_field(1);  // uid field.
-    auto dimensionCondition = links->mutable_dimensions_in_condition();
+    auto dimensionCondition = links->mutable_fields_in_condition();
     dimensionCondition->set_field(android::util::SYNC_STATE_CHANGED);
     dimensionCondition->add_child()->set_field(1);  // uid field.
 
     // Links between crash atom and condition of app is in background.
     links = countMetric->add_links();
     links->set_condition(isInBackgroundPredicate.id());
-    dimensionWhat = links->mutable_dimensions_in_what();
+    dimensionWhat = links->mutable_fields_in_what();
     dimensionWhat->set_field(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
     dimensionWhat->add_child()->set_field(1);  // uid field.
-    dimensionCondition = links->mutable_dimensions_in_condition();
+    dimensionCondition = links->mutable_fields_in_condition();
     dimensionCondition->set_field(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED);
     dimensionCondition->add_child()->set_field(1);  // uid field.
     return config;

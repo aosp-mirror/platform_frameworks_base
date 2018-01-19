@@ -158,15 +158,15 @@ void flattenValueLeaves(const DimensionsValue& value,
 std::vector<HashableDimensionKey> getDimensionKeysForCondition(
     const LogEvent& event, const MetricConditionLink& link) {
     std::vector<Field> whatFields;
-    getFieldsFromFieldMatcher(link.dimensions_in_what(), &whatFields);
+    getFieldsFromFieldMatcher(link.fields_in_what(), &whatFields);
     std::vector<Field> conditionFields;
-    getFieldsFromFieldMatcher(link.dimensions_in_condition(), &conditionFields);
+    getFieldsFromFieldMatcher(link.fields_in_condition(), &conditionFields);
 
     std::vector<HashableDimensionKey> hashableDimensionKeys;
 
     // TODO(yanglu): here we could simplify the logic to get the leaf value node in what and
     // directly construct the full condition value tree.
-    std::vector<DimensionsValue> whatValues = getDimensionKeys(event, link.dimensions_in_what());
+    std::vector<DimensionsValue> whatValues = getDimensionKeys(event, link.fields_in_what());
 
     for (size_t i = 0; i < whatValues.size(); ++i) {
         std::vector<DimensionsValue> whatLeaves;
@@ -185,7 +185,7 @@ std::vector<HashableDimensionKey> getDimensionKeysForCondition(
             conditionValueMap.insert(std::make_pair(conditionFields[j], whatLeaves[j]));
         }
         std::vector<DimensionsValue> conditionValues;
-        findDimensionsValues(conditionValueMap, link.dimensions_in_condition(), &conditionValues);
+        findDimensionsValues(conditionValueMap, link.fields_in_condition(), &conditionValues);
         if (conditionValues.size() != 1) {
             ALOGE("Not able to find unambiguous field value in condition atom.");
             continue;

@@ -98,8 +98,8 @@ TEST(EventMetricProducerTest, TestEventsWithSlicedCondition) {
     metric.set_condition(StringToId("APP_IN_BACKGROUND_PER_UID_AND_SCREEN_ON"));
     MetricConditionLink* link = metric.add_links();
     link->set_condition(StringToId("APP_IN_BACKGROUND_PER_UID"));
-    *link->mutable_dimensions_in_what() = buildSimpleAtomFieldMatcher(tagId, 1);
-    *link->mutable_dimensions_in_condition() = buildSimpleAtomFieldMatcher(conditionTagId, 2);
+    *link->mutable_fields_in_what() = buildSimpleAtomFieldMatcher(tagId, 1);
+    *link->mutable_fields_in_condition() = buildSimpleAtomFieldMatcher(conditionTagId, 2);
 
     LogEvent event1(tagId, bucketStartTimeNs + 1);
     EXPECT_TRUE(event1.write("111"));

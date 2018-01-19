@@ -57,10 +57,10 @@ StatsdConfig CreateStatsdConfigForPushedEvent() {
 
     auto links = gaugeMetric->add_links();
     links->set_condition(isInBackgroundPredicate.id());
-    auto dimensionWhat = links->mutable_dimensions_in_what();
+    auto dimensionWhat = links->mutable_fields_in_what();
     dimensionWhat->set_field(android::util::APP_START_CHANGED);
     dimensionWhat->add_child()->set_field(1);  // uid field.
-    auto dimensionCondition = links->mutable_dimensions_in_condition();
+    auto dimensionCondition = links->mutable_fields_in_condition();
     dimensionCondition->set_field(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED);
     dimensionCondition->add_child()->set_field(1);  // uid field.
     return config;
