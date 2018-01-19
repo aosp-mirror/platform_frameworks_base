@@ -698,10 +698,9 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     protected boolean handleReportAudioStatus(HdmiCecMessage message) {
         assertRunOnServiceThread();
 
-        byte params[] = message.getParams();
-        int mute = params[0] & 0x80;
-        int volume = params[0] & 0x7F;
-        setAudioStatus(mute == 0x80, volume);
+        boolean mute = HdmiUtils.isAudioStatusMute(message);
+        int volume = HdmiUtils.getAudioStatusVolume(message);
+        setAudioStatus(mute, volume);
         return true;
     }
 
