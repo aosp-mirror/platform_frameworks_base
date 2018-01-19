@@ -23,4 +23,17 @@ package android.debug;
  * @hide Only should be called from the system server.
  */
 public abstract class AdbManagerInternal {
+    /**
+     * Registers a ADB transport mechanism.
+     *
+     * @param transport ADB transport interface to register
+     */
+    public abstract void registerTransport(IAdbTransport transport);
+
+    /**
+     * Unregisters a previously registered ADB transport mechanism.
+     *
+     * @param transport previously-added ADB transport interface to be removed
+     */
+    public abstract void unregisterTransport(IAdbTransport transport);
 }

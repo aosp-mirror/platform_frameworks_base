@@ -18,7 +18,10 @@ package com.android.server.adb;
 import android.content.Context;
 import android.debug.AdbManagerInternal;
 import android.debug.IAdbManager;
+import android.debug.IAdbTransport;
 import android.os.Binder;
+import android.os.IBinder;
+import android.util.ArrayMap;
 
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
@@ -51,11 +54,21 @@ public class AdbService extends IAdbManager.Stub {
     }
 
     private class AdbManagerInternalImpl extends AdbManagerInternal {
+        @Override
+        public void registerTransport(IAdbTransport transport) {
+            mTransports.put(transport.asBinder(), transport);
+        }
+
+        @Override
+        public void unregisterTransport(IAdbTransport transport) {
+            mTransports.remove(transport.asBinder());
+        }
     }
 
     private static final String TAG = "AdbService";
 
     private final Context mContext;
+    private final ArrayMap<IBinder, IAdbTransport> mTransports = new ArrayMap<>();
 
     private AdbService(Context context) {
         mContext = context;
@@ -73,8 +86,8 @@ public class AdbService extends IAdbManager.Stub {
             if (args == null || args.length == 0 || "-a".equals(args[0])) {
                 pw.println("ADB Manager State:");
                 pw.increaseIndent();
-                pw.println("None");
-                // TODO: flesh out with status.
+                pw.print("Number of registered transports: ");
+                pw.println(mTransports.size());
             } else {
                 pw.println("Dump current ADB state");
                 pw.println("  No commands available");
