@@ -251,7 +251,15 @@ public class PhoneStateListener {
      */
     public static final int LISTEN_USER_MOBILE_DATA_STATE                  = 0x00080000;
 
-     /*
+    /**
+     *  Listen for changes to the physical channel configuration.
+     *
+     *  @see #onPhysicalChannelConfigurationChanged
+     *  @hide
+     */
+    public static final int LISTEN_PHYSICAL_CHANNEL_CONFIGURATION          = 0x00100000;
+
+    /*
      * Subscription used to listen to the phone state changes
      * @hide
      */
@@ -362,7 +370,10 @@ public class PhoneStateListener {
                     case LISTEN_CARRIER_NETWORK_CHANGE:
                         PhoneStateListener.this.onCarrierNetworkChange((boolean)msg.obj);
                         break;
-
+                    case LISTEN_PHYSICAL_CHANNEL_CONFIGURATION:
+                        PhoneStateListener.this.onPhysicalChannelConfigurationChanged(
+                            (List<PhysicalChannelConfig>)msg.obj);
+                        break;
                 }
             }
         };
@@ -557,6 +568,16 @@ public class PhoneStateListener {
      * @param enabled indicates whether the current user mobile data state is enabled or disabled.
      */
     public void onUserMobileDataStateChanged(boolean enabled) {
+        // default implementation empty
+    }
+
+    /**
+     * Callback invoked when the current physical channel configuration has changed
+     *
+     * @param configs List of the current {@link PhysicalChannelConfig}s
+     * @hide
+     */
+    public void onPhysicalChannelConfigurationChanged(List<PhysicalChannelConfig> configs) {
         // default implementation empty
     }
 
