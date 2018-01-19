@@ -40,6 +40,7 @@ import android.os.UserManagerInternal;
 import android.os.WorkSource;
 import android.os.WorkSource.WorkChain;
 import android.os.connectivity.CellularBatteryStats;
+import android.os.connectivity.GpsBatteryStats;
 import android.os.health.HealthStatsParceler;
 import android.os.health.HealthStatsWriter;
 import android.os.health.UidHealthStats;
@@ -591,6 +592,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         synchronized (mStats) {
             mStats.noteStopGpsLocked(uid);
+        }
+    }
+
+    public void noteGpsSignalQuality(int signalLevel) {
+        synchronized (mStats) {
+            mStats.noteGpsSignalQualityLocked(signalLevel);
         }
     }
 
@@ -1444,6 +1451,16 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     public CellularBatteryStats getCellularBatteryStats() {
         synchronized (mStats) {
             return mStats.getCellularBatteryStats();
+        }
+    }
+
+    /**
+     * Gets a snapshot of Gps stats
+     * @hide
+     */
+    public GpsBatteryStats getGpsBatteryStats() {
+        synchronized (mStats) {
+            return mStats.getGpsBatteryStats();
         }
     }
 

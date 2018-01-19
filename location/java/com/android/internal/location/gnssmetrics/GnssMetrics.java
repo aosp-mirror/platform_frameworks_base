@@ -19,10 +19,12 @@ package com.android.internal.location.gnssmetrics;
 import android.os.SystemClock;
 
 import android.util.Base64;
+import android.util.Log;
 import android.util.TimeUtils;
 
 import java.util.Arrays;
 
+import com.android.internal.app.IBatteryStats;
 import com.android.internal.location.nano.GnssLogsProto.GnssLog;
 
 /**
@@ -31,14 +33,29 @@ import com.android.internal.location.nano.GnssLogsProto.GnssLog;
  */
 public class GnssMetrics {
 
+  private static final String TAG = GnssMetrics.class.getSimpleName();
+
+  /* Constant which indicates GPS signal quality is poor */
+  public static final int GPS_SIGNAL_QUALITY_POOR = 0;
+
+  /* Constant which indicates GPS signal quality is good */
+  public static final int GPS_SIGNAL_QUALITY_GOOD = 1;
+
+  /* Number of GPS signal quality levels */
+  public static final int NUM_GPS_SIGNAL_QUALITY_LEVELS = GPS_SIGNAL_QUALITY_GOOD + 1;
+
   /** Default time between location fixes (in millisecs) */
   private static final int DEFAULT_TIME_BETWEEN_FIXES_MILLISECS = 1000;
 
   /* The time since boot when logging started */
   private String logStartInElapsedRealTime;
 
+  /* GNSS power metrics */
+  private GnssPowerMetrics mGnssPowerMetrics;
+
   /** Constructor */
-  public GnssMetrics() {
+  public GnssMetrics(IBatteryStats stats) {
+    mGnssPowerMetrics = new GnssPowerMetrics(stats);
     locationFailureStatistics = new Statistics();
     timeToFirstFixSecStatistics = new Statistics();
     positionAccuracyMeterStatistics = new Statistics();
@@ -103,11 +120,18 @@ public class GnssMetrics {
   *
   */
   public void logCn0(float[] cn0s, int numSv) {
-    if (numSv < 4) {
+    if (numSv == 0 || cn0s == null || cn0s.length == 0 || cn0s.length < numSv) {
+      if (numSv == 0) {
+         mGnssPowerMetrics.reportSignalQuality(null, 0);
+      }
       return;
     }
     float[] cn0Array = Arrays.copyOf(cn0s, numSv);
     Arrays.sort(cn0Array);
+    mGnssPowerMetrics.reportSignalQuality(cn0Array, numSv);
+    if (numSv < 4) {
+      return;
+    }
     if (cn0Array[numSv - 4] > 0.0) {
       double top4AvgCn0 = 0.0;
       for (int i = numSv - 4; i < numSv; i++) {
@@ -264,5 +288,63 @@ public class GnssMetrics {
     positionAccuracyMeterStatistics.reset();
     topFourAverageCn0Statistics.reset();
     return;
+  }
+
+  /* Class for handling GNSS power related metrics */
+  private class GnssPowerMetrics {
+
+    /* Threshold for Top Four Average CN0 below which GNSS signal quality is declared poor */
+    private static final double POOR_TOP_FOUR_AVG_CN0_THRESHOLD_DB_HZ = 20.0;
+
+    /* Minimum change in Top Four Average CN0 needed to trigger a report */
+    private static final double REPORTING_THRESHOLD_DB_HZ = 1.0;
+
+    /* BatteryStats API */
+    private final IBatteryStats mBatteryStats;
+
+    /* Last reported Top Four Average CN0 */
+    private double mLastAverageCn0;
+
+    public GnssPowerMetrics(IBatteryStats stats) {
+      mBatteryStats = stats;
+      // Used to initialize the variable to a very small value (unachievable in practice) so that
+      // the first CNO report will trigger an update to BatteryStats
+      mLastAverageCn0 = -100.0;
+    }
+
+    /**
+     * Reports signal quality to BatteryStats. Signal quality is based on Top four average CN0. If
+     * the number of SVs seen is less than 4, then signal quality is the average CN0.
+     * Changes are reported only if the average CN0 changes by more than REPORTING_THRESHOLD_DB_HZ.
+     */
+    public void reportSignalQuality(float[] ascendingCN0Array, int numSv) {
+      double avgCn0 = 0.0;
+      if (numSv > 0) {
+        for (int i = Math.max(0, numSv - 4); i < numSv; i++) {
+          avgCn0 += (double) ascendingCN0Array[i];
+        }
+        avgCn0 /= Math.min(numSv, 4);
+      }
+      if (Math.abs(avgCn0 - mLastAverageCn0) < REPORTING_THRESHOLD_DB_HZ) {
+        return;
+      }
+      try {
+        mBatteryStats.noteGpsSignalQuality(getSignalLevel(avgCn0));
+        mLastAverageCn0 = avgCn0;
+      } catch (Exception e) {
+        Log.w(TAG, "Exception", e);
+      }
+      return;
+    }
+
+    /**
+     * Obtains signal level based on CN0
+     */
+    private int getSignalLevel(double cn0) {
+      if (cn0 > POOR_TOP_FOUR_AVG_CN0_THRESHOLD_DB_HZ) {
+        return GnssMetrics.GPS_SIGNAL_QUALITY_GOOD;
+      }
+      return GnssMetrics.GPS_SIGNAL_QUALITY_POOR;
+    }
   }
 }
