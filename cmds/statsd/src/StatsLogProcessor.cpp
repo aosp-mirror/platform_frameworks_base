@@ -127,6 +127,10 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event) {
     StatsdStats::getInstance().noteAtomLogged(
         event->GetTagId(), event->GetTimestampNs() / NS_PER_SEC);
 
+    if (mMetricsManagers.empty()) {
+        return;
+    }
+
     // Hard-coded logic to update the isolated uid's in the uid-map.
     // The field numbers need to be currently updated by hand with atoms.proto
     if (event->GetTagId() == android::util::ISOLATED_UID_CHANGED) {
