@@ -152,9 +152,9 @@ private:
     // until the memory consumed by mOutput is below the specified limit.
     void ensureBytesUsedBelowLimit();
 
-    // Override used for testing the max memory allowed by uid map. -1 means we use the value
+    // Override used for testing the max memory allowed by uid map. 0 means we use the value
     // specified in StatsdStats.h with the rest of the guardrails.
-    size_t maxBytesOverride = -1;
+    size_t maxBytesOverride = 0;
 
     // Cache the size of mOutput;
     size_t mBytesUsed;
