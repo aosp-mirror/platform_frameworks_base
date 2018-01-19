@@ -50,13 +50,16 @@ import android.os.PowerSaveState;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.test.mock.MockContentResolver;
 import android.util.ArraySet;
 import android.util.Pair;
 
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
+import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.ForceAppStandbyTracker.Listener;
 
 import org.junit.Before;
@@ -137,6 +140,9 @@ public class ForceAppStandbyTrackerTest {
     private Consumer<PowerSaveState> mPowerSaveObserver;
     private BroadcastReceiver mReceiver;
 
+    private MockContentResolver mMockContentResolver;
+    private FakeSettingsProvider mFakeSettingsProvider;
+
     private boolean mPowerSaveMode;
 
     private final ArraySet<Pair<Integer, String>> mRestrictedPackages = new ArraySet();
@@ -181,6 +187,11 @@ public class ForceAppStandbyTrackerTest {
         when(mMockAppOpsManager.getPackagesForOps(
                 any(int[].class)
                 )).thenAnswer(inv -> new ArrayList<AppOpsManager.PackageOps>());
+
+        mMockContentResolver = new MockContentResolver();
+        mFakeSettingsProvider = new FakeSettingsProvider();
+        when(mMockContext.getContentResolver()).thenReturn(mMockContentResolver);
+        mMockContentResolver.addProvider(Settings.AUTHORITY, mFakeSettingsProvider);
 
         // Call start.
         instance.start();
@@ -495,8 +506,8 @@ public class ForceAppStandbyTrackerTest {
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
 
-        // Power save on.
-        mPowerSaveMode = true;
+        // Updating to the same state should not fire listener
+        mPowerSaveMode = false;
         mPowerSaveObserver.accept(getPowerSaveState());
 
         assertNoCallbacks(l);
@@ -534,14 +545,14 @@ public class ForceAppStandbyTrackerTest {
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
-        verify(l, times(0)).unblockAlarmsForUidPackage(eq(UID_10_2), eq(PACKAGE_2));
+        verify(l, times(1)).unblockAlarmsForUidPackage(eq(UID_10_2), eq(PACKAGE_2));
         reset(l);
 
         setAppOps(UID_10_2, PACKAGE_2, false);
 
         verify(l, times(0)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt());
-        verify(l, times(1)).updateJobsForUidPackage(eq(UID_10_2), eq(PACKAGE_2));
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
         verify(l, times(0)).unblockAlarmsForUid(anyInt());
@@ -634,10 +645,20 @@ public class ForceAppStandbyTrackerTest {
         mPowerSaveMode = true;
         mPowerSaveObserver.accept(getPowerSaveState());
 
+        verify(l, times(1)).updateAllJobs();
+        verify(l, times(0)).updateJobsForUid(anyInt());
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+
+        verify(l, times(0)).unblockAllUnrestrictedAlarms();
+        verify(l, times(0)).unblockAlarmsForUid(anyInt());
+        verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
+        reset(l);
+
         instance.setPowerSaveWhitelistAppIds(new int[] {UID_1, UID_2}, new int[] {});
 
         waitUntilMainHandlerDrain();
-        verify(l, times(1)).updateAllJobs();
+        // Called once for updating all whitelist and once for updating temp whitelist
+        verify(l, times(2)).updateAllJobs();
         verify(l, times(0)).updateJobsForUid(anyInt());
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
 
@@ -699,7 +720,7 @@ public class ForceAppStandbyTrackerTest {
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
-        verify(l, times(0)).unblockAlarmsForUid(anyInt());
+        verify(l, times(1)).unblockAlarmsForUid(eq(UID_10_1));
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
 
@@ -723,7 +744,7 @@ public class ForceAppStandbyTrackerTest {
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
-        verify(l, times(0)).unblockAlarmsForUid(anyInt());
+        verify(l, times(1)).unblockAlarmsForUid(eq(UID_10_1));
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
 
@@ -743,6 +764,15 @@ public class ForceAppStandbyTrackerTest {
         mPowerSaveMode = false;
         mPowerSaveObserver.accept(getPowerSaveState());
 
+        verify(l, times(1)).updateAllJobs();
+        verify(l, times(0)).updateJobsForUid(eq(UID_10_1));
+        verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
+
+        verify(l, times(1)).unblockAllUnrestrictedAlarms();
+        verify(l, times(0)).unblockAlarmsForUid(anyInt());
+        verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
+        reset(l);
+
         mIUidObserver.onUidActive(UID_10_1);
 
         waitUntilMainHandlerDrain();
@@ -751,7 +781,7 @@ public class ForceAppStandbyTrackerTest {
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
-        verify(l, times(0)).unblockAlarmsForUid(anyInt());
+        verify(l, times(1)).unblockAlarmsForUid(eq(UID_10_1));
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
 
@@ -775,7 +805,7 @@ public class ForceAppStandbyTrackerTest {
         verify(l, times(0)).updateJobsForUidPackage(anyInt(), anyString());
 
         verify(l, times(0)).unblockAllUnrestrictedAlarms();
-        verify(l, times(0)).unblockAlarmsForUid(anyInt());
+        verify(l, times(1)).unblockAlarmsForUid(eq(UID_10_1));
         verify(l, times(0)).unblockAlarmsForUidPackage(anyInt(), anyString());
         reset(l);
 
