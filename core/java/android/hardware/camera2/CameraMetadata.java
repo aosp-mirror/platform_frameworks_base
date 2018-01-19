@@ -1134,6 +1134,38 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int INFO_SUPPORTED_HARDWARE_LEVEL_3 = 3;
 
+    /**
+     * <p>This camera device is backed by an external camera connected to this Android device.</p>
+     * <p>The device has capability identical to a LIMITED level device, with the following
+     * exceptions:</p>
+     * <ul>
+     * <li>The device may not report lens/sensor related information such as<ul>
+     * <li>{@link CaptureRequest#LENS_FOCAL_LENGTH android.lens.focalLength}</li>
+     * <li>{@link CameraCharacteristics#LENS_INFO_HYPERFOCAL_DISTANCE android.lens.info.hyperfocalDistance}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_INFO_PHYSICAL_SIZE android.sensor.info.physicalSize}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_INFO_WHITE_LEVEL android.sensor.info.whiteLevel}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN android.sensor.blackLevelPattern}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT android.sensor.info.colorFilterArrangement}</li>
+     * <li>{@link CaptureResult#SENSOR_ROLLING_SHUTTER_SKEW android.sensor.rollingShutterSkew}</li>
+     * </ul>
+     * </li>
+     * <li>The device will report 0 for {@link CameraCharacteristics#SENSOR_ORIENTATION android.sensor.orientation}</li>
+     * <li>The device has less guarantee on stable framerate, as the framerate partly depends
+     *   on the external camera being used.</li>
+     * </ul>
+     *
+     * @see CaptureRequest#LENS_FOCAL_LENGTH
+     * @see CameraCharacteristics#LENS_INFO_HYPERFOCAL_DISTANCE
+     * @see CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN
+     * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
+     * @see CameraCharacteristics#SENSOR_INFO_PHYSICAL_SIZE
+     * @see CameraCharacteristics#SENSOR_INFO_WHITE_LEVEL
+     * @see CameraCharacteristics#SENSOR_ORIENTATION
+     * @see CaptureResult#SENSOR_ROLLING_SHUTTER_SKEW
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     */
+    public static final int INFO_SUPPORTED_HARDWARE_LEVEL_EXTERNAL = 4;
+
     //
     // Enumeration values for CameraCharacteristics#SYNC_MAX_LATENCY
     //
