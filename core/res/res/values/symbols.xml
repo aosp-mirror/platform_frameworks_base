@@ -3241,4 +3241,6 @@
   <java-symbol type="string" name="slices_permission_request" />
 
   <java-symbol type="string" name="screenshot_edit" />
+
+  <java-symbol type="bool" name="config_keepRestrictedProfilesInBackground" />
 </resources>

@@ -245,6 +245,7 @@ public class SettingsBackupTest {
                     Settings.Global.INTENT_FIREWALL_UPDATE_CONTENT_URL,
                     Settings.Global.INTENT_FIREWALL_UPDATE_METADATA_URL,
                     Settings.Global.JOB_SCHEDULER_CONSTANTS,
+                    Settings.Global.KEEP_PROFILE_IN_BACKGROUND,
                     Settings.Global.LANG_ID_UPDATE_CONTENT_URL,
                     Settings.Global.LANG_ID_UPDATE_METADATA_URL,
                     Settings.Global.LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS,
