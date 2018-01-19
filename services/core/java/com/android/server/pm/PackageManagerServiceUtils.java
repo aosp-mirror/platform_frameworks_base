@@ -54,6 +54,7 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.PackageUtils;
 import android.util.Slog;
 import android.util.jar.StrictJarFile;
 import android.util.proto.ProtoOutputStream;
@@ -74,6 +75,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
@@ -574,6 +577,69 @@ public class PackageManagerServiceUtils {
             return false;
         }
         return true;
+    }
+
+
+    /**
+     * Checks the signing certificates to see if the provided certificate is a member.  Invalid for
+     * {@code SigningDetails} with multiple signing certificates.
+     * @param certificate certificate to check for membership
+     * @param signingDetails signing certificates record whose members are to be searched
+     * @return true if {@code certificate} is in {@code signingDetails}
+     */
+    public static boolean signingDetailsHasCertificate(
+            byte[] certificate, PackageParser.SigningDetails signingDetails) {
+        if (signingDetails == PackageParser.SigningDetails.UNKNOWN) {
+            return false;
+        }
+        Signature signature = new Signature(certificate);
+        if (signingDetails.hasPastSigningCertificates()) {
+            for (int i = 0; i < signingDetails.pastSigningCertificates.length; i++) {
+                if (signingDetails.pastSigningCertificates[i].equals(signature)) {
+                    return true;
+                }
+            }
+        } else {
+            // no signing history, just check the current signer
+            if (signingDetails.signatures.length == 1
+                    && signingDetails.signatures[0].equals(signature)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks the signing certificates to see if the provided certificate is a member.  Invalid for
+     * {@code SigningDetails} with multiple signing certificaes.
+     * @param sha256Certificate certificate to check for membership
+     * @param signingDetails signing certificates record whose members are to be searched
+     * @return true if {@code certificate} is in {@code signingDetails}
+     */
+    public static boolean signingDetailsHasSha256Certificate(
+            byte[] sha256Certificate, PackageParser.SigningDetails signingDetails ) {
+        if (signingDetails == PackageParser.SigningDetails.UNKNOWN) {
+            return false;
+        }
+        if (signingDetails.hasPastSigningCertificates()) {
+            for (int i = 0; i < signingDetails.pastSigningCertificates.length; i++) {
+                byte[] digest = PackageUtils.computeSha256DigestBytes(
+                        signingDetails.pastSigningCertificates[i].toByteArray());
+                if (Arrays.equals(sha256Certificate, digest)) {
+                    return true;
+                }
+            }
+        } else {
+            // no signing history, just check the current signer
+            if (signingDetails.signatures.length == 1) {
+                byte[] digest = PackageUtils.computeSha256DigestBytes(
+                        signingDetails.signatures[0].toByteArray());
+                if (Arrays.equals(sha256Certificate, digest)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /** Returns true to force apk verification if the updated package (in /data) is a priv app. */

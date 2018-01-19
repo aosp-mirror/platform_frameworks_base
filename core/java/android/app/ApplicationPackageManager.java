@@ -690,6 +690,26 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public boolean hasSigningCertificate(
+            String packageName, byte[] certificate, @PackageManager.CertificateInputType int type) {
+        try {
+            return mPM.hasSigningCertificate(packageName, certificate, type);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public boolean hasSigningCertificate(
+            int uid, byte[] certificate, @PackageManager.CertificateInputType int type) {
+        try {
+            return mPM.hasUidSigningCertificate(uid, certificate, type);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
     public String[] getPackagesForUid(int uid) {
         try {
             return mPM.getPackagesForUid(uid);

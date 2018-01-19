@@ -24,6 +24,8 @@ import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.REQUEST_DELETE_PACKAGES;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_MEDIA_STORAGE;
+import static android.content.pm.PackageManager.CERT_INPUT_RAW_X509;
+import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
@@ -108,6 +110,8 @@ import static com.android.server.pm.PackageManagerServiceUtils.dumpCriticalInfo;
 import static com.android.server.pm.PackageManagerServiceUtils.getCompressedFiles;
 import static com.android.server.pm.PackageManagerServiceUtils.getLastModifiedTime;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
+import static com.android.server.pm.PackageManagerServiceUtils.signingDetailsHasCertificate;
+import static com.android.server.pm.PackageManagerServiceUtils.signingDetailsHasSha256Certificate;
 import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
 import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_FAILURE;
 import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_SUCCESS;
@@ -5424,6 +5428,73 @@ Slog.e("TODD",
                 return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
             }
             return compareSignatures(s1, s2);
+        }
+    }
+
+    @Override
+    public boolean hasSigningCertificate(
+            String packageName, byte[] certificate, @PackageManager.CertificateInputType int type) {
+
+        synchronized (mPackages) {
+            final PackageParser.Package p = mPackages.get(packageName);
+            if (p == null || p.mExtras == null) {
+                return false;
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int callingUserId = UserHandle.getUserId(callingUid);
+            final PackageSetting ps = (PackageSetting) p.mExtras;
+            if (filterAppAccessLPr(ps, callingUid, callingUserId)) {
+                return false;
+            }
+            switch (type) {
+                case CERT_INPUT_RAW_X509:
+                    return signingDetailsHasCertificate(certificate, p.mSigningDetails);
+                case CERT_INPUT_SHA256:
+                    return signingDetailsHasSha256Certificate(certificate, p.mSigningDetails);
+                default:
+                    return false;
+            }
+        }
+    }
+
+    @Override
+    public boolean hasUidSigningCertificate(
+            int uid, byte[] certificate, @PackageManager.CertificateInputType int type) {
+        final int callingUid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        // Map to base uids.
+        uid = UserHandle.getAppId(uid);
+        // reader
+        synchronized (mPackages) {
+            final PackageParser.SigningDetails signingDetails;
+            final Object obj = mSettings.getUserIdLPr(uid);
+            if (obj != null) {
+                if (obj instanceof SharedUserSetting) {
+                    final boolean isCallerInstantApp = getInstantAppPackageName(callingUid) != null;
+                    if (isCallerInstantApp) {
+                        return false;
+                    }
+                    signingDetails = ((SharedUserSetting)obj).signatures.mSigningDetails;
+                } else if (obj instanceof PackageSetting) {
+                    final PackageSetting ps = (PackageSetting) obj;
+                    if (filterAppAccessLPr(ps, callingUid, callingUserId)) {
+                        return false;
+                    }
+                    signingDetails = ps.signatures.mSigningDetails;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+            switch (type) {
+                case CERT_INPUT_RAW_X509:
+                    return signingDetailsHasCertificate(certificate, signingDetails);
+                case CERT_INPUT_SHA256:
+                    return signingDetailsHasSha256Certificate(certificate, signingDetails);
+                default:
+                    return false;
+            }
         }
     }
 
