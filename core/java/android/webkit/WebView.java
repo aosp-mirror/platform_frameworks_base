@@ -663,6 +663,10 @@ public class WebView extends AbsoluteLayout
         if (context == null) {
             throw new IllegalArgumentException("Invalid context argument");
         }
+        if (mWebViewThread == null) {
+            throw new RuntimeException(
+                "WebView cannot be initialized on a thread that has no Looper.");
+        }
         sEnforceThreadChecking = context.getApplicationInfo().targetSdkVersion >=
                 Build.VERSION_CODES.JELLY_BEAN_MR2;
         checkThread();
@@ -2420,6 +2424,14 @@ public class WebView extends AbsoluteLayout
     @NonNull
     public static ClassLoader getWebViewClassLoader() {
         return getFactory().getWebViewClassLoader();
+    }
+
+    /**
+     * Returns the {@link Looper} corresponding to the thread on which WebView calls must be made.
+     */
+    @NonNull
+    public Looper getLooper() {
+        return mWebViewThread;
     }
 
     //-------------------------------------------------------------------------
