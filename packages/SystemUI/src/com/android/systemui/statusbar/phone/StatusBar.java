@@ -1704,7 +1704,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mReportRejectedTouch == null) {
             return;
         }
-        mReportRejectedTouch.setVisibility(mState == StatusBarState.KEYGUARD
+        mReportRejectedTouch.setVisibility(mState == StatusBarState.KEYGUARD && !mDozing
                 && mFalsingManager.isReportingEnabled() ? View.VISIBLE : View.INVISIBLE);
     }
 
@@ -4506,6 +4506,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             ((DozeReceiver) mAmbientIndicationContainer).setDozing(mDozing);
         }
         updateDozingState();
+        updateReportRejectedTouchVisibility();
         Trace.endSection();
     }
 
