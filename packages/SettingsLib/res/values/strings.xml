@@ -1015,4 +1015,10 @@
     <!-- About phone, status item value if the actual value is not available. -->
     <string name="status_unavailable">Unavailable</string>
 
+    <!-- Summary to show how many devices are connected in wifi hotspot [CHAR LIMIT=NONE] -->
+    <plurals name="wifi_tether_connected_summary">
+        <item quantity="one">%1$d device connected</item>
+        <item quantity="other">%1$d devices connected</item>
+    </plurals>
+
 </resources>
