@@ -17,24 +17,48 @@
 package android.text.style;
 
 import android.annotation.ColorInt;
+import android.annotation.NonNull;
 import android.os.Parcel;
 import android.text.ParcelableSpan;
 import android.text.TextPaint;
 import android.text.TextUtils;
 
+/**
+ * Changes the color of the text to which the span is attached.
+ * <p>
+ * For example, to set a green text color you would create a {@link
+ * android.text.SpannableStringBuilder} based on the text and set the span.
+ * <pre>{@code
+ * SpannableString string = new SpannableString("Text with a foreground color span");
+ *string.setSpan(new ForegroundColorSpan(color), 12, 28, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+ * }</pre>
+ * <img src="{@docRoot}reference/android/images/text/style/foregroundcolorspan.png" />
+ * <figcaption>Set a text color.</figcaption>
+ */
 public class ForegroundColorSpan extends CharacterStyle
         implements UpdateAppearance, ParcelableSpan {
 
     private final int mColor;
 
+    /**
+     * Creates a {@link ForegroundColorSpan} from a color integer.
+     * <p>
+     * To get the color integer associated with a particular color resource ID, use
+     * {@link android.content.res.Resources#getColor(int, Resources.Theme)}
+     *
+     * @param color color integer that defines the text color
+     */
     public ForegroundColorSpan(@ColorInt int color) {
         mColor = color;
     }
 
-    public ForegroundColorSpan(Parcel src) {
+    /**
+     * Creates a {@link ForegroundColorSpan} from a parcel.
+     */
+    public ForegroundColorSpan(@NonNull Parcel src) {
         mColor = src.readInt();
     }
-    
+
     public int getSpanTypeId() {
         return getSpanTypeIdInternal();
     }
@@ -48,22 +72,35 @@ public class ForegroundColorSpan extends CharacterStyle
         return 0;
     }
 
-    public void writeToParcel(Parcel dest, int flags) {
+    /**
+     * Flatten this object into a Parcel.
+     *
+     * @param dest  The Parcel in which the object should be written.
+     * @param flags Additional flags about how the object should be written.
+     */
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         writeToParcelInternal(dest, flags);
     }
 
     /** @hide */
-    public void writeToParcelInternal(Parcel dest, int flags) {
+    public void writeToParcelInternal(@NonNull Parcel dest, int flags) {
         dest.writeInt(mColor);
     }
 
+    /**
+     * @return the foreground color of this span.
+     * @see ForegroundColorSpan#ForegroundColorSpan(int)
+     */
     @ColorInt
     public int getForegroundColor() {
         return mColor;
     }
 
+    /**
+     * Updates the color of the TextPaint to the foreground color.
+     */
     @Override
-    public void updateDrawState(TextPaint ds) {
-        ds.setColor(mColor);
+    public void updateDrawState(@NonNull TextPaint textPaint) {
+        textPaint.setColor(mColor);
     }
 }
