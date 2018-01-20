@@ -22,8 +22,10 @@ import static com.android.server.backup.transport.TransportUtils.formatMessage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
+
 import com.android.server.backup.TransportManager;
+import com.android.server.backup.transport.TransportUtils.Priority;
+
 import java.io.PrintWriter;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -63,11 +65,14 @@ public class TransportClientManager {
                             mContext,
                             bindIntent,
                             transportComponent,
-                            Integer.toString(mTransportClientsCreated));
+                            Integer.toString(mTransportClientsCreated),
+                            caller);
             mTransportClientsCallerMap.put(transportClient, caller);
             mTransportClientsCreated++;
             TransportUtils.log(
-                    Log.DEBUG, TAG, formatMessage(null, caller, "Retrieving " + transportClient));
+                    Priority.DEBUG,
+                    TAG,
+                    formatMessage(null, caller, "Retrieving " + transportClient));
             return transportClient;
         }
     }
@@ -82,9 +87,12 @@ public class TransportClientManager {
      */
     public void disposeOfTransportClient(TransportClient transportClient, String caller) {
         transportClient.unbind(caller);
+        transportClient.markAsDisposed();
         synchronized (mTransportClientsLock) {
             TransportUtils.log(
-                    Log.DEBUG, TAG, formatMessage(null, caller, "Disposing of " + transportClient));
+                    Priority.DEBUG,
+                    TAG,
+                    formatMessage(null, caller, "Disposing of " + transportClient));
             mTransportClientsCallerMap.remove(transportClient);
         }
     }
