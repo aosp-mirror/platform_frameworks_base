@@ -3761,6 +3761,33 @@ public class AudioManager {
     }
 
      /**
+     * Indicate A2DP source or sink connection state change and eventually suppress
+     * the {@link AudioManager.ACTION_AUDIO_BECOMING_NOISY} intent.
+     * @param device Bluetooth device connected/disconnected
+     * @param state  new connection state (BluetoothProfile.STATE_xxx)
+     * @param profile profile for the A2DP device
+     * (either {@link android.bluetooth.BluetoothProfile.A2DP} or
+     * {@link android.bluetooth.BluetoothProfile.A2DP_SINK})
+     * @param suppressNoisyIntent if true the
+     * {@link AudioManager.ACTION_AUDIO_BECOMING_NOISY} intent will not be sent.
+     * @return a delay in ms that the caller should wait before broadcasting
+     * BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED intent.
+     * {@hide}
+     */
+    public int setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
+                BluetoothDevice device, int state, int profile, boolean suppressNoisyIntent) {
+        final IAudioService service = getService();
+        int delay = 0;
+        try {
+            delay = service.setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(device,
+                state, profile, suppressNoisyIntent);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return delay;
+    }
+
+     /**
      * Indicate A2DP device configuration has changed.
      * @param device Bluetooth device whose configuration has changed.
      * {@hide}
