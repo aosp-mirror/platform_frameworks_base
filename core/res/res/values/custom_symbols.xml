@@ -92,4 +92,7 @@
     <java-symbol type="string" name="app_killed_message" />
     <java-symbol type="integer" name="config_backKillTimeout" />
 
+    <!-- Defines the actions shown in advanced reboot submenu -->
+    <java-symbol type="array" name="config_restartActionsList" />
+
 </resources>

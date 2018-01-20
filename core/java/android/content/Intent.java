@@ -4427,6 +4427,17 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_CAMERA_STATE =
             "android.intent.extra.CAMERA_STATE";
 
+    /**
+     * Broadcast Action: Update preferences for the power menu dialog. This is to provide a
+     * way for the preferences that need to be enabled/disabled to update because they were
+     * toggled elsewhere in the settings (ie screenshot, user switcher, etc) so we don't have
+     * to do constant lookups while we wait for the menu to be created. Getting the values once
+     * when necessary is enough.
+     *@hide
+     */
+    public static final String ACTION_UPDATE_POWER_MENU =
+            "android.intent.action.UPDATE_POWER_MENU";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent categories (see addCategory()).
