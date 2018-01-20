@@ -97,7 +97,7 @@ public class SettingsValidators {
             if (value == null) {
                 return false;
             }
-            String[] subparts = value.split(".");
+            String[] subparts = value.split("\\.");
             boolean isValidPackageName = true;
             for (String subpart : subparts) {
                 isValidPackageName |= isSubpartValidForPackageName(subpart);
