@@ -261,12 +261,12 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                     String instructionSet, int dexoptNeeded, @Nullable String outputPath,
                     int dexFlags, String compilerFilter, @Nullable String volumeUuid,
                     @Nullable String sharedLibraries, @Nullable String seInfo, boolean downgrade,
-                    int targetSdkVersion)
+                    int targetSdkVersion, @Nullable String profileName)
                     throws InstallerException {
                 final StringBuilder builder = new StringBuilder();
 
-                // The version. Right now it's 4.
-                builder.append("4 ");
+                // The version. Right now it's 5.
+                builder.append("5 ");
 
                 builder.append("dexopt");
 
@@ -283,6 +283,7 @@ public class OtaDexoptService extends IOtaDexopt.Stub {
                 encodeParameter(builder, seInfo);
                 encodeParameter(builder, downgrade);
                 encodeParameter(builder, targetSdkVersion);
+                encodeParameter(builder, profileName);
 
                 commands.add(builder.toString());
             }

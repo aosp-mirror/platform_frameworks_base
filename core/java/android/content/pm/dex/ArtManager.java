@@ -19,12 +19,15 @@ package android.content.pm.dex;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Slog;
+
+import java.io.File;
 
 /**
  * Class for retrieving various kinds of information related to the runtime artifacts of
@@ -162,5 +165,30 @@ public class ArtManager {
      */
     public static String getProfileName(String splitName) {
         return splitName == null ? "primary.prof" : splitName + ".split.prof";
+    }
+
+    /**
+     * Return the path to the current profile corresponding to given package and split.
+     *
+     * @hide
+     */
+    public static String getCurrentProfilePath(String packageName, int userId, String splitName) {
+        File profileDir = Environment.getDataProfilesDePackageDirectory(userId, packageName);
+        return new File(profileDir, getProfileName(splitName)).getAbsolutePath();
+    }
+
+    /**
+     * Return the snapshot profile file for the given package and split.
+     *
+     * KEEP in sync with installd dexopt.cpp.
+     * TODO(calin): inject the snapshot profile name from PM to avoid the dependency.
+     *
+     * @hide
+     */
+    public static File getProfileSnapshotFile(String packageName, String splitName) {
+        File profileDir = Environment.getDataRefProfilesDePackageDirectory(packageName);
+        String snapshotFile = getProfileName(splitName) + ".snapshot";
+        return new File(profileDir, snapshotFile);
+
     }
 }
