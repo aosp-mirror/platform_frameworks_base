@@ -104,7 +104,7 @@ final class OverlayManagerSettings {
         return true;
     }
 
-    OverlayInfo getOverlayInfo(@NonNull final String packageName, final int userId)
+    @NonNull OverlayInfo getOverlayInfo(@NonNull final String packageName, final int userId)
             throws BadKeyException {
         final int idx = select(packageName, userId);
         if (idx < 0) {
