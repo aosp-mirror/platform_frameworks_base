@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -65,6 +66,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+
 
 /**
  * AudioManager provides access to volume and ringer mode control.
@@ -4861,6 +4864,114 @@ public class AudioManager {
          */
         public void onServiceDied() {
             broadcastDeviceListChange(null);
+        }
+    }
+
+
+    /**
+     * @hide
+     * Abstract class to receive event notification about audioserver process state.
+     */
+    @SystemApi
+    public abstract static class AudioServerStateCallback {
+        public void onAudioServerDown() { }
+        public void onAudioServerUp() { }
+    }
+
+    private Executor mAudioServerStateExec;
+    private AudioServerStateCallback mAudioServerStateCb;
+    private final Object mAudioServerStateCbLock = new Object();
+
+    private final IAudioServerStateDispatcher mAudioServerStateDispatcher =
+            new IAudioServerStateDispatcher.Stub() {
+        @Override
+        public void dispatchAudioServerStateChange(boolean state) {
+            Executor exec;
+            AudioServerStateCallback cb;
+
+            synchronized (mAudioServerStateCbLock) {
+                exec = mAudioServerStateExec;
+                cb = mAudioServerStateCb;
+            }
+
+            if ((exec == null) || (cb == null)) {
+                return;
+            }
+            if (state) {
+                exec.execute(() -> cb.onAudioServerUp());
+            } else {
+                exec.execute(() -> cb.onAudioServerDown());
+            }
+        }
+    };
+
+    /**
+     * @hide
+     * Registers a callback for notification of audio server state changes.
+     * @param executor {@link Executor} to handle the callbacks
+     * @param stateCallback the callback to receive the audio server state changes
+     *        To remove the callabck, pass a null reference for both executor and stateCallback.
+     */
+    @SystemApi
+    public void setAudioServerStateCallback(@NonNull Executor executor,
+            @NonNull AudioServerStateCallback stateCallback) {
+        if (stateCallback == null) {
+            throw new IllegalArgumentException("Illegal null AudioServerStateCallback");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException(
+                    "Illegal null Executor for the AudioServerStateCallback");
+        }
+
+        synchronized (mAudioServerStateCbLock) {
+            if (mAudioServerStateCb != null) {
+                throw new IllegalStateException(
+                    "setAudioServerStateCallback called with already registered callabck");
+            }
+            final IAudioService service = getService();
+            try {
+                service.registerAudioServerStateDispatcher(mAudioServerStateDispatcher);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            mAudioServerStateExec = executor;
+            mAudioServerStateCb = stateCallback;
+        }
+    }
+
+    /**
+     * @hide
+     * Unregisters the callback for notification of audio server state changes.
+     */
+    @SystemApi
+    public void clearAudioServerStateCallback() {
+        synchronized (mAudioServerStateCbLock) {
+            if (mAudioServerStateCb != null) {
+                final IAudioService service = getService();
+                try {
+                    service.unregisterAudioServerStateDispatcher(
+                            mAudioServerStateDispatcher);
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
+            }
+            mAudioServerStateExec = null;
+            mAudioServerStateCb = null;
+        }
+    }
+
+    /**
+     * @hide
+     * Checks if native audioservice is running or not.
+     * @return true if native audioservice runs, false otherwise.
+     */
+    @SystemApi
+    public boolean isAudioServerRunning() {
+        final IAudioService service = getService();
+        try {
+            return service.isAudioServerRunning();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

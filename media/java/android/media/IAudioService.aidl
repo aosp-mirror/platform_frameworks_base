@@ -24,9 +24,11 @@ import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioRoutesObserver;
+import android.media.IAudioServerStateDispatcher;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
+import android.media.IVolumeController;
 import android.media.IVolumeController;
 import android.media.PlayerBase;
 import android.media.VolumePolicy;
@@ -207,6 +209,12 @@ interface IAudioService {
 
     oneway void setFocusRequestResultFromExtPolicy(in AudioFocusInfo afi, int requestResult,
             in IAudioPolicyCallback pcb);
+
+    void registerAudioServerStateDispatcher(IAudioServerStateDispatcher asd);
+
+    oneway void unregisterAudioServerStateDispatcher(IAudioServerStateDispatcher asd);
+
+    boolean isAudioServerRunning();
 
     // WARNING: read warning at top of file, new methods that need to be used by native
     // code via IAudioManager.h need to be added to the top section.
