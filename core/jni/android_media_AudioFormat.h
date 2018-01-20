@@ -35,6 +35,7 @@
 #define ENCODING_DOLBY_TRUEHD   14
 #define ENCODING_AAC_ELD        15
 #define ENCODING_AAC_XHE        16
+#define ENCODING_AC4            17
 
 #define ENCODING_INVALID    0
 #define ENCODING_DEFAULT    1
@@ -77,6 +78,8 @@ static inline audio_format_t audioFormatToNative(int audioFormat)
         return AUDIO_FORMAT_AAC_ELD;
     case ENCODING_AAC_XHE:
         return AUDIO_FORMAT_AAC; // FIXME temporary value, needs addition of xHE-AAC
+    case ENCODING_AC4:
+        return AUDIO_FORMAT_AC4;
     case ENCODING_DEFAULT:
         return AUDIO_FORMAT_DEFAULT;
     default:
@@ -125,6 +128,8 @@ static inline int audioFormatFromNative(audio_format_t nativeFormat)
     // FIXME needs addition of AUDIO_FORMAT_AAC_XHE
     //case AUDIO_FORMAT_AAC_XHE:
     //    return ENCODING_AAC_XHE;
+    case AUDIO_FORMAT_AC4:
+        return ENCODING_AC4;
     case AUDIO_FORMAT_DEFAULT:
         return ENCODING_DEFAULT;
     default:
