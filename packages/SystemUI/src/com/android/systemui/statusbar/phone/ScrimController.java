@@ -866,13 +866,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        pw.println(" ScrimController:");
-        pw.print(" state:"); pw.println(mState);
-        pw.print("   frontScrim:"); pw.print(" viewAlpha="); pw.print(mScrimInFront.getViewAlpha());
+        pw.println(" ScrimController: ");
+        pw.print("  state: "); pw.println(mState);
+        pw.print("  frontScrim:"); pw.print(" viewAlpha="); pw.print(mScrimInFront.getViewAlpha());
         pw.print(" alpha="); pw.print(mCurrentInFrontAlpha);
         pw.print(" tint=0x"); pw.println(Integer.toHexString(mScrimInFront.getTint()));
 
-        pw.print("   backScrim:"); pw.print(" viewAlpha="); pw.print(mScrimBehind.getViewAlpha());
+        pw.print("  backScrim:"); pw.print(" viewAlpha="); pw.print(mScrimBehind.getViewAlpha());
         pw.print(" alpha="); pw.print(mCurrentBehindAlpha);
         pw.print(" tint=0x"); pw.println(Integer.toHexString(mScrimBehind.getTint()));
 
