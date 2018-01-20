@@ -331,6 +331,8 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		$(framework_docs_LOCAL_DROIDDOC_OPTIONS) \
 		-referenceonly \
 		-api $(INTERNAL_PLATFORM_API_FILE) \
+		-privateApi $(INTERNAL_PLATFORM_PRIVATE_API_FILE) \
+		-privateDexApi $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE) \
 		-removedApi $(INTERNAL_PLATFORM_REMOVED_API_FILE) \
 		-nodocs
 
@@ -340,7 +342,9 @@ LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_DROIDDOC)
 
-$(INTERNAL_PLATFORM_API_FILE): $(full_target)
+$(full_target): .KATI_IMPLICIT_OUTPUTS := $(INTERNAL_PLATFORM_API_FILE) \
+                                          $(INTERNAL_PLATFORM_PRIVATE_API_FILE) \
+                                          $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_API_FILE))
 
 # ====  the system api stubs ===================================
@@ -365,6 +369,8 @@ LOCAL_DROIDDOC_OPTIONS:=\
 		-referenceonly \
 		-showAnnotation android.annotation.SystemApi \
 		-api $(INTERNAL_PLATFORM_SYSTEM_API_FILE) \
+		-privateApi $(INTERNAL_PLATFORM_SYSTEM_PRIVATE_API_FILE) \
+		-privateDexApi $(INTERNAL_PLATFORM_SYSTEM_PRIVATE_DEX_API_FILE) \
 		-removedApi $(INTERNAL_PLATFORM_SYSTEM_REMOVED_API_FILE) \
 		-exactApi $(INTERNAL_PLATFORM_SYSTEM_EXACT_API_FILE) \
 		-nodocs
@@ -375,7 +381,9 @@ LOCAL_UNINSTALLABLE_MODULE := true
 
 include $(BUILD_DROIDDOC)
 
-$(INTERNAL_PLATFORM_SYSTEM_API_FILE): $(full_target)
+$(full_target): .KATI_IMPLICIT_OUTPUTS := $(INTERNAL_PLATFORM_SYSTEM_API_FILE) \
+                                          $(INTERNAL_PLATFORM_SYSTEM_PRIVATE_API_FILE) \
+                                          $(INTERNAL_PLATFORM_SYSTEM_PRIVATE_DEX_API_FILE)
 $(call dist-for-goals,sdk,$(INTERNAL_PLATFORM_SYSTEM_API_FILE))
 
 # ====  the test api stubs ===================================
