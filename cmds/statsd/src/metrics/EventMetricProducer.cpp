@@ -118,7 +118,6 @@ void EventMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                        reinterpret_cast<char*>(buffer.get()->data()), buffer.get()->size());
 
     startNewProtoOutputStreamLocked();
-    mStartTimeNs = dumpTimeNs;
 }
 
 void EventMetricProducer::onConditionChangedLocked(const bool conditionMet,

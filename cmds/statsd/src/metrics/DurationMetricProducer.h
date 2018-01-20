@@ -73,6 +73,8 @@ private:
     // Util function to flush the old packet.
     void flushIfNeededLocked(const uint64_t& eventTime);
 
+    void flushCurrentBucketLocked(const uint64_t& eventTimeNs) override;
+
     const DurationMetric_AggregationType mAggregationType;
 
     // Index of the SimpleAtomMatcher which defines the start.
@@ -112,6 +114,10 @@ private:
 
     FRIEND_TEST(DurationMetricTrackerTest, TestNoCondition);
     FRIEND_TEST(DurationMetricTrackerTest, TestNonSlicedCondition);
+    FRIEND_TEST(DurationMetricTrackerTest, TestSumDurationWithUpgrade);
+    FRIEND_TEST(DurationMetricTrackerTest, TestSumDurationWithUpgradeInFollowingBucket);
+    FRIEND_TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgrade);
+    FRIEND_TEST(DurationMetricTrackerTest, TestMaxDurationWithUpgradeInNextBucket);
     FRIEND_TEST(WakelockDurationE2eTest, TestAggregatedPredicates);
 };
 

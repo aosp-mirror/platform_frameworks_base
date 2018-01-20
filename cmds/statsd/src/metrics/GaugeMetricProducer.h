@@ -62,6 +62,22 @@ public:
     // Handles when the pulled data arrives.
     void onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& data) override;
 
+    // GaugeMetric needs to immediately trigger another pull when we create the partial bucket.
+    void notifyAppUpgrade(const uint64_t& eventTimeNs, const string& apk, const int uid,
+                          const int64_t version) override {
+        std::lock_guard<std::mutex> lock(mMutex);
+
+        if (eventTimeNs > getCurrentBucketEndTimeNs()) {
+            // Flush full buckets on the normal path up to the latest bucket boundary.
+            flushIfNeededLocked(eventTimeNs);
+        }
+        flushCurrentBucketLocked(eventTimeNs);
+        mCurrentBucketStartTimeNs = eventTimeNs;
+        if (mPullTagId != -1) {
+            pullLocked();
+        }
+    };
+
 protected:
     void onMatchedLogEventInternalLocked(
             const size_t matcherIndex, const MetricDimensionKey& eventKey,
@@ -91,7 +107,11 @@ private:
     void dumpStatesLocked(FILE* out, bool verbose) const override{};
 
     // Util function to flush the old packet.
-    void flushIfNeededLocked(const uint64_t& eventTime);
+    void flushIfNeededLocked(const uint64_t& eventTime) override;
+
+    void flushCurrentBucketLocked(const uint64_t& eventTimeNs) override;
+
+    void pullLocked();
 
     std::shared_ptr<StatsPullerManager> mStatsPullerManager;
     // tagId for pulled data. -1 if this is not pulled
@@ -101,13 +121,15 @@ private:
     // TODO: Add a lock to mPastBuckets.
     std::unordered_map<MetricDimensionKey, std::vector<GaugeBucket>> mPastBuckets;
 
-    // The current bucket.
+    // The current partial bucket.
     std::shared_ptr<DimToGaugeAtomsMap> mCurrentSlicedBucket;
 
-    // The current bucket for anomaly detection.
+    // The current full bucket for anomaly detection. This is updated to the latest value seen for
+    // this slice (ie, for partial buckets, we use the last partial bucket in this full bucket).
     std::shared_ptr<DimToValMap> mCurrentSlicedBucketForAnomaly;
 
-    // Translate Atom based bucket to single numeric value bucket for anomaly
+    // Translate Atom based bucket to single numeric value bucket for anomaly and updates the map
+    // for each slice with the latest value.
     void updateCurrentSlicedBucketForAnomaly();
 
     // Whitelist of fields to report. Empty means all are reported.
@@ -125,6 +147,8 @@ private:
 
     FRIEND_TEST(GaugeMetricProducerTest, TestWithCondition);
     FRIEND_TEST(GaugeMetricProducerTest, TestNoCondition);
+    FRIEND_TEST(GaugeMetricProducerTest, TestPushedEventsWithUpgrade);
+    FRIEND_TEST(GaugeMetricProducerTest, TestPulledWithUpgrade);
     FRIEND_TEST(GaugeMetricProducerTest, TestAnomalyDetection);
 };
 

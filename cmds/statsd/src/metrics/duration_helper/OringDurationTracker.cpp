@@ -26,12 +26,13 @@ using std::pair;
 
 OringDurationTracker::OringDurationTracker(
         const ConfigKey& key, const int64_t& id, const MetricDimensionKey& eventKey,
-        sp<ConditionWizard> wizard, int conditionIndex,
-        const FieldMatcher& dimensionInCondition, bool nesting, uint64_t currentBucketStartNs,
-        uint64_t bucketSizeNs, bool conditionSliced,
+        sp<ConditionWizard> wizard, int conditionIndex, const FieldMatcher& dimensionInCondition,
+        bool nesting, uint64_t currentBucketStartNs, uint64_t currentBucketNum,
+        uint64_t startTimeNs, uint64_t bucketSizeNs, bool conditionSliced,
         const vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
     : DurationTracker(key, id, eventKey, wizard, conditionIndex, dimensionInCondition, nesting,
-                      currentBucketStartNs, bucketSizeNs, conditionSliced, anomalyTrackers),
+                      currentBucketStartNs, currentBucketNum, startTimeNs, bucketSizeNs,
+                      conditionSliced, anomalyTrackers),
       mStarted(),
       mPaused() {
     mLastStartTime = 0;
@@ -100,7 +101,7 @@ void OringDurationTracker::noteStop(const HashableDimensionKey& key, const uint6
         }
         if (mStarted.empty()) {
             mDuration += (timestamp - mLastStartTime);
-            detectAndDeclareAnomaly(timestamp, mCurrentBucketNum, mDuration);
+            detectAndDeclareAnomaly(timestamp, mCurrentBucketNum, mDuration + mDurationFullBucket);
             VLOG("record duration %lld, total %lld ", (long long)timestamp - mLastStartTime,
                  (long long)mDuration);
         }
@@ -125,7 +126,7 @@ void OringDurationTracker::noteStopAll(const uint64_t timestamp) {
         mDuration += (timestamp - mLastStartTime);
         VLOG("Oring Stop all: record duration %lld %lld ", (long long)timestamp - mLastStartTime,
              (long long)mDuration);
-        detectAndDeclareAnomaly(timestamp, mCurrentBucketNum, mDuration);
+        detectAndDeclareAnomaly(timestamp, mCurrentBucketNum, mDuration + mDurationFullBucket);
     }
 
     stopAnomalyAlarm();
@@ -134,49 +135,81 @@ void OringDurationTracker::noteStopAll(const uint64_t timestamp) {
     mConditionKeyMap.clear();
 }
 
-bool OringDurationTracker::flushIfNeeded(
-        uint64_t eventTime, unordered_map<MetricDimensionKey, vector<DurationBucket>>* output) {
-    if (eventTime < mCurrentBucketStartTimeNs + mBucketSizeNs) {
-        return false;
-    }
+bool OringDurationTracker::flushCurrentBucket(
+        const uint64_t& eventTimeNs,
+        std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>>* output) {
     VLOG("OringDurationTracker Flushing.............");
-    // adjust the bucket start time
-    int numBucketsForward = (eventTime - mCurrentBucketStartTimeNs) / mBucketSizeNs;
-    DurationBucket current_info;
-    current_info.mBucketStartNs = mCurrentBucketStartTimeNs;
-    current_info.mBucketEndNs = current_info.mBucketStartNs + mBucketSizeNs;
-    current_info.mBucketNum = mCurrentBucketNum;
+
+    // Note that we have to mimic the bucket time changes we do in the
+    // MetricProducer#notifyAppUpgrade.
+
+    int numBucketsForward = 0;
+    uint64_t fullBucketEnd = getCurrentBucketEndTimeNs();
+    uint64_t currentBucketEndTimeNs;
+
+    if (eventTimeNs >= fullBucketEnd) {
+        numBucketsForward = 1 + (eventTimeNs - fullBucketEnd) / mBucketSizeNs;
+        currentBucketEndTimeNs = fullBucketEnd;
+    } else {
+        // This must be a partial bucket.
+        currentBucketEndTimeNs = eventTimeNs;
+    }
+
     // Process the current bucket.
     if (mStarted.size() > 0) {
-        mDuration += (current_info.mBucketEndNs - mLastStartTime);
+        mDuration += (currentBucketEndTimeNs - mLastStartTime);
     }
     if (mDuration > 0) {
+        DurationBucket current_info;
+        current_info.mBucketStartNs = mCurrentBucketStartTimeNs;
+        current_info.mBucketEndNs = currentBucketEndTimeNs;
+        current_info.mBucketNum = mCurrentBucketNum;
         current_info.mDuration = mDuration;
         (*output)[mEventKey].push_back(current_info);
-        addPastBucketToAnomalyTrackers(current_info.mDuration, current_info.mBucketNum);
+        mDurationFullBucket += mDuration;
+        if (eventTimeNs > fullBucketEnd) {
+            // End of full bucket, can send to anomaly tracker now.
+            addPastBucketToAnomalyTrackers(mDurationFullBucket, current_info.mBucketNum);
+            mDurationFullBucket = 0;
+        }
         VLOG("  duration: %lld", (long long)current_info.mDuration);
     }
 
     if (mStarted.size() > 0) {
         for (int i = 1; i < numBucketsForward; i++) {
             DurationBucket info;
-            info.mBucketStartNs = mCurrentBucketStartTimeNs + mBucketSizeNs * i;
+            info.mBucketStartNs = fullBucketEnd + mBucketSizeNs * (i - 1);
             info.mBucketEndNs = info.mBucketStartNs + mBucketSizeNs;
             info.mBucketNum = mCurrentBucketNum + i;
             info.mDuration = mBucketSizeNs;
             (*output)[mEventKey].push_back(info);
+            // Safe to send these buckets to anomaly tracker since they must be full buckets.
+            // If it's a partial bucket, numBucketsForward would be 0.
             addPastBucketToAnomalyTrackers(info.mDuration, info.mBucketNum);
             VLOG("  add filling bucket with duration %lld", (long long)info.mDuration);
         }
     }
-    mCurrentBucketStartTimeNs += numBucketsForward * mBucketSizeNs;
-    mCurrentBucketNum += numBucketsForward;
 
-    mLastStartTime = mCurrentBucketStartTimeNs;
     mDuration = 0;
+
+    if (numBucketsForward > 0) {
+        mCurrentBucketStartTimeNs = fullBucketEnd + (numBucketsForward - 1) * mBucketSizeNs;
+        mCurrentBucketNum += numBucketsForward;
+    } else {  // We must be forming a partial bucket.
+        mCurrentBucketStartTimeNs = eventTimeNs;
+    }
+    mLastStartTime = mCurrentBucketStartTimeNs;
 
     // if all stopped, then tell owner it's safe to remove this tracker.
     return mStarted.empty() && mPaused.empty();
+}
+
+bool OringDurationTracker::flushIfNeeded(
+        uint64_t eventTimeNs, unordered_map<MetricDimensionKey, vector<DurationBucket>>* output) {
+    if (eventTimeNs < getCurrentBucketEndTimeNs()) {
+        return false;
+    }
+    return flushCurrentBucket(eventTimeNs, output);
 }
 
 void OringDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) {
@@ -211,7 +244,7 @@ void OringDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) 
             mDuration += (timestamp - mLastStartTime);
             VLOG("Duration add %lld , to %lld ", (long long)(timestamp - mLastStartTime),
                  (long long)mDuration);
-            detectAndDeclareAnomaly(timestamp, mCurrentBucketNum, mDuration);
+            detectAndDeclareAnomaly(timestamp, mCurrentBucketNum, mDuration + mDurationFullBucket);
         }
     }
 
@@ -275,7 +308,7 @@ void OringDurationTracker::onConditionChanged(bool condition, const uint64_t tim
             mDuration += (timestamp - mLastStartTime);
             mPaused.insert(mStarted.begin(), mStarted.end());
             mStarted.clear();
-            detectAndDeclareAnomaly(timestamp, mCurrentBucketNum, mDuration);
+            detectAndDeclareAnomaly(timestamp, mCurrentBucketNum, mDuration + mDurationFullBucket);
         }
     }
     if (mStarted.empty()) {
@@ -298,7 +331,7 @@ int64_t OringDurationTracker::predictAnomalyTimestampNs(
     // As we move into the future, old buckets get overwritten (so their old data is erased).
 
     // Sum of past durations. Will change as we overwrite old buckets.
-    int64_t pastNs = mDuration;
+    int64_t pastNs = mDuration + mDurationFullBucket;
     pastNs += anomalyTracker.getSumOverPastBuckets(mEventKey);
 
     // How much of the threshold is still unaccounted after considering pastNs.

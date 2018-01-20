@@ -119,7 +119,8 @@ bool MetricsManager::isConfigValid() const {
     return mConfigValid;
 }
 
-void MetricsManager::notifyAppUpgrade(const string& apk, const int uid, const int64_t version) {
+void MetricsManager::notifyAppUpgrade(const uint64_t& eventTimeNs, const string& apk, const int uid,
+                                      const int64_t version) {
     // check if we care this package
     if (std::find(mAllowedPkg.begin(), mAllowedPkg.end(), apk) == mAllowedPkg.end()) {
         return;
@@ -129,7 +130,8 @@ void MetricsManager::notifyAppUpgrade(const string& apk, const int uid, const in
     initLogSourceWhiteList();
 }
 
-void MetricsManager::notifyAppRemoved(const string& apk, const int uid) {
+void MetricsManager::notifyAppRemoved(const uint64_t& eventTimeNs, const string& apk,
+                                      const int uid) {
     // check if we care this package
     if (std::find(mAllowedPkg.begin(), mAllowedPkg.end(), apk) == mAllowedPkg.end()) {
         return;
@@ -139,7 +141,7 @@ void MetricsManager::notifyAppRemoved(const string& apk, const int uid) {
     initLogSourceWhiteList();
 }
 
-void MetricsManager::onUidMapReceived() {
+void MetricsManager::onUidMapReceived(const uint64_t& eventTimeNs) {
     if (mAllowedPkg.size() == 0) {
         return;
     }

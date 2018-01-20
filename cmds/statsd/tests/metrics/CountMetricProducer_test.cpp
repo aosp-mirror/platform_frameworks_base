@@ -191,6 +191,117 @@ TEST(CountMetricProducerTest, TestEventsWithSlicedCondition) {
     EXPECT_EQ(1LL, bucketInfo.mCount);
 }
 
+TEST(CountMetricProducerTest, TestEventWithAppUpgrade) {
+    uint64_t bucketStartTimeNs = 10000000000;
+    uint64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
+    uint64_t eventUpgradeTimeNs = bucketStartTimeNs + 15 * NS_PER_SEC;
+
+    int tagId = 1;
+    int conditionTagId = 2;
+
+    CountMetric metric;
+    metric.set_id(1);
+    metric.set_bucket(ONE_MINUTE);
+    Alert alert;
+    alert.set_num_buckets(3);
+    alert.set_trigger_if_sum_gt(2);
+    LogEvent event1(tagId, bucketStartTimeNs + 1);
+    event1.write("111");  // uid
+    event1.init();
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+    CountMetricProducer countProducer(kConfigKey, metric, -1 /* no condition */, wizard,
+                                      bucketStartTimeNs);
+    sp<AnomalyTracker> anomalyTracker = countProducer.addAnomalyTracker(alert);
+    EXPECT_TRUE(anomalyTracker != nullptr);
+
+    // Bucket is flushed yet.
+    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
+    EXPECT_EQ(0UL, countProducer.mPastBuckets.size());
+    EXPECT_EQ(0, anomalyTracker->getSumOverPastBuckets(DEFAULT_METRIC_DIMENSION_KEY));
+
+    // App upgrade forces bucket flush.
+    // Check that there's a past bucket and the bucket end is not adjusted.
+    countProducer.notifyAppUpgrade(eventUpgradeTimeNs, "ANY.APP", 1, 1);
+    EXPECT_EQ(1UL, countProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
+    EXPECT_EQ((long long)bucketStartTimeNs,
+              countProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].mBucketStartNs);
+    EXPECT_EQ((long long)eventUpgradeTimeNs,
+              countProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].mBucketEndNs);
+    EXPECT_EQ(eventUpgradeTimeNs, countProducer.mCurrentBucketStartTimeNs);
+    // Anomaly tracker only contains full buckets.
+    EXPECT_EQ(0, anomalyTracker->getSumOverPastBuckets(DEFAULT_METRIC_DIMENSION_KEY));
+
+    uint64_t lastEndTimeNs = countProducer.getCurrentBucketEndTimeNs();
+    // Next event occurs in same bucket as partial bucket created.
+    LogEvent event2(tagId, bucketStartTimeNs + 59 * NS_PER_SEC + 10);
+    event2.write("222");  // uid
+    event2.init();
+    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event2);
+    EXPECT_EQ(1UL, countProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
+    EXPECT_EQ(eventUpgradeTimeNs, countProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(0, anomalyTracker->getSumOverPastBuckets(DEFAULT_METRIC_DIMENSION_KEY));
+
+    // Third event in following bucket.
+    LogEvent event3(tagId, bucketStartTimeNs + 62 * NS_PER_SEC + 10);
+    event3.write("333");  // uid
+    event3.init();
+    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event3);
+    EXPECT_EQ(2UL, countProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
+    EXPECT_EQ(lastEndTimeNs, countProducer.mCurrentBucketStartTimeNs);
+    EXPECT_EQ(2, anomalyTracker->getSumOverPastBuckets(DEFAULT_METRIC_DIMENSION_KEY));
+}
+
+TEST(CountMetricProducerTest, TestEventWithAppUpgradeInNextBucket) {
+    uint64_t bucketStartTimeNs = 10000000000;
+    uint64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
+    uint64_t eventUpgradeTimeNs = bucketStartTimeNs + 65 * NS_PER_SEC;
+
+    int tagId = 1;
+    int conditionTagId = 2;
+
+    CountMetric metric;
+    metric.set_id(1);
+    metric.set_bucket(ONE_MINUTE);
+    LogEvent event1(tagId, bucketStartTimeNs + 1);
+    event1.write("111");  // uid
+    event1.init();
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+    CountMetricProducer countProducer(kConfigKey, metric, -1 /* no condition */, wizard,
+                                      bucketStartTimeNs);
+
+    // Bucket is flushed yet.
+    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event1);
+    EXPECT_EQ(0UL, countProducer.mPastBuckets.size());
+
+    // App upgrade forces bucket flush.
+    // Check that there's a past bucket and the bucket end is not adjusted.
+    countProducer.notifyAppUpgrade(eventUpgradeTimeNs, "ANY.APP", 1, 1);
+    EXPECT_EQ(1UL, countProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
+    EXPECT_EQ((int64_t)bucketStartTimeNs,
+              countProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].mBucketStartNs);
+    EXPECT_EQ(bucketStartTimeNs + bucketSizeNs,
+              (uint64_t)countProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].mBucketEndNs);
+    EXPECT_EQ(eventUpgradeTimeNs, countProducer.mCurrentBucketStartTimeNs);
+
+    // Next event occurs in same bucket as partial bucket created.
+    LogEvent event2(tagId, bucketStartTimeNs + 70 * NS_PER_SEC + 10);
+    event2.write("222");  // uid
+    event2.init();
+    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event2);
+    EXPECT_EQ(1UL, countProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
+
+    // Third event in following bucket.
+    LogEvent event3(tagId, bucketStartTimeNs + 121 * NS_PER_SEC + 10);
+    event3.write("333");  // uid
+    event3.init();
+    countProducer.onMatchedLogEvent(1 /*log matcher index*/, event3);
+    EXPECT_EQ(2UL, countProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
+    EXPECT_EQ((int64_t)eventUpgradeTimeNs,
+              countProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][1].mBucketStartNs);
+    EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs,
+              (uint64_t)countProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][1].mBucketEndNs);
+}
+
 TEST(CountMetricProducerTest, TestAnomalyDetectionUnSliced) {
     Alert alert;
     alert.set_id(11);
