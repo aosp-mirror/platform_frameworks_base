@@ -592,6 +592,20 @@ public final class PowerManager {
     public static final String REBOOT_RECOVERY_UPDATE = "recovery-update";
 
     /**
+     * The value to pass as the 'reason' argument to reboot() to
+     * reboot into bootloader mode
+     * @hide
+     */
+    public static final String REBOOT_BOOTLOADER = "bootloader";
+
+    /**
+     * The value to pass as the 'reason' argument to reboot() to
+     * reboot into download mode
+     * @hide
+     */
+    public static final String REBOOT_DOWNLOAD = "download";
+
+    /**
      * The value to pass as the 'reason' argument to reboot() when device owner requests a reboot on
      * the device.
      * @hide
@@ -1393,6 +1407,24 @@ public final class PowerManager {
     public void reboot(String reason) {
         try {
             mService.reboot(false, reason, true);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Reboot the device.  Will not return if the reboot is successful.
+     * <p>
+     * Requires the {@link android.Manifest.permission#REBOOT} permission.
+     * </p>
+     *
+     * @param reason code to pass to the kernel (e.g., "recovery", "bootloader", "download") to
+     *               request special boot modes, or null.
+     * @hide
+     */
+    public void rebootCustom(String reason) {
+        try {
+            mService.rebootCustom(false, reason, true);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

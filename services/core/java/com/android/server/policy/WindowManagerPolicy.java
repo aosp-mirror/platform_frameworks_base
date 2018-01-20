@@ -555,6 +555,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
 
         public void shutdown(boolean confirm);
         public void reboot(boolean confirm);
+        public void reboot(boolean confirm, String reason);
         public void rebootSafeMode(boolean confirm);
 
         /**
