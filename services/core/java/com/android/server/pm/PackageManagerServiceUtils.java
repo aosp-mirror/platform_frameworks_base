@@ -562,8 +562,7 @@ public class PackageManagerServiceUtils {
     private static boolean matchSignatureInSystem(PackageSetting pkgSetting,
             PackageSetting disabledPkgSetting) {
         try {
-            PackageParser.collectCertificates(disabledPkgSetting.pkg,
-                    PackageParser.PARSE_IS_SYSTEM_DIR);
+            PackageParser.collectCertificates(disabledPkgSetting.pkg, true /* skipVerify */);
             if (compareSignatures(pkgSetting.signatures.mSigningDetails.signatures,
                         disabledPkgSetting.signatures.mSigningDetails.signatures)
                     != PackageManager.SIGNATURE_MATCH) {

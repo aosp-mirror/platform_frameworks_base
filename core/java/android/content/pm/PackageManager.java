@@ -4740,7 +4740,7 @@ public abstract class PackageManager {
 
             PackageParser.Package pkg = parser.parseMonolithicPackage(apkFile, 0);
             if ((flags & GET_SIGNATURES) != 0) {
-                PackageParser.collectCertificates(pkg, 0);
+                PackageParser.collectCertificates(pkg, false /* skipVerify */);
             }
             PackageUserState state = new PackageUserState();
             return PackageParser.generatePackageInfo(pkg, null, flags, 0, 0, null, state);

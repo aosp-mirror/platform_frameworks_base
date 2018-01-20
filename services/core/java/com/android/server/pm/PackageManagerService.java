@@ -339,6 +339,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
+import java.security.DigestException;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -8295,11 +8296,13 @@ Slog.e("TODD",
     }
 
     private void collectCertificatesLI(PackageSetting ps, PackageParser.Package pkg,
-            final @ParseFlags int parseFlags, boolean forceCollect) throws PackageManagerException {
+            boolean forceCollect) throws PackageManagerException {
         // When upgrading from pre-N MR1, verify the package time stamp using the package
         // directory and not the APK file.
         final long lastModifiedTime = mIsPreNMR1Upgrade
                 ? new File(pkg.codePath).lastModified() : getLastModifiedTime(pkg);
+        // Note that currently skipVerify skips verification on both base and splits for simplicity.
+        final boolean skipVerify = forceCollect && canSkipFullPackageVerification(pkg);
         if (ps != null && !forceCollect
                 && ps.codePathString.equals(pkg.codePath)
                 && ps.timeStamp == lastModifiedTime
@@ -8325,7 +8328,7 @@ Slog.e("TODD",
 
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
-            PackageParser.collectCertificates(pkg, parseFlags);
+            PackageParser.collectCertificates(pkg, skipVerify);
         } catch (PackageParserException e) {
             throw PackageManagerException.from(e);
         } finally {
@@ -8417,6 +8420,48 @@ Slog.e("TODD",
         }
 
         return scannedPkg;
+    }
+
+    /**
+     * Returns if full apk verification can be skipped for the whole package, including the splits.
+     */
+    private boolean canSkipFullPackageVerification(PackageParser.Package pkg) {
+        if (!canSkipFullApkVerification(pkg.baseCodePath)) {
+            return false;
+        }
+        // TODO: Allow base and splits to be verified individually.
+        if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
+            for (int i = 0; i < pkg.splitCodePaths.length; i++) {
+                if (!canSkipFullApkVerification(pkg.splitCodePaths[i])) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Returns if full apk verification can be skipped, depending on current FSVerity setup and
+     * whether the apk contains signed root hash.  Note that the signer's certificate still needs to
+     * match one in a trusted source, and should be done separately.
+     */
+    private boolean canSkipFullApkVerification(String apkPath) {
+        byte[] rootHashObserved = null;
+        try {
+            rootHashObserved = VerityUtils.generateFsverityRootHash(apkPath);
+            if (rootHashObserved == null) {
+                return false;  // APK does not contain Merkle tree root hash.
+            }
+            synchronized (mInstallLock) {
+                // Returns whether the observed root hash matches what kernel has.
+                mInstaller.assertFsverityRootHashMatches(apkPath, rootHashObserved);
+                return true;
+            }
+        } catch (InstallerException | IOException | DigestException |
+                NoSuchAlgorithmException e) {
+            Slog.w(TAG, "Error in fsverity check. Fallback to full apk verification.", e);
+        }
+        return false;
     }
 
     // Temporary to catch potential issues with refactoring
@@ -8630,10 +8675,11 @@ Slog.e("TODD",
         }
 
         // Verify certificates against what was last scanned. If it is an updated priv app, we will
-        // force the verification. Full apk verification will happen unless apk verity is set up for
-        // the file. In that case, only small part of the apk is verified upfront.
-        collectCertificatesLI(pkgSetting, pkg, parseFlags,
-                PackageManagerServiceUtils.isApkVerificationForced(disabledPkgSetting));
+        // force re-collecting certificate. Full apk verification will happen unless apk verity is
+        // set up for the file. In that case, only small part of the apk is verified upfront.
+        final boolean forceCollect = PackageManagerServiceUtils.isApkVerificationForced(
+                disabledPkgSetting);
+        collectCertificatesLI(pkgSetting, pkg, forceCollect);
 
         boolean shouldHideSystemApp = false;
         // A new application appeared on /system, but, we already have a copy of
@@ -16708,7 +16754,7 @@ Slog.e("TODD",
             if (args.signingDetails != PackageParser.SigningDetails.UNKNOWN) {
                 pkg.setSigningDetails(args.signingDetails);
             } else {
-                PackageParser.collectCertificates(pkg, parseFlags);
+                PackageParser.collectCertificates(pkg, false /* skipVerify */);
             }
         } catch (PackageParserException e) {
             res.setError("Failed collect during installPackageLI", e);

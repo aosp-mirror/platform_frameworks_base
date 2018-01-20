@@ -1504,9 +1504,9 @@ public class PackageParser {
      * populating {@link Package#mSigningDetails}. Also asserts that all APK
      * contents are signed correctly and consistently.
      */
-    public static void collectCertificates(Package pkg, @ParseFlags int parseFlags)
+    public static void collectCertificates(Package pkg, boolean skipVerify)
             throws PackageParserException {
-        collectCertificatesInternal(pkg, parseFlags);
+        collectCertificatesInternal(pkg, skipVerify);
         final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
         for (int i = 0; i < childCount; i++) {
             Package childPkg = pkg.childPackages.get(i);
@@ -1514,17 +1514,17 @@ public class PackageParser {
         }
     }
 
-    private static void collectCertificatesInternal(Package pkg, @ParseFlags int parseFlags)
+    private static void collectCertificatesInternal(Package pkg, boolean skipVerify)
             throws PackageParserException {
         pkg.mSigningDetails = SigningDetails.UNKNOWN;
 
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
         try {
-            collectCertificates(pkg, new File(pkg.baseCodePath), parseFlags);
+            collectCertificates(pkg, new File(pkg.baseCodePath), skipVerify);
 
             if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
                 for (int i = 0; i < pkg.splitCodePaths.length; i++) {
-                    collectCertificates(pkg, new File(pkg.splitCodePaths[i]), parseFlags);
+                    collectCertificates(pkg, new File(pkg.splitCodePaths[i]), skipVerify);
                 }
             }
         } finally {
@@ -1532,7 +1532,7 @@ public class PackageParser {
         }
     }
 
-    private static void collectCertificates(Package pkg, File apkFile, @ParseFlags int parseFlags)
+    private static void collectCertificates(Package pkg, File apkFile, boolean skipVerify)
             throws PackageParserException {
         final String apkPath = apkFile.getAbsolutePath();
 
@@ -1542,7 +1542,7 @@ public class PackageParser {
             minSignatureScheme = SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V2;
         }
         SigningDetails verified;
-        if ((parseFlags & PARSE_IS_SYSTEM_DIR) != 0) {
+        if (skipVerify) {
             // systemDir APKs are already trusted, save time by not verifying
             verified = ApkSignatureVerifier.plsCertsNoVerifyOnlyCerts(
                         apkPath, minSignatureScheme);
@@ -1622,9 +1622,10 @@ public class PackageParser {
             if ((flags & PARSE_COLLECT_CERTIFICATES) != 0) {
                 // TODO: factor signature related items out of Package object
                 final Package tempPkg = new Package((String) null);
+                final boolean skipVerify = (flags & PARSE_IS_SYSTEM_DIR) != 0;
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
                 try {
-                    collectCertificates(tempPkg, apkFile, flags);
+                    collectCertificates(tempPkg, apkFile, skipVerify);
                 } finally {
                     Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
                 }

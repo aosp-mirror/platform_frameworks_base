@@ -77,6 +77,14 @@ abstract public class VerityUtils {
     }
 
     /**
+     * {@see ApkSignatureVerifier#generateFsverityRootHash(String)}.
+     */
+    public static byte[] generateFsverityRootHash(@NonNull String apkPath)
+            throws NoSuchAlgorithmException, DigestException, IOException {
+        return ApkSignatureVerifier.generateFsverityRootHash(apkPath);
+    }
+
+    /**
      * Returns a {@code SharedMemory} that contains Merkle tree and fsverity headers for the given
      * apk, in the form that can immediately be used for fsverity setup.
      */

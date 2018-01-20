@@ -523,6 +523,20 @@ public class ApkSignatureSchemeV3Verifier {
         }
     }
 
+    static byte[] generateFsverityRootHash(String apkPath)
+            throws NoSuchAlgorithmException, DigestException, IOException,
+                   SignatureNotFoundException {
+        try (RandomAccessFile apk = new RandomAccessFile(apkPath, "r")) {
+            SignatureInfo signatureInfo = findSignature(apk);
+            VerifiedSigner vSigner = verify(apk, false);
+            if (vSigner.verityRootHash == null) {
+                return null;
+            }
+            return ApkVerityBuilder.generateFsverityRootHash(
+                    apk, ByteBuffer.wrap(vSigner.verityRootHash), signatureInfo);
+        }
+    }
+
     private static boolean isSupportedSignatureAlgorithm(int sigAlgorithm) {
         switch (sigAlgorithm) {
             case SIGNATURE_RSA_PSS_WITH_SHA256:
