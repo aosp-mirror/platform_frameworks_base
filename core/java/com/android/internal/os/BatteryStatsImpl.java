@@ -3892,8 +3892,10 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         mKernelUidCpuTimeReader.removeUid(isolatedUid);
         mKernelUidCpuFreqTimeReader.removeUid(isolatedUid);
-        mKernelUidCpuActiveTimeReader.removeUid(isolatedUid);
-        mKernelUidCpuClusterTimeReader.removeUid(isolatedUid);
+        if (mConstants.TRACK_CPU_ACTIVE_CLUSTER_TIME) {
+            mKernelUidCpuActiveTimeReader.removeUid(isolatedUid);
+            mKernelUidCpuClusterTimeReader.removeUid(isolatedUid);
+        }
     }
 
     public int mapUid(int uid) {
@@ -11538,8 +11540,10 @@ public class BatteryStatsImpl extends BatteryStats {
         if (!mOnBatteryInternal) {
             mKernelUidCpuTimeReader.readDelta(null);
             mKernelUidCpuFreqTimeReader.readDelta(null);
-            mKernelUidCpuActiveTimeReader.readDelta(null);
-            mKernelUidCpuClusterTimeReader.readDelta(null);
+            if (mConstants.TRACK_CPU_ACTIVE_CLUSTER_TIME) {
+                mKernelUidCpuActiveTimeReader.readDelta(null);
+                mKernelUidCpuClusterTimeReader.readDelta(null);
+            }
             for (int cluster = mKernelCpuSpeedReaders.length - 1; cluster >= 0; --cluster) {
                 mKernelCpuSpeedReaders[cluster].readDelta();
             }
@@ -11556,8 +11560,10 @@ public class BatteryStatsImpl extends BatteryStats {
             updateClusterSpeedTimes(updatedUids);
         }
         readKernelUidCpuFreqTimesLocked(partialTimersToConsider);
-        readKernelUidCpuActiveTimesLocked();
-        readKernelUidCpuClusterTimesLocked();
+        if (mConstants.TRACK_CPU_ACTIVE_CLUSTER_TIME) {
+            readKernelUidCpuActiveTimesLocked();
+            readKernelUidCpuClusterTimesLocked();
+        }
     }
 
     /**
@@ -12804,10 +12810,19 @@ public class BatteryStatsImpl extends BatteryStats {
     public final class Constants extends ContentObserver {
         public static final String KEY_TRACK_CPU_TIMES_BY_PROC_STATE
                 = "track_cpu_times_by_proc_state";
+        public static final String KEY_TRACK_CPU_ACTIVE_CLUSTER_TIME
+                = "track_cpu_active_cluster_time";
+        public static final String KEY_READ_BINARY_CPU_TIME
+                = "read_binary_cpu_time";
 
         private static final boolean DEFAULT_TRACK_CPU_TIMES_BY_PROC_STATE = true;
+        private static final boolean DEFAULT_TRACK_CPU_ACTIVE_CLUSTER_TIME = true;
+        private static final boolean DEFAULT_READ_BINARY_CPU_TIME = false;
 
         public boolean TRACK_CPU_TIMES_BY_PROC_STATE = DEFAULT_TRACK_CPU_TIMES_BY_PROC_STATE;
+        public boolean TRACK_CPU_ACTIVE_CLUSTER_TIME = DEFAULT_TRACK_CPU_ACTIVE_CLUSTER_TIME;
+        // Not used right now.
+        public boolean READ_BINARY_CPU_TIME = DEFAULT_READ_BINARY_CPU_TIME;
 
         private ContentResolver mResolver;
         private final KeyValueListParser mParser = new KeyValueListParser(',');
@@ -12843,6 +12858,11 @@ public class BatteryStatsImpl extends BatteryStats {
                 updateTrackCpuTimesByProcStateLocked(TRACK_CPU_TIMES_BY_PROC_STATE,
                         mParser.getBoolean(KEY_TRACK_CPU_TIMES_BY_PROC_STATE,
                                 DEFAULT_TRACK_CPU_TIMES_BY_PROC_STATE));
+                TRACK_CPU_ACTIVE_CLUSTER_TIME = mParser.getBoolean(
+                        KEY_TRACK_CPU_ACTIVE_CLUSTER_TIME, DEFAULT_TRACK_CPU_ACTIVE_CLUSTER_TIME);
+                READ_BINARY_CPU_TIME = mParser.getBoolean(
+                        KEY_READ_BINARY_CPU_TIME, DEFAULT_READ_BINARY_CPU_TIME);
+
             }
         }
 
@@ -12857,6 +12877,10 @@ public class BatteryStatsImpl extends BatteryStats {
         public void dumpLocked(PrintWriter pw) {
             pw.print(KEY_TRACK_CPU_TIMES_BY_PROC_STATE); pw.print("=");
             pw.println(TRACK_CPU_TIMES_BY_PROC_STATE);
+            pw.print(KEY_TRACK_CPU_ACTIVE_CLUSTER_TIME); pw.print("=");
+            pw.println(TRACK_CPU_ACTIVE_CLUSTER_TIME);
+            pw.print(KEY_READ_BINARY_CPU_TIME); pw.print("=");
+            pw.println(READ_BINARY_CPU_TIME);
         }
     }
 
