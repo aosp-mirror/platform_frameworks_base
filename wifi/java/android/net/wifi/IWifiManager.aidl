@@ -108,8 +108,6 @@ interface IWifiManager
 
     boolean isDualBandSupported();
 
-    boolean saveConfiguration(String packageName);
-
     DhcpInfo getDhcpInfo();
 
     boolean isScanAlwaysAvailable();
