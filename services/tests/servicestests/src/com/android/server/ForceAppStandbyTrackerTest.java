@@ -266,7 +266,7 @@ public class ForceAppStandbyTrackerTest {
         assertEquals(((restrictionTypes & JOBS_ONLY) != 0),
                 instance.areJobsRestricted(uid, packageName, exemptFromBatterySaver));
         assertEquals(((restrictionTypes & ALARMS_ONLY) != 0),
-                instance.areAlarmsRestricted(uid, packageName));
+                instance.areAlarmsRestricted(uid, packageName, exemptFromBatterySaver));
     }
 
     private void areRestricted(ForceAppStandbyTrackerTestable instance, int uid, String packageName,
