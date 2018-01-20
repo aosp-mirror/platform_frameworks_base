@@ -727,6 +727,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private CharSequence mError;
     private CharSequence mPaneTitle;
     private CharSequence mContentDescription;
+    private CharSequence mTooltipText;
     private String mViewIdResourceName;
     private ArrayList<String> mExtraDataKeys;
 
@@ -2655,6 +2656,34 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Gets the tooltip text of this node.
+     *
+     * @return The tooltip text.
+     */
+    @Nullable
+    public CharSequence getTooltipText() {
+        return mTooltipText;
+    }
+
+    /**
+     * Sets the tooltip text of this node.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param tooltipText The tooltip text.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setTooltipText(@Nullable CharSequence tooltipText) {
+        enforceNotSealed();
+        mTooltipText = (tooltipText == null) ? null
+                : tooltipText.subSequence(0, tooltipText.length());
+    }
+
+    /**
      * Sets the view for which the view represented by this info serves as a
      * label for accessibility purposes.
      *
@@ -3208,6 +3237,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         if (!Objects.equals(mPaneTitle, DEFAULT.mPaneTitle)) {
             nonDefaultFields |= bitAt(fieldIndex);
         }
+        if (!Objects.equals(mTooltipText, DEFAULT.mTooltipText)) {
+            nonDefaultFields |= bitAt(fieldIndex);
+        }
         fieldIndex++;
         if (!Objects.equals(mViewIdResourceName, DEFAULT.mViewIdResourceName)) {
             nonDefaultFields |= bitAt(fieldIndex);
@@ -3329,6 +3361,8 @@ public class AccessibilityNodeInfo implements Parcelable {
             parcel.writeCharSequence(mContentDescription);
         }
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeCharSequence(mPaneTitle);
+        if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeCharSequence(mTooltipText);
+
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeString(mViewIdResourceName);
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) parcel.writeInt(mTextSelectionStart);
@@ -3401,6 +3435,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mError = other.mError;
         mContentDescription = other.mContentDescription;
         mPaneTitle = other.mPaneTitle;
+        mTooltipText = other.mTooltipText;
         mViewIdResourceName = other.mViewIdResourceName;
 
         if (mActions != null) mActions.clear();
@@ -3522,6 +3557,7 @@ public class AccessibilityNodeInfo implements Parcelable {
             mContentDescription = parcel.readCharSequence();
         }
         if (isBitSet(nonDefaultFields, fieldIndex++)) mPaneTitle = parcel.readString();
+        if (isBitSet(nonDefaultFields, fieldIndex++)) mTooltipText = parcel.readCharSequence();
         if (isBitSet(nonDefaultFields, fieldIndex++)) mViewIdResourceName = parcel.readString();
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) mTextSelectionStart = parcel.readInt();
@@ -3684,6 +3720,10 @@ public class AccessibilityNodeInfo implements Parcelable {
                 return "ACTION_SET_PROGRESS";
             case R.id.accessibilityActionContextClick:
                 return "ACTION_CONTEXT_CLICK";
+            case R.id.accessibilityActionShowTooltip:
+                return "ACTION_SHOW_TOOLTIP";
+            case R.id.accessibilityActionHideTooltip:
+                return "ACTION_HIDE_TOOLTIP";
             default:
                 return "ACTION_UNKNOWN";
         }
@@ -3797,6 +3837,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; error: ").append(mError);
         builder.append("; maxTextLength: ").append(mMaxTextLength);
         builder.append("; contentDescription: ").append(mContentDescription);
+        builder.append("; tooltipText: ").append(mTooltipText);
         builder.append("; viewIdResName: ").append(mViewIdResourceName);
 
         builder.append("; checkable: ").append(isCheckable());
@@ -4210,6 +4251,20 @@ public class AccessibilityNodeInfo implements Parcelable {
          */
         public static final AccessibilityAction ACTION_MOVE_WINDOW =
                 new AccessibilityAction(R.id.accessibilityActionMoveWindow);
+
+        /**
+         * Action to show a tooltip. A node should expose this action only for views with tooltip
+         * text that but are not currently showing a tooltip.
+         */
+        public static final AccessibilityAction ACTION_SHOW_TOOLTIP =
+                new AccessibilityAction(R.id.accessibilityActionShowTooltip);
+
+        /**
+         * Action to hide a tooltip. A node should expose this action only for views that are
+         * currently showing a tooltip.
+         */
+        public static final AccessibilityAction ACTION_HIDE_TOOLTIP =
+                new AccessibilityAction(R.id.accessibilityActionHideTooltip);
 
         private final int mActionId;
         private final CharSequence mLabel;
