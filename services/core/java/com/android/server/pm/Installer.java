@@ -285,43 +285,44 @@ public class Installer extends SystemService {
     public void dexopt(String apkPath, int uid, @Nullable String pkgName, String instructionSet,
             int dexoptNeeded, @Nullable String outputPath, int dexFlags,
             String compilerFilter, @Nullable String volumeUuid, @Nullable String sharedLibraries,
-            @Nullable String seInfo, boolean downgrade, int targetSdkVersion)
-            throws InstallerException {
+            @Nullable String seInfo, boolean downgrade, int targetSdkVersion,
+            @Nullable String profileName) throws InstallerException {
         assertValidInstructionSet(instructionSet);
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.dexopt(apkPath, uid, pkgName, instructionSet, dexoptNeeded, outputPath,
                     dexFlags, compilerFilter, volumeUuid, sharedLibraries, seInfo, downgrade,
-                    targetSdkVersion);
+                    targetSdkVersion, profileName);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
 
-    public boolean mergeProfiles(int uid, String packageName) throws InstallerException {
-        if (!checkBeforeRemote()) return false;
-        try {
-            return mInstalld.mergeProfiles(uid, packageName);
-        } catch (Exception e) {
-            throw InstallerException.from(e);
-        }
-    }
-
-    public boolean dumpProfiles(int uid, String packageName, String codePaths)
+    public boolean mergeProfiles(int uid, String packageName, String profileName)
             throws InstallerException {
         if (!checkBeforeRemote()) return false;
         try {
-            return mInstalld.dumpProfiles(uid, packageName, codePaths);
+            return mInstalld.mergeProfiles(uid, packageName, profileName);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
 
-    public boolean copySystemProfile(String systemProfile, int uid, String packageName)
+    public boolean dumpProfiles(int uid, String packageName, String profileName, String codePath)
             throws InstallerException {
         if (!checkBeforeRemote()) return false;
         try {
-            return mInstalld.copySystemProfile(systemProfile, uid, packageName);
+            return mInstalld.dumpProfiles(uid, packageName, profileName, codePath);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    public boolean copySystemProfile(String systemProfile, int uid, String packageName,
+                String profileName) throws InstallerException {
+        if (!checkBeforeRemote()) return false;
+        try {
+            return mInstalld.copySystemProfile(systemProfile, uid, packageName, profileName);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -365,10 +366,10 @@ public class Installer extends SystemService {
         }
     }
 
-    public void clearAppProfiles(String packageName) throws InstallerException {
+    public void clearAppProfiles(String packageName, String profileName) throws InstallerException {
         if (!checkBeforeRemote()) return;
         try {
-            mInstalld.clearAppProfiles(packageName);
+            mInstalld.clearAppProfiles(packageName, profileName);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -501,21 +502,21 @@ public class Installer extends SystemService {
         }
     }
 
-    public boolean createProfileSnapshot(int appId, String packageName, String codePath)
+    public boolean createProfileSnapshot(int appId, String packageName, String profileName)
             throws InstallerException {
         if (!checkBeforeRemote()) return false;
         try {
-            return mInstalld.createProfileSnapshot(appId, packageName, codePath);
+            return mInstalld.createProfileSnapshot(appId, packageName, profileName);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
     }
 
-    public void destroyProfileSnapshot(String packageName, String codePath)
+    public void destroyProfileSnapshot(String packageName, String profileName)
             throws InstallerException {
         if (!checkBeforeRemote()) return;
         try {
-            mInstalld.destroyProfileSnapshot(packageName, codePath);
+            mInstalld.destroyProfileSnapshot(packageName, profileName);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
