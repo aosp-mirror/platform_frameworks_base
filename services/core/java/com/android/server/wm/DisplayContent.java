@@ -3599,6 +3599,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     private final class AboveAppWindowContainers extends NonAppWindowContainers {
+        private final Dimmer mDimmer = new Dimmer(this);
+        private final Rect mTmpDimBoundsRect = new Rect();
         AboveAppWindowContainers(String name, WindowManagerService service) {
             super(name, service);
         }
@@ -3628,6 +3630,22 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
             if (needAssignIme) {
                 imeContainer.assignRelativeLayer(t, getSurfaceControl(), Integer.MAX_VALUE);
+            }
+        }
+
+        @Override
+        Dimmer getDimmer() {
+            return mDimmer;
+        }
+
+        @Override
+        void prepareSurfaces() {
+            mDimmer.resetDimStates();
+            super.prepareSurfaces();
+            getBounds(mTmpDimBoundsRect);
+
+            if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
+                scheduleAnimation();
             }
         }
     }

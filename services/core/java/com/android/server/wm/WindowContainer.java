@@ -1219,4 +1219,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             outPos.offset(-parentBounds.left, -parentBounds.top);
         }
     }
+
+    Dimmer getDimmer() {
+        if (mParent == null) {
+            return null;
+        }
+        return mParent.getDimmer();
+    }
 }
