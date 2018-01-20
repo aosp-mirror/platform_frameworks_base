@@ -3589,7 +3589,7 @@ public class WifiManager {
     }
 
     /**
-     * Resets all wifi manager settings back to factory defaults.
+     * Removes all saved wifi networks.
      *
      * @hide
      */
