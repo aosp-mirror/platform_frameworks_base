@@ -1172,8 +1172,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 Slog.w(TAG, "No field classification score on " + result);
                 return;
             }
-            final float[][] scoresMatrix = scores.getScores();
-
             int i = 0, j = 0;
             try {
                 for (i = 0; i < viewsSize; i++) {
@@ -1182,8 +1180,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     ArrayList<Match> matches = null;
                     for (j = 0; j < userValues.length; j++) {
                         String remoteId = remoteIds[j];
-                        final String actualAlgorithm = scores.getAlgorithm();
-                        final float score = scoresMatrix[i][j];
+                        final float score = scores.scores[i][j];
                         if (score > 0) {
                             if (sVerbose) {
                                 Slog.v(TAG, "adding score " + score + " at index " + j + " and id "
@@ -1192,7 +1189,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                             if (matches == null) {
                                 matches = new ArrayList<>(userValues.length);
                             }
-                            matches.add(new Match(remoteId, score, actualAlgorithm));
+                            matches.add(new Match(remoteId, score));
                         }
                         else if (sVerbose) {
                             Slog.v(TAG, "skipping score 0 at index " + j + " and id " + fieldId);
@@ -1205,7 +1202,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
             } catch (ArrayIndexOutOfBoundsException e) {
                 Slog.wtf(TAG, "Error accessing FC score at " + i + " x " + j + ": "
-                        + Arrays.toString(scoresMatrix), e);
+                        + Arrays.toString(scores.scores), e);
                 return;
             }
 

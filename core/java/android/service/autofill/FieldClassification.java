@@ -105,21 +105,16 @@ public final class FieldClassification {
 
     /**
      * Represents the score of a {@link UserData} entry for the field.
-     *
-     * <p>The score is calculated by the given {@link #getAlgorithm() algorithm} and
-     * the entry is identified by {@link #getRemoteId()}.
      */
     public static final class Match {
 
         private final String mRemoteId;
         private final float mScore;
-        private final String mAlgorithm;
 
         /** @hide */
-        public Match(String remoteId, float score, String algorithm) {
+        public Match(String remoteId, float score) {
             mRemoteId = Preconditions.checkNotNull(remoteId);
             mScore = score;
-            mAlgorithm = algorithm;
         }
 
         /**
@@ -150,38 +145,22 @@ public final class FieldClassification {
             return mScore;
         }
 
-        /**
-         * Gets the algorithm used to calculate this score.
-         *
-         * <p>Typically, this is either the algorithm set by
-         * {@link UserData.Builder#setFieldClassificationAlgorithm(String, android.os.Bundle)},
-         * or the
-         * {@link android.view.autofill.AutofillManager#getDefaultFieldClassificationAlgorithm()}.
-         */
-        @NonNull
-        public String getAlgorithm() {
-            return mAlgorithm;
-        }
-
         @Override
         public String toString() {
             if (!sDebug) return super.toString();
 
             final StringBuilder string = new StringBuilder("Match: remoteId=");
             Helper.appendRedacted(string, mRemoteId);
-            return string.append(", score=").append(mScore)
-                    .append(", algorithm=").append(mAlgorithm)
-                    .toString();
+            return string.append(", score=").append(mScore).toString();
         }
 
         private void writeToParcel(@NonNull Parcel parcel) {
             parcel.writeString(mRemoteId);
             parcel.writeFloat(mScore);
-            parcel.writeString(mAlgorithm);
         }
 
         private static Match readFromParcel(@NonNull Parcel parcel) {
-            return new Match(parcel.readString(), parcel.readFloat(), parcel.readString());
+            return new Match(parcel.readString(), parcel.readFloat());
         }
     }
 }

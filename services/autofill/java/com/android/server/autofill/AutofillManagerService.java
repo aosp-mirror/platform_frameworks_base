@@ -52,7 +52,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
-import android.service.autofill.AutofillFieldClassificationService.Scores;
 import android.service.autofill.FillEventHistory;
 import android.service.autofill.UserData;
 import android.util.LocalLog;

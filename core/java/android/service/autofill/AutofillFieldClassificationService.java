@@ -64,6 +64,20 @@ public abstract class AutofillFieldClassificationService extends Service {
     public static final String SERVICE_INTERFACE =
             "android.service.autofill.AutofillFieldClassificationService";
 
+    /**
+     * Manifest metadata key for the resource string containing the name of the default field
+     * classification algorithm.
+     */
+    public static final String SERVICE_META_DATA_KEY_DEFAULT_ALGORITHM =
+            "android.autofill.field_classification.default_algorithm";
+    /**
+     * Manifest metadata key for the resource string array containing the names of all field
+     * classification algorithms provided by the service.
+     */
+    public static final String SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS =
+            "android.autofill.field_classification.available_algorithms";
+
+
     /** {@hide} **/
     public static final String EXTRA_SCORES = "scores";
 
@@ -83,9 +97,9 @@ public abstract class AutofillFieldClassificationService extends Service {
                 final List<AutofillValue> actualValues = ((List<AutofillValue>) args.arg4);
                 @SuppressWarnings("unchecked")
                 final String[] userDataValues = (String[]) args.arg5;
-                final Scores scores = onGetScores(algorithmName, algorithmArgs, actualValues,
+                final float[][] scores = onGetScores(algorithmName, algorithmArgs, actualValues,
                         Arrays.asList(userDataValues));
-                data.putParcelable(EXTRA_SCORES, scores);
+                data.putParcelable(EXTRA_SCORES, new Scores(scores));
                 break;
             default:
                 Log.w(TAG, "Handling unknown message: " + action);
@@ -124,13 +138,14 @@ public abstract class AutofillFieldClassificationService extends Service {
      * @param args optional arguments to be passed to the algorithm.
      * @param actualValues values entered by the user.
      * @param userDataValues values predicted from the user data.
-     * @return the calculated scores and the algorithm used.
+     * @return the calculated scores, with the first dimension representing actual values and the
+     * second dimension values from {@link UserData}.
      *
      * {@hide}
      */
     @Nullable
     @SystemApi
-    public Scores onGetScores(@Nullable String algorithm,
+    public float[][] onGetScores(@Nullable String algorithm,
             @Nullable Bundle args, @NonNull List<AutofillValue> actualValues,
             @NonNull List<String> userDataValues) {
         throw new UnsupportedOperationException("Must be implemented by external service");
@@ -148,52 +163,27 @@ public abstract class AutofillFieldClassificationService extends Service {
         }
     }
 
-
-    // TODO(b/70939974): it might be simpler to remove this class and return the float[][] directly,
-    // ignoring the request if the algorithm name is invalid.
     /**
-     * Represents field classification scores used in a batch calculation.
+     * Helper class used to encapsulate a float[][] in a Parcelable.
      *
      * {@hide}
      */
-    @SystemApi
     public static final class Scores implements Parcelable {
-        private final String mAlgorithmName;
-        private final float[][] mScores;
+        public final float[][] scores;
 
-        /* @hide */
-        public Scores(String algorithmName, int size1, int size2) {
-            mAlgorithmName = algorithmName;
-            mScores = new float[size1][size2];
-        }
-
-        public Scores(Parcel parcel) {
-            mAlgorithmName = parcel.readString();
+        private Scores(Parcel parcel) {
             final int size1 = parcel.readInt();
             final int size2 = parcel.readInt();
-            mScores = new float[size1][size2];
+            scores = new float[size1][size2];
             for (int i = 0; i < size1; i++) {
                 for (int j = 0; j < size2; j++) {
-                    mScores[i][j] = parcel.readFloat();
+                    scores[i][j] = parcel.readFloat();
                 }
             }
         }
 
-        /**
-         * Gets the name of algorithm used to calculate the score.
-         */
-        @NonNull
-        public String getAlgorithm() {
-            return mAlgorithmName;
-        }
-
-        /**
-         * Gets the resulting scores, with the 1st dimension representing actual values and the 2nd
-         * dimension values from {@link UserData}.
-         */
-        @NonNull
-        public float[][] getScores() {
-            return mScores;
+        private  Scores(float[][] scores) {
+            this.scores = scores;
         }
 
         @Override
@@ -203,20 +193,18 @@ public abstract class AutofillFieldClassificationService extends Service {
 
         @Override
         public void writeToParcel(Parcel parcel, int flags) {
-            parcel.writeString(mAlgorithmName);
-            int size1 = mScores.length;
-            int size2 = mScores[0].length;
+            int size1 = scores.length;
+            int size2 = scores[0].length;
             parcel.writeInt(size1);
             parcel.writeInt(size2);
             for (int i = 0; i < size1; i++) {
                 for (int j = 0; j < size2; j++) {
-                    parcel.writeFloat(mScores[i][j]);
+                    parcel.writeFloat(scores[i][j]);
                 }
             }
         }
 
         public static final Creator<Scores> CREATOR = new Creator<Scores>() {
-
             @Override
             public Scores createFromParcel(Parcel parcel) {
                 return new Scores(parcel);
@@ -226,7 +214,6 @@ public abstract class AutofillFieldClassificationService extends Service {
             public Scores[] newArray(int size) {
                 return new Scores[size];
             }
-
         };
     }
 }
