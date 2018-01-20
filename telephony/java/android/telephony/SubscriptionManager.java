@@ -284,6 +284,14 @@ public class SubscriptionManager {
     public static final String IS_EMBEDDED = "is_embedded";
 
     /**
+     * TelephonyProvider column name for SIM card identifier. For UICC card it is the ICCID of the
+     * current enabled profile on the card, while for eUICC card it is the EID of the card.
+     * <P>Type: TEXT (String)</P>
+     * @hide
+     */
+     public static final String CARD_ID = "card_id";
+
+    /**
      * TelephonyProvider column name for the encoded {@link UiccAccessRule}s from
      * {@link UiccAccessRule#encodeRules}. Only present if {@link #IS_EMBEDDED} is 1.
      * <p>TYPE: BLOB
