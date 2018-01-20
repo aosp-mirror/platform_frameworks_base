@@ -176,6 +176,15 @@ public class MeasuredParagraph {
     }
 
     /**
+     * Returns the length of the paragraph.
+     *
+     * This is always available.
+     */
+    public int getTextLength() {
+        return mTextLength;
+    }
+
+    /**
      * Returns the characters to be measured.
      *
      * This is always available.
@@ -212,7 +221,7 @@ public class MeasuredParagraph {
     /**
      * Returns the whole text width.
      *
-     * This is available only if the MeasureText is computed with computeForMeasurement.
+     * This is available only if the MeasuredParagraph is computed with buildForMeasurement.
      * Returns 0 in other cases.
      */
     public @FloatRange(from = 0.0f) float getWholeWidth() {
@@ -222,7 +231,7 @@ public class MeasuredParagraph {
     /**
      * Returns the individual character's width.
      *
-     * This is available only if the MeasureText is computed with computeForMeasurement.
+     * This is available only if the MeasuredParagraph is computed with buildForMeasurement.
      * Returns empty array in other cases.
      */
     public @NonNull FloatArray getWidths() {
@@ -234,7 +243,7 @@ public class MeasuredParagraph {
      *
      * If the input text is not a spanned string, this has one value that is the length of the text.
      *
-     * This is available only if the MeasureText is computed with computeForStaticLayout.
+     * This is available only if the MeasuredParagraph is computed with buildForStaticLayout.
      * Returns empty array in other cases.
      */
     public @NonNull IntArray getSpanEndCache() {
@@ -246,7 +255,7 @@ public class MeasuredParagraph {
      *
      * This array holds the repeat of top, bottom, ascent, descent of font metrics value.
      *
-     * This is available only if the MeasureText is computed with computeForStaticLayout.
+     * This is available only if the MeasuredParagraph is computed with buildForStaticLayout.
      * Returns empty array in other cases.
      */
     public @NonNull IntArray getFontMetrics() {
@@ -256,11 +265,35 @@ public class MeasuredParagraph {
     /**
      * Returns the native ptr of the MeasuredParagraph.
      *
-     * This is available only if the MeasureText is computed with computeForStaticLayout.
+     * This is available only if the MeasuredParagraph is computed with buildForStaticLayout.
      * Returns 0 in other cases.
      */
     public /* Maybe Zero */ long getNativePtr() {
         return mNativePtr;
+    }
+
+    /**
+     * Returns the width of the given range.
+     *
+     * This is not available if the MeasuredParagraph is computed with buildForBidi.
+     * Returns 0 if the MeasuredParagraph is computed with buildForBidi.
+     *
+     * @param start the inclusive start offset of the target region in the text
+     * @param end the exclusive end offset of the target region in the text
+     */
+    public float getWidth(int start, int end) {
+        if (mNativePtr == 0) {
+            // We have result in Java.
+            final float[] widths = mWidths.getRawArray();
+            float r = 0.0f;
+            for (int i = start; i < end; ++i) {
+                r += widths[i];
+            }
+            return r;
+        } else {
+            // We have result in native.
+            return nGetWidth(mNativePtr, start, end);
+        }
     }
 
     /**
@@ -357,6 +390,7 @@ public class MeasuredParagraph {
             @IntRange(from = 0) int end,
             @NonNull TextDirectionHeuristic textDir,
             boolean computeHyphenation,
+            boolean computeLayout,
             @Nullable MeasuredParagraph recycle) {
         final MeasuredParagraph mt = recycle == null ? obtain() : recycle;
         mt.resetAndAnalyzeBidi(text, start, end, textDir);
@@ -367,7 +401,7 @@ public class MeasuredParagraph {
             try {
                 mt.bindNativeObject(
                         nBuildNativeMeasuredParagraph(nativeBuilderPtr, mt.mCopiedBuffer,
-                              computeHyphenation));
+                              computeHyphenation, computeLayout));
             } finally {
                 nFreeBuilder(nativeBuilderPtr);
             }
@@ -397,7 +431,7 @@ public class MeasuredParagraph {
                 }
             }
             mt.bindNativeObject(nBuildNativeMeasuredParagraph(nativeBuilderPtr, mt.mCopiedBuffer,
-                      computeHyphenation));
+                      computeHyphenation, computeLayout));
         } finally {
             nFreeBuilder(nativeBuilderPtr);
         }
@@ -595,7 +629,7 @@ public class MeasuredParagraph {
      *
      * If forward=false is passed, returns the minimum index from the end instead.
      *
-     * This only works if the MeasuredParagraph is computed with computeForMeasurement.
+     * This only works if the MeasuredParagraph is computed with buildForMeasurement.
      * Undefined behavior in other case.
      */
     @IntRange(from = 0) int breakText(int limit, boolean forwards, float width) {
@@ -626,7 +660,7 @@ public class MeasuredParagraph {
     /**
      * Returns the length of the substring.
      *
-     * This only works if the MeasuredParagraph is computed with computeForMeasurement.
+     * This only works if the MeasuredParagraph is computed with buildForMeasurement.
      * Undefined behavior in other case.
      */
     @FloatRange(from = 0.0f) float measure(int start, int limit) {
@@ -672,9 +706,15 @@ public class MeasuredParagraph {
 
     private static native long nBuildNativeMeasuredParagraph(/* Non Zero */ long nativeBuilderPtr,
                                                  @NonNull char[] text,
-                                                 boolean computeHyphenation);
+                                                 boolean computeHyphenation,
+                                                 boolean computeLayout);
 
     private static native void nFreeBuilder(/* Non Zero */ long nativeBuilderPtr);
+
+    @CriticalNative
+    private static native float nGetWidth(/* Non Zero */ long nativePtr,
+                                         @IntRange(from = 0) int start,
+                                         @IntRange(from = 0) int end);
 
     @CriticalNative
     private static native /* Non Zero */ long nGetReleaseFunc();

@@ -678,7 +678,7 @@ public class StaticLayout extends Layout {
                     .setTextDirection(textDir)
                     .setBreakStrategy(b.mBreakStrategy)
                     .setHyphenationFrequency(b.mHyphenationFrequency)
-                    .build();
+                    .build(false /* full layout is not necessary for line breaking */);
             spanned = (source instanceof Spanned) ? (Spanned) source : null;
         } else {
             final CharSequence original = measured.getText();

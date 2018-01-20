@@ -20,6 +20,7 @@
 
 #include <log/log.h>
 
+#include <minikin/MeasuredText.h>
 #include "Paint.h"
 #include "SkPathMeasure.h"
 #include "Typeface.h"
@@ -49,11 +50,24 @@ minikin::MinikinPaint MinikinUtils::prepareMinikinPaint(const Paint* paint,
 
 minikin::Layout MinikinUtils::doLayout(const Paint* paint, minikin::Bidi bidiFlags,
                                        const Typeface* typeface, const uint16_t* buf, size_t start,
-                                       size_t count, size_t bufSize) {
+                                       size_t count, size_t bufSize, minikin::MeasuredText* mt,
+                                       int mtOffset) {
     minikin::MinikinPaint minikinPaint = prepareMinikinPaint(paint, typeface);
+    const auto& fc = Typeface::resolveDefault(typeface)->fFontCollection;
     minikin::Layout layout;
-    layout.doLayout(buf, start, count, bufSize, bidiFlags, minikinPaint,
-                    Typeface::resolveDefault(typeface)->fFontCollection);
+
+    if (mt == nullptr) {
+        layout.doLayout(buf, start, count, bufSize, bidiFlags, minikinPaint, fc);
+        return layout;
+    }
+
+    if (mt->buildLayout(minikin::U16StringPiece(buf, bufSize),
+                        minikin::Range(start, start + count),
+                        minikinPaint, fc, bidiFlags, mtOffset, &layout)) {
+        return layout;
+    }
+
+    layout.doLayout(buf, start, count, bufSize, bidiFlags, minikinPaint, fc);
     return layout;
 }
 
@@ -64,7 +78,7 @@ float MinikinUtils::measureText(const Paint* paint, minikin::Bidi bidiFlags,
     const Typeface* resolvedTypeface = Typeface::resolveDefault(typeface);
     return minikin::Layout::measureText(buf, start, count, bufSize, bidiFlags, minikinPaint,
                                         resolvedTypeface->fFontCollection, advances,
-                                        nullptr /* extent */, nullptr /* overhangs */);
+                                        nullptr /* extent */);
 }
 
 bool MinikinUtils::hasVariationSelector(const Typeface* typeface, uint32_t codepoint, uint32_t vs) {
