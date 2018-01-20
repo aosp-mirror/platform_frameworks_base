@@ -781,6 +781,7 @@ LOCAL_PROTOC_FLAGS := \
 LOCAL_SOURCE_FILES_ALL_GENERATED := true
 LOCAL_SRC_FILES := \
     cmds/am/proto/instrumentation_data.proto \
+    cmds/statsd/src/perfetto/perfetto_config.proto \
     $(call all-proto-files-under, core/proto) \
     $(call all-proto-files-under, libs/incident/proto) \
     $(call all-proto-files-under, cmds/statsd/src)
