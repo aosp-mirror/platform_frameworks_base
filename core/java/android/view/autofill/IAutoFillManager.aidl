@@ -59,6 +59,6 @@ interface IAutoFillManager {
     void setUserData(in UserData userData);
     boolean isFieldClassificationEnabled();
     ComponentName getAutofillServiceComponentName();
-    void getAvailableFieldClassificationAlgorithms(in RemoteCallback callback);
-    void getDefaultFieldClassificationAlgorithm(in RemoteCallback callback);
+    String[] getAvailableFieldClassificationAlgorithms();
+    String getDefaultFieldClassificationAlgorithm();
 }

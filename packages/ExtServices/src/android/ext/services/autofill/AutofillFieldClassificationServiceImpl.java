@@ -24,24 +24,13 @@ import android.view.autofill.AutofillValue;
 
 import com.android.internal.util.ArrayUtils;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class AutofillFieldClassificationServiceImpl extends AutofillFieldClassificationService {
 
     private static final String TAG = "AutofillFieldClassificationServiceImpl";
-    private static final boolean DEBUG = false;
-    private static final List<String> sAvailableAlgorithms = Arrays.asList(EditDistanceScorer.NAME);
-
-    @Override
-    public List<String> onGetAvailableAlgorithms() {
-        return sAvailableAlgorithms;
-    }
-
-    @Override
-    public String onGetDefaultAlgorithm() {
-        return EditDistanceScorer.NAME;
-    }
+    // TODO(b/70291841): set to false before launching
+    private static final boolean DEBUG = true;
 
     @Nullable
     @Override

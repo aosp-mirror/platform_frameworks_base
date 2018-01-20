@@ -15,9 +15,6 @@
  */
 package android.service.autofill;
 
-import static android.view.autofill.AutofillManager.EXTRA_AVAILABLE_ALGORITHMS;
-import static android.view.autofill.AutofillManager.EXTRA_DEFAULT_ALGORITHM;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -58,9 +55,7 @@ public abstract class AutofillFieldClassificationService extends Service {
 
     private static final String TAG = "AutofillFieldClassificationService";
 
-    private static final int MSG_GET_AVAILABLE_ALGORITHMS = 1;
-    private static final int MSG_GET_DEFAULT_ALGORITHM = 2;
-    private static final int MSG_GET_SCORES = 3;
+    private static final int MSG_GET_SCORES = 1;
 
     /**
      * The {@link Intent} action that must be declared as handled by a service
@@ -79,21 +74,6 @@ public abstract class AutofillFieldClassificationService extends Service {
         final Bundle data = new Bundle();
         final RemoteCallback callback;
         switch (action) {
-            case MSG_GET_AVAILABLE_ALGORITHMS:
-                callback = (RemoteCallback) msg.obj;
-                final List<String> availableAlgorithms = onGetAvailableAlgorithms();
-                String[] asArray = null;
-                if (availableAlgorithms != null) {
-                    asArray = new String[availableAlgorithms.size()];
-                    availableAlgorithms.toArray(asArray);
-                }
-                data.putStringArray(EXTRA_AVAILABLE_ALGORITHMS, asArray);
-                break;
-            case MSG_GET_DEFAULT_ALGORITHM:
-                callback = (RemoteCallback) msg.obj;
-                final String defaultAlgorithm = onGetDefaultAlgorithm();
-                data.putString(EXTRA_DEFAULT_ALGORITHM, defaultAlgorithm);
-                break;
             case MSG_GET_SCORES:
                 final SomeArgs args = (SomeArgs) msg.obj;
                 callback = (RemoteCallback) args.arg1;
@@ -134,27 +114,6 @@ public abstract class AutofillFieldClassificationService extends Service {
     }
 
     /**
-     * Gets the name of all available algorithms.
-     *
-     * @throws UnsupportedOperationException if not implemented by service.
-     */
-    // TODO(b/70939974): rename to onGetAvailableAlgorithms if not removed
-    @NonNull
-    public List<String> onGetAvailableAlgorithms() {
-        throw new UnsupportedOperationException("Must be implemented by external service");
-    }
-
-    /**
-     * Gets the default algorithm that's used when an algorithm is not specified or is invalid.
-     *
-     * @throws UnsupportedOperationException if not implemented by service.
-     */
-    @NonNull
-    public String onGetDefaultAlgorithm() {
-        throw new UnsupportedOperationException("Must be implemented by external service");
-    }
-
-    /**
      * Calculates field classification scores in a batch.
      *
      * <p>See {@link AutofillFieldClassificationService} for more info about field classification
@@ -179,17 +138,6 @@ public abstract class AutofillFieldClassificationService extends Service {
 
     private final class AutofillFieldClassificationServiceWrapper
             extends IAutofillFieldClassificationService.Stub {
-
-        @Override
-        public void getAvailableAlgorithms(RemoteCallback callback) throws RemoteException {
-            mHandlerCaller.obtainMessageO(MSG_GET_AVAILABLE_ALGORITHMS, callback).sendToTarget();
-        }
-
-        @Override
-        public void getDefaultAlgorithm(RemoteCallback callback) throws RemoteException {
-            mHandlerCaller.obtainMessageO(MSG_GET_DEFAULT_ALGORITHM, callback).sendToTarget();
-        }
-
         @Override
         public void getScores(RemoteCallback callback, String algorithmName, Bundle algorithmArgs,
                 List<AutofillValue> actualValues, String[] userDataValues)
