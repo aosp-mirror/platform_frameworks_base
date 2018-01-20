@@ -33,6 +33,8 @@
 #define ENCODING_AAC_HE_V2      12
 #define ENCODING_IEC61937       13
 #define ENCODING_DOLBY_TRUEHD   14
+#define ENCODING_AAC_ELD        15
+#define ENCODING_AAC_XHE        16
 
 #define ENCODING_INVALID    0
 #define ENCODING_DEFAULT    1
@@ -71,6 +73,10 @@ static inline audio_format_t audioFormatToNative(int audioFormat)
         return AUDIO_FORMAT_DOLBY_TRUEHD;
     case ENCODING_IEC61937:
         return AUDIO_FORMAT_IEC61937;
+    case ENCODING_AAC_ELD:
+        return AUDIO_FORMAT_AAC_ELD;
+    case ENCODING_AAC_XHE:
+        return AUDIO_FORMAT_AAC; // FIXME temporary value, needs addition of xHE-AAC
     case ENCODING_DEFAULT:
         return AUDIO_FORMAT_DEFAULT;
     default:
@@ -114,11 +120,35 @@ static inline int audioFormatFromNative(audio_format_t nativeFormat)
         return ENCODING_IEC61937;
     case AUDIO_FORMAT_DOLBY_TRUEHD:
         return ENCODING_DOLBY_TRUEHD;
+    case AUDIO_FORMAT_AAC_ELD:
+            return ENCODING_AAC_ELD;
+    // FIXME needs addition of AUDIO_FORMAT_AAC_XHE
+    //case AUDIO_FORMAT_AAC_XHE:
+    //    return ENCODING_AAC_XHE;
     case AUDIO_FORMAT_DEFAULT:
         return ENCODING_DEFAULT;
     default:
         return ENCODING_INVALID;
     }
+}
+
+// This function converts Java channel masks to a native channel mask.
+// validity should be checked with audio_is_output_channel().
+static inline audio_channel_mask_t nativeChannelMaskFromJavaChannelMasks(
+        jint channelPositionMask, jint channelIndexMask)
+{
+    // 0 is the java android.media.AudioFormat.CHANNEL_INVALID value
+    if (channelIndexMask != 0) {  // channel index mask takes priority
+        // To convert to a native channel mask, the Java channel index mask
+        // requires adding the index representation.
+        return audio_channel_mask_from_representation_and_bits(
+                        AUDIO_CHANNEL_REPRESENTATION_INDEX,
+                        channelIndexMask);
+    }
+    // To convert to a native channel mask, the Java channel position mask
+    // requires a shift by 2 to skip the two deprecated channel
+    // configurations "default" and "mono".
+    return (audio_channel_mask_t)((uint32_t)channelPositionMask >> 2);
 }
 
 static inline audio_channel_mask_t outChannelMaskToNative(int channelMask)

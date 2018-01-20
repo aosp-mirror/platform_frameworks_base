@@ -240,20 +240,25 @@ public final class AudioFormat implements Parcelable {
     public static final int ENCODING_DTS_HD = 8;
     /** Audio data format: MP3 compressed
      * @hide
+     * TODO unhide and add to @Encoding (intentional white space   
      * */
     public static final int ENCODING_MP3 = 9;
     /** Audio data format: AAC LC compressed
      * @hide
+     * TODO unhide and add to @Encoding (intentional white space   
      * */
     public static final int ENCODING_AAC_LC = 10;
     /** Audio data format: AAC HE V1 compressed
      * @hide
+     * TODO unhide and add to @Encoding (intentional white space   
      * */
     public static final int ENCODING_AAC_HE_V1 = 11;
     /** Audio data format: AAC HE V2 compressed
      * @hide
+     * TODO unhide and add to @Encoding (intentional white space   
      * */
     public static final int ENCODING_AAC_HE_V2 = 12;
+
     /** Audio data format: compressed audio wrapped in PCM for HDMI
      * or S/PDIF passthrough.
      * IEC61937 uses a stereo stream of 16-bit samples as the wrapper.
@@ -266,6 +271,16 @@ public final class AudioFormat implements Parcelable {
     /** Audio data format: DOLBY TRUEHD compressed
      **/
     public static final int ENCODING_DOLBY_TRUEHD = 14;
+    /** Audio data format: AAC ELD compressed
+     * @hide
+     * TODO unhide and add to @Encoding (intentional white space   
+     * */
+    public static final int ENCODING_AAC_ELD = 15;
+    /** Audio data format: AAC xHE compressed
+     * @hide
+     * TODO unhide and add to @Encoding (intentional white space   
+     * */
+    public static final int ENCODING_AAC_XHE = 16;
 
     /** @hide */
     public static String toLogFriendlyEncoding(int enc) {
@@ -298,6 +313,10 @@ public final class AudioFormat implements Parcelable {
                 return "ENCODING_IEC61937";
             case ENCODING_DOLBY_TRUEHD:
                 return "ENCODING_DOLBY_TRUEHD";
+            case ENCODING_AAC_ELD:
+                return "ENCODING_AAC_ELD";
+            case ENCODING_AAC_XHE:
+                return "ENCODING_AAC_XHE";
             default :
                 return "invalid encoding " + enc;
         }
@@ -514,6 +533,8 @@ public final class AudioFormat implements Parcelable {
         case ENCODING_AAC_HE_V1:
         case ENCODING_AAC_HE_V2:
         case ENCODING_IEC61937:
+        case ENCODING_AAC_ELD:
+        case ENCODING_AAC_XHE:
             return true;
         default:
             return false;
@@ -532,6 +553,13 @@ public final class AudioFormat implements Parcelable {
         case ENCODING_DTS:
         case ENCODING_DTS_HD:
         case ENCODING_IEC61937:
+            //TODO not true yet (intended white space     
+        case ENCODING_MP3:
+        case ENCODING_AAC_LC:
+        case ENCODING_AAC_HE_V1:
+        case ENCODING_AAC_HE_V2:
+        case ENCODING_AAC_ELD:
+        case ENCODING_AAC_XHE:
             return true;
         default:
             return false;
@@ -556,6 +584,8 @@ public final class AudioFormat implements Parcelable {
         case ENCODING_AAC_HE_V1:
         case ENCODING_AAC_HE_V2:
         case ENCODING_IEC61937: // wrapped in PCM but compressed
+        case ENCODING_AAC_ELD:
+        case ENCODING_AAC_XHE:
             return false;
         case ENCODING_INVALID:
         default:
@@ -581,6 +611,8 @@ public final class AudioFormat implements Parcelable {
         case ENCODING_AAC_LC:
         case ENCODING_AAC_HE_V1:
         case ENCODING_AAC_HE_V2:
+        case ENCODING_AAC_ELD:
+        case ENCODING_AAC_XHE:
             return false;
         case ENCODING_INVALID:
         default:
@@ -794,14 +826,7 @@ public final class AudioFormat implements Parcelable {
 
         /**
          * Sets the data encoding format.
-         * @param encoding one of {@link AudioFormat#ENCODING_DEFAULT},
-         *     {@link AudioFormat#ENCODING_PCM_8BIT},
-         *     {@link AudioFormat#ENCODING_PCM_16BIT},
-         *     {@link AudioFormat#ENCODING_PCM_FLOAT},
-         *     {@link AudioFormat#ENCODING_AC3},
-         *     {@link AudioFormat#ENCODING_E_AC3}.
-         *     {@link AudioFormat#ENCODING_DTS},
-         *     {@link AudioFormat#ENCODING_DTS_HD}.
+         * @param encoding the specified encoding or default.
          * @return the same Builder instance.
          * @throws java.lang.IllegalArgumentException
          */
@@ -818,6 +843,12 @@ public final class AudioFormat implements Parcelable {
                 case ENCODING_DTS:
                 case ENCODING_DTS_HD:
                 case ENCODING_IEC61937:
+                case ENCODING_MP3:
+                case ENCODING_AAC_LC:
+                case ENCODING_AAC_HE_V1:
+                case ENCODING_AAC_HE_V2:
+                case ENCODING_AAC_ELD:
+                case ENCODING_AAC_XHE:
                     mEncoding = encoding;
                     break;
                 case ENCODING_INVALID:
@@ -1016,7 +1047,7 @@ public final class AudioFormat implements Parcelable {
     }
 
     /** @hide */
-    @IntDef({
+    @IntDef(flag = false, prefix = "ENCODING", value = {
         ENCODING_DEFAULT,
         ENCODING_PCM_8BIT,
         ENCODING_PCM_16BIT,
@@ -1025,8 +1056,8 @@ public final class AudioFormat implements Parcelable {
         ENCODING_E_AC3,
         ENCODING_DTS,
         ENCODING_DTS_HD,
-        ENCODING_IEC61937
-    })
+        ENCODING_IEC61937 }
+    )
     @Retention(RetentionPolicy.SOURCE)
     public @interface Encoding {}
 
