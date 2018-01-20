@@ -45,6 +45,7 @@ import android.view.IWindowManager;
 
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.net.NetworkPolicyManagerInternal;
 
 import java.io.File;
 import java.io.IOException;
@@ -156,6 +157,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         UsageStatsManagerInternal getUsageStatsManagerInternal() {
             return services.usageStatsManagerInternal;
+        }
+
+        @Override
+        NetworkPolicyManagerInternal getNetworkPolicyManagerInternal() {
+            return services.networkPolicyManagerInternal;
         }
 
         @Override
@@ -437,6 +443,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         KeyChain.KeyChainConnection keyChainBindAsUser(UserHandle user) {
             return services.keyChainConnection;
+        }
+
+        @Override
+        void postOnSystemServerInitThreadPool(Runnable runnable) {
+            runnable.run();
         }
     }
 }

@@ -176,6 +176,12 @@ public abstract class UsageStatsManagerInternal {
     public abstract void setActiveAdminApps(Set<String> adminApps, int userId);
 
     /**
+     * Called by DevicePolicyManagerService during boot to inform that admin data is loaded and
+     * pushed to UsageStatsService.
+     */
+    public abstract void onAdminDataAvailable();
+
+    /**
      * Return usage stats.
      *
      * @param obfuscateInstantApps whether instant app package names need to be obfuscated in the

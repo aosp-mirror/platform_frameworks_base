@@ -199,6 +199,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
@@ -333,6 +334,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private static final long TIME_CACHE_MAX_AGE = DAY_IN_MILLIS;
 
+    /**
+     * Indicates the maximum wait time for admin data to be available;
+     */
+    private static final long WAIT_FOR_ADMIN_DATA_TIMEOUT_MS = 10_000;
+
     private static final int MSG_RULES_CHANGED = 1;
     private static final int MSG_METERED_IFACES_CHANGED = 2;
     private static final int MSG_LIMIT_REACHED = 5;
@@ -383,6 +389,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     @GuardedBy("mUidRulesFirstLock") volatile boolean mRestrictBackgroundChangedInBsm;
 
     private final boolean mSuppressDefaultPolicy;
+
+    private final CountDownLatch mAdminDataAvailableLatch = new CountDownLatch(1);
 
     /** Defined network policies. */
     @GuardedBy("mNetworkPoliciesSecondLock")
@@ -671,6 +679,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                             ServiceType.NETWORK_FIREWALL).batterySaverEnabled;
 
                     mSystemReady = true;
+
+                    waitForAdminData();
 
                     // read policy from disk
                     readPolicyAL();
@@ -4590,6 +4600,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 return mSubscriptionOpportunisticQuota.get(getSubIdLocked(network));
             }
         }
+
+        @Override
+        public void onAdminDataAvailable() {
+            mAdminDataAvailableLatch.countDown();
+        }
     }
 
     private int parseSubId(NetworkState state) {
@@ -4615,6 +4630,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private SubscriptionPlan getPrimarySubscriptionPlanLocked(int subId) {
         final SubscriptionPlan[] plans = mSubscriptionPlans.get(subId);
         return ArrayUtils.isEmpty(plans) ? null : plans[0];
+    }
+
+    /**
+     * This will only ever be called once - during device boot.
+     */
+    private void waitForAdminData() {
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN)) {
+            ConcurrentUtils.waitForCountDownNoInterrupt(mAdminDataAvailableLatch,
+                    WAIT_FOR_ADMIN_DATA_TIMEOUT_MS, "Wait for admin data");
+        }
     }
 
     private static boolean hasRule(int uidRules, int rule) {

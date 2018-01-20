@@ -78,6 +78,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 
@@ -90,6 +91,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * Manages the standby state of an app, listening to various events.
@@ -128,6 +130,11 @@ public class AppStandbyController {
     // Expiration time for predicted bucket
     private static final long PREDICTION_TIMEOUT = 12 * ONE_HOUR;
 
+    /**
+     * Indicates the maximum wait time for admin data to be available;
+     */
+    private static final long WAIT_FOR_ADMIN_DATA_TIMEOUT_MS = 10_000;
+
     // To name the lock for stack traces
     static class Lock {}
 
@@ -152,6 +159,8 @@ public class AppStandbyController {
 
     @GuardedBy("mActiveAdminApps")
     private final SparseArray<Set<String>> mActiveAdminApps = new SparseArray<>();
+
+    private final CountDownLatch mAdminDataAvailableLatch = new CountDownLatch(1);
 
     // Messages for the handler
     static final int MSG_INFORM_LISTENERS = 3;
@@ -895,6 +904,20 @@ public class AppStandbyController {
         }
     }
 
+    public void onAdminDataAvailable() {
+        mAdminDataAvailableLatch.countDown();
+    }
+
+    /**
+     * This will only ever be called once - during device boot.
+     */
+    private void waitForAdminData() {
+        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_DEVICE_ADMIN)) {
+            ConcurrentUtils.waitForCountDownNoInterrupt(mAdminDataAvailableLatch,
+                    WAIT_FOR_ADMIN_DATA_TIMEOUT_MS, "Wait for admin data");
+        }
+    }
+
     Set<String> getActiveAdminAppsForTest(int userId) {
         synchronized (mActiveAdminApps) {
             return mActiveAdminApps.get(userId);
@@ -1224,6 +1247,7 @@ public class AppStandbyController {
 
                 case MSG_ONE_TIME_CHECK_IDLE_STATES:
                     mHandler.removeMessages(MSG_ONE_TIME_CHECK_IDLE_STATES);
+                    waitForAdminData();
                     checkIdleStates(UserHandle.USER_ALL);
                     break;
 
