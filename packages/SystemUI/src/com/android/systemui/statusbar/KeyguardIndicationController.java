@@ -52,6 +52,8 @@ import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.util.wakelock.SettableWakeLock;
 import com.android.systemui.util.wakelock.WakeLock;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.text.NumberFormat;
 
 /**
@@ -116,11 +118,9 @@ public class KeyguardIndicationController {
                 WakeLock wakeLock) {
         mContext = context;
         mIndicationArea = indicationArea;
-        mTextView = (KeyguardIndicationTextView) indicationArea.findViewById(
-                R.id.keyguard_indication_text);
+        mTextView = indicationArea.findViewById(R.id.keyguard_indication_text);
         mInitialTextColor = mTextView != null ? mTextView.getCurrentTextColor() : Color.WHITE;
-        mDisclosure = (KeyguardIndicationTextView) indicationArea.findViewById(
-                R.id.keyguard_indication_enterprise_disclosure);
+        mDisclosure = indicationArea.findViewById(R.id.keyguard_indication_enterprise_disclosure);
         mLockIcon = lockIcon;
         mWakeLock = new SettableWakeLock(wakeLock);
 
@@ -414,6 +414,21 @@ public class KeyguardIndicationController {
         mDozing = dozing;
         updateIndication();
         updateDisclosure();
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("KeyguardIndicationController:");
+        pw.println("  mTransientTextColor: " + Integer.toHexString(mTransientTextColor));
+        pw.println("  mInitialTextColor: " + Integer.toHexString(mInitialTextColor));
+        pw.println("  mPowerPluggedIn: " + mPowerPluggedIn);
+        pw.println("  mPowerCharged: " + mPowerCharged);
+        pw.println("  mChargingSpeed: " + mChargingSpeed);
+        pw.println("  mChargingWattage: " + mChargingWattage);
+        pw.println("  mMessageToShowOnScreenOn: " + mMessageToShowOnScreenOn);
+        pw.println("  mDozing: " + mDozing);
+        pw.println("  mBatteryLevel: " + mBatteryLevel);
+        pw.println("  mTextView.getText(): " + (mTextView == null ? null : mTextView.getText()));
+        pw.println("  computePowerIndication(): " + computePowerIndication());
     }
 
     protected class BaseKeyguardCallback extends KeyguardUpdateMonitorCallback {

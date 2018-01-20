@@ -2663,6 +2663,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             mFingerprintUnlockController.dump(pw);
         }
 
+        if (mKeyguardIndicationController != null) {
+            mKeyguardIndicationController.dump(fd, pw, args);
+        }
+
         if (mScrimController != null) {
             mScrimController.dump(fd, pw, args);
         }
