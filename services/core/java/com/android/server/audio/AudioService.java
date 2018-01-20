@@ -4155,22 +4155,30 @@ public class AudioService extends IAudioService.Stub
 
     public int setBluetoothA2dpDeviceConnectionState(BluetoothDevice device, int state, int profile)
     {
+        return setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
+                device, state, profile, false /* suppressNoisyIntent */);
+    }
+
+    public int setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(BluetoothDevice device,
+                int state, int profile, boolean suppressNoisyIntent)
+    {
         if (mAudioHandler.hasMessages(MSG_SET_A2DP_SINK_CONNECTION_STATE, device)) {
             return 0;
         }
         return setBluetoothA2dpDeviceConnectionStateInt(
-                device, state, profile, AudioSystem.DEVICE_NONE);
+                device, state, profile, suppressNoisyIntent, AudioSystem.DEVICE_NONE);
     }
 
     public int setBluetoothA2dpDeviceConnectionStateInt(
-            BluetoothDevice device, int state, int profile, int musicDevice)
+            BluetoothDevice device, int state, int profile, boolean suppressNoisyIntent,
+            int musicDevice)
     {
         int delay;
         if (profile != BluetoothProfile.A2DP && profile != BluetoothProfile.A2DP_SINK) {
             throw new IllegalArgumentException("invalid profile " + profile);
         }
         synchronized (mConnectedDevices) {
-            if (profile == BluetoothProfile.A2DP) {
+            if (profile == BluetoothProfile.A2DP && !suppressNoisyIntent) {
                 int intState = (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0;
                 delay = checkSendBecomingNoisyIntent(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                         intState, musicDevice);
@@ -5420,7 +5428,7 @@ public class AudioService extends IAudioService.Stub
                    // consistent with audio policy manager state
                    setBluetoothA2dpDeviceConnectionStateInt(
                            btDevice, BluetoothA2dp.STATE_DISCONNECTED, BluetoothProfile.A2DP,
-                           musicDevice);
+                           false /* suppressNoisyIntent */, musicDevice);
                }
             }
         }
