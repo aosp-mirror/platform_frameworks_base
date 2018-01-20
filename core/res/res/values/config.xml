@@ -430,7 +430,7 @@
     <integer translatable="false" name="config_mobile_hotspot_provision_check_period">24</integer>
 
     <!-- Activity name to enable wifi tethering after provisioning app succeeds -->
-    <string translatable="false" name="config_wifi_tether_enable">com.android.settings/.TetherService</string>
+    <string translatable="false" name="config_wifi_tether_enable">com.android.settings/.wifi.tether.TetherService</string>
 
     <!-- Controls the WiFi wakeup feature.
           0 = Not available.
