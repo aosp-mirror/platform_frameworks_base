@@ -22,4 +22,5 @@ interface IPermissionController {
     boolean checkPermission(String permission, int pid, int uid);
     String[] getPackagesForUid(int uid);
     boolean isRuntimePermission(String permission);
+    int getPackageUid(String packageName, int flags);
 }

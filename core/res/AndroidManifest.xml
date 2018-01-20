@@ -1747,6 +1747,12 @@
     <permission android:name="android.permission.SEND_EMBMS_INTENTS"
         android:protectionLevel="signature|privileged" />
 
+
+    <!-- Allows internal management of the sensor framework
+         @hide -->
+    <permission android:name="android.permission.MANAGE_SENSORS"
+        android:protectionLevel="signature" />
+
     <!-- Must be required by an ImsService to ensure that only the
          system can bind to it.
          <p>Protection level: signature|privileged
