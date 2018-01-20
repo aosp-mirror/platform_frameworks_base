@@ -2203,8 +2203,6 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * significant illumination change, this value will be set to DETECTED for a single capture
      * result. Otherwise the value will be NOT_DETECTED. The threshold for detection is similar
      * to what would trigger a new passive focus scan to begin in CONTINUOUS autofocus modes.</p>
-     * <p>afSceneChange may be DETECTED only if afMode is AF_MODE_CONTINUOUS_VIDEO or
-     * AF_MODE_CONTINUOUS_PICTURE. In other AF modes, afSceneChange must be NOT_DETECTED.</p>
      * <p>This key will be available if the camera device advertises this key via {@link android.hardware.camera2.CameraCharacteristics#getAvailableCaptureResultKeys }.</p>
      * <p><b>Possible values:</b>
      * <ul>
