@@ -16,13 +16,18 @@
 
 package com.android.server.accessibility;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.accessibilityservice.AccessibilityService;
 import android.app.StatusBarManager;
 import android.content.Context;
+import android.os.Handler;
 
+import com.android.internal.util.ScreenshotHelper;
 import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.Before;
@@ -39,6 +44,7 @@ public class GlobalActionPerformerTest {
     @Mock Context mMockContext;
     @Mock WindowManagerInternal mMockWindowManagerInternal;
     @Mock StatusBarManager mMockStatusBarManager;
+    @Mock ScreenshotHelper mMockScreenshotHelper;
 
     @Before
     public void setup() {
@@ -48,7 +54,8 @@ public class GlobalActionPerformerTest {
                 .thenReturn(mMockStatusBarManager);
 
         mGlobalActionPerformer =
-                new GlobalActionPerformer(mMockContext, mMockWindowManagerInternal);
+                new GlobalActionPerformer(mMockContext, mMockWindowManagerInternal,
+                        () -> mMockScreenshotHelper);
     }
 
     @Test
@@ -69,5 +76,14 @@ public class GlobalActionPerformerTest {
     public void testPowerDialog_requestsFromWindowManager() {
         mGlobalActionPerformer.performGlobalAction(AccessibilityService.GLOBAL_ACTION_POWER_DIALOG);
         verify(mMockWindowManagerInternal).showGlobalActions();
+    }
+
+    @Test
+    public void testScreenshot_requestsFromScreenshotHelper() {
+        mGlobalActionPerformer.performGlobalAction(
+                AccessibilityService.GLOBAL_ACTION_TAKE_SCREENSHOT);
+        verify(mMockScreenshotHelper).takeScreenshot(
+                eq(android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN), anyBoolean(),
+                anyBoolean(), any(Handler.class));
     }
 }

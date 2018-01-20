@@ -21,6 +21,8 @@ import android.app.StatusBarManager;
 import android.content.Context;
 import android.hardware.input.InputManager;
 import android.os.Binder;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -30,9 +32,13 @@ import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.ScreenshotHelper;
 import com.android.server.LocalServices;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
+
+import java.util.function.Supplier;
 
 /**
  * Handle the back-end of AccessibilityService#performGlobalAction
@@ -40,10 +46,20 @@ import com.android.server.wm.WindowManagerInternal;
 public class GlobalActionPerformer {
     private final WindowManagerInternal mWindowManagerService;
     private final Context mContext;
+    private Supplier<ScreenshotHelper> mScreenshotHelperSupplier;
 
     public GlobalActionPerformer(Context context, WindowManagerInternal windowManagerInternal) {
         mContext = context;
         mWindowManagerService = windowManagerInternal;
+        mScreenshotHelperSupplier = null;
+    }
+
+    // Used to mock ScreenshotHelper
+    @VisibleForTesting
+    public GlobalActionPerformer(Context context, WindowManagerInternal windowManagerInternal,
+            Supplier<ScreenshotHelper> screenshotHelperSupplier) {
+        this(context, windowManagerInternal);
+        mScreenshotHelperSupplier = screenshotHelperSupplier;
     }
 
     public boolean performGlobalAction(int action) {
@@ -78,6 +94,9 @@ public class GlobalActionPerformer {
                 }
                 case AccessibilityService.GLOBAL_ACTION_LOCK_SCREEN: {
                     return lockScreen();
+                }
+                case AccessibilityService.GLOBAL_ACTION_TAKE_SCREENSHOT: {
+                    return takeScreenshot();
                 }
             }
             return false;
@@ -165,6 +184,14 @@ public class GlobalActionPerformer {
         mContext.getSystemService(PowerManager.class).goToSleep(SystemClock.uptimeMillis(),
                 PowerManager.GO_TO_SLEEP_REASON_ACCESSIBILITY, 0);
         mWindowManagerService.lockNow();
+        return true;
+    }
+
+    private boolean takeScreenshot() {
+        ScreenshotHelper screenshotHelper = (mScreenshotHelperSupplier != null)
+                ? mScreenshotHelperSupplier.get() : new ScreenshotHelper(mContext);
+        screenshotHelper.takeScreenshot(android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN,
+                true, true, new Handler(Looper.getMainLooper()));
         return true;
     }
 }
