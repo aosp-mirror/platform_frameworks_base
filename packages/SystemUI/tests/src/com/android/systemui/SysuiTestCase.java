@@ -83,7 +83,7 @@ public abstract class SysuiTestCase {
         return null;
     }
 
-    public Context getContext() {
+    public SysuiTestableContext getContext() {
         return mContext;
     }
 

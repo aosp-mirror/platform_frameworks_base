@@ -14,7 +14,7 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<!-- extends FrameLayout -->
+<!-- extends LinearLayout -->
 <com.android.systemui.volume.OutputChooserLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:sysui="http://schemas.android.com/apk/res-auto"
@@ -23,7 +23,16 @@
     android:minHeight="320dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:padding="20dp" >
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textDirection="locale"
+        android:textAppearance="@style/TextAppearance.QS.DetailHeader"
+        android:layout_marginBottom="20dp" />
 
     <com.android.systemui.qs.AutoSizingList
         android:id="@android:id/list"
@@ -42,9 +51,10 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@android:id/title"
+            android:id="@+id/empty_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textDirection="locale"
             android:layout_marginTop="20dp"
             android:textAppearance="@style/TextAppearance.QS.DetailEmpty"/>
     </LinearLayout>

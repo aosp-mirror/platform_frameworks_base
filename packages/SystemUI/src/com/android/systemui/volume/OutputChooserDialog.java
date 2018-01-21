@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import android.os.SystemClock;
 import android.support.v7.media.MediaControlIntent;
 import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter;
+import android.telecom.TelecomManager;
 import android.util.Log;
 import android.util.Pair;
 
@@ -54,7 +55,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -65,15 +65,17 @@ public class OutputChooserDialog extends SystemUIDialog
     private static final int MAX_DEVICES = 10;
 
     private static final long UPDATE_DELAY_MS = 300L;
-    static final int MSG_UPDATE_ITEMS = 1;
+    private static final int MSG_UPDATE_ITEMS = 1;
 
     private final Context mContext;
-    private final BluetoothController mController;
-    private final WifiManager mWifiManager;
+    private final BluetoothController mBluetoothController;
+    private WifiManager mWifiManager;
     private OutputChooserLayout mView;
-    private final MediaRouter mRouter;
+    private final MediaRouterWrapper mRouter;
     private final MediaRouterCallback mRouterCallback;
     private long mLastUpdateTime;
+    private boolean mIsInCall;
+    protected boolean isAttached;
 
     private final MediaRouteSelector mRouteSelector;
     private Drawable mDefaultIcon;
@@ -81,12 +83,14 @@ public class OutputChooserDialog extends SystemUIDialog
     private Drawable mSpeakerIcon;
     private Drawable mSpeakerGroupIcon;
 
-    public OutputChooserDialog(Context context) {
+    public OutputChooserDialog(Context context, MediaRouterWrapper router) {
         super(context);
         mContext = context;
-        mController = Dependency.get(BluetoothController.class);
+        mBluetoothController = Dependency.get(BluetoothController.class);
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        mRouter = MediaRouter.getInstance(context);
+        TelecomManager tm = (TelecomManager) context.getSystemService(Context.TELECOM_SERVICE);
+        mIsInCall = tm.isInCall();
+        mRouter = router;
         mRouterCallback = new MediaRouterCallback();
         mRouteSelector = new MediaRouteSelector.Builder()
                 .addControlCategory(MediaControlIntent.CATEGORY_REMOTE_PLAYBACK)
@@ -96,16 +100,25 @@ public class OutputChooserDialog extends SystemUIDialog
         context.registerReceiver(mReceiver, filter);
     }
 
+    protected void setIsInCall(boolean inCall) {
+        mIsInCall = inCall;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.output_chooser);
         setCanceledOnTouchOutside(true);
         setOnDismissListener(this::onDismiss);
-        setTitle(R.string.output_title);
 
         mView = findViewById(R.id.output_chooser);
         mView.setCallback(this);
+
+        if (mIsInCall) {
+            mView.setTitle(R.string.output_calls_title);
+        } else {
+            mView.setTitle(R.string.output_title);
+        }
 
         mDefaultIcon = mContext.getDrawable(R.drawable.ic_cast);
         mTvIcon = mContext.getDrawable(R.drawable.ic_tv);
@@ -113,10 +126,12 @@ public class OutputChooserDialog extends SystemUIDialog
         mSpeakerGroupIcon = mContext.getDrawable(R.drawable.ic_speaker_group);
 
         final boolean wifiOff = !mWifiManager.isWifiEnabled();
-        final boolean btOff = !mController.isBluetoothEnabled();
-        if (wifiOff || btOff) {
+        final boolean btOff = !mBluetoothController.isBluetoothEnabled();
+        if (wifiOff && btOff) {
             mView.setEmptyState(getDisabledServicesMessage(wifiOff, btOff));
         }
+        // time out after 5 seconds
+        mView.postDelayed(() -> updateItems(true), 5000);
     }
 
     protected void cleanUp() {}
@@ -131,15 +146,19 @@ public class OutputChooserDialog extends SystemUIDialog
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        mRouter.addCallback(mRouteSelector, mRouterCallback,
-                MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN);
-        mController.addCallback(mCallback);
+        if (!mIsInCall) {
+            mRouter.addCallback(mRouteSelector, mRouterCallback,
+                    MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN);
+        }
+        mBluetoothController.addCallback(mCallback);
+        isAttached = true;
     }
 
     @Override
     public void onDetachedFromWindow() {
+        isAttached = false;
         mRouter.removeCallback(mRouterCallback);
-        mController.removeCallback(mCallback);
+        mBluetoothController.removeCallback(mCallback);
         super.onDetachedFromWindow();
     }
 
@@ -154,9 +173,8 @@ public class OutputChooserDialog extends SystemUIDialog
         if (item == null || item.tag == null) return;
         if (item.deviceType == OutputChooserLayout.Item.DEVICE_TYPE_BT) {
             final CachedBluetoothDevice device = (CachedBluetoothDevice) item.tag;
-            if (device != null && device.getMaxConnectionState()
-                    == BluetoothProfile.STATE_DISCONNECTED) {
-                mController.connect(device);
+            if (device.getMaxConnectionState() == BluetoothProfile.STATE_DISCONNECTED) {
+                mBluetoothController.connect(device);
             }
         } else if (item.deviceType == OutputChooserLayout.Item.DEVICE_TYPE_MEDIA_ROUTER) {
             final MediaRouter.RouteInfo route = (MediaRouter.RouteInfo) item.tag;
@@ -171,18 +189,16 @@ public class OutputChooserDialog extends SystemUIDialog
         if (item == null || item.tag == null) return;
         if (item.deviceType == OutputChooserLayout.Item.DEVICE_TYPE_BT) {
             final CachedBluetoothDevice device = (CachedBluetoothDevice) item.tag;
-            if (device != null) {
-                mController.disconnect(device);
-            }
+            mBluetoothController.disconnect(device);
         } else if (item.deviceType == OutputChooserLayout.Item.DEVICE_TYPE_MEDIA_ROUTER) {
             mRouter.unselect(UNSELECT_REASON_DISCONNECTED);
         }
     }
 
-    private void updateItems() {
+    private void updateItems(boolean timeout) {
         if (SystemClock.uptimeMillis() - mLastUpdateTime < UPDATE_DELAY_MS) {
             mHandler.removeMessages(MSG_UPDATE_ITEMS);
-            mHandler.sendMessageAtTime(mHandler.obtainMessage(MSG_UPDATE_ITEMS),
+            mHandler.sendMessageAtTime(mHandler.obtainMessage(MSG_UPDATE_ITEMS, timeout),
                     mLastUpdateTime + UPDATE_DELAY_MS);
             return;
         }
@@ -194,14 +210,16 @@ public class OutputChooserDialog extends SystemUIDialog
         addBluetoothDevices(items);
 
         // Add remote displays
-        addRemoteDisplayRoutes(items);
+        if (!mIsInCall) {
+            addRemoteDisplayRoutes(items);
+        }
 
-        Collections.sort(items, ItemComparator.sInstance);
+        items.sort(ItemComparator.sInstance);
 
-        if (items.size() == 0) {
+        if (items.size() == 0 && timeout) {
             String emptyMessage = mContext.getString(R.string.output_none_found);
             final boolean wifiOff = !mWifiManager.isWifiEnabled();
-            final boolean btOff = !mController.isBluetoothEnabled();
+            final boolean btOff = !mBluetoothController.isBluetoothEnabled();
             if (wifiOff || btOff) {
                 emptyMessage = getDisabledServicesMessage(wifiOff, btOff);
             }
@@ -219,12 +237,12 @@ public class OutputChooserDialog extends SystemUIDialog
     }
 
     private void addBluetoothDevices(List<OutputChooserLayout.Item> items) {
-        final Collection<CachedBluetoothDevice> devices = mController.getDevices();
+        final Collection<CachedBluetoothDevice> devices = mBluetoothController.getDevices();
         if (devices != null) {
             int connectedDevices = 0;
             int count = 0;
             for (CachedBluetoothDevice device : devices) {
-                if (mController.getBondState(device) == BluetoothDevice.BOND_NONE) continue;
+                if (mBluetoothController.getBondState(device) == BluetoothDevice.BOND_NONE) continue;
                 final int majorClass = device.getBtClass().getMajorDeviceClass();
                 if (majorClass != BluetoothClass.Device.Major.AUDIO_VIDEO
                         && majorClass != BluetoothClass.Device.Major.UNCATEGORIZED) {
@@ -328,22 +346,22 @@ public class OutputChooserDialog extends SystemUIDialog
     private final class MediaRouterCallback extends MediaRouter.Callback {
         @Override
         public void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo info) {
-            updateItems();
+            updateItems(false);
         }
 
         @Override
         public void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo info) {
-            updateItems();
+            updateItems(false);
         }
 
         @Override
         public void onRouteChanged(MediaRouter router, MediaRouter.RouteInfo info) {
-            updateItems();
+            updateItems(false);
         }
 
         @Override
         public void onRouteSelected(MediaRouter router, MediaRouter.RouteInfo route) {
-            dismiss();
+            updateItems(false);
         }
     }
 
@@ -361,12 +379,12 @@ public class OutputChooserDialog extends SystemUIDialog
     private final BluetoothController.Callback mCallback = new BluetoothController.Callback() {
         @Override
         public void onBluetoothStateChange(boolean enabled) {
-            updateItems();
+            updateItems(false);
         }
 
         @Override
         public void onBluetoothDevicesChanged() {
-            updateItems();
+            updateItems(false);
         }
     };
 
@@ -393,7 +411,7 @@ public class OutputChooserDialog extends SystemUIDialog
         public void handleMessage(Message message) {
             switch (message.what) {
                 case MSG_UPDATE_ITEMS:
-                    updateItems();
+                    updateItems((Boolean) message.obj);
                     break;
             }
         }
