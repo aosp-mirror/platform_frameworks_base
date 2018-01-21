@@ -2067,21 +2067,5 @@
     <string name="touch_filtered_warning">Because an app is obscuring a permission request, Settings
         can’t verify your response.</string>
 
-    <!-- Title of prompt requesting access to display slices [CHAR LIMIT=NONE] -->
-    <string name="slice_permission_title">Allow <xliff:g id="app" example="Example App">%1$s</xliff:g> to show <xliff:g id="app_2" example="Other Example App">%2$s</xliff:g> slices?</string>
-
-    <!-- Description of what kind of access is given to a slice host [CHAR LIMIT=NONE] -->
-    <string name="slice_permission_text_1"> - It can read information from <xliff:g id="app" example="Example App">%1$s</xliff:g></string>
-    <!-- Description of what kind of access is given to a slice host [CHAR LIMIT=NONE] -->
-    <string name="slice_permission_text_2"> - It can take actions inside <xliff:g id="app" example="Example App">%1$s</xliff:g></string>
-
-    <!-- Text on checkbox allowing the app to show slices from all apps [CHAR LIMIT=NONE] -->
-    <string name="slice_permission_checkbox">Allow <xliff:g id="app" example="Example App">%1$s</xliff:g> to show slices from any app</string>
-
-    <!-- Option to grant the slice permission request on the screen [CHAR LIMIT=15] -->
-    <string name="slice_permission_allow">Allow</string>
-
-    <!-- Option to grant the slice permission request on the screen [CHAR LIMIT=15] -->
-    <string name="slice_permission_deny">Deny</string>
 
 </resources>

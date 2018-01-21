@@ -4817,8 +4817,4 @@
     <string name="harmful_app_warning_launch_anyway">Launch anyway</string>
     <!-- Title for the harmful app warning dialog. -->
     <string name="harmful_app_warning_title">Uninstall harmful app?</string>
-
-    <!-- Text describing a permission request for one app to show another app's
-         slices [CHAR LIMIT=NONE] -->
-    <string name="slices_permission_request"><xliff:g id="app" example="Example App">%1$s</xliff:g> wants to show <xliff:g id="app_2" example="Other Example App">%2$s</xliff:g> slices</string>
 </resources>

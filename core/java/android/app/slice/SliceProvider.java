@@ -15,19 +15,13 @@
  */
 package android.app.slice;
 
+import android.Manifest.permission;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.ProviderInfo;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
@@ -135,40 +129,8 @@ public abstract class SliceProvider extends ContentProvider {
      * @hide
      */
     public static final String EXTRA_SLICE_DESCENDANTS = "slice_descendants";
-    /**
-     * @hide
-     */
-    public static final String EXTRA_PKG = "pkg";
-    /**
-     * @hide
-     */
-    public static final String EXTRA_PROVIDER_PKG = "provider_pkg";
-    /**
-     * @hide
-     */
-    public static final String EXTRA_OVERRIDE_PKG = "override_pkg";
 
     private static final boolean DEBUG = false;
-
-    private String mBindingPkg;
-    private SliceManager mSliceManager;
-
-    /**
-     * Return the package name of the caller that initiated the binding request
-     * currently happening. The returned package will have been
-     * verified to belong to the calling UID. Returns {@code null} if not
-     * currently performing an {@link #onBindSlice(Uri, List)}.
-     * @hide
-     */
-    public final @Nullable String getBindingPackage() {
-        return mBindingPkg;
-    }
-
-    @Override
-    public void attachInfo(Context context, ProviderInfo info) {
-        super.attachInfo(context, info);
-        mSliceManager = context.getSystemService(SliceManager.class);
-    }
 
     /**
      * Implemented to create a slice. Will be called on the main thread.
@@ -300,27 +262,28 @@ public abstract class SliceProvider extends ContentProvider {
     public Bundle call(String method, String arg, Bundle extras) {
         if (method.equals(METHOD_SLICE)) {
             Uri uri = extras.getParcelable(EXTRA_BIND_URI);
+            if (!UserHandle.isSameApp(Binder.getCallingUid(), Process.myUid())) {
+                getContext().enforceUriPermission(uri, permission.BIND_SLICE,
+                        permission.BIND_SLICE, Binder.getCallingPid(), Binder.getCallingUid(),
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                        "Slice binding requires the permission BIND_SLICE");
+            }
             List<SliceSpec> supportedSpecs = extras.getParcelableArrayList(EXTRA_SUPPORTED_SPECS);
 
-            String callingPackage = getCallingPackage();
-            if (extras.containsKey(EXTRA_OVERRIDE_PKG)) {
-                if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-                    throw new SecurityException("Only the system can override calling pkg");
-                }
-                callingPackage = extras.getString(EXTRA_OVERRIDE_PKG);
-            }
-            Slice s = handleBindSlice(uri, supportedSpecs, callingPackage);
+            Slice s = handleBindSlice(uri, supportedSpecs);
             Bundle b = new Bundle();
             b.putParcelable(EXTRA_SLICE, s);
             return b;
         } else if (method.equals(METHOD_MAP_INTENT)) {
+            getContext().enforceCallingPermission(permission.BIND_SLICE,
+                    "Slice binding requires the permission BIND_SLICE");
             Intent intent = extras.getParcelable(EXTRA_INTENT);
             if (intent == null) return null;
             Uri uri = onMapIntentToUri(intent);
             List<SliceSpec> supportedSpecs = extras.getParcelableArrayList(EXTRA_SUPPORTED_SPECS);
             Bundle b = new Bundle();
             if (uri != null) {
-                Slice s = handleBindSlice(uri, supportedSpecs, getCallingPackage());
+                Slice s = handleBindSlice(uri, supportedSpecs);
                 b.putParcelable(EXTRA_SLICE, s);
             } else {
                 b.putParcelable(EXTRA_SLICE, null);
@@ -328,14 +291,20 @@ public abstract class SliceProvider extends ContentProvider {
             return b;
         } else if (method.equals(METHOD_PIN)) {
             Uri uri = extras.getParcelable(EXTRA_BIND_URI);
-            if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-                throw new SecurityException("Only the system can pin/unpin slices");
+            if (!UserHandle.isSameApp(Binder.getCallingUid(), Process.myUid())) {
+                getContext().enforceUriPermission(uri, permission.BIND_SLICE,
+                        permission.BIND_SLICE, Binder.getCallingPid(), Binder.getCallingUid(),
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                        "Slice binding requires the permission BIND_SLICE");
             }
             handlePinSlice(uri);
         } else if (method.equals(METHOD_UNPIN)) {
             Uri uri = extras.getParcelable(EXTRA_BIND_URI);
-            if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-                throw new SecurityException("Only the system can pin/unpin slices");
+            if (!UserHandle.isSameApp(Binder.getCallingUid(), Process.myUid())) {
+                getContext().enforceUriPermission(uri, permission.BIND_SLICE,
+                        permission.BIND_SLICE, Binder.getCallingPid(), Binder.getCallingUid(),
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                        "Slice binding requires the permission BIND_SLICE");
             }
             handleUnpinSlice(uri);
         } else if (method.equals(METHOD_GET_DESCENDANTS)) {
@@ -401,27 +370,14 @@ public abstract class SliceProvider extends ContentProvider {
         }
     }
 
-    private Slice handleBindSlice(Uri sliceUri, List<SliceSpec> supportedSpecs,
-            String callingPkg) {
-        // This can be removed once Slice#bindSlice is removed and everyone is using
-        // SliceManager#bindSlice.
-        String pkg = callingPkg != null ? callingPkg
-                : getContext().getPackageManager().getNameForUid(Binder.getCallingUid());
-        if (!UserHandle.isSameApp(Binder.getCallingUid(), Process.myUid())) {
-            try {
-                mSliceManager.enforceSlicePermission(sliceUri, pkg,
-                        Binder.getCallingPid(), Binder.getCallingUid());
-            } catch (SecurityException e) {
-                return createPermissionSlice(getContext(), sliceUri, pkg);
-            }
-        }
+    private Slice handleBindSlice(Uri sliceUri, List<SliceSpec> supportedSpecs) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            return onBindSliceStrict(sliceUri, supportedSpecs, pkg);
+            return onBindSliceStrict(sliceUri, supportedSpecs);
         } else {
             CountDownLatch latch = new CountDownLatch(1);
             Slice[] output = new Slice[1];
             Handler.getMain().post(() -> {
-                output[0] = onBindSliceStrict(sliceUri, supportedSpecs, pkg);
+                output[0] = onBindSliceStrict(sliceUri, supportedSpecs);
                 latch.countDown();
             });
             try {
@@ -433,66 +389,15 @@ public abstract class SliceProvider extends ContentProvider {
         }
     }
 
-    /**
-     * @hide
-     */
-    public static Slice createPermissionSlice(Context context, Uri sliceUri,
-            String callingPackage) {
-        return new Slice.Builder(sliceUri)
-                .addAction(createPermissionIntent(context, sliceUri, callingPackage),
-                        new Slice.Builder(sliceUri.buildUpon().appendPath("permission").build())
-                                .addText(getPermissionString(context, callingPackage), null)
-                                .build())
-                .addHints(Slice.HINT_LIST_ITEM)
-                .build();
-    }
-
-    /**
-     * @hide
-     */
-    public static PendingIntent createPermissionIntent(Context context, Uri sliceUri,
-            String callingPackage) {
-        Intent intent = new Intent(SliceManager.ACTION_REQUEST_SLICE_PERMISSION);
-        intent.setComponent(new ComponentName("com.android.systemui",
-                "com.android.systemui.SlicePermissionActivity"));
-        intent.putExtra(EXTRA_BIND_URI, sliceUri);
-        intent.putExtra(EXTRA_PKG, callingPackage);
-        intent.putExtra(EXTRA_PROVIDER_PKG, context.getPackageName());
-        // Unique pending intent.
-        intent.setData(sliceUri.buildUpon().appendQueryParameter("package", callingPackage)
-                .build());
-
-        return PendingIntent.getActivity(context, 0, intent, 0);
-    }
-
-    /**
-     * @hide
-     */
-    public static CharSequence getPermissionString(Context context, String callingPackage) {
-        PackageManager pm = context.getPackageManager();
-        try {
-            return context.getString(
-                    com.android.internal.R.string.slices_permission_request,
-                    pm.getApplicationInfo(callingPackage, 0).loadLabel(pm),
-                    context.getApplicationInfo().loadLabel(pm));
-        } catch (NameNotFoundException e) {
-            // This shouldn't be possible since the caller is verified.
-            throw new RuntimeException("Unknown calling app", e);
-        }
-    }
-
-    private Slice onBindSliceStrict(Uri sliceUri, List<SliceSpec> supportedSpecs,
-            String callingPackage) {
+    private Slice onBindSliceStrict(Uri sliceUri, List<SliceSpec> supportedSpecs) {
         ThreadPolicy oldPolicy = StrictMode.getThreadPolicy();
         try {
             StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                     .detectAll()
                     .penaltyDeath()
                     .build());
-            mBindingPkg = callingPackage;
             return onBindSlice(sliceUri, supportedSpecs);
         } finally {
-            mBindingPkg = null;
             StrictMode.setThreadPolicy(oldPolicy);
         }
     }

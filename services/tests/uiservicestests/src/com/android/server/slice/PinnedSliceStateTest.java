@@ -149,7 +149,7 @@ public class PinnedSliceStateTest extends UiServiceTestCase {
         ISliceListener listener = mock(ISliceListener.class);
         assertFalse(mPinnedSliceManager.isPinned());
 
-        mPinnedSliceManager.addSliceListener(listener, mContext.getPackageName(), FIRST_SPECS);
+        mPinnedSliceManager.addSliceListener(listener, FIRST_SPECS);
         assertTrue(mPinnedSliceManager.isPinned());
 
         assertTrue(mPinnedSliceManager.removeSliceListener(listener));
@@ -162,9 +162,9 @@ public class PinnedSliceStateTest extends UiServiceTestCase {
         ISliceListener listener2 = mock(ISliceListener.class);
         assertFalse(mPinnedSliceManager.isPinned());
 
-        mPinnedSliceManager.addSliceListener(listener, mContext.getPackageName(), FIRST_SPECS);
+        mPinnedSliceManager.addSliceListener(listener, FIRST_SPECS);
         assertTrue(mPinnedSliceManager.isPinned());
-        mPinnedSliceManager.addSliceListener(listener2, mContext.getPackageName(), FIRST_SPECS);
+        mPinnedSliceManager.addSliceListener(listener2, FIRST_SPECS);
 
         assertFalse(mPinnedSliceManager.removeSliceListener(listener));
         assertTrue(mPinnedSliceManager.removeSliceListener(listener2));
@@ -176,7 +176,7 @@ public class PinnedSliceStateTest extends UiServiceTestCase {
         ISliceListener listener = mock(ISliceListener.class);
         assertFalse(mPinnedSliceManager.isPinned());
 
-        mPinnedSliceManager.addSliceListener(listener, mContext.getPackageName(), FIRST_SPECS);
+        mPinnedSliceManager.addSliceListener(listener, FIRST_SPECS);
         assertTrue(mPinnedSliceManager.isPinned());
         mPinnedSliceManager.pin("pkg", FIRST_SPECS);
 
@@ -199,7 +199,7 @@ public class PinnedSliceStateTest extends UiServiceTestCase {
 
         assertFalse(mPinnedSliceManager.isPinned());
 
-        mPinnedSliceManager.addSliceListener(listener, mContext.getPackageName(), FIRST_SPECS);
+        mPinnedSliceManager.addSliceListener(listener, FIRST_SPECS);
 
         mPinnedSliceManager.onChange();
         TestableLooper.get(this).processAllMessages();

@@ -53,32 +53,10 @@ public class SliceManager {
 
     private static final String TAG = "SliceManager";
 
-    /**
-     * @hide
-     */
-    public static final String ACTION_REQUEST_SLICE_PERMISSION =
-            "android.intent.action.REQUEST_SLICE_PERMISSION";
-
     private final ISliceManager mService;
     private final Context mContext;
     private final ArrayMap<Pair<Uri, SliceCallback>, ISliceListener> mListenerLookup =
             new ArrayMap<>();
-
-    /**
-     * Permission denied.
-     * @hide
-     */
-    public static final int PERMISSION_DENIED = -1;
-    /**
-     * Permission granted.
-     * @hide
-     */
-    public static final int PERMISSION_GRANTED = 0;
-    /**
-     * Permission just granted by the user, and should be granted uri permission as well.
-     * @hide
-     */
-    public static final int PERMISSION_USER_GRANTED = 1;
 
     /**
      * @hide
@@ -306,7 +284,7 @@ public class SliceManager {
             extras.putParcelable(SliceProvider.EXTRA_BIND_URI, uri);
             extras.putParcelableArrayList(SliceProvider.EXTRA_SUPPORTED_SPECS,
                     new ArrayList<>(supportedSpecs));
-            final Bundle res = provider.call(mContext.getPackageName(), SliceProvider.METHOD_SLICE,
+            final Bundle res = provider.call(resolver.getPackageName(), SliceProvider.METHOD_SLICE,
                     null, extras);
             Bundle.setDefusable(res, true);
             if (res == null) {
@@ -364,7 +342,7 @@ public class SliceManager {
             extras.putParcelable(SliceProvider.EXTRA_INTENT, intent);
             extras.putParcelableArrayList(SliceProvider.EXTRA_SUPPORTED_SPECS,
                     new ArrayList<>(supportedSpecs));
-            final Bundle res = provider.call(mContext.getPackageName(),
+            final Bundle res = provider.call(resolver.getPackageName(),
                     SliceProvider.METHOD_MAP_INTENT, null, extras);
             if (res == null) {
                 return null;
@@ -376,45 +354,6 @@ public class SliceManager {
             return null;
         } finally {
             resolver.releaseProvider(provider);
-        }
-    }
-
-    /**
-     * Does the permission check to see if a caller has access to a specific slice.
-     * @hide
-     */
-    public void enforceSlicePermission(Uri uri, String pkg, int pid, int uid) {
-        try {
-            if (pkg == null) {
-                throw new SecurityException("No pkg specified");
-            }
-            int result = mService.checkSlicePermission(uri, pkg, pid, uid);
-            if (result == PERMISSION_DENIED) {
-                throw new SecurityException("User " + uid + " does not have slice permission for "
-                        + uri + ".");
-            }
-            if (result == PERMISSION_USER_GRANTED) {
-                // We just had a user grant of this permission and need to grant this to the app
-                // permanently.
-                mContext.grantUriPermission(pkg, uri.buildUpon().path("").build(),
-                        Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-                                | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                                | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Called by SystemUI to grant a slice permission after a dialog is shown.
-     * @hide
-     */
-    public void grantPermissionFromUser(Uri uri, String pkg, boolean allSlices) {
-        try {
-            mService.grantPermissionFromUser(uri, pkg, mContext.getPackageName(), allSlices);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
         }
     }
 
