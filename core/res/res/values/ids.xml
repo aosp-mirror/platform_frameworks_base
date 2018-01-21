@@ -163,9 +163,4 @@
   <!-- Action used to manually trigger an autofill request -->
   <item type="id" name="autofill" />
 
-    <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_SHOW_TOOLTIP}. -->
-    <item type="id" name="accessibilityActionShowTooltip" />
-
-    <!-- Accessibility action identifier for {@link android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction#ACTION_HIDE_TOOLTIP}. -->
-    <item type="id" name="accessibilityActionHideTooltip" />
 </resources>
