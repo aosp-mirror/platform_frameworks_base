@@ -616,8 +616,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                     && entry.row.getGuts() == mGutsManager.getExposedGuts();
             entry.row.onDensityOrFontScaleChanged();
             if (exposedGuts) {
-                mGutsManager.setExposedGuts(entry.row.getGuts());
-                mGutsManager.bindGuts(entry.row);
+                mGutsManager.onDensityOrFontScaleChanged(entry.row);
             }
         }
     }
