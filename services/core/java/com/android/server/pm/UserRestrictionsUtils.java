@@ -561,6 +561,25 @@ public class UserRestrictionsUtils {
                         }
                     }
                     break;
+                case UserManager.DISALLOW_AMBIENT_DISPLAY:
+                    if (newValue) {
+                        android.provider.Settings.Secure.putString(
+                                context.getContentResolver(),
+                                Settings.Secure.DOZE_ENABLED, "0");
+                        android.provider.Settings.Secure.putString(
+                                context.getContentResolver(),
+                                Settings.Secure.DOZE_ALWAYS_ON, "0");
+                        android.provider.Settings.Secure.putString(
+                                context.getContentResolver(),
+                                Settings.Secure.DOZE_PULSE_ON_PICK_UP, "0");
+                        android.provider.Settings.Secure.putString(
+                                context.getContentResolver(),
+                                Settings.Secure.DOZE_PULSE_ON_LONG_PRESS, "0");
+                        android.provider.Settings.Secure.putString(
+                                context.getContentResolver(),
+                                Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP, "0");
+                    }
+                    break;
             }
         } finally {
             Binder.restoreCallingIdentity(id);
