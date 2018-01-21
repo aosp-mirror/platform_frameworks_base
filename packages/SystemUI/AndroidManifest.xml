@@ -121,7 +121,7 @@
     <uses-permission android:name="android.permission.TRUST_LISTENER" />
     <uses-permission android:name="android.permission.USE_FINGERPRINT" />
     <uses-permission android:name="android.permission.RESET_FINGERPRINT_LOCKOUT" />
-    <uses-permission android:name="android.permission.BIND_SLICE" />
+    <uses-permission android:name="android.permission.MANAGE_SLICE_PERMISSIONS" />
 
     <!-- Needed for WallpaperManager.clear in ImageWallpaper.updateWallpaperLocked -->
     <uses-permission android:name="android.permission.SET_WALLPAPER"/>
@@ -435,6 +435,16 @@
             android:launchMode="singleTop"
             androidprv:alwaysFocusable="true" />
 
+        <!-- started from SliceProvider -->
+        <activity android:name=".SlicePermissionActivity"
+            android:theme="@style/Theme.SystemUI.Dialog.Alert"
+            android:finishOnCloseSystemDialogs="true"
+            android:excludeFromRecents="true">
+            <intent-filter>
+                <action android:name="android.intent.action.REQUEST_SLICE_PERMISSION" />
+            </intent-filter>
+        </activity>
+
         <!-- platform logo easter egg activity -->
         <activity
             android:name=".DessertCase"
@@ -572,6 +582,7 @@
 
         <provider android:name=".keyguard.KeyguardSliceProvider"
                   android:authorities="com.android.systemui.keyguard"
+                  android:grantUriPermissions="true"
                   android:exported="true">
         </provider>
 
