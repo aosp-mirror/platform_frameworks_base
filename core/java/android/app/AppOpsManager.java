@@ -1326,6 +1326,25 @@ public class AppOpsManager {
     }
 
     /**
+     * Retrieve the human readable mode.
+     * @hide
+     */
+    public static String modeToString(int mode) {
+        switch (mode) {
+            case MODE_ALLOWED:
+                return "allow";
+            case MODE_IGNORED:
+                return "ignore";
+            case MODE_ERRORED:
+                return "deny";
+            case MODE_DEFAULT:
+                return "default";
+            default:
+                return "mode=" + mode;
+        }
+    }
+
+    /**
      * Retrieve whether the op allows itself to be reset.
      * @hide
      */
