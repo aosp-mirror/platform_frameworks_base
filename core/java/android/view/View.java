@@ -16,8 +16,6 @@
 
 package android.view;
 
-import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
-
 import static java.lang.Math.max;
 
 import android.animation.AnimatorInflater;
@@ -8550,12 +8548,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         info.setLongClickable(isLongClickable());
         info.setContextClickable(isContextClickable());
         info.setLiveRegion(getAccessibilityLiveRegion());
-        if ((mTooltipInfo != null) && (mTooltipInfo.mTooltipText != null)) {
-            info.setTooltipText(mTooltipInfo.mTooltipText);
-            info.addAction((mTooltipInfo.mTooltipPopup == null)
-                    ? AccessibilityNodeInfo.AccessibilityAction.ACTION_SHOW_TOOLTIP
-                    : AccessibilityNodeInfo.AccessibilityAction.ACTION_HIDE_TOOLTIP);
-        }
 
         // TODO: These make sense only if we are in an AdapterView but all
         // views can be selected. Maybe from accessibility perspective
@@ -8959,7 +8951,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return;
         }
         mAccessibilityTraversalBeforeId = beforeId;
-        notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
+        notifyAccessibilityStateChanged(
+                AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
     }
 
     /**
@@ -9002,7 +8995,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return;
         }
         mAccessibilityTraversalAfterId = afterId;
-        notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
+        notifyAccessibilityStateChanged(
+                AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
     }
 
     /**
@@ -9044,7 +9038,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 && mID == View.NO_ID) {
             mID = generateViewId();
         }
-        notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
+        notifyAccessibilityStateChanged(
+                AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
     }
 
     /**
@@ -10544,7 +10539,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (pflags3 != mPrivateFlags3) {
             mPrivateFlags3 = pflags3;
-            notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
+            notifyAccessibilityStateChanged(AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
         }
     }
 
@@ -11372,7 +11367,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPrivateFlags2 &= ~PFLAG2_ACCESSIBILITY_LIVE_REGION_MASK;
             mPrivateFlags2 |= (mode << PFLAG2_ACCESSIBILITY_LIVE_REGION_SHIFT)
                     & PFLAG2_ACCESSIBILITY_LIVE_REGION_MASK;
-            notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
+            notifyAccessibilityStateChanged(
+                    AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
         }
     }
 
@@ -11431,7 +11427,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (!maySkipNotify || oldIncludeForAccessibility != includeForAccessibility()) {
                 notifyAccessibilitySubtreeChanged();
             } else {
-                notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
+                notifyAccessibilityStateChanged(
+                        AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
             }
         }
     }
@@ -11841,7 +11838,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         || getAccessibilitySelectionEnd() != end)
                         && (start == end)) {
                     setAccessibilitySelection(start, end);
-                    notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
+                    notifyAccessibilityStateChanged(
+                            AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
                     return true;
                 }
             } break;
@@ -11858,21 +11856,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     return true;
                 }
             } break;
-            case R.id.accessibilityActionShowTooltip: {
-                if ((mTooltipInfo != null) && (mTooltipInfo.mTooltipPopup != null)) {
-                    // Tooltip already showing
-                    return false;
-                }
-                return showLongClickTooltip(0, 0);
-            }
-            case R.id.accessibilityActionHideTooltip: {
-                if ((mTooltipInfo == null) || (mTooltipInfo.mTooltipPopup == null)) {
-                    // No tooltip showing
-                    return false;
-                }
-                hideTooltip();
-                return true;
-            }
         }
         return false;
     }
@@ -13906,10 +13889,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 if (oldIncludeForAccessibility != includeForAccessibility()) {
                     notifyAccessibilitySubtreeChanged();
                 } else {
-                    notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
+                    notifyAccessibilityStateChanged(
+                            AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
                 }
             } else if ((changed & ENABLED_MASK) != 0) {
-                notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
+                notifyAccessibilityStateChanged(
+                        AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
             }
         }
     }
@@ -21869,7 +21854,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (selected) {
                 sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
             } else {
-                notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
+                notifyAccessibilityStateChanged(
+                        AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
             }
         }
     }
@@ -27048,8 +27034,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final boolean fromTouch = (mPrivateFlags3 & PFLAG3_FINGER_DOWN) == PFLAG3_FINGER_DOWN;
         mTooltipInfo.mTooltipPopup.show(this, x, y, fromTouch, mTooltipInfo.mTooltipText);
         mAttachInfo.mTooltipHost = this;
-        // The available accessibility actions have changed
-        notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
         return true;
     }
 
@@ -27068,8 +27052,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mAttachInfo != null) {
             mAttachInfo.mTooltipHost = null;
         }
-        // The available accessibility actions have changed
-        notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
     }
 
     private boolean showLongClickTooltip(int x, int y) {
@@ -27078,8 +27060,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return showTooltip(x, y, true);
     }
 
-    private boolean showHoverTooltip() {
-        return showTooltip(mTooltipInfo.mAnchorX, mTooltipInfo.mAnchorY, false);
+    private void showHoverTooltip() {
+        showTooltip(mTooltipInfo.mAnchorX, mTooltipInfo.mAnchorY, false);
     }
 
     boolean dispatchTooltipHoverEvent(MotionEvent event) {

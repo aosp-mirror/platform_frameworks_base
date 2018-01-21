@@ -2874,8 +2874,6 @@
     </public-group>
 
     <public-group type="id" first-id="0x01020044">
-      <public name="accessibilityActionShowTooltip" />
-      <public name="accessibilityActionHideTooltip" />
     </public-group>
 
     <public-group type="string" first-id="0x0104001b">
