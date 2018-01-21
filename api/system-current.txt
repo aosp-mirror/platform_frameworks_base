@@ -4143,18 +4143,21 @@ package android.telephony.data {
     method public abstract android.telephony.data.DataService.DataServiceProvider createDataServiceProvider(int);
     field public static final java.lang.String DATA_SERVICE_EXTRA_SLOT_ID = "android.telephony.data.extra.SLOT_ID";
     field public static final java.lang.String DATA_SERVICE_INTERFACE = "android.telephony.data.DataService";
+    field public static final int REQUEST_REASON_HANDOVER = 3; // 0x3
+    field public static final int REQUEST_REASON_NORMAL = 1; // 0x1
+    field public static final int REQUEST_REASON_SHUTDOWN = 2; // 0x2
   }
 
   public class DataService.DataServiceProvider {
     ctor public DataService.DataServiceProvider(int);
-    method public void deactivateDataCall(int, boolean, boolean, android.telephony.data.DataServiceCallback);
+    method public void deactivateDataCall(int, int, android.telephony.data.DataServiceCallback);
     method public void getDataCallList(android.telephony.data.DataServiceCallback);
     method public final int getSlotId();
     method public final void notifyDataCallListChanged(java.util.List<android.telephony.data.DataCallResponse>);
     method protected void onDestroy();
     method public void setDataProfile(java.util.List<android.telephony.data.DataProfile>, boolean, android.telephony.data.DataServiceCallback);
     method public void setInitialAttachApn(android.telephony.data.DataProfile, boolean, android.telephony.data.DataServiceCallback);
-    method public void setupDataCall(int, android.telephony.data.DataProfile, boolean, boolean, boolean, android.net.LinkProperties, android.telephony.data.DataServiceCallback);
+    method public void setupDataCall(int, android.telephony.data.DataProfile, boolean, boolean, int, android.net.LinkProperties, android.telephony.data.DataServiceCallback);
   }
 
   public class DataServiceCallback {
