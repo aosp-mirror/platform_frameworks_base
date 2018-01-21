@@ -22,6 +22,7 @@ import android.content.ContentProviderClient;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -51,6 +52,8 @@ public class PinnedSliceState {
     private final ArraySet<ISliceListener> mListeners = new ArraySet<>();
     @GuardedBy("mLock")
     private SliceSpec[] mSupportedSpecs = null;
+    @GuardedBy("mLock")
+    private final ArrayMap<ISliceListener, String> mPkgMap = new ArrayMap<>();
 
     public PinnedSliceState(SliceManagerService service, Uri uri) {
         mService = service;
@@ -102,17 +105,19 @@ public class PinnedSliceState {
         mService.getHandler().post(this::handleBind);
     }
 
-    public void addSliceListener(ISliceListener listener, SliceSpec[] specs) {
+    public void addSliceListener(ISliceListener listener, String pkg, SliceSpec[] specs) {
         synchronized (mLock) {
             if (mListeners.add(listener) && mListeners.size() == 1) {
                 mService.listen(mUri);
             }
+            mPkgMap.put(listener, pkg);
             mergeSpecs(specs);
         }
     }
 
     public boolean removeSliceListener(ISliceListener listener) {
         synchronized (mLock) {
+            mPkgMap.remove(listener);
             if (mListeners.remove(listener) && mListeners.size() == 0) {
                 mService.unlisten(mUri);
             }
@@ -155,25 +160,16 @@ public class PinnedSliceState {
     }
 
     private void handleBind() {
-        Slice s;
-        try (ContentProviderClient client = getClient()) {
-            Bundle extras = new Bundle();
-            extras.putParcelable(SliceProvider.EXTRA_BIND_URI, mUri);
-            extras.putParcelableArrayList(SliceProvider.EXTRA_SUPPORTED_SPECS,
-                    new ArrayList<>(Arrays.asList(mSupportedSpecs)));
-            final Bundle res;
-            try {
-                res = client.call(SliceProvider.METHOD_SLICE, null, extras);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Unable to bind slice " + mUri, e);
-                return;
-            }
-            if (res == null) return;
-            Bundle.setDefusable(res, true);
-            s = res.getParcelable(SliceProvider.EXTRA_SLICE);
-        }
+        Slice cachedSlice = doBind(null);
         synchronized (mLock) {
             mListeners.removeIf(l -> {
+                Slice s = cachedSlice;
+                if (s == null || s.hasHint(Slice.HINT_CALLER_NEEDED)) {
+                    s = doBind(mPkgMap.get(l));
+                }
+                if (s == null) {
+                    return true;
+                }
                 try {
                     l.onSliceUpdated(s);
                     return false;
@@ -186,6 +182,26 @@ public class PinnedSliceState {
                 // All the listeners died, remove from pinned state.
                 mService.removePinnedSlice(mUri);
             }
+        }
+    }
+
+    private Slice doBind(String overridePkg) {
+        try (ContentProviderClient client = getClient()) {
+            Bundle extras = new Bundle();
+            extras.putParcelable(SliceProvider.EXTRA_BIND_URI, mUri);
+            extras.putParcelableArrayList(SliceProvider.EXTRA_SUPPORTED_SPECS,
+                    new ArrayList<>(Arrays.asList(mSupportedSpecs)));
+            extras.putString(SliceProvider.EXTRA_OVERRIDE_PKG, overridePkg);
+            final Bundle res;
+            try {
+                res = client.call(SliceProvider.METHOD_SLICE, null, extras);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Unable to bind slice " + mUri, e);
+                return null;
+            }
+            if (res == null) return null;
+            Bundle.setDefusable(res, true);
+            return res.getParcelable(SliceProvider.EXTRA_SLICE);
         }
     }
 
