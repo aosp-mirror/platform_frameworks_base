@@ -92,10 +92,20 @@ void StatsLogProcessor::onAnomalyAlarmFired(
 
 void StatsLogProcessor::mapIsolatedUidToHostUidIfNecessaryLocked(LogEvent* event) const {
     std::vector<Field> uidFields;
-    findFields(
-        event->getFieldValueMap(),
-        buildAttributionUidFieldMatcher(event->GetTagId(), Position::ANY),
-        &uidFields);
+    if (android::util::kAtomsWithAttributionChain.find(event->GetTagId()) !=
+        android::util::kAtomsWithAttributionChain.end()) {
+        findFields(
+            event->getFieldValueMap(),
+            buildAttributionUidFieldMatcher(event->GetTagId(), Position::ANY),
+            &uidFields);
+    } else if (android::util::kAtomsWithUidField.find(event->GetTagId()) !=
+               android::util::kAtomsWithUidField.end()) {
+        findFields(
+            event->getFieldValueMap(),
+            buildSimpleAtomFieldMatcher(event->GetTagId(), 1 /* uid is always the 1st field. */),
+            &uidFields);
+    }
+
     for (size_t i = 0; i < uidFields.size(); ++i) {
         DimensionsValue* value = event->findFieldValueOrNull(uidFields[i]);
         if (value != nullptr && value->value_case() == DimensionsValue::ValueCase::kValueInt) {

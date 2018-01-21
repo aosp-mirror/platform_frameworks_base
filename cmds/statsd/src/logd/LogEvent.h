@@ -58,14 +58,14 @@ public:
     /**
      * Get the timestamp associated with this event.
      */
-    uint64_t GetTimestampNs() const { return mTimestampNs; }
+    inline uint64_t GetTimestampNs() const { return mTimestampNs; }
 
     /**
      * Get the tag for this event.
      */
-    int GetTagId() const { return mTagId; }
+    inline int GetTagId() const { return mTagId; }
 
-    uint32_t GetUid() const {
+    inline uint32_t GetUid() const {
         return mLogUid;
     }
 
