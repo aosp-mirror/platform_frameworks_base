@@ -233,7 +233,7 @@ public class SliceManagerService extends ISliceManager.Stub {
     }
 
     @VisibleForTesting
-    PinnedSliceState createPinnedSlice(Uri uri) {
+    protected PinnedSliceState createPinnedSlice(Uri uri) {
         return new PinnedSliceState(this, uri);
     }
 
@@ -352,7 +352,7 @@ public class SliceManagerService extends ISliceManager.Stub {
     // Based on getDefaultHome in ShortcutService.
     // TODO: Unify if possible
     @VisibleForTesting
-    String getDefaultHome(int userId) {
+    protected String getDefaultHome(int userId) {
         final long token = Binder.clearCallingIdentity();
         try {
             final List<ResolveInfo> allHomeCandidates = new ArrayList<>();
