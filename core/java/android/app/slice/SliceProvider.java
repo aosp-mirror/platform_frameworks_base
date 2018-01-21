@@ -158,7 +158,6 @@ public abstract class SliceProvider extends ContentProvider {
      * currently happening. The returned package will have been
      * verified to belong to the calling UID. Returns {@code null} if not
      * currently performing an {@link #onBindSlice(Uri, List)}.
-     * @hide
      */
     public final @Nullable String getBindingPackage() {
         return mBindingPkg;
