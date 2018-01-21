@@ -95,7 +95,7 @@ public interface StatusBarManagerInternal {
      *
      * @param rotation rotation suggestion
      */
-    void onProposedRotationChanged(int rotation);
+    void onProposedRotationChanged(int rotation, boolean isValid);
 
     public interface GlobalActionsListener {
         /**

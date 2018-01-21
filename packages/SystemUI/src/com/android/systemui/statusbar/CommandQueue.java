@@ -144,7 +144,7 @@ public class CommandQueue extends IStatusBar.Stub {
         default void handleShowGlobalActionsMenu() { }
         default void handleShowShutdownUi(boolean isReboot, String reason) { }
 
-        default void onRotationProposal(int rotation) { }
+        default void onRotationProposal(int rotation, boolean isValid) { }
     }
 
     @VisibleForTesting
@@ -462,10 +462,10 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     @Override
-    public void onProposedRotationChanged(int rotation) {
+    public void onProposedRotationChanged(int rotation, boolean isValid) {
         synchronized (mLock) {
             mHandler.removeMessages(MSG_ROTATION_PROPOSAL);
-            mHandler.obtainMessage(MSG_ROTATION_PROPOSAL, rotation, 0,
+            mHandler.obtainMessage(MSG_ROTATION_PROPOSAL, rotation, isValid ? 1 : 0,
                     null).sendToTarget();
         }
     }
@@ -668,7 +668,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 case MSG_ROTATION_PROPOSAL:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).onRotationProposal(msg.arg1);
+                        mCallbacks.get(i).onRotationProposal(msg.arg1, msg.arg2 != 0);
                     }
                     break;
             }
