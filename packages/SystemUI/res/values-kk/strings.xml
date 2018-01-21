@@ -33,7 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Ағымдағы"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Хабарлар"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Батарея заряды төмен"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"Батарея заряды аз. \"Battery Saver\" функциясын қосыңыз"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> қалды"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Пайдалану барысына байланысты <xliff:g id="PERCENTAGE">%s</xliff:g> заряд, шамамен <xliff:g id="TIME">%s</xliff:g> қалды"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> заряд, шамамен <xliff:g id="TIME">%s</xliff:g> қалды"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> қалды. Battery Saver қосулы."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB зарядтауды қолдау ұсынылмаған.\nЖабдықталған зарядтағыш құрылғысын ғана қолданыңыз."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB арқылы зарядтауға қолдау көрсетілмейді."</string>
@@ -67,14 +70,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Бұл құрылғыға жаңа кірген пайдаланушы USB түзетуін іске қосылмайды. Бұл мүмкіндікті пайдалану үшін негізгі пайдаланушыға ауысыңыз."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Экранды толтыру үшін ұлғайту"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Экранды толтыру үшін созу"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Скриншот"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Скриншотты сақтауда…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Скриншотты сақтауда…"</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"Скриншот сақталуда."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Скриншот сақталды."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Скриншотты көру үшін түртіңіз."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Скриншот жасалмады."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Скриншотты сақтау кезінде мәселе туындады."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Жадтағы шектеулі бос орынға байланысты скриншотты сақтау мүмкін емес."</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"Скриншот сақталуда"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"Скриншот сақталды"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"Скриншотты көру үшін түртіңіз"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"Скриншот жасалмады"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"Скриншотты сақтау кезінде ақау болды"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Жадтағы шектеулі бос орынға байланысты скриншот сақталмайды"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Қолданба немесе ұйым скриншоттар түсіруге рұқсат етпейді"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB файлын жіберу опциялары"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Медиа ойнатқыш (MTP) ретінде қосыңыз"</string>
@@ -557,26 +561,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Өшірулі"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Қуат хабарландыруының басқару элементтерімен қолданбаның хабарландырулары үшін 0-ден бастап 5-ке дейін маңыздылық деңгейін орнатуға болады. \n\n"<b>"5-деңгей"</b>" \n- Хабарландыру тізімінің ең басында көрсету \n- Толық экранға ашылуын рұқсат ету \n- Әрдайым қалқымалы хабарландыру түрінде көрсету \n\n"<b>"4-деңгей"</b>" \n- Толық экранға шығармау \n- Әрдайым қалқымалы хабарландыру түрінде көрсету \n\n"<b>"3-деңгей"</b>" \n- Толық экранға шығармау \n- Ешқашан қалқымалы хабарландыру түрінде көрсетпеу \n\n"<b>"2-деңгей"</b>" \n- Толық экранға шығармау \n- Ешқашан қалқымалы хабарландыру түрінде көрсетпеу \n- Ешқашан дыбыс және діріл шығармау \n\n"<b>"1-деңгей"</b>" \n- Толық экранға шығармау \n- Ешқашан қалқымалы хабарландыру түрінде көрсетпеу \n- Ешқашан дыбыс немесе діріл шығармау \n- Құлыпталған экраннан және күйін көрсету жолағынан жасыру \n- Хабарландыру тізімінің ең астында көрсету \n\n"<b>"0-деңгей"</b>" \n- Қолданбадағы барлық хабарландыруларға тыйым салу"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Хабарландырулар"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"Енді сізге бұл хабарландырулар жіберілмейді"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> хабарландыру санаттары"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"Бұл қолданбада хабарландыру санаттары жоқ"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Бұл қолданбаның хабарландырулары өшірілмейді"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">Осы қолданбадан <xliff:g id="NUMBER_1">%s</xliff:g> ішінен 1 хабарландыру санаты</item>
-      <item quantity="one">Осы қолданбадан <xliff:g id="NUMBER_0">%s</xliff:g> ішінен 1 хабарландыру санаты</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> және тағы <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> және тағы <xliff:g id="NUMBER_2">%3$d</xliff:g></item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Хабарландырулар бұдан былай көрсетілмейді"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"Хабарландырулар көрсетілсін бе?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"Хабарландыруларға тыйым салу"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"Көрсету"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"Осы қолданбаның хабарландырулары көрсетілсін бе?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"Хабарландыруларды өшіру мүмкін емес"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> хабарландыруларын басқару элементтері ашылды"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> хабарландыруларын басқару элементтері жабылды"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Осы арнадан келетін хабарландыруларға рұқсат беру"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"Барлық санаттар"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Қосымша параметрлер"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"Реттеу: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"Реттеу"</string>
     <string name="notification_done" msgid="5279426047273930175">"Дайын"</string>
+    <string name="inline_undo" msgid="558916737624706010">"Қайтару"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"хабарландыруларды басқару элементтері"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"хабарландыруды кідірту опциялары"</string>
@@ -731,8 +728,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Жаю"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Кішірейту"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Жабу"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"Реттеулер"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Жабу үшін төмен қарай сүйреңіз"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Mәзір"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> \"сурет ішіндегі сурет\" режимінде"</string>

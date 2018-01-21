@@ -51,6 +51,7 @@ import android.view.IWindowSession;
 import android.view.IWindowSessionCallback;
 import android.view.InputChannel;
 import android.view.Surface;
+import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.WindowManager;
 
@@ -308,27 +309,19 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     /* Drag/drop */
+
     @Override
-    public IBinder prepareDrag(IWindow window, int flags, int width, int height,
-            Surface outSurface) {
+    public IBinder performDrag(IWindow window, int flags, SurfaceControl surface, int touchSource,
+            float touchX, float touchY, float thumbCenterX, float thumbCenterY, ClipData data) {
         final int callerPid = Binder.getCallingPid();
         final int callerUid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         try {
-            return mDragDropController.prepareDrag(
-                    mSurfaceSession, callerPid, callerUid, window, flags, width, height,
-                    outSurface);
+            return mDragDropController.performDrag(mSurfaceSession, callerPid, callerUid, window,
+                    flags, surface, touchSource, touchX, touchY, thumbCenterX, thumbCenterY, data);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
-    }
-
-    @Override
-    public boolean performDrag(IWindow window, IBinder dragToken,
-            int touchSource, float touchX, float touchY, float thumbCenterX, float thumbCenterY,
-            ClipData data) {
-        return mDragDropController.performDrag(window, dragToken, touchSource,
-                touchX, touchY, thumbCenterX, thumbCenterY, data);
     }
 
     @Override
@@ -462,6 +455,17 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         final long identity = Binder.clearCallingIdentity();
         try {
             mService.updatePointerIcon(window);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void updateTapExcludeRegion(IWindow window, int regionId, int left, int top, int width,
+            int height) {
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            mService.updateTapExcludeRegion(window, regionId, left, top, width, height);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

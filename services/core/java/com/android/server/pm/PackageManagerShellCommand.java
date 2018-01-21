@@ -18,6 +18,7 @@ package com.android.server.pm;
 
 import android.accounts.IAccountManager;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -46,6 +47,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
+import android.content.pm.dex.DexMetadataHelper;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.net.Uri;
@@ -72,13 +74,13 @@ import android.util.PrintWriterPrinter;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.SizedInputStream;
+import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 
 import dalvik.system.DexFile;
 
 import libcore.io.IoUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -222,6 +224,8 @@ class PackageManagerShellCommand extends ShellCommand {
                     return runSetUserRestriction();
                 case "get-max-users":
                     return runGetMaxUsers();
+                case "get-max-running-users":
+                    return runGetMaxRunningUsers();
                 case "set-home-activity":
                     return runSetHomeActivity();
                 case "set-installer":
@@ -1883,6 +1887,14 @@ class PackageManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    public int runGetMaxRunningUsers() {
+        ActivityManagerInternal activityManagerInternal =
+                LocalServices.getService(ActivityManagerInternal.class);
+        getOutPrintWriter().println("Maximum supported running users: "
+                + activityManagerInternal.getMaxRunningUsers());
+        return 0;
+    }
+
     private static class InstallParams {
         SessionParams sessionParams;
         String installerPackageName;
@@ -2246,6 +2258,14 @@ class PackageManagerShellCommand extends ShellCommand {
             session = new PackageInstaller.Session(
                     mInterface.getPackageInstaller().openSession(sessionId));
 
+            // Sanity check that all .dm files match an apk.
+            // (The installer does not support standalone .dm files and will not process them.)
+            try {
+                DexMetadataHelper.validateDexPaths(session.getNames());
+            } catch (IllegalStateException | IOException e) {
+                pw.println("Warning [Could not validate the dex paths: " + e.getMessage() + "]");
+            }
+
             final LocalIntentReceiver receiver = new LocalIntentReceiver();
             session.commit(receiver.getIntentSender());
 
@@ -2606,6 +2626,8 @@ class PackageManagerShellCommand extends ShellCommand {
         pw.println("  set-user-restriction [--user USER_ID] RESTRICTION VALUE");
         pw.println("");
         pw.println("  get-max-users");
+        pw.println("");
+        pw.println("  get-max-running-users");
         pw.println("");
         pw.println("  compile [-m MODE | -r REASON] [-f] [-c] [--split SPLIT_NAME]");
         pw.println("          [--reset] [--check-prof (true | false)] (-a | TARGET-PACKAGE)");

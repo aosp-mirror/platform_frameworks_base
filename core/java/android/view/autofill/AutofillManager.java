@@ -53,6 +53,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -169,7 +170,6 @@ public final class AutofillManager {
     public static final String EXTRA_CLIENT_STATE =
             "android.view.autofill.extra.CLIENT_STATE";
 
-
     /** @hide */
     public static final String EXTRA_RESTORE_SESSION_TOKEN =
             "android.view.autofill.extra.RESTORE_SESSION_TOKEN";
@@ -257,6 +257,12 @@ public final class AutofillManager {
      * @hide
      */
     public static final int STATE_DISABLED_BY_SERVICE = 4;
+
+    /**
+     * Timeout in ms for calls to the field classification service.
+     * @hide
+     */
+    public static final int FC_SERVICE_TIMEOUT = 5000;
 
     /**
      * Makes an authentication id from a request id and a dataset id.
@@ -1175,17 +1181,15 @@ public final class AutofillManager {
      * <a href="AutofillService.html#FieldClassification">field classification</a>.
      *
      * <p><b>Note:</b> This method should only be called by an app providing an autofill service,
-     * and it's ignored if the caller currently doesn't have an enabled autofill service for
-     * the user.
-     *
-     * @return list of all algorithms currently available, or an empty list if the caller currently
-     * does not have an enabled autofill service for the user.
+     * and it returns an empty list if the caller currently doesn't have an enabled autofill service
+     * for the user.
      */
     @NonNull
     public List<String> getAvailableFieldClassificationAlgorithms() {
+        final String[] algorithms;
         try {
-            final List<String> names = mService.getAvailableFieldClassificationAlgorithms();
-            return names != null ? names : Collections.emptyList();
+            algorithms = mService.getAvailableFieldClassificationAlgorithms();
+            return algorithms != null ? Arrays.asList(algorithms) : Collections.emptyList();
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
             return null;

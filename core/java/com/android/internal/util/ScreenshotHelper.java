@@ -1,5 +1,6 @@
 package com.android.internal.util;
 
+import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -32,8 +33,18 @@ public class ScreenshotHelper {
         mContext = context;
     }
 
+    /**
+     * Request a screenshot be taken.
+     *
+     * @param screenshotType The type of screenshot, for example either
+     *                       {@link android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN}
+     *                       or {@link android.view.WindowManager.TAKE_SCREENSHOT_SELECTED_REGION}
+     * @param hasStatus {@code true} if the status bar is currently showing. {@code false} if not.
+     * @param hasNav {@code true} if the navigation bar is currently showing. {@code false} if not.
+     * @param handler A handler used in case the screenshot times out
+     */
     public void takeScreenshot(final int screenshotType, final boolean hasStatus,
-            final boolean hasNav, Handler handler) {
+            final boolean hasNav, @NonNull Handler handler) {
         synchronized (mScreenshotLock) {
             if (mScreenshotConnection != null) {
                 return;

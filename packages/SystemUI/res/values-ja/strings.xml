@@ -33,7 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"実行中"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"通知"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"電池残量が少なくなっています"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"電池残量が少なくなっています。バッテリー セーバーを ON にしてください"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"残量が<xliff:g id="PERCENTAGE">%s</xliff:g>です"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"残量 <xliff:g id="PERCENTAGE">%s</xliff:g>、約 <xliff:g id="TIME">%s</xliff:g>（使用状況に基づく）"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"残量 <xliff:g id="PERCENTAGE">%s</xliff:g>、約 <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"残量が <xliff:g id="PERCENTAGE">%s</xliff:g> です。バッテリー セーバーは ON です。"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB充電には対応していません。\n付属の充電器をお使いください。"</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB充電には対応していません。"</string>
@@ -67,14 +70,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"この端末に現在ログインしているユーザーでは、USB デバッグを ON にすることはできません。この機能を使用するには、メインユーザーに切り替えてください。"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"画面サイズに合わせて拡大"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"画面サイズに合わせて拡大"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"スクリーンショット"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"スクリーンショットを保存中..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"スクリーンショットを保存しています..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"スクリーンショットを保存しています。"</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"スクリーンショットを取得しました。"</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"タップするとスクリーンショットが表示されます。"</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"スクリーンショットをキャプチャできませんでした。"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"スクリーンショットの保存中に問題が発生しました。"</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"空き容量が足りないため、スクリーンショットを保存できません。"</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"スクリーンショットを保存しています"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"スクリーンショットを保存しました"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"タップするとスクリーンショットが表示されます"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"スクリーンショットを撮影できませんでした"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"スクリーンショットの保存中に問題が発生しました"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"空き容量が足りないため、スクリーンショットを保存できません"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"スクリーンショットの作成はアプリまたは組織で許可されていません"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USBファイル転送オプション"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"メディアプレーヤー（MTP）としてマウント"</string>
@@ -559,26 +563,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"OFF"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"電源通知管理では、アプリの通知の重要度をレベル 0～5 で設定できます。\n\n"<b>"レベル 5"</b>" \n- 通知リストの一番上に表示する \n- 全画面表示を許可する \n- 常にポップアップする \n\n"<b>"レベル 4"</b>" \n- 全画面表示しない \n- 常にポップアップする \n\n"<b>"レベル 3"</b>" \n- 全画面表示しない \n- ポップアップしない \n\n"<b>"レベル 2"</b>" \n- 全画面表示しない \n- ポップアップしない \n- 音やバイブレーションを使用しない \n\n"<b>"レベル 1"</b>" \n- 全画面表示しない \n- ポップアップしない \n- 音やバイブレーションを使用しない \n- ロック画面やステータスバーに表示しない \n- 通知リストの一番下に表示する \n\n"<b>"レベル 0"</b>" \n- アプリからのすべての通知をブロックする"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"通知"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"今後、この通知は配信されません"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> 個の通知カテゴリ"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"このアプリでは通知カテゴリが設定されていません"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"このアプリの通知を OFF にすることはできません"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">このアプリの通知カテゴリ <xliff:g id="NUMBER_1">%s</xliff:g> 件中 1 件</item>
-      <item quantity="one">このアプリの通知カテゴリ <xliff:g id="NUMBER_0">%s</xliff:g> 件中 1 件</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>、<xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>、<xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g>、他 <xliff:g id="NUMBER_5">%3$d</xliff:g> 件</item>
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>、<xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g>、他 <xliff:g id="NUMBER_2">%3$d</xliff:g> 件</item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"今後、この通知は表示されません"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"この通知を今後も表示しますか？"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"通知を表示しない"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"今後も表示する"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"このアプリからの通知を今後も表示しますか？"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"この通知を OFF にすることはできません"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> の通知管理は開いています"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> の通知管理は閉じています"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"このチャンネルからの通知を許可する"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"すべてのカテゴリ"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"詳細設定"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"カスタマイズ: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"カスタマイズ"</string>
     <string name="notification_done" msgid="5279426047273930175">"完了"</string>
+    <string name="inline_undo" msgid="558916737624706010">"元に戻す"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"通知管理"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"通知スヌーズ設定"</string>
@@ -733,8 +730,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"展開"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"最小化"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"閉じる"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"設定"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"下にドラッグして閉じる"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"メニュー"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g>はピクチャー イン ピクチャーで表示中です"</string>

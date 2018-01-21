@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
+
 import static java.lang.Math.max;
 
 import android.animation.AnimatorInflater;
@@ -8548,6 +8550,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         info.setLongClickable(isLongClickable());
         info.setContextClickable(isContextClickable());
         info.setLiveRegion(getAccessibilityLiveRegion());
+        if ((mTooltipInfo != null) && (mTooltipInfo.mTooltipText != null)) {
+            info.setTooltipText(mTooltipInfo.mTooltipText);
+            info.addAction((mTooltipInfo.mTooltipPopup == null)
+                    ? AccessibilityNodeInfo.AccessibilityAction.ACTION_SHOW_TOOLTIP
+                    : AccessibilityNodeInfo.AccessibilityAction.ACTION_HIDE_TOOLTIP);
+        }
 
         // TODO: These make sense only if we are in an AdapterView but all
         // views can be selected. Maybe from accessibility perspective
@@ -8951,8 +8959,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return;
         }
         mAccessibilityTraversalBeforeId = beforeId;
-        notifyAccessibilityStateChanged(
-                AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+        notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
     }
 
     /**
@@ -8995,8 +9002,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return;
         }
         mAccessibilityTraversalAfterId = afterId;
-        notifyAccessibilityStateChanged(
-                AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+        notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
     }
 
     /**
@@ -9038,8 +9044,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 && mID == View.NO_ID) {
             mID = generateViewId();
         }
-        notifyAccessibilityStateChanged(
-                AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+        notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
     }
 
     /**
@@ -10539,7 +10544,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         if (pflags3 != mPrivateFlags3) {
             mPrivateFlags3 = pflags3;
-            notifyAccessibilityStateChanged(AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+            notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
         }
     }
 
@@ -11367,8 +11372,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mPrivateFlags2 &= ~PFLAG2_ACCESSIBILITY_LIVE_REGION_MASK;
             mPrivateFlags2 |= (mode << PFLAG2_ACCESSIBILITY_LIVE_REGION_SHIFT)
                     & PFLAG2_ACCESSIBILITY_LIVE_REGION_MASK;
-            notifyAccessibilityStateChanged(
-                    AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+            notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
         }
     }
 
@@ -11427,8 +11431,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (!maySkipNotify || oldIncludeForAccessibility != includeForAccessibility()) {
                 notifyAccessibilitySubtreeChanged();
             } else {
-                notifyAccessibilityStateChanged(
-                        AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+                notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
             }
         }
     }
@@ -11838,8 +11841,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         || getAccessibilitySelectionEnd() != end)
                         && (start == end)) {
                     setAccessibilitySelection(start, end);
-                    notifyAccessibilityStateChanged(
-                            AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+                    notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
                     return true;
                 }
             } break;
@@ -11856,6 +11858,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     return true;
                 }
             } break;
+            case R.id.accessibilityActionShowTooltip: {
+                if ((mTooltipInfo != null) && (mTooltipInfo.mTooltipPopup != null)) {
+                    // Tooltip already showing
+                    return false;
+                }
+                return showLongClickTooltip(0, 0);
+            }
+            case R.id.accessibilityActionHideTooltip: {
+                if ((mTooltipInfo == null) || (mTooltipInfo.mTooltipPopup == null)) {
+                    // No tooltip showing
+                    return false;
+                }
+                hideTooltip();
+                return true;
+            }
         }
         return false;
     }
@@ -13889,12 +13906,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 if (oldIncludeForAccessibility != includeForAccessibility()) {
                     notifyAccessibilitySubtreeChanged();
                 } else {
-                    notifyAccessibilityStateChanged(
-                            AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+                    notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
                 }
             } else if ((changed & ENABLED_MASK) != 0) {
-                notifyAccessibilityStateChanged(
-                        AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+                notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
             }
         }
     }
@@ -17886,6 +17901,15 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
+     * Return the window this view is currently attached to. Used in
+     * {@link android.app.ActivityView} to communicate with WM.
+     * @hide
+     */
+    protected IWindow getWindow() {
+        return mAttachInfo != null ? mAttachInfo.mWindow : null;
+    }
+
+    /**
      * Return the visibility value of the least visible component passed.
      */
     int combineVisibility(int vis1, int vis2) {
@@ -21845,8 +21869,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             if (selected) {
                 sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SELECTED);
             } else {
-                notifyAccessibilityStateChanged(
-                        AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+                notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
             }
         }
     }
@@ -23553,15 +23576,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             data.prepareToLeaveProcess((flags & View.DRAG_FLAG_GLOBAL) != 0);
         }
 
-        boolean okay = false;
-
         Point shadowSize = new Point();
         Point shadowTouchPoint = new Point();
         shadowBuilder.onProvideShadowMetrics(shadowSize, shadowTouchPoint);
 
-        if ((shadowSize.x < 0) || (shadowSize.y < 0) ||
-                (shadowTouchPoint.x < 0) || (shadowTouchPoint.y < 0)) {
-            throw new IllegalStateException("Drag shadow dimensions must not be negative");
+        if ((shadowSize.x <= 0) || (shadowSize.y <= 0)
+                || (shadowTouchPoint.x < 0) || (shadowTouchPoint.y < 0)) {
+            throw new IllegalStateException("Drag shadow dimensions must be positive");
         }
 
         if (ViewDebug.DEBUG_DRAG) {
@@ -23572,40 +23593,50 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mAttachInfo.mDragSurface.release();
         }
         mAttachInfo.mDragSurface = new Surface();
+        mAttachInfo.mDragToken = null;
+
+        final ViewRootImpl root = mAttachInfo.mViewRootImpl;
+        final SurfaceSession session = new SurfaceSession(root.mSurface);
+        final SurfaceControl surface = new SurfaceControl.Builder(session)
+                .setName("drag surface")
+                .setSize(shadowSize.x, shadowSize.y)
+                .setFormat(PixelFormat.TRANSLUCENT)
+                .build();
         try {
-            mAttachInfo.mDragToken = mAttachInfo.mSession.prepareDrag(mAttachInfo.mWindow,
-                    flags, shadowSize.x, shadowSize.y, mAttachInfo.mDragSurface);
-            if (ViewDebug.DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "prepareDrag returned token="
-                    + mAttachInfo.mDragToken + " surface=" + mAttachInfo.mDragSurface);
-            if (mAttachInfo.mDragToken != null) {
-                Canvas canvas = mAttachInfo.mDragSurface.lockCanvas(null);
-                try {
-                    canvas.drawColor(0, PorterDuff.Mode.CLEAR);
-                    shadowBuilder.onDrawShadow(canvas);
-                } finally {
-                    mAttachInfo.mDragSurface.unlockCanvasAndPost(canvas);
-                }
-
-                final ViewRootImpl root = getViewRootImpl();
-
-                // Cache the local state object for delivery with DragEvents
-                root.setLocalDragState(myLocalState);
-
-                // repurpose 'shadowSize' for the last touch point
-                root.getLastTouchPoint(shadowSize);
-
-                okay = mAttachInfo.mSession.performDrag(mAttachInfo.mWindow, mAttachInfo.mDragToken,
-                        root.getLastTouchSource(), shadowSize.x, shadowSize.y,
-                        shadowTouchPoint.x, shadowTouchPoint.y, data);
-                if (ViewDebug.DEBUG_DRAG) Log.d(VIEW_LOG_TAG, "performDrag returned " + okay);
+            mAttachInfo.mDragSurface.copyFrom(surface);
+            final Canvas canvas = mAttachInfo.mDragSurface.lockCanvas(null);
+            try {
+                canvas.drawColor(0, PorterDuff.Mode.CLEAR);
+                shadowBuilder.onDrawShadow(canvas);
+            } finally {
+                mAttachInfo.mDragSurface.unlockCanvasAndPost(canvas);
             }
+
+            // Cache the local state object for delivery with DragEvents
+            root.setLocalDragState(myLocalState);
+
+            // repurpose 'shadowSize' for the last touch point
+            root.getLastTouchPoint(shadowSize);
+
+            mAttachInfo.mDragToken = mAttachInfo.mSession.performDrag(
+                    mAttachInfo.mWindow, flags, surface, root.getLastTouchSource(),
+                    shadowSize.x, shadowSize.y, shadowTouchPoint.x, shadowTouchPoint.y, data);
+            if (ViewDebug.DEBUG_DRAG) {
+                Log.d(VIEW_LOG_TAG, "performDrag returned " + mAttachInfo.mDragToken);
+            }
+
+            return mAttachInfo.mDragToken != null;
         } catch (Exception e) {
             Log.e(VIEW_LOG_TAG, "Unable to initiate drag", e);
-            mAttachInfo.mDragSurface.destroy();
-            mAttachInfo.mDragSurface = null;
+            return false;
+        } finally {
+            if (mAttachInfo.mDragToken == null) {
+                mAttachInfo.mDragSurface.destroy();
+                mAttachInfo.mDragSurface = null;
+                root.setLocalDragState(null);
+            }
+            session.kill();
         }
-
-        return okay;
     }
 
     /**
@@ -27017,6 +27048,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final boolean fromTouch = (mPrivateFlags3 & PFLAG3_FINGER_DOWN) == PFLAG3_FINGER_DOWN;
         mTooltipInfo.mTooltipPopup.show(this, x, y, fromTouch, mTooltipInfo.mTooltipText);
         mAttachInfo.mTooltipHost = this;
+        // The available accessibility actions have changed
+        notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
         return true;
     }
 
@@ -27035,6 +27068,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mAttachInfo != null) {
             mAttachInfo.mTooltipHost = null;
         }
+        // The available accessibility actions have changed
+        notifyAccessibilityStateChanged(CONTENT_CHANGE_TYPE_UNDEFINED);
     }
 
     private boolean showLongClickTooltip(int x, int y) {
@@ -27043,8 +27078,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         return showTooltip(x, y, true);
     }
 
-    private void showHoverTooltip() {
-        showTooltip(mTooltipInfo.mAnchorX, mTooltipInfo.mAnchorY, false);
+    private boolean showHoverTooltip() {
+        return showTooltip(mTooltipInfo.mAnchorX, mTooltipInfo.mAnchorY, false);
     }
 
     boolean dispatchTooltipHoverEvent(MotionEvent event) {

@@ -330,6 +330,7 @@ public class SettingsBackupTest {
                     Settings.Global.SETUP_PREPAID_DETECTION_REDIR_HOST,
                     Settings.Global.SETUP_PREPAID_DETECTION_TARGET_URL,
                     Settings.Global.SHORTCUT_MANAGER_CONSTANTS,
+                    Settings.Global.SHOW_FIRST_CRASH_DIALOG,
                     Settings.Global.SHOW_NOTIFICATION_CHANNEL_WARNINGS,
                     Settings.Global.SHOW_TEMPERATURE_WARNING,
                     Settings.Global.SMART_SELECTION_UPDATE_CONTENT_URL,
@@ -352,6 +353,7 @@ public class SettingsBackupTest {
                     Settings.Global.SYS_STORAGE_THRESHOLD_MAX_BYTES,
                     Settings.Global.SYS_STORAGE_THRESHOLD_PERCENTAGE,
                     Settings.Global.SYS_VDSO,
+                    Settings.Global.FPS_DEVISOR,
                     Settings.Global.TCP_DEFAULT_INIT_RWND,
                     Settings.Global.TETHER_DUN_APN,
                     Settings.Global.TETHER_DUN_REQUIRED,
@@ -532,7 +534,9 @@ public class SettingsBackupTest {
                  Settings.Secure.VOICE_RECOGNITION_SERVICE,
                  Settings.Secure.INSTANT_APPS_ENABLED,
                  Settings.Secure.BACKUP_MANAGER_CONSTANTS,
-                 Settings.Secure.KEYGUARD_SLICE_URI);
+                 Settings.Secure.KEYGUARD_SLICE_URI,
+                 Settings.Secure.PARENTAL_CONTROL_ENABLED,
+                 Settings.Secure.PARENTAL_CONTROL_REDIRECT_URL);
 
     @Test
     public void systemSettingsBackedUpOrBlacklisted() {

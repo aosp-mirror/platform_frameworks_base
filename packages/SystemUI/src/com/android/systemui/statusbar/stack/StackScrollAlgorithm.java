@@ -122,7 +122,9 @@ public class StackScrollAlgorithm {
     }
     private void updateShelfState(StackScrollState resultState, AmbientState ambientState) {
         NotificationShelf shelf = ambientState.getShelf();
-        shelf.updateState(resultState, ambientState);
+        if (shelf != null) {
+            shelf.updateState(resultState, ambientState);
+        }
     }
 
     private void updateClipping(StackScrollState resultState,
@@ -495,6 +497,10 @@ public class StackScrollAlgorithm {
      */
     private void clampPositionToShelf(ExpandableViewState childViewState,
             AmbientState ambientState) {
+        if (ambientState.getShelf() == null) {
+            return;
+        }
+
         int shelfStart = ambientState.getInnerHeight()
                 - ambientState.getShelf().getIntrinsicHeight();
         childViewState.yTranslation = Math.min(childViewState.yTranslation, shelfStart);
@@ -556,7 +562,8 @@ public class StackScrollAlgorithm {
         } else if (i == 0 && ambientState.isAboveShelf(child)) {
             // In case this is a new view that has never been measured before, we don't want to
             // elevate if we are currently expanded more then the notification
-            int shelfHeight = ambientState.getShelf().getIntrinsicHeight();
+            int shelfHeight = ambientState.getShelf() == null ? 0 :
+                    ambientState.getShelf().getIntrinsicHeight();
             float shelfStart = ambientState.getInnerHeight()
                     - shelfHeight + ambientState.getTopPadding()
                     + ambientState.getStackTranslation();

@@ -63,6 +63,7 @@ import android.net.NetworkConfig;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkMisc;
+import android.net.NetworkPolicyManager;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
@@ -1501,13 +1502,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return true;
     }
 
-    private final INetworkPolicyListener mPolicyListener = new INetworkPolicyListener.Stub() {
+    private final INetworkPolicyListener mPolicyListener = new NetworkPolicyManager.Listener() {
         @Override
         public void onUidRulesChanged(int uid, int uidRules) {
             // TODO: notify UID when it has requested targeted updates
-        }
-        @Override
-        public void onMeteredIfacesChanged(String[] meteredIfaces) {
         }
         @Override
         public void onRestrictBackgroundChanged(boolean restrictBackground) {
@@ -1516,9 +1514,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 log("onRestrictBackgroundChanged(true): disabling tethering");
                 mTethering.untetherAll();
             }
-        }
-        @Override
-        public void onUidPoliciesChanged(int uid, int uidPolicies) {
         }
     };
 
@@ -4990,10 +4985,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         } catch (Exception e) {
             loge("Exception setting default network :" + e);
         }
+
         notifyLockdownVpn(newNetwork);
         handleApplyDefaultProxy(newNetwork.linkProperties.getHttpProxy());
         updateTcpBufferSizes(newNetwork);
         mDnsManager.setDefaultDnsSystemProperties(newNetwork.linkProperties.getDnsServers());
+        notifyIfacesChangedForNetworkStats();
     }
 
     private void processListenRequests(NetworkAgentInfo nai, boolean capabilitiesChanged) {
@@ -5567,12 +5564,30 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     /**
+     * Returns the list of all interfaces that could be used by network traffic that does not
+     * explicitly specify a network. This includes the default network, but also all VPNs that are
+     * currently connected.
+     *
+     * Must be called on the handler thread.
+     */
+    private Network[] getDefaultNetworks() {
+        ArrayList<Network> defaultNetworks = new ArrayList<>();
+        NetworkAgentInfo defaultNetwork = getDefaultNetwork();
+        for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+            if (nai.everConnected && (nai == defaultNetwork || nai.isVPN())) {
+                defaultNetworks.add(nai.network);
+            }
+        }
+        return defaultNetworks.toArray(new Network[0]);
+    }
+
+    /**
      * Notify NetworkStatsService that the set of active ifaces has changed, or that one of the
      * properties tracked by NetworkStatsService on an active iface has changed.
      */
     private void notifyIfacesChangedForNetworkStats() {
         try {
-            mStatsService.forceUpdateIfaces();
+            mStatsService.forceUpdateIfaces(getDefaultNetworks());
         } catch (Exception ignored) {
         }
     }
@@ -5604,7 +5619,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             success = mVpns.get(user).setUnderlyingNetworks(networks);
         }
         if (success) {
-            notifyIfacesChangedForNetworkStats();
+            mHandler.post(() -> notifyIfacesChangedForNetworkStats());
         }
         return success;
     }

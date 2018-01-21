@@ -58,8 +58,11 @@ public class PersistentDataStoreTest {
         String contents = "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>\n"
                 + "<display-manager-state>\n"
                 + "  <brightness-configurations>\n"
-                + "    <brightness-configuration user-serial=\"1\">\n"
-                + "      <brightness-curve>\n"
+                + "    <brightness-configuration"
+                + "         user-serial=\"1\""
+                + "         package-name=\"example.com\""
+                + "         timestamp=\"123456\">\n"
+                + "      <brightness-curve description=\"something\">\n"
                 + "        <brightness-point lux=\"0\" nits=\"13.25\"/>\n"
                 + "        <brightness-point lux=\"25\" nits=\"35.94\"/>\n"
                 + "      </brightness-curve>\n"
@@ -81,6 +84,7 @@ public class PersistentDataStoreTest {
         float[] expectedNits = { 13.25f, 35.94f };
         assertArrayEquals(expectedLux, curve.first, "lux");
         assertArrayEquals(expectedNits, curve.second, "nits");
+        assertEquals("something", config.getDescription());
 
         config = mDataStore.getBrightnessConfiguration(3 /*userSerial*/);
         curve = config.getCurve();
@@ -88,6 +92,7 @@ public class PersistentDataStoreTest {
         expectedNits = new float[] { 13.25f, 15f };
         assertArrayEquals(expectedLux, curve.first, "lux");
         assertArrayEquals(expectedNits, curve.second, "nits");
+        assertNull(config.getDescription());
     }
 
     @Test
@@ -144,12 +149,12 @@ public class PersistentDataStoreTest {
     public void testStoreAndReloadOfBrightnessConfigurations() {
         final float[] lux = { 0f, 10f };
         final float[] nits = {1f, 100f };
-        final BrightnessConfiguration config = new BrightnessConfiguration.Builder()
-                .setCurve(lux, nits)
+        final BrightnessConfiguration config = new BrightnessConfiguration.Builder(lux, nits)
+                .setDescription("a description")
                 .build();
         mDataStore.loadIfNeeded();
         assertNull(mDataStore.getBrightnessConfiguration(0 /*userSerial*/));
-        mDataStore.setBrightnessConfigurationForUser(config, 0);
+        mDataStore.setBrightnessConfigurationForUser(config, 0, "packagename");
 
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         mInjector.setWriteStream(baos);

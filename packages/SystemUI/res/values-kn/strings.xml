@@ -33,7 +33,13 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ಚಾಲ್ತಿಯಲ್ಲಿರುವ"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"ಅಧಿಸೂಚನೆಗಳು"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"ಬ್ಯಾಟರಿ ಕಡಿಮೆ ಇದೆ"</string>
+    <!-- no translation found for battery_low_title_hybrid (6268991275887381595) -->
+    <skip />
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> ಉಳಿದಿದೆ"</string>
+    <!-- no translation found for battery_low_percent_format_hybrid (6838677459286775617) -->
+    <skip />
+    <!-- no translation found for battery_low_percent_format_hybrid_short (9025795469949145586) -->
+    <skip />
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> ಉಳಿದಿದೆ. ಬ್ಯಾಟರಿ ಉಳಿತಾಯ ಆನ್‌ ಆಗಿದೆ."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB ಚಾರ್ಜಿಂಗ್ ಬೆಂಬಲಿತವಾಗಿಲ್ಲ.\nಒದಗಿಸಿರುವ ಚಾರ್ಜರ್ ಮಾತ್ರ ಬಳಸಿ."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB ಚಾರ್ಜಿಂಗ್ ಬೆಂಬಲಿತವಾಗಿಲ್ಲ."</string>
@@ -67,14 +73,22 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"ಬಳಕೆದಾರರು ಪ್ರಸ್ತುತ ಈ ಸಾಧನಕ್ಕೆ ಸೈನ್ ಇನ್ ಮಾಡಿದ್ದಾರೆ USB ಡೀಬಗ್ ಮಾಡುವುದನ್ನು ಆನ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ. ಈ ವೈಶಿಷ್ಟ್ಯವನ್ನು ಬಳಸಲು, ಪ್ರಾಥಮಿಕ ಬಳಕೆದಾರರಿಗೆ ಬದಲಾಯಿಸಿ."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ಪರದೆ ತುಂಬಿಸಲು ಝೂಮ್ ಮಾಡು"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ಪರದೆ ತುಂಬಿಸಲು ವಿಸ್ತಾರಗೊಳಿಸು"</string>
+    <!-- no translation found for global_action_screenshot (8329831278085426283) -->
+    <skip />
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲಾಗುತ್ತಿದೆ."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಸೆರೆಹಿಡಿಯಲಾಗಿದೆ."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ ವೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಸೆರೆಹಿಡಿಯಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸುವಲ್ಲಿ ಸಮಸ್ಯೆ ಎದುರಾಗಿದೆ."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"ಪರಿಮಿತ ಸಂಗ್ರಹಣೆ ಸ್ಥಳದ ಕಾರಣದಿಂದಾಗಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
+    <!-- no translation found for screenshot_saving_text (2545047868936087248) -->
+    <skip />
+    <!-- no translation found for screenshot_saved_title (5637073968117370753) -->
+    <skip />
+    <!-- no translation found for screenshot_saved_text (7574667448002050363) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_title (9096484883063264803) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_to_save_unknown_text (8844781948876286488) -->
+    <skip />
+    <!-- no translation found for screenshot_failed_to_save_text (3041612585107107310) -->
+    <skip />
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"ಅಪ್ಲಿಕೇಶನ್ ಅಥವಾ ಸಂಸ್ಥೆಯು ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆಯುವುದನ್ನು ಅನುಮತಿಸುವುದಿಲ್ಲ"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ಫೈಲ್ ವರ್ಗಾವಣೆ ಆಯ್ಕೆಗಳು"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"ಮೀಡಿಯಾ ಪ್ಲೇಯರ್ ರೂಪದಲ್ಲಿ ಅಳವಡಿಸಿ (MTP)"</string>
@@ -557,26 +571,27 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"ಆಫ್"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"ಪವರ್ ಅಧಿಸೂಚನೆ ನಿಯಂತ್ರಣಗಳ ಮೂಲಕ, ನೀವು ಅಪ್ಲಿಕೇಶನ್‌ಗಳ ಅಧಿಸೂಚನೆಗಳನ್ನು 0 ರಿಂದ 5 ರವರೆಗಿನ ಹಂತಗಳ ಪ್ರಾಮುಖ್ಯತೆಯನ್ನು ಹೊಂದಿಸಬಹುದು. \n\n"<b>"ಹಂತ 5"</b>" \n- ಮೇಲಿನ ಅಧಿಸೂಚನೆ ಪಟ್ಟಿಯನ್ನು ತೋರಿಸಿ \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ಅನುಮತಿಸಿ \n- ಯಾವಾಗಲು ಇಣುಕು ನೋಟ \n\n"<b>"ಹಂತ 4"</b>" \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ತಡೆಯಿರಿ \n- ಯಾವಾಗಲು ಇಣುಕು ನೋಟ\n\n"<b>"ಹಂತ 3"</b>" \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ತಡೆಯಿರಿ \n- ಎಂದಿಗೂ ಇಣುಕು ನೋಟ ಬೇಡ \n\n"<b>"ಹಂತ 2"</b>" \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ತಡೆಯಿರಿ \n- ಎಂದಿಗೂ ಇಣುಕು ನೋಟ ಬೇಡ \n- ಶಬ್ದ ಮತ್ತು ವೈಬ್ರೇಷನ್ ಎಂದಿಗೂ ಮಾಡಬೇಡಿ \n\n"<b>"ಹಂತ 1"</b>" \n- ಪೂರ್ಣ ಪರದೆ ಅಡಚಣೆಯನ್ನು ತಡೆಯಿರಿ \n- ಎಂದಿಗೂ ಇಣುಕು ನೋಟ ಬೇಡ \n- ಶಬ್ದ ಮತ್ತು ವೈಬ್ರೇಷನ್ ಎಂದಿಗೂ ಮಾಡಬೇಡಿ \n- ಸ್ಥಿತಿ ಪಟ್ಟಿ ಮತ್ತು ಲಾಕ್ ಪರದೆಯಿಂದ ಮರೆಮಾಡಿ \n- ಕೆಳಗಿನ ಅಧಿಸೂಚನೆ ಪಟ್ಟಿಯನ್ನು ತೋರಿಸಿ \n\n"<b>"ಹಂತ 0"</b>" \n- ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳನ್ನು ನಿರ್ಬಂಧಿಸಿ"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"ಅಧಿಸೂಚನೆಗಳು"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"ನೀವು ಇನ್ನು ಮುಂದೆ ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಪಡೆಯುವುದಿಲ್ಲ"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> ಅಧಿಸೂಚನೆ ವರ್ಗಗಳು"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"ಈ ಅಪ್ಲಿಕೇಶನ್ ಅಧಿಸೂಚನೆ ವರ್ಗಗಳನ್ನು ಹೊಂದಿಲ್ಲ"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"ಈ ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ ಅಧಿಸೂಚನೆಗಳನ್ನು ಆಫ್ ಮಾಡಲಾಗುವುದಿಲ್ಲ"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="one">ಈ ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ <xliff:g id="NUMBER_1">%s</xliff:g> ಅಧಿಸೂಚನೆ ವರ್ಗಗಳಲ್ಲಿ 1 ವರ್ಗ</item>
-      <item quantity="other">ಈ ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ <xliff:g id="NUMBER_1">%s</xliff:g> ಅಧಿಸೂಚನೆ ವರ್ಗಗಳಲ್ಲಿ 1 ವರ್ಗ</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g>, ಮತ್ತು ಇತರ <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g>, ಮತ್ತು ಇತರ <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
-    </plurals>
+    <!-- no translation found for notification_channel_disabled (344536703863700565) -->
+    <skip />
+    <!-- no translation found for inline_keep_showing (8945102997083836858) -->
+    <skip />
+    <!-- no translation found for inline_stop_button (4172980096860941033) -->
+    <skip />
+    <!-- no translation found for inline_keep_button (6665940297019018232) -->
+    <skip />
+    <!-- no translation found for inline_keep_showing_app (1723113469580031041) -->
+    <skip />
+    <!-- no translation found for notification_unblockable_desc (1037434112919403708) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನ ಅಧಿಸೂಚನೆ ನಿಯಂತ್ರಣಗಳನ್ನು ತೆರೆಯಲಾಗಿದೆ"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನ ಅಧಿಸೂಚನೆ ನಿಯಂತ್ರಣಗಳನ್ನು ಮುಚ್ಚಲಾಗಿದೆ"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"ಈ ಚಾನಲ್‌ನ ಅಧಿಸೂಚನೆಗಳಿಗೆ ಅನುಮತಿ ನೀಡಿ"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"ಎಲ್ಲ ವರ್ಗಗಳು"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"ಹೆಚ್ಚಿನ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"ಕಸ್ಟಮೈಸ್: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <!-- no translation found for notification_app_settings (420348114670768449) -->
+    <skip />
     <string name="notification_done" msgid="5279426047273930175">"ಮುಗಿದಿದೆ"</string>
+    <!-- no translation found for inline_undo (558916737624706010) -->
+    <skip />
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"ಅಧಿಸೂಚನೆ ನಿಯಂತ್ರಣಗಳು"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"ಅಧಿಸೂಚನೆ ಸ್ನೂಜ್ ಆಯ್ಕೆಗಳು"</string>
@@ -731,8 +746,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"ವಿಸ್ತೃತಗೊಳಿಸು"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"ಕುಗ್ಗಿಸಿ"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"ಮುಚ್ಚಿ"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"ವಜಾಗೊಳಿಸಲು ಕೆಳಕ್ಕೆ ಡ್ರ್ಯಾಗ್ ಮಾಡಿ"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"ಮೆನು"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ಚಿತ್ರದಲ್ಲಿನ ಚಿತ್ರದಲ್ಲಿದೆ"</string>

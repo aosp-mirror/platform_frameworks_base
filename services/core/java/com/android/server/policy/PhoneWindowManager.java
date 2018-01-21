@@ -66,7 +66,6 @@ import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SYSTEM_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_DEFAULT;
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
 import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
@@ -163,13 +162,10 @@ import android.app.StatusBarManager;
 import android.app.UiModeManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
-import android.content.ComponentCallbacks;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -202,7 +198,6 @@ import android.os.IBinder;
 import android.os.IDeviceIdleController;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.Process;
@@ -850,7 +845,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     dispatchMediaKeyRepeatWithWakeLock((KeyEvent)msg.obj);
                     break;
                 case MSG_DISPATCH_SHOW_RECENTS:
-                    showRecentApps(false, msg.arg1 != 0);
+                    showRecentApps(false);
                     break;
                 case MSG_DISPATCH_SHOW_GLOBAL_ACTIONS:
                     showGlobalActionsInternal();
@@ -1030,8 +1025,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             public void run() {
                 // send interaction hint to improve redraw performance
                 mPowerManagerInternal.powerHint(PowerHint.INTERACTION, 0);
-                if (showRotationChoice(mCurrentAppOrientation, mRotation)) {
-                    sendProposedRotationChangeToStatusBarInternal(mRotation);
+                if (isRotationChoiceEnabled()) {
+                    final boolean isValid = isValidRotationChoice(mCurrentAppOrientation,
+                            mRotation);
+                    sendProposedRotationChangeToStatusBarInternal(mRotation, isValid);
                 } else {
                     updateRotation(false);
                 }
@@ -3817,7 +3814,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 final int shiftlessModifiers = event.getModifiers() & ~KeyEvent.META_SHIFT_MASK;
                 if (KeyEvent.metaStateHasModifiers(shiftlessModifiers, KeyEvent.META_ALT_ON)) {
                     mRecentAppsHeldModifiers = shiftlessModifiers;
-                    showRecentApps(true, false);
+                    showRecentApps(true);
                     return -1;
                 }
             }
@@ -4164,16 +4161,16 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public void showRecentApps(boolean fromHome) {
+    public void showRecentApps() {
         mHandler.removeMessages(MSG_DISPATCH_SHOW_RECENTS);
-        mHandler.obtainMessage(MSG_DISPATCH_SHOW_RECENTS, fromHome ? 1 : 0, 0).sendToTarget();
+        mHandler.obtainMessage(MSG_DISPATCH_SHOW_RECENTS).sendToTarget();
     }
 
-    private void showRecentApps(boolean triggeredFromAltTab, boolean fromHome) {
+    private void showRecentApps(boolean triggeredFromAltTab) {
         mPreloadedRecentApps = false; // preloading no longer needs to be canceled
         StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
         if (statusbar != null) {
-            statusbar.showRecentApps(triggeredFromAltTab, fromHome);
+            statusbar.showRecentApps(triggeredFromAltTab);
         }
     }
 
@@ -6193,10 +6190,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /**
      * Notify the StatusBar that system rotation suggestion has changed.
      */
-    private void sendProposedRotationChangeToStatusBarInternal(int rotation) {
+    private void sendProposedRotationChangeToStatusBarInternal(int rotation, boolean isValid) {
         StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
         if (statusBar != null) {
-            statusBar.onProposedRotationChanged(rotation);
+            statusBar.onProposedRotationChanged(rotation, isValid);
         }
     }
 
@@ -7142,15 +7139,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mOrientationListener.setCurrentRotation(rotation);
     }
 
-    public boolean showRotationChoice(int orientation, final int preferredRotation) {
+    public boolean isRotationChoiceEnabled() {
         // Rotation choice is only shown when the user is in locked mode.
         if (mUserRotationMode != WindowManagerPolicy.USER_ROTATION_LOCKED) return false;
 
-        // We should only show a rotation choice if:
-        // 1. The rotation isn't forced by the lid, dock, demo, hdmi, vr, etc mode
-        // 2. The user choice won't be ignored due to screen orientation settings
+        // We should only enable rotation choice if the rotation isn't forced by the lid, dock,
+        // demo, hdmi, vr, etc mode
 
-        // Determine if the rotation currently forced
+        // Determine if the rotation is currently forced
         if (mForceDefaultOrientation) {
             return false; // Rotation is forced to default orientation
 
@@ -7183,7 +7179,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return false;
         }
 
-        // Determine if the orientation will ignore user choice
+        // Rotation isn't forced, enable choice
+        return true;
+    }
+
+    public boolean isValidRotationChoice(int orientation, final int preferredRotation) {
+        // Determine if the given app orientation can be chosen and, if so, if it is compatible
+        // with the provided rotation choice
+
         switch (orientation) {
             case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
             case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:

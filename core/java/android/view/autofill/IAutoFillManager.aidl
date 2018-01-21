@@ -20,6 +20,7 @@ import android.content.ComponentName;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteCallback;
 import android.service.autofill.FillEventHistory;
 import android.service.autofill.UserData;
 import android.view.autofill.AutofillId;
@@ -58,6 +59,6 @@ interface IAutoFillManager {
     void setUserData(in UserData userData);
     boolean isFieldClassificationEnabled();
     ComponentName getAutofillServiceComponentName();
-    List<String> getAvailableFieldClassificationAlgorithms();
+    String[] getAvailableFieldClassificationAlgorithms();
     String getDefaultFieldClassificationAlgorithm();
 }

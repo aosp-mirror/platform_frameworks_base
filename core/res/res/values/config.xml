@@ -430,7 +430,7 @@
     <integer translatable="false" name="config_mobile_hotspot_provision_check_period">24</integer>
 
     <!-- Activity name to enable wifi tethering after provisioning app succeeds -->
-    <string translatable="false" name="config_wifi_tether_enable">com.android.settings/.TetherService</string>
+    <string translatable="false" name="config_wifi_tether_enable">com.android.settings/.wifi.tether.TetherService</string>
 
     <!-- Controls the WiFi wakeup feature.
           0 = Not available.
@@ -639,6 +639,12 @@
 
     <!-- Wifi driver supports batched scan -->
     <bool translatable="false" name="config_wifi_batched_scan_supported">false</bool>
+
+    <!-- Wifi driver supports Automatic channel selection (ACS) for softap -->
+    <bool translatable="false" name="config_wifi_softap_acs_supported">false</bool>
+
+    <!-- Wifi driver supports IEEE80211AC for softap -->
+    <bool translatable="false" name="config_wifi_softap_ieee80211ac_supported">false</bool>
 
     <!-- Idle Receive current for wifi radio. 0 by default-->
     <integer translatable="false" name="config_wifi_idle_receive_cur_ma">0</integer>
@@ -2780,8 +2786,22 @@
     <!-- The bounding path of the cutout region of the main built-in display.
          Must either be empty if there is no cutout region, or a string that is parsable by
          {@link android.util.PathParser}.
+
          The path is assumed to be specified in display coordinates with pixel units and in
-         the display's native orientation. -->
+         the display's native orientation, with the origin of the coordinate system at the
+         center top of the display.
+
+         To facilitate writing device-independent emulation overlays, the marker `@dp` can be
+         appended after the path string to interpret coordinates in dp instead of px units.
+         Note that a physical cutout should be configured in pixels for the best results.
+
+         Example for a 10px x 10px square top-center cutout:
+                <string ...>M -5,0 L -5,10 L 5,10 L 5,0 Z</string>
+         Example for a 10dp x 10dp square top-center cutout:
+                <string ...>M -5,0 L -5,10 L 5,10 L 5,0 Z @dp</string>
+
+         @see https://www.w3.org/TR/SVG/paths.html#PathData
+         -->
     <string translatable="false" name="config_mainBuiltInDisplayCutout"></string>
 
     <!-- Whether the display cutout region of the main built-in display should be forced to
@@ -3252,4 +3272,6 @@
 
     <!-- Package name that should be granted Notification Assistant access -->
     <string name="config_defaultAssistantAccessPackage" translatable="false">android.ext.services</string>
+
+    <bool name="config_supportBluetoothPersistedState">true</bool>
 </resources>

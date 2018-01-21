@@ -55,7 +55,7 @@ oneway interface IStatusBar
             boolean showImeSwitcher);
     void setWindowState(int window, int state);
 
-    void showRecentApps(boolean triggeredFromAltTab, boolean fromHome);
+    void showRecentApps(boolean triggeredFromAltTab);
     void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
     void toggleRecentApps();
     void toggleSplitScreen();
@@ -115,7 +115,7 @@ oneway interface IStatusBar
     /**
      * Notifies the status bar that a new rotation suggestion is available.
      */
-    void onProposedRotationChanged(int rotation);
+    void onProposedRotationChanged(int rotation, boolean isValid);
 
     /**
      * Set whether the top app currently hides the statusbar.

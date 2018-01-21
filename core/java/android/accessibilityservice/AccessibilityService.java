@@ -363,6 +363,11 @@ public abstract class AccessibilityService extends Service {
      */
     public static final int GLOBAL_ACTION_LOCK_SCREEN = 8;
 
+    /**
+     * Action to take a screenshot
+     */
+    public static final int GLOBAL_ACTION_TAKE_SCREENSHOT = 9;
+
     private static final String LOG_TAG = "AccessibilityService";
 
     /**

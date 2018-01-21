@@ -300,21 +300,6 @@ public final class IpSecTransform implements AutoCloseable {
         }
 
         /**
-         * Set the {@link Network} which will carry tunneled traffic.
-         *
-         * <p>Restricts the transformed traffic to a particular {@link Network}. This is required
-         * for tunnel mode, otherwise tunneled traffic would be sent on the default network.
-         *
-         * @hide
-         */
-        @SystemApi
-        public IpSecTransform.Builder setUnderlyingNetwork(@NonNull Network net) {
-            Preconditions.checkNotNull(net);
-            mConfig.setNetwork(net);
-            return this;
-        }
-
-        /**
          * Add UDP encapsulation to an IPv4 transform.
          *
          * <p>This allows IPsec traffic to pass through a NAT.
@@ -415,6 +400,7 @@ public final class IpSecTransform implements AutoCloseable {
          * @throws IOException indicating other errors
          * @hide
          */
+        @SystemApi
         public IpSecTransform buildTunnelModeTransform(
                 @NonNull InetAddress sourceAddress,
                 @NonNull IpSecManager.SecurityParameterIndex spi)

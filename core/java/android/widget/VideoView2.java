@@ -20,9 +20,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.graphics.Canvas;
 import android.media.AudioAttributes;
-import android.media.MediaPlayer;
+import android.media.AudioManager;
 import android.media.update.ApiLoader;
 import android.media.update.VideoView2Provider;
 import android.media.update.ViewProvider;
@@ -80,7 +79,8 @@ public class VideoView2 extends FrameLayout {
             int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        mProvider = ApiLoader.getProvider(context).createVideoView2(this, new SuperProvider());
+        mProvider = ApiLoader.getProvider(context).createVideoView2(this, new SuperProvider(),
+                attrs, defStyleAttr, defStyleRes);
     }
 
     /**
@@ -88,6 +88,20 @@ public class VideoView2 extends FrameLayout {
      */
     public VideoView2Provider getProvider() {
         return mProvider;
+    }
+
+    /**
+     * @hide
+     */
+    public void setMediaControlView2(MediaControlView2 mediaControlView) {
+        mProvider.setMediaControlView2_impl(mediaControlView);
+    }
+
+    /**
+     * @hide
+     */
+    public MediaControlView2 getMediaControlView2() {
+        return mProvider.getMediaControlView2_impl();
     }
 
     /**
@@ -161,6 +175,45 @@ public class VideoView2 extends FrameLayout {
     }
 
     /**
+     * Sets playback speed.
+     *
+     * It is expressed as a multiplicative factor, where normal speed is 1.0f. If it is less than
+     * or equal to zero, it will be just ignored and nothing will be changed. If it exceeds the
+     * maximum speed that internal engine supports, system will determine best handling or it will
+     * be reset to the normal speed 1.0f.
+     * TODO: This should be revised after integration with MediaPlayer2.
+     * @param speed the playback speed. It should be positive.
+     * @hide
+     */
+    public void setSpeed(float speed) {
+        mProvider.setSpeed_impl(speed);
+    }
+
+    /**
+     * Returns current speed setting.
+     *
+     * If setSpeed() has never been called, returns the default value 1.0f.
+     * @return current speed setting
+     * @hide
+     */
+    public float getSpeed() {
+        return mProvider.getSpeed_impl();
+    }
+
+    /**
+     * Sets which type of audio focus will be requested during the playback, or configures playback
+     * to not request audio focus. Valid values for focus requests are
+     * {@link AudioManager#AUDIOFOCUS_GAIN}, {@link AudioManager#AUDIOFOCUS_GAIN_TRANSIENT},
+     * {@link AudioManager#AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK}, and
+     * {@link AudioManager#AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE}. Or use
+     * {@link AudioManager#AUDIOFOCUS_NONE} to express that audio focus should not be
+     * requested when playback starts. You can for instance use this when playing a silent animation
+     * through this class, and you don't want to affect other audio applications playing in the
+     * background.
+     *
+     * @param focusGain the type of audio focus gain that will be requested, or
+     *     {@link AudioManager#AUDIOFOCUS_NONE} to disable the use audio focus during playback.
+     *
      * @hide
      */
     public void setAudioFocusRequest(int focusGain) {
@@ -168,6 +221,10 @@ public class VideoView2 extends FrameLayout {
     }
 
     /**
+     * Sets the {@link AudioAttributes} to be used during the playback of the video.
+     *
+     * @param attributes non-null <code>AudioAttributes</code>.
+     *
      * @hide
      */
     public void setAudioAttributes(@NonNull AudioAttributes attributes) {
@@ -175,6 +232,9 @@ public class VideoView2 extends FrameLayout {
     }
 
     /**
+     * Sets video path.
+     *
+     * @param path the path of the video.
      * @hide
      */
     public void setVideoPath(String path) {
@@ -193,13 +253,6 @@ public class VideoView2 extends FrameLayout {
      */
     public void setVideoURI(Uri uri, Map<String, String> headers) {
         mProvider.setVideoURI_impl(uri, headers);
-    }
-
-    /**
-     * @hide
-     */
-    public void setMediaController2(MediaController2 controllerView) {
-        mProvider.setMediaController2_impl(controllerView);
     }
 
     /**
@@ -227,28 +280,28 @@ public class VideoView2 extends FrameLayout {
     /**
      * @hide
      */
-    public void setOnPreparedListener(MediaPlayer.OnPreparedListener l) {
+    public void setOnPreparedListener(OnPreparedListener l) {
         mProvider.setOnPreparedListener_impl(l);
     }
 
     /**
      * @hide
      */
-    public void setOnCompletionListener(MediaPlayer.OnCompletionListener l) {
+    public void setOnCompletionListener(OnCompletionListener l) {
         mProvider.setOnCompletionListener_impl(l);
     }
 
     /**
      * @hide
      */
-    public void setOnErrorListener(MediaPlayer.OnErrorListener l) {
+    public void setOnErrorListener(OnErrorListener l) {
         mProvider.setOnErrorListener_impl(l);
     }
 
     /**
      * @hide
      */
-    public void setOnInfoListener(MediaPlayer.OnInfoListener l) {
+    public void setOnInfoListener(OnInfoListener l) {
         mProvider.setOnInfoListener_impl(l);
     }
 
@@ -260,13 +313,59 @@ public class VideoView2 extends FrameLayout {
     }
 
     /**
+     * Interface definition of a callback to be invoked when the viw type has been changed.
      * @hide
      */
     public interface OnViewTypeChangedListener {
         /**
-         * @hide
+         * Called when the view type has been changed.
+         * @see VideoView2#setViewType(int)
          */
         void onViewTypeChanged(@ViewType int viewType);
+    }
+
+    /**
+     * @hide
+     */
+    public interface OnPreparedListener {
+        /**
+         * Called when the media file is ready for playback.
+         */
+        void onPrepared();
+    }
+
+    /**
+     * @hide
+     */
+    public interface OnCompletionListener {
+        /**
+         * Called when the end of a media source is reached during playback.
+         */
+        void onCompletion();
+    }
+
+    /**
+     * @hide
+     */
+    public interface OnErrorListener {
+        /**
+         * Called to indicate an error.
+         */
+        boolean onError(int what, int extra);
+    }
+
+    /**
+     * @hide
+     */
+    public interface OnInfoListener {
+        /**
+         * Called to indicate an info or a warning.
+         * @see MediaPlayer#OnInfoListener
+         *
+         * @param what the type of info or warning.
+         * @param extra an extra code, specific to the info.
+         */
+        void onInfo(int what, int extra);
     }
 
     @Override
@@ -305,26 +404,6 @@ public class VideoView2 extends FrameLayout {
     }
 
     private class SuperProvider implements ViewProvider {
-        @Override
-        public void onAttachedToWindow_impl() {
-            VideoView2.super.onAttachedToWindow();
-        }
-
-        @Override
-        public void onDetachedFromWindow_impl() {
-            VideoView2.super.onDetachedFromWindow();
-        }
-
-        @Override
-        public void onLayout_impl(boolean changed, int left, int top, int right, int bottom) {
-            VideoView2.super.onLayout(changed, left, top, right, bottom);
-        }
-
-        @Override
-        public void draw_impl(Canvas canvas) {
-            VideoView2.super.draw(canvas);
-        }
-
         @Override
         public CharSequence getAccessibilityClassName_impl() {
             return VideoView2.super.getAccessibilityClassName();

@@ -106,9 +106,9 @@ void UidMap::updateMap(const int64_t& timestamp, const vector<int32_t>& uid,
             t->set_uid(uid[j]);
         }
         mBytesUsed += snapshot->ByteSize();
+        ensureBytesUsedBelowLimit();
         StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
         StatsdStats::getInstance().setUidMapSnapshots(mOutput.snapshots_size());
-        ensureBytesUsedBelowLimit();
         getListenerListCopyLocked(&broadcastList);
     }
     // To avoid invoking callback while holding the internal lock. we get a copy of the listener
@@ -142,9 +142,9 @@ void UidMap::updateApp(const int64_t& timestamp, const String16& app_16, const i
         log->set_uid(uid);
         log->set_version(versionCode);
         mBytesUsed += log->ByteSize();
+        ensureBytesUsedBelowLimit();
         StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
         StatsdStats::getInstance().setUidMapChanges(mOutput.changes_size());
-        ensureBytesUsedBelowLimit();
 
         auto range = mMap.equal_range(int(uid));
         bool found = false;
@@ -222,9 +222,9 @@ void UidMap::removeApp(const int64_t& timestamp, const String16& app_16, const i
         log->set_app(app);
         log->set_uid(uid);
         mBytesUsed += log->ByteSize();
+        ensureBytesUsedBelowLimit();
         StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
         StatsdStats::getInstance().setUidMapChanges(mOutput.changes_size());
-        ensureBytesUsedBelowLimit();
 
         auto range = mMap.equal_range(int(uid));
         for (auto it = range.first; it != range.second; ++it) {

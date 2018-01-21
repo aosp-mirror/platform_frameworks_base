@@ -737,21 +737,23 @@ public class ForceAppStandbyTracker {
      * @return whether alarms should be restricted for a UID package-name.
      */
     public boolean areAlarmsRestricted(int uid, @NonNull String packageName) {
-        return isRestricted(uid, packageName, /*useTempWhitelistToo=*/ false);
+        return isRestricted(uid, packageName, /*useTempWhitelistToo=*/ false,
+                /* exemptOnBatterySaver =*/ false);
     }
 
     /**
      * @return whether jobs should be restricted for a UID package-name.
      */
     public boolean areJobsRestricted(int uid, @NonNull String packageName) {
-        return isRestricted(uid, packageName, /*useTempWhitelistToo=*/ true);
+        return isRestricted(uid, packageName, /*useTempWhitelistToo=*/ true,
+                /* exemptOnBatterySaver =*/ false);
     }
 
     /**
      * @return whether force-app-standby is effective for a UID package-name.
      */
     private boolean isRestricted(int uid, @NonNull String packageName,
-            boolean useTempWhitelistToo) {
+            boolean useTempWhitelistToo, boolean exemptOnBatterySaver) {
         if (isInForeground(uid)) {
             return false;
         }
@@ -765,12 +767,13 @@ public class ForceAppStandbyTracker {
                     ArrayUtils.contains(mTempWhitelistedAppIds, appId)) {
                 return false;
             }
-
-            if (mForceAllAppsStandby) {
+            if (mForcedAppStandbyEnabled && isRunAnyRestrictedLocked(uid, packageName)) {
                 return true;
             }
-
-            return mForcedAppStandbyEnabled && isRunAnyRestrictedLocked(uid, packageName);
+            if (exemptOnBatterySaver) {
+                return false;
+            }
+            return mForceAllAppsStandby;
         }
     }
 

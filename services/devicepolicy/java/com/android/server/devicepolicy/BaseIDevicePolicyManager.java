@@ -39,12 +39,6 @@ import java.util.List;
  */
 abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     /**
-     * To be called by {@link DevicePolicyManagerService#Lifecycle} when the service is started.
-     *
-     * @see {@link SystemService#onStart}.
-     */
-    abstract void handleStart();
-    /**
      * To be called by {@link DevicePolicyManagerService#Lifecycle} during the various boot phases.
      *
      * @see {@link SystemService#onBootPhase}.
@@ -124,6 +118,21 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
 
     @Override
     public String getEndUserSessionMessage(ComponentName admin) {
+        return null;
+    }
+
+    @Override
+    public void setPrintingEnabled(ComponentName admin, boolean enabled) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isPrintingEnabled() {
+        return true;
+    }
+
+    @Override
+    public CharSequence getPrintingDisabledReason() {
         return null;
     }
 }

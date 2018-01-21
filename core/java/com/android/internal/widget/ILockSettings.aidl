@@ -21,7 +21,7 @@ import android.app.trust.IStrongAuthTracker;
 import android.os.Bundle;
 import android.security.keystore.WrappedApplicationKey;
 import android.security.keystore.KeychainSnapshot;
-import android.security.keystore.KeychainProtectionParameter;
+import android.security.keystore.KeychainProtectionParams;
 import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.VerifyCredentialResponse;
 
@@ -60,7 +60,7 @@ interface ILockSettings {
             in byte[] token, int requestedQuality, int userId);
     void unlockUserWithToken(long tokenHandle, in byte[] token, int userId);
 
-    // Keystore RecoveryManager methods.
+    // Keystore RecoveryController methods.
     // {@code ServiceSpecificException} may be thrown to signal an error, which caller can
     // convert to  {@code RecoveryManagerException}.
     void initRecoveryService(in String rootCertificateAlias, in byte[] signedPublicKeyList);
@@ -75,10 +75,11 @@ interface ILockSettings {
     void setRecoverySecretTypes(in int[] secretTypes);
     int[] getRecoverySecretTypes();
     int[] getPendingRecoverySecretTypes();
-    void recoverySecretAvailable(in KeychainProtectionParameter recoverySecret);
+    void recoverySecretAvailable(in KeychainProtectionParams recoverySecret);
     byte[] startRecoverySession(in String sessionId,
             in byte[] verifierPublicKey, in byte[] vaultParams, in byte[] vaultChallenge,
-            in List<KeychainProtectionParameter> secrets);
+            in List<KeychainProtectionParams> secrets);
     Map/*<String, byte[]>*/ recoverKeys(in String sessionId, in byte[] recoveryKeyBlob,
             in List<WrappedApplicationKey> applicationKeys);
+    void closeSession(in String sessionId);
 }

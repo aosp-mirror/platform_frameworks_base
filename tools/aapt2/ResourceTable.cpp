@@ -47,6 +47,13 @@ static bool less_than_struct_with_name(const std::unique_ptr<T>& lhs, const Stri
   return lhs->name.compare(0, lhs->name.size(), rhs.data(), rhs.size()) < 0;
 }
 
+template <typename T>
+static bool less_than_struct_with_name_and_id(const std::unique_ptr<T>& lhs,
+                                              const std::pair<StringPiece, Maybe<uint8_t>>& rhs) {
+  int name_cmp = lhs->name.compare(0, lhs->name.size(), rhs.first.data(), rhs.first.size());
+  return name_cmp < 0 || (name_cmp == 0 && lhs->id < rhs.second);
+}
+
 ResourceTablePackage* ResourceTable::FindPackage(const StringPiece& name) const {
   const auto last = packages.end();
   auto iter = std::lower_bound(packages.begin(), last, name,
@@ -77,6 +84,22 @@ ResourceTablePackage* ResourceTable::CreatePackage(const StringPiece& name, Mayb
     return nullptr;
   }
   return package;
+}
+
+ResourceTablePackage* ResourceTable::CreatePackageAllowingDuplicateNames(const StringPiece& name,
+                                                                         const Maybe<uint8_t> id) {
+  const auto last = packages.end();
+  auto iter = std::lower_bound(packages.begin(), last, std::make_pair(name, id),
+                               less_than_struct_with_name_and_id<ResourceTablePackage>);
+
+  if (iter != last && name == (*iter)->name && id == (*iter)->id) {
+    return iter->get();
+  }
+
+  std::unique_ptr<ResourceTablePackage> new_package = util::make_unique<ResourceTablePackage>();
+  new_package->name = name.to_string();
+  new_package->id = id;
+  return packages.emplace(iter, std::move(new_package))->get();
 }
 
 ResourceTablePackage* ResourceTable::FindOrCreatePackage(const StringPiece& name) {

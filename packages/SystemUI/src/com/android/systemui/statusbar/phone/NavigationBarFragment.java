@@ -335,9 +335,16 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     }
 
     @Override
-    public void onRotationProposal(final int rotation) {
-        // This method will only be called if rotation is valid but will include proposals for the
-        // current system rotation
+    public void onRotationProposal(final int rotation, boolean isValid) {
+        // This method will be called on rotation suggestion changes even if the proposed rotation
+        // is not valid for the top app. Use invalid rotation choices as a signal to remove the
+        // rotate button if shown.
+
+        if (!isValid) {
+            setRotateSuggestionButtonState(false);
+            return;
+        }
+
         Handler h = getView().getHandler();
         if (rotation == mWindowManager.getDefaultDisplay().getRotation()) {
             // Use this as a signal to remove any current suggestions

@@ -331,13 +331,15 @@ bool IsSubDimension(const DimensionsValue& dimension, const DimensionsValue& sub
         case DimensionsValue::ValueCase::kValueFloat:
             return dimension.value_float() == sub.value_float();
         case DimensionsValue::ValueCase::kValueTuple: {
-            if (dimension.value_tuple().dimensions_value_size() < sub.value_tuple().dimensions_value_size()) {
+            if (dimension.value_tuple().dimensions_value_size() <
+                sub.value_tuple().dimensions_value_size()) {
                 return false;
             }
             bool allSub = true;
-            for (int i = 0; i < sub.value_tuple().dimensions_value_size(); ++i) {
+            for (int i = 0; allSub && i < sub.value_tuple().dimensions_value_size(); ++i) {
                 bool isSub = false;
-                for (int j = 0; !isSub && j < dimension.value_tuple().dimensions_value_size(); ++j) {
+                for (int j = 0; !isSub &&
+                        j < dimension.value_tuple().dimensions_value_size(); ++j) {
                     isSub |= IsSubDimension(dimension.value_tuple().dimensions_value(j),
                                             sub.value_tuple().dimensions_value(i));
                 }

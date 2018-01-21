@@ -30,7 +30,7 @@ public interface StatusBarManagerInternal {
 
     void cancelPreloadRecentApps();
 
-    void showRecentApps(boolean triggeredFromAltTab, boolean fromHome);
+    void showRecentApps(boolean triggeredFromAltTab);
 
     void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
 
@@ -95,7 +95,7 @@ public interface StatusBarManagerInternal {
      *
      * @param rotation rotation suggestion
      */
-    void onProposedRotationChanged(int rotation);
+    void onProposedRotationChanged(int rotation, boolean isValid);
 
     public interface GlobalActionsListener {
         /**

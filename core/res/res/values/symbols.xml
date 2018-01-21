@@ -309,6 +309,8 @@
   <java-symbol type="bool" name="config_useFixedVolume" />
   <java-symbol type="bool" name="config_forceDefaultOrientation" />
   <java-symbol type="bool" name="config_wifi_batched_scan_supported" />
+  <java-symbol type="bool" name="config_wifi_softap_acs_supported" />
+  <java-symbol type="bool" name="config_wifi_softap_ieee80211ac_supported" />
   <java-symbol type="bool" name="config_enableMultiUserUI"/>
   <java-symbol type="bool" name="config_disableUsbPermissionDialogs"/>
   <java-symbol type="bool" name="config_hasRecents" />
@@ -878,6 +880,7 @@
   <java-symbol type="string" name="preposition_for_time" />
   <java-symbol type="string" name="print_service_installed_title" />
   <java-symbol type="string" name="print_service_installed_message" />
+  <java-symbol type="string" name="printing_disabled_by" />
   <java-symbol type="string" name="progress_erasing" />
   <java-symbol type="string" name="mobile_provisioning_apn" />
   <java-symbol type="string" name="mobile_provisioning_url" />
@@ -1507,6 +1510,7 @@
   <java-symbol type="xml" name="password_kbd_symbols" />
   <java-symbol type="xml" name="password_kbd_symbols_shift" />
   <java-symbol type="xml" name="power_profile" />
+  <java-symbol type="xml" name="power_profile_test" />
   <java-symbol type="xml" name="sms_short_codes" />
   <java-symbol type="xml" name="audio_assets" />
   <java-symbol type="xml" name="global_keys" />
@@ -1973,6 +1977,8 @@
   <java-symbol type="string" name="data_usage_warning_title" />
   <java-symbol type="string" name="data_usage_wifi_limit_snoozed_title" />
   <java-symbol type="string" name="data_usage_wifi_limit_title" />
+  <java-symbol type="string" name="data_usage_rapid_title" />
+  <java-symbol type="string" name="data_usage_rapid_body" />
   <java-symbol type="string" name="default_wallpaper_component" />
   <java-symbol type="string" name="device_storage_monitor_notification_channel" />
   <java-symbol type="string" name="dlg_ok" />
@@ -3204,6 +3210,7 @@
 
   <java-symbol type="string" name="global_action_logout" />
   <java-symbol type="string" name="config_mainBuiltInDisplayCutout" />
+  <java-symbol type="drawable" name="messaging_user" />
   <java-symbol type="bool" name="config_fillMainBuiltInDisplayCutout" />
   <java-symbol type="drawable" name="ic_logout" />
 
@@ -3218,4 +3225,7 @@
   <java-symbol type="string" name="harmful_app_warning_title" />
 
   <java-symbol type="string" name="config_defaultAssistantAccessPackage" />
+
+  <java-symbol type="bool" name="config_supportBluetoothPersistedState" />
+  <java-symbol type="string" name="slices_permission_request" />
 </resources>

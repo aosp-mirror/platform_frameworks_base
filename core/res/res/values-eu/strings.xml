@@ -86,7 +86,7 @@
     <string name="NetworkPreferenceSwitchSummary" msgid="7056776609127756440">"Seinalea hobea izan dadin, aldatu sare mota Ezarpenak &gt; Sareak eta Internet &gt; Sare mugikorrak &gt; Sare mota hobetsia atalean."</string>
     <string name="EmergencyCallWarningTitle" msgid="4790413876281901612">"Wi‑Fi bidezko deiak aktibo daude"</string>
     <string name="EmergencyCallWarningSummary" msgid="8973232888021643293">"Sare mugikorrera konektatuta egon behar da larrialdi-deiak egin ahal izateko."</string>
-    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Abisuak"</string>
+    <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertak"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Dei-desbideratzea"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Larrialdi-deiak soilik jasotzeko modua"</string>
     <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Datu mugikorren egoera"</string>
@@ -217,6 +217,8 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"Larrialdi-deiak"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Akatsen txostena"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Amaitu saioa"</string>
+    <!-- no translation found for global_action_screenshot (8329831278085426283) -->
+    <skip />
     <string name="bugreport_title" msgid="2667494803742548533">"Sortu akatsen txostena"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Gailuaren uneko egoerari buruzko informazioa bilduko da, mezu elektroniko gisa bidaltzeko. Minutu batzuk igaroko dira akatsen txostena sortzen hasten denetik bidaltzeko prest egon arte. Itxaron, mesedez."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Txosten dinamikoa"</string>
@@ -251,7 +253,7 @@
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Sare bat erabilgarri dago"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"VPN egoera"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"Gailuen administrazioa"</string>
-    <string name="notification_channel_alerts" msgid="4496839309318519037">"Abisuak"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"Alertak"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Saltzaileentzako demoa"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB konexioa"</string>
     <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"Aplikazio bat abian da"</string>
@@ -1123,6 +1125,10 @@
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi konexioa automatikoki aktibatuko da"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Gordeta daukazun kalitate handiko sare batetik gertu zaudenean"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Ez aktibatu berriro"</string>
+    <!-- no translation found for wifi_wakeup_enabled_title (6534603733173085309) -->
+    <skip />
+    <!-- no translation found for wifi_wakeup_enabled_content (189330154407990583) -->
+    <skip />
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Hasi saioa Wi-Fi sarean"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Hasi saioa sarean"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1808,6 +1814,11 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Ezin izan da leheneratu lasterbidea aplikazioak ez duelako onartzen babeskopiak egiteko eta leheneratzeko aukera"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Ezin izan da leheneratu lasterbidea aplikazioaren sinadurak ez datozelako bat"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Ezin izan da leheneratu lasterbidea"</string>
-    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"Desgaituta dago lasterbidea"</string>
+    <!-- no translation found for harmful_app_warning_uninstall (3846265696369136266) -->
+    <skip />
+    <!-- no translation found for harmful_app_warning_launch_anyway (5784428382367400530) -->
+    <skip />
+    <!-- no translation found for harmful_app_warning_title (2229996292333310435) -->
     <skip />
 </resources>

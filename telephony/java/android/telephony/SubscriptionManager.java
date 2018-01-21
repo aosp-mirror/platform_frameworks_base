@@ -16,6 +16,10 @@
 
 package android.telephony;
 
+import static android.net.NetworkPolicyManager.OVERRIDE_CONGESTED;
+import static android.net.NetworkPolicyManager.OVERRIDE_UNMETERED;
+
+import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -30,6 +34,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.INetworkPolicyManager;
+import android.net.NetworkCapabilities;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -38,7 +43,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.util.DisplayMetrics;
-import android.util.Log;
 
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 import com.android.internal.telephony.ISub;
@@ -280,6 +284,14 @@ public class SubscriptionManager {
     public static final String IS_EMBEDDED = "is_embedded";
 
     /**
+     * TelephonyProvider column name for SIM card identifier. For UICC card it is the ICCID of the
+     * current enabled profile on the card, while for eUICC card it is the EID of the card.
+     * <P>Type: TEXT (String)</P>
+     * @hide
+     */
+     public static final String CARD_ID = "card_id";
+
+    /**
      * TelephonyProvider column name for the encoded {@link UiccAccessRule}s from
      * {@link UiccAccessRule#encodeRules}. Only present if {@link #IS_EMBEDDED} is 1.
      * <p>TYPE: BLOB
@@ -499,7 +511,7 @@ public class SubscriptionManager {
     public static final String EXTRA_SUBSCRIPTION_INDEX = "android.telephony.extra.SUBSCRIPTION_INDEX";
 
     private final Context mContext;
-    private final INetworkPolicyManager mNetworkPolicy;
+    private INetworkPolicyManager mNetworkPolicy;
 
     /**
      * A listener class for monitoring changes to {@link SubscriptionInfo} records.
@@ -572,11 +584,9 @@ public class SubscriptionManager {
     }
 
     /** @hide */
-    public SubscriptionManager(Context context) throws ServiceNotFoundException {
+    public SubscriptionManager(Context context) {
         if (DBG) logd("SubscriptionManager created");
         mContext = context;
-        mNetworkPolicy = INetworkPolicyManager.Stub
-                .asInterface(ServiceManager.getServiceOrThrow(Context.NETWORK_POLICY_SERVICE));
     }
 
     /**
@@ -587,6 +597,14 @@ public class SubscriptionManager {
     public static SubscriptionManager from(Context context) {
         return (SubscriptionManager) context
                 .getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
+    }
+
+    private final INetworkPolicyManager getNetworkPolicy() {
+        if (mNetworkPolicy == null) {
+            mNetworkPolicy = INetworkPolicyManager.Stub
+                    .asInterface(ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
+        }
+        return mNetworkPolicy;
     }
 
     /**
@@ -1686,7 +1704,7 @@ public class SubscriptionManager {
     public @NonNull List<SubscriptionPlan> getSubscriptionPlans(int subId) {
         try {
             SubscriptionPlan[] subscriptionPlans =
-                    mNetworkPolicy.getSubscriptionPlans(subId, mContext.getOpPackageName());
+                    getNetworkPolicy().getSubscriptionPlans(subId, mContext.getOpPackageName());
             return subscriptionPlans == null
                     ? Collections.emptyList() : Arrays.asList(subscriptionPlans);
         } catch (RemoteException e) {
@@ -1715,7 +1733,7 @@ public class SubscriptionManager {
     @SystemApi
     public void setSubscriptionPlans(int subId, @NonNull List<SubscriptionPlan> plans) {
         try {
-            mNetworkPolicy.setSubscriptionPlans(subId,
+            getNetworkPolicy().setSubscriptionPlans(subId,
                     plans.toArray(new SubscriptionPlan[plans.size()]), mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1725,7 +1743,76 @@ public class SubscriptionManager {
     /** @hide */
     private String getSubscriptionPlansOwner(int subId) {
         try {
-            return mNetworkPolicy.getSubscriptionPlansOwner(subId);
+            return getNetworkPolicy().getSubscriptionPlansOwner(subId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Temporarily override the billing relationship plan between a carrier and
+     * a specific subscriber to be considered unmetered. This will be reflected
+     * to apps via {@link NetworkCapabilities#NET_CAPABILITY_NOT_METERED}.
+     * <p>
+     * This method is only accessible to the following narrow set of apps:
+     * <ul>
+     * <li>The carrier app for this subscriberId, as determined by
+     * {@link TelephonyManager#hasCarrierPrivileges()}.
+     * <li>The carrier app explicitly delegated access through
+     * {@link CarrierConfigManager#KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING}.
+     * </ul>
+     *
+     * @param subId the subscriber this override applies to.
+     * @param overrideUnmetered set if the billing relationship should be
+     *            considered unmetered.
+     * @param timeoutMillis the timeout after which the requested override will
+     *            be automatically cleared, or {@code 0} to leave in the
+     *            requested state until explicitly cleared, or the next reboot,
+     *            whichever happens first.
+     * @hide
+     */
+    @SystemApi
+    public void setSubscriptionOverrideUnmetered(int subId, boolean overrideUnmetered,
+            @DurationMillisLong long timeoutMillis) {
+        try {
+            final int overrideValue = overrideUnmetered ? OVERRIDE_UNMETERED : 0;
+            mNetworkPolicy.setSubscriptionOverride(subId, OVERRIDE_UNMETERED, overrideValue,
+                    timeoutMillis, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Temporarily override the billing relationship plan between a carrier and
+     * a specific subscriber to be considered congested. This will cause the
+     * device to delay certain network requests when possible, such as developer
+     * jobs that are willing to run in a flexible time window.
+     * <p>
+     * This method is only accessible to the following narrow set of apps:
+     * <ul>
+     * <li>The carrier app for this subscriberId, as determined by
+     * {@link TelephonyManager#hasCarrierPrivileges()}.
+     * <li>The carrier app explicitly delegated access through
+     * {@link CarrierConfigManager#KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING}.
+     * </ul>
+     *
+     * @param subId the subscriber this override applies to.
+     * @param overrideCongested set if the subscription should be considered
+     *            congested.
+     * @param timeoutMillis the timeout after which the requested override will
+     *            be automatically cleared, or {@code 0} to leave in the
+     *            requested state until explicitly cleared, or the next reboot,
+     *            whichever happens first.
+     * @hide
+     */
+    @SystemApi
+    public void setSubscriptionOverrideCongested(int subId, boolean overrideCongested,
+            @DurationMillisLong long timeoutMillis) {
+        try {
+            final int overrideValue = overrideCongested ? OVERRIDE_CONGESTED : 0;
+            mNetworkPolicy.setSubscriptionOverride(subId, OVERRIDE_CONGESTED, overrideValue,
+                    timeoutMillis, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

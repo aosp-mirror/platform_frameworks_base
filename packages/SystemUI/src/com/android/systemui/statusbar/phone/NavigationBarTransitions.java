@@ -26,6 +26,7 @@ import android.view.IWallpaperVisibilityListener;
 import android.view.IWindowManager;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnLayoutChangeListener;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dependency;
@@ -41,6 +42,7 @@ public final class NavigationBarTransitions extends BarTransitions {
 
     private boolean mLightsOut;
     private boolean mAutoDim;
+    private View mNavButtons;
 
     public NavigationBarTransitions(NavigationBarView view) {
         super(view, R.drawable.nav_background);
@@ -65,6 +67,18 @@ public final class NavigationBarTransitions extends BarTransitions {
                     }
                 }, Display.DEFAULT_DISPLAY);
         } catch (RemoteException e) {
+        }
+        mView.addOnLayoutChangeListener(
+                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                    View currentView = mView.getCurrentView();
+                    if (currentView != null) {
+                        mNavButtons = currentView.findViewById(R.id.nav_buttons);
+                        applyLightsOut(false, true);
+                    }
+                });
+        View currentView = mView.getCurrentView();
+        if (currentView != null) {
+            mNavButtons = currentView.findViewById(R.id.nav_buttons);
         }
     }
 
@@ -105,21 +119,20 @@ public final class NavigationBarTransitions extends BarTransitions {
         if (!force && lightsOut == mLightsOut) return;
 
         mLightsOut = lightsOut;
-
-        final View navButtons = mView.getCurrentView().findViewById(R.id.nav_buttons);
+        if (mNavButtons == null) return;
 
         // ok, everyone, stop it right there
-        navButtons.animate().cancel();
+        mNavButtons.animate().cancel();
 
         // Bump percentage by 10% if dark.
         float darkBump = mLightTransitionsController.getCurrentDarkIntensity() / 10;
         final float navButtonsAlpha = lightsOut ? 0.6f + darkBump : 1f;
 
         if (!animate) {
-            navButtons.setAlpha(navButtonsAlpha);
+            mNavButtons.setAlpha(navButtonsAlpha);
         } else {
             final int duration = lightsOut ? LIGHTS_OUT_DURATION : LIGHTS_IN_DURATION;
-            navButtons.animate()
+            mNavButtons.animate()
                 .alpha(navButtonsAlpha)
                 .setDuration(duration)
                 .start();

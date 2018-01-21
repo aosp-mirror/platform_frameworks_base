@@ -320,9 +320,9 @@ package android.hardware.display {
   }
 
   public static class BrightnessConfiguration.Builder {
-    ctor public BrightnessConfiguration.Builder();
+    ctor public BrightnessConfiguration.Builder(float[], float[]);
     method public android.hardware.display.BrightnessConfiguration build();
-    method public android.hardware.display.BrightnessConfiguration.Builder setCurve(float[], float[]);
+    method public android.hardware.display.BrightnessConfiguration.Builder setDescription(java.lang.String);
   }
 
   public final class DisplayManager {
@@ -561,11 +561,6 @@ package android.service.autofill {
 
   public final class CharSequenceTransformation extends android.service.autofill.InternalTransformation implements android.os.Parcelable android.service.autofill.Transformation {
     method public void apply(android.service.autofill.ValueFinder, android.widget.RemoteViews, int) throws java.lang.Exception;
-  }
-
-  public final class EditDistanceScorer {
-    method public static android.service.autofill.EditDistanceScorer getInstance();
-    method public float getScore(android.view.autofill.AutofillValue, java.lang.String);
   }
 
   public final class FillResponse implements android.os.Parcelable {
@@ -966,6 +961,9 @@ package android.view {
 
   public final class Choreographer {
     method public static long getFrameDelay();
+    method public void postCallback(int, java.lang.Runnable, java.lang.Object);
+    method public void postCallbackDelayed(int, java.lang.Runnable, java.lang.Object, long);
+    method public void removeCallbacks(int, java.lang.Runnable, java.lang.Object);
     method public static void setFrameDelay(long);
     field public static final int CALLBACK_ANIMATION = 1; // 0x1
   }

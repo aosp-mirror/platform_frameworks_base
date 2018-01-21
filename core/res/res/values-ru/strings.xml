@@ -221,6 +221,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"Экстренный вызов"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Отчет об ошибке"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Закончить сеанс"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Скриншот"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Отчет об ошибке"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Информация о текущем состоянии вашего устройства будет собрана и отправлена по электронной почте. Подготовка отчета займет некоторое время."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактивный отчет"</string>
@@ -1167,6 +1168,8 @@
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi-Fi включится автоматически"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Когда вы будете в зоне действия сохраненной сети с хорошим сигналом."</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Не включать снова"</string>
+    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi‑Fi включен автоматически"</string>
+    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Вы находитесь в зоне действия сохраненной сети <xliff:g id="NETWORK_SSID">%1$s</xliff:g>."</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Подключение к Wi-Fi"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Регистрация в сети"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1877,6 +1880,8 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Не удалось восстановить ярлык: приложение не поддерживает резервное копирование"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Не удалось восстановить ярлык: некорректная подпись приложения"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Не удалось восстановить ярлык"</string>
-    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
-    <skip />
+    <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"Ярлык отключен"</string>
+    <string name="harmful_app_warning_uninstall" msgid="3846265696369136266">"Удалить"</string>
+    <string name="harmful_app_warning_launch_anyway" msgid="5784428382367400530">"Запустить все равно"</string>
+    <string name="harmful_app_warning_title" msgid="2229996292333310435">"Удалите опасное приложение"</string>
 </resources>

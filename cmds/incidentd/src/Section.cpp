@@ -19,6 +19,7 @@
 #include "Section.h"
 
 #include <errno.h>
+#include <sys/prctl.h>
 #include <unistd.h>
 #include <wait.h>
 
@@ -30,7 +31,6 @@
 #include <log/log_event_list.h>
 #include <log/logprint.h>
 #include <log/log_read.h>
-#include <private/android_filesystem_config.h> // for AID_NOBODY
 #include <private/android_logger.h>
 
 #include "FdBuffer.h"
@@ -55,25 +55,19 @@ static pid_t
 fork_execute_incident_helper(const int id, const char* name, Fpipe& p2cPipe, Fpipe& c2pPipe)
 {
     const char* ihArgs[] { INCIDENT_HELPER, "-s", String8::format("%d", id).string(), NULL };
-
     // fork used in multithreaded environment, avoid adding unnecessary code in child process
     pid_t pid = fork();
     if (pid == 0) {
-        // child process executes incident helper as nobody
-        if (setgid(AID_NOBODY) == -1) {
-            ALOGW("%s can't change gid: %s", name, strerror(errno));
-            _exit(EXIT_FAILURE);
-        }
-        if (setuid(AID_NOBODY) == -1) {
-            ALOGW("%s can't change uid: %s", name, strerror(errno));
-            _exit(EXIT_FAILURE);
-        }
-
-        if (dup2(p2cPipe.readFd(),  STDIN_FILENO)  != 0 || !p2cPipe.close() ||
-            dup2(c2pPipe.writeFd(), STDOUT_FILENO) != 1 || !c2pPipe.close()) {
+        if (TEMP_FAILURE_RETRY(dup2(p2cPipe.readFd(),  STDIN_FILENO))  != 0
+            || !p2cPipe.close()
+            || TEMP_FAILURE_RETRY(dup2(c2pPipe.writeFd(), STDOUT_FILENO)) != 1
+            || !c2pPipe.close()) {
             ALOGW("%s can't setup stdin and stdout for incident helper", name);
             _exit(EXIT_FAILURE);
         }
+
+        /* make sure the child dies when incidentd dies */
+        prctl(PR_SET_PDEATHSIG, SIGKILL);
 
         execv(INCIDENT_HELPER, const_cast<char**>(ihArgs));
 
@@ -87,11 +81,23 @@ fork_execute_incident_helper(const int id, const char* name, Fpipe& p2cPipe, Fpi
 }
 
 // ================================================================================
+static status_t statusCode(int status) {
+    if (WIFSIGNALED(status)) {
+      ALOGD("return by signal: %s", strerror(WTERMSIG(status)));
+      return -WTERMSIG(status);
+    } else if (WIFEXITED(status) && WEXITSTATUS(status) > 0) {
+      ALOGD("return by exit: %s", strerror(WEXITSTATUS(status)));
+      return -WEXITSTATUS(status);
+    }
+    return NO_ERROR;
+}
+
 static status_t kill_child(pid_t pid) {
     int status;
+    ALOGD("try to kill child process %d", pid);
     kill(pid, SIGKILL);
     if (waitpid(pid, &status, 0) == -1) return -1;
-    return WIFEXITED(status) == 0 ? NO_ERROR : -WEXITSTATUS(status);
+    return statusCode(status);
 }
 
 static status_t wait_child(pid_t pid) {
@@ -104,7 +110,7 @@ static status_t wait_child(pid_t pid) {
         nanosleep(&WAIT_INTERVAL_NS, NULL);
     }
     if (!died) return kill_child(pid);
-    return WIFEXITED(status) == 0 ? NO_ERROR : -WEXITSTATUS(status);
+    return statusCode(status);
 }
 // ================================================================================
 static const Privacy*
@@ -275,9 +281,9 @@ FileSection::Execute(ReportRequestSet* requests) const
     status_t readStatus = buffer.readProcessedDataInStream(fd, p2cPipe.writeFd(), c2pPipe.readFd(),
             this->timeoutMs, mIsSysfs);
     if (readStatus != NO_ERROR || buffer.timedOut()) {
-        ALOGW("FileSection '%s' failed to read data from incident helper: %s, timedout: %s, kill: %s",
-            this->name.string(), strerror(-readStatus), buffer.timedOut() ? "true" : "false",
-            strerror(-kill_child(pid)));
+        ALOGW("FileSection '%s' failed to read data from incident helper: %s, timedout: %s",
+            this->name.string(), strerror(-readStatus), buffer.timedOut() ? "true" : "false");
+        kill_child(pid);
         return readStatus;
     }
 
@@ -543,10 +549,10 @@ CommandSection::Execute(ReportRequestSet* requests) const
     close(cmdPipe.writeFd());
     status_t readStatus = buffer.read(ihPipe.readFd(), this->timeoutMs);
     if (readStatus != NO_ERROR || buffer.timedOut()) {
-        ALOGW("CommandSection '%s' failed to read data from incident helper: %s, "
-            "timedout: %s, kill command: %s, kill incident helper: %s",
-            this->name.string(), strerror(-readStatus), buffer.timedOut() ? "true" : "false",
-            strerror(-kill_child(cmdPid)), strerror(-kill_child(ihPid)));
+        ALOGW("CommandSection '%s' failed to read data from incident helper: %s, timedout: %s",
+            this->name.string(), strerror(-readStatus), buffer.timedOut() ? "true" : "false");
+        kill_child(cmdPid);
+        kill_child(ihPid);
         return readStatus;
     }
 

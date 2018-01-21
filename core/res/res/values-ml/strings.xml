@@ -217,6 +217,8 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"അടിയന്തിരാവശ്യം"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"ബഗ് റിപ്പോർട്ട്"</string>
     <string name="global_action_logout" msgid="935179188218826050">"സെഷൻ അവസാനിപ്പിക്കുക"</string>
+    <!-- no translation found for global_action_screenshot (8329831278085426283) -->
+    <skip />
     <string name="bugreport_title" msgid="2667494803742548533">"ബഗ് റിപ്പോർട്ട് എടുക്കുക"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ഒരു ഇമെയിൽ സന്ദേശമായി അയയ്‌ക്കുന്നതിന്, ഇത് നിങ്ങളുടെ നിലവിലെ ഉപകരണ നിലയെക്കുറിച്ചുള്ള വിവരങ്ങൾ ശേഖരിക്കും. ബഗ് റിപ്പോർട്ട് ആരംഭിക്കുന്നതിൽ നിന്ന് ഇത് അയയ്‌ക്കാനായി തയ്യാറാകുന്നതുവരെ അൽപ്പസമയമെടുക്കും; ക്ഷമയോടെ കാത്തിരിക്കുക."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ഇന്റരാക്റ്റീവ് റിപ്പോർട്ട്"</string>
@@ -1123,6 +1125,10 @@
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"വൈഫൈ സ്വമേധയാ ഓണാകും"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"നിങ്ങൾ ഉയർന്ന നിലവാരമുള്ള സംരക്ഷിക്കപ്പെട്ട നെറ്റ്‌വർക്കിനരികിലെത്തുമ്പോൾ"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"തിരികെ ഓണാക്കരുത്"</string>
+    <!-- no translation found for wifi_wakeup_enabled_title (6534603733173085309) -->
+    <skip />
+    <!-- no translation found for wifi_wakeup_enabled_content (189330154407990583) -->
+    <skip />
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"വൈഫൈ നെറ്റ്‌വർക്കിലേക്ക് സൈൻ ഇൻ ചെയ്യുക"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"നെറ്റ്‌വർക്കിലേക്ക് സൈൻ ഇൻ ചെയ്യുക"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1808,6 +1814,11 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"ആപ്പ് \'ബാക്കപ്പും പുനഃസ്ഥാപിക്കലും\' പിന്തുണയ്ക്കാത്തതിനാൽ കുറുക്കുവഴി പുനഃസ്ഥാപിക്കാനായില്ല"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"ആപ്പ് സിഗ്നേച്ചർ പൊരുത്തപ്പെടാത്തതിനാൽ കുറുക്കുവഴി പുനഃസ്ഥാപിക്കാനായില്ല"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"കുറുക്കുവഴി പുനഃസ്ഥാപിക്കാനായില്ല"</string>
-    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"കുറുക്കുവഴി പ്രവർത്തനരഹിതമാണ്"</string>
+    <!-- no translation found for harmful_app_warning_uninstall (3846265696369136266) -->
+    <skip />
+    <!-- no translation found for harmful_app_warning_launch_anyway (5784428382367400530) -->
+    <skip />
+    <!-- no translation found for harmful_app_warning_title (2229996292333310435) -->
     <skip />
 </resources>

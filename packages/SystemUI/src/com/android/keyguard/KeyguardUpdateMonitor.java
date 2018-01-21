@@ -991,6 +991,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                     maxChargingWattage > fastThreshold ? CHARGING_FAST :
                     CHARGING_REGULAR;
         }
+
+        @Override
+        public String toString() {
+            return "BatteryStatus{status=" + status + ",level=" + level + ",plugged=" + plugged
+                    + ",health=" + health + ",maxChargingWattage=" + maxChargingWattage + "}";
+        }
     }
 
     public class StrongAuthTracker extends LockPatternUtils.StrongAuthTracker {
@@ -1624,18 +1630,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
             return true;
         }
 
-        // change in battery level while plugged in
-        if (nowPluggedIn && old.level != current.level) {
-            return true;
-        }
-
-        // change in battery level while keyguard visible
-        if (mKeyguardIsVisible && old.level != current.level) {
-            return true;
-        }
-
-        // change where battery needs charging
-        if (!nowPluggedIn && current.isBatteryLow() && current.level != old.level) {
+        // change in battery level
+        if (old.level != current.level) {
             return true;
         }
 

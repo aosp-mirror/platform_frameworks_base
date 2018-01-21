@@ -25,6 +25,7 @@ import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageParser.PackageLite;
+import android.content.pm.dex.DexMetadataHelper;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -414,6 +415,9 @@ public class PackageHelper {
             final File codeFile = new File(codePath);
             sizeBytes += codeFile.length();
         }
+
+        // Include raw dex metadata files
+        sizeBytes += DexMetadataHelper.getPackageDexMetadataSize(pkg);
 
         // Include all relevant native code
         sizeBytes += NativeLibraryHelper.sumNativeBinariesWithOverride(handle, abiOverride);

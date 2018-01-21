@@ -16,12 +16,12 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import static android.security.keystore.KeychainProtectionParameter.TYPE_LOCKSCREEN;
+import static android.security.keystore.KeychainProtectionParams.TYPE_LOCKSCREEN;
 
 import android.annotation.Nullable;
 import android.content.Context;
 import android.security.keystore.KeyDerivationParams;
-import android.security.keystore.KeychainProtectionParameter;
+import android.security.keystore.KeychainProtectionParams;
 import android.security.keystore.KeychainSnapshot;
 import android.security.keystore.WrappedApplicationKey;
 import android.util.Log;
@@ -174,8 +174,8 @@ public class KeySyncTask implements Runnable {
             return;
         }
 
-        byte[] deviceId = mRecoverableKeyStoreDb.getServerParams(mUserId, recoveryAgentUid);
-        if (deviceId == null) {
+        byte[] vaultHandle = mRecoverableKeyStoreDb.getServerParams(mUserId, recoveryAgentUid);
+        if (vaultHandle == null) {
             Log.w(TAG, "No device ID set for user " + mUserId);
             return;
         }
@@ -228,11 +228,15 @@ public class KeySyncTask implements Runnable {
                 counterId = generateAndStoreCounterId(recoveryAgentUid);
             }
         }
+
+        // TODO: make sure the same counter id is used during recovery and remove temporary fix.
+        counterId = 1L;
+
         byte[] vaultParams = KeySyncUtils.packVaultParams(
                 publicKey,
                 counterId,
-                deviceId,
-                TRUSTED_HARDWARE_MAX_ATTEMPTS);
+                TRUSTED_HARDWARE_MAX_ATTEMPTS,
+                vaultHandle);
 
         byte[] encryptedRecoveryKey;
         try {
@@ -250,12 +254,12 @@ public class KeySyncTask implements Runnable {
         }
         // TODO: store raw data in RecoveryServiceMetadataEntry and generate Parcelables later
         // TODO: use Builder.
-        KeychainProtectionParameter metadata = new KeychainProtectionParameter(
+        KeychainProtectionParams metadata = new KeychainProtectionParams(
                 /*userSecretType=*/ TYPE_LOCKSCREEN,
                 /*lockScreenUiFormat=*/ getUiFormat(mCredentialType, mCredential),
                 /*keyDerivationParams=*/ KeyDerivationParams.createSha256Params(salt),
                 /*secret=*/ new byte[0]);
-        ArrayList<KeychainProtectionParameter> metadataList = new ArrayList<>();
+        ArrayList<KeychainProtectionParams> metadataList = new ArrayList<>();
         metadataList.add(metadata);
 
         int snapshotVersion = incrementSnapshotVersion(recoveryAgentUid);
@@ -263,12 +267,16 @@ public class KeySyncTask implements Runnable {
         // If application keys are not updated, snapshot will not be created on next unlock.
         mRecoverableKeyStoreDb.setShouldCreateSnapshot(mUserId, recoveryAgentUid, false);
 
-        // TODO: use Builder.
-        mRecoverySnapshotStorage.put(recoveryAgentUid, new KeychainSnapshot(
-                snapshotVersion,
-                /*recoveryMetadata=*/ metadataList,
-                /*applicationKeyBlobs=*/ createApplicationKeyEntries(encryptedApplicationKeys),
-                /*encryptedRecoveryKeyblob=*/ encryptedRecoveryKey));
+        mRecoverySnapshotStorage.put(recoveryAgentUid, new KeychainSnapshot.Builder()
+                .setSnapshotVersion(snapshotVersion)
+                .setMaxAttempts(TRUSTED_HARDWARE_MAX_ATTEMPTS)
+                .setCounterId(counterId)
+                .setTrustedHardwarePublicKey(SecureBox.encodePublicKey(publicKey))
+                .setServerParams(vaultHandle)
+                .setKeychainProtectionParams(metadataList)
+                .setWrappedApplicationKeys(createApplicationKeyEntries(encryptedApplicationKeys))
+                .setEncryptedRecoveryKeyBlob(encryptedRecoveryKey)
+                .build());
 
         mSnapshotListenersStorage.recoverySnapshotAvailable(recoveryAgentUid);
     }
@@ -307,7 +315,7 @@ public class KeySyncTask implements Runnable {
      */
     private boolean shoudCreateSnapshot(int recoveryAgentUid) {
         int[] types = mRecoverableKeyStoreDb.getRecoverySecretTypes(mUserId, recoveryAgentUid);
-        if (!ArrayUtils.contains(types, KeychainProtectionParameter.TYPE_LOCKSCREEN)) {
+        if (!ArrayUtils.contains(types, KeychainProtectionParams.TYPE_LOCKSCREEN)) {
             // Only lockscreen type is supported.
             // We will need to pass extra argument to KeySyncTask to support custom pass phrase.
             return false;
@@ -330,14 +338,14 @@ public class KeySyncTask implements Runnable {
      * @return The format - either pattern, pin, or password.
      */
     @VisibleForTesting
-    @KeychainProtectionParameter.LockScreenUiFormat static int getUiFormat(
+    @KeychainProtectionParams.LockScreenUiFormat static int getUiFormat(
             int credentialType, String credential) {
         if (credentialType == LockPatternUtils.CREDENTIAL_TYPE_PATTERN) {
-            return KeychainProtectionParameter.TYPE_PATTERN;
+            return KeychainProtectionParams.TYPE_PATTERN;
         } else if (isPin(credential)) {
-            return KeychainProtectionParameter.TYPE_PIN;
+            return KeychainProtectionParams.TYPE_PIN;
         } else {
-            return KeychainProtectionParameter.TYPE_PASSWORD;
+            return KeychainProtectionParams.TYPE_PASSWORD;
         }
     }
 

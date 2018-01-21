@@ -19,4 +19,4 @@ service incidentd /system/bin/incidentd
 
 on post-fs-data
     # Create directory for incidentd
-    mkdir /data/misc/incidents 0770 root root
+    mkdir /data/misc/incidents 0770 incidentd incidentd

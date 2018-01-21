@@ -274,20 +274,21 @@ public class SystemServicesProxy {
         return false;
     }
 
+    public ActivityManager.StackInfo getSplitScreenPrimaryStack() {
+        try {
+            return mIam.getStackInfo(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_UNDEFINED);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
     /**
      * @return whether there are any docked tasks for the current user.
      */
     public boolean hasDockedTask() {
         if (mIam == null) return false;
 
-        ActivityManager.StackInfo stackInfo = null;
-        try {
-            stackInfo =
-                    mIam.getStackInfo(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_UNDEFINED);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
-
+        ActivityManager.StackInfo stackInfo = getSplitScreenPrimaryStack();
         if (stackInfo != null) {
             int userId = getCurrentUser();
             boolean hasUserTask = false;

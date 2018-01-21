@@ -135,6 +135,9 @@
     <uses-permission android:name="android.permission.RESTRICTED_VR_ACCESS" />
     <uses-permission android:name="android.permission.MANAGE_BIND_INSTANT_SERVICE" />
     <uses-permission android:name="android.permission.SET_HARMFUL_APP_WARNINGS" />
+    <uses-permission android:name="android.permission.MANAGE_SENSORS" />
+
+    <uses-permission android:name="android.permission.MANAGE_AUDIO_POLICY" />
 
     <application android:label="@string/app_label"
                  android:defaultToDeviceProtectedStorage="true"

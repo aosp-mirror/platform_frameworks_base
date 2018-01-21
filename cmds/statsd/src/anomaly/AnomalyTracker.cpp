@@ -18,6 +18,7 @@
 #include "Log.h"
 
 #include "AnomalyTracker.h"
+#include "external/Perfetto.h"
 #include "guardrail/StatsdStats.h"
 
 #include <android/os/IIncidentManager.h>
@@ -239,7 +240,7 @@ void AnomalyTracker::informSubscribers(const HashableDimensionKey& key) {
                 }
                 break;
             case Subscription::SubscriberInformationCase::kPerfettoDetails:
-                ALOGW("Perfetto reports not implemented.");
+                CollectPerfettoTraceAndUploadToDropbox(subscription.perfetto_details());
                 break;
             default:
                 break;

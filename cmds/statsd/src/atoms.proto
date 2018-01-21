@@ -84,6 +84,7 @@ message Atom {
         AppStartChanged app_start_changed = 48;
         AppStartCancelChanged app_start_cancel_changed = 49;
         AppStartFullyDrawnChanged app_start_fully_drawn_changed = 50;
+        LmkEventOccurred lmk_event_occurred = 51;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
@@ -94,14 +95,18 @@ message Atom {
         MobileBytesTransfer mobile_bytes_transfer = 10002;
         MobileBytesTransferByFgBg mobile_bytes_transfer_by_fg_bg = 10003;
         KernelWakelock kernel_wakelock = 10004;
-        PlatformSleepState platform_sleep_state = 10005;
-        SleepStateVoter sleep_state_voter = 10006;
-        SubsystemSleepState subsystem_sleep_state = 10007;
+        SubsystemSleepState subsystem_sleep_state = 10005;
+        // 10006 and 10007 are free to use.
         CpuTimePerFreq cpu_time_per_freq = 10008;
         CpuTimePerUid cpu_time_per_uid = 10009;
         CpuTimePerUidFreq cpu_time_per_uid_freq = 10010;
         WifiActivityEnergyInfo wifi_activity_energy_info = 10011;
         ModemActivityInfo modem_activity_info = 10012;
+        MemoryStat memory_stat = 10013;
+        CpuSuspendTime cpu_suspend_time = 10014;
+        CpuIdleTime cpu_idle_time = 10015;
+        CpuActiveTime cpu_active_time = 10016;
+        CpuClusterTime cpu_cluster_time = 10017;
     }
 }
 
@@ -1027,44 +1032,21 @@ message KernelWakelock {
 }
 
 /**
- * Pulls PowerStatePlatformSleepState.
- *
- * Definition here:
+ * Pulls low power state information. This includes platform and subsystem sleep state information,
+ * PowerStatePlatformSleepState, PowerStateVoter or PowerStateSubsystemSleepState as defined in
  *   hardware/interfaces/power/1.0/types.hal
- */
-message PlatformSleepState {
-    optional string name = 1;
-    optional uint64 residency_in_msec_since_boot = 2;
-    optional uint64 total_transitions = 3;
-    optional bool supported_only_in_suspend = 4;
-}
-
-/**
- * Pulls PowerStateVoter.
- *
- * Definition here:
- *   hardware/interfaces/power/1.0/types.hal
- */
-message SleepStateVoter {
-    optional string platform_sleep_state_name = 1;
-    optional string voter_name = 2;
-    optional uint64 total_time_in_msec_voted_for_since_boot = 3;
-    optional uint64 total_number_of_times_voted_since_boot = 4;
-}
-
-/**
- * Pulls PowerStateSubsystemSleepState.
- *
- * Definition here:
  *   hardware/interfaces/power/1.1/types.hal
  */
 message SubsystemSleepState {
-    optional string subsystem_name = 1;
-    optional string subsystem_sleep_state_name = 2;
-    optional uint64 residency_in_msec_since_boot = 3;
-    optional uint64 total_transitions = 4;
-    optional uint64 last_entry_timestamp_ms = 5;
-    optional bool supported_only_in_suspend = 6;
+    // Name should be in the format of XXX.YYY where XXX is subsystem name,
+    // YYY is corresponding voter name.
+    // If there are no voters, the format should just be XXX (with no dot).
+    // XXX and YYY should not contain a "." in it.
+    optional string name = 1;
+    // The number of times it entered, or voted for entering the sleep state
+    optional uint64 count = 2;
+    // The length of time spent in, or spent voting for, the sleep state
+    optional uint64 timeMs = 3;
 }
 
 /**
@@ -1200,4 +1182,92 @@ message ModemActivityInfo {
     optional uint64 controller_rx_time_ms = 9;
     // product of current(mA), voltage(V) and time(ms)
     optional uint64 energy_used = 10;
+}
+
+/*
+ * Logs the memory stats for a process
+ */
+message MemoryStat {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1;
+
+    // The app package name.
+    optional string pkg_name = 2;
+
+    // # of page-faults
+    optional int64 pgfault = 3;
+
+    // # of major page-faults
+    optional int64 pgmajfault = 4;
+
+    // RSS+CACHE(+SWAP)
+    optional int64 usage_in_bytes = 5;
+}
+
+/*
+ * Logs the event when LMKD kills a process to reduce memory pressure
+ * Logged from:
+ *      system/core/lmkd/lmkd.c
+ */
+message LmkEventOccurred {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1;
+
+    // The app package name.
+    optional string pkg_name = 2;
+
+    // oom adj score.
+    optional int32 oom_score = 3;
+
+    // Used as start/stop boundaries for the event
+    enum State {
+        UNKNOWN = 0;
+        START = 1;
+        END = 2;
+    }
+    optional State state = 4;
+}
+
+/*
+ * Cpu syspend time for cpu power calculation.
+ */
+message CpuSuspendTime {
+    optional uint64 time = 1;
+}
+
+/*
+ * Cpu idle time for cpu power calculation.
+ */
+message CpuIdleTime {
+    optional uint64 time = 1;
+}
+
+/*
+ * Reads from /proc/uid_concurrent_active_time which has the format:
+ * active: X (X is # cores)
+ * [uid0]: [time-0] [time-1] [time-2] ... (# entries = # cores)
+ * [uid1]: [time-0] [time-1] [time-2] ... ...
+ * ...
+ * Time-N means the CPU time a UID spent running concurrently with N other processes.
+ * The file contains a monotonically increasing count of time for a single boot.
+ */
+message CpuActiveTime {
+    optional uint64 uid = 1;
+    optional uint64 idx = 2;
+    optional uint64 time_ms = 3;
+}
+
+/**
+ * Reads from /proc/uid_concurrent_policy_time which has the format:
+ * policy0: X policy4: Y (there are X cores on policy0, Y cores on policy4)
+ * [uid0]: [time-0-0] [time-0-1] ... [time-1-0] [time-1-1] ...
+ * [uid1]: [time-0-0] [time-0-1] ... [time-1-0] [time-1-1] ...
+ * ...
+ * Time-X-Y means the time a UID spent on clusterX running concurrently with Y other processes.
+ * The file contains a monotonically increasing count of time for a single boot.
+ */
+message CpuClusterTime {
+    optional uint64 uid = 1;
+    optional uint64 idx = 2;
+    optional uint64 time_ms = 3;
 }

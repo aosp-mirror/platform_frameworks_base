@@ -155,12 +155,9 @@ public final class UserData implements Parcelable {
          * <p>The currently available algorithms can be retrieve through
          * {@link AutofillManager#getAvailableFieldClassificationAlgorithms()}.
          *
-         * <p><b>Note: </b>The available algorithms in the Android System can change dinamically,
-         * so it's not guaranteed that the algorithm set here is the one that will be effectually
-         * used. If the algorithm set here is not available at runtime, the
-         * {@link AutofillManager#getDefaultFieldClassificationAlgorithm()} is used instead.
-         * You can verify which algorithm was used by calling
-         * {@link FieldClassification.Match#getAlgorithm()}.
+         * <p>If not set, the
+         * {@link AutofillManager#getDefaultFieldClassificationAlgorithm() default algorithm} is
+         * used instead.
          *
          * @param name name of the algorithm or {@code null} to used default.
          * @param args optional arguments to the algorithm.

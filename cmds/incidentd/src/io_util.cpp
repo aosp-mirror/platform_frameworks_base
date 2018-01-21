@@ -23,7 +23,7 @@
 status_t write_all(int fd, uint8_t const* buf, size_t size)
 {
     while (size > 0) {
-        ssize_t amt = ::write(fd, buf, size);
+        ssize_t amt = TEMP_FAILURE_RETRY(::write(fd, buf, size));
         if (amt < 0) {
             return -errno;
         }

@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.audiopolicy.AudioMix;
@@ -818,6 +819,14 @@ public class AudioSystem
 
     public static native float getStreamVolumeDB(int stream, int index, int device);
 
+    static boolean isOffloadSupported(@NonNull AudioFormat format) {
+        return native_is_offload_supported(format.getEncoding(), format.getSampleRate(),
+                format.getChannelMask(), format.getChannelIndexMask());
+    }
+
+    private static native boolean native_is_offload_supported(int encoding, int sampleRate,
+            int channelMask, int channelIndexMask);
+
     // Items shared with audio service
 
     /**
@@ -914,7 +923,8 @@ public class AudioSystem
             (1 << STREAM_MUSIC) |
             (1 << STREAM_RING) |
             (1 << STREAM_NOTIFICATION) |
-            (1 << STREAM_SYSTEM);
+            (1 << STREAM_SYSTEM) |
+            (1 << STREAM_VOICE_CALL);
 
     /**
      * Event posted by AudioTrack and AudioRecord JNI (JNIDeviceCallback) when routing changes.

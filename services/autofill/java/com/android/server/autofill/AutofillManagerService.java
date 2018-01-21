@@ -44,6 +44,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
@@ -78,6 +79,7 @@ import com.android.server.autofill.ui.AutoFillUI;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -443,6 +445,18 @@ public final class AutofillManagerService extends SystemService {
         }
     }
 
+    // Called by Shell command.
+    public void getScore(@Nullable String algorithmName, @NonNull String value1,
+            @NonNull String value2, @NonNull RemoteCallback callback) {
+        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+
+        final FieldClassificationStrategy strategy =
+                new FieldClassificationStrategy(mContext, UserHandle.USER_CURRENT);
+
+        strategy.getScores(callback, algorithmName, null,
+                Arrays.asList(AutofillValue.forText(value1)), new String[] { value2 });
+    }
+
     private void setDebugLocked(boolean debug) {
         com.android.server.autofill.Helper.sDebug = debug;
         android.view.autofill.Helper.sDebug = debug;
@@ -518,6 +532,8 @@ public final class AutofillManagerService extends SystemService {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
                     service.removeClientLocked(client);
+                } else if (sVerbose) {
+                    Slog.v(TAG, "removeClient(): no service for " + userId);
                 }
             }
         }
@@ -574,6 +590,8 @@ public final class AutofillManagerService extends SystemService {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
                     return service.getFillEventHistory(getCallingUid());
+                } else if (sVerbose) {
+                    Slog.v(TAG, "getFillEventHistory(): no service for " + userId);
                 }
             }
 
@@ -588,6 +606,8 @@ public final class AutofillManagerService extends SystemService {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
                     return service.getUserData(getCallingUid());
+                } else if (sVerbose) {
+                    Slog.v(TAG, "getUserData(): no service for " + userId);
                 }
             }
 
@@ -602,6 +622,8 @@ public final class AutofillManagerService extends SystemService {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
                     service.setUserData(getCallingUid(), userData);
+                } else if (sVerbose) {
+                    Slog.v(TAG, "setUserData(): no service for " + userId);
                 }
             }
         }
@@ -614,6 +636,8 @@ public final class AutofillManagerService extends SystemService {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
                     return service.isFieldClassificationEnabled(getCallingUid());
+                } else if (sVerbose) {
+                    Slog.v(TAG, "isFieldClassificationEnabled(): no service for " + userId);
                 }
             }
 
@@ -628,24 +652,30 @@ public final class AutofillManagerService extends SystemService {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
                     return service.getDefaultFieldClassificationAlgorithm(getCallingUid());
-                }
+                } else {
+                    if (sVerbose) {
+                        Slog.v(TAG, "getDefaultFcAlgorithm(): no service for " + userId);
+                    }
+                    return null;
+               }
             }
-
-            return null;
         }
 
         @Override
-        public List<String> getAvailableFieldClassificationAlgorithms() throws RemoteException {
+        public String[] getAvailableFieldClassificationAlgorithms() throws RemoteException {
             final int userId = UserHandle.getCallingUserId();
 
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
                     return service.getAvailableFieldClassificationAlgorithms(getCallingUid());
+                } else {
+                    if (sVerbose) {
+                        Slog.v(TAG, "getAvailableFcAlgorithms(): no service for " + userId);
+                    }
+                    return null;
                 }
             }
-
-            return null;
         }
 
         @Override
@@ -656,6 +686,8 @@ public final class AutofillManagerService extends SystemService {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
                     return service.getServiceComponentName();
+                } else if (sVerbose) {
+                    Slog.v(TAG, "getAutofillServiceComponentName(): no service for " + userId);
                 }
             }
 
@@ -665,15 +697,17 @@ public final class AutofillManagerService extends SystemService {
         @Override
         public boolean restoreSession(int sessionId, IBinder activityToken, IBinder appCallback)
                 throws RemoteException {
+            final int userId = UserHandle.getCallingUserId();
             activityToken = Preconditions.checkNotNull(activityToken, "activityToken");
             appCallback = Preconditions.checkNotNull(appCallback, "appCallback");
 
             synchronized (mLock) {
-                final AutofillManagerServiceImpl service = mServicesCache.get(
-                        UserHandle.getCallingUserId());
+                final AutofillManagerServiceImpl service = mServicesCache.get(userId);
                 if (service != null) {
                     return service.restoreSession(sessionId, getCallingUid(), activityToken,
                             appCallback);
+                } else if (sVerbose) {
+                    Slog.v(TAG, "restoreSession(): no service for " + userId);
                 }
             }
 
@@ -688,6 +722,8 @@ public final class AutofillManagerService extends SystemService {
                 if (service != null) {
                     service.updateSessionLocked(sessionId, getCallingUid(), autoFillId, bounds,
                             value, action, flags);
+                } else if (sVerbose) {
+                    Slog.v(TAG, "updateSession(): no service for " + userId);
                 }
             }
         }
@@ -703,6 +739,8 @@ public final class AutofillManagerService extends SystemService {
                 if (service != null) {
                     restart = service.updateSessionLocked(sessionId, getCallingUid(), autoFillId,
                             bounds, value, action, flags);
+                } else if (sVerbose) {
+                    Slog.v(TAG, "updateOrRestartSession(): no service for " + userId);
                 }
             }
             if (restart) {
@@ -720,6 +758,8 @@ public final class AutofillManagerService extends SystemService {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
                     service.finishSessionLocked(sessionId, getCallingUid());
+                } else if (sVerbose) {
+                    Slog.v(TAG, "finishSession(): no service for " + userId);
                 }
             }
         }
@@ -730,6 +770,8 @@ public final class AutofillManagerService extends SystemService {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
                     service.cancelSessionLocked(sessionId, getCallingUid());
+                } else if (sVerbose) {
+                    Slog.v(TAG, "cancelSession(): no service for " + userId);
                 }
             }
         }
@@ -740,6 +782,8 @@ public final class AutofillManagerService extends SystemService {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
                     service.disableOwnedAutofillServicesLocked(Binder.getCallingUid());
+                } else if (sVerbose) {
+                    Slog.v(TAG, "cancelSession(): no service for " + userId);
                 }
             }
         }
@@ -755,8 +799,12 @@ public final class AutofillManagerService extends SystemService {
         public boolean isServiceEnabled(int userId, String packageName) {
             synchronized (mLock) {
                 final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
-                if (service == null) return false;
-                return Objects.equals(packageName, service.getServicePackageName());
+                if (service != null) {
+                    return Objects.equals(packageName, service.getServicePackageName());
+                } else if (sVerbose) {
+                    Slog.v(TAG, "isServiceEnabled(): no service for " + userId);
+                }
+                return false;
             }
         }
 

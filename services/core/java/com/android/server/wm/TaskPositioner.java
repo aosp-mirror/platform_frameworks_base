@@ -59,6 +59,8 @@ class TaskPositioner {
     private static final String TAG_LOCAL = "TaskPositioner";
     private static final String TAG = TAG_WITH_CLASS_NAME ? TAG_LOCAL : TAG_WM;
 
+    private static Factory sFactory;
+
     // The margin the pointer position has to be within the side of the screen to be
     // considered at the side of the screen.
     static final int SIDE_MARGIN_DIP = 100;
@@ -214,6 +216,7 @@ class TaskPositioner {
         }
     }
 
+    /** Use {@link #create(WindowManagerService)} instead **/
     TaskPositioner(WindowManagerService service) {
         mService = service;
     }
@@ -621,5 +624,23 @@ class TaskPositioner {
 
     public String toShortString() {
         return TAG;
+    }
+
+    static void setFactory(Factory factory) {
+        sFactory = factory;
+    }
+
+    static TaskPositioner create(WindowManagerService service) {
+        if (sFactory == null) {
+            sFactory = new Factory() {};
+        }
+
+        return sFactory.create(service);
+    }
+
+    interface Factory {
+        default TaskPositioner create(WindowManagerService service) {
+            return new TaskPositioner(service);
+        }
     }
 }

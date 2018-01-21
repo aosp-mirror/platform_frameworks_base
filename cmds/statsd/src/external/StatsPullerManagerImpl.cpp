@@ -23,7 +23,7 @@
 #include <climits>
 #include "CpuTimePerUidFreqPuller.h"
 #include "CpuTimePerUidPuller.h"
-#include "ResourcePowerManagerPuller.h"
+#include "SubsystemSleepStatePuller.h"
 #include "StatsCompanionServicePuller.h"
 #include "StatsPullerManagerImpl.h"
 #include "StatsService.h"
@@ -58,16 +58,14 @@ StatsPullerManagerImpl::StatsPullerManagerImpl()
     mPullers.insert({android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG,
                      make_shared<StatsCompanionServicePuller>(
                              android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG)});
-    mPullers.insert({android::util::PLATFORM_SLEEP_STATE,
-                     make_shared<ResourcePowerManagerPuller>(android::util::PLATFORM_SLEEP_STATE)});
-    mPullers.insert({android::util::SLEEP_STATE_VOTER,
-                     make_shared<ResourcePowerManagerPuller>(android::util::SLEEP_STATE_VOTER)});
     mPullers.insert(
             {android::util::SUBSYSTEM_SLEEP_STATE,
-             make_shared<ResourcePowerManagerPuller>(android::util::SUBSYSTEM_SLEEP_STATE)});
+             make_shared<SubsystemSleepStatePuller>()});
     mPullers.insert({android::util::CPU_TIME_PER_FREQ, make_shared<StatsCompanionServicePuller>(android::util::CPU_TIME_PER_FREQ)});
     mPullers.insert({android::util::CPU_TIME_PER_UID, make_shared<CpuTimePerUidPuller>()});
     mPullers.insert({android::util::CPU_TIME_PER_UID_FREQ, make_shared<CpuTimePerUidFreqPuller>()});
+    mPullers.insert({android::util::CPU_SUSPEND_TIME, make_shared<StatsCompanionServicePuller>(android::util::CPU_SUSPEND_TIME)});
+    mPullers.insert({android::util::CPU_IDLE_TIME, make_shared<StatsCompanionServicePuller>(android::util::CPU_IDLE_TIME)});
 
     mStatsCompanionService = StatsService::getStatsCompanionService();
 }

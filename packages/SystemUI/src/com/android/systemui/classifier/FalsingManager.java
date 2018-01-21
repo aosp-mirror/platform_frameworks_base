@@ -167,6 +167,9 @@ public class FalsingManager implements SensorEventListener {
         if (mDataCollector.isEnabledFull()) {
             registerSensors(COLLECTOR_SENSORS);
         }
+        if (mDataCollector.isEnabled()) {
+            mDataCollector.onFalsingSessionStarted();
+        }
     }
 
     private void registerSensors(int [] sensors) {

@@ -27,7 +27,7 @@ oneway interface IRecentsNonSystemUserCallbacks {
     void preloadRecents();
     void cancelPreloadingRecents();
     void showRecents(boolean triggeredFromAltTab, boolean draggingInRecents, boolean animate,
-            boolean reloadTasks, boolean fromHome, int recentsGrowTarget);
+            int recentsGrowTarget);
     void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
     void toggleRecents(int recentsGrowTarget);
     void onConfigurationChanged();

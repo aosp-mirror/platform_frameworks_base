@@ -1047,9 +1047,11 @@ public class AudioService extends IAudioService.Stub
 
     private void checkMuteAffectedStreams() {
         // any stream with a min level > 0 is not muteable by definition
+        // STREAM_VOICE_CALL can be muted by applications that has the the MODIFY_PHONE_STATE permission.
         for (int i = 0; i < mStreamStates.length; i++) {
             final VolumeStreamState vss = mStreamStates[i];
-            if (vss.mIndexMin > 0) {
+            if (vss.mIndexMin > 0 &&
+                vss.mStreamType != AudioSystem.STREAM_VOICE_CALL) {
                 mMuteAffectedStreams &= ~(1 << vss.mStreamType);
             }
         }
@@ -1412,6 +1414,18 @@ public class AudioService extends IAudioService.Stub
             return;
         }
 
+        // If adjust is mute and the stream is STREAM_VOICE_CALL, make sure
+        // that the calling app have the MODIFY_PHONE_STATE permission.
+        if (isMuteAdjust &&
+            streamType == AudioSystem.STREAM_VOICE_CALL &&
+            mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.MODIFY_PHONE_STATE)
+                    != PackageManager.PERMISSION_GRANTED) {
+            Log.w(TAG, "MODIFY_PHONE_STATE Permission Denial: adjustStreamVolume from pid="
+                    + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
+            return;
+        }
+
         // use stream type alias here so that streams with same alias have the same behavior,
         // including with regard to silent mode control (e.g the use of STREAM_RING below and in
         // checkForRingerModeChange() in place of STREAM_RING or STREAM_NOTIFICATION)
@@ -1710,6 +1724,15 @@ public class AudioService extends IAudioService.Stub
         if ((streamType == AudioManager.STREAM_ACCESSIBILITY) && !canChangeAccessibilityVolume()) {
             Log.w(TAG, "Trying to call setStreamVolume() for a11y without"
                     + " CHANGE_ACCESSIBILITY_VOLUME  callingPackage=" + callingPackage);
+            return;
+        }
+        if ((streamType == AudioManager.STREAM_VOICE_CALL) &&
+                (index == 0) &&
+                (mContext.checkCallingOrSelfPermission(
+                android.Manifest.permission.MODIFY_PHONE_STATE)
+                    != PackageManager.PERMISSION_GRANTED)) {
+            Log.w(TAG, "Trying to call setStreamVolume() for STREAM_VOICE_CALL and index 0 without"
+                    + " MODIFY_PHONE_STATE  callingPackage=" + callingPackage);
             return;
         }
         mVolumeLogger.log(new VolumeEvent(VolumeEvent.VOL_SET_STREAM_VOL, streamType,
@@ -4132,22 +4155,30 @@ public class AudioService extends IAudioService.Stub
 
     public int setBluetoothA2dpDeviceConnectionState(BluetoothDevice device, int state, int profile)
     {
+        return setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(
+                device, state, profile, false /* suppressNoisyIntent */);
+    }
+
+    public int setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(BluetoothDevice device,
+                int state, int profile, boolean suppressNoisyIntent)
+    {
         if (mAudioHandler.hasMessages(MSG_SET_A2DP_SINK_CONNECTION_STATE, device)) {
             return 0;
         }
         return setBluetoothA2dpDeviceConnectionStateInt(
-                device, state, profile, AudioSystem.DEVICE_NONE);
+                device, state, profile, suppressNoisyIntent, AudioSystem.DEVICE_NONE);
     }
 
     public int setBluetoothA2dpDeviceConnectionStateInt(
-            BluetoothDevice device, int state, int profile, int musicDevice)
+            BluetoothDevice device, int state, int profile, boolean suppressNoisyIntent,
+            int musicDevice)
     {
         int delay;
         if (profile != BluetoothProfile.A2DP && profile != BluetoothProfile.A2DP_SINK) {
             throw new IllegalArgumentException("invalid profile " + profile);
         }
         synchronized (mConnectedDevices) {
-            if (profile == BluetoothProfile.A2DP) {
+            if (profile == BluetoothProfile.A2DP && !suppressNoisyIntent) {
                 int intState = (state == BluetoothA2dp.STATE_CONNECTED) ? 1 : 0;
                 delay = checkSendBecomingNoisyIntent(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
                         intState, musicDevice);
@@ -4503,27 +4534,30 @@ public class AudioService extends IAudioService.Stub
             if (mStreamType == srcStream.mStreamType) {
                 return;
             }
-            synchronized (VolumeStreamState.class) {
-                int srcStreamType = srcStream.getStreamType();
-                // apply default device volume from source stream to all devices first in case
-                // some devices are present in this stream state but not in source stream state
-                int index = srcStream.getIndex(AudioSystem.DEVICE_OUT_DEFAULT);
-                index = rescaleIndex(index, srcStreamType, mStreamType);
-                for (int i = 0; i < mIndexMap.size(); i++) {
-                    mIndexMap.put(mIndexMap.keyAt(i), index);
-                }
-                // Now apply actual volume for devices in source stream state
-                SparseIntArray srcMap = srcStream.mIndexMap;
-                for (int i = 0; i < srcMap.size(); i++) {
-                    int device = srcMap.keyAt(i);
-                    index = srcMap.valueAt(i);
+            synchronized (mSettingsLock) {
+                synchronized (VolumeStreamState.class) {
+                    int srcStreamType = srcStream.getStreamType();
+                    // apply default device volume from source stream to all devices first in case
+                    // some devices are present in this stream state but not in source stream state
+                    int index = srcStream.getIndex(AudioSystem.DEVICE_OUT_DEFAULT);
                     index = rescaleIndex(index, srcStreamType, mStreamType);
+                    for (int i = 0; i < mIndexMap.size(); i++) {
+                        mIndexMap.put(mIndexMap.keyAt(i), index);
+                    }
+                    // Now apply actual volume for devices in source stream state
+                    SparseIntArray srcMap = srcStream.mIndexMap;
+                    for (int i = 0; i < srcMap.size(); i++) {
+                        int device = srcMap.keyAt(i);
+                        index = srcMap.valueAt(i);
+                        index = rescaleIndex(index, srcStreamType, mStreamType);
 
-                    setIndex(index, device, caller);
+                        setIndex(index, device, caller);
+                    }
                 }
             }
         }
 
+        @GuardedBy("mSettingsLock")
         public void setAllIndexesToMax() {
             synchronized (VolumeStreamState.class) {
                 for (int i = 0; i < mIndexMap.size(); i++) {
@@ -5397,7 +5431,7 @@ public class AudioService extends IAudioService.Stub
                    // consistent with audio policy manager state
                    setBluetoothA2dpDeviceConnectionStateInt(
                            btDevice, BluetoothA2dp.STATE_DISCONNECTED, BluetoothProfile.A2DP,
-                           musicDevice);
+                           false /* suppressNoisyIntent */, musicDevice);
                }
             }
         }

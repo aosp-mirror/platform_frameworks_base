@@ -34,6 +34,7 @@ import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.Build;
 import android.os.connectivity.CellularBatteryStats;
+import android.os.connectivity.GpsBatteryStats;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBatteryPropertiesRegistrar;
@@ -78,6 +79,7 @@ import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.location.gnssmetrics.GnssMetrics;
 import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
@@ -153,11 +155,11 @@ public class BatteryStatsImpl extends BatteryStats {
             MAX_HISTORY_BUFFER = 96*1024;  // 96KB
             MAX_MAX_HISTORY_BUFFER = 128*1024; // 128KB
         } else {
-            MAX_HISTORY_ITEMS = 2000;
-            MAX_MAX_HISTORY_ITEMS = 3000;
-            MAX_WAKELOCKS_PER_UID = 100;
-            MAX_HISTORY_BUFFER = 256*1024;  // 256KB
-            MAX_MAX_HISTORY_BUFFER = 320*1024;  // 256KB
+            MAX_HISTORY_ITEMS = 4000;
+            MAX_MAX_HISTORY_ITEMS = 6000;
+            MAX_WAKELOCKS_PER_UID = 200;
+            MAX_HISTORY_BUFFER = 512*1024;  // 512KB
+            MAX_MAX_HISTORY_BUFFER = 640*1024;  // 640KB
         }
     }
 
@@ -197,6 +199,12 @@ public class BatteryStatsImpl extends BatteryStats {
     @VisibleForTesting
     protected KernelUidCpuFreqTimeReader mKernelUidCpuFreqTimeReader =
             new KernelUidCpuFreqTimeReader();
+    @VisibleForTesting
+    protected KernelUidCpuActiveTimeReader mKernelUidCpuActiveTimeReader =
+            new KernelUidCpuActiveTimeReader();
+    @VisibleForTesting
+    protected KernelUidCpuClusterTimeReader mKernelUidCpuClusterTimeReader =
+            new KernelUidCpuClusterTimeReader();
     @VisibleForTesting
     protected KernelSingleUidTimeReader mKernelSingleUidTimeReader;
 
@@ -665,6 +673,10 @@ public class BatteryStatsImpl extends BatteryStats {
 
     int mCameraOnNesting;
     StopwatchTimer mCameraOnTimer;
+
+    int mGpsSignalQualityBin = -1;
+    final StopwatchTimer[] mGpsSignalQualityTimer =
+        new StopwatchTimer[GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS];
 
     int mPhoneSignalStrengthBin = -1;
     int mPhoneSignalStrengthBinRaw = -1;
@@ -3880,6 +3892,8 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         mKernelUidCpuTimeReader.removeUid(isolatedUid);
         mKernelUidCpuFreqTimeReader.removeUid(isolatedUid);
+        mKernelUidCpuActiveTimeReader.removeUid(isolatedUid);
+        mKernelUidCpuClusterTimeReader.removeUid(isolatedUid);
     }
 
     public int mapUid(int uid) {
@@ -4575,8 +4589,35 @@ public class BatteryStatsImpl extends BatteryStats {
             if (DEBUG_HISTORY) Slog.v(TAG, "Stop GPS to: "
                     + Integer.toHexString(mHistoryCur.states));
             addHistoryRecordLocked(elapsedRealtime, uptime);
+            stopAllGpsSignalQualityTimersLocked(-1);
+            mGpsSignalQualityBin = -1;
         }
         getUidStatsLocked(uid).noteStopGps(elapsedRealtime);
+    }
+
+    public void noteGpsSignalQualityLocked(int signalLevel) {
+        if (mGpsNesting == 0) {
+            return;
+        }
+        if (signalLevel < 0 || signalLevel >= GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS) {
+            stopAllGpsSignalQualityTimersLocked(-1);
+            return;
+        }
+        final long elapsedRealtime = mClocks.elapsedRealtime();
+        final long uptime = mClocks.uptimeMillis();
+        if (mGpsSignalQualityBin != signalLevel) {
+            if (mGpsSignalQualityBin >= 0) {
+                mGpsSignalQualityTimer[mGpsSignalQualityBin].stopRunningLocked(elapsedRealtime);
+            }
+            if(!mGpsSignalQualityTimer[signalLevel].isRunningLocked()) {
+                mGpsSignalQualityTimer[signalLevel].startRunningLocked(elapsedRealtime);
+            }
+            mHistoryCur.states2 = (mHistoryCur.states2&~HistoryItem.STATE2_GPS_SIGNAL_QUALITY_MASK)
+                    | (signalLevel << HistoryItem.STATE2_GPS_SIGNAL_QUALITY_SHIFT);
+            addHistoryRecordLocked(elapsedRealtime, uptime);
+            mGpsSignalQualityBin = signalLevel;
+        }
+        return;
     }
 
     public void noteScreenStateLocked(int state) {
@@ -4910,6 +4951,18 @@ public class BatteryStatsImpl extends BatteryStats {
             mDailyPackageChanges = new ArrayList<>();
         }
         mDailyPackageChanges.add(pc);
+    }
+
+    void stopAllGpsSignalQualityTimersLocked(int except) {
+        final long elapsedRealtime = mClocks.elapsedRealtime();
+        for (int i = 0; i < GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
+            if (i == except) {
+                continue;
+            }
+            while (mGpsSignalQualityTimer[i].isRunningLocked()) {
+                mGpsSignalQualityTimer[i].stopRunningLocked(elapsedRealtime);
+            }
+        }
     }
 
     public void notePhoneOnLocked() {
@@ -6123,6 +6176,20 @@ public class BatteryStatsImpl extends BatteryStats {
         return val;
     }
 
+    @Override public long getGpsSignalQualityTime(int strengthBin,
+        long elapsedRealtimeUs, int which) {
+        if (strengthBin < 0 || strengthBin >= GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS) {
+            return 0;
+        }
+        return mGpsSignalQualityTimer[strengthBin].getTotalTimeLocked(
+            elapsedRealtimeUs, which);
+    }
+
+    @Override public long getGpsBatteryDrainMaMs() {
+        //TODO: Add GPS power computation (b/67213967)
+        return 0;
+    }
+
     @Override public long getPhoneOnTime(long elapsedRealtimeUs, int which) {
         return mPhoneOnTimer.getTotalTimeLocked(elapsedRealtimeUs, which);
     }
@@ -6479,9 +6546,11 @@ public class BatteryStatsImpl extends BatteryStats {
         LongSamplingCounter mUserCpuTime;
         LongSamplingCounter mSystemCpuTime;
         LongSamplingCounter[][] mCpuClusterSpeedTimesUs;
+        LongSamplingCounter mCpuActiveTimeMs;
 
         LongSamplingCounterArray mCpuFreqTimeMs;
         LongSamplingCounterArray mScreenOffCpuFreqTimeMs;
+        LongSamplingCounterArray mCpuClusterTimesMs;
 
         LongSamplingCounterArray[] mProcStateTimeMs;
         LongSamplingCounterArray[] mProcStateScreenOffTimeMs;
@@ -6551,6 +6620,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
             mUserCpuTime = new LongSamplingCounter(mBsi.mOnBatteryTimeBase);
             mSystemCpuTime = new LongSamplingCounter(mBsi.mOnBatteryTimeBase);
+            mCpuActiveTimeMs = new LongSamplingCounter(mBsi.mOnBatteryTimeBase);
+            mCpuClusterTimesMs = new LongSamplingCounterArray(mBsi.mOnBatteryTimeBase);
 
             mWakelockStats = mBsi.new OverflowArrayMap<Wakelock>(uid) {
                 @Override public Wakelock instantiateObject() {
@@ -6596,6 +6667,17 @@ public class BatteryStatsImpl extends BatteryStats {
         public long[] getScreenOffCpuFreqTimes(int which) {
             return nullIfAllZeros(mScreenOffCpuFreqTimeMs, which);
         }
+
+        @Override
+        public long getCpuActiveTime() {
+            return mCpuActiveTimeMs.getCountLocked(STATS_SINCE_CHARGED);
+        }
+
+        @Override
+        public long[] getCpuClusterTimes() {
+            return nullIfAllZeros(mCpuClusterTimesMs, STATS_SINCE_CHARGED);
+        }
+
 
         @Override
         public long[] getCpuFreqTimes(int which, int procState) {
@@ -7660,6 +7742,9 @@ public class BatteryStatsImpl extends BatteryStats {
                 mScreenOffCpuFreqTimeMs.reset(false);
             }
 
+            mCpuActiveTimeMs.reset(false);
+            mCpuClusterTimesMs.reset(false);
+
             if (mProcStateTimeMs != null) {
                 for (LongSamplingCounterArray counters : mProcStateTimeMs) {
                     if (counters != null) {
@@ -7864,6 +7949,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 if (mScreenOffCpuFreqTimeMs != null) {
                     mScreenOffCpuFreqTimeMs.detach();
                 }
+                mCpuActiveTimeMs.detach();
+                mCpuClusterTimesMs.detach();
 
                 if (mProcStateTimeMs != null) {
                     for (LongSamplingCounterArray counters : mProcStateTimeMs) {
@@ -8139,6 +8226,10 @@ public class BatteryStatsImpl extends BatteryStats {
 
             LongSamplingCounterArray.writeToParcel(out, mCpuFreqTimeMs);
             LongSamplingCounterArray.writeToParcel(out, mScreenOffCpuFreqTimeMs);
+
+            mCpuActiveTimeMs.writeToParcel(out);
+            mCpuClusterTimesMs.writeToParcel(out);
+
             if (mProcStateTimeMs != null) {
                 out.writeInt(mProcStateTimeMs.length);
                 for (LongSamplingCounterArray counters : mProcStateTimeMs) {
@@ -8455,6 +8546,9 @@ public class BatteryStatsImpl extends BatteryStats {
             mCpuFreqTimeMs = LongSamplingCounterArray.readFromParcel(in, mBsi.mOnBatteryTimeBase);
             mScreenOffCpuFreqTimeMs = LongSamplingCounterArray.readFromParcel(
                     in, mBsi.mOnBatteryScreenOffTimeBase);
+
+            mCpuActiveTimeMs = new LongSamplingCounter(mBsi.mOnBatteryTimeBase, in);
+            mCpuClusterTimesMs = new LongSamplingCounterArray(mBsi.mOnBatteryTimeBase, in);
 
             int length = in.readInt();
             if (length == NUM_PROCESS_STATE) {
@@ -9822,6 +9916,10 @@ public class BatteryStatsImpl extends BatteryStats {
             mWifiSignalStrengthsTimer[i] = new StopwatchTimer(mClocks, null, -800-i, null,
                     mOnBatteryTimeBase);
         }
+        for (int i=0; i< GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
+            mGpsSignalQualityTimer[i] = new StopwatchTimer(mClocks, null, -1000-i, null,
+                mOnBatteryTimeBase);
+        }
         mAudioOnTimer = new StopwatchTimer(mClocks, null, -7, null, mOnBatteryTimeBase);
         mVideoOnTimer = new StopwatchTimer(mClocks, null, -8, null, mOnBatteryTimeBase);
         mFlashlightOnTimer = new StopwatchTimer(mClocks, null, -9, null, mOnBatteryTimeBase);
@@ -10511,6 +10609,9 @@ public class BatteryStatsImpl extends BatteryStats {
             mWifiSignalStrengthsTimer[i].reset(false);
         }
         mWifiMulticastWakelockTimer.reset(false);
+        for (int i=0; i< GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
+            mGpsSignalQualityTimer[i].reset(false);
+        }
         mWifiActivity.reset(false);
         mBluetoothActivity.reset(false);
         mModemActivity.reset(false);
@@ -11437,6 +11538,8 @@ public class BatteryStatsImpl extends BatteryStats {
         if (!mOnBatteryInternal) {
             mKernelUidCpuTimeReader.readDelta(null);
             mKernelUidCpuFreqTimeReader.readDelta(null);
+            mKernelUidCpuActiveTimeReader.readDelta(null);
+            mKernelUidCpuClusterTimeReader.readDelta(null);
             for (int cluster = mKernelCpuSpeedReaders.length - 1; cluster >= 0; --cluster) {
                 mKernelCpuSpeedReaders[cluster].readDelta();
             }
@@ -11453,6 +11556,8 @@ public class BatteryStatsImpl extends BatteryStats {
             updateClusterSpeedTimes(updatedUids);
         }
         readKernelUidCpuFreqTimesLocked(partialTimersToConsider);
+        readKernelUidCpuActiveTimesLocked();
+        readKernelUidCpuClusterTimesLocked();
     }
 
     /**
@@ -11761,6 +11866,64 @@ public class BatteryStatsImpl extends BatteryStats {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Take a snapshot of the cpu active times spent by each uid and update the corresponding
+     * counters.
+     */
+    @VisibleForTesting
+    public void readKernelUidCpuActiveTimesLocked() {
+        final long startTimeMs = mClocks.uptimeMillis();
+        mKernelUidCpuActiveTimeReader.readDelta((uid, cpuActiveTimesUs) -> {
+            uid = mapUid(uid);
+            if (Process.isIsolated(uid)) {
+                mKernelUidCpuActiveTimeReader.removeUid(uid);
+                Slog.w(TAG, "Got active times for an isolated uid with no mapping: " + uid);
+                return;
+            }
+            if (!mUserInfoProvider.exists(UserHandle.getUserId(uid))) {
+                Slog.w(TAG, "Got active times for an invalid user's uid " + uid);
+                mKernelUidCpuActiveTimeReader.removeUid(uid);
+                return;
+            }
+            final Uid u = getUidStatsLocked(uid);
+            u.mCpuActiveTimeMs.addCountLocked(cpuActiveTimesUs);
+        });
+
+        final long elapsedTimeMs = mClocks.uptimeMillis() - startTimeMs;
+        if (DEBUG_ENERGY_CPU || elapsedTimeMs >= 100) {
+            Slog.d(TAG, "Reading cpu active times took " + elapsedTimeMs + "ms");
+        }
+    }
+
+    /**
+     * Take a snapshot of the cpu cluster times spent by each uid and update the corresponding
+     * counters.
+     */
+    @VisibleForTesting
+    public void readKernelUidCpuClusterTimesLocked() {
+        final long startTimeMs = mClocks.uptimeMillis();
+        mKernelUidCpuClusterTimeReader.readDelta((uid, cpuClusterTimesUs) -> {
+            uid = mapUid(uid);
+            if (Process.isIsolated(uid)) {
+                mKernelUidCpuClusterTimeReader.removeUid(uid);
+                Slog.w(TAG, "Got cluster times for an isolated uid with no mapping: " + uid);
+                return;
+            }
+            if (!mUserInfoProvider.exists(UserHandle.getUserId(uid))) {
+                Slog.w(TAG, "Got cluster times for an invalid user's uid " + uid);
+                mKernelUidCpuClusterTimeReader.removeUid(uid);
+                return;
+            }
+            final Uid u = getUidStatsLocked(uid);
+            u.mCpuClusterTimesMs.addCountLocked(cpuClusterTimesUs);
+        });
+
+        final long elapsedTimeMs = mClocks.uptimeMillis() - startTimeMs;
+        if (DEBUG_ENERGY_CPU || elapsedTimeMs >= 100) {
+            Slog.d(TAG, "Reading cpu cluster times took " + elapsedTimeMs + "ms");
         }
     }
 
@@ -12364,6 +12527,21 @@ public class BatteryStatsImpl extends BatteryStats {
         s.setTimeInRatMs(timeInRatMs);
         s.setTimeInRxSignalStrengthLevelMs(timeInRxSignalStrengthLevelMs);
         s.setTxTimeMs(txTimeMs);
+        return s;
+    }
+
+    /*@hide */
+    public GpsBatteryStats getGpsBatteryStats() {
+        GpsBatteryStats s = new GpsBatteryStats();
+        final int which = STATS_SINCE_CHARGED;
+        final long rawRealTime = SystemClock.elapsedRealtime() * 1000;
+        s.setLoggingDurationMs(computeBatteryRealtime(rawRealTime, which) / 1000);
+        s.setEnergyConsumedMaMs(getGpsBatteryDrainMaMs());
+        long[] time = new long[GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS];
+        for (int i=0; i<time.length; i++) {
+            time[i] = getGpsSignalQualityTime(i, rawRealTime, which) / 1000;
+        }
+        s.setTimeInGpsSignalQualityLevel(time);
         return s;
     }
 
@@ -13044,6 +13222,9 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
             mWifiSignalStrengthsTimer[i].readSummaryFromParcelLocked(in);
         }
+        for (int i=0; i<GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
+            mGpsSignalQualityTimer[i].readSummaryFromParcelLocked(in);
+        }
         mWifiActivity.readSummaryFromParcel(in);
         mBluetoothActivity.readSummaryFromParcel(in);
         mModemActivity.readSummaryFromParcel(in);
@@ -13249,6 +13430,10 @@ public class BatteryStatsImpl extends BatteryStats {
                     in, mOnBatteryTimeBase);
             u.mScreenOffCpuFreqTimeMs = LongSamplingCounterArray.readSummaryFromParcelLocked(
                     in, mOnBatteryScreenOffTimeBase);
+
+            u.mCpuActiveTimeMs.readSummaryFromParcelLocked(in);
+            u.mCpuClusterTimesMs.readSummaryFromParcelLocked(in);
+
             int length = in.readInt();
             if (length == Uid.NUM_PROCESS_STATE) {
                 u.mProcStateTimeMs = new LongSamplingCounterArray[length];
@@ -13481,6 +13666,9 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
             mWifiSignalStrengthsTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
+        }
+        for (int i=0; i< GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
+            mGpsSignalQualityTimer[i].writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         }
         mWifiActivity.writeSummaryToParcel(out);
         mBluetoothActivity.writeSummaryToParcel(out);
@@ -13725,6 +13913,9 @@ public class BatteryStatsImpl extends BatteryStats {
             LongSamplingCounterArray.writeSummaryToParcelLocked(out, u.mCpuFreqTimeMs);
             LongSamplingCounterArray.writeSummaryToParcelLocked(out, u.mScreenOffCpuFreqTimeMs);
 
+            u.mCpuActiveTimeMs.writeSummaryFromParcelLocked(out);
+            u.mCpuClusterTimesMs.writeSummaryToParcelLocked(out);
+
             if (u.mProcStateTimeMs != null) {
                 out.writeInt(u.mProcStateTimeMs.length);
                 for (LongSamplingCounterArray counters : u.mProcStateTimeMs) {
@@ -13954,7 +14145,10 @@ public class BatteryStatsImpl extends BatteryStats {
             mWifiSignalStrengthsTimer[i] = new StopwatchTimer(mClocks, null, -800-i,
                     null, mOnBatteryTimeBase, in);
         }
-
+        for (int i=0; i<GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
+            mGpsSignalQualityTimer[i] = new StopwatchTimer(mClocks, null, -1000-i,
+                null, mOnBatteryTimeBase, in);
+        }
         mWifiActivity = new ControllerActivityCounterImpl(mOnBatteryTimeBase,
                 NUM_WIFI_TX_LEVELS, in);
         mBluetoothActivity = new ControllerActivityCounterImpl(mOnBatteryTimeBase,
@@ -14154,6 +14348,9 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
             mWifiSignalStrengthsTimer[i].writeToParcel(out, uSecRealtime);
         }
+        for (int i=0; i< GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
+            mGpsSignalQualityTimer[i].writeToParcel(out, uSecRealtime);
+        }
         mWifiActivity.writeToParcel(out, 0);
         mBluetoothActivity.writeToParcel(out, 0);
         mModemActivity.writeToParcel(out, 0);
@@ -14347,6 +14544,10 @@ public class BatteryStatsImpl extends BatteryStats {
             for (int i=0; i<NUM_WIFI_SIGNAL_STRENGTH_BINS; i++) {
                 pr.println("*** Wifi signal strength #" + i + ":");
                 mWifiSignalStrengthsTimer[i].logState(pr, "  ");
+            }
+            for (int i=0; i<GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
+                pr.println("*** GPS signal quality #" + i + ":");
+                mGpsSignalQualityTimer[i].logState(pr, "  ");
             }
             pr.println("*** Flashlight timer:");
             mFlashlightOnTimer.logState(pr, "  ");

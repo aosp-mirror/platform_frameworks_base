@@ -254,6 +254,111 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeXml) {
   EXPECT_THAT(child_text->text, StrEq("woah there"));
 }
 
+TEST(ProtoSerializeTest, SerializeAndDeserializePrimitives) {
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .AddValue("android:bool/boolean_true",
+                    test::BuildPrimitive(android::Res_value::TYPE_INT_BOOLEAN, true))
+          .AddValue("android:bool/boolean_false",
+                    test::BuildPrimitive(android::Res_value::TYPE_INT_BOOLEAN, false))
+          .AddValue("android:color/color_rgb8", ResourceUtils::TryParseColor("#AABBCC"))
+          .AddValue("android:color/color_argb8", ResourceUtils::TryParseColor("#11223344"))
+          .AddValue("android:color/color_rgb4", ResourceUtils::TryParseColor("#DEF"))
+          .AddValue("android:color/color_argb4", ResourceUtils::TryParseColor("#5678"))
+          .AddValue("android:integer/integer_444", ResourceUtils::TryParseInt("444"))
+          .AddValue("android:integer/integer_neg_333", ResourceUtils::TryParseInt("-333"))
+          .AddValue("android:integer/hex_int_abcd", ResourceUtils::TryParseInt("0xABCD"))
+          .AddValue("android:dimen/dimen_1.39mm", ResourceUtils::TryParseFloat("1.39mm"))
+          .AddValue("android:fraction/fraction_27", ResourceUtils::TryParseFloat("27%"))
+          .AddValue("android:integer/null", ResourceUtils::MakeEmpty())
+          .Build();
+
+  pb::ResourceTable pb_table;
+  SerializeTableToPb(*table, &pb_table);
+
+  test::TestFile file_a("res/layout/main.xml");
+  MockFileCollection files;
+  EXPECT_CALL(files, FindFile(Eq("res/layout/main.xml")))
+      .WillRepeatedly(::testing::Return(&file_a));
+
+  ResourceTable new_table;
+  std::string error;
+  ASSERT_TRUE(DeserializeTableFromPb(pb_table, &files, &new_table, &error));
+  EXPECT_THAT(error, IsEmpty());
+
+  BinaryPrimitive* bp = test::GetValueForConfigAndProduct<BinaryPrimitive>(
+      &new_table, "android:bool/boolean_true", ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(bp, NotNull());
+  EXPECT_THAT(bp->value.dataType, Eq(android::Res_value::TYPE_INT_BOOLEAN));
+  EXPECT_THAT(bp->value.data, Eq(ResourceUtils::TryParseBool("true")->value.data));
+
+  bp = test::GetValueForConfigAndProduct<BinaryPrimitive>(&new_table, "android:bool/boolean_false",
+                                                          ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(bp, NotNull());
+  EXPECT_THAT(bp->value.dataType, Eq(android::Res_value::TYPE_INT_BOOLEAN));
+  EXPECT_THAT(bp->value.data, Eq(ResourceUtils::TryParseBool("false")->value.data));
+
+  bp = test::GetValueForConfigAndProduct<BinaryPrimitive>(&new_table, "android:color/color_rgb8",
+                                                          ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(bp, NotNull());
+  EXPECT_THAT(bp->value.dataType, Eq(android::Res_value::TYPE_INT_COLOR_RGB8));
+  EXPECT_THAT(bp->value.data, Eq(ResourceUtils::TryParseColor("#AABBCC")->value.data));
+
+  bp = test::GetValueForConfigAndProduct<BinaryPrimitive>(&new_table, "android:color/color_argb8",
+                                                          ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(bp, NotNull());
+  EXPECT_THAT(bp->value.dataType, Eq(android::Res_value::TYPE_INT_COLOR_ARGB8));
+  EXPECT_THAT(bp->value.data, Eq(ResourceUtils::TryParseColor("#11223344")->value.data));
+
+  bp = test::GetValueForConfigAndProduct<BinaryPrimitive>(&new_table, "android:color/color_rgb4",
+                                                          ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(bp, NotNull());
+  EXPECT_THAT(bp->value.dataType, Eq(android::Res_value::TYPE_INT_COLOR_RGB4));
+  EXPECT_THAT(bp->value.data, Eq(ResourceUtils::TryParseColor("#DEF")->value.data));
+
+  bp = test::GetValueForConfigAndProduct<BinaryPrimitive>(&new_table, "android:color/color_argb4",
+                                                          ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(bp, NotNull());
+  EXPECT_THAT(bp->value.dataType, Eq(android::Res_value::TYPE_INT_COLOR_ARGB4));
+  EXPECT_THAT(bp->value.data, Eq(ResourceUtils::TryParseColor("#5678")->value.data));
+
+  bp = test::GetValueForConfigAndProduct<BinaryPrimitive>(&new_table, "android:integer/integer_444",
+                                                          ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(bp, NotNull());
+  EXPECT_THAT(bp->value.dataType, Eq(android::Res_value::TYPE_INT_DEC));
+  EXPECT_THAT(bp->value.data, Eq(ResourceUtils::TryParseInt("444")->value.data));
+
+  bp = test::GetValueForConfigAndProduct<BinaryPrimitive>(
+      &new_table, "android:integer/integer_neg_333", ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(bp, NotNull());
+  EXPECT_THAT(bp->value.dataType, Eq(android::Res_value::TYPE_INT_DEC));
+  EXPECT_THAT(bp->value.data, Eq(ResourceUtils::TryParseInt("-333")->value.data));
+
+  bp = test::GetValueForConfigAndProduct<BinaryPrimitive>(
+      &new_table, "android:integer/hex_int_abcd", ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(bp, NotNull());
+  EXPECT_THAT(bp->value.dataType, Eq(android::Res_value::TYPE_INT_HEX));
+  EXPECT_THAT(bp->value.data, Eq(ResourceUtils::TryParseInt("0xABCD")->value.data));
+
+  bp = test::GetValueForConfigAndProduct<BinaryPrimitive>(&new_table, "android:dimen/dimen_1.39mm",
+                                                          ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(bp, NotNull());
+  EXPECT_THAT(bp->value.dataType, Eq(android::Res_value::TYPE_DIMENSION));
+  EXPECT_THAT(bp->value.data, Eq(ResourceUtils::TryParseFloat("1.39mm")->value.data));
+
+  bp = test::GetValueForConfigAndProduct<BinaryPrimitive>(
+      &new_table, "android:fraction/fraction_27", ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(bp, NotNull());
+  EXPECT_THAT(bp->value.dataType, Eq(android::Res_value::TYPE_FRACTION));
+  EXPECT_THAT(bp->value.data, Eq(ResourceUtils::TryParseFloat("27%")->value.data));
+
+  bp = test::GetValueForConfigAndProduct<BinaryPrimitive>(&new_table, "android:integer/null",
+                                                          ConfigDescription::DefaultConfig(), "");
+  ASSERT_THAT(bp, NotNull());
+  EXPECT_THAT(bp->value.dataType, Eq(android::Res_value::TYPE_NULL));
+  EXPECT_THAT(bp->value.data, Eq(ResourceUtils::MakeEmpty()->value.data));
+}
+
 static void ExpectConfigSerializes(const StringPiece& config_str) {
   const ConfigDescription expected_config = test::ParseConfigOrDie(config_str);
   pb::Configuration pb_config;

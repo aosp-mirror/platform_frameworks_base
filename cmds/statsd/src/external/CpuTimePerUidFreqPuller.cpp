@@ -34,7 +34,7 @@ namespace android {
 namespace os {
 namespace statsd {
 
-static const string sProcFile = "/proc/uid_cputime/show_uid_stat";
+static const string sProcFile = "/proc/uid_time_in_state";
 static const int kLineBufferSize = 1024;
 
 /**

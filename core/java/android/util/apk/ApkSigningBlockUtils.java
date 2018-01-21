@@ -306,6 +306,26 @@ final class ApkSigningBlockUtils {
     }
 
     /**
+     * Generates the fsverity header and hash tree to be used by kernel for the given apk. This
+     * method does not check whether the root hash exists in the Signing Block or not.
+     *
+     * <p>The output is stored in the {@link ByteBuffer} created by the given {@link
+     * ByteBufferFactory}.
+     *
+     * @return the root hash of the generated hash tree.
+     */
+    public static byte[] generateApkVerity(String apkPath, ByteBufferFactory bufferFactory,
+            SignatureInfo signatureInfo)
+            throws IOException, SignatureNotFoundException, SecurityException, DigestException,
+                   NoSuchAlgorithmException {
+        try (RandomAccessFile apk = new RandomAccessFile(apkPath, "r")) {
+            ApkVerityBuilder.ApkVerityResult result = ApkVerityBuilder.generateApkVerity(apk,
+                    signatureInfo, bufferFactory);
+            return result.rootHash;
+        }
+    }
+
+    /**
      * Returns the ZIP End of Central Directory (EoCD) and its offset in the file.
      *
      * @throws IOException if an I/O error occurs while reading the file.

@@ -1489,19 +1489,21 @@ public class NotificationContentView extends FrameLayout {
         return false;
     }
 
-    public boolean shouldClipToRounding() {
-        boolean needsPaddings = shouldClipToRounding(getVisibleType());
+    public boolean shouldClipToRounding(boolean topRounded, boolean bottomRounded) {
+        boolean needsPaddings = shouldClipToRounding(getVisibleType(), topRounded, bottomRounded);
         if (mUserExpanding) {
-             needsPaddings |= shouldClipToRounding(mTransformationStartVisibleType);
+             needsPaddings |= shouldClipToRounding(mTransformationStartVisibleType, topRounded,
+                     bottomRounded);
         }
         return needsPaddings;
     }
 
-    private boolean shouldClipToRounding(int visibleType) {
+    private boolean shouldClipToRounding(int visibleType, boolean topRounded,
+            boolean bottomRounded) {
         NotificationViewWrapper visibleWrapper = getVisibleWrapper(visibleType);
         if (visibleWrapper == null) {
             return false;
         }
-        return visibleWrapper.shouldClipToRounding();
+        return visibleWrapper.shouldClipToRounding(topRounded, bottomRounded);
     }
 }

@@ -436,8 +436,51 @@ class ValueSerializer : public ConstValueVisitor {
     prim->Flatten(&val);
 
     pb::Primitive* pb_prim = out_value_->mutable_item()->mutable_prim();
-    pb_prim->set_type(val.dataType);
-    pb_prim->set_data(val.data);
+
+    switch (val.dataType) {
+      case android::Res_value::TYPE_NULL: {
+        if (val.data == android::Res_value::DATA_NULL_UNDEFINED) {
+          pb_prim->set_allocated_null_value(new pb::Primitive_NullType());
+        } else if (val.data == android::Res_value::DATA_NULL_EMPTY) {
+          pb_prim->set_allocated_empty_value(new pb::Primitive_EmptyType());
+        } else {
+          LOG(FATAL) << "Unexpected data value for TYPE_NULL BinaryPrimitive: " << val.data;
+        }
+      } break;
+      case android::Res_value::TYPE_FLOAT: {
+        pb_prim->set_float_value(*(float*)&val.data);
+      } break;
+      case android::Res_value::TYPE_DIMENSION: {
+        pb_prim->set_dimension_value(*(float*)&val.data);
+      } break;
+      case android::Res_value::TYPE_FRACTION: {
+        pb_prim->set_fraction_value(*(float*)&val.data);
+      } break;
+      case android::Res_value::TYPE_INT_DEC: {
+        pb_prim->set_int_decimal_value(static_cast<int32_t>(val.data));
+      } break;
+      case android::Res_value::TYPE_INT_HEX: {
+        pb_prim->set_int_hexidecimal_value(val.data);
+      } break;
+      case android::Res_value::TYPE_INT_BOOLEAN: {
+        pb_prim->set_boolean_value(static_cast<bool>(val.data));
+      } break;
+      case android::Res_value::TYPE_INT_COLOR_ARGB8: {
+        pb_prim->set_color_argb8_value(val.data);
+      } break;
+      case android::Res_value::TYPE_INT_COLOR_RGB8: {
+        pb_prim->set_color_rgb8_value(val.data);
+      } break;
+      case android::Res_value::TYPE_INT_COLOR_ARGB4: {
+        pb_prim->set_color_argb4_value(val.data);
+      } break;
+      case android::Res_value::TYPE_INT_COLOR_RGB4: {
+        pb_prim->set_color_rgb4_value(val.data);
+      } break;
+      default:
+        LOG(FATAL) << "Unexpected BinaryPrimitive type: " << val.dataType;
+        break;
+    }
   }
 
   void Visit(const Attribute* attr) override {

@@ -54,8 +54,9 @@ const int FIELD_ID_VALUE_METRICS = 7;
 // for ValueMetricDataWrapper
 const int FIELD_ID_DATA = 1;
 // for ValueMetricData
-const int FIELD_ID_DIMENSION = 1;
-const int FIELD_ID_BUCKET_INFO = 2;
+const int FIELD_ID_DIMENSION_IN_WHAT = 1;
+const int FIELD_ID_DIMENSION_IN_CONDITION = 2;
+const int FIELD_ID_BUCKET_INFO = 3;
 // for ValueBucketInfo
 const int FIELD_ID_START_BUCKET_NANOS = 1;
 const int FIELD_ID_END_BUCKET_NANOS = 2;
@@ -80,7 +81,7 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
     }
 
     mBucketSizeNs = bucketSizeMills * 1000000;
-    mDimensions = metric.dimensions();
+    mDimensions = metric.dimensions_in_what();
 
     if (metric.links().size() > 0) {
         mConditionLinks.insert(mConditionLinks.begin(), metric.links().begin(),
@@ -123,7 +124,7 @@ void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs, StatsLog
     auto value_metrics = report->mutable_value_metrics();
     for (const auto& pair : mPastBuckets) {
         ValueMetricData* metricData = value_metrics->add_data();
-        *metricData->mutable_dimension() = pair.first.getDimensionsValue();
+        *metricData->mutable_dimensions_in_what() = pair.first.getDimensionsValue();
         for (const auto& bucket : pair.second) {
             ValueBucketInfo* bucketInfo = metricData->add_bucket_info();
             bucketInfo->set_start_bucket_nanos(bucket.mBucketStartNs);
@@ -149,7 +150,7 @@ void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
 
         // First fill dimension.
         long long dimensionToken = protoOutput->start(
-                FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DIMENSION);
+            FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_WHAT);
         writeDimensionsValueProtoToStream(hashableKey.getDimensionsValue(), protoOutput);
         protoOutput->end(dimensionToken);
 
@@ -284,8 +285,15 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
             interval.start = value;
             interval.startUpdated = true;
         } else {
+            // Generally we expect value to be monotonically increasing.
+            // If not, there was a reset event. We take the absolute value as
+            // diff in this case.
             if (interval.startUpdated) {
-                interval.sum += (value - interval.start);
+                if (value > interval.start) {
+                    interval.sum += (value - interval.start);
+                } else {
+                    interval.sum += value;
+                }
                 interval.startUpdated = false;
             } else {
                 VLOG("No start for matching end %ld", value);

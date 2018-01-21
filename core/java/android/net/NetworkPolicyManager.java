@@ -113,6 +113,9 @@ public class NetworkPolicyManager {
      */
     public static final String EXTRA_NETWORK_TEMPLATE = "android.net.NETWORK_TEMPLATE";
 
+    public static final int OVERRIDE_UNMETERED = 1 << 0;
+    public static final int OVERRIDE_CONGESTED = 1 << 1;
+
     private final Context mContext;
     private INetworkPolicyManager mService;
 
@@ -346,5 +349,14 @@ public class NetworkPolicyManager {
 
     public static String resolveNetworkId(String ssid) {
         return WifiInfo.removeDoubleQuotes(ssid);
+    }
+
+    /** {@hide} */
+    public static class Listener extends INetworkPolicyListener.Stub {
+        @Override public void onUidRulesChanged(int uid, int uidRules) { }
+        @Override public void onMeteredIfacesChanged(String[] meteredIfaces) { }
+        @Override public void onRestrictBackgroundChanged(boolean restrictBackground) { }
+        @Override public void onUidPoliciesChanged(int uid, int uidPolicies) { }
+        @Override public void onSubscriptionOverride(int subId, int overrideMask, int overrideValue) { }
     }
 }

@@ -33,7 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"បន្ត"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"ការ​ជូន​ដំណឹង"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"ជិត​អស់​ថ្ម​ហើយ"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"កម្រិត​ថ្ម​នៅ​សល់​តិច។ សូមបើក​កម្មវិធីសន្សំថ្ម"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"នៅ​សល់ <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"នៅសល់ <xliff:g id="PERCENTAGE">%s</xliff:g> អាច​ប្រើ​បាន​ប្រហែល <xliff:g id="TIME">%s</xliff:g> ទៀត​ផ្អែកលើ​ការប្រើប្រាស់​របស់អ្នក"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"នៅសល់ <xliff:g id="PERCENTAGE">%s</xliff:g> អាច​ប្រើ​បាន​ប្រហែល <xliff:g id="TIME">%s</xliff:g> ទៀត"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"នៅ​សល់ <xliff:g id="PERCENTAGE">%s</xliff:g> ។ កម្មវិធី​សន្សំ​ថ្ម​បានបើក។"</string>
     <string name="invalid_charger" msgid="4549105996740522523">"មិន​គាំទ្រ​ការ​បញ្ចូល​តាម​យូអេសប៊ី។\nប្រើ​តែ​ឧបករណ៍​បញ្ចូល​ថ្ម​ដែល​បាន​ផ្ដល់។"</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"មិន​គាំទ្រ​ការ​បញ្ចូល​ថ្ម​តាម​យូអេសប៊ី​ទេ។"</string>
@@ -67,14 +70,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"អ្នកប្រើ​ដែលបច្ចុប្បន្ន​បានចូលគណនី​នៅលើឧបករណ៍នេះ​មិនអាចបើកការកែកំហុស USB បានទេ។ ដើម្បីប្រើមុខងារនេះ សូមប្តូរទៅអ្នកប្រើចម្បង។"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"ពង្រីក​​ដើម្បី​ឲ្យ​ពេញ​អេក្រង់"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"ទាញ​ដើម្បី​ឲ្យ​ពេញ​អេក្រង់"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"រូបថតអេក្រង់"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"កំពុង​រក្សាទុក​រូបថត​អេក្រង់…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"កំពុង​រក្សាទុក​រូបថត​អេក្រង់..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"រូបថត​អេក្រង់​កំពុង​ត្រូវ​បាន​រក្សាទុក។"</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"បាន​ចាប់​យក​រូបថត​អេក្រង់។​"</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"ប៉ះដើម្បីមើលរូបថតអេក្រង់របស់អ្នក"</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"មិន​អាច​ចាប់​យក​រូប​ថត​អេក្រង់​។"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"បានជួបប្រទះបញ្ហាខណៈពេលរក្សាទុកការថតអេក្រង់"</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"មិនអាចរក្សាទុករូបថតអេក្រង់បានទេដោយសារទំហំផ្ទុកមានកម្រិត។"</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"​កំពុង​​រក្សាទុករូបថត​អេក្រង់"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"បានរក្សាទុក​រូបថតអេក្រង់"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"ចុច​ដើម្បីមើល​រូបថតអេក្រង់​របស់អ្នក"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"មិន​អាច​​ថត​រូប​អេក្រង់​​បាន​ទេ"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"បានជួប​បញ្ហា​ពេល​កំពុង​​រក្សាទុក​រូបថតអេក្រង់"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"មិនអាច​រក្សាទុក​រូបថតអេក្រង់​បានទេ ​ដោយសារ​ទំហំផ្ទុក​មានកម្រិតទាប"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"ការថត​រូបអេក្រង់​មិនត្រូវ​បាន​អនុញ្ញាត​ដោយ​កម្មវិធី​នេះ ឬ​ស្ថាប័ន​របស់អ្នក"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"ជម្រើស​ផ្ទេរ​ឯកសារ​តាម​យូអេសប៊ី"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"ភ្ជាប់​ជា​កម្មវិធី​ចាក់​មេឌៀ (MTP)"</string>
@@ -557,26 +561,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"បិទ"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"ជាមួយអង្គគ្រប់គ្រងការជូនដំណឹងថាមពល អ្នកអាចកំណត់កម្រិតសំខាន់ពី 0 ទៅ 5 សម្រាប់ការជូនដំណឹងរបស់កម្មវិធី។ \n\n"<b>"កម្រិត 5"</b>" \n- បង្ហាញនៅផ្នែកខាងលើបញ្ជីជូនដំណឹង \n- អនុញ្ញាតការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n\n"<b>"កម្រិត 4"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n\n"<b>"កម្រិត 3"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n\n"<b>"កម្រិត 2"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n- មិនបន្លឺសំឡេង ឬញ័រ \n\n"<b>"កម្រិត 1"</b>" \n- រារាំងការរំខានលើអេក្រង់ពេញ \n- លោតឡើងជានិច្ច \n- មិនបន្លឺសំឡេង ឬញ័រ \n- លាក់ពីអេក្រង់ចាក់សោ និងរបារស្ថានភាព \n- បង្ហាញនៅផ្នែកខាងក្រោមបញ្ជីជូនដំណឹង \n\n"<b>"កម្រិត 0"</b>" \n- រារាំងការជូនដំណឹងទាំងអស់ពីកម្មវិធី"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"ការ​ជូនដំណឹង"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"អ្នក​នឹង​មិន​ទទួល​បានការ​ជូនដំណឹង​ទាំងនេះ​ទៀត​ទេ"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"ប្រភេទនៃការជូនដំណឹងចំនួន <xliff:g id="NUMBER">%d</xliff:g>"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"កម្មវិធីនេះ​មិនមាន​ប្រភេទនៃ​ការជូនដំណឹង​ទេ"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"ការជូនដំណឹងពី​កម្មវិធីនេះមិនអាចបិទបានទេ"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">ប្រភេទនៃការ​ជូនដំណឹង 1 ក្នុង​ចំណោម <xliff:g id="NUMBER_1">%s</xliff:g> ដែលបានពី​កម្មវិធី​នេះ</item>
-      <item quantity="one">ប្រភេទនៃការ​ជូនដំណឹង 1 ក្នុង​ចំណោម <xliff:g id="NUMBER_0">%s</xliff:g> ដែលបានពី​កម្មវិធី​នេះ</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g>, និង <xliff:g id="NUMBER_5">%3$d</xliff:g> ផ្សេងទៀត</item>
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g>, និង <xliff:g id="NUMBER_2">%3$d</xliff:g> ផ្សេងទៀត</item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"អ្នក​នឹង​មិនឃើញ​ការជូនដំណឹង​ទាំងនេះ​ទៀតទេ"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"បន្ត​បង្ហាញ​ការជូនដំណឹង​ទាំងនេះ?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"បញ្ឈប់​ការជូនដំណឹង"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"បន្ត​បង្ហាញ"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"បន្ត​បង្ហាញ​ការជូនដំណឹង​សម្រាប់​កម្មវិធីនេះ?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"​មិនអាច​បិទការជូនដំណឹង​ទាំងនេះបានទេ"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"ការគ្រប់គ្រងការជូនដំណឹងសម្រាប់ <xliff:g id="APP_NAME">%1$s</xliff:g> បានបើក"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"ការគ្រប់គ្រងការជូនដំណឹងសម្រាប់ <xliff:g id="APP_NAME">%1$s</xliff:g> បានបិទ"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"អនុញ្ញាតឲ្យមានការជូនដំណឹងពីប៉ុស្តិ៍នេះ"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"ប្រភេទ​ទាំងអស់"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"ការកំណត់ច្រើនទៀត"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"ប្ដូរ​តាម​បំណង៖ <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"ប្ដូរតាមបំណង"</string>
     <string name="notification_done" msgid="5279426047273930175">"រួចរាល់"</string>
+    <string name="inline_undo" msgid="558916737624706010">"ត្រឡប់វិញ"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"ការគ្រប់គ្រង​ការជូន​ដំណឹង"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"ជម្រើស​ផ្អាកការ​ជូនដំណឹង"</string>
@@ -731,8 +728,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"ពង្រីក"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"បង្រួម"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"បិទ"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"ការកំណត់"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"អូស​ចុះក្រោម​ដើម្បី​បដិសេធ"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"ម៉ឺនុយ"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ស្ថិតក្នុងមុខងាររូបក្នុងរូប"</string>

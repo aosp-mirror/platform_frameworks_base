@@ -41,21 +41,20 @@ public class TransportUtils {
     }
 
     static void log(int priority, String tag, String message) {
-        log(priority, tag, null, message);
-    }
-
-    static void log(int priority, String tag, @Nullable String caller, String message) {
-        log(priority, tag, "", caller, message);
-    }
-
-    static void log(
-            int priority, String tag, String prefix, @Nullable String caller, String message) {
         if (Log.isLoggable(tag, priority)) {
-            if (caller != null) {
-                prefix += "[" + caller + "] ";
-            }
-            Slog.println(priority, tag, prefix + message);
+            Slog.println(priority, tag, message);
         }
+    }
+
+    static String formatMessage(@Nullable String prefix, @Nullable String caller, String message) {
+        StringBuilder string = new StringBuilder();
+        if (prefix != null) {
+            string.append(prefix).append(" ");
+        }
+        if (caller != null) {
+            string.append("[").append(caller).append("] ");
+        }
+        return string.append(message).toString();
     }
 
     private TransportUtils() {}

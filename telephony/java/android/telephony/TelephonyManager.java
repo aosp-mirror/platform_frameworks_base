@@ -2122,6 +2122,27 @@ public class TelephonyManager {
      * carrier restrictions.
      */
     public static final int SIM_STATE_CARD_RESTRICTED = 9;
+    /**
+     * SIM card state: Loaded: SIM card applications have been loaded
+     * @hide
+     */
+    @SystemApi
+    public static final int SIM_STATE_LOADED = 10;
+    /**
+     * SIM card state: SIM Card is present
+     * @hide
+     */
+    @SystemApi
+    public static final int SIM_STATE_PRESENT = 11;
+
+    /**
+     * Extra included in {@link Intent.ACTION_SIM_CARD_STATE_CHANGED} and
+     * {@link Intent.ACTION_SIM_APPLICATION_STATE_CHANGED} to indicate the card/application state.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_SIM_STATE = "android.telephony.extra.SIM_STATE";
 
     /**
      * @return true if a ICC card is present
@@ -2168,6 +2189,14 @@ public class TelephonyManager {
      * @see #SIM_STATE_CARD_RESTRICTED
      */
     public int getSimState() {
+        int simState = getSimStateIncludingLoaded();
+        if (simState == SIM_STATE_LOADED) {
+            simState = SIM_STATE_READY;
+        }
+        return simState;
+    }
+
+    private int getSimStateIncludingLoaded() {
         int slotIndex = getSlotIndex();
         // slotIndex may be invalid due to sim being absent. In that case query all slots to get
         // sim state
@@ -2186,7 +2215,63 @@ public class TelephonyManager {
                     "state as absent");
             return SIM_STATE_ABSENT;
         }
-        return getSimState(slotIndex);
+        return SubscriptionManager.getSimStateForSlotIndex(slotIndex);
+    }
+
+    /**
+     * Returns a constant indicating the state of the default SIM card.
+     *
+     * @see #SIM_STATE_UNKNOWN
+     * @see #SIM_STATE_ABSENT
+     * @see #SIM_STATE_CARD_IO_ERROR
+     * @see #SIM_STATE_CARD_RESTRICTED
+     * @see #SIM_STATE_PRESENT
+     *
+     * @hide
+     */
+    @SystemApi
+    public int getSimCardState() {
+        int simCardState = getSimState();
+        switch (simCardState) {
+            case SIM_STATE_UNKNOWN:
+            case SIM_STATE_ABSENT:
+            case SIM_STATE_CARD_IO_ERROR:
+            case SIM_STATE_CARD_RESTRICTED:
+                return simCardState;
+            default:
+                return SIM_STATE_PRESENT;
+        }
+    }
+
+    /**
+     * Returns a constant indicating the state of the card applications on the default SIM card.
+     *
+     * @see #SIM_STATE_UNKNOWN
+     * @see #SIM_STATE_PIN_REQUIRED
+     * @see #SIM_STATE_PUK_REQUIRED
+     * @see #SIM_STATE_NETWORK_LOCKED
+     * @see #SIM_STATE_NOT_READY
+     * @see #SIM_STATE_PERM_DISABLED
+     * @see #SIM_STATE_LOADED
+     *
+     * @hide
+     */
+    @SystemApi
+    public int getSimApplicationState() {
+        int simApplicationState = getSimStateIncludingLoaded();
+        switch (simApplicationState) {
+            case SIM_STATE_UNKNOWN:
+            case SIM_STATE_ABSENT:
+            case SIM_STATE_CARD_IO_ERROR:
+            case SIM_STATE_CARD_RESTRICTED:
+                return SIM_STATE_UNKNOWN;
+            case SIM_STATE_READY:
+                // Ready is not a valid state anymore. The state that is broadcast goes from
+                // NOT_READY to either LOCKED or LOADED.
+                return SIM_STATE_NOT_READY;
+            default:
+                return simApplicationState;
+        }
     }
 
     /**
@@ -2207,6 +2292,9 @@ public class TelephonyManager {
      */
     public int getSimState(int slotIndex) {
         int simState = SubscriptionManager.getSimStateForSlotIndex(slotIndex);
+        if (simState == SIM_STATE_LOADED) {
+            simState = SIM_STATE_READY;
+        }
         return simState;
     }
 

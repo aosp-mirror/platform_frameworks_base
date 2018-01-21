@@ -1030,5 +1030,10 @@ public class UsageStatsService extends SystemService implements
         public void setActiveAdminApps(Set<String> packageNames, int userId) {
             mAppStandby.setActiveAdminApps(packageNames, userId);
         }
+
+        @Override
+        public void onAdminDataAvailable() {
+            mAppStandby.onAdminDataAvailable();
+        }
     }
 }

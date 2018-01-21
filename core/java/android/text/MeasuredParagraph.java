@@ -356,6 +356,7 @@ public class MeasuredParagraph {
             @IntRange(from = 0) int start,
             @IntRange(from = 0) int end,
             @NonNull TextDirectionHeuristic textDir,
+            boolean computeHyphenation,
             @Nullable MeasuredParagraph recycle) {
         final MeasuredParagraph mt = recycle == null ? obtain() : recycle;
         mt.resetAndAnalyzeBidi(text, start, end, textDir);
@@ -365,7 +366,8 @@ public class MeasuredParagraph {
             long nativeBuilderPtr = nInitBuilder();
             try {
                 mt.bindNativeObject(
-                        nBuildNativeMeasuredParagraph(nativeBuilderPtr, mt.mCopiedBuffer));
+                        nBuildNativeMeasuredParagraph(nativeBuilderPtr, mt.mCopiedBuffer,
+                              computeHyphenation));
             } finally {
                 nFreeBuilder(nativeBuilderPtr);
             }
@@ -394,7 +396,8 @@ public class MeasuredParagraph {
                     mt.mSpanEndCache.append(spanEnd);
                 }
             }
-            mt.bindNativeObject(nBuildNativeMeasuredParagraph(nativeBuilderPtr, mt.mCopiedBuffer));
+            mt.bindNativeObject(nBuildNativeMeasuredParagraph(nativeBuilderPtr, mt.mCopiedBuffer,
+                      computeHyphenation));
         } finally {
             nFreeBuilder(nativeBuilderPtr);
         }
@@ -668,7 +671,8 @@ public class MeasuredParagraph {
                                                   @FloatRange(from = 0) float width);
 
     private static native long nBuildNativeMeasuredParagraph(/* Non Zero */ long nativeBuilderPtr,
-                                                 @NonNull char[] text);
+                                                 @NonNull char[] text,
+                                                 boolean computeHyphenation);
 
     private static native void nFreeBuilder(/* Non Zero */ long nativeBuilderPtr);
 

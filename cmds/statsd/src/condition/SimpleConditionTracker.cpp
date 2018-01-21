@@ -19,6 +19,7 @@
 
 #include "SimpleConditionTracker.h"
 #include "guardrail/StatsdStats.h"
+#include "dimension.h"
 
 #include <log/logprint.h>
 
@@ -171,12 +172,12 @@ void SimpleConditionTracker::handleConditionEvent(const HashableDimensionKey& ou
         // We get a new output key.
         newCondition = matchStart ? ConditionState::kTrue : ConditionState::kFalse;
         if (matchStart && mInitialValue != ConditionState::kTrue) {
-            mSlicedConditionState[outputKey] = 1;
+            mSlicedConditionState.insert(std::make_pair(outputKey, 1));
             changed = true;
         } else if (mInitialValue != ConditionState::kFalse) {
             // it's a stop and we don't have history about it.
             // If the default condition is not false, it means this stop is valuable to us.
-            mSlicedConditionState[outputKey] = 0;
+            mSlicedConditionState.insert(std::make_pair(outputKey, 0));
             changed = true;
         }
     } else {
@@ -341,7 +342,23 @@ void SimpleConditionTracker::isConditionMet(
             conditionState = conditionState |
                     (startedCountIt->second > 0 ? ConditionState::kTrue : ConditionState::kFalse);
         } else {
-            conditionState = conditionState | mInitialValue;
+            // For unseen key, check whether the require dimensions are subset of sliced condition
+            // output.
+            bool seenDimension = false;
+            for (const auto& slice : mSlicedConditionState) {
+                if (IsSubDimension(slice.first.getDimensionsValue(),
+                                   key.getDimensionsValue())) {
+                    seenDimension = true;
+                    conditionState = conditionState |
+                        (slice.second > 0 ? ConditionState::kTrue : ConditionState::kFalse);
+                }
+                if (conditionState == ConditionState::kTrue) {
+                    break;
+                }
+            }
+            if (!seenDimension) {
+                conditionState = conditionState | mInitialValue;
+            }
         }
     }
     conditionCache[mIndex] = conditionState;

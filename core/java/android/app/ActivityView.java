@@ -34,6 +34,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.WindowManagerGlobal;
 
 import dalvik.system.CloseGuard;
 
@@ -58,6 +59,8 @@ public class ActivityView extends ViewGroup {
     private StateCallback mActivityViewCallback;
 
     private IInputForwarder mInputForwarder;
+    // Temp container to store view coordinates on screen.
+    private final int[] mLocationOnScreen = new int[2];
 
     private final CloseGuard mGuard = CloseGuard.get();
     private boolean mOpened; // Protected by mGuard.
@@ -198,9 +201,28 @@ public class ActivityView extends ViewGroup {
         performRelease();
     }
 
+    /**
+     * Triggers an update of {@link ActivityView}'s location on screen to properly set touch exclude
+     * regions and avoid focus switches by touches on this view.
+     */
+    public void onLocationChanged() {
+        updateLocation();
+    }
+
     @Override
     public void onLayout(boolean changed, int l, int t, int r, int b) {
         mSurfaceView.layout(0 /* left */, 0 /* top */, r - l /* right */, b - t /* bottom */);
+    }
+
+    /** Send current location and size to the WM to set tap exclude region for this view. */
+    private void updateLocation() {
+        try {
+            getLocationOnScreen(mLocationOnScreen);
+            WindowManagerGlobal.getWindowSession().updateTapExcludeRegion(getWindow(), hashCode(),
+                    mLocationOnScreen[0], mLocationOnScreen[1], getWidth(), getHeight());
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
     }
 
     @Override
@@ -241,6 +263,7 @@ public class ActivityView extends ViewGroup {
             } else {
                 mVirtualDisplay.setSurface(surfaceHolder.getSurface());
             }
+            updateLocation();
         }
 
         @Override
@@ -248,6 +271,7 @@ public class ActivityView extends ViewGroup {
             if (mVirtualDisplay != null) {
                 mVirtualDisplay.resize(width, height, getBaseDisplayDensity());
             }
+            updateLocation();
         }
 
         @Override
@@ -257,6 +281,7 @@ public class ActivityView extends ViewGroup {
             if (mVirtualDisplay != null) {
                 mVirtualDisplay.setSurface(null);
             }
+            cleanTapExcludeRegion();
         }
     }
 
@@ -290,6 +315,7 @@ public class ActivityView extends ViewGroup {
         if (mInputForwarder != null) {
             mInputForwarder = null;
         }
+        cleanTapExcludeRegion();
 
         final boolean displayReleased;
         if (mVirtualDisplay != null) {
@@ -311,6 +337,17 @@ public class ActivityView extends ViewGroup {
 
         mGuard.close();
         mOpened = false;
+    }
+
+    /** Report to server that tap exclude region on hosting display should be cleared. */
+    private void cleanTapExcludeRegion() {
+        // Update tap exclude region with an empty rect to clean the state on server.
+        try {
+            WindowManagerGlobal.getWindowSession().updateTapExcludeRegion(getWindow(), hashCode(),
+                    0 /* left */, 0 /* top */, 0 /* width */, 0 /* height */);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
     }
 
     /** Get density of the hosting display. */

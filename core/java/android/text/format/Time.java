@@ -358,7 +358,7 @@ public class Time {
     }
 
     /**
-     * Return the current time in YYYYMMDDTHHMMSS<tz> format
+     * Return the current time in YYYYMMDDTHHMMSS&lt;tz&gt; format
      */
     @Override
     public String toString() {
@@ -738,6 +738,7 @@ public class Time {
      * <p>
      * You should also use <tt>toMillis(false)</tt> if you want
      * to read back the same milliseconds that you set with {@link #set(long)}
+     * or {@link #set(Time)} or after parsing a date string.
      *
      * <p>
      * This method can return {@code -1} when the date / time fields have been
@@ -745,8 +746,6 @@ public class Time {
      * For example, when daylight savings transitions cause an hour to be
      * skipped: times within that hour will return {@code -1} if isDst =
      * {@code -1}.
-     *
-     * or {@link #set(Time)} or after parsing a date string.
      */
     public long toMillis(boolean ignoreDst) {
         calculator.copyFieldsFromTime(this);

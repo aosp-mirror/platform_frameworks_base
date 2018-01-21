@@ -775,6 +775,15 @@
     <string name="quick_settings_work_mode_label">Work mode</string>
     <!-- QuickSettings: Label for the toggle to activate Night display (renamed "Night Light" with title caps). [CHAR LIMIT=20] -->
     <string name="quick_settings_night_display_label">Night Light</string>
+    <!-- QuickSettings: Secondary text for when the Night Light will be enabled at sunset. [CHAR LIMIT=20] -->
+    <string name="quick_settings_night_secondary_label_on_at_sunset">On at sunset</string>
+    <!-- QuickSettings: Secondary text for when the Night Light will be on until sunrise. [CHAR LIMIT=20] -->
+    <string name="quick_settings_night_secondary_label_until_sunrise">Until sunrise</string>
+    <!-- QuickSettings: Secondary text for when the Night Light will be enabled at some user-selected time. [CHAR LIMIT=20] -->
+    <string name="quick_settings_night_secondary_label_on_at">On at <xliff:g id="time" example="10 pm">%s</xliff:g></string>
+    <!-- QuickSettings: Secondary text for when the Night Light will be on until some user-selected time. [CHAR LIMIT=20] -->
+    <string name="quick_settings_night_secondary_label_until">Until <xliff:g id="time" example="7 am">%s</xliff:g></string>
+
     <!-- QuickSettings: NFC tile [CHAR LIMIT=NONE] -->
     <string name="quick_settings_nfc_label">NFC</string>
     <!-- QuickSettings: NFC (off) [CHAR LIMIT=NONE] -->
@@ -1693,12 +1702,14 @@
         <item>Clipboard</item>
         <item>Keycode</item>
         <item>Keyboard switcher</item>
+        <item>Rotation suggestion</item>
         <item>None</item>
     </string-array>
     <string-array name="nav_bar_button_values" translatable="false">
         <item>clipboard</item>
         <item>key</item>
         <item>menu_ime</item>
+        <item>rotate</item>
         <item>space</item>
     </string-array>
 
@@ -2056,5 +2067,21 @@
     <string name="touch_filtered_warning">Because an app is obscuring a permission request, Settings
         can’t verify your response.</string>
 
+    <!-- Title of prompt requesting access to display slices [CHAR LIMIT=NONE] -->
+    <string name="slice_permission_title">Allow <xliff:g id="app" example="Example App">%1$s</xliff:g> to show <xliff:g id="app_2" example="Other Example App">%2$s</xliff:g> slices?</string>
+
+    <!-- Description of what kind of access is given to a slice host [CHAR LIMIT=NONE] -->
+    <string name="slice_permission_text_1"> - It can read information from <xliff:g id="app" example="Example App">%1$s</xliff:g></string>
+    <!-- Description of what kind of access is given to a slice host [CHAR LIMIT=NONE] -->
+    <string name="slice_permission_text_2"> - It can take actions inside <xliff:g id="app" example="Example App">%1$s</xliff:g></string>
+
+    <!-- Text on checkbox allowing the app to show slices from all apps [CHAR LIMIT=NONE] -->
+    <string name="slice_permission_checkbox">Allow <xliff:g id="app" example="Example App">%1$s</xliff:g> to show slices from any app</string>
+
+    <!-- Option to grant the slice permission request on the screen [CHAR LIMIT=15] -->
+    <string name="slice_permission_allow">Allow</string>
+
+    <!-- Option to grant the slice permission request on the screen [CHAR LIMIT=15] -->
+    <string name="slice_permission_deny">Deny</string>
 
 </resources>

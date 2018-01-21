@@ -78,6 +78,8 @@ public class NotificationComparatorTest extends UiServiceTestCase {
     private NotificationRecord mRecordCheater;
     private NotificationRecord mRecordCheaterColorized;
     private NotificationRecord mNoMediaSessionMedia;
+    private NotificationRecord mRecordColorized;
+    private NotificationRecord mRecordColorizedCall;
 
     @Before
     public void setUp() {
@@ -113,7 +115,6 @@ public class NotificationComparatorTest extends UiServiceTestCase {
         Notification n2 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
                 .setCategory(Notification.CATEGORY_CALL)
                 .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
-                .setColorized(true /* colorized */)
                 .build();
         mRecordHighCall = new NotificationRecord(mContext, new StatusBarNotification(callPkg,
                 callPkg, 1, "highcall", callUid, callUid, n2,
@@ -200,13 +201,34 @@ public class NotificationComparatorTest extends UiServiceTestCase {
                 pkg2, pkg2, 1, "cheater", uid2, uid2, n12, new UserHandle(userId),
                 "", 9258), getDefaultChannel());
         mNoMediaSessionMedia.setUserImportance(NotificationManager.IMPORTANCE_DEFAULT);
+
+        Notification n13 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+                .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
+                .setColorized(true /* colorized */)
+                .build();
+        mRecordColorized = new NotificationRecord(mContext, new StatusBarNotification(pkg2,
+                pkg2, 1, "colorized", uid2, uid2, n13,
+                new UserHandle(userId), "", 1999), getDefaultChannel());
+        mRecordHighCall.setUserImportance(NotificationManager.IMPORTANCE_HIGH);
+
+        Notification n14 = new Notification.Builder(mContext, TEST_CHANNEL_ID)
+                .setCategory(Notification.CATEGORY_CALL)
+                .setColorized(true)
+                .setFlag(Notification.FLAG_FOREGROUND_SERVICE, true)
+                .build();
+        mRecordColorizedCall = new NotificationRecord(mContext, new StatusBarNotification(callPkg,
+                callPkg, 1, "colorizedCall", callUid, callUid, n14,
+                new UserHandle(userId), "", 1999), getDefaultChannel());
+        mRecordColorizedCall.setUserImportance(NotificationManager.IMPORTANCE_HIGH);
     }
 
     @Test
     public void testOrdering() throws Exception {
         final List<NotificationRecord> expected = new ArrayList<>();
-        expected.add(mRecordHighCall);
+        expected.add(mRecordColorizedCall);
         expected.add(mRecordDefaultMedia);
+        expected.add(mRecordColorized);
+        expected.add(mRecordHighCall);
         expected.add(mRecordInlineReply);
         expected.add(mRecordSms);
         expected.add(mRecordStarredContact);

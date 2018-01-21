@@ -189,6 +189,11 @@ public:
      */
     void dumpStats(std::vector<uint8_t>* buffer, bool reset);
 
+    /**
+     * Output statsd stats in human readable format to [out] file.
+     */
+    void dumpStats(FILE* out) const;
+
     typedef struct {
         long totalPull;
         long totalPullFromCache;

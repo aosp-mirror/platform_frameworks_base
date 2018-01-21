@@ -1002,7 +1002,7 @@ public class ZenModeHelper {
                     if (isChange && policy.doNotDisturbWhenSilent) {
                         if (mZenMode != Global.ZEN_MODE_NO_INTERRUPTIONS
                                 && mZenMode != Global.ZEN_MODE_ALARMS) {
-                            newZen = Global.ZEN_MODE_ALARMS;
+                            newZen = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
                         }
                         setPreviousRingerModeSetting(ringerModeOld);
                     }
@@ -1042,7 +1042,7 @@ public class ZenModeHelper {
                 case AudioManager.RINGER_MODE_SILENT:
                     if (isChange) {
                         if (mZenMode == Global.ZEN_MODE_OFF) {
-                            newZen = Global.ZEN_MODE_ALARMS;
+                            newZen = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
                         }
                         ringerModeInternalOut = isVibrate ? AudioManager.RINGER_MODE_VIBRATE
                                 : AudioManager.RINGER_MODE_SILENT;

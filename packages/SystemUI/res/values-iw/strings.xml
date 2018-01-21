@@ -35,7 +35,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"מתמשך"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"הודעות"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"עוצמת הסוללה נמוכה"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"עוצמת הסוללה נמוכה. כדאי להפעיל את מצב החיסכון בסוללה"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"נותרו <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"נותרו <xliff:g id="PERCENTAGE">%s</xliff:g>, נשארו בערך <xliff:g id="TIME">%s</xliff:g> על סמך השימוש במכשיר"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"נותרו <xliff:g id="PERCENTAGE">%s</xliff:g>, נשארו בערך <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"נותרו <xliff:g id="PERCENTAGE">%s</xliff:g>. הופעלה תכונת החיסכון בסוללה."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"‏טעינה באמצעות USB אינה נתמכת.\nהשתמש אך ורק במטען שסופק."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"‏טעינה בחיבור USB אינה נתמכת."</string>
@@ -69,14 +72,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"‏למשתמש המחובר לחשבון במכשיר הזה אין אפשרות להפעיל ניפוי באגים ב-USB. כדי להשתמש בתכונה הזו יש לעבור אל המשתמש הראשי."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"הגדל תצוגה כדי למלא את המסך"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"מתח כדי למלא את המסך"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"צילום מסך"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"שומר צילום מסך..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"שומר צילום מסך..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"מתבצעת שמירה של צילום המסך."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"צילום המסך בוצע."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"הקש כדי להציג את צילום המסך שלך."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"לא ניתן לבצע צילום מסך."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"התגלתה בעיה בשמירת צילום מסך."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"לא ניתן לשמור צילום מסך עקב שטח אחסון מוגבל."</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"מתבצעת שמירה של צילום המסך"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"צילום המסך נשמר"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"אפשר להקיש כדי להציג את צילום המסך"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"לא ניתן לבצע צילום מסך"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"התגלתה בעיה בשמירת צילום המסך"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"לא ניתן לשמור צילום מסך עקב שטח אחסון מוגבל"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"האפליקציה או הארגון שלך אינם מתירים ליצור צילומי מסך"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"‏אפשרויות העברת קבצים ב-USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"‏טען כנגן מדיה (MTP)"</string>
@@ -561,30 +565,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"כבוי"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"בעזרת פקדים של הודעות הפעלה, תוכל להגדיר רמת חשיבות מ-0 עד 5 להודעות אפליקציה. \n\n"<b>"רמה 5"</b>" \n- הצג בראש רשימת ההודעות \n- אפשר הפרעה במסך מלא \n- תמיד אפשר הצצה \n\n"<b>"רמה 4"</b>" \n- מנע הפרעה במסך מלא \n- תמיד אפשר הצצה \n\n"<b>"רמה 3"</b>" \n- מנע הפרעה במסך מלא \n- אף פעם אל תאפשר הצצה \n\n"<b>"רמה 2"</b>" \n- מנע הפרעה במסך מלא \n- אף פעם אל תאפשר הצצה \n- אף פעם אל תאפשר קול ורטט \n\n"<b>"רמה 1"</b>" \n- מנע הפרעה במסך מלא \n- אף פעם אל תאפשר הצצה \n- אף פעם אל תאפשר קול ורטט \n- הסתר ממסך הנעילה ומשורת הסטטוס \n- הצג בתחתית רשימת ההודעות \n\n"<b>"רמה 0"</b>" \n- חסום את כל ההודעות מהאפליקציה"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"הודעות"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"לא תקבל את ההודעות האלה יותר"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> קטגוריות של הודעות"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"האפליקציה הזו לא תומכת בקטגוריות של הודעות"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"לא ניתן לכבות הודעות של האפליקציה הזאת"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="two">קטגוריית הודעות אחת מתוך <xliff:g id="NUMBER_1">%s</xliff:g> מאפליקציה זו</item>
-      <item quantity="many">קטגוריית הודעות אחת מתוך <xliff:g id="NUMBER_1">%s</xliff:g> מאפליקציה זו</item>
-      <item quantity="other">קטגוריית הודעות אחת מתוך <xliff:g id="NUMBER_1">%s</xliff:g> מאפליקציה זו</item>
-      <item quantity="one">קטגוריית הודעות אחת מתוך <xliff:g id="NUMBER_0">%s</xliff:g> מאפליקציה זו</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="two"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>‏, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> ו-<xliff:g id="NUMBER_5">%3$d</xliff:g> אחרים</item>
-      <item quantity="many"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>‏, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> ו-,<xliff:g id="NUMBER_5">%3$d</xliff:g> אחרים</item>
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>‏, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> ו-<xliff:g id="NUMBER_5">%3$d</xliff:g> אחרים</item>
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>‏, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> ו-<xliff:g id="NUMBER_2">%3$d</xliff:g> אחר</item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"לא תראה יותר את ההודעות האלה"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"להמשיך להציג את ההודעות האלה?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"הפסקת הודעות"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"להמשיך להציג"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"להמשיך להציג הודעות מהאפליקציה הזאת?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"לא ניתן לכבות את ההודעות האלה"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"פקדי ההודעות של <xliff:g id="APP_NAME">%1$s</xliff:g> נפתחו"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"פקדי ההודעות של <xliff:g id="APP_NAME">%1$s</xliff:g> נסגרו"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"התר הודעות מערוץ זה"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"כל הקטגוריות"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"הגדרות נוספות"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"התאמה אישית: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"התאמה אישית"</string>
     <string name="notification_done" msgid="5279426047273930175">"סיום"</string>
+    <string name="inline_undo" msgid="558916737624706010">"ביטול"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"בקרת הודעות"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"אפשרויות של דחיית הודעות לטיפול בהמשך"</string>
@@ -743,8 +736,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"הרחב"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"מזער"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"סגור"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"הגדרות"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"גרור למטה כדי לסגור"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"תפריט"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> במצב תמונה בתוך תמונה"</string>

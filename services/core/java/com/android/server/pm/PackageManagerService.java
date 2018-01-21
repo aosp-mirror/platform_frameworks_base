@@ -191,6 +191,7 @@ import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VerifierInfo;
 import android.content.pm.VersionedPackage;
+import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
 import android.content.res.Resources;
 import android.database.ContentObserver;
@@ -16486,6 +16487,7 @@ Slog.e("TODD",
         final PackageParser.Package pkg;
         try {
             pkg = pp.parsePackage(tmpPackageFile, parseFlags);
+            DexMetadataHelper.validatePackageDexMetadata(pkg);
         } catch (PackageParserException e) {
             res.setError("Failed parse during installPackageLI", e);
             return;
@@ -18894,6 +18896,14 @@ Slog.e("TODD",
             if (ps.pkg != null) {
                 return ps.pkg.applicationInfo.targetSdkVersion;
             }
+        }
+        return Build.VERSION_CODES.CUR_DEVELOPMENT;
+    }
+
+    private int getPackageTargetSdkVersionLockedLPr(String packageName) {
+        final PackageParser.Package p = mPackages.get(packageName);
+        if (p != null) {
+            return p.applicationInfo.targetSdkVersion;
         }
         return Build.VERSION_CODES.CUR_DEVELOPMENT;
     }
@@ -23413,6 +23423,13 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
         public int getUidTargetSdkVersion(int uid) {
             synchronized (mPackages) {
                 return getUidTargetSdkVersionLockedLPr(uid);
+            }
+        }
+
+        @Override
+        public int getPackageTargetSdkVersion(String packageName) {
+            synchronized (mPackages) {
+                return getPackageTargetSdkVersionLockedLPr(packageName);
             }
         }
 

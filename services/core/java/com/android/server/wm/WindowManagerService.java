@@ -5967,8 +5967,8 @@ public class WindowManagerService extends IWindowManager.Stub
         mPolicy.lockNow(options);
     }
 
-    public void showRecentApps(boolean fromHome) {
-        mPolicy.showRecentApps(fromHome);
+    public void showRecentApps() {
+        mPolicy.showRecentApps();
     }
 
     @Override
@@ -6613,7 +6613,7 @@ public class WindowManagerService extends IWindowManager.Stub
     public void onOverlayChanged() {
         synchronized (mWindowMap) {
             mPolicy.onOverlayChangedLw();
-            mDisplayManagerInternal.onOverlayChanged();
+            getDefaultDisplayContentLocked().updateDisplayInfo();
             requestTraversal();
         }
     }
@@ -6919,6 +6919,23 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         } else {
             InputManager.getInstance().setPointerIconType(PointerIcon.TYPE_DEFAULT);
+        }
+    }
+
+    /**
+     * Update a tap exclude region with a rectangular area in the window identified by the provided
+     * id. Touches on this region will not switch focus to this window. Passing an empty rect will
+     * remove the area from the exclude region of this window.
+     */
+    void updateTapExcludeRegion(IWindow client, int regionId, int left, int top, int width,
+            int height) {
+        synchronized (mWindowMap) {
+            final WindowState callingWin = windowForClientLocked(null, client, false);
+            if (callingWin == null) {
+                Slog.w(TAG_WM, "Bad requesting window " + client);
+                return;
+            }
+            callingWin.updateTapExcludeRegion(regionId, left, top, width, height);
         }
     }
 

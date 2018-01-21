@@ -34,7 +34,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Notiekošs"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Paziņojumi"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Zems akumulatora enerģijas līmenis"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"Akumulatora uzlādes līmenis ir zems. Ieslēdziet akumulatora jaudas taupīšanas režīmu."</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Atlikuši <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Atlikušais laiks: <xliff:g id="PERCENTAGE">%s</xliff:g> — aptuveni <xliff:g id="TIME">%s</xliff:g> (ņemot vērā lietojumu)"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Atlikušais laiks: <xliff:g id="PERCENTAGE">%s</xliff:g> — aptuveni <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Atlikuši <xliff:g id="PERCENTAGE">%s</xliff:g>. Ir ieslēgts akumulatora jaudas taupīšanas režīms."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB lādēšana netiek atbalstīta.\nIzmantojiet tikai komplektā iekļauto lādētāju."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB uzlāde netiek atbalstīta."</string>
@@ -68,14 +71,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Lietotājs, kurš pašlaik ir pierakstījies šajā ierīcē, nevar iespējot USB atkļūdošanu. Lai izmantotu šo funkciju, pārslēdzieties uz galveno lietotāju."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Tālumm., lai aizp. ekr."</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Stiepiet, lai aizp. ekr."</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Ekrānuzņēmums"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Saglabā ekrānuzņēmumu…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Notiek ekrānuzņēmuma saglabāšana..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"Notiek ekrānuzņēmuma saglabāšana."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Ekrānuzņēmums ir uzņemts."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Pieskarieties, lai skatītu ekrānuzņēmumu."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Nevarēja uzņemt ekrānuzņēmumu."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Saglabājot ekrānuzņēmumu, radās problēma."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Nevar saglabāt ekrānuzņēmumu, jo krātuvē nepietiek vietas."</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"Notiek ekrānuzņēmuma saglabāšana."</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"Ekrānuzņēmums saglabāts"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"Pieskarieties, lai skatītu ekrānuzņēmumu."</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"Nevarēja uzņemt ekrānuzņēmumu"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"Saglabājot ekrānuzņēmumu, radās problēma."</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Nevar saglabāt ekrānuzņēmumu, jo krātuvē nepietiek vietas."</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Lietotne vai jūsu organizācija neatļauj veikt ekrānuzņēmumus."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB failu pārsūtīšanas opcijas"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Pievienot kā multivides atskaņotāju (MTP)"</string>
@@ -559,28 +563,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Izslēgts"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Izmantojot barošanas paziņojumu vadīklas, varat lietotnes paziņojumiem iestatīt svarīguma līmeni (no 0 līdz 5). \n\n"<b>"5. līmenis"</b>" \n- Tiek rādīts paziņojumu saraksta augšdaļā \n- Tiek atļauta pilnekrāna režīma pārtraukšana \n- Ieskats vienmēr atļauts \n\n"<b>"4. līmenis"</b>" \n- Tiek novērsta pilnekrāna režīma pārtraukšana \n- Ieskats vienmēr atļauts \n\n"<b>"3. līmenis"</b>" \n- Tiek novērsta pilnekrāna režīma pārtraukšana \n- Ieskats nav atļauts \n\n"<b>"2. līmenis"</b>" \n- Tiek novērsta pilnekrāna režīma pārtraukšana \n- Ieskats nav atļauts \n- Nav atļautas skaņas un vibrosignāls \n\n"<b>"1. līmenis"</b>" \n- Tiek novērsta pilnekrāna režīma pārtraukšana \n- Ieskats nav atļauts \n- Nav atļautas skaņas un vibrosignāls \n- Paziņojumi tiek paslēpti bloķēšanas ekrānā un statusa joslā \n- Paziņojumi tiek rādīti paziņojumu saraksta apakšdaļā \n\n"<b>"0. līmenis"</b>" \n- Visi lietotnes paziņojumi tiek bloķēti"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Paziņojumi"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"Jūs vairs nesaņemsiet šos paziņojumus"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> paziņojumu kategorijas"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"Paziņojumu kategorijas šajā lietotnē nav pieejamas."</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Paziņojumus no šīs lietotnes nevar izslēgt"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="zero">1 no <xliff:g id="NUMBER_1">%s</xliff:g> šīs lietotnes paziņojumu kategorijām.</item>
-      <item quantity="one">1 no <xliff:g id="NUMBER_1">%s</xliff:g> šīs lietotnes paziņojumu kategorijas.</item>
-      <item quantity="other">1 no <xliff:g id="NUMBER_1">%s</xliff:g> šīs lietotnes paziņojumu kategorijām.</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="zero"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> un vēl <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> un vēl <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> un vēl <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Jūs vairs neredzēsiet šos paziņojumus."</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"Vai turpināt rādīt šos paziņojumus?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"Apturēt paziņojumu rādīšanu"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"Turpināt rādīt"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"Vai turpināt rādīt paziņojumus no šīs lietotnes?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"Šos paziņojumus nevar izslēgt."</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Lietotnes <xliff:g id="APP_NAME">%1$s</xliff:g> paziņojumu vadīklas ir atvērtas"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Lietotnes <xliff:g id="APP_NAME">%1$s</xliff:g> paziņojumu vadīklas ir aizvērtas"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Atļaut paziņojumus no šī kanāla"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"Visas kategorijas"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Citi iestatījumi"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"Pielāgot: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"Pielāgot"</string>
     <string name="notification_done" msgid="5279426047273930175">"Gatavs"</string>
+    <string name="inline_undo" msgid="558916737624706010">"Atsaukt"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"paziņojumu vadīklas"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"paziņojumu atlikšanas opcijas"</string>
@@ -737,8 +732,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Izvērst"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimizēt"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Aizvērt"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"Iestatījumi"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Velciet lejup, lai noraidītu"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Izvēlne"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> ir attēlā attēlā"</string>

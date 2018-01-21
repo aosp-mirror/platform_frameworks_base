@@ -5134,15 +5134,20 @@ message MetricsEvent {
     // OS: P
     ACTION_SCREENSHOT_POWER_MENU = 1282;
 
-    // OPEN: Settings > Apps & Notifications -> Special app access -> Storage Access
+    // OPEN: Settings > Apps & Notifications -> Special app access -> Directory Access
     // CATEGORY: SETTINGS
     // OS: P
-    STORAGE_ACCESS = 1283;
+    DIRECTORY_ACCESS = 1283;
 
-    // OPEN: Settings > Apps & Notifications -> Special app access -> Storage Access -> Package
+    // OPEN: Settings > Apps & Notifications -> Special app access -> Directory Access -> Package
     // CATEGORY: SETTINGS
     // OS: P
-    APPLICATIONS_STORAGE_DETAIL = 1284;
+    APPLICATIONS_DIRECTORY_ACCESS_DETAIL = 1284;
+
+    // OPEN: Settings > Battery > Smart Battery > Restricted apps
+    // CATEGORY: SETTINGS
+    // OS: P
+    FUELGAUGE_RESTRICTED_APP_DETAILS = 1285;
 
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.

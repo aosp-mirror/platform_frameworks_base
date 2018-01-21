@@ -23,6 +23,7 @@
 #include "Locale.h"
 #include "ResourceTable.h"
 #include "ResourceUtils.h"
+#include "ResourceValues.h"
 #include "ValueVisitor.h"
 
 using ::android::ResStringPool;
@@ -380,7 +381,8 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
 
   std::map<ResourceId, ResourceNameRef> id_index;
 
-  ResourceTablePackage* pkg = out_table->CreatePackage(pb_package.package_name(), id);
+  ResourceTablePackage* pkg =
+      out_table->CreatePackageAllowingDuplicateNames(pb_package.package_name(), id);
   for (const pb::Type& pb_type : pb_package.type()) {
     const ResourceType* res_type = ParseResourceType(pb_type.name());
     if (res_type == nullptr) {
@@ -761,8 +763,66 @@ std::unique_ptr<Item> DeserializeItemFromPb(const pb::Item& pb_item,
 
     case pb::Item::kPrim: {
       const pb::Primitive& pb_prim = pb_item.prim();
-      return util::make_unique<BinaryPrimitive>(static_cast<uint8_t>(pb_prim.type()),
-                                                pb_prim.data());
+      android::Res_value val = {};
+      switch (pb_prim.oneof_value_case()) {
+        case pb::Primitive::kNullValue: {
+          val.dataType = android::Res_value::TYPE_NULL;
+          val.data = android::Res_value::DATA_NULL_UNDEFINED;
+        } break;
+        case pb::Primitive::kEmptyValue: {
+          val.dataType = android::Res_value::TYPE_NULL;
+          val.data = android::Res_value::DATA_NULL_EMPTY;
+        } break;
+        case pb::Primitive::kFloatValue: {
+          val.dataType = android::Res_value::TYPE_FLOAT;
+          float float_val = pb_prim.float_value();
+          val.data = *(uint32_t*)&float_val;
+        } break;
+        case pb::Primitive::kDimensionValue: {
+          val.dataType = android::Res_value::TYPE_DIMENSION;
+          float dimen_val = pb_prim.dimension_value();
+          val.data = *(uint32_t*)&dimen_val;
+        } break;
+        case pb::Primitive::kFractionValue: {
+          val.dataType = android::Res_value::TYPE_FRACTION;
+          float fraction_val = pb_prim.fraction_value();
+          val.data = *(uint32_t*)&fraction_val;
+        } break;
+        case pb::Primitive::kIntDecimalValue: {
+          val.dataType = android::Res_value::TYPE_INT_DEC;
+          val.data = static_cast<uint32_t>(pb_prim.int_decimal_value());
+        } break;
+        case pb::Primitive::kIntHexidecimalValue: {
+          val.dataType = android::Res_value::TYPE_INT_HEX;
+          val.data = pb_prim.int_hexidecimal_value();
+        } break;
+        case pb::Primitive::kBooleanValue: {
+          val.dataType = android::Res_value::TYPE_INT_BOOLEAN;
+          val.data = pb_prim.boolean_value() ? 0xFFFFFFFF : 0x0;
+        } break;
+        case pb::Primitive::kColorArgb8Value: {
+          val.dataType = android::Res_value::TYPE_INT_COLOR_ARGB8;
+          val.data = pb_prim.color_argb8_value();
+        } break;
+        case pb::Primitive::kColorRgb8Value: {
+          val.dataType = android::Res_value::TYPE_INT_COLOR_RGB8;
+          val.data = pb_prim.color_rgb8_value();
+        } break;
+        case pb::Primitive::kColorArgb4Value: {
+          val.dataType = android::Res_value::TYPE_INT_COLOR_ARGB4;
+          val.data = pb_prim.color_argb4_value();
+        } break;
+        case pb::Primitive::kColorRgb4Value: {
+          val.dataType = android::Res_value::TYPE_INT_COLOR_RGB4;
+          val.data = pb_prim.color_rgb4_value();
+        } break;
+        default: {
+          LOG(FATAL) << "Unexpected Primitive type: "
+                     << static_cast<uint32_t>(pb_prim.oneof_value_case());
+          return {};
+        } break;
+      }
+      return util::make_unique<BinaryPrimitive>(val);
     } break;
 
     case pb::Item::kId: {

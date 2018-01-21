@@ -23,15 +23,15 @@ import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.net.wifi.hotspot2.IProvisioningCallback;
 
+import android.net.DhcpInfo;
+import android.net.Network;
+import android.net.wifi.ISoftApCallback;
+import android.net.wifi.PasspointManagementObjectDefinition;
+import android.net.wifi.ScanResult;
+import android.net.wifi.ScanSettings;
+import android.net.wifi.WifiActivityEnergyInfo;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
-import android.net.wifi.ScanSettings;
-import android.net.wifi.ScanResult;
-import android.net.wifi.PasspointManagementObjectDefinition;
-import android.net.wifi.WifiActivityEnergyInfo;
-import android.net.Network;
-
-import android.net.DhcpInfo;
 
 import android.os.Messenger;
 import android.os.ResultReceiver;
@@ -178,5 +178,9 @@ interface IWifiManager
     void restoreSupplicantBackupData(in byte[] supplicantData, in byte[] ipConfigData);
 
     void startSubscriptionProvisioning(in OsuProvider provider, in IProvisioningCallback callback);
+
+    void registerSoftApCallback(in IBinder binder, in ISoftApCallback callback, int callbackIdentifier);
+
+    void unregisterSoftApCallback(int callbackIdentifier);
 }
 

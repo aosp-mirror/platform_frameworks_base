@@ -253,6 +253,11 @@ public class JobInfo implements Parcelable {
     /**
      * @hide
      */
+    public static final int FLAG_IS_PREFETCH = 1 << 2;
+
+    /**
+     * @hide
+     */
     public static final int CONSTRAINT_FLAG_CHARGING = 1 << 0;
 
     /**
@@ -1359,6 +1364,28 @@ public class JobInfo implements Parcelable {
                 mFlags |= FLAG_IMPORTANT_WHILE_FOREGROUND;
             } else {
                 mFlags &= (~FLAG_IMPORTANT_WHILE_FOREGROUND);
+            }
+            return this;
+        }
+
+        /**
+         * Setting this to true indicates that this job is designed to prefetch
+         * content that will make a material improvement to the experience of
+         * the specific user of this device. For example, fetching top headlines
+         * of interest to the current user.
+         * <p>
+         * The system may use this signal to relax the network constraints you
+         * originally requested, such as allowing a
+         * {@link JobInfo#NETWORK_TYPE_UNMETERED} job to run over a metered
+         * network when there is a surplus of metered data available. The system
+         * may also use this signal in combination with end user usage patterns
+         * to ensure data is prefetched before the user launches your app.
+         */
+        public Builder setIsPrefetch(boolean isPrefetch) {
+            if (isPrefetch) {
+                mFlags |= FLAG_IS_PREFETCH;
+            } else {
+                mFlags &= (~FLAG_IS_PREFETCH);
             }
             return this;
         }

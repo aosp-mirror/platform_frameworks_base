@@ -16,11 +16,11 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import static android.security.keystore.KeychainProtectionParameter.TYPE_LOCKSCREEN;
+import static android.security.keystore.KeychainProtectionParams.TYPE_LOCKSCREEN;
 
-import static android.security.keystore.KeychainProtectionParameter.TYPE_PASSWORD;
-import static android.security.keystore.KeychainProtectionParameter.TYPE_PATTERN;
-import static android.security.keystore.KeychainProtectionParameter.TYPE_PIN;
+import static android.security.keystore.KeychainProtectionParams.TYPE_PASSWORD;
+import static android.security.keystore.KeychainProtectionParams.TYPE_PATTERN;
+import static android.security.keystore.KeychainProtectionParams.TYPE_PIN;
 
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
@@ -77,8 +77,8 @@ public class KeySyncTaskTest {
     private static final int TEST_USER_ID = 1000;
     private static final int TEST_RECOVERY_AGENT_UID = 10009;
     private static final int TEST_RECOVERY_AGENT_UID2 = 10010;
-    private static final byte[] TEST_DEVICE_ID =
-            new byte[]{1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2};
+    private static final byte[] TEST_VAULT_HANDLE =
+            new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
     private static final String TEST_APP_KEY_ALIAS = "rcleaver";
     private static final int TEST_GENERATION_ID = 2;
     private static final int TEST_CREDENTIAL_TYPE = CREDENTIAL_TYPE_PASSWORD;
@@ -241,7 +241,7 @@ public class KeySyncTaskTest {
     public void run_doesNotSendAnythingIfNoRecoveryAgentPendingIntentRegistered() throws Exception {
         SecretKey applicationKey = generateKey();
         mRecoverableKeyStoreDb.setServerParams(
-                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_DEVICE_ID);
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_VAULT_HANDLE);
         mRecoverableKeyStoreDb.setPlatformKeyGenerationId(TEST_USER_ID, TEST_GENERATION_ID);
         mRecoverableKeyStoreDb.insertKey(
                 TEST_USER_ID,
@@ -278,9 +278,13 @@ public class KeySyncTaskTest {
     public void run_sendsEncryptedKeysIfAvailableToSync() throws Exception {
         mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());
+
+        mRecoverableKeyStoreDb.setServerParams(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_VAULT_HANDLE);
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
         SecretKey applicationKey =
                 addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
+
         mKeySyncTask.run();
 
         KeychainSnapshot keychainSnapshot = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
@@ -293,6 +297,7 @@ public class KeySyncTaskTest {
                 KeyDerivationParams.getSalt(),
                 TEST_CREDENTIAL);
         Long counterId = mRecoverableKeyStoreDb.getCounterId(TEST_USER_ID, TEST_RECOVERY_AGENT_UID);
+        counterId = 1L; // TODO: use value from the database.
         assertThat(counterId).isNotNull();
         byte[] recoveryKey = decryptThmEncryptedKey(
                 lockScreenHash,
@@ -300,10 +305,15 @@ public class KeySyncTaskTest {
                 /*vaultParams=*/ KeySyncUtils.packVaultParams(
                         mKeyPair.getPublic(),
                         counterId,
-                        TEST_DEVICE_ID,
-                        /*maxAttempts=*/ 10));
+                        /*maxAttempts=*/ 10,
+                        TEST_VAULT_HANDLE));
         List<WrappedApplicationKey> applicationKeys = keychainSnapshot.getWrappedApplicationKeys();
         assertThat(applicationKeys).hasSize(1);
+        assertThat(keychainSnapshot.getCounterId()).isEqualTo(counterId);
+        assertThat(keychainSnapshot.getMaxAttempts()).isEqualTo(10);
+        assertThat(keychainSnapshot.getTrustedHardwarePublicKey())
+                .isEqualTo(SecureBox.encodePublicKey(mKeyPair.getPublic()));
+        assertThat(keychainSnapshot.getServerParams()).isEqualTo(TEST_VAULT_HANDLE);
         WrappedApplicationKey keyData = applicationKeys.get(0);
         assertEquals(TEST_APP_KEY_ALIAS, keyData.getAlias());
         assertThat(keyData.getAlias()).isEqualTo(keyData.getAlias());
@@ -471,7 +481,7 @@ public class KeySyncTaskTest {
             throws Exception{
         SecretKey applicationKey = generateKey();
         mRecoverableKeyStoreDb.setServerParams(
-                userId, recoveryAgentUid, TEST_DEVICE_ID);
+                userId, recoveryAgentUid, TEST_VAULT_HANDLE);
         mRecoverableKeyStoreDb.setPlatformKeyGenerationId(userId, TEST_GENERATION_ID);
 
         // Newly added key is not synced.

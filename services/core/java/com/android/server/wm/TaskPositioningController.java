@@ -126,7 +126,7 @@ class TaskPositioningController {
         }
 
         Display display = displayContent.getDisplay();
-        mTaskPositioner = new TaskPositioner(mService);
+        mTaskPositioner = TaskPositioner.create(mService);
         mTaskPositioner.register(displayContent);
         mInputMonitor.updateInputWindowsLw(true /*force*/);
 

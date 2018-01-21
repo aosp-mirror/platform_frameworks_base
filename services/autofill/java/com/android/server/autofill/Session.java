@@ -18,6 +18,7 @@ package com.android.server.autofill;
 
 import static android.app.ActivityManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
 import static android.app.ActivityManagerInternal.ASSIST_KEY_STRUCTURE;
+import static android.service.autofill.AutofillFieldClassificationService.EXTRA_SCORES;
 import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.INVALID_REQUEST_ID;
 import static android.view.autofill.AutofillManager.ACTION_START_SESSION;
@@ -25,7 +26,6 @@ import static android.view.autofill.AutofillManager.ACTION_VALUE_CHANGED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_ENTERED;
 import static android.view.autofill.AutofillManager.ACTION_VIEW_EXITED;
 
-import static com.android.server.autofill.AutofillManagerServiceImpl.FieldClassificationAlgorithmService.EXTRA_SCORES;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sPartitionMaxCount;
 import static com.android.server.autofill.Helper.sVerbose;
@@ -54,11 +54,11 @@ import android.os.Parcelable;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.service.autofill.AutofillFieldClassificationService.Scores;
 import android.service.autofill.AutofillService;
 import android.service.autofill.Dataset;
 import android.service.autofill.FieldClassification;
 import android.service.autofill.FieldClassification.Match;
-import android.service.carrier.CarrierMessagingService.ResultCallback;
 import android.service.autofill.FillContext;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
@@ -86,8 +86,6 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.autofill.AutofillManagerServiceImpl.FieldClassificationAlgorithmService;
-import com.android.server.autofill.AutofillManagerServiceImpl.FieldClassificationScores;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.autofill.ui.PendingUi;
 
@@ -99,7 +97,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A session for a given activity.
@@ -1101,10 +1098,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         // Sets field classification scores
-        final FieldClassificationAlgorithmService fcService =
-                mService.getFieldClassificationService();
-        if (userData != null && fcService != null) {
-            logFieldClassificationScoreLocked(fcService, ignoredDatasets, changedFieldIds,
+        final FieldClassificationStrategy fcStrategy = mService.getFieldClassificationStrategy();
+        if (userData != null && fcStrategy != null) {
+            logFieldClassificationScoreLocked(fcStrategy, ignoredDatasets, changedFieldIds,
                     changedDatasetIds, manuallyFilledFieldIds, manuallyFilledDatasetIds,
                     manuallyFilledIds, userData,
                     mViewStates.values());
@@ -1121,7 +1117,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * {@code fieldId} based on its {@code currentValue} and {@code userData}.
      */
     private void logFieldClassificationScoreLocked(
-            @NonNull AutofillManagerServiceImpl.FieldClassificationAlgorithmService fcService,
+            @NonNull FieldClassificationStrategy fcStrategy,
             @NonNull ArraySet<String> ignoredDatasets,
             @NonNull ArrayList<AutofillId> changedFieldIds,
             @NonNull ArrayList<String> changedDatasetIds,
@@ -1161,6 +1157,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             fieldIds[k++] = viewState.id;
         }
 
+        // Then use the results, asynchronously
         final RemoteCallback callback = new RemoteCallback((result) -> {
             if (result == null) {
                 if (sDebug) Slog.d(TAG, "setFieldClassificationScore(): no results");
@@ -1170,35 +1167,43 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         mComponentName.getPackageName());
                 return;
             }
-            final FieldClassificationScores matrix = result.getParcelable(EXTRA_SCORES);
+            final Scores scores = result.getParcelable(EXTRA_SCORES);
+            if (scores == null) {
+                Slog.w(TAG, "No field classification score on " + result);
+                return;
+            }
+            int i = 0, j = 0;
+            try {
+                for (i = 0; i < viewsSize; i++) {
+                    final AutofillId fieldId = fieldIds[i];
 
-            // Then use the results.
-            for (int i = 0; i < viewsSize; i++) {
-                final AutofillId fieldId = fieldIds[i];
-
-                ArrayList<Match> matches = null;
-                for (int j = 0; j < userValues.length; j++) {
-                    String remoteId = remoteIds[j];
-                    final String actualAlgorithm = matrix.algorithmName;
-                    final float score = matrix.scores[i][j];
-                    if (score > 0) {
-                        if (sVerbose) {
-                            Slog.v(TAG, "adding score " + score + " at index " + j + " and id "
-                                    + fieldId);
+                    ArrayList<Match> matches = null;
+                    for (j = 0; j < userValues.length; j++) {
+                        String remoteId = remoteIds[j];
+                        final float score = scores.scores[i][j];
+                        if (score > 0) {
+                            if (sVerbose) {
+                                Slog.v(TAG, "adding score " + score + " at index " + j + " and id "
+                                        + fieldId);
+                            }
+                            if (matches == null) {
+                                matches = new ArrayList<>(userValues.length);
+                            }
+                            matches.add(new Match(remoteId, score));
                         }
-                        if (matches == null) {
-                            matches = new ArrayList<>(userValues.length);
+                        else if (sVerbose) {
+                            Slog.v(TAG, "skipping score 0 at index " + j + " and id " + fieldId);
                         }
-                        matches.add(new Match(remoteId, score, actualAlgorithm));
                     }
-                    else if (sVerbose) {
-                        Slog.v(TAG, "skipping score 0 at index " + j + " and id " + fieldId);
+                    if (matches != null) {
+                        detectedFieldIds.add(fieldId);
+                        detectedFieldClassifications.add(new FieldClassification(matches));
                     }
                 }
-                if (matches != null) {
-                    detectedFieldIds.add(fieldId);
-                    detectedFieldClassifications.add(new FieldClassification(matches));
-                }
+            } catch (ArrayIndexOutOfBoundsException e) {
+                Slog.wtf(TAG, "Error accessing FC score at " + i + " x " + j + ": "
+                        + Arrays.toString(scores.scores), e);
+                return;
             }
 
             mService.logContextCommittedLocked(id, mClientState, mSelectedDatasetIds,
@@ -1207,7 +1212,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     mComponentName.getPackageName());
         });
 
-        fcService.getScores(algorithm, algorithmArgs, currentValues, userValues, callback);
+        fcStrategy.getScores(callback, algorithm, algorithmArgs, currentValues, userValues);
     }
 
     /**

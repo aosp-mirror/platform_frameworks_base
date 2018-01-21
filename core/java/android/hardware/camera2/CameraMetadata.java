@@ -1359,6 +1359,20 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int CONTROL_AE_MODE_ON_AUTO_FLASH_REDEYE = 4;
 
+    /**
+     * <p>An external flash has been turned on.</p>
+     * <p>It informs the camera device that an external flash has been turned on, and that
+     * metering (and continuous focus if active) should be quickly recaculated to account
+     * for the external flash. Otherwise, this mode acts like ON.</p>
+     * <p>When the external flash is turned off, AE mode should be changed to one of the
+     * other available AE modes.</p>
+     * <p>If the camera device supports AE external flash mode, aeState must be
+     * FLASH_REQUIRED after the camera device finishes AE scan and it's too dark without
+     * flash.</p>
+     * @see CaptureRequest#CONTROL_AE_MODE
+     */
+    public static final int CONTROL_AE_MODE_ON_EXTERNAL_FLASH = 5;
+
     //
     // Enumeration values for CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
     //

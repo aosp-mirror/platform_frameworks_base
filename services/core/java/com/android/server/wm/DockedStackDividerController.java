@@ -454,8 +454,11 @@ public class DockedStackDividerController {
                 inputMethodManagerInternal.hideCurrentInputMethod();
                 mImeHideRequested = true;
             }
+
+            // If a primary stack was just created, it will not have access to display content at
+            // this point so pass it from here to get a valid dock side.
             final TaskStack stack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
-            mOriginalDockedSide = stack.getDockSide();
+            mOriginalDockedSide = stack.getDockSideForDisplay(mDisplayContent);
             return;
         }
         mOriginalDockedSide = DOCKED_INVALID;
@@ -604,7 +607,7 @@ public class DockedStackDividerController {
         if (wasMinimized && mMinimizedDock && containsAppInDockedStack(openingApps)
                 && appTransition != TRANSIT_NONE &&
                 !AppTransition.isKeyguardGoingAwayTransit(appTransition)) {
-            mService.showRecentApps(true /* fromHome */);
+            mService.showRecentApps();
         }
     }
 

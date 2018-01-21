@@ -3464,16 +3464,21 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BACKUP, "isAppEligibleForBackup");
 
-        String callerLogString = "BMS.isAppEligibleForBackup";
-        TransportClient transportClient =
-                mTransportManager.getCurrentTransportClient(callerLogString);
-        boolean eligible =
-                AppBackupUtils.appIsRunningAndEligibleForBackupWithTransport(
-                        transportClient, packageName, mPackageManager);
-        if (transportClient != null) {
-            mTransportManager.disposeOfTransportClient(transportClient, callerLogString);
+        long oldToken = Binder.clearCallingIdentity();
+        try {
+            String callerLogString = "BMS.isAppEligibleForBackup";
+            TransportClient transportClient =
+                    mTransportManager.getCurrentTransportClient(callerLogString);
+            boolean eligible =
+                    AppBackupUtils.appIsRunningAndEligibleForBackupWithTransport(
+                            transportClient, packageName, mPackageManager);
+            if (transportClient != null) {
+                mTransportManager.disposeOfTransportClient(transportClient, callerLogString);
+            }
+            return eligible;
+        } finally {
+            Binder.restoreCallingIdentity(oldToken);
         }
-        return eligible;
     }
 
     @Override
@@ -3481,21 +3486,26 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BACKUP, "filterAppsEligibleForBackup");
 
-        String callerLogString = "BMS.filterAppsEligibleForBackup";
-        TransportClient transportClient =
-                mTransportManager.getCurrentTransportClient(callerLogString);
-        List<String> eligibleApps = new LinkedList<>();
-        for (String packageName : packages) {
-            if (AppBackupUtils
-                    .appIsRunningAndEligibleForBackupWithTransport(
-                            transportClient, packageName, mPackageManager)) {
-                eligibleApps.add(packageName);
+        long oldToken = Binder.clearCallingIdentity();
+        try {
+            String callerLogString = "BMS.filterAppsEligibleForBackup";
+            TransportClient transportClient =
+                    mTransportManager.getCurrentTransportClient(callerLogString);
+            List<String> eligibleApps = new LinkedList<>();
+            for (String packageName : packages) {
+                if (AppBackupUtils
+                        .appIsRunningAndEligibleForBackupWithTransport(
+                                transportClient, packageName, mPackageManager)) {
+                    eligibleApps.add(packageName);
+                }
             }
+            if (transportClient != null) {
+                mTransportManager.disposeOfTransportClient(transportClient, callerLogString);
+            }
+            return eligibleApps.toArray(new String[eligibleApps.size()]);
+        } finally {
+            Binder.restoreCallingIdentity(oldToken);
         }
-        if (transportClient != null) {
-            mTransportManager.disposeOfTransportClient(transportClient, callerLogString);
-        }
-        return eligibleApps.toArray(new String[eligibleApps.size()]);
     }
 
     @Override
@@ -3513,6 +3523,9 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                         return;
                     } else if ("agents".startsWith(arg)) {
                         dumpAgents(pw);
+                        return;
+                    } else if ("transportclients".equals(arg.toLowerCase())) {
+                        mTransportManager.dump(pw);
                         return;
                     }
                 }
@@ -3575,6 +3588,8 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
                     }
                 }
             }
+
+            mTransportManager.dump(pw);
 
             pw.println("Pending init: " + mPendingInits.size());
             for (String s : mPendingInits) {

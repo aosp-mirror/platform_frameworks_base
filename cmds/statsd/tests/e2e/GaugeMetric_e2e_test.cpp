@@ -51,16 +51,16 @@ StatsdConfig CreateStatsdConfigForPushedEvent() {
     fieldMatcher->add_child()->set_field(3);  // type (enum)
     fieldMatcher->add_child()->set_field(4);  // activity_name(str)
     fieldMatcher->add_child()->set_field(7);  // activity_start_msec(int64)
-    *gaugeMetric->mutable_dimensions() =
+    *gaugeMetric->mutable_dimensions_in_what() =
         CreateDimensions(android::util::APP_START_CHANGED, {1 /* uid field */ });
     gaugeMetric->set_bucket(ONE_MINUTE);
 
     auto links = gaugeMetric->add_links();
     links->set_condition(isInBackgroundPredicate.id());
-    auto dimensionWhat = links->mutable_dimensions_in_what();
+    auto dimensionWhat = links->mutable_fields_in_what();
     dimensionWhat->set_field(android::util::APP_START_CHANGED);
     dimensionWhat->add_child()->set_field(1);  // uid field.
-    auto dimensionCondition = links->mutable_dimensions_in_condition();
+    auto dimensionCondition = links->mutable_fields_in_condition();
     dimensionCondition->set_field(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED);
     dimensionCondition->add_child()->set_field(1);  // uid field.
     return config;
@@ -148,10 +148,10 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
     EXPECT_EQ(gaugeMetrics.data_size(), 2);
 
     auto data = gaugeMetrics.data(0);
-    EXPECT_EQ(data.dimension().field(), android::util::APP_START_CHANGED);
-    EXPECT_EQ(data.dimension().value_tuple().dimensions_value_size(), 1);
-    EXPECT_EQ(data.dimension().value_tuple().dimensions_value(0).field(), 1 /* uid field */);
-    EXPECT_EQ(data.dimension().value_tuple().dimensions_value(0).value_int(), appUid1);
+    EXPECT_EQ(data.dimensions_in_what().field(), android::util::APP_START_CHANGED);
+    EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
+    EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1 /* uid field */);
+    EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).value_int(), appUid1);
     EXPECT_EQ(data.bucket_info_size(), 3);
     EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs);
     EXPECT_EQ(data.bucket_info(0).end_bucket_nanos(), bucketStartTimeNs + bucketSizeNs);
@@ -172,10 +172,11 @@ TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent) {
     EXPECT_EQ(data.bucket_info(2).atom().app_start_changed().activity_start_msec(), 105L);
 
     data = gaugeMetrics.data(1);
-    EXPECT_EQ(data.dimension().field(), android::util::APP_START_CHANGED);
-    EXPECT_EQ(data.dimension().value_tuple().dimensions_value_size(), 1);
-    EXPECT_EQ(data.dimension().value_tuple().dimensions_value(0).field(), 1 /* uid field */);
-    EXPECT_EQ(data.dimension().value_tuple().dimensions_value(0).value_int(), appUid2);
+
+    EXPECT_EQ(data.dimensions_in_what().field(), android::util::APP_START_CHANGED);
+    EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value_size(), 1);
+    EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).field(), 1 /* uid field */);
+    EXPECT_EQ(data.dimensions_in_what().value_tuple().dimensions_value(0).value_int(), appUid2);
     EXPECT_EQ(data.bucket_info_size(), 1);
     EXPECT_EQ(data.bucket_info(0).start_bucket_nanos(), bucketStartTimeNs + 2 * bucketSizeNs);
     EXPECT_EQ(data.bucket_info(0).end_bucket_nanos(), bucketStartTimeNs + 3 * bucketSizeNs);

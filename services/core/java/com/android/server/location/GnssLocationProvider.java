@@ -827,7 +827,7 @@ public class GnssLocationProvider implements LocationProviderInterface {
                 return isEnabled();
             }
         };
-        mGnssMetrics = new GnssMetrics();
+        mGnssMetrics = new GnssMetrics(mBatteryStats);
     }
 
     /**

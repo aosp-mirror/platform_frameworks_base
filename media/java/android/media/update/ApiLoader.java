@@ -16,8 +16,10 @@
 
 package android.media.update;
 
+import android.content.res.Resources;
 import android.content.Context;
-import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManager;
+import android.os.Build;
 
 /**
  * @hide
@@ -34,23 +36,25 @@ public final class ApiLoader {
     public static StaticProvider getProvider(Context context) {
         try {
             return (StaticProvider) getMediaLibraryImpl(context);
-        } catch (NameNotFoundException | ReflectiveOperationException e) {
+        } catch (PackageManager.NameNotFoundException | ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
     }
 
     // TODO This method may do I/O; Ensure it does not violate (emit warnings in) strict mode.
-    private static synchronized Object getMediaLibraryImpl(Context appContext)
-            throws NameNotFoundException, ReflectiveOperationException {
+    private static synchronized Object getMediaLibraryImpl(Context context)
+            throws PackageManager.NameNotFoundException, ReflectiveOperationException {
         if (sMediaLibrary != null) return sMediaLibrary;
 
-        // TODO Dynamically find the package name
-        Context libContext = appContext.createPackageContext(UPDATE_PACKAGE,
+        // TODO Figure out when to use which package (query media update service)
+        int flags = Build.IS_DEBUGGABLE ? 0 : PackageManager.MATCH_FACTORY_ONLY;
+        Context libContext = context.createApplicationContext(
+                context.getPackageManager().getPackageInfo(UPDATE_PACKAGE, flags).applicationInfo,
                 Context.CONTEXT_INCLUDE_CODE | Context.CONTEXT_IGNORE_SECURITY);
         sMediaLibrary = libContext.getClassLoader()
                 .loadClass(UPDATE_CLASS)
-                .getMethod(UPDATE_METHOD, Context.class, Context.class)
-                .invoke(null, appContext, libContext);
+                .getMethod(UPDATE_METHOD, Resources.class, Resources.Theme.class)
+                .invoke(null, libContext.getResources(), libContext.getTheme());
         return sMediaLibrary;
     }
 }

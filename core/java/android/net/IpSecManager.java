@@ -19,6 +19,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
@@ -624,6 +625,133 @@ public final class IpSecManager {
         return new UdpEncapsulationSocket(mService, 0);
     }
 
+    /**
+     * This class represents an IpSecTunnelInterface
+     *
+     * <p>IpSecTunnelInterface objects track tunnel interfaces that serve as
+     * local endpoints for IPsec tunnels.
+     *
+     * <p>Creating an IpSecTunnelInterface creates a device to which IpSecTransforms may be
+     * applied to provide IPsec security to packets sent through the tunnel. While a tunnel
+     * cannot be used in standalone mode within Android, the higher layers may use the tunnel
+     * to create Network objects which are accessible to the Android system.
+     * @hide
+     */
+    @SystemApi
+    public static final class IpSecTunnelInterface implements AutoCloseable {
+        private final IIpSecService mService;
+        private final InetAddress mRemoteAddress;
+        private final InetAddress mLocalAddress;
+        private final Network mUnderlyingNetwork;
+        private final CloseGuard mCloseGuard = CloseGuard.get();
+        private String mInterfaceName;
+        private int mResourceId = INVALID_RESOURCE_ID;
+
+        /** Get the underlying SPI held by this object. */
+        public String getInterfaceName() {
+            return mInterfaceName;
+        }
+
+        /**
+         * Add an address to the IpSecTunnelInterface
+         *
+         * <p>Add an address which may be used as the local inner address for
+         * tunneled traffic.
+         *
+         * @param address the local address for traffic inside the tunnel
+         * @throws IOException if the address could not be added
+         * @hide
+         */
+        public void addAddress(LinkAddress address) throws IOException {
+        }
+
+        /**
+         * Remove an address from the IpSecTunnelInterface
+         *
+         * <p>Remove an address which was previously added to the IpSecTunnelInterface
+         *
+         * @param address to be removed
+         * @throws IOException if the address could not be removed
+         * @hide
+         */
+        public void removeAddress(LinkAddress address) throws IOException {
+        }
+
+        private IpSecTunnelInterface(@NonNull IIpSecService service,
+                @NonNull InetAddress localAddress, @NonNull InetAddress remoteAddress,
+                @NonNull Network underlyingNetwork)
+                throws ResourceUnavailableException, IOException {
+            mService = service;
+            mLocalAddress = localAddress;
+            mRemoteAddress = remoteAddress;
+            mUnderlyingNetwork = underlyingNetwork;
+            // TODO: Call IpSecService
+        }
+
+        /**
+         * Delete an IpSecTunnelInterface
+         *
+         * <p>Calling close will deallocate the IpSecTunnelInterface and all of its system
+         * resources. Any packets bound for this interface either inbound or outbound will
+         * all be lost.
+         */
+        @Override
+        public void close() {
+            // try {
+            // TODO: Call IpSecService
+            mResourceId = INVALID_RESOURCE_ID;
+            // } catch (RemoteException e) {
+            //    throw e.rethrowFromSystemServer();
+            // }
+            mCloseGuard.close();
+        }
+
+        /** Check that the Interface was closed properly. */
+        @Override
+        protected void finalize() throws Throwable {
+            if (mCloseGuard != null) {
+                mCloseGuard.warnIfOpen();
+            }
+            close();
+        }
+    }
+
+    /**
+     * Create a new IpSecTunnelInterface as a local endpoint for tunneled IPsec traffic.
+     *
+     * @param localAddress The local addres of the tunnel
+     * @param remoteAddress The local addres of the tunnel
+     * @param underlyingNetwork the {@link Network} that will carry traffic for this tunnel.
+     *        This network should almost certainly be a network such as WiFi with an L2 address.
+     * @return a new {@link IpSecManager#IpSecTunnelInterface} with the specified properties
+     * @throws IOException indicating that the socket could not be opened or bound
+     * @throws ResourceUnavailableException indicating that too many encapsulation sockets are open
+     * @hide
+     */
+    @SystemApi
+    public IpSecTunnelInterface createIpSecTunnelInterface(@NonNull InetAddress localAddress,
+            @NonNull InetAddress remoteAddress, @NonNull Network underlyingNetwork)
+            throws ResourceUnavailableException, IOException {
+        return new IpSecTunnelInterface(mService, localAddress, remoteAddress, underlyingNetwork);
+    }
+
+    /**
+     * Apply a transform to the IpSecTunnelInterface
+     *
+     * @param tunnel The {@link IpSecManager#IpSecTunnelInterface} that will use the supplied
+     *        transform.
+     * @param direction the direction, {@link DIRECTION_OUT} or {@link #DIRECTION_IN} in which
+     *        the transform will be used.
+     * @param transform an {@link IpSecTransform} created in tunnel mode
+     * @throws IOException indicating that the transform could not be applied due to a lower
+     *         layer failure.
+     * @hide
+     */
+    @SystemApi
+    void applyTunnelModeTransform(IpSecTunnelInterface tunnel, int direction,
+            IpSecTransform transform) throws IOException {
+        // TODO: call IpSecService
+    }
     /**
      * Construct an instance of IpSecManager within an application context.
      *

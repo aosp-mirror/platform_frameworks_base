@@ -16,6 +16,9 @@
 
 package android.net;
 
+import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
+import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
+import static android.net.NetworkStats.DEFAULT_NETWORK_YES;
 import static android.net.NetworkStats.METERED_ALL;
 import static android.net.NetworkStats.METERED_NO;
 import static android.net.NetworkStats.METERED_YES;
@@ -56,71 +59,75 @@ public class NetworkStatsTest {
     @Test
     public void testFindIndex() throws Exception {
         final NetworkStats stats = new NetworkStats(TEST_START, 5)
-                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 1024L,
-                        8L, 0L, 0L, 10)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 0L, 0L,
-                        1024L, 8L, 11)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_NO, 0L, 0L,
-                        1024L, 8L, 11)
-                .addValues(TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 1024L,
-                        8L, 1024L, 8L, 12)
-                .addValues(TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_YES, 1024L,
-                        8L, 1024L, 8L, 12);
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_YES, 1024L, 8L, 0L, 0L, 10)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_NO, 0L, 0L, 1024L, 8L, 11)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_NO,
+                        DEFAULT_NETWORK_YES, 0L, 0L, 1024L, 8L, 11)
+                .addValues(TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_NO, 1024L, 8L, 1024L, 8L, 12)
+                .addValues(TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_YES,
+                        DEFAULT_NETWORK_YES, 1024L, 8L, 1024L, 8L, 12);
 
         assertEquals(4, stats.findIndex(TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, METERED_YES,
-                ROAMING_YES));
+                ROAMING_YES, DEFAULT_NETWORK_YES));
         assertEquals(3, stats.findIndex(TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, METERED_NO,
-                ROAMING_NO));
+                ROAMING_NO, DEFAULT_NETWORK_NO));
         assertEquals(2, stats.findIndex(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_YES,
-                ROAMING_NO));
+                ROAMING_NO, DEFAULT_NETWORK_YES));
         assertEquals(1, stats.findIndex(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_NO,
-                ROAMING_NO));
+                ROAMING_NO, DEFAULT_NETWORK_NO));
         assertEquals(0, stats.findIndex(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO,
-                ROAMING_NO));
+                ROAMING_NO, DEFAULT_NETWORK_YES));
         assertEquals(-1, stats.findIndex(TEST_IFACE, 6, SET_DEFAULT, TAG_NONE, METERED_NO,
-                ROAMING_NO));
+                ROAMING_NO, DEFAULT_NETWORK_NO));
+        assertEquals(-1, stats.findIndex(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO,
+                ROAMING_NO, DEFAULT_NETWORK_NO));
     }
 
     @Test
     public void testFindIndexHinted() {
         final NetworkStats stats = new NetworkStats(TEST_START, 3)
-                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 1024L,
-                        8L, 0L, 0L, 10)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 0L, 0L,
-                        1024L, 8L, 11)
-                .addValues(TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 1024L,
-                        8L, 1024L, 8L, 12)
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_YES, 1024L, 8L, 0L, 0L, 10)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_NO, 0L, 0L, 1024L, 8L, 11)
+                .addValues(TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_YES, 1024L, 8L, 1024L, 8L, 12)
                 .addValues(TEST_IFACE2, 100, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO,
-                        1024L, 8L, 0L, 0L, 10)
-                .addValues(TEST_IFACE2, 101, SET_DEFAULT, 0xF00D, METERED_NO, ROAMING_NO, 0L, 0L,
-                        1024L, 8L, 11)
-                .addValues(TEST_IFACE2, 101, SET_DEFAULT, 0xF00D, METERED_YES, ROAMING_NO, 0L, 0L,
-                        1024L, 8L, 11)
-                .addValues(TEST_IFACE2, 102, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 1024L,
-                        8L, 1024L, 8L, 12)
-                .addValues(TEST_IFACE2, 102, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_YES, 1024L,
-                        8L, 1024L, 8L, 12);
+                        DEFAULT_NETWORK_NO, 1024L, 8L, 0L, 0L, 10)
+                .addValues(TEST_IFACE2, 101, SET_DEFAULT, 0xF00D, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_YES, 0L, 0L, 1024L, 8L, 11)
+                .addValues(TEST_IFACE2, 101, SET_DEFAULT, 0xF00D, METERED_YES, ROAMING_NO,
+                        DEFAULT_NETWORK_NO, 0L, 0L, 1024L, 8L, 11)
+                .addValues(TEST_IFACE2, 102, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_YES, 1024L, 8L, 1024L, 8L, 12)
+                .addValues(TEST_IFACE2, 102, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_YES,
+                        DEFAULT_NETWORK_NO, 1024L, 8L, 1024L, 8L, 12);
 
         // verify that we correctly find across regardless of hinting
         for (int hint = 0; hint < stats.size(); hint++) {
             assertEquals(0, stats.findIndexHinted(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE,
-                    METERED_NO, ROAMING_NO, hint));
+                    METERED_NO, ROAMING_NO, DEFAULT_NETWORK_YES, hint));
             assertEquals(1, stats.findIndexHinted(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE,
-                    METERED_NO, ROAMING_NO, hint));
+                    METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO, hint));
             assertEquals(2, stats.findIndexHinted(TEST_IFACE, 102, SET_DEFAULT, TAG_NONE,
-                    METERED_NO, ROAMING_NO, hint));
+                    METERED_NO, ROAMING_NO, DEFAULT_NETWORK_YES, hint));
             assertEquals(3, stats.findIndexHinted(TEST_IFACE2, 100, SET_FOREGROUND, TAG_NONE,
-                    METERED_NO, ROAMING_NO, hint));
+                    METERED_NO, ROAMING_NO, DEFAULT_NETWORK_NO, hint));
             assertEquals(4, stats.findIndexHinted(TEST_IFACE2, 101, SET_DEFAULT, 0xF00D,
-                    METERED_NO, ROAMING_NO, hint));
+                    METERED_NO, ROAMING_NO, DEFAULT_NETWORK_YES, hint));
             assertEquals(5, stats.findIndexHinted(TEST_IFACE2, 101, SET_DEFAULT, 0xF00D,
-                    METERED_YES, ROAMING_NO, hint));
+                    METERED_YES, ROAMING_NO, DEFAULT_NETWORK_NO, hint));
             assertEquals(6, stats.findIndexHinted(TEST_IFACE2, 102, SET_DEFAULT, TAG_NONE,
-                    METERED_NO, ROAMING_NO, hint));
+                    METERED_NO, ROAMING_NO, DEFAULT_NETWORK_YES, hint));
             assertEquals(7, stats.findIndexHinted(TEST_IFACE2, 102, SET_DEFAULT, TAG_NONE,
-                    METERED_YES, ROAMING_YES, hint));
+                    METERED_YES, ROAMING_YES, DEFAULT_NETWORK_NO, hint));
             assertEquals(-1, stats.findIndexHinted(TEST_IFACE, 6, SET_DEFAULT, TAG_NONE,
-                    METERED_NO, ROAMING_NO, hint));
+                    METERED_NO, ROAMING_NO, DEFAULT_NETWORK_YES, hint));
+            assertEquals(-1, stats.findIndexHinted(TEST_IFACE2, 102, SET_DEFAULT, TAG_NONE,
+                    METERED_YES, ROAMING_YES, DEFAULT_NETWORK_YES, hint));
         }
     }
 
@@ -131,50 +138,50 @@ public class NetworkStatsTest {
         assertEquals(0, stats.size());
         assertEquals(4, stats.internalSize());
 
-        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 1L, 1L,
-                2L, 2L, 3);
-        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 2L, 2L,
-                2L, 2L, 4);
-        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_YES, 3L,
-                3L, 2L, 2L, 5);
-        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_YES, 3L,
-                3L, 2L, 2L, 5);
+        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_YES, 1L, 1L, 2L, 2L, 3);
+        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 2L, 2L, 2L, 2L, 4);
+        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_YES,
+                DEFAULT_NETWORK_YES, 3L, 3L, 2L, 2L, 5);
+        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_YES,
+                DEFAULT_NETWORK_NO, 3L, 3L, 2L, 2L, 5);
 
         assertEquals(4, stats.size());
         assertEquals(4, stats.internalSize());
 
-        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 4L,
-                40L, 4L, 40L, 7);
-        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 5L,
-                50L, 4L, 40L, 8);
-        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 6L,
-                60L, 5L, 50L, 10);
-        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_YES, 7L,
-                70L, 5L, 50L, 11);
-        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_YES, 7L,
-                70L, 5L, 50L, 11);
+        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 4L, 40L, 4L, 40L, 7);
+        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_YES, 5L, 50L, 4L, 40L, 8);
+        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 6L, 60L, 5L, 50L, 10);
+        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_YES,
+                DEFAULT_NETWORK_YES, 7L, 70L, 5L, 50L, 11);
+        stats.addValues(TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_YES,
+                DEFAULT_NETWORK_NO, 7L, 70L, 5L, 50L, 11);
 
         assertEquals(9, stats.size());
         assertTrue(stats.internalSize() >= 9);
 
         assertValues(stats, 0, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                1L, 1L, 2L, 2L, 3);
+                DEFAULT_NETWORK_YES, 1L, 1L, 2L, 2L, 3);
         assertValues(stats, 1, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                2L, 2L, 2L, 2L, 4);
+                DEFAULT_NETWORK_NO, 2L, 2L, 2L, 2L, 4);
         assertValues(stats, 2, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_YES,
-                3L, 3L, 2L, 2L, 5);
+                DEFAULT_NETWORK_YES, 3L, 3L, 2L, 2L, 5);
         assertValues(stats, 3, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_YES,
-                ROAMING_YES, 3L, 3L, 2L, 2L, 5);
+                ROAMING_YES, DEFAULT_NETWORK_NO, 3L, 3L, 2L, 2L, 5);
         assertValues(stats, 4, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                4L, 40L, 4L, 40L, 7);
+                DEFAULT_NETWORK_NO, 4L, 40L, 4L, 40L, 7);
         assertValues(stats, 5, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                5L, 50L, 4L, 40L, 8);
+                DEFAULT_NETWORK_YES, 5L, 50L, 4L, 40L, 8);
         assertValues(stats, 6, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                6L, 60L, 5L, 50L, 10);
+                DEFAULT_NETWORK_NO, 6L, 60L, 5L, 50L, 10);
         assertValues(stats, 7, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_YES,
-                7L, 70L, 5L, 50L, 11);
+                DEFAULT_NETWORK_YES, 7L, 70L, 5L, 50L, 11);
         assertValues(stats, 8, TEST_IFACE, TEST_UID, SET_DEFAULT, TAG_NONE, METERED_YES,
-                ROAMING_YES, 7L, 70L, 5L, 50L, 11);
+                ROAMING_YES, DEFAULT_NETWORK_NO, 7L, 70L, 5L, 50L, 11);
     }
 
     @Test
@@ -187,17 +194,17 @@ public class NetworkStatsTest {
                 -128L, -1L, -1);
 
         assertValues(stats, 0, TEST_IFACE, 1001, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                384L, 3L, 128L, 1L, 9);
-        assertValues(stats, 1, TEST_IFACE, 1001, SET_DEFAULT, 0xff, METERED_NO, ROAMING_NO, 128L,
-                1L, 128L, 1L, 2);
+                DEFAULT_NETWORK_NO, 384L, 3L, 128L, 1L, 9);
+        assertValues(stats, 1, TEST_IFACE, 1001, SET_DEFAULT, 0xff, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 128L, 1L, 128L, 1L, 2);
 
         // now try combining that should create row
         stats.combineValues(TEST_IFACE, 5005, SET_DEFAULT, TAG_NONE, 128L, 1L, 128L, 1L, 3);
         assertValues(stats, 2, TEST_IFACE, 5005, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                128L, 1L, 128L, 1L, 3);
+                DEFAULT_NETWORK_NO, 128L, 1L, 128L, 1L, 3);
         stats.combineValues(TEST_IFACE, 5005, SET_DEFAULT, TAG_NONE, 128L, 1L, 128L, 1L, 3);
         assertValues(stats, 2, TEST_IFACE, 5005, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                256L, 2L, 256L, 2L, 6);
+                DEFAULT_NETWORK_NO, 256L, 2L, 256L, 2L, 6);
     }
 
     @Test
@@ -213,10 +220,10 @@ public class NetworkStatsTest {
         final NetworkStats result = after.subtract(before);
 
         // identical data should result in zero delta
-        assertValues(result, 0, TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 0L,
-                0L, 0L, 0L, 0);
-        assertValues(result, 1, TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 0L,
-                0L, 0L, 0L, 0);
+        assertValues(result, 0, TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 0L, 0L, 0L, 0L, 0);
+        assertValues(result, 1, TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 0L, 0L, 0L, 0L, 0);
     }
 
     @Test
@@ -232,10 +239,10 @@ public class NetworkStatsTest {
         final NetworkStats result = after.subtract(before);
 
         // expect delta between measurements
-        assertValues(result, 0, TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 1L,
-                1L, 2L, 1L, 4);
-        assertValues(result, 1, TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 3L,
-                1L, 4L, 1L, 8);
+        assertValues(result, 0, TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 1L, 1L, 2L, 1L, 4);
+        assertValues(result, 1, TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 3L, 1L, 4L, 1L, 8);
     }
 
     @Test
@@ -252,12 +259,12 @@ public class NetworkStatsTest {
         final NetworkStats result = after.subtract(before);
 
         // its okay to have new rows
-        assertValues(result, 0, TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 0L,
-                0L, 0L, 0L, 0);
-        assertValues(result, 1, TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 0L,
-                0L, 0L, 0L, 0);
+        assertValues(result, 0, TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 0L, 0L, 0L, 0L, 0);
+        assertValues(result, 1, TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 0L, 0L, 0L, 0L, 0);
         assertValues(result, 2, TEST_IFACE, 102, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                1024L, 8L, 1024L, 8L, 20);
+                DEFAULT_NETWORK_NO, 1024L, 8L, 1024L, 8L, 20);
     }
 
     @Test
@@ -274,7 +281,7 @@ public class NetworkStatsTest {
         // should silently drop omitted rows
         assertEquals(1, result.size());
         assertValues(result, 0, TEST_IFACE2, UID_ALL, SET_DEFAULT, TAG_NONE, METERED_NO,
-                ROAMING_NO, 1L, 2L, 3L, 4L, 0);
+                ROAMING_NO, DEFAULT_NETWORK_NO, 1L, 2L, 3L, 4L, 0);
         assertEquals(4L, result.getTotalBytes());
     }
 
@@ -301,21 +308,21 @@ public class NetworkStatsTest {
         assertEquals(64L, uidTag.getTotalBytes());
 
         final NetworkStats uidMetered = new NetworkStats(TEST_START, 3)
-                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 32L, 0L,
-                        0L, 0L, 0L)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_NO, 32L, 0L,
-                        0L, 0L, 0L)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_NO, 32L, 0L,
-                        0L, 0L, 0L);
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_YES, 32L, 0L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_NO,
+                        DEFAULT_NETWORK_NO, 32L, 0L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_NO,
+                        DEFAULT_NETWORK_YES, 32L, 0L, 0L, 0L, 0L);
         assertEquals(96L, uidMetered.getTotalBytes());
 
         final NetworkStats uidRoaming = new NetworkStats(TEST_START, 3)
-                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 32L, 0L,
-                        0L, 0L, 0L)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_NO, 32L, 0L,
-                        0L, 0L, 0L)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_YES, 32L, 0L,
-                        0L, 0L, 0L);
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_YES, 32L, 0L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_NO,
+                        DEFAULT_NETWORK_NO, 32L, 0L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_YES,
+                        DEFAULT_NETWORK_YES, 32L, 0L, 0L, 0L, 0L);
         assertEquals(96L, uidRoaming.getTotalBytes());
     }
 
@@ -331,38 +338,38 @@ public class NetworkStatsTest {
     @Test
     public void testGroupedByIfaceAll() throws Exception {
         final NetworkStats uidStats = new NetworkStats(TEST_START, 3)
-                .addValues(IFACE_ALL, 100, SET_ALL, TAG_NONE, METERED_NO, ROAMING_NO, 128L, 8L, 0L,
-                        2L, 20L)
-                .addValues(IFACE_ALL, 101, SET_FOREGROUND, TAG_NONE, METERED_YES, ROAMING_NO, 128L,
-                        8L, 0L, 2L, 20L)
-                .addValues(IFACE_ALL, 101, SET_ALL, TAG_NONE, METERED_NO, ROAMING_YES, 128L, 8L, 0L,
-                        2L, 20L);
+                .addValues(IFACE_ALL, 100, SET_ALL, TAG_NONE, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_YES, 128L, 8L, 0L, 2L, 20L)
+                .addValues(IFACE_ALL, 101, SET_FOREGROUND, TAG_NONE, METERED_YES, ROAMING_NO,
+                        DEFAULT_NETWORK_NO, 128L, 8L, 0L, 2L, 20L)
+                .addValues(IFACE_ALL, 101, SET_ALL, TAG_NONE, METERED_NO, ROAMING_YES,
+                        DEFAULT_NETWORK_YES, 128L, 8L, 0L, 2L, 20L);
         final NetworkStats grouped = uidStats.groupedByIface();
 
         assertEquals(3, uidStats.size());
         assertEquals(1, grouped.size());
 
         assertValues(grouped, 0, IFACE_ALL, UID_ALL, SET_ALL, TAG_NONE, METERED_ALL, ROAMING_ALL,
-                384L, 24L, 0L, 6L, 0L);
+                DEFAULT_NETWORK_ALL, 384L, 24L, 0L, 6L, 0L);
     }
 
     @Test
     public void testGroupedByIface() throws Exception {
         final NetworkStats uidStats = new NetworkStats(TEST_START, 7)
-                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 128L, 8L,
-                        0L, 2L, 20L)
-                .addValues(TEST_IFACE2, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 512L,
-                        32L, 0L, 0L, 0L)
-                .addValues(TEST_IFACE2, 100, SET_DEFAULT, 0xF00D, METERED_NO, ROAMING_NO, 64L, 4L,
-                        0L, 0L, 0L)
-                .addValues(TEST_IFACE2, 100, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO, 512L,
-                        32L, 0L, 0L, 0L)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 128L, 8L,
-                        0L, 0L, 0L)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, 0xF00D, METERED_YES, ROAMING_NO, 128L, 8L,
-                        0L, 0L, 0L)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_YES, 128L,
-                        8L, 0L, 0L, 0L);
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_YES, 128L, 8L, 0L, 2L, 20L)
+                .addValues(TEST_IFACE2, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_NO, 512L, 32L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE2, 100, SET_DEFAULT, 0xF00D, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_YES, 64L, 4L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE2, 100, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_NO, 512L, 32L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_YES, 128L, 8L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, 0xF00D, METERED_YES, ROAMING_NO,
+                        DEFAULT_NETWORK_NO, 128L, 8L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_YES,
+                        DEFAULT_NETWORK_YES, 128L, 8L, 0L, 0L, 0L);
 
         final NetworkStats grouped = uidStats.groupedByIface();
 
@@ -370,59 +377,59 @@ public class NetworkStatsTest {
 
         assertEquals(2, grouped.size());
         assertValues(grouped, 0, TEST_IFACE, UID_ALL, SET_ALL, TAG_NONE, METERED_ALL, ROAMING_ALL,
-                384L, 24L, 0L, 2L, 0L);
+                DEFAULT_NETWORK_ALL, 384L, 24L, 0L, 2L, 0L);
         assertValues(grouped, 1, TEST_IFACE2, UID_ALL, SET_ALL, TAG_NONE, METERED_ALL, ROAMING_ALL,
-                1024L, 64L, 0L, 0L, 0L);
+                DEFAULT_NETWORK_ALL, 1024L, 64L, 0L, 0L, 0L);
     }
 
     @Test
     public void testAddAllValues() {
         final NetworkStats first = new NetworkStats(TEST_START, 5)
-                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_NO, 32L, 0L,
-                        0L, 0L, 0L)
-                .addValues(TEST_IFACE, 100, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO, 32L,
-                        0L, 0L, 0L, 0L)
-                .addValues(TEST_IFACE, 100, SET_FOREGROUND, TAG_NONE, METERED_YES, ROAMING_YES, 32L,
-                        0L, 0L, 0L, 0L);
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_NO,
+                        DEFAULT_NETWORK_YES, 32L, 0L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 100, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_NO, 32L, 0L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 100, SET_FOREGROUND, TAG_NONE, METERED_YES, ROAMING_YES,
+                        DEFAULT_NETWORK_YES, 32L, 0L, 0L, 0L, 0L);
 
         final NetworkStats second = new NetworkStats(TEST_START, 2)
-                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_NO, 32L, 0L,
-                        0L, 0L, 0L)
-                .addValues(TEST_IFACE2, UID_ALL, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 32L,
-                        0L, 0L, 0L, 0L)
-                .addValues(TEST_IFACE, 100, SET_FOREGROUND, TAG_NONE, METERED_YES, ROAMING_YES, 32L,
-                        0L, 0L, 0L, 0L);
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_NO,
+                        DEFAULT_NETWORK_YES, 32L, 0L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE2, UID_ALL, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_NO, 32L, 0L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 100, SET_FOREGROUND, TAG_NONE, METERED_YES, ROAMING_YES,
+                        DEFAULT_NETWORK_YES, 32L, 0L, 0L, 0L, 0L);
 
         first.combineAllValues(second);
 
         assertEquals(4, first.size());
-        assertValues(first, 0, TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_NO, 64L,
-                0L, 0L, 0L, 0L);
+        assertValues(first, 0, TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_NO,
+                DEFAULT_NETWORK_YES, 64L, 0L, 0L, 0L, 0L);
         assertValues(first, 1, TEST_IFACE, 100, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO,
-                32L, 0L, 0L, 0L, 0L);
+                DEFAULT_NETWORK_NO, 32L, 0L, 0L, 0L, 0L);
         assertValues(first, 2, TEST_IFACE, 100, SET_FOREGROUND, TAG_NONE, METERED_YES, ROAMING_YES,
-                64L, 0L, 0L, 0L, 0L);
+                DEFAULT_NETWORK_YES, 64L, 0L, 0L, 0L, 0L);
         assertValues(first, 3, TEST_IFACE2, UID_ALL, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                32L, 0L, 0L, 0L, 0L);
+                DEFAULT_NETWORK_NO, 32L, 0L, 0L, 0L, 0L);
     }
 
     @Test
     public void testGetTotal() {
         final NetworkStats stats = new NetworkStats(TEST_START, 7)
-                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 128L, 8L,
-                        0L, 2L, 20L)
-                .addValues(TEST_IFACE2, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 512L,
-                        32L, 0L, 0L, 0L)
-                .addValues(TEST_IFACE2, 100, SET_DEFAULT, 0xF00D, METERED_NO, ROAMING_NO, 64L, 4L,
-                        0L, 0L, 0L)
-                .addValues(TEST_IFACE2, 100, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO, 512L,
-                        32L, 0L, 0L, 0L)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_NO, 128L,
-                        8L, 0L, 0L, 0L)
-                .addValues(TEST_IFACE, 101, SET_DEFAULT, 0xF00D, METERED_NO, ROAMING_NO, 128L, 8L,
-                        0L, 0L, 0L)
-                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_YES, 128L,
-                        8L, 0L, 0L, 0L);
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_YES, 128L, 8L, 0L, 2L, 20L)
+                .addValues(TEST_IFACE2, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_NO, 512L, 32L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE2, 100, SET_DEFAULT, 0xF00D, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_YES, 64L, 4L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE2, 100, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_NO, 512L,32L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_NO,
+                        DEFAULT_NETWORK_YES, 128L, 8L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, SET_DEFAULT, 0xF00D, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_NO, 128L, 8L, 0L, 0L, 0L)
+                .addValues(TEST_IFACE, 100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_YES,
+                        DEFAULT_NETWORK_NO, 128L, 8L, 0L, 0L, 0L);
 
         assertValues(stats.getTotal(null), 1408L, 88L, 0L, 2L, 20L);
         assertValues(stats.getTotal(null, 100), 1280L, 80L, 0L, 2L, 20L);
@@ -449,9 +456,9 @@ public class NetworkStatsTest {
         assertEquals(6, before.size());
         assertEquals(2, after.size());
         assertValues(after, 0, TEST_IFACE, 101, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                128L, 8L, 0L, 0L, 0L);
-        assertValues(after, 1, TEST_IFACE, 101, SET_DEFAULT, 0xF00D, METERED_NO, ROAMING_NO, 128L,
-                8L, 0L, 0L, 0L);
+                DEFAULT_NETWORK_NO, 128L, 8L, 0L, 0L, 0L);
+        assertValues(after, 1, TEST_IFACE, 101, SET_DEFAULT, 0xF00D, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO, 128L, 8L, 0L, 0L, 0L);
     }
 
     @Test
@@ -489,90 +496,90 @@ public class NetworkStatsTest {
         final String underlyingIface = "wlan0";
         final int testTag1 = 8888;
         NetworkStats delta = new NetworkStats(TEST_START, 17)
-            .addValues(tunIface, 10100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 39605L, 46L,
-                    12259L, 55L, 0L)
-            .addValues(tunIface, 10100, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO, 0L, 0L,
-                    0L, 0L, 0L)
-            .addValues(tunIface, 10120, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 72667L, 197L,
-                    43909L, 241L, 0L)
-            .addValues(tunIface, 10120, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO, 9297L,
-                    17L, 4128L, 21L, 0L)
+            .addValues(tunIface, 10100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                    DEFAULT_NETWORK_NO, 39605L, 46L, 12259L, 55L, 0L)
+            .addValues(tunIface, 10100, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO,
+                    DEFAULT_NETWORK_NO, 0L, 0L, 0L, 0L, 0L)
+            .addValues(tunIface, 10120, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                    DEFAULT_NETWORK_NO, 72667L, 197L, 43909L, 241L, 0L)
+            .addValues(tunIface, 10120, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO,
+                    DEFAULT_NETWORK_NO, 9297L, 17L, 4128L, 21L, 0L)
             // VPN package also uses some traffic through unprotected network.
-            .addValues(tunIface, tunUid, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 4983L, 10L,
-                    1801L, 12L, 0L)
-            .addValues(tunIface, tunUid, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO, 0L, 0L,
-                    0L, 0L, 0L)
+            .addValues(tunIface, tunUid, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                    DEFAULT_NETWORK_NO, 4983L, 10L, 1801L, 12L, 0L)
+            .addValues(tunIface, tunUid, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO,
+                    DEFAULT_NETWORK_NO, 0L, 0L, 0L, 0L, 0L)
             // Tag entries
-            .addValues(tunIface, 10120, SET_DEFAULT, testTag1, METERED_NO, ROAMING_NO, 21691L, 41L,
-                    13820L, 51L, 0L)
-            .addValues(tunIface, 10120, SET_FOREGROUND, testTag1, METERED_NO, ROAMING_NO, 1281L, 2L,
-                    665L, 2L, 0L)
+            .addValues(tunIface, 10120, SET_DEFAULT, testTag1, METERED_NO, ROAMING_NO,
+                    DEFAULT_NETWORK_NO, 21691L, 41L, 13820L, 51L, 0L)
+            .addValues(tunIface, 10120, SET_FOREGROUND, testTag1, METERED_NO, ROAMING_NO,
+                    DEFAULT_NETWORK_NO, 1281L, 2L, 665L, 2L, 0L)
             // Irrelevant entries
-            .addValues(TEST_IFACE, 10100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 1685L, 5L,
-                    2070L, 6L, 0L)
+            .addValues(TEST_IFACE, 10100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                    DEFAULT_NETWORK_NO, 1685L, 5L, 2070L, 6L, 0L)
             // Underlying Iface entries
-            .addValues(underlyingIface, 10100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 5178L,
-                    8L, 2139L, 11L, 0L)
-            .addValues(underlyingIface, 10100, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO, 0L,
-                    0L, 0L, 0L, 0L)
+            .addValues(underlyingIface, 10100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                    DEFAULT_NETWORK_NO, 5178L, 8L, 2139L, 11L, 0L)
+            .addValues(underlyingIface, 10100, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO,
+                    DEFAULT_NETWORK_NO, 0L, 0L, 0L, 0L, 0L)
             .addValues(underlyingIface, tunUid, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                    149873L, 287L, 59217L /* smaller than sum(tun0) */,
+                    DEFAULT_NETWORK_NO, 149873L, 287L, 59217L /* smaller than sum(tun0) */,
                     299L /* smaller than sum(tun0) */, 0L)
             .addValues(underlyingIface, tunUid, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO,
-                    0L, 0L, 0L, 0L, 0L);
+                    DEFAULT_NETWORK_NO, 0L, 0L, 0L, 0L, 0L);
 
-        assertTrue(delta.migrateTun(tunUid, tunIface, underlyingIface));
+        assertTrue(delta.toString(), delta.migrateTun(tunUid, tunIface, underlyingIface));
         assertEquals(20, delta.size());
 
         // tunIface and TEST_IFACE entries are not changed.
         assertValues(delta, 0, tunIface, 10100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                39605L, 46L, 12259L, 55L, 0L);
+                DEFAULT_NETWORK_NO, 39605L, 46L, 12259L, 55L, 0L);
         assertValues(delta, 1, tunIface, 10100, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO,
-                0L, 0L, 0L, 0L, 0L);
+                DEFAULT_NETWORK_NO, 0L, 0L, 0L, 0L, 0L);
         assertValues(delta, 2, tunIface, 10120, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                72667L, 197L, 43909L, 241L, 0L);
+                DEFAULT_NETWORK_NO, 72667L, 197L, 43909L, 241L, 0L);
         assertValues(delta, 3, tunIface, 10120, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO,
-                9297L, 17L, 4128L, 21L, 0L);
+                DEFAULT_NETWORK_NO, 9297L, 17L, 4128L, 21L, 0L);
         assertValues(delta, 4, tunIface, tunUid, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                4983L, 10L, 1801L, 12L, 0L);
+                DEFAULT_NETWORK_NO, 4983L, 10L, 1801L, 12L, 0L);
         assertValues(delta, 5, tunIface, tunUid, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO,
-                0L, 0L, 0L, 0L, 0L);
+                DEFAULT_NETWORK_NO, 0L, 0L, 0L, 0L, 0L);
         assertValues(delta, 6, tunIface, 10120, SET_DEFAULT, testTag1, METERED_NO, ROAMING_NO,
-                21691L, 41L, 13820L, 51L, 0L);
+                DEFAULT_NETWORK_NO, 21691L, 41L, 13820L, 51L, 0L);
         assertValues(delta, 7, tunIface, 10120, SET_FOREGROUND, testTag1, METERED_NO, ROAMING_NO,
-                1281L, 2L, 665L, 2L, 0L);
+                DEFAULT_NETWORK_NO, 1281L, 2L, 665L, 2L, 0L);
         assertValues(delta, 8, TEST_IFACE, 10100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                1685L, 5L, 2070L, 6L, 0L);
+                DEFAULT_NETWORK_NO, 1685L, 5L, 2070L, 6L, 0L);
 
         // Existing underlying Iface entries are updated
         assertValues(delta, 9, underlyingIface, 10100, SET_DEFAULT, TAG_NONE, METERED_NO,
-                ROAMING_NO, 44783L, 54L, 14178L, 62L, 0L);
+                ROAMING_NO, DEFAULT_NETWORK_NO, 44783L, 54L, 14178L, 62L, 0L);
         assertValues(delta, 10, underlyingIface, 10100, SET_FOREGROUND, TAG_NONE, METERED_NO,
-                ROAMING_NO, 0L, 0L, 0L, 0L, 0L);
+                ROAMING_NO, DEFAULT_NETWORK_NO, 0L, 0L, 0L, 0L, 0L);
 
         // VPN underlying Iface entries are updated
         assertValues(delta, 11, underlyingIface, tunUid, SET_DEFAULT, TAG_NONE, METERED_NO,
-                ROAMING_NO, 28304L, 27L, 1L, 2L, 0L);
+                ROAMING_NO, DEFAULT_NETWORK_NO, 28304L, 27L, 1L, 2L, 0L);
         assertValues(delta, 12, underlyingIface, tunUid, SET_FOREGROUND, TAG_NONE, METERED_NO,
-                ROAMING_NO, 0L, 0L, 0L, 0L, 0L);
+                ROAMING_NO, DEFAULT_NETWORK_NO, 0L, 0L, 0L, 0L, 0L);
 
         // New entries are added for new application's underlying Iface traffic
         assertContains(delta, underlyingIface, 10120, SET_DEFAULT, TAG_NONE, METERED_NO,
-                ROAMING_NO, 72667L, 197L, 43123L, 227L, 0L);
+                ROAMING_NO, DEFAULT_NETWORK_NO, 72667L, 197L, 43123L, 227L, 0L);
         assertContains(delta, underlyingIface, 10120, SET_FOREGROUND, TAG_NONE, METERED_NO,
-                ROAMING_NO, 9297L, 17L, 4054, 19L, 0L);
+                ROAMING_NO, DEFAULT_NETWORK_NO, 9297L, 17L, 4054, 19L, 0L);
         assertContains(delta, underlyingIface, 10120, SET_DEFAULT, testTag1, METERED_NO,
-                ROAMING_NO, 21691L, 41L, 13572L, 48L, 0L);
+                ROAMING_NO, DEFAULT_NETWORK_NO, 21691L, 41L, 13572L, 48L, 0L);
         assertContains(delta, underlyingIface, 10120, SET_FOREGROUND, testTag1, METERED_NO,
-                ROAMING_NO, 1281L, 2L, 653L, 1L, 0L);
+                ROAMING_NO, DEFAULT_NETWORK_NO, 1281L, 2L, 653L, 1L, 0L);
 
         // New entries are added for debug purpose
         assertContains(delta, underlyingIface, 10100, SET_DBG_VPN_IN, TAG_NONE, METERED_NO,
-                ROAMING_NO, 39605L, 46L, 12039, 51, 0);
+                ROAMING_NO, DEFAULT_NETWORK_NO, 39605L, 46L, 12039, 51, 0);
         assertContains(delta, underlyingIface, 10120, SET_DBG_VPN_IN, TAG_NONE, METERED_NO,
-                ROAMING_NO, 81964, 214, 47177, 246, 0);
+                ROAMING_NO, DEFAULT_NETWORK_NO, 81964, 214, 47177, 246, 0);
         assertContains(delta, underlyingIface, tunUid, SET_DBG_VPN_OUT, TAG_NONE, METERED_ALL,
-                ROAMING_ALL, 121569, 260, 59216, 297, 0);
+                ROAMING_ALL, DEFAULT_NETWORK_ALL, 121569, 260, 59216, 297, 0);
 
     }
 
@@ -587,79 +594,80 @@ public class NetworkStatsTest {
         final String underlyingIface = "wlan0";
         NetworkStats delta = new NetworkStats(TEST_START, 9)
             // 2 different apps sent/receive data via tun0.
-            .addValues(tunIface, 10100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 50000L, 25L,
-                    100000L, 50L, 0L)
-            .addValues(tunIface, 20100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 500L, 2L,
-                    200L, 5L, 0L)
+            .addValues(tunIface, 10100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                    DEFAULT_NETWORK_NO, 50000L, 25L, 100000L, 50L, 0L)
+            .addValues(tunIface, 20100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                    DEFAULT_NETWORK_NO, 500L, 2L, 200L, 5L, 0L)
             // VPN package resends data through the tunnel (with exaggerated overhead)
-            .addValues(tunIface, tunUid, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 240000,
-                    100L, 120000L, 60L, 0L)
+            .addValues(tunIface, tunUid, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                    DEFAULT_NETWORK_NO, 240000, 100L, 120000L, 60L, 0L)
             // 1 app already has some traffic on the underlying interface, the other doesn't yet
-            .addValues(underlyingIface, 10100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 1000L,
-                    10L, 2000L, 20L, 0L)
+            .addValues(underlyingIface, 10100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                    DEFAULT_NETWORK_NO, 1000L, 10L, 2000L, 20L, 0L)
             // Traffic through the underlying interface via the vpn app.
             // This test should redistribute this data correctly.
             .addValues(underlyingIface, tunUid, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                    75500L, 37L, 130000L, 70L, 0L);
+                    DEFAULT_NETWORK_NO,  75500L, 37L, 130000L, 70L, 0L);
 
         assertTrue(delta.migrateTun(tunUid, tunIface, underlyingIface));
         assertEquals(9, delta.size());
 
         // tunIface entries should not be changed.
         assertValues(delta, 0, tunIface, 10100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                50000L, 25L, 100000L, 50L, 0L);
+                DEFAULT_NETWORK_NO, 50000L, 25L, 100000L, 50L, 0L);
         assertValues(delta, 1, tunIface, 20100, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                500L, 2L, 200L, 5L, 0L);
+                DEFAULT_NETWORK_NO, 500L, 2L, 200L, 5L, 0L);
         assertValues(delta, 2, tunIface, tunUid, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                240000L, 100L, 120000L, 60L, 0L);
+                DEFAULT_NETWORK_NO, 240000L, 100L, 120000L, 60L, 0L);
 
         // Existing underlying Iface entries are updated
         assertValues(delta, 3, underlyingIface, 10100, SET_DEFAULT, TAG_NONE, METERED_NO,
-                ROAMING_NO, 51000L, 35L, 102000L, 70L, 0L);
+                ROAMING_NO, DEFAULT_NETWORK_NO, 51000L, 35L, 102000L, 70L, 0L);
 
         // VPN underlying Iface entries are updated
         assertValues(delta, 4, underlyingIface, tunUid, SET_DEFAULT, TAG_NONE, METERED_NO,
-                ROAMING_NO, 25000L, 10L, 29800L, 15L, 0L);
+                ROAMING_NO, DEFAULT_NETWORK_NO, 25000L, 10L, 29800L, 15L, 0L);
 
         // New entries are added for new application's underlying Iface traffic
         assertContains(delta, underlyingIface, 20100, SET_DEFAULT, TAG_NONE, METERED_NO,
-                ROAMING_NO, 500L, 2L, 200L, 5L, 0L);
+                ROAMING_NO, DEFAULT_NETWORK_NO, 500L, 2L, 200L, 5L, 0L);
 
         // New entries are added for debug purpose
         assertContains(delta, underlyingIface, 10100, SET_DBG_VPN_IN, TAG_NONE, METERED_NO,
-                ROAMING_NO, 50000L, 25L, 100000L, 50L, 0L);
+                ROAMING_NO, DEFAULT_NETWORK_NO, 50000L, 25L, 100000L, 50L, 0L);
         assertContains(delta, underlyingIface, 20100, SET_DBG_VPN_IN, TAG_NONE, METERED_NO,
-                ROAMING_NO, 500, 2L, 200L, 5L, 0L);
+                ROAMING_NO, DEFAULT_NETWORK_NO, 500, 2L, 200L, 5L, 0L);
         assertContains(delta, underlyingIface, tunUid, SET_DBG_VPN_OUT, TAG_NONE, METERED_ALL,
-                ROAMING_ALL, 50500L, 27L, 100200L, 55, 0);
+                ROAMING_ALL, DEFAULT_NETWORK_ALL, 50500L, 27L, 100200L, 55, 0);
     }
 
     private static void assertContains(NetworkStats stats,  String iface, int uid, int set,
-            int tag, int metered, int roaming, long rxBytes, long rxPackets, long txBytes,
-            long txPackets, long operations) {
-        int index = stats.findIndex(iface, uid, set, tag, metered, roaming);
+            int tag, int metered, int roaming, int defaultNetwork, long rxBytes, long rxPackets,
+            long txBytes, long txPackets, long operations) {
+        int index = stats.findIndex(iface, uid, set, tag, metered, roaming, defaultNetwork);
         assertTrue(index != -1);
-        assertValues(stats, index, iface, uid, set, tag, metered, roaming,
+        assertValues(stats, index, iface, uid, set, tag, metered, roaming, defaultNetwork,
                 rxBytes, rxPackets, txBytes, txPackets, operations);
     }
 
     private static void assertValues(NetworkStats stats, int index, String iface, int uid, int set,
-            int tag, int metered, int roaming, long rxBytes, long rxPackets, long txBytes,
-            long txPackets, long operations) {
+            int tag, int metered, int roaming, int defaultNetwork, long rxBytes, long rxPackets,
+            long txBytes, long txPackets, long operations) {
         final NetworkStats.Entry entry = stats.getValues(index, null);
-        assertValues(entry, iface, uid, set, tag, metered, roaming);
+        assertValues(entry, iface, uid, set, tag, metered, roaming, defaultNetwork);
         assertValues(entry, rxBytes, rxPackets, txBytes, txPackets, operations);
     }
 
     private static void assertValues(
             NetworkStats.Entry entry, String iface, int uid, int set, int tag, int metered,
-            int roaming) {
+            int roaming, int defaultNetwork) {
         assertEquals(iface, entry.iface);
         assertEquals(uid, entry.uid);
         assertEquals(set, entry.set);
         assertEquals(tag, entry.tag);
         assertEquals(metered, entry.metered);
         assertEquals(roaming, entry.roaming);
+        assertEquals(defaultNetwork, entry.defaultNetwork);
     }
 
     private static void assertValues(NetworkStats.Entry entry, long rxBytes, long rxPackets,

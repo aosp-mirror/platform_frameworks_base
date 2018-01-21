@@ -872,13 +872,19 @@ class ContextImpl extends Context {
 
         // Calling start activity from outside an activity without FLAG_ACTIVITY_NEW_TASK is
         // generally not allowed, except if the caller specifies the task id the activity should
-        // be launched in.
-        if ((intent.getFlags()&Intent.FLAG_ACTIVITY_NEW_TASK) == 0
-                && options != null && ActivityOptions.fromBundle(options).getLaunchTaskId() == -1) {
+        // be launched in. A bug was existed between N and O-MR1 which allowed this to work. We
+        // maintain this for backwards compatibility.
+        final int targetSdkVersion = getApplicationInfo().targetSdkVersion;
+
+        if ((intent.getFlags() & Intent.FLAG_ACTIVITY_NEW_TASK) == 0
+                && (targetSdkVersion < Build.VERSION_CODES.N
+                        || targetSdkVersion >= Build.VERSION_CODES.P)
+                && (options == null
+                        || ActivityOptions.fromBundle(options).getLaunchTaskId() == -1)) {
             throw new AndroidRuntimeException(
                     "Calling startActivity() from outside of an Activity "
-                    + " context requires the FLAG_ACTIVITY_NEW_TASK flag."
-                    + " Is this really what you want?");
+                            + " context requires the FLAG_ACTIVITY_NEW_TASK flag."
+                            + " Is this really what you want?");
         }
         mMainThread.getInstrumentation().execStartActivity(
                 getOuterContext(), mMainThread.getApplicationThread(), null,

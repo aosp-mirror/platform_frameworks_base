@@ -74,6 +74,7 @@ import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityThread;
 import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
@@ -197,8 +198,10 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.LocalServices;
+import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemService;
 import com.android.server.devicepolicy.DevicePolicyManagerService.ActiveAdmin.TrustAgentInfo;
+import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.pm.UserRestrictionsUtils;
 
 import com.google.android.collect.Sets;
@@ -284,6 +287,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final String TAG_PASSWORD_TOKEN_HANDLE = "password-token";
 
     private static final String TAG_PASSWORD_VALIDITY = "password-validity";
+
+    private static final String TAG_PRINTING_ENABLED = "printing-enabled";
 
     private static final int REQUEST_EXPIRE_PASSWORD = 5571;
 
@@ -508,7 +513,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         @Override
         public void onStart() {
             publishBinderService(Context.DEVICE_POLICY_SERVICE, mService);
-            mService.handleStart();
         }
 
         @Override
@@ -589,6 +593,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         long mPasswordTokenHandle = 0;
 
+        boolean mPrintingEnabled = true;
+
         public DevicePolicyData(int userHandle) {
             mUserHandle = userHandle;
         }
@@ -648,14 +654,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
 
             if (Intent.ACTION_USER_ADDED.equals(action)) {
-                sendUserAddedOrRemovedCommand(DeviceAdminReceiver.ACTION_USER_ADDED, userHandle);
+                sendDeviceOwnerUserCommand(DeviceAdminReceiver.ACTION_USER_ADDED, userHandle);
                 synchronized (DevicePolicyManagerService.this) {
                     // It might take a while for the user to become affiliated. Make security
                     // and network logging unavailable in the meantime.
                     maybePauseDeviceWideLoggingLocked();
                 }
             } else if (Intent.ACTION_USER_REMOVED.equals(action)) {
-                sendUserAddedOrRemovedCommand(DeviceAdminReceiver.ACTION_USER_REMOVED, userHandle);
+                sendDeviceOwnerUserCommand(DeviceAdminReceiver.ACTION_USER_REMOVED, userHandle);
                 synchronized (DevicePolicyManagerService.this) {
                     // Check whether the user is affiliated, *before* removing its data.
                     boolean isRemovedUserAffiliated = isUserAffiliatedWithDeviceLocked(userHandle);
@@ -669,12 +675,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     }
                 }
             } else if (Intent.ACTION_USER_STARTED.equals(action)) {
+                sendDeviceOwnerUserCommand(DeviceAdminReceiver.ACTION_USER_STARTED, userHandle);
                 synchronized (DevicePolicyManagerService.this) {
                     maybeSendAdminEnabledBroadcastLocked(userHandle);
                     // Reset the policy data
                     mUserData.remove(userHandle);
                 }
                 handlePackagesChanged(null /* check all admins */, userHandle);
+            } else if (Intent.ACTION_USER_STOPPED.equals(action)) {
+                sendDeviceOwnerUserCommand(DeviceAdminReceiver.ACTION_USER_STOPPED, userHandle);
+            } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
+                sendDeviceOwnerUserCommand(DeviceAdminReceiver.ACTION_USER_SWITCHED, userHandle);
             } else if (Intent.ACTION_USER_UNLOCKED.equals(action)) {
                 synchronized (DevicePolicyManagerService.this) {
                     maybeSendAdminEnabledBroadcastLocked(userHandle);
@@ -683,7 +694,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 handlePackagesChanged(null /* check all admins */, userHandle);
             } else if (Intent.ACTION_PACKAGE_CHANGED.equals(action)
                     || (Intent.ACTION_PACKAGE_ADDED.equals(action)
-                            && intent.getBooleanExtra(Intent.EXTRA_REPLACING, false))) {
+                    && intent.getBooleanExtra(Intent.EXTRA_REPLACING, false))) {
                 handlePackagesChanged(intent.getData().getSchemeSpecificPart(), userHandle);
             } else if (Intent.ACTION_PACKAGE_REMOVED.equals(action)
                     && !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
@@ -693,7 +704,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
 
-        private void sendUserAddedOrRemovedCommand(String action, int userHandle) {
+        private void sendDeviceOwnerUserCommand(String action, int userHandle) {
             synchronized (DevicePolicyManagerService.this) {
                 ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
                 if (deviceOwner != null) {
@@ -1733,6 +1744,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return LocalServices.getService(UsageStatsManagerInternal.class);
         }
 
+        NetworkPolicyManagerInternal getNetworkPolicyManagerInternal() {
+            return LocalServices.getService(NetworkPolicyManagerInternal.class);
+        }
+
         NotificationManager getNotificationManager() {
             return mContext.getSystemService(NotificationManager.class);
         }
@@ -1986,6 +2001,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         KeyChainConnection keyChainBindAsUser(UserHandle user) throws InterruptedException {
             return KeyChain.bindAsUser(mContext, user);
         }
+
+        void postOnSystemServerInitThreadPool(Runnable runnable) {
+            SystemServerInitThreadPool.get().submit(runnable, LOG_TAG);
+        }
     }
 
     /**
@@ -2041,6 +2060,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         filter.addAction(Intent.ACTION_USER_ADDED);
         filter.addAction(Intent.ACTION_USER_REMOVED);
         filter.addAction(Intent.ACTION_USER_STARTED);
+        filter.addAction(Intent.ACTION_USER_STOPPED);
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
         filter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
         mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, mHandler);
@@ -2880,6 +2901,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 out.endTag(null, TAG_CURRENT_INPUT_METHOD_SET);
             }
 
+            if (!policy.mPrintingEnabled) {
+                out.startTag(null, TAG_PRINTING_ENABLED);
+                out.attribute(null, ATTR_VALUE, Boolean.toString(policy.mPrintingEnabled));
+                out.endTag(null, TAG_PRINTING_ENABLED);
+            }
+
             for (final String cert : policy.mOwnerInstalledCaCerts) {
                 out.startTag(null, TAG_OWNER_INSTALLED_CA_CERT);
                 out.attribute(null, ATTR_ALIAS, cert);
@@ -3098,6 +3125,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     policy.mCurrentInputMethodSet = true;
                 } else if (TAG_OWNER_INSTALLED_CA_CERT.equals(tag)) {
                     policy.mOwnerInstalledCaCerts.add(parser.getAttributeValue(null, ATTR_ALIAS));
+                } else if (TAG_PRINTING_ENABLED.equals(tag)) {
+                    String enabled = parser.getAttributeValue(null, ATTR_VALUE);
+                    policy.mPrintingEnabled = Boolean.toString(true).equals(enabled);
                 } else {
                     Slog.w(LOG_TAG, "Unknown tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -3218,6 +3248,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         switch (phase) {
             case SystemService.PHASE_LOCK_SETTINGS_READY:
                 onLockSettingsReady();
+                loadAdminDataAsync();
                 break;
             case SystemService.PHASE_BOOT_COMPLETED:
                 ensureDeviceOwnerUserStarted(); // TODO Consider better place to do this.
@@ -3283,11 +3314,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 Slog.w(LOG_TAG, "Exception starting user", e);
             }
         }
-    }
-
-    @Override
-    void handleStart() {
-        pushActiveAdminPackages();
     }
 
     @Override
@@ -3470,6 +3496,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mInjector.binderRestoreCallingIdentity(ident);
             }
         }
+    }
+
+    private void loadAdminDataAsync() {
+        mInjector.postOnSystemServerInitThreadPool(() -> {
+            pushActiveAdminPackages();
+            mUsageStatsManagerInternal.onAdminDataAvailable();
+            mInjector.getNetworkPolicyManagerInternal().onAdminDataAvailable();
+        });
     }
 
     private void pushActiveAdminPackages() {
@@ -12272,6 +12306,95 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final ActiveAdmin deviceOwner =
                     getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
             return deviceOwner.endUserSessionMessage;
+        }
+    }
+
+    private boolean hasPrinting() {
+        return mInjector.getPackageManager().hasSystemFeature(PackageManager.FEATURE_PRINTING);
+    }
+
+    @Override
+    public void setPrintingEnabled(ComponentName admin, boolean enabled) {
+        if (!mHasFeature || !hasPrinting()) {
+            return;
+        }
+        Preconditions.checkNotNull(admin, "Admin cannot be null.");
+        enforceProfileOrDeviceOwner(admin);
+        synchronized (this) {
+            final int userHandle = mInjector.userHandleGetCallingUserId();
+            DevicePolicyData policy = getUserData(userHandle);
+            if (policy.mPrintingEnabled != enabled) {
+                policy.mPrintingEnabled = enabled;
+                saveSettingsLocked(userHandle);
+            }
+        }
+    }
+
+    /**
+     * Returns whether printing is enabled for current user.
+     * @hide
+     */
+    @Override
+    public boolean isPrintingEnabled() {
+        if (!hasPrinting()) {
+            return false;
+        }
+        if (!mHasFeature) {
+            return true;
+        }
+        synchronized (this) {
+            final int userHandle = mInjector.userHandleGetCallingUserId();
+            DevicePolicyData policy = getUserData(userHandle);
+            return policy.mPrintingEnabled;
+        }
+    }
+
+    /**
+     * Returns text of error message if printing is disabled.
+     * Only to be called by Print Service.
+     * @hide
+     */
+    @Override
+    public CharSequence getPrintingDisabledReason() {
+        if (!hasPrinting() || !mHasFeature) {
+            Log.e(LOG_TAG, "no printing or no management");
+            return null;
+        }
+        synchronized (this) {
+            final int userHandle = mInjector.userHandleGetCallingUserId();
+            DevicePolicyData policy = getUserData(userHandle);
+            if (policy.mPrintingEnabled) {
+                Log.e(LOG_TAG, "printing is enabled");
+                return null;
+            }
+            String ownerPackage = mOwners.getProfileOwnerPackage(userHandle);
+            if (ownerPackage == null) {
+                ownerPackage = mOwners.getDeviceOwnerPackageName();
+            }
+            PackageManager pm = mInjector.getPackageManager();
+            PackageInfo packageInfo;
+            try {
+                packageInfo = pm.getPackageInfo(ownerPackage, 0);
+            } catch (NameNotFoundException e) {
+                Log.e(LOG_TAG, "getPackageInfo error", e);
+                return null;
+            }
+            if (packageInfo == null) {
+                Log.e(LOG_TAG, "packageInfo is inexplicably null");
+                return null;
+            }
+            ApplicationInfo appInfo = packageInfo.applicationInfo;
+            if (appInfo == null) {
+                Log.e(LOG_TAG, "appInfo is inexplicably null");
+                return null;
+            }
+            CharSequence appLabel = pm.getApplicationLabel(appInfo);
+            if (appLabel == null) {
+                Log.e(LOG_TAG, "appLabel is inexplicably null");
+                return null;
+            }
+            return ((Context) ActivityThread.currentActivityThread().getSystemUiContext())
+                    .getResources().getString(R.string.printing_disabled_by, appLabel);
         }
     }
 }

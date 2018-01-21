@@ -255,7 +255,6 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             // When this fires, then the user has not released alt-tab for at least
             // FAST_ALT_TAB_DELAY_MS milliseconds
             showRecents(mTriggeredFromAltTab, false /* draggingInRecents */, true /* animate */,
-                    false /* reloadTasks */, false /* fromHome */,
                     DividerView.INVALID_RECENTS_GROW_TARGET);
         }
     });
@@ -322,8 +321,15 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
     }
 
     public void showRecents(boolean triggeredFromAltTab, boolean draggingInRecents,
-            boolean animate, boolean launchedWhileDockingTask, boolean fromHome,
-            int growTarget) {
+            boolean animate, int growTarget) {
+        final SystemServicesProxy ssp = Recents.getSystemServices();
+        final MutableBoolean isHomeStackVisible = new MutableBoolean(true);
+        final boolean isRecentsVisible = Recents.getSystemServices().isRecentsActivityVisible(
+                isHomeStackVisible);
+        final boolean fromHome = isHomeStackVisible.value;
+        final boolean launchedWhileDockingTask =
+                Recents.getSystemServices().getSplitScreenPrimaryStack() != null;
+
         mTriggeredFromAltTab = triggeredFromAltTab;
         mDraggingInRecents = draggingInRecents;
         mLaunchedWhileDocking = launchedWhileDockingTask;
@@ -349,10 +355,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
         try {
             // Check if the top task is in the home stack, and start the recents activity
-            SystemServicesProxy ssp = Recents.getSystemServices();
-            boolean forceVisible = launchedWhileDockingTask || draggingInRecents;
-            MutableBoolean isHomeStackVisible = new MutableBoolean(forceVisible);
-            if (forceVisible || !ssp.isRecentsActivityVisible(isHomeStackVisible)) {
+            final boolean forceVisible = launchedWhileDockingTask || draggingInRecents;
+            if (forceVisible || !isRecentsVisible) {
                 ActivityManager.RunningTaskInfo runningTask =
                         ActivityManagerWrapper.getInstance().getRunningTask();
                 startRecentsActivityAndDismissKeyguardIfNeeded(runningTask,

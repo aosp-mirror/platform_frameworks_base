@@ -21,6 +21,9 @@ import static android.content.Intent.EXTRA_UID;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
+import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
+import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
+import static android.net.NetworkStats.DEFAULT_NETWORK_YES;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.METERED_ALL;
 import static android.net.NetworkStats.METERED_NO;
@@ -67,6 +70,7 @@ import android.net.IConnectivityManager;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkStatsSession;
 import android.net.LinkProperties;
+import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
@@ -135,6 +139,12 @@ public class NetworkStatsServiceTest {
     private static final int UID_RED = 1001;
     private static final int UID_BLUE = 1002;
     private static final int UID_GREEN = 1003;
+
+
+    private static final Network WIFI_NETWORK =  new Network(100);
+    private static final Network MOBILE_NETWORK =  new Network(101);
+    private static final Network[] NETWORKS_WIFI = new Network[]{ WIFI_NETWORK };
+    private static final Network[] NETWORKS_MOBILE = new Network[]{ MOBILE_NETWORK };
 
     private static final long WAIT_TIMEOUT = 2 * 1000;  // 2 secs
     private static final int INVALID_TYPE = -1;
@@ -230,7 +240,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_WIFI);
 
         // verify service has empty history for wifi
         assertNetworkTotal(sTemplateWifi, 0L, 0L, 0L, 0L, 0);
@@ -277,7 +287,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_WIFI);
 
         // verify service has empty history for wifi
         assertNetworkTotal(sTemplateWifi, 0L, 0L, 0L, 0L, 0);
@@ -305,10 +315,10 @@ public class NetworkStatsServiceTest {
         // verify service recorded history
         assertNetworkTotal(sTemplateWifi, 1024L, 8L, 2048L, 16L, 0);
         assertUidTotal(sTemplateWifi, UID_RED, 1024L, 8L, 512L, 4L, 10);
-        assertUidTotal(sTemplateWifi, UID_RED, SET_DEFAULT, METERED_NO, ROAMING_NO, 512L, 4L, 256L,
-                2L, 4);
-        assertUidTotal(sTemplateWifi, UID_RED, SET_FOREGROUND, METERED_NO, ROAMING_NO, 512L, 4L,
-                256L, 2L, 6);
+        assertUidTotal(sTemplateWifi, UID_RED, SET_DEFAULT, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_YES, 512L, 4L, 256L, 2L, 4);
+        assertUidTotal(sTemplateWifi, UID_RED, SET_FOREGROUND, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_YES, 512L, 4L, 256L, 2L, 6);
         assertUidTotal(sTemplateWifi, UID_BLUE, 128L, 1L, 128L, 1L, 0);
 
 
@@ -330,10 +340,10 @@ public class NetworkStatsServiceTest {
         // after systemReady(), we should have historical stats loaded again
         assertNetworkTotal(sTemplateWifi, 1024L, 8L, 2048L, 16L, 0);
         assertUidTotal(sTemplateWifi, UID_RED, 1024L, 8L, 512L, 4L, 10);
-        assertUidTotal(sTemplateWifi, UID_RED, SET_DEFAULT, METERED_NO, ROAMING_NO, 512L, 4L, 256L,
-                2L, 4);
-        assertUidTotal(sTemplateWifi, UID_RED, SET_FOREGROUND, METERED_NO, ROAMING_NO, 512L, 4L,
-                256L, 2L, 6);
+        assertUidTotal(sTemplateWifi, UID_RED, SET_DEFAULT, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_YES, 512L, 4L, 256L, 2L, 4);
+        assertUidTotal(sTemplateWifi, UID_RED, SET_FOREGROUND, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_YES, 512L, 4L, 256L, 2L, 6);
         assertUidTotal(sTemplateWifi, UID_BLUE, 128L, 1L, 128L, 1L, 0);
 
     }
@@ -355,7 +365,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_WIFI);
 
 
         // modify some number on wifi, and trigger poll event
@@ -400,7 +410,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_MOBILE);
 
 
         // create some traffic on first network
@@ -438,7 +448,7 @@ public class NetworkStatsServiceTest {
                 .addValues(TEST_IFACE, UID_BLUE, SET_DEFAULT, TAG_NONE, 512L, 4L, 0L, 0L, 0L));
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_MOBILE);
         forcePollAndWaitForIdle();
 
 
@@ -480,7 +490,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_WIFI);
 
 
         // create some traffic
@@ -542,7 +552,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_MOBILE);
 
 
         // create some traffic
@@ -572,7 +582,7 @@ public class NetworkStatsServiceTest {
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 512L, 4L, 512L, 4L, 0L));
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_MOBILE);
         forcePollAndWaitForIdle();
 
 
@@ -604,7 +614,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_WIFI);
 
 
         // create some traffic for two apps
@@ -640,12 +650,12 @@ public class NetworkStatsServiceTest {
         NetworkStats stats = mSession.getSummaryForAllUid(
                 sTemplateWifi, Long.MIN_VALUE, Long.MAX_VALUE, true);
         assertEquals(3, stats.size());
-        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 50L,
-                5L, 50L, 5L, 1);
-        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, 0xF00D, METERED_NO, ROAMING_NO, 10L,
-                1L, 10L, 1L, 1);
+        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_YES, 50L, 5L, 50L, 5L, 1);
+        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, 0xF00D, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_YES, 10L, 1L, 10L, 1L, 1);
         assertValues(stats, IFACE_ALL, UID_BLUE, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                2048L, 16L, 1024L, 8L, 0);
+                DEFAULT_NETWORK_YES, 2048L, 16L, 1024L, 8L, 0);
 
         // now verify that recent history only contains one uid
         final long currentTime = currentTimeMillis();
@@ -653,7 +663,7 @@ public class NetworkStatsServiceTest {
                 sTemplateWifi, currentTime - HOUR_IN_MILLIS, currentTime, true);
         assertEquals(1, stats.size());
         assertValues(stats, IFACE_ALL, UID_BLUE, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
-                1024L, 8L, 512L, 4L, 0);
+                DEFAULT_NETWORK_YES, 1024L, 8L, 512L, 4L, 0);
     }
 
     @Test
@@ -666,7 +676,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_WIFI);
 
 
         // create some initial traffic
@@ -707,14 +717,14 @@ public class NetworkStatsServiceTest {
         final NetworkStats stats = mSession.getSummaryForAllUid(
                 sTemplateWifi, Long.MIN_VALUE, Long.MAX_VALUE, true);
         assertEquals(4, stats.size());
-        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 128L,
-                2L, 128L, 2L, 1);
-        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, 0xF00D, METERED_NO, ROAMING_NO, 64L,
-                1L, 64L, 1L, 1);
+        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_YES, 128L, 2L, 128L, 2L, 1);
+        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, 0xF00D, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_YES, 64L, 1L, 64L, 1L, 1);
         assertValues(stats, IFACE_ALL, UID_RED, SET_FOREGROUND, TAG_NONE, METERED_NO, ROAMING_NO,
-                32L, 2L, 32L, 2L, 1);
-        assertValues(stats, IFACE_ALL, UID_RED, SET_FOREGROUND, 0xFAAD, METERED_NO, ROAMING_NO, 1L,
-                1L, 1L, 1L, 1);
+                DEFAULT_NETWORK_YES, 32L, 2L, 32L, 2L, 1);
+        assertValues(stats, IFACE_ALL, UID_RED, SET_FOREGROUND, 0xFAAD, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_YES, 1L, 1L, 1L, 1L, 1);
     }
 
     @Test
@@ -727,7 +737,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_WIFI);
 
 
         // create some initial traffic
@@ -735,14 +745,14 @@ public class NetworkStatsServiceTest {
         expectCurrentTime();
         expectDefaultSettings();
         expectNetworkStatsSummary(buildEmptyStats());
-        // Note that all traffic from NetworkManagementService is tagged as METERED_NO and
-        // ROAMING_NO, because metered and roaming isn't tracked at that layer. We layer it
-        // on top by inspecting the iface properties.
+        // Note that all traffic from NetworkManagementService is tagged as METERED_NO, ROAMING_NO
+        // and DEFAULT_NETWORK_YES, because these three properties aren't tracked at that layer.
+        // We layer them on top by inspecting the iface properties.
         expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
-                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO, 128L,
-                        2L, 128L, 2L, 0L)
-                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, METERED_NO, ROAMING_NO, 64L,
-                        1L, 64L, 1L, 0L));
+                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_YES, 128L, 2L, 128L, 2L, 0L)
+                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, METERED_NO, ROAMING_NO,
+                        DEFAULT_NETWORK_YES, 64L, 1L, 64L, 1L, 0L));
         mService.incrementOperationCount(UID_RED, 0xF00D, 1);
 
         forcePollAndWaitForIdle();
@@ -754,9 +764,9 @@ public class NetworkStatsServiceTest {
                 sTemplateWifi, Long.MIN_VALUE, Long.MAX_VALUE, true);
         assertEquals(2, stats.size());
         assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, TAG_NONE, METERED_YES, ROAMING_NO,
-                128L, 2L, 128L, 2L, 1);
-        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, 0xF00D, METERED_YES, ROAMING_NO, 64L,
-                1L, 64L, 1L, 1);
+                DEFAULT_NETWORK_YES,  128L, 2L, 128L, 2L, 1);
+        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, 0xF00D, METERED_YES, ROAMING_NO,
+                DEFAULT_NETWORK_YES, 64L, 1L, 64L, 1L, 1);
     }
 
     @Test
@@ -769,7 +779,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_MOBILE);
 
 
         // Create some traffic
@@ -782,9 +792,9 @@ public class NetworkStatsServiceTest {
         // on top by inspecting the iface properties.
         expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
                 .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, METERED_ALL, ROAMING_NO,
-                        128L, 2L, 128L, 2L, 0L)
-                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, METERED_ALL, ROAMING_NO, 64L,
-                        1L, 64L, 1L, 0L));
+                        DEFAULT_NETWORK_YES,  128L, 2L, 128L, 2L, 0L)
+                .addValues(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, METERED_ALL, ROAMING_NO,
+                        DEFAULT_NETWORK_YES, 64L, 1L, 64L, 1L, 0L));
         forcePollAndWaitForIdle();
 
         // verify service recorded history
@@ -795,9 +805,9 @@ public class NetworkStatsServiceTest {
                 sTemplateImsi1, Long.MIN_VALUE, Long.MAX_VALUE, true);
         assertEquals(2, stats.size());
         assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, TAG_NONE, METERED_ALL, ROAMING_YES,
-                128L, 2L, 128L, 2L, 0);
-        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, 0xF00D, METERED_ALL, ROAMING_YES, 64L,
-                1L, 64L, 1L, 0);
+                DEFAULT_NETWORK_YES, 128L, 2L, 128L, 2L, 0);
+        assertValues(stats, IFACE_ALL, UID_RED, SET_DEFAULT, 0xF00D, METERED_ALL, ROAMING_YES,
+                DEFAULT_NETWORK_YES, 64L, 1L, 64L, 1L, 0);
     }
 
     @Test
@@ -810,7 +820,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_MOBILE);
 
 
         // create some tethering traffic
@@ -855,7 +865,7 @@ public class NetworkStatsServiceTest {
         expectNetworkStatsUidDetail(buildEmptyStats());
         expectBandwidthControlCheck();
 
-        mService.forceUpdateIfaces();
+        mService.forceUpdateIfaces(NETWORKS_WIFI);
 
         // verify service has empty history for wifi
         assertNetworkTotal(sTemplateWifi, 0L, 0L, 0L, 0L, 0);
@@ -976,18 +986,18 @@ public class NetworkStatsServiceTest {
         // verify summary API
         final NetworkStats stats = mSession.getSummaryForNetwork(template, start, end);
         assertValues(stats, IFACE_ALL, UID_ALL, SET_ALL, TAG_NONE, METERED_ALL, ROAMING_ALL,
-                rxBytes, rxPackets, txBytes, txPackets, operations);
+                DEFAULT_NETWORK_ALL,  rxBytes, rxPackets, txBytes, txPackets, operations);
     }
 
     private void assertUidTotal(NetworkTemplate template, int uid, long rxBytes, long rxPackets,
             long txBytes, long txPackets, int operations) throws Exception {
-        assertUidTotal(template, uid, SET_ALL, METERED_ALL, ROAMING_ALL, rxBytes, rxPackets,
-                txBytes, txPackets, operations);
+        assertUidTotal(template, uid, SET_ALL, METERED_ALL, ROAMING_ALL, DEFAULT_NETWORK_ALL,
+                rxBytes, rxPackets, txBytes, txPackets, operations);
     }
 
     private void assertUidTotal(NetworkTemplate template, int uid, int set, int metered,
-            int roaming, long rxBytes, long rxPackets, long txBytes, long txPackets, int operations)
-            throws Exception {
+            int roaming, int defaultNetwork, long rxBytes, long rxPackets, long txBytes,
+            long txPackets, int operations) throws Exception {
         // verify history API
         final NetworkStatsHistory history = mSession.getHistoryForUid(
                 template, uid, set, TAG_NONE, FIELD_ALL);
@@ -997,8 +1007,8 @@ public class NetworkStatsServiceTest {
         // verify summary API
         final NetworkStats stats = mSession.getSummaryForAllUid(
                 template, Long.MIN_VALUE, Long.MAX_VALUE, false);
-        assertValues(stats, IFACE_ALL, uid, set, TAG_NONE, metered, roaming, rxBytes, rxPackets,
-                txBytes, txPackets, operations);
+        assertValues(stats, IFACE_ALL, uid, set, TAG_NONE, metered, roaming, defaultNetwork,
+                rxBytes, rxPackets, txBytes, txPackets, operations);
     }
 
     private void expectSystemReady() throws Exception {
@@ -1096,8 +1106,8 @@ public class NetworkStatsServiceTest {
     }
 
     private static void assertValues(NetworkStats stats, String iface, int uid, int set,
-            int tag, int metered, int roaming, long rxBytes, long rxPackets, long txBytes,
-            long txPackets, int operations) {
+            int tag, int metered, int roaming, int defaultNetwork, long rxBytes, long rxPackets,
+            long txBytes, long txPackets, int operations) {
         final NetworkStats.Entry entry = new NetworkStats.Entry();
         final int[] sets;
         if (set == SET_ALL) {
@@ -1120,12 +1130,22 @@ public class NetworkStatsServiceTest {
             meterings = new int[] { metered };
         }
 
+        final int[] defaultNetworks;
+        if (defaultNetwork == DEFAULT_NETWORK_ALL) {
+            defaultNetworks = new int[] { DEFAULT_NETWORK_ALL, DEFAULT_NETWORK_YES,
+                    DEFAULT_NETWORK_NO };
+        } else {
+            defaultNetworks = new int[] { defaultNetwork };
+        }
+
         for (int s : sets) {
             for (int r : roamings) {
                 for (int m : meterings) {
-                    final int i = stats.findIndex(iface, uid, s, tag, m, r);
-                    if (i != -1) {
-                        entry.add(stats.getValues(i, null));
+                    for (int d : defaultNetworks) {
+                        final int i = stats.findIndex(iface, uid, s, tag, m, r, d);
+                        if (i != -1) {
+                            entry.add(stats.getValues(i, null));
+                        }
                     }
                 }
             }
@@ -1160,7 +1180,7 @@ public class NetworkStatsServiceTest {
         final NetworkCapabilities capabilities = new NetworkCapabilities();
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED, !isMetered);
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING, true);
-        return new NetworkState(info, prop, capabilities, null, null, TEST_SSID);
+        return new NetworkState(info, prop, capabilities, WIFI_NETWORK, null, TEST_SSID);
     }
 
     private static NetworkState buildMobile3gState(String subscriberId) {
@@ -1177,7 +1197,7 @@ public class NetworkStatsServiceTest {
         final NetworkCapabilities capabilities = new NetworkCapabilities();
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED, false);
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING, !isRoaming);
-        return new NetworkState(info, prop, capabilities, null, subscriberId, null);
+        return new NetworkState(info, prop, capabilities, MOBILE_NETWORK, subscriberId, null);
     }
 
     private static NetworkState buildMobile4gState(String iface) {
@@ -1188,7 +1208,7 @@ public class NetworkStatsServiceTest {
         final NetworkCapabilities capabilities = new NetworkCapabilities();
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED, false);
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING, true);
-        return new NetworkState(info, prop, capabilities, null, null, null);
+        return new NetworkState(info, prop, capabilities, MOBILE_NETWORK, null, null);
     }
 
     private NetworkStats buildEmptyStats() {

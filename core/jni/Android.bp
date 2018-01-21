@@ -119,6 +119,7 @@ cc_library_shared {
         "android_util_jar_StrictJarFile.cpp",
         "android_graphics_Canvas.cpp",
         "android_graphics_Picture.cpp",
+        "android/graphics/AnimatedImageDrawable.cpp",
         "android/graphics/Bitmap.cpp",
         "android/graphics/BitmapFactory.cpp",
         "android/graphics/ByteBufferStreamAdaptor.cpp",

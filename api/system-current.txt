@@ -790,7 +790,9 @@ package android.content {
     field public static final java.lang.String ACTION_QUERY_PACKAGE_RESTART = "android.intent.action.QUERY_PACKAGE_RESTART";
     field public static final java.lang.String ACTION_RESOLVE_INSTANT_APP_PACKAGE = "android.intent.action.RESOLVE_INSTANT_APP_PACKAGE";
     field public static final java.lang.String ACTION_REVIEW_PERMISSIONS = "android.intent.action.REVIEW_PERMISSIONS";
-    field public static final java.lang.String ACTION_SIM_STATE_CHANGED = "android.intent.action.SIM_STATE_CHANGED";
+    field public static final java.lang.String ACTION_SIM_APPLICATION_STATE_CHANGED = "android.intent.action.SIM_APPLICATION_STATE_CHANGED";
+    field public static final java.lang.String ACTION_SIM_CARD_STATE_CHANGED = "android.intent.action.SIM_CARD_STATE_CHANGED";
+    field public static final deprecated java.lang.String ACTION_SIM_STATE_CHANGED = "android.intent.action.SIM_STATE_CHANGED";
     field public static final java.lang.String ACTION_UPGRADE_SETUP = "android.intent.action.UPGRADE_SETUP";
     field public static final java.lang.String ACTION_USER_REMOVED = "android.intent.action.USER_REMOVED";
     field public static final java.lang.String ACTION_VOICE_ASSIST = "android.intent.action.VOICE_ASSIST";
@@ -1118,9 +1120,9 @@ package android.hardware.display {
   }
 
   public static class BrightnessConfiguration.Builder {
-    ctor public BrightnessConfiguration.Builder();
+    ctor public BrightnessConfiguration.Builder(float[], float[]);
     method public android.hardware.display.BrightnessConfiguration build();
-    method public android.hardware.display.BrightnessConfiguration.Builder setCurve(float[], float[]);
+    method public android.hardware.display.BrightnessConfiguration.Builder setDescription(java.lang.String);
   }
 
   public final class DisplayManager {
@@ -1775,9 +1777,9 @@ package android.hardware.radio {
     method public android.hardware.radio.ProgramSelector.Identifier[] getAllIds(int);
     method public long getFirstId(int);
     method public android.hardware.radio.ProgramSelector.Identifier getPrimaryId();
-    method public int getProgramType();
+    method public deprecated int getProgramType();
     method public android.hardware.radio.ProgramSelector.Identifier[] getSecondaryIds();
-    method public long[] getVendorIds();
+    method public deprecated long[] getVendorIds();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.hardware.radio.ProgramSelector> CREATOR;
     field public static final int IDENTIFIER_TYPE_AMFM_FREQUENCY = 1; // 0x1
@@ -1785,27 +1787,31 @@ package android.hardware.radio {
     field public static final int IDENTIFIER_TYPE_DAB_FREQUENCY = 8; // 0x8
     field public static final int IDENTIFIER_TYPE_DAB_SCID = 7; // 0x7
     field public static final int IDENTIFIER_TYPE_DAB_SIDECC = 5; // 0x5
+    field public static final int IDENTIFIER_TYPE_DAB_SID_EXT = 5; // 0x5
     field public static final int IDENTIFIER_TYPE_DRMO_FREQUENCY = 10; // 0xa
-    field public static final int IDENTIFIER_TYPE_DRMO_MODULATION = 11; // 0xb
+    field public static final deprecated int IDENTIFIER_TYPE_DRMO_MODULATION = 11; // 0xb
     field public static final int IDENTIFIER_TYPE_DRMO_SERVICE_ID = 9; // 0x9
     field public static final int IDENTIFIER_TYPE_HD_STATION_ID_EXT = 3; // 0x3
-    field public static final int IDENTIFIER_TYPE_HD_SUBCHANNEL = 4; // 0x4
+    field public static final int IDENTIFIER_TYPE_HD_STATION_NAME = 10004; // 0x2714
+    field public static final deprecated int IDENTIFIER_TYPE_HD_SUBCHANNEL = 4; // 0x4
     field public static final int IDENTIFIER_TYPE_INVALID = 0; // 0x0
     field public static final int IDENTIFIER_TYPE_RDS_PI = 2; // 0x2
     field public static final int IDENTIFIER_TYPE_SXM_CHANNEL = 13; // 0xd
     field public static final int IDENTIFIER_TYPE_SXM_SERVICE_ID = 12; // 0xc
-    field public static final int IDENTIFIER_TYPE_VENDOR_PRIMARY_END = 1999; // 0x7cf
-    field public static final int IDENTIFIER_TYPE_VENDOR_PRIMARY_START = 1000; // 0x3e8
-    field public static final int PROGRAM_TYPE_AM = 1; // 0x1
-    field public static final int PROGRAM_TYPE_AM_HD = 3; // 0x3
-    field public static final int PROGRAM_TYPE_DAB = 5; // 0x5
-    field public static final int PROGRAM_TYPE_DRMO = 6; // 0x6
-    field public static final int PROGRAM_TYPE_FM = 2; // 0x2
-    field public static final int PROGRAM_TYPE_FM_HD = 4; // 0x4
-    field public static final int PROGRAM_TYPE_INVALID = 0; // 0x0
-    field public static final int PROGRAM_TYPE_SXM = 7; // 0x7
-    field public static final int PROGRAM_TYPE_VENDOR_END = 1999; // 0x7cf
-    field public static final int PROGRAM_TYPE_VENDOR_START = 1000; // 0x3e8
+    field public static final int IDENTIFIER_TYPE_VENDOR_END = 1999; // 0x7cf
+    field public static final deprecated int IDENTIFIER_TYPE_VENDOR_PRIMARY_END = 1999; // 0x7cf
+    field public static final deprecated int IDENTIFIER_TYPE_VENDOR_PRIMARY_START = 1000; // 0x3e8
+    field public static final int IDENTIFIER_TYPE_VENDOR_START = 1000; // 0x3e8
+    field public static final deprecated int PROGRAM_TYPE_AM = 1; // 0x1
+    field public static final deprecated int PROGRAM_TYPE_AM_HD = 3; // 0x3
+    field public static final deprecated int PROGRAM_TYPE_DAB = 5; // 0x5
+    field public static final deprecated int PROGRAM_TYPE_DRMO = 6; // 0x6
+    field public static final deprecated int PROGRAM_TYPE_FM = 2; // 0x2
+    field public static final deprecated int PROGRAM_TYPE_FM_HD = 4; // 0x4
+    field public static final deprecated int PROGRAM_TYPE_INVALID = 0; // 0x0
+    field public static final deprecated int PROGRAM_TYPE_SXM = 7; // 0x7
+    field public static final deprecated int PROGRAM_TYPE_VENDOR_END = 1999; // 0x7cf
+    field public static final deprecated int PROGRAM_TYPE_VENDOR_START = 1000; // 0x3e8
   }
 
   public static final class ProgramSelector.Identifier implements android.os.Parcelable {
@@ -1820,7 +1826,7 @@ package android.hardware.radio {
   public static abstract class ProgramSelector.IdentifierType implements java.lang.annotation.Annotation {
   }
 
-  public static abstract class ProgramSelector.ProgramType implements java.lang.annotation.Annotation {
+  public static abstract deprecated class ProgramSelector.ProgramType implements java.lang.annotation.Annotation {
   }
 
   public class RadioManager {
@@ -2858,9 +2864,18 @@ package android.net {
     method public void onTetheringStarted();
   }
 
+  public final class IpSecManager {
+    method public android.net.IpSecManager.IpSecTunnelInterface createIpSecTunnelInterface(java.net.InetAddress, java.net.InetAddress, android.net.Network) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException;
+  }
+
+  public static final class IpSecManager.IpSecTunnelInterface implements java.lang.AutoCloseable {
+    method public void close();
+    method public java.lang.String getInterfaceName();
+  }
+
   public static class IpSecTransform.Builder {
+    method public android.net.IpSecTransform buildTunnelModeTransform(java.net.InetAddress, android.net.IpSecManager.SecurityParameterIndex) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException, android.net.IpSecManager.SpiUnavailableException;
     method public android.net.IpSecTransform.Builder setNattKeepalive(int);
-    method public android.net.IpSecTransform.Builder setUnderlyingNetwork(android.net.Network);
   }
 
   public class NetworkKey implements android.os.Parcelable {
@@ -3557,6 +3572,7 @@ package android.os {
     method public boolean isRestrictedProfile();
     field public static final java.lang.String ACTION_USER_RESTRICTIONS_CHANGED = "android.os.action.USER_RESTRICTIONS_CHANGED";
     field public static final deprecated java.lang.String DISALLOW_OEM_UNLOCK = "no_oem_unlock";
+    field public static final java.lang.String DISALLOW_RUN_IN_BACKGROUND = "no_run_in_background";
     field public static final int RESTRICTION_NOT_SET = 0; // 0x0
     field public static final int RESTRICTION_SOURCE_DEVICE_OWNER = 2; // 0x2
     field public static final int RESTRICTION_SOURCE_PROFILE_OWNER = 4; // 0x4
@@ -3851,6 +3867,18 @@ package android.security.keystore {
     field public static final int ID_TYPE_IMEI = 2; // 0x2
     field public static final int ID_TYPE_MEID = 3; // 0x3
     field public static final int ID_TYPE_SERIAL = 1; // 0x1
+  }
+
+}
+
+package android.service.autofill {
+
+  public abstract class AutofillFieldClassificationService extends android.app.Service {
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public float[][] onGetScores(java.lang.String, android.os.Bundle, java.util.List<android.view.autofill.AutofillValue>, java.util.List<java.lang.String>);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.autofill.AutofillFieldClassificationService";
+    field public static final java.lang.String SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS = "android.autofill.field_classification.available_algorithms";
+    field public static final java.lang.String SERVICE_META_DATA_KEY_DEFAULT_ALGORITHM = "android.autofill.field_classification.default_algorithm";
   }
 
 }
@@ -4356,6 +4384,8 @@ package android.telephony {
 
   public class SubscriptionManager {
     method public java.util.List<android.telephony.SubscriptionPlan> getSubscriptionPlans(int);
+    method public void setSubscriptionOverrideCongested(int, boolean, long);
+    method public void setSubscriptionOverrideUnmetered(int, boolean, long);
     method public void setSubscriptionPlans(int, java.util.List<android.telephony.SubscriptionPlan>);
     field public static final java.lang.String ACTION_MANAGE_SUBSCRIPTION_PLANS = "android.telephony.action.MANAGE_SUBSCRIPTION_PLANS";
     field public static final java.lang.String ACTION_REFRESH_SUBSCRIPTION_PLANS = "android.telephony.action.REFRESH_SUBSCRIPTION_PLANS";
@@ -4437,6 +4467,8 @@ package android.telephony {
     method public deprecated boolean getDataEnabled();
     method public deprecated boolean getDataEnabled(int);
     method public boolean getEmergencyCallbackMode();
+    method public int getSimApplicationState();
+    method public int getSimCardState();
     method public java.util.List<android.telephony.TelephonyHistogram> getTelephonyHistograms();
     method public android.os.Bundle getVisualVoicemailSettings();
     method public int getVoiceActivationState();
@@ -4470,6 +4502,7 @@ package android.telephony {
     field public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1; // 0x1
     field public static final int CARRIER_PRIVILEGE_STATUS_NO_ACCESS = 0; // 0x0
     field public static final int CARRIER_PRIVILEGE_STATUS_RULES_NOT_LOADED = -1; // 0xffffffff
+    field public static final java.lang.String EXTRA_SIM_STATE = "android.telephony.extra.SIM_STATE";
     field public static final java.lang.String EXTRA_VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL = "android.telephony.extra.VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL";
     field public static final java.lang.String EXTRA_VOICEMAIL_SCRAMBLED_PIN_STRING = "android.telephony.extra.VOICEMAIL_SCRAMBLED_PIN_STRING";
     field public static final int SIM_ACTIVATION_STATE_ACTIVATED = 2; // 0x2
@@ -4477,6 +4510,8 @@ package android.telephony {
     field public static final int SIM_ACTIVATION_STATE_DEACTIVATED = 3; // 0x3
     field public static final int SIM_ACTIVATION_STATE_RESTRICTED = 4; // 0x4
     field public static final int SIM_ACTIVATION_STATE_UNKNOWN = 0; // 0x0
+    field public static final int SIM_STATE_LOADED = 10; // 0xa
+    field public static final int SIM_STATE_PRESENT = 11; // 0xb
   }
 
   public abstract class VisualVoicemailService extends android.app.Service {

@@ -554,8 +554,6 @@
     <protected-broadcast android:name="android.intent.action.DEVICE_LOCKED_CHANGED" />
 
     <!-- Added in O -->
-    <!-- TODO: temporary broadcast used by AutoFillManagerServiceImpl; will be removed -->
-    <protected-broadcast android:name="com.android.internal.autofill.action.REQUEST_AUTOFILL" />
     <protected-broadcast android:name="android.app.action.APPLICATION_DELEGATION_SCOPES_CHANGED" />
     <protected-broadcast android:name="com.android.server.wm.ACTION_REVOKE_SYSTEM_ALERT_WINDOW_PERMISSION" />
     <protected-broadcast android:name="android.media.tv.action.PARENTAL_CONTROLS_ENABLED_CHANGED" />
@@ -1749,6 +1747,12 @@
     <permission android:name="android.permission.SEND_EMBMS_INTENTS"
         android:protectionLevel="signature|privileged" />
 
+
+    <!-- Allows internal management of the sensor framework
+         @hide -->
+    <permission android:name="android.permission.MANAGE_SENSORS"
+        android:protectionLevel="signature" />
+
     <!-- Must be required by an ImsService to ensure that only the
          system can bind to it.
          <p>Protection level: signature|privileged
@@ -2684,6 +2688,13 @@
     <permission android:name="android.permission.BIND_AUTOFILL_SERVICE"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by an {@link android.service.autofill.AutofillFieldClassificationService}
+         to ensure that only the system can bind to it.
+         @hide This is not a third-party API (intended for OEMs and system apps).
+    -->
+    <permission android:name="android.permission.BIND_AUTOFILL_FIELD_CLASSIFICATION_SERVICE"
+                android:protectionLevel="signature" />
+
     <!-- Must be required by hotword enrollment application,
          to ensure that only the system can interact with it.
          @hide <p>Not for use by third-party applications.</p> -->
@@ -3181,10 +3192,14 @@
     <permission android:name="android.permission.BIND_APPWIDGET"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @hide Allows sysui to manage user grants of slice permissions. -->
+    <permission android:name="android.permission.MANAGE_SLICE_PERMISSIONS"
+        android:protectionLevel="signature" />
+
     <!-- Allows an application to bind app's slices and get their
          content. This content will be surfaced to the
          user and not to leave the device.
-         <p>Not for use by third-party applications. -->
+         <p>Not for use by third-party applications.-->
     <permission android:name="android.permission.BIND_SLICE"
         android:protectionLevel="signature|privileged|development" />
 
@@ -3686,6 +3701,10 @@
          @hide <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.READ_RUNTIME_PROFILES"
                 android:protectionLevel="signature|privileged" />
+
+    <!-- @hide Allows audio policy management. -->
+    <permission android:name="android.permission.MANAGE_AUDIO_POLICY"
+        android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows an application to turn on / off quiet mode.
          @hide <p>Not for use by third-party applications. -->

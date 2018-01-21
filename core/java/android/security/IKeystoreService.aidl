@@ -51,7 +51,6 @@ interface IKeystoreService {
     String grant(String name, int granteeUid);
     int ungrant(String name, int granteeUid);
     long getmtime(String name, int uid);
-    int duplicate(String srcKey, int srcUid, String destKey, int destUid);
     int is_hardware_backed(String string);
     int clear_uid(long uid);
 

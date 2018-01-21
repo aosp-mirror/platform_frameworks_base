@@ -665,14 +665,14 @@ public class BatteryStatsHelper {
 
     /**
      * Calculate the baseline power usage for the device when it is in suspend and idle.
-     * The device is drawing POWER_CPU_IDLE power at its lowest power state.
-     * The device is drawing POWER_CPU_IDLE + POWER_CPU_AWAKE power when a wakelock is held.
+     * The device is drawing POWER_CPU_SUSPEND power at its lowest power state.
+     * The device is drawing POWER_CPU_SUSPEND + POWER_CPU_IDLE power when a wakelock is held.
      */
     private void addIdleUsage() {
         final double suspendPowerMaMs = (mTypeBatteryRealtimeUs / 1000) *
-                mPowerProfile.getAveragePower(PowerProfile.POWER_CPU_IDLE);
+                mPowerProfile.getAveragePower(PowerProfile.POWER_CPU_SUSPEND);
         final double idlePowerMaMs = (mTypeBatteryUptimeUs / 1000) *
-                mPowerProfile.getAveragePower(PowerProfile.POWER_CPU_AWAKE);
+                mPowerProfile.getAveragePower(PowerProfile.POWER_CPU_IDLE);
         final double totalPowerMah = (suspendPowerMaMs + idlePowerMaMs) / (60 * 60 * 1000);
         if (DEBUG && totalPowerMah != 0) {
             Log.d(TAG, "Suspend: time=" + (mTypeBatteryRealtimeUs / 1000)

@@ -618,6 +618,8 @@
          type icon is wide for the tile in quick settings. -->
     <dimen name="wide_type_icon_start_padding_qs">3dp</dimen>
 
+    <dimen name="signal_indicator_to_icon_frame_spacing">3dp</dimen>
+
     <!-- The maximum width of the navigation bar ripples. -->
     <dimen name="key_button_ripple_max_width">95dp</dimen>
 

@@ -39,7 +39,6 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
-import android.content.pm.UserInfo;
 import android.graphics.drawable.Icon;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -66,7 +65,6 @@ import com.android.systemui.UiOffloadThread;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
-import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
@@ -146,7 +144,6 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
     private boolean mDockedStackExists;
 
     private boolean mManagedProfileIconVisible = false;
-    private boolean mManagedProfileInQuietMode = false;
 
     private BluetoothController mBluetooth;
 
@@ -474,17 +471,6 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         }
     }
 
-    private void updateQuietState() {
-        mManagedProfileInQuietMode = false;
-        int currentUserId = ActivityManager.getCurrentUser();
-        for (UserInfo ui : mUserManager.getEnabledProfiles(currentUserId)) {
-            if (ui.isManagedProfile() && ui.isQuietModeEnabled()) {
-                mManagedProfileInQuietMode = true;
-                return;
-            }
-        }
-    }
-
     private void updateManagedProfile() {
         // getLastResumedActivityUserId needds to acquire the AM lock, which may be contended in
         // some cases. Since it doesn't really matter here whether it's updated in this frame
@@ -501,11 +487,6 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
                         showIcon = true;
                         mIconController.setIcon(mSlotManagedProfile,
                                 R.drawable.stat_sys_managed_profile_status,
-                                mContext.getString(R.string.accessibility_managed_profile));
-                    } else if (mManagedProfileInQuietMode) {
-                        showIcon = true;
-                        mIconController.setIcon(mSlotManagedProfile,
-                                R.drawable.stat_sys_managed_profile_status_off,
                                 mContext.getString(R.string.accessibility_managed_profile));
                     } else {
                         showIcon = false;
@@ -676,7 +657,6 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
                 public void onUserSwitchComplete(int newUserId) throws RemoteException {
                     mHandler.post(() -> {
                         updateAlarm();
-                        updateQuietState();
                         updateManagedProfile();
                         updateForegroundInstantApps();
                     });
@@ -724,7 +704,6 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         if (mCurrentUserSetup == userSetup) return;
         mCurrentUserSetup = userSetup;
         updateAlarm();
-        updateQuietState();
     }
 
     @Override
@@ -793,7 +772,6 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
             } else if (action.equals(Intent.ACTION_MANAGED_PROFILE_AVAILABLE) ||
                     action.equals(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE) ||
                     action.equals(Intent.ACTION_MANAGED_PROFILE_REMOVED)) {
-                updateQuietState();
                 updateManagedProfile();
             } else if (action.equals(AudioManager.ACTION_HEADSET_PLUG)) {
                 updateHeadsetPlug(intent);

@@ -43,8 +43,15 @@ import java.util.List;
  * @hide
  */
 public final class KeychainSnapshot implements Parcelable {
+    private static final int DEFAULT_MAX_ATTEMPTS = 10;
+    private static final long DEFAULT_COUNTER_ID = 1L;
+
     private int mSnapshotVersion;
-    private List<KeychainProtectionParameter> mKeychainProtectionParams;
+    private int mMaxAttempts = DEFAULT_MAX_ATTEMPTS;
+    private long mCounterId = DEFAULT_COUNTER_ID;
+    private byte[] mServerParams;
+    private byte[] mPublicKey;
+    private List<KeychainProtectionParams> mKeychainProtectionParams;
     private List<WrappedApplicationKey> mEntryRecoveryData;
     private byte[] mEncryptedRecoveryKeyBlob;
 
@@ -54,7 +61,7 @@ public final class KeychainSnapshot implements Parcelable {
      */
     public KeychainSnapshot(
             int snapshotVersion,
-            @NonNull List<KeychainProtectionParameter> keychainProtectionParams,
+            @NonNull List<KeychainProtectionParams> keychainProtectionParams,
             @NonNull List<WrappedApplicationKey> wrappedApplicationKeys,
             @NonNull byte[] encryptedRecoveryKeyBlob) {
         mSnapshotVersion = snapshotVersion;
@@ -79,9 +86,40 @@ public final class KeychainSnapshot implements Parcelable {
     }
 
     /**
+     * Number of user secret guesses allowed during Keychain recovery.
+     */
+    public int getMaxAttempts() {
+        return mMaxAttempts;
+    }
+
+    /**
+     * CounterId which is rotated together with user secret.
+     */
+    public long getCounterId() {
+        return mCounterId;
+    }
+
+    /**
+     * Server parameters.
+     */
+    public @NonNull byte[] getServerParams() {
+        return mServerParams;
+    }
+
+    /**
+     * Public key used to encrypt {@code encryptedRecoveryKeyBlob}.
+     *
+     * See implementation for binary key format
+     */
+    // TODO: document key format.
+    public @NonNull byte[] getTrustedHardwarePublicKey() {
+        return mPublicKey;
+    }
+
+    /**
      * UI and key derivation parameters. Note that combination of secrets may be used.
      */
-    public @NonNull List<KeychainProtectionParameter> getKeychainProtectionParams() {
+    public @NonNull List<KeychainProtectionParams> getKeychainProtectionParams() {
         return mKeychainProtectionParams;
     }
 
@@ -129,13 +167,57 @@ public final class KeychainSnapshot implements Parcelable {
         }
 
         /**
+         * Sets the number of user secret guesses allowed during Keychain recovery.
+         *
+         * @param maxAttempts The maximum number of guesses.
+         * @return This builder.
+         */
+        public Builder setMaxAttempts(int maxAttempts) {
+            mInstance.mMaxAttempts = maxAttempts;
+            return this;
+        }
+
+        /**
+         * Sets counter id.
+         *
+         * @param counterId The counter id.
+         * @return This builder.
+         */
+        public Builder setCounterId(long counterId) {
+            mInstance.mCounterId = counterId;
+            return this;
+        }
+
+        /**
+         * Sets server parameters.
+         *
+         * @param serverParams The server parameters
+         * @return This builder.
+         */
+        public Builder setServerParams(byte[] serverParams) {
+            mInstance.mServerParams = serverParams;
+            return this;
+        }
+
+        /**
+         * Sets public key used to encrypt recovery blob.
+         *
+         * @param publicKey The public key
+         * @return This builder.
+         */
+        public Builder setTrustedHardwarePublicKey(byte[] publicKey) {
+            mInstance.mPublicKey = publicKey;
+            return this;
+        }
+
+        /**
          * Sets UI and key derivation parameters
          *
          * @param recoveryMetadata The UI and key derivation parameters
          * @return This builder.
          */
         public Builder setKeychainProtectionParams(
-                @NonNull List<KeychainProtectionParameter> recoveryMetadata) {
+                @NonNull List<KeychainProtectionParams> recoveryMetadata) {
             mInstance.mKeychainProtectionParams = recoveryMetadata;
             return this;
         }
@@ -175,6 +257,8 @@ public final class KeychainSnapshot implements Parcelable {
             Preconditions.checkCollectionElementsNotNull(mInstance.mEntryRecoveryData,
                     "entryRecoveryData");
             Preconditions.checkNotNull(mInstance.mEncryptedRecoveryKeyBlob);
+            Preconditions.checkNotNull(mInstance.mServerParams);
+            Preconditions.checkNotNull(mInstance.mPublicKey);
             return mInstance;
         }
     }
@@ -195,7 +279,7 @@ public final class KeychainSnapshot implements Parcelable {
      */
     protected KeychainSnapshot(Parcel in) {
         mSnapshotVersion = in.readInt();
-        mKeychainProtectionParams = in.createTypedArrayList(KeychainProtectionParameter.CREATOR);
+        mKeychainProtectionParams = in.createTypedArrayList(KeychainProtectionParams.CREATOR);
         mEncryptedRecoveryKeyBlob = in.createByteArray();
         mEntryRecoveryData = in.createTypedArrayList(WrappedApplicationKey.CREATOR);
     }

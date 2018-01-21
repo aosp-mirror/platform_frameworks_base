@@ -73,6 +73,16 @@ public class RecoverySessionStorage implements Destroyable {
     }
 
     /**
+     * Deletes the session with {@code sessionId} created by app with {@code uid}.
+     */
+    public void remove(int uid, String sessionId) {
+        if (mSessionsByUid.get(uid) == null) {
+            return;
+        }
+        mSessionsByUid.get(uid).removeIf(session -> session.mSessionId.equals(sessionId));
+    }
+
+    /**
      * Removes all sessions associated with the given recovery agent uid.
      *
      * @param uid The uid of the recovery agent whose sessions to remove.

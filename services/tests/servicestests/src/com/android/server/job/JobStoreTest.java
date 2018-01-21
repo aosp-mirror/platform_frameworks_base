@@ -6,12 +6,17 @@ import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.app.job.JobInfo;
 import android.app.job.JobInfo.Builder;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManagerInternal;
 import android.net.NetworkRequest;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -24,6 +29,7 @@ import android.util.Pair;
 
 import com.android.internal.util.HexDump;
 import com.android.server.IoThread;
+import com.android.server.LocalServices;
 import com.android.server.job.JobStore.JobSet;
 import com.android.server.job.controllers.JobStatus;
 
@@ -64,6 +70,13 @@ public class JobStoreTest {
         mTaskStoreUnderTest =
                 JobStore.initAndGetForTesting(mTestContext, mTestContext.getFilesDir());
         mComponent = new ComponentName(getContext().getPackageName(), StubClass.class.getName());
+
+        // Assume all packages are current SDK
+        final PackageManagerInternal pm = mock(PackageManagerInternal.class);
+        when(pm.getPackageTargetSdkVersion(anyString()))
+                .thenReturn(Build.VERSION_CODES.CUR_DEVELOPMENT);
+        LocalServices.removeServiceForTest(PackageManagerInternal.class);
+        LocalServices.addService(PackageManagerInternal.class, pm);
 
         // Freeze the clocks at this moment in time
         JobSchedulerService.sSystemClock =

@@ -35,7 +35,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Probíhající"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Oznámení"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Baterie je slabá"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"Baterie je téměř vybitá, zapněte spořič baterie"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Zbývá <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Zbývá <xliff:g id="PERCENTAGE">%s</xliff:g>, při obvyklém využití asi <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Zbývá <xliff:g id="PERCENTAGE">%s</xliff:g>, asi <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Zbývá <xliff:g id="PERCENTAGE">%s</xliff:g>. Spořič baterie je zapnutý."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Nabíjení pomocí rozhraní USB není podporováno.\nPoužívejte pouze nabíječku, která byla dodána se zařízením."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Nabíjení přes USB není podporováno."</string>
@@ -69,14 +72,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Uživatel aktuálně přihlášený k tomuto zařízení nemůže zapnout ladění USB. Chcete-li tuto funkci použít, přepněte na primárního uživatele."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Přiblížit na celou obrazovku"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Na celou obrazovku"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Snímek obrazovky"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Ukládání snímku obrazovky..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Ukládání snímku obrazovky..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"Probíhá ukládání snímku obrazovky."</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Snímek obrazovky pořízen"</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Klepnutím zobrazíte snímek obrazovky."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Snímek obrazovky se nepodařilo zachytit."</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Při ukládání snímku obrazovky došlo k problému."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Snímek obrazovky nelze pořídit kvůli nedostatku místa v úložišti."</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"Ukládání snímku obrazovky"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"Snímek obrazovky byl uložen"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"Klepnutím snímek obrazovky zobrazíte"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"Snímek obrazovky se nepodařilo zachytit"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"Při ukládání snímku obrazovky došlo k problému"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Snímek obrazovky kvůli nedostatku místa v úložišti nelze uložit"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Aplikace nebo organizace zakazuje pořizování snímků obrazovky"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Možnosti přenosu souborů pomocí rozhraní USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Připojit jako přehrávač médií (MTP)"</string>
@@ -563,30 +567,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Vypnuto"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Rozšířené ovládací prvky oznámení umožňují nastavit úroveň důležitosti oznámení aplikace od 0 do 5. \n\n"<b>"Úroveň 5"</b>" \n– Zobrazit na začátku seznamu oznámení \n– Povolit vyrušení na celou obrazovku \n– Vždy zobrazit náhled \n\n"<b>"Úroveň 4"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Vždy zobrazit náhled \n\n"<b>"Úroveň 3"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n\n"<b>"Úroveň 2"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n– Nikdy nevydávat žádný zvukový signál ani nevibrovat \n\n"<b>"Úroveň 1"</b>" \n– Zabránit vyrušení na celou obrazovku \n– Nikdy nezobrazovat náhled \n– Nikdy nevydávat zvukový signál ani nevibrovat \n– Skrýt z obrazovky uzamčení a stavového řádku \n– Zobrazovat na konci seznamu oznámení \n\n"<b>";Úroveň 0"</b>" \n– Blokovat všechna oznámení z aplikace"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Oznámení"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"Tato oznámení již nebudete dostávat"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"Kategorie oznámení: <xliff:g id="NUMBER">%d</xliff:g>"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"Tato aplikace nemá kategorie oznámení"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Oznámení této aplikace nelze vypnout"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="few">1 ze <xliff:g id="NUMBER_1">%s</xliff:g> kategorií oznámení z této aplikace</item>
-      <item quantity="many">1 z <xliff:g id="NUMBER_1">%s</xliff:g> kategorie oznámení z této aplikace</item>
-      <item quantity="other">1 z <xliff:g id="NUMBER_1">%s</xliff:g> kategorií oznámení z této aplikace</item>
-      <item quantity="one">1 z <xliff:g id="NUMBER_0">%s</xliff:g> kategorie oznámení z této aplikace</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="few"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> a <xliff:g id="NUMBER_5">%3$d</xliff:g> další</item>
-      <item quantity="many"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> a <xliff:g id="NUMBER_5">%3$d</xliff:g> dalšího</item>
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> a <xliff:g id="NUMBER_5">%3$d</xliff:g> dalších</item>
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> a <xliff:g id="NUMBER_2">%3$d</xliff:g> další</item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Tato oznámení již nebudete dostávat"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"Mají se tato oznámení nadále zobrazovat?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"Přestat zobrazovat oznámení"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"Nadále zobrazovat"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"Mají se oznámení z této aplikace nadále zobrazovat?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"Tato oznámení nelze deaktivovat"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Ovládací prvky oznámení aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> byly otevřeny"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Ovládací prvky oznámení aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> byly zavřeny"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Povolit oznámení z tohoto kanálu"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"Všechny kategorie"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Další nastavení"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"Přizpůsobit: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"Upravit"</string>
     <string name="notification_done" msgid="5279426047273930175">"Hotovo"</string>
+    <string name="inline_undo" msgid="558916737624706010">"Zpět"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g> aplikace <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"Nastavení oznámení"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"Možnosti odložení oznámení"</string>
@@ -745,8 +738,7 @@
     <string name="pip_phone_expand" msgid="5889780005575693909">"Rozbalit"</string>
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimalizovat"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Zavřít"</string>
-    <!-- no translation found for pip_phone_settings (8080777499521528521) -->
-    <skip />
+    <string name="pip_phone_settings" msgid="8080777499521528521">"Nastavení"</string>
     <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Nápovědu zavřete přetažením dolů"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Nabídka"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"Aplikace <xliff:g id="NAME">%s</xliff:g> je v režimu obraz v obraze"</string>

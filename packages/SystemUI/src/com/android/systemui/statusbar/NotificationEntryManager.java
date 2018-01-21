@@ -35,6 +35,7 @@ import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
 import android.service.notification.StatusBarNotification;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Log;
@@ -462,7 +463,8 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         mMediaManager.onNotificationRemoved(key);
 
         NotificationData.Entry entry = mNotificationData.get(key);
-        if (FORCE_REMOTE_INPUT_HISTORY && mRemoteInputManager.getController().isSpinning(key)
+        if (FORCE_REMOTE_INPUT_HISTORY
+                && shouldKeepForRemoteInput(entry)
                 && entry.row != null && !entry.row.isDismissed()) {
             StatusBarNotification sbn = entry.notification;
 
@@ -477,7 +479,11 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                 newHistory = new CharSequence[oldHistory.length + 1];
                 System.arraycopy(oldHistory, 0, newHistory, 1, oldHistory.length);
             }
-            newHistory[0] = String.valueOf(entry.remoteInputText);
+            CharSequence remoteInputText = entry.remoteInputText;
+            if (TextUtils.isEmpty(remoteInputText)) {
+                remoteInputText = entry.remoteInputTextWhenReset;
+            }
+            newHistory[0] = String.valueOf(remoteInputText);
             b.setRemoteInputHistory(newHistory);
 
             Notification newNotification = b.build();
@@ -492,6 +498,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                     sbn.getId(), sbn.getTag(), sbn.getUid(), sbn.getInitialPid(),
                     newNotification, sbn.getUser(), sbn.getOverrideGroupKey(), sbn.getPostTime());
             boolean updated = false;
+            entry.onRemoteInputInserted();
             try {
                 updateNotificationInternal(newSbn, null);
                 updated = true;
@@ -537,6 +544,19 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         StatusBarNotification old = removeNotificationViews(key, ranking);
 
         mCallback.onNotificationRemoved(key, old);
+    }
+
+    private boolean shouldKeepForRemoteInput(NotificationData.Entry entry) {
+        if (entry == null) {
+            return false;
+        }
+        if (mRemoteInputManager.getController().isSpinning(entry.key)) {
+            return true;
+        }
+        if (entry.hasJustSentRemoteInput()) {
+            return true;
+        }
+        return false;
     }
 
     private StatusBarNotification removeNotificationViews(String key,

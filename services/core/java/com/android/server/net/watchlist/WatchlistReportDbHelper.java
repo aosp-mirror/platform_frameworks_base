@@ -76,13 +76,20 @@ class WatchlistReportDbHelper extends SQLiteOpenHelper {
      */
     public static class AggregatedResult {
         // A list of digests that visited c&c domain or ip before.
-        Set<String> appDigestList;
+        final Set<String> appDigestList;
 
         // The c&c domain or ip visited before.
-        String cncDomainVisited;
+        final String cncDomainVisited;
 
         // A list of app digests and c&c domain visited.
-        HashMap<String, String> appDigestCNCList;
+        final HashMap<String, String> appDigestCNCList;
+
+        public AggregatedResult(Set<String> appDigestList, String cncDomainVisited,
+                HashMap<String, String> appDigestCNCList) {
+            this.appDigestList = appDigestList;
+            this.cncDomainVisited = cncDomainVisited;
+            this.appDigestCNCList = appDigestCNCList;
+        }
     }
 
     static File getSystemWatchlistDbFile() {
@@ -151,23 +158,21 @@ class WatchlistReportDbHelper extends SQLiteOpenHelper {
             if (c == null || c.getCount() == 0) {
                 return null;
             }
-            final AggregatedResult result = new AggregatedResult();
-            result.cncDomainVisited = null;
-            // After aggregation, each digest maximum will have only 1 record.
-            result.appDigestList = new HashSet<>();
-            result.appDigestCNCList = new HashMap<>();
+            final HashSet<String> appDigestList = new HashSet<>();
+            final HashMap<String, String> appDigestCNCList = new HashMap<>();
+            String cncDomainVisited = null;
             while (c.moveToNext()) {
                 // We use hex string here as byte[] cannot be a key in HashMap.
                 String digestHexStr = HexDump.toHexString(c.getBlob(INDEX_DIGEST));
                 String cncDomain = c.getString(INDEX_CNC_DOMAIN);
 
-                result.appDigestList.add(digestHexStr);
-                if (result.cncDomainVisited != null) {
-                    result.cncDomainVisited = cncDomain;
+                appDigestList.add(digestHexStr);
+                if (cncDomainVisited != null) {
+                    cncDomainVisited = cncDomain;
                 }
-                result.appDigestCNCList.put(digestHexStr, cncDomain);
+                appDigestCNCList.put(digestHexStr, cncDomain);
             }
-            return result;
+            return new AggregatedResult(appDigestList, cncDomainVisited, appDigestCNCList);
         } finally {
             if (c != null) {
                 c.close();

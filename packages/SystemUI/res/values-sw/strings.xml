@@ -33,7 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Inaendelea"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Arifa"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"Betri inaisha"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"Chaji imepungua. Washa Kiokoa Betri"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"Imebakisha <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"Imesalia <xliff:g id="PERCENTAGE">%s</xliff:g>, itadumu takribani <xliff:g id="TIME">%s</xliff:g> kulingana na jinsi unavyotumia"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"Imesalia <xliff:g id="PERCENTAGE">%s</xliff:g>, itadumu takribani <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"Imesalia <xliff:g id="PERCENTAGE">%s</xliff:g>. Umewasha Kiokoa Betri."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"Chaji ya USB haihamiliwi.\n Tumia chaka iliyopeanwa."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"Kuchaji kwa kutumia USB hakutumiki."</string>
@@ -67,14 +70,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Mtumiaji aliyeingia katika akaunti kwa kutumia kifaa hiki kwa sasa hawezi kuwasha utatuzi wa USB. Ili utumie kipengele hiki, tumia akaunti ya mtumiaji wa msingi."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Kuza ili kujaza skrini"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Tanua ili kujaza skrini"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Picha ya skrini"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Inahifadhi picha ya skrini..."</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Inahifadhi picha ya skrini..."</string>
-    <string name="screenshot_saving_text" msgid="2419718443411738818">"Picha ya skrini inahifadhiwa"</string>
-    <string name="screenshot_saved_title" msgid="6461865960961414961">"Picha ya skrini imenaswa."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Gusa ili utazame picha ya skrini uliyohifadhi."</string>
-    <string name="screenshot_failed_title" msgid="705781116746922771">"Haikuweza kunasa picha ya skrini"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Hitilafu imetokea wakati wa kuhifadhi picha ya skrini."</string>
-    <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Haina nafasi ya kutosha kuhifadhi picha ya skrini."</string>
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"Inahifadhi picha ya skrini"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"Imehifadhi picha ya skrini"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"Gusa ili utazame picha ya skrini uliyohifadhi"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"Imeshindwa kupiga picha ya skrini"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"Hitilafu imetokea wakati wa kuhifadhi picha ya skrini"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Imeshindwa kuhifadhi picha ya skrini kwa sababu nafasi haitoshi"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Programu au shirika lako halikuruhusu kupiga picha za skrini"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Machaguo ya uhamisho wa faili la USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Angika kama kichezaji cha maudhui (MTP)"</string>
@@ -557,26 +561,19 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"Imezimwa"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Ukiwa na udhibiti wa arifa, unaweza kuweka kiwango cha umuhimu wa arifa za programu kuanzia 0 hadi 5. \n\n"<b>"Kiwango cha 5"</b>" \n- Onyesha katika sehemu ya juu ya orodha ya arifa \n- Ruhusu ukatizaji wa skrini nzima \n- Ruhusu arifa za kuchungulia kila wakati\n\n"<b>"Kiwango cha 4"</b>" \n- Zuia ukatizaji wa skrini nzima\n- Ruhusu arifa za kuchungulia kila wakati \n\n"<b>"Kiwango cha 3"</b>" \n- Zuia ukatizaji wa skrini nzima\n- Usiruhusu kamwe arifa za kuchungulia\n\n"<b>"Kiwango cha 2"</b>" \n- Zuia ukatizaji wa skrini nzima\n- Usiruhusu kamwe arifa za kuchungulia \n- Usiruhusu kamwe sauti au mtetemo \n\n"<b>"Kiwango cha 1"</b>" \n- Zuia ukatizaji wa skrini nzima \n- Usiruhusu kamwe arifa za kuchungulia \n- Usiruhusu kamwe sauti na mtetemo \n- Usionyeshe skrini iliyofungwa na sehemu ya arifa \n- Onyesha katika sehemu ya chini ya orodha ya arifa \n\n"<b>"Kiwango cha 0"</b>" \n- Zuia arifa zote kutoka programu"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Arifa"</string>
-    <string name="notification_channel_disabled" msgid="2139193533791840539">"Hutapokea arifa hizi tena"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"Aina <xliff:g id="NUMBER">%d</xliff:g> za arifa"</string>
-    <string name="notification_default_channel_desc" msgid="2506053815870808359">"Programu hii haina aina za arifa"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"Arifa kutoka kwenye programu hii haziwezi kuzimwa"</string>
-    <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
-      <item quantity="other">Aina 1 ya arifa kati ya <xliff:g id="NUMBER_1">%s</xliff:g> kutoka kwenye kifaa hiki</item>
-      <item quantity="one">Aina 1 ya arifa kati ya <xliff:g id="NUMBER_0">%s</xliff:g> kutoka kwenye kifaa hiki</item>
-    </plurals>
-    <string name="notification_channels_list_desc_2" msgid="6214732715833946441">"<xliff:g id="CHANNEL_NAME_1">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2">%2$s</xliff:g>"</string>
-    <plurals name="notification_channels_list_desc_2_and_others" formatted="false" msgid="2747813553355336157">
-      <item quantity="other"><xliff:g id="CHANNEL_NAME_1_3">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_4">%2$s</xliff:g> na vingine <xliff:g id="NUMBER_5">%3$d</xliff:g></item>
-      <item quantity="one"><xliff:g id="CHANNEL_NAME_1_0">%1$s</xliff:g>, <xliff:g id="CHANNEL_NAME_2_1">%2$s</xliff:g> na kingine <xliff:g id="NUMBER_2">%3$d</xliff:g></item>
-    </plurals>
+    <string name="notification_channel_disabled" msgid="344536703863700565">"Hutaona tena arifa hizi"</string>
+    <string name="inline_keep_showing" msgid="8945102997083836858">"Ungependa kuendelea kuonyesha arifa hizi?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"Acha kuonyesha arifa"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"Endelea kuonyesha"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"Ungependa kuendelea kuonyesha arifa kutoka programu hii?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"Huwezi kuzima arifa hizi"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"Vidhibiti vya arifa <xliff:g id="APP_NAME">%1$s</xliff:g> vimefunguliwa"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"Vidhibiti vya arifa vya <xliff:g id="APP_NAME">%1$s</xliff:g> vimefungwa"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"Ruhusu arifa kutoka kwenye kituo hiki"</string>
-    <string name="notification_all_categories" msgid="5407190218055113282">"Aina Zote"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"Mipangilio zaidi"</string>
-    <string name="notification_app_settings" msgid="3743278649182392015">"Badilisha upendavyo: <xliff:g id="SUB_CATEGORY">%1$s</xliff:g>"</string>
+    <string name="notification_app_settings" msgid="420348114670768449">"Weka mapendeleo"</string>
     <string name="notification_done" msgid="5279426047273930175">"Nimemaliza"</string>
+    <string name="inline_undo" msgid="558916737624706010">"Tendua"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"vidhibiti vya arifa"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"chaguo za kuahirisha arifa"</string>
