@@ -156,13 +156,6 @@ public final class Slice implements Parcelable {
      */
     public static final String HINT_SEE_MORE = "see_more";
     /**
-     * A hint to tell the system that this slice cares about the return value of
-     * {@link SliceProvider#getBindingPackage} and should not cache the result
-     * for multiple apps.
-     * @hide
-     */
-    public static final String HINT_CALLER_NEEDED = "caller_needed";
-    /**
      * Key to retrieve an extra added to an intent when a control is changed.
      */
     public static final String EXTRA_TOGGLE_STATE = "android.app.slice.extra.TOGGLE_STATE";
