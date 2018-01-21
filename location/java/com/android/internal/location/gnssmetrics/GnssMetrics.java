@@ -17,7 +17,9 @@
 package com.android.internal.location.gnssmetrics;
 
 import android.os.SystemClock;
+import android.os.connectivity.GpsBatteryStats;
 
+import android.text.format.DateUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.util.TimeUtils;
@@ -26,6 +28,7 @@ import java.util.Arrays;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.location.nano.GnssLogsProto.GnssLog;
+import com.android.internal.location.nano.GnssLogsProto.PowerMetrics;
 
 /**
  * GnssMetrics: Is used for logging GNSS metrics
@@ -171,6 +174,7 @@ public class GnssMetrics {
       msg.standardDeviationTopFourAverageCn0DbHz
           = topFourAverageCn0Statistics.getStandardDeviation();
     }
+    msg.powerMetrics = mGnssPowerMetrics.buildProto();
     String s = Base64.encodeToString(GnssLog.toByteArray(msg), Base64.DEFAULT);
     reset();
     return s;
@@ -218,6 +222,21 @@ public class GnssMetrics {
           topFourAverageCn0Statistics.getStandardDeviation()).append("\n");
     }
     s.append("GNSS_KPI_END").append("\n");
+    GpsBatteryStats stats = mGnssPowerMetrics.getGpsBatteryStats();
+    if (stats != null) {
+      s.append("Power Metrics").append('\n');
+      long[] t = stats.getTimeInGpsSignalQualityLevel();
+      if (t != null && t.length == NUM_GPS_SIGNAL_QUALITY_LEVELS) {
+        s.append("  Amount of time (while on battery) Top 4 Avg CN0 > " +
+            Double.toString(GnssPowerMetrics.POOR_TOP_FOUR_AVG_CN0_THRESHOLD_DB_HZ) +
+            " dB-Hz (min): ").append(t[1] / ((double) DateUtils.MINUTE_IN_MILLIS)).append("\n");
+        s.append("  Amount of time (while on battery) Top 4 Avg CN0 <= " +
+            Double.toString(GnssPowerMetrics.POOR_TOP_FOUR_AVG_CN0_THRESHOLD_DB_HZ) +
+            " dB-Hz (min): ").append(t[0] / ((double) DateUtils.MINUTE_IN_MILLIS)).append("\n");
+      }
+      s.append("  Energy consumed while on battery (mAh): ").append(
+          stats.getEnergyConsumedMaMs() / ((double) DateUtils.HOUR_IN_MILLIS)).append("\n");
+    }
     return s.toString();
   }
 
@@ -294,7 +313,7 @@ public class GnssMetrics {
   private class GnssPowerMetrics {
 
     /* Threshold for Top Four Average CN0 below which GNSS signal quality is declared poor */
-    private static final double POOR_TOP_FOUR_AVG_CN0_THRESHOLD_DB_HZ = 20.0;
+    public static final double POOR_TOP_FOUR_AVG_CN0_THRESHOLD_DB_HZ = 20.0;
 
     /* Minimum change in Top Four Average CN0 needed to trigger a report */
     private static final double REPORTING_THRESHOLD_DB_HZ = 1.0;
@@ -310,6 +329,38 @@ public class GnssMetrics {
       // Used to initialize the variable to a very small value (unachievable in practice) so that
       // the first CNO report will trigger an update to BatteryStats
       mLastAverageCn0 = -100.0;
+    }
+
+    /**
+     * Builds power metrics proto buf. This is included in the gnss proto buf.
+     * @return PowerMetrics
+     */
+    public PowerMetrics buildProto() {
+      PowerMetrics p = new PowerMetrics();
+      GpsBatteryStats stats = mGnssPowerMetrics.getGpsBatteryStats();
+      if (stats != null) {
+        p.loggingDurationMs = stats.getLoggingDurationMs();
+        p.energyConsumedMah = stats.getEnergyConsumedMaMs() / ((double) DateUtils.HOUR_IN_MILLIS);
+        long[] t = stats.getTimeInGpsSignalQualityLevel();
+        p.timeInSignalQualityLevelMs = new long[t.length];
+        for (int i = 0; i < t.length; i++) {
+          p.timeInSignalQualityLevelMs[i] = t[i];
+        }
+      }
+      return p;
+    }
+
+    /**
+     * Returns the GPS power stats
+     * @return GpsBatteryStats
+     */
+    public GpsBatteryStats getGpsBatteryStats() {
+      try {
+        return mBatteryStats.getGpsBatteryStats();
+      } catch (Exception e) {
+        Log.w(TAG, "Exception", e);
+        return null;
+      }
     }
 
     /**
