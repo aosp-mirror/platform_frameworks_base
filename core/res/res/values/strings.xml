@@ -4480,7 +4480,7 @@
     <string name="zen_mode_alarm">Until <xliff:g id="formattedTime" example="10:00 PM">%1$s</xliff:g> (next alarm)</string>
 
     <!-- Zen mode condition: no exit criteria. [CHAR LIMIT=NONE] -->
-    <string name="zen_mode_forever">Until you turn off Do Not Disturb</string>
+    <string name="zen_mode_forever">Until you turn off</string>
 
     <!-- Zen mode condition: no exit criteria, includes the name of the feature for emphasis. [CHAR LIMIT=NONE] -->
     <string name="zen_mode_forever_dnd">Until you turn off Do Not Disturb</string>
