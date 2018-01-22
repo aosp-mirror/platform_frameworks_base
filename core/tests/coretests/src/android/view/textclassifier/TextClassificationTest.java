@@ -32,7 +32,9 @@ import android.view.View;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Calendar;
 import java.util.Locale;
+import java.util.TimeZone;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -146,8 +148,12 @@ public class TextClassificationTest {
 
     @Test
     public void testParcelOptions() {
+        Calendar referenceTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.US);
+        referenceTime.setTimeInMillis(946771200000L);  // 2000-01-02
+
         TextClassification.Options reference = new TextClassification.Options();
         reference.setDefaultLocales(new LocaleList(Locale.US, Locale.GERMANY));
+        reference.setReferenceTime(referenceTime);
 
         // Parcel and unparcel.
         final Parcel parcel = Parcel.obtain();
@@ -157,5 +163,6 @@ public class TextClassificationTest {
                 parcel);
 
         assertEquals("en-US,de-DE", result.getDefaultLocales().toLanguageTags());
+        assertEquals(referenceTime, result.getReferenceTime());
     }
 }

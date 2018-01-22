@@ -47,12 +47,26 @@ public interface TextClassifier {
     /** @hide */
     String DEFAULT_LOG_TAG = "androidtc";
 
+    /** The TextClassifier failed to run. */
     String TYPE_UNKNOWN = "";
+    /** The classifier ran, but didn't recognize a known entity. */
     String TYPE_OTHER = "other";
+    /** E-mail address (e.g. "noreply@android.com"). */
     String TYPE_EMAIL = "email";
+    /** Phone number (e.g. "555-123 456"). */
     String TYPE_PHONE = "phone";
+    /** Physical address. */
     String TYPE_ADDRESS = "address";
+    /** Web URL. */
     String TYPE_URL = "url";
+    /** Time reference that is no more specific than a date. May be absolute such as "01/01/2000" or
+     * relative like "tomorrow". **/
+    String TYPE_DATE = "date";
+    /** Time reference that includes a specific time. May be absolute such as "01/01/2000 5:30pm" or
+     * relative like "tomorrow at 5:30pm". **/
+    String TYPE_DATE_TIME = "datetime";
+    /** Flight number in IATA format. */
+    String TYPE_FLIGHT_NUMBER = "flight";
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -63,6 +77,9 @@ public interface TextClassifier {
             TYPE_PHONE,
             TYPE_ADDRESS,
             TYPE_URL,
+            TYPE_DATE,
+            TYPE_DATE_TIME,
+            TYPE_FLIGHT_NUMBER,
     })
     @interface EntityType {}
 
