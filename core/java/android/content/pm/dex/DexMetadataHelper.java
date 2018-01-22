@@ -107,8 +107,8 @@ public class DexMetadataHelper {
      * For each code path (.apk) the method checks if a matching dex metadata file (.dm) exists.
      * If it does it adds the pair to the returned map.
      *
-     * Note that this method will do a strict
-     * matching based on the extension ('foo.dm' will only match 'foo.apk').
+     * Note that this method will do a loose
+     * matching based on the extension ('foo.dm' will match 'foo.apk' or 'foo').
      *
      * This should only be used for code paths extracted from a package structure after the naming
      * was enforced in the installer.
@@ -118,7 +118,7 @@ public class DexMetadataHelper {
         ArrayMap<String, String> result = new ArrayMap<>();
         for (int i = codePaths.size() - 1; i >= 0; i--) {
             String codePath = codePaths.get(i);
-            String dexMetadataPath = buildDexMetadataPathForApk(codePath);
+            String dexMetadataPath = buildDexMetadataPathForFile(new File(codePath));
 
             if (Files.exists(Paths.get(dexMetadataPath))) {
                 result.put(codePath, dexMetadataPath);
