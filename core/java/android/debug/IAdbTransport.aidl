@@ -18,4 +18,5 @@ package android.debug;
 
 /** @hide */
 interface IAdbTransport {
+    void onAdbEnabled(boolean enabled);
 }
