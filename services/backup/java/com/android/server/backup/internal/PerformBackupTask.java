@@ -114,14 +114,14 @@ public class PerformBackupTask implements BackupRestoreTask {
     private RefactoredBackupManagerService backupManagerService;
     private final Object mCancelLock = new Object();
 
-    ArrayList<BackupRequest> mQueue;
-    ArrayList<BackupRequest> mOriginalQueue;
-    File mStateDir;
-    @Nullable DataChangedJournal mJournal;
-    BackupState mCurrentState;
-    List<String> mPendingFullBackups;
-    IBackupObserver mObserver;
-    IBackupManagerMonitor mMonitor;
+    private ArrayList<BackupRequest> mQueue;
+    private ArrayList<BackupRequest> mOriginalQueue;
+    private File mStateDir;
+    @Nullable private DataChangedJournal mJournal;
+    private BackupState mCurrentState;
+    private List<String> mPendingFullBackups;
+    private IBackupObserver mObserver;
+    private IBackupManagerMonitor mMonitor;
 
     private final TransportClient mTransportClient;
     private final OnTaskFinishedListener mListener;
@@ -130,18 +130,18 @@ public class PerformBackupTask implements BackupRestoreTask {
     private volatile int mEphemeralOpToken;
 
     // carried information about the current in-flight operation
-    IBackupAgent mAgentBinder;
-    PackageInfo mCurrentPackage;
-    File mSavedStateName;
-    File mBackupDataName;
-    File mNewStateName;
-    ParcelFileDescriptor mSavedState;
-    ParcelFileDescriptor mBackupData;
-    ParcelFileDescriptor mNewState;
-    int mStatus;
-    boolean mFinished;
-    final boolean mUserInitiated;
-    final boolean mNonIncremental;
+    private IBackupAgent mAgentBinder;
+    private PackageInfo mCurrentPackage;
+    private File mSavedStateName;
+    private File mBackupDataName;
+    private File mNewStateName;
+    private ParcelFileDescriptor mSavedState;
+    private ParcelFileDescriptor mBackupData;
+    private ParcelFileDescriptor mNewState;
+    private int mStatus;
+    private boolean mFinished;
+    private final boolean mUserInitiated;
+    private final boolean mNonIncremental;
 
     private volatile boolean mCancelAll;
 
@@ -241,7 +241,7 @@ public class PerformBackupTask implements BackupRestoreTask {
 
     // We're starting a backup pass.  Initialize the transport and send
     // the PM metadata blob if we haven't already.
-    void beginBackup() {
+    private void beginBackup() {
         if (DEBUG_BACKUP_TRACE) {
             backupManagerService.clearBackupTrace();
             StringBuilder b = new StringBuilder(256);
@@ -369,7 +369,7 @@ public class PerformBackupTask implements BackupRestoreTask {
 
     // Transport has been initialized and the PM metadata submitted successfully
     // if that was warranted.  Now we process the single next thing in the queue.
-    void invokeNextAgent() {
+    private void invokeNextAgent() {
         mStatus = BackupTransport.TRANSPORT_OK;
         backupManagerService.addBackupTrace("invoke q=" + mQueue.size());
 
@@ -511,7 +511,7 @@ public class PerformBackupTask implements BackupRestoreTask {
         }
     }
 
-    void finalizeBackup() {
+    private void finalizeBackup() {
         backupManagerService.addBackupTrace("finishing");
 
         // Mark packages that we didn't backup (because backup was cancelled, etc.) as needing
@@ -617,14 +617,14 @@ public class PerformBackupTask implements BackupRestoreTask {
     }
 
     // Remove the PM metadata state. This will generate an init on the next pass.
-    void clearMetadata() {
+    private void clearMetadata() {
         final File pmState = new File(mStateDir, PACKAGE_MANAGER_SENTINEL);
         if (pmState.exists()) pmState.delete();
     }
 
     // Invoke an agent's doBackup() and start a timeout message spinning on the main
     // handler in case it doesn't get back to us.
-    int invokeAgentForBackup(String packageName, IBackupAgent agent) {
+    private int invokeAgentForBackup(String packageName, IBackupAgent agent) {
         if (DEBUG) {
             Slog.d(TAG, "invokeAgentForBackup on " + packageName);
         }
@@ -711,7 +711,7 @@ public class PerformBackupTask implements BackupRestoreTask {
         return BackupTransport.TRANSPORT_OK;
     }
 
-    public void failAgent(IBackupAgent agent, String message) {
+    private void failAgent(IBackupAgent agent, String message) {
         try {
             agent.fail(message);
         } catch (Exception e) {
@@ -1059,7 +1059,7 @@ public class PerformBackupTask implements BackupRestoreTask {
         }
     }
 
-    void revertAndEndBackup() {
+    private void revertAndEndBackup() {
         if (MORE_DEBUG) {
             Slog.i(TAG, "Reverting backup queue - restaging everything");
         }
@@ -1085,14 +1085,14 @@ public class PerformBackupTask implements BackupRestoreTask {
 
     }
 
-    void errorCleanup() {
+    private void errorCleanup() {
         mBackupDataName.delete();
         mNewStateName.delete();
         clearAgentState();
     }
 
     // Cleanup common to both success and failure cases
-    void clearAgentState() {
+    private void clearAgentState() {
         try {
             if (mSavedState != null) mSavedState.close();
         } catch (IOException e) {
@@ -1123,7 +1123,7 @@ public class PerformBackupTask implements BackupRestoreTask {
         }
     }
 
-    void executeNextState(BackupState nextState) {
+    private void executeNextState(BackupState nextState) {
         if (MORE_DEBUG) {
             Slog.i(TAG, " => executing next step on "
                     + this + " nextState=" + nextState);
