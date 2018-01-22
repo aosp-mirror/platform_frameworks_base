@@ -10229,7 +10229,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int userId = UserHandle.getUserId(uid);
         Intent intent = null;
         if (DevicePolicyManager.POLICY_DISABLE_CAMERA.equals(restriction) ||
-                DevicePolicyManager.POLICY_DISABLE_SCREEN_CAPTURE.equals(restriction)) {
+                DevicePolicyManager.POLICY_DISABLE_SCREEN_CAPTURE.equals(restriction) ||
+                DevicePolicyManager.POLICY_MANDATORY_BACKUPS.equals(restriction)) {
             synchronized(this) {
                 final DevicePolicyData policy = getUserData(userId);
                 final int N = policy.mAdminList.size();
@@ -10238,7 +10239,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     if ((admin.disableCamera &&
                                 DevicePolicyManager.POLICY_DISABLE_CAMERA.equals(restriction)) ||
                         (admin.disableScreenCapture && DevicePolicyManager
-                                .POLICY_DISABLE_SCREEN_CAPTURE.equals(restriction))) {
+                                .POLICY_DISABLE_SCREEN_CAPTURE.equals(restriction)) ||
+                        (admin.mandatoryBackupTransport != null && DevicePolicyManager
+                                .POLICY_MANDATORY_BACKUPS.equals(restriction))) {
                         intent = createShowAdminSupportIntent(admin.info.getComponent(), userId);
                         break;
                     }

@@ -1157,9 +1157,17 @@ public class DevicePolicyManager {
     public static final String POLICY_DISABLE_SCREEN_CAPTURE = "policy_disable_screen_capture";
 
     /**
+     * Constant to indicate the feature of mandatory backups. Used as argument to
+     * {@link #createAdminSupportIntent(String)}.
+     * @see #setMandatoryBackupTransport(ComponentName, ComponentName)
+     */
+    public static final String POLICY_MANDATORY_BACKUPS = "policy_mandatory_backups";
+
+    /**
      * A String indicating a specific restricted feature. Can be a user restriction from the
      * {@link UserManager}, e.g. {@link UserManager#DISALLOW_ADJUST_VOLUME}, or one of the values
-     * {@link #POLICY_DISABLE_CAMERA} or {@link #POLICY_DISABLE_SCREEN_CAPTURE}.
+     * {@link #POLICY_DISABLE_CAMERA}, {@link #POLICY_DISABLE_SCREEN_CAPTURE} or
+     * {@link #POLICY_MANDATORY_BACKUPS}.
      * @see #createAdminSupportIntent(String)
      * @hide
      */
@@ -6806,7 +6814,8 @@ public class DevicePolicyManager {
      * @param restriction Indicates for which feature the dialog should be displayed. Can be a
      *            user restriction from {@link UserManager}, e.g.
      *            {@link UserManager#DISALLOW_ADJUST_VOLUME}, or one of the constants
-     *            {@link #POLICY_DISABLE_CAMERA} or {@link #POLICY_DISABLE_SCREEN_CAPTURE}.
+     *            {@link #POLICY_DISABLE_CAMERA}, {@link #POLICY_DISABLE_SCREEN_CAPTURE} or
+     *            {@link #POLICY_MANDATORY_BACKUPS}.
      * @return Intent An intent to be used to start the dialog-activity if the restriction is
      *            set by an admin, or null if the restriction does not exist or no admin set it.
      */
