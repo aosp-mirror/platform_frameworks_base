@@ -608,6 +608,9 @@ public class KeyboardUI extends SystemUI implements InputManager.OnTabletModeCha
         public void onScanningStateChanged(boolean started) { }
         @Override
         public void onConnectionStateChanged(CachedBluetoothDevice cachedDevice, int state) { }
+        @Override
+        public void onActiveDeviceChanged(CachedBluetoothDevice activeDevice,
+                                          int bluetoothProfile) { }
     }
 
     private final class BluetoothErrorListener implements Utils.ErrorListener {
