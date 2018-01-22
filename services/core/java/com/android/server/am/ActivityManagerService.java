@@ -13088,6 +13088,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             case ActivityManager.BUGREPORT_OPTION_TELEPHONY:
                 extraOptions = "bugreporttelephony";
                 break;
+            case ActivityManager.BUGREPORT_OPTION_WIFI:
+                extraOptions = "bugreportwifi";
+                break;
             default:
                 throw new IllegalArgumentException("Provided bugreport type is not correct, value: "
                         + bugreportType);
@@ -13109,9 +13112,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      * No new code should be calling it.
      */
     @Deprecated
-    @Override
-    public void requestTelephonyBugReport(String shareTitle, String shareDescription) {
-
+    private void requestBugReportWithDescription(String shareTitle, String shareDescription,
+                                                 int bugreportType) {
         if (!TextUtils.isEmpty(shareTitle)) {
             if (shareTitle.length() > MAX_BUGREPORT_TITLE_SIZE) {
                 String errorStr = "shareTitle should be less than " +
@@ -13140,8 +13142,33 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         Slog.d(TAG, "Bugreport notification title " + shareTitle
                 + " description " + shareDescription);
-        requestBugReport(ActivityManager.BUGREPORT_OPTION_TELEPHONY);
+        requestBugReport(bugreportType);
     }
+
+    /**
+     * @deprecated This method is only used by a few internal components and it will soon be
+     * replaced by a proper bug report API (which will be restricted to a few, pre-defined apps).
+     * No new code should be calling it.
+     */
+    @Deprecated
+    @Override
+    public void requestTelephonyBugReport(String shareTitle, String shareDescription) {
+        requestBugReportWithDescription(shareTitle, shareDescription,
+                ActivityManager.BUGREPORT_OPTION_TELEPHONY);
+    }
+
+    /**
+     * @deprecated This method is only used by a few internal components and it will soon be
+     * replaced by a proper bug report API (which will be restricted to a few, pre-defined apps).
+     * No new code should be calling it.
+     */
+    @Deprecated
+    @Override
+    public void requestWifiBugReport(String shareTitle, String shareDescription) {
+        requestBugReportWithDescription(shareTitle, shareDescription,
+                ActivityManager.BUGREPORT_OPTION_WIFI);
+    }
+
 
     public static long getInputDispatchingTimeoutLocked(ActivityRecord r) {
         return r != null ? getInputDispatchingTimeoutLocked(r.app) : KEY_DISPATCHING_TIMEOUT;
