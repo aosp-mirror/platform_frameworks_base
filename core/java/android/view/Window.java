@@ -2244,8 +2244,35 @@ public abstract class Window {
      * <p>
      * The transitionName for the view background will be "android:navigation:background".
      * </p>
+     * @attr ref android.R.styleable#Window_navigationBarColor
      */
     public abstract void setNavigationBarColor(@ColorInt int color);
+
+    /**
+     * Shows a thin line of the specified color between the navigation bar and the app
+     * content.
+     * <p>
+     * For this to take effect,
+     * the window must be drawing the system bar backgrounds with
+     * {@link android.view.WindowManager.LayoutParams#FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS} and
+     * {@link android.view.WindowManager.LayoutParams#FLAG_TRANSLUCENT_NAVIGATION} must not be set.
+     *
+     * @param dividerColor The color of the thin line.
+     * @attr ref android.R.styleable#Window_navigationBarDividerColor
+     */
+    public void setNavigationBarDividerColor(@ColorInt int dividerColor) {
+    }
+
+    /**
+     * Retrieves the color of the navigation bar divider.
+     *
+     * @return The color of the navigation bar divider color.
+     * @see #setNavigationBarColor(int)
+     * @attr ref android.R.styleable#Window_navigationBarDividerColor
+     */
+    public @ColorInt int getNavigationBarDividerColor() {
+        return 0;
+    }
 
     /** @hide */
     public void setTheme(int resId) {
