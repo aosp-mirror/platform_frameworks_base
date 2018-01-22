@@ -2665,6 +2665,22 @@ public abstract class CameraMetadata<TKey> {
     public static final int STATISTICS_LENS_SHADING_MAP_MODE_ON = 1;
 
     //
+    // Enumeration values for CaptureRequest#STATISTICS_OIS_DATA_MODE
+    //
+
+    /**
+     * <p>Do not include OIS data in the capture result.</p>
+     * @see CaptureRequest#STATISTICS_OIS_DATA_MODE
+     */
+    public static final int STATISTICS_OIS_DATA_MODE_OFF = 0;
+
+    /**
+     * <p>Include OIS data in the capture result.</p>
+     * @see CaptureRequest#STATISTICS_OIS_DATA_MODE
+     */
+    public static final int STATISTICS_OIS_DATA_MODE_ON = 1;
+
+    //
     // Enumeration values for CaptureRequest#TONEMAP_MODE
     //
 

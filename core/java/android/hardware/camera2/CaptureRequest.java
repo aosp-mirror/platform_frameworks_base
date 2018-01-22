@@ -2619,6 +2619,29 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
             new Key<Integer>("android.statistics.lensShadingMapMode", int.class);
 
     /**
+     * <p>Whether the camera device outputs the OIS data in output
+     * result metadata.</p>
+     * <p>When set to ON,
+     * {@link CaptureResult#STATISTICS_OIS_TIMESTAMPS android.statistics.oisTimestamps}, android.statistics.oisShiftPixelX,
+     * android.statistics.oisShiftPixelY will provide OIS data in the output result metadata.</p>
+     * <p><b>Possible values:</b>
+     * <ul>
+     *   <li>{@link #STATISTICS_OIS_DATA_MODE_OFF OFF}</li>
+     *   <li>{@link #STATISTICS_OIS_DATA_MODE_ON ON}</li>
+     * </ul></p>
+     * <p><b>Available values for this device:</b><br>
+     * android.Statistics.info.availableOisDataModes</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureResult#STATISTICS_OIS_TIMESTAMPS
+     * @see #STATISTICS_OIS_DATA_MODE_OFF
+     * @see #STATISTICS_OIS_DATA_MODE_ON
+     */
+    @PublicKey
+    public static final Key<Integer> STATISTICS_OIS_DATA_MODE =
+            new Key<Integer>("android.statistics.oisDataMode", int.class);
+
+    /**
      * <p>Tonemapping / contrast / gamma curve for the blue
      * channel, to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is
      * CONTRAST_CURVE.</p>

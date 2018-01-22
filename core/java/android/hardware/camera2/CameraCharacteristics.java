@@ -2915,6 +2915,21 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<int[]>("android.statistics.info.availableLensShadingMapModes", int[].class);
 
     /**
+     * <p>List of OIS data output modes for {@link CaptureRequest#STATISTICS_OIS_DATA_MODE android.statistics.oisDataMode} that
+     * are supported by this camera device.</p>
+     * <p>If no OIS data output is available for this camera device, this key will
+     * contain only OFF.</p>
+     * <p><b>Range of valid values:</b><br>
+     * Any value listed in {@link CaptureRequest#STATISTICS_OIS_DATA_MODE android.statistics.oisDataMode}</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#STATISTICS_OIS_DATA_MODE
+     */
+    @PublicKey
+    public static final Key<int[]> STATISTICS_INFO_AVAILABLE_OIS_DATA_MODES =
+            new Key<int[]>("android.statistics.info.availableOisDataModes", int[].class);
+
+    /**
      * <p>Maximum number of supported points in the
      * tonemap curve that can be used for {@link CaptureRequest#TONEMAP_CURVE android.tonemap.curve}.</p>
      * <p>If the actual number of points provided by the application (in {@link CaptureRequest#TONEMAP_CURVE android.tonemap.curve}*) is

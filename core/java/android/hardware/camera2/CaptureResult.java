@@ -3911,6 +3911,76 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             new Key<Integer>("android.statistics.lensShadingMapMode", int.class);
 
     /**
+     * <p>Whether the camera device outputs the OIS data in output
+     * result metadata.</p>
+     * <p>When set to ON,
+     * {@link CaptureResult#STATISTICS_OIS_TIMESTAMPS android.statistics.oisTimestamps}, android.statistics.oisShiftPixelX,
+     * android.statistics.oisShiftPixelY will provide OIS data in the output result metadata.</p>
+     * <p><b>Possible values:</b>
+     * <ul>
+     *   <li>{@link #STATISTICS_OIS_DATA_MODE_OFF OFF}</li>
+     *   <li>{@link #STATISTICS_OIS_DATA_MODE_ON ON}</li>
+     * </ul></p>
+     * <p><b>Available values for this device:</b><br>
+     * android.Statistics.info.availableOisDataModes</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureResult#STATISTICS_OIS_TIMESTAMPS
+     * @see #STATISTICS_OIS_DATA_MODE_OFF
+     * @see #STATISTICS_OIS_DATA_MODE_ON
+     */
+    @PublicKey
+    public static final Key<Integer> STATISTICS_OIS_DATA_MODE =
+            new Key<Integer>("android.statistics.oisDataMode", int.class);
+
+    /**
+     * <p>An array of timestamps of OIS samples, in nanoseconds.</p>
+     * <p>The array contains the timestamps of OIS samples. The timestamps are in the same
+     * timebase as and comparable to {@link CaptureResult#SENSOR_TIMESTAMP android.sensor.timestamp}.</p>
+     * <p><b>Units</b>: nanoseconds</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureResult#SENSOR_TIMESTAMP
+     */
+    @PublicKey
+    public static final Key<long[]> STATISTICS_OIS_TIMESTAMPS =
+            new Key<long[]>("android.statistics.oisTimestamps", long[].class);
+
+    /**
+     * <p>An array of shifts of OIS samples, in x direction.</p>
+     * <p>The array contains the amount of shifts in x direction, in pixels, based on OIS samples.
+     * A positive value is a shift from left to right in active array coordinate system. For
+     * example, if the optical center is (1000, 500) in active array coordinates, an shift of
+     * (3, 0) puts the new optical center at (1003, 500).</p>
+     * <p>The number of shifts must match the number of timestamps in
+     * {@link CaptureResult#STATISTICS_OIS_TIMESTAMPS android.statistics.oisTimestamps}.</p>
+     * <p><b>Units</b>: Pixels in active array.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureResult#STATISTICS_OIS_TIMESTAMPS
+     */
+    @PublicKey
+    public static final Key<float[]> STATISTICS_OIS_X_SHIFTS =
+            new Key<float[]>("android.statistics.oisXShifts", float[].class);
+
+    /**
+     * <p>An array of shifts of OIS samples, in y direction.</p>
+     * <p>The array contains the amount of shifts in y direction, in pixels, based on OIS samples.
+     * A positive value is a shift from top to bottom in active array coordinate system. For
+     * example, if the optical center is (1000, 500) in active array coordinates, an shift of
+     * (0, 5) puts the new optical center at (1000, 505).</p>
+     * <p>The number of shifts must match the number of timestamps in
+     * {@link CaptureResult#STATISTICS_OIS_TIMESTAMPS android.statistics.oisTimestamps}.</p>
+     * <p><b>Units</b>: Pixels in active array.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureResult#STATISTICS_OIS_TIMESTAMPS
+     */
+    @PublicKey
+    public static final Key<float[]> STATISTICS_OIS_Y_SHIFTS =
+            new Key<float[]>("android.statistics.oisYShifts", float[].class);
+
+    /**
      * <p>Tonemapping / contrast / gamma curve for the blue
      * channel, to use when {@link CaptureRequest#TONEMAP_MODE android.tonemap.mode} is
      * CONTRAST_CURVE.</p>
