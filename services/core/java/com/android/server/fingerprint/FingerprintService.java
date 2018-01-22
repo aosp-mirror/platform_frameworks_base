@@ -44,6 +44,7 @@ import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.fingerprint.IFingerprintServiceLockoutResetCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.DeadObjectException;
 import android.os.Environment;
@@ -56,6 +57,7 @@ import android.os.PowerManager.WakeLock;
 import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.security.KeyStore;
@@ -1411,8 +1413,17 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
             try {
                 userId = getUserOrWorkProfileId(clientPackage, userId);
                 if (userId != mCurrentUserId) {
-                    final File systemDir = Environment.getUserSystemDirectory(userId);
-                    final File fpDir = new File(systemDir, FP_DATA_DIR);
+                    File baseDir;
+                    if (Build.VERSION.FIRST_SDK_INT <= Build.VERSION_CODES.O_MR1
+                            && !SystemProperties.getBoolean(
+                                "ro.treble.supports_vendor_data", false)) {
+                        // TODO(b/72405644) remove the override when possible.
+                        baseDir = Environment.getUserSystemDirectory(userId);
+                    } else {
+                        baseDir = Environment.getDataVendorDeDirectory(userId);
+                    }
+
+                    File fpDir = new File(baseDir, FP_DATA_DIR);
                     if (!fpDir.exists()) {
                         if (!fpDir.mkdir()) {
                             Slog.v(TAG, "Cannot make directory: " + fpDir.getAbsolutePath());
@@ -1426,6 +1437,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                             return;
                         }
                     }
+
                     daemon.setActiveGroup(userId, fpDir.getAbsolutePath());
                     mCurrentUserId = userId;
                 }
