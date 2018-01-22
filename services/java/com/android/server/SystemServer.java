@@ -1172,6 +1172,15 @@ public final class SystemServer {
             }
             traceEnd();
 
+            traceBeginAndSlog("StartSystemUpdateManagerService");
+            try {
+                ServiceManager.addService(Context.SYSTEM_UPDATE_SERVICE,
+                        new SystemUpdateManagerService(context));
+            } catch (Throwable e) {
+                reportWtf("starting SystemUpdateManagerService", e);
+            }
+            traceEnd();
+
             traceBeginAndSlog("StartUpdateLockService");
             try {
                 ServiceManager.addService(Context.UPDATE_LOCK_SERVICE,

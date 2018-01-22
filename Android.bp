@@ -230,6 +230,7 @@ java_library {
         "core/java/android/os/ISchedulingPolicyService.aidl",
         "core/java/android/os/IStatsCompanionService.aidl",
         "core/java/android/os/IStatsManager.aidl",
+        "core/java/android/os/ISystemUpdateManager.aidl",
         "core/java/android/os/IThermalEventListener.aidl",
         "core/java/android/os/IThermalService.aidl",
         "core/java/android/os/IUpdateLock.aidl",

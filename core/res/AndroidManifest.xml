@@ -2313,6 +2313,11 @@
     <permission android:name="android.permission.RECOVERY"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows an application to read system update info.
+         @hide -->
+    <permission android:name="android.permission.READ_SYSTEM_UPDATE_INFO"
+        android:protectionLevel="signature" />
+
     <!-- Allows the system to bind to an application's task services
          @hide -->
     <permission android:name="android.permission.BIND_JOB_SERVICE"
