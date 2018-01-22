@@ -263,8 +263,10 @@ public class AppOpsManager {
     public static final int OP_REQUEST_DELETE_PACKAGES = 72;
     /** @hide Bind an accessibility service. */
     public static final int OP_BIND_ACCESSIBILITY_SERVICE = 73;
+    /** @hide Continue handover of a call from another app */
+    public static final int OP_ACCEPT_HANDOVER = 74;
     /** @hide */
-    public static final int _NUM_OP = 74;
+    public static final int _NUM_OP = 75;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -378,7 +380,13 @@ public class AppOpsManager {
     /** Answer incoming phone calls */
     public static final String OPSTR_ANSWER_PHONE_CALLS
             = "android:answer_phone_calls";
-
+    /**
+     * Accept call handover
+     * @hide
+     */
+    @SystemApi @TestApi
+    public static final String OPSTR_ACCEPT_HANDOVER
+            = "android:accept_handover";
     /** @hide */
     @SystemApi @TestApi
     public static final String OPSTR_GPS = "android:gps";
@@ -528,6 +536,7 @@ public class AppOpsManager {
             OP_USE_SIP,
             OP_PROCESS_OUTGOING_CALLS,
             OP_ANSWER_PHONE_CALLS,
+            OP_ACCEPT_HANDOVER,
             // Microphone
             OP_RECORD_AUDIO,
             // Camera
@@ -626,6 +635,7 @@ public class AppOpsManager {
             OP_CHANGE_WIFI_STATE,
             OP_REQUEST_DELETE_PACKAGES,
             OP_BIND_ACCESSIBILITY_SERVICE,
+            OP_ACCEPT_HANDOVER,
     };
 
     /**
@@ -706,6 +716,7 @@ public class AppOpsManager {
             OPSTR_CHANGE_WIFI_STATE,
             OPSTR_REQUEST_DELETE_PACKAGES,
             OPSTR_BIND_ACCESSIBILITY_SERVICE,
+            OPSTR_ACCEPT_HANDOVER,
     };
 
     /**
@@ -787,6 +798,7 @@ public class AppOpsManager {
             "CHANGE_WIFI_STATE",
             "REQUEST_DELETE_PACKAGES",
             "BIND_ACCESSIBILITY_SERVICE",
+            "ACCEPT_HANDOVER",
     };
 
     /**
@@ -868,6 +880,7 @@ public class AppOpsManager {
             Manifest.permission.CHANGE_WIFI_STATE,
             Manifest.permission.REQUEST_DELETE_PACKAGES,
             Manifest.permission.BIND_ACCESSIBILITY_SERVICE,
+            Manifest.permission.ACCEPT_HANDOVER,
     };
 
     /**
@@ -950,6 +963,7 @@ public class AppOpsManager {
             null, // OP_CHANGE_WIFI_STATE
             null, // REQUEST_DELETE_PACKAGES
             null, // OP_BIND_ACCESSIBILITY_SERVICE
+            null, // ACCEPT_HANDOVER
     };
 
     /**
@@ -1031,6 +1045,7 @@ public class AppOpsManager {
             false, // OP_CHANGE_WIFI_STATE
             false, // OP_REQUEST_DELETE_PACKAGES
             false, // OP_BIND_ACCESSIBILITY_SERVICE
+            false, // ACCEPT_HANDOVER
     };
 
     /**
@@ -1111,6 +1126,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED,  // OP_CHANGE_WIFI_STATE
             AppOpsManager.MODE_ALLOWED,  // REQUEST_DELETE_PACKAGES
             AppOpsManager.MODE_ALLOWED,  // OP_BIND_ACCESSIBILITY_SERVICE
+            AppOpsManager.MODE_ALLOWED,  // ACCEPT_HANDOVER
     };
 
     /**
@@ -1195,6 +1211,7 @@ public class AppOpsManager {
             false, // OP_CHANGE_WIFI_STATE
             false, // OP_REQUEST_DELETE_PACKAGES
             false, // OP_BIND_ACCESSIBILITY_SERVICE
+            false, // ACCEPT_HANDOVER
     };
 
     /**
