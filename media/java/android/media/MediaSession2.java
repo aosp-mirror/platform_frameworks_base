@@ -16,7 +16,7 @@
 
 package android.media;
 
-import android.annotation.LongDef;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -26,11 +26,16 @@ import android.media.session.PlaybackState;
 import android.media.update.ApiLoader;
 import android.media.update.MediaSession2Provider;
 import android.media.update.MediaSession2Provider.ControllerInfoProvider;
+import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcelable;
 import android.os.Process;
+import android.text.TextUtils;
+import android.util.ArraySet;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -79,30 +84,199 @@ import java.util.List;
 public final class MediaSession2 extends MediaPlayerBase {
     private final MediaSession2Provider mProvider;
 
-    // These are intentionally public to allow apps to hook for every incoming command.
-    // Type is long (64 bits) to have enough buffer to keep all commands from MediaControllers (29)
-    // and future extensions.
-    // Sync with the MediaSession2Impl.java
-    // TODO(jaewan): Add a way to log every incoming calls outside of the app with the calling
-    //               package.
-    //               Keep these sync with IMediaSession2RecordCallback.
-    // TODO(jaewan): Should we move this to updatable as well?
-    public static final long COMMAND_FLAG_PLAYBACK_START = 1 << 0;
-    public static final long COMMAND_FLAG_PLAYBACK_PAUSE = 1 << 1;
-    public static final long COMMAND_FLAG_PLAYBACK_STOP = 1 << 2;
-    public static final long COMMAND_FLAG_PLAYBACK_SKIP_NEXT_ITEM = 1 << 3;
-    public static final long COMMAND_FLAG_PLAYBACK_SKIP_PREV_ITEM = 1 << 4;
+    // Note: Do not define IntDef because subclass can add more command code on top of these.
+    public static final int COMMAND_CODE_CUSTOM = 0;
+    public static final int COMMAND_CODE_PLAYBACK_START = 1;
+    public static final int COMMAND_CODE_PLAYBACK_PAUSE = 2;
+    public static final int COMMAND_CODE_PLAYBACK_STOP = 3;
+    public static final int COMMAND_CODE_PLAYBACK_SKIP_NEXT_ITEM = 4;
+    public static final int COMMAND_CODE_PLAYBACK_SKIP_PREV_ITEM = 5;
 
     /**
-     * Command flag for adding/removing playback listener to get playback state.
+     * Define a command that a {@link MediaController2} can send to a {@link MediaSession2}.
+     * <p>
+     * If {@link #getCommandCode()} isn't {@link #COMMAND_CODE_CUSTOM}), it's predefined command.
+     * If {@link #getCommandCode()} is {@link #COMMAND_CODE_CUSTOM}), it's custom command and
+     * {@link #getCustomCommand()} shouldn't be {@code null}.
      */
-    public static final long COMMAND_FLAG_GET_PLAYBACK_STATE = 1 << 5;
+    // TODO(jaewan): Move this into the updatable.
+    public static final class Command {
+        private static final String KEY_COMMAND_CODE
+                = "android.media.mediasession2.command.command_command";
+        private static final String KEY_COMMAND_CUSTOM_COMMAND
+                = "android.media.mediasession2.command.custom_command";
+        private static final String KEY_COMMAND_EXTRA
+                = "android.media.mediasession2.command.extra";
 
-    @Retention(RetentionPolicy.SOURCE)
-    @LongDef(flag = true, value = {COMMAND_FLAG_PLAYBACK_START, COMMAND_FLAG_PLAYBACK_PAUSE,
-            COMMAND_FLAG_PLAYBACK_STOP, COMMAND_FLAG_PLAYBACK_SKIP_NEXT_ITEM,
-            COMMAND_FLAG_PLAYBACK_SKIP_PREV_ITEM, COMMAND_FLAG_GET_PLAYBACK_STATE})
-    public @interface CommandFlags {
+        private final int mCommandCode;
+        // Nonnull if it's custom command
+        private final String mCustomCommand;
+        private final Bundle mExtra;
+
+        public Command(int commandCode) {
+            mCommandCode = commandCode;
+            mCustomCommand = null;
+            mExtra = null;
+        }
+
+        public Command(@NonNull String action, @Nullable Bundle extra) {
+            if (action == null) {
+                throw new IllegalArgumentException("action shouldn't be null");
+            }
+            mCommandCode = COMMAND_CODE_CUSTOM;
+            mCustomCommand = action;
+            mExtra = extra;
+        }
+
+        public int getCommandCode() {
+            return mCommandCode;
+        }
+
+        public @Nullable String getCustomCommand() {
+            return mCustomCommand;
+        }
+
+        public @Nullable Bundle getExtra() {
+            return mExtra;
+        }
+
+        /**
+         * @return a new Bundle instance from the Command
+         * @hide
+         */
+        public Bundle toBundle() {
+            Bundle bundle = new Bundle();
+            bundle.putInt(KEY_COMMAND_CODE, mCommandCode);
+            bundle.putString(KEY_COMMAND_CUSTOM_COMMAND, mCustomCommand);
+            bundle.putBundle(KEY_COMMAND_EXTRA, mExtra);
+            return bundle;
+        }
+
+        /**
+         * @return a new Command instance from the Bundle
+         * @hide
+         */
+        public static Command fromBundle(Bundle command) {
+            int code = command.getInt(KEY_COMMAND_CODE);
+            if (code != COMMAND_CODE_CUSTOM) {
+                return new Command(code);
+            } else {
+                String customCommand = command.getString(KEY_COMMAND_CUSTOM_COMMAND);
+                if (customCommand == null) {
+                    return null;
+                }
+                return new Command(customCommand, command.getBundle(KEY_COMMAND_EXTRA));
+            }
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof Command)) {
+                return false;
+            }
+            Command other = (Command) obj;
+            // TODO(jaewan): Should we also compare contents in bundle?
+            //               It may not be possible if the bundle contains private class.
+            return mCommandCode == other.mCommandCode
+                    && TextUtils.equals(mCustomCommand, other.mCustomCommand);
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            return ((mCustomCommand != null) ? mCustomCommand.hashCode() : 0) * prime + mCommandCode;
+        }
+    }
+
+    /**
+     * Represent set of {@link Command}.
+     */
+    // TODO(jaewan): Move this to updatable
+    public static class CommandGroup {
+        private static final String KEY_COMMANDS =
+                "android.media.mediasession2.commandgroup.commands";
+        private ArraySet<Command> mCommands = new ArraySet<>();
+
+        public CommandGroup() {
+        }
+
+        public CommandGroup(CommandGroup others) {
+            mCommands.addAll(others.mCommands);
+        }
+
+        public void addCommand(Command command) {
+            mCommands.add(command);
+        }
+
+        public void addAllPredefinedCommands() {
+            // TODO(jaewan): Is there any better way than this?
+            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_START));
+            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_PAUSE));
+            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_STOP));
+            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_SKIP_NEXT_ITEM));
+            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_SKIP_PREV_ITEM));
+        }
+
+        public void removeCommand(Command command) {
+            mCommands.remove(command);
+        }
+
+        public boolean hasCommand(Command command) {
+            return mCommands.contains(command);
+        }
+
+        public boolean hasCommand(int code) {
+            if (code == COMMAND_CODE_CUSTOM) {
+                throw new IllegalArgumentException("Use hasCommand(Command) for custom command");
+            }
+            for (int i = 0; i < mCommands.size(); i++) {
+                if (mCommands.valueAt(i).getCommandCode() == code) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /**
+         * @return new bundle from the CommandGroup
+         * @hide
+         */
+        public Bundle toBundle() {
+            ArrayList<Bundle> list = new ArrayList<>();
+            for (int i = 0; i < mCommands.size(); i++) {
+                list.add(mCommands.valueAt(i).toBundle());
+            }
+            Bundle bundle = new Bundle();
+            bundle.putParcelableArrayList(KEY_COMMANDS, list);
+            return bundle;
+        }
+
+        /**
+         * @return new instance of CommandGroup from the bundle
+         * @hide
+         */
+        public static @Nullable CommandGroup fromBundle(Bundle commands) {
+            if (commands == null) {
+                return null;
+            }
+            List<Parcelable> list = commands.getParcelableArrayList(KEY_COMMANDS);
+            if (list == null) {
+                return null;
+            }
+            CommandGroup commandGroup = new CommandGroup();
+            for (int i = 0; i < list.size(); i++) {
+                Parcelable parcelable = list.get(i);
+                if (!(parcelable instanceof Bundle)) {
+                    continue;
+                }
+                Bundle commandBundle = (Bundle) parcelable;
+                Command command = Command.fromBundle(commandBundle);
+                if (command != null) {
+                    commandGroup.addCommand(command);
+                }
+            }
+            return commandGroup;
+        }
     }
 
     /**
@@ -111,47 +285,37 @@ public final class MediaSession2 extends MediaPlayerBase {
      * If it's not set, the session will accept all controllers and all incoming commands by
      * default.
      */
-    // TODO(jaewan): Add UID with multi-user support.
     // TODO(jaewan): Can we move this inside of the updatable for default implementation.
-    // TODO(jaewan): Add onConnected() to return permitted action.
-    // TODO(jaewan): Cache the result? Will it be persistent?
     public static class SessionCallback {
         /**
          * Called when a controller is created for this session. Return allowed commands for
-         * controller. By default it allows system apps and self.
+         * controller. By default it allows all connection requests and commands.
          * <p>
-         * You can reject the connection at all by return {@code 0}.
+         * You can reject the connection by return {@code null}. In that case, controller receives
+         * {@link MediaController2.ControllerCallback#onDisconnected()} and cannot be usable.
          *
          * @param controller controller information.
-         * @return
+         * @return allowed commands. Can be {@code null} to reject coonnection.
          */
         // TODO(jaewan): Change return type. Once we do, null is for reject.
-        public @CommandFlags long onConnect(ControllerInfo controller) {
-            // TODO(jaewan): Move this to updatable.
-            if (controller.isTrusted() || controller.getUid() == Process.myUid()) {
-                // TODO(jaewan): Change default.
-                return (1 << 6) - 1;
-            }
-            // Reject others
-            return 0;
+        public @Nullable CommandGroup onConnect(@NonNull ControllerInfo controller) {
+            CommandGroup commands = new CommandGroup();
+            commands.addAllPredefinedCommands();
+            return commands;
         }
 
         /**
          * Called when a controller sent a command to the session. You can also reject the request
-         * by return {@code false} for apps without system permission. You cannot reject commands
-         * from apps with system permission.
+         * by return {@code false}.
          * <p>
          * This method will be called on the session handler.
          *
          * @param controller controller information.
-         * @param command one of the {@link CommandFlags}. This method will be called for every
-         *      single command.
+         * @param command a command. This method will be called for every single command.
          * @return {@code true} if you want to accept incoming command. {@code false} otherwise.
-         *      It will be ignored for apps with the system permission.
-         * @see {@link CommandFlags}
          */
-        // TODO(jaewan): Get confirmation from devrel/auto that it's OK to return void here.
-        public boolean onCommand(ControllerInfo controller, @CommandFlags long command) {
+        public boolean onCommandRequest(@NonNull ControllerInfo controller,
+                @NonNull Command command) {
             return true;
         }
     };

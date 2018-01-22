@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.os.Bundle;
 import android.media.session.PlaybackState;
 import android.media.IMediaSession2;
 
@@ -42,5 +43,5 @@ oneway interface IMediaSession2Callback {
     //               it's better for controller to know such information in advance.
     //               Follow-up TODO: Add similar functions to the session.
     // TODO(jaewan): Is term 'accepted/rejected' correct? For permission, 'grant' is used.
-    void onConnectionChanged(IMediaSession2 sessionBinder, long commands);
+    void onConnectionChanged(IMediaSession2 sessionBinder, in Bundle commandGroup);
 }
