@@ -668,5 +668,13 @@ public class PersistentDataBlockService extends SystemService {
                 IoUtils.closeQuietly(inputStream);
             }
         }
+
+        @Override
+        public void forceOemUnlockEnabled(boolean enabled) {
+            synchronized (mLock) {
+                doSetOemUnlockEnabledLocked(enabled);
+                computeAndWriteDigestLocked();
+            }
+        }
     };
 }
