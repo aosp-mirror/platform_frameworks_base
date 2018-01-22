@@ -80,7 +80,7 @@ public class RapporEncoderTest {
         int numBits = 8;
         final long inputValue = 254L;
         final long prrValue = 250L;
-        final long prrAndIrrValue = 184L;
+        final long prrAndIrrValue = 244L;
 
         final RapporConfig config1 = new RapporConfig(
                 "Foo", // encoderId
