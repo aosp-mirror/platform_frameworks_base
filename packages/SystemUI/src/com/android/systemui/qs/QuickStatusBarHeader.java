@@ -18,10 +18,12 @@ import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 import static android.app.StatusBarManager.DISABLE_NONE;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.provider.AlarmClock;
 import android.support.annotation.VisibleForTesting;
 import android.util.AttributeSet;
 import android.view.View;
@@ -41,7 +43,8 @@ import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 
-public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue.Callbacks {
+public class QuickStatusBarHeader extends RelativeLayout
+        implements CommandQueue.Callbacks, View.OnClickListener {
 
     private ActivityStarter mActivityStarter;
 
@@ -54,6 +57,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
     protected QuickQSPanel mHeaderQsPanel;
     protected QSTileHost mHost;
 
+    private View mDate;
+
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -64,6 +69,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
         Resources res = getResources();
 
         mHeaderQsPanel = findViewById(R.id.quick_qs_panel);
+        mDate = findViewById(R.id.date);
+        mDate.setOnClickListener(this);
 
         // RenderThread is doing more harm than good when touching the header (to expand quick
         // settings), so disable it for this view
@@ -143,6 +150,14 @@ public class QuickStatusBarHeader extends RelativeLayout implements CommandQueue
         setListening(false);
         SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).removeCallbacks(this);
         super.onDetachedFromWindow();
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v == mDate) {
+            Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(new Intent(
+                    AlarmClock.ACTION_SHOW_ALARMS), 0);
+        }
     }
 
     public void setListening(boolean listening) {
