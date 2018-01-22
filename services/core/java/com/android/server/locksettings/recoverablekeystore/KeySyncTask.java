@@ -36,6 +36,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyStoreException;
 import java.security.MessageDigest;
@@ -301,7 +302,8 @@ public class KeySyncTask implements Runnable {
      */
     private Map<String, SecretKey> getKeysToSync(int recoveryAgentUid)
             throws InsecureUserException, KeyStoreException, UnrecoverableKeyException,
-            NoSuchAlgorithmException, NoSuchPaddingException, BadPlatformKeyException {
+            NoSuchAlgorithmException, NoSuchPaddingException, BadPlatformKeyException,
+            InvalidKeyException, InvalidAlgorithmParameterException {
         PlatformKeyManager platformKeyManager = mPlatformKeyManagerFactory.newInstance();
         PlatformDecryptionKey decryptKey = platformKeyManager.getDecryptKey(mUserId);
         Map<String, WrappedKey> wrappedKeys = mRecoverableKeyStoreDb.getAllKeys(
