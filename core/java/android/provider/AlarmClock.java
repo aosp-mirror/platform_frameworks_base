@@ -154,9 +154,12 @@ public final class AlarmClock {
     public static final String ACTION_SET_TIMER = "android.intent.action.SET_TIMER";
 
     /**
-     * Activity Action: Dismiss timers.
+     * Activity Action: Dismiss a timer.
      * <p>
-     * Dismiss all currently expired timers. If there are no expired timers, then this is a no-op.
+     * The timer to dismiss should be specified using the Intent's data URI, which represents a
+     * deeplink to the timer.
+     * </p><p>
+     * If no data URI is provided, dismiss all expired timers.
      * </p>
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
