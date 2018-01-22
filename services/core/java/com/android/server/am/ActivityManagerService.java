@@ -1493,6 +1493,14 @@ public class ActivityManagerService extends IActivityManager.Stub
     String mProfileApp = null;
     ProcessRecord mProfileProc = null;
     ProfilerInfo mProfilerInfo = null;
+
+    /**
+     * Stores a map of process name -> agent string. When a process is started and mAgentAppMap
+     * is not null, this map is checked and the mapped agent installed during bind-time. Note:
+     * A non-null agent in mProfileInfo overrides this.
+     */
+    private @Nullable Map<String, String> mAppAgentMap = null;
+
     int mProfileType = 0;
     final ProcessMap<Pair<Long, String>> mMemWatchProcesses = new ProcessMap<>();
     String mMemWatchDumpProcName;
@@ -7011,25 +7019,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
 
-            ProfilerInfo profilerInfo = null;
-            String preBindAgent = null;
-            if (mProfileApp != null && mProfileApp.equals(processName)) {
-                mProfileProc = app;
-                if (mProfilerInfo != null) {
-                    // Send a profiler info object to the app if either a file is given, or
-                    // an agent should be loaded at bind-time.
-                    boolean needsInfo = mProfilerInfo.profileFile != null
-                            || mProfilerInfo.attachAgentDuringBind;
-                    profilerInfo = needsInfo ? new ProfilerInfo(mProfilerInfo) : null;
-                    if (!mProfilerInfo.attachAgentDuringBind) {
-                        preBindAgent = mProfilerInfo.agent;
-                    }
-                }
-            } else if (app.instr != null && app.instr.mProfileFile != null) {
-                profilerInfo = new ProfilerInfo(app.instr.mProfileFile, null, 0, false, false,
-                        null, false);
-            }
-
             boolean enableTrackAllocation = false;
             if (mTrackAllocationApp != null && mTrackAllocationApp.equals(processName)) {
                 enableTrackAllocation = true;
@@ -7053,6 +7042,39 @@ public class ActivityManagerService extends IActivityManager.Stub
                     + processName + " with config " + getGlobalConfiguration());
             ApplicationInfo appInfo = app.instr != null ? app.instr.mTargetInfo : app.info;
             app.compat = compatibilityInfoForPackageLocked(appInfo);
+
+            ProfilerInfo profilerInfo = null;
+            String preBindAgent = null;
+            if (mProfileApp != null && mProfileApp.equals(processName)) {
+                mProfileProc = app;
+                if (mProfilerInfo != null) {
+                    // Send a profiler info object to the app if either a file is given, or
+                    // an agent should be loaded at bind-time.
+                    boolean needsInfo = mProfilerInfo.profileFile != null
+                            || mProfilerInfo.attachAgentDuringBind;
+                    profilerInfo = needsInfo ? new ProfilerInfo(mProfilerInfo) : null;
+                    if (mProfilerInfo.agent != null) {
+                        preBindAgent = mProfilerInfo.agent;
+                    }
+                }
+            } else if (app.instr != null && app.instr.mProfileFile != null) {
+                profilerInfo = new ProfilerInfo(app.instr.mProfileFile, null, 0, false, false,
+                        null, false);
+            }
+            if (mAppAgentMap != null && mAppAgentMap.containsKey(processName)) {
+                // We need to do a debuggable check here. See setAgentApp for why the check is
+                // postponed to here.
+                if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+                    String agent = mAppAgentMap.get(processName);
+                    // Do not overwrite already requested agent.
+                    if (profilerInfo == null) {
+                        profilerInfo = new ProfilerInfo(null, null, 0, false, false,
+                                mAppAgentMap.get(processName), true);
+                    } else if (profilerInfo.agent == null) {
+                        profilerInfo = profilerInfo.setAgent(mAppAgentMap.get(processName), true);
+                    }
+                }
+            }
 
             if (profilerInfo != null && profilerInfo.profileFd != null) {
                 profilerInfo.profileFd = profilerInfo.profileFd.dup();
@@ -12784,6 +12806,52 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    /**
+     * Set or remove an agent to be run whenever an app with the given process name starts.
+     *
+     * This method will not check whether the given process name matches a debuggable app. That
+     * would require scanning all current packages, and a rescan when new packages are installed
+     * or updated.
+     *
+     * Instead, do the check when an application is started and matched to a stored agent.
+     *
+     * @param packageName the process name of the app.
+     * @param agent the agent string to be used, or null to remove any previously set agent.
+     */
+    @Override
+    public void setAgentApp(@NonNull String packageName, @Nullable String agent) {
+        synchronized (this) {
+            // note: hijacking SET_ACTIVITY_WATCHER, but should be changed to
+            // its own permission.
+            if (checkCallingPermission(
+                    android.Manifest.permission.SET_ACTIVITY_WATCHER) !=
+                        PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException(
+                        "Requires permission " + android.Manifest.permission.SET_ACTIVITY_WATCHER);
+            }
+
+            if (agent == null) {
+                if (mAppAgentMap != null) {
+                    mAppAgentMap.remove(packageName);
+                    if (mAppAgentMap.isEmpty()) {
+                        mAppAgentMap = null;
+                    }
+                }
+            } else {
+                if (mAppAgentMap == null) {
+                    mAppAgentMap = new HashMap<>();
+                }
+                if (mAppAgentMap.size() >= 100) {
+                    // Limit the size of the map, to avoid OOMEs.
+                    Slog.e(TAG, "App agent map has too many entries, cannot add " + packageName
+                            + "/" + agent);
+                    return;
+                }
+                mAppAgentMap.put(packageName, agent);
+            }
         }
     }
 
