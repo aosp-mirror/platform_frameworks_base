@@ -21,6 +21,8 @@ import android.app.slice.SliceSpec;
 import android.content.ContentProviderClient;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -49,11 +51,13 @@ public class PinnedSliceState {
     @GuardedBy("mLock")
     private final ArraySet<String> mPinnedPkgs = new ArraySet<>();
     @GuardedBy("mLock")
-    private final ArraySet<ISliceListener> mListeners = new ArraySet<>();
+    private final ArrayMap<IBinder, ISliceListener> mListeners = new ArrayMap<>();
     @GuardedBy("mLock")
     private SliceSpec[] mSupportedSpecs = null;
     @GuardedBy("mLock")
-    private final ArrayMap<ISliceListener, String> mPkgMap = new ArrayMap<>();
+    private final ArrayMap<IBinder, String> mPkgMap = new ArrayMap<>();
+
+    private final DeathRecipient mDeathRecipient = this::handleRecheckListeners;
 
     public PinnedSliceState(SliceManagerService service, Uri uri) {
         mService = service;
@@ -107,20 +111,27 @@ public class PinnedSliceState {
 
     public void addSliceListener(ISliceListener listener, String pkg, SliceSpec[] specs) {
         synchronized (mLock) {
-            if (mListeners.add(listener) && mListeners.size() == 1) {
+            if (mListeners.size() == 0) {
                 mService.listen(mUri);
             }
-            mPkgMap.put(listener, pkg);
+            try {
+                listener.asBinder().linkToDeath(mDeathRecipient, 0);
+            } catch (RemoteException e) {
+            }
+            mListeners.put(listener.asBinder(), listener);
+            mPkgMap.put(listener.asBinder(), pkg);
             mergeSpecs(specs);
         }
     }
 
     public boolean removeSliceListener(ISliceListener listener) {
         synchronized (mLock) {
-            mPkgMap.remove(listener);
-            if (mListeners.remove(listener) && mListeners.size() == 0) {
+            listener.asBinder().unlinkToDeath(mDeathRecipient, 0);
+            mPkgMap.remove(listener.asBinder());
+            if (mListeners.containsKey(listener.asBinder()) && mListeners.size() == 1) {
                 mService.unlisten(mUri);
             }
+            mListeners.remove(listener.asBinder());
         }
         return !isPinned();
     }
@@ -159,25 +170,44 @@ public class PinnedSliceState {
         return client;
     }
 
+    private void handleRecheckListeners() {
+        if (!isPinned()) return;
+        synchronized (mLock) {
+            for (int i = mListeners.size() - 1; i >= 0; i--) {
+                ISliceListener l = mListeners.valueAt(i);
+                if (!l.asBinder().isBinderAlive()) {
+                    mListeners.removeAt(i);
+                }
+            }
+            if (!isPinned()) {
+                // All the listeners died, remove from pinned state.
+                mService.removePinnedSlice(mUri);
+            }
+        }
+    }
+
     private void handleBind() {
         Slice cachedSlice = doBind(null);
         synchronized (mLock) {
-            mListeners.removeIf(l -> {
+            if (!isPinned()) return;
+            for (int i = mListeners.size() - 1; i >= 0; i--) {
+                ISliceListener l = mListeners.valueAt(i);
                 Slice s = cachedSlice;
                 if (s == null || s.hasHint(Slice.HINT_CALLER_NEEDED)) {
                     s = doBind(mPkgMap.get(l));
                 }
                 if (s == null) {
-                    return true;
+                    mListeners.removeAt(i);
+                    continue;
                 }
                 try {
                     l.onSliceUpdated(s);
-                    return false;
                 } catch (RemoteException e) {
                     Log.e(TAG, "Unable to notify slice " + mUri, e);
-                    return true;
+                    mListeners.removeAt(i);
+                    continue;
                 }
-            });
+            }
             if (!isPinned()) {
                 // All the listeners died, remove from pinned state.
                 mService.removePinnedSlice(mUri);
