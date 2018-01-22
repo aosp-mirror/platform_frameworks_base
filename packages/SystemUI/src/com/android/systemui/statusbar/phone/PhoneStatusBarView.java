@@ -62,6 +62,7 @@ public class PhoneStatusBarView extends PanelBar {
     };
     private DarkReceiver mBattery;
     private int mLastOrientation;
+    @Nullable
     private View mCutoutSpace;
     @Nullable
     private DisplayCutout mDisplayCutout;
@@ -284,6 +285,11 @@ public class PhoneStatusBarView extends PanelBar {
     }
 
     private void updateCutoutLocation() {
+        // Not all layouts have a cutout (e.g., Car)
+        if (mCutoutSpace == null) {
+            return;
+        }
+
         if (mDisplayCutout == null || mDisplayCutout.isEmpty()
                     || mLastOrientation != ORIENTATION_PORTRAIT) {
             mCutoutSpace.setVisibility(View.GONE);
