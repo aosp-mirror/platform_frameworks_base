@@ -61,6 +61,7 @@ import java.util.Map;
  * @attr ref android.R.styleable#KeyboardView_keyBackground
  * @attr ref android.R.styleable#KeyboardView_keyPreviewLayout
  * @attr ref android.R.styleable#KeyboardView_keyPreviewOffset
+ * @attr ref android.R.styleable#KeyboardView_keyPreviewHeight
  * @attr ref android.R.styleable#KeyboardView_labelTextSize
  * @attr ref android.R.styleable#KeyboardView_keyTextSize
  * @attr ref android.R.styleable#KeyboardView_keyTextColor
