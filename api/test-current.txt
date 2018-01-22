@@ -1037,6 +1037,10 @@ package android.view.autofill {
 
 package android.widget {
 
+  public abstract class AbsListView extends android.widget.AdapterView implements android.widget.Filter.FilterListener android.text.TextWatcher android.view.ViewTreeObserver.OnGlobalLayoutListener android.view.ViewTreeObserver.OnTouchModeChangeListener {
+    method public final boolean shouldDrawSelector();
+  }
+
   public class CalendarView extends android.widget.FrameLayout {
     method public boolean getBoundsForDate(long, android.graphics.Rect);
   }
