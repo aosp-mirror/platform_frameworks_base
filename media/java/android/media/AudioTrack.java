@@ -755,8 +755,8 @@ public class AudioTrack extends PlayerBase
      * <code>MODE_STREAM</code> will be used.
      * <br>If the session ID is not specified with {@link #setSessionId(int)}, a new one will
      * be generated.
+     * <br>Offload is false by default.
      */
-    // TODO add that offload is false by default (intended white space   
     public static class Builder {
         private AudioAttributes mAttributes;
         private AudioFormat mFormat;
@@ -895,14 +895,11 @@ public class AudioTrack extends PlayerBase
         }
 
         /**
-         * @hide
-         * TODO unhide (intentional whitespace    
-         * TODO should offload require POWER_SAVING?    
          * Sets whether this track will play through the offloaded audio path.
          * When set to true, at build time, the audio format will be checked against
          * {@link AudioManager#isOffloadedPlaybackSupported(AudioFormat)} to verify the audio format
          * used by this track is supported on the device's offload path (if any).
-         * <br>Offload is only supported for media audio data, and therefore require that
+         * <br>Offload is only supported for media audio streams, and therefore requires that
          * the usage be {@link AudioAttributes#USAGE_MEDIA}.
          * @param offload true to require the offload path for playback.
          * @return the same Builder instance.
@@ -962,7 +959,7 @@ public class AudioTrack extends PlayerBase
                     throw new UnsupportedOperationException(
                             "Cannot create AudioTrack, offload requires USAGE_MEDIA");
                 }
-                if (!AudioManager.isOffloadedPlaybackSupported(mFormat)) {
+                if (!AudioSystem.isOffloadSupported(mFormat)) {
                     throw new UnsupportedOperationException(
                             "Cannot create AudioTrack, offload format not supported");
                 }
@@ -2942,14 +2939,31 @@ public class AudioTrack extends PlayerBase
     }
 
     /**
-     * @hide
-     * TODO unhide (intentional white space to attract attention:    
      * Abstract class to receive event notification about the stream playback.
+     * See {@link AudioTrack#setStreamEventCallback(Executor, StreamEventCallback)} to register
+     * the callback on the given {@link AudioTrack} instance.
      */
     public abstract static class StreamEventCallback {
-        // TODO rename if supported for non offload tracks
+        /** @hide */ // add hidden empty constructor so it doesn't show in SDK
+        public StreamEventCallback() { }
+        /**
+         * Called when an offloaded track is no longer valid and has been discarded by the system.
+         * An example of this happening is when an offloaded track has been paused too long, and
+         * gets invalidated by the system to prevent any other offload.
+         * @param track the {@link AudioTrack} on which the event happened
+         */
         public void onTearDown(AudioTrack track) { }
+        /**
+         * Called when all the buffers of an offloaded track that were queued in the audio system
+         * (e.g. the combination of the Android audio framework and the device's audio hardware)
+         * have been played after {@link AudioTrack#stop()} has been called.
+         * @param track the {@link AudioTrack} on which the event happened
+         */
         public void onStreamPresentationEnd(AudioTrack track) { }
+        /**
+         * Called when more audio data can be written without blocking on an offloaded track.
+         * @param track the {@link AudioTrack} on which the event happened
+         */
         public void onStreamDataRequest(AudioTrack track) { }
     }
 
@@ -2958,11 +2972,9 @@ public class AudioTrack extends PlayerBase
     private final Object mStreamEventCbLock = new Object();
 
     /**
-     * @hide
-     * TODO unhide (intentional white space to attract attention:    
-     * Registers a callback for notification of stream events.
+     * Sets the callback for the notification of stream events.
      * @param executor {@link Executor} to handle the callbacks
-     * @param eventCallback the callback to receive the stream events
+     * @param eventCallback the callback to receive the stream event notifications
      */
     public void setStreamEventCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull StreamEventCallback eventCallback) {
@@ -2979,9 +2991,8 @@ public class AudioTrack extends PlayerBase
     }
 
     /**
-     * @hide
      * Unregisters the callback for notification of stream events, previously set
-     * by {@link #setStreamEventCallback(StreamEventCallback, Executor)}.
+     * by {@link #setStreamEventCallback(Executor, StreamEventCallback)}.
      */
     public void removeStreamEventCallback() {
         synchronized (mStreamEventCbLock) {
