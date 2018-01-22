@@ -38,6 +38,7 @@ import static android.view.WindowManager.TRANSIT_WALLPAPER_CLOSE;
 import static android.view.WindowManager.TRANSIT_WALLPAPER_INTRA_CLOSE;
 import static android.view.WindowManager.TRANSIT_WALLPAPER_INTRA_OPEN;
 import static android.view.WindowManager.TRANSIT_WALLPAPER_OPEN;
+
 import static com.android.internal.R.styleable.WindowAnimation_activityCloseEnterAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_activityCloseExitAnimation;
 import static com.android.internal.R.styleable.WindowAnimation_activityOpenEnterAnimation;
@@ -1647,10 +1648,7 @@ public class AppTransition implements Dump {
                         + " transit=" + appTransitionToString(transit) + " isEntrance=" + enter
                         + " Callers=" + Debug.getCallers(3));
             }
-        } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS
-                && (transit == TRANSIT_ACTIVITY_OPEN
-                        || transit == TRANSIT_TASK_OPEN
-                        || transit == TRANSIT_TASK_TO_FRONT)) {
+        } else if (mNextAppTransitionType == NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS && enter) {
 
             a = loadAnimationRes("android", enter
                     ? com.android.internal.R.anim.task_open_enter_cross_profile_apps
