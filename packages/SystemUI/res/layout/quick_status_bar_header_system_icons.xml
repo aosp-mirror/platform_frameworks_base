@@ -17,6 +17,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/quick_status_bar_system_icons"
     android:layout_width="match_parent"
     android:layout_height="@dimen/qs_header_system_icons_area_height"
     android:layout_alignParentEnd="true"

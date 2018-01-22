@@ -13,8 +13,13 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+<View
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/quick_qs_status_icons"
+    android:layout_width="match_parent"
+    android:layout_height="20dp"
+    android:layout_marginBottom="22dp"
+    android:layout_below="@id/quick_status_bar_system_icons"
+    >
 
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:alpha="1"
-          android:color="?android:attr/colorBackgroundFloating"/>
-</selector>
+</View>
