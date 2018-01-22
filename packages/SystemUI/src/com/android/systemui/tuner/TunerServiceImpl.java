@@ -58,7 +58,7 @@ public class TunerServiceImpl extends TunerService {
 
     private static final String TUNER_VERSION = "sysui_tuner_version";
 
-    private static final int CURRENT_TUNER_VERSION = 1;
+    private static final int CURRENT_TUNER_VERSION = 2;
 
     private final Observer mObserver = new Observer();
     // Map of Uris we listen on to their settings keys.
@@ -115,6 +115,9 @@ public class TunerServiceImpl extends TunerService {
                         StatusBarIconController.ICON_BLACKLIST,
                         TextUtils.join(",", iconBlacklist), mCurrentUser);
             }
+        }
+        if (oldVersion < 2) {
+            setTunerEnabled(mContext, false);
         }
         setValue(TUNER_VERSION, newVersion);
     }
