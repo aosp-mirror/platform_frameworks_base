@@ -10251,6 +10251,45 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         public boolean canUserHaveUntrustedCredentialReset(@UserIdInt int userId) {
             return DevicePolicyManagerService.this.canUserHaveUntrustedCredentialReset(userId);
         }
+
+        @Override
+        public CharSequence getPrintingDisabledReasonForUser(@UserIdInt int userId) {
+            synchronized (DevicePolicyManagerService.this) {
+                DevicePolicyData policy = getUserData(userId);
+                if (policy.mPrintingEnabled) {
+                    Log.e(LOG_TAG, "printing is enabled");
+                    return null;
+                }
+                String ownerPackage = mOwners.getProfileOwnerPackage(userId);
+                if (ownerPackage == null) {
+                    ownerPackage = mOwners.getDeviceOwnerPackageName();
+                }
+                PackageManager pm = mInjector.getPackageManager();
+                PackageInfo packageInfo;
+                try {
+                    packageInfo = pm.getPackageInfo(ownerPackage, 0);
+                } catch (NameNotFoundException e) {
+                    Log.e(LOG_TAG, "getPackageInfo error", e);
+                    return null;
+                }
+                if (packageInfo == null) {
+                    Log.e(LOG_TAG, "packageInfo is inexplicably null");
+                    return null;
+                }
+                ApplicationInfo appInfo = packageInfo.applicationInfo;
+                if (appInfo == null) {
+                    Log.e(LOG_TAG, "appInfo is inexplicably null");
+                    return null;
+                }
+                CharSequence appLabel = pm.getApplicationLabel(appInfo);
+                if (appLabel == null) {
+                    Log.e(LOG_TAG, "appLabel is inexplicably null");
+                    return null;
+                }
+                return ((Context) ActivityThread.currentActivityThread().getSystemUiContext())
+                        .getResources().getString(R.string.printing_disabled_by, appLabel);
+            }
+        }
     }
 
     private Intent createShowAdminSupportIntent(ComponentName admin, int userId) {
@@ -12477,55 +12516,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final int userHandle = mInjector.userHandleGetCallingUserId();
             DevicePolicyData policy = getUserData(userHandle);
             return policy.mPrintingEnabled;
-        }
-    }
-
-    /**
-     * Returns text of error message if printing is disabled.
-     * Only to be called by Print Service.
-     * @hide
-     */
-    @Override
-    public CharSequence getPrintingDisabledReason() {
-        if (!hasPrinting() || !mHasFeature) {
-            Log.e(LOG_TAG, "no printing or no management");
-            return null;
-        }
-        synchronized (this) {
-            final int userHandle = mInjector.userHandleGetCallingUserId();
-            DevicePolicyData policy = getUserData(userHandle);
-            if (policy.mPrintingEnabled) {
-                Log.e(LOG_TAG, "printing is enabled");
-                return null;
-            }
-            String ownerPackage = mOwners.getProfileOwnerPackage(userHandle);
-            if (ownerPackage == null) {
-                ownerPackage = mOwners.getDeviceOwnerPackageName();
-            }
-            PackageManager pm = mInjector.getPackageManager();
-            PackageInfo packageInfo;
-            try {
-                packageInfo = pm.getPackageInfo(ownerPackage, 0);
-            } catch (NameNotFoundException e) {
-                Log.e(LOG_TAG, "getPackageInfo error", e);
-                return null;
-            }
-            if (packageInfo == null) {
-                Log.e(LOG_TAG, "packageInfo is inexplicably null");
-                return null;
-            }
-            ApplicationInfo appInfo = packageInfo.applicationInfo;
-            if (appInfo == null) {
-                Log.e(LOG_TAG, "appInfo is inexplicably null");
-                return null;
-            }
-            CharSequence appLabel = pm.getApplicationLabel(appInfo);
-            if (appLabel == null) {
-                Log.e(LOG_TAG, "appLabel is inexplicably null");
-                return null;
-            }
-            return ((Context) ActivityThread.currentActivityThread().getSystemUiContext())
-                    .getResources().getString(R.string.printing_disabled_by, appLabel);
         }
     }
 

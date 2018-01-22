@@ -382,7 +382,6 @@ package android.app.admin {
     method public java.lang.CharSequence getDeviceOwnerOrganizationName();
     method public java.util.List<java.lang.String> getPermittedAccessibilityServices(int);
     method public java.util.List<java.lang.String> getPermittedInputMethodsForCurrentUser();
-    method public java.lang.CharSequence getPrintingDisabledReason();
     method public android.content.ComponentName getProfileOwner() throws java.lang.IllegalArgumentException;
     method public java.lang.String getProfileOwnerNameAsUser(int) throws java.lang.IllegalArgumentException;
     method public int getUserProvisioningState();

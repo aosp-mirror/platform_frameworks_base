@@ -135,11 +135,6 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public CharSequence getPrintingDisabledReason() {
-        return null;
-    }
-
-    @Override
     public List<String> setMeteredDataDisabled(ComponentName admin, List<String> packageNames) {
         return packageNames;
     }

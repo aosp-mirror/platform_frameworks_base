@@ -400,7 +400,6 @@ interface IDevicePolicyManager {
 
     void setPrintingEnabled(in ComponentName admin, boolean enabled);
     boolean isPrintingEnabled();
-    CharSequence getPrintingDisabledReason();
 
     List<String> setMeteredDataDisabled(in ComponentName admin, in List<String> packageNames);
     List<String> getMeteredDataDisabled(in ComponentName admin);
