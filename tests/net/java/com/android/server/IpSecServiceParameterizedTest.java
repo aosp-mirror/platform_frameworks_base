@@ -204,13 +204,13 @@ public class IpSecServiceParameterizedTest {
     }
 
     @Test
-    public void testCreateTransportModeTransform() throws Exception {
+    public void testCreateTransform() throws Exception {
         IpSecConfig ipSecConfig = new IpSecConfig();
         addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
         addAuthAndCryptToIpSecConfig(ipSecConfig);
 
         IpSecTransformResponse createTransformResp =
-                mIpSecService.createTransportModeTransform(ipSecConfig, new Binder());
+                mIpSecService.createTransform(ipSecConfig, new Binder());
         assertEquals(IpSecManager.Status.OK, createTransformResp.status);
 
         verify(mMockNetd)
@@ -236,14 +236,14 @@ public class IpSecServiceParameterizedTest {
     }
 
     @Test
-    public void testCreateTransportModeTransformAead() throws Exception {
+    public void testCreateTransformAead() throws Exception {
         IpSecConfig ipSecConfig = new IpSecConfig();
         addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
 
         ipSecConfig.setAuthenticatedEncryption(AEAD_ALGO);
 
         IpSecTransformResponse createTransformResp =
-                mIpSecService.createTransportModeTransform(ipSecConfig, new Binder());
+                mIpSecService.createTransform(ipSecConfig, new Binder());
         assertEquals(IpSecManager.Status.OK, createTransformResp.status);
 
         verify(mMockNetd)
@@ -269,14 +269,14 @@ public class IpSecServiceParameterizedTest {
     }
 
     @Test
-    public void testDeleteTransportModeTransform() throws Exception {
+    public void testDeleteTransform() throws Exception {
         IpSecConfig ipSecConfig = new IpSecConfig();
         addDefaultSpisAndRemoteAddrToIpSecConfig(ipSecConfig);
         addAuthAndCryptToIpSecConfig(ipSecConfig);
 
         IpSecTransformResponse createTransformResp =
-                mIpSecService.createTransportModeTransform(ipSecConfig, new Binder());
-        mIpSecService.deleteTransportModeTransform(createTransformResp.resourceId);
+                mIpSecService.createTransform(ipSecConfig, new Binder());
+        mIpSecService.deleteTransform(createTransformResp.resourceId);
 
         verify(mMockNetd)
                 .ipSecDeleteSecurityAssociation(
@@ -302,7 +302,7 @@ public class IpSecServiceParameterizedTest {
         addAuthAndCryptToIpSecConfig(ipSecConfig);
 
         IpSecTransformResponse createTransformResp =
-                mIpSecService.createTransportModeTransform(ipSecConfig, new Binder());
+                mIpSecService.createTransform(ipSecConfig, new Binder());
 
         IpSecService.UserRecord userRecord =
                 mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
@@ -334,7 +334,7 @@ public class IpSecServiceParameterizedTest {
         addAuthAndCryptToIpSecConfig(ipSecConfig);
 
         IpSecTransformResponse createTransformResp =
-                mIpSecService.createTransportModeTransform(ipSecConfig, new Binder());
+                mIpSecService.createTransform(ipSecConfig, new Binder());
         ParcelFileDescriptor pfd = ParcelFileDescriptor.fromSocket(new Socket());
 
         int resourceId = createTransformResp.resourceId;
