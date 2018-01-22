@@ -1091,9 +1091,19 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mGroupParentWhenDismissed;
     }
 
-    public void performDismiss() {
-        if (mOnDismissRunnable != null) {
-            mOnDismissRunnable.run();
+    public void performDismiss(boolean fromAccessibility) {
+        if (mGroupManager.isOnlyChildInGroup(getStatusBarNotification())) {
+            ExpandableNotificationRow groupSummary =
+                    mGroupManager.getLogicalGroupSummary(getStatusBarNotification());
+            if (groupSummary.isClearable()) {
+                groupSummary.performDismiss(fromAccessibility);
+            }
+        }
+        setDismissed(true, fromAccessibility);
+        if (isClearable()) {
+            if (mOnDismissRunnable != null) {
+                mOnDismissRunnable.run();
+            }
         }
     }
 
@@ -2313,8 +2323,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         switch (action) {
             case AccessibilityNodeInfo.ACTION_DISMISS:
-                NotificationStackScrollLayout.performDismiss(this, mGroupManager,
-                        true /* fromAccessibility */);
+                performDismiss(true /* fromAccessibility */);
                 return true;
             case AccessibilityNodeInfo.ACTION_COLLAPSE:
             case AccessibilityNodeInfo.ACTION_EXPAND:

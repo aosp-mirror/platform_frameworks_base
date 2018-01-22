@@ -951,33 +951,15 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mHeadsUpManager.addSwipedOutNotification(row.getStatusBarNotification().getKey());
             }
         }
-        performDismiss(v, mGroupManager, false /* fromAccessibility */);
+        if (v instanceof ExpandableNotificationRow) {
+            ((ExpandableNotificationRow) v).performDismiss(false /* fromAccessibility */);
+        }
 
         mFalsingManager.onNotificationDismissed();
         if (mFalsingManager.shouldEnforceBouncer()) {
             mStatusBar.executeRunnableDismissingKeyguard(null, null /* cancelAction */,
                     false /* dismissShade */, true /* afterKeyguardGone */, false /* deferred */);
         }
-    }
-
-    public static void performDismiss(View v, NotificationGroupManager groupManager,
-            boolean fromAccessibility) {
-        if (!(v instanceof ExpandableNotificationRow)) {
-            return;
-        }
-        ExpandableNotificationRow row = (ExpandableNotificationRow) v;
-        if (groupManager.isOnlyChildInGroup(row.getStatusBarNotification())) {
-            ExpandableNotificationRow groupSummary =
-                    groupManager.getLogicalGroupSummary(row.getStatusBarNotification());
-            if (groupSummary.isClearable()) {
-                performDismiss(groupSummary, groupManager, fromAccessibility);
-            }
-        }
-        row.setDismissed(true, fromAccessibility);
-        if (row.isClearable()) {
-            row.performDismiss();
-        }
-        if (DEBUG) Log.v(TAG, "onChildDismissed: " + v);
     }
 
     @Override
