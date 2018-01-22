@@ -33,11 +33,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.Arrays;
+
 
 /**
  * runtest frameworks-services -c com.android.server.net.watchlist.WatchlistConfigTests
@@ -115,6 +118,15 @@ public class WatchlistConfigTests {
         copyWatchlistConfigXml(mContext, TEST_XML_1, mTestXmlFile);
         WatchlistConfig config = new WatchlistConfig(mTestXmlFile);
         assertEquals(TEST_XML_1_HASH, HexDump.toHexString(config.getWatchlistConfigHash()));
+    }
+
+    @Test
+    public void testWatchlistConfig_testDumpDoesNotCrash() throws Exception {
+        WatchlistConfig config = new WatchlistConfig(new File("/not_exist_path.xml"));
+        ByteArrayOutputStream bs = new ByteArrayOutputStream(2048);
+        PrintWriter pw = new PrintWriter(bs);
+        // Make sure dump still works even watchlist does not exist
+        config.dump(null, pw, null);
     }
 
     private static void copyWatchlistConfigXml(Context context, String xmlAsset, File outFile)

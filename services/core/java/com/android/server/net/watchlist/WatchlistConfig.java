@@ -161,7 +161,7 @@ class WatchlistConfig {
     public boolean containsDomain(String domain) {
         final CrcShaDigests domainDigests = mDomainDigests;
         if (domainDigests == null) {
-            Slog.wtf(TAG, "domainDigests should not be null");
+            // mDomainDigests is not initialized
             return false;
         }
         // First it does a quick CRC32 check.
@@ -177,7 +177,7 @@ class WatchlistConfig {
     public boolean containsIp(String ip) {
         final CrcShaDigests ipDigests = mIpDigests;
         if (ipDigests == null) {
-            Slog.wtf(TAG, "ipDigests should not be null");
+            // mIpDigests is not initialized
             return false;
         }
         // First it does a quick CRC32 check.
@@ -234,12 +234,20 @@ class WatchlistConfig {
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("Domain CRC32 digest list:");
-        mDomainDigests.crc32Digests.dump(fd, pw, args);
+        if (mDomainDigests != null) {
+            mDomainDigests.crc32Digests.dump(fd, pw, args);
+        }
         pw.println("Domain SHA256 digest list:");
-        mDomainDigests.sha256Digests.dump(fd, pw, args);
+        if (mDomainDigests != null) {
+            mDomainDigests.sha256Digests.dump(fd, pw, args);
+        }
         pw.println("Ip CRC32 digest list:");
-        mIpDigests.crc32Digests.dump(fd, pw, args);
+        if (mIpDigests != null) {
+            mIpDigests.crc32Digests.dump(fd, pw, args);
+        }
         pw.println("Ip SHA256 digest list:");
-        mIpDigests.sha256Digests.dump(fd, pw, args);
+        if (mIpDigests != null) {
+            mIpDigests.sha256Digests.dump(fd, pw, args);
+        }
     }
 }
