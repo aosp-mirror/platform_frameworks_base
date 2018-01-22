@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import static android.app.NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
@@ -1881,6 +1882,18 @@ public class NotificationManagerService extends SystemService {
                 cancelAllNotificationsInt(MY_UID, MY_PID, pkg, null, 0, 0, true,
                         UserHandle.getUserId(uid), REASON_PACKAGE_BANNED, null);
             }
+
+            try {
+                getContext().sendBroadcastAsUser(
+                        new Intent(ACTION_APP_BLOCK_STATE_CHANGED)
+                                .putExtra(NotificationManager.EXTRA_BLOCKED_STATE, !enabled)
+                                .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
+                                .setPackage(pkg),
+                        UserHandle.of(UserHandle.getUserId(uid)), null);
+            } catch (SecurityException e) {
+                Slog.w(TAG, "Can't notify app about app block change", e);
+            }
+
             savePolicyFile();
         }
 

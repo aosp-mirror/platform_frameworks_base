@@ -93,6 +93,18 @@ public class NotificationManager {
     private static boolean localLOGV = false;
 
     /**
+     * Intent that is broadcast when an application is blocked or unblocked.
+     *
+     * This broadcast is only sent to the app whose block state has changed.
+     *
+     * Input: nothing
+     * Output: nothing
+     */
+    @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_APP_BLOCK_STATE_CHANGED =
+            "android.app.action.APP_BLOCK_STATE_CHANGED";
+
+    /**
      * Intent that is broadcast when a {@link NotificationChannel} is blocked
      * (when {@link NotificationChannel#getImportance()} is {@link #IMPORTANCE_NONE}) or unblocked
      * (when {@link NotificationChannel#getImportance()} is anything other than

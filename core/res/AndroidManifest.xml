@@ -510,6 +510,7 @@
     <protected-broadcast android:name="android.os.action.ACTION_EFFECTS_SUPPRESSOR_CHANGED" />
     <protected-broadcast android:name="android.app.action.NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED" />
     <protected-broadcast android:name="android.app.action.NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED" />
+    <protected-broadcast android:name="android.app.action.APP_BLOCK_STATE_CHANGED" />
 
     <protected-broadcast android:name="android.permission.GET_APP_GRANTED_URI_PERMISSIONS" />
     <protected-broadcast android:name="android.permission.CLEAR_APP_GRANTED_URI_PERMISSIONS" />
