@@ -143,7 +143,7 @@ public class Process {
      * Defines the UID/GID for the WebView zygote process.
      * @hide
      */
-    public static final int WEBVIEW_ZYGOTE_UID = 1051;
+    public static final int WEBVIEW_ZYGOTE_UID = 1053;
 
     /**
      * Defines the UID used for resource tracking for OTA updates.
