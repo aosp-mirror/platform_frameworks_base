@@ -99,7 +99,9 @@ public abstract class AutofillFieldClassificationService extends Service {
                 final String[] userDataValues = (String[]) args.arg5;
                 final float[][] scores = onGetScores(algorithmName, algorithmArgs, actualValues,
                         Arrays.asList(userDataValues));
-                data.putParcelable(EXTRA_SCORES, new Scores(scores));
+                if (scores != null) {
+                    data.putParcelable(EXTRA_SCORES, new Scores(scores));
+                }
                 break;
             default:
                 Log.w(TAG, "Handling unknown message: " + action);
@@ -148,7 +150,8 @@ public abstract class AutofillFieldClassificationService extends Service {
     public float[][] onGetScores(@Nullable String algorithm,
             @Nullable Bundle args, @NonNull List<AutofillValue> actualValues,
             @NonNull List<String> userDataValues) {
-        throw new UnsupportedOperationException("Must be implemented by external service");
+        Log.e(TAG, "service implementation (" + getClass() + " does not implement onGetScore()");
+        return null;
     }
 
     private final class AutofillFieldClassificationServiceWrapper
@@ -182,7 +185,7 @@ public abstract class AutofillFieldClassificationService extends Service {
             }
         }
 
-        private  Scores(float[][] scores) {
+        private Scores(float[][] scores) {
             this.scores = scores;
         }
 
