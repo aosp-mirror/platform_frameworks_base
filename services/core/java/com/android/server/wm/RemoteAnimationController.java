@@ -99,11 +99,15 @@ class RemoteAnimationController {
     }
 
     private RemoteAnimationTarget[] createAnimations() {
-        final RemoteAnimationTarget[] result = new RemoteAnimationTarget[mPendingAnimations.size()];
+        final ArrayList<RemoteAnimationTarget> targets = new ArrayList<>();
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
-            result[i] = mPendingAnimations.get(i).createRemoteAppAnimation();
+            final RemoteAnimationTarget target =
+                    mPendingAnimations.get(i).createRemoteAppAnimation();
+            if (target != null) {
+                targets.add(target);
+            }
         }
-        return result;
+        return targets.toArray(new RemoteAnimationTarget[targets.size()]);
     }
 
     private void onAnimationFinished() {
@@ -145,9 +149,17 @@ class RemoteAnimationController {
         }
 
         RemoteAnimationTarget createRemoteAppAnimation() {
-            return new RemoteAnimationTarget(mAppWindowToken.getTask().mTaskId, getMode(),
+            final Task task = mAppWindowToken.getTask();
+            final WindowState mainWindow = mAppWindowToken.findMainWindow();
+            if (task == null) {
+                return null;
+            }
+            if (mainWindow == null) {
+                return null;
+            }
+            return new RemoteAnimationTarget(task.mTaskId, getMode(),
                     mCapturedLeash, !mAppWindowToken.fillsParent(),
-                    mAppWindowToken.findMainWindow().mWinAnimator.mLastClipRect,
+                    mainWindow.mWinAnimator.mLastClipRect,
                     mAppWindowToken.getPrefixOrderIndex(), mPosition, mStackBounds);
         }
 
