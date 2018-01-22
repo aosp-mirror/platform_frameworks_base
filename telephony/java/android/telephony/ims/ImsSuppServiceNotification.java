@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,12 +11,13 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
 
 
-package com.android.ims;
+package android.telephony.ims;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -28,27 +29,31 @@ import java.util.Arrays;
  *
  * @hide
  */
-public class ImsSuppServiceNotification implements Parcelable {
+@SystemApi
+public final class ImsSuppServiceNotification implements Parcelable {
     private static final String TAG = "ImsSuppServiceNotification";
 
     /** Type of notification: 0 = MO; 1 = MT */
-    public int notificationType;
+    public final int notificationType;
     /** TS 27.007 7.17 "code1" or "code2" */
-    public int code;
+    public final int code;
     /** TS 27.007 7.17 "index" - Not used currently*/
-    public int index;
+    public final int index;
     /** TS 27.007 7.17 "type" (MT only) - Not used currently */
-    public int type;
+    public final int type;
     /** TS 27.007 7.17 "number" (MT only) */
-    public String number;
+    public final String number;
     /** List of forwarded numbers, if any */
-    public String[] history;
+    public final String[] history;
 
-    public ImsSuppServiceNotification() {
-    }
-
+    /** @hide */
     public ImsSuppServiceNotification(Parcel in) {
-        readFromParcel(in);
+        notificationType = in.readInt();
+        code = in.readInt();
+        index = in.readInt();
+        type = in.readInt();
+        number = in.readString();
+        history = in.createStringArray();
     }
 
     @Override
@@ -75,15 +80,6 @@ public class ImsSuppServiceNotification implements Parcelable {
         out.writeInt(type);
         out.writeString(number);
         out.writeStringArray(history);
-    }
-
-    private void readFromParcel(Parcel in) {
-        notificationType = in.readInt();
-        code = in.readInt();
-        index = in.readInt();
-        type = in.readInt();
-        number = in.readString();
-        history = in.createStringArray();
     }
 
     public static final Creator<ImsSuppServiceNotification> CREATOR =

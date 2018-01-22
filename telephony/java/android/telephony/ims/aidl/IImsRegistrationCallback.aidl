@@ -20,7 +20,7 @@ package android.telephony.ims.aidl;
 import android.net.Uri;
 import android.telephony.ims.stub.ImsFeatureConfiguration;
 
-import com.android.ims.ImsReasonInfo;
+import android.telephony.ims.ImsReasonInfo;
 
 /**
  * See ImsRegistrationImplBase.Callback for more information.

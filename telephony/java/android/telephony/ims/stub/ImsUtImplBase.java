@@ -16,177 +16,332 @@
 
 package android.telephony.ims.stub;
 
+import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.telephony.ims.ImsUtListener;
 
 import com.android.ims.internal.IImsUt;
 import com.android.ims.internal.IImsUtListener;
 
 /**
- * Base implementation of ImsUt, which implements stub versions of the methods
- * in the IImsUt AIDL. Override the methods that your implementation of ImsUt supports.
- *
- * DO NOT remove or change the existing APIs, only add new ones to this Base implementation or you
- * will break other implementations of ImsUt maintained by other ImsServices.
- *
- * Provides the Ut interface interworking to get/set the supplementary service configuration.
+ * Base implementation of IMS UT interface, which implements stubs. Override these methods to
+ * implement functionality.
  *
  * @hide
  */
+// DO NOT remove or change the existing APIs, only add new ones to this Base implementation or you
+// will break other implementations of ImsUt maintained by other ImsServices.
+@SystemApi
+public class ImsUtImplBase {
 
-public class ImsUtImplBase extends IImsUt.Stub {
+    private IImsUt.Stub mServiceImpl = new IImsUt.Stub() {
+        @Override
+        public void close() throws RemoteException {
+            ImsUtImplBase.this.close();
+        }
+
+        @Override
+        public int queryCallBarring(int cbType) throws RemoteException {
+            return ImsUtImplBase.this.queryCallBarring(cbType);
+        }
+
+        @Override
+        public int queryCallForward(int condition, String number) throws RemoteException {
+            return ImsUtImplBase.this.queryCallForward(condition, number);
+        }
+
+        @Override
+        public int queryCallWaiting() throws RemoteException {
+            return ImsUtImplBase.this.queryCallWaiting();
+        }
+
+        @Override
+        public int queryCLIR() throws RemoteException {
+            return ImsUtImplBase.this.queryCLIR();
+        }
+
+        @Override
+        public int queryCLIP() throws RemoteException {
+            return ImsUtImplBase.this.queryCLIP();
+        }
+
+        @Override
+        public int queryCOLR() throws RemoteException {
+            return ImsUtImplBase.this.queryCOLR();
+        }
+
+        @Override
+        public int queryCOLP() throws RemoteException {
+            return ImsUtImplBase.this.queryCOLP();
+        }
+
+        @Override
+        public int transact(Bundle ssInfo) throws RemoteException {
+            return ImsUtImplBase.this.transact(ssInfo);
+        }
+
+        @Override
+        public int updateCallBarring(int cbType, int action, String[] barrList) throws
+                RemoteException {
+            return ImsUtImplBase.this.updateCallBarring(cbType, action, barrList);
+        }
+
+        @Override
+        public int updateCallForward(int action, int condition, String number, int serviceClass,
+                int timeSeconds) throws RemoteException {
+            return ImsUtImplBase.this.updateCallForward(action, condition, number, serviceClass,
+                    timeSeconds);
+        }
+
+        @Override
+        public int updateCallWaiting(boolean enable, int serviceClass) throws RemoteException {
+            return ImsUtImplBase.this.updateCallWaiting(enable, serviceClass);
+        }
+
+        @Override
+        public int updateCLIR(int clirMode) throws RemoteException {
+            return ImsUtImplBase.this.updateCLIR(clirMode);
+        }
+
+        @Override
+        public int updateCLIP(boolean enable) throws RemoteException {
+            return ImsUtImplBase.this.updateCLIP(enable);
+        }
+
+        @Override
+        public int updateCOLR(int presentation) throws RemoteException {
+            return ImsUtImplBase.this.updateCOLR(presentation);
+        }
+
+        @Override
+        public int updateCOLP(boolean enable) throws RemoteException {
+            return ImsUtImplBase.this.updateCOLP(enable);
+        }
+
+        @Override
+        public void setListener(IImsUtListener listener) throws RemoteException {
+            ImsUtImplBase.this.setListener(new ImsUtListener(listener));
+        }
+
+        @Override
+        public int queryCallBarringForServiceClass(int cbType, int serviceClass)
+                throws RemoteException {
+            return ImsUtImplBase.this.queryCallBarringForServiceClass(cbType, serviceClass);
+        }
+
+        @Override
+        public int updateCallBarringForServiceClass(int cbType, int action,
+                String[] barrList, int serviceClass) throws RemoteException {
+            return ImsUtImplBase.this.updateCallBarringForServiceClass(
+                    cbType, action, barrList, serviceClass);
+        }
+    };
 
     /**
-     * Closes the object. This object is not usable after being closed.
+     * Called when the framework no longer needs to interact with the IMS UT implementation any
+     * longer.
      */
-    @Override
-    public void close() throws RemoteException {
+    public void close() {
 
     }
 
     /**
-     * Retrieves the configuration of the call barring.
+     * Retrieves the call barring configuration.
+     * @param cbType
      */
-    @Override
-    public int queryCallBarring(int cbType) throws RemoteException {
+    public int queryCallBarring(int cbType) {
         return -1;
     }
 
     /**
      * Retrieves the configuration of the call barring for specified service class.
      */
-    @Override
-    public int queryCallBarringForServiceClass(int cbType, int serviceClass)
-            throws RemoteException {
+    public int queryCallBarringForServiceClass(int cbType, int serviceClass) {
         return -1;
     }
 
     /**
      * Retrieves the configuration of the call forward.
      */
-    @Override
-    public int queryCallForward(int condition, String number) throws RemoteException {
+    public int queryCallForward(int condition, String number) {
         return -1;
     }
 
     /**
      * Retrieves the configuration of the call waiting.
      */
-    @Override
-    public int queryCallWaiting() throws RemoteException {
+    public int queryCallWaiting() {
         return -1;
     }
 
     /**
      * Retrieves the default CLIR setting.
+     * @hide
      */
-    @Override
-    public int queryCLIR() throws RemoteException {
+    public int queryCLIR() {
+        return queryClir();
+    }
+
+    /**
+     * Retrieves the CLIP call setting.
+     * @hide
+     */
+    public int queryCLIP() {
+        return queryClip();
+    }
+
+    /**
+     * Retrieves the COLR call setting.
+     * @hide
+     */
+    public int queryCOLR() {
+        return queryColr();
+    }
+
+    /**
+     * Retrieves the COLP call setting.
+     * @hide
+     */
+    public int queryCOLP() {
+        return queryColp();
+    }
+
+    /**
+     * Retrieves the default CLIR setting.
+     */
+    public int queryClir() {
         return -1;
     }
 
     /**
      * Retrieves the CLIP call setting.
      */
-    @Override
-    public int queryCLIP() throws RemoteException {
+    public int queryClip() {
         return -1;
     }
 
     /**
      * Retrieves the COLR call setting.
      */
-    @Override
-    public int queryCOLR() throws RemoteException {
+    public int queryColr() {
         return -1;
     }
 
     /**
      * Retrieves the COLP call setting.
      */
-    @Override
-    public int queryCOLP() throws RemoteException {
+    public int queryColp() {
         return -1;
     }
 
     /**
      * Updates or retrieves the supplementary service configuration.
      */
-    @Override
-    public int transact(Bundle ssInfo) throws RemoteException {
+    public int transact(Bundle ssInfo) {
         return -1;
     }
 
     /**
      * Updates the configuration of the call barring.
      */
-    @Override
-    public int updateCallBarring(int cbType, int action, String[] barrList) throws RemoteException {
+    public int updateCallBarring(int cbType, int action, String[] barrList) {
         return -1;
     }
 
     /**
      * Updates the configuration of the call barring for specified service class.
      */
-    @Override
     public int updateCallBarringForServiceClass(int cbType, int action, String[] barrList,
-            int serviceClass) throws RemoteException {
+            int serviceClass) {
         return -1;
     }
 
     /**
      * Updates the configuration of the call forward.
      */
-    @Override
     public int updateCallForward(int action, int condition, String number, int serviceClass,
-            int timeSeconds) throws RemoteException {
+            int timeSeconds) {
         return 0;
     }
 
     /**
      * Updates the configuration of the call waiting.
      */
-    @Override
-    public int updateCallWaiting(boolean enable, int serviceClass) throws RemoteException {
+    public int updateCallWaiting(boolean enable, int serviceClass) {
         return -1;
     }
 
     /**
      * Updates the configuration of the CLIR supplementary service.
+     * @hide
      */
-    @Override
-    public int updateCLIR(int clirMode) throws RemoteException {
+    public int updateCLIR(int clirMode) {
+        return updateClir(clirMode);
+    }
+
+    /**
+     * Updates the configuration of the CLIP supplementary service.
+     * @hide
+     */
+    public int updateCLIP(boolean enable) {
+        return updateClip(enable);
+    }
+
+    /**
+     * Updates the configuration of the COLR supplementary service.
+     * @hide
+     */
+    public int updateCOLR(int presentation) {
+        return updateColr(presentation);
+    }
+
+    /**
+     * Updates the configuration of the COLP supplementary service.
+     * @hide
+     */
+    public int updateCOLP(boolean enable) {
+        return updateColp(enable);
+    }
+
+    /**
+     * Updates the configuration of the CLIR supplementary service.
+     */
+    public int updateClir(int clirMode) {
         return -1;
     }
 
     /**
      * Updates the configuration of the CLIP supplementary service.
      */
-    @Override
-    public int updateCLIP(boolean enable) throws RemoteException {
+    public int updateClip(boolean enable) {
         return -1;
     }
 
     /**
      * Updates the configuration of the COLR supplementary service.
      */
-    @Override
-    public int updateCOLR(int presentation) throws RemoteException {
+    public int updateColr(int presentation) {
         return -1;
     }
 
     /**
      * Updates the configuration of the COLP supplementary service.
      */
-    @Override
-    public int updateCOLP(boolean enable) throws RemoteException {
+    public int updateColp(boolean enable) {
         return -1;
     }
 
     /**
      * Sets the listener.
      */
-    @Override
-    public void setListener(IImsUtListener listener) throws RemoteException {
+    public void setListener(ImsUtListener listener) {
+    }
+
+    /**
+     * @hide
+     */
+    public IImsUt getInterface() {
+        return mServiceImpl;
     }
 }

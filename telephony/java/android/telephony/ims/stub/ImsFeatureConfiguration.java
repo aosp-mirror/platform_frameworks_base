@@ -16,6 +16,7 @@
 
 package android.telephony.ims.stub;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.ims.feature.ImsFeature;
@@ -25,17 +26,22 @@ import java.util.Set;
 
 /**
  * Container class for IMS Feature configuration. This class contains the features that the
- * ImsService supports, which are defined in {@link ImsFeature.FeatureType}.
+ * ImsService supports, which are defined in {@link ImsFeature} as
+ * {@link ImsFeature#FEATURE_EMERGENCY_MMTEL}, {@link ImsFeature#FEATURE_MMTEL}, and
+ * {@link ImsFeature#FEATURE_RCS}.
+ *
  * @hide
  */
-public class ImsFeatureConfiguration implements Parcelable {
+@SystemApi
+public final class ImsFeatureConfiguration implements Parcelable {
     /**
      * Features that this ImsService supports.
      */
     private final Set<Integer> mFeatures;
 
     /**
-     * Creates an ImsFeatureConfiguration with the features
+     * Builder for {@link ImsFeatureConfiguration} that makes adding supported {@link ImsFeature}s
+     * easier.
      */
     public static class Builder {
             ImsFeatureConfiguration mConfig;
@@ -71,7 +77,10 @@ public class ImsFeatureConfiguration implements Parcelable {
      * Configuration of the ImsService, which describes which features the ImsService supports
      * (for registration).
      * @param features an array of feature integers defined in {@link ImsFeature} that describe
-     * which features this ImsService supports.
+     * which features this ImsService supports. Supported values are
+     * {@link ImsFeature#FEATURE_EMERGENCY_MMTEL}, {@link ImsFeature#FEATURE_MMTEL}, and
+     * {@link ImsFeature#FEATURE_RCS}.
+     * @hide
      */
     public ImsFeatureConfiguration(int[] features) {
         mFeatures = new ArraySet<>();
@@ -84,7 +93,9 @@ public class ImsFeatureConfiguration implements Parcelable {
     }
 
     /**
-     * @return an int[] containing the features that this ImsService supports.
+     * @return an int[] containing the features that this ImsService supports. Supported values are
+     * {@link ImsFeature#FEATURE_EMERGENCY_MMTEL}, {@link ImsFeature#FEATURE_MMTEL}, and
+     * {@link ImsFeature#FEATURE_RCS}.
      */
     public int[] getServiceFeatures() {
         return mFeatures.stream().mapToInt(i->i).toArray();
@@ -94,6 +105,7 @@ public class ImsFeatureConfiguration implements Parcelable {
         mFeatures.add(feature);
     }
 
+    /** @hide */
     protected ImsFeatureConfiguration(Parcel in) {
         int[] features = in.createIntArray();
         if (features != null) {
@@ -129,6 +141,9 @@ public class ImsFeatureConfiguration implements Parcelable {
         dest.writeIntArray(mFeatures.stream().mapToInt(i->i).toArray());
     }
 
+    /**
+     * @hide
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -140,6 +155,9 @@ public class ImsFeatureConfiguration implements Parcelable {
         return mFeatures.equals(that.mFeatures);
     }
 
+    /**
+     * @hide
+     */
     @Override
     public int hashCode() {
         return mFeatures.hashCode();

@@ -20,7 +20,7 @@ import android.app.PendingIntent;
 import android.os.Message;
 import android.os.RemoteException;
 
-import com.android.ims.ImsCallProfile;
+import android.telephony.ims.ImsCallProfile;
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsConfig;
 import com.android.ims.internal.IImsEcbm;
@@ -28,7 +28,7 @@ import com.android.ims.internal.IImsMMTelFeature;
 import com.android.ims.internal.IImsMultiEndpoint;
 import com.android.ims.internal.IImsRegistrationListener;
 import com.android.ims.internal.IImsUt;
-import com.android.ims.internal.ImsCallSession;
+import android.telephony.ims.ImsCallSession;
 
 /**
  * Base implementation for MMTel.

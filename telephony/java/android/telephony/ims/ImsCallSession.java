@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,23 +11,25 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
 
-package com.android.ims.internal;
+package android.telephony.ims;
 
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.ims.aidl.IImsCallSessionListener;
 
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
+import android.telephony.ims.stub.ImsCallSessionImplBase;
 import android.util.Log;
-import com.android.ims.ImsCallProfile;
-import com.android.ims.ImsConferenceState;
-import com.android.ims.ImsReasonInfo;
-import com.android.ims.ImsStreamMediaProfile;
-import com.android.ims.ImsSuppServiceNotification;
+
+import com.android.ims.internal.IImsCallSession;
+import com.android.ims.internal.IImsVideoCallProvider;
 
 /**
  * Provides the call initiation/termination, and media exchange between two IMS endpoints.
@@ -39,7 +41,8 @@ public class ImsCallSession {
     private static final String TAG = "ImsCallSession";
 
     /**
-     * Defines IMS call session state.
+     * Defines IMS call session state. Please use {@link ImsCallSessionImplBase.State} definition.
+     * This is kept around for capability reasons.
      */
     public static class State {
         public static final int IDLE = 0;
@@ -92,6 +95,7 @@ public class ImsCallSession {
      * Listener for events relating to an IMS session, such as when a session is being
      * recieved ("on ringing") or a call is outgoing ("on calling").
      * <p>Many of these events are also received by {@link ImsCall.Listener}.</p>
+     * @hide
      */
     public static class Listener {
         /**
@@ -449,6 +453,7 @@ public class ImsCallSession {
     private boolean mClosed = false;
     private Listener mListener;
 
+    /** @hide */
     public ImsCallSession(IImsCallSession iSession) {
         miSession = iSession;
 
@@ -462,6 +467,7 @@ public class ImsCallSession {
         }
     }
 
+    /** @hide */
     public ImsCallSession(IImsCallSession iSession, Listener listener) {
         this(iSession);
         setListener(listener);
@@ -470,15 +476,17 @@ public class ImsCallSession {
     /**
      * Closes this object. This object is not usable after being closed.
      */
-    public synchronized void close() {
-        if (mClosed) {
-            return;
-        }
+    public void close() {
+        synchronized (this) {
+            if (mClosed) {
+                return;
+            }
 
-        try {
-            miSession.close();
-            mClosed = true;
-        } catch (RemoteException e) {
+            try {
+                miSession.close();
+                mClosed = true;
+            } catch (RemoteException e) {
+            }
         }
     }
 
@@ -554,6 +562,7 @@ public class ImsCallSession {
      * Gets the video call provider for the session.
      *
      * @return The video call provider.
+     * @hide
      */
     public IImsVideoCallProvider getVideoCallProvider() {
         if (mClosed) {
@@ -659,6 +668,7 @@ public class ImsCallSession {
      * override the previous listener.
      *
      * @param listener to listen to the session events of this object
+     * @hide
      */
     public void setListener(Listener listener) {
         mListener = listener;
@@ -1274,7 +1284,7 @@ public class ImsCallSession {
         }
 
         /**
-         * Notifies of a case where a {@link com.android.ims.internal.ImsCallSession} may
+         * Notifies of a case where a {@link ImsCallSession} may
          * potentially handover from one radio technology to another.
          * @param srcAccessTech The source radio access technology; one of the access technology
          *                      constants defined in {@link android.telephony.ServiceState}.  For

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016 The Android Open Source Project
+ * Copyright (c) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,25 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.ims.internal;
+package android.telephony.ims;
 
-import android.telephony.ims.ImsExternalCallState;
-
-/**
- * A listener type for receiving notifications about DEP through IMS
- *
- * {@hide}
- */
-oneway interface IImsExternalCallStateListener {
-
-    /**
-     * Notifies client when Dialog Event Package update is received
-     *
-     * @param List<ImsExternalCallState> - External Call Dialog
-     *
-     * @return void.
-     */
-    void onImsExternalCallStateUpdate(in List<ImsExternalCallState> externalCallDialogs);
-
-}
-
+parcelable ImsSsData;

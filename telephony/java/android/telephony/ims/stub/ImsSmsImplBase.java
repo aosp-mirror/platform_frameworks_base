@@ -157,7 +157,7 @@ public class ImsSmsImplBase {
      * @param token token provided in {@link #onSmsReceived(int, String, byte[])}
      * @param result result of delivering the message. Valid values are:
      *  {@link #DELIVER_STATUS_OK},
-     *  {@link #DELIVER_STATUS_OK}
+     *  {@link #DELIVER_STATUS_ERROR}
      * @param messageRef the message reference
      */
     public void acknowledgeSms(int token, @DeliverStatusResult int messageRef, int result) {
@@ -302,9 +302,9 @@ public class ImsSmsImplBase {
     }
 
     /**
-     * Called when SmsImpl has been initialized and communication with the framework is set up.
+     * Called when ImsSmsImpl has been initialized and communication with the framework is set up.
      * Any attempt by this class to access the framework before this method is called will return
-     * with an {@link RuntimeException}.
+     * with a {@link RuntimeException}.
      */
     public void onReady() {
         // Base Implementation - Should be overridden

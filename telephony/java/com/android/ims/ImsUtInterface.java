@@ -18,6 +18,8 @@ package com.android.ims;
 
 import android.os.Handler;
 import android.os.Message;
+import android.telephony.ims.ImsCallForwardInfo;
+import android.telephony.ims.ImsSsInfo;
 
 /**
  * Provides APIs for the supplementary service settings using IMS (Ut interface).

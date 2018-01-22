@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,11 +11,12 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
 
-package com.android.ims;
+package android.telephony.ims;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -24,23 +25,32 @@ import android.os.Parcelable;
  *
  * @hide
  */
-public class ImsCallForwardInfo implements Parcelable {
+@SystemApi
+public final class ImsCallForwardInfo implements Parcelable {
     // Refer to ImsUtInterface#CDIV_CF_XXX
+    /** @hide */
     public int mCondition;
     // 0: disabled, 1: enabled
+    /** @hide */
     public int mStatus;
     // 0x91: International, 0x81: Unknown
+    /** @hide */
     public int mToA;
     // Service class
+    /** @hide */
     public int mServiceClass;
     // Number (it will not include the "sip" or "tel" URI scheme)
+    /** @hide */
     public String mNumber;
     // No reply timer for CF
+    /** @hide */
     public int mTimeSeconds;
 
+    /** @hide */
     public ImsCallForwardInfo() {
     }
 
+    /** @hide */
     public ImsCallForwardInfo(Parcel in) {
         readFromParcel(in);
     }
@@ -91,4 +101,28 @@ public class ImsCallForwardInfo implements Parcelable {
             return new ImsCallForwardInfo[size];
         }
     };
+
+    public int getCondition() {
+        return mCondition;
+    }
+
+    public int getStatus() {
+        return mStatus;
+    }
+
+    public int getToA() {
+        return mToA;
+    }
+
+    public int getServiceClass() {
+        return mServiceClass;
+    }
+
+    public String getNumber() {
+        return mNumber;
+    }
+
+    public int getTimeSeconds() {
+        return mTimeSeconds;
+    }
 }

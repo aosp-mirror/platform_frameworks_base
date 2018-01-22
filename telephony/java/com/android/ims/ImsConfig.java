@@ -19,6 +19,7 @@ package com.android.ims;
 import android.content.Context;
 import android.os.RemoteException;
 import android.telephony.Rlog;
+import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.aidl.IImsConfig;
 import android.telephony.ims.stub.ImsConfigImplBase;
 
