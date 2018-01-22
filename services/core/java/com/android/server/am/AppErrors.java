@@ -745,7 +745,7 @@ class AppErrors {
                     mContext.getContentResolver(),
                     Settings.Secure.SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
                     0,
-                    UserHandle.USER_CURRENT) != 0;
+                    mService.mUserController.getCurrentUserId()) != 0;
             final boolean crashSilenced = mAppsNotReportingCrashes != null &&
                     mAppsNotReportingCrashes.contains(proc.info.packageName);
             if ((mService.canShowErrorDialogs() || showBackground) && !crashSilenced
