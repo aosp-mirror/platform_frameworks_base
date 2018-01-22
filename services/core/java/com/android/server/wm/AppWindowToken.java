@@ -463,10 +463,14 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 mService.mActivityManagerAppTransitionNotifier.onAppTransitionFinishedLocked(token);
             }
 
-            // Update the client visibility if we are not running an animation. Otherwise, we'll
-            // update client visibility state in onAnimationFinished.
-            if (!visible && !delayed) {
-                setClientHidden(true);
+            // If we're becoming visible, immediately change client visibility as well although it
+            // usually gets changed in AppWindowContainerController.setVisibility already. However,
+            // there seem to be some edge cases where we change our visibility but client visibility
+            // never gets updated.
+            // If we're becoming invisible, update the client visibility if we are not running an
+            // animation. Otherwise, we'll update client visibility in onAnimationFinished.
+            if (visible || !delayed) {
+                setClientHidden(!visible);
             }
 
             // If we are hidden but there is no delay needed we immediately
