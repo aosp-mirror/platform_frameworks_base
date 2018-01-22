@@ -225,7 +225,7 @@ easier.
     <style name="TextAppearance.DeviceDefault.SearchResult.Subtitle" parent="TextAppearance.Material.SearchResult.Subtitle"/>
     <style name="TextAppearance.DeviceDefault.Widget" parent="TextAppearance.Material.Widget"/>
     <style name="TextAppearance.DeviceDefault.Widget.Button" parent="TextAppearance.Material.Widget.Button">
-        <item name="fontFamily">@string/config_fontFamilyButton</item>
+        <item name="fontFamily">@string/config_headlineFontFamilyMedium</item>
         <item name="textAllCaps">@bool/config_buttonTextAllCaps</item>
     </style>
     <style name="TextAppearance.DeviceDefault.Widget.IconMenu.Item" parent="TextAppearance.Material.Widget.IconMenu.Item"/>
