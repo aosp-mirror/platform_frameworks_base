@@ -19,7 +19,10 @@ package android.media.update;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.media.IMediaSession2Callback;
+import android.media.MediaBrowser2;
+import android.media.MediaBrowser2.BrowserCallback;
 import android.media.MediaController2;
+import android.media.MediaController2.ControllerCallback;
 import android.media.MediaPlayerBase;
 import android.media.MediaSession2;
 import android.media.MediaSessionService2;
@@ -53,7 +56,10 @@ public interface StaticProvider {
             String packageName, IMediaSession2Callback callback);
     MediaController2Provider createMediaController2(
             MediaController2 instance, Context context, SessionToken token,
-            MediaController2.ControllerCallback callback, Executor executor);
+            ControllerCallback callback, Executor executor);
+    MediaBrowser2Provider createMediaBrowser2(
+            MediaBrowser2 instance, Context context, SessionToken token,
+            BrowserCallback callback, Executor executor);
     MediaSessionService2Provider createMediaSessionService2(
             MediaSessionService2 instance);
 }
