@@ -1502,6 +1502,21 @@ public final class Settings {
     public static final String ACTION_REQUEST_SET_AUTOFILL_SERVICE =
             "android.settings.REQUEST_SET_AUTOFILL_SERVICE";
 
+    /**
+     * Activity Action: Show screen for controlling which apps have access on volume directories.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * <p>
+     * Applications typically use this action to ask the user to revert the "Do not ask again"
+     * status of directory access requests made by
+     * {@link android.os.storage.StorageVolume#createAccessIntent(String)}.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_STORAGE_VOLUME_ACCESS_SETTINGS =
+            "android.settings.STORAGE_VOLUME_ACCESS_SETTINGS";
+
     // End of Intent actions for Settings
 
     /**
