@@ -16,18 +16,20 @@
 
 package android.content.pm.dex;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Slog;
 
 import java.io.File;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.util.concurrent.Executor;
 
 /**
  * Class for retrieving various kinds of information related to the runtime artifacts of
@@ -46,6 +48,20 @@ public class ArtManager {
     /** The snapshot failed because of an internal error (e.g. error during opening profiles). */
     public static final int SNAPSHOT_FAILED_INTERNAL_ERROR = 2;
 
+    /** Constant used for applications profiles. */
+    public static final int PROFILE_APPS = 0;
+    /** Constant used for the boot image profile. */
+    public static final int PROFILE_BOOT_IMAGE = 1;
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "PROFILE_" }, value = {
+            PROFILE_APPS,
+            PROFILE_BOOT_IMAGE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ProfileType {}
+
+
     private IArtManager mArtManager;
 
     /**
@@ -56,41 +72,59 @@ public class ArtManager {
     }
 
     /**
-     * Snapshots the runtime profile for an apk belonging to the package {@code packageName}.
-     * The apk is identified by {@code codePath}. The calling process must have
-     * {@code android.permission.READ_RUNTIME_PROFILE} permission.
+     * Snapshots a runtime profile according to the {@code profileType} parameter.
      *
-     * The result will be posted on {@code handler} using the given {@code callback}.
-     * The profile being available as a read-only {@link android.os.ParcelFileDescriptor}.
+     * If {@code profileType} is {@link ArtManager#PROFILE_APPS} the method will snapshot
+     * the profile for for an apk belonging to the package {@code packageName}.
+     * The apk is identified by {@code codePath}.
      *
-     * @param packageName the target package name
-     * @param codePath the code path for which the profile should be retrieved
+     * If {@code profileType} is {@code ArtManager.PROFILE_BOOT_IMAGE} the method will snapshot
+     * the profile for the boot image. In this case {@code codePath can be null}. The parameters
+     * {@code packageName} and {@code codePath} are ignored.
+     *u
+     * The calling process must have {@code android.permission.READ_RUNTIME_PROFILE} permission.
+     *
+     * The result will be posted on the {@code executor} using the given {@code callback}.
+     * The profile will be available as a read-only {@link android.os.ParcelFileDescriptor}.
+     *
+     * This method will throw {@link IllegalStateException} if
+     * {@link ArtManager#isRuntimeProfilingEnabled(int)} does not return true for the given
+     * {@code profileType}.
+     *
+     * @param profileType the type of profile that should be snapshot (boot image or app)
+     * @param packageName the target package name or null if the target is the boot image
+     * @param codePath the code path for which the profile should be retrieved or null if
+     *                 the target is the boot image
      * @param callback the callback which should be used for the result
-     * @param handler the handler which should be used to post the result
+     * @param executor the executor which should be used to post the result
      */
     @RequiresPermission(android.Manifest.permission.READ_RUNTIME_PROFILES)
-    public void snapshotRuntimeProfile(@NonNull String packageName, @NonNull String codePath,
-            @NonNull SnapshotRuntimeProfileCallback callback, @NonNull Handler handler) {
+    public void snapshotRuntimeProfile(@ProfileType int profileType, @Nullable String packageName,
+            @Nullable String codePath, @NonNull Executor executor,
+            @NonNull SnapshotRuntimeProfileCallback callback) {
         Slog.d(TAG, "Requesting profile snapshot for " + packageName + ":" + codePath);
 
         SnapshotRuntimeProfileCallbackDelegate delegate =
-                new SnapshotRuntimeProfileCallbackDelegate(callback, handler.getLooper());
+                new SnapshotRuntimeProfileCallbackDelegate(callback, executor);
         try {
-            mArtManager.snapshotRuntimeProfile(packageName, codePath, delegate);
+            mArtManager.snapshotRuntimeProfile(profileType, packageName, codePath, delegate);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
     }
 
     /**
-     * Returns true if runtime profiles are enabled, false otherwise.
+     * Returns true if runtime profiles are enabled for the given type, false otherwise.
      *
      * The calling process must have {@code android.permission.READ_RUNTIME_PROFILE} permission.
+     *
+     * @param profileType can be either {@link ArtManager#PROFILE_APPS}
+     *                    or {@link ArtManager#PROFILE_BOOT_IMAGE}
      */
     @RequiresPermission(android.Manifest.permission.READ_RUNTIME_PROFILES)
-    public boolean isRuntimeProfilingEnabled() {
+    public boolean isRuntimeProfilingEnabled(@ProfileType int profileType) {
         try {
-            return mArtManager.isRuntimeProfilingEnabled();
+            return mArtManager.isRuntimeProfilingEnabled(profileType);
         } catch (RemoteException e) {
             e.rethrowAsRuntimeException();
         }
@@ -119,41 +153,24 @@ public class ArtManager {
     }
 
     private static class SnapshotRuntimeProfileCallbackDelegate
-            extends android.content.pm.dex.ISnapshotRuntimeProfileCallback.Stub
-            implements Handler.Callback {
-        private static final int MSG_SNAPSHOT_OK = 1;
-        private static final int MSG_ERROR = 2;
+            extends android.content.pm.dex.ISnapshotRuntimeProfileCallback.Stub {
         private final ArtManager.SnapshotRuntimeProfileCallback mCallback;
-        private final Handler mHandler;
+        private final Executor mExecutor;
 
         private SnapshotRuntimeProfileCallbackDelegate(
-                ArtManager.SnapshotRuntimeProfileCallback callback, Looper looper) {
+                ArtManager.SnapshotRuntimeProfileCallback callback, Executor executor) {
             mCallback = callback;
-            mHandler = new Handler(looper, this);
+            mExecutor = executor;
         }
 
         @Override
-        public void onSuccess(ParcelFileDescriptor profileReadFd) {
-            mHandler.obtainMessage(MSG_SNAPSHOT_OK, profileReadFd).sendToTarget();
+        public void onSuccess(final ParcelFileDescriptor profileReadFd) {
+            mExecutor.execute(() -> mCallback.onSuccess(profileReadFd));
         }
 
         @Override
         public void onError(int errCode) {
-            mHandler.obtainMessage(MSG_ERROR, errCode, 0).sendToTarget();
-        }
-
-        @Override
-        public boolean handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_SNAPSHOT_OK:
-                    mCallback.onSuccess((ParcelFileDescriptor) msg.obj);
-                    break;
-                case MSG_ERROR:
-                    mCallback.onError(msg.arg1);
-                    break;
-                default: return false;
-            }
-            return true;
+            mExecutor.execute(() -> mCallback.onError(errCode));
         }
     }
 
@@ -178,17 +195,15 @@ public class ArtManager {
     }
 
     /**
-     * Return the snapshot profile file for the given package and split.
+     * Return the snapshot profile file for the given package and profile name.
      *
      * KEEP in sync with installd dexopt.cpp.
      * TODO(calin): inject the snapshot profile name from PM to avoid the dependency.
      *
      * @hide
      */
-    public static File getProfileSnapshotFile(String packageName, String splitName) {
+    public static File getProfileSnapshotFileForName(String packageName, String profileName) {
         File profileDir = Environment.getDataRefProfilesDePackageDirectory(packageName);
-        String snapshotFile = getProfileName(splitName) + ".snapshot";
-        return new File(profileDir, snapshotFile);
-
+        return new File(profileDir, profileName  + ".snapshot");
     }
 }

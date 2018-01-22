@@ -953,8 +953,10 @@ package android.content.pm {
 package android.content.pm.dex {
 
   public class ArtManager {
-    method public boolean isRuntimeProfilingEnabled();
-    method public void snapshotRuntimeProfile(java.lang.String, java.lang.String, android.content.pm.dex.ArtManager.SnapshotRuntimeProfileCallback, android.os.Handler);
+    method public boolean isRuntimeProfilingEnabled(int);
+    method public void snapshotRuntimeProfile(int, java.lang.String, java.lang.String, java.util.concurrent.Executor, android.content.pm.dex.ArtManager.SnapshotRuntimeProfileCallback);
+    field public static final int PROFILE_APPS = 0; // 0x0
+    field public static final int PROFILE_BOOT_IMAGE = 1; // 0x1
     field public static final int SNAPSHOT_FAILED_CODE_PATH_NOT_FOUND = 1; // 0x1
     field public static final int SNAPSHOT_FAILED_INTERNAL_ERROR = 2; // 0x2
     field public static final int SNAPSHOT_FAILED_PACKAGE_NOT_FOUND = 0; // 0x0

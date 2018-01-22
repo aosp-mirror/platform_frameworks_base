@@ -502,11 +502,11 @@ public class Installer extends SystemService {
         }
     }
 
-    public boolean createProfileSnapshot(int appId, String packageName, String profileName)
-            throws InstallerException {
+    public boolean createProfileSnapshot(int appId, String packageName, String profileName,
+            String classpath) throws InstallerException {
         if (!checkBeforeRemote()) return false;
         try {
-            return mInstalld.createProfileSnapshot(appId, packageName, profileName);
+            return mInstalld.createProfileSnapshot(appId, packageName, profileName, classpath);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
