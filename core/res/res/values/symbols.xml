@@ -3227,5 +3227,8 @@
   <java-symbol type="string" name="config_defaultAssistantAccessPackage" />
 
   <java-symbol type="bool" name="config_supportBluetoothPersistedState" />
+
   <java-symbol type="string" name="slices_permission_request" />
+
+  <java-symbol type="string" name="screenshot_edit" />
 </resources>

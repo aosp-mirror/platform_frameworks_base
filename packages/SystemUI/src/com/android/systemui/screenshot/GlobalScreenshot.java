@@ -293,12 +293,13 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
             sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
 
-            // Create a share action for the notification. Note, we proxy the call to ShareReceiver
-            // because RemoteViews currently forces an activity options on the PendingIntent being
-            // launched, and since we don't want to trigger the share sheet in this case, we will
-            // start the chooser activitiy directly in ShareReceiver.
+            // Create a share action for the notification. Note, we proxy the call to
+            // ScreenshotActionReceiver because RemoteViews currently forces an activity options
+            // on the PendingIntent being launched, and since we don't want to trigger the share
+            // sheet in this case, we start the chooser activity directly in
+            // ScreenshotActionReceiver.
             PendingIntent shareAction = PendingIntent.getBroadcast(context, 0,
-                    new Intent(context, GlobalScreenshot.ShareReceiver.class)
+                    new Intent(context, GlobalScreenshot.ScreenshotActionReceiver.class)
                             .putExtra(SHARING_INTENT, sharingIntent),
                     PendingIntent.FLAG_CANCEL_CURRENT);
             Notification.Action.Builder shareActionBuilder = new Notification.Action.Builder(
@@ -306,15 +307,19 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                     r.getString(com.android.internal.R.string.share), shareAction);
             mNotificationBuilder.addAction(shareActionBuilder.build());
 
-            // Create a delete action for the notification
-            PendingIntent deleteAction = PendingIntent.getBroadcast(context, 0,
-                    new Intent(context, GlobalScreenshot.DeleteScreenshotReceiver.class)
-                            .putExtra(GlobalScreenshot.SCREENSHOT_URI_ID, uri.toString()),
-                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT);
-            Notification.Action.Builder deleteActionBuilder = new Notification.Action.Builder(
-                    R.drawable.ic_screenshot_delete,
-                    r.getString(com.android.internal.R.string.delete), deleteAction);
-            mNotificationBuilder.addAction(deleteActionBuilder.build());
+            Intent editIntent = new Intent(Intent.ACTION_EDIT);
+            editIntent.setType("image/png");
+            editIntent.putExtra(Intent.EXTRA_STREAM, uri);
+
+            // Create a edit action for the notification the same way.
+            PendingIntent editAction = PendingIntent.getBroadcast(context, 1,
+                    new Intent(context, GlobalScreenshot.ScreenshotActionReceiver.class)
+                            .putExtra(SHARING_INTENT, editIntent),
+                    PendingIntent.FLAG_CANCEL_CURRENT);
+            Notification.Action.Builder editActionBuilder = new Notification.Action.Builder(
+                    R.drawable.ic_screenshot_edit,
+                    r.getString(com.android.internal.R.string.screenshot_edit), editAction);
+            mNotificationBuilder.addAction(editActionBuilder.build());
 
             mParams.imageUri = uri;
             mParams.image = null;
@@ -879,9 +884,9 @@ class GlobalScreenshot {
     }
 
     /**
-     * Receiver to proxy the share intent.
+     * Receiver to proxy the share or edit intent.
      */
-    public static class ShareReceiver extends BroadcastReceiver {
+    public static class ScreenshotActionReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             try {
@@ -903,7 +908,7 @@ class GlobalScreenshot {
     }
 
     /**
-     * Removes the notification for a screenshot after a share target is chosen.
+     * Removes the notification for a screenshot after a share or edit target is chosen.
      */
     public static class TargetChosenReceiver extends BroadcastReceiver {
         @Override
