@@ -1597,8 +1597,48 @@ public final class MediaDrm implements AutoCloseable {
             = "/drm/mediadrm/open_session/error/count";
 
         /**
-         * Key to extract the number of successful {@link #getKeyRequest}
-         * calls from the {@link PersistableBundle} returned by a
+         * Key to extract the list of error codes that were returned from
+         * {@link #openSession} calls. The key is used to lookup the list
+         * in the {@link PersistableBundle} returned by a {@link #getMetrics}
+         * call.
+         * The list is an array of Long values
+         * ({@link android.os.BaseBundle#getLongArray}).
+         */
+        public static final String OPEN_SESSION_ERROR_LIST
+            = "/drm/mediadrm/open_session/error/list";
+
+        /**
+         * Key to extract the number of successful {@link #closeSession} calls
+         * from the {@link PersistableBundle} returned by a
+         * {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String CLOSE_SESSION_OK_COUNT
+            = "/drm/mediadrm/close_session/ok/count";
+
+        /**
+         * Key to extract the number of failed {@link #closeSession} calls
+         * from the {@link PersistableBundle} returned by a
+         * {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String CLOSE_SESSION_ERROR_COUNT
+            = "/drm/mediadrm/close_session/error/count";
+
+        /**
+         * Key to extract the list of error codes that were returned from
+         * {@link #closeSession} calls. The key is used to lookup the list
+         * in the {@link PersistableBundle} returned by a {@link #getMetrics}
+         * call.
+         * The list is an array of Long values
+         * ({@link android.os.BaseBundle#getLongArray}).
+         */
+        public static final String CLOSE_SESSION_ERROR_LIST
+            = "/drm/mediadrm/close_session/error/list";
+
+        /**
+         * Key to extract the number of successful {@link #getKeyRequest} calls
+         * from the {@link PersistableBundle} returned by a
          * {@link #getMetrics} call.
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
@@ -1613,5 +1653,251 @@ public final class MediaDrm implements AutoCloseable {
          */
         public static final String GET_KEY_REQUEST_ERROR_COUNT
             = "/drm/mediadrm/get_key_request/error/count";
+
+        /**
+         * Key to extract the list of error codes that were returned from
+         * {@link #getKeyRequest} calls. The key is used to lookup the list
+         * in the {@link PersistableBundle} returned by a {@link #getMetrics}
+         * call.
+         * The list is an array of Long values
+         * ({@link android.os.BaseBundle#getLongArray}).
+         */
+        public static final String GET_KEY_REQUEST_ERROR_LIST
+            = "/drm/mediadrm/get_key_request/error/list";
+
+        /**
+         * Key to extract the average time in microseconds of calls to
+         * {@link #getKeyRequest}. The value is retrieved from the
+         * {@link PersistableBundle} returned from {@link #getMetrics}.
+         * The time is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String GET_KEY_REQUEST_OK_TIME_MICROS
+            = "/drm/mediadrm/get_key_request/ok/average_time_micros";
+
+        /**
+         * Key to extract the number of successful {@link #provideKeyResponse}
+         * calls from the {@link PersistableBundle} returned by a
+         * {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String PROVIDE_KEY_RESPONSE_OK_COUNT
+            = "/drm/mediadrm/provide_key_response/ok/count";
+
+        /**
+         * Key to extract the number of failed {@link #provideKeyResponse}
+         * calls from the {@link PersistableBundle} returned by a
+         * {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String PROVIDE_KEY_RESPONSE_ERROR_COUNT
+            = "/drm/mediadrm/provide_key_response/error/count";
+
+        /**
+         * Key to extract the list of error codes that were returned from
+         * {@link #provideKeyResponse} calls. The key is used to lookup the
+         * list in the {@link PersistableBundle} returned by a
+         * {@link #getMetrics} call.
+         * The list is an array of Long values
+         * ({@link android.os.BaseBundle#getLongArray}).
+         */
+        public static final String PROVIDE_KEY_RESPONSE_ERROR_LIST
+            = "/drm/mediadrm/provide_key_response/error/list";
+
+        /**
+         * Key to extract the average time in microseconds of calls to
+         * {@link #provideKeyResponse}. The valus is retrieved from the
+         * {@link PersistableBundle} returned from {@link #getMetrics}.
+         * The time is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String PROVIDE_KEY_RESPONSE_OK_TIME_MICROS
+            = "/drm/mediadrm/provide_key_response/ok/average_time_micros";
+
+        /**
+         * Key to extract the number of successful {@link #getProvisionRequest}
+         * calls from the {@link PersistableBundle} returned by a
+         * {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String GET_PROVISION_REQUEST_OK_COUNT
+            = "/drm/mediadrm/get_provision_request/ok/count";
+
+        /**
+         * Key to extract the number of failed {@link #getProvisionRequest}
+         * calls from the {@link PersistableBundle} returned by a
+         * {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String GET_PROVISION_REQUEST_ERROR_COUNT
+            = "/drm/mediadrm/get_provision_request/error/count";
+
+        /**
+         * Key to extract the list of error codes that were returned from
+         * {@link #getProvisionRequest} calls. The key is used to lookup the
+         * list in the {@link PersistableBundle} returned by a
+         * {@link #getMetrics} call.
+         * The list is an array of Long values
+         * ({@link android.os.BaseBundle#getLongArray}).
+         */
+        public static final String GET_PROVISION_REQUEST_ERROR_LIST
+            = "/drm/mediadrm/get_provision_request/error/list";
+
+        /**
+         * Key to extract the number of successful
+         * {@link #provideProvisionResponse} calls from the
+         * {@link PersistableBundle} returned by a {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String PROVIDE_PROVISION_RESPONSE_OK_COUNT
+            = "/drm/mediadrm/provide_provision_response/ok/count";
+
+        /**
+         * Key to extract the number of failed
+         * {@link #provideProvisionResponse} calls from the
+         * {@link PersistableBundle} returned by a {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String PROVIDE_PROVISION_RESPONSE_ERROR_COUNT
+            = "/drm/mediadrm/provide_provision_response/error/count";
+
+        /**
+         * Key to extract the list of error codes that were returned from
+         * {@link #provideProvisionResponse} calls. The key is used to lookup
+         * the list in the {@link PersistableBundle} returned by a
+         * {@link #getMetrics} call.
+         * The list is an array of Long values
+         * ({@link android.os.BaseBundle#getLongArray}).
+         */
+        public static final String PROVIDE_PROVISION_RESPONSE_ERROR_LIST
+            = "/drm/mediadrm/provide_provision_response/error/list";
+
+        /**
+         * Key to extract the number of successful
+         * {@link #getPropertyByteArray} calls were made with the
+         * {@link #PROPERTY_DEVICE_UNIQUE_ID} value. The key is used to lookup
+         * the value in the {@link PersistableBundle} returned by a
+         * {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String GET_DEVICE_UNIQUE_ID_OK_COUNT
+            = "/drm/mediadrm/get_device_unique_id/ok/count";
+
+        /**
+         * Key to extract the number of failed
+         * {@link #getPropertyByteArray} calls were made with the
+         * {@link #PROPERTY_DEVICE_UNIQUE_ID} value. The key is used to lookup
+         * the value in the {@link PersistableBundle} returned by a
+         * {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String GET_DEVICE_UNIQUE_ID_ERROR_COUNT
+            = "/drm/mediadrm/get_device_unique_id/error/count";
+
+        /**
+         * Key to extract the list of error codes that were returned from
+         * {@link #getPropertyByteArray} calls with the
+         * {@link #PROPERTY_DEVICE_UNIQUE_ID} value. The key is used to lookup
+         * the list in the {@link PersistableBundle} returned by a
+         * {@link #getMetrics} call.
+         * The list is an array of Long values
+         * ({@link android.os.BaseBundle#getLongArray}).
+         */
+        public static final String GET_DEVICE_UNIQUE_ID_ERROR_LIST
+            = "/drm/mediadrm/get_device_unique_id/error/list";
+
+        /**
+         * Key to extraact the count of {@link KeyStatus#STATUS_EXPIRED} events
+         * that occured. The count is extracted from the
+         * {@link PersistableBundle} returned from a {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String KEY_STATUS_EXPIRED_COUNT
+            = "/drm/mediadrm/key_status/EXPIRED/count";
+
+        /**
+         * Key to extract the count of {@link KeyStatus#STATUS_INTERNAL_ERROR}
+         * events that occured. The count is extracted from the
+         * {@link PersistableBundle} returned from a {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String KEY_STATUS_INTERNAL_ERROR_COUNT
+            = "/drm/mediadrm/key_status/INTERNAL_ERROR/count";
+
+        /**
+         * Key to extract the count of
+         * {@link KeyStatus#STATUS_OUTPUT_NOT_ALLOWED} events that occured.
+         * The count is extracted from the
+         * {@link PersistableBundle} returned from a {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String KEY_STATUS_OUTPUT_NOT_ALLOWED_COUNT
+            = "/drm/mediadrm/key_status_change/OUTPUT_NOT_ALLOWED/count";
+
+        /**
+         * Key to extract the count of {@link KeyStatus#STATUS_PENDING}
+         * events that occured. The count is extracted from the
+         * {@link PersistableBundle} returned from a {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String KEY_STATUS_PENDING_COUNT
+            = "/drm/mediadrm/key_status_change/PENDING/count";
+
+        /**
+         * Key to extract the count of {@link KeyStatus#STATUS_USABLE}
+         * events that occured. The count is extracted from the
+         * {@link PersistableBundle} returned from a {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String KEY_STATUS_USABLE_COUNT
+            = "/drm/mediadrm/key_status_change/USABLE/count";
+
+        /**
+         * Key to extract the count of {@link OnEventListener#onEvent}
+         * calls of type PROVISION_REQUIRED occured. The count is
+         * extracted from the {@link PersistableBundle} returned from a
+         * {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String EVENT_PROVISION_REQUIRED_COUNT
+            = "/drm/mediadrm/event/PROVISION_REQUIRED/count";
+
+        /**
+         * Key to extract the count of {@link OnEventListener#onEvent}
+         * calls of type KEY_NEEDED occured. The count is
+         * extracted from the {@link PersistableBundle} returned from a
+         * {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String EVENT_KEY_NEEDED_COUNT
+            = "/drm/mediadrm/event/KEY_NEEDED/count";
+
+        /**
+         * Key to extract the count of {@link OnEventListener#onEvent}
+         * calls of type KEY_EXPIRED occured. The count is
+         * extracted from the {@link PersistableBundle} returned from a
+         * {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String EVENT_KEY_EXPIRED_COUNT
+            = "/drm/mediadrm/event/KEY_EXPIRED/count";
+
+        /**
+         * Key to extract the count of {@link OnEventListener#onEvent}
+         * calls of type VENDOR_DEFINED. The count is
+         * extracted from the {@link PersistableBundle} returned from a
+         * {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String EVENT_VENDOR_DEFINED_COUNT
+            = "/drm/mediadrm/event/VENDOR_DEFINED/count";
+
+        /**
+         * Key to extract the count of {@link OnEventListener#onEvent}
+         * calls of type SESSION_RECLAIMED. The count is
+         * extracted from the {@link PersistableBundle} returned from a
+         * {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String EVENT_SESSION_RECLAIMED_COUNT
+            = "/drm/mediadrm/event/SESSION_RECLAIMED/count";
     }
 }
