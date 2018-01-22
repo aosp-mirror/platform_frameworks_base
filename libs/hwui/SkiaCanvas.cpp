@@ -725,18 +725,8 @@ void SkiaCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& chunk, floa
     mCanvas->drawImageLattice(image.get(), lattice, dst, addFilter(paint, &tmpPaint, colorFilter));
 }
 
-void SkiaCanvas::drawAnimatedImage(SkAnimatedImage* image, float left, float top,
-                                   const SkPaint* paint) {
-    sk_sp<SkPicture> pic(image->newPictureSnapshot());
-    SkMatrix matrixStorage;
-    SkMatrix* matrix;
-    if (left == 0.0f && top == 0.0f) {
-        matrix = nullptr;
-    } else {
-        matrixStorage = SkMatrix::MakeTrans(left, top);
-        matrix = &matrixStorage;
-    }
-    mCanvas->drawPicture(pic.get(), matrix, paint);
+double SkiaCanvas::drawAnimatedImage(AnimatedImageDrawable* imgDrawable) {
+    return imgDrawable->drawStaging(mCanvas);
 }
 
 void SkiaCanvas::drawVectorDrawable(VectorDrawableRoot* vectorDrawable) {

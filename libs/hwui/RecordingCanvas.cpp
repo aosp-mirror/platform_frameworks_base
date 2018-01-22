@@ -495,9 +495,9 @@ void RecordingCanvas::drawNinePatch(Bitmap& bitmap, const android::Res_png_9patc
                                           refPaint(paint), refBitmap(bitmap), refPatch(&patch)));
 }
 
-void RecordingCanvas::drawAnimatedImage(SkAnimatedImage*, float left, float top,
-                                        const SkPaint*) {
+double RecordingCanvas::drawAnimatedImage(AnimatedImageDrawable*) {
     // Unimplemented
+    return 0;
 }
 
 // Text

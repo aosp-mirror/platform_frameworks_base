@@ -18,6 +18,7 @@
 
 #include <SkSurface.h>
 #include "FrameBuilder.h"
+#include "hwui/AnimatedImageDrawable.h"
 #include "renderthread/CanvasContext.h"
 #include "renderthread/IRenderPipeline.h"
 
@@ -53,6 +54,12 @@ public:
                      const Rect& contentDrawBounds, sk_sp<SkSurface> surface);
 
     std::vector<VectorDrawableRoot*>* getVectorDrawables() { return &mVectorDrawables; }
+
+    void scheduleDeferredUpdate(AnimatedImageDrawable* imageDrawable) {
+        mAnimatedImageDrawables.push_back(imageDrawable);
+    }
+
+    std::vector<AnimatedImageDrawable*>* getAnimatingImages() { return &mAnimatedImageDrawables; }
 
     static void destroyLayer(RenderNode* node);
 
@@ -136,6 +143,11 @@ private:
      *  populated by prepareTree with dirty VDs
      */
     std::vector<VectorDrawableRoot*> mVectorDrawables;
+
+    /**
+     * populated by prepareTree with images with active animations
+     */
+    std::vector<AnimatedImageDrawable*> mAnimatedImageDrawables;
 
     // Block of properties used only for debugging to record a SkPicture and save it in a file.
     /**

@@ -17,6 +17,7 @@
 #pragma once
 
 #include "DisplayList.h"
+#include "hwui/AnimatedImageDrawable.h"
 #include "GLFunctorDrawable.h"
 #include "RenderNodeDrawable.h"
 
@@ -144,6 +145,7 @@ public:
     std::deque<GLFunctorDrawable> mChildFunctors;
     std::vector<SkImage*> mMutableImages;
     std::vector<VectorDrawableRoot*> mVectorDrawables;
+    std::vector<AnimatedImageDrawable*> mAnimatedImages;
     SkLiteDL mDisplayList;
 
     // mProjectionReceiver points to a child node (stored in mChildNodes) that is as a projection

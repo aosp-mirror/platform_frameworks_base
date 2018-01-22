@@ -18,6 +18,7 @@
 #include "ImageDecoder.h"
 #include "core_jni_helpers.h"
 
+#include <hwui/AnimatedImageDrawable.h>
 #include <hwui/Canvas.h>
 #include <SkAndroidCodec.h>
 #include <SkAnimatedImage.h>
@@ -27,10 +28,6 @@
 
 using namespace android;
 
-struct AnimatedImageDrawable {
-    sk_sp<SkAnimatedImage> mDrawable;
-    SkPaint                mPaint;
-};
 
 // Note: jpostProcess holds a handle to the ImageDecoder.
 static jlong AnimatedImageDrawable_nCreate(JNIEnv* env, jobject /*clazz*/,
@@ -65,20 +62,22 @@ static jlong AnimatedImageDrawable_nCreate(JNIEnv* env, jobject /*clazz*/,
         picture = recorder.finishRecordingAsPicture();
     }
 
-    std::unique_ptr<AnimatedImageDrawable> drawable(new AnimatedImageDrawable);
-    drawable->mDrawable = SkAnimatedImage::Make(std::move(imageDecoder->mCodec),
-                scaledSize, subset, std::move(picture));
-    if (!drawable->mDrawable) {
+
+    sk_sp<SkAnimatedImage> animatedImg = SkAnimatedImage::Make(std::move(imageDecoder->mCodec),
+                                                               scaledSize, subset,
+                                                               std::move(picture));
+    if (!animatedImg) {
         doThrowIOE(env, "Failed to create drawable");
         return 0;
     }
-    drawable->mDrawable->start();
 
+    sk_sp<AnimatedImageDrawable> drawable(new AnimatedImageDrawable(animatedImg));
+    drawable->start();
     return reinterpret_cast<jlong>(drawable.release());
 }
 
 static void AnimatedImageDrawable_destruct(AnimatedImageDrawable* drawable) {
-    delete drawable;
+    SkSafeUnref(drawable);
 }
 
 static jlong AnimatedImageDrawable_nGetNativeFinalizer(JNIEnv* /*env*/, jobject /*clazz*/) {
@@ -86,45 +85,43 @@ static jlong AnimatedImageDrawable_nGetNativeFinalizer(JNIEnv* /*env*/, jobject 
 }
 
 static jlong AnimatedImageDrawable_nDraw(JNIEnv* env, jobject /*clazz*/, jlong nativePtr,
-                                         jlong canvasPtr, jlong msecs) {
+                                         jlong canvasPtr) {
     auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
-    double timeToNextUpdate = drawable->mDrawable->update(msecs);
     auto* canvas = reinterpret_cast<Canvas*>(canvasPtr);
-    canvas->drawAnimatedImage(drawable->mDrawable.get(), 0, 0, &drawable->mPaint);
-    return (jlong) timeToNextUpdate;
+    return (jlong) canvas->drawAnimatedImage(drawable);
 }
 
 static void AnimatedImageDrawable_nSetAlpha(JNIEnv* env, jobject /*clazz*/, jlong nativePtr,
                                             jint alpha) {
     auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
-    drawable->mPaint.setAlpha(alpha);
+    drawable->setStagingAlpha(alpha);
 }
 
 static jlong AnimatedImageDrawable_nGetAlpha(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
     auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
-    return drawable->mPaint.getAlpha();
+    return drawable->getStagingAlpha();
 }
 
 static void AnimatedImageDrawable_nSetColorFilter(JNIEnv* env, jobject /*clazz*/, jlong nativePtr,
                                                   jlong nativeFilter) {
     auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
     auto* filter = reinterpret_cast<SkColorFilter*>(nativeFilter);
-    drawable->mPaint.setColorFilter(sk_ref_sp(filter));
+    drawable->setStagingColorFilter(sk_ref_sp(filter));
 }
 
 static jboolean AnimatedImageDrawable_nIsRunning(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
     auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
-    return drawable->mDrawable->isRunning();
+    return drawable->isRunning();
 }
 
 static void AnimatedImageDrawable_nStart(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
     auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
-    drawable->mDrawable->start();
+    drawable->start();
 }
 
 static void AnimatedImageDrawable_nStop(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
     auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
-    drawable->mDrawable->stop();
+    drawable->stop();
 }
 
 static long AnimatedImageDrawable_nNativeByteSize(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
@@ -136,7 +133,7 @@ static long AnimatedImageDrawable_nNativeByteSize(JNIEnv* env, jobject /*clazz*/
 static const JNINativeMethod gAnimatedImageDrawableMethods[] = {
     { "nCreate",             "(JLandroid/graphics/ImageDecoder;IILandroid/graphics/Rect;)J", (void*) AnimatedImageDrawable_nCreate },
     { "nGetNativeFinalizer", "()J",                                                          (void*) AnimatedImageDrawable_nGetNativeFinalizer },
-    { "nDraw",               "(JJJ)J",                                                       (void*) AnimatedImageDrawable_nDraw },
+    { "nDraw",               "(JJ)J",                                                        (void*) AnimatedImageDrawable_nDraw },
     { "nSetAlpha",           "(JI)V",                                                        (void*) AnimatedImageDrawable_nSetAlpha },
     { "nGetAlpha",           "(J)I",                                                         (void*) AnimatedImageDrawable_nGetAlpha },
     { "nSetColorFilter",     "(JJ)V",                                                        (void*) AnimatedImageDrawable_nSetColorFilter },

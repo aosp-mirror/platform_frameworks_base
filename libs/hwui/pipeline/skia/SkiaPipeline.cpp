@@ -40,6 +40,7 @@ uint8_t SkiaPipeline::mSpotShadowAlpha = 0;
 Vector3 SkiaPipeline::mLightCenter = {FLT_MIN, FLT_MIN, FLT_MIN};
 
 SkiaPipeline::SkiaPipeline(RenderThread& thread) : mRenderThread(thread) {
+    mAnimatedImageDrawables.reserve(30);
     mVectorDrawables.reserve(30);
 }
 
@@ -326,6 +327,15 @@ void SkiaPipeline::renderFrame(const LayerUpdateQueue& layers, const SkRect& cli
 
     ATRACE_NAME("flush commands");
     surface->getCanvas()->flush();
+
+    // TODO move to another method
+    if (!mAnimatedImageDrawables.empty()) {
+        ATRACE_NAME("Update AnimatedImageDrawables");
+        for (auto animatedImage : mAnimatedImageDrawables) {
+            animatedImage->scheduleUpdate(getTaskManager());
+        }
+        mAnimatedImageDrawables.clear();
+    }
 }
 
 namespace {

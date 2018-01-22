@@ -246,6 +246,12 @@ void SkiaRecordingCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& ch
     }
 }
 
+double SkiaRecordingCanvas::drawAnimatedImage(AnimatedImageDrawable* animatedImage) {
+    drawDrawable(animatedImage);
+    mDisplayList->mAnimatedImages.push_back(animatedImage);
+    return 0;
+}
+
 };  // namespace skiapipeline
 };  // namespace uirenderer
 };  // namespace android
