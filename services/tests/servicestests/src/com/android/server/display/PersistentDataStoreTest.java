@@ -171,6 +171,23 @@ public class PersistentDataStoreTest {
                 newDataStore.getBrightnessConfiguration(0 /*userSerial*/));
     }
 
+    @Test
+    public void testNullBrightnessConfiguration() {
+        final float[] lux = { 0f, 10f };
+        final float[] nits = {1f, 100f };
+        final BrightnessConfiguration config = new BrightnessConfiguration.Builder(lux, nits)
+                .setDescription("a description")
+                .build();
+        mDataStore.loadIfNeeded();
+        assertNull(mDataStore.getBrightnessConfiguration(0 /*userSerial*/));
+
+        mDataStore.setBrightnessConfigurationForUser(config, 0, "packagename");
+        assertNotNull(mDataStore.getBrightnessConfiguration(0 /*userSerial*/));
+
+        mDataStore.setBrightnessConfigurationForUser(null, 0, "packagename");
+        assertNull(mDataStore.getBrightnessConfiguration(0 /*userSerial*/));
+    }
+
     public class TestInjector extends PersistentDataStore.Injector {
         private InputStream mReadStream;
         private OutputStream mWriteStream;

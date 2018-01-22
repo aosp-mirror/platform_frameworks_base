@@ -1849,7 +1849,6 @@ public final class DisplayManagerService extends SystemService {
             if (packageName != null && !validatePackageName(getCallingUid(), packageName)) {
                 packageName = null;
             }
-            Preconditions.checkNotNull(c);
             final long token = Binder.clearCallingIdentity();
             try {
                 setBrightnessConfigurationForUserInternal(c, userId, packageName);
