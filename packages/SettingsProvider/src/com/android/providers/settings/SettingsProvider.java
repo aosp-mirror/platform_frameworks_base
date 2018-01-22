@@ -3015,7 +3015,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 151;
+            private static final int SETTINGS_VERSION = 152;
 
             private final int mUserId;
 
@@ -3618,6 +3618,19 @@ public class SettingsProvider extends ContentProvider {
                             null, true, SettingsState.SYSTEM_PACKAGE_NAME);
 
                     currentVersion = 151;
+                }
+
+                if (currentVersion == 151) {
+                    // Version 152: Reset wifi wake available for upgrading users
+                    final SettingsState globalSettings = getGlobalSettingsLocked();
+                    final int defaultValue = getContext().getResources().getInteger(
+                            com.android.internal.R.integer.config_wifi_wakeup_available);
+                    globalSettings.insertSettingLocked(
+                            Settings.Global.WIFI_WAKEUP_AVAILABLE,
+                            String.valueOf(defaultValue),
+                            null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+
+                    currentVersion = 152;
                 }
 
                 // vXXX: Add new settings above this point.
