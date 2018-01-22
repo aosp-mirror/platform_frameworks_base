@@ -461,8 +461,20 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void onResize() {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
-            wc.onResize();
+            wc.onParentResize();
         }
+    }
+
+    void onParentResize() {
+        // In the case this container has specified its own bounds, a parent resize will not
+        // affect its bounds. Any relevant changes will be propagated through changes to the
+        // Configuration override.
+        if (hasOverrideBounds()) {
+            return;
+        }
+
+        // Default implementation is to treat as resize on self.
+        onResize();
     }
 
     void onMovedByResize() {

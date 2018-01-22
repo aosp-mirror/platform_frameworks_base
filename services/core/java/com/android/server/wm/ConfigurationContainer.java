@@ -219,6 +219,14 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     }
 
     /**
+     * Returns {@code true} if the {@link WindowConfiguration} in the override
+     * {@link Configuration} specifies bounds.
+     */
+    public boolean hasOverrideBounds() {
+        return !getOverrideBounds().isEmpty();
+    }
+
+    /**
      * Sets the passed in {@link Rect} to the current bounds.
      * @see {@link #getOverrideBounds()}.
      */
