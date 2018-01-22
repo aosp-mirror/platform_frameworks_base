@@ -33,7 +33,6 @@ import java.util.Random;
 public class RapporEncoder implements DifferentialPrivacyEncoder {
 
     // Hard-coded seed and secret for insecure encoder
-    private static final long INSECURE_RANDOM_SEED = 0x12345678L;
     private static final byte[] INSECURE_SECRET = new byte[]{
             (byte) 0xD7, (byte) 0x68, (byte) 0x99, (byte) 0x93,
             (byte) 0x94, (byte) 0x13, (byte) 0x53, (byte) 0x54,
@@ -66,8 +65,8 @@ public class RapporEncoder implements DifferentialPrivacyEncoder {
             // Use SecureRandom as random generator.
             random = sSecureRandom;
         } else {
-            // Hard-coded random generator, to have deterministic result.
-            random = new Random(INSECURE_RANDOM_SEED);
+            // To have deterministic result by hard coding encoder id as seed.
+            random = new Random((long) config.mEncoderId.hashCode());
             userSecret = INSECURE_SECRET;
         }
         mEncoder = new Encoder(random, null, null,

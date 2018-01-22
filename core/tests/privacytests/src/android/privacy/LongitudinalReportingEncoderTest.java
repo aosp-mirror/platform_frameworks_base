@@ -72,13 +72,13 @@ public class LongitudinalReportingEncoderTest {
         final LongitudinalReportingEncoder encoder =
                 LongitudinalReportingEncoder.createInsecureEncoderForTest(
                         config);
+        assertEquals(0, encoder.encodeBoolean(true)[0]);
+        assertEquals(0, encoder.encodeBoolean(true)[0]);
         assertEquals(1, encoder.encodeBoolean(true)[0]);
         assertEquals(0, encoder.encodeBoolean(true)[0]);
         assertEquals(1, encoder.encodeBoolean(true)[0]);
         assertEquals(1, encoder.encodeBoolean(true)[0]);
         assertEquals(1, encoder.encodeBoolean(true)[0]);
-        assertEquals(1, encoder.encodeBoolean(true)[0]);
-        assertEquals(0, encoder.encodeBoolean(true)[0]);
         assertEquals(1, encoder.encodeBoolean(true)[0]);
         assertEquals(1, encoder.encodeBoolean(true)[0]);
         assertEquals(1, encoder.encodeBoolean(true)[0]);
@@ -86,12 +86,12 @@ public class LongitudinalReportingEncoderTest {
         assertEquals(0, encoder.encodeBoolean(false)[0]);
         assertEquals(1, encoder.encodeBoolean(false)[0]);
         assertEquals(1, encoder.encodeBoolean(false)[0]);
-        assertEquals(0, encoder.encodeBoolean(false)[0]);
+        assertEquals(1, encoder.encodeBoolean(false)[0]);
         assertEquals(0, encoder.encodeBoolean(false)[0]);
         assertEquals(0, encoder.encodeBoolean(false)[0]);
         assertEquals(1, encoder.encodeBoolean(false)[0]);
         assertEquals(0, encoder.encodeBoolean(false)[0]);
-        assertEquals(0, encoder.encodeBoolean(false)[0]);
+        assertEquals(1, encoder.encodeBoolean(false)[0]);
         assertEquals(1, encoder.encodeBoolean(false)[0]);
 
         // Test if IRR returns original result when f = 0

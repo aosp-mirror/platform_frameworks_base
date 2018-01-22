@@ -77,9 +77,9 @@ public class PrivacyUtilsTests {
         assertEquals(6, result.size());
         assertTrue(result.get("C86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB48"));
         assertTrue(result.get("C86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB49"));
-        assertFalse(result.get("C86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB47"));
-        assertTrue(result.get("E86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB45"));
-        assertFalse(result.get("C86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB44"));
+        assertTrue(result.get("C86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB47"));
+        assertFalse(result.get("E86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB45"));
+        assertTrue(result.get("C86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB44"));
         assertTrue(result.get("B86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB43"));
     }
 
@@ -87,7 +87,7 @@ public class PrivacyUtilsTests {
     public void testPrivacyUtils_createInsecureDPEncoderForTest() throws Exception {
         DifferentialPrivacyEncoder encoder = PrivacyUtils.createInsecureDPEncoderForTest("foo");
         assertEquals(
-                "EncoderId: watchlist_encoder:foo, ProbabilityF: 0.400, ProbabilityP: 0.250, "
+                "EncoderId: watchlist_encoder:foo, ProbabilityF: 0.469, ProbabilityP: 0.280, "
                         + "ProbabilityQ: 1.000",
                 encoder.getConfig().toString());
         assertTrue(encoder.isInsecureEncoderForTest());
@@ -97,7 +97,7 @@ public class PrivacyUtilsTests {
     public void testPrivacyUtils_createSecureDPEncoderTest() throws Exception {
         DifferentialPrivacyEncoder encoder = PrivacyUtils.createSecureDPEncoder(TEST_SECRET, "foo");
         assertEquals(
-                "EncoderId: watchlist_encoder:foo, ProbabilityF: 0.400, ProbabilityP: 0.250, "
+                "EncoderId: watchlist_encoder:foo, ProbabilityF: 0.469, ProbabilityP: 0.280, "
                         + "ProbabilityQ: 1.000",
                 encoder.getConfig().toString());
         assertFalse(encoder.isInsecureEncoderForTest());
