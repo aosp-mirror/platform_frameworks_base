@@ -142,6 +142,7 @@ void RenderNodeDrawable::forceDraw(SkCanvas* canvas) {
 
 static bool layerNeedsPaint(const LayerProperties& properties, float alphaMultiplier,
                             SkPaint* paint) {
+    paint->setFilterQuality(kLow_SkFilterQuality);
     if (alphaMultiplier < 1.0f || properties.alpha() < 255 ||
         properties.xferMode() != SkBlendMode::kSrcOver || properties.colorFilter() != nullptr) {
         paint->setAlpha(properties.alpha() * alphaMultiplier);
@@ -200,18 +201,15 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
         // composing a hardware layer
         if (renderNode->getLayerSurface() && mComposeLayer) {
             SkASSERT(properties.effectiveLayerType() == LayerType::RenderLayer);
-            SkPaint* paint = nullptr;
-            SkPaint tmpPaint;
-            if (layerNeedsPaint(layerProperties, alphaMultiplier, &tmpPaint)) {
-                paint = &tmpPaint;
-            }
+            SkPaint paint;
+            layerNeedsPaint(layerProperties, alphaMultiplier, &paint);
 
             // surfaces for layers are created on LAYER_SIZE boundaries (which are >= layer size) so
             // we need to restrict the portion of the surface drawn to the size of the renderNode.
             SkASSERT(renderNode->getLayerSurface()->width() >= bounds.width());
             SkASSERT(renderNode->getLayerSurface()->height() >= bounds.height());
             canvas->drawImageRect(renderNode->getLayerSurface()->makeImageSnapshot().get(),
-                                  bounds, bounds, paint);
+                    bounds, bounds, &paint);
 
             if (!renderNode->getSkiaLayer()->hasRenderedSinceRepaint) {
                 renderNode->getSkiaLayer()->hasRenderedSinceRepaint = true;
