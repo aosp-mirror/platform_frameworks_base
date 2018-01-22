@@ -1586,8 +1586,10 @@ public class LockSettingsService extends ILockSettings.Stub {
                 userId, progressCallback);
         // The user employs synthetic password based credential.
         if (response != null) {
-            mRecoverableKeyStoreManager.lockScreenSecretAvailable(credentialType, credential,
-                    userId);
+            if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
+                mRecoverableKeyStoreManager.lockScreenSecretAvailable(credentialType, credential,
+                        userId);
+            }
             return response;
         }
 
