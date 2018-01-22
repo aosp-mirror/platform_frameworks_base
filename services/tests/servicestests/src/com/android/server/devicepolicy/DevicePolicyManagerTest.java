@@ -50,6 +50,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 
 import android.Manifest.permission;
+import android.annotation.RawRes;
 import android.app.Activity;
 import android.app.Notification;
 import android.app.admin.DeviceAdminReceiver;
@@ -93,10 +94,13 @@ import com.android.server.pm.UserRestrictionsUtils;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -202,9 +206,14 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         setUpUserManager();
     }
 
+    private TransferOwnershipMetadataManager getMockTransferMetadataManager() {
+        return dpms.mTransferOwnershipMetadataManager;
+    }
+
     @Override
     protected void tearDown() throws Exception {
         flushTasks();
+        getMockTransferMetadataManager().deleteMetadataFile();
         super.tearDown();
     }
 
@@ -4833,6 +4842,176 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertAttestationFlags(ID_TYPE_SERIAL | ID_TYPE_IMEI | ID_TYPE_MEID | ID_TYPE_BASE_INFO,
                 new int[] {AttestationUtils.ID_TYPE_IMEI, AttestationUtils.ID_TYPE_SERIAL,
                     AttestationUtils.ID_TYPE_MEID});
+    }
+
+    public void testRevertDeviceOwnership_noMetadataFile() throws Exception {
+        setDeviceOwner();
+        initializeDpms();
+        assertFalse(getMockTransferMetadataManager().metadataFileExists());
+        assertTrue(dpms.isDeviceOwner(admin1, UserHandle.USER_SYSTEM));
+        assertTrue(dpms.isAdminActive(admin1, UserHandle.USER_SYSTEM));
+    }
+
+    public void testRevertDeviceOwnership_adminAndDeviceMigrated() throws Exception {
+        DpmTestUtils.writeInputStreamToFile(
+                getRawStream(com.android.frameworks.servicestests.R.raw.active_admin_migrated),
+                getDeviceOwnerPoliciesFile());
+        DpmTestUtils.writeInputStreamToFile(
+                getRawStream(com.android.frameworks.servicestests.R.raw.device_owner_migrated),
+                getDeviceOwnerFile());
+        assertDeviceOwnershipRevertedWithFakeTransferMetadata();
+    }
+
+    public void testRevertDeviceOwnership_deviceNotMigrated()
+            throws Exception {
+        DpmTestUtils.writeInputStreamToFile(
+                getRawStream(com.android.frameworks.servicestests.R.raw.active_admin_migrated),
+                getDeviceOwnerPoliciesFile());
+        DpmTestUtils.writeInputStreamToFile(
+                getRawStream(com.android.frameworks.servicestests.R.raw.device_owner_not_migrated),
+                getDeviceOwnerFile());
+        assertDeviceOwnershipRevertedWithFakeTransferMetadata();
+    }
+
+    public void testRevertDeviceOwnership_adminAndDeviceNotMigrated()
+            throws Exception {
+        DpmTestUtils.writeInputStreamToFile(
+                getRawStream(com.android.frameworks.servicestests.R.raw.active_admin_not_migrated),
+                getDeviceOwnerPoliciesFile());
+        DpmTestUtils.writeInputStreamToFile(
+                getRawStream(com.android.frameworks.servicestests.R.raw.device_owner_not_migrated),
+                getDeviceOwnerFile());
+        assertDeviceOwnershipRevertedWithFakeTransferMetadata();
+    }
+
+    public void testRevertProfileOwnership_noMetadataFile() throws Exception {
+        setupProfileOwner();
+        initializeDpms();
+        assertFalse(getMockTransferMetadataManager().metadataFileExists());
+        assertTrue(dpms.isProfileOwner(admin1, DpmMockContext.CALLER_USER_HANDLE));
+        assertTrue(dpms.isAdminActive(admin1, DpmMockContext.CALLER_USER_HANDLE));
+        UserHandle userHandle = UserHandle.of(DpmMockContext.CALLER_USER_HANDLE);
+    }
+
+    public void testRevertProfileOwnership_adminAndProfileMigrated() throws Exception {
+        getServices().addUser(DpmMockContext.CALLER_USER_HANDLE, UserInfo.FLAG_MANAGED_PROFILE,
+                UserHandle.USER_SYSTEM);
+        DpmTestUtils.writeInputStreamToFile(
+                getRawStream(com.android.frameworks.servicestests.R.raw.active_admin_migrated),
+                getProfileOwnerPoliciesFile());
+        DpmTestUtils.writeInputStreamToFile(
+                getRawStream(com.android.frameworks.servicestests.R.raw.profile_owner_migrated),
+                getProfileOwnerFile());
+        assertProfileOwnershipRevertedWithFakeTransferMetadata();
+    }
+
+    public void testRevertProfileOwnership_profileNotMigrated() throws Exception {
+        getServices().addUser(DpmMockContext.CALLER_USER_HANDLE, UserInfo.FLAG_MANAGED_PROFILE,
+                UserHandle.USER_SYSTEM);
+        DpmTestUtils.writeInputStreamToFile(
+                getRawStream(com.android.frameworks.servicestests.R.raw.active_admin_migrated),
+                getProfileOwnerPoliciesFile());
+        DpmTestUtils.writeInputStreamToFile(
+                getRawStream(com.android.frameworks.servicestests.R.raw.profile_owner_not_migrated),
+                getProfileOwnerFile());
+        assertProfileOwnershipRevertedWithFakeTransferMetadata();
+    }
+
+    public void testRevertProfileOwnership_adminAndProfileNotMigrated() throws Exception {
+        getServices().addUser(DpmMockContext.CALLER_USER_HANDLE, UserInfo.FLAG_MANAGED_PROFILE,
+                UserHandle.USER_SYSTEM);
+        DpmTestUtils.writeInputStreamToFile(
+                getRawStream(com.android.frameworks.servicestests.R.raw.active_admin_not_migrated),
+                getProfileOwnerPoliciesFile());
+        DpmTestUtils.writeInputStreamToFile(
+                getRawStream(com.android.frameworks.servicestests.R.raw.profile_owner_not_migrated),
+                getProfileOwnerFile());
+        assertProfileOwnershipRevertedWithFakeTransferMetadata();
+    }
+
+    // admin1 is the outgoing DPC, adminAnotherPakcage is the incoming one.
+    private void assertDeviceOwnershipRevertedWithFakeTransferMetadata() throws Exception {
+        writeFakeTransferMetadataFile(UserHandle.USER_SYSTEM,
+                TransferOwnershipMetadataManager.ADMIN_TYPE_DEVICE_OWNER);
+
+        final long ident = mServiceContext.binder.clearCallingIdentity();
+        setUpPackageManagerForAdmin(admin1, DpmMockContext.CALLER_SYSTEM_USER_UID);
+        setUpPackageManagerForFakeAdmin(adminAnotherPackage,
+                DpmMockContext.CALLER_SYSTEM_USER_UID, admin1);
+        // To simulate a reboot, we just reinitialize dpms and call systemReady
+        initializeDpms();
+
+        assertTrue(dpm.isDeviceOwnerApp(admin1.getPackageName()));
+        assertFalse(dpm.isDeviceOwnerApp(adminAnotherPackage.getPackageName()));
+        assertFalse(dpm.isAdminActive(adminAnotherPackage));
+        assertTrue(dpm.isAdminActive(admin1));
+        assertTrue(dpm.isDeviceOwnerAppOnCallingUser(admin1.getPackageName()));
+        assertEquals(admin1, dpm.getDeviceOwnerComponentOnCallingUser());
+
+        assertTrue(dpm.isDeviceOwnerAppOnAnyUser(admin1.getPackageName()));
+        assertEquals(admin1, dpm.getDeviceOwnerComponentOnAnyUser());
+        assertEquals(UserHandle.USER_SYSTEM, dpm.getDeviceOwnerUserId());
+        assertFalse(getMockTransferMetadataManager().metadataFileExists());
+
+        mServiceContext.binder.restoreCallingIdentity(ident);
+    }
+
+    // admin1 is the outgoing DPC, adminAnotherPakcage is the incoming one.
+    private void assertProfileOwnershipRevertedWithFakeTransferMetadata() throws Exception {
+        writeFakeTransferMetadataFile(DpmMockContext.CALLER_USER_HANDLE,
+                TransferOwnershipMetadataManager.ADMIN_TYPE_PROFILE_OWNER);
+
+        int uid = UserHandle.getUid(DpmMockContext.CALLER_USER_HANDLE,
+                DpmMockContext.CALLER_SYSTEM_USER_UID);
+        setUpPackageManagerForAdmin(admin1, uid);
+        setUpPackageManagerForFakeAdmin(adminAnotherPackage, uid, admin1);
+        // To simulate a reboot, we just reinitialize dpms and call systemReady
+        initializeDpms();
+
+        assertTrue(dpm.isProfileOwnerApp(admin1.getPackageName()));
+        assertTrue(dpm.isAdminActive(admin1));
+        assertFalse(dpm.isProfileOwnerApp(adminAnotherPackage.getPackageName()));
+        assertFalse(dpm.isAdminActive(adminAnotherPackage));
+        assertEquals(dpm.getProfileOwnerAsUser(DpmMockContext.CALLER_USER_HANDLE), admin1);
+        assertFalse(getMockTransferMetadataManager().metadataFileExists());
+    }
+
+    private void writeFakeTransferMetadataFile(int callerUserHandle, String adminType) {
+        TransferOwnershipMetadataManager metadataManager = getMockTransferMetadataManager();
+        metadataManager.deleteMetadataFile();
+
+        final TransferOwnershipMetadataManager.Metadata metadata =
+                new TransferOwnershipMetadataManager.Metadata(
+                        admin1.flattenToString(), adminAnotherPackage.flattenToString(),
+                        callerUserHandle,
+                        adminType);
+        metadataManager.saveMetadataFile(metadata);
+    }
+
+    private File getDeviceOwnerFile() {
+        return dpms.mOwners.getDeviceOwnerFile();
+    }
+
+    private File getProfileOwnerFile() {
+        return dpms.mOwners.getProfileOwnerFile(DpmMockContext.CALLER_USER_HANDLE);
+    }
+
+    private File getProfileOwnerPoliciesFile() {
+        File parentDir = dpms.mMockInjector.environmentGetUserSystemDirectory(
+                DpmMockContext.CALLER_USER_HANDLE);
+        return getPoliciesFile(parentDir);
+    }
+
+    private File getDeviceOwnerPoliciesFile() {
+        return getPoliciesFile(getServices().systemUserDataDir);
+    }
+
+    private File getPoliciesFile(File parentDir) {
+        return new File(parentDir, "device_policies.xml");
+    }
+
+    private InputStream getRawStream(@RawRes int id) {
+        return mRealTestContext.getResources().openRawResource(id);
     }
 
     private void setUserSetupCompleteForUser(boolean isUserSetupComplete, int userhandle) {
