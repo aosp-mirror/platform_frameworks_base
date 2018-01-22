@@ -89,7 +89,7 @@ import java.util.concurrent.CountDownLatch;
  */
 public abstract class SliceProvider extends ContentProvider {
     /**
-     * This is the Android platform's MIME type for a slice: URI
+     * This is the Android platform's MIME type for a URI
      * containing a slice implemented through {@link SliceProvider}.
      */
     public static final String SLICE_TYPE = "vnd.android.slice";
