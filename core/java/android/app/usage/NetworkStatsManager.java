@@ -131,6 +131,17 @@ public class NetworkStatsManager {
         }
     }
 
+    /** @hide */
+    public Bucket querySummaryForDevice(NetworkTemplate template,
+            long startTime, long endTime) throws SecurityException, RemoteException {
+        Bucket bucket = null;
+        NetworkStats stats = new NetworkStats(mContext, template, mFlags, startTime, endTime);
+        bucket = stats.getDeviceSummaryForNetwork();
+
+        stats.close();
+        return bucket;
+    }
+
     /**
      * Query network usage statistics summaries. Result is summarised data usage for the whole
      * device. Result is a single Bucket aggregated over time, state, uid, tag, metered, and
@@ -163,12 +174,7 @@ public class NetworkStatsManager {
             return null;
         }
 
-        Bucket bucket = null;
-        NetworkStats stats = new NetworkStats(mContext, template, mFlags, startTime, endTime);
-        bucket = stats.getDeviceSummaryForNetwork();
-
-        stats.close();
-        return bucket;
+        return querySummaryForDevice(template, startTime, endTime);
     }
 
     /**
@@ -340,6 +346,37 @@ public class NetworkStatsManager {
         return result;
     }
 
+    /** @hide */
+    public void registerUsageCallback(NetworkTemplate template, int networkType,
+            long thresholdBytes, UsageCallback callback, @Nullable Handler handler) {
+        checkNotNull(callback, "UsageCallback cannot be null");
+
+        final Looper looper;
+        if (handler == null) {
+            looper = Looper.myLooper();
+        } else {
+            looper = handler.getLooper();
+        }
+
+        DataUsageRequest request = new DataUsageRequest(DataUsageRequest.REQUEST_ID_UNSET,
+                template, thresholdBytes);
+        try {
+            CallbackHandler callbackHandler = new CallbackHandler(looper, networkType,
+                    template.getSubscriberId(), callback);
+            callback.request = mService.registerUsageCallback(
+                    mContext.getOpPackageName(), request, new Messenger(callbackHandler),
+                    new Binder());
+            if (DBG) Log.d(TAG, "registerUsageCallback returned " + callback.request);
+
+            if (callback.request == null) {
+                Log.e(TAG, "Request from callback is null; should not happen");
+            }
+        } catch (RemoteException e) {
+            if (DBG) Log.d(TAG, "Remote exception when registering callback");
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Registers to receive notifications about data usage on specified networks.
      *
@@ -368,15 +405,7 @@ public class NetworkStatsManager {
      */
     public void registerUsageCallback(int networkType, String subscriberId, long thresholdBytes,
             UsageCallback callback, @Nullable Handler handler) {
-        checkNotNull(callback, "UsageCallback cannot be null");
-
-        final Looper looper;
-        if (handler == null) {
-            looper = Looper.myLooper();
-        } else {
-            looper = handler.getLooper();
-        }
-
+        NetworkTemplate template = createTemplate(networkType, subscriberId);
         if (DBG) {
             Log.d(TAG, "registerUsageCallback called with: {"
                 + " networkType=" + networkType
@@ -384,25 +413,7 @@ public class NetworkStatsManager {
                 + " thresholdBytes=" + thresholdBytes
                 + " }");
         }
-
-        NetworkTemplate template = createTemplate(networkType, subscriberId);
-        DataUsageRequest request = new DataUsageRequest(DataUsageRequest.REQUEST_ID_UNSET,
-                template, thresholdBytes);
-        try {
-            CallbackHandler callbackHandler = new CallbackHandler(looper, networkType,
-                    subscriberId, callback);
-            callback.request = mService.registerUsageCallback(
-                    mContext.getOpPackageName(), request, new Messenger(callbackHandler),
-                    new Binder());
-            if (DBG) Log.d(TAG, "registerUsageCallback returned " + callback.request);
-
-            if (callback.request == null) {
-                Log.e(TAG, "Request from callback is null; should not happen");
-            }
-        } catch (RemoteException e) {
-            if (DBG) Log.d(TAG, "Remote exception when registering callback");
-            throw e.rethrowFromSystemServer();
-        }
+        registerUsageCallback(template, networkType, thresholdBytes, callback, handler);
     }
 
     /**
