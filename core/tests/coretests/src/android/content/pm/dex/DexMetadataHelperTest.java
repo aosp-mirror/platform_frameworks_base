@@ -24,7 +24,9 @@ import static org.junit.Assert.fail;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
+import android.content.pm.PackageParser.ApkLite;
 import android.content.pm.PackageParser.Package;
+import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.os.FileUtils;
 import android.support.test.InstrumentationRegistry;
@@ -34,6 +36,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import com.android.frameworks.coretests.R;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,6 +48,7 @@ import java.util.zip.ZipOutputStream;
 import libcore.io.IoUtils;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -199,6 +203,29 @@ public class DexMetadataHelperTest {
         } catch (IllegalStateException e) {
             // expected.
         }
+    }
+
+    @Test
+    public void testPackageSizeWithDmFile()
+            throws IOException, PackageParserException {
+        copyApkToToTmpDir("install_split_base.apk", R.raw.install_split_base);
+        File dm = createDexMetadataFile("install_split_base.apk");
+        PackageParser.PackageLite pkg = new PackageParser().parsePackageLite(mTmpDir,
+                0 /* flags */);
+
+        Assert.assertEquals(dm.length(), DexMetadataHelper.getPackageDexMetadataSize(pkg));
+    }
+
+    // This simulates the 'adb shell pm install' flow.
+    @Test
+    public void testPackageSizeWithPartialPackageLite() throws IOException, PackageParserException {
+        File base = copyApkToToTmpDir("install_split_base", R.raw.install_split_base);
+        File dm = createDexMetadataFile("install_split_base.apk");
+        ApkLite baseApk = PackageParser.parseApkLite(base, 0);
+        PackageLite pkgLite = new PackageLite(null, baseApk, null, null, null, null,
+                null, null);
+        Assert.assertEquals(dm.length(), DexMetadataHelper.getPackageDexMetadataSize(pkgLite));
+
     }
 
     private static boolean isDexMetadataForApk(String dmaPath, String apkPath) {
