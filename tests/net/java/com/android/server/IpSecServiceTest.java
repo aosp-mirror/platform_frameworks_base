@@ -412,9 +412,9 @@ public class IpSecServiceTest {
     }
 
     @Test
-    public void testDeleteInvalidTransportModeTransform() throws Exception {
+    public void testDeleteInvalidTransform() throws Exception {
         try {
-            mIpSecService.deleteTransportModeTransform(1);
+            mIpSecService.deleteTransform(1);
             fail("IllegalArgumentException not thrown");
         } catch (IllegalArgumentException e) {
         }
