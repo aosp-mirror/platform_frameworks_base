@@ -1054,6 +1054,14 @@ public final class JobStatus {
         if ((constraints&CONSTRAINT_DEVICE_NOT_DOZING) != 0) {
             pw.print(" DEVICE_NOT_DOZING");
         }
+        if ((constraints&CONSTRAINT_BACKGROUND_NOT_RESTRICTED) != 0) {
+            pw.print(" BACKGROUND_NOT_RESTRICTED");
+        }
+        if (constraints != 0) {
+            pw.print(" [0x");
+            pw.print(Integer.toHexString(constraints));
+            pw.print("]");
+        }
     }
 
     /** Writes constraints to the given repeating proto field. */
