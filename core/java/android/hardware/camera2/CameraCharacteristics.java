@@ -22,9 +22,11 @@ import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
 import android.hardware.camera2.params.SessionConfiguration;
+import android.hardware.camera2.utils.ArrayUtils;
 import android.hardware.camera2.utils.TypeReference;
 import android.util.Rational;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -405,6 +407,47 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
         List<TKey> staticKeyList = getKeys(
                 metadataClass, keyClass, /*instance*/null, filterTags);
         return Collections.unmodifiableList(staticKeyList);
+    }
+
+    /**
+     * Returns the list of physical camera ids that this logical {@link CameraDevice} is
+     * made up of.
+     *
+     * <p>A camera device is a logical camera if it has
+     * REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA capability. If the camera device
+     * doesn't have the capability, the return value will be an empty list. </p>
+     *
+     * <p>The list returned is not modifiable, so any attempts to modify it will throw
+     * a {@code UnsupportedOperationException}.</p>
+     *
+     * <p>Each physical camera id is only listed once in the list. The order of the keys
+     * is undefined.</p>
+     *
+     * @return List of physical camera ids for this logical camera device.
+     */
+    @NonNull
+    public List<String> getPhysicalCameraIds() {
+        int[] availableCapabilities = get(REQUEST_AVAILABLE_CAPABILITIES);
+        if (availableCapabilities == null) {
+            throw new AssertionError("android.request.availableCapabilities must be non-null "
+                        + "in the characteristics");
+        }
+
+        if (!ArrayUtils.contains(availableCapabilities,
+                REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA)) {
+            return Collections.emptyList();
+        }
+        byte[] physicalCamIds = get(LOGICAL_MULTI_CAMERA_PHYSICAL_IDS);
+
+        String physicalCamIdString = null;
+        try {
+            physicalCamIdString = new String(physicalCamIds, "UTF-8");
+        } catch (java.io.UnsupportedEncodingException e) {
+            throw new AssertionError("android.logicalCam.physicalIds must be UTF-8 string");
+        }
+        String[] physicalCameraIdList = physicalCamIdString.split("\0");
+
+        return Collections.unmodifiableList(Arrays.asList(physicalCameraIdList));
     }
 
     /*@O~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
@@ -1579,6 +1622,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT DEPTH_OUTPUT}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO CONSTRAINED_HIGH_SPEED_VIDEO}</li>
      *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_MOTION_TRACKING MOTION_TRACKING}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA LOGICAL_MULTI_CAMERA}</li>
      * </ul></p>
      * <p>This key is available on all devices.</p>
      *
@@ -1594,6 +1638,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #REQUEST_AVAILABLE_CAPABILITIES_DEPTH_OUTPUT
      * @see #REQUEST_AVAILABLE_CAPABILITIES_CONSTRAINED_HIGH_SPEED_VIDEO
      * @see #REQUEST_AVAILABLE_CAPABILITIES_MOTION_TRACKING
+     * @see #REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA
      */
     @PublicKey
     public static final Key<int[]> REQUEST_AVAILABLE_CAPABILITIES =
@@ -3168,6 +3213,54 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @PublicKey
     public static final Key<Boolean> DEPTH_DEPTH_IS_EXCLUSIVE =
             new Key<Boolean>("android.depth.depthIsExclusive", boolean.class);
+
+    /**
+     * <p>String containing the ids of the underlying physical cameras.</p>
+     * <p>For a logical camera, this is concatenation of all underlying physical camera ids.
+     * The null terminator for physical camera id must be preserved so that the whole string
+     * can be tokenized using '\0' to generate list of physical camera ids.</p>
+     * <p>For example, if the physical camera ids of the logical camera are "2" and "3", the
+     * value of this tag will be ['2', '\0', '3', '\0'].</p>
+     * <p>The number of physical camera ids must be no less than 2.</p>
+     * <p><b>Units</b>: UTF-8 null-terminated string</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @hide
+     */
+    public static final Key<byte[]> LOGICAL_MULTI_CAMERA_PHYSICAL_IDS =
+            new Key<byte[]>("android.logicalMultiCamera.physicalIds", byte[].class);
+
+    /**
+     * <p>The accuracy of frame timestamp synchronization between physical cameras</p>
+     * <p>The accuracy of the frame timestamp synchronization determines the physical cameras'
+     * ability to start exposure at the same time. If the sensorSyncType is CALIBRATED,
+     * the physical camera sensors usually run in master-slave mode so that their shutter
+     * time is synchronized. For APPROXIMATE sensorSyncType, the camera sensors usually run in
+     * master-master mode, and there could be offset between their start of exposure.</p>
+     * <p>In both cases, all images generated for a particular capture request still carry the same
+     * timestamps, so that they can be used to look up the matching frame number and
+     * onCaptureStarted callback.</p>
+     * <p><b>Possible values:</b>
+     * <ul>
+     *   <li>{@link #LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE_APPROXIMATE APPROXIMATE}</li>
+     *   <li>{@link #LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE_CALIBRATED CALIBRATED}</li>
+     * </ul></p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * <p><b>Limited capability</b> -
+     * Present on all camera devices that report being at least {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL_LIMITED HARDWARE_LEVEL_LIMITED} devices in the
+     * {@link CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL android.info.supportedHardwareLevel} key</p>
+     *
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     * @see #LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE_APPROXIMATE
+     * @see #LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE_CALIBRATED
+     */
+    @PublicKey
+    public static final Key<Integer> LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE =
+            new Key<Integer>("android.logicalMultiCamera.sensorSyncType", int.class);
 
     /*~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~@~
      * End generated code
