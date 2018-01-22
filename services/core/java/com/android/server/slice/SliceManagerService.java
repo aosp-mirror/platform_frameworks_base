@@ -16,11 +16,15 @@
 
 package com.android.server.slice;
 
+import static android.content.ContentProvider.getUriWithoutUserId;
 import static android.content.ContentProvider.getUserIdFromUri;
 import static android.content.ContentProvider.maybeAddUserId;
 
 import android.Manifest.permission;
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.ContentProviderHolder;
+import android.app.IActivityManager;
 import android.app.slice.ISliceListener;
 import android.app.slice.ISliceManager;
 import android.app.slice.SliceManager;
@@ -35,6 +39,7 @@ import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
@@ -244,13 +249,45 @@ public class SliceManagerService extends ISliceManager.Stub {
         return mHandler;
     }
 
-    private void enforceAccess(String pkg, Uri uri) {
-        if (!hasFullSliceAccess(pkg, Binder.getCallingUid())) {
-            getContext().enforceUriPermission(uri, Binder.getCallingPid(), Binder.getCallingUid(),
-                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
-                    "Slice binding requires permission to the Uri");
-        }
+    private void enforceAccess(String pkg, Uri uri) throws RemoteException {
         int user = Binder.getCallingUserHandle().getIdentifier();
+        // Check for default launcher/assistant.
+        if (!hasFullSliceAccess(pkg, Binder.getCallingUid())) {
+            try {
+                // Also allow things with uri access.
+                getContext().enforceUriPermission(uri, Binder.getCallingPid(),
+                        Binder.getCallingUid(),
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                        "Slice binding requires permission to the Uri");
+            } catch (SecurityException e) {
+                // Last fallback (if the calling app owns the authority, then it can have access).
+                long ident = Binder.clearCallingIdentity();
+                try {
+                    IBinder token = new Binder();
+                    IActivityManager activityManager = ActivityManager.getService();
+                    ContentProviderHolder holder = null;
+                    String providerName = getUriWithoutUserId(uri).getAuthority();
+                    try {
+                        holder = activityManager.getContentProviderExternal(
+                                providerName, getUserIdFromUri(uri, user), token);
+                        if (holder == null || holder.info == null
+                                || !Objects.equals(holder.info.packageName, pkg)) {
+                            // No more fallbacks, no access.
+                            throw e;
+                        }
+                    } finally {
+                        if (holder != null && holder.provider != null) {
+                            activityManager.removeContentProviderExternal(providerName, token);
+                        }
+                    }
+                } finally {
+                    // I know, the double finally seems ugly, but seems safest for the identity.
+                    Binder.restoreCallingIdentity(ident);
+                }
+            }
+        }
+        // Lastly check for any multi-userness. Any return statements above here will break this
+        // important check.
         if (getUserIdFromUri(uri, user) != user) {
             getContext().enforceCallingOrSelfPermission(permission.INTERACT_ACROSS_USERS_FULL,
                     "Slice interaction across users requires INTERACT_ACROSS_USERS_FULL");

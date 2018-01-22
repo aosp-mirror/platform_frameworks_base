@@ -29,8 +29,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.systemui.FontSizeUtils;
@@ -40,11 +40,10 @@ import com.android.systemui.qs.AutoSizingList;
 /**
  * Limited height list of devices.
  */
-public class OutputChooserLayout extends FrameLayout {
+public class OutputChooserLayout extends LinearLayout {
     private static final String TAG = "OutputChooserLayout";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private final int mQsDetailIconOverlaySize;
     private final Context mContext;
     private final H mHandler = new H();
     private final Adapter mAdapter = new Adapter();
@@ -55,6 +54,7 @@ public class OutputChooserLayout extends FrameLayout {
     private AutoSizingList mItemList;
     private View mEmpty;
     private TextView mEmptyText;
+    private TextView mTitle;
 
     private Item[] mItems;
 
@@ -62,8 +62,6 @@ public class OutputChooserLayout extends FrameLayout {
         super(context, attrs);
         mContext = context;
         mTag = TAG;
-        mQsDetailIconOverlaySize = (int) getResources().getDimension(
-                R.dimen.qs_detail_icon_overlay_size);
     }
 
     @Override
@@ -74,7 +72,8 @@ public class OutputChooserLayout extends FrameLayout {
         mItemList.setAdapter(mAdapter);
         mEmpty = findViewById(android.R.id.empty);
         mEmpty.setVisibility(GONE);
-        mEmptyText = mEmpty.findViewById(android.R.id.title);
+        mEmptyText = mEmpty.findViewById(R.id.empty_text);
+        mTitle = findViewById(R.id.title);
     }
 
     @Override
@@ -84,17 +83,21 @@ public class OutputChooserLayout extends FrameLayout {
         int count = mItemList.getChildCount();
         for (int i = 0; i < count; i++) {
             View item = mItemList.getChildAt(i);
-            FontSizeUtils.updateFontSize(item, android.R.id.title,
+            FontSizeUtils.updateFontSize(item, R.id.empty_text,
                     R.dimen.qs_detail_item_primary_text_size);
             FontSizeUtils.updateFontSize(item, android.R.id.summary,
                     R.dimen.qs_detail_item_secondary_text_size);
+            FontSizeUtils.updateFontSize(item, android.R.id.title,
+                    R.dimen.qs_detail_header_text_size);
         }
     }
 
+    public void setTitle(int title) {
+            mTitle.setText(title);
+    }
+
     public void setEmptyState(String text) {
-        mEmpty.post(() -> {
-            mEmptyText.setText(text);
-        });
+        mEmptyText.setText(text);
     }
 
     @Override
@@ -175,11 +178,6 @@ public class OutputChooserLayout extends FrameLayout {
                 iv.setImageDrawable(item.icon);
             } else {
                 iv.setImageResource(item.iconResId);
-            }
-            iv.getOverlay().clear();
-            if (item.overlay != null) {
-                item.overlay.setBounds(0, 0, mQsDetailIconOverlaySize, mQsDetailIconOverlaySize);
-                iv.getOverlay().add(item.overlay);
             }
             final TextView title = view.findViewById(android.R.id.title);
             title.setText(item.line1);

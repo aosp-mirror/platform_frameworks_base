@@ -47,6 +47,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.provider.Settings.Global;
+import android.support.v7.media.MediaRouter;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -858,7 +859,8 @@ public class VolumeDialogImpl implements VolumeDialog {
             if (mOutputChooserDialog != null) {
                 return;
             }
-            mOutputChooserDialog = new OutputChooserDialog(mContext) {
+            mOutputChooserDialog = new OutputChooserDialog(mContext,
+                    new MediaRouterWrapper(MediaRouter.getInstance(mContext))) {
                 @Override
                 protected void cleanUp() {
                     synchronized (mOutputChooserLock) {
