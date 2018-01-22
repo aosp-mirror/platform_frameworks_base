@@ -21,7 +21,6 @@ option java_outer_classname = "IncidentProtoMetadata";
 import "frameworks/base/core/proto/android/os/batterytype.proto";
 import "frameworks/base/core/proto/android/os/cpufreq.proto";
 import "frameworks/base/core/proto/android/os/cpuinfo.proto";
-import "frameworks/base/core/proto/android/os/incidentheader.proto";
 import "frameworks/base/core/proto/android/os/kernelwake.proto";
 import "frameworks/base/core/proto/android/os/pagetypeinfo.proto";
 import "frameworks/base/core/proto/android/os/procrank.proto";
@@ -46,6 +45,7 @@ import "frameworks/base/core/proto/android/service/print.proto";
 import "frameworks/base/core/proto/android/service/procstats.proto";
 import "frameworks/base/core/proto/android/util/event_log_tags.proto";
 import "frameworks/base/core/proto/android/util/log.proto";
+import "frameworks/base/libs/incident/proto/android/os/header.proto";
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
 import "frameworks/base/libs/incident/proto/android/section.proto";
 
