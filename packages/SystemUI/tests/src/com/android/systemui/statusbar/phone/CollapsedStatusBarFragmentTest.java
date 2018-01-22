@@ -74,6 +74,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         assertEquals(View.VISIBLE, mFragment.getView().findViewById(R.id.system_icon_area)
                 .getVisibility());
+        assertEquals(View.VISIBLE, mFragment.getView().findViewById(R.id.clock)
+                .getVisibility());
     }
 
     @Test
@@ -87,10 +89,14 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         assertEquals(View.INVISIBLE, mFragment.getView().findViewById(R.id.system_icon_area)
                 .getVisibility());
+        assertEquals(View.INVISIBLE, mFragment.getView().findViewById(R.id.clock)
+                .getVisibility());
 
         fragment.disable(0, 0, false);
 
         assertEquals(View.VISIBLE, mFragment.getView().findViewById(R.id.system_icon_area)
+                .getVisibility());
+        assertEquals(View.VISIBLE, mFragment.getView().findViewById(R.id.clock)
                 .getVisibility());
     }
 

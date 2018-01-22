@@ -62,7 +62,7 @@ public interface StatusBarIconController {
     }
 
     /**
-     * Version of ViewGroup that observers state from the DarkIconDispatcher.
+     * Version of ViewGroup that observes state from the DarkIconDispatcher.
      */
     public static class DarkIconManager extends IconManager {
         private final DarkIconDispatcher mDarkIconDispatcher;

@@ -54,30 +54,47 @@
             android:layout_height="match_parent"
             android:layout="@layout/operator_name" />
 
-        <com.android.systemui.statusbar.policy.Clock
-            android:id="@+id/clock"
-            android:textAppearance="@style/TextAppearance.StatusBar.Clock"
-            android:layout_width="wrap_content"
+        <LinearLayout
             android:layout_height="match_parent"
-            android:singleLine="true"
-            android:paddingStart="@dimen/status_bar_left_clock_starting_padding"
-            android:paddingEnd="@dimen/status_bar_left_clock_end_padding"
-            android:gravity="center_vertical|start"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+        >
+            <com.android.systemui.statusbar.policy.Clock
+                android:id="@+id/clock"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textAppearance="@style/TextAppearance.StatusBar.Clock"
+                android:singleLine="true"
+                android:paddingStart="@dimen/status_bar_left_clock_starting_padding"
+                android:paddingEnd="@dimen/status_bar_left_clock_end_padding"
+                android:gravity="center_vertical|start"
+            />
+
+            <!-- The alpha of this area is controlled from both PhoneStatusBarTransitions and
+                 PhoneStatusBar (DISABLE_NOTIFICATION_ICONS). -->
+            <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
+                android:id="@+id/notification_icon_area"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:orientation="horizontal" />
+
+        </LinearLayout>
+
+        <!-- Space should cover the notch (if it exists) and let other views lay out around it -->
+        <android.widget.Space
+            android:id="@+id/cutout_space_view"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:gravity="center_horizontal|center_vertical"
         />
 
-        <!-- The alpha of this area is controlled from both PhoneStatusBarTransitions and
-             PhoneStatusBar (DISABLE_NOTIFICATION_ICONS). -->
-        <com.android.systemui.statusbar.AlphaOptimizedFrameLayout
-            android:id="@+id/notification_icon_area"
-            android:layout_width="0dip"
+        <com.android.keyguard.AlphaOptimizedLinearLayout android:id="@+id/system_icon_area"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:orientation="horizontal" />
-
-        <com.android.keyguard.AlphaOptimizedLinearLayout android:id="@+id/system_icon_area"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
             android:orientation="horizontal"
+            android:gravity="center_vertical|end"
             >
 
             <include layout="@layout/system_icons" />
