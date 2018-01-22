@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,11 +11,12 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
 
-package com.android.ims;
+package android.telephony.ims;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -24,7 +25,8 @@ import android.os.Parcelable;
  *
  * @hide
  */
-public class ImsReasonInfo implements Parcelable {
+@SystemApi
+public final class ImsReasonInfo implements Parcelable {
 
     /**
      * Specific code of each types
@@ -418,27 +420,36 @@ public class ImsReasonInfo implements Parcelable {
 
 
     // For main reason code
-    public int mCode;
+    /** @hide */
+    public final int mCode;
     // For the extra code value; it depends on the code value.
-    public int mExtraCode;
+    /** @hide */
+    public final int mExtraCode;
     // For the additional message of the reason info.
-    public String mExtraMessage;
+    /** @hide */
+    public final String mExtraMessage;
+
+    /** @hide */
     public ImsReasonInfo() {
         mCode = CODE_UNSPECIFIED;
         mExtraCode = CODE_UNSPECIFIED;
         mExtraMessage = null;
     }
 
-    public ImsReasonInfo(Parcel in) {
-        readFromParcel(in);
+    private ImsReasonInfo(Parcel in) {
+        mCode = in.readInt();
+        mExtraCode = in.readInt();
+        mExtraMessage = in.readString();
     }
 
+    /** @hide */
     public ImsReasonInfo(int code, int extraCode) {
         mCode = code;
         mExtraCode = extraCode;
         mExtraMessage = null;
     }
 
+    /** @hide */
     public ImsReasonInfo(int code, int extraCode, String extraMessage) {
         mCode = code;
         mExtraCode = extraCode;
@@ -485,12 +496,6 @@ public class ImsReasonInfo implements Parcelable {
         out.writeInt(mCode);
         out.writeInt(mExtraCode);
         out.writeString(mExtraMessage);
-    }
-
-    private void readFromParcel(Parcel in) {
-        mCode = in.readInt();
-        mExtraCode = in.readInt();
-        mExtraMessage = in.readString();
     }
 
     public static final Creator<ImsReasonInfo> CREATOR = new Creator<ImsReasonInfo>() {

@@ -16,6 +16,8 @@
 
 package com.android.ims;
 
+import android.telephony.ims.ImsReasonInfo;
+
 /**
  * This class defines a general IMS-related exception.
  *

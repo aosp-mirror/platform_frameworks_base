@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,11 +11,12 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
 
-package com.android.ims;
+package android.telephony.ims;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -24,7 +25,8 @@ import android.os.Parcelable;
  *
  * @hide
  */
-public class ImsSsInfo implements Parcelable {
+@SystemApi
+public final class ImsSsInfo implements Parcelable {
     /**
      * For the status of service registration or activation/deactivation.
      */
@@ -33,13 +35,15 @@ public class ImsSsInfo implements Parcelable {
     public static final int ENABLED = 1;
 
     // 0: disabled, 1: enabled
+    /** @hide */
     public int mStatus;
+    /** @hide */
     public String mIcbNum;
 
     public ImsSsInfo() {
     }
 
-    public ImsSsInfo(Parcel in) {
+    private ImsSsInfo(Parcel in) {
         readFromParcel(in);
     }
 
@@ -76,4 +80,12 @@ public class ImsSsInfo implements Parcelable {
             return new ImsSsInfo[size];
         }
     };
+
+    public int getStatus() {
+        return mStatus;
+    }
+
+    public String getIcbNum() {
+        return mIcbNum;
+    }
 }

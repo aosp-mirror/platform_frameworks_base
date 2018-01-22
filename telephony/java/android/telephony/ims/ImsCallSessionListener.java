@@ -16,343 +16,508 @@
 
 package android.telephony.ims;
 
+import android.annotation.SystemApi;
 import android.os.RemoteException;
 import android.telephony.ims.aidl.IImsCallSessionListener;
+import android.telephony.ims.stub.ImsCallSessionImplBase;
 
-import com.android.ims.ImsCallProfile;
-import com.android.ims.ImsConferenceState;
-import com.android.ims.ImsReasonInfo;
-import com.android.ims.ImsStreamMediaProfile;
-import com.android.ims.ImsSuppServiceNotification;
 import com.android.ims.internal.IImsCallSession;
-import com.android.ims.internal.ImsCallSession;
 
 /**
- * Proxy class for interfacing with the framework's Call session for an ongoing IMS call.
- *
- * DO NOT remove or change the existing APIs, only add new ones to this Base implementation or you
- * will break other implementations of ImsCallSessionListener maintained by other ImsServices.
+ * Listener interface for notifying the Framework's {@link ImsCallSession} for updates to an ongoing
+ * IMS call.
  *
  * @hide
  */
+// DO NOT remove or change the existing APIs, only add new ones to this implementation or you
+// will break other implementations of ImsCallSessionListener maintained by other ImsServices.
+// TODO: APIs in here do not conform to API guidelines yet. This can be changed if
+// ImsCallSessionListenerConverter is also changed.
+@SystemApi
 public class ImsCallSessionListener {
 
     private final IImsCallSessionListener mListener;
 
+    /** @hide */
     public ImsCallSessionListener(IImsCallSessionListener l) {
         mListener = l;
     }
 
     /**
-     * Called when a request is sent out to initiate a new session
-     * and 1xx response is received from the network.
+     * A request has been sent out to initiate a new IMS call session and a 1xx response has been
+     * received from the network.
      */
-    public void callSessionProgressing(ImsStreamMediaProfile profile)
-            throws RemoteException {
-        mListener.callSessionProgressing(profile);
+    public void callSessionProgressing(ImsStreamMediaProfile profile) {
+        try {
+            mListener.callSessionProgressing(profile);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when the session is initiated.
+     * The IMS call session has been initiated.
      *
-     * @param profile the associated {@link ImsCallSession}.
+     * @param profile the associated {@link ImsCallProfile}.
      */
-    public void callSessionInitiated(ImsCallProfile profile) throws RemoteException {
-        mListener.callSessionInitiated(profile);
+    public void callSessionInitiated(ImsCallProfile profile) {
+        try {
+            mListener.callSessionInitiated(profile);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when the session establishment has failed.
+     * The IMS call session establishment has failed.
      *
-     * @param reasonInfo detailed reason of the session establishment failure
+     * @param reasonInfo {@link ImsReasonInfo} detailing the reason of the IMS call session
+     * establishment failure.
      */
-    public void callSessionInitiatedFailed(ImsReasonInfo reasonInfo) throws RemoteException {
-        mListener.callSessionInitiatedFailed(reasonInfo);
+    public void callSessionInitiatedFailed(ImsReasonInfo reasonInfo) {
+        try {
+            mListener.callSessionInitiatedFailed(reasonInfo);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when the session is terminated.
+     * The IMS call session has been terminated.
      *
-     * @param reasonInfo detailed reason of the session termination
+     * @param reasonInfo {@link ImsReasonInfo} detailing the reason of the session termination.
      */
-    public void callSessionTerminated(ImsReasonInfo reasonInfo) throws RemoteException {
-        mListener.callSessionTerminated(reasonInfo);
+    public void callSessionTerminated(ImsReasonInfo reasonInfo) {
+        try {
+            mListener.callSessionTerminated(reasonInfo);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when the session is on hold.
-     */
-    public void callSessionHeld(ImsCallProfile profile) throws RemoteException {
-        mListener.callSessionHeld(profile);
-    }
-
-    /**
-     * Called when the session hold has failed.
+     * The IMS call session has started the process of holding the call. If it fails,
+     * {@link #callSessionHoldFailed(ImsReasonInfo)} should be called.
      *
-     * @param reasonInfo detailed reason of the session hold failure
-     */
-    public void callSessionHoldFailed(ImsReasonInfo reasonInfo) throws RemoteException {
-        mListener.callSessionHoldFailed(reasonInfo);
-    }
-
-    /**
-     * Called when the session hold is received from the remote user.
-     */
-    public void callSessionHoldReceived(ImsCallProfile profile) throws RemoteException {
-        mListener.callSessionHoldReceived(profile);
-    }
-
-    /**
-     * Called when the session resume is done.
-     */
-    public void callSessionResumed(ImsCallProfile profile) throws RemoteException {
-        mListener.callSessionResumed(profile);
-    }
-
-    /**
-     * Called when the session resume has failed.
+     * If the IMS call session is resumed, call {@link #callSessionResumed(ImsCallProfile)}.
      *
-     * @param reasonInfo detailed reason of the session resume failure
+     * @param profile The associated {@link ImsCallProfile} of the call session that has been put
+     * on hold.
      */
-    public void callSessionResumeFailed(ImsReasonInfo reasonInfo) throws RemoteException {
-        mListener.callSessionResumeFailed(reasonInfo);
+    public void callSessionHeld(ImsCallProfile profile) {
+        try {
+            mListener.callSessionHeld(profile);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when the session resume is received from the remote user.
-     */
-    public void callSessionResumeReceived(ImsCallProfile profile) throws RemoteException {
-        mListener.callSessionResumeReceived(profile);
-    }
-
-    /**
-     * Called when the session merge has been started.  At this point, the {@code newSession}
-     * represents the session which has been initiated to the IMS conference server for the
-     * new merged conference.
+     * The IMS call session has failed to be held.
      *
-     * @param newSession the session object that is merged with an active & hold session
+     * @param reasonInfo {@link ImsReasonInfo} detailing the reason of the session hold failure.
      */
-    public void callSessionMergeStarted(ImsCallSession newSession, ImsCallProfile profile)
-            throws RemoteException {
-        mListener.callSessionMergeStarted(newSession != null ? newSession.getSession() : null,
-                profile);
+    public void callSessionHoldFailed(ImsReasonInfo reasonInfo) {
+        try {
+            mListener.callSessionHoldFailed(reasonInfo);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when the session merge has been started.  At this point, the {@code newSession}
-     * represents the session which has been initiated to the IMS conference server for the
-     * new merged conference.
+     * This IMS Call session has been put on hold by the remote party.
      *
-     * @param newSession the session object that is merged with an active & hold session
+     * @param profile The {@link ImsCallProfile} associated with this IMS call session.
+     */
+    public void callSessionHoldReceived(ImsCallProfile profile) {
+        try {
+            mListener.callSessionHoldReceived(profile);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * The IMS call session has started the process of resuming the call. If the process of resuming
+     * the call fails, call {@link #callSessionResumeFailed(ImsReasonInfo)}.
+     *
+     * @param profile The {@link ImsCallProfile} associated with this IMS call session.
+     */
+    public void callSessionResumed(ImsCallProfile profile) {
+        try {
+            mListener.callSessionResumed(profile);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * The IMS call session resume has failed.
+     *
+     * @param reasonInfo {@link ImsReasonInfo} containing the detailed reason of the session resume
+     * failure.
+     */
+    public void callSessionResumeFailed(ImsReasonInfo reasonInfo) {
+        try {
+            mListener.callSessionResumeFailed(reasonInfo);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * The remote party has resumed this IMS call session.
+     *
+     * @param profile {@link ImsCallProfile} associated with the IMS call session.
+     */
+    public void callSessionResumeReceived(ImsCallProfile profile) {
+        try {
+            mListener.callSessionResumeReceived(profile);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * The IMS call session merge has been started.  At this point, the {@code newSession}
+     * represents the IMS call session which represents the new merged conference and has been
+     * initiated to the IMS conference server.
+     *
+     * @param newSession the {@link ImsCallSessionImplBase} that represents the merged active & held
+     * sessions.
+     * @param profile The {@link ImsCallProfile} associated with this IMS call session.
+     */
+    public void callSessionMergeStarted(ImsCallSessionImplBase newSession, ImsCallProfile profile)
+    {
+        try {
+            mListener.callSessionMergeStarted(newSession != null ?
+                            newSession.getServiceImpl() : null, profile);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Compatibility method for older implementations.
+     * See {@link #callSessionMergeStarted(ImsCallSessionImplBase, ImsCallProfile)}.
      *
      * @hide
      */
     public void callSessionMergeStarted(IImsCallSession newSession, ImsCallProfile profile)
-            throws RemoteException {
-        mListener.callSessionMergeStarted(newSession, profile);
+    {
+        try {
+            mListener.callSessionMergeStarted(newSession, profile);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when the session merge is successful and the merged session is active.
+     * The session merge is successful and the merged {@link ImsCallSession} is active.
      *
-     * @param newSession the new session object that is used for the conference
+     * @param newSession the new {@link ImsCallSessionImplBase}
+     *                  that represents the conference IMS call
+     * session.
      */
-    public void callSessionMergeComplete(ImsCallSession newSession) throws RemoteException {
-        mListener.callSessionMergeComplete(newSession != null ? newSession.getSession() : null);
+    public void callSessionMergeComplete(ImsCallSessionImplBase newSession) {
+        try {
+            mListener.callSessionMergeComplete(newSession != null ?
+                    newSession.getServiceImpl() : null);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when the session merge is successful and the merged session is active.
+     * Compatibility method for older implementations of ImsService.
      *
-     * @param newSession the new session object that is used for the conference
+     * See {@link #callSessionMergeComplete(ImsCallSessionImplBase)}}.
      *
      * @hide
      */
-    public void callSessionMergeComplete(IImsCallSession newSession) throws RemoteException {
-        mListener.callSessionMergeComplete(newSession);
+    public void callSessionMergeComplete(IImsCallSession newSession) {
+        try {
+            mListener.callSessionMergeComplete(newSession);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when the session merge has failed.
+     * The IMS call session merge has failed.
      *
-     * @param reasonInfo detailed reason of the call merge failure
+     * @param reasonInfo {@link ImsReasonInfo} contining the reason for the call merge failure.
      */
-    public void callSessionMergeFailed(ImsReasonInfo reasonInfo) throws RemoteException {
-        mListener.callSessionMergeFailed(reasonInfo);
+    public void callSessionMergeFailed(ImsReasonInfo reasonInfo) {
+        try {
+            mListener.callSessionMergeFailed(reasonInfo);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when the session is updated (except for hold/unhold).
-     */
-    public void callSessionUpdated(ImsCallProfile profile) throws RemoteException {
-        mListener.callSessionUpdated(profile);
-    }
-
-    /**
-     * Called when the session update has failed.
+     * The IMS call session profile has been updated. Does not include holding or resuming a call.
      *
-     * @param reasonInfo detailed reason of the session update failure
+     * @param profile The {@link ImsCallProfile} associated with the updated IMS call session.
      */
-    public void callSessionUpdateFailed(ImsReasonInfo reasonInfo) throws RemoteException {
-        mListener.callSessionUpdateFailed(reasonInfo);
+    public void callSessionUpdated(ImsCallProfile profile) {
+        try {
+            mListener.callSessionUpdated(profile);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when the session update is received from the remote user.
+     * The IMS call session profile update has failed.
+     *
+     * @param reasonInfo {@link ImsReasonInfo} containing a reason for the session update failure.
      */
-    public void callSessionUpdateReceived(ImsCallProfile profile) throws RemoteException {
-        mListener.callSessionUpdateReceived(profile);
+    public void callSessionUpdateFailed(ImsReasonInfo reasonInfo) {
+        try {
+            mListener.callSessionUpdateFailed(reasonInfo);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * The IMS call session profile has received an update from the remote user.
+     *
+     * @param profile The new {@link ImsCallProfile} associated with the update.
+     */
+    public void callSessionUpdateReceived(ImsCallProfile profile) {
+        try {
+            mListener.callSessionUpdateReceived(profile);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
      * Called when the session has been extended to a conference session.
      *
-     * @param newSession the session object that is extended to the conference
-     *      from the active session
+     * If the conference extension fails, call
+     * {@link #callSessionConferenceExtendFailed(ImsReasonInfo)}.
+     *
+     * @param newSession the session object that is extended to the conference from the active
+     * IMS Call session.
+     * @param profile The {@link ImsCallProfile} associated with the IMS call session.
      */
-    public void callSessionConferenceExtended(ImsCallSession newSession, ImsCallProfile profile)
-            throws RemoteException {
-        mListener.callSessionConferenceExtended(newSession != null ? newSession.getSession() : null,
-                profile);
+    public void callSessionConferenceExtended(ImsCallSessionImplBase newSession,
+            ImsCallProfile profile) {
+        try {
+            mListener.callSessionConferenceExtended(
+                    newSession != null ? newSession.getServiceImpl() : null, profile);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when the session has been extended to a conference session.
+     * Compatibility method to interface with older versions of ImsService.
+     * See {@link #callSessionConferenceExtended(ImsCallSessionImplBase, ImsCallProfile)}.
      *
-     * @param newSession the session object that is extended to the conference
-     *      from the active session
      * @hide
      */
-    public void callSessionConferenceExtended(IImsCallSession newSession, ImsCallProfile profile)
-            throws RemoteException {
-        mListener.callSessionConferenceExtended(newSession, profile);
+    public void callSessionConferenceExtended(IImsCallSession newSession, ImsCallProfile profile) {
+        try {
+            mListener.callSessionConferenceExtended(newSession, profile);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when the conference extension has failed.
+     * The previous conference extension has failed.
      *
-     * @param reasonInfo detailed reason of the conference extension failure
+     * @param reasonInfo {@link ImsReasonInfo} containing the detailed reason of the conference
+     * extension failure.
      */
-    public void callSessionConferenceExtendFailed(ImsReasonInfo reasonInfo) throws RemoteException {
-        mListener.callSessionConferenceExtendFailed(reasonInfo);
+    public void callSessionConferenceExtendFailed(ImsReasonInfo reasonInfo) {
+        try {
+            mListener.callSessionConferenceExtendFailed(reasonInfo);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when the conference extension is received from the remote user.
+     * A conference extension has been received received from the remote party.
+     *
+     * @param newSession An {@link ImsCallSessionImplBase}
+     *                   representing the extended IMS call session.
+     * @param profile The {@link ImsCallProfile} associated with the new IMS call session.
      */
-    public void callSessionConferenceExtendReceived(ImsCallSession newSession,
-            ImsCallProfile profile) throws RemoteException {
-        mListener.callSessionConferenceExtendReceived(newSession != null
-                ? newSession.getSession() : null, profile);
+    public void callSessionConferenceExtendReceived(ImsCallSessionImplBase newSession,
+            ImsCallProfile profile) {
+        try {
+            mListener.callSessionConferenceExtendReceived(newSession != null
+                    ? newSession.getServiceImpl() : null, profile);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when the conference extension is received from the remote user.
+     * Compatibility method to interface with older versions of ImsService.
+     * See {@link #callSessionConferenceExtendReceived(ImsCallSessionImplBase, ImsCallProfile)}.
      *
      * @hide
      */
     public void callSessionConferenceExtendReceived(IImsCallSession newSession,
-            ImsCallProfile profile) throws RemoteException {
-        mListener.callSessionConferenceExtendReceived(newSession, profile);
+            ImsCallProfile profile) {
+        try {
+            mListener.callSessionConferenceExtendReceived(newSession, profile);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when the invitation request of the participants is delivered to the conference
+     * The request to invite participants to the conference has been delivered to the conference
      * server.
      */
-    public void callSessionInviteParticipantsRequestDelivered() throws RemoteException {
-        mListener.callSessionInviteParticipantsRequestDelivered();
+    public void callSessionInviteParticipantsRequestDelivered() {
+        try {
+            mListener.callSessionInviteParticipantsRequestDelivered();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when the invitation request of the participants has failed.
+     * The previous request to invite participants to the conference (see
+     * {@link #callSessionInviteParticipantsRequestDelivered()}) has failed.
      *
-     * @param reasonInfo detailed reason of the conference invitation failure
+     * @param reasonInfo {@link ImsReasonInfo} detailing the reason forthe conference invitation
+     * failure.
      */
     public void callSessionInviteParticipantsRequestFailed(ImsReasonInfo reasonInfo)
-            throws RemoteException {
-        mListener.callSessionInviteParticipantsRequestFailed(reasonInfo);
+    {
+        try {
+            mListener.callSessionInviteParticipantsRequestFailed(reasonInfo);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when the removal request of the participants is delivered to the conference
+     * The request to remove participants from the conference has been delivered to the conference
      * server.
      */
-    public void callSessionRemoveParticipantsRequestDelivered() throws RemoteException {
-        mListener.callSessionRemoveParticipantsRequestDelivered();
+    public void callSessionRemoveParticipantsRequestDelivered() {
+        try {
+            mListener.callSessionRemoveParticipantsRequestDelivered();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when the removal request of the participants has failed.
+     * The previous request to remove participants from the conference (see
+     * {@link #callSessionRemoveParticipantsRequestDelivered()}) has failed.
      *
-     * @param reasonInfo detailed reason of the conference removal failure
+     * @param reasonInfo {@link ImsReasonInfo} detailing the reason for the conference removal
+     * failure.
      */
     public void callSessionRemoveParticipantsRequestFailed(ImsReasonInfo reasonInfo)
-            throws RemoteException {
-        mListener.callSessionInviteParticipantsRequestFailed(reasonInfo);
+    {
+        try {
+            mListener.callSessionInviteParticipantsRequestFailed(reasonInfo);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Notifies the framework of the updated Call session conference state.
+     * The IMS call session's conference state has changed.
      *
-     * @param state the new {@link ImsConferenceState} associated with the conference.
+     * @param state The new {@link ImsConferenceState} associated with the conference.
      */
-    public void callSessionConferenceStateUpdated(ImsConferenceState state) throws RemoteException {
-        mListener.callSessionConferenceStateUpdated(state);
+    public void callSessionConferenceStateUpdated(ImsConferenceState state) {
+        try {
+            mListener.callSessionConferenceStateUpdated(state);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Notifies the incoming USSD message.
+     * The IMS call session has received a Ussd message.
+     *
+     * @param mode The mode of the USSD message, either
+     * {@link ImsCallSessionImplBase#USSD_MODE_NOTIFY} or
+     * {@link ImsCallSessionImplBase#USSD_MODE_REQUEST}.
+     * @param ussdMessage The USSD message.
      */
     public void callSessionUssdMessageReceived(int mode, String ussdMessage)
-            throws RemoteException {
-        mListener.callSessionUssdMessageReceived(mode, ussdMessage);
+    {
+        try {
+            mListener.callSessionUssdMessageReceived(mode, ussdMessage);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Notifies of a case where a {@link com.android.ims.internal.ImsCallSession} may potentially
-     * handover from one radio technology to another.
+     * An {@link ImsCallSession} may potentially handover from one radio
+     * technology to another.
      *
-     * @param srcAccessTech    The source radio access technology; one of the access technology
-     *                         constants defined in {@link android.telephony.ServiceState}.  For
-     *                         example
-     *                         {@link android.telephony.ServiceState#RIL_RADIO_TECHNOLOGY_LTE}.
+     * @param srcAccessTech The source radio access technology; one of the access technology
+     * constants defined in {@link android.telephony.ServiceState}. For example
+     * {@link android.telephony.ServiceState#RIL_RADIO_TECHNOLOGY_LTE}.
      * @param targetAccessTech The target radio access technology; one of the access technology
-     *                         constants defined in {@link android.telephony.ServiceState}.  For
-     *                         example
-     *                         {@link android.telephony.ServiceState#RIL_RADIO_TECHNOLOGY_LTE}.
+     * constants defined in {@link android.telephony.ServiceState}. For example
+     * {@link android.telephony.ServiceState#RIL_RADIO_TECHNOLOGY_LTE}.
      */
     public void callSessionMayHandover(int srcAccessTech, int targetAccessTech)
-            throws RemoteException {
-        mListener.callSessionMayHandover(srcAccessTech, targetAccessTech);
+    {
+        try {
+            mListener.callSessionMayHandover(srcAccessTech, targetAccessTech);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when session access technology changes.
+     * The IMS call session's access technology has changed.
      *
-     * @param srcAccessTech original access technology
-     * @param targetAccessTech new access technology
-     * @param reasonInfo
+     * @param srcAccessTech original access technology, defined in
+     * {@link android.telephony.ServiceState}.
+     * @param targetAccessTech new access technology, defined in
+     * {@link android.telephony.ServiceState}.
+     * @param reasonInfo The {@link ImsReasonInfo} associated with this handover.
      */
     public void callSessionHandover(int srcAccessTech, int targetAccessTech,
-            ImsReasonInfo reasonInfo) throws RemoteException {
-        mListener.callSessionHandover(srcAccessTech, targetAccessTech, reasonInfo);
+            ImsReasonInfo reasonInfo) {
+        try {
+            mListener.callSessionHandover(srcAccessTech, targetAccessTech, reasonInfo);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when session access technology change fails.
+     * The IMS call session's access technology change has failed..
      *
      * @param srcAccessTech original access technology
      * @param targetAccessTech new access technology
-     * @param reasonInfo handover failure reason
+     * @param reasonInfo An {@link ImsReasonInfo} detailing the reason for the failure.
      */
     public void callSessionHandoverFailed(int srcAccessTech, int targetAccessTech,
-            ImsReasonInfo reasonInfo) throws RemoteException {
-        mListener.callSessionHandoverFailed(srcAccessTech, targetAccessTech, reasonInfo);
+            ImsReasonInfo reasonInfo) {
+        try {
+            mListener.callSessionHandoverFailed(srcAccessTech, targetAccessTech, reasonInfo);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when the TTY mode is changed by the remote party.
+     * The TTY mode has been changed by the remote party.
      *
      * @param mode one of the following: -
      *             {@link com.android.internal.telephony.Phone#TTY_MODE_OFF} -
@@ -360,53 +525,79 @@ public class ImsCallSessionListener {
      *             {@link com.android.internal.telephony.Phone#TTY_MODE_HCO} -
      *             {@link com.android.internal.telephony.Phone#TTY_MODE_VCO}
      */
-    public void callSessionTtyModeReceived(int mode) throws RemoteException {
-        mListener.callSessionTtyModeReceived(mode);
+    public void callSessionTtyModeReceived(int mode) {
+        try {
+            mListener.callSessionTtyModeReceived(mode);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when the multiparty state is changed for this {@code ImsCallSession}.
+     * The multiparty state has been changed for this {@code ImsCallSession}.
      *
-     * @param isMultiParty {@code true} if the session became multiparty,
-     *                     {@code false} otherwise.
+     * @param isMultiParty {@code true} if the session became multiparty, {@code false} otherwise.
      */
-
-    public void callSessionMultipartyStateChanged(boolean isMultiParty) throws RemoteException {
-        mListener.callSessionMultipartyStateChanged(isMultiParty);
+    public void callSessionMultipartyStateChanged(boolean isMultiParty) {
+        try {
+            mListener.callSessionMultipartyStateChanged(isMultiParty);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Called when the supplementary service information is received for the current session.
+     * Supplementary service information has been received for the current IMS call session.
+     *
+     * @param suppSrvNotification The {@link ImsSuppServiceNotification} containing the change.
      */
     public void callSessionSuppServiceReceived(ImsSuppServiceNotification suppSrvNotification)
-            throws RemoteException {
-        mListener.callSessionSuppServiceReceived(suppSrvNotification);
+    {
+        try {
+            mListener.callSessionSuppServiceReceived(suppSrvNotification);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Received RTT modify request from the remote party.
+     * An RTT modify request has been received from the remote party.
      *
-     * @param callProfile ImsCallProfile with updated attributes
+     * @param callProfile An {@link ImsCallProfile} with the updated attributes
      */
     public void callSessionRttModifyRequestReceived(ImsCallProfile callProfile)
-            throws RemoteException {
-        mListener.callSessionRttModifyRequestReceived(callProfile);
+    {
+        try {
+            mListener.callSessionRttModifyRequestReceived(callProfile);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
+     * An RTT modify response has been received.
+     *
      * @param status the received response for RTT modify request.
      */
-    public void callSessionRttModifyResponseReceived(int status) throws RemoteException {
-        mListener.callSessionRttModifyResponseReceived(status);
+    public void callSessionRttModifyResponseReceived(int status) {
+        try {
+            mListener.callSessionRttModifyResponseReceived(status);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * Device received RTT message from Remote UE.
+     * An RTT message has been received from the remote party.
      *
-     * @param rttMessage RTT message received
+     * @param rttMessage The RTT message that has been received.
      */
-    public void callSessionRttMessageReceived(String rttMessage) throws RemoteException {
-        mListener.callSessionRttMessageReceived(rttMessage);
+    public void callSessionRttMessageReceived(String rttMessage) {
+        try {
+            mListener.callSessionRttMessageReceived(rttMessage);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 

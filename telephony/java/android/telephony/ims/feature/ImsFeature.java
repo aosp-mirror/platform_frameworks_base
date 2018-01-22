@@ -18,6 +18,7 @@ package android.telephony.ims.feature;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IInterface;
@@ -25,6 +26,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.telephony.SubscriptionManager;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
+import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.util.Log;
 
 import com.android.ims.internal.IImsFeatureStatusCallback;
@@ -38,10 +40,12 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 /**
- * Base class for all IMS features that are supported by the framework.
+ * Base class for all IMS features that are supported by the framework. Use a concrete subclass
+ * of {@link ImsFeature}, such as {@link MmTelFeature} or {@link RcsFeature}.
  *
  * @hide
  */
+@SystemApi
 public abstract class ImsFeature {
 
     private static final String LOG_TAG = "ImsFeature";
@@ -75,17 +79,35 @@ public abstract class ImsFeature {
      */
     public static final String EXTRA_PHONE_ID = "android:phone_id";
 
-    // Invalid feature value
+    /**
+     * Invalid feature value\
+     * @hide
+     */
     public static final int FEATURE_INVALID = -1;
     // ImsFeatures that are defined in the Manifests. Ensure that these values match the previously
     // defined values in ImsServiceClass for compatibility purposes.
+    /**
+     * This feature supports emergency calling over MMTEL.
+     */
     public static final int FEATURE_EMERGENCY_MMTEL = 0;
+    /**
+     * This feature supports the MMTEL feature.
+     */
     public static final int FEATURE_MMTEL = 1;
+    /**
+     * This feature supports the RCS feature.
+     */
     public static final int FEATURE_RCS = 2;
-    // Total number of features defined
+    /**
+     * Total number of features defined
+     * @hide
+     */
     public static final int FEATURE_MAX = 3;
 
-    // Integer values defining IMS features that are supported in ImsFeature.
+    /**
+     * Integer values defining IMS features that are supported in ImsFeature.
+     * @hide
+     */
     @IntDef(flag = true,
             value = {
                     FEATURE_EMERGENCY_MMTEL,
@@ -95,7 +117,10 @@ public abstract class ImsFeature {
     @Retention(RetentionPolicy.SOURCE)
     public @interface FeatureType {}
 
-    // Integer values defining the state of the ImsFeature at any time.
+    /**
+     * Integer values defining the state of the ImsFeature at any time.
+     * @hide
+     */
     @IntDef(flag = true,
             value = {
                     STATE_UNAVAILABLE,
@@ -105,12 +130,24 @@ public abstract class ImsFeature {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ImsState {}
 
+    /**
+     * This {@link ImsFeature}'s state is unavailable and should not be communicated with.
+     */
     public static final int STATE_UNAVAILABLE = 0;
+    /**
+     * This {@link ImsFeature} state is initializing and should not be communicated with.
+     */
     public static final int STATE_INITIALIZING = 1;
+    /**
+     * This {@link ImsFeature} is ready for communication.
+     */
     public static final int STATE_READY = 2;
 
-    // Integer values defining the result codes that should be returned from
-    // {@link changeEnabledCapabilities} when the framework tries to set a feature's capability.
+    /**
+     * Integer values defining the result codes that should be returned from
+     * {@link #changeEnabledCapabilities} when the framework tries to set a feature's capability.
+     * @hide
+     */
     @IntDef(flag = true,
             value = {
                     CAPABILITY_ERROR_GENERIC,
@@ -119,7 +156,13 @@ public abstract class ImsFeature {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ImsCapabilityError {}
 
+    /**
+     * The capability was unable to be changed.
+     */
     public static final int CAPABILITY_ERROR_GENERIC = -1;
+    /**
+     * The capability was able to be changed.
+     */
     public static final int CAPABILITY_SUCCESS = 0;
 
 
@@ -129,6 +172,8 @@ public abstract class ImsFeature {
      * configurations, via {@link #onQueryCapabilityConfiguration}, as well as to receive error
      * callbacks when the ImsService can not change the capability as requested, via
      * {@link #onChangeCapabilityConfigurationError}.
+     *
+     * @hide
      */
     public static class CapabilityCallback extends IImsCapabilityCallback.Stub {
 
@@ -159,7 +204,7 @@ public abstract class ImsFeature {
          */
         @Override
         public void onChangeCapabilityConfigurationError(int capability, int radioTech,
-                int reason) {
+                @ImsCapabilityError int reason) {
         }
 
         /**
@@ -180,6 +225,7 @@ public abstract class ImsFeature {
     protected static class CapabilityCallbackProxy {
         private final IImsCapabilityCallback mCallback;
 
+        /** @hide */
         public CapabilityCallbackProxy(IImsCapabilityCallback c) {
             mCallback = c;
         }
@@ -188,9 +234,16 @@ public abstract class ImsFeature {
          * This method notifies the provided framework callback that the request to change the
          * indicated capability has failed and has not changed.
          *
-         * @param capability The Capability that will be notified to the framework.
-         * @param radioTech The radio tech that this capability failed for.
-         * @param reason The reason this capability was unable to be changed.
+         * @param capability The Capability that will be notified to the framework, defined as
+         * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VOICE},
+         * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_VIDEO},
+         * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_UT}, or
+         * {@link MmTelFeature.MmTelCapabilities#CAPABILITY_TYPE_SMS}.
+         * @param radioTech The radio tech that this capability failed for, defined as
+         * {@link ImsRegistrationImplBase#REGISTRATION_TECH_LTE} or
+         * {@link ImsRegistrationImplBase#REGISTRATION_TECH_IWLAN}.
+         * @param reason The reason this capability was unable to be changed, defined as
+         * {@link #CAPABILITY_ERROR_GENERIC} or {@link #CAPABILITY_SUCCESS}.
          */
         public void onChangeCapabilityConfigurationError(int capability, int radioTech,
                 @ImsCapabilityError int reason) {
@@ -203,22 +256,11 @@ public abstract class ImsFeature {
                 Log.e(LOG_TAG, "onChangeCapabilityConfigurationError called on dead binder.");
             }
         }
-
-        public void onQueryCapabilityConfiguration(int capability, int radioTech,
-                boolean isEnabled) {
-            if (mCallback == null) {
-                return;
-            }
-            try {
-                mCallback.onQueryCapabilityConfiguration(capability, radioTech, isEnabled);
-            } catch (RemoteException e) {
-                Log.e(LOG_TAG, "onQueryCapabilityConfiguration called on dead binder.");
-            }
-        }
     }
 
     /**
      * Contains the capabilities defined and supported by an ImsFeature in the form of a bit mask.
+     * @hide
      */
     public static class Capabilities {
         protected int mCapabilities = 0;
@@ -253,6 +295,9 @@ public abstract class ImsFeature {
             return (mCapabilities & capabilities) == capabilities;
         }
 
+        /**
+         * @return a deep copy of the Capabilites.
+         */
         public Capabilities copy() {
             return new Capabilities(mCapabilities);
         }
@@ -264,6 +309,9 @@ public abstract class ImsFeature {
             return mCapabilities;
         }
 
+        /**
+         * @hide
+         */
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
@@ -274,11 +322,17 @@ public abstract class ImsFeature {
             return mCapabilities == that.mCapabilities;
         }
 
+        /**
+         * @hide
+         */
         @Override
         public int hashCode() {
             return mCapabilities;
         }
 
+        /**
+         * @hide
+         */
         @Override
         public String toString() {
             return "Capabilities: " + Integer.toBinaryString(mCapabilities);
@@ -289,24 +343,40 @@ public abstract class ImsFeature {
             new WeakHashMap<IImsFeatureStatusCallback, Boolean>());
     private @ImsState int mState = STATE_UNAVAILABLE;
     private int mSlotId = SubscriptionManager.INVALID_SIM_SLOT_INDEX;
+    /**
+     * @hide
+     */
     protected Context mContext;
     private final Object mLock = new Object();
     private final RemoteCallbackList<IImsCapabilityCallback> mCapabilityCallbacks
             = new RemoteCallbackList<>();
     private Capabilities mCapabilityStatus = new Capabilities();
 
+    /**
+     * @hide
+     */
     public final void initialize(Context context, int slotId) {
         mContext = context;
         mSlotId = slotId;
     }
 
+    /**
+     * @return The current state of the feature, defined as {@link #STATE_UNAVAILABLE},
+     * {@link #STATE_INITIALIZING}, or {@link #STATE_READY}.
+     */
     public final int getFeatureState() {
         synchronized (mLock) {
             return mState;
         }
     }
 
-    protected final void setFeatureState(@ImsState int state) {
+    /**
+     * Set the state of the ImsFeature. The state is used as a signal to the framework to start or
+     * stop communication, depending on the state sent.
+     * @param state The ImsFeature's state, defined as {@link #STATE_UNAVAILABLE},
+     * {@link #STATE_INITIALIZING}, or {@link #STATE_READY}.
+     */
+    public final void setFeatureState(@ImsState int state) {
         synchronized (mLock) {
             if (mState != state) {
                 mState = state;
@@ -315,7 +385,10 @@ public abstract class ImsFeature {
         }
     }
 
-    // Not final for testing, but shouldn't be extended!
+    /**
+     * Not final for testing, but shouldn't be extended!
+     * @hide
+     */
     @VisibleForTesting
     public void addImsFeatureStatusCallback(@NonNull IImsFeatureStatusCallback c) {
         try {
@@ -330,8 +403,11 @@ public abstract class ImsFeature {
         }
     }
 
+    /**
+     * Not final for testing, but shouldn't be extended!
+     * @hide
+     */
     @VisibleForTesting
-    // Not final for testing, but should not be extended!
     public void removeImsFeatureStatusCallback(@NonNull IImsFeatureStatusCallback c) {
         synchronized (mLock) {
             mStatusCallbacks.remove(c);
@@ -382,16 +458,23 @@ public abstract class ImsFeature {
         mContext.sendBroadcast(intent);
     }
 
+    /**
+     * @hide
+     */
     public final void addCapabilityCallback(IImsCapabilityCallback c) {
         mCapabilityCallbacks.register(c);
     }
 
+    /**
+     * @hide
+     */
     public final void removeCapabilityCallback(IImsCapabilityCallback c) {
         mCapabilityCallbacks.unregister(c);
     }
 
     /**
      * @return the cached capabilities status for this feature.
+     * @hide
      */
     @VisibleForTesting
     public Capabilities queryCapabilityStatus() {
@@ -400,7 +483,10 @@ public abstract class ImsFeature {
         }
     }
 
-    // Called internally to request the change of enabled capabilities.
+    /**
+     * Called internally to request the change of enabled capabilities.
+     * @hide
+     */
     @VisibleForTesting
     public final void requestChangeEnabledCapabilities(CapabilityChangeRequest request,
             IImsCapabilityCallback c) throws RemoteException {
@@ -415,6 +501,8 @@ public abstract class ImsFeature {
      * Called by the ImsFeature when the capabilities status has changed.
      *
      * @param c A {@link Capabilities} containing the new Capabilities status.
+     *
+     * @hide
      */
     protected final void notifyCapabilitiesStatusChanged(Capabilities c) {
         synchronized (mLock) {
@@ -468,6 +556,7 @@ public abstract class ImsFeature {
 
     /**
      * @return Binder instance that the framework will use to communicate with this feature.
+     * @hide
      */
     protected abstract IInterface getBinder();
 }

@@ -51,9 +51,7 @@ import static android.Manifest.permission.MODIFY_PHONE_STATE;
  * ...
  * <service android:name=".EgImsService"
  *     android:permission="android.permission.BIND_IMS_SERVICE" >
- *     <!-- Apps must declare which features they support as metadata. The different categories are
- *     defined below. In this example, the RCS_FEATURE feature is supported. -->
- *     <meta-data android:name="android.telephony.ims.RCS_FEATURE" android:value="true" />
+ *     ...
  *     <intent-filter>
  *         <action android:name="android.telephony.ims.ImsService" />
  *     </intent-filter>
@@ -65,12 +63,33 @@ import static android.Manifest.permission.MODIFY_PHONE_STATE;
  * 1) Defined as the default ImsService for the device in the device overlay using
  *    "config_ims_package".
  * 2) Defined as a Carrier Provided ImsService in the Carrier Configuration using
- *    {@link CarrierConfigManager#KEY_CTONFIG_IMS_PACKAGE_OVERRIDE_STRING}.
+ *    {@link CarrierConfigManager#KEY_CONFIG_IMS_PACKAGE_OVERRIDE_STRING}.
+ *
+ * There are two ways to define to the platform which {@link ImsFeature}s this {@link ImsService}
+ * supports, dynamic or static definitions.
+ *
+ * In the static definition, the {@link ImsFeature}s that are supported are defined in the service
+ * definition of the AndroidManifest.xml file as metadata:
+ * <!-- Apps must declare which features they support as metadata. The different categories are
+ *      defined below. In this example, the MMTEL_FEATURE feature is supported. -->
+ * <meta-data android:name="android.telephony.ims.MMTEL_FEATURE" android:value="true" />
  *
  * The features that are currently supported in an ImsService are:
  * - RCS_FEATURE: This ImsService implements the RcsFeature class.
  * - MMTEL_FEATURE: This ImsService implements the MmTelFeature class.
- *   @hide
+ * - EMERGENCY_MMTEL_FEATURE: This ImsService supports Emergency Calling for MMTEL, must be
+ *   declared along with the MMTEL_FEATURE. If this is not specified, the framework will use
+ *   circuit switch for emergency calling.
+ *
+ * In the dynamic definition, the supported features are not specified in the service definition
+ * of the AndroidManifest. Instead, the framework binds to this service and calls
+ * {@link #querySupportedImsFeatures()}. The {@link ImsService} then returns an
+ * {@link ImsFeatureConfiguration}, which the framework uses to initialize the supported
+ * {@link ImsFeature}s. If at any time, the list of supported {@link ImsFeature}s changes,
+ * {@link #onUpdateSupportedImsFeatures(ImsFeatureConfiguration)} can be called to tell the
+ * framework of the changes.
+ *
+ * @hide
  */
 @SystemApi
 public class ImsService extends Service {
@@ -127,8 +146,7 @@ public class ImsService extends Service {
         }
 
         @Override
-        public void removeImsFeature(int slotId, int featureType, IImsFeatureStatusCallback c)
-                throws RemoteException {
+        public void removeImsFeature(int slotId, int featureType, IImsFeatureStatusCallback c) {
             ImsService.this.removeImsFeature(slotId, featureType, c);
         }
 
@@ -143,19 +161,18 @@ public class ImsService extends Service {
         }
 
         @Override
-        public void notifyImsFeatureReady(int slotId, int featureType)
-                throws RemoteException {
+        public void notifyImsFeatureReady(int slotId, int featureType) {
             ImsService.this.notifyImsFeatureReady(slotId, featureType);
         }
 
         @Override
-        public IImsConfig getConfig(int slotId) throws RemoteException {
+        public IImsConfig getConfig(int slotId) {
             ImsConfigImplBase c = ImsService.this.getConfig(slotId);
             return c != null ? c.getIImsConfig() : null;
         }
 
         @Override
-        public IImsRegistration getRegistration(int slotId) throws RemoteException {
+        public IImsRegistration getRegistration(int slotId) {
             ImsRegistrationImplBase r = ImsService.this.getRegistration(slotId);
             return r != null ? r.getBinder() : null;
         }
@@ -277,12 +294,14 @@ public class ImsService extends Service {
     }
 
     /**
-     * When called, provide the {@link ImsFeatureConfiguration} that this ImsService currently
-     * supports. This will trigger the framework to set up the {@link ImsFeature}s that correspond
-     * to the {@link ImsFeature.FeatureType}s configured here.
-     * @return an {@link ImsFeatureConfiguration} containing Features this ImsService supports,
-     * defined in {@link ImsFeature.FeatureType}.
-     * @hide
+     * When called, provide the {@link ImsFeatureConfiguration} that this {@link ImsService}
+     * currently supports. This will trigger the framework to set up the {@link ImsFeature}s that
+     * correspond to the {@link ImsFeature}s configured here.
+     *
+     * Use {@link #onUpdateSupportedImsFeatures(ImsFeatureConfiguration)} to change the supported
+     * {@link ImsFeature}s.
+     *
+     * @return an {@link ImsFeatureConfiguration} containing Features this ImsService supports.
      */
     public ImsFeatureConfiguration querySupportedImsFeatures() {
         // Return empty for base implementation
@@ -291,9 +310,8 @@ public class ImsService extends Service {
 
     /**
      * Updates the framework with a new {@link ImsFeatureConfiguration} containing the updated
-     * features, defined in {@link ImsFeature.FeatureType} that this ImsService supports. This may
-     * trigger the framework to add/remove new ImsFeatures, depending on the configuration.
-     * @hide
+     * features, that this {@link ImsService} supports. This may trigger the framework to add/remove
+     * new ImsFeatures, depending on the configuration.
      */
     public final void onUpdateSupportedImsFeatures(ImsFeatureConfiguration c)
             throws RemoteException {
@@ -306,11 +324,12 @@ public class ImsService extends Service {
     /**
      * The ImsService has been bound and is ready for ImsFeature creation based on the Features that
      * the ImsService has registered for with the framework, either in the manifest or via
+     * {@link #querySupportedImsFeatures()}.
+     *
      * The ImsService should use this signal instead of onCreate/onBind or similar to perform
      * feature initialization because the framework may bind to this service multiple times to
      * query the ImsService's {@link ImsFeatureConfiguration} via
      * {@link #querySupportedImsFeatures()}before creating features.
-     * @hide
      */
     public void readyForFeatureCreation() {
     }
@@ -318,7 +337,6 @@ public class ImsService extends Service {
     /**
      * The framework has enabled IMS for the slot specified, the ImsService should register for IMS
      * and perform all appropriate initialization to bring up all ImsFeatures.
-     * @hide
      */
     public void enableIms(int slotId) {
     }
@@ -326,50 +344,50 @@ public class ImsService extends Service {
     /**
      * The framework has disabled IMS for the slot specified. The ImsService must deregister for IMS
      * and set capability status to false for all ImsFeatures.
-     * @hide
      */
     public void disableIms(int slotId) {
     }
 
     /**
-     * When called, the framework is requesting that a new MmTelFeature is created for the specified
-     * slot.
+     * When called, the framework is requesting that a new {@link MmTelFeature} is created for the
+     * specified slot.
      *
-     * @param slotId The slot ID that the MMTel Feature is being created for.
-     * @return The newly created MmTelFeature associated with the slot or null if the feature is not
-     * supported.
-     * @hide
+     * @param slotId The slot ID that the MMTEL Feature is being created for.
+     * @return The newly created {@link MmTelFeature} associated with the slot or null if the
+     * feature is not supported.
      */
     public MmTelFeature createMmTelFeature(int slotId) {
         return null;
     }
 
     /**
-     * When called, the framework is requesting that a new RcsFeature is created for the specified
-     * slot
+     * When called, the framework is requesting that a new {@link RcsFeature} is created for the
+     * specified slot.
      *
      * @param slotId The slot ID that the RCS Feature is being created for.
-     * @return The newly created RcsFeature associated with the slot or null if the feature is not
-     * supported.
-     * @hide
+     * @return The newly created {@link RcsFeature} associated with the slot or null if the feature
+     * is not supported.
      */
     public RcsFeature createRcsFeature(int slotId) {
         return null;
     }
 
     /**
+     * Return the {@link ImsConfigImplBase} implementation associated with the provided slot. This
+     * will be used by the platform to get/set specific IMS related configurations.
+     *
      * @param slotId The slot that the IMS configuration is associated with.
      * @return ImsConfig implementation that is associated with the specified slot.
-     * @hide
      */
     public ImsConfigImplBase getConfig(int slotId) {
         return new ImsConfigImplBase();
     }
 
     /**
+     * Return the {@link ImsRegistrationImplBase} implementation associated with the provided slot.
+     *
      * @param slotId The slot that is associated with the IMS Registration.
      * @return the ImsRegistration implementation associated with the slot.
-     * @hide
      */
     public ImsRegistrationImplBase getRegistration(int slotId) {
         return new ImsRegistrationImplBase();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,15 @@
  * limitations under the License
  */
 
-package android.telephony.ims.stub;
+package android.telephony.ims.compat.stub;
 
 import android.os.Bundle;
 import android.os.RemoteException;
 
-import com.android.ims.ImsCallForwardInfo;
-import com.android.ims.ImsReasonInfo;
-import com.android.ims.ImsSsData;
-import com.android.ims.ImsSsInfo;
+import android.telephony.ims.ImsCallForwardInfo;
+import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.ImsSsData;
+import android.telephony.ims.ImsSsInfo;
 import com.android.ims.internal.IImsUt;
 import com.android.ims.internal.IImsUtListener;
 

@@ -16,6 +16,7 @@
 
 package android.telephony.ims.feature;
 
+import android.annotation.SystemApi;
 import android.telephony.ims.aidl.IImsRcsFeature;
 
 /**
@@ -23,9 +24,10 @@ import android.telephony.ims.aidl.IImsRcsFeature;
  * this class and provide implementations of the RcsFeature methods that they support.
  * @hide
  */
-
+@SystemApi
 public class RcsFeature extends ImsFeature {
 
+    /**{@inheritDoc}*/
     private final IImsRcsFeature mImsRcsBinder = new IImsRcsFeature.Stub() {
         // Empty Default Implementation.
     };
@@ -35,12 +37,16 @@ public class RcsFeature extends ImsFeature {
         super();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void changeEnabledCapabilities(CapabilityChangeRequest request,
             CapabilityCallbackProxy c) {
         // Do nothing for base implementation.
     }
 
+    /**{@inheritDoc}*/
     @Override
     public void onFeatureRemoved() {
 
@@ -52,6 +58,9 @@ public class RcsFeature extends ImsFeature {
 
     }
 
+    /**
+     * @hide
+     */
     @Override
     public final IImsRcsFeature getBinder() {
         return mImsRcsBinder;
