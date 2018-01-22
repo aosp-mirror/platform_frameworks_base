@@ -9210,10 +9210,13 @@ public class DevicePolicyManager {
     /**
      * Allows/disallows printing.
      *
+     * Called by a device owner or a profile owner.
+     * Device owner changes policy for all users. Profile owner can override it if present.
+     * Printing is enabled by default. If {@code FEATURE_PRINTING} is absent, the call is ignored.
+     *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with.
      * @param enabled whether printing should be allowed or not.
      * @throws SecurityException if {@code admin} is neither device, nor profile owner.
-     * @hide
      */
     public void setPrintingEnabled(@NonNull ComponentName admin, boolean enabled) {
         try {
@@ -9224,10 +9227,12 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns whether printing is enabled for current user.
+     * Returns whether printing is enabled for this user.
+     *
+     * Always {@code false} if {@code FEATURE_PRINTING} is absent.
+     * Otherwise, {@code true} by default.
      *
      * @return {@code true} iff printing is enabled.
-     * @hide
      */
     public boolean isPrintingEnabled() {
         try {
@@ -9242,9 +9247,9 @@ public class DevicePolicyManager {
      *
      * Used only by PrintService.
      * @return Localized error message.
-     * @throws SecurityException if caller is not system.
      * @hide
      */
+    @SystemApi
     public CharSequence getPrintingDisabledReason() {
         try {
             return mService.getPrintingDisabledReason();
