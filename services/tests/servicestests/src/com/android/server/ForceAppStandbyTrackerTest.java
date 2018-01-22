@@ -42,6 +42,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager.ServiceType;
@@ -51,6 +52,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentResolver;
@@ -105,6 +107,9 @@ public class ForceAppStandbyTrackerTest {
         PowerManagerInternal injectPowerManagerInternal() {
             return mMockPowerManagerInternal;
         }
+
+        @Override
+        boolean isSmallBatteryDevice() { return mIsSmallBatteryDevice; };
     }
 
     private static final int UID_1 = Process.FIRST_APPLICATION_UID + 1;
@@ -144,6 +149,7 @@ public class ForceAppStandbyTrackerTest {
     private FakeSettingsProvider mFakeSettingsProvider;
 
     private boolean mPowerSaveMode;
+    private boolean mIsSmallBatteryDevice;
 
     private final ArraySet<Pair<Integer, String>> mRestrictedPackages = new ArraySet();
 
@@ -232,6 +238,7 @@ public class ForceAppStandbyTrackerTest {
         assertNotNull(mAppOpsCallback);
         assertNotNull(mPowerSaveObserver);
         assertNotNull(mReceiver);
+        assertNotNull(instance.mFlagsObserver);
     }
 
     private void setAppOps(int uid, String packageName, boolean restrict) throws RemoteException {
@@ -850,6 +857,56 @@ public class ForceAppStandbyTrackerTest {
 
         assertFalse(instance.isRunAnyInBackgroundAppOpsAllowed(UID_2, PACKAGE_2));
         assertTrue(instance.isRunAnyInBackgroundAppOpsAllowed(UID_10_2, PACKAGE_2));
+    }
+
+    @Test
+    public void testSmallBatteryAndPluggedIn() throws Exception {
+        // This is a small battery device
+        mIsSmallBatteryDevice = true;
+
+        final ForceAppStandbyTrackerTestable instance = newInstance();
+        callStart(instance);
+        assertFalse(instance.isForceAllAppsStandbyEnabled());
+
+        // Setting/experiment for all app standby for small battery is enabled
+        Global.putInt(mMockContentResolver, Global.FORCED_APP_STANDBY_FOR_SMALL_BATTERY_ENABLED, 1);
+        instance.mFlagsObserver.onChange(true,
+                Global.getUriFor(Global.FORCED_APP_STANDBY_FOR_SMALL_BATTERY_ENABLED));
+        assertTrue(instance.isForceAllAppsStandbyEnabled());
+
+        // When battery is plugged in, force app standby is disabled
+        Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
+        intent.putExtra(BatteryManager.EXTRA_PLUGGED, BatteryManager.BATTERY_PLUGGED_USB);
+        mReceiver.onReceive(mMockContext, intent);
+        assertFalse(instance.isForceAllAppsStandbyEnabled());
+
+        // When battery stops plugged in, force app standby is enabled
+        mReceiver.onReceive(mMockContext, new Intent(Intent.ACTION_BATTERY_CHANGED));
+        assertTrue(instance.isForceAllAppsStandbyEnabled());
+    }
+
+    @Test
+    public void testNotSmallBatteryAndPluggedIn() throws Exception {
+        // Not a small battery device, so plugged in status should not affect forced app standby
+        mIsSmallBatteryDevice = false;
+
+        final ForceAppStandbyTrackerTestable instance = newInstance();
+        callStart(instance);
+        assertFalse(instance.isForceAllAppsStandbyEnabled());
+
+        mPowerSaveMode = true;
+        mPowerSaveObserver.accept(getPowerSaveState());
+        assertTrue(instance.isForceAllAppsStandbyEnabled());
+
+        // When battery is plugged in, force app standby is unaffected
+        Intent intent = new Intent(Intent.ACTION_BATTERY_CHANGED);
+        intent.putExtra(BatteryManager.EXTRA_PLUGGED, BatteryManager.BATTERY_PLUGGED_USB);
+        mReceiver.onReceive(mMockContext, intent);
+        assertTrue(instance.isForceAllAppsStandbyEnabled());
+
+        // When battery stops plugged in, force app standby is unaffected
+        mReceiver.onReceive(mMockContext, new Intent(Intent.ACTION_BATTERY_CHANGED));
+        assertTrue(instance.isForceAllAppsStandbyEnabled());
     }
 
     static int[] array(int... appIds) {
