@@ -265,6 +265,10 @@ public class InputMethodService extends AbstractInputMethodService {
      */
     public static final int IME_VISIBLE = 0x2;
 
+    // Min and max values for back disposition.
+    private static final int BACK_DISPOSITION_MIN = BACK_DISPOSITION_DEFAULT;
+    private static final int BACK_DISPOSITION_MAX = BACK_DISPOSITION_WILL_DISMISS;
+
     InputMethodManager mImm;
     
     int mTheme = 0;
@@ -501,9 +505,8 @@ public class InputMethodService extends AbstractInputMethodService {
             }
             clearInsetOfPreviousIme();
             // If user uses hard keyboard, IME button should always be shown.
-            boolean showing = isInputViewShown();
             mImm.setImeWindowStatus(mToken, mStartInputToken,
-                    IME_ACTIVE | (showing ? IME_VISIBLE : 0), mBackDisposition);
+                    mapToImeWindowStatus(isInputViewShown()), mBackDisposition);
             if (resultReceiver != null) {
                 resultReceiver.send(wasVis != isInputViewShown()
                         ? InputMethodManager.RESULT_SHOWN
@@ -1014,7 +1017,16 @@ public class InputMethodService extends AbstractInputMethodService {
     }
     
     public void setBackDisposition(int disposition) {
+        if (disposition == mBackDisposition) {
+            return;
+        }
+        if (disposition > BACK_DISPOSITION_MAX || disposition < BACK_DISPOSITION_MIN) {
+            Log.e(TAG, "Invalid back disposition value (" + disposition + ") specified.");
+            return;
+        }
         mBackDisposition = disposition;
+        mImm.setImeWindowStatus(mToken, mStartInputToken, mapToImeWindowStatus(isInputViewShown()),
+                mBackDisposition);
     }
 
     public int getBackDisposition() {
@@ -1762,7 +1774,7 @@ public class InputMethodService extends AbstractInputMethodService {
             startExtractingText(false);
         }
 
-        final int nextImeWindowStatus = IME_ACTIVE | (isInputViewShown() ? IME_VISIBLE : 0);
+        final int nextImeWindowStatus = mapToImeWindowStatus(isInputViewShown());
         if (previousImeWindowStatus != nextImeWindowStatus) {
             mImm.setImeWindowStatus(mToken, mStartInputToken, nextImeWindowStatus,
                     mBackDisposition);
@@ -1889,6 +1901,7 @@ public class InputMethodService extends AbstractInputMethodService {
         mInputStarted = false;
         mStartedInputConnection = null;
         mCurCompletions = null;
+        mBackDisposition = BACK_DISPOSITION_DEFAULT;
     }
 
     void doStartInput(InputConnection ic, EditorInfo attribute, boolean restarting) {
@@ -2104,7 +2117,11 @@ public class InputMethodService extends AbstractInputMethodService {
      * them to perform navigation in the underlying application.
      */
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+
         if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+            if (mBackDisposition == BACK_DISPOSITION_WILL_NOT_DISMISS) {
+                return false;
+            }
             final ExtractEditText eet = getExtractEditTextIfVisible();
             if (eet != null && eet.handleBackInTextActionModeIfNeeded(event)) {
                 return true;
@@ -2736,6 +2753,10 @@ public class InputMethodService extends AbstractInputMethodService {
             return;
         }
         mImm.exposeContent(mToken, inputContentInfo, getCurrentInputEditorInfo());
+    }
+
+    private static int mapToImeWindowStatus(boolean isInputViewShown) {
+        return IME_ACTIVE | (isInputViewShown ? IME_VISIBLE : 0);
     }
 
     /**
