@@ -137,6 +137,7 @@ import android.service.notification.NotificationRankingUpdate;
 import android.service.notification.NotificationRecordProto;
 import android.service.notification.NotificationServiceDumpProto;
 import android.service.notification.NotificationStats;
+import android.service.notification.NotifyingApp;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
@@ -329,6 +330,7 @@ public class NotificationManagerService extends SystemService {
     final ArrayMap<Integer, ArrayMap<String, String>> mAutobundledSummaries = new ArrayMap<>();
     final ArrayList<ToastRecord> mToastQueue = new ArrayList<>();
     final ArrayMap<String, NotificationRecord> mSummaryByGroupKey = new ArrayMap<>();
+    final ArrayMap<Integer, ArrayList<NotifyingApp>> mRecentApps = new ArrayMap<>();
 
     // The last key in this list owns the hardware.
     ArrayList<String> mLights = new ArrayList<>();
@@ -2107,6 +2109,16 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystemOrSameApp(pkg);
             return mRankingHelper.getNotificationChannels(
                     pkg, Binder.getCallingUid(), false /* includeDeleted */);
+        }
+
+        @Override
+        public ParceledListSlice<NotifyingApp> getRecentNotifyingAppsForUser(int userId) {
+            checkCallerIsSystem();
+            synchronized (mNotificationLock) {
+                List<NotifyingApp> apps = new ArrayList<>(
+                        mRecentApps.getOrDefault(userId, new ArrayList<>()));
+                return new ParceledListSlice<>(apps);
+            }
         }
 
         @Override
@@ -4096,6 +4108,10 @@ public class NotificationManagerService extends SystemService {
 
                     mNotificationsByKey.put(n.getKey(), r);
 
+                    if (!r.isUpdate) {
+                        logRecentLocked(r);
+                    }
+
                     // Ensure if this is a foreground service that the proper additional
                     // flags are set.
                     if ((notification.flags & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
@@ -4150,6 +4166,38 @@ public class NotificationManagerService extends SystemService {
                 }
             }
         }
+    }
+
+    /**
+     * Keeps the last 5 packages that have notified, by user.
+     */
+    @GuardedBy("mNotificationLock")
+    @VisibleForTesting
+    protected void logRecentLocked(NotificationRecord r) {
+        if (r.isUpdate) {
+            return;
+        }
+        ArrayList<NotifyingApp> recentAppsForUser =
+                mRecentApps.getOrDefault(r.getUser().getIdentifier(), new ArrayList<>(6));
+        NotifyingApp na = new NotifyingApp()
+                .setPackage(r.sbn.getPackageName())
+                .setUid(r.sbn.getUid())
+                .setLastNotified(r.sbn.getPostTime());
+        // A new notification gets an app moved to the front of the list
+        for (int i = recentAppsForUser.size() - 1; i >= 0; i--) {
+            NotifyingApp naExisting = recentAppsForUser.get(i);
+            if (na.getPackage().equals(naExisting.getPackage())
+                    && na.getUid() == naExisting.getUid()) {
+                recentAppsForUser.remove(i);
+                break;
+            }
+        }
+        // time is always increasing, so always add to the front of the list
+        recentAppsForUser.add(0, na);
+        if (recentAppsForUser.size() > 5) {
+            recentAppsForUser.remove(recentAppsForUser.size() -1);
+        }
+        mRecentApps.put(r.getUser().getIdentifier(), recentAppsForUser);
     }
 
     /**

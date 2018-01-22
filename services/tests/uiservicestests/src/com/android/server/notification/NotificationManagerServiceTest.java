@@ -73,6 +73,7 @@ import android.provider.Settings.Secure;
 import android.service.notification.Adjustment;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationStats;
+import android.service.notification.NotifyingApp;
 import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -105,8 +106,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -253,8 +256,17 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mFile.delete();
     }
 
-    public void waitForIdle() throws Exception {
+    public void waitForIdle() {
         mTestableLooper.processAllMessages();
+    }
+
+    private StatusBarNotification generateSbn(String pkg, int uid, long postTime, int userId) {
+        Notification.Builder nb = new Notification.Builder(mContext, "a")
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon);
+        StatusBarNotification sbn = new StatusBarNotification(pkg, pkg, uid, "tag", uid, 0,
+                nb.build(), new UserHandle(userId), null, postTime);
+        return sbn;
     }
 
     private NotificationRecord generateNotificationRecord(NotificationChannel channel, int id,
@@ -2290,5 +2302,103 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         waitForIdle();
 
         verify(handler, timeout(300).times(1)).scheduleSendRankingUpdate();
+    }
+
+    @Test
+    public void testRecents() throws Exception {
+        Set<NotifyingApp> expected = new HashSet<>();
+
+        final NotificationRecord oldest = new NotificationRecord(mContext,
+                generateSbn("p", 1000, 9, 0), mTestNotificationChannel);
+        mService.logRecentLocked(oldest);
+        for (int i = 1; i <= 5; i++) {
+            NotificationRecord r = new NotificationRecord(mContext,
+                    generateSbn("p" + i, i, i*100, 0), mTestNotificationChannel);
+            expected.add(new NotifyingApp()
+                    .setPackage(r.sbn.getPackageName())
+                    .setUid(r.sbn.getUid())
+                    .setLastNotified(r.sbn.getPostTime()));
+            mService.logRecentLocked(r);
+        }
+
+        List<NotifyingApp> apps = mBinderService.getRecentNotifyingAppsForUser(0).getList();
+        assertTrue(apps.size() == 5);
+        for (NotifyingApp actual : apps) {
+            assertTrue("got unexpected result: " + actual, expected.contains(actual));
+        }
+    }
+
+    @Test
+    public void testRecentsNoDuplicatePackages() throws Exception {
+        final NotificationRecord p1 = new NotificationRecord(mContext, generateSbn("p", 1, 1000, 0),
+                mTestNotificationChannel);
+        final NotificationRecord p2 = new NotificationRecord(mContext, generateSbn("p", 1, 2000, 0),
+                mTestNotificationChannel);
+
+        mService.logRecentLocked(p1);
+        mService.logRecentLocked(p2);
+
+        List<NotifyingApp> apps = mBinderService.getRecentNotifyingAppsForUser(0).getList();
+        assertTrue(apps.size() == 1);
+        NotifyingApp expected = new NotifyingApp().setPackage("p").setUid(1).setLastNotified(2000);
+        assertEquals(expected, apps.get(0));
+    }
+
+    @Test
+    public void testRecentsWithDuplicatePackage() throws Exception {
+        Set<NotifyingApp> expected = new HashSet<>();
+
+        final NotificationRecord oldest = new NotificationRecord(mContext,
+                generateSbn("p", 1000, 9, 0), mTestNotificationChannel);
+        mService.logRecentLocked(oldest);
+        for (int i = 1; i <= 5; i++) {
+            NotificationRecord r = new NotificationRecord(mContext,
+                    generateSbn("p" + i, i, i*100, 0), mTestNotificationChannel);
+            expected.add(new NotifyingApp()
+                    .setPackage(r.sbn.getPackageName())
+                    .setUid(r.sbn.getUid())
+                    .setLastNotified(r.sbn.getPostTime()));
+            mService.logRecentLocked(r);
+        }
+        NotificationRecord r = new NotificationRecord(mContext,
+                generateSbn("p" + 3, 3, 300000, 0), mTestNotificationChannel);
+        expected.remove(new NotifyingApp()
+                .setPackage(r.sbn.getPackageName())
+                .setUid(3)
+                .setLastNotified(300));
+        NotifyingApp newest = new NotifyingApp()
+                .setPackage(r.sbn.getPackageName())
+                .setUid(r.sbn.getUid())
+                .setLastNotified(r.sbn.getPostTime());
+        expected.add(newest);
+        mService.logRecentLocked(r);
+
+        List<NotifyingApp> apps = mBinderService.getRecentNotifyingAppsForUser(0).getList();
+        assertTrue(apps.size() == 5);
+        for (NotifyingApp actual : apps) {
+            assertTrue("got unexpected result: " + actual, expected.contains(actual));
+        }
+        assertEquals(newest, apps.get(0));
+    }
+
+    @Test
+    public void testRecentsMultiuser() throws Exception {
+        final NotificationRecord user1 = new NotificationRecord(mContext,
+                generateSbn("p", 1000, 9, 1), mTestNotificationChannel);
+        mService.logRecentLocked(user1);
+
+        final NotificationRecord user2 = new NotificationRecord(mContext,
+                generateSbn("p2", 100000, 9999, 2), mTestNotificationChannel);
+        mService.logRecentLocked(user2);
+
+        assertEquals(0, mBinderService.getRecentNotifyingAppsForUser(0).getList().size());
+        assertEquals(1, mBinderService.getRecentNotifyingAppsForUser(1).getList().size());
+        assertEquals(1, mBinderService.getRecentNotifyingAppsForUser(2).getList().size());
+
+        assertTrue(mBinderService.getRecentNotifyingAppsForUser(2).getList().contains(
+                new NotifyingApp()
+                        .setPackage(user2.sbn.getPackageName())
+                        .setUid(user2.sbn.getUid())
+                        .setLastNotified(user2.sbn.getPostTime())));
     }
 }
