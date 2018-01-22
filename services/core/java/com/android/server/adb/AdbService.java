@@ -22,6 +22,7 @@ import android.debug.IAdbTransport;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.ArrayMap;
+import android.util.Slog;
 
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
@@ -51,6 +52,13 @@ public class AdbService extends IAdbManager.Stub {
             mAdbService = new AdbService(getContext());
             publishBinderService(Context.ADB_SERVICE, mAdbService);
         }
+
+        @Override
+        public void onBootPhase(int phase) {
+            if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+                mAdbService.systemReady();
+            }
+        }
     }
 
     private class AdbManagerInternalImpl extends AdbManagerInternal {
@@ -71,6 +79,7 @@ public class AdbService extends IAdbManager.Stub {
     }
 
     private static final String TAG = "AdbService";
+    private static final boolean DEBUG = false;
 
     private final Context mContext;
     private final ArrayMap<IBinder, IAdbTransport> mTransports = new ArrayMap<>();
@@ -81,6 +90,14 @@ public class AdbService extends IAdbManager.Stub {
         mContext = context;
 
         LocalServices.addService(AdbManagerInternal.class, new AdbManagerInternalImpl());
+    }
+
+    /**
+     * Called in response to {@code SystemService.PHASE_ACTIVITY_MANAGER_READY} from {@code
+     * SystemServer}.
+     */
+    public void systemReady() {
+        if (DEBUG) Slog.d(TAG, "systemReady");
     }
 
     @Override
