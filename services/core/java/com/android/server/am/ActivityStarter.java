@@ -1252,7 +1252,7 @@ class ActivityStarter {
                     outActivity[0] = reusedActivity;
                 }
 
-                return START_TASK_TO_FRONT;
+                return START_DELIVERED_TO_TOP;
             }
         }
 

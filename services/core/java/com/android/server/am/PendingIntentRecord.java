@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManager.START_SUCCESS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -311,7 +312,7 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                 if (userId == UserHandle.USER_CURRENT) {
                     userId = owner.mUserController.getCurrentOrTargetUserId();
                 }
-                int res = 0;
+                int res = START_SUCCESS;
                 switch (key.type) {
                     case ActivityManager.INTENT_SENDER_ACTIVITY:
                         try {
@@ -332,11 +333,11 @@ final class PendingIntentRecord extends IIntentSender.Stub {
                                 }
                                 allIntents[allIntents.length-1] = finalIntent;
                                 allResolvedTypes[allResolvedTypes.length-1] = resolvedType;
-                                owner.getActivityStartController().startActivitiesInPackage(uid,
-                                        key.packageName, allIntents, allResolvedTypes, resultTo,
-                                        mergedOptions, userId);
+                                res = owner.getActivityStartController().startActivitiesInPackage(
+                                        uid, key.packageName, allIntents, allResolvedTypes,
+                                        resultTo, mergedOptions, userId);
                             } else {
-                                owner.getActivityStartController().startActivityInPackage(uid,
+                                res = owner.getActivityStartController().startActivityInPackage(uid,
                                         callingPid, callingUid, key.packageName, finalIntent,
                                         resolvedType, resultTo, resultWho, requestCode, 0,
                                         mergedOptions, userId, null, "PendingIntentRecord");
