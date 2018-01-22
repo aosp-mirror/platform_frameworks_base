@@ -10351,6 +10351,8 @@ public final class Settings {
          * The following keys are supported:
          * <pre>
          * track_cpu_times_by_proc_state (boolean)
+         * track_cpu_active_cluster_time (boolean)
+         * read_binary_cpu_time          (boolean)
          * </pre>
          *
          * <p>
