@@ -118,6 +118,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.ResourcesManager;
@@ -992,6 +993,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private List<String> mKeepUninstalledPackages;
 
     private UserManagerInternal mUserManagerInternal;
+    private ActivityManagerInternal mActivityManagerInternal;
 
     private DeviceIdleController.LocalService mDeviceIdleController;
 
@@ -4575,6 +4577,14 @@ Slog.e("TODD",
         return mUserManagerInternal;
     }
 
+    private ActivityManagerInternal getActivityManagerInternal() {
+        if (mActivityManagerInternal == null) {
+            mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+        }
+        return mActivityManagerInternal;
+    }
+
+
     private DeviceIdleController.LocalService getDeviceIdleController() {
         if (mDeviceIdleController == null) {
             mDeviceIdleController =
@@ -4735,8 +4745,12 @@ Slog.e("TODD",
             int filterCallingUid, int userId) {
         if (!sUserManager.exists(userId)) return null;
         flags = updateFlagsForComponent(flags, userId, component);
-        mPermissionManager.enforceCrossUserPermission(Binder.getCallingUid(), userId,
-                false /* requireFullPermission */, false /* checkShell */, "get activity info");
+
+        if (!isRecentsAccessingChildProfiles(Binder.getCallingUid(), userId)) {
+            mPermissionManager.enforceCrossUserPermission(Binder.getCallingUid(), userId,
+                    false /* requireFullPermission */, false /* checkShell */, "get activity info");
+        }
+
         synchronized (mPackages) {
             PackageParser.Activity a = mActivities.mActivities.get(component);
 
@@ -4756,6 +4770,22 @@ Slog.e("TODD",
             }
         }
         return null;
+    }
+
+    private boolean isRecentsAccessingChildProfiles(int callingUid, int targetUserId) {
+        if (!getActivityManagerInternal().isCallerRecents(callingUid)) {
+            return false;
+        }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            final int callingUserId = UserHandle.getUserId(callingUid);
+            if (ActivityManager.getCurrentUser() != callingUserId) {
+                return false;
+            }
+            return sUserManager.isSameProfileGroup(callingUserId, targetUserId);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override
