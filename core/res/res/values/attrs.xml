@@ -2066,7 +2066,8 @@
              <p>For this to take effect, the window must be drawing the system bar backgrounds with
              {@link android.R.attr#windowDrawsSystemBarBackgrounds} and the navigation bar must not
              have been requested to be translucent with
-             {@link android.R.attr#windowTranslucentNavigation}. -->
+             {@link android.R.attr#windowTranslucentNavigation}.
+             Corresponds to {@link android.view.Window#setNavigationBarDividerColor(int)}. -->
         <attr name="navigationBarDividerColor" format="color" />
 
         <!-- The duration, in milliseconds, of the window background fade duration
