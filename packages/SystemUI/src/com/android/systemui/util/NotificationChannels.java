@@ -31,7 +31,8 @@ import java.util.Arrays;
 
 public class NotificationChannels extends SystemUI {
     public static String ALERTS      = "ALR";
-    public static String SCREENSHOTS = "SCN";
+    public static String SCREENSHOTS_LEGACY = "SCN";
+    public static String SCREENSHOTS_HEADSUP = "SCN_HEADSUP";
     public static String GENERAL     = "GEN";
     public static String STORAGE     = "DSK";
     public static String TVPIP       = "TPP";
@@ -56,10 +57,6 @@ public class NotificationChannels extends SystemUI {
                         context.getString(R.string.notification_channel_alerts),
                         NotificationManager.IMPORTANCE_HIGH),
                 new NotificationChannel(
-                        SCREENSHOTS,
-                        context.getString(R.string.notification_channel_screenshot),
-                        NotificationManager.IMPORTANCE_LOW),
-                new NotificationChannel(
                         GENERAL,
                         context.getString(R.string.notification_channel_general),
                         NotificationManager.IMPORTANCE_MIN),
@@ -69,8 +66,17 @@ public class NotificationChannels extends SystemUI {
                         isTv(context)
                                 ? NotificationManager.IMPORTANCE_DEFAULT
                                 : NotificationManager.IMPORTANCE_LOW),
+                createScreenshotChannel(
+                        context.getString(R.string.notification_channel_screenshot),
+                        nm.getNotificationChannel(SCREENSHOTS_LEGACY)),
                 batteryChannel
         ));
+
+        // Delete older SS channel if present.
+        // Screenshots promoted to heads-up in P, this cleans up the lower priority channel from O.
+        // This line can be deleted in Q.
+        nm.deleteNotificationChannel(SCREENSHOTS_LEGACY);
+
 
         if (isTv(context)) {
             // TV specific notification channel for TV PIP controls.
@@ -81,6 +87,40 @@ public class NotificationChannels extends SystemUI {
                     context.getString(R.string.notification_channel_tv_pip),
                     NotificationManager.IMPORTANCE_MAX));
         }
+    }
+
+    /**
+     * Set up screenshot channel, respecting any previously committed user settings on legacy
+     * channel.
+     * @return
+     */
+    @VisibleForTesting static NotificationChannel createScreenshotChannel(
+            String name, NotificationChannel legacySS) {
+        NotificationChannel screenshotChannel = new NotificationChannel(SCREENSHOTS_HEADSUP,
+                name, NotificationManager.IMPORTANCE_HIGH); // pop on screen
+
+        screenshotChannel.setSound(Uri.parse(""), // silent
+                new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION).build());
+
+        if (legacySS != null) {
+            // Respect any user modified fields from the old channel.
+            int userlock = legacySS.getUserLockedFields();
+            if ((userlock & NotificationChannel.USER_LOCKED_IMPORTANCE) != 0) {
+                screenshotChannel.setImportance(legacySS.getImportance());
+            }
+            if ((userlock & NotificationChannel.USER_LOCKED_SOUND) != 0)  {
+                screenshotChannel.setSound(legacySS.getSound(), legacySS.getAudioAttributes());
+            }
+            if ((userlock & NotificationChannel.USER_LOCKED_VIBRATION) != 0)  {
+                screenshotChannel.setVibrationPattern(legacySS.getVibrationPattern());
+            }
+            if ((userlock & NotificationChannel.USER_LOCKED_LIGHTS) != 0)  {
+                screenshotChannel.setLightColor(legacySS.getLightColor());
+            }
+            // skip show_badge, irrelevant for system channel
+        }
+
+        return screenshotChannel;
     }
 
     @Override
