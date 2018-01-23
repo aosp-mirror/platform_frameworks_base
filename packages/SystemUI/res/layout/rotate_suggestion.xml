@@ -14,19 +14,13 @@
      limitations under the License.
 -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:systemui="http://schemas.android.com/apk/res-auto"
-    android:layout_width="@dimen/navigation_side_padding"
+<com.android.systemui.statusbar.policy.KeyButtonView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rotate_suggestion"
+    android:layout_width="@dimen/navigation_extra_key_width"
     android:layout_height="match_parent"
-    android:layout_weight="0"
-    >
-    <com.android.systemui.statusbar.policy.KeyButtonView
-        android:id="@+id/rotate_suggestion"
-        android:layout_width="@dimen/navigation_extra_key_width"
-        android:layout_height="match_parent"
-        android:layout_marginEnd="2dp"
-        android:visibility="invisible"
-        android:scaleType="centerInside"
-    />
-    <!-- TODO android:contentDescription -->
-</FrameLayout>
+    android:layout_marginEnd="2dp"
+    android:visibility="invisible"
+    android:scaleType="centerInside"
+    android:contentDescription="@string/accessibility_rotate_button"
+/>

@@ -228,6 +228,8 @@
     <string name="accessibility_menu">Menu</string>
     <!-- Content description of the accessibility button in the navigation bar (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_accessibility_button">Accessibility</string>
+    <!-- Content description of the rotate button in the navigation bar (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_rotate_button">Rotate screen</string>
     <!-- Content description of the recents button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_recent">Overview</string>
     <!-- Content description of the search button for accessibility. [CHAR LIMIT=NONE] -->
