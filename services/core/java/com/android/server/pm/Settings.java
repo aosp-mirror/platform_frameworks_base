@@ -920,13 +920,13 @@ public final class Settings {
     // by that time.
     void insertPackageSettingLPw(PackageSetting p, PackageParser.Package pkg) {
         // Update signatures if needed.
-        if (p.signatures.mSignatures == null) {
-            p.signatures.assignSignatures(pkg.mSigningDetails);
+        if (p.signatures.mSigningDetails.signatures == null) {
+            p.signatures.mSigningDetails = pkg.mSigningDetails;
         }
         // If this app defines a shared user id initialize
         // the shared user signatures as well.
-        if (p.sharedUser != null && p.sharedUser.signatures.mSignatures == null) {
-            p.sharedUser.signatures.assignSignatures(pkg.mSigningDetails);
+        if (p.sharedUser != null && p.sharedUser.signatures.mSigningDetails.signatures == null) {
+            p.sharedUser.signatures.mSigningDetails = pkg.mSigningDetails;
         }
         addPackageSettingLPw(p, p.sharedUser);
     }
