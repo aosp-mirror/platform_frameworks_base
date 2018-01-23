@@ -9424,6 +9424,14 @@ public final class Settings {
        public static final String WIFI_VERBOSE_LOGGING_ENABLED =
                "wifi_verbose_logging_enabled";
 
+        /**
+         * Setting to enable connected MAC randomization in Wi-Fi; disabled by default, and
+         * setting to 1 will enable it. In the future, additional values may be supported.
+         * @hide
+         */
+        public static final String WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED =
+                "wifi_connected_mac_randomization_enabled";
+
        /**
         * The maximum number of times we will retry a connection to an access
         * point for which we have failed in acquiring an IP address from DHCP.

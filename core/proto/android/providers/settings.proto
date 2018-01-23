@@ -391,8 +391,9 @@ message GlobalSettingsProto {
     optional SettingProto zram_enabled = 347;
     optional SettingProto enable_smart_replies_in_notifications = 348;
     optional SettingProto show_first_crash_dialog = 349;
+    optional SettingProto wifi_connected_mac_randomization_enabled = 350;
 
-    // Next tag = 350;
+    // Next tag = 351;
 }
 
 message SecureSettingsProto {
