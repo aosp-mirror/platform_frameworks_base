@@ -108,6 +108,8 @@ message Atom {
         CpuIdleTime cpu_idle_time = 10015;
         CpuActiveTime cpu_active_time = 10016;
         CpuClusterTime cpu_cluster_time = 10017;
+        DiskSpace disk_space = 10018;
+        SystemUptime system_uptime = 10019;
     }
 }
 
@@ -1297,4 +1299,27 @@ message CpuClusterTime {
     optional uint64 uid = 1;
     optional uint64 idx = 2;
     optional uint64 time_ms = 3;
+}
+
+/*
+ * Pulls free disk space, for data, system partition and temporary directory.
+ */
+message DiskSpace {
+    // available bytes in data partition
+    optional uint64 data_available_bytes = 1;
+    // available bytes in system partition
+    optional uint64 system_available_bytes = 2;
+    // available bytes in download cache or temp directories
+    optional uint64 temp_available_bytes = 3;
+}
+
+/*
+ * Pulls system up time.
+ */
+message SystemUptime {
+    // Milliseconds since the system was booted.
+    // This clock stops when the system enters deep sleep (CPU off, display dark, device waiting
+    // for external input).
+    // It is not affected by clock scaling, idle, or other power saving mechanisms.
+    optional uint64 uptime_ms = 1;
 }

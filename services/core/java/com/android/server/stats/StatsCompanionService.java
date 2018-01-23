@@ -28,12 +28,10 @@ import android.content.pm.UserInfo;
 import android.net.NetworkStats;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiActivityEnergyInfo;
-import android.os.SystemClock;
-import android.telephony.ModemActivityInfo;
-import android.telephony.TelephonyManager;
 import android.os.BatteryStatsInternal;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.IStatsCompanionService;
 import android.os.IStatsManager;
@@ -41,18 +39,22 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.StatFs;
 import android.os.StatsLogEventWrapper;
 import android.os.SynchronousResultReceiver;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.telephony.ModemActivityInfo;
+import android.telephony.TelephonyManager;
 import android.util.Slog;
 import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.net.NetworkStatsFactory;
+import com.android.internal.os.KernelCpuSpeedReader;
 import com.android.internal.os.KernelWakelockReader;
 import com.android.internal.os.KernelWakelockStats;
-import com.android.internal.os.KernelCpuSpeedReader;
 import com.android.internal.os.PowerProfile;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -97,6 +99,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private final KernelCpuSpeedReader[] mKernelCpuSpeedReaders;
     private IWifiManager mWifiManager = null;
     private TelephonyManager mTelephony = null;
+    private final StatFs mStatFsData = new StatFs(Environment.getDataDirectory().getAbsolutePath());
+    private final StatFs mStatFsSystem =
+        new StatFs(Environment.getRootDirectory().getAbsolutePath());
+    private final StatFs mStatFsTemp =
+        new StatFs(Environment.getDownloadCacheDirectory().getAbsolutePath());
 
     public StatsCompanionService(Context context) {
         super();
@@ -560,7 +567,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     if (clusterTimeMs != null) {
                         for (int speed = clusterTimeMs.length - 1; speed >= 0; --speed) {
                             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 3);
-                            e.writeInt(tagId);
+                            e.writeInt(cluster);
                             e.writeInt(speed);
                             e.writeLong(clusterTimeMs[speed]);
                             ret.add(e);
@@ -589,6 +596,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                         e.writeLong(wifiInfo.getControllerIdleTimeMillis());
                         e.writeLong(wifiInfo.getControllerEnergyUsed());
                         ret.add(e);
+                        return ret.toArray(new StatsLogEventWrapper[ret.size()]);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "Pulling wifiManager for wifi controller activity energy info has error", e);
                     } finally {
@@ -619,6 +627,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                     e.writeLong(modemInfo.getRxTimeMillis());
                     e.writeLong(modemInfo.getEnergyUsed());
                     ret.add(e);
+                    return ret.toArray(new StatsLogEventWrapper[ret.size()]);
                 }
                 break;
             }
@@ -627,14 +636,30 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 1);
                 e.writeLong(SystemClock.elapsedRealtime());
                 ret.add(e);
-                break;
+                return ret.toArray(new StatsLogEventWrapper[ret.size()]);
             }
             case StatsLog.CPU_IDLE_TIME: {
                 List<StatsLogEventWrapper> ret = new ArrayList();
                 StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 1);
                 e.writeLong(SystemClock.uptimeMillis());
                 ret.add(e);
-                break;
+                return ret.toArray(new StatsLogEventWrapper[ret.size()]);
+            }
+            case StatsLog.DISK_SPACE: {
+              List<StatsLogEventWrapper> ret = new ArrayList();
+              StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 3);
+              e.writeLong(mStatFsData.getAvailableBytes());
+              e.writeLong(mStatFsSystem.getAvailableBytes());
+              e.writeLong(mStatFsTemp.getAvailableBytes());
+              ret.add(e);
+              return ret.toArray(new StatsLogEventWrapper[ret.size()]);
+            }
+            case StatsLog.SYSTEM_UPTIME: {
+              List<StatsLogEventWrapper> ret = new ArrayList();
+              StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, 1);
+              e.writeLong(SystemClock.uptimeMillis());
+              ret.add(e);
+              return ret.toArray(new StatsLogEventWrapper[ret.size()]);
             }
             default:
                 Slog.w(TAG, "No such tagId data as " + tagId);
