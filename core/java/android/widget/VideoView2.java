@@ -467,6 +467,16 @@ public class VideoView2 extends FrameLayout {
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        mProvider.onAttachedToWindow_impl();
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        mProvider.onDetachedFromWindow_impl();
+    }
+
+    @Override
     public CharSequence getAccessibilityClassName() {
         return mProvider.getAccessibilityClassName_impl();
     }
@@ -502,6 +512,16 @@ public class VideoView2 extends FrameLayout {
     }
 
     private class SuperProvider implements ViewProvider {
+        @Override
+        public void onAttachedToWindow_impl() {
+            VideoView2.super.onAttachedToWindow();
+        }
+
+        @Override
+        public void onDetachedFromWindow_impl() {
+            VideoView2.super.onDetachedFromWindow();
+        }
+
         @Override
         public CharSequence getAccessibilityClassName_impl() {
             return VideoView2.super.getAccessibilityClassName();

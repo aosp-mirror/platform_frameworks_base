@@ -37,6 +37,8 @@ import android.view.MotionEvent;
 // TODO @SystemApi
 public interface ViewProvider {
     // TODO Add more (all?) methods from View
+    void onAttachedToWindow_impl();
+    void onDetachedFromWindow_impl();
     CharSequence getAccessibilityClassName_impl();
     boolean onTouchEvent_impl(MotionEvent ev);
     boolean onTrackballEvent_impl(MotionEvent ev);
