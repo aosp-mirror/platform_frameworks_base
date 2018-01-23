@@ -26,10 +26,9 @@ import android.telephony.data.IDataServiceCallback;
 oneway interface IDataService
 {
     void setupDataCall(int accessNetwork, in DataProfile dataProfile, boolean isRoaming,
-                       boolean allowRoaming, boolean isHandover, in LinkProperties linkProperties,
+                       boolean allowRoaming, int reason, in LinkProperties linkProperties,
                        IDataServiceCallback callback);
-    void deactivateDataCall(int cid, boolean reasonRadioShutDown, boolean isHandover,
-                            IDataServiceCallback callback);
+    void deactivateDataCall(int cid, int reason, IDataServiceCallback callback);
     void setInitialAttachApn(in DataProfile dataProfile, boolean isRoaming,
                              IDataServiceCallback callback);
     void setDataProfile(in List<DataProfile> dps, boolean isRoaming, IDataServiceCallback callback);
