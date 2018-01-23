@@ -31,7 +31,7 @@
     <TextView android:id="@+id/title"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:layout_marginBottom="@dimen/widget_vertical_padding"
+              android:layout_marginBottom="7dp"
               android:paddingStart="64dp"
               android:paddingEnd="64dp"
               android:theme="@style/TextAppearance.Keyguard"

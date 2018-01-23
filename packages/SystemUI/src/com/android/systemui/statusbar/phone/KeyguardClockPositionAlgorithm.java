@@ -20,6 +20,7 @@ import static com.android.systemui.statusbar.notification.NotificationUtils.inte
 
 import android.content.res.Resources;
 import android.graphics.Path;
+import android.util.MathUtils;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.PathInterpolator;
 
@@ -45,8 +46,7 @@ public class KeyguardClockPositionAlgorithm {
     private static final float BURN_IN_PREVENTION_PERIOD_Y = 521;
     private static final float BURN_IN_PREVENTION_PERIOD_X = 83;
 
-    private int mClockNotificationsMarginMin;
-    private int mClockNotificationsMarginMax;
+    private int mClockNotificationsMargin;
     private float mClockYFractionMin;
     private float mClockYFractionMax;
     private int mMaxKeyguardNotifications;
@@ -84,10 +84,8 @@ public class KeyguardClockPositionAlgorithm {
      * Refreshes the dimension values.
      */
     public void loadDimens(Resources res) {
-        mClockNotificationsMarginMin = res.getDimensionPixelSize(
-                R.dimen.keyguard_clock_notifications_margin_min);
-        mClockNotificationsMarginMax = res.getDimensionPixelSize(
-                R.dimen.keyguard_clock_notifications_margin_max);
+        mClockNotificationsMargin = res.getDimensionPixelSize(
+                R.dimen.keyguard_clock_notifications_margin);
         mClockYFractionMin = res.getFraction(R.fraction.keyguard_clock_y_fraction_min, 1, 1);
         mClockYFractionMax = res.getFraction(R.fraction.keyguard_clock_y_fraction_max, 1, 1);
         mMoreCardNotificationAmount =
@@ -117,7 +115,7 @@ public class KeyguardClockPositionAlgorithm {
 
     public float getMinStackScrollerPadding(int height, int keyguardStatusHeight) {
         return mClockYFractionMin * height + keyguardStatusHeight / 2
-                + mClockNotificationsMarginMin;
+                + mClockNotificationsMargin;
     }
 
     public void run(Result result) {
@@ -125,21 +123,15 @@ public class KeyguardClockPositionAlgorithm {
         float clockAdjustment = getClockYExpansionAdjustment();
         float topPaddingAdjMultiplier = getTopPaddingAdjMultiplier();
         result.stackScrollerPaddingAdjustment = (int) (clockAdjustment*topPaddingAdjMultiplier);
-        int clockNotificationsPadding = getClockNotificationsPadding()
+        result.clockY = y;
+        int clockNotificationsPadding = mClockNotificationsMargin
                 + result.stackScrollerPaddingAdjustment;
         int padding = y + clockNotificationsPadding;
-        result.clockY = y;
-        result.stackScrollerPadding = mKeyguardStatusHeight + padding;
-        result.clockScale = getClockScale(result.stackScrollerPadding,
-                result.clockY,
-                y + getClockNotificationsPadding() + mKeyguardStatusHeight);
+        result.clockScale = getClockScale(mKeyguardStatusHeight + padding,
+                y, y + mClockNotificationsMargin + mKeyguardStatusHeight);
         result.clockAlpha = getClockAlpha(result.clockScale);
 
-        result.stackScrollerPadding = (int) interpolate(
-                result.stackScrollerPadding,
-                mClockBottom + y + mDozingStackPadding,
-                mDarkAmount);
-
+        result.stackScrollerPadding = mClockBottom + y + mDozingStackPadding;
         result.clockX = (int) interpolate(0, burnInPreventionOffsetX(), mDarkAmount);
     }
 
@@ -154,22 +146,16 @@ public class KeyguardClockPositionAlgorithm {
         return interpolate(progress, 1, mDarkAmount);
     }
 
-    private int getClockNotificationsPadding() {
-        float t = getNotificationAmountT();
-        t = Math.min(t, 1.0f);
-        return (int) (t * mClockNotificationsMarginMin + (1 - t) * mClockNotificationsMarginMax);
-    }
-
     private float getClockYFraction() {
         float t = getNotificationAmountT();
         t = Math.min(t, 1.0f);
-        return (1 - t) * mClockYFractionMax + t * mClockYFractionMin;
+        return MathUtils.lerp(mClockYFractionMax, mClockYFractionMin, t);
     }
 
     private int getClockY() {
-        // Dark: Align the bottom edge of the clock at one third:
-        // clockBottomEdge = result - mKeyguardStatusHeight / 2 + mClockBottom
-        float clockYDark = (0.33f * mHeight + (float) mKeyguardStatusHeight / 2 - mClockBottom)
+        // Dark: Align the bottom edge of the clock at about half of the screen:
+        float clockYDark = (mClockYFractionMax * mHeight +
+                (float) mKeyguardStatusHeight / 2 - mClockBottom)
                 + burnInPreventionOffsetY();
         float clockYRegular = getClockYFraction() * mHeight;
         return (int) interpolate(clockYRegular, clockYDark, mDarkAmount);
