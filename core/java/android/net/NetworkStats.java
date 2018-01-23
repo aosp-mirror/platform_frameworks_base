@@ -160,13 +160,6 @@ public class NetworkStats implements Parcelable {
                     rxBytes, rxPackets, txBytes, txPackets, operations);
         }
 
-        // TODO: fix the the telephony code to pass DEFAULT_NETWORK_YES and remove this constructor.
-        public Entry(String iface, int uid, int set, int tag, int metered, int roaming,
-                 long rxBytes, long rxPackets, long txBytes, long txPackets, long operations) {
-            this(iface, uid, set, tag, metered, roaming, DEFAULT_NETWORK_YES, rxBytes, rxPackets,
-                    txBytes, txPackets, operations);
-        }
-
         public Entry(String iface, int uid, int set, int tag, int metered, int roaming,
                  int defaultNetwork, long rxBytes, long rxPackets, long txBytes, long txPackets,
                  long operations) {
