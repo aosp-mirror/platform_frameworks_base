@@ -16,6 +16,7 @@
 
 package android.app.slice;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
@@ -90,66 +91,56 @@ public class SliceManager {
     }
 
     /**
-     * Adds a callback to a specific slice uri.
-     * <p>
-     * This is a convenience that performs a few slice actions at once. It will put
-     * the slice in a pinned state since there is a callback attached. It will also
-     * listen for content changes, when a content change observes, the android system
-     * will bind the new slice and provide it to all registered {@link SliceCallback}s.
-     *
-     * @param uri The uri of the slice being listened to.
-     * @param callback The listener that should receive the callbacks.
-     * @param specs The list of supported {@link SliceSpec}s of the callback.
-     * @see SliceProvider#onSlicePinned(Uri)
+     * @deprecated TO BE REMOVED.
      */
+    @Deprecated
     public void registerSliceCallback(@NonNull Uri uri, @NonNull SliceCallback callback,
             @NonNull List<SliceSpec> specs) {
-        registerSliceCallback(uri, callback, specs, Handler.getMain());
+        registerSliceCallback(uri, specs, mContext.getMainExecutor(), callback);
     }
 
     /**
-     * Adds a callback to a specific slice uri.
-     * <p>
-     * This is a convenience that performs a few slice actions at once. It will put
-     * the slice in a pinned state since there is a callback attached. It will also
-     * listen for content changes, when a content change observes, the android system
-     * will bind the new slice and provide it to all registered {@link SliceCallback}s.
-     *
-     * @param uri The uri of the slice being listened to.
-     * @param callback The listener that should receive the callbacks.
-     * @param specs The list of supported {@link SliceSpec}s of the callback.
-     * @see SliceProvider#onSlicePinned(Uri)
+     * @deprecated TO BE REMOVED.
      */
-    public void registerSliceCallback(@NonNull Uri uri, @NonNull SliceCallback callback,
-            @NonNull List<SliceSpec> specs, Handler handler) {
-        try {
-            mService.addSliceListener(uri, mContext.getPackageName(),
-                    getListener(uri, callback, new ISliceListener.Stub() {
-                        @Override
-                        public void onSliceUpdated(Slice s) throws RemoteException {
-                            handler.post(() -> callback.onSliceUpdated(s));
-                        }
-                    }), specs.toArray(new SliceSpec[specs.size()]));
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Adds a callback to a specific slice uri.
-     * <p>
-     * This is a convenience that performs a few slice actions at once. It will put
-     * the slice in a pinned state since there is a callback attached. It will also
-     * listen for content changes, when a content change observes, the android system
-     * will bind the new slice and provide it to all registered {@link SliceCallback}s.
-     *
-     * @param uri The uri of the slice being listened to.
-     * @param callback The listener that should receive the callbacks.
-     * @param specs The list of supported {@link SliceSpec}s of the callback.
-     * @see SliceProvider#onSlicePinned(Uri)
-     */
+    @Deprecated
     public void registerSliceCallback(@NonNull Uri uri, @NonNull SliceCallback callback,
             @NonNull List<SliceSpec> specs, Executor executor) {
+        registerSliceCallback(uri, specs, executor, callback);
+    }
+
+    /**
+     * Adds a callback to a specific slice uri.
+     * <p>
+     * This is a convenience that performs a few slice actions at once. It will put
+     * the slice in a pinned state since there is a callback attached. It will also
+     * listen for content changes, when a content change observes, the android system
+     * will bind the new slice and provide it to all registered {@link SliceCallback}s.
+     *
+     * @param uri The uri of the slice being listened to.
+     * @param callback The listener that should receive the callbacks.
+     * @param specs The list of supported {@link SliceSpec}s of the callback.
+     * @see SliceProvider#onSlicePinned(Uri)
+     */
+    public void registerSliceCallback(@NonNull Uri uri, @NonNull List<SliceSpec> specs,
+            @NonNull SliceCallback callback) {
+        registerSliceCallback(uri, specs, mContext.getMainExecutor(), callback);
+    }
+
+    /**
+     * Adds a callback to a specific slice uri.
+     * <p>
+     * This is a convenience that performs a few slice actions at once. It will put
+     * the slice in a pinned state since there is a callback attached. It will also
+     * listen for content changes, when a content change observes, the android system
+     * will bind the new slice and provide it to all registered {@link SliceCallback}s.
+     *
+     * @param uri The uri of the slice being listened to.
+     * @param callback The listener that should receive the callbacks.
+     * @param specs The list of supported {@link SliceSpec}s of the callback.
+     * @see SliceProvider#onSlicePinned(Uri)
+     */
+    public void registerSliceCallback(@NonNull Uri uri, @NonNull List<SliceSpec> specs,
+            @NonNull @CallbackExecutor Executor executor, @NonNull SliceCallback callback) {
         try {
             mService.addSliceListener(uri, mContext.getPackageName(),
                     getListener(uri, callback, new ISliceListener.Stub() {
