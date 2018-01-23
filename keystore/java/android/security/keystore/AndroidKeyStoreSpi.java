@@ -18,6 +18,7 @@ package android.security.keystore;
 
 import libcore.util.EmptyArray;
 import android.security.Credentials;
+import android.security.GateKeeper;
 import android.security.KeyStore;
 import android.security.KeyStoreParameter;
 import android.security.keymaster.KeyCharacteristics;
@@ -25,6 +26,7 @@ import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterDefs;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
+import android.security.keystore.WrappedKeyEntry;
 import android.util.Log;
 
 import java.io.ByteArrayInputStream;
@@ -744,6 +746,31 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         }
     }
 
+    private void setWrappedKeyEntry(String alias, byte[] wrappedKeyBytes, String wrappingKeyAlias,
+            java.security.KeyStore.ProtectionParameter param) throws KeyStoreException {
+        if (param != null) {
+            throw new KeyStoreException("Protection parameters are specified inside wrapped keys");
+        }
+
+        byte[] maskingKey = new byte[32];
+        KeymasterArguments args = new KeymasterArguments(); // TODO: populate wrapping key args.
+
+        int errorCode = mKeyStore.importWrappedKey(
+            Credentials.USER_SECRET_KEY + alias,
+            wrappedKeyBytes,
+            Credentials.USER_PRIVATE_KEY + wrappingKeyAlias,
+            maskingKey,
+            args,
+            GateKeeper.getSecureUserId(),
+            0, // FIXME fingerprint id?
+            mUid,
+            new KeyCharacteristics());
+        if (errorCode != KeyStore.NO_ERROR) {
+            throw new KeyStoreException("Failed to import wrapped key. Keystore error code: "
+                + errorCode);
+        }
+    }
+
     @Override
     public void engineSetKeyEntry(String alias, byte[] userKey, Certificate[] chain)
             throws KeyStoreException {
@@ -974,6 +1001,9 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         } else if (entry instanceof SecretKeyEntry) {
             SecretKeyEntry secE = (SecretKeyEntry) entry;
             setSecretKeyEntry(alias, secE.getSecretKey(), param);
+        } else if (entry instanceof WrappedKeyEntry) {
+            WrappedKeyEntry wke = (WrappedKeyEntry) entry;
+            setWrappedKeyEntry(alias, wke.getWrappedKeyBytes(), wke.getWrappingKeyAlias(), param);
         } else {
             throw new KeyStoreException(
                     "Entry must be a PrivateKeyEntry, SecretKeyEntry or TrustedCertificateEntry"

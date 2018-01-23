@@ -60,6 +60,12 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
         }
     }
 
+    public static class DESede extends AndroidKeyStoreKeyGeneratorSpi {
+        public DESede() {
+            super(KeymasterDefs.KM_ALGORITHM_3DES, 168);
+        }
+    }
+
     protected static abstract class HmacBase extends AndroidKeyStoreKeyGeneratorSpi {
         protected HmacBase(int keymasterDigest) {
             super(KeymasterDefs.KM_ALGORITHM_HMAC,

@@ -510,6 +510,19 @@ public class KeyStore {
         return importKey(alias, args, format, keyData, UID_SELF, flags, outCharacteristics);
     }
 
+    public int importWrappedKey(String wrappedKeyAlias, byte[] wrappedKey,
+            String wrappingKeyAlias,
+            byte[] maskingKey, KeymasterArguments args, long rootSid, long fingerprintSid, int uid,
+            KeyCharacteristics outCharacteristics) {
+        try {
+            return mBinder.importWrappedKey(wrappedKeyAlias, wrappedKey, wrappingKeyAlias,
+                    maskingKey, args, rootSid, fingerprintSid, outCharacteristics);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return SYSTEM_ERROR;
+        }
+    }
+
     public ExportResult exportKey(String alias, int format, KeymasterBlob clientId,
             KeymasterBlob appId, int uid) {
         try {
