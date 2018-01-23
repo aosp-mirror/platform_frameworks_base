@@ -230,7 +230,7 @@ final class OverlayManagerSettings {
         }
 
         mItems.remove(moveIdx);
-        final int newParentIdx = select(newParentPackageName, userId);
+        final int newParentIdx = select(newParentPackageName, userId) + 1;
         mItems.add(newParentIdx, itemToMove);
         return moveIdx != newParentIdx;
     }
