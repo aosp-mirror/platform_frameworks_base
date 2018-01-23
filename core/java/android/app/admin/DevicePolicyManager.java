@@ -8733,6 +8733,7 @@ public class DevicePolicyManager {
      */
     public void setMandatoryBackupTransport(
             @NonNull ComponentName admin, @Nullable ComponentName backupTransportComponent) {
+        throwIfParentInstance("setMandatoryBackupTransport");
         try {
             mService.setMandatoryBackupTransport(admin, backupTransportComponent);
         } catch (RemoteException re) {
@@ -8748,6 +8749,7 @@ public class DevicePolicyManager {
      *         mandatory or {@code null} if backups are not mandatory.
      */
     public ComponentName getMandatoryBackupTransport() {
+        throwIfParentInstance("getMandatoryBackupTransport");
         try {
             return mService.getMandatoryBackupTransport();
         } catch (RemoteException re) {
