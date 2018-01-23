@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.security.keystore;
+package android.security.keystore.recovery;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -164,10 +164,10 @@ public class RecoveryController {
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
      */
-    public @NonNull KeychainSnapshot getRecoveryData(@NonNull byte[] account)
+    @NonNull public KeychainSnapshot getRecoveryData(@NonNull byte[] account)
             throws InternalRecoveryServiceException {
         try {
-            return BackwardsCompat.toLegacyKeychainSnapshot(mBinder.getRecoveryData(account));
+            return mBinder.getRecoveryData(account);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
@@ -360,6 +360,28 @@ public class RecoveryController {
     }
 
     /**
+     * Method notifies KeyStore that a user-generated secret is available. This method generates a
+     * symmetric session key which a trusted remote device can use to return a recovery key. Caller
+     * should use {@link KeychainProtectionParams#clearSecret} to override the secret value in
+     * memory.
+     *
+     * @param recoverySecret user generated secret together with parameters necessary to regenerate
+     *     it on a new device.
+     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
+     *     service.
+     */
+    public void recoverySecretAvailable(@NonNull KeychainProtectionParams recoverySecret)
+            throws InternalRecoveryServiceException {
+        try {
+            mBinder.recoverySecretAvailable(recoverySecret);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (ServiceSpecificException e) {
+            throw wrapUnexpectedServiceSpecificException(e);
+        }
+    }
+
+    /**
      * Initializes recovery session and returns a blob with proof of recovery secrets possession.
      * The method generates symmetric key for a session, which trusted remote device can use to
      * return recovery key.
@@ -395,7 +417,7 @@ public class RecoveryController {
                             verifierPublicKey,
                             vaultParams,
                             vaultChallenge,
-                            BackwardsCompat.fromLegacyKeychainProtectionParams(secrets));
+                            secrets);
             return new RecoveryClaim(recoverySession, recoveryClaim);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -429,9 +451,7 @@ public class RecoveryController {
             InternalRecoveryServiceException {
         try {
             return (Map<String, byte[]>) mBinder.recoverKeys(
-                    session.getSessionId(),
-                    recoveryKeyBlob,
-                    BackwardsCompat.fromLegacyWrappedApplicationKeys(applicationKeys));
+                    session.getSessionId(), recoveryKeyBlob, applicationKeys);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {

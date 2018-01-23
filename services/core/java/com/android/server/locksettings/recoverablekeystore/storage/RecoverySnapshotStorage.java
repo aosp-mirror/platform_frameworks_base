@@ -17,7 +17,7 @@
 package com.android.server.locksettings.recoverablekeystore.storage;
 
 import android.annotation.Nullable;
-import android.security.keystore.KeychainSnapshot;
+import android.security.keystore.recovery.KeychainSnapshot;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;

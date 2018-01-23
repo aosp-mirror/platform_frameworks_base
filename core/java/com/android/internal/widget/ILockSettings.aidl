@@ -19,9 +19,9 @@ package com.android.internal.widget;
 import android.app.PendingIntent;
 import android.app.trust.IStrongAuthTracker;
 import android.os.Bundle;
-import android.security.keystore.WrappedApplicationKey;
-import android.security.keystore.KeychainSnapshot;
-import android.security.keystore.KeychainProtectionParams;
+import android.security.keystore.recovery.WrappedApplicationKey;
+import android.security.keystore.recovery.KeychainSnapshot;
+import android.security.keystore.recovery.KeychainProtectionParams;
 import com.android.internal.widget.ICheckCredentialProgressCallback;
 import com.android.internal.widget.VerifyCredentialResponse;
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.security.keystore;
+package android.security.keystore.recovery;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -61,7 +61,8 @@ public final class KeyDerivationParams implements Parcelable {
         return new KeyDerivationParams(ALGORITHM_SHA256, salt);
     }
 
-    KeyDerivationParams(@KeyDerivationAlgorithm int algorithm, @NonNull byte[] salt) {
+    // TODO: Make private once legacy API is removed
+    public KeyDerivationParams(@KeyDerivationAlgorithm int algorithm, @NonNull byte[] salt) {
         mAlgorithm = algorithm;
         mSalt = Preconditions.checkNotNull(salt);
     }
@@ -80,8 +81,8 @@ public final class KeyDerivationParams implements Parcelable {
         return mSalt;
     }
 
-    public static final Parcelable.Creator<KeyDerivationParams> CREATOR =
-            new Parcelable.Creator<KeyDerivationParams>() {
+    public static final Creator<KeyDerivationParams> CREATOR =
+            new Creator<KeyDerivationParams>() {
         public KeyDerivationParams createFromParcel(Parcel in) {
                 return new KeyDerivationParams(in);
         }

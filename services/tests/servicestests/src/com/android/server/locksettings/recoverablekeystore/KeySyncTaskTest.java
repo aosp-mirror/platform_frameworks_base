@@ -16,11 +16,11 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import static android.security.keystore.KeychainProtectionParams.TYPE_LOCKSCREEN;
+import static android.security.keystore.recovery.KeychainProtectionParams.TYPE_LOCKSCREEN;
 
-import static android.security.keystore.KeychainProtectionParams.TYPE_PASSWORD;
-import static android.security.keystore.KeychainProtectionParams.TYPE_PATTERN;
-import static android.security.keystore.KeychainProtectionParams.TYPE_PIN;
+import static android.security.keystore.recovery.KeychainProtectionParams.TYPE_PASSWORD;
+import static android.security.keystore.recovery.KeychainProtectionParams.TYPE_PATTERN;
+import static android.security.keystore.recovery.KeychainProtectionParams.TYPE_PIN;
 
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSWORD;
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PATTERN;
@@ -40,9 +40,9 @@ import android.content.Context;
 import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
-import android.security.keystore.KeyDerivationParams;
-import android.security.keystore.KeychainSnapshot;
-import android.security.keystore.WrappedApplicationKey;
+import android.security.keystore.recovery.KeyDerivationParams;
+import android.security.keystore.recovery.KeychainSnapshot;
+import android.security.keystore.recovery.WrappedApplicationKey;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;

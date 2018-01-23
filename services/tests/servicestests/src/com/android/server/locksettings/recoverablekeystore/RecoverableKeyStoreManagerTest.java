@@ -16,8 +16,8 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import static android.security.keystore.KeychainProtectionParams.TYPE_LOCKSCREEN;
-import static android.security.keystore.KeychainProtectionParams.TYPE_PASSWORD;
+import static android.security.keystore.recovery.KeychainProtectionParams.TYPE_LOCKSCREEN;
+import static android.security.keystore.recovery.KeychainProtectionParams.TYPE_PASSWORD;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
@@ -42,9 +42,9 @@ import android.os.UserHandle;
 import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
-import android.security.keystore.KeyDerivationParams;
-import android.security.keystore.KeychainProtectionParams;
-import android.security.keystore.WrappedApplicationKey;
+import android.security.keystore.recovery.KeyDerivationParams;
+import android.security.keystore.recovery.KeychainProtectionParams;
+import android.security.keystore.recovery.WrappedApplicationKey;
 import android.support.test.filters.SmallTest;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;

@@ -3,7 +3,7 @@ package com.android.server.locksettings.recoverablekeystore.storage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
-import android.security.keystore.KeychainSnapshot;
+import android.security.keystore.recovery.KeychainSnapshot;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
