@@ -171,15 +171,16 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     private void onSliceContentChanged(boolean hasHeader) {
-        final float clockScale = hasHeader ? mSmallClockScale : 1;
+        final boolean smallClock = hasHeader || mPulsing;
+        final float clockScale = smallClock ? mSmallClockScale : 1;
         float translation = (mClockView.getHeight() - (mClockView.getHeight() * clockScale)) / 2f;
-        if (hasHeader) {
+        if (smallClock) {
             translation -= mWidgetPadding;
         }
         mClockView.setTranslationY(translation);
         mClockView.setScaleX(clockScale);
         mClockView.setScaleY(clockScale);
-        mClockSeparator.setVisibility(hasHeader ? VISIBLE : GONE);
+        mClockSeparator.setVisibility(hasHeader && !mPulsing ? VISIBLE : GONE);
     }
 
     @Override
@@ -329,6 +330,8 @@ public class KeyguardStatusView extends GridLayout {
 
     public void setPulsing(boolean pulsing) {
         mPulsing = pulsing;
+        mKeyguardSlice.setVisibility(pulsing ? GONE : VISIBLE);
+        onSliceContentChanged(mKeyguardSlice.hasHeader());
         updateDozeVisibleViews();
     }
 

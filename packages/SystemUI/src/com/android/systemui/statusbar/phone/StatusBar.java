@@ -4615,8 +4615,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
 
                 private void setPulsing(Collection<HeadsUpManager.HeadsUpEntry> pulsing) {
-                    mStackScroller.setPulsing(pulsing);
-                    mNotificationPanel.setPulsing(pulsing != null);
+                    mNotificationPanel.setPulsing(pulsing);
                     mVisualStabilityManager.setPulsing(pulsing != null);
                     mIgnoreTouchWhilePulsing = false;
                 }
