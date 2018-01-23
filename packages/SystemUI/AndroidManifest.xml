@@ -323,7 +323,7 @@
         </activity>
 
         <!-- Springboard for launching the share activity -->
-        <receiver android:name=".screenshot.GlobalScreenshot$ShareReceiver"
+        <receiver android:name=".screenshot.GlobalScreenshot$ScreenshotActionReceiver"
             android:process=":screenshot"
             android:exported="false" />
 
