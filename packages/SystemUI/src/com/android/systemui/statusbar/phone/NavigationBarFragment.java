@@ -409,7 +409,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
         if (visible) { // Appear and change
             rotBtn.setVisibility(View.VISIBLE);
-            mNavigationBarView.notifyAccessibilitySubtreeChanged();
+            mNavigationBarView.notifySubtreeAccessibilityStateChangedIfNeeded();
 
             if (skipAnim) {
                 currentView.setAlpha(1f);
@@ -437,7 +437,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
             if (skipAnim) {
                 rotBtn.setVisibility(View.INVISIBLE);
-                mNavigationBarView.notifyAccessibilitySubtreeChanged();
+                mNavigationBarView.notifySubtreeAccessibilityStateChangedIfNeeded();
                 return;
             }
 
@@ -454,7 +454,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     rotBtn.setVisibility(View.INVISIBLE);
-                    mNavigationBarView.notifyAccessibilitySubtreeChanged();
+                    mNavigationBarView.notifySubtreeAccessibilityStateChangedIfNeeded();
                 }
             });
 

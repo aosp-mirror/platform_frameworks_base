@@ -23,7 +23,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-
 import com.android.printspooler.R;
 
 /**
@@ -411,7 +410,7 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
 
             mPrintButton.offsetTopAndBottom(dy);
 
-            mDraggableContent.notifyAccessibilitySubtreeChanged();
+            mDraggableContent.notifySubtreeAccessibilityStateChangedIfNeeded();
 
             onDragProgress(progress);
         }
