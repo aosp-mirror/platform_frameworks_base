@@ -196,7 +196,6 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"ქსელი"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"უსადენო ეკრანის სერტიფიცირება"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi-ს დაწვრილებითი აღრიცხვის ჩართვა"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Wi‑Fi-ს მობ. ინტერნეტზე აგრესიული გადართვა"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi Roam სკანირების მუდამ დაშვება"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"მობილური ინტერნეტის ყოველთვის გააქტიურება"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ტეტერინგის აპარატურული აჩქარება"</string>
@@ -223,7 +222,6 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"შეიყვანეთ DNS პროვაიდერის სერვერის სახელი"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"უსადენო ეკრანის სერტიფიცირების ვარიანტების ჩვენება"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi-ს აღრიცხვის დონის გაზრდა, Wi‑Fi ამომრჩეველში ყოველ SSID RSSI-ზე ჩვენება"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"ჩართვის შემთხვევაში, Wi‑Fi უფრო აქტიურად შეეცდება მობილურ ინტერნეტზე გადართვას, როცა Wi‑Fi სიგნალი სუსტია"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Wifi Roam სკანირების დაშვება/აკრძალვა, ინტერფეისზე არსებული მონაცემთა ტრაფიკზე დაფუძნებით"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ჟურნალიზაციის ბუფერის ზომები"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"აირჩიეთ ჟურნ. ზომა / ჟურნ. ბუფერზე"</string>

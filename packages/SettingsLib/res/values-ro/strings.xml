@@ -196,7 +196,6 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Conectare la rețele"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certificare Ecran wireless"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Înregistrare prin Wi-Fi de volume mari de date"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Predare agresivă de la Wi-Fi la mobilă"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Se permite întotdeauna scanarea traficului Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Date mobile permanent active"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Accelerare hardware pentru tethering"</string>
@@ -223,7 +222,6 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Introduceți numele de gazdă al furnizorului de DNS"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Afișați opțiunile pentru certificarea Ecran wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Măriți niv. de înr. prin Wi‑Fi, afișați în fcț. de SSID RSSI în Selectorul Wi‑Fi"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Când este activată, Wi-Fi va fi mai agresivă la predarea conexiunii de date către rețeaua mobilă când semnalul Wi-Fi este slab"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Permiteți/Nu permiteți scanarea traficului Wi-Fi în funcție de traficul de date din interfață"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Dimensiunile tamponului jurnalului"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Dimensiuni jurnal / tampon jurnal"</string>

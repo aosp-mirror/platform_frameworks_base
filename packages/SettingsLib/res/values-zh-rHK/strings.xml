@@ -196,7 +196,6 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"網絡"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"無線螢幕分享認證"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"啟用 Wi‑Fi 詳細記錄"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"加強 Wi-Fi 至流動數據轉換"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"永遠允許 Wi-Fi 漫遊掃描"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"一律保持啟用流動數據"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"網絡共享硬件加速"</string>
@@ -223,7 +222,6 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"輸入網域名稱系統 (DNS) 供應商的主機名稱"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"顯示無線螢幕分享認證的選項"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"讓 Wi‑Fi 記錄功能升級，在 Wi‑Fi 選擇器中依每個 SSID RSSI 顯示 Wi‑Fi 詳細紀錄"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"啟用後，Wi-Fi 連線會在訊號不穩定的情況下更積極轉換成流動數據連線"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"根據介面中目前的數據流量允許/禁止 WiFi 漫遊掃描"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"記錄器緩衝區空間"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"選取每個記錄緩衝區的記錄器空間"</string>
