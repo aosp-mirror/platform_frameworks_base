@@ -23,6 +23,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.Signature;
 import android.service.pm.PackageProto;
@@ -234,6 +235,10 @@ public abstract class PackageSettingBase extends SettingBase {
 
     public Signature[] getSignatures() {
         return signatures.mSigningDetails.signatures;
+    }
+
+    public PackageParser.SigningDetails getSigningDetails() {
+        return signatures.mSigningDetails;
     }
 
     /**
