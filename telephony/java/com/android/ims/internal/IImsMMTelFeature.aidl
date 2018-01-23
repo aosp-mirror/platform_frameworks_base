@@ -61,4 +61,5 @@ interface IImsMMTelFeature {
     oneway void acknowledgeSms(int token, int messageRef, int result);
     oneway void acknowledgeSmsReport(int token, int messageRef, int result);
     String getSmsFormat();
+    oneway void onSmsReady();
 }

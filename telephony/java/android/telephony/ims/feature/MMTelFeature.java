@@ -209,6 +209,13 @@ public class MMTelFeature extends ImsFeature {
                 return MMTelFeature.this.getSmsFormat();
             }
         }
+
+        @Override
+        public void onSmsReady() {
+            synchronized (mLock) {
+                MMTelFeature.this.onSmsReady();
+            }
+        }
     };
 
     /**
@@ -401,6 +408,10 @@ public class MMTelFeature extends ImsFeature {
     public void acknowledgeSmsReport(int token, int messageRef,
             @SmsImplBase.StatusReportResult int result) {
         getSmsImplementation().acknowledgeSmsReport(token, messageRef, result);
+    }
+
+    private void onSmsReady() {
+        getSmsImplementation().onReady();
     }
 
     /**
