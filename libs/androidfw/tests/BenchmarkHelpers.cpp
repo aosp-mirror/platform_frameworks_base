@@ -33,19 +33,21 @@ void GetResourceBenchmarkOld(const std::vector<std::string>& paths, const ResTab
     }
   }
 
+  // Make sure to force creation of the ResTable first, or else the configuration doesn't get set.
+  const ResTable& table = assetmanager.getResources(true);
   if (config != nullptr) {
     assetmanager.setConfiguration(*config);
   }
 
-  const ResTable& table = assetmanager.getResources(true);
-
   Res_value value;
   ResTable_config selected_config;
   uint32_t flags;
+  uint32_t last_ref = 0u;
 
   while (state.KeepRunning()) {
-    table.getResource(resid, &value, false /*may_be_bag*/, 0u /*density*/, &flags,
-                      &selected_config);
+    ssize_t block = table.getResource(resid, &value, false /*may_be_bag*/, 0u /*density*/, &flags,
+                                      &selected_config);
+    table.resolveReference(&value, block, &last_ref, &flags, &selected_config);
   }
 }
 
@@ -72,10 +74,12 @@ void GetResourceBenchmark(const std::vector<std::string>& paths, const ResTable_
   Res_value value;
   ResTable_config selected_config;
   uint32_t flags;
+  uint32_t last_id = 0u;
 
   while (state.KeepRunning()) {
-    assetmanager.GetResource(resid, false /* may_be_bag */, 0u /* density_override */, &value,
-                             &selected_config, &flags);
+    ApkAssetsCookie cookie = assetmanager.GetResource(
+        resid, false /* may_be_bag */, 0u /* density_override */, &value, &selected_config, &flags);
+    assetmanager.ResolveReference(cookie, &value, &selected_config, &flags, &last_id);
   }
 }
 

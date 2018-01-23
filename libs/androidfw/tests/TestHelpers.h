@@ -20,6 +20,7 @@
 #include <string>
 
 #include "androidfw/ResourceTypes.h"
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
 #include "CommonHelpers.h"
