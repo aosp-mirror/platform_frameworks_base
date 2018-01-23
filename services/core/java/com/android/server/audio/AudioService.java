@@ -63,6 +63,7 @@ import android.hardware.usb.UsbManager;
 import android.media.AudioAttributes;
 import android.media.AudioDevicePort;
 import android.media.AudioFocusInfo;
+import android.media.AudioFocusRequest;
 import android.media.AudioSystem;
 import android.media.AudioFormat;
 import android.media.AudioManager;
@@ -6003,6 +6004,44 @@ public class AudioService extends IAudioService.Stub
     //==========================================================================================
     // Audio Focus
     //==========================================================================================
+    /**
+     * Returns whether a focus request is eligible to force ducking.
+     * Will return true if:
+     * - the AudioAttributes have a usage of USAGE_ASSISTANCE_ACCESSIBILITY,
+     * - the focus request is AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK,
+     * - the associated Bundle has KEY_ACCESSIBILITY_FORCE_FOCUS_DUCKING set to true,
+     * - the uid of the requester is a known accessibility service or root.
+     * @param aa AudioAttributes of the focus request
+     * @param uid uid of the focus requester
+     * @return true if ducking is to be forced
+     */
+    private boolean forceFocusDuckingForAccessibility(@Nullable AudioAttributes aa,
+            int request, int uid) {
+        if (aa == null || aa.getUsage() != AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY
+                || request != AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK) {
+            return false;
+        }
+        final Bundle extraInfo = aa.getBundle();
+        if (extraInfo == null ||
+                !extraInfo.getBoolean(AudioFocusRequest.KEY_ACCESSIBILITY_FORCE_FOCUS_DUCKING)) {
+            return false;
+        }
+        if (uid == 0) {
+            return true;
+        }
+        synchronized (mAccessibilityServiceUidsLock) {
+            if (mAccessibilityServiceUids != null) {
+                int callingUid = Binder.getCallingUid();
+                for (int i = 0; i < mAccessibilityServiceUids.length; i++) {
+                    if (mAccessibilityServiceUids[i] == callingUid) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     public int requestAudioFocus(AudioAttributes aa, int durationHint, IBinder cb,
             IAudioFocusDispatcher fd, String clientId, String callingPackageName, int flags,
             IAudioPolicyCallback pcb, int sdk) {
@@ -6026,7 +6065,8 @@ public class AudioService extends IAudioService.Stub
         }
 
         return mMediaFocusControl.requestAudioFocus(aa, durationHint, cb, fd,
-                clientId, callingPackageName, flags, sdk);
+                clientId, callingPackageName, flags, sdk,
+                forceFocusDuckingForAccessibility(aa, durationHint, Binder.getCallingUid()));
     }
 
     public int abandonAudioFocus(IAudioFocusDispatcher fd, String clientId, AudioAttributes aa,

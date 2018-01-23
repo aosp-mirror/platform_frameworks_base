@@ -307,9 +307,10 @@ public class FocusRequester {
      * @return true if the focus loss is definitive, false otherwise.
      */
     @GuardedBy("MediaFocusControl.mAudioFocusLock")
-    boolean handleFocusLossFromGain(int focusGain, final FocusRequester frWinner) {
+    boolean handleFocusLossFromGain(int focusGain, final FocusRequester frWinner, boolean forceDuck)
+    {
         final int focusLoss = focusLossForGainRequest(focusGain);
-        handleFocusLoss(focusLoss, frWinner);
+        handleFocusLoss(focusLoss, frWinner, forceDuck);
         return (focusLoss == AudioManager.AUDIOFOCUS_LOSS);
     }
 
@@ -343,7 +344,8 @@ public class FocusRequester {
     }
 
     @GuardedBy("MediaFocusControl.mAudioFocusLock")
-    void handleFocusLoss(int focusLoss, @Nullable final FocusRequester frWinner) {
+    void handleFocusLoss(int focusLoss, @Nullable final FocusRequester frWinner, boolean forceDuck)
+    {
         try {
             if (focusLoss != mFocusLossReceived) {
                 mFocusLossReceived = focusLoss;
@@ -374,19 +376,20 @@ public class FocusRequester {
                         && frWinner != null) {
                     // candidate for enforcement by the framework
                     if (frWinner.mCallingUid != this.mCallingUid) {
-                        if ((mGrantFlags
-                                & AudioManager.AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS) != 0) {
+                        if (!forceDuck && ((mGrantFlags
+                                & AudioManager.AUDIOFOCUS_FLAG_PAUSES_ON_DUCKABLE_LOSS) != 0)) {
                             // the focus loser declared it would pause instead of duck, let it
                             // handle it (the framework doesn't pause for apps)
                             handled = false;
                             Log.v(TAG, "not ducking uid " + this.mCallingUid + " - flags");
-                        } else if (MediaFocusControl.ENFORCE_DUCKING_FOR_NEW &&
-                                this.getSdkTarget() <= MediaFocusControl.DUCKING_IN_APP_SDK_LEVEL) {
+                        } else if (!forceDuck && (MediaFocusControl.ENFORCE_DUCKING_FOR_NEW &&
+                                this.getSdkTarget() <= MediaFocusControl.DUCKING_IN_APP_SDK_LEVEL))
+                        {
                             // legacy behavior, apps used to be notified when they should be ducking
                             handled = false;
                             Log.v(TAG, "not ducking uid " + this.mCallingUid + " - old SDK");
                         } else {
-                            handled = mFocusController.duckPlayers(frWinner, this);
+                            handled = mFocusController.duckPlayers(frWinner, this, forceDuck);
                         }
                     } // else: the focus change is within the same app, so let the dispatching
                       //       happen as if the framework was not involved.
