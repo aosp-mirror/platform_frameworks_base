@@ -9762,8 +9762,9 @@ Slog.e("TODD",
      * <li>{@link #SCAN_AS_VIRTUAL_PRELOAD}</li>
      * </ul>
      */
-    private static @ScanFlags int adjustScanFlags(@ScanFlags int scanFlags,
-            PackageSetting pkgSetting, PackageSetting disabledPkgSetting, UserHandle user) {
+    private @ScanFlags int adjustScanFlags(@ScanFlags int scanFlags,
+            PackageSetting pkgSetting, PackageSetting disabledPkgSetting, UserHandle user,
+            PackageParser.Package pkg) {
         if (disabledPkgSetting != null) {
             // updated system application, must at least have SCAN_AS_SYSTEM
             scanFlags |= SCAN_AS_SYSTEM;
@@ -9789,6 +9790,30 @@ Slog.e("TODD",
                 scanFlags |= SCAN_AS_VIRTUAL_PRELOAD;
             }
         }
+
+        // Scan as privileged apps that share a user with a priv-app.
+        if (((scanFlags & SCAN_AS_PRIVILEGED) == 0) && !pkg.isPrivileged()
+                && (pkg.mSharedUserId != null)) {
+            SharedUserSetting sharedUserSetting = null;
+            try {
+                sharedUserSetting = mSettings.getSharedUserLPw(pkg.mSharedUserId, 0, 0, false);
+            } catch (PackageManagerException ignore) {}
+            if (sharedUserSetting != null && sharedUserSetting.isPrivileged()) {
+                // Exempt SharedUsers signed with the platform key.
+                // TODO(b/72378145) Fix this exemption. Force signature apps
+                // to whitelist their privileged permissions just like other
+                // priv-apps.
+                synchronized (mPackages) {
+                    PackageSetting platformPkgSetting = mSettings.mPackages.get("android");
+                    if (!pkg.packageName.equals("android")
+                            && (compareSignatures(platformPkgSetting.signatures.mSignatures,
+                                pkg.mSigningDetails.signatures) != PackageManager.SIGNATURE_MATCH)) {
+                        scanFlags |= SCAN_AS_PRIVILEGED;
+                    }
+                }
+            }
+        }
+
         return scanFlags;
     }
 
@@ -9812,7 +9837,7 @@ Slog.e("TODD",
                     + " was transferred to another, but its .apk remains");
         }
 
-        scanFlags = adjustScanFlags(scanFlags, pkgSetting, disabledPkgSetting, user);
+        scanFlags = adjustScanFlags(scanFlags, pkgSetting, disabledPkgSetting, user, pkg);
         synchronized (mPackages) {
             applyPolicy(pkg, parseFlags, scanFlags);
             assertPackageIsValid(pkg, parseFlags, scanFlags);
