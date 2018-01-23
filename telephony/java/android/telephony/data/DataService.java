@@ -17,6 +17,7 @@
 package android.telephony.data;
 
 import android.annotation.CallSuper;
+import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
@@ -32,6 +33,8 @@ import android.telephony.Rlog;
 import android.telephony.SubscriptionManager;
 import android.util.SparseArray;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,6 +58,33 @@ public abstract class DataService extends Service {
 
     public static final String DATA_SERVICE_INTERFACE = "android.telephony.data.DataService";
     public static final String DATA_SERVICE_EXTRA_SLOT_ID = "android.telephony.data.extra.SLOT_ID";
+
+    /** {@hide} */
+    @IntDef(prefix = "REQUEST_REASON_", value = {
+            REQUEST_REASON_NORMAL,
+            REQUEST_REASON_HANDOVER,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SetupDataReason {}
+
+    /** {@hide} */
+    @IntDef(prefix = "REQUEST_REASON_", value = {
+            REQUEST_REASON_NORMAL,
+            REQUEST_REASON_SHUTDOWN,
+            REQUEST_REASON_HANDOVER,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DeactivateDataReason {}
+
+
+    /** The reason of the data request is normal */
+    public static final int REQUEST_REASON_NORMAL = 1;
+
+    /** The reason of the data request is device shutdown */
+    public static final int REQUEST_REASON_SHUTDOWN = 2;
+
+    /** The reason of the data request is IWLAN handover */
+    public static final int REQUEST_REASON_HANDOVER = 3;
 
     private static final int DATA_SERVICE_INTERNAL_REQUEST_INITIALIZE_SERVICE          = 1;
     private static final int DATA_SERVICE_REQUEST_SETUP_DATA_CALL                      = 2;
@@ -110,13 +140,14 @@ public abstract class DataService extends Service {
          * @param dataProfile Data profile used for data call setup. See {@link DataProfile}
          * @param isRoaming True if the device is data roaming.
          * @param allowRoaming True if data roaming is allowed by the user.
-         * @param isHandover True if the request is for IWLAN handover.
-         * @param linkProperties If {@code isHandover} is true, this is the link properties of the
-         * existing data connection, otherwise null.
+         * @param reason The reason for data setup. Must be {@link #REQUEST_REASON_NORMAL} or
+         * {@link #REQUEST_REASON_HANDOVER}.
+         * @param linkProperties If {@code reason} is {@link #REQUEST_REASON_HANDOVER}, this is the
+         * link properties of the existing data connection, otherwise null.
          * @param callback The result callback for this request.
          */
         public void setupDataCall(int accessNetworkType, DataProfile dataProfile, boolean isRoaming,
-                                  boolean allowRoaming, boolean isHandover,
+                                  boolean allowRoaming, @SetupDataReason int reason,
                                   LinkProperties linkProperties, DataServiceCallback callback) {
             // The default implementation is to return unsupported.
             callback.onSetupDataCallComplete(DataServiceCallback.RESULT_ERROR_UNSUPPORTED, null);
@@ -128,12 +159,12 @@ public abstract class DataService extends Service {
          * provided callback to notify the platform.
          *
          * @param cid Call id returned in the callback of {@link DataServiceProvider#setupDataCall(
-         * int, DataProfile, boolean, boolean, boolean, LinkProperties, DataServiceCallback)}.
-         * @param reasonRadioShutDown True if the deactivate request reason is device shut down.
-         * @param isHandover True if the request is for IWLAN handover.
+         * int, DataProfile, boolean, boolean, int, LinkProperties, DataServiceCallback)}.
+         * @param reason The reason for data deactivation. Must be {@link #REQUEST_REASON_NORMAL},
+         * {@link #REQUEST_REASON_SHUTDOWN} or {@link #REQUEST_REASON_HANDOVER}.
          * @param callback The result callback for this request.
          */
-        public void deactivateDataCall(int cid, boolean reasonRadioShutDown, boolean isHandover,
+        public void deactivateDataCall(int cid, @DeactivateDataReason int reason,
                                        DataServiceCallback callback) {
             // The default implementation is to return unsupported.
             callback.onDeactivateDataCallComplete(DataServiceCallback.RESULT_ERROR_UNSUPPORTED);
@@ -219,32 +250,29 @@ public abstract class DataService extends Service {
         public final DataProfile dataProfile;
         public final boolean isRoaming;
         public final boolean allowRoaming;
-        public final boolean isHandover;
+        public final int reason;
         public final LinkProperties linkProperties;
         public final IDataServiceCallback callback;
         SetupDataCallRequest(int accessNetworkType, DataProfile dataProfile, boolean isRoaming,
-                             boolean allowRoaming, boolean isHandover,
-                             LinkProperties linkProperties, IDataServiceCallback callback) {
+                             boolean allowRoaming, int reason, LinkProperties linkProperties,
+                             IDataServiceCallback callback) {
             this.accessNetworkType = accessNetworkType;
             this.dataProfile = dataProfile;
             this.isRoaming = isRoaming;
             this.allowRoaming = allowRoaming;
             this.linkProperties = linkProperties;
-            this.isHandover = isHandover;
+            this.reason = reason;
             this.callback = callback;
         }
     }
 
     private static final class DeactivateDataCallRequest {
         public final int cid;
-        public final boolean reasonRadioShutDown;
-        public final boolean isHandover;
+        public final int reason;
         public final IDataServiceCallback callback;
-        DeactivateDataCallRequest(int cid, boolean reasonRadioShutDown, boolean isHandover,
-                                  IDataServiceCallback callback) {
+        DeactivateDataCallRequest(int cid, int reason, IDataServiceCallback callback) {
             this.cid = cid;
-            this.reasonRadioShutDown = reasonRadioShutDown;
-            this.isHandover = isHandover;
+            this.reason = reason;
             this.callback = callback;
         }
     }
@@ -311,7 +339,7 @@ public abstract class DataService extends Service {
                     SetupDataCallRequest setupDataCallRequest = (SetupDataCallRequest) message.obj;
                     service.setupDataCall(setupDataCallRequest.accessNetworkType,
                             setupDataCallRequest.dataProfile, setupDataCallRequest.isRoaming,
-                            setupDataCallRequest.allowRoaming, setupDataCallRequest.isHandover,
+                            setupDataCallRequest.allowRoaming, setupDataCallRequest.reason,
                             setupDataCallRequest.linkProperties,
                             new DataServiceCallback(setupDataCallRequest.callback));
 
@@ -321,8 +349,7 @@ public abstract class DataService extends Service {
                     DeactivateDataCallRequest deactivateDataCallRequest =
                             (DeactivateDataCallRequest) message.obj;
                     service.deactivateDataCall(deactivateDataCallRequest.cid,
-                            deactivateDataCallRequest.reasonRadioShutDown,
-                            deactivateDataCallRequest.isHandover,
+                            deactivateDataCallRequest.reason,
                             new DataServiceCallback(deactivateDataCallRequest.callback));
                     break;
                 case DATA_SERVICE_REQUEST_SET_INITIAL_ATTACH_APN:
@@ -370,7 +397,8 @@ public abstract class DataService extends Service {
         }
     }
 
-    private DataService() {
+    /** @hide */
+    protected DataService() {
         mHandlerThread = new HandlerThread(TAG);
         mHandlerThread.start();
 
@@ -472,19 +500,18 @@ public abstract class DataService extends Service {
 
         @Override
         public void setupDataCall(int accessNetworkType, DataProfile dataProfile,
-                                  boolean isRoaming, boolean allowRoaming, boolean isHandover,
+                                  boolean isRoaming, boolean allowRoaming, int reason,
                                   LinkProperties linkProperties, IDataServiceCallback callback) {
             mHandler.obtainMessage(DATA_SERVICE_REQUEST_SETUP_DATA_CALL, mSlotId, 0,
                     new SetupDataCallRequest(accessNetworkType, dataProfile, isRoaming,
-                            allowRoaming, isHandover, linkProperties, callback))
+                            allowRoaming, reason, linkProperties, callback))
                     .sendToTarget();
         }
 
         @Override
-        public void deactivateDataCall(int cid, boolean reasonRadioShutDown, boolean isHandover,
-                                       IDataServiceCallback callback) {
+        public void deactivateDataCall(int cid, int reason, IDataServiceCallback callback) {
             mHandler.obtainMessage(DATA_SERVICE_REQUEST_DEACTIVATE_DATA_CALL, mSlotId, 0,
-                    new DeactivateDataCallRequest(cid, reasonRadioShutDown, isHandover, callback))
+                    new DeactivateDataCallRequest(cid, reason, callback))
                     .sendToTarget();
         }
 
