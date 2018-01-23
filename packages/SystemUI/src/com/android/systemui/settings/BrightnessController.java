@@ -31,6 +31,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
@@ -39,6 +40,7 @@ import android.widget.ImageView;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.Dependency;
 
 import java.util.ArrayList;
@@ -382,6 +384,18 @@ public class BrightnessController implements ToggleSlider.Listener {
         for (BrightnessStateChangeCallback cb : mChangeCallbacks) {
             cb.onBrightnessLevelChanged();
         }
+    }
+
+    public void checkRestrictionAndSetEnabled() {
+        mBackgroundHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                ((ToggleSliderView)mControl).setEnforcedAdmin(
+                        RestrictedLockUtils.checkIfRestrictionEnforced(mContext,
+                                UserManager.DISALLOW_CONFIG_BRIGHTNESS,
+                                mUserTracker.getCurrentUserId()));
+            }
+        });
     }
 
     private void setMode(int mode) {
