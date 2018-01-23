@@ -634,6 +634,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (mGestureHelper != null) {
             mGestureHelper.onDarkIntensityChange(intensity);
         }
+        if (mSwipeUpOnboarding != null) {
+            mSwipeUpOnboarding.setContentDarkIntensity(intensity);
+        }
     }
 
     @Override

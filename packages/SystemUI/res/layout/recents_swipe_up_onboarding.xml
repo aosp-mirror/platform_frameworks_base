@@ -20,20 +20,27 @@
     android:layout_width="match_parent"
     android:background="@android:color/black"
     android:layout_gravity="center">
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        android:gravity="top"/>
     <TextView
+        android:id="@+id/onboarding_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="@string/recents_swipe_up_onboarding"
         android:textColor="@android:color/white"
+        android:textSize="16sp"
         android:drawableBottom="@drawable/ic_chevron_up"/>
     <ImageView
         android:id="@+id/dismiss"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp"
-        android:paddingEnd="18dp"
+        android:padding="12dp"
+        android:layout_marginEnd="6dp"
         android:src="@drawable/ic_close_white"
+        android:background="?android:attr/selectableItemBackgroundBorderless"
         android:layout_gravity="center_vertical|end"/>
 </FrameLayout>

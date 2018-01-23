@@ -20,14 +20,16 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -36,6 +38,8 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
@@ -58,10 +62,20 @@ public class SwipeUpOnboarding {
     private final Context mContext;
     private final WindowManager mWindowManager;
     private final View mLayout;
+    private final TextView mTextView;
+    private final ImageView mDismissView;
+    private final ColorDrawable mBackgroundDrawable;
+    private final int mDarkBackgroundColor;
+    private final int mLightBackgroundColor;
+    private final int mDarkContentColor;
+    private final int mLightContentColor;
+    private final RippleDrawable mDarkRipple;
+    private final RippleDrawable mLightRipple;
 
     private boolean mTaskListenerRegistered;
     private ComponentName mLauncherComponent;
     private boolean mLayoutAttachedToWindow;
+    private boolean mBackgroundIsLight;
 
     private final SysUiTaskStackChangeListener mTaskListener = new SysUiTaskStackChangeListener() {
         @Override
@@ -110,10 +124,24 @@ public class SwipeUpOnboarding {
 
     public SwipeUpOnboarding(Context context) {
         mContext = context;
+        final Resources res = context.getResources();
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mLayout = LayoutInflater.from(mContext).inflate(R.layout.recents_swipe_up_onboarding, null);
+        mTextView = (TextView) mLayout.findViewById(R.id.onboarding_text);
+        mDismissView = (ImageView) mLayout.findViewById(R.id.dismiss);
+        mDarkBackgroundColor = res.getColor(android.R.color.background_dark);
+        mLightBackgroundColor = res.getColor(android.R.color.background_light);
+        mDarkContentColor = res.getColor(R.color.primary_text_default_material_light);
+        mLightContentColor = res.getColor(R.color.primary_text_default_material_dark);
+        mDarkRipple = new RippleDrawable(res.getColorStateList(R.color.ripple_material_light),
+                null, null);
+        mLightRipple = new RippleDrawable(res.getColorStateList(R.color.ripple_material_dark),
+                null, null);
+        mBackgroundDrawable = new ColorDrawable(mDarkBackgroundColor);
+
         mLayout.addOnAttachStateChangeListener(mOnAttachStateChangeListener);
-        mLayout.findViewById(R.id.dismiss).setOnClickListener(v -> hide(true));
+        mLayout.setBackground(mBackgroundDrawable);
+        mDismissView.setOnClickListener(v -> hide(true));
 
         if (RESET_PREFS_FOR_DEBUG) {
             Prefs.putBoolean(mContext, Prefs.Key.HAS_SWIPED_UP_FOR_RECENTS, false);
@@ -183,6 +211,21 @@ public class SwipeUpOnboarding {
             } else {
                 mWindowManager.removeView(mLayout);
             }
+        }
+    }
+
+    public void setContentDarkIntensity(float contentDarkIntensity) {
+        boolean backgroundIsLight = contentDarkIntensity > 0.5f;
+        if (backgroundIsLight != mBackgroundIsLight) {
+            mBackgroundIsLight = backgroundIsLight;
+            mBackgroundDrawable.setColor(mBackgroundIsLight
+                    ? mLightBackgroundColor : mDarkBackgroundColor);
+            int contentColor = mBackgroundIsLight ? mDarkContentColor : mLightContentColor;
+            mTextView.setTextColor(contentColor);
+            mTextView.getCompoundDrawables()[3].setColorFilter(contentColor,
+                    PorterDuff.Mode.SRC_IN);
+            mDismissView.setColorFilter(contentColor);
+            mDismissView.setBackground(mBackgroundIsLight ? mDarkRipple : mLightRipple);
         }
     }
 
