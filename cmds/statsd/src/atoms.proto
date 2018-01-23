@@ -85,6 +85,7 @@ message Atom {
         AppStartCancelChanged app_start_cancel_changed = 49;
         AppStartFullyDrawnChanged app_start_fully_drawn_changed = 50;
         LmkEventOccurred lmk_event_occurred = 51;
+        PictureInPictureStateChanged picture_in_picture_state_changed = 52;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
@@ -935,6 +936,31 @@ message AppStartFullyDrawnChanged {
 
     // App startup time (until call to Activity#reportFullyDrawn()).
     optional int64 app_startup_time_ms = 6;
+}
+
+/**
+ * Logs a picture-in-picture action
+ * Logged from:
+ *      frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ *      frameworks/base/services/core/java/com/android/server/am/ActivityStackSupervisor.java
+ *      frameworks/base/packages/SystemUI/src/com/android/systemui/pip/phone/PipTouchHandler.java
+ */
+message PictureInPictureStateChanged {
+    optional int32 uid = 1;
+
+    optional string package_name = 2;
+
+    optional string class_name = 3;
+
+    // Picture-in-Picture action occurred, similar to
+    // frameworks/base/proto/src/metrics_constants.proto
+    enum State {
+        ENTERED = 1;
+        EXPANDED_TO_FULL_SCREEN = 2;
+        MINIMIZED = 3;
+        DISMISSED = 4;
+    }
+    optional State state = 4;
 }
 
 /**
