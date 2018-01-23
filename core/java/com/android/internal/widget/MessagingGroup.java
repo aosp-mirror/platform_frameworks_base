@@ -89,9 +89,12 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         mAvatarView = findViewById(R.id.message_icon);
     }
 
-    public void setSender(Notification.Person sender) {
+    public void setSender(Notification.Person sender, CharSequence nameOverride) {
         mSender = sender;
-        mSenderName.setText(sender.getName());
+        if (nameOverride == null) {
+            nameOverride = sender.getName();
+        }
+        mSenderName.setText(nameOverride);
         mNeedsGeneratedAvatar = sender.getIcon() == null;
         if (!mNeedsGeneratedAvatar) {
             setAvatar(sender.getIcon());
