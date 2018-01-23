@@ -18,20 +18,23 @@
 <resources>
     <dimen name="car_margin">148dp</dimen>
 
+    <dimen name="car_fullscreen_user_pod_margin_image_top">24dp</dimen>
     <dimen name="car_fullscreen_user_pod_margin_name_top">24dp</dimen>
-    <dimen name="car_fullscreen_user_pod_margin_name_bottom">64dp</dimen>
+    <dimen name="car_fullscreen_user_pod_margin_name_bottom">20dp</dimen>
     <dimen name="car_fullscreen_user_pod_margin_between">24dp</dimen>
     <dimen name="car_fullscreen_user_pod_icon_text_size">96dp</dimen>
     <dimen name="car_fullscreen_user_pod_image_avatar_width">192dp</dimen>
     <dimen name="car_fullscreen_user_pod_image_avatar_height">192dp</dimen>
     <dimen name="car_fullscreen_user_pod_width">264dp</dimen>
-    <dimen name="car_fullscreen_user_pod_text_size">40sp</dimen> <!-- B1 -->
+    <dimen name="car_fullscreen_user_pod_height">356dp</dimen>
+    <dimen name="car_fullscreen_user_pod_name_text_size">40sp</dimen> <!-- B1 -->
+    <dimen name="car_fullscreen_user_pod_device_text_size">@dimen/car_body2_size</dimen>
 
     <dimen name="car_navigation_button_width">64dp</dimen>
     <dimen name="car_navigation_bar_width">760dp</dimen>
 
     <dimen name="car_page_indicator_dot_diameter">12dp</dimen>
-    <dimen name="car_page_indicator_margin_top">32dp</dimen>
+    <dimen name="car_page_indicator_margin_bottom">24dp</dimen>
 
     <dimen name="car_user_switcher_progress_bar_height">6dp</dimen>
     <dimen name="car_user_switcher_progress_bar_margin_top">@dimen/status_bar_height</dimen>
@@ -47,8 +50,14 @@
     <dimen name="car_qs_footer_padding_start">46dp</dimen>
     <dimen name="car_qs_footer_icon_width">56dp</dimen>
     <dimen name="car_qs_footer_icon_height">56dp</dimen>
-    <dimen name="car_qs_footer_user_switch_margin_right">46dp</dimen>
+    <dimen name="car_qs_footer_user_switch_icon_margin">5dp</dimen>
+    <dimen name="car_qs_footer_user_switch_icon_width">36dp</dimen>
     <dimen name="car_qs_footer_user_name_text_size">@dimen/car_body2_size</dimen>
+
+    <dimen name="car_user_switcher_container_height">420dp</dimen>
+    <!-- This must be the negative of car_user_switcher_container_height for the animation. -->
+    <dimen name="car_user_switcher_container_anim_height">-420dp</dimen>
+    <dimen name="car_user_grid_margin_bottom">28dp</dimen>
 
     <dimen name="car_body2_size">26sp</dimen>
 </resources>

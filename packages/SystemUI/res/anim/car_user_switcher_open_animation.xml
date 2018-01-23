@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!--
-     Copyright (C) 2017 The Android Open Source Project
+<!-- Copyright (C) 2017 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,12 +12,9 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:clipChildren="false"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:gravity="center" >
-
-    <!-- car_fullscreen_user_pods will be dynamically added here. -->
-</LinearLayout>
+<animator xmlns:android="http://schemas.android.com/apk/res/android"
+    android:duration="200"
+    android:valueType="intType"
+    android:valueFrom="0"
+    android:valueTo="@dimen/car_user_switcher_container_height"
+    android:interpolator="@android:interpolator/fast_out_slow_in" />
