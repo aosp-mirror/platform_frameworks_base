@@ -897,10 +897,26 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     boolean handleNotObscuredLocked(WindowState w, boolean obscured, boolean syswin) {
         final WindowManager.LayoutParams attrs = w.mAttrs;
         final int attrFlags = attrs.flags;
+        final boolean onScreen = w.isOnScreen();
         final boolean canBeSeen = w.isDisplayedLw();
         final int privateflags = attrs.privateFlags;
         boolean displayHasContent = false;
 
+        if (DEBUG_KEEP_SCREEN_ON) {
+            Slog.d(TAG_KEEP_SCREEN_ON, "handleNotObscuredLocked w: " + w
+                + ", w.mHasSurface: " + w.mHasSurface
+                + ", w.isOnScreen(): " + onScreen
+                + ", w.isDisplayedLw(): " + w.isDisplayedLw()
+                + ", w.mAttrs.userActivityTimeout: " + w.mAttrs.userActivityTimeout);
+        }
+        if (w.mHasSurface && onScreen) {
+            if (!syswin && w.mAttrs.userActivityTimeout >= 0 && mUserActivityTimeout < 0) {
+                mUserActivityTimeout = w.mAttrs.userActivityTimeout;
+                if (DEBUG_KEEP_SCREEN_ON) {
+                    Slog.d(TAG, "mUserActivityTimeout set to " + mUserActivityTimeout);
+                }
+            }
+        }
         if (w.mHasSurface && canBeSeen) {
             if ((attrFlags & FLAG_KEEP_SCREEN_ON) != 0) {
                 mHoldScreen = w.mSession;
@@ -912,9 +928,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             }
             if (!syswin && w.mAttrs.screenBrightness >= 0 && mScreenBrightness < 0) {
                 mScreenBrightness = w.mAttrs.screenBrightness;
-            }
-            if (!syswin && w.mAttrs.userActivityTimeout >= 0 && mUserActivityTimeout < 0) {
-                mUserActivityTimeout = w.mAttrs.userActivityTimeout;
             }
 
             final int type = attrs.type;
