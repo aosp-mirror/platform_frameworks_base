@@ -17,6 +17,7 @@
 package android.net;
 
 import android.content.Context;
+import android.net.ConnectivityManager.PacketKeepalive;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -26,7 +27,6 @@ import android.util.Log;
 
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
-import android.net.ConnectivityManager.PacketKeepalive;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
