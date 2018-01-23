@@ -94,8 +94,8 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
         // Note that after this step, the requestMetadata is mutated (swapped) and can not be used
         // for next request builder creation.
         CaptureRequest.Builder singleTargetRequestBuilder = new CaptureRequest.Builder(
-                requestMetadata, /*reprocess*/false, CameraCaptureSession.SESSION_ID_NONE);
-
+                requestMetadata, /*reprocess*/false, CameraCaptureSession.SESSION_ID_NONE,
+                request.getLogicalCameraId(), /*physicalCameraIdSet*/ null);
         // Carry over userTag, as native metadata doesn't have this field.
         singleTargetRequestBuilder.setTag(request.getTag());
 
@@ -120,7 +120,8 @@ public class CameraConstrainedHighSpeedCaptureSessionImpl
             // CaptureRequest.Builder creation.
             requestMetadata = new CameraMetadataNative(request.getNativeCopy());
             doubleTargetRequestBuilder = new CaptureRequest.Builder(
-                    requestMetadata, /*reprocess*/false, CameraCaptureSession.SESSION_ID_NONE);
+                    requestMetadata, /*reprocess*/false, CameraCaptureSession.SESSION_ID_NONE,
+                    request.getLogicalCameraId(), /*physicalCameraIdSet*/null);
             doubleTargetRequestBuilder.setTag(request.getTag());
             doubleTargetRequestBuilder.set(CaptureRequest.CONTROL_CAPTURE_INTENT,
                     CaptureRequest.CONTROL_CAPTURE_INTENT_VIDEO_RECORD);

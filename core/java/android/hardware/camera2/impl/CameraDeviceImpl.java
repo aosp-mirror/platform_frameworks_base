@@ -55,6 +55,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -711,6 +712,38 @@ public class CameraDeviceImpl extends CameraDevice
     }
 
     @Override
+    public CaptureRequest.Builder createCaptureRequest(int templateType,
+            Set<String> physicalCameraIdSet)
+            throws CameraAccessException {
+        synchronized(mInterfaceLock) {
+            checkIfCameraClosedOrInError();
+
+            for (String physicalId : physicalCameraIdSet) {
+                if (physicalId == getId()) {
+                    throw new IllegalStateException("Physical id matches the logical id!");
+                }
+            }
+
+            CameraMetadataNative templatedRequest = null;
+
+            templatedRequest = mRemoteDevice.createDefaultRequest(templateType);
+
+            // If app target SDK is older than O, or it's not a still capture template, enableZsl
+            // must be false in the default request.
+            if (mAppTargetSdkVersion < Build.VERSION_CODES.O ||
+                    templateType != TEMPLATE_STILL_CAPTURE) {
+                overrideEnableZsl(templatedRequest, false);
+            }
+
+            CaptureRequest.Builder builder = new CaptureRequest.Builder(
+                    templatedRequest, /*reprocess*/false, CameraCaptureSession.SESSION_ID_NONE,
+                    getId(), physicalCameraIdSet);
+
+            return builder;
+        }
+    }
+
+    @Override
     public CaptureRequest.Builder createCaptureRequest(int templateType)
             throws CameraAccessException {
         synchronized(mInterfaceLock) {
@@ -728,7 +761,8 @@ public class CameraDeviceImpl extends CameraDevice
             }
 
             CaptureRequest.Builder builder = new CaptureRequest.Builder(
-                    templatedRequest, /*reprocess*/false, CameraCaptureSession.SESSION_ID_NONE);
+                    templatedRequest, /*reprocess*/false, CameraCaptureSession.SESSION_ID_NONE,
+                    getId(), /*physicalCameraIdSet*/ null);
 
             return builder;
         }
@@ -744,7 +778,7 @@ public class CameraDeviceImpl extends CameraDevice
                     CameraMetadataNative(inputResult.getNativeCopy());
 
             return new CaptureRequest.Builder(resultMetadata, /*reprocess*/true,
-                    inputResult.getSessionId());
+                    inputResult.getSessionId(), getId(), /*physicalCameraIdSet*/ null);
         }
     }
 
