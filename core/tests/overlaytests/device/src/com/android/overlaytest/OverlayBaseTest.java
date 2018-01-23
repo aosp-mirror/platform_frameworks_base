@@ -1,45 +1,80 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.overlaytest;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
+import android.app.UiAutomation;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
-import android.test.AndroidTestCase;
+import android.os.LocaleList;
+import android.os.ParcelFileDescriptor;
+import android.support.test.InstrumentationRegistry;
 import android.util.AttributeSet;
 import android.util.Xml;
+
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
-public abstract class OverlayBaseTest extends AndroidTestCase {
+@Ignore
+public abstract class OverlayBaseTest {
     private Resources mResources;
-    protected int mMode; // will be set by subclasses
-    static final protected int MODE_NO_OVERLAY = 0;
-    static final protected int MODE_SINGLE_OVERLAY = 1;
-    static final protected int MODE_MULTIPLE_OVERLAYS = 2;
+    private final int mMode;
+    static final int MODE_NO_OVERLAY = 0;
+    static final int MODE_SINGLE_OVERLAY = 1;
+    static final int MODE_MULTIPLE_OVERLAYS = 2;
 
-    protected void setUp() {
-        mResources = getContext().getResources();
+    static final String APP_OVERLAY_ONE_PKG = "com.android.overlaytest.app_overlay_one";
+    static final String APP_OVERLAY_TWO_PKG = "com.android.overlaytest.app_overlay_two";
+    static final String FRAMEWORK_OVERLAY_PKG = "com.android.overlaytest.framework";
+
+    protected OverlayBaseTest(int mode) {
+        mMode = mode;
+    }
+
+    @Before
+    public void setUp() {
+        mResources = InstrumentationRegistry.getContext().getResources();
     }
 
     private int calculateRawResourceChecksum(int resId) throws Throwable {
-        InputStream input = null;
-        try {
-            input = mResources.openRawResource(resId);
+        try (InputStream input = mResources.openRawResource(resId)) {
             int ch, checksum = 0;
             while ((ch = input.read()) != -1) {
                 checksum = (checksum + ch) % 0xffddbb00;
             }
             return checksum;
-        } finally {
-            input.close();
         }
     }
 
     private void setLocale(Locale locale) {
-        Locale.setDefault(locale);
+        final LocaleList locales = new LocaleList(locale);
+        LocaleList.setDefault(locales);
         Configuration config = new Configuration();
-        config.locale = locale;
+        config.setLocales(locales);
         mResources.updateConfiguration(config, mResources.getDisplayMetrics());
     }
 
@@ -126,6 +161,7 @@ public abstract class OverlayBaseTest extends AndroidTestCase {
         }
     }
 
+    @Test
     public void testFrameworkBooleanOverlay() throws Throwable {
         // config_annoy_dianne has the value:
         // - true when no overlay exists (MODE_NO_OVERLAY)
@@ -135,6 +171,7 @@ public abstract class OverlayBaseTest extends AndroidTestCase {
         assertResource(resId, true, false, false);
     }
 
+    @Test
     public void testBooleanOverlay() throws Throwable {
         // usually_false has the value:
         // - false when no overlay exists (MODE_NO_OVERLAY)
@@ -144,12 +181,14 @@ public abstract class OverlayBaseTest extends AndroidTestCase {
         assertResource(resId, false, true, false);
     }
 
+    @Test
     public void testBoolean() throws Throwable {
         // always_true has no overlay
         final int resId = R.bool.always_true;
         assertResource(resId, true, true, true);
     }
 
+    @Test
     public void testIntegerArrayOverlay() throws Throwable {
         // fibonacci has values:
         // - eight first values of Fibonacci sequence, when no overlay exists (MODE_NO_OVERLAY)
@@ -162,6 +201,7 @@ public abstract class OverlayBaseTest extends AndroidTestCase {
                 new int[]{21, 13, 8, 5, 3, 2, 1, 1});
     }
 
+    @Test
     public void testIntegerArray() throws Throwable {
         // prime_numbers has no overlay
         final int resId = R.array.prime_numbers;
@@ -169,6 +209,7 @@ public abstract class OverlayBaseTest extends AndroidTestCase {
         assertResource(resId, expected, expected, expected);
     }
 
+    @Test
     public void testDrawable() throws Throwable {
         // drawable-nodpi/drawable has overlay (default config)
         final int resId = R.drawable.drawable;
@@ -188,16 +229,19 @@ public abstract class OverlayBaseTest extends AndroidTestCase {
         assertEquals(expected, actual);
     }
 
+    @Test
     public void testAppString() throws Throwable {
         final int resId = R.string.str;
         assertResource(resId, "none", "single", "multiple");
     }
 
+    @Test
     public void testApp2() throws Throwable {
         final int resId = R.string.str2; // only in base package and first app overlay
         assertResource(resId, "none", "single", "single");
     }
 
+    @Test
     public void testAppXml() throws Throwable {
         int expected = getExpected(0, 1, 2);
         int actual = -1;
@@ -214,6 +258,7 @@ public abstract class OverlayBaseTest extends AndroidTestCase {
         assertEquals(expected, actual);
     }
 
+    @Test
     public void testAppRaw() throws Throwable {
         final int resId = R.raw.lorem_ipsum;
 
@@ -256,10 +301,10 @@ public abstract class OverlayBaseTest extends AndroidTestCase {
      * SLOT  PACKAGE           CONFIGURATION  VALUE
      * A     target package    (default)      100
      * B     target package    -sv            200
-     * C     OverlayAppFirst   (default)      300
-     * D     OverlayAppFirst   -sv            400
-     * E     OverlayAppSecond  (default)      500
-     * F     OverlayAppSecond  -sv            600
+     * C     AppOverlayOne     (default)      300
+     * D     AppOverlayOne     -sv            400
+     * E     AppOverlayTwo     (default)      500
+     * F     AppOverlayTwo     -sv            600
      *
      * Example: in testMatrix101110, the base package defines the
      * R.integer.matrix101110 resource for the default configuration (value
@@ -269,195 +314,283 @@ public abstract class OverlayBaseTest extends AndroidTestCase {
      * are loaded, the expected value after setting the language to Swedish is
      * 400.
      */
+    @Test
     public void testMatrix100000() throws Throwable {
         final int resId = R.integer.matrix_100000;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 100, 100);
     }
 
+    @Test
     public void testMatrix100001() throws Throwable {
         final int resId = R.integer.matrix_100001;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 100, 600);
     }
 
+    @Test
     public void testMatrix100010() throws Throwable {
         final int resId = R.integer.matrix_100010;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 100, 500);
     }
 
+    @Test
     public void testMatrix100011() throws Throwable {
         final int resId = R.integer.matrix_100011;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 100, 600);
     }
 
+    @Test
     public void testMatrix100100() throws Throwable {
         final int resId = R.integer.matrix_100100;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 400, 400);
     }
 
+    @Test
     public void testMatrix100101() throws Throwable {
         final int resId = R.integer.matrix_100101;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 400, 600);
     }
 
+    @Test
     public void testMatrix100110() throws Throwable {
         final int resId = R.integer.matrix_100110;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 400, 400);
     }
 
+    @Test
     public void testMatrix100111() throws Throwable {
         final int resId = R.integer.matrix_100111;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 400, 600);
     }
 
+    @Test
     public void testMatrix101000() throws Throwable {
         final int resId = R.integer.matrix_101000;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 300, 300);
     }
 
+    @Test
     public void testMatrix101001() throws Throwable {
         final int resId = R.integer.matrix_101001;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 300, 600);
     }
 
+    @Test
     public void testMatrix101010() throws Throwable {
         final int resId = R.integer.matrix_101010;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 300, 500);
     }
 
+    @Test
     public void testMatrix101011() throws Throwable {
         final int resId = R.integer.matrix_101011;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 300, 600);
     }
 
+    @Test
     public void testMatrix101100() throws Throwable {
         final int resId = R.integer.matrix_101100;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 400, 400);
     }
 
+    @Test
     public void testMatrix101101() throws Throwable {
         final int resId = R.integer.matrix_101101;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 400, 600);
     }
 
+    @Test
     public void testMatrix101110() throws Throwable {
         final int resId = R.integer.matrix_101110;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 400, 400);
     }
 
+    @Test
     public void testMatrix101111() throws Throwable {
         final int resId = R.integer.matrix_101111;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 100, 400, 600);
     }
 
+    @Test
     public void testMatrix110000() throws Throwable {
         final int resId = R.integer.matrix_110000;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 200, 200);
     }
 
+    @Test
     public void testMatrix110001() throws Throwable {
         final int resId = R.integer.matrix_110001;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 200, 600);
     }
 
+    @Test
     public void testMatrix110010() throws Throwable {
         final int resId = R.integer.matrix_110010;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 200, 200);
     }
 
+    @Test
     public void testMatrix110011() throws Throwable {
         final int resId = R.integer.matrix_110011;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 200, 600);
     }
 
+    @Test
     public void testMatrix110100() throws Throwable {
         final int resId = R.integer.matrix_110100;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 400, 400);
     }
 
+    @Test
     public void testMatrix110101() throws Throwable {
         final int resId = R.integer.matrix_110101;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 400, 600);
     }
 
+    @Test
     public void testMatrix110110() throws Throwable {
         final int resId = R.integer.matrix_110110;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 400, 400);
     }
 
+    @Test
     public void testMatrix110111() throws Throwable {
         final int resId = R.integer.matrix_110111;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 400, 600);
     }
 
+    @Test
     public void testMatrix111000() throws Throwable {
         final int resId = R.integer.matrix_111000;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 200, 200);
     }
 
+    @Test
     public void testMatrix111001() throws Throwable {
         final int resId = R.integer.matrix_111001;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 200, 600);
     }
 
+    @Test
     public void testMatrix111010() throws Throwable {
         final int resId = R.integer.matrix_111010;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 200, 200);
     }
 
+    @Test
     public void testMatrix111011() throws Throwable {
         final int resId = R.integer.matrix_111011;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 200, 600);
     }
 
+    @Test
     public void testMatrix111100() throws Throwable {
         final int resId = R.integer.matrix_111100;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 400, 400);
     }
 
+    @Test
     public void testMatrix111101() throws Throwable {
         final int resId = R.integer.matrix_111101;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 400, 600);
     }
 
+    @Test
     public void testMatrix111110() throws Throwable {
         final int resId = R.integer.matrix_111110;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 400, 400);
     }
 
+    @Test
     public void testMatrix111111() throws Throwable {
         final int resId = R.integer.matrix_111111;
         setLocale(new Locale("sv", "SE"));
         assertResource(resId, 200, 400, 600);
+    }
+
+    /**
+     * Executes the shell command and reads all the output to ensure the command ran and didn't
+     * get stuck buffering on output.
+     */
+    protected static String executeShellCommand(UiAutomation automation, String command)
+            throws Exception {
+        final ParcelFileDescriptor pfd = automation.executeShellCommand(command);
+        try (InputStream in = new ParcelFileDescriptor.AutoCloseInputStream(pfd)) {
+            final BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(in, StandardCharsets.UTF_8));
+            StringBuilder str = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                str.append(line);
+            }
+            return str.toString();
+        }
+    }
+
+    /**
+     * Enables overlay packages and waits for a configuration change event before
+     * returning, to guarantee that Resources are up-to-date.
+     * @param packages the list of package names to enable.
+     */
+    protected static void enableOverlayPackages(String... packages) throws Exception {
+        enableOverlayPackages(true, packages);
+    }
+
+    /**
+     * Disables overlay packages and waits for a configuration change event before
+     * returning, to guarantee that Resources are up-to-date.
+     * @param packages the list of package names to disable.
+     */
+    protected static void disableOverlayPackages(String... packages) throws Exception {
+        enableOverlayPackages(false, packages);
+    }
+
+    /**
+     * Enables/disables overlay packages and waits for a configuration change event before
+     * returning, to guarantee that Resources are up-to-date.
+     * @param enable enables the overlays when true, disables when false.
+     * @param packages the list of package names to enable/disable.
+     */
+    private static void enableOverlayPackages(boolean enable, String[] packages)
+            throws Exception {
+        final UiAutomation uiAutomation = InstrumentationRegistry.getInstrumentation()
+                .getUiAutomation();
+        for (final String pkg : packages) {
+            executeShellCommand(uiAutomation,
+                    "cmd overlay " + (enable ? "enable " : "disable ") + pkg);
+        }
+
+        // Wait for the overlay change to propagate.
+        Thread.sleep(1000);
     }
 }
