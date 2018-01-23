@@ -81,7 +81,6 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
-import com.android.server.adb.AdbDebuggingManager;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.File;
@@ -180,7 +179,6 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
     private final boolean mHasUsbAccessory;
     @GuardedBy("mLock")
     private String[] mAccessoryStrings;
-    private AdbDebuggingManager mDebuggingManager;
     private final UEventObserver mUEventObserver;
 
     private static Set<Integer> sBlackListedInterfaces;
@@ -273,24 +271,18 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         }
         mControlFds.put(UsbManager.FUNCTION_PTP, ptpFd);
 
-        boolean secureAdbEnabled = SystemProperties.getBoolean("ro.adb.secure", false);
-        boolean dataEncrypted = "1".equals(SystemProperties.get("vold.decrypt"));
-        if (secureAdbEnabled && !dataEncrypted) {
-            mDebuggingManager = new AdbDebuggingManager(context);
-        }
-
         if (halNotPresent) {
             /**
              * Initialze the legacy UsbHandler
              */
             mHandler = new UsbHandlerLegacy(FgThread.get().getLooper(), mContext, this,
-                    mDebuggingManager, alsaManager, settingsManager);
+                    alsaManager, settingsManager);
         } else {
             /**
              * Initialize HAL based UsbHandler
              */
             mHandler = new UsbHandlerHal(FgThread.get().getLooper(), mContext, this,
-                    mDebuggingManager, alsaManager, settingsManager);
+                    alsaManager, settingsManager);
         }
 
         if (nativeIsStartRequested()) {
@@ -466,7 +458,6 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         private int mMidiDevice;
 
         private final Context mContext;
-        private final AdbDebuggingManager mDebuggingManager;
         private final UsbAlsaManager mUsbAlsaManager;
         private final UsbSettingsManager mSettingsManager;
         private NotificationManager mNotificationManager;
@@ -489,11 +480,9 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         protected static final String USB_PERSISTENT_CONFIG_PROPERTY = "persist.sys.usb.config";
 
         UsbHandler(Looper looper, Context context, UsbDeviceManager deviceManager,
-                AdbDebuggingManager debuggingManager, UsbAlsaManager alsaManager,
-                UsbSettingsManager settingsManager) {
+                UsbAlsaManager alsaManager, UsbSettingsManager settingsManager) {
             super(looper);
             mContext = context;
-            mDebuggingManager = debuggingManager;
             mUsbDeviceManager = deviceManager;
             mUsbAlsaManager = alsaManager;
             mSettingsManager = settingsManager;
@@ -611,10 +600,6 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
             setEnabledFunctions(mCurrentFunctions, true);
             updateAdbNotification(false);
-
-            if (mDebuggingManager != null) {
-                mDebuggingManager.setAdbEnabled(enable);
-            }
         }
 
         protected boolean isUsbTransferAllowed() {
@@ -1018,9 +1003,6 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                 if (mCurrentAccessory != null) {
                     mUsbDeviceManager.getCurrentSettings().accessoryAttached(mCurrentAccessory);
                 }
-                if (mDebuggingManager != null) {
-                    mDebuggingManager.setAdbEnabled(isAdbEnabled());
-                }
 
                 updateUsbNotification(false);
                 updateAdbNotification(false);
@@ -1344,9 +1326,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         private boolean mUsbDataUnlocked;
 
         UsbHandlerLegacy(Looper looper, Context context, UsbDeviceManager deviceManager,
-                AdbDebuggingManager debuggingManager, UsbAlsaManager alsaManager,
-                UsbSettingsManager settingsManager) {
-            super(looper, context, deviceManager, debuggingManager, alsaManager, settingsManager);
+                UsbAlsaManager alsaManager, UsbSettingsManager settingsManager) {
+            super(looper, context, deviceManager, alsaManager, settingsManager);
             try {
                 readOemUsbOverrideConfig(context);
                 // Restore default functions.
@@ -1734,9 +1715,8 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         protected boolean mCurrentUsbFunctionsRequested;
 
         UsbHandlerHal(Looper looper, Context context, UsbDeviceManager deviceManager,
-                AdbDebuggingManager debuggingManager, UsbAlsaManager alsaManager,
-                UsbSettingsManager settingsManager) {
-            super(looper, context, deviceManager, debuggingManager, alsaManager, settingsManager);
+                UsbAlsaManager alsaManager, UsbSettingsManager settingsManager) {
+            super(looper, context, deviceManager, alsaManager, settingsManager);
             try {
                 ServiceNotification serviceNotification = new ServiceNotification();
 
@@ -2043,27 +2023,6 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
         mHandler.sendMessage(MSG_SET_SCREEN_UNLOCKED_FUNCTIONS, functions);
     }
 
-    public void allowUsbDebugging(boolean alwaysAllow, String publicKey) {
-        if (mDebuggingManager != null) {
-            mDebuggingManager.allowUsbDebugging(alwaysAllow, publicKey);
-        }
-    }
-
-    public void denyUsbDebugging() {
-        if (mDebuggingManager != null) {
-            mDebuggingManager.denyUsbDebugging();
-        }
-    }
-
-    public void clearUsbDebuggingKeys() {
-        if (mDebuggingManager != null) {
-            mDebuggingManager.clearUsbDebuggingKeys();
-        } else {
-            throw new RuntimeException("Cannot clear Usb Debugging keys, "
-                    + "AdbDebuggingManager not enabled");
-        }
-    }
-
     private void onAdbEnabled(boolean enabled) {
         mHandler.sendMessage(MSG_ENABLE_ADB, enabled);
     }
@@ -2076,10 +2035,6 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
 
         if (mHandler != null) {
             mHandler.dump(dump, "handler", UsbDeviceManagerProto.HANDLER);
-        }
-        if (mDebuggingManager != null) {
-            mDebuggingManager.dump(dump, "debugging_manager",
-                    UsbDeviceManagerProto.DEBUGGING_MANAGER);
         }
 
         dump.end(token);

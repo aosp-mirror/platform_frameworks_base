@@ -453,7 +453,7 @@ public class AdbDebuggingManager {
      * Allows the debugging from the endpoint identified by {@code publicKey} either once or
      * always if {@code alwaysAllow} is {@code true}.
      */
-    public void allowUsbDebugging(boolean alwaysAllow, String publicKey) {
+    public void allowDebugging(boolean alwaysAllow, String publicKey) {
         Message msg = mHandler.obtainMessage(AdbDebuggingHandler.MESSAGE_ADB_ALLOW);
         msg.arg1 = alwaysAllow ? 1 : 0;
         msg.obj = publicKey;
@@ -463,7 +463,7 @@ public class AdbDebuggingManager {
     /**
      * Denies debugging connection from the device that last requested to connect.
      */
-    public void denyUsbDebugging() {
+    public void denyDebugging() {
         mHandler.sendEmptyMessage(AdbDebuggingHandler.MESSAGE_ADB_DENY);
     }
 
@@ -471,7 +471,7 @@ public class AdbDebuggingManager {
      * Clears all previously accepted ADB debugging public keys. Any subsequent request will need
      * to pass through {@link #allowUsbDebugging(boolean, String)} again.
      */
-    public void clearUsbDebuggingKeys() {
+    public void clearDebuggingKeys() {
         mHandler.sendEmptyMessage(AdbDebuggingHandler.MESSAGE_ADB_CLEAR);
     }
 

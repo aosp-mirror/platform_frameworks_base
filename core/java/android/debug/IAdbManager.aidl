@@ -16,6 +16,29 @@
 
 package android.debug;
 
-/** @hide */
+/**
+ * Interface to communicate remotely with the {@code AdbService} in the system server.
+ *
+ * @hide
+ */
 interface IAdbManager {
+    /**
+     * Allow ADB debugging from the attached host. If {@code alwaysAllow} is
+     * {@code true}, add {@code publicKey} to list of host keys that the
+     * user has approved.
+     *
+     * @param alwaysAllow if true, add permanently to list of allowed keys
+     * @param publicKey RSA key in mincrypt format and Base64-encoded
+     */
+    void allowDebugging(boolean alwaysAllow, String publicKey);
+
+    /**
+     * Deny ADB debugging from the attached host.
+     */
+    void denyDebugging();
+
+    /**
+     * Clear all public keys installed for secure ADB debugging.
+     */
+    void clearDebuggingKeys();
 }

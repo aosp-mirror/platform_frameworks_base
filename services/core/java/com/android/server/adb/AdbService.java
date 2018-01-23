@@ -30,17 +30,23 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.provider.Settings;
+import android.service.adb.AdbServiceDumpProto;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
+
 
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Collections;
 
 /**
  * The Android Debug Bridge (ADB) service. This controls the availability of ADB and authorization
@@ -67,6 +73,8 @@ public class AdbService extends IAdbManager.Stub {
         public void onBootPhase(int phase) {
             if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
                 mAdbService.systemReady();
+            } else if (phase == SystemService.PHASE_BOOT_COMPLETED) {
+                mAdbService.bootCompleted();
             }
         }
     }
@@ -131,6 +139,11 @@ public class AdbService extends IAdbManager.Stub {
                 case MSG_ENABLE_ADB:
                     setAdbEnabled(msg.arg1 == 1);
                     break;
+                case MSG_BOOT_COMPLETED:
+                    if (mDebuggingManager != null) {
+                        mDebuggingManager.setAdbEnabled(mAdbEnabled);
+                    }
+                    break;
             }
         }
     }
@@ -152,6 +165,7 @@ public class AdbService extends IAdbManager.Stub {
     private static final boolean DEBUG = false;
 
     private static final int MSG_ENABLE_ADB = 1;
+    private static final int MSG_BOOT_COMPLETED = 2;
 
     /**
      * The persistent property which stores whether adb is enabled or not.
@@ -165,10 +179,17 @@ public class AdbService extends IAdbManager.Stub {
     private final ArrayMap<IBinder, IAdbTransport> mTransports = new ArrayMap<>();
 
     private boolean mAdbEnabled;
+    private AdbDebuggingManager mDebuggingManager;
 
     private AdbService(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
+
+        boolean secureAdbEnabled = SystemProperties.getBoolean("ro.adb.secure", false);
+        boolean dataEncrypted = "1".equals(SystemProperties.get("vold.decrypt"));
+        if (secureAdbEnabled && !dataEncrypted) {
+            mDebuggingManager = new AdbDebuggingManager(context);
+        }
 
         mHandler = new AdbHandler(FgThread.get().getLooper());
 
@@ -192,6 +213,41 @@ public class AdbService extends IAdbManager.Stub {
         }
     }
 
+    /**
+     * Callend in response to {@code SystemService.PHASE_BOOT_COMPLETED} from {@code SystemServer}.
+     */
+    public void bootCompleted() {
+        if (DEBUG) Slog.d(TAG, "boot completed");
+        mHandler.sendEmptyMessage(MSG_BOOT_COMPLETED);
+    }
+
+    @Override
+    public void allowDebugging(boolean alwaysAllow, String publicKey) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_DEBUGGING, null);
+        if (mDebuggingManager != null) {
+            mDebuggingManager.allowDebugging(alwaysAllow, publicKey);
+        }
+    }
+
+    @Override
+    public void denyDebugging() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_DEBUGGING, null);
+        if (mDebuggingManager != null) {
+            mDebuggingManager.denyDebugging();
+        }
+    }
+
+    @Override
+    public void clearDebuggingKeys() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_DEBUGGING, null);
+        if (mDebuggingManager != null) {
+            mDebuggingManager.clearDebuggingKeys();
+        } else {
+            throw new RuntimeException("Cannot clear ADB debugging keys, "
+                    + "AdbDebuggingManager not enabled");
+        }
+    }
+
     private void setAdbEnabled(boolean enable) {
         if (DEBUG) Slog.d(TAG, "setAdbEnabled(" + enable + "), mAdbEnabled=" + mAdbEnabled);
 
@@ -207,6 +263,10 @@ public class AdbService extends IAdbManager.Stub {
                 Slog.w(TAG, "Unable to send onAdbEnabled to transport " + transport.toString());
             }
         }
+
+        if (mDebuggingManager != null) {
+            mDebuggingManager.setAdbEnabled(enable);
+        }
     }
 
     @Override
@@ -216,13 +276,30 @@ public class AdbService extends IAdbManager.Stub {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
         final long ident = Binder.clearCallingIdentity();
         try {
-            if (args == null || args.length == 0 || "-a".equals(args[0])) {
-                pw.println("ADB Manager State:");
-                pw.increaseIndent();
-                pw.print("ADB enabled: ");
-                pw.println(mAdbEnabled);
-                pw.print("Number of registered transports: ");
-                pw.println(mTransports.size());
+            ArraySet<String> argsSet = new ArraySet<>();
+            Collections.addAll(argsSet, args);
+
+            boolean dumpAsProto = false;
+            if (argsSet.contains("--proto")) {
+                dumpAsProto = true;
+            }
+
+            if (argsSet.size() == 0 || argsSet.contains("-a") || dumpAsProto) {
+                DualDumpOutputStream dump;
+                if (dumpAsProto) {
+                    dump = new DualDumpOutputStream(new ProtoOutputStream(fd));
+                } else {
+                    pw.println("ADB MANAGER STATE (dumpsys adb):");
+
+                    dump = new DualDumpOutputStream(new IndentingPrintWriter(pw, "  "));
+                }
+
+                if (mDebuggingManager != null) {
+                    mDebuggingManager.dump(dump, "debugging_manager",
+                            AdbServiceDumpProto.DEBUGGING_MANAGER);
+                }
+
+                dump.flush();
             } else {
                 pw.println("Dump current ADB state");
                 pw.println("  No commands available");
