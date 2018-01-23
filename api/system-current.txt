@@ -4312,6 +4312,7 @@ package android.telephony.ims.internal.stub {
     method public void acknowledgeSms(int, int, int);
     method public void acknowledgeSmsReport(int, int, int);
     method public java.lang.String getSmsFormat();
+    method public void onReady();
     method public final void onSendSmsResult(int, int, int, int) throws java.lang.RuntimeException;
     method public final void onSmsReceived(int, java.lang.String, byte[]) throws java.lang.RuntimeException;
     method public final void onSmsStatusReportReceived(int, int, java.lang.String, byte[]) throws java.lang.RuntimeException;
