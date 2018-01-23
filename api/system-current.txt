@@ -2578,6 +2578,7 @@ package android.net {
   }
 
   public final class IpSecManager {
+    method public void applyTunnelModeTransform(android.net.IpSecManager.IpSecTunnelInterface, int, android.net.IpSecTransform) throws java.io.IOException;
     method public android.net.IpSecManager.IpSecTunnelInterface createIpSecTunnelInterface(java.net.InetAddress, java.net.InetAddress, android.net.Network) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException;
   }
 
