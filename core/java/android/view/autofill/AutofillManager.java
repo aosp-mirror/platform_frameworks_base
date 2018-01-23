@@ -24,7 +24,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -393,6 +392,13 @@ public final class AutofillManager {
          * Runs the specified action on the UI thread.
          */
         void runOnUiThread(Runnable action);
+
+        /**
+         * Gets the complete component name of this client.
+         *
+         * <p>Temporary method on O-MR1 only.
+         */
+        ComponentName getComponentNameForAutofill();
     }
 
     /**
@@ -949,11 +955,8 @@ public final class AutofillManager {
         return mContext.getAutofillClient();
     }
 
-    private ComponentName getComponentNameFromContext() {
-        if (mContext instanceof Activity) {
-            return ((Activity) mContext).getComponentName();
-        }
-        return null;
+    private ComponentName getComponentNameFromContext(AutofillClient client) {
+        return client == null ? null : client.getComponentNameForAutofill();
     }
 
     /** @hide */
@@ -1006,7 +1009,8 @@ public final class AutofillManager {
             return;
         }
         try {
-            final ComponentName componentName = getComponentNameFromContext();
+            final AutofillClient client = getClientLocked();
+            final ComponentName componentName = getComponentNameFromContext(client);
             if (componentName == null) {
                 Log.w(TAG, "startSessionLocked(): context is not activity: " + mContext);
                 return;
@@ -1017,7 +1021,6 @@ public final class AutofillManager {
             if (mSessionId != NO_SESSION) {
                 mState = STATE_ACTIVE;
             }
-            final AutofillClient client = getClientLocked();
             if (client != null) {
                 client.autofillCallbackResetableStateAvailable();
             }
@@ -1071,7 +1074,8 @@ public final class AutofillManager {
 
         try {
             if (restartIfNecessary) {
-                final ComponentName componentName = getComponentNameFromContext();
+                final AutofillClient client = getClientLocked();
+                final ComponentName componentName = getComponentNameFromContext(client);
                 if (componentName == null) {
                     Log.w(TAG, "startSessionLocked(): context is not activity: " + mContext);
                     return;
@@ -1083,7 +1087,6 @@ public final class AutofillManager {
                     if (sDebug) Log.d(TAG, "Session restarted: " + mSessionId + "=>" + newId);
                     mSessionId = newId;
                     mState = (mSessionId == NO_SESSION) ? STATE_UNKNOWN : STATE_ACTIVE;
-                    final AutofillClient client = getClientLocked();
                     if (client != null) {
                         client.autofillCallbackResetableStateAvailable();
                     }
