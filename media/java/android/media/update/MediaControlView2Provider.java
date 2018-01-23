@@ -40,7 +40,6 @@ public interface MediaControlView2Provider extends ViewProvider {
     void show_impl(int timeout);
     boolean isShowing_impl();
     void hide_impl();
-    void showCCButton_impl();
     boolean isPlaying_impl();
     int getCurrentPosition_impl();
     int getBufferPercentage_impl();
