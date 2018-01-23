@@ -792,7 +792,7 @@ public class AudioSystem
     public static native int getPrimaryOutputFrameCount();
     public static native int getOutputLatency(int stream);
 
-    public static native int setLowRamDevice(boolean isLowRamDevice);
+    public static native int setLowRamDevice(boolean isLowRamDevice, long totalMemory);
     public static native int checkAudioFlinger();
 
     public static native int listAudioPorts(ArrayList<AudioPort> ports, int[] generation);
