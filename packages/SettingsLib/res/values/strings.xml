@@ -1025,4 +1025,9 @@
         <item quantity="other">%1$d devices connected</item>
     </plurals>
 
+    <!-- Content description of zen mode time condition plus button (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_manual_zen_more_time">More time.</string>
+    <!-- Content description of zen mode time condition minus button (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_manual_zen_less_time">Less time.</string>
+
 </resources>
