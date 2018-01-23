@@ -156,10 +156,11 @@ public final class Slice implements Parcelable {
      */
     public static final String HINT_SEE_MORE = "see_more";
     /**
-     * A hint to tell the system that this slice cares about the return value of
-     * {@link SliceProvider#getBindingPackage} and should not cache the result
-     * for multiple apps.
-     * @hide
+     * A hint used when implementing app-specific slice permissions.
+     * Tells the system that for this slice the return value of
+     * {@link SliceProvider#onBindSlice(Uri, List)} may be different depending on
+     * {@link SliceProvider#getBindingPackage} and should not be cached for multiple
+     * apps.
      */
     public static final String HINT_CALLER_NEEDED = "caller_needed";
     /**
