@@ -18,11 +18,9 @@
 #include <utils/Log.h>
 
 #include <android/asset_manager_jni.h>
-#include <android_runtime/android_util_AssetManager.h>
 #include <androidfw/Asset.h>
 #include <androidfw/AssetDir.h>
 #include <androidfw/AssetManager.h>
-#include <androidfw/AssetManager2.h>
 #include <utils/threads.h>
 
 #include "jni.h"
@@ -37,20 +35,21 @@ using namespace android;
 
 // -----
 struct AAssetDir {
-    std::unique_ptr<AssetDir> mAssetDir;
+    AssetDir* mAssetDir;
     size_t mCurFileIndex;
     String8 mCachedFileName;
 
-    explicit AAssetDir(std::unique_ptr<AssetDir> dir) :
-        mAssetDir(std::move(dir)), mCurFileIndex(0) { }
+    explicit AAssetDir(AssetDir* dir) : mAssetDir(dir), mCurFileIndex(0) { }
+    ~AAssetDir() { delete mAssetDir; }
 };
 
 
 // -----
 struct AAsset {
-    std::unique_ptr<Asset> mAsset;
+    Asset* mAsset;
 
-    explicit AAsset(std::unique_ptr<Asset> asset) : mAsset(std::move(asset)) { }
+    explicit AAsset(Asset* asset) : mAsset(asset) { }
+    ~AAsset() { delete mAsset; }
 };
 
 // -------------------- Public native C API --------------------
@@ -105,18 +104,19 @@ AAsset* AAssetManager_open(AAssetManager* amgr, const char* filename, int mode)
         return NULL;
     }
 
-    ScopedLock<AssetManager2> locked_mgr(*AssetManagerForNdkAssetManager(amgr));
-    std::unique_ptr<Asset> asset = locked_mgr->Open(filename, amMode);
-    if (asset == nullptr) {
-        return nullptr;
+    AssetManager* mgr = static_cast<AssetManager*>(amgr);
+    Asset* asset = mgr->open(filename, amMode);
+    if (asset == NULL) {
+        return NULL;
     }
-    return new AAsset(std::move(asset));
+
+    return new AAsset(asset);
 }
 
 AAssetDir* AAssetManager_openDir(AAssetManager* amgr, const char* dirName)
 {
-    ScopedLock<AssetManager2> locked_mgr(*AssetManagerForNdkAssetManager(amgr));
-    return new AAssetDir(locked_mgr->OpenDir(dirName));
+    AssetManager* mgr = static_cast<AssetManager*>(amgr);
+    return new AAssetDir(mgr->openDir(dirName));
 }
 
 /**

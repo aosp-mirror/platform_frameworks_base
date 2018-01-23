@@ -21,7 +21,6 @@ import static android.app.ActivityThread.DEBUG_CONFIGURATION;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.ActivityInfo;
-import android.content.res.ApkAssets;
 import android.content.res.AssetManager;
 import android.content.res.CompatResources;
 import android.content.res.CompatibilityInfo;
@@ -35,7 +34,6 @@ import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.LruCache;
 import android.util.Pair;
 import android.util.Slog;
 import android.view.Display;
@@ -43,13 +41,9 @@ import android.view.DisplayAdjustments;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.IndentingPrintWriter;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.function.Predicate;
@@ -65,7 +59,12 @@ public class ResourcesManager {
      * Predicate that returns true if a WeakReference is gc'ed.
      */
     private static final Predicate<WeakReference<Resources>> sEmptyReferencePredicate =
-            weakRef -> weakRef == null || weakRef.get() == null;
+            new Predicate<WeakReference<Resources>>() {
+                @Override
+                public boolean test(WeakReference<Resources> weakRef) {
+                    return weakRef == null || weakRef.get() == null;
+                }
+            };
 
     /**
      * The global compatibility settings.
@@ -89,48 +88,6 @@ public class ResourcesManager {
      * A list of Resource references that can be reused.
      */
     private final ArrayList<WeakReference<Resources>> mResourceReferences = new ArrayList<>();
-
-    private static class ApkKey {
-        public final String path;
-        public final boolean sharedLib;
-        public final boolean overlay;
-
-        ApkKey(String path, boolean sharedLib, boolean overlay) {
-            this.path = path;
-            this.sharedLib = sharedLib;
-            this.overlay = overlay;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = 1;
-            result = 31 * result + this.path.hashCode();
-            result = 31 * result + Boolean.hashCode(this.sharedLib);
-            result = 31 * result + Boolean.hashCode(this.overlay);
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof ApkKey)) {
-                return false;
-            }
-            ApkKey other = (ApkKey) obj;
-            return this.path.equals(other.path) && this.sharedLib == other.sharedLib
-                    && this.overlay == other.overlay;
-        }
-    }
-
-    /**
-     * The ApkAssets we are caching and intend to hold strong references to.
-     */
-    private final LruCache<ApkKey, ApkAssets> mLoadedApkAssets = new LruCache<>(15);
-
-    /**
-     * The ApkAssets that are being referenced in the wild that we can reuse, even if they aren't
-     * in our LRU cache. Bonus resources :)
-     */
-    private final ArrayMap<ApkKey, WeakReference<ApkAssets>> mCachedApkAssets = new ArrayMap<>();
 
     /**
      * Resources and base configuration override associated with an Activity.
@@ -303,41 +260,6 @@ public class ResourcesManager {
         }
     }
 
-    private @NonNull ApkAssets loadApkAssets(String path, boolean sharedLib, boolean overlay)
-            throws IOException {
-        final ApkKey newKey = new ApkKey(path, sharedLib, overlay);
-        ApkAssets apkAssets = mLoadedApkAssets.get(newKey);
-        if (apkAssets != null) {
-            return apkAssets;
-        }
-
-        // Optimistically check if this ApkAssets exists somewhere else.
-        final WeakReference<ApkAssets> apkAssetsRef = mCachedApkAssets.get(newKey);
-        if (apkAssetsRef != null) {
-            apkAssets = apkAssetsRef.get();
-            if (apkAssets != null) {
-                mLoadedApkAssets.put(newKey, apkAssets);
-                return apkAssets;
-            } else {
-                // Clean up the reference.
-                mCachedApkAssets.remove(newKey);
-            }
-        }
-
-        // We must load this from disk.
-        if (overlay) {
-            final String idmapPath = "/data/resource-cache/"
-                    + path.substring(1).replace('/', '@')
-                    + "@idmap";
-            apkAssets = ApkAssets.loadOverlayFromPath(idmapPath, false /*system*/);
-        } else {
-            apkAssets = ApkAssets.loadFromPath(path, false /*system*/, sharedLib);
-        }
-        mLoadedApkAssets.put(newKey, apkAssets);
-        mCachedApkAssets.put(newKey, new WeakReference<>(apkAssets));
-        return apkAssets;
-    }
-
     /**
      * Creates an AssetManager from the paths within the ResourcesKey.
      *
@@ -348,15 +270,13 @@ public class ResourcesManager {
     */
     @VisibleForTesting
     protected @Nullable AssetManager createAssetManager(@NonNull final ResourcesKey key) {
-        final ArrayList<ApkAssets> apkAssets = new ArrayList<>();
+        AssetManager assets = new AssetManager();
 
         // resDir can be null if the 'android' package is creating a new Resources object.
         // This is fine, since each AssetManager automatically loads the 'android' package
         // already.
         if (key.mResDir != null) {
-            try {
-                apkAssets.add(loadApkAssets(key.mResDir, false /*sharedLib*/, false /*overlay*/));
-            } catch (IOException e) {
+            if (assets.addAssetPath(key.mResDir) == 0) {
                 Log.e(TAG, "failed to add asset path " + key.mResDir);
                 return null;
             }
@@ -364,10 +284,7 @@ public class ResourcesManager {
 
         if (key.mSplitResDirs != null) {
             for (final String splitResDir : key.mSplitResDirs) {
-                try {
-                    apkAssets.add(loadApkAssets(splitResDir, false /*sharedLib*/,
-                            false /*overlay*/));
-                } catch (IOException e) {
+                if (assets.addAssetPath(splitResDir) == 0) {
                     Log.e(TAG, "failed to add split asset path " + splitResDir);
                     return null;
                 }
@@ -376,13 +293,7 @@ public class ResourcesManager {
 
         if (key.mOverlayDirs != null) {
             for (final String idmapPath : key.mOverlayDirs) {
-                try {
-                    apkAssets.add(loadApkAssets(idmapPath, false /*sharedLib*/, true /*overlay*/));
-                } catch (IOException e) {
-                    Log.w(TAG, "failed to add overlay path " + idmapPath);
-
-                    // continue.
-                }
+                assets.addOverlayPath(idmapPath);
             }
         }
 
@@ -391,75 +302,14 @@ public class ResourcesManager {
                 if (libDir.endsWith(".apk")) {
                     // Avoid opening files we know do not have resources,
                     // like code-only .jar files.
-                    try {
-                        apkAssets.add(loadApkAssets(libDir, true /*sharedLib*/, false /*overlay*/));
-                    } catch (IOException e) {
+                    if (assets.addAssetPathAsSharedLibrary(libDir) == 0) {
                         Log.w(TAG, "Asset path '" + libDir +
                                 "' does not exist or contains no resources.");
-
-                        // continue.
                     }
                 }
             }
         }
-
-        AssetManager assets = new AssetManager();
-        assets.setApkAssets(apkAssets.toArray(new ApkAssets[apkAssets.size()]),
-                false /*invalidateCaches*/);
         return assets;
-    }
-
-    private static <T> int countLiveReferences(Collection<WeakReference<T>> collection) {
-        int count = 0;
-        for (WeakReference<T> ref : collection) {
-            final T value = ref != null ? ref.get() : null;
-            if (value != null) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    /**
-     * @hide
-     */
-    public void dump(String prefix, PrintWriter printWriter) {
-        synchronized (this) {
-            IndentingPrintWriter pw = new IndentingPrintWriter(printWriter, "  ");
-            for (int i = 0; i < prefix.length() / 2; i++) {
-                pw.increaseIndent();
-            }
-
-            pw.println("ResourcesManager:");
-            pw.increaseIndent();
-            pw.print("cached apks: total=");
-            pw.print(mLoadedApkAssets.size());
-            pw.print(" created=");
-            pw.print(mLoadedApkAssets.createCount());
-            pw.print(" evicted=");
-            pw.print(mLoadedApkAssets.evictionCount());
-            pw.print(" hit=");
-            pw.print(mLoadedApkAssets.hitCount());
-            pw.print(" miss=");
-            pw.print(mLoadedApkAssets.missCount());
-            pw.print(" max=");
-            pw.print(mLoadedApkAssets.maxSize());
-            pw.println();
-
-            pw.print("total apks: ");
-            pw.println(countLiveReferences(mCachedApkAssets.values()));
-
-            pw.print("resources: ");
-
-            int references = countLiveReferences(mResourceReferences);
-            for (ActivityResources activityResources : mActivityResourceReferences.values()) {
-                references += countLiveReferences(activityResources.activityResources);
-            }
-            pw.println(references);
-
-            pw.print("resource impls: ");
-            pw.println(countLiveReferences(mResourceImpls.values()));
-        }
     }
 
     private Configuration generateConfig(@NonNull ResourcesKey key, @NonNull DisplayMetrics dm) {
@@ -780,15 +630,27 @@ public class ResourcesManager {
 
                 // We will create the ResourcesImpl object outside of holding this lock.
             }
+        }
 
-            // If we're here, we didn't find a suitable ResourcesImpl to use, so create one now.
-            ResourcesImpl resourcesImpl = createResourcesImpl(key);
-            if (resourcesImpl == null) {
-                return null;
+        // If we're here, we didn't find a suitable ResourcesImpl to use, so create one now.
+        ResourcesImpl resourcesImpl = createResourcesImpl(key);
+        if (resourcesImpl == null) {
+            return null;
+        }
+
+        synchronized (this) {
+            ResourcesImpl existingResourcesImpl = findResourcesImplForKeyLocked(key);
+            if (existingResourcesImpl != null) {
+                if (DEBUG) {
+                    Slog.d(TAG, "- got beat! existing impl=" + existingResourcesImpl
+                            + " new impl=" + resourcesImpl);
+                }
+                resourcesImpl.getAssets().close();
+                resourcesImpl = existingResourcesImpl;
+            } else {
+                // Add this ResourcesImpl to the cache.
+                mResourceImpls.put(key, new WeakReference<>(resourcesImpl));
             }
-
-            // Add this ResourcesImpl to the cache.
-            mResourceImpls.put(key, new WeakReference<>(resourcesImpl));
 
             final Resources resources;
             if (activityToken != null) {
