@@ -98,11 +98,6 @@ public final class SliceItem implements Parcelable {
      */
     public static final String FORMAT_INT = "int";
     /**
-     * A {@link SliceItem} that contains an int.
-     * @deprecated to be removed
-     */
-    public static final String FORMAT_COLOR = "color";
-    /**
      * A {@link SliceItem} that contains a timestamp.
      */
     public static final String FORMAT_TIMESTAMP = "timestamp";
@@ -227,13 +222,6 @@ public final class SliceItem implements Parcelable {
      * @return The color held by this {@link #FORMAT_INT} SliceItem
      */
     public int getInt() {
-        return (Integer) mObj;
-    }
-
-    /**
-     * @deprecated to be removed.
-     */
-    public int getColor() {
         return (Integer) mObj;
     }
 
