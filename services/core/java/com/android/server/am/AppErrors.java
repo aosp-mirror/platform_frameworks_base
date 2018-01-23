@@ -408,9 +408,11 @@ class AppErrors {
                         final Set<String> cats = task.intent.getCategories();
                         if (cats != null && cats.contains(Intent.CATEGORY_LAUNCHER)) {
                             mService.getActivityStartController().startActivityInPackage(
-                                    task.mCallingUid, task.mCallingPackage, task.intent, null, null,
-                                    null, 0, 0, ActivityOptions.makeBasic().toBundle(), task.userId,
-                                    null, "AppErrors");
+                                    task.mCallingUid, callingPid, callingUid, task.mCallingPackage,
+                                    task.intent, null, null, null, 0, 0,
+                                    new SafeActivityOptions(ActivityOptions.makeBasic()),
+                                    task.userId, null,
+                                    "AppErrors");
                         }
                     }
                 }

@@ -20,6 +20,7 @@ import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS
 import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.IAppTask;
 import android.app.IApplicationThread;
 import android.content.Intent;
@@ -93,10 +94,13 @@ class AppTaskImpl extends IAppTask.Stub {
     public void moveToFront() {
         checkCaller();
         // Will bring task to front if it already has a root activity.
+        final int callingPid = Binder.getCallingPid();
+        final int callingUid = Binder.getCallingUid();
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (this) {
-                mService.mStackSupervisor.startActivityFromRecents(mTaskId, null);
+                mService.mStackSupervisor.startActivityFromRecents(callingPid, callingUid, mTaskId,
+                        null);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -127,7 +131,8 @@ class AppTaskImpl extends IAppTask.Stub {
                 .setCaller(appThread)
                 .setCallingPackage(callingPackage)
                 .setResolvedType(resolvedType)
-                .setMayWait(bOptions, callingUser)
+                .setActivityOptions(bOptions)
+                .setMayWait(callingUser)
                 .setInTask(tr)
                 .execute();
     }
