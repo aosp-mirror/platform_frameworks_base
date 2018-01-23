@@ -25,7 +25,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.test.TestLooper;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.filters.SmallTest;
 import android.net.wifi.WifiScanner.ScanSettings;
 
 import com.android.internal.util.test.BidirectionalAsyncChannelServer;
