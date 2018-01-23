@@ -19,8 +19,9 @@ package android.media;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.media.MediaSession2.CommandFlags;
+import android.media.MediaSession2.CommandGroup;
 import android.media.MediaSession2.ControllerInfo;
+import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
 import android.media.update.ApiLoader;
 import android.media.update.MediaController2Provider;
@@ -41,10 +42,10 @@ import java.util.concurrent.Executor;
  * When controlling {@link MediaSessionService2}, the {@link MediaController2} would be
  * available only if the session service allows this controller by
  * {@link MediaSession2.SessionCallback#onConnect(ControllerInfo)} for the service. Wait
- * {@link ControllerCallback#onConnected(long)} or {@link ControllerCallback#onDisconnected()} for
- * the result.
+ * {@link ControllerCallback#onConnected(CommandGroup)} or
+ * {@link ControllerCallback#onDisconnected()} for the result.
  * <p>
- * A controller can be created through {@link MediaPlayerSessionManager} if you hold the
+ * A controller can be created through token from {@link MediaSessionManager} if you hold the
  * signature|privileged permission "android.permission.MEDIA_CONTENT_CONTROL" permission or are
  * an enabled notification listener or by getting a {@link SessionToken} directly the
  * the session owner.
@@ -67,9 +68,9 @@ public class MediaController2 extends MediaPlayerBase {
          * Called when the controller is successfully connected to the session. The controller
          * becomes available afterwards.
          *
-         * @param commands commands that's allowed by the session.
+         * @param allowedCommands commands that's allowed by the session.
          */
-        public void onConnected(@CommandFlags long commands) { }
+        public void onConnected(CommandGroup allowedCommands) { }
 
         /**
          * Called when the session refuses the controller or the controller is disconnected from

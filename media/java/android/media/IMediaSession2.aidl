@@ -18,6 +18,7 @@ package android.media;
 
 import android.media.session.PlaybackState;
 import android.media.IMediaSession2Callback;
+import android.os.Bundle;
 
 /**
  * Interface to MediaSession2. Framework MUST only call oneway APIs.
@@ -39,13 +40,9 @@ interface IMediaSession2 {
     oneway void release(IMediaSession2Callback caller);
 
     //////////////////////////////////////////////////////////////////////////////////////////////
-    // Playback controls.
+    // send command
     //////////////////////////////////////////////////////////////////////////////////////////////
-    oneway void play(IMediaSession2Callback caller);
-    oneway void pause(IMediaSession2Callback caller);
-    oneway void stop(IMediaSession2Callback caller);
-    oneway void skipToPrevious(IMediaSession2Callback caller);
-    oneway void skipToNext(IMediaSession2Callback caller);
+    oneway void sendCommand(IMediaSession2Callback caller, in Bundle command, in Bundle args);
 
     PlaybackState getPlaybackState();
 
