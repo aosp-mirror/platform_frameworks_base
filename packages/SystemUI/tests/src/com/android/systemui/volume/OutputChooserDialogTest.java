@@ -38,6 +38,7 @@ import android.widget.TextView;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 
 import org.junit.After;
@@ -54,6 +55,8 @@ public class OutputChooserDialogTest extends SysuiTestCase {
     OutputChooserDialog mDialog;
 
     @Mock
+    private VolumeDialogController mVolumeController;
+    @Mock
     private BluetoothController mController;
     @Mock
     private WifiManager mWifiManager;
@@ -69,6 +72,7 @@ public class OutputChooserDialogTest extends SysuiTestCase {
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
+        mVolumeController = mDependency.injectMockDependency(VolumeDialogController.class);
         mController = mDependency.injectMockDependency(BluetoothController.class);
         when(mWifiManager.isWifiEnabled()).thenReturn(true);
 
@@ -78,20 +82,10 @@ public class OutputChooserDialogTest extends SysuiTestCase {
         mDialog = new OutputChooserDialog(getContext(), mRouter);
     }
 
-    @After
-    @UiThreadTest
-    public void tearDown() throws Exception {
-        mDialog.dismiss();
-    }
-
-    private void showDialog() {
-        mDialog.show();
-    }
-
     @Test
     @UiThreadTest
     public void testClickMediaRouterItemConnectsMedia() {
-        showDialog();
+        mDialog.show();
 
         OutputChooserLayout.Item item = new OutputChooserLayout.Item();
         item.deviceType = OutputChooserLayout.Item.DEVICE_TYPE_MEDIA_ROUTER;
@@ -102,12 +96,13 @@ public class OutputChooserDialogTest extends SysuiTestCase {
         mDialog.onDetailItemClick(item);
         verify(info, times(1)).select();
         verify(mController, never()).connect(any());
+        mDialog.dismiss();
     }
 
     @Test
     @UiThreadTest
     public void testClickBtItemConnectsBt() {
-        showDialog();
+        mDialog.show();
 
         OutputChooserLayout.Item item = new OutputChooserLayout.Item();
         item.deviceType = OutputChooserLayout.Item.DEVICE_TYPE_BT;
@@ -117,25 +112,28 @@ public class OutputChooserDialogTest extends SysuiTestCase {
 
         mDialog.onDetailItemClick(item);
         verify(mController, times(1)).connect(any());
+        mDialog.dismiss();
     }
 
     @Test
     @UiThreadTest
     public void testTitleNotInCall() {
-        showDialog();
+        mDialog.show();
 
         assertTrue(((TextView) mDialog.findViewById(R.id.title))
                 .getText().toString().contains("Media"));
+        mDialog.dismiss();
     }
 
     @Test
     @UiThreadTest
     public void testTitleInCall() {
         mDialog.setIsInCall(true);
-        showDialog();
+        mDialog.show();
 
         assertTrue(((TextView) mDialog.findViewById(R.id.title))
                 .getText().toString().contains("Phone"));
+        mDialog.dismiss();
     }
 
     @Test
@@ -154,5 +152,27 @@ public class OutputChooserDialogTest extends SysuiTestCase {
         mDialog.onAttachedToWindow();
 
         verify(mRouter, times(1)).addCallback(any(), any(), anyInt());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testRegisterCallbacks() {
+        mDialog.setIsInCall(false);
+        mDialog.onAttachedToWindow();
+
+        verify(mRouter, times(1)).addCallback(any(), any(), anyInt());
+        verify(mController, times(1)).addCallback(any());
+        verify(mVolumeController, times(1)).addCallback(any(), any());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testUnregisterCallbacks() {
+        mDialog.setIsInCall(false);
+        mDialog.onDetachedFromWindow();
+
+        verify(mRouter, times(1)).removeCallback(any());
+        verify(mController, times(1)).removeCallback(any());
+        verify(mVolumeController, times(1)).removeCallback(any());
     }
 }

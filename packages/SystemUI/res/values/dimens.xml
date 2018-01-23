@@ -267,6 +267,8 @@
 
     <dimen name="volume_dialog_panel_width">120dp</dimen>
 
+    <dimen name="output_chooser_panel_width">320dp</dimen>
+
     <!-- Gravity for the notification panel -->
     <integer name="notification_panel_layout_gravity">0x31</integer><!-- center_horizontal|top -->
 
