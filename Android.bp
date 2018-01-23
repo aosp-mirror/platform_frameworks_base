@@ -630,6 +630,11 @@ java_library {
         ],
     },
 
+    // See comment on framework-oahl-backward-compatibility module below
+    exclude_srcs: [
+        "core/java/android/content/pm/OrgApacheHttpLegacyUpdater.java",
+    ],
+
     no_framework_libs: true,
     libs: [
         "conscrypt",
@@ -662,6 +667,18 @@ java_library {
     dxflags: [
         "--core-library",
         "--multi-dex",
+    ],
+}
+
+// A temporary build target that is conditionally included on the bootclasspath if
+// org.apache.http.legacy library has been removed and which provides support for
+// maintaining backwards compatibility for APKs that target pre-P and depend on
+// org.apache.http.legacy classes. This is used iff REMOVE_OAHL_FROM_BCP=true is
+// specified on the build command line.
+java_library {
+    name: "framework-oahl-backward-compatibility",
+    srcs: [
+        "core/java/android/content/pm/OrgApacheHttpLegacyUpdater.java",
     ],
 }
 
