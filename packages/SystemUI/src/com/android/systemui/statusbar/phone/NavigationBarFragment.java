@@ -124,6 +124,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     private AccessibilityManager mAccessibilityManager;
     private MagnificationContentObserver mMagnificationObserver;
     private ContentResolver mContentResolver;
+    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
 
     private int mDisabledFlags1;
     private StatusBar mStatusBar;
@@ -355,6 +356,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
             mLastRotationSuggestion = rotation; // Remember rotation for click
             setRotateSuggestionButtonState(true);
             rescheduleRotationTimeout(false);
+            mMetricsLogger.visible(MetricsEvent.ROTATION_SUGGESTION_SHOWN);
         }
     }
 
@@ -612,7 +614,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         if (shouldDisableNavbarGestures()) {
             return false;
         }
-        MetricsLogger.action(getContext(), MetricsEvent.ACTION_ASSIST_LONG_PRESS);
+        mMetricsLogger.action(MetricsEvent.ACTION_ASSIST_LONG_PRESS);
         mAssistManager.startAssist(new Bundle() /* args */);
         mStatusBar.awakenDreams();
 
@@ -768,6 +770,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     }
 
     private void onRotateSuggestionClick(View v) {
+        mMetricsLogger.action(MetricsEvent.ACTION_ROTATION_SUGGESTION_ACCEPTED);
         mRotationLockController.setRotationLockedAtAngle(true, mLastRotationSuggestion);
     }
 

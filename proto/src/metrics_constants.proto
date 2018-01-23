@@ -5158,6 +5158,16 @@ message MetricsEvent {
     // OS: P
     NOTIFICATION_ZEN_MODE_ENABLE_DIALOG = 1286;
 
+    // ACTION: Rotate suggestion accepted in rotation locked mode
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: P
+    ACTION_ROTATION_SUGGESTION_ACCEPTED = 1287;
+
+    // OPEN: Rotation suggestion shown in rotation locked mode
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: P
+    ROTATION_SUGGESTION_SHOWN = 1288;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
