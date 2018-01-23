@@ -148,7 +148,7 @@ public final class ImageDecoder implements AutoCloseable {
                     throw new FileNotFoundException(mUri.toString());
                 }
 
-                return createFromStream(is);
+                return createFromStream(is, true);
             }
 
             final FileDescriptor fd = assetFd.getFileDescriptor();
@@ -160,7 +160,7 @@ public final class ImageDecoder implements AutoCloseable {
                     Os.lseek(fd, offset, SEEK_SET);
                     decoder = nCreate(fd);
                 } catch (ErrnoException e) {
-                    decoder = createFromStream(new FileInputStream(fd));
+                    decoder = createFromStream(new FileInputStream(fd), true);
                 }
             } finally {
                 if (decoder == null) {
@@ -180,7 +180,7 @@ public final class ImageDecoder implements AutoCloseable {
         try {
             Os.lseek(fd, 0, SEEK_CUR);
         } catch (ErrnoException e) {
-            return createFromStream(stream);
+            return createFromStream(stream, true);
         }
 
         ImageDecoder decoder = null;
@@ -191,13 +191,15 @@ public final class ImageDecoder implements AutoCloseable {
                 IoUtils.closeQuietly(stream);
             } else {
                 decoder.mInputStream = stream;
+                decoder.mOwnsInputStream = true;
             }
         }
         return decoder;
     }
 
     @NonNull
-    private static ImageDecoder createFromStream(@NonNull InputStream is) throws IOException {
+    private static ImageDecoder createFromStream(@NonNull InputStream is,
+            boolean closeInputStream) throws IOException {
         // Arbitrary size matches BitmapFactory.
         byte[] storage = new byte[16 * 1024];
         ImageDecoder decoder = null;
@@ -205,9 +207,12 @@ public final class ImageDecoder implements AutoCloseable {
             decoder = nCreate(is, storage);
         } finally {
             if (decoder == null) {
-                IoUtils.closeQuietly(is);
+                if (closeInputStream) {
+                    IoUtils.closeQuietly(is);
+                }
             } else {
                 decoder.mInputStream = is;
+                decoder.mOwnsInputStream = closeInputStream;
                 decoder.mTempStorage = storage;
             }
         }
@@ -215,6 +220,9 @@ public final class ImageDecoder implements AutoCloseable {
         return decoder;
     }
 
+    /**
+     * For backwards compatibility, this does *not* close the InputStream.
+     */
     private static class InputStreamSource extends Source {
         InputStreamSource(Resources res, InputStream is, int inputDensity) {
             if (is == null) {
@@ -244,7 +252,7 @@ public final class ImageDecoder implements AutoCloseable {
                 }
                 InputStream is = mInputStream;
                 mInputStream = null;
-                return createFromStream(is);
+                return createFromStream(is, false);
             }
         }
     }
@@ -293,6 +301,7 @@ public final class ImageDecoder implements AutoCloseable {
                     IoUtils.closeQuietly(is);
                 } else {
                     decoder.mInputStream = is;
+                    decoder.mOwnsInputStream = true;
                 }
             }
             return decoder;
@@ -426,6 +435,7 @@ public final class ImageDecoder implements AutoCloseable {
 
     // Objects for interacting with the input.
     private InputStream         mInputStream;
+    private boolean             mOwnsInputStream;
     private byte[]              mTempStorage;
     private AssetFileDescriptor mAssetFd;
     private final AtomicBoolean mClosed = new AtomicBoolean();
@@ -797,7 +807,9 @@ public final class ImageDecoder implements AutoCloseable {
         nClose(mNativePtr);
         mNativePtr = 0;
 
-        IoUtils.closeQuietly(mInputStream);
+        if (mOwnsInputStream) {
+            IoUtils.closeQuietly(mInputStream);
+        }
         IoUtils.closeQuietly(mAssetFd);
 
         mInputStream = null;
