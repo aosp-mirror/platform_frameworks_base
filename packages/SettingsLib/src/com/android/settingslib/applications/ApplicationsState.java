@@ -48,6 +48,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.support.annotation.VisibleForTesting;
 import android.text.format.Formatter;
 import android.util.IconDrawableFactory;
 import android.util.Log;
@@ -1282,7 +1283,8 @@ public class ApplicationsState {
         // A location where extra info can be placed to be used by custom filters.
         public Object extraInfo;
 
-        AppEntry(Context context, ApplicationInfo info, long id) {
+        @VisibleForTesting(otherwise = VisibleForTesting.PACKAGE_PRIVATE)
+        public AppEntry(Context context, ApplicationInfo info, long id) {
             apkFile = new File(info.sourceDir);
             this.id = id;
             this.info = info;

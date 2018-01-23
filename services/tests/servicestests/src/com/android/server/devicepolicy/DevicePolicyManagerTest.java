@@ -2160,6 +2160,51 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 () -> dpm.getMeteredDataDisabled(admin1));
     }
 
+    public void testGetMeteredDataDisabledForUser() throws Exception {
+        setAsProfileOwner(admin1);
+
+        // Setup
+        final ArrayList<String> emptyList = new ArrayList<>();
+        final ArrayList<String> pkgsToRestrict = new ArrayList<>();
+        final String package1 = "com.example.one";
+        final String package2 = "com.example.two";
+        final String package3 = "com.example.three";
+        pkgsToRestrict.add(package1);
+        pkgsToRestrict.add(package2);
+        setupPackageInPackageManager(package1, DpmMockContext.CALLER_USER_HANDLE, 123, 0);
+        setupPackageInPackageManager(package2, DpmMockContext.CALLER_USER_HANDLE, 456, 0);
+        List<String> excludedPkgs = dpm.setMeteredDataDisabled(admin1, pkgsToRestrict);
+
+        // Verify
+        assertEquals(emptyList, excludedPkgs);
+        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
+        assertTrue(package1 + "should be restricted",
+                dpm.isMeteredDataDisabledForUser(admin1, package1,
+                        DpmMockContext.CALLER_USER_HANDLE));
+        assertTrue(package2 + "should be restricted",
+                dpm.isMeteredDataDisabledForUser(admin1, package2,
+                        DpmMockContext.CALLER_USER_HANDLE));
+        assertFalse(package3 + "should not be restricted",
+                dpm.isMeteredDataDisabledForUser(admin1, package3,
+                        DpmMockContext.CALLER_USER_HANDLE));
+    }
+
+    public void testGetMeteredDataDisabledForUser_nonSystemUidCaller() throws Exception {
+        setAsProfileOwner(admin1);
+        assertExpectException(SecurityException.class,
+                /* messageRegex= */ "Only the system can query restricted pkgs",
+                () -> dpm.isMeteredDataDisabledForUser(
+                        admin1, "com.example.one", DpmMockContext.CALLER_USER_HANDLE));
+        dpm.clearProfileOwner(admin1);
+
+        setDeviceOwner();
+        assertExpectException(SecurityException.class,
+                /* messageRegex= */ "Only the system can query restricted pkgs",
+                () -> dpm.isMeteredDataDisabledForUser(
+                        admin1, "com.example.one", DpmMockContext.CALLER_USER_HANDLE));
+        clearDeviceOwner();
+    }
+
     public void testCreateAdminSupportIntent() throws Exception {
         // Setup device owner.
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;

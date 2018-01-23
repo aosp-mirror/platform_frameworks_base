@@ -8261,7 +8261,7 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Called by a device or profile owner to restrict packages from accessing metered data.
+     * Called by a device or profile owner to restrict packages from using metered data.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageNames the list of package names to be restricted.
@@ -8283,7 +8283,7 @@ public class DevicePolicyManager {
 
     /**
      * Called by a device or profile owner to retrieve the list of packages which are restricted
-     * by the admin from accessing metered data.
+     * by the admin from using metered data.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with.
      * @return the list of restricted package names.
@@ -8299,6 +8299,30 @@ public class DevicePolicyManager {
             }
         }
         return new ArrayList<>();
+    }
+
+    /**
+     * Called by the system to check if a package is restricted from using metered data
+     * by {@param admin}.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageName the package whose restricted status is needed.
+     * @param userId the user to which {@param packageName} belongs.
+     * @return {@code true} if the package is restricted by admin, otherwise {@code false}
+     * @throws SecurityException if the caller doesn't run with {@link Process#SYSTEM_UID}
+     * @hide
+     */
+    public boolean isMeteredDataDisabledForUser(@NonNull ComponentName admin, String packageName,
+            @UserIdInt int userId) {
+        throwIfParentInstance("getMeteredDataDisabledForUser");
+        if (mService != null) {
+            try {
+                return mService.isMeteredDataDisabledForUser(admin, packageName, userId);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return false;
     }
 
     /**

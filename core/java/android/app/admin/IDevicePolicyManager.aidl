@@ -413,4 +413,6 @@ interface IDevicePolicyManager {
     List<ApnSetting> getOverrideApns(in ComponentName admin);
     void setOverrideApnsEnabled(in ComponentName admin, boolean enabled);
     boolean isOverrideApnEnabled(in ComponentName admin);
+
+    boolean isMeteredDataDisabledForUser(in ComponentName admin, String packageName, int userId);
 }
