@@ -16,13 +16,6 @@
 
 package android.media;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -34,6 +27,16 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.util.Log;
+import dalvik.system.CloseGuard;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 
 /**
  * MediaDrm can be used to obtain keys for decrypting protected media streams, in
@@ -117,9 +120,12 @@ import android.util.Log;
  * MediaDrm objects on a thread with its own Looper running (main UI
  * thread by default has a Looper running).
  */
-public final class MediaDrm {
+public final class MediaDrm implements AutoCloseable {
 
     private static final String TAG = "MediaDrm";
+
+    private final AtomicBoolean mClosed = new AtomicBoolean();
+    private final CloseGuard mCloseGuard = CloseGuard.get();
 
     private static final String PERMISSION = android.Manifest.permission.ACCESS_DRM_CERTIFICATES;
 
@@ -215,6 +221,8 @@ public final class MediaDrm {
          */
         native_setup(new WeakReference<MediaDrm>(this),
                 getByteArrayFromUUID(uuid),  ActivityThread.currentOpPackageName());
+
+        mCloseGuard.open("release");
     }
 
     /**
@@ -954,6 +962,168 @@ public final class MediaDrm {
      */
     public native void releaseAllSecureStops();
 
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({HDCP_LEVEL_UNKNOWN, HDCP_NONE, HDCP_V1, HDCP_V2,
+                        HDCP_V2_1, HDCP_V2_2, HDCP_NO_DIGITAL_OUTPUT})
+    public @interface HdcpLevel {}
+
+
+    /**
+     * The DRM plugin did not report an HDCP level, or an error
+     * occurred accessing it
+     */
+    public static final int HDCP_LEVEL_UNKNOWN = 0;
+
+    /**
+     * HDCP is not supported on this device, content is unprotected
+     */
+    public static final int HDCP_NONE = 1;
+
+    /**
+     * HDCP version 1.0
+     */
+    public static final int HDCP_V1 = 2;
+
+    /**
+     * HDCP version 2.0 Type 1.
+     */
+    public static final int HDCP_V2 = 3;
+
+    /**
+     * HDCP version 2.1 Type 1.
+     */
+    public static final int HDCP_V2_1 = 4;
+
+    /**
+     *  HDCP version 2.2 Type 1.
+     */
+    public static final int HDCP_V2_2 = 5;
+
+    /**
+     * No digital output, implicitly secure
+     */
+    public static final int HDCP_NO_DIGITAL_OUTPUT = Integer.MAX_VALUE;
+
+    /**
+     * Return the HDCP level negotiated with downstream receivers the
+     * device is connected to. If multiple HDCP-capable displays are
+     * simultaneously connected to separate interfaces, this method
+     * returns the lowest negotiated level of all interfaces.
+     * <p>
+     * This method should only be used for informational purposes, not for
+     * enforcing compliance with HDCP requirements. Trusted enforcement of
+     * HDCP policies must be handled by the DRM system.
+     * <p>
+     * @return one of {@link #HDCP_LEVEL_UNKNOWN}, {@link #HDCP_NONE},
+     * {@link #HDCP_V1}, {@link #HDCP_V2}, {@link #HDCP_V2_1}, {@link #HDCP_V2_2}
+     * or {@link #HDCP_NO_DIGITAL_OUTPUT}.
+     */
+    @HdcpLevel
+    public native int getConnectedHdcpLevel();
+
+    /**
+     * Return the maximum supported HDCP level. The maximum HDCP level is a
+     * constant for a given device, it does not depend on downstream receivers
+     * that may be connected. If multiple HDCP-capable interfaces are present,
+     * it indicates the highest of the maximum HDCP levels of all interfaces.
+     * <p>
+     * @return one of {@link #HDCP_LEVEL_UNKNOWN}, {@link #HDCP_NONE},
+     * {@link #HDCP_V1}, {@link #HDCP_V2}, {@link #HDCP_V2_1}, {@link #HDCP_V2_2}
+     * or {@link #HDCP_NO_DIGITAL_OUTPUT}.
+     */
+    @HdcpLevel
+    public native int getMaxHdcpLevel();
+
+    /**
+     * Return the number of MediaDrm sessions that are currently opened
+     * simultaneously among all MediaDrm instances for the active DRM scheme.
+     * @return the number of open sessions.
+     */
+    public native int getOpenSessionCount();
+
+    /**
+     * Return the maximum number of MediaDrm sessions that may be opened
+     * simultaneosly among all MediaDrm instances for the active DRM
+     * scheme. The maximum number of sessions is not affected by any
+     * sessions that may have already been opened.
+     * @return maximum sessions.
+     */
+    public native int getMaxSessionCount();
+
+    /**
+     * Security level indicates the robustness of the device's DRM
+     * implementation.
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({SECURITY_LEVEL_UNKNOWN, SW_SECURE_CRYPTO, SW_SECURE_DECODE,
+                        HW_SECURE_CRYPTO, HW_SECURE_DECODE, HW_SECURE_ALL})
+    public @interface SecurityLevel {}
+
+    /**
+     * The DRM plugin did not report a security level, or an error occurred
+     * accessing it
+     */
+    public static final int SECURITY_LEVEL_UNKNOWN = 0;
+
+    /**
+     *  Software-based whitebox crypto
+     */
+    public static final int SW_SECURE_CRYPTO = 1;
+
+    /**
+     * Software-based whitebox crypto and an obfuscated decoder
+     */
+     public static final int SW_SECURE_DECODE = 2;
+
+    /**
+     * DRM key management and crypto operations are performed within a
+     * hardware backed trusted execution environment
+     */
+    public static final int HW_SECURE_CRYPTO = 3;
+
+    /**
+     * DRM key management, crypto operations and decoding of content
+     * are performed within a hardware backed trusted execution environment
+     */
+     public static final int HW_SECURE_DECODE = 4;
+
+    /**
+     * DRM key management, crypto operations, decoding of content and all
+     * handling of the media (compressed and uncompressed) is handled within
+     * a hardware backed trusted execution environment.
+     */
+    public static final int HW_SECURE_ALL = 5;
+
+    /**
+     * Return the current security level of a session. A session
+     * has an initial security level determined by the robustness of
+     * the DRM system's implementation on the device. The security
+     * level may be adjusted using {@link #setSecurityLevel}.
+     * @param sessionId the session to query.
+     * <p>
+     * @return one of {@link #SECURITY_LEVEL_UNKNOWN},
+     * {@link #SW_SECURE_CRYPTO}, {@link #SW_SECURE_DECODE},
+     * {@link #HW_SECURE_CRYPTO}, {@link #HW_SECURE_DECODE} or
+     * {@link #HW_SECURE_ALL}.
+     */
+    @SecurityLevel
+    public native int getSecurityLevel(@NonNull byte[] sessionId);
+
+    /**
+     * Set the security level of a session. This can be useful if specific
+     * attributes of a lower security level are needed by an application,
+     * such as image manipulation or compositing. Reducing the security
+     * level will typically limit decryption to lower content resolutions,
+     * depending on the license policy.
+     * @param sessionId the session to set the security level on.
+     * @param level the new security level, one of
+     * {@link #SW_SECURE_CRYPTO}, {@link #SW_SECURE_DECODE},
+     * {@link #HW_SECURE_CRYPTO}, {@link #HW_SECURE_DECODE} or
+     * {@link #HW_SECURE_ALL}.
+     */
+    public native void setSecurityLevel(@NonNull byte[] sessionId,
+            @SecurityLevel int level);
+
     /**
      * String property name: identifies the maker of the DRM plugin
      */
@@ -1311,17 +1481,51 @@ public final class MediaDrm {
     }
 
     @Override
-    protected void finalize() {
-        native_finalize();
+    protected void finalize() throws Throwable {
+        try {
+            if (mCloseGuard != null) {
+                mCloseGuard.warnIfOpen();
+            }
+            release();
+        } finally {
+            super.finalize();
+        }
     }
 
-    public native final void release();
+    /**
+     * Releases resources associated with the current session of
+     * MediaDrm. It is considered good practice to call this method when
+     * the {@link MediaDrm} object is no longer needed in your
+     * application. After this method is called, {@link MediaDrm} is no
+     * longer usable since it has lost all of its required resource.
+     *
+     * This method was added in API 28. In API versions 18 through 27, release()
+     * should be called instead. There is no need to do anything for API
+     * versions prior to 18.
+     */
+    @Override
+    public void close() {
+        release();
+    }
+
+    /**
+     * @deprecated replaced by {@link #close()}.
+     */
+    @Deprecated
+    public void release() {
+        mCloseGuard.close();
+        if (mClosed.compareAndSet(false, true)) {
+            native_release();
+        }
+    }
+
+    /** @hide */
+    public native final void native_release();
+
     private static native final void native_init();
 
     private native final void native_setup(Object mediadrm_this, byte[] uuid,
             String appPackageName);
-
-    private native final void native_finalize();
 
     static {
         System.loadLibrary("media_jni");
