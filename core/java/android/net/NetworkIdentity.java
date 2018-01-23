@@ -130,6 +130,7 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         proto.write(NetworkIdentityProto.NETWORK_ID, mNetworkId);
         proto.write(NetworkIdentityProto.ROAMING, mRoaming);
         proto.write(NetworkIdentityProto.METERED, mMetered);
+        proto.write(NetworkIdentityProto.DEFAULT_NETWORK, mDefaultNetwork);
 
         proto.end(start);
     }
