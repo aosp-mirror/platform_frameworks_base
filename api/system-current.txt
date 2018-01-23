@@ -3506,6 +3506,14 @@ package android.os {
     method public abstract void onResult(android.os.Bundle);
   }
 
+  public class SystemProperties {
+    method public static java.lang.String get(java.lang.String);
+    method public static java.lang.String get(java.lang.String, java.lang.String);
+    method public static boolean getBoolean(java.lang.String, boolean);
+    method public static int getInt(java.lang.String, int);
+    method public static long getLong(java.lang.String, long);
+  }
+
   public class SystemUpdateManager {
     method public android.os.Bundle retrieveSystemUpdateInfo();
     method public void updateSystemUpdateInfo(android.os.PersistableBundle);
