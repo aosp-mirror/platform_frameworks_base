@@ -113,6 +113,8 @@ struct KeyRequestTypes {
     jint kKeyRequestTypeInitial;
     jint kKeyRequestTypeRenewal;
     jint kKeyRequestTypeRelease;
+    jint kKeyRequestTypeNone;
+    jint kKeyRequestTypeUpdate;
 } gKeyRequestTypes;
 
 struct CertificateTypes {
@@ -691,6 +693,10 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     gKeyRequestTypes.kKeyRequestTypeRenewal = env->GetStaticIntField(clazz, field);
     GET_STATIC_FIELD_ID(field, clazz, "REQUEST_TYPE_RELEASE", "I");
     gKeyRequestTypes.kKeyRequestTypeRelease = env->GetStaticIntField(clazz, field);
+    GET_STATIC_FIELD_ID(field, clazz, "REQUEST_TYPE_NONE", "I");
+    gKeyRequestTypes.kKeyRequestTypeNone = env->GetStaticIntField(clazz, field);
+    GET_STATIC_FIELD_ID(field, clazz, "REQUEST_TYPE_UPDATE", "I");
+    gKeyRequestTypes.kKeyRequestTypeUpdate = env->GetStaticIntField(clazz, field);
 
     FIND_CLASS(clazz, "android/media/MediaDrm$ProvisionRequest");
     GET_FIELD_ID(gFields.provisionRequest.data, clazz, "mData", "[B");
@@ -921,6 +927,15 @@ static jobject android_media_MediaDrm_getKeyRequest(
                 env->SetIntField(keyObj, gFields.keyRequest.requestType,
                         gKeyRequestTypes.kKeyRequestTypeRelease);
                 break;
+            case DrmPlugin::kKeyRequestType_None:
+                env->SetIntField(keyObj, gFields.keyRequest.requestType,
+                        gKeyRequestTypes.kKeyRequestTypeNone);
+                break;
+            case DrmPlugin::kKeyRequestType_Update:
+                env->SetIntField(keyObj, gFields.keyRequest.requestType,
+                        gKeyRequestTypes.kKeyRequestTypeUpdate);
+                break;
+
             default:
                 throwStateException(env, "DRM plugin failure: unknown key request type",
                         ERROR_DRM_UNKNOWN);
