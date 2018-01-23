@@ -20,38 +20,38 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.graphics.drawable.Drawable;
 
-
 /**
  *  Helper interface for adding custom processing to an image.
  *
- *  The image being processed may be a {@link Drawable}, {@link Bitmap} or frame
+ *  <p>The image being processed may be a {@link Drawable}, {@link Bitmap} or frame
  *  of an animated image produced by {@link ImageDecoder}. This is called before
- *  the requested object is returned.
+ *  the requested object is returned.</p>
  *
- *  This custom processing also applies to image types that are otherwise
- *  immutable, such as {@link Bitmap.Config#HARDWARE}.
+ *  <p>This custom processing also applies to image types that are otherwise
+ *  immutable, such as {@link Bitmap.Config#HARDWARE}.</p>
  *
- *  On an animated image, the callback will only be called once, but the drawing
+ *  <p>On an animated image, the callback will only be called once, but the drawing
  *  commands will be applied to each frame, as if the {@code Canvas} had been
- *  returned by {@link Picture#beginRecording}.
+ *  returned by {@link Picture#beginRecording}.<p>
  *
- *  Supplied to ImageDecoder via {@link ImageDecoder#setPostProcess}.
- *  @hide
+ *  <p>Supplied to ImageDecoder via {@link ImageDecoder#setPostProcessor}.</p>
  */
-public interface PostProcess {
+public interface PostProcessor {
     /**
      *  Do any processing after (for example) decoding.
      *
-     *  Drawing to the {@link Canvas} will behave as if the initial processing
+     *  <p>Drawing to the {@link Canvas} will behave as if the initial processing
      *  (e.g. decoding) already exists in the Canvas. An implementation can draw
      *  effects on top of this, or it can even draw behind it using
      *  {@link PorterDuff.Mode#DST_OVER}. A common effect is to add transparency
      *  to the corners to achieve rounded corners. That can be done with the
-     *  following code:
+     *  following code:</p>
      *
      *  <code>
      *      Path path = new Path();
      *      path.setFillType(Path.FillType.INVERSE_EVEN_ODD);
+     *      int width = canvas.getWidth();
+     *      int height = canvas.getHeight();
      *      path.addRoundRect(0, 0, width, height, 20, 20, Path.Direction.CW);
      *      Paint paint = new Paint();
      *      paint.setAntiAlias(true);
@@ -63,10 +63,6 @@ public interface PostProcess {
      *
      *
      *  @param canvas The {@link Canvas} to draw to.
-     *  @param width Width of {@code canvas}. Anything drawn outside of this
-     *      will be ignored.
-     *  @param height Height of {@code canvas}. Anything drawn outside of this
-     *      will be ignored.
      *  @return Opacity of the result after drawing.
      *      {@link PixelFormat#UNKNOWN} means that the implementation did not
      *      change whether the image has alpha. Return this unless you added
@@ -87,5 +83,5 @@ public interface PostProcess {
      *      {@link java.lang.IllegalArgumentException}.
      */
     @PixelFormat.Opacity
-    public int postProcess(@NonNull Canvas canvas, int width, int height);
+    public int onPostProcess(@NonNull Canvas canvas);
 }

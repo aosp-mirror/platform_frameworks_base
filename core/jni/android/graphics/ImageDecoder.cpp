@@ -37,15 +37,13 @@
 using namespace android;
 
 static jclass    gImageDecoder_class;
-static jclass    gPoint_class;
+static jclass    gSize_class;
 static jclass    gIncomplete_class;
-static jclass    gCorrupt_class;
 static jclass    gCanvas_class;
 static jmethodID gImageDecoder_constructorMethodID;
 static jmethodID gImageDecoder_postProcessMethodID;
-static jmethodID gPoint_constructorMethodID;
+static jmethodID gSize_constructorMethodID;
 static jmethodID gIncomplete_constructorMethodID;
-static jmethodID gCorrupt_constructorMethodID;
 static jmethodID gCallback_onPartialImageMethodID;
 static jmethodID gCanvas_constructorMethodID;
 static jmethodID gCanvas_releaseMethodID;
@@ -157,8 +155,7 @@ static jobject ImageDecoder_nCreateByteArray(JNIEnv* env, jobject /*clazz*/, jby
     return native_create(env, std::move(stream));
 }
 
-jint postProcessAndRelease(JNIEnv* env, jobject jimageDecoder, std::unique_ptr<Canvas> canvas,
-                           int width, int height) {
+jint postProcessAndRelease(JNIEnv* env, jobject jimageDecoder, std::unique_ptr<Canvas> canvas) {
     jobject jcanvas = env->NewObject(gCanvas_class, gCanvas_constructorMethodID,
                                      reinterpret_cast<jlong>(canvas.get()));
     if (!jcanvas) {
@@ -169,8 +166,7 @@ jint postProcessAndRelease(JNIEnv* env, jobject jimageDecoder, std::unique_ptr<C
     // jcanvas now owns canvas.
     canvas.release();
 
-    return env->CallIntMethod(jimageDecoder, gImageDecoder_postProcessMethodID,
-                              jcanvas, width, height);
+    return env->CallIntMethod(jimageDecoder, gImageDecoder_postProcessMethodID, jcanvas);
 }
 
 // Note: jpostProcess points to an ImageDecoder object if it has a PostProcess object, and nullptr
@@ -271,39 +267,47 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
     if (jexception) {
         env->ExceptionClear();
     }
+    int onPartialImageError = jexception ? 1  // ImageDecoder.java's ERROR_SOURCE_EXCEPTION
+                                         : 0; // No error.
     switch (result) {
         case SkCodec::kSuccess:
             // Ignore the exception, since the decode was successful anyway.
             jexception = nullptr;
+            onPartialImageError = 0;
             break;
         case SkCodec::kIncompleteInput:
-            if (jcallback && !jexception) {
-                jexception = (jthrowable) env->NewObject(gIncomplete_class,
-                                                         gIncomplete_constructorMethodID);
+            if (!jexception) {
+                onPartialImageError = 2; // ImageDecoder.java's ERROR_SOURCE_EXCEPTION
             }
             break;
         case SkCodec::kErrorInInput:
-            if (jcallback && !jexception) {
-                jexception = (jthrowable) env->NewObject(gCorrupt_class,
-                                                         gCorrupt_constructorMethodID);
+            if (!jexception) {
+                onPartialImageError = 3; // ImageDecoder.java's ERROR_SOURCE_ERROR
             }
             break;
         default:
             SkString msg;
-            msg.printf("getPixels failed with error %i", result);
+            msg.printf("getPixels failed with error %s", SkCodec::ResultToString(result));
             doThrowIOE(env, msg.c_str());
             return nullptr;
     }
 
-    if (jexception) {
-        bool throwException = !env->CallBooleanMethod(jcallback, gCallback_onPartialImageMethodID,
-                                                      jexception);
+    if (jexception || onPartialImageError) {
+        bool throwException = !jcallback ||
+            !env->CallBooleanMethod(jcallback, gCallback_onPartialImageMethodID,
+                                    onPartialImageError);
         if (env->ExceptionCheck()) {
             return nullptr;
         }
 
         if (throwException) {
-            env->Throw(jexception);
+            if (jexception) {
+                env->Throw(jexception);
+            } else if (onPartialImageError == 2) {
+                env->ThrowNew(gIncomplete_class, "Incomplete input");
+            } else {
+                doThrowIOE(env, "image has an error!");
+            }
             return nullptr;
         }
     }
@@ -399,8 +403,7 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
     if (jpostProcess) {
         std::unique_ptr<Canvas> canvas(Canvas::create_canvas(bm));
 
-        jint pixelFormat = postProcessAndRelease(env, jpostProcess, std::move(canvas),
-                                                 bm.width(), bm.height());
+        jint pixelFormat = postProcessAndRelease(env, jpostProcess, std::move(canvas));
         if (env->ExceptionCheck()) {
             return nullptr;
         }
@@ -472,7 +475,7 @@ static jobject ImageDecoder_nGetSampledSize(JNIEnv* env, jobject /*clazz*/, jlon
                                             jint sampleSize) {
     auto* decoder = reinterpret_cast<ImageDecoder*>(nativePtr);
     SkISize size = decoder->mCodec->getSampledDimensions(sampleSize);
-    return env->NewObject(gPoint_class, gPoint_constructorMethodID, size.width(), size.height());
+    return env->NewObject(gSize_class, gSize_constructorMethodID, size.width(), size.height());
 }
 
 static void ImageDecoder_nGetPadding(JNIEnv* env, jobject /*clazz*/, jlong nativePtr,
@@ -496,9 +499,9 @@ static const JNINativeMethod gImageDecoderMethods[] = {
     { "nCreate",        "([BII)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateByteArray },
     { "nCreate",        "(Ljava/io/InputStream;[B)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateInputStream },
     { "nCreate",        "(Ljava/io/FileDescriptor;)Landroid/graphics/ImageDecoder;", (void*) ImageDecoder_nCreateFd },
-    { "nDecodeBitmap",  "(JLandroid/graphics/ImageDecoder$OnPartialImageListener;Landroid/graphics/ImageDecoder;IILandroid/graphics/Rect;ZIZZZ)Landroid/graphics/Bitmap;",
+    { "nDecodeBitmap",  "(JLandroid/graphics/ImageDecoder;Landroid/graphics/ImageDecoder;IILandroid/graphics/Rect;ZIZZZ)Landroid/graphics/Bitmap;",
                                                                  (void*) ImageDecoder_nDecodeBitmap },
-    { "nGetSampledSize","(JI)Landroid/graphics/Point;",          (void*) ImageDecoder_nGetSampledSize },
+    { "nGetSampledSize","(JI)Landroid/util/Size;",               (void*) ImageDecoder_nGetSampledSize },
     { "nGetPadding",    "(JLandroid/graphics/Rect;)V",           (void*) ImageDecoder_nGetPadding },
     { "nClose",         "(J)V",                                  (void*) ImageDecoder_nClose},
     { "nGetMimeType",   "(J)Ljava/lang/String;",                 (void*) ImageDecoder_nGetMimeType },
@@ -507,19 +510,15 @@ static const JNINativeMethod gImageDecoderMethods[] = {
 int register_android_graphics_ImageDecoder(JNIEnv* env) {
     gImageDecoder_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/ImageDecoder"));
     gImageDecoder_constructorMethodID = GetMethodIDOrDie(env, gImageDecoder_class, "<init>", "(JIIZ)V");
-    gImageDecoder_postProcessMethodID = GetMethodIDOrDie(env, gImageDecoder_class, "postProcessAndRelease", "(Landroid/graphics/Canvas;II)I");
+    gImageDecoder_postProcessMethodID = GetMethodIDOrDie(env, gImageDecoder_class, "postProcessAndRelease", "(Landroid/graphics/Canvas;)I");
 
-    gPoint_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/Point"));
-    gPoint_constructorMethodID = GetMethodIDOrDie(env, gPoint_class, "<init>", "(II)V");
+    gSize_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/util/Size"));
+    gSize_constructorMethodID = GetMethodIDOrDie(env, gSize_class, "<init>", "(II)V");
 
     gIncomplete_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/ImageDecoder$IncompleteException"));
     gIncomplete_constructorMethodID = GetMethodIDOrDie(env, gIncomplete_class, "<init>", "()V");
 
-    gCorrupt_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/ImageDecoder$CorruptException"));
-    gCorrupt_constructorMethodID = GetMethodIDOrDie(env, gCorrupt_class, "<init>", "()V");
-
-    jclass callback_class = FindClassOrDie(env, "android/graphics/ImageDecoder$OnPartialImageListener");
-    gCallback_onPartialImageMethodID = GetMethodIDOrDie(env, callback_class, "onPartialImage", "(Ljava/io/IOException;)Z");
+    gCallback_onPartialImageMethodID = GetMethodIDOrDie(env, gImageDecoder_class, "onPartialImage", "(I)Z");
 
     gCanvas_class = MakeGlobalRefOrDie(env, FindClassOrDie(env, "android/graphics/Canvas"));
     gCanvas_constructorMethodID = GetMethodIDOrDie(env, gCanvas_class, "<init>", "(J)V");
