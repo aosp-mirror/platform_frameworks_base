@@ -108,6 +108,12 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public Intent getCarLaunchIntentForPackage(String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public int[] getPackageGids(String packageName) throws NameNotFoundException {
         throw new UnsupportedOperationException();

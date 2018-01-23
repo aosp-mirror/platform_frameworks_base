@@ -3044,6 +3044,21 @@ public abstract class PackageManager {
     public abstract @Nullable Intent getLeanbackLaunchIntentForPackage(@NonNull String packageName);
 
     /**
+     * Return a "good" intent to launch a front-door Car activity in a
+     * package, for use for example to implement an "open" button when browsing
+     * through packages. The current implementation will look for a main
+     * activity in the category {@link Intent#CATEGORY_CAR_LAUNCHER}, or
+     * return null if no main car activities are found.
+     *
+     * @param packageName The name of the package to inspect.
+     * @return Returns either a fully-qualified Intent that can be used to launch
+     *         the main Car activity in the package, or null if the package
+     *         does not contain such an activity.
+     * @hide
+     */
+    public abstract @Nullable Intent getCarLaunchIntentForPackage(@NonNull String packageName);
+
+    /**
      * Return an array of all of the POSIX secondary group IDs that have been
      * assigned to the given package.
      * <p>

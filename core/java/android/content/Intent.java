@@ -3930,6 +3930,14 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.INTENT_CATEGORY)
     public static final String CATEGORY_LEANBACK_LAUNCHER = "android.intent.category.LEANBACK_LAUNCHER";
     /**
+     * Indicates the preferred entry-point activity when an application is launched from a Car
+     * launcher. If not present, Car launcher can optionally use {@link #CATEGORY_LAUNCHER} as a
+     * fallback, or exclude the application entirely.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.INTENT_CATEGORY)
+    public static final String CATEGORY_CAR_LAUNCHER = "android.intent.category.CAR_LAUNCHER";
+    /**
      * Indicates a Leanback settings activity to be displayed in the Leanback launcher.
      * @hide
      */

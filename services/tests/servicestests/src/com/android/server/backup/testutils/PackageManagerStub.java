@@ -87,6 +87,11 @@ public class PackageManagerStub extends PackageManager {
     }
 
     @Override
+    public Intent getCarLaunchIntentForPackage(String packageName) {
+        return null;
+    }
+
+    @Override
     public int[] getPackageGids(String packageName) throws NameNotFoundException {
         return new int[0];
     }
