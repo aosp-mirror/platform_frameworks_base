@@ -43,7 +43,6 @@ import java.util.Iterator;
  *
  * @see SubscriptionManager#setSubscriptionPlans(int, java.util.List)
  * @see SubscriptionManager#getSubscriptionPlans(int)
- * @hide
  */
 @SystemApi
 public final class SubscriptionPlan implements Parcelable {
