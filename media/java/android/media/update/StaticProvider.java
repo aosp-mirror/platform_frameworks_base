@@ -17,10 +17,18 @@
 package android.media.update;
 
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
+import android.content.Context;
+import android.media.IMediaSession2Callback;
+import android.media.MediaController2;
+import android.media.MediaPlayerBase;
+import android.media.MediaSession2;
+import android.media.MediaSessionService2;
+import android.media.SessionToken;
 import android.util.AttributeSet;
 import android.widget.MediaControlView2;
 import android.widget.VideoView2;
+
+import java.util.concurrent.Executor;
 
 /**
  * Interface for connecting the public API to an updatable implementation.
@@ -37,4 +45,15 @@ public interface StaticProvider {
     VideoView2Provider createVideoView2(
             VideoView2 instance, ViewProvider superProvider,
             @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes);
+
+    MediaSession2Provider createMediaSession2(MediaSession2 mediaSession2, Context context,
+            MediaPlayerBase player, String id, MediaSession2.SessionCallback callback);
+    MediaSession2Provider.ControllerInfoProvider createMediaSession2ControllerInfoProvider(
+            MediaSession2.ControllerInfo instance, Context context, int uid, int pid,
+            String packageName, IMediaSession2Callback callback);
+    MediaController2Provider createMediaController2(
+            MediaController2 instance, Context context, SessionToken token,
+            MediaController2.ControllerCallback callback, Executor executor);
+    MediaSessionService2Provider createMediaSessionService2(
+            MediaSessionService2 instance);
 }

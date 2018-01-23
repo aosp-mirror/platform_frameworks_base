@@ -417,6 +417,8 @@ java_library {
         "media/java/android/media/IMediaRouterService.aidl",
         "media/java/android/media/IMediaScannerListener.aidl",
         "media/java/android/media/IMediaScannerService.aidl",
+        "media/java/android/media/IMediaSession2.aidl",
+        "media/java/android/media/IMediaSession2Callback.aidl",
         "media/java/android/media/IPlaybackConfigDispatcher.aidl",
         ":libaudioclient_aidl",
         "media/java/android/media/IRecordingConfigDispatcher.aidl",
