@@ -42,12 +42,13 @@ import java.lang.annotation.RetentionPolicy;
 // TODO(jaewan): Find better name for this (SessionToken or Session2Token)
 public final class SessionToken {
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(value = {TYPE_SESSION, TYPE_SESSION_SERVICE})
+    @IntDef(value = {TYPE_SESSION, TYPE_SESSION_SERVICE, TYPE_LIBRARY_SERVICE})
     public @interface TokenType {
     }
 
     public static final int TYPE_SESSION = 0;
     public static final int TYPE_SESSION_SERVICE = 1;
+    public static final int TYPE_LIBRARY_SERVICE = 2;
 
     private static final String KEY_TYPE = "android.media.token.type";
     private static final String KEY_PACKAGE_NAME = "android.media.token.package_name";
@@ -73,6 +74,7 @@ public final class SessionToken {
      * @hide
      */
     // TODO(jaewan): UID is also needed.
+    // TODO(jaewan): Unhide
     public SessionToken(@TokenType int type, @NonNull String packageName, @NonNull String id,
             @Nullable String serviceName, @Nullable IMediaSession2 sessionBinder) {
         // TODO(jaewan): Add sanity check.

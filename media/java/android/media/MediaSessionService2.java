@@ -29,7 +29,7 @@ import android.media.update.MediaSessionService2Provider;
 import android.os.IBinder;
 
 /**
- * Service version of the {@link MediaSession2}.
+ * Base class for media session services, which is the service version of the {@link MediaSession2}.
  * <p>
  * It's highly recommended for an app to use this instead of {@link MediaSession2} if it wants
  * to keep media playback in the background.
@@ -43,11 +43,11 @@ import android.os.IBinder;
  * </ul>
  * For example, user's voice command can start playback of your app even when it's not running.
  * <p>
- * To use this class, adding followings directly to your {@code AndroidManifest.xml}.
+ * To extend this class, adding followings directly to your {@code AndroidManifest.xml}.
  * <pre>
  * &lt;service android:name="component_name_of_your_implementation" &gt;
  *   &lt;intent-filter&gt;
- *     &lt;action android:name="android.media.session.MediaSessionService2" /&gt;
+ *     &lt;action android:name="android.media.MediaSessionService2" /&gt;
  *   &lt;/intent-filter&gt;
  * &lt;/service&gt;</pre>
  * <p>
@@ -58,7 +58,7 @@ import android.os.IBinder;
  * <pre>
  * &lt;service android:name="component_name_of_your_implementation" &gt;
  *   &lt;intent-filter&gt;
- *     &lt;action android:name="android.media.session.MediaSessionService2" /&gt;
+ *     &lt;action android:name="android.media.MediaSessionService2" /&gt;
  *   &lt;/intent-filter&gt;
  *   &lt;meta-data android:name="android.media.session"
  *       android:value="session_id"/&gt;
@@ -120,8 +120,7 @@ public abstract class MediaSessionService2 extends Service {
      * This is the interface name that a service implementing a session service should say that it
      * support -- that is, this is the action it uses for its intent filter.
      */
-    public static final String SERVICE_INTERFACE =
-            "android.media.session.MediaSessionService2";
+    public static final String SERVICE_INTERFACE = "android.media.MediaSessionService2";
 
     /**
      * Name under which a MediaSessionService2 component publishes information about itself.
@@ -129,21 +128,13 @@ public abstract class MediaSessionService2 extends Service {
      */
     public static final String SERVICE_META_DATA = "android.media.session";
 
-    /**
-     * Default notification channel ID used by {@link #onUpdateNotification(PlaybackState)}.
-     *
-     */
-    public static final String DEFAULT_MEDIA_NOTIFICATION_CHANNEL_ID = "media_session_service";
-
-    /**
-     * Default notification channel ID used by {@link #onUpdateNotification(PlaybackState)}.
-     *
-     */
-    public static final int DEFAULT_MEDIA_NOTIFICATION_ID = 1001;
-
     public MediaSessionService2() {
         super();
-        mProvider = ApiLoader.getProvider(this).createMediaSessionService2(this);
+        mProvider = createProvider();
+    }
+
+    MediaSessionService2Provider createProvider() {
+        return ApiLoader.getProvider(this).createMediaSessionService2(this);
     }
 
     /**
@@ -168,32 +159,24 @@ public abstract class MediaSessionService2 extends Service {
      * Service wouldn't run if {@code null} is returned or session's ID doesn't match with the
      * expected ID that you've specified through the AndroidManifest.xml.
      * <p>
-     * This method will be call on the main thread.
+     * This method will be called on the main thread.
      *
      * @param sessionId session id written in the AndroidManifest.xml.
      * @return a new session
      * @see MediaSession2.Builder
      * @see #getSession()
      */
-    // TODO(jaewan): Replace this with onCreateSession(). Its sesssion callback will replace
-    //               this abstract method.
-    // TODO(jaewan): Should we also include/documents notification listener access?
-    // TODO(jaewan): Is term accepted/rejected correct? For permission, granted is more common.
-    // TODO(jaewan): Return ConnectResult() that encapsulate supported action and player.
     public @NonNull abstract MediaSession2 onCreateSession(String sessionId);
 
     /**
      * Called when the playback state of this session is changed, and notification needs update.
-     * <p>
-     * Default media style notification will be shown if you don't override this or return
-     * {@code null}. Override this method to show your own notification UI.
+     * Override this method to show your own notification UI.
      * <p>
      * With the notification returned here, the service become foreground service when the playback
      * is started. It becomes background service after the playback is stopped.
      *
      * @param state playback state
-     * @return a {@link MediaNotification}. If it's {@code null}, default notification will be shown
-     *     instead.
+     * @return a {@link MediaNotification}. If it's {@code null}, notification wouldn't be shown.
      */
     // TODO(jaewan): Also add metadata
     public MediaNotification onUpdateNotification(PlaybackState state) {

@@ -23,6 +23,7 @@ import android.media.MediaBrowser2;
 import android.media.MediaBrowser2.BrowserCallback;
 import android.media.MediaController2;
 import android.media.MediaController2.ControllerCallback;
+import android.media.MediaLibraryService2;
 import android.media.MediaPlayerBase;
 import android.media.MediaSession2;
 import android.media.MediaSessionService2;
@@ -62,4 +63,6 @@ public interface StaticProvider {
             BrowserCallback callback, Executor executor);
     MediaSessionService2Provider createMediaSessionService2(
             MediaSessionService2 instance);
+    MediaSessionService2Provider createMediaLibraryService2(
+            MediaLibraryService2 instance);
 }
