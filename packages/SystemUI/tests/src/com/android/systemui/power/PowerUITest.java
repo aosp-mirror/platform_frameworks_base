@@ -40,6 +40,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.power.PowerUI.WarningsUI;
 import com.android.systemui.statusbar.phone.StatusBar;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,18 +54,19 @@ public class PowerUITest extends SysuiTestCase {
     private static final boolean UNPLUGGED = false;
     private static final boolean POWER_SAVER_OFF = false;
     private static final int ABOVE_WARNING_BUCKET = 1;
+    private static final long ONE_HOUR_MILLIS = Duration.ofHours(1).toMillis();
     public static final int BELOW_WARNING_BUCKET = -1;
     public static final long BELOW_HYBRID_THRESHOLD = TimeUnit.HOURS.toMillis(2);
     public static final long ABOVE_HYBRID_THRESHOLD = TimeUnit.HOURS.toMillis(4);
     private HardwarePropertiesManager mHardProps;
     private WarningsUI mMockWarnings;
     private PowerUI mPowerUI;
-    private EnhancedEstimates mEnhacedEstimates;
+    private EnhancedEstimates mEnhancedEstimates;
 
     @Before
     public void setup() {
         mMockWarnings = mDependency.injectMockDependency(WarningsUI.class);
-        mEnhacedEstimates = mDependency.injectMockDependency(EnhancedEstimates.class);
+        mEnhancedEstimates = mDependency.injectMockDependency(EnhancedEstimates.class);
         mHardProps = mock(HardwarePropertiesManager.class);
 
         mContext.putComponent(StatusBar.class, mock(StatusBar.class));
@@ -142,8 +144,44 @@ public class PowerUITest extends SysuiTestCase {
     }
 
     @Test
+    public void testShouldShowLowBatteryWarning_showHybridOnly_overrideThresholdHigh_returnsNoShow() {
+        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.getLowWarningThreshold())
+                .thenReturn(Duration.ofHours(1).toMillis());
+        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
+        mPowerUI.start();
+
+        // unplugged device that would not show the non-hybrid notification but would show the
+        // hybrid but the threshold has been overriden to be too low
+        boolean shouldShow =
+                mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
+                        ABOVE_WARNING_BUCKET, Long.MAX_VALUE, BELOW_HYBRID_THRESHOLD,
+                        POWER_SAVER_OFF, BatteryManager.BATTERY_HEALTH_GOOD);
+        assertFalse(shouldShow);
+    }
+
+    @Test
+    public void testShouldShowLowBatteryWarning_showHybridOnly_overrideThresholdHigh_returnsShow() {
+        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.getLowWarningThreshold())
+                .thenReturn(Duration.ofHours(5).toMillis());
+        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
+        mPowerUI.start();
+
+        // unplugged device that would not show the non-hybrid notification but would show the
+        // hybrid since the threshold has been overriden to be much higher
+        boolean shouldShow =
+                mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
+                        ABOVE_WARNING_BUCKET, Long.MAX_VALUE, ABOVE_HYBRID_THRESHOLD,
+                        POWER_SAVER_OFF, BatteryManager.BATTERY_HEALTH_GOOD);
+        assertTrue(shouldShow);
+    }
+
+    @Test
     public void testShouldShowLowBatteryWarning_showHybridOnly_returnsShow() {
-        when(mEnhacedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
+        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
         mPowerUI.start();
 
         // unplugged device that would not show the non-hybrid notification but would show the
@@ -157,7 +195,9 @@ public class PowerUITest extends SysuiTestCase {
 
     @Test
     public void testShouldShowLowBatteryWarning_showHybrid_showStandard_returnsShow() {
-        when(mEnhacedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
+        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
         mPowerUI.start();
 
         // unplugged device that would show the non-hybrid notification and the hybrid
@@ -170,7 +210,9 @@ public class PowerUITest extends SysuiTestCase {
 
     @Test
     public void testShouldShowLowBatteryWarning_showStandardOnly_returnsShow() {
-        when(mEnhacedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
+        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
         mPowerUI.start();
 
         // unplugged device that would show the non-hybrid but not the hybrid
@@ -183,7 +225,9 @@ public class PowerUITest extends SysuiTestCase {
 
     @Test
     public void testShouldShowLowBatteryWarning_deviceHighBattery_returnsNoShow() {
-        when(mEnhacedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
+        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
         mPowerUI.start();
 
         // unplugged device that would show the neither due to battery level being good
@@ -196,7 +240,9 @@ public class PowerUITest extends SysuiTestCase {
 
     @Test
     public void testShouldShowLowBatteryWarning_devicePlugged_returnsNoShow() {
-        when(mEnhacedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
+        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
         mPowerUI.start();
 
         // plugged device that would show the neither due to being plugged
@@ -209,7 +255,9 @@ public class PowerUITest extends SysuiTestCase {
 
     @Test
     public void testShouldShowLowBatteryWarning_deviceBatteryStatusUnkown_returnsNoShow() {
-        when(mEnhacedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
+        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
         mPowerUI.start();
 
         // Unknown battery status device that would show the neither due
@@ -222,7 +270,9 @@ public class PowerUITest extends SysuiTestCase {
 
     @Test
     public void testShouldShowLowBatteryWarning_batterySaverEnabled_returnsNoShow() {
-        when(mEnhacedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
+        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
         mPowerUI.start();
 
         // BatterySaverEnabled device that would show the neither due to battery saver
@@ -236,7 +286,10 @@ public class PowerUITest extends SysuiTestCase {
     @Test
     public void testShouldDismissLowBatteryWarning_dismissWhenPowerSaverEnabled() {
         mPowerUI.start();
-        when(mEnhacedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
+        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
+
         // device that gets power saver turned on should dismiss
         boolean shouldDismiss =
                 mPowerUI.shouldDismissLowBatteryWarning(UNPLUGGED, BELOW_WARNING_BUCKET,
@@ -247,7 +300,9 @@ public class PowerUITest extends SysuiTestCase {
     @Test
     public void testShouldDismissLowBatteryWarning_dismissWhenPlugged() {
         mPowerUI.start();
-        when(mEnhacedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
+        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
 
         // device that gets plugged in should dismiss
         boolean shouldDismiss =
@@ -259,7 +314,10 @@ public class PowerUITest extends SysuiTestCase {
     @Test
     public void testShouldDismissLowBatteryWarning_dismissHybridSignal_showStandardSignal_shouldShow() {
         mPowerUI.start();
-        when(mEnhacedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
+        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
+
         // would dismiss hybrid but not non-hybrid should not dismiss
         boolean shouldDismiss =
                 mPowerUI.shouldDismissLowBatteryWarning(UNPLUGGED, BELOW_WARNING_BUCKET,
@@ -270,7 +328,9 @@ public class PowerUITest extends SysuiTestCase {
     @Test
     public void testShouldDismissLowBatteryWarning_showHybridSignal_dismissStandardSignal_shouldShow() {
         mPowerUI.start();
-        when(mEnhacedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
+        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
 
         // would dismiss non-hybrid but not hybrid should not dismiss
         boolean shouldDismiss =
@@ -282,7 +342,9 @@ public class PowerUITest extends SysuiTestCase {
     @Test
     public void testShouldDismissLowBatteryWarning_showBothSignal_shouldShow() {
         mPowerUI.start();
-        when(mEnhacedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
+        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
 
         // should not dismiss when both would not dismiss
         boolean shouldDismiss =
@@ -294,7 +356,9 @@ public class PowerUITest extends SysuiTestCase {
     @Test
     public void testShouldDismissLowBatteryWarning_dismissBothSignal_shouldDismiss() {
         mPowerUI.start();
-        when(mEnhacedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
+        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
 
         //should dismiss if both would dismiss
         boolean shouldDismiss =
@@ -306,7 +370,9 @@ public class PowerUITest extends SysuiTestCase {
     @Test
     public void testShouldDismissLowBatteryWarning_dismissStandardSignal_hybridDisabled_shouldDismiss() {
         mPowerUI.start();
-        when(mEnhacedEstimates.isHybridNotificationEnabled()).thenReturn(false);
+        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(false);
+        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
+        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
 
         // would dismiss non-hybrid with hybrid disabled should dismiss
         boolean shouldDismiss =
