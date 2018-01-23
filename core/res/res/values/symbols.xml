@@ -384,10 +384,6 @@
   <java-symbol type="integer" name="config_wifi_framework_current_network_boost" />
   <java-symbol type="string"  name="config_wifi_random_mac_oui" />
   <java-symbol type="integer"  name="config_wifi_network_switching_blacklist_time" />
-  <java-symbol type="integer"  name="config_wifi_idle_receive_cur_ma" />
-  <java-symbol type="integer"  name="config_wifi_active_rx_cur_ma" />
-  <java-symbol type="integer"  name="config_wifi_tx_cur_ma" />
-  <java-symbol type="integer"  name="config_wifi_operating_voltage_mv" />
   <java-symbol type="string"  name="config_wifi_framework_sap_2G_channel_list" />
   <java-symbol type="integer" name="config_wifi_framework_max_tx_rate_for_full_scan" />
   <java-symbol type="integer" name="config_wifi_framework_max_rx_rate_for_full_scan" />
