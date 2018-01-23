@@ -172,4 +172,10 @@ public interface WebViewFactoryProvider {
      * @return the singleton WebViewDatabase instance
      */
     WebViewDatabase getWebViewDatabase(Context context);
+
+    /**
+     * Gets the classloader used to load internal WebView implementation classes. This interface
+     * should only be used by the WebView Support Library.
+     */
+    ClassLoader getWebViewClassLoader();
 }
