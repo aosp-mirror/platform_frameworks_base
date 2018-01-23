@@ -51,12 +51,15 @@ public class SignalStrength implements Parcelable {
         "none", "poor", "moderate", "good", "great"
     };
 
-    /** @hide */
-    //Use int max, as -1 is a valid value in signal strength
-    public static final int INVALID = 0x7FFFFFFF;
+    /**
+     * Use Integer.MAX_VALUE because -1 is a valid value in signal strength.
+     * @hide
+     */
+    public static final int INVALID = Integer.MAX_VALUE;
 
     private static final int LTE_RSRP_THRESHOLDS_NUM = 6;
 
+    /** Parameters reported by the Radio */
     private int mGsmSignalStrength; // Valid values are (0-31, 99) as defined in TS 27.007 8.5
     private int mGsmBitErrorRate;   // bit error rate (0-7, 99) as defined in TS 27.007 8.5
     private int mCdmaDbm;   // This value is the RSSI value
@@ -69,11 +72,13 @@ public class SignalStrength implements Parcelable {
     private int mLteRsrq;
     private int mLteRssnr;
     private int mLteCqi;
-    private int mLteRsrpBoost; // offset to be reduced from the rsrp threshold while calculating
-                                // signal strength level
     private int mTdScdmaRscp;
 
-    private boolean isGsm; // This value is set by the ServiceStateTracker onSignalStrengthResult
+    /** Parameters from the framework */
+    private int mLteRsrpBoost; // offset to be reduced from the rsrp threshold while calculating
+                                // signal strength level
+    private boolean mIsGsm; // This value is set by the ServiceStateTracker
+                            // onSignalStrengthResult.
     private boolean mUseOnlyRsrpForLteLevel; // Use only RSRP for the number of LTE signal bar.
 
     // The threshold of LTE RSRP for determining the display level of LTE signal bar.
@@ -103,28 +108,12 @@ public class SignalStrength implements Parcelable {
      * @hide
      */
     public SignalStrength() {
-        mGsmSignalStrength = 99;
-        mGsmBitErrorRate = -1;
-        mCdmaDbm = -1;
-        mCdmaEcio = -1;
-        mEvdoDbm = -1;
-        mEvdoEcio = -1;
-        mEvdoSnr = -1;
-        mLteSignalStrength = 99;
-        mLteRsrp = INVALID;
-        mLteRsrq = INVALID;
-        mLteRssnr = INVALID;
-        mLteCqi = INVALID;
-        mLteRsrpBoost = 0;
-        mTdScdmaRscp = INVALID;
-        isGsm = true;
-        mUseOnlyRsrpForLteLevel = false;
-        setLteRsrpThresholds(getDefaultLteRsrpThresholds());
+        this(true);
     }
 
     /**
      * This constructor is used to create SignalStrength with default
-     * values and set the isGsmFlag with the value passed in the input
+     * values and set the gsmFlag with the value passed in the input
      *
      * @param gsmFlag true if Gsm Phone,false if Cdma phone
      * @return newly created SignalStrength
@@ -143,134 +132,26 @@ public class SignalStrength implements Parcelable {
         mLteRsrq = INVALID;
         mLteRssnr = INVALID;
         mLteCqi = INVALID;
-        mLteRsrpBoost = 0;
         mTdScdmaRscp = INVALID;
-        isGsm = gsmFlag;
+        mLteRsrpBoost = 0;
+        mIsGsm = gsmFlag;
         mUseOnlyRsrpForLteLevel = false;
         setLteRsrpThresholds(getDefaultLteRsrpThresholds());
     }
 
     /**
-     * Constructor
+     * Constructor with all fields present
      *
      * @hide
      */
-    public SignalStrength(int gsmSignalStrength, int gsmBitErrorRate,
+    public SignalStrength(
+            int gsmSignalStrength, int gsmBitErrorRate,
             int cdmaDbm, int cdmaEcio,
             int evdoDbm, int evdoEcio, int evdoSnr,
             int lteSignalStrength, int lteRsrp, int lteRsrq, int lteRssnr, int lteCqi,
-            int lteRsrpBoost, int tdScdmaRscp, boolean gsmFlag, boolean lteLevelBaseOnRsrp) {
-        initialize(gsmSignalStrength, gsmBitErrorRate, cdmaDbm, cdmaEcio,
-                evdoDbm, evdoEcio, evdoSnr, lteSignalStrength, lteRsrp,
-                lteRsrq, lteRssnr, lteCqi, lteRsrpBoost, gsmFlag, lteLevelBaseOnRsrp);
-        mTdScdmaRscp = tdScdmaRscp;
-    }
-
-    /**
-     * Constructor
-     *
-     * @hide
-     */
-    public SignalStrength(int gsmSignalStrength, int gsmBitErrorRate,
-            int cdmaDbm, int cdmaEcio,
-            int evdoDbm, int evdoEcio, int evdoSnr,
-            int lteSignalStrength, int lteRsrp, int lteRsrq, int lteRssnr, int lteCqi,
-            int tdScdmaRscp, boolean gsmFlag) {
-        initialize(gsmSignalStrength, gsmBitErrorRate, cdmaDbm, cdmaEcio,
-                evdoDbm, evdoEcio, evdoSnr, lteSignalStrength, lteRsrp,
-                lteRsrq, lteRssnr, lteCqi, 0, gsmFlag, false);
-        mTdScdmaRscp = tdScdmaRscp;
-    }
-
-    /**
-     * Constructor
-     *
-     * @hide
-     */
-    public SignalStrength(int gsmSignalStrength, int gsmBitErrorRate,
-            int cdmaDbm, int cdmaEcio,
-            int evdoDbm, int evdoEcio, int evdoSnr,
-            int lteSignalStrength, int lteRsrp, int lteRsrq, int lteRssnr, int lteCqi,
-            boolean gsmFlag) {
-        initialize(gsmSignalStrength, gsmBitErrorRate, cdmaDbm, cdmaEcio,
-                evdoDbm, evdoEcio, evdoSnr, lteSignalStrength, lteRsrp,
-                lteRsrq, lteRssnr, lteCqi, 0, gsmFlag, false);
-    }
-
-    /**
-     * Constructor
-     *
-     * @hide
-     */
-    public SignalStrength(int gsmSignalStrength, int gsmBitErrorRate,
-            int cdmaDbm, int cdmaEcio,
-            int evdoDbm, int evdoEcio, int evdoSnr,
-            boolean gsmFlag) {
-        initialize(gsmSignalStrength, gsmBitErrorRate, cdmaDbm, cdmaEcio,
-                evdoDbm, evdoEcio, evdoSnr, 99, INVALID,
-                INVALID, INVALID, INVALID, 0, gsmFlag, false);
-    }
-
-    /**
-     * Copy constructors
-     *
-     * @param s Source SignalStrength
-     *
-     * @hide
-     */
-    public SignalStrength(SignalStrength s) {
-        copyFrom(s);
-    }
-
-    /**
-     * Initialize gsm/cdma values, sets lte values to defaults.
-     *
-     * @param gsmSignalStrength
-     * @param gsmBitErrorRate
-     * @param cdmaDbm
-     * @param cdmaEcio
-     * @param evdoDbm
-     * @param evdoEcio
-     * @param evdoSnr
-     * @param gsm
-     *
-     * @hide
-     */
-    public void initialize(int gsmSignalStrength, int gsmBitErrorRate,
-            int cdmaDbm, int cdmaEcio,
-            int evdoDbm, int evdoEcio, int evdoSnr,
-            boolean gsm) {
-        initialize(gsmSignalStrength, gsmBitErrorRate, cdmaDbm, cdmaEcio,
-                evdoDbm, evdoEcio, evdoSnr, 99, INVALID,
-                INVALID, INVALID, INVALID, 0, gsm, false);
-    }
-
-    /**
-     * Initialize all the values
-     *
-     * @param gsmSignalStrength
-     * @param gsmBitErrorRate
-     * @param cdmaDbm
-     * @param cdmaEcio
-     * @param evdoDbm
-     * @param evdoEcio
-     * @param evdoSnr
-     * @param lteSignalStrength
-     * @param lteRsrp
-     * @param lteRsrq
-     * @param lteRssnr
-     * @param lteCqi
-     * @param lteRsrpBoost
-     * @param gsm
-     * @param useOnlyRsrpForLteLevel
-     *
-     * @hide
-     */
-    public void initialize(int gsmSignalStrength, int gsmBitErrorRate,
-            int cdmaDbm, int cdmaEcio,
-            int evdoDbm, int evdoEcio, int evdoSnr,
-            int lteSignalStrength, int lteRsrp, int lteRsrq, int lteRssnr, int lteCqi,
-            int lteRsrpBoost, boolean gsm, boolean useOnlyRsrpForLteLevel) {
+            int tdScdmaRscp,
+            // values Added by config
+            int lteRsrpBoost, boolean gsmFlag, boolean lteLevelBaseOnRsrp) {
         mGsmSignalStrength = gsmSignalStrength;
         mGsmBitErrorRate = gsmBitErrorRate;
         mCdmaDbm = cdmaDbm;
@@ -283,13 +164,38 @@ public class SignalStrength implements Parcelable {
         mLteRsrq = lteRsrq;
         mLteRssnr = lteRssnr;
         mLteCqi = lteCqi;
-        mLteRsrpBoost = lteRsrpBoost;
         mTdScdmaRscp = INVALID;
-        isGsm = gsm;
-        mUseOnlyRsrpForLteLevel = useOnlyRsrpForLteLevel;
-
+        mLteRsrpBoost = lteRsrpBoost;
+        mIsGsm = gsmFlag;
+        mUseOnlyRsrpForLteLevel = lteLevelBaseOnRsrp;
         setLteRsrpThresholds(getDefaultLteRsrpThresholds());
         if (DBG) log("initialize: " + toString());
+    }
+
+    /**
+     * Constructor for only values provided by Radio HAL
+     *
+     * @hide
+     */
+    public SignalStrength(int gsmSignalStrength, int gsmBitErrorRate,
+            int cdmaDbm, int cdmaEcio,
+            int evdoDbm, int evdoEcio, int evdoSnr,
+            int lteSignalStrength, int lteRsrp, int lteRsrq, int lteRssnr, int lteCqi,
+            int tdScdmaRscp) {
+        this(gsmSignalStrength, gsmBitErrorRate, cdmaDbm, cdmaEcio,
+                evdoDbm, evdoEcio, evdoSnr, lteSignalStrength, lteRsrp,
+                lteRsrq, lteRssnr, lteCqi, tdScdmaRscp, 0, true, false);
+    }
+
+    /**
+     * Copy constructors
+     *
+     * @param s Source SignalStrength
+     *
+     * @hide
+     */
+    public SignalStrength(SignalStrength s) {
+        copyFrom(s);
     }
 
     /**
@@ -308,9 +214,9 @@ public class SignalStrength implements Parcelable {
         mLteRsrq = s.mLteRsrq;
         mLteRssnr = s.mLteRssnr;
         mLteCqi = s.mLteCqi;
-        mLteRsrpBoost = s.mLteRsrpBoost;
         mTdScdmaRscp = s.mTdScdmaRscp;
-        isGsm = s.isGsm;
+        mLteRsrpBoost = s.mLteRsrpBoost;
+        mIsGsm = s.mIsGsm;
         mUseOnlyRsrpForLteLevel = s.mUseOnlyRsrpForLteLevel;
         setLteRsrpThresholds(s.mLteRsrpThresholds);
     }
@@ -335,40 +241,11 @@ public class SignalStrength implements Parcelable {
         mLteRsrq = in.readInt();
         mLteRssnr = in.readInt();
         mLteCqi = in.readInt();
-        mLteRsrpBoost = in.readInt();
         mTdScdmaRscp = in.readInt();
-        isGsm = (in.readInt() != 0);
-        mUseOnlyRsrpForLteLevel = (in.readInt() != 0);
-        for (int i = 0; i < LTE_RSRP_THRESHOLDS_NUM; i++) {
-            mLteRsrpThresholds[i] = in.readInt();
-        }
-    }
-
-    /**
-     * Make a SignalStrength object from the given parcel as passed up by
-     * the ril which does not have isGsm. isGsm will be changed by ServiceStateTracker
-     * so the default is a don't care.
-     *
-     * @hide
-     */
-    public static SignalStrength makeSignalStrengthFromRilParcel(Parcel in) {
-        if (DBG) log("Size of signalstrength parcel:" + in.dataSize());
-
-        SignalStrength ss = new SignalStrength();
-        ss.mGsmSignalStrength = in.readInt();
-        ss.mGsmBitErrorRate = in.readInt();
-        ss.mCdmaDbm = in.readInt();
-        ss.mCdmaEcio = in.readInt();
-        ss.mEvdoDbm = in.readInt();
-        ss.mEvdoEcio = in.readInt();
-        ss.mEvdoSnr = in.readInt();
-        ss.mLteSignalStrength = in.readInt();
-        ss.mLteRsrp = in.readInt();
-        ss.mLteRsrq = in.readInt();
-        ss.mLteRssnr = in.readInt();
-        ss.mLteCqi = in.readInt();
-        ss.mTdScdmaRscp = in.readInt();
-        return ss;
+        mLteRsrpBoost = in.readInt();
+        mIsGsm = in.readBoolean();
+        mUseOnlyRsrpForLteLevel = in.readBoolean();
+        in.readIntArray(mLteRsrpThresholds);
     }
 
     /**
@@ -387,13 +264,11 @@ public class SignalStrength implements Parcelable {
         out.writeInt(mLteRsrq);
         out.writeInt(mLteRssnr);
         out.writeInt(mLteCqi);
-        out.writeInt(mLteRsrpBoost);
         out.writeInt(mTdScdmaRscp);
-        out.writeInt(isGsm ? 1 : 0);
-        out.writeInt(mUseOnlyRsrpForLteLevel ? 1 : 0);
-        for (int i = 0; i < LTE_RSRP_THRESHOLDS_NUM; i++) {
-            out.writeInt(mLteRsrpThresholds[i]);
-        }
+        out.writeInt(mLteRsrpBoost);
+        out.writeBoolean(mIsGsm);
+        out.writeBoolean(mUseOnlyRsrpForLteLevel);
+        out.writeIntArray(mLteRsrpThresholds);
     }
 
     /**
@@ -456,24 +331,24 @@ public class SignalStrength implements Parcelable {
     }
 
     /**
-     * Fix {@link #isGsm} based on the signal strength data.
+     * Fix {@link #mIsGsm} based on the signal strength data.
      *
      * @hide
      */
     public void fixType() {
-        isGsm = getCdmaRelatedSignalStrength() == SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
+        mIsGsm = getCdmaRelatedSignalStrength() == SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
     }
 
     /**
      * @param true - Gsm, Lte phones
      *        false - Cdma phones
      *
-     * Used by voice phone to set the isGsm
+     * Used by voice phone to set the mIsGsm
      *        flag
      * @hide
      */
     public void setGsm(boolean gsmFlag) {
-        isGsm = gsmFlag;
+        mIsGsm = gsmFlag;
     }
 
     /**
@@ -604,7 +479,7 @@ public class SignalStrength implements Parcelable {
      *     while 4 represents a very strong signal strength.
      */
     public int getLevel() {
-        int level = isGsm ? getGsmRelatedSignalStrength() : getCdmaRelatedSignalStrength();
+        int level = mIsGsm ? getGsmRelatedSignalStrength() : getCdmaRelatedSignalStrength();
         if (DBG) log("getLevel=" + level);
         return level;
     }
@@ -616,15 +491,13 @@ public class SignalStrength implements Parcelable {
      */
     public int getAsuLevel() {
         int asuLevel = 0;
-        if (isGsm) {
-            if (getLteLevel() == SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
-                if (getTdScdmaLevel() == SIGNAL_STRENGTH_NONE_OR_UNKNOWN) {
-                    asuLevel = getGsmAsuLevel();
-                } else {
-                    asuLevel = getTdScdmaAsuLevel();
-                }
-            } else {
+        if (mIsGsm) {
+            if (mLteRsrp != SignalStrength.INVALID) {
                 asuLevel = getLteAsuLevel();
+            } else if (mTdScdmaRscp != SignalStrength.INVALID) {
+                asuLevel = getTdScdmaAsuLevel();
+            } else {
+                asuLevel = getGsmAsuLevel();
             }
         } else {
             int cdmaAsuLevel = getCdmaAsuLevel();
@@ -966,7 +839,7 @@ public class SignalStrength implements Parcelable {
      * @return true if this is for GSM
      */
     public boolean isGsm() {
-        return this.isGsm;
+        return this.mIsGsm;
     }
 
     /**
@@ -1038,7 +911,7 @@ public class SignalStrength implements Parcelable {
                 + (mEvdoDbm * primeNum) + (mEvdoEcio * primeNum) + (mEvdoSnr * primeNum)
                 + (mLteSignalStrength * primeNum) + (mLteRsrp * primeNum)
                 + (mLteRsrq * primeNum) + (mLteRssnr * primeNum) + (mLteCqi * primeNum)
-                + (mLteRsrpBoost * primeNum) + (mTdScdmaRscp * primeNum) + (isGsm ? 1 : 0)
+                + (mLteRsrpBoost * primeNum) + (mTdScdmaRscp * primeNum) + (mIsGsm ? 1 : 0)
                 + (mUseOnlyRsrpForLteLevel ? 1 : 0) + (Arrays.hashCode(mLteRsrpThresholds)));
     }
 
@@ -1073,7 +946,7 @@ public class SignalStrength implements Parcelable {
                 && mLteCqi == s.mLteCqi
                 && mLteRsrpBoost == s.mLteRsrpBoost
                 && mTdScdmaRscp == s.mTdScdmaRscp
-                && isGsm == s.isGsm
+                && mIsGsm == s.mIsGsm
                 && mUseOnlyRsrpForLteLevel == s.mUseOnlyRsrpForLteLevel
                 && Arrays.equals(mLteRsrpThresholds, s.mLteRsrpThresholds));
     }
@@ -1098,7 +971,7 @@ public class SignalStrength implements Parcelable {
                 + " " + mLteCqi
                 + " " + mLteRsrpBoost
                 + " " + mTdScdmaRscp
-                + " " + (isGsm ? "gsm|lte" : "cdma")
+                + " " + (mIsGsm ? "gsm|lte" : "cdma")
                 + " " + (mUseOnlyRsrpForLteLevel ? "use_only_rsrp_for_lte_level" :
                          "use_rsrp_and_rssnr_for_lte_level")
                 + " " + (Arrays.toString(mLteRsrpThresholds)));
@@ -1153,10 +1026,10 @@ public class SignalStrength implements Parcelable {
         mLteRsrq = m.getInt("LteRsrq");
         mLteRssnr = m.getInt("LteRssnr");
         mLteCqi = m.getInt("LteCqi");
-        mLteRsrpBoost = m.getInt("lteRsrpBoost");
+        mLteRsrpBoost = m.getInt("LteRsrpBoost");
         mTdScdmaRscp = m.getInt("TdScdma");
-        isGsm = m.getBoolean("isGsm");
-        mUseOnlyRsrpForLteLevel = m.getBoolean("useOnlyRsrpForLteLevel");
+        mIsGsm = m.getBoolean("IsGsm");
+        mUseOnlyRsrpForLteLevel = m.getBoolean("UseOnlyRsrpForLteLevel");
         ArrayList<Integer> lteRsrpThresholds = m.getIntegerArrayList("lteRsrpThresholds");
         for (int i = 0; i < lteRsrpThresholds.size(); i++) {
             mLteRsrpThresholds[i] = lteRsrpThresholds.get(i);
@@ -1182,10 +1055,10 @@ public class SignalStrength implements Parcelable {
         m.putInt("LteRsrq", mLteRsrq);
         m.putInt("LteRssnr", mLteRssnr);
         m.putInt("LteCqi", mLteCqi);
-        m.putInt("lteRsrpBoost", mLteRsrpBoost);
+        m.putInt("LteRsrpBoost", mLteRsrpBoost);
         m.putInt("TdScdma", mTdScdmaRscp);
-        m.putBoolean("isGsm", isGsm);
-        m.putBoolean("useOnlyRsrpForLteLevel", mUseOnlyRsrpForLteLevel);
+        m.putBoolean("IsGsm", mIsGsm);
+        m.putBoolean("UseOnlyRsrpForLteLevel", mUseOnlyRsrpForLteLevel);
         ArrayList<Integer> lteRsrpThresholds = new ArrayList<Integer>();
         for (int value : mLteRsrpThresholds) {
             lteRsrpThresholds.add(value);
