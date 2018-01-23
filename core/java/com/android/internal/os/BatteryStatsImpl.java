@@ -760,6 +760,8 @@ public class BatteryStatsImpl extends BatteryStats {
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     protected StopwatchTimer mBluetoothScanTimer;
 
+    boolean mIsCellularTxPowerHigh = false;
+
     int mMobileRadioPowerState = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
     long mMobileRadioActiveStartTime;
     StopwatchTimer mMobileRadioActiveTimer;
@@ -11214,6 +11216,9 @@ public class BatteryStatsImpl extends BatteryStats {
             Slog.d(TAG, "Updating mobile radio stats with " + activityInfo);
         }
 
+        // Add modem tx power to history.
+        addModemTxPowerToHistory(activityInfo);
+
         // Grab a separate lock to acquire the network stats, which may do I/O.
         NetworkStats delta = null;
         synchronized (mModemNetworkLock) {
@@ -11386,6 +11391,44 @@ public class BatteryStatsImpl extends BatteryStats {
     // Cache last value for comparison.
     private BluetoothActivityEnergyInfo mLastBluetoothActivityEnergyInfo =
             new BluetoothActivityEnergyInfo(0, 0, 0, 0, 0, 0);
+
+    /**
+     * Add modem tx power to history
+     * Device is said to be in high cellular transmit power when it has spent most of the transmit
+     * time at the highest power level.
+     * @param activityInfo
+     */
+    private void addModemTxPowerToHistory(final ModemActivityInfo activityInfo) {
+        if (activityInfo == null) {
+            return;
+        }
+        int[] txTimeMs = activityInfo.getTxTimeMillis();
+        if (txTimeMs == null || txTimeMs.length != ModemActivityInfo.TX_POWER_LEVELS) {
+            return;
+        }
+        final long elapsedRealtime = mClocks.elapsedRealtime();
+        final long uptime = mClocks.uptimeMillis();
+        int levelMaxTimeSpent = 0;
+        for (int i = 1; i < txTimeMs.length; i++) {
+            if (txTimeMs[i] > txTimeMs[levelMaxTimeSpent]) {
+                levelMaxTimeSpent = i;
+            }
+        }
+        if (levelMaxTimeSpent == ModemActivityInfo.TX_POWER_LEVELS - 1) {
+            if (!mIsCellularTxPowerHigh) {
+                mHistoryCur.states2 |= HistoryItem.STATE2_CELLULAR_HIGH_TX_POWER_FLAG;
+                addHistoryRecordLocked(elapsedRealtime, uptime);
+                mIsCellularTxPowerHigh = true;
+            }
+            return;
+        }
+        if (mIsCellularTxPowerHigh) {
+            mHistoryCur.states2 &= ~HistoryItem.STATE2_CELLULAR_HIGH_TX_POWER_FLAG;
+            addHistoryRecordLocked(elapsedRealtime, uptime);
+            mIsCellularTxPowerHigh = false;
+        }
+        return;
+    }
 
     /**
      * Distribute Bluetooth energy info and network traffic to apps.
@@ -13542,6 +13585,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mCameraOnTimer.readSummaryFromParcelLocked(in);
         mBluetoothScanNesting = 0;
         mBluetoothScanTimer.readSummaryFromParcelLocked(in);
+        mIsCellularTxPowerHigh = false;
 
         int NRPMS = in.readInt();
         if (NRPMS > 10000) {
@@ -14478,6 +14522,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mCameraOnTimer = new StopwatchTimer(mClocks, null, -13, null, mOnBatteryTimeBase, in);
         mBluetoothScanNesting = 0;
         mBluetoothScanTimer = new StopwatchTimer(mClocks, null, -14, null, mOnBatteryTimeBase, in);
+        mIsCellularTxPowerHigh = false;
         mDischargeUnplugLevel = in.readInt();
         mDischargePlugLevel = in.readInt();
         mDischargeCurrentLevel = in.readInt();
