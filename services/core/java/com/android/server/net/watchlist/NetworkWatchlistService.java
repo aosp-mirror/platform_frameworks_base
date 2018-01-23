@@ -16,6 +16,7 @@
 
 package com.android.server.net.watchlist;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.net.IIpConnectivityMetrics;
 import android.net.INetdEventCallback;
@@ -208,6 +209,12 @@ public class NetworkWatchlistService extends INetworkWatchlistManager.Stub {
     public boolean stopWatchlistLogging() throws RemoteException {
         enforceWatchlistLoggingPermission();
         return stopWatchlistLoggingImpl();
+    }
+
+    @Nullable
+    @Override
+    public byte[] getWatchlistConfigHash() {
+        return mConfig.getWatchlistConfigHash();
     }
 
     private void enforceWatchlistLoggingPermission() {

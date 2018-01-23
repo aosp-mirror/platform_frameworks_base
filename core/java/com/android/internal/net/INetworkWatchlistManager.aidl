@@ -24,4 +24,5 @@ interface INetworkWatchlistManager {
     boolean stopWatchlistLogging();
     void reloadWatchlist();
     void reportWatchlistIfNecessary();
+    byte[] getWatchlistConfigHash();
 }

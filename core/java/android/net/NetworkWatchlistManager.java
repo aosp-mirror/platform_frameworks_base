@@ -86,4 +86,16 @@ public class NetworkWatchlistManager {
             e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Get Network Watchlist config file hash.
+     */
+    public byte[] getWatchlistConfigHash() {
+        try {
+            return mNetworkWatchlistManager.getWatchlistConfigHash();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to get watchlist config hash");
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }
