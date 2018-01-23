@@ -380,6 +380,8 @@ status_t StatsService::cmd_config(FILE* in, FILE* out, FILE* err, Vector<String8
                             "The config can only be set for other UIDs on eng or userdebug "
                             "builds.\n");
                 }
+            } else if (argCount == 2 && args[1] == "remove") {
+                good = true;
             }
 
             if (!good) {

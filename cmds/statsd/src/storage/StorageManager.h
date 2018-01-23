@@ -47,9 +47,9 @@ public:
     static void deleteAllFiles(const char* path);
 
     /**
-     * Deletes all files whose name matches with a provided prefix.
+     * Deletes all files whose name matches with a provided suffix.
      */
-    static void deletePrefixedFiles(const char* path, const char* prefix);
+    static void deleteSuffixedFiles(const char* path, const char* suffix);
 
     /**
      * Send broadcasts to relevant receiver for each data stored on disk.

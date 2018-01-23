@@ -101,8 +101,8 @@ void ConfigManager::RemoveConfig(const ConfigKey& key) {
 }
 
 void ConfigManager::remove_saved_configs(const ConfigKey& key) {
-    string prefix = StringPrintf("%d-%lld", key.GetUid(), (long long)key.GetId());
-    StorageManager::deletePrefixedFiles(STATS_SERVICE_DIR, prefix.c_str());
+    string suffix = StringPrintf("%d-%lld", key.GetUid(), (long long)key.GetId());
+    StorageManager::deleteSuffixedFiles(STATS_SERVICE_DIR, suffix.c_str());
 }
 
 void ConfigManager::RemoveConfigs(int uid) {
@@ -111,6 +111,7 @@ void ConfigManager::RemoveConfigs(int uid) {
     for (auto it = mConfigs.begin(); it != mConfigs.end();) {
         // Remove from map
         if (it->GetUid() == uid) {
+            remove_saved_configs(*it);
             removed.push_back(*it);
             mConfigReceivers.erase(*it);
             it = mConfigs.erase(it);
