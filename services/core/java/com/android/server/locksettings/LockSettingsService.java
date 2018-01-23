@@ -53,6 +53,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.sqlite.SQLiteDatabase;
+import android.hardware.authsecret.V1_0.IAuthSecret;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -126,8 +127,10 @@ import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -183,6 +186,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private boolean mFirstCallToVold;
     protected IGateKeeperService mGateKeeperService;
+    protected IAuthSecret mAuthSecretService;
 
     /**
      * The UIDs that are used for system credential storage in keystore.
@@ -612,6 +616,14 @@ public class LockSettingsService extends ILockSettings.Stub {
             mSpManager.initWeaverService();
         } catch (RemoteException e) {
             Slog.e(TAG, "Failure retrieving IGateKeeperService", e);
+        }
+        // Find the AuthSecret HAL
+        try {
+            mAuthSecretService = IAuthSecret.getService();
+        } catch (NoSuchElementException e) {
+            Slog.i(TAG, "Device doesn't implement AuthSecret HAL");
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to get AuthSecret HAL", e);
         }
         mDeviceProvisionedObserver.onSystemReady();
         // TODO: maybe skip this for split system user mode.
@@ -2127,6 +2139,20 @@ public class LockSettingsService extends ILockSettings.Stub {
     private SparseArray<AuthenticationToken> mSpCache = new SparseArray();
 
     private void onAuthTokenKnownForUser(@UserIdInt int userId, AuthenticationToken auth) {
+        // Pass the primary user's auth secret to the HAL
+        if (mAuthSecretService != null && mUserManager.getUserInfo(userId).isPrimary()) {
+            try {
+                final byte[] rawSecret = auth.deriveVendorAuthSecret();
+                final ArrayList<Byte> secret = new ArrayList<>(rawSecret.length);
+                for (int i = 0; i < rawSecret.length; ++i) {
+                    secret.add(rawSecret[i]);
+                }
+                mAuthSecretService.primaryUserCredential(secret);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to pass primary user secret to AuthSecret HAL", e);
+            }
+        }
+
         // Update the SP cache, removing the entry when allowed
         synchronized (mSpManager) {
             if (shouldCacheSpForUser(userId)) {

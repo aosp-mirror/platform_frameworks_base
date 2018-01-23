@@ -22,6 +22,7 @@ import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_PASSW
 import static com.android.server.testutils.TestUtils.assertExpectException;
 
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 
@@ -30,6 +31,10 @@ import android.os.RemoteException;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.VerifyCredentialResponse;
 import com.android.server.locksettings.SyntheticPasswordManager.AuthenticationResult;
+
+import java.util.ArrayList;
+
+import org.mockito.ArgumentCaptor;
 
 /**
  * Run the synthetic password tests with caching enabled.
@@ -86,6 +91,26 @@ public class CachedSyntheticPasswordTests extends SyntheticPasswordTests {
         assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
                 NEWPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
                     .getResponseCode());
+    }
+
+    public void testUntrustedCredentialChangeMaintainsAuthSecret() throws RemoteException {
+        final String PASSWORD = "testUntrustedCredentialChangeMaintainsAuthSecret-password";
+        final String NEWPASSWORD = "testUntrustedCredentialChangeMaintainsAuthSecret-newpassword";
+
+        initializeCredentialUnderSP(PASSWORD, PRIMARY_USER_ID);
+        // Untrusted change password
+        mService.setLockCredential(NEWPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, null,
+                PASSWORD_QUALITY_ALPHABETIC, PRIMARY_USER_ID);
+
+        // Verify the password
+        assertEquals(VerifyCredentialResponse.RESPONSE_OK, mService.verifyCredential(
+                NEWPASSWORD, LockPatternUtils.CREDENTIAL_TYPE_PASSWORD, 0, PRIMARY_USER_ID)
+                    .getResponseCode());
+
+        // Ensure the same secret was passed each time
+        ArgumentCaptor<ArrayList<Byte>> secret = ArgumentCaptor.forClass(ArrayList.class);
+        verify(mAuthSecretService, atLeastOnce()).primaryUserCredential(secret.capture());
+        assertEquals(1, secret.getAllValues().stream().distinct().count());
     }
 
     public void testUntrustedCredentialChangeBlockedIfSpNotCached() throws RemoteException {

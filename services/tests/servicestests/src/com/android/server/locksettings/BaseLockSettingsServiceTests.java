@@ -31,6 +31,7 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.app.trust.TrustManager;
 import android.content.ComponentName;
 import android.content.pm.UserInfo;
+import android.hardware.authsecret.V1_0.IAuthSecret;
 import android.os.FileUtils;
 import android.os.IProgressListener;
 import android.os.RemoteException;
@@ -80,6 +81,7 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
     DevicePolicyManagerInternal mDevicePolicyManagerInternal;
     KeyStore mKeyStore;
     MockSyntheticPasswordManager mSpManager;
+    IAuthSecret mAuthSecretService;
 
     @Override
     protected void setUp() throws Exception {
@@ -115,16 +117,20 @@ public class BaseLockSettingsServiceTests extends AndroidTestCase {
         };
         mSpManager = new MockSyntheticPasswordManager(mContext, mStorage, mGateKeeperService,
                 mUserManager);
+        mAuthSecretService = mock(IAuthSecret.class);
         mService = new LockSettingsServiceTestable(mContext, mLockPatternUtils, mStorage,
                 mGateKeeperService, mKeyStore, setUpStorageManagerMock(), mActivityManager,
-                mSpManager);
+                mSpManager, mAuthSecretService);
         when(mUserManager.getUserInfo(eq(PRIMARY_USER_ID))).thenReturn(PRIMARY_USER_INFO);
         mPrimaryUserProfiles.add(PRIMARY_USER_INFO);
         installChildProfile(MANAGED_PROFILE_USER_ID);
         installAndTurnOffChildProfile(TURNED_OFF_PROFILE_USER_ID);
-        when(mUserManager.getUsers(anyBoolean())).thenReturn(mPrimaryUserProfiles);
         when(mUserManager.getProfiles(eq(PRIMARY_USER_ID))).thenReturn(mPrimaryUserProfiles);
         when(mUserManager.getUserInfo(eq(SECONDARY_USER_ID))).thenReturn(SECONDARY_USER_INFO);
+
+        final ArrayList<UserInfo> allUsers = new ArrayList<>(mPrimaryUserProfiles);
+        allUsers.add(SECONDARY_USER_INFO);
+        when(mUserManager.getUsers(anyBoolean())).thenReturn(allUsers);
 
         when(mActivityManager.unlockUser(anyInt(), any(), any(), any())).thenAnswer(
                 new Answer<Boolean>() {
