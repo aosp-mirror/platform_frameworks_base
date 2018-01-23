@@ -50,7 +50,7 @@ public:
 
 protected:
     void onMatchedLogEventInternalLocked(
-            const size_t matcherIndex, const HashableDimensionKey& eventKey,
+            const size_t matcherIndex, const MetricDimensionKey& eventKey,
             const ConditionKey& conditionKeys, bool condition,
             const LogEvent& event) override;
 
@@ -92,21 +92,21 @@ private:
 
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
     // TODO: Add a lock to mPastBuckets.
-    std::unordered_map<HashableDimensionKey, std::vector<DurationBucket>> mPastBuckets;
+    std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>> mPastBuckets;
 
     // The current bucket.
-    std::unordered_map<HashableDimensionKey, std::unique_ptr<DurationTracker>>
-            mCurrentSlicedDuration;
+    std::unordered_map<MetricDimensionKey, std::unique_ptr<DurationTracker>>
+            mCurrentSlicedDurationTrackerMap;
 
     // Helper function to create a duration tracker given the metric aggregation type.
     std::unique_ptr<DurationTracker> createDurationTracker(
-            const HashableDimensionKey& eventKey) const;
+        const MetricDimensionKey& eventKey) const;
 
     // This hides the base class's std::vector<sp<AnomalyTracker>> mAnomalyTrackers
     std::vector<sp<DurationAnomalyTracker>> mAnomalyTrackers;
 
     // Util function to check whether the specified dimension hits the guardrail.
-    bool hitGuardRailLocked(const HashableDimensionKey& newKey);
+    bool hitGuardRailLocked(const MetricDimensionKey& newKey);
 
     static const size_t kBucketSize = sizeof(DurationBucket{});
 

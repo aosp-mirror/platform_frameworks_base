@@ -24,6 +24,7 @@
 #include <log/logprint.h>
 #include <utils/RefBase.h>
 
+#include <unordered_set>
 #include <unordered_map>
 
 namespace android {
@@ -84,10 +85,19 @@ public:
     // [allConditions]: all condition trackers. This is needed because the condition evaluation is
     //                  done recursively
     // [conditionCache]: the cache holding the condition evaluation values.
+    // [dimensionsKeySet]: the dimensions where the sliced condition is true. For combination
+    //                    condition, it assumes that only one child predicate is sliced.
     virtual void isConditionMet(
             const ConditionKey& conditionParameters,
             const std::vector<sp<ConditionTracker>>& allConditions,
-            std::vector<ConditionState>& conditionCache) const = 0;
+            const FieldMatcher& dimensionFields,
+            std::vector<ConditionState>& conditionCache,
+            std::unordered_set<HashableDimensionKey> &dimensionsKeySet) const = 0;
+
+    virtual ConditionState getMetConditionDimension(
+            const std::vector<sp<ConditionTracker>>& allConditions,
+            const FieldMatcher& dimensionFields,
+            std::unordered_set<HashableDimensionKey> &dimensionsKeySet) const = 0;
 
     // return the list of LogMatchingTracker index that this ConditionTracker uses.
     virtual const std::set<int>& getLogTrackerIndex() const {
@@ -96,6 +106,10 @@ public:
 
     virtual void setSliced(bool sliced) {
         mSliced = mSliced | sliced;
+    }
+
+    bool isSliced() const {
+        return mSliced;
     }
 
 protected:

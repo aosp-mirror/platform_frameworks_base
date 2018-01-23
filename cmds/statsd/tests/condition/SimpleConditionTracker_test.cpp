@@ -78,7 +78,7 @@ void makeWakeLockEvent(
 std::map<int64_t, std::vector<HashableDimensionKey>> getWakeLockQueryKey(
     const Position position,
     const std::vector<int> &uids, const string& conditionName) {
-    std::map<int64_t, std::vector<HashableDimensionKey>>  outputKeyMap;
+    std::map<int64_t, std::vector<HashableDimensionKey>> outputKeyMap;
     std::vector<int> uid_indexes;
     switch(position) {
         case Position::FIRST:
@@ -265,6 +265,9 @@ TEST(SimpleConditionTrackerTest, TestNonSlicedConditionNestCounting) {
 TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
     for (Position position :
             { Position::ANY, Position::FIRST, Position::LAST}) {
+        FieldMatcher dimensionInCondition;
+        std::unordered_set<HashableDimensionKey> dimensionKeys;
+
         SimplePredicate simplePredicate = getWakeLockHeldCondition(
                 true /*nesting*/, true /*default to false*/, true /*output slice by uid*/,
                 position);
@@ -307,7 +310,8 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
         const auto queryKey = getWakeLockQueryKey(position, uids, conditionName);
         conditionCache[0] = ConditionState::kNotEvaluated;
 
-        conditionTracker.isConditionMet(queryKey, allPredicates, conditionCache);
+        conditionTracker.isConditionMet(queryKey, allPredicates, dimensionInCondition,
+                                        conditionCache, dimensionKeys);
         EXPECT_EQ(ConditionState::kTrue, conditionCache[0]);
 
         // another wake lock acquired by this uid
@@ -361,7 +365,8 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
 
         // query again
         conditionCache[0] = ConditionState::kNotEvaluated;
-        conditionTracker.isConditionMet(queryKey, allPredicates, conditionCache);
+        conditionTracker.isConditionMet(queryKey, allPredicates, dimensionInCondition,
+                                        conditionCache, dimensionKeys);
         EXPECT_EQ(ConditionState::kFalse, conditionCache[0]);
 
     }
@@ -369,6 +374,9 @@ TEST(SimpleConditionTrackerTest, TestSlicedCondition) {
 }
 
 TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim) {
+    FieldMatcher dimensionInCondition;
+    std::unordered_set<HashableDimensionKey> dimensionKeys;
+
     SimplePredicate simplePredicate = getWakeLockHeldCondition(
             true /*nesting*/, true /*default to false*/, false /*slice output by uid*/,
             Position::ANY /* position */);
@@ -410,7 +418,8 @@ TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim) {
     ConditionKey queryKey;
     conditionCache[0] = ConditionState::kNotEvaluated;
 
-    conditionTracker.isConditionMet(queryKey, allPredicates, conditionCache);
+    conditionTracker.isConditionMet(queryKey, allPredicates, dimensionInCondition,
+                                    conditionCache, dimensionKeys);
     EXPECT_EQ(ConditionState::kTrue, conditionCache[0]);
 
     // another wake lock acquired by this uid
@@ -452,13 +461,17 @@ TEST(SimpleConditionTrackerTest, TestSlicedWithNoOutputDim) {
 
     // query again
     conditionCache[0] = ConditionState::kNotEvaluated;
-    conditionTracker.isConditionMet(queryKey, allPredicates, conditionCache);
+    dimensionKeys.clear();
+    conditionTracker.isConditionMet(queryKey, allPredicates, dimensionInCondition,
+                                    conditionCache, dimensionKeys);
     EXPECT_EQ(ConditionState::kFalse, conditionCache[0]);
 }
 
 TEST(SimpleConditionTrackerTest, TestStopAll) {
     for (Position position :
             {Position::ANY, Position::FIRST, Position::LAST}) {
+        FieldMatcher dimensionInCondition;
+        std::unordered_set<HashableDimensionKey> dimensionKeys;
         SimplePredicate simplePredicate = getWakeLockHeldCondition(
                 true /*nesting*/, true /*default to false*/, true /*output slice by uid*/,
                 position);
@@ -502,7 +515,8 @@ TEST(SimpleConditionTrackerTest, TestStopAll) {
         const auto queryKey = getWakeLockQueryKey(position, uid_list1, conditionName);
         conditionCache[0] = ConditionState::kNotEvaluated;
 
-        conditionTracker.isConditionMet(queryKey, allPredicates, conditionCache);
+        conditionTracker.isConditionMet(queryKey, allPredicates, dimensionInCondition,
+                                        conditionCache, dimensionKeys);
         EXPECT_EQ(ConditionState::kTrue, conditionCache[0]);
 
         // another wake lock acquired by uid2
@@ -528,8 +542,9 @@ TEST(SimpleConditionTrackerTest, TestStopAll) {
         // TEST QUERY
         const auto queryKey2 = getWakeLockQueryKey(position, uid_list2, conditionName);
         conditionCache[0] = ConditionState::kNotEvaluated;
+        conditionTracker.isConditionMet(queryKey, allPredicates, dimensionInCondition,
+                                        conditionCache, dimensionKeys);
 
-        conditionTracker.isConditionMet(queryKey, allPredicates, conditionCache);
         EXPECT_EQ(ConditionState::kTrue, conditionCache[0]);
 
 
@@ -550,15 +565,15 @@ TEST(SimpleConditionTrackerTest, TestStopAll) {
         // TEST QUERY
         const auto queryKey3 = getWakeLockQueryKey(position, uid_list1, conditionName);
         conditionCache[0] = ConditionState::kNotEvaluated;
-
-        conditionTracker.isConditionMet(queryKey, allPredicates, conditionCache);
+        conditionTracker.isConditionMet(queryKey, allPredicates, dimensionInCondition,
+                                        conditionCache, dimensionKeys);
         EXPECT_EQ(ConditionState::kFalse, conditionCache[0]);
 
         // TEST QUERY
         const auto queryKey4 = getWakeLockQueryKey(position, uid_list2, conditionName);
         conditionCache[0] = ConditionState::kNotEvaluated;
-
-        conditionTracker.isConditionMet(queryKey, allPredicates, conditionCache);
+        conditionTracker.isConditionMet(queryKey, allPredicates, dimensionInCondition,
+                                        conditionCache, dimensionKeys);
         EXPECT_EQ(ConditionState::kFalse, conditionCache[0]);
     }
 

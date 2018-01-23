@@ -28,10 +28,14 @@ namespace statsd {
 class OringDurationTracker : public DurationTracker {
 public:
     OringDurationTracker(const ConfigKey& key, const int64_t& id,
-                         const HashableDimensionKey& eventKey, sp<ConditionWizard> wizard,
-                         int conditionIndex, bool nesting, uint64_t currentBucketStartNs,
-                         uint64_t bucketSizeNs, bool conditionSliced,
+                         const MetricDimensionKey& eventKey, sp<ConditionWizard> wizard,
+                         int conditionIndex, const FieldMatcher& dimensionInCondition, bool nesting,
+                         uint64_t currentBucketStartNs, uint64_t bucketSizeNs, bool conditionSliced,
                          const std::vector<sp<DurationAnomalyTracker>>& anomalyTrackers);
+
+    OringDurationTracker(const OringDurationTracker& tracker) = default;
+
+    unique_ptr<DurationTracker> clone(const uint64_t eventTime) override;
 
     void noteStart(const HashableDimensionKey& key, bool condition, const uint64_t eventTime,
                    const ConditionKey& conditionKey) override;
@@ -44,7 +48,7 @@ public:
 
     bool flushIfNeeded(
             uint64_t timestampNs,
-            std::unordered_map<HashableDimensionKey, std::vector<DurationBucket>>* output) override;
+            std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>>* output) override;
 
     int64_t predictAnomalyTimestampNs(const DurationAnomalyTracker& anomalyTracker,
                                       const uint64_t currentTimestamp) const override;

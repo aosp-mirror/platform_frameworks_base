@@ -96,7 +96,7 @@ void AnomalyTracker::flushPastBuckets(const int64_t& latestPastBucketNum) {
     }
 }
 
-void AnomalyTracker::addPastBucket(const HashableDimensionKey& key, const int64_t& bucketValue,
+void AnomalyTracker::addPastBucket(const MetricDimensionKey& key, const int64_t& bucketValue,
                                    const int64_t& bucketNum) {
     flushPastBuckets(bucketNum);
 
@@ -147,7 +147,7 @@ void AnomalyTracker::addBucketToSum(const shared_ptr<DimToValMap>& bucket) {
     }
 }
 
-int64_t AnomalyTracker::getPastBucketValue(const HashableDimensionKey& key,
+int64_t AnomalyTracker::getPastBucketValue(const MetricDimensionKey& key,
                                            const int64_t& bucketNum) const {
     const auto& bucket = mPastBuckets[index(bucketNum)];
     if (bucket == nullptr) {
@@ -157,7 +157,7 @@ int64_t AnomalyTracker::getPastBucketValue(const HashableDimensionKey& key,
     return itr == bucket->end() ? 0 : itr->second;
 }
 
-int64_t AnomalyTracker::getSumOverPastBuckets(const HashableDimensionKey& key) const {
+int64_t AnomalyTracker::getSumOverPastBuckets(const MetricDimensionKey& key) const {
     const auto& itr = mSumOverPastBuckets.find(key);
     if (itr != mSumOverPastBuckets.end()) {
         return itr->second;
@@ -165,7 +165,7 @@ int64_t AnomalyTracker::getSumOverPastBuckets(const HashableDimensionKey& key) c
     return 0;
 }
 
-bool AnomalyTracker::detectAnomaly(const int64_t& currentBucketNum, const HashableDimensionKey& key,
+bool AnomalyTracker::detectAnomaly(const int64_t& currentBucketNum, const MetricDimensionKey& key,
                                    const int64_t& currentBucketValue) {
     if (currentBucketNum > mMostRecentBucketNum + 1) {
         // TODO: This creates a needless 0 entry in mSumOverPastBuckets. Fix this.
@@ -175,7 +175,7 @@ bool AnomalyTracker::detectAnomaly(const int64_t& currentBucketNum, const Hashab
             && getSumOverPastBuckets(key) + currentBucketValue > mAlert.trigger_if_sum_gt();
 }
 
-void AnomalyTracker::declareAnomaly(const uint64_t& timestampNs, const HashableDimensionKey& key) {
+void AnomalyTracker::declareAnomaly(const uint64_t& timestampNs, const MetricDimensionKey& key) {
     // TODO: Why receive timestamp? RefractoryPeriod should always be based on real time right now.
     if (isInRefractoryPeriod(timestampNs, key)) {
         VLOG("Skipping anomaly declaration since within refractory period");
@@ -199,14 +199,14 @@ void AnomalyTracker::declareAnomaly(const uint64_t& timestampNs, const HashableD
 
     StatsdStats::getInstance().noteAnomalyDeclared(mConfigKey, mAlert.id());
 
-    // TODO: This should also take in the const HashableDimensionKey& key?
+    // TODO: This should also take in the const MetricDimensionKey& key?
     android::util::stats_write(android::util::ANOMALY_DETECTED, mConfigKey.GetUid(),
                                mConfigKey.GetId(), mAlert.id());
 }
 
 void AnomalyTracker::detectAndDeclareAnomaly(const uint64_t& timestampNs,
                                              const int64_t& currBucketNum,
-                                             const HashableDimensionKey& key,
+                                             const MetricDimensionKey& key,
                                              const int64_t& currentBucketValue) {
     if (detectAnomaly(currBucketNum, key, currentBucketValue)) {
         declareAnomaly(timestampNs, key);
@@ -214,7 +214,7 @@ void AnomalyTracker::detectAndDeclareAnomaly(const uint64_t& timestampNs,
 }
 
 bool AnomalyTracker::isInRefractoryPeriod(const uint64_t& timestampNs,
-                                          const HashableDimensionKey& key) {
+                                          const MetricDimensionKey& key) {
     const auto& it = mRefractoryPeriodEndsSec.find(key);
     if (it != mRefractoryPeriodEndsSec.end()) {
         if ((timestampNs / NS_PER_SEC) <= it->second) {
@@ -226,7 +226,7 @@ bool AnomalyTracker::isInRefractoryPeriod(const uint64_t& timestampNs,
     return false;
 }
 
-void AnomalyTracker::informSubscribers(const HashableDimensionKey& key) {
+void AnomalyTracker::informSubscribers(const MetricDimensionKey& key) {
     VLOG("informSubscribers called.");
     if (mSubscriptions.empty()) {
         ALOGE("Attempt to call with no subscribers.");

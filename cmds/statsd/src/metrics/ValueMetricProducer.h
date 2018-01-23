@@ -49,7 +49,7 @@ public:
 
 protected:
     void onMatchedLogEventInternalLocked(
-            const size_t matcherIndex, const HashableDimensionKey& eventKey,
+            const size_t matcherIndex, const MetricDimensionKey& eventKey,
             const ConditionKey& conditionKey, bool condition,
             const LogEvent& event) override;
 
@@ -99,16 +99,16 @@ private:
         long sum;
     } Interval;
 
-    std::unordered_map<HashableDimensionKey, Interval> mCurrentSlicedBucket;
+    std::unordered_map<MetricDimensionKey, Interval> mCurrentSlicedBucket;
 
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
     // TODO: Add a lock to mPastBuckets.
-    std::unordered_map<HashableDimensionKey, std::vector<ValueBucket>> mPastBuckets;
+    std::unordered_map<MetricDimensionKey, std::vector<ValueBucket>> mPastBuckets;
 
     std::shared_ptr<FieldValueMap> getValueFields(const LogEvent& event);
 
     // Util function to check whether the specified dimension hits the guardrail.
-    bool hitGuardRailLocked(const HashableDimensionKey& newKey);
+    bool hitGuardRailLocked(const MetricDimensionKey& newKey);
 
     static const size_t kBucketSize = sizeof(ValueBucket{});
 

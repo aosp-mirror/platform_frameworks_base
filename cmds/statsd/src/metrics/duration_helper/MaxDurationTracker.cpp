@@ -25,13 +25,23 @@ namespace os {
 namespace statsd {
 
 MaxDurationTracker::MaxDurationTracker(const ConfigKey& key, const int64_t& id,
-                                       const HashableDimensionKey& eventKey,
-                                       sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
+                                       const MetricDimensionKey& eventKey,
+                                       sp<ConditionWizard> wizard, int conditionIndex,
+                                       const FieldMatcher& dimensionInCondition, bool nesting,
                                        uint64_t currentBucketStartNs, uint64_t bucketSizeNs,
                                        bool conditionSliced,
                                        const vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
-    : DurationTracker(key, id, eventKey, wizard, conditionIndex, nesting, currentBucketStartNs,
-                      bucketSizeNs, conditionSliced, anomalyTrackers) {
+    : DurationTracker(key, id, eventKey, wizard, conditionIndex, dimensionInCondition, nesting,
+                      currentBucketStartNs, bucketSizeNs, conditionSliced, anomalyTrackers) {
+}
+
+unique_ptr<DurationTracker> MaxDurationTracker::clone(const uint64_t eventTime) {
+    auto clonedTracker = make_unique<MaxDurationTracker>(*this);
+    for (auto it = clonedTracker->mInfos.begin(); it != clonedTracker->mInfos.end(); ++it) {
+        it->second.lastStartTime = eventTime;
+        it->second.lastDuration = 0;
+    }
+    return clonedTracker;
 }
 
 bool MaxDurationTracker::hitGuardRail(const HashableDimensionKey& newKey) {
@@ -44,7 +54,7 @@ bool MaxDurationTracker::hitGuardRail(const HashableDimensionKey& newKey) {
     if (mInfos.size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
         size_t newTupleCount = mInfos.size() + 1;
         StatsdStats::getInstance().noteMetricDimensionSize(
-            mConfigKey, hashDimensionsValue(mTrackerId, mEventKey.getDimensionsValue()),
+            mConfigKey, hashMetricDimensionKey(mTrackerId, mEventKey),
             newTupleCount);
         // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
         if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
@@ -149,7 +159,7 @@ void MaxDurationTracker::noteStopAll(const uint64_t eventTime) {
 }
 
 bool MaxDurationTracker::flushIfNeeded(
-        uint64_t eventTime, unordered_map<HashableDimensionKey, vector<DurationBucket>>* output) {
+        uint64_t eventTime, unordered_map<MetricDimensionKey, vector<DurationBucket>>* output) {
     if (mCurrentBucketStartTimeNs + mBucketSizeNs > eventTime) {
         return false;
     }
@@ -236,8 +246,14 @@ void MaxDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) {
         if (pair.second.state == kStopped) {
             continue;
         }
-        bool conditionMet = mWizard->query(mConditionTrackerIndex, pair.second.conditionKeys) ==
-                            ConditionState::kTrue;
+        std::unordered_set<HashableDimensionKey> conditionDimensionKeySet;
+        ConditionState conditionState = mWizard->query(
+            mConditionTrackerIndex, pair.second.conditionKeys, mDimensionInCondition,
+            &conditionDimensionKeySet);
+        bool conditionMet = (conditionState == ConditionState::kTrue) &&
+            (!mDimensionInCondition.has_field() ||
+             conditionDimensionKeySet.find(mEventKey.getDimensionKeyInCondition()) !=
+                conditionDimensionKeySet.end());
         VLOG("key: %s, condition: %d", pair.first.c_str(), conditionMet);
         noteConditionChanged(pair.first, conditionMet, timestamp);
     }
