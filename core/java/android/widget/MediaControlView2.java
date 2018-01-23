@@ -158,6 +158,15 @@ public class MediaControlView2 extends FrameLayout {
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        mProvider.onAttachedToWindow_impl();
+    }
+    @Override
+    protected void onDetachedFromWindow() {
+        mProvider.onDetachedFromWindow_impl();
+    }
+
+    @Override
     public CharSequence getAccessibilityClassName() {
         return mProvider.getAccessibilityClassName_impl();
     }
@@ -193,6 +202,16 @@ public class MediaControlView2 extends FrameLayout {
     }
 
     private class SuperProvider implements ViewProvider {
+        @Override
+        public void onAttachedToWindow_impl() {
+            MediaControlView2.super.onAttachedToWindow();
+        }
+
+        @Override
+        public void onDetachedFromWindow_impl() {
+            MediaControlView2.super.onDetachedFromWindow();
+        }
+
         @Override
         public CharSequence getAccessibilityClassName_impl() {
             return MediaControlView2.super.getAccessibilityClassName();
