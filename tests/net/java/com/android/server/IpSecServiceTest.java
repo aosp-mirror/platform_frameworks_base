@@ -166,6 +166,7 @@ public class IpSecServiceTest {
         mIpSecService.closeUdpEncapsulationSocket(udpEncapResp.resourceId);
         udpEncapResp.fileDescriptor.close();
 
+        // Verify quota and RefcountedResource objects cleaned up
         IpSecService.UserRecord userRecord =
                 mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
         assertEquals(0, userRecord.mSocketQuotaTracker.mCurrent);
@@ -179,10 +180,8 @@ public class IpSecServiceTest {
 
     @Test
     public void testUdpEncapsulationSocketBinderDeath() throws Exception {
-        int localport = findUnusedPort();
-
         IpSecUdpEncapResponse udpEncapResp =
-                mIpSecService.openUdpEncapsulationSocket(localport, new Binder());
+                mIpSecService.openUdpEncapsulationSocket(0, new Binder());
 
         IpSecService.UserRecord userRecord =
                 mIpSecService.mUserResourceTracker.getUserRecord(Os.getuid());
@@ -192,6 +191,7 @@ public class IpSecServiceTest {
 
         refcountedRecord.binderDied();
 
+        // Verify quota and RefcountedResource objects cleaned up
         assertEquals(0, userRecord.mSocketQuotaTracker.mCurrent);
         try {
             userRecord.mEncapSocketRecords.getRefcountedResourceOrThrow(udpEncapResp.resourceId);
