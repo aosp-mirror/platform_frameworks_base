@@ -60,6 +60,7 @@ import android.view.IRotationWatcher.Stub;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -830,10 +831,13 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
             // window in response to the orientation change.
             Handler h = getView().getHandler();
             Message msg = Message.obtain(h, () -> {
-                // If the screen rotation changes while locked, update lock rotation to flow with
+
+                // If the screen rotation changes while locked, potentially update lock to flow with
                 // new screen rotation and hide any showing suggestions.
                 if (mRotationLockController.isRotationLocked()) {
-                    mRotationLockController.setRotationLockedAtAngle(true, rotation);
+                    if (shouldOverrideUserLockPrefs(rotation)) {
+                        mRotationLockController.setRotationLockedAtAngle(true, rotation);
+                    }
                     setRotateSuggestionButtonState(false, true);
                 }
 
@@ -844,6 +848,12 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
             });
             msg.setAsynchronous(true);
             h.sendMessageAtFrontOfQueue(msg);
+        }
+
+        private boolean shouldOverrideUserLockPrefs(final int rotation) {
+            // Only override user prefs when returning to portrait.
+            // Don't let apps that force landscape or 180 alter user lock.
+            return rotation == Surface.ROTATION_0;
         }
     };
 
