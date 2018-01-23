@@ -28,6 +28,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Slog;
 import android.view.Display;
@@ -131,7 +132,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
         new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velX, float velY) {
-                if (mQuickScrubActive) {
+                if (!isQuickScrubEnabled() || mQuickScrubActive) {
                     return false;
                 }
                 float velocityX = mIsRTL ? -velX : velX;
@@ -196,12 +197,13 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
             case MotionEvent.ACTION_DOWN: {
                 int x = (int) event.getX();
                 int y = (int) event.getY();
-                if (mHomeButtonRect.contains(x, y)) {
+                if (isQuickScrubEnabled() && mHomeButtonRect.contains(x, y)) {
                     mTouchDownX = x;
                     mTouchDownY = y;
                     homeButton.setDelayTouchFeedback(true);
                     mHandler.postDelayed(mLongPressRunnable, LONG_PRESS_DELAY_MS);
                 } else {
+                    homeButton.setDelayTouchFeedback(false);
                     mTouchDownX = mTouchDownY = -1;
                 }
                 break;
@@ -354,6 +356,10 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to get nav bar position.", e);
         }
+    }
+
+    boolean isQuickScrubEnabled() {
+        return SystemProperties.getBoolean("persist.quickstep.scrub.enabled", false);
     }
 
     private void startQuickScrub() {
