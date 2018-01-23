@@ -51,6 +51,7 @@ public class Events {
     public static final int EVENT_SUPPRESSOR_CHANGED = 14;  // (component|string) (name|string)
     public static final int EVENT_MUTE_CHANGED = 15;  // (stream|int) (muted|bool)
     public static final int EVENT_TOUCH_LEVEL_DONE = 16;  // (stream|int) (level|bool)
+    public static final int EVENT_ZEN_CONFIG_CHANGED = 17; // (allow/disallow|string)
 
     private static final String[] EVENT_TAGS = {
         "show_dialog",
@@ -70,6 +71,7 @@ public class Events {
         "suppressor_changed",
         "mute_changed",
         "touch_level_done",
+        "zen_mode_config_changed",
     };
 
     public static final int DISMISS_REASON_UNKNOWN = 0;

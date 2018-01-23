@@ -668,10 +668,14 @@ public class VolumeDialogImpl implements VolumeDialog {
                 && mState.ringerModeInternal == AudioManager.RINGER_MODE_VIBRATE;
         final boolean isRingSilent = isRingStream
                 && mState.ringerModeInternal == AudioManager.RINGER_MODE_SILENT;
+        final boolean isZenPriorityOnly = mState.zenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         final boolean isZenAlarms = mState.zenMode == Global.ZEN_MODE_ALARMS;
         final boolean isZenNone = mState.zenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
         final boolean zenMuted = isZenAlarms ? (isRingStream || isSystemStream)
                 : isZenNone ? (isRingStream || isSystemStream || isAlarmStream || isMusicStream)
+                : isZenPriorityOnly ? ((isAlarmStream && mState.disallowAlarms) ||
+                        (isMusicStream && mState.disallowMedia) ||
+                        (isRingStream && mState.disallowRinger))
                 : false;
 
         // update slider max

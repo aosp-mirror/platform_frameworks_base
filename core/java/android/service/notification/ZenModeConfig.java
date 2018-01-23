@@ -17,6 +17,7 @@
 package android.service.notification;
 
 import android.app.ActivityManager;
+import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
 import android.content.ComponentName;
 import android.content.Context;
@@ -1385,4 +1386,38 @@ public class ZenModeConfig implements Parcelable {
         }
     }
 
+    /**
+     * Determines whether dnd behavior should mute all notification sounds
+     */
+    public static boolean areAllPriorityOnlyNotificationZenSoundsMuted(NotificationManager.Policy
+            policy) {
+        boolean allowReminders = (policy.priorityCategories
+                & NotificationManager.Policy.PRIORITY_CATEGORY_REMINDERS) != 0;
+        boolean allowCalls = (policy.priorityCategories
+                & NotificationManager.Policy.PRIORITY_CATEGORY_CALLS) != 0;
+        boolean allowMessages = (policy.priorityCategories
+                & NotificationManager.Policy.PRIORITY_CATEGORY_MESSAGES) != 0;
+        boolean allowEvents = (policy.priorityCategories
+                & NotificationManager.Policy.PRIORITY_CATEGORY_EVENTS) != 0;
+        boolean allowRepeatCallers = (policy.priorityCategories
+                & NotificationManager.Policy.PRIORITY_CATEGORY_REPEAT_CALLERS) != 0;
+        return !allowReminders && !allowCalls && !allowMessages && !allowEvents
+                && !allowRepeatCallers;
+    }
+
+    /**
+     * Determines whether dnd behavior should mute all notification sounds
+     */
+    public static boolean areAllPriorityOnlyNotificationZenSoundsMuted(ZenModeConfig config) {
+        return !config.allowReminders && !config.allowCalls && !config.allowMessages
+                && !config.allowEvents && !config.allowRepeatCallers;
+    }
+
+    /**
+     * Determines whether all dnd mutes all sounds
+     */
+    public static boolean areAllZenBehaviorSoundsMuted(ZenModeConfig config) {
+        return !config.allowAlarms  && !config.allowMediaSystemOther
+                && areAllPriorityOnlyNotificationZenSoundsMuted(config);
+    }
 }
