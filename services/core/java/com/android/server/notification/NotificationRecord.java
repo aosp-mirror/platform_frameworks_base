@@ -361,8 +361,11 @@ public final class NotificationRecord {
     /** @deprecated Use {@link #getUser()} instead. */
     public int getUserId() { return sbn.getUserId(); }
 
-    void dump(ProtoOutputStream proto, boolean redact) {
+    void dump(ProtoOutputStream proto, long fieldId, boolean redact, int state) {
+        final long token = proto.start(fieldId);
+
         proto.write(NotificationRecordProto.KEY, sbn.getKey());
+        proto.write(NotificationRecordProto.STATE, state);
         if (getChannel() != null) {
             proto.write(NotificationRecordProto.CHANNEL_ID, getChannel().getId());
         }
@@ -375,8 +378,10 @@ public final class NotificationRecord {
             proto.write(NotificationRecordProto.SOUND, getSound().toString());
         }
         if (getAudioAttributes() != null) {
-            proto.write(NotificationRecordProto.SOUND_USAGE, getAudioAttributes().getUsage());
+            getAudioAttributes().writeToProto(proto, NotificationRecordProto.AUDIO_ATTRIBUTES);
         }
+
+        proto.end(token);
     }
 
     String formatRemoteViews(RemoteViews rv) {

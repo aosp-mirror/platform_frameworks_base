@@ -3382,36 +3382,28 @@ public class NotificationManagerService extends SystemService {
     private void dumpProto(FileDescriptor fd, @NonNull DumpFilter filter) {
         final ProtoOutputStream proto = new ProtoOutputStream(fd);
         synchronized (mNotificationLock) {
-            long records = proto.start(NotificationServiceDumpProto.RECORDS);
             int N = mNotificationList.size();
-            if (N > 0) {
-                for (int i = 0; i < N; i++) {
-                    final NotificationRecord nr = mNotificationList.get(i);
-                    if (filter.filtered && !filter.matches(nr.sbn)) continue;
-                    nr.dump(proto, filter.redact);
-                    proto.write(NotificationRecordProto.STATE, NotificationRecordProto.POSTED);
-                }
+            for (int i = 0; i < N; i++) {
+                final NotificationRecord nr = mNotificationList.get(i);
+                if (filter.filtered && !filter.matches(nr.sbn)) continue;
+                nr.dump(proto, NotificationServiceDumpProto.RECORDS, filter.redact,
+                        NotificationRecordProto.POSTED);
             }
             N = mEnqueuedNotifications.size();
-            if (N > 0) {
-                for (int i = 0; i < N; i++) {
-                    final NotificationRecord nr = mEnqueuedNotifications.get(i);
-                    if (filter.filtered && !filter.matches(nr.sbn)) continue;
-                    nr.dump(proto, filter.redact);
-                    proto.write(NotificationRecordProto.STATE, NotificationRecordProto.ENQUEUED);
-                }
+            for (int i = 0; i < N; i++) {
+                final NotificationRecord nr = mEnqueuedNotifications.get(i);
+                if (filter.filtered && !filter.matches(nr.sbn)) continue;
+                nr.dump(proto, NotificationServiceDumpProto.RECORDS, filter.redact,
+                        NotificationRecordProto.ENQUEUED);
             }
             List<NotificationRecord> snoozed = mSnoozeHelper.getSnoozed();
             N = snoozed.size();
-            if (N > 0) {
-                for (int i = 0; i < N; i++) {
-                    final NotificationRecord nr = snoozed.get(i);
-                    if (filter.filtered && !filter.matches(nr.sbn)) continue;
-                    nr.dump(proto, filter.redact);
-                    proto.write(NotificationRecordProto.STATE, NotificationRecordProto.SNOOZED);
-                }
+            for (int i = 0; i < N; i++) {
+                final NotificationRecord nr = snoozed.get(i);
+                if (filter.filtered && !filter.matches(nr.sbn)) continue;
+                nr.dump(proto, NotificationServiceDumpProto.RECORDS, filter.redact,
+                        NotificationRecordProto.SNOOZED);
             }
-            proto.end(records);
 
             long zenLog = proto.start(NotificationServiceDumpProto.ZEN);
             mZenModeHelper.dump(proto);

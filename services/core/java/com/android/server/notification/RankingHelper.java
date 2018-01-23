@@ -973,16 +973,11 @@ public class RankingHelper implements RankingConfig {
                 proto.write(RecordProto.VISIBILITY, r.visibility);
                 proto.write(RecordProto.SHOW_BADGE, r.showBadge);
 
-                long token;
                 for (NotificationChannel channel : r.channels.values()) {
-                    token = proto.start(RecordProto.CHANNELS);
-                    channel.toProto(proto);
-                    proto.end(token);
+                    channel.writeToProto(proto, RecordProto.CHANNELS);
                 }
                 for (NotificationChannelGroup group : r.groups.values()) {
-                    token = proto.start(RecordProto.CHANNEL_GROUPS);
-                    group.toProto(proto);
-                    proto.end(token);
+                    group.writeToProto(proto, RecordProto.CHANNEL_GROUPS);
                 }
 
                 proto.end(fToken);
