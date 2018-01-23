@@ -54,7 +54,7 @@ public class WindowAnimationSpecTest {
     @Test
     public void testApply_clipNone() {
         Rect windowCrop = new Rect(0, 0, 20, 20);
-        Animation a = new ClipRectAnimation(windowCrop, windowCrop);
+        Animation a = createClipRectAnimation(windowCrop, windowCrop);
         WindowAnimationSpec windowAnimationSpec = new WindowAnimationSpec(a, null,
                 mStackBounds, false /* canSkipFirstFrame */, STACK_CLIP_NONE);
         windowAnimationSpec.apply(mTransaction, mSurfaceControl, 0);
@@ -99,7 +99,8 @@ public class WindowAnimationSpecTest {
     public void testApply_clipBeforeNoStackBounds() {
         // Stack bounds is (0, 0, 0, 0) animation clip is (0, 0, 20, 20)
         Rect windowCrop = new Rect(0, 0, 20, 20);
-        Animation a = new ClipRectAnimation(windowCrop, windowCrop);
+        Animation a = createClipRectAnimation(windowCrop, windowCrop);
+        a.initialize(0, 0, 0, 0);
         WindowAnimationSpec windowAnimationSpec = new WindowAnimationSpec(a, null,
                 null, false /* canSkipFirstFrame */, STACK_CLIP_BEFORE_ANIM);
         windowAnimationSpec.apply(mTransaction, mSurfaceControl, 0);
@@ -110,7 +111,7 @@ public class WindowAnimationSpecTest {
     public void testApply_clipBeforeSmallerAnimationClip() {
         // Stack bounds is (0, 0, 10, 10) animation clip is (0, 0, 5, 5)
         Rect windowCrop = new Rect(0, 0, 5, 5);
-        Animation a = new ClipRectAnimation(windowCrop, windowCrop);
+        Animation a = createClipRectAnimation(windowCrop, windowCrop);
         WindowAnimationSpec windowAnimationSpec = new WindowAnimationSpec(a, null,
                 mStackBounds, false /* canSkipFirstFrame */, STACK_CLIP_BEFORE_ANIM);
         windowAnimationSpec.apply(mTransaction, mSurfaceControl, 0);
@@ -122,11 +123,17 @@ public class WindowAnimationSpecTest {
     public void testApply_clipBeforeSmallerStackClip() {
         // Stack bounds is (0, 0, 10, 10) animation clip is (0, 0, 20, 20)
         Rect windowCrop = new Rect(0, 0, 20, 20);
-        Animation a = new ClipRectAnimation(windowCrop, windowCrop);
+        Animation a = createClipRectAnimation(windowCrop, windowCrop);
         WindowAnimationSpec windowAnimationSpec = new WindowAnimationSpec(a, null,
                 mStackBounds, false /* canSkipFirstFrame */, STACK_CLIP_BEFORE_ANIM);
         windowAnimationSpec.apply(mTransaction, mSurfaceControl, 0);
         verify(mTransaction).setWindowCrop(eq(mSurfaceControl),
                 argThat(rect -> rect.equals(mStackBounds)));
+    }
+
+    private Animation createClipRectAnimation(Rect fromClip, Rect toClip) {
+        Animation a = new ClipRectAnimation(fromClip, toClip);
+        a.initialize(0, 0, 0, 0);
+        return a;
     }
 }
