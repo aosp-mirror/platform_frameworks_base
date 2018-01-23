@@ -348,8 +348,7 @@
         <item>com.android.systemui.util.leak.GarbageMonitor$Service</item>
         <item>com.android.systemui.LatencyTester</item>
         <item>com.android.systemui.globalactions.GlobalActionsComponent</item>
-        <item>com.android.systemui.RoundedCorners</item>
-        <item>com.android.systemui.EmulatedDisplayCutout</item>
+        <item>com.android.systemui.ScreenDecorations</item>
         <item>com.android.systemui.fingerprint.FingerprintDialogImpl</item>
     </string-array>
 

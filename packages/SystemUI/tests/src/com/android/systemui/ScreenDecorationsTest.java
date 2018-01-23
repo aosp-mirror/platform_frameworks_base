@@ -14,9 +14,13 @@
 
 package com.android.systemui;
 
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
+
 import static com.android.systemui.tuner.TunablePadding.FLAG_END;
 import static com.android.systemui.tuner.TunablePadding.FLAG_START;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -29,6 +33,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Fragment;
+import android.content.res.Configuration;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.view.Display;
@@ -36,7 +41,7 @@ import android.view.View;
 import android.view.WindowManager;
 
 import com.android.systemui.R.dimen;
-import com.android.systemui.RoundedCorners.TunablePaddingTagListener;
+import com.android.systemui.ScreenDecorations.TunablePaddingTagListener;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -51,9 +56,9 @@ import org.junit.runner.RunWith;
 
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class RoundedCornersTest extends SysuiTestCase {
+public class ScreenDecorationsTest extends SysuiTestCase {
 
-    private RoundedCorners mRoundedCorners;
+    private ScreenDecorations mScreenDecorations;
     private StatusBar mStatusBar;
     private WindowManager mWindowManager;
     private FragmentService mFragmentService;
@@ -81,20 +86,22 @@ public class RoundedCornersTest extends SysuiTestCase {
 
         mTunerService = mDependency.injectMockDependency(TunerService.class);
 
-        mRoundedCorners = new RoundedCorners();
-        mRoundedCorners.mContext = mContext;
-        mRoundedCorners.mComponents = mContext.getComponents();
+        mScreenDecorations = new ScreenDecorations();
+        mScreenDecorations.mContext = mContext;
+        mScreenDecorations.mComponents = mContext.getComponents();
 
         mTunablePaddingService = mDependency.injectMockDependency(TunablePaddingService.class);
     }
 
     @Test
-    public void testNoRounding() {
+    public void testNoRounding_NoCutout() {
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, false);
         mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius, 0);
         mContext.getOrCreateTestableResources()
                 .addOverride(dimen.rounded_corner_content_padding, 0);
 
-        mRoundedCorners.start();
+        mScreenDecorations.start();
         // No views added.
         verify(mWindowManager, never()).addView(any(), any());
         // No Fragments watched.
@@ -105,11 +112,13 @@ public class RoundedCornersTest extends SysuiTestCase {
 
     @Test
     public void testRounding() {
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, false);
         mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius, 20);
         mContext.getOrCreateTestableResources()
                 .addOverride(dimen.rounded_corner_content_padding, 20);
 
-        mRoundedCorners.start();
+        mScreenDecorations.start();
         // Add 2 windows for rounded corners (top and bottom).
         verify(mWindowManager, times(2)).addView(any(), any());
 
@@ -119,6 +128,44 @@ public class RoundedCornersTest extends SysuiTestCase {
         verify(mTunerService, times(1)).addTunable(any(), any());
         // One TunablePadding.
         verify(mTunablePaddingService, times(1)).add(any(), anyString(), anyInt(), anyInt());
+    }
+
+    @Test
+    public void testCutout() {
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, true);
+        mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius, 0);
+        mContext.getOrCreateTestableResources()
+                .addOverride(dimen.rounded_corner_content_padding, 0);
+
+        mScreenDecorations.start();
+        // Add 2 windows for rounded corners (top and bottom).
+        verify(mWindowManager, times(2)).addView(any(), any());
+    }
+
+    @Test
+    public void testDelayedCutout() {
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, false);
+        mContext.getOrCreateTestableResources().addOverride(dimen.rounded_corner_radius, 0);
+        mContext.getOrCreateTestableResources()
+                .addOverride(dimen.rounded_corner_content_padding, 0);
+
+        mScreenDecorations.start();
+
+        mContext.getOrCreateTestableResources().addOverride(
+                com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout, true);
+        mScreenDecorations.onConfigurationChanged(new Configuration());
+
+        // Add 2 windows for rounded corners (top and bottom).
+        verify(mWindowManager, times(2)).addView(any(), any());
+    }
+
+    @Test
+    public void hasRoundedCornerOverlayFlagSet() {
+        assertThat(mScreenDecorations.getWindowLayoutParams().privateFlags
+                        & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY,
+                is(PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY));
     }
 
     @Test
@@ -136,7 +183,7 @@ public class RoundedCornersTest extends SysuiTestCase {
 
         // Trigger callback and verify we get a TunablePadding created.
         tagListener.onFragmentViewCreated(null, f);
-        verify(mTunablePaddingService).add(eq(child), eq(RoundedCorners.PADDING), eq(14),
+        verify(mTunablePaddingService).add(eq(child), eq(ScreenDecorations.PADDING), eq(14),
                 eq(FLAG_START | FLAG_END));
 
         // Call again and verify destroy is called.
