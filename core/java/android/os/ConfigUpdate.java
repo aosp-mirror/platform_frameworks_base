@@ -82,6 +82,14 @@ public final class ConfigUpdate {
     public static final String ACTION_UPDATE_SMART_SELECTION
             = "android.intent.action.UPDATE_SMART_SELECTION";
 
+    /**
+     * Update network watchlist config file.
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_UPDATE_NETWORK_WATCHLIST
+            = "android.intent.action.UPDATE_NETWORK_WATCHLIST";
+
     private ConfigUpdate() {
     }
 }
