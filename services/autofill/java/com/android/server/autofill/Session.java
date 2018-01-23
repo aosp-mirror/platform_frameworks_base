@@ -210,6 +210,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     private final LocalLog mUiLatencyHistory;
 
+    @GuardedBy("mLock")
+    private final LocalLog mWtfHistory;
+
     /**
      * Receiver of assist data from the app's {@link Activity}.
      */
@@ -241,7 +244,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 // ONE_WAY warning because system_service could block on app calls. We need to
                 // change AssistStructure so it provides a "one-way" writeToParcel() method that
                 // sends all the data
-                structure.ensureData();
+                try {
+                    structure.ensureData();
+                } catch (RuntimeException e) {
+                    wtf(e, "Exception lazy loading assist structure for %s: %s",
+                            structure.getActivityComponent(), e);
+                    return;
+                }
 
                 // Sanitize structure before it's sent to service.
                 final ComponentName componentNameFromApp = structure.getActivityComponent();
@@ -447,6 +456,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             @NonNull Context context, @NonNull HandlerCaller handlerCaller, int userId,
             @NonNull Object lock, int sessionId, int uid, @NonNull IBinder activityToken,
             @NonNull IBinder client, boolean hasCallback, @NonNull LocalLog uiLatencyHistory,
+            @NonNull LocalLog wtfHistory,
             @NonNull ComponentName serviceComponentName, @NonNull ComponentName componentName,
             int flags) {
         id = sessionId;
@@ -461,6 +471,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mActivityToken = activityToken;
         mHasCallback = hasCallback;
         mUiLatencyHistory = uiLatencyHistory;
+        mWtfHistory = wtfHistory;
         mComponentName = componentName;
         mClient = IAutoFillManagerClient.Stub.asInterface(client);
 
@@ -1102,8 +1113,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (userData != null && fcStrategy != null) {
             logFieldClassificationScoreLocked(fcStrategy, ignoredDatasets, changedFieldIds,
                     changedDatasetIds, manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                    manuallyFilledIds, userData,
-                    mViewStates.values());
+                    userData, mViewStates.values());
         } else {
             mService.logContextCommittedLocked(id, mClientState, mSelectedDatasetIds,
                     ignoredDatasets, changedFieldIds, changedDatasetIds,
@@ -1123,7 +1133,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             @NonNull ArrayList<String> changedDatasetIds,
             @NonNull ArrayList<AutofillId> manuallyFilledFieldIds,
             @NonNull ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
-            @NonNull ArrayMap<AutofillId, ArraySet<String>> manuallyFilledIds,
             @NonNull UserData userData, @NonNull Collection<ViewState> viewStates) {
 
         final String[] userValues = userData.getValues();
@@ -1201,8 +1210,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     }
                 }
             } catch (ArrayIndexOutOfBoundsException e) {
-                Slog.wtf(TAG, "Error accessing FC score at " + i + " x " + j + ": "
-                        + Arrays.toString(scores.scores), e);
+                wtf(e, "Error accessing FC score at [%d, %d] (%s): %s", i, j, scores, e);
                 return;
             }
 
@@ -2151,9 +2159,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final Intent fillInIntent = new Intent();
 
         final FillContext context = getFillContextByRequestIdLocked(requestId);
+
         if (context == null) {
-            Slog.wtf(TAG, "createAuthFillInIntentLocked(): no FillContext. requestId=" + requestId
-                    + "; mContexts= " + mContexts);
+            wtf(null, "createAuthFillInIntentLocked(): no FillContext. requestId=%d; mContexts=%s",
+                    requestId, mContexts);
             return null;
         }
         fillInIntent.putExtra(AutofillManager.EXTRA_ASSIST_STRUCTURE, context.getStructure());
@@ -2417,5 +2426,16 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     private void writeLog(int category) {
         mMetricsLogger.write(newLogMaker(category));
+    }
+
+    private void wtf(@Nullable Exception e, String fmt, Object...args) {
+        final String message = String.format(fmt, args);
+        mWtfHistory.log(message);
+
+        if (e != null) {
+            Slog.wtf(TAG, message, e);
+        } else {
+            Slog.wtf(TAG, message);
+        }
     }
 }

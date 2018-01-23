@@ -172,6 +172,7 @@ public abstract class AutofillFieldClassificationService extends Service {
      * {@hide}
      */
     public static final class Scores implements Parcelable {
+        @NonNull
         public final float[][] scores;
 
         private Scores(Parcel parcel) {
@@ -185,8 +186,20 @@ public abstract class AutofillFieldClassificationService extends Service {
             }
         }
 
-        private Scores(float[][] scores) {
+        private Scores(@NonNull float[][] scores) {
             this.scores = scores;
+        }
+
+        @Override
+        public String toString() {
+            final int size1 = scores.length;
+            final int size2 = size1 > 0 ? scores[0].length : 0;
+            final StringBuilder builder = new StringBuilder("Scores [")
+                    .append(size1).append("x").append(size2).append("] ");
+            for (int i = 0; i < size1; i++) {
+                builder.append(i).append(": ").append(Arrays.toString(scores[i])).append(' ');
+            }
+            return builder.toString();
         }
 
         @Override
