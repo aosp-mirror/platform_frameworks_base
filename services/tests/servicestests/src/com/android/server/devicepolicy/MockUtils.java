@@ -119,25 +119,25 @@ public class MockUtils {
         return MockitoHamcrest.argThat(m);
     }
 
-    public static Set<String> checkAdminApps(String... adminApps) {
+    public static Set<String> checkApps(String... adminApps) {
         final Matcher<Set<String>> m = new BaseMatcher<Set<String>>() {
             @Override
             public boolean matches(Object item) {
                 if (item == null) return false;
-                final Set<String> actualAdminApps = (Set<String>) item;
-                if (adminApps.length != actualAdminApps.size()) {
+                final Set<String> actualApps = (Set<String>) item;
+                if (adminApps.length != actualApps.size()) {
                     return false;
                 }
-                final Set<String> copyOfAdmins = new ArraySet<>(actualAdminApps);
+                final Set<String> copyOfApps = new ArraySet<>(actualApps);
                 for (String adminApp : adminApps) {
-                    copyOfAdmins.remove(adminApp);
+                    copyOfApps.remove(adminApp);
                 }
-                return copyOfAdmins.isEmpty();
+                return copyOfApps.isEmpty();
             }
 
             @Override
             public void describeTo(Description description) {
-                description.appendText("Admin apps=" + Arrays.toString(adminApps));
+                description.appendText("Apps=" + Arrays.toString(adminApps));
             }
         };
         return MockitoHamcrest.argThat(m);

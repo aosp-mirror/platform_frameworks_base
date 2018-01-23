@@ -232,6 +232,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -349,6 +350,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final int MSG_POLICIES_CHANGED = 13;
     private static final int MSG_RESET_FIREWALL_RULES_BY_UID = 15;
     private static final int MSG_SUBSCRIPTION_OVERRIDE = 16;
+    private static final int MSG_METERED_RESTRICTED_PACKAGES_CHANGED = 17;
 
     private static final int UID_MSG_STATE_CHANGED = 100;
     private static final int UID_MSG_GONE = 101;
@@ -479,6 +481,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     /** Map from netId to subId as of last update */
     @GuardedBy("mNetworkPoliciesSecondLock")
     private final SparseIntArray mNetIdToSubId = new SparseIntArray();
+
+    /**
+     * Indicates the uids restricted by admin from accessing metered data. It's a mapping from
+     * userId to restricted uids which belong to that user.
+     */
+    @GuardedBy("mUidRulesFirstLock")
+    private final SparseArray<Set<Integer>> mMeteredRestrictedUids = new SparseArray<>();
 
     private final RemoteCallbackList<INetworkPolicyListener>
             mListeners = new RemoteCallbackList<>();
@@ -898,6 +907,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         // Remove any persistable state for the given user; both cleaning up after a
                         // USER_REMOVED, and one last sanity check during USER_ADDED
                         removeUserStateUL(userId, true);
+                        // Removing outside removeUserStateUL since that can also be called when
+                        // user resets app preferences.
+                        mMeteredRestrictedUids.remove(userId);
                         if (action == ACTION_USER_ADDED) {
                             // Add apps that are whitelisted by default.
                             addDefaultRestrictBackgroundWhitelistUidsUL(userId);
@@ -3137,6 +3149,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 }
                 fout.decreaseIndent();
 
+                fout.println("Admin restricted uids for metered data:");
+                fout.increaseIndent();
+                size = mMeteredRestrictedUids.size();
+                for (int i = 0; i < size; ++i) {
+                    fout.print("u" + mMeteredRestrictedUids.keyAt(i) + ": ");
+                    fout.println(mMeteredRestrictedUids.valueAt(i));
+                }
+                fout.decreaseIndent();
+
                 mLogger.dumpLogs(fout);
             }
         }
@@ -3705,6 +3726,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final int uidPolicy = mUidPolicy.get(uid, POLICY_NONE);
         final int oldUidRules = mUidRules.get(uid, RULE_NONE);
         final boolean isForeground = isUidForegroundOnRestrictBackgroundUL(uid);
+        final boolean isRestrictedByAdmin = isRestrictedByAdminUL(uid);
 
         final boolean isBlacklisted = (uidPolicy & POLICY_REJECT_METERED_BACKGROUND) != 0;
         final boolean isWhitelisted = (uidPolicy & POLICY_ALLOW_METERED_BACKGROUND) != 0;
@@ -3712,7 +3734,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         int newRule = RULE_NONE;
 
         // First step: define the new rule based on user restrictions and foreground state.
-        if (isForeground) {
+        if (isRestrictedByAdmin) {
+            newRule = RULE_REJECT_METERED;
+        } else if (isForeground) {
             if (isBlacklisted || (mRestrictBackground && !isWhitelisted)) {
                 newRule = RULE_TEMPORARY_ALLOW_METERED;
             } else if (isWhitelisted) {
@@ -3732,6 +3756,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     + ": isForeground=" +isForeground
                     + ", isBlacklisted=" + isBlacklisted
                     + ", isWhitelisted=" + isWhitelisted
+                    + ", isRestrictedByAdmin=" + isRestrictedByAdmin
                     + ", oldRule=" + uidRulesToString(oldRule)
                     + ", newRule=" + uidRulesToString(newRule)
                     + ", newUidRules=" + uidRulesToString(newUidRules)
@@ -3767,13 +3792,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 if (!isWhitelisted) {
                     setMeteredNetworkWhitelist(uid, false);
                 }
-                if (isBlacklisted) {
+                if (isBlacklisted || isRestrictedByAdmin) {
                     setMeteredNetworkBlacklist(uid, true);
                 }
             } else if (hasRule(newRule, RULE_REJECT_METERED)
                     || hasRule(oldRule, RULE_REJECT_METERED)) {
                 // Flip state because app was explicitly added or removed to blacklist.
-                setMeteredNetworkBlacklist(uid, isBlacklisted);
+                setMeteredNetworkBlacklist(uid, (isBlacklisted || isRestrictedByAdmin));
                 if (hasRule(oldRule, RULE_REJECT_METERED) && isWhitelisted) {
                     // Since blacklist prevails over whitelist, we need to handle the special case
                     // where app is whitelisted and blacklisted at the same time (although such
@@ -3790,6 +3815,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         + ": foreground=" + isForeground
                         + ", whitelisted=" + isWhitelisted
                         + ", blacklisted=" + isBlacklisted
+                        + ", isRestrictedByAdmin=" + isRestrictedByAdmin
                         + ", newRule=" + uidRulesToString(newUidRules)
                         + ", oldRule=" + uidRulesToString(oldUidRules));
             }
@@ -4100,6 +4126,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                         dispatchSubscriptionOverride(listener, subId, overrideMask, overrideValue);
                     }
                     mListeners.finishBroadcast();
+                    return true;
+                }
+                case MSG_METERED_RESTRICTED_PACKAGES_CHANGED: {
+                    final int userId = msg.arg1;
+                    final Set<String> packageNames = (Set<String>) msg.obj;
+                    setMeteredRestrictedPackagesInternal(packageNames, userId);
                     return true;
                 }
                 default: {
@@ -4605,6 +4637,42 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         public void onAdminDataAvailable() {
             mAdminDataAvailableLatch.countDown();
         }
+
+        @Override
+        public void setMeteredRestrictedPackages(Set<String> packageNames, int userId) {
+            setMeteredRestrictedPackagesInternal(packageNames, userId);
+        }
+
+        @Override
+        public void setMeteredRestrictedPackagesAsync(Set<String> packageNames, int userId) {
+            mHandler.obtainMessage(MSG_METERED_RESTRICTED_PACKAGES_CHANGED,
+                    userId, 0, packageNames).sendToTarget();
+        }
+    }
+
+    private void setMeteredRestrictedPackagesInternal(Set<String> packageNames, int userId) {
+        synchronized (mUidRulesFirstLock) {
+            final Set<Integer> newRestrictedUids = new ArraySet<>();
+            for (String packageName : packageNames) {
+                final int uid = getUidForPackage(packageName, userId);
+                if (uid >= 0) {
+                    newRestrictedUids.add(uid);
+                }
+            }
+            final Set<Integer> oldRestrictedUids = mMeteredRestrictedUids.get(userId);
+            mMeteredRestrictedUids.put(userId, newRestrictedUids);
+            handleRestrictedPackagesChangeUL(oldRestrictedUids, newRestrictedUids);
+            mLogger.meteredRestrictedPkgsChanged(newRestrictedUids);
+        }
+    }
+
+    private int getUidForPackage(String packageName, int userId) {
+        try {
+            return mContext.getPackageManager().getPackageUidAsUser(packageName,
+                    PackageManager.MATCH_KNOWN_PACKAGES, userId);
+        } catch (NameNotFoundException e) {
+            return -1;
+        }
     }
 
     private int parseSubId(NetworkState state) {
@@ -4640,6 +4708,32 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             ConcurrentUtils.waitForCountDownNoInterrupt(mAdminDataAvailableLatch,
                     WAIT_FOR_ADMIN_DATA_TIMEOUT_MS, "Wait for admin data");
         }
+    }
+
+    private void handleRestrictedPackagesChangeUL(Set<Integer> oldRestrictedUids,
+            Set<Integer> newRestrictedUids) {
+        if (oldRestrictedUids == null) {
+            for (int uid : newRestrictedUids) {
+                updateRulesForDataUsageRestrictionsUL(uid);
+            }
+            return;
+        }
+        for (int uid : oldRestrictedUids) {
+            if (!newRestrictedUids.contains(uid)) {
+                updateRulesForDataUsageRestrictionsUL(uid);
+            }
+        }
+        for (int uid : newRestrictedUids) {
+            if (!oldRestrictedUids.contains(uid)) {
+                updateRulesForDataUsageRestrictionsUL(uid);
+            }
+        }
+    }
+
+    private boolean isRestrictedByAdminUL(int uid) {
+        final Set<Integer> restrictedUids = mMeteredRestrictedUids.get(
+                UserHandle.getUserId(uid));
+        return restrictedUids != null && restrictedUids.contains(uid);
     }
 
     private static boolean hasRule(int uidRules, int rule) {

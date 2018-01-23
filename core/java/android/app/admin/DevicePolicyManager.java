@@ -8228,6 +8228,47 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Called by a device or profile owner to restrict packages from accessing metered data.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
+     * @param packageNames the list of package names to be restricted.
+     * @return a list of package names which could not be restricted.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     */
+    public @NonNull List<String> setMeteredDataDisabled(@NonNull ComponentName admin,
+            @NonNull List<String> packageNames) {
+        throwIfParentInstance("setMeteredDataDisabled");
+        if (mService != null) {
+            try {
+                return mService.setMeteredDataDisabled(admin, packageNames);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return packageNames;
+    }
+
+    /**
+     * Called by a device or profile owner to retrieve the list of packages which are restricted
+     * by the admin from accessing metered data.
+     *
+     * @param admin which {@link DeviceAdminReceiver} this request is associated with.
+     * @return the list of restricted package names.
+     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     */
+    public @NonNull List<String> getMeteredDataDisabled(@NonNull ComponentName admin) {
+        throwIfParentInstance("getMeteredDataDisabled");
+        if (mService != null) {
+            try {
+                return mService.getMeteredDataDisabled(admin);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return new ArrayList<>();
+    }
+
+    /**
      * Called by device owners to retrieve device logs from before the device's last reboot.
      * <p>
      * <strong> This API is not supported on all devices. Calling this API on unsupported devices

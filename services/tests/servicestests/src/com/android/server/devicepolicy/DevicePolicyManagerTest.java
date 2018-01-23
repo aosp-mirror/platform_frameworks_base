@@ -126,6 +126,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             permission.MANAGE_DEVICE_ADMINS, permission.MANAGE_PROFILE_AND_DEVICE_OWNERS,
             permission.MANAGE_USERS, permission.INTERACT_ACROSS_USERS_FULL);
     public static final String NOT_DEVICE_OWNER_MSG = "does not own the device";
+    public static final String NOT_PROFILE_OWNER_MSG = "does not own the profile";
     public static final String ONGOING_CALL_MSG = "ongoing call on the device";
 
     // TODO replace all instances of this with explicit {@link #mServiceContext}.
@@ -301,10 +302,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Verify
         verify(getServices().usageStatsManagerInternal).setActiveAdminApps(
-                MockUtils.checkAdminApps(admin1.getPackageName()),
+                MockUtils.checkApps(admin1.getPackageName()),
                 eq(UserHandle.USER_SYSTEM));
         verify(getServices().usageStatsManagerInternal).setActiveAdminApps(
-                MockUtils.checkAdminApps(admin2.getPackageName(),
+                MockUtils.checkApps(admin2.getPackageName(),
                         adminAnotherPackage.getPackageName()),
                 eq(DpmMockContext.CALLER_USER_HANDLE));
         verify(getServices().usageStatsManagerInternal).onAdminDataAvailable();
@@ -705,7 +706,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         assertFalse(dpm.isAdminActiveAsUser(admin1, DpmMockContext.CALLER_USER_HANDLE));
         verify(getServices().usageStatsManagerInternal).setActiveAdminApps(
-                MockUtils.checkAdminApps(admin2.getPackageName()),
+                MockUtils.checkApps(admin2.getPackageName()),
                 eq(DpmMockContext.CALLER_USER_HANDLE));
 
         // Again broadcast from saveSettingsLocked().
@@ -1360,6 +1361,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 eq(packageName),
                 anyInt(),
                 eq(userId));
+        doReturn(true).when(getServices().ipackageManager).isPackageAvailable(packageName, userId);
         // Setup application UID with the PackageManager
         doReturn(uid).when(getServices().packageManager).getPackageUidAsUser(
                 eq(packageName),
@@ -2099,6 +2101,53 @@ public class DevicePolicyManagerTest extends DpmTestBase {
             dpm.setLongSupportMessage(admin1, null);
             assertNull(dpm.getLongSupportMessage(admin1));
         }
+    }
+
+    public void testSetGetMeteredDataDisabled() throws Exception {
+        setAsProfileOwner(admin1);
+
+        final ArrayList<String> emptyList = new ArrayList<>();
+        assertEquals(emptyList, dpm.getMeteredDataDisabled(admin1));
+
+        // Setup
+        final ArrayList<String> pkgsToRestrict = new ArrayList<>();
+        final String package1 = "com.example.one";
+        final String package2 = "com.example.two";
+        pkgsToRestrict.add(package1);
+        pkgsToRestrict.add(package2);
+        setupPackageInPackageManager(package1, DpmMockContext.CALLER_USER_HANDLE, 123, 0);
+        setupPackageInPackageManager(package2, DpmMockContext.CALLER_USER_HANDLE, 456, 0);
+        List<String> excludedPkgs = dpm.setMeteredDataDisabled(admin1, pkgsToRestrict);
+
+        // Verify
+        assertEquals(emptyList, excludedPkgs);
+        assertEquals(pkgsToRestrict, dpm.getMeteredDataDisabled(admin1));
+        verify(getServices().networkPolicyManagerInternal).setMeteredRestrictedPackages(
+                MockUtils.checkApps(pkgsToRestrict.toArray(new String[0])),
+                eq(DpmMockContext.CALLER_USER_HANDLE));
+
+        // Setup
+        pkgsToRestrict.remove(package1);
+        excludedPkgs = dpm.setMeteredDataDisabled(admin1, pkgsToRestrict);
+
+        // Verify
+        assertEquals(emptyList, excludedPkgs);
+        assertEquals(pkgsToRestrict, dpm.getMeteredDataDisabled(admin1));
+        verify(getServices().networkPolicyManagerInternal).setMeteredRestrictedPackages(
+                MockUtils.checkApps(pkgsToRestrict.toArray(new String[0])),
+                eq(DpmMockContext.CALLER_USER_HANDLE));
+    }
+
+    public void testSetGetMeteredDataDisabled_deviceAdmin() {
+        mContext.callerPermissions.add(permission.MANAGE_DEVICE_ADMINS);
+        dpm.setActiveAdmin(admin1, true);
+        assertTrue(dpm.isAdminActive(admin1));
+        mContext.callerPermissions.remove(permission.MANAGE_DEVICE_ADMINS);
+
+        assertExpectException(SecurityException.class,  /* messageRegex= */ NOT_PROFILE_OWNER_MSG,
+                () -> dpm.setMeteredDataDisabled(admin1, new ArrayList<>()));
+        assertExpectException(SecurityException.class,  /* messageRegex= */ NOT_PROFILE_OWNER_MSG,
+                () -> dpm.getMeteredDataDisabled(admin1));
     }
 
     public void testCreateAdminSupportIntent() throws Exception {
