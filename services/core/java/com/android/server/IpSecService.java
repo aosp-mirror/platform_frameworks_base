@@ -571,6 +571,8 @@ public class IpSecService extends IIpSecService.Stub {
             mConfig = config;
             mSpi = spi;
             mSocket = socket;
+
+            spi.setOwnedByTransform();
         }
 
         public IpSecConfig getConfig() {
@@ -651,16 +653,6 @@ public class IpSecService extends IIpSecService.Stub {
         /** always guarded by IpSecService#this */
         @Override
         public void freeUnderlyingResources() {
-            if (mOwnedByTransform) {
-                Log.d(TAG, "Cannot release Spi " + mSpi + ": Currently locked by a Transform");
-                // Because SPIs are "handed off" to transform, objects, they should never be
-                // freed from the SpiRecord once used in a transform. (They refer to the same SA,
-                // thus ownership and responsibility for freeing these resources passes to the
-                // Transform object). Thus, we should let the user free them without penalty once
-                // they are applied in a Transform object.
-                return;
-            }
-
             try {
                 mSrvConfig
                         .getNetdInstance()
@@ -692,6 +684,10 @@ public class IpSecService extends IIpSecService.Stub {
             }
 
             mOwnedByTransform = true;
+        }
+
+        public boolean getOwnedByTransform() {
+            return mOwnedByTransform;
         }
 
         @Override
@@ -1106,6 +1102,11 @@ public class IpSecService extends IIpSecService.Stub {
 
         // Retrieve SPI record; will throw IllegalArgumentException if not found
         SpiRecord s = userRecord.mSpiRecords.getResourceOrThrow(config.getSpiResourceId());
+
+        // Check to ensure that SPI has not already been used.
+        if (s.getOwnedByTransform()) {
+            throw new IllegalStateException("SPI already in use; cannot be used in new Transforms");
+        }
 
         // If no remote address is supplied, then use one from the SPI.
         if (TextUtils.isEmpty(config.getDestinationAddress())) {
