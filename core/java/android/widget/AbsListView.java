@@ -30,6 +30,7 @@ import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
+import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.StrictMode;
@@ -6025,6 +6026,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         @Override
         public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
             return getTarget().commitContent(inputContentInfo, flags, opts);
+        }
+
+        @Override
+        public void reportLanguageHint(@NonNull LocaleList languageHint) {
+            getTarget().reportLanguageHint(languageHint);
         }
     }
 
