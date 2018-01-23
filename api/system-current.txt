@@ -4616,6 +4616,24 @@ package android.telephony {
   public final class SmsManager {
     method public void sendMultipartTextMessageWithoutPersisting(java.lang.String, java.lang.String, java.util.List<java.lang.String>, java.util.List<android.app.PendingIntent>, java.util.List<android.app.PendingIntent>);
     method public void sendTextMessageWithoutPersisting(java.lang.String, java.lang.String, java.lang.String, android.app.PendingIntent, android.app.PendingIntent);
+    field public static final int RESULT_CANCELLED = 23; // 0x17
+    field public static final int RESULT_ENCODING_ERROR = 18; // 0x12
+    field public static final int RESULT_ERROR_FDN_CHECK_FAILURE = 6; // 0x6
+    field public static final int RESULT_ERROR_NONE = 0; // 0x0
+    field public static final int RESULT_INTERNAL_ERROR = 21; // 0x15
+    field public static final int RESULT_INVALID_ARGUMENTS = 11; // 0xb
+    field public static final int RESULT_INVALID_SMSC_ADDRESS = 19; // 0x13
+    field public static final int RESULT_INVALID_SMS_FORMAT = 14; // 0xe
+    field public static final int RESULT_INVALID_STATE = 12; // 0xc
+    field public static final int RESULT_MODEM_ERROR = 16; // 0x10
+    field public static final int RESULT_NETWORK_ERROR = 17; // 0x11
+    field public static final int RESULT_NETWORK_REJECT = 10; // 0xa
+    field public static final int RESULT_NO_MEMORY = 13; // 0xd
+    field public static final int RESULT_NO_RESOURCES = 22; // 0x16
+    field public static final int RESULT_OPERATION_NOT_ALLOWED = 20; // 0x14
+    field public static final int RESULT_RADIO_NOT_AVAILABLE = 9; // 0x9
+    field public static final int RESULT_REQUEST_NOT_SUPPORTED = 24; // 0x18
+    field public static final int RESULT_SYSTEM_ERROR = 15; // 0xf
   }
 
   public class SubscriptionManager {
@@ -4851,6 +4869,30 @@ package android.telephony.ims {
 
   public class ImsService extends android.app.Service {
     ctor public ImsService();
+  }
+
+}
+
+package android.telephony.ims.internal.stub {
+
+  public class SmsImplBase {
+    ctor public SmsImplBase();
+    method public void acknowledgeSms(int, int, int);
+    method public void acknowledgeSmsReport(int, int, int);
+    method public java.lang.String getSmsFormat();
+    method public void onReady();
+    method public final void onSendSmsResult(int, int, int, int) throws java.lang.RuntimeException;
+    method public final void onSmsReceived(int, java.lang.String, byte[]) throws java.lang.RuntimeException;
+    method public final void onSmsStatusReportReceived(int, int, java.lang.String, byte[]) throws java.lang.RuntimeException;
+    method public void sendSms(int, int, java.lang.String, java.lang.String, boolean, byte[]);
+    field public static final int DELIVER_STATUS_ERROR = 2; // 0x2
+    field public static final int DELIVER_STATUS_OK = 1; // 0x1
+    field public static final int SEND_STATUS_ERROR = 2; // 0x2
+    field public static final int SEND_STATUS_ERROR_FALLBACK = 4; // 0x4
+    field public static final int SEND_STATUS_ERROR_RETRY = 3; // 0x3
+    field public static final int SEND_STATUS_OK = 1; // 0x1
+    field public static final int STATUS_REPORT_STATUS_ERROR = 2; // 0x2
+    field public static final int STATUS_REPORT_STATUS_OK = 1; // 0x1
   }
 
 }

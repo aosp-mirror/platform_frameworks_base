@@ -391,21 +391,21 @@ public class MMTelFeature extends ImsFeature {
         return null;
     }
 
-    public void setSmsListener(IImsSmsListener listener) {
+    private void setSmsListener(IImsSmsListener listener) {
         getSmsImplementation().registerSmsListener(listener);
     }
 
-    public void sendSms(int token, int messageRef, String format, String smsc, boolean isRetry,
+    private void sendSms(int token, int messageRef, String format, String smsc, boolean isRetry,
             byte[] pdu) {
         getSmsImplementation().sendSms(token, messageRef, format, smsc, isRetry, pdu);
     }
 
-    public void acknowledgeSms(int token, int messageRef,
+    private void acknowledgeSms(int token, int messageRef,
             @SmsImplBase.DeliverStatusResult int result) {
         getSmsImplementation().acknowledgeSms(token, messageRef, result);
     }
 
-    public void acknowledgeSmsReport(int token, int messageRef,
+    private void acknowledgeSmsReport(int token, int messageRef,
             @SmsImplBase.StatusReportResult int result) {
         getSmsImplementation().acknowledgeSmsReport(token, messageRef, result);
     }
