@@ -60,10 +60,11 @@ import android.util.Log;
  * {@link #queryDetailsForUid} <p />
  * {@link #queryDetails} <p />
  * These queries do not aggregate over time but do aggregate over state, metered and roaming.
- * Therefore there can be multiple buckets for a particular key but all Bucket's state is going to
- * be {@link NetworkStats.Bucket#STATE_ALL}, all Bucket's metered is going to be
- * {@link NetworkStats.Bucket#METERED_ALL}, and all Bucket's roaming is going to be
- * {@link NetworkStats.Bucket#ROAMING_ALL}.
+ * Therefore there can be multiple buckets for a particular key. However, all Buckets will have
+ * {@code state} {@link NetworkStats.Bucket#STATE_ALL},
+ * {@code defaultNetwork} {@link NetworkStats.Bucket#DEFAULT_NETWORK_ALL},
+ * {@code metered } {@link NetworkStats.Bucket#METERED_ALL},
+ * {@code roaming} {@link NetworkStats.Bucket#ROAMING_ALL}.
  * <p />
  * <b>NOTE:</b> Calling {@link #querySummaryForDevice} or accessing stats for apps other than the
  * calling app requires the permission {@link android.Manifest.permission#PACKAGE_USAGE_STATS},
@@ -130,13 +131,26 @@ public class NetworkStatsManager {
         }
     }
 
+    /** @hide */
+    public Bucket querySummaryForDevice(NetworkTemplate template,
+            long startTime, long endTime) throws SecurityException, RemoteException {
+        Bucket bucket = null;
+        NetworkStats stats = new NetworkStats(mContext, template, mFlags, startTime, endTime);
+        bucket = stats.getDeviceSummaryForNetwork();
+
+        stats.close();
+        return bucket;
+    }
+
     /**
      * Query network usage statistics summaries. Result is summarised data usage for the whole
      * device. Result is a single Bucket aggregated over time, state, uid, tag, metered, and
      * roaming. This means the bucket's start and end timestamp are going to be the same as the
      * 'startTime' and 'endTime' parameters. State is going to be
      * {@link NetworkStats.Bucket#STATE_ALL}, uid {@link NetworkStats.Bucket#UID_ALL},
-     * tag {@link NetworkStats.Bucket#TAG_NONE}, metered {@link NetworkStats.Bucket#METERED_ALL},
+     * tag {@link NetworkStats.Bucket#TAG_NONE},
+     * default network {@link NetworkStats.Bucket#DEFAULT_NETWORK_ALL},
+     * metered {@link NetworkStats.Bucket#METERED_ALL},
      * and roaming {@link NetworkStats.Bucket#ROAMING_ALL}.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
@@ -160,12 +174,7 @@ public class NetworkStatsManager {
             return null;
         }
 
-        Bucket bucket = null;
-        NetworkStats stats = new NetworkStats(mContext, template, mFlags, startTime, endTime);
-        bucket = stats.getDeviceSummaryForNetwork();
-
-        stats.close();
-        return bucket;
+        return querySummaryForDevice(template, startTime, endTime);
     }
 
     /**
@@ -209,10 +218,10 @@ public class NetworkStatsManager {
     /**
      * Query network usage statistics summaries. Result filtered to include only uids belonging to
      * calling user. Result is aggregated over time, hence all buckets will have the same start and
-     * end timestamps. Not aggregated over state, uid, metered, or roaming. This means buckets'
-     * start and end timestamps are going to be the same as the 'startTime' and 'endTime'
-     * parameters. State, uid, metered, and roaming are going to vary, and tag is going to be the
-     * same.
+     * end timestamps. Not aggregated over state, uid, default network, metered, or roaming. This
+     * means buckets' start and end timestamps are going to be the same as the 'startTime' and
+     * 'endTime' parameters. State, uid, metered, and roaming are going to vary, and tag is going to
+     * be the same.
      *
      * @param networkType As defined in {@link ConnectivityManager}, e.g.
      *            {@link ConnectivityManager#TYPE_MOBILE}, {@link ConnectivityManager#TYPE_WIFI}
@@ -258,9 +267,10 @@ public class NetworkStatsManager {
      * belonging to calling user. Result is aggregated over state but not aggregated over time.
      * This means buckets' start and end timestamps are going to be between 'startTime' and
      * 'endTime' parameters. State is going to be {@link NetworkStats.Bucket#STATE_ALL}, uid the
-     * same as the 'uid' parameter and tag the same as 'tag' parameter. metered is going to be
-     * {@link NetworkStats.Bucket#METERED_ALL}, and roaming is going to be
-     * {@link NetworkStats.Bucket#ROAMING_ALL}.
+     * same as the 'uid' parameter and tag the same as 'tag' parameter.
+     * defaultNetwork is going to be {@link NetworkStats.Bucket#DEFAULT_NETWORK_ALL},
+     * metered is going to be {@link NetworkStats.Bucket#METERED_ALL}, and
+     * roaming is going to be {@link NetworkStats.Bucket#ROAMING_ALL}.
      * <p>Only includes buckets that atomically occur in the inclusive time range. Doesn't
      * interpolate across partial buckets. Since bucket length is in the order of hours, this
      * method cannot be used to measure data usage on a fine grained time scale.
@@ -301,9 +311,10 @@ public class NetworkStatsManager {
      * metered, nor roaming. This means buckets' start and end timestamps are going to be between
      * 'startTime' and 'endTime' parameters. State is going to be
      * {@link NetworkStats.Bucket#STATE_ALL}, uid will vary,
-     * tag {@link NetworkStats.Bucket#TAG_NONE}, metered is going to be
-     * {@link NetworkStats.Bucket#METERED_ALL}, and roaming is going to be
-     * {@link NetworkStats.Bucket#ROAMING_ALL}.
+     * tag {@link NetworkStats.Bucket#TAG_NONE},
+     * default network is going to be {@link NetworkStats.Bucket#DEFAULT_NETWORK_ALL},
+     * metered is going to be {@link NetworkStats.Bucket#METERED_ALL},
+     * and roaming is going to be {@link NetworkStats.Bucket#ROAMING_ALL}.
      * <p>Only includes buckets that atomically occur in the inclusive time range. Doesn't
      * interpolate across partial buckets. Since bucket length is in the order of hours, this
      * method cannot be used to measure data usage on a fine grained time scale.
@@ -335,6 +346,37 @@ public class NetworkStatsManager {
         return result;
     }
 
+    /** @hide */
+    public void registerUsageCallback(NetworkTemplate template, int networkType,
+            long thresholdBytes, UsageCallback callback, @Nullable Handler handler) {
+        checkNotNull(callback, "UsageCallback cannot be null");
+
+        final Looper looper;
+        if (handler == null) {
+            looper = Looper.myLooper();
+        } else {
+            looper = handler.getLooper();
+        }
+
+        DataUsageRequest request = new DataUsageRequest(DataUsageRequest.REQUEST_ID_UNSET,
+                template, thresholdBytes);
+        try {
+            CallbackHandler callbackHandler = new CallbackHandler(looper, networkType,
+                    template.getSubscriberId(), callback);
+            callback.request = mService.registerUsageCallback(
+                    mContext.getOpPackageName(), request, new Messenger(callbackHandler),
+                    new Binder());
+            if (DBG) Log.d(TAG, "registerUsageCallback returned " + callback.request);
+
+            if (callback.request == null) {
+                Log.e(TAG, "Request from callback is null; should not happen");
+            }
+        } catch (RemoteException e) {
+            if (DBG) Log.d(TAG, "Remote exception when registering callback");
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Registers to receive notifications about data usage on specified networks.
      *
@@ -363,15 +405,7 @@ public class NetworkStatsManager {
      */
     public void registerUsageCallback(int networkType, String subscriberId, long thresholdBytes,
             UsageCallback callback, @Nullable Handler handler) {
-        checkNotNull(callback, "UsageCallback cannot be null");
-
-        final Looper looper;
-        if (handler == null) {
-            looper = Looper.myLooper();
-        } else {
-            looper = handler.getLooper();
-        }
-
+        NetworkTemplate template = createTemplate(networkType, subscriberId);
         if (DBG) {
             Log.d(TAG, "registerUsageCallback called with: {"
                 + " networkType=" + networkType
@@ -379,25 +413,7 @@ public class NetworkStatsManager {
                 + " thresholdBytes=" + thresholdBytes
                 + " }");
         }
-
-        NetworkTemplate template = createTemplate(networkType, subscriberId);
-        DataUsageRequest request = new DataUsageRequest(DataUsageRequest.REQUEST_ID_UNSET,
-                template, thresholdBytes);
-        try {
-            CallbackHandler callbackHandler = new CallbackHandler(looper, networkType,
-                    subscriberId, callback);
-            callback.request = mService.registerUsageCallback(
-                    mContext.getOpPackageName(), request, new Messenger(callbackHandler),
-                    new Binder());
-            if (DBG) Log.d(TAG, "registerUsageCallback returned " + callback.request);
-
-            if (callback.request == null) {
-                Log.e(TAG, "Request from callback is null; should not happen");
-            }
-        } catch (RemoteException e) {
-            if (DBG) Log.d(TAG, "Remote exception when registering callback");
-            throw e.rethrowFromSystemServer();
-        }
+        registerUsageCallback(template, networkType, thresholdBytes, callback, handler);
     }
 
     /**
