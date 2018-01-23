@@ -4352,6 +4352,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             DisplayFrames displayFrames, Rect outContentInsets, Rect outStableInsets,
             Rect outOutsets, DisplayCutout.ParcelableWrapper outDisplayCutout) {
         final int fl = PolicyControl.getWindowFlags(null, attrs);
+        final int pfl = attrs.privateFlags;
         final int sysuiVis = PolicyControl.getSystemUiVisibility(null, attrs);
         final int systemUiVisibility = (sysuiVis | attrs.subtreeSystemUiVisibility);
         final int displayRotation = displayFrames.mRotation;
@@ -4374,8 +4375,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        if ((fl & (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR))
-                == (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR)) {
+        final boolean layoutInScreenAndInsetDecor =
+                (fl & (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR))
+                        == (FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR);
+        final boolean screenDecor = (pfl & PRIVATE_FLAG_IS_SCREEN_DECOR) != 0;
+
+        if (layoutInScreenAndInsetDecor && !screenDecor) {
             Rect frame;
             int availRight, availBottom;
             if (canHideNavigationBar() &&
@@ -4495,7 +4500,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             mHandler.obtainMessage(MSG_DISPOSE_INPUT_CONSUMER, mInputConsumer));
                     mInputConsumer = null;
                 }
-            } else if (mInputConsumer == null) {
+            } else if (mInputConsumer == null && mStatusBar != null && canHideNavigationBar()) {
                 mInputConsumer = mWindowManagerFuncs.createInputConsumer(mHandler.getLooper(),
                         INPUT_CONSUMER_NAVIGATION,
                         (channel, looper) -> new HideNavInputEventReceiver(channel, looper));

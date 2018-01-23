@@ -3024,7 +3024,8 @@ public abstract class Context {
             //@hide: INCIDENT_SERVICE,
             //@hide: STATS_COMPANION_SERVICE,
             COMPANION_DEVICE_SERVICE,
-            CROSS_PROFILE_APPS_SERVICE
+            CROSS_PROFILE_APPS_SERVICE,
+            //@hide: SYSTEM_UPDATE_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -3239,6 +3240,17 @@ public abstract class Context {
      * @hide
      */
     public static final String RECOVERY_SERVICE = "recovery";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.os.SystemUpdateManager} for accessing the system update
+     * manager service.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    @SystemApi
+    public static final String SYSTEM_UPDATE_SERVICE = "system_update";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a

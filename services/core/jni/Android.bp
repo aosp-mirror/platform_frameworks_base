@@ -55,6 +55,17 @@ cc_library_static {
         "frameworks/native/services",
         "system/gatekeeper/include",
     ],
+
+    product_variables: {
+        arc: {
+            cflags: [
+                "-DUSE_ARC",
+            ],
+            srcs: [
+                "com_android_server_ArcVideoService.cpp",
+            ],
+        }
+    }
 }
 
 cc_defaults {
@@ -119,4 +130,17 @@ cc_defaults {
         "android.hardware.broadcastradio@common-utils-1x-lib",
         "libscrypt_static",
     ],
+
+    product_variables: {
+        arc: {
+            // TODO: remove the suffix "_bp" after finishing migration to Android.bp.
+            shared_libs: [
+                "libarcbridge",
+                "libarcbridgeservice",
+                "libarcvideobridge",
+                "libchrome",
+                "libmojo_bp",
+            ],
+        }
+    }
 }

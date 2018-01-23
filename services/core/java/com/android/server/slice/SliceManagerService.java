@@ -91,9 +91,9 @@ public class SliceManagerService extends ISliceManager.Stub {
 
         mObserver = new ContentObserver(mHandler) {
             @Override
-            public void onChange(boolean selfChange, Uri uri) {
+            public void onChange(boolean selfChange, Uri uri, int userId) {
                 try {
-                    getPinnedSlice(uri).onChange();
+                    getPinnedSlice(maybeAddUserId(uri, userId)).onChange();
                 } catch (IllegalStateException e) {
                     Log.e(TAG, "Received change for unpinned slice " + uri, e);
                 }
@@ -204,7 +204,7 @@ public class SliceManagerService extends ISliceManager.Stub {
     }
 
     ///  ----- internal code -----
-    void removePinnedSlice(Uri uri) {
+    protected void removePinnedSlice(Uri uri) {
         synchronized (mLock) {
             mPinnedSlicesByUri.remove(uri).destroy();
         }
@@ -233,7 +233,7 @@ public class SliceManagerService extends ISliceManager.Stub {
     }
 
     @VisibleForTesting
-    PinnedSliceState createPinnedSlice(Uri uri) {
+    protected PinnedSliceState createPinnedSlice(Uri uri) {
         return new PinnedSliceState(this, uri);
     }
 
@@ -352,7 +352,7 @@ public class SliceManagerService extends ISliceManager.Stub {
     // Based on getDefaultHome in ShortcutService.
     // TODO: Unify if possible
     @VisibleForTesting
-    String getDefaultHome(int userId) {
+    protected String getDefaultHome(int userId) {
         final long token = Binder.clearCallingIdentity();
         try {
             final List<ResolveInfo> allHomeCandidates = new ArrayList<>();

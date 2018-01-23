@@ -75,6 +75,7 @@ package android {
     field public static final java.lang.String INSTALL_GRANT_RUNTIME_PERMISSIONS = "android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS";
     field public static final java.lang.String INSTALL_LOCATION_PROVIDER = "android.permission.INSTALL_LOCATION_PROVIDER";
     field public static final java.lang.String INSTALL_PACKAGES = "android.permission.INSTALL_PACKAGES";
+    field public static final java.lang.String INSTALL_PACKAGE_UPDATES = "android.permission.INSTALL_PACKAGE_UPDATES";
     field public static final java.lang.String INSTALL_SELF_UPDATES = "android.permission.INSTALL_SELF_UPDATES";
     field public static final java.lang.String INTENT_FILTER_VERIFICATION_AGENT = "android.permission.INTENT_FILTER_VERIFICATION_AGENT";
     field public static final java.lang.String INTERACT_ACROSS_USERS = "android.permission.INTERACT_ACROSS_USERS";
@@ -131,6 +132,7 @@ package android {
     field public static final java.lang.String READ_PRIVILEGED_PHONE_STATE = "android.permission.READ_PRIVILEGED_PHONE_STATE";
     field public static final java.lang.String READ_RUNTIME_PROFILES = "android.permission.READ_RUNTIME_PROFILES";
     field public static final java.lang.String READ_SEARCH_INDEXABLES = "android.permission.READ_SEARCH_INDEXABLES";
+    field public static final java.lang.String READ_SYSTEM_UPDATE_INFO = "android.permission.READ_SYSTEM_UPDATE_INFO";
     field public static final java.lang.String READ_WALLPAPER_INTERNAL = "android.permission.READ_WALLPAPER_INTERNAL";
     field public static final java.lang.String READ_WIFI_CREDENTIAL = "android.permission.READ_WIFI_CREDENTIAL";
     field public static final java.lang.String REAL_GET_TASKS = "android.permission.REAL_GET_TASKS";
@@ -380,6 +382,7 @@ package android.app.admin {
     method public java.lang.CharSequence getDeviceOwnerOrganizationName();
     method public java.util.List<java.lang.String> getPermittedAccessibilityServices(int);
     method public java.util.List<java.lang.String> getPermittedInputMethodsForCurrentUser();
+    method public java.lang.CharSequence getPrintingDisabledReason();
     method public android.content.ComponentName getProfileOwner() throws java.lang.IllegalArgumentException;
     method public java.lang.String getProfileOwnerNameAsUser(int) throws java.lang.IllegalArgumentException;
     method public int getUserProvisioningState();
@@ -760,6 +763,7 @@ package android.content {
     field public static final java.lang.String OEM_LOCK_SERVICE = "oem_lock";
     field public static final java.lang.String PERSISTENT_DATA_BLOCK_SERVICE = "persistent_data_block";
     field public static final java.lang.String STATS_MANAGER = "stats";
+    field public static final java.lang.String SYSTEM_UPDATE_SERVICE = "system_update";
     field public static final java.lang.String VR_SERVICE = "vrmanager";
     field public static final java.lang.String WIFI_RTT_SERVICE = "rttmanager";
     field public static final java.lang.String WIFI_SCANNING_SERVICE = "wifiscanner";
@@ -3502,6 +3506,30 @@ package android.os {
     method public abstract void onResult(android.os.Bundle);
   }
 
+  public class SystemProperties {
+    method public static java.lang.String get(java.lang.String);
+    method public static java.lang.String get(java.lang.String, java.lang.String);
+    method public static boolean getBoolean(java.lang.String, boolean);
+    method public static int getInt(java.lang.String, int);
+    method public static long getLong(java.lang.String, long);
+  }
+
+  public class SystemUpdateManager {
+    method public android.os.Bundle retrieveSystemUpdateInfo();
+    method public void updateSystemUpdateInfo(android.os.PersistableBundle);
+    field public static final java.lang.String KEY_IS_SECURITY_UPDATE = "is_security_update";
+    field public static final java.lang.String KEY_STATUS = "status";
+    field public static final java.lang.String KEY_TARGET_BUILD_FINGERPRINT = "target_build_fingerprint";
+    field public static final java.lang.String KEY_TARGET_SECURITY_PATCH_LEVEL = "target_security_patch_level";
+    field public static final java.lang.String KEY_TITLE = "title";
+    field public static final int STATUS_IDLE = 1; // 0x1
+    field public static final int STATUS_IN_PROGRESS = 3; // 0x3
+    field public static final int STATUS_UNKNOWN = 0; // 0x0
+    field public static final int STATUS_WAITING_DOWNLOAD = 2; // 0x2
+    field public static final int STATUS_WAITING_INSTALL = 4; // 0x4
+    field public static final int STATUS_WAITING_REBOOT = 5; // 0x5
+  }
+
   public class UpdateEngine {
     ctor public UpdateEngine();
     method public void applyPayload(java.lang.String, long, long, java.lang.String[]);
@@ -4968,6 +4996,7 @@ package android.webkit {
     method public abstract android.webkit.TracingController getTracingController();
     method public abstract android.webkit.WebIconDatabase getWebIconDatabase();
     method public abstract android.webkit.WebStorage getWebStorage();
+    method public abstract java.lang.ClassLoader getWebViewClassLoader();
     method public abstract android.webkit.WebViewDatabase getWebViewDatabase(android.content.Context);
   }
 

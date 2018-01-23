@@ -27,14 +27,19 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.view.DisplayCutout;
 import android.view.WindowManager;
 
 import org.junit.Before;
@@ -262,4 +267,23 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
         assertInsetBy(mAppWindow.decorFrame, 0, 0, 0, 0);
     }
 
+    @Test
+    public void insetHint_screenDecorWindow() {
+        addDisplayCutout();
+        mAppWindow.attrs.privateFlags |= PRIVATE_FLAG_IS_SCREEN_DECOR;
+
+        mPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
+
+        final Rect content = new Rect();
+        final Rect stable = new Rect();
+        final Rect outsets = new Rect();
+        final DisplayCutout.ParcelableWrapper cutout = new DisplayCutout.ParcelableWrapper();
+        mPolicy.getInsetHintLw(mAppWindow.attrs, null /* taskBounds */, mFrames, content,
+                stable, outsets, cutout);
+
+        assertThat(content, equalTo(new Rect()));
+        assertThat(stable, equalTo(new Rect()));
+        assertThat(outsets, equalTo(new Rect()));
+        assertThat(cutout.get(), equalTo(DisplayCutout.NO_CUTOUT));
+    }
 }

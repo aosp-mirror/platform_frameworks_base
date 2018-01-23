@@ -27,11 +27,10 @@ import android.text.TextUtils;
  * Changes the background color of the text to which the span is attached.
  * <p>
  * For example, to set a green background color for a text you would create a {@link
- * android.text.SpannableStringBuilder} based on the text and set the span.
+ * android.text.SpannableString} based on the text and set the span.
  * <pre>{@code
  * SpannableString string = new SpannableString("Text with a background color span");
- *string.setSpan(new BackgroundColorSpan(color), 12, 28, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
- * }</pre>
+ *string.setSpan(new BackgroundColorSpan(color), 12, 28, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);}</pre>
  * <img src="{@docRoot}reference/android/images/text/style/backgroundcolorspan.png" />
  * <figcaption>Set a background color for the text.</figcaption>
  */
@@ -58,30 +57,29 @@ public class BackgroundColorSpan extends CharacterStyle
         mColor = src.readInt();
     }
 
+    @Override
     public int getSpanTypeId() {
         return getSpanTypeIdInternal();
     }
 
     /** @hide */
+    @Override
     public int getSpanTypeIdInternal() {
         return TextUtils.BACKGROUND_COLOR_SPAN;
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
 
-    /**
-     * Flatten this object into a Parcel.
-     *
-     * @param dest The Parcel in which the object should be written.
-     * @param flags Additional flags about how the object should be written.
-     */
+    @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         writeToParcelInternal(dest, flags);
     }
 
     /** @hide */
+    @Override
     public void writeToParcelInternal(@NonNull Parcel dest, int flags) {
         dest.writeInt(mColor);
     }

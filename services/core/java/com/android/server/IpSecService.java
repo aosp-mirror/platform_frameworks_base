@@ -148,7 +148,7 @@ public class IpSecService extends IIpSecService.Stub {
          * resources.
          *
          * <p>References to the IResource object may be held by other RefcountedResource objects,
-         * and as such, the kernel resources and quota may not be cleaned up.
+         * and as such, the underlying resources and quota may not be cleaned up.
          */
         void invalidate() throws RemoteException;
 
@@ -298,7 +298,12 @@ public class IpSecService extends IIpSecService.Stub {
         }
     }
 
-    /* Very simple counting class that looks much like a counting semaphore */
+    /**
+     * Very simple counting class that looks much like a counting semaphore
+     *
+     * <p>This class is not thread-safe, and expects that that users of this class will ensure
+     * synchronization and thread safety by holding the IpSecService.this instance lock.
+     */
     @VisibleForTesting
     static class ResourceTracker {
         private final int mMax;
@@ -341,26 +346,38 @@ public class IpSecService extends IIpSecService.Stub {
 
     @VisibleForTesting
     static final class UserRecord {
-        /* Type names */
-        public static final String TYPENAME_SPI = "SecurityParameterIndex";
-        public static final String TYPENAME_TRANSFORM = "IpSecTransform";
-        public static final String TYPENAME_ENCAP_SOCKET = "UdpEncapSocket";
-
         /* Maximum number of each type of resource that a single UID may possess */
         public static final int MAX_NUM_ENCAP_SOCKETS = 2;
         public static final int MAX_NUM_TRANSFORMS = 4;
         public static final int MAX_NUM_SPIS = 8;
 
+        /**
+         * Store each of the OwnedResource types in an (thinly wrapped) sparse array for indexing
+         * and explicit (user) reference management.
+         *
+         * <p>These are stored in separate arrays to improve debuggability and dump output clarity.
+         *
+         * <p>Resources are removed from this array when the user releases their explicit reference
+         * by calling one of the releaseResource() methods.
+         */
         final RefcountedResourceArray<SpiRecord> mSpiRecords =
-                new RefcountedResourceArray<>(TYPENAME_SPI);
-        final ResourceTracker mSpiQuotaTracker = new ResourceTracker(MAX_NUM_SPIS);
-
+                new RefcountedResourceArray<>(SpiRecord.class.getSimpleName());
         final RefcountedResourceArray<TransformRecord> mTransformRecords =
-                new RefcountedResourceArray<>(TYPENAME_TRANSFORM);
-        final ResourceTracker mTransformQuotaTracker = new ResourceTracker(MAX_NUM_TRANSFORMS);
-
+                new RefcountedResourceArray<>(TransformRecord.class.getSimpleName());
         final RefcountedResourceArray<EncapSocketRecord> mEncapSocketRecords =
-                new RefcountedResourceArray<>(TYPENAME_ENCAP_SOCKET);
+                new RefcountedResourceArray<>(EncapSocketRecord.class.getSimpleName());
+
+        /**
+         * Trackers for quotas for each of the OwnedResource types.
+         *
+         * <p>These trackers are separate from the resource arrays, since they are incremented and
+         * decremented at different points in time. Specifically, quota is only returned upon final
+         * resource deallocation (after all explicit and implicit references are released). Note
+         * that it is possible that calls to releaseResource() will not return the used quota if
+         * there are other resources that depend on (are parents of) the resource being released.
+         */
+        final ResourceTracker mSpiQuotaTracker = new ResourceTracker(MAX_NUM_SPIS);
+        final ResourceTracker mTransformQuotaTracker = new ResourceTracker(MAX_NUM_TRANSFORMS);
         final ResourceTracker mSocketQuotaTracker = new ResourceTracker(MAX_NUM_ENCAP_SOCKETS);
 
         void removeSpiRecord(int resourceId) {
@@ -395,11 +412,15 @@ public class IpSecService extends IIpSecService.Stub {
         }
     }
 
+    /**
+     * This class is not thread-safe, and expects that that users of this class will ensure
+     * synchronization and thread safety by holding the IpSecService.this instance lock.
+     */
     @VisibleForTesting
     static final class UserResourceTracker {
         private final SparseArray<UserRecord> mUserRecords = new SparseArray<>();
 
-        /** Never-fail getter that populates the list of UIDs as-needed */
+        /** Lazy-initialization/getter that populates or retrieves the UserRecord as needed */
         public UserRecord getUserRecord(int uid) {
             checkCallerUid(uid);
 
@@ -428,18 +449,20 @@ public class IpSecService extends IIpSecService.Stub {
     @VisibleForTesting final UserResourceTracker mUserResourceTracker = new UserResourceTracker();
 
     /**
-     * The KernelResourceRecord class provides a facility to cleanly and reliably track system
+     * The OwnedResourceRecord class provides a facility to cleanly and reliably track system
      * resources. It relies on a provided resourceId that should uniquely identify the kernel
      * resource. To use this class, the user should implement the invalidate() and
      * freeUnderlyingResources() methods that are responsible for cleaning up IpSecService resource
-     * tracking arrays and kernel resources, respectively
+     * tracking arrays and kernel resources, respectively.
+     *
+     * <p>This class associates kernel resources with the UID that owns and controls them.
      */
-    private abstract class KernelResourceRecord implements IResource {
+    private abstract class OwnedResourceRecord implements IResource {
         final int pid;
         final int uid;
         protected final int mResourceId;
 
-        KernelResourceRecord(int resourceId) {
+        OwnedResourceRecord(int resourceId) {
             super();
             if (resourceId == INVALID_RESOURCE_ID) {
                 throw new IllegalArgumentException("Resource ID must not be INVALID_RESOURCE_ID");
@@ -479,8 +502,6 @@ public class IpSecService extends IIpSecService.Stub {
         }
     };
 
-    // TODO: Move this to right after RefcountedResource. With this here, Gerrit was showing many
-    // more things as changed.
     /**
      * Thin wrapper over SparseArray to ensure resources exist, and simplify generic typing.
      *
@@ -534,7 +555,12 @@ public class IpSecService extends IIpSecService.Stub {
         }
     }
 
-    private final class TransformRecord extends KernelResourceRecord {
+    /**
+     * Tracks an SA in the kernel, and manages cleanup paths. Once a TransformRecord is
+     * created, the SpiRecord that originally tracked the SAs will reliquish the
+     * responsibility of freeing the underlying SA to this class via the mOwnedByTransform flag.
+     */
+    private final class TransformRecord extends OwnedResourceRecord {
         private final IpSecConfig mConfig;
         private final SpiRecord mSpi;
         private final EncapSocketRecord mSocket;
@@ -603,7 +629,12 @@ public class IpSecService extends IIpSecService.Stub {
         }
     }
 
-    private final class SpiRecord extends KernelResourceRecord {
+    /**
+     * Tracks a single SA in the kernel, and manages cleanup paths. Once used in a Transform, the
+     * responsibility for cleaning up underlying resources will be passed to the TransformRecord
+     * object
+     */
+    private final class SpiRecord extends OwnedResourceRecord {
         private final String mSourceAddress;
         private final String mDestinationAddress;
         private int mSpi;
@@ -692,7 +723,14 @@ public class IpSecService extends IIpSecService.Stub {
         }
     }
 
-    private final class EncapSocketRecord extends KernelResourceRecord {
+    /**
+     * Tracks a UDP encap socket, and manages cleanup paths
+     *
+     * <p>While this class does not manage non-kernel resources, race conditions around socket
+     * binding require that the service creates the encap socket, binds it and applies the socket
+     * policy before handing it to a user.
+     */
+    private final class EncapSocketRecord extends OwnedResourceRecord {
         private FileDescriptor mSocket;
         private final int mPort;
 
@@ -1105,16 +1143,14 @@ public class IpSecService extends IIpSecService.Stub {
      * receive data.
      */
     @Override
-    public synchronized IpSecTransformResponse createTransportModeTransform(
-            IpSecConfig c, IBinder binder) throws RemoteException {
+    public synchronized IpSecTransformResponse createTransform(IpSecConfig c, IBinder binder)
+            throws RemoteException {
         checkIpSecConfig(c);
-        checkNotNull(binder, "Null Binder passed to createTransportModeTransform");
+        checkNotNull(binder, "Null Binder passed to createTransform");
         final int resourceId = mNextResourceId++;
 
         UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
-
-        // Avoid resizing by creating a dependency array of min-size 2 (1 UDP encap + 1 SPI)
-        List<RefcountedResource> dependencies = new ArrayList<>(2);
+        List<RefcountedResource> dependencies = new ArrayList<>();
 
         if (!userRecord.mTransformQuotaTracker.isAvailable()) {
             return new IpSecTransformResponse(IpSecManager.Status.RESOURCE_UNAVAILABLE);
@@ -1186,7 +1222,7 @@ public class IpSecService extends IIpSecService.Stub {
      * other reasons.
      */
     @Override
-    public synchronized void deleteTransportModeTransform(int resourceId) throws RemoteException {
+    public synchronized void deleteTransform(int resourceId) throws RemoteException {
         UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
         releaseResource(userRecord.mTransformRecords, resourceId);
     }

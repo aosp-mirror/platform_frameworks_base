@@ -676,6 +676,15 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
         }
     }
 
+    public void dumpStacks(PrintWriter pw) {
+        for (int i = mStacks.size() - 1; i >= 0; --i) {
+            pw.print(mStacks.get(i).mStackId);
+            if (i > 0) {
+                pw.print(",");
+            }
+        }
+    }
+
     public void writeToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         super.writeToProto(proto, CONFIGURATION_CONTAINER, false /* trim */);

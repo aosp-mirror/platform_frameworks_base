@@ -97,6 +97,7 @@ public class PowerProfile {
     public static final String POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE =
             "bluetooth.controller.voltage";
 
+    public static final String POWER_MODEM_CONTROLLER_SLEEP = "modem.controller.sleep";
     public static final String POWER_MODEM_CONTROLLER_IDLE = "modem.controller.idle";
     public static final String POWER_MODEM_CONTROLLER_RX = "modem.controller.rx";
     public static final String POWER_MODEM_CONTROLLER_TX = "modem.controller.tx";
@@ -296,10 +297,6 @@ public class PowerProfile {
                 com.android.internal.R.integer.config_bluetooth_rx_cur_ma,
                 com.android.internal.R.integer.config_bluetooth_tx_cur_ma,
                 com.android.internal.R.integer.config_bluetooth_operating_voltage_mv,
-                com.android.internal.R.integer.config_wifi_idle_receive_cur_ma,
-                com.android.internal.R.integer.config_wifi_active_rx_cur_ma,
-                com.android.internal.R.integer.config_wifi_tx_cur_ma,
-                com.android.internal.R.integer.config_wifi_operating_voltage_mv,
         };
 
         String[] configResIdKeys = new String[]{
@@ -307,10 +304,6 @@ public class PowerProfile {
                 POWER_BLUETOOTH_CONTROLLER_RX,
                 POWER_BLUETOOTH_CONTROLLER_TX,
                 POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE,
-                POWER_WIFI_CONTROLLER_IDLE,
-                POWER_WIFI_CONTROLLER_RX,
-                POWER_WIFI_CONTROLLER_TX,
-                POWER_WIFI_CONTROLLER_OPERATING_VOLTAGE,
         };
 
         for (int i = 0; i < configResIds.length; i++) {

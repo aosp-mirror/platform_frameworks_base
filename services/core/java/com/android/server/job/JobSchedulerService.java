@@ -63,6 +63,7 @@ import android.util.KeyValueListParser;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
@@ -823,6 +824,8 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 jobStatus.enqueueWorkLocked(ActivityManager.getService(), work);
             }
             startTrackingJobLocked(jobStatus, toCancel);
+            StatsLog.write_non_chained(StatsLog.SCHEDULED_JOB_STATE_CHANGED,
+                    uId, null, jobStatus.getBatteryName(), 2);
 
             // If the job is immediately ready to run, then we can just immediately
             // put it in the pending list and try to schedule it.  This is especially

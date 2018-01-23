@@ -1157,9 +1157,17 @@ public class DevicePolicyManager {
     public static final String POLICY_DISABLE_SCREEN_CAPTURE = "policy_disable_screen_capture";
 
     /**
+     * Constant to indicate the feature of mandatory backups. Used as argument to
+     * {@link #createAdminSupportIntent(String)}.
+     * @see #setMandatoryBackupTransport(ComponentName, ComponentName)
+     */
+    public static final String POLICY_MANDATORY_BACKUPS = "policy_mandatory_backups";
+
+    /**
      * A String indicating a specific restricted feature. Can be a user restriction from the
      * {@link UserManager}, e.g. {@link UserManager#DISALLOW_ADJUST_VOLUME}, or one of the values
-     * {@link #POLICY_DISABLE_CAMERA} or {@link #POLICY_DISABLE_SCREEN_CAPTURE}.
+     * {@link #POLICY_DISABLE_CAMERA}, {@link #POLICY_DISABLE_SCREEN_CAPTURE} or
+     * {@link #POLICY_MANDATORY_BACKUPS}.
      * @see #createAdminSupportIntent(String)
      * @hide
      */
@@ -6806,7 +6814,8 @@ public class DevicePolicyManager {
      * @param restriction Indicates for which feature the dialog should be displayed. Can be a
      *            user restriction from {@link UserManager}, e.g.
      *            {@link UserManager#DISALLOW_ADJUST_VOLUME}, or one of the constants
-     *            {@link #POLICY_DISABLE_CAMERA} or {@link #POLICY_DISABLE_SCREEN_CAPTURE}.
+     *            {@link #POLICY_DISABLE_CAMERA}, {@link #POLICY_DISABLE_SCREEN_CAPTURE} or
+     *            {@link #POLICY_MANDATORY_BACKUPS}.
      * @return Intent An intent to be used to start the dialog-activity if the restriction is
      *            set by an admin, or null if the restriction does not exist or no admin set it.
      */
@@ -9201,10 +9210,13 @@ public class DevicePolicyManager {
     /**
      * Allows/disallows printing.
      *
+     * Called by a device owner or a profile owner.
+     * Device owner changes policy for all users. Profile owner can override it if present.
+     * Printing is enabled by default. If {@code FEATURE_PRINTING} is absent, the call is ignored.
+     *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with.
      * @param enabled whether printing should be allowed or not.
      * @throws SecurityException if {@code admin} is neither device, nor profile owner.
-     * @hide
      */
     public void setPrintingEnabled(@NonNull ComponentName admin, boolean enabled) {
         try {
@@ -9215,10 +9227,12 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns whether printing is enabled for current user.
+     * Returns whether printing is enabled for this user.
+     *
+     * Always {@code false} if {@code FEATURE_PRINTING} is absent.
+     * Otherwise, {@code true} by default.
      *
      * @return {@code true} iff printing is enabled.
-     * @hide
      */
     public boolean isPrintingEnabled() {
         try {
@@ -9233,9 +9247,9 @@ public class DevicePolicyManager {
      *
      * Used only by PrintService.
      * @return Localized error message.
-     * @throws SecurityException if caller is not system.
      * @hide
      */
+    @SystemApi
     public CharSequence getPrintingDisabledReason() {
         try {
             return mService.getPrintingDisabledReason();

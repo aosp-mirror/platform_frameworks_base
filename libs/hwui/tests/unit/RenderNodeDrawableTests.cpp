@@ -1046,6 +1046,40 @@ TEST(RenderNodeDrawable, renderNode) {
     EXPECT_EQ(2, canvas.mDrawCounter);
 }
 
+// Verify that layers are composed with kLow_SkFilterQuality filter quality.
+RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, layerComposeQuality) {
+    static const int CANVAS_WIDTH = 1;
+    static const int CANVAS_HEIGHT = 1;
+    static const int LAYER_WIDTH = 1;
+    static const int LAYER_HEIGHT = 1;
+    class FrameTestCanvas : public TestCanvasBase {
+    public:
+        FrameTestCanvas() : TestCanvasBase(CANVAS_WIDTH, CANVAS_HEIGHT) {}
+        void onDrawImageRect(const SkImage* image, const SkRect* src, const SkRect& dst,
+                const SkPaint* paint, SrcRectConstraint constraint) override {
+            mDrawCounter++;
+            EXPECT_EQ(kLow_SkFilterQuality, paint->getFilterQuality());
+        }
+    };
+
+    auto layerNode = TestUtils::createSkiaNode(
+            0, 0, LAYER_WIDTH, LAYER_HEIGHT,
+            [](RenderProperties& properties, SkiaRecordingCanvas& canvas) {
+                canvas.drawPaint(SkPaint());
+            });
+
+    layerNode->animatorProperties().mutateLayerProperties().setType(LayerType::RenderLayer);
+    layerNode->setLayerSurface(SkSurface::MakeRasterN32Premul(LAYER_WIDTH, LAYER_HEIGHT));
+
+    FrameTestCanvas canvas;
+    RenderNodeDrawable drawable(layerNode.get(), &canvas, true);
+    canvas.drawDrawable(&drawable);
+    EXPECT_EQ(1, canvas.mDrawCounter);  //make sure the layer was composed
+
+    // clean up layer pointer, so we can safely destruct RenderNode
+    layerNode->setLayerSurface(nullptr);
+}
+
 TEST(ReorderBarrierDrawable, testShadowMatrix) {
     static const int CANVAS_WIDTH = 100;
     static const int CANVAS_HEIGHT = 100;

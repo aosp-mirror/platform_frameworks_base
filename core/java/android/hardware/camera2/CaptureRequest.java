@@ -33,9 +33,11 @@ import android.view.Surface;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-
+import java.util.Set;
 
 /**
  * <p>An immutable package of settings and outputs needed to capture a single
@@ -219,7 +221,11 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
     private static final ArraySet<Surface> mEmptySurfaceSet = new ArraySet<Surface>();
 
-    private final CameraMetadataNative mSettings;
+    private String mLogicalCameraId;
+    private CameraMetadataNative mLogicalCameraSettings;
+    private final HashMap<String, CameraMetadataNative> mPhysicalCameraSettings =
+            new HashMap<String, CameraMetadataNative>();
+
     private boolean mIsReprocess;
     // If this request is part of constrained high speed request list that was created by
     // {@link android.hardware.camera2.CameraConstrainedHighSpeedCaptureSession#createHighSpeedRequestList}
@@ -236,8 +242,6 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * Used by Binder to unparcel this object only.
      */
     private CaptureRequest() {
-        mSettings = new CameraMetadataNative();
-        setNativeInstance(mSettings);
         mIsReprocess = false;
         mReprocessableSessionId = CameraCaptureSession.SESSION_ID_NONE;
     }
@@ -249,8 +253,14 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      */
     @SuppressWarnings("unchecked")
     private CaptureRequest(CaptureRequest source) {
-        mSettings = new CameraMetadataNative(source.mSettings);
-        setNativeInstance(mSettings);
+        mLogicalCameraId = new String(source.mLogicalCameraId);
+        for (Map.Entry<String, CameraMetadataNative> entry :
+                source.mPhysicalCameraSettings.entrySet()) {
+            mPhysicalCameraSettings.put(new String(entry.getKey()),
+                    new CameraMetadataNative(entry.getValue()));
+        }
+        mLogicalCameraSettings = mPhysicalCameraSettings.get(mLogicalCameraId);
+        setNativeInstance(mLogicalCameraSettings);
         mSurfaceSet.addAll(source.mSurfaceSet);
         mIsReprocess = source.mIsReprocess;
         mIsPartOfCHSRequestList = source.mIsPartOfCHSRequestList;
@@ -272,16 +282,35 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      *                               reprocess capture request to the same session where
      *                               the {@link TotalCaptureResult}, used to create the reprocess
      *                               capture, came from.
+     * @param logicalCameraId Camera Id of the actively open camera that instantiates the
+     *                        Builder.
+     *
+     * @param physicalCameraIdSet A set of physical camera ids that can be used to customize
+     *                            the request for a specific physical camera.
      *
      * @throws IllegalArgumentException If creating a reprocess capture request with an invalid
-     *                                  reprocessableSessionId.
+     *                                  reprocessableSessionId, or multiple physical cameras.
      *
      * @see CameraDevice#createReprocessCaptureRequest
      */
     private CaptureRequest(CameraMetadataNative settings, boolean isReprocess,
-            int reprocessableSessionId) {
-        mSettings = CameraMetadataNative.move(settings);
-        setNativeInstance(mSettings);
+            int reprocessableSessionId, String logicalCameraId, Set<String> physicalCameraIdSet) {
+        if ((physicalCameraIdSet != null) && isReprocess) {
+            throw new IllegalArgumentException("Create a reprocess capture request with " +
+                    "with more than one physical camera is not supported!");
+        }
+
+        mLogicalCameraId = logicalCameraId;
+        mLogicalCameraSettings = CameraMetadataNative.move(settings);
+        mPhysicalCameraSettings.put(mLogicalCameraId, mLogicalCameraSettings);
+        if (physicalCameraIdSet != null) {
+            for (String physicalId : physicalCameraIdSet) {
+                mPhysicalCameraSettings.put(physicalId, new CameraMetadataNative(
+                            mLogicalCameraSettings));
+            }
+        }
+
+        setNativeInstance(mLogicalCameraSettings);
         mIsReprocess = isReprocess;
         if (isReprocess) {
             if (reprocessableSessionId == CameraCaptureSession.SESSION_ID_NONE) {
@@ -309,7 +338,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      */
     @Nullable
     public <T> T get(Key<T> key) {
-        return mSettings.get(key);
+        return mLogicalCameraSettings.get(key);
     }
 
     /**
@@ -319,7 +348,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     @SuppressWarnings("unchecked")
     @Override
     protected <T> T getProtected(Key<?> key) {
-        return (T) mSettings.get(key);
+        return (T) mLogicalCameraSettings.get(key);
     }
 
     /**
@@ -403,7 +432,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @hide
      */
     public CameraMetadataNative getNativeCopy() {
-        return new CameraMetadataNative(mSettings);
+        return new CameraMetadataNative(mLogicalCameraSettings);
     }
 
     /**
@@ -444,14 +473,16 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
         return other != null
                 && Objects.equals(mUserTag, other.mUserTag)
                 && mSurfaceSet.equals(other.mSurfaceSet)
-                && mSettings.equals(other.mSettings)
+                && mPhysicalCameraSettings.equals(other.mPhysicalCameraSettings)
+                && mLogicalCameraId.equals(other.mLogicalCameraId)
+                && mLogicalCameraSettings.equals(other.mLogicalCameraSettings)
                 && mIsReprocess == other.mIsReprocess
                 && mReprocessableSessionId == other.mReprocessableSessionId;
     }
 
     @Override
     public int hashCode() {
-        return HashCodeHelpers.hashCodeGeneric(mSettings, mSurfaceSet, mUserTag);
+        return HashCodeHelpers.hashCodeGeneric(mPhysicalCameraSettings, mSurfaceSet, mUserTag);
     }
 
     public static final Parcelable.Creator<CaptureRequest> CREATOR =
@@ -479,8 +510,25 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * @hide
      */
     private void readFromParcel(Parcel in) {
-        mSettings.readFromParcel(in);
-        setNativeInstance(mSettings);
+        int physicalCameraCount = in.readInt();
+        if (physicalCameraCount <= 0) {
+            throw new RuntimeException("Physical camera count" + physicalCameraCount +
+                    " should always be positive");
+        }
+
+        //Always start with the logical camera id
+        mLogicalCameraId = in.readString();
+        mLogicalCameraSettings = new CameraMetadataNative();
+        mLogicalCameraSettings.readFromParcel(in);
+        setNativeInstance(mLogicalCameraSettings);
+        mPhysicalCameraSettings.put(mLogicalCameraId, mLogicalCameraSettings);
+        for (int i = 1; i < physicalCameraCount; i++) {
+            String physicalId = in.readString();
+            CameraMetadataNative physicalCameraSettings = new CameraMetadataNative();
+            physicalCameraSettings.readFromParcel(in);
+            mPhysicalCameraSettings.put(physicalId, physicalCameraSettings);
+        }
+
         mIsReprocess = (in.readInt() == 0) ? false : true;
         mReprocessableSessionId = CameraCaptureSession.SESSION_ID_NONE;
 
@@ -509,7 +557,19 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        mSettings.writeToParcel(dest, flags);
+        int physicalCameraCount = mPhysicalCameraSettings.size();
+        dest.writeInt(physicalCameraCount);
+        //Logical camera id and settings always come first.
+        dest.writeString(mLogicalCameraId);
+        mLogicalCameraSettings.writeToParcel(dest, flags);
+        for (Map.Entry<String, CameraMetadataNative> entry : mPhysicalCameraSettings.entrySet()) {
+            if (entry.getKey().equals(mLogicalCameraId)) {
+                continue;
+            }
+            dest.writeString(entry.getKey());
+            entry.getValue().writeToParcel(dest, flags);
+        }
+
         dest.writeInt(mIsReprocess ? 1 : 0);
 
         synchronized (mSurfacesLock) {
@@ -539,6 +599,14 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      */
     public Collection<Surface> getTargets() {
         return Collections.unmodifiableCollection(mSurfaceSet);
+    }
+
+    /**
+     * Retrieves the logical camera id.
+     * @hide
+     */
+    public String getLogicalCameraId() {
+        return mLogicalCameraId;
     }
 
     /**
@@ -633,14 +701,20 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          *                               submits a reprocess capture request to the same session
          *                               where the {@link TotalCaptureResult}, used to create the
          *                               reprocess capture, came from.
+         * @param logicalCameraId Camera Id of the actively open camera that instantiates the
+         *                        Builder.
+         * @param physicalCameraIdSet A set of physical camera ids that can be used to customize
+         *                            the request for a specific physical camera.
          *
          * @throws IllegalArgumentException If creating a reprocess capture request with an invalid
          *                                  reprocessableSessionId.
          * @hide
          */
         public Builder(CameraMetadataNative template, boolean reprocess,
-                int reprocessableSessionId) {
-            mRequest = new CaptureRequest(template, reprocess, reprocessableSessionId);
+                int reprocessableSessionId, String logicalCameraId,
+                Set<String> physicalCameraIdSet) {
+            mRequest = new CaptureRequest(template, reprocess, reprocessableSessionId,
+                    logicalCameraId, physicalCameraIdSet);
         }
 
         /**
@@ -682,7 +756,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          * type to the key.
          */
         public <T> void set(@NonNull Key<T> key, T value) {
-            mRequest.mSettings.set(key, value);
+            mRequest.mLogicalCameraSettings.set(key, value);
         }
 
         /**
@@ -696,7 +770,71 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          */
         @Nullable
         public <T> T get(Key<T> key) {
-            return mRequest.mSettings.get(key);
+            return mRequest.mLogicalCameraSettings.get(key);
+        }
+
+        /**
+         * Set a capture request field to a value. The field definitions can be
+         * found in {@link CaptureRequest}.
+         *
+         * <p>Setting a field to {@code null} will remove that field from the capture request.
+         * Unless the field is optional, removing it will likely produce an error from the camera
+         * device when the request is submitted.</p>
+         *
+         *<p>This method can be called for logical camera devices, which are devices that have
+         * REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA capability and calls to
+         * {@link CameraCharacteristics#getPhysicalCameraIds} return a non-empty list of
+         * physical devices that are backing the logical camera. The camera Id included in the
+         * 'physicalCameraId' argument selects an individual physical device that will receive
+         * the customized capture request field.</p>
+         *
+         * @throws IllegalArgumentException if the physical camera id is not valid
+         *
+         * @param key The metadata field to write.
+         * @param value The value to set the field to, which must be of a matching
+         * @param physicalCameraId A valid physical camera Id. The valid camera Ids can be obtained
+         *                         via calls to {@link CameraCharacteristics#getPhysicalCameraIds}.
+         * @return The builder object.
+         * type to the key.
+         */
+        public <T> Builder setPhysicalCameraKey(@NonNull Key<T> key, T value,
+                @NonNull String physicalCameraId) {
+            if (!mRequest.mPhysicalCameraSettings.containsKey(physicalCameraId)) {
+                throw new IllegalArgumentException("Physical camera id: " + physicalCameraId +
+                        " is not valid!");
+            }
+
+            mRequest.mPhysicalCameraSettings.get(physicalCameraId).set(key, value);
+
+            return this;
+        }
+
+        /**
+         * Get a capture request field value for a specific physical camera Id. The field
+         * definitions can be found in {@link CaptureRequest}.
+         *
+         *<p>This method can be called for logical camera devices, which are devices that have
+         * REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA capability and calls to
+         * {@link CameraCharacteristics#getPhysicalCameraIds} return a non-empty list of
+         * physical devices that are backing the logical camera. The camera Id included in the
+         * 'physicalCameraId' argument selects an individual physical device and returns
+         * its specific capture request field.</p>
+         *
+         * @throws IllegalArgumentException if the key or physical camera id were not valid
+         *
+         * @param key The metadata field to read.
+         * @param physicalCameraId A valid physical camera Id. The valid camera Ids can be obtained
+         *                         via calls to {@link CameraCharacteristics#getPhysicalCameraIds}.
+         * @return The value of that key, or {@code null} if the field is not set.
+         */
+        @Nullable
+        public <T> T getPhysicalCameraKey(Key<T> key,@NonNull String physicalCameraId) {
+            if (!mRequest.mPhysicalCameraSettings.containsKey(physicalCameraId)) {
+                throw new IllegalArgumentException("Physical camera id: " + physicalCameraId +
+                        " is not valid!");
+            }
+
+            return mRequest.mPhysicalCameraSettings.get(physicalCameraId).get(key);
         }
 
         /**
@@ -748,7 +886,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
          * @hide
          */
         public boolean isEmpty() {
-            return mRequest.mSettings.isEmpty();
+            return mRequest.mLogicalCameraSettings.isEmpty();
         }
 
     }
@@ -2617,6 +2755,29 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
     @PublicKey
     public static final Key<Integer> STATISTICS_LENS_SHADING_MAP_MODE =
             new Key<Integer>("android.statistics.lensShadingMapMode", int.class);
+
+    /**
+     * <p>Whether the camera device outputs the OIS data in output
+     * result metadata.</p>
+     * <p>When set to ON,
+     * {@link CaptureResult#STATISTICS_OIS_TIMESTAMPS android.statistics.oisTimestamps}, android.statistics.oisShiftPixelX,
+     * android.statistics.oisShiftPixelY will provide OIS data in the output result metadata.</p>
+     * <p><b>Possible values:</b>
+     * <ul>
+     *   <li>{@link #STATISTICS_OIS_DATA_MODE_OFF OFF}</li>
+     *   <li>{@link #STATISTICS_OIS_DATA_MODE_ON ON}</li>
+     * </ul></p>
+     * <p><b>Available values for this device:</b><br>
+     * android.Statistics.info.availableOisDataModes</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     *
+     * @see CaptureResult#STATISTICS_OIS_TIMESTAMPS
+     * @see #STATISTICS_OIS_DATA_MODE_OFF
+     * @see #STATISTICS_OIS_DATA_MODE_ON
+     */
+    @PublicKey
+    public static final Key<Integer> STATISTICS_OIS_DATA_MODE =
+            new Key<Integer>("android.statistics.oisDataMode", int.class);
 
     /**
      * <p>Tonemapping / contrast / gamma curve for the blue

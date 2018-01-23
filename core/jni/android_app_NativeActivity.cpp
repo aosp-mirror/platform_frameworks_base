@@ -361,7 +361,7 @@ loadNativeCode_native(JNIEnv* env, jobject clazz, jstring path, jstring funcName
     code->sdkVersion = sdkVersion;
 
     code->javaAssetManager = env->NewGlobalRef(jAssetMgr);
-    code->assetManager = assetManagerForJavaObject(env, jAssetMgr);
+    code->assetManager = NdkAssetManagerForJavaObject(env, jAssetMgr);
 
     if (obbDir != NULL) {
         dirStr = env->GetStringUTFChars(obbDir, NULL);

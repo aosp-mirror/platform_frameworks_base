@@ -31,32 +31,34 @@ LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_CERTIFICATE := platform
 
 # These are not normally accessible from apps so they must be explicitly included.
-LOCAL_JNI_SHARED_LIBRARIES := libframeworksnettestsjni \
+LOCAL_JNI_SHARED_LIBRARIES := \
+    android.hidl.token@1.0 \
     libbacktrace \
     libbase \
     libbinder \
     libc++ \
+    libcrypto \
     libcutils \
+    libframeworksnettestsjni \
+    libhidl-gen-utils \
+    libhidlbase \
+    libhidltransport \
+    libhwbinder \
     liblog \
     liblzma \
     libnativehelper \
     libnetdaidl \
-    libui \
-    libunwind \
-    libutils \
-    libvndksupport \
-    libcrypto \
-    libhidl-gen-utils \
-    libhidlbase \
-    libhidltransport \
     libpackagelistparser \
     libpcre2 \
     libselinux \
-    libtinyxml2 \
+    libui \
+    libunwind \
+    libutils \
     libvintf \
-    libhwbinder \
+    libvndksupport \
+    libtinyxml2 \
     libunwindstack \
-    android.hidl.token@1.0
+    libutilscallstack
 
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 

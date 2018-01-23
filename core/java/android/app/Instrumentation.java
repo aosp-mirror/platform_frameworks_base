@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -458,7 +459,8 @@ public class Instrumentation {
      *
      * @see Context#startActivity(Intent, Bundle)
      */
-    public Activity startActivitySync(Intent intent, @Nullable Bundle options) {
+    @NonNull
+    public Activity startActivitySync(@NonNull Intent intent, @Nullable Bundle options) {
         validateNotAppThread();
 
         synchronized (mSync) {

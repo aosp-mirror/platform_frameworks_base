@@ -755,7 +755,9 @@ public class RecoverySystem {
         // Block until the ordered broadcast has completed.
         condition.block();
 
-        wipeEuiccData(context, wipeEuicc, PACKAGE_NAME_WIPING_EUICC_DATA_CALLBACK);
+        if (wipeEuicc) {
+            wipeEuiccData(context, PACKAGE_NAME_WIPING_EUICC_DATA_CALLBACK);
+        }
 
         String shutdownArg = null;
         if (shutdown) {
@@ -774,13 +776,11 @@ public class RecoverySystem {
     /**
      * Returns whether wipe Euicc data successfully or not.
      *
-     * @param isWipeEuicc whether we want to wipe Euicc data or not
      * @param packageName the package name of the caller app.
      *
      * @hide
      */
-    public static boolean wipeEuiccData(
-            Context context, final boolean isWipeEuicc, final String packageName) {
+    public static boolean wipeEuiccData(Context context, final String packageName) {
         ContentResolver cr = context.getContentResolver();
         if (Settings.Global.getInt(cr, Settings.Global.EUICC_PROVISIONED, 0) == 0) {
             // If the eUICC isn't provisioned, there's no reason to either wipe or retain profiles,
@@ -802,19 +802,10 @@ public class RecoverySystem {
                         if (getResultCode() != EuiccManager.EMBEDDED_SUBSCRIPTION_RESULT_OK) {
                             int detailedCode = intent.getIntExtra(
                                     EuiccManager.EXTRA_EMBEDDED_SUBSCRIPTION_DETAILED_CODE, 0);
-                            if (isWipeEuicc) {
-                                Log.e(TAG, "Error wiping euicc data, Detailed code = "
-                                        + detailedCode);
-                            } else {
-                                Log.e(TAG, "Error retaining euicc data, Detailed code = "
-                                        + detailedCode);
-                            }
+                            Log.e(TAG, "Error wiping euicc data, Detailed code = "
+                                    + detailedCode);
                         } else {
-                            if (isWipeEuicc) {
-                                Log.d(TAG, "Successfully wiped euicc data.");
-                            } else {
-                                Log.d(TAG, "Successfully retained euicc data.");
-                            }
+                            Log.d(TAG, "Successfully wiped euicc data.");
                             wipingSucceeded.set(true /* newValue */);
                         }
                         euiccFactoryResetLatch.countDown();
@@ -833,11 +824,7 @@ public class RecoverySystem {
             Handler euiccHandler = new Handler(euiccHandlerThread.getLooper());
             context.getApplicationContext()
                     .registerReceiver(euiccWipeFinishReceiver, filterConsent, null, euiccHandler);
-            if (isWipeEuicc) {
-                euiccManager.eraseSubscriptions(callbackIntent);
-            } else {
-                euiccManager.retainSubscriptionsForFactoryReset(callbackIntent);
-            }
+            euiccManager.eraseSubscriptions(callbackIntent);
             try {
                 long waitingTimeMillis = Settings.Global.getLong(
                         context.getContentResolver(),
@@ -849,20 +836,12 @@ public class RecoverySystem {
                     waitingTimeMillis = MAX_EUICC_FACTORY_RESET_TIMEOUT_MILLIS;
                 }
                 if (!euiccFactoryResetLatch.await(waitingTimeMillis, TimeUnit.MILLISECONDS)) {
-                    if (isWipeEuicc) {
-                        Log.e(TAG, "Timeout wiping eUICC data.");
-                    } else {
-                        Log.e(TAG, "Timeout retaining eUICC data.");
-                    }
+                    Log.e(TAG, "Timeout wiping eUICC data.");
                     return false;
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                if (isWipeEuicc) {
-                    Log.e(TAG, "Wiping eUICC data interrupted", e);
-                } else {
-                    Log.e(TAG, "Retaining eUICC data interrupted", e);
-                }
+                Log.e(TAG, "Wiping eUICC data interrupted", e);
                 return false;
             } finally {
                 context.getApplicationContext().unregisterReceiver(euiccWipeFinishReceiver);

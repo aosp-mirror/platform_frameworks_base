@@ -167,7 +167,7 @@ import android.view.RemoteAnimationAdapter;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.ReferrerIntent;
-import com.android.internal.logging.MetricsLogger;
+import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
@@ -2620,8 +2620,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 mAllowDockedStackResize = false;
             } else if (inPinnedWindowingMode && onTop) {
                 // Log if we are expanding the PiP to fullscreen
-                MetricsLogger.action(mService.mContext,
-                        ACTION_PICTURE_IN_PICTURE_EXPANDED_TO_FULLSCREEN);
+                MetricsLoggerWrapper.logPictureInPictureFullScreen(mService.mContext);
             }
 
             // If we are moving from the pinned stack, then the animation takes care of updating
@@ -3749,6 +3748,15 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                             "validateTop...: activity in back resumed r=" + r + " state=" + state);
                 }
             }
+        }
+    }
+
+    public void dumpDisplays(PrintWriter pw) {
+        for (int i = mActivityDisplays.size() - 1; i >= 0; --i) {
+            final ActivityDisplay display = mActivityDisplays.valueAt(i);
+            pw.print("[id:" + display.mDisplayId + " stacks:");
+            display.dumpStacks(pw);
+            pw.print("]");
         }
     }
 

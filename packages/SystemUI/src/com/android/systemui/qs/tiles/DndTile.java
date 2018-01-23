@@ -33,7 +33,6 @@ import android.provider.Settings.Global;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ZenRule;
 import android.service.quicksettings.Tile;
-import android.util.Log;
 import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,7 +54,6 @@ import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.ZenModeController;
-import com.android.systemui.statusbar.policy.ZenModeController.Callback;
 import com.android.systemui.volume.ZenModePanel;
 
 /** Quick settings tile: Do not disturb **/
@@ -134,8 +132,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
         if (mState.value) {
             mController.setZen(ZEN_MODE_OFF, null, TAG);
         } else {
-            int zen = Prefs.getInt(mContext, Prefs.Key.DND_FAVORITE_ZEN, Global.ZEN_MODE_ALARMS);
-            mController.setZen(zen, null, TAG);
+            mController.setZen(Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
         }
     }
 
@@ -159,9 +156,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
                     showDetail(true);
                 }
             });
-            int zen = Prefs.getInt(mContext, Prefs.Key.DND_FAVORITE_ZEN,
-                    Global.ZEN_MODE_ALARMS);
-            mController.setZen(zen, null, TAG);
+            mController.setZen(Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
         } else {
             showDetail(true);
         }
@@ -313,9 +308,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
                 mController.setZen(ZEN_MODE_OFF, null, TAG);
                 mAuto = false;
             } else {
-                int zen = Prefs.getInt(mContext, Prefs.Key.DND_FAVORITE_ZEN,
-                        ZEN_MODE_ALARMS);
-                mController.setZen(zen, null, TAG);
+                mController.setZen(Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
             }
         }
 

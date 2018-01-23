@@ -48,7 +48,6 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SHARED_LIBRARY;
-import static android.content.pm.PackageManager.INSTALL_FAILED_NEWER_SDK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_REPLACE_COULDNT_DELETE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SANDBOX_VERSION_DOWNGRADE;
@@ -119,6 +118,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.ResourcesManager;
@@ -993,6 +993,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private List<String> mKeepUninstalledPackages;
 
     private UserManagerInternal mUserManagerInternal;
+    private ActivityManagerInternal mActivityManagerInternal;
 
     private DeviceIdleController.LocalService mDeviceIdleController;
 
@@ -4576,6 +4577,14 @@ Slog.e("TODD",
         return mUserManagerInternal;
     }
 
+    private ActivityManagerInternal getActivityManagerInternal() {
+        if (mActivityManagerInternal == null) {
+            mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+        }
+        return mActivityManagerInternal;
+    }
+
+
     private DeviceIdleController.LocalService getDeviceIdleController() {
         if (mDeviceIdleController == null) {
             mDeviceIdleController =
@@ -4736,8 +4745,12 @@ Slog.e("TODD",
             int filterCallingUid, int userId) {
         if (!sUserManager.exists(userId)) return null;
         flags = updateFlagsForComponent(flags, userId, component);
-        mPermissionManager.enforceCrossUserPermission(Binder.getCallingUid(), userId,
-                false /* requireFullPermission */, false /* checkShell */, "get activity info");
+
+        if (!isRecentsAccessingChildProfiles(Binder.getCallingUid(), userId)) {
+            mPermissionManager.enforceCrossUserPermission(Binder.getCallingUid(), userId,
+                    false /* requireFullPermission */, false /* checkShell */, "get activity info");
+        }
+
         synchronized (mPackages) {
             PackageParser.Activity a = mActivities.mActivities.get(component);
 
@@ -4757,6 +4770,22 @@ Slog.e("TODD",
             }
         }
         return null;
+    }
+
+    private boolean isRecentsAccessingChildProfiles(int callingUid, int targetUserId) {
+        if (!getActivityManagerInternal().isCallerRecents(callingUid)) {
+            return false;
+        }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            final int callingUserId = UserHandle.getUserId(callingUid);
+            if (ActivityManager.getCurrentUser() != callingUserId) {
+                return false;
+            }
+            return sUserManager.isSameProfileGroup(callingUserId, targetUserId);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override
@@ -16493,16 +16522,6 @@ Slog.e("TODD",
             return;
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
-        }
-
-        // App targetSdkVersion is below min supported version
-        if (!forceSdk && pkg.applicationInfo.isTargetingDeprecatedSdkVersion()) {
-            Slog.w(TAG, "App " + pkg.packageName + " targets deprecated sdk");
-
-            res.setError(INSTALL_FAILED_NEWER_SDK,
-                    "App is targeting deprecated sdk (targetSdkVersion should be at least "
-                    + Build.VERSION.MIN_SUPPORTED_TARGET_SDK_INT + ").");
-            return;
         }
 
         // Instant apps have several additional install-time checks.

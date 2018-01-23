@@ -10128,7 +10128,8 @@ public final class Settings {
          * This is encoded as a key=value list, separated by commas. Ex:
          *
          * "battery_tip_enabled=true,summary_enabled=true,high_usage_enabled=true,"
-         * "high_usage_app_count=3,reduced_battery_enabled=false,reduced_battery_percent=50"
+         * "high_usage_app_count=3,reduced_battery_enabled=false,reduced_battery_percent=50,"
+         * "high_usage_battery_draining=25,high_usage_period_ms=3000"
          *
          * The following keys are supported:
          *
@@ -10138,6 +10139,8 @@ public final class Settings {
          * battery_saver_tip_enabled        (boolean)
          * high_usage_enabled               (boolean)
          * high_usage_app_count             (int)
+         * high_usage_period_ms             (long)
+         * high_usage_battery_draining      (int)
          * app_restriction_enabled          (boolean)
          * reduced_battery_enabled          (boolean)
          * reduced_battery_percent          (int)
@@ -10348,6 +10351,8 @@ public final class Settings {
          * The following keys are supported:
          * <pre>
          * track_cpu_times_by_proc_state (boolean)
+         * track_cpu_active_cluster_time (boolean)
+         * read_binary_cpu_time          (boolean)
          * </pre>
          *
          * <p>
@@ -10373,6 +10378,15 @@ public final class Settings {
          * @hide
          */
         public static final String FORCED_APP_STANDBY_ENABLED = "forced_app_standby_enabled";
+
+        /**
+         * Whether or not to enable Forced App Standby on small battery devices.
+         * Type: int (0 for false, 1 for true)
+         * Default: 0
+         * @hide
+         */
+        public static final String FORCED_APP_STANDBY_FOR_SMALL_BATTERY_ENABLED
+                = "forced_app_standby_for_small_battery_enabled";
 
         /**
          * Whether or not Network Watchlist feature is enabled.

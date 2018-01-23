@@ -66,6 +66,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -174,6 +175,7 @@ public class IpConnectivityMetricsTest {
     }
 
     @Test
+    @Ignore
     public void testDefaultNetworkEvents() throws Exception {
         final long cell = BitUtils.packBits(new int[]{NetworkCapabilities.TRANSPORT_CELLULAR});
         final long wifi = BitUtils.packBits(new int[]{NetworkCapabilities.TRANSPORT_WIFI});
@@ -292,6 +294,7 @@ public class IpConnectivityMetricsTest {
     }
 
     @Test
+    @Ignore
     public void testEndToEndLogging() throws Exception {
         // TODO: instead of comparing textpb to textpb, parse textpb and compare proto to proto.
         IpConnectivityLog logger = new IpConnectivityLog(mService.impl);

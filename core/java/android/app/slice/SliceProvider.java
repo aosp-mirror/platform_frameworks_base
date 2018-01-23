@@ -299,7 +299,7 @@ public abstract class SliceProvider extends ContentProvider {
     @Override
     public Bundle call(String method, String arg, Bundle extras) {
         if (method.equals(METHOD_SLICE)) {
-            Uri uri = extras.getParcelable(EXTRA_BIND_URI);
+            Uri uri = getUriWithoutUserId(extras.getParcelable(EXTRA_BIND_URI));
             List<SliceSpec> supportedSpecs = extras.getParcelableArrayList(EXTRA_SUPPORTED_SPECS);
 
             String callingPackage = getCallingPackage();
@@ -327,19 +327,19 @@ public abstract class SliceProvider extends ContentProvider {
             }
             return b;
         } else if (method.equals(METHOD_PIN)) {
-            Uri uri = extras.getParcelable(EXTRA_BIND_URI);
+            Uri uri = getUriWithoutUserId(extras.getParcelable(EXTRA_BIND_URI));
             if (Binder.getCallingUid() != Process.SYSTEM_UID) {
                 throw new SecurityException("Only the system can pin/unpin slices");
             }
             handlePinSlice(uri);
         } else if (method.equals(METHOD_UNPIN)) {
-            Uri uri = extras.getParcelable(EXTRA_BIND_URI);
+            Uri uri = getUriWithoutUserId(extras.getParcelable(EXTRA_BIND_URI));
             if (Binder.getCallingUid() != Process.SYSTEM_UID) {
                 throw new SecurityException("Only the system can pin/unpin slices");
             }
             handleUnpinSlice(uri);
         } else if (method.equals(METHOD_GET_DESCENDANTS)) {
-            Uri uri = extras.getParcelable(EXTRA_BIND_URI);
+            Uri uri = getUriWithoutUserId(extras.getParcelable(EXTRA_BIND_URI));
             Bundle b = new Bundle();
             b.putParcelableArrayList(EXTRA_SLICE_DESCENDANTS,
                     new ArrayList<>(handleGetDescendants(uri)));

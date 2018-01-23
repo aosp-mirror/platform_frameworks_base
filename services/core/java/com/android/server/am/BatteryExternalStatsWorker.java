@@ -99,7 +99,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     // Keep the last WiFi stats so we can compute a delta.
     @GuardedBy("mWorkerLock")
     private WifiActivityEnergyInfo mLastInfo =
-            new WifiActivityEnergyInfo(0, 0, 0, new long[]{0}, 0, 0, 0);
+            new WifiActivityEnergyInfo(0, 0, 0, new long[]{0}, 0, 0, 0, 0);
 
     BatteryExternalStatsWorker(Context context, BatteryStatsImpl stats) {
         mContext = context;
@@ -374,6 +374,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
 
     private WifiActivityEnergyInfo extractDeltaLocked(WifiActivityEnergyInfo latest) {
         final long timePeriodMs = latest.mTimestamp - mLastInfo.mTimestamp;
+        final long lastScanMs = mLastInfo.mControllerScanTimeMs;
         final long lastIdleMs = mLastInfo.mControllerIdleTimeMs;
         final long lastTxMs = mLastInfo.mControllerTxTimeMs;
         final long lastRxMs = mLastInfo.mControllerRxTimeMs;
@@ -388,14 +389,16 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         final long txTimeMs = latest.mControllerTxTimeMs - lastTxMs;
         final long rxTimeMs = latest.mControllerRxTimeMs - lastRxMs;
         final long idleTimeMs = latest.mControllerIdleTimeMs - lastIdleMs;
+        final long scanTimeMs = latest.mControllerScanTimeMs - lastScanMs;
 
-        if (txTimeMs < 0 || rxTimeMs < 0) {
+        if (txTimeMs < 0 || rxTimeMs < 0 || scanTimeMs < 0) {
             // The stats were reset by the WiFi system (which is why our delta is negative).
             // Returns the unaltered stats.
             delta.mControllerEnergyUsed = latest.mControllerEnergyUsed;
             delta.mControllerRxTimeMs = latest.mControllerRxTimeMs;
             delta.mControllerTxTimeMs = latest.mControllerTxTimeMs;
             delta.mControllerIdleTimeMs = latest.mControllerIdleTimeMs;
+            delta.mControllerScanTimeMs = latest.mControllerScanTimeMs;
             Slog.v(TAG, "WiFi energy data was reset, new WiFi energy data is " + delta);
         } else {
             final long totalActiveTimeMs = txTimeMs + rxTimeMs;
@@ -433,6 +436,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             // These times seem to be the most reliable.
             delta.mControllerTxTimeMs = txTimeMs;
             delta.mControllerRxTimeMs = rxTimeMs;
+            delta.mControllerScanTimeMs = scanTimeMs;
             // WiFi calculates the idle time as a difference from the on time and the various
             // Rx + Tx times. There seems to be some missing time there because this sometimes
             // becomes negative. Just cap it at 0 and ensure that it is less than the expected idle

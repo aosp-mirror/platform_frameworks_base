@@ -61,18 +61,16 @@ import com.android.systemui.tuner.TunerService;
 public class QSFooterImpl extends FrameLayout implements QSFooter,
         OnClickListener, OnUserInfoChangedListener, EmergencyListener,
         SignalCallback, CommandQueue.Callbacks {
-    private static final float EXPAND_INDICATOR_THRESHOLD = .93f;
-
     private ActivityStarter mActivityStarter;
     private UserInfoController mUserInfoController;
     private SettingsButton mSettingsButton;
     protected View mSettingsContainer;
+    private View mCarrierText;
 
     private boolean mQsDisabled;
     private QSPanel mQsPanel;
 
     private boolean mExpanded;
-    protected ExpandableIndicator mExpandIndicator;
 
     private boolean mListening;
 
@@ -100,10 +98,11 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
                 Dependency.get(ActivityStarter.class).postQSRunnableDismissingKeyguard(() ->
                         mQsPanel.showEdit(view)));
 
-        mExpandIndicator = findViewById(R.id.expand_indicator);
         mSettingsButton = findViewById(R.id.settings_button);
         mSettingsContainer = findViewById(R.id.settings_button_container);
         mSettingsButton.setOnClickListener(this);
+
+        mCarrierText = findViewById(R.id.qs_carrier_text);
 
         mMultiUserSwitch = findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
@@ -111,7 +110,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         // RenderThread is doing more harm than good when touching the header (to expand quick
         // settings), so disable it for this view
         ((RippleDrawable) mSettingsButton.getBackground()).setForceSoftware(true);
-        ((RippleDrawable) mExpandIndicator.getBackground()).setForceSoftware(true);
 
         updateResources();
 
@@ -162,6 +160,8 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         return new TouchAnimator.Builder()
                 .addFloat(mEdit, "alpha", 0, 1)
                 .addFloat(mMultiUserSwitch, "alpha", 0, 1)
+                .addFloat(mCarrierText, "alpha", 0, 1)
+                .addFloat(mSettingsButton, "alpha", 0, 1)
                 .build();
     }
 
@@ -185,8 +185,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         if (mSettingsAlpha != null) {
             mSettingsAlpha.setPosition(headerExpansionFraction);
         }
-
-        mExpandIndicator.setExpanded(headerExpansionFraction > EXPAND_INDICATOR_THRESHOLD);
     }
 
     @Override
@@ -236,8 +234,6 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
         mSettingsContainer.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
         mSettingsContainer.findViewById(R.id.tuner_icon).setVisibility(
                 TunerService.isTunerEnabled(mContext) ? View.VISIBLE : View.INVISIBLE);
-
-        mExpandIndicator.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
 
         final boolean isDemo = UserManager.isDeviceInDemoMode(mContext);
 

@@ -42,7 +42,7 @@
     <dimen name="eca_overlap">-10dip</dimen>
 
     <!-- Default clock parameters -->
-    <dimen name="bottom_text_spacing_digital">-10dp</dimen>
+    <dimen name="bottom_text_spacing_digital">-24dp</dimen>
     <!-- Slice header -->
     <dimen name="widget_title_font_size">28sp</dimen>
     <!-- Slice subtitle  -->
@@ -52,12 +52,16 @@
     <!-- Clock with header -->
     <dimen name="widget_small_font_size">22dp</dimen>
     <!-- Dash between clock and header -->
-    <dimen name="widget_vertical_padding">16dp</dimen>
+    <dimen name="widget_separator_width">16dp</dimen>
+    <dimen name="widget_separator_thickness">1dp</dimen>
+    <dimen name="widget_vertical_padding">26dp</dimen>
+    <dimen name="widget_icon_bottom_padding">14dp</dimen>
     <!-- Subtitle paddings -->
-    <dimen name="widget_separator_thickness">2dp</dimen>
     <dimen name="widget_horizontal_padding">8dp</dimen>
     <dimen name="widget_icon_size">16dp</dimen>
     <dimen name="widget_icon_padding">8dp</dimen>
+    <!-- Dash between notification shelf and date/alarm -->
+    <dimen name="widget_bottom_separator_padding">29dp</dimen>
 
     <!-- The y translation to apply at the start in appear animations. -->
     <dimen name="appear_y_translation_start">32dp</dimen>

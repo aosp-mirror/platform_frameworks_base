@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -21,8 +22,11 @@ import android.app.slice.SliceSpec;
 import android.content.ContentProvider;
 import android.content.IContentProvider;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.IBinder.DeathRecipient;
 import android.os.RemoteException;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -34,6 +38,7 @@ import com.android.server.UiServiceTestCase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -147,6 +152,7 @@ public class PinnedSliceStateTest extends UiServiceTestCase {
     @Test
     public void testListenerPin() {
         ISliceListener listener = mock(ISliceListener.class);
+        when(listener.asBinder()).thenReturn(new Binder());
         assertFalse(mPinnedSliceManager.isPinned());
 
         mPinnedSliceManager.addSliceListener(listener, mContext.getPackageName(), FIRST_SPECS);
@@ -159,7 +165,11 @@ public class PinnedSliceStateTest extends UiServiceTestCase {
     @Test
     public void testMultiListenerPin() {
         ISliceListener listener = mock(ISliceListener.class);
+        Binder value = new Binder();
+        when(listener.asBinder()).thenReturn(value);
         ISliceListener listener2 = mock(ISliceListener.class);
+        Binder value2 = new Binder();
+        when(listener2.asBinder()).thenReturn(value2);
         assertFalse(mPinnedSliceManager.isPinned());
 
         mPinnedSliceManager.addSliceListener(listener, mContext.getPackageName(), FIRST_SPECS);
@@ -172,8 +182,30 @@ public class PinnedSliceStateTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testListenerDeath() throws RemoteException {
+        ISliceListener listener = mock(ISliceListener.class);
+        IBinder binder = mock(IBinder.class);
+        when(binder.isBinderAlive()).thenReturn(true);
+        when(listener.asBinder()).thenReturn(binder);
+        assertFalse(mPinnedSliceManager.isPinned());
+
+        mPinnedSliceManager.addSliceListener(listener, mContext.getPackageName(), FIRST_SPECS);
+        assertTrue(mPinnedSliceManager.isPinned());
+
+        ArgumentCaptor<DeathRecipient> arg = ArgumentCaptor.forClass(DeathRecipient.class);
+        verify(binder).linkToDeath(arg.capture(), anyInt());
+
+        when(binder.isBinderAlive()).thenReturn(false);
+        arg.getValue().binderDied();
+
+        verify(mSliceService).removePinnedSlice(eq(TEST_URI));
+        assertFalse(mPinnedSliceManager.isPinned());
+    }
+
+    @Test
     public void testPkgListenerPin() {
         ISliceListener listener = mock(ISliceListener.class);
+        when(listener.asBinder()).thenReturn(new Binder());
         assertFalse(mPinnedSliceManager.isPinned());
 
         mPinnedSliceManager.addSliceListener(listener, mContext.getPackageName(), FIRST_SPECS);
@@ -191,6 +223,7 @@ public class PinnedSliceStateTest extends UiServiceTestCase {
         clearInvocations(mIContentProvider);
 
         ISliceListener listener = mock(ISliceListener.class);
+        when(listener.asBinder()).thenReturn(new Binder());
         Slice s = new Slice.Builder(TEST_URI).build();
         Bundle b = new Bundle();
         b.putParcelable(SliceProvider.EXTRA_SLICE, s);

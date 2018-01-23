@@ -336,6 +336,9 @@ public abstract class BatteryStats implements Parcelable {
     private final StringBuilder mFormatBuilder = new StringBuilder(32);
     private final Formatter mFormatter = new Formatter(mFormatBuilder);
 
+    private static final String CELLULAR_CONTROLLER_NAME = "Cellular";
+    private static final String WIFI_CONTROLLER_NAME = "WiFi";
+
     /**
      * Indicates times spent by the uid at each cpu frequency in all process states.
      *
@@ -410,6 +413,13 @@ public abstract class BatteryStats implements Parcelable {
          * idle state.
          */
         public abstract LongCounter getIdleTimeCounter();
+
+        /**
+         * @return a non-null {@link LongCounter} representing time spent (milliseconds) in the
+         * scan state.
+         */
+        public abstract LongCounter getScanTimeCounter();
+
 
         /**
          * @return a non-null {@link LongCounter} representing time spent (milliseconds) in the
@@ -2399,6 +2409,14 @@ public abstract class BatteryStats implements Parcelable {
     public abstract long getWifiOnTime(long elapsedRealtimeUs, int which);
 
     /**
+     * Returns the time in microseconds that wifi has been active while the device was
+     * running on battery.
+     *
+     * {@hide}
+     */
+    public abstract long getWifiActiveTime(long elapsedRealtimeUs, int which);
+
+    /**
      * Returns the time in microseconds that wifi has been on and the driver has
      * been in the running state while the device was running on battery.
      *
@@ -3345,6 +3363,20 @@ public abstract class BatteryStats implements Parcelable {
         final long sleepTimeMs
             = totalControllerActivityTimeMs - (idleTimeMs + rxTimeMs + totalTxTimeMs);
 
+        if (controllerName.equals(WIFI_CONTROLLER_NAME)) {
+            final long scanTimeMs = counter.getScanTimeCounter().getCountLocked(which);
+            sb.setLength(0);
+            sb.append(prefix);
+            sb.append("     ");
+            sb.append(controllerName);
+            sb.append(" Scan time:  ");
+            formatTimeMs(sb, scanTimeMs);
+            sb.append("(");
+            sb.append(formatRatioLocked(scanTimeMs, totalControllerActivityTimeMs));
+            sb.append(")");
+            pw.println(sb.toString());
+        }
+
         sb.setLength(0);
         sb.append(prefix);
         sb.append("     ");
@@ -3386,7 +3418,7 @@ public abstract class BatteryStats implements Parcelable {
 
         String [] powerLevel;
         switch(controllerName) {
-            case "Cellular":
+            case CELLULAR_CONTROLLER_NAME:
                 powerLevel = new String[] {
                     "   less than 0dBm: ",
                     "   0dBm to 8dBm: ",
@@ -4674,13 +4706,23 @@ public abstract class BatteryStats implements Parcelable {
         if (!didOne) sb.append(" (no activity)");
         pw.println(sb.toString());
 
-        printControllerActivity(pw, sb, prefix, "Cellular",
+        printControllerActivity(pw, sb, prefix, CELLULAR_CONTROLLER_NAME,
             getModemControllerActivity(), which);
 
         pw.print(prefix);
         sb.setLength(0);
         sb.append(prefix);
         sb.append("  Wifi Statistics:");
+        pw.println(sb.toString());
+
+        pw.print(prefix);
+        sb.setLength(0);
+        sb.append(prefix);
+        sb.append("     Wifi kernel active time: ");
+        final long wifiActiveTime = getWifiActiveTime(rawRealtime, which);
+        formatTimeMs(sb, wifiActiveTime / 1000);
+        sb.append("("); sb.append(formatRatioLocked(wifiActiveTime, whichBatteryRealtime));
+        sb.append(")");
         pw.println(sb.toString());
 
         pw.print("     Wifi data received: "); pw.println(formatBytesLocked(wifiRxTotalBytes));
@@ -4760,7 +4802,8 @@ public abstract class BatteryStats implements Parcelable {
         if (!didOne) sb.append(" (no activity)");
         pw.println(sb.toString());
 
-        printControllerActivity(pw, sb, prefix, "WiFi", getWifiControllerActivity(), which);
+        printControllerActivity(pw, sb, prefix, WIFI_CONTROLLER_NAME,
+            getWifiControllerActivity(), which);
 
         pw.print(prefix);
         sb.setLength(0);
@@ -5238,8 +5281,8 @@ public abstract class BatteryStats implements Parcelable {
                 pw.println(sb.toString());
             }
 
-            printControllerActivityIfInteresting(pw, sb, prefix + "  ", "Modem",
-                    u.getModemControllerActivity(), which);
+            printControllerActivityIfInteresting(pw, sb, prefix + "  ",
+                CELLULAR_CONTROLLER_NAME, u.getModemControllerActivity(), which);
 
             if (wifiRxBytes > 0 || wifiTxBytes > 0 || wifiRxPackets > 0 || wifiTxPackets > 0) {
                 pw.print(prefix); pw.print("    Wi-Fi network: ");
@@ -5293,7 +5336,7 @@ public abstract class BatteryStats implements Parcelable {
                 pw.println(sb.toString());
             }
 
-            printControllerActivityIfInteresting(pw, sb, prefix + "  ", "WiFi",
+            printControllerActivityIfInteresting(pw, sb, prefix + "  ", WIFI_CONTROLLER_NAME,
                     u.getWifiControllerActivity(), which);
 
             if (btRxBytes > 0 || btTxBytes > 0) {

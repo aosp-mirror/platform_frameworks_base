@@ -2412,6 +2412,16 @@ public class WebView extends AbsoluteLayout
         return mProvider.getTextClassifier();
     }
 
+    /**
+     * Returns the {@link ClassLoader} used to load internal WebView classes.
+     * This method is meant for use by the WebView Support Library, there is no reason to use this
+     * method otherwise.
+     */
+    @NonNull
+    public static ClassLoader getWebViewClassLoader() {
+        return getFactory().getWebViewClassLoader();
+    }
+
     //-------------------------------------------------------------------------
     // Interface for WebView providers
     //-------------------------------------------------------------------------

@@ -23,6 +23,7 @@ import android.net.wifi.WifiActivityEnergyInfo;
 import android.os.ParcelFileDescriptor;
 import android.os.WorkSource;
 import android.os.connectivity.CellularBatteryStats;
+import android.os.connectivity.WifiBatteryStats;
 import android.os.connectivity.GpsBatteryStats;
 import android.os.health.HealthStatsParceler;
 import android.telephony.DataConnectionRealTimeInfo;
@@ -141,6 +142,9 @@ interface IBatteryStats {
 
     /** {@hide} */
     CellularBatteryStats getCellularBatteryStats();
+
+    /** {@hide} */
+    WifiBatteryStats getWifiBatteryStats();
 
     /** {@hide} */
     GpsBatteryStats getGpsBatteryStats();

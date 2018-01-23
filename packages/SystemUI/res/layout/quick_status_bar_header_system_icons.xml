@@ -17,6 +17,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/quick_status_bar_system_icons"
     android:layout_width="match_parent"
     android:layout_height="@dimen/qs_header_system_icons_area_height"
     android:layout_alignParentEnd="true"
@@ -39,6 +40,17 @@
         android:gravity="center_vertical|start"
         systemui:showDark="false"
     />
+
+    <com.android.systemui.statusbar.policy.DateView
+        android:id="@+id/date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="4dp"
+        android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.StatusBar.Expanded.Date"
+        android:textSize="@dimen/qs_time_collapsed_size"
+        android:gravity="center_vertical"
+        systemui:datePattern="@string/abbrev_wday_month_day_no_year_alarm" />
 
     <android.widget.Space
         android:id="@+id/space"

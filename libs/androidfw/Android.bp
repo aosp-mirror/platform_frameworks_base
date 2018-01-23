@@ -145,6 +145,7 @@ cc_test {
         "tests/TypeWrappers_test.cpp",
         "tests/ZipUtils_test.cpp",
     ],
+    static_libs: ["libgmock"],
     target: {
         android: {
             srcs: [
@@ -171,6 +172,7 @@ cc_benchmark {
 
         // Actual benchmarks.
         "tests/AssetManager2_bench.cpp",
+        "tests/AttributeResolution_bench.cpp",
         "tests/SparseEntry_bench.cpp",
         "tests/Theme_bench.cpp",
     ],

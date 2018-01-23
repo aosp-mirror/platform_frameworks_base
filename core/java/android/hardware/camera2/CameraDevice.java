@@ -31,6 +31,7 @@ import android.os.Handler;
 import android.view.Surface;
 
 import java.util.List;
+import java.util.Set;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -908,6 +909,47 @@ public abstract class CameraDevice implements AutoCloseable {
     @NonNull
     public abstract CaptureRequest.Builder createCaptureRequest(@RequestTemplate int templateType)
             throws CameraAccessException;
+
+    /**
+     * <p>Create a {@link CaptureRequest.Builder} for new capture requests,
+     * initialized with template for a target use case. This methods allows
+     * clients to pass physical camera ids which can be used to customize the
+     * request for a specific physical camera. The settings are chosen
+     * to be the best options for the specific logical camera device. If
+     * additional physical camera ids are passed, then they will also use the
+     * same settings template. Requests containing individual physical camera
+     * settings can be passed only to {@link CameraCaptureSession#capture} or
+     * {@link CameraCaptureSession#captureBurst} and not to
+     * {@link CameraCaptureSession#setRepeatingRequest} or
+     * {@link CameraCaptureSession#setRepeatingBurst}</p>
+     *
+     * @param templateType An enumeration selecting the use case for this request. Not all template
+     * types are supported on every device. See the documentation for each template type for
+     * details.
+     * @param physicalCameraIdSet A set of physical camera ids that can be used to customize
+     *                            the request for a specific physical camera.
+     * @return a builder for a capture request, initialized with default
+     * settings for that template, and no output streams
+     *
+     * @throws IllegalArgumentException if the templateType is not supported by
+     * this device, or one of the physical id arguments matches with logical camera id.
+     * @throws CameraAccessException if the camera device is no longer connected or has
+     *                               encountered a fatal error
+     * @throws IllegalStateException if the camera device has been closed
+     *
+     * @see #TEMPLATE_PREVIEW
+     * @see #TEMPLATE_RECORD
+     * @see #TEMPLATE_STILL_CAPTURE
+     * @see #TEMPLATE_VIDEO_SNAPSHOT
+     * @see #TEMPLATE_MANUAL
+     * @see CaptureRequest.Builder#setKey
+     * @see CaptureRequest.Builder#getKey
+     */
+    @NonNull
+    public CaptureRequest.Builder createCaptureRequest(@RequestTemplate int templateType,
+            Set<String> physicalCameraIdSet) throws CameraAccessException {
+        throw new UnsupportedOperationException("Subclasses must override this method");
+    }
 
     /**
      * <p>Create a {@link CaptureRequest.Builder} for a new reprocess {@link CaptureRequest} from a

@@ -2313,6 +2313,11 @@
     <permission android:name="android.permission.RECOVERY"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows an application to read system update info.
+         @hide -->
+    <permission android:name="android.permission.READ_SYSTEM_UPDATE_INFO"
+        android:protectionLevel="signature" />
+
     <!-- Allows the system to bind to an application's task services
          @hide -->
     <permission android:name="android.permission.BIND_JOB_SERVICE"
@@ -2841,6 +2846,14 @@
         @hide
     -->
     <permission android:name="android.permission.INSTALL_SELF_UPDATES"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi Allows an application to install updates. This is a limited version
+         of {@link android.Manifest.permission#INSTALL_PACKAGES}.
+        <p>Not for use by third-party applications.
+        @hide
+    -->
+    <permission android:name="android.permission.INSTALL_PACKAGE_UPDATES"
         android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi Allows an application to clear user data.

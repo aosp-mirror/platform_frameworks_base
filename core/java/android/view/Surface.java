@@ -283,6 +283,7 @@ public class Surface implements Parcelable {
      */
     public long getNextFrameNumber() {
         synchronized (mLock) {
+            checkNotReleasedLocked();
             return nativeGetNextFrameNumber(mNativeObject);
         }
     }

@@ -16,26 +16,34 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+
+import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.EventLog;
+import android.view.DisplayCutout;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityEvent;
 
-import com.android.systemui.BatteryMeterView;
-import com.android.systemui.DejankUtils;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import com.android.systemui.Dependency;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
+import com.android.systemui.util.leak.RotationUtils;
 
 public class PhoneStatusBarView extends PanelBar {
     private static final String TAG = "PhoneStatusBarView";
     private static final boolean DEBUG = StatusBar.DEBUG;
     private static final boolean DEBUG_GESTURES = false;
+    private static final int NO_VALUE = Integer.MIN_VALUE;
 
     StatusBar mBar;
 
@@ -53,6 +61,11 @@ public class PhoneStatusBarView extends PanelBar {
         }
     };
     private DarkReceiver mBattery;
+    private int mLastOrientation;
+    @Nullable
+    private View mCutoutSpace;
+    @Nullable
+    private DisplayCutout mDisplayCutout;
 
     public PhoneStatusBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -76,6 +89,7 @@ public class PhoneStatusBarView extends PanelBar {
     public void onFinishInflate() {
         mBarTransitions.init();
         mBattery = findViewById(R.id.battery);
+        mCutoutSpace = findViewById(R.id.cutout_space_view);
     }
 
     @Override
@@ -83,12 +97,51 @@ public class PhoneStatusBarView extends PanelBar {
         super.onAttachedToWindow();
         // Always have Battery meters in the status bar observe the dark/light modes.
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mBattery);
+        if (updateOrientationAndCutout(getResources().getConfiguration().orientation)) {
+            postUpdateLayoutForCutout();
+        }
     }
 
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(mBattery);
+        mDisplayCutout = null;
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // May trigger cutout space layout-ing
+        if (updateOrientationAndCutout(newConfig.orientation)) {
+            postUpdateLayoutForCutout();
+        }
+    }
+
+    /**
+     *
+     * @param newOrientation may pass NO_VALUE for no change
+     * @return boolean indicating if we need to update the cutout location / margins
+     */
+    private boolean updateOrientationAndCutout(int newOrientation) {
+        boolean changed = false;
+        if (newOrientation != NO_VALUE) {
+            if (mLastOrientation != newOrientation) {
+                changed = true;
+                mLastOrientation = newOrientation;
+            }
+        }
+
+        if (mDisplayCutout == null) {
+            DisplayCutout cutout = getRootWindowInsets().getDisplayCutout();
+            if (cutout != null) {
+                changed = true;
+                mDisplayCutout = cutout;
+            }
+        }
+
+        return changed;
     }
 
     @Override
@@ -213,5 +266,81 @@ public class PhoneStatusBarView extends PanelBar {
         layoutParams.height = getResources().getDimensionPixelSize(
                 R.dimen.status_bar_height);
         setLayoutParams(layoutParams);
+    }
+
+    private void updateLayoutForCutout() {
+        updateCutoutLocation();
+        updateSafeInsets();
+    }
+
+    private void postUpdateLayoutForCutout() {
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                updateLayoutForCutout();
+            }
+        };
+        // Let the cutout emulation draw first
+        postDelayed(r, 0);
+    }
+
+    private void updateCutoutLocation() {
+        // Not all layouts have a cutout (e.g., Car)
+        if (mCutoutSpace == null) {
+            return;
+        }
+
+        if (mDisplayCutout == null || mDisplayCutout.isEmpty()
+                    || mLastOrientation != ORIENTATION_PORTRAIT) {
+            mCutoutSpace.setVisibility(View.GONE);
+            return;
+        }
+
+        mCutoutSpace.setVisibility(View.VISIBLE);
+        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) mCutoutSpace.getLayoutParams();
+        lp.width = mDisplayCutout.getBoundingRect().width();
+        lp.height = mDisplayCutout.getBoundingRect().height();
+    }
+
+    private void updateSafeInsets() {
+        // Depending on our rotation, we may have to work around a cutout in the middle of the view,
+        // or letterboxing from the right or left sides.
+
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) getLayoutParams();
+        if (mDisplayCutout == null || mDisplayCutout.isEmpty()) {
+            lp.leftMargin = 0;
+            lp.rightMargin = 0;
+            return;
+        }
+
+        int leftMargin = 0;
+        int rightMargin = 0;
+        switch (RotationUtils.getRotation(getContext())) {
+            /*
+             * Landscape: <-|
+             * Seascape:  |->
+             */
+            case RotationUtils.ROTATION_LANDSCAPE:
+                leftMargin = getDisplayCutoutHeight();
+                break;
+            case RotationUtils.ROTATION_SEASCAPE:
+                rightMargin = getDisplayCutoutHeight();
+                break;
+            default:
+                break;
+        }
+
+        lp.leftMargin = leftMargin;
+        lp.rightMargin = rightMargin;
+    }
+
+    //TODO: Find a better way
+    private int getDisplayCutoutHeight() {
+        if (mDisplayCutout == null || mDisplayCutout.isEmpty()) {
+            return 0;
+        }
+
+        Rect r = mDisplayCutout.getBoundingRect();
+        return r.bottom - r.top;
     }
 }

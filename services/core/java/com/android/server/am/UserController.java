@@ -1431,7 +1431,13 @@ class UserController implements Handler.Callback {
 
         if (callingUid != 0 && callingUid != SYSTEM_UID) {
             final boolean allow;
-            if (mInjector.checkComponentPermission(INTERACT_ACROSS_USERS_FULL, callingPid,
+            if (mInjector.isCallerRecents(callingUid)
+                    && callingUserId == getCurrentUserId()
+                    && isSameProfileGroup(callingUserId, targetUserId)) {
+                // If the caller is Recents and it is running in the current user, we then allow it
+                // to access its profiles.
+                allow = true;
+            } else if (mInjector.checkComponentPermission(INTERACT_ACROSS_USERS_FULL, callingPid,
                     callingUid, -1, true) == PackageManager.PERMISSION_GRANTED) {
                 // If the caller has this permission, they always pass go.  And collect $200.
                 allow = true;
@@ -2148,6 +2154,10 @@ class UserController implements Handler.Callback {
             synchronized (mService) {
                 mService.mLockTaskController.clearLockedTasks(reason);
             }
+        }
+
+        protected boolean isCallerRecents(int callingUid) {
+            return mService.getRecentTasks().isCallerRecents(callingUid);
         }
     }
 }

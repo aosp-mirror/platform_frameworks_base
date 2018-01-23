@@ -18,6 +18,7 @@
 
 #include <android-base/file.h>
 #include <android-base/test_utils.h>
+#include <frameworks/base/libs/incident/proto/android/os/header.pb.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <string.h>
@@ -34,6 +35,7 @@ const string FIX64_FIELD_3 = "\x19\xff\xff\xff\xff\xff\xff\xff\xff"; // -1
 
 using namespace android::base;
 using namespace android::binder;
+using namespace android::os;
 using namespace std;
 using ::testing::StrEq;
 using ::testing::internal::CaptureStdout;
@@ -66,15 +68,9 @@ TEST(SectionTest, HeaderSection) {
     args1.addSection(2);
     args2.setAll(true);
 
-    vector<uint8_t> head1;
-    head1.push_back('a');
-    head1.push_back('x');
-    head1.push_back('e');
-
-    vector<uint8_t> head2;
-    head2.push_back('p');
-    head2.push_back('u');
-    head2.push_back('p');
+    IncidentHeaderProto head1, head2;
+    head1.set_reason("axe");
+    head2.set_reason("pup");
 
     args1.addHeader(head1);
     args1.addHeader(head2);
@@ -87,10 +83,10 @@ TEST(SectionTest, HeaderSection) {
     string content;
     CaptureStdout();
     ASSERT_EQ(NO_ERROR, hs.Execute(&requests));
-    EXPECT_THAT(GetCapturedStdout(), StrEq("\n\x3" "axe\n\x03pup"));
+    EXPECT_THAT(GetCapturedStdout(), StrEq("\n\x5" "\x12\x3" "axe\n\x05\x12\x03pup"));
 
     EXPECT_TRUE(ReadFileToString(output2.path, &content));
-    EXPECT_THAT(content, StrEq("\n\x03pup"));
+    EXPECT_THAT(content, StrEq("\n\x05\x12\x03pup"));
 }
 
 TEST(SectionTest, FileSection) {

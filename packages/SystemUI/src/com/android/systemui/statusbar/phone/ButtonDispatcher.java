@@ -34,6 +34,7 @@ public class ButtonDispatcher {
     private View.OnClickListener mClickListener;
     private View.OnTouchListener mTouchListener;
     private View.OnLongClickListener mLongClickListener;
+    private View.OnHoverListener mOnHoverListener;
     private Boolean mLongClickable;
     private Integer mAlpha;
     private Float mDarkIntensity;
@@ -56,6 +57,7 @@ public class ButtonDispatcher {
         view.setOnClickListener(mClickListener);
         view.setOnTouchListener(mTouchListener);
         view.setOnLongClickListener(mLongClickListener);
+        view.setOnHoverListener(mOnHoverListener);
         if (mLongClickable != null) {
             view.setLongClickable(mLongClickable);
         }
@@ -171,6 +173,14 @@ public class ButtonDispatcher {
         final int N = mViews.size();
         for (int i = 0; i < N; i++) {
             mViews.get(i).setOnLongClickListener(mLongClickListener);
+        }
+    }
+
+    public void setOnHoverListener(View.OnHoverListener hoverListener) {
+        mOnHoverListener = hoverListener;
+        final int N = mViews.size();
+        for (int i = 0; i < N; i++) {
+            mViews.get(i).setOnHoverListener(mOnHoverListener);
         }
     }
 

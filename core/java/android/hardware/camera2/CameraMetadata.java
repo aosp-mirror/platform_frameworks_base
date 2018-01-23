@@ -845,6 +845,53 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_MOTION_TRACKING = 10;
 
+    /**
+     * <p>The camera device is a logical camera backed by two or more physical cameras that are
+     * also exposed to the application.</p>
+     * <p>This capability requires the camera device to support the following:</p>
+     * <ul>
+     * <li>This camera device must list the following static metadata entries in {@link android.hardware.camera2.CameraCharacteristics }:<ul>
+     * <li>android.logicalMultiCamera.physicalIds</li>
+     * <li>{@link CameraCharacteristics#LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE android.logicalMultiCamera.sensorSyncType}</li>
+     * </ul>
+     * </li>
+     * <li>The underlying physical cameras' static metadata must list the following entries,
+     *   so that the application can correlate pixels from the physical streams:<ul>
+     * <li>{@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference}</li>
+     * <li>{@link CameraCharacteristics#LENS_POSE_ROTATION android.lens.poseRotation}</li>
+     * <li>{@link CameraCharacteristics#LENS_POSE_TRANSLATION android.lens.poseTranslation}</li>
+     * <li>{@link CameraCharacteristics#LENS_INTRINSIC_CALIBRATION android.lens.intrinsicCalibration}</li>
+     * <li>{@link CameraCharacteristics#LENS_RADIAL_DISTORTION android.lens.radialDistortion}</li>
+     * </ul>
+     * </li>
+     * <li>The logical camera device must be LIMITED or higher device.</li>
+     * </ul>
+     * <p>Both the logical camera device and its underlying physical devices support the
+     * mandatory stream combinations required for their device levels.</p>
+     * <p>Additionally, for each guaranteed stream combination, the logical camera supports:</p>
+     * <ul>
+     * <li>Replacing one logical {@link android.graphics.ImageFormat#YUV_420_888 YUV_420_888}
+     *   or raw stream with two physical streams of the same size and format, each from a
+     *   separate physical camera, given that the size and format are supported by both
+     *   physical cameras.</li>
+     * <li>Adding two raw streams, each from one physical camera, if the logical camera doesn't
+     *   advertise RAW capability, but the underlying physical cameras do. This is usually
+     *   the case when the physical cameras have different sensor sizes.</li>
+     * </ul>
+     * <p>Using physical streams in place of a logical stream of the same size and format will
+     * not slow down the frame rate of the capture, as long as the minimum frame duration
+     * of the physical and logical streams are the same.</p>
+     *
+     * @see CameraCharacteristics#LENS_INTRINSIC_CALIBRATION
+     * @see CameraCharacteristics#LENS_POSE_REFERENCE
+     * @see CameraCharacteristics#LENS_POSE_ROTATION
+     * @see CameraCharacteristics#LENS_POSE_TRANSLATION
+     * @see CameraCharacteristics#LENS_RADIAL_DISTORTION
+     * @see CameraCharacteristics#LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE
+     * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
+     */
+    public static final int REQUEST_AVAILABLE_CAPABILITIES_LOGICAL_MULTI_CAMERA = 11;
+
     //
     // Enumeration values for CameraCharacteristics#SCALER_CROPPING_TYPE
     //
@@ -1134,6 +1181,38 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int INFO_SUPPORTED_HARDWARE_LEVEL_3 = 3;
 
+    /**
+     * <p>This camera device is backed by an external camera connected to this Android device.</p>
+     * <p>The device has capability identical to a LIMITED level device, with the following
+     * exceptions:</p>
+     * <ul>
+     * <li>The device may not report lens/sensor related information such as<ul>
+     * <li>{@link CaptureRequest#LENS_FOCAL_LENGTH android.lens.focalLength}</li>
+     * <li>{@link CameraCharacteristics#LENS_INFO_HYPERFOCAL_DISTANCE android.lens.info.hyperfocalDistance}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_INFO_PHYSICAL_SIZE android.sensor.info.physicalSize}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_INFO_WHITE_LEVEL android.sensor.info.whiteLevel}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN android.sensor.blackLevelPattern}</li>
+     * <li>{@link CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT android.sensor.info.colorFilterArrangement}</li>
+     * <li>{@link CaptureResult#SENSOR_ROLLING_SHUTTER_SKEW android.sensor.rollingShutterSkew}</li>
+     * </ul>
+     * </li>
+     * <li>The device will report 0 for {@link CameraCharacteristics#SENSOR_ORIENTATION android.sensor.orientation}</li>
+     * <li>The device has less guarantee on stable framerate, as the framerate partly depends
+     *   on the external camera being used.</li>
+     * </ul>
+     *
+     * @see CaptureRequest#LENS_FOCAL_LENGTH
+     * @see CameraCharacteristics#LENS_INFO_HYPERFOCAL_DISTANCE
+     * @see CameraCharacteristics#SENSOR_BLACK_LEVEL_PATTERN
+     * @see CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT
+     * @see CameraCharacteristics#SENSOR_INFO_PHYSICAL_SIZE
+     * @see CameraCharacteristics#SENSOR_INFO_WHITE_LEVEL
+     * @see CameraCharacteristics#SENSOR_ORIENTATION
+     * @see CaptureResult#SENSOR_ROLLING_SHUTTER_SKEW
+     * @see CameraCharacteristics#INFO_SUPPORTED_HARDWARE_LEVEL
+     */
+    public static final int INFO_SUPPORTED_HARDWARE_LEVEL_EXTERNAL = 4;
+
     //
     // Enumeration values for CameraCharacteristics#SYNC_MAX_LATENCY
     //
@@ -1158,6 +1237,26 @@ public abstract class CameraMetadata<TKey> {
      * @see CameraCharacteristics#SYNC_MAX_LATENCY
      */
     public static final int SYNC_MAX_LATENCY_UNKNOWN = -1;
+
+    //
+    // Enumeration values for CameraCharacteristics#LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE
+    //
+
+    /**
+     * <p>A software mechanism is used to synchronize between the physical cameras. As a result,
+     * the timestamp of an image from a physical stream is only an approximation of the
+     * image sensor start-of-exposure time.</p>
+     * @see CameraCharacteristics#LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE
+     */
+    public static final int LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE_APPROXIMATE = 0;
+
+    /**
+     * <p>The camera device supports frame timestamp synchronization at the hardware level,
+     * and the timestamp of a physical stream image accurately reflects its
+     * start-of-exposure time.</p>
+     * @see CameraCharacteristics#LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE
+     */
+    public static final int LOGICAL_MULTI_CAMERA_SENSOR_SYNC_TYPE_CALIBRATED = 1;
 
     //
     // Enumeration values for CaptureRequest#COLOR_CORRECTION_MODE
@@ -2564,6 +2663,22 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#STATISTICS_LENS_SHADING_MAP_MODE
      */
     public static final int STATISTICS_LENS_SHADING_MAP_MODE_ON = 1;
+
+    //
+    // Enumeration values for CaptureRequest#STATISTICS_OIS_DATA_MODE
+    //
+
+    /**
+     * <p>Do not include OIS data in the capture result.</p>
+     * @see CaptureRequest#STATISTICS_OIS_DATA_MODE
+     */
+    public static final int STATISTICS_OIS_DATA_MODE_OFF = 0;
+
+    /**
+     * <p>Include OIS data in the capture result.</p>
+     * @see CaptureRequest#STATISTICS_OIS_DATA_MODE
+     */
+    public static final int STATISTICS_OIS_DATA_MODE_ON = 1;
 
     //
     // Enumeration values for CaptureRequest#TONEMAP_MODE

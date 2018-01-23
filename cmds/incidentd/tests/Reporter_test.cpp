@@ -17,6 +17,7 @@
 #include "Reporter.h"
 
 #include <android/os/BnIncidentReportStatusListener.h>
+#include <frameworks/base/libs/incident/proto/android/os/header.pb.h>
 
 #include <android-base/file.h>
 #include <android-base/test_utils.h>
@@ -29,6 +30,7 @@
 using namespace android;
 using namespace android::base;
 using namespace android::binder;
+using namespace android::os;
 using namespace std;
 using ::testing::StrEq;
 using ::testing::Test;
@@ -141,7 +143,8 @@ TEST_F(ReporterTest, RunReportWithHeaders) {
     IncidentReportArgs args1, args2;
     args1.addSection(1);
     args2.addSection(2);
-    std::vector<uint8_t> header {'a', 'b', 'c', 'd', 'e'};
+    IncidentHeaderProto header;
+    header.set_alert_id(12);
     args2.addHeader(header);
     sp<ReportRequest> r1 = new ReportRequest(args1, l, tf.fd);
     sp<ReportRequest> r2 = new ReportRequest(args2, l, tf.fd);
@@ -153,7 +156,7 @@ TEST_F(ReporterTest, RunReportWithHeaders) {
 
     string result;
     ReadFileToString(tf.path, &result);
-    EXPECT_THAT(result, StrEq("\n\x5" "abcde"));
+    EXPECT_THAT(result, StrEq("\n\x2" "\b\f"));
 
     EXPECT_EQ(l->startInvoked, 2);
     EXPECT_EQ(l->finishInvoked, 2);
@@ -164,13 +167,16 @@ TEST_F(ReporterTest, RunReportWithHeaders) {
 
 TEST_F(ReporterTest, RunReportToGivenDirectory) {
     IncidentReportArgs args;
-    args.addHeader({'1', '2', '3'});
-    args.addHeader({'a', 'b', 'c', 'd'});
+    IncidentHeaderProto header1, header2;
+    header1.set_alert_id(12);
+    header2.set_reason("abcd");
+    args.addHeader(header1);
+    args.addHeader(header2);
     sp<ReportRequest> r = new ReportRequest(args, l, -1);
     reporter->batch.add(r);
 
     ASSERT_EQ(Reporter::REPORT_FINISHED, reporter->runReport());
     vector<string> results = InspectFiles();
     ASSERT_EQ((int)results.size(), 1);
-    EXPECT_EQ(results[0], "\n\x3" "123\n\x4" "abcd");
+    EXPECT_EQ(results[0], "\n\x2" "\b\f\n\x6" "\x12\x4" "abcd");
 }

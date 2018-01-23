@@ -26,4 +26,7 @@ public interface PersistentDataBlockManagerInternal {
 
     /** Retrieves handle to a lockscreen credential to be used for Factory Reset Protection. */
     byte[] getFrpCredentialHandle();
+
+    /** Update the OEM unlock enabled bit, bypassing user restriction checks. */
+    void forceOemUnlockEnabled(boolean enabled);
 }

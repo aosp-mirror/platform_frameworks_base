@@ -339,4 +339,9 @@ public abstract class ActivityManagerInternal {
      * Returns maximum number of users that can run simultaneously.
      */
     public abstract int getMaxRunningUsers();
+
+    /**
+     * Returns is the caller has the same uid as the Recents component
+     */
+    public abstract boolean isCallerRecents(int callingUid);
 }
