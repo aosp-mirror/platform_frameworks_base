@@ -25,6 +25,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Surface;
@@ -34,6 +35,8 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -1405,6 +1408,31 @@ public class MediaRecorder implements AudioRouting
     private native final boolean native_setInputDevice(int deviceId);
     private native final int native_getRoutedDeviceId();
     private native final void native_enableDeviceCallback(boolean enabled);
+
+    //--------------------------------------------------------------------------
+    // Microphone information
+    //--------------------
+    /**
+     * Return A lists of {@link MicrophoneInfo} representing the active microphones.
+     * By querying channel mapping for each active microphone, developer can know how
+     * the microphone is used by each channels or a capture stream.
+     *
+     * @return a lists of {@link MicrophoneInfo} representing the active microphones
+     * @throws IOException if an error occurs
+     */
+    public List<MicrophoneInfo> getActiveMicrophones() throws IOException {
+        ArrayList<MicrophoneInfo> activeMicrophones = new ArrayList<>();
+        int status = native_getActiveMicrophones(activeMicrophones);
+        if (status != AudioManager.SUCCESS) {
+            Log.e(TAG, "getActiveMicrophones failed:" + status);
+            return new ArrayList<MicrophoneInfo>();
+        }
+        AudioManager.setPortIdForMicrophones(activeMicrophones);
+        return activeMicrophones;
+    }
+
+    private native final int native_getActiveMicrophones(
+            ArrayList<MicrophoneInfo> activeMicrophones);
 
     /**
      * Called from native code when an interesting event happens.  This method
