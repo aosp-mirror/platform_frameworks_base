@@ -358,6 +358,7 @@ struct GnssCallback : public IGnssCallback {
     Return<void> gnssAcquireWakelockCb() override;
     Return<void> gnssReleaseWakelockCb() override;
     Return<void> gnssRequestTimeCb() override;
+    Return<void> gnssRequestLocationCb(const bool independentFromGnss) override;
     Return<void> gnssSetSystemInfoCb(const IGnssCallback::GnssSystemInfo& info) override;
 
     // New in 1.1
@@ -469,6 +470,11 @@ Return<void> GnssCallback::gnssRequestTimeCb() {
     JNIEnv* env = getJniEnv();
     env->CallVoidMethod(mCallbacksObj, method_requestUtcTime);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
+    return Void();
+}
+
+Return<void> GnssCallback::gnssRequestLocationCb(const bool independentFromGnss) {
+    // TODO(b/72405645): call into java implementation
     return Void();
 }
 
