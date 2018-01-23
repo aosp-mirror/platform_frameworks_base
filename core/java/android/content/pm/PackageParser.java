@@ -6738,31 +6738,6 @@ public class PackageParser {
                 + " " + packageName + "}";
         }
 
-        public String dumpState_temp() {
-            String flags = "";
-            flags += ((applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0 ? "U" : "");
-            flags += ((applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0 ? "S" : "");
-            if ("".equals(flags)) {
-                flags = "-";
-            }
-            String privFlags = "";
-            privFlags += ((applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0 ? "P" : "");
-            privFlags += ((applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_OEM) != 0 ? "O" : "");
-            privFlags += ((applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_VENDOR) != 0 ? "V" : "");
-            if ("".equals(privFlags)) {
-                privFlags = "-";
-            }
-            return "Package{"
-            + Integer.toHexString(System.identityHashCode(this))
-            + " " + packageName
-            + ", ver:" + getLongVersionCode()
-            + ", path: " + codePath
-            + ", flags: " + flags
-            + ", privFlags: " + privFlags
-            + ", extra: " + (mExtras == null ? "<<NULL>>" : Integer.toHexString(System.identityHashCode(mExtras)) + "}")
-            + "}";
-        }
-
         @Override
         public int describeContents() {
             return 0;

@@ -97,35 +97,6 @@ public final class PackageSetting extends PackageSettingBase {
             + " " + name + "/" + appId + "}";
     }
 
-    // Temporary to catch potential issues with refactoring
-    public String dumpState_temp() {
-        String flags = "";
-        flags += ((pkgFlags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0 ? "U" : "");
-        flags += ((pkgFlags & ApplicationInfo.FLAG_SYSTEM) != 0 ? "S" : "");
-        if ("".equals(flags)) {
-            flags = "-";
-        }
-        String privFlags = "";
-        privFlags += ((pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0 ? "P" : "");
-        privFlags += ((pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_OEM) != 0 ? "O" : "");
-        privFlags += ((pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_VENDOR) != 0 ? "V" : "");
-        if ("".equals(privFlags)) {
-            privFlags = "-";
-        }
-        return "PackageSetting{"
-                + Integer.toHexString(System.identityHashCode(this))
-                + " " + name + (realName == null ? "" : "("+realName+")") + "/" + appId + (sharedUser==null?"":" u:" + sharedUser.name+"("+sharedUserId+")")
-                + ", ver:" + versionCode
-                + ", path: " + codePath
-                + ", pABI: " + primaryCpuAbiString
-                + ", sABI: " + secondaryCpuAbiString
-                + ", oABI: " + cpuAbiOverrideString
-                + ", flags: " + flags
-                + ", privFlags: " + privFlags
-                + ", pkg: " + (pkg == null ? "<<NULL>>" : pkg.dumpState_temp())
-                + "}";
-    }
-
     public void copyFrom(PackageSetting orig) {
         super.copyFrom(orig);
         doCopy(orig);
