@@ -79,9 +79,9 @@ import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
 import android.security.keystore.UserNotAuthenticatedException;
-import android.security.keystore.recovery.KeychainProtectionParams;
+import android.security.keystore.recovery.KeyChainProtectionParams;
 import android.security.keystore.recovery.WrappedApplicationKey;
-import android.security.keystore.recovery.KeychainSnapshot;
+import android.security.keystore.recovery.KeyChainSnapshot;
 import android.service.gatekeeper.GateKeeperResponse;
 import android.service.gatekeeper.IGateKeeperService;
 import android.text.TextUtils;
@@ -1980,7 +1980,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public KeychainSnapshot getRecoveryData(@NonNull byte[] account) throws RemoteException {
+    public KeyChainSnapshot getRecoveryData(@NonNull byte[] account) throws RemoteException {
         return mRecoverableKeyStoreManager.getRecoveryData(account);
     }
 
@@ -2009,7 +2009,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public void setRecoverySecretTypes(@NonNull @KeychainProtectionParams.UserSecretType
+    public void setRecoverySecretTypes(@NonNull @KeyChainProtectionParams.UserSecretType
             int[] secretTypes) throws RemoteException {
         mRecoverableKeyStoreManager.setRecoverySecretTypes(secretTypes);
     }
@@ -2026,7 +2026,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public void recoverySecretAvailable(@NonNull KeychainProtectionParams recoverySecret)
+    public void recoverySecretAvailable(@NonNull KeyChainProtectionParams recoverySecret)
             throws RemoteException {
         mRecoverableKeyStoreManager.recoverySecretAvailable(recoverySecret);
     }
@@ -2034,7 +2034,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public byte[] startRecoverySession(@NonNull String sessionId,
             @NonNull byte[] verifierPublicKey, @NonNull byte[] vaultParams,
-            @NonNull byte[] vaultChallenge, @NonNull List<KeychainProtectionParams> secrets)
+            @NonNull byte[] vaultChallenge, @NonNull List<KeyChainProtectionParams> secrets)
             throws RemoteException {
         return mRecoverableKeyStoreManager.startRecoverySession(sessionId, verifierPublicKey,
                 vaultParams, vaultChallenge, secrets);

@@ -16,8 +16,8 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import static android.security.keystore.recovery.KeychainProtectionParams.TYPE_LOCKSCREEN;
-import static android.security.keystore.recovery.KeychainProtectionParams.TYPE_PASSWORD;
+import static android.security.keystore.recovery.KeyChainProtectionParams.TYPE_LOCKSCREEN;
+import static android.security.keystore.recovery.KeyChainProtectionParams.UI_FORMAT_PASSWORD;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertArrayEquals;
@@ -43,7 +43,7 @@ import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.recovery.KeyDerivationParams;
-import android.security.keystore.recovery.KeychainProtectionParams;
+import android.security.keystore.recovery.KeyChainProtectionParams;
 import android.security.keystore.recovery.WrappedApplicationKey;
 import android.support.test.filters.SmallTest;
 import android.support.test.InstrumentationRegistry;
@@ -250,9 +250,9 @@ public class RecoverableKeyStoreManagerTest {
                 TEST_VAULT_PARAMS,
                 TEST_VAULT_CHALLENGE,
                 ImmutableList.of(
-                        new KeychainProtectionParams(
+                        new KeyChainProtectionParams(
                                 TYPE_LOCKSCREEN,
-                                TYPE_PASSWORD,
+                                UI_FORMAT_PASSWORD,
                                 KeyDerivationParams.createSha256Params(TEST_SALT),
                                 TEST_SECRET)));
 
@@ -269,9 +269,9 @@ public class RecoverableKeyStoreManagerTest {
                 TEST_VAULT_PARAMS,
                 TEST_VAULT_CHALLENGE,
                 ImmutableList.of(
-                        new KeychainProtectionParams(
+                        new KeyChainProtectionParams(
                                 TYPE_LOCKSCREEN,
-                                TYPE_PASSWORD,
+                                UI_FORMAT_PASSWORD,
                                 KeyDerivationParams.createSha256Params(TEST_SALT),
                                 TEST_SECRET)));
 
@@ -290,9 +290,9 @@ public class RecoverableKeyStoreManagerTest {
                 TEST_VAULT_PARAMS,
                 TEST_VAULT_CHALLENGE,
                 ImmutableList.of(
-                        new KeychainProtectionParams(
+                        new KeyChainProtectionParams(
                                 TYPE_LOCKSCREEN,
-                                TYPE_PASSWORD,
+                                UI_FORMAT_PASSWORD,
                                 KeyDerivationParams.createSha256Params(TEST_SALT),
                                 TEST_SECRET)));
 
@@ -309,9 +309,9 @@ public class RecoverableKeyStoreManagerTest {
                 TEST_VAULT_PARAMS,
                 TEST_VAULT_CHALLENGE,
                 ImmutableList.of(
-                        new KeychainProtectionParams(
+                        new KeyChainProtectionParams(
                                 TYPE_LOCKSCREEN,
-                                TYPE_PASSWORD,
+                                UI_FORMAT_PASSWORD,
                                 KeyDerivationParams.createSha256Params(TEST_SALT),
                                 TEST_SECRET)));
 
@@ -332,7 +332,7 @@ public class RecoverableKeyStoreManagerTest {
             fail("should have thrown");
         } catch (UnsupportedOperationException e) {
             assertThat(e.getMessage()).startsWith(
-                    "Only a single KeychainProtectionParams is supported");
+                    "Only a single KeyChainProtectionParams is supported");
         }
     }
 
@@ -345,9 +345,9 @@ public class RecoverableKeyStoreManagerTest {
                     TEST_VAULT_PARAMS,
                     TEST_VAULT_CHALLENGE,
                     ImmutableList.of(
-                            new KeychainProtectionParams(
+                            new KeyChainProtectionParams(
                                     TYPE_LOCKSCREEN,
-                                    TYPE_PASSWORD,
+                                    UI_FORMAT_PASSWORD,
                                     KeyDerivationParams.createSha256Params(TEST_SALT),
                                     TEST_SECRET)));
             fail("should have thrown");
@@ -367,9 +367,9 @@ public class RecoverableKeyStoreManagerTest {
                     vaultParams,
                     TEST_VAULT_CHALLENGE,
                     ImmutableList.of(
-                            new KeychainProtectionParams(
+                            new KeyChainProtectionParams(
                                     TYPE_LOCKSCREEN,
-                                    TYPE_PASSWORD,
+                                    UI_FORMAT_PASSWORD,
                                     KeyDerivationParams.createSha256Params(TEST_SALT),
                                     TEST_SECRET)));
             fail("should have thrown");
@@ -400,9 +400,9 @@ public class RecoverableKeyStoreManagerTest {
                 TEST_PUBLIC_KEY,
                 TEST_VAULT_PARAMS,
                 TEST_VAULT_CHALLENGE,
-                ImmutableList.of(new KeychainProtectionParams(
+                ImmutableList.of(new KeyChainProtectionParams(
                         TYPE_LOCKSCREEN,
-                        TYPE_PASSWORD,
+                        UI_FORMAT_PASSWORD,
                         KeyDerivationParams.createSha256Params(TEST_SALT),
                         TEST_SECRET)));
 
@@ -424,9 +424,9 @@ public class RecoverableKeyStoreManagerTest {
                 TEST_PUBLIC_KEY,
                 TEST_VAULT_PARAMS,
                 TEST_VAULT_CHALLENGE,
-                ImmutableList.of(new KeychainProtectionParams(
+                ImmutableList.of(new KeyChainProtectionParams(
                         TYPE_LOCKSCREEN,
-                        TYPE_PASSWORD,
+                        UI_FORMAT_PASSWORD,
                         KeyDerivationParams.createSha256Params(TEST_SALT),
                         TEST_SECRET)));
         byte[] keyClaimant = mRecoverySessionStorage.get(Binder.getCallingUid(), TEST_SESSION_ID)
@@ -456,9 +456,9 @@ public class RecoverableKeyStoreManagerTest {
                 TEST_PUBLIC_KEY,
                 TEST_VAULT_PARAMS,
                 TEST_VAULT_CHALLENGE,
-                ImmutableList.of(new KeychainProtectionParams(
+                ImmutableList.of(new KeyChainProtectionParams(
                         TYPE_LOCKSCREEN,
-                        TYPE_PASSWORD,
+                        UI_FORMAT_PASSWORD,
                         KeyDerivationParams.createSha256Params(TEST_SALT),
                         TEST_SECRET)));
         byte[] keyClaimant = mRecoverySessionStorage.get(Binder.getCallingUid(), TEST_SESSION_ID)

@@ -30,7 +30,7 @@ class BackwardsCompat {
 
 
     static KeychainProtectionParams toLegacyKeychainProtectionParams(
-            android.security.keystore.recovery.KeychainProtectionParams keychainProtectionParams
+            android.security.keystore.recovery.KeyChainProtectionParams keychainProtectionParams
     ) {
         return new KeychainProtectionParams.Builder()
                 .setUserSecretType(keychainProtectionParams.getUserSecretType())
@@ -80,15 +80,15 @@ class BackwardsCompat {
         return map(wrappedApplicationKeys, BackwardsCompat::fromLegacyWrappedApplicationKey);
     }
 
-    static List<android.security.keystore.recovery.KeychainProtectionParams>
+    static List<android.security.keystore.recovery.KeyChainProtectionParams>
             fromLegacyKeychainProtectionParams(
                     List<KeychainProtectionParams> keychainProtectionParams) {
         return map(keychainProtectionParams, BackwardsCompat::fromLegacyKeychainProtectionParam);
     }
 
-    static android.security.keystore.recovery.KeychainProtectionParams
+    static android.security.keystore.recovery.KeyChainProtectionParams
             fromLegacyKeychainProtectionParam(KeychainProtectionParams keychainProtectionParams) {
-        return new android.security.keystore.recovery.KeychainProtectionParams.Builder()
+        return new android.security.keystore.recovery.KeyChainProtectionParams.Builder()
                 .setUserSecretType(keychainProtectionParams.getUserSecretType())
                 .setSecret(keychainProtectionParams.getSecret())
                 .setLockScreenUiFormat(keychainProtectionParams.getLockScreenUiFormat())
@@ -99,7 +99,7 @@ class BackwardsCompat {
     }
 
     static KeychainSnapshot toLegacyKeychainSnapshot(
-            android.security.keystore.recovery.KeychainSnapshot keychainSnapshot
+            android.security.keystore.recovery.KeyChainSnapshot keychainSnapshot
     ) {
         return new KeychainSnapshot.Builder()
                 .setCounterId(keychainSnapshot.getCounterId())
@@ -109,7 +109,7 @@ class BackwardsCompat {
                 .setMaxAttempts(keychainSnapshot.getMaxAttempts())
                 .setServerParams(keychainSnapshot.getServerParams())
                 .setKeychainProtectionParams(
-                        map(keychainSnapshot.getKeychainProtectionParams(),
+                        map(keychainSnapshot.getKeyChainProtectionParams(),
                                 BackwardsCompat::toLegacyKeychainProtectionParams))
                 .setWrappedApplicationKeys(
                         map(keychainSnapshot.getWrappedApplicationKeys(),

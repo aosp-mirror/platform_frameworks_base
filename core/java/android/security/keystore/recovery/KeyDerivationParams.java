@@ -81,8 +81,8 @@ public final class KeyDerivationParams implements Parcelable {
         return mSalt;
     }
 
-    public static final Creator<KeyDerivationParams> CREATOR =
-            new Creator<KeyDerivationParams>() {
+    public static final Parcelable.Creator<KeyDerivationParams> CREATOR =
+            new Parcelable.Creator<KeyDerivationParams>() {
         public KeyDerivationParams createFromParcel(Parcel in) {
                 return new KeyDerivationParams(in);
         }

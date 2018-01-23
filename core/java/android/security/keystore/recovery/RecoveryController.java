@@ -18,15 +18,18 @@ package android.security.keystore.recovery;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
-import android.util.Log;
 
 import com.android.internal.widget.ILockSettings;
 
+import java.security.cert.CertificateException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -114,9 +117,18 @@ public class RecoveryController {
     }
 
     /**
+     * Internal method used by {@code RecoverySession}.
+     *
+     * @hide
+     */
+    ILockSettings getBinder() {
+        return mBinder;
+    }
+
+    /**
      * Gets a new instance of the class.
      */
-    public static RecoveryController getInstance() {
+    public static RecoveryController getInstance(Context context) {
         ILockSettings lockSettings =
                 ILockSettings.Stub.asInterface(ServiceManager.getService("lock_settings"));
         return new RecoveryController(lockSettings);
@@ -136,38 +148,39 @@ public class RecoveryController {
      *
      * @param rootCertificateAlias alias of a root certificate preinstalled on the device
      * @param signedPublicKeyList binary blob a list of X509 certificates and signature
-     * @throws BadCertificateFormatException if the {@code signedPublicKeyList} is in a bad format.
+     * @throws CertificateException if the {@code signedPublicKeyList} is in a bad format.
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
      */
+    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     public void initRecoveryService(
             @NonNull String rootCertificateAlias, @NonNull byte[] signedPublicKeyList)
-            throws BadCertificateFormatException, InternalRecoveryServiceException {
+            throws CertificateException, InternalRecoveryServiceException {
         try {
             mBinder.initRecoveryService(rootCertificateAlias, signedPublicKeyList);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
             if (e.errorCode == ERROR_BAD_CERTIFICATE_FORMAT) {
-                throw new BadCertificateFormatException(e.getMessage());
+                throw new CertificateException(e.getMessage());
             }
             throw wrapUnexpectedServiceSpecificException(e);
         }
     }
 
     /**
-     * Returns data necessary to store all recoverable keys for given account. Key material is
+     * Returns data necessary to store all recoverable keys. Key material is
      * encrypted with user secret and recovery public key.
      *
-     * @param account specific to Recovery agent.
      * @return Data necessary to recover keystore.
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
      */
-    @NonNull public KeychainSnapshot getRecoveryData(@NonNull byte[] account)
+    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
+    public @NonNull KeyChainSnapshot getRecoveryData()
             throws InternalRecoveryServiceException {
         try {
-            return mBinder.getRecoveryData(account);
+            return mBinder.getRecoveryData(/*account=*/ new byte[]{});
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
@@ -188,6 +201,7 @@ public class RecoveryController {
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
      */
+    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     public void setSnapshotCreatedPendingIntent(@Nullable PendingIntent intent)
             throws InternalRecoveryServiceException {
         try {
@@ -200,32 +214,8 @@ public class RecoveryController {
     }
 
     /**
-     * Returns a map from recovery agent accounts to corresponding KeyStore recovery snapshot
-     * version. Version zero is used, if no snapshots were created for the account.
-     *
-     * @return Map from recovery agent accounts to snapshot versions.
-     * @see KeychainSnapshot#getSnapshotVersion
-     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
-     *     service.
-     */
-    public @NonNull Map<byte[], Integer> getRecoverySnapshotVersions()
-            throws InternalRecoveryServiceException {
-        try {
-            // IPC doesn't support generic Maps.
-            @SuppressWarnings("unchecked")
-            Map<byte[], Integer> result =
-                    (Map<byte[], Integer>) mBinder.getRecoverySnapshotVersions();
-            return result;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } catch (ServiceSpecificException e) {
-            throw wrapUnexpectedServiceSpecificException(e);
-        }
-    }
-
-    /**
      * Server parameters used to generate new recovery key blobs. This value will be included in
-     * {@code KeychainSnapshot.getEncryptedRecoveryKeyBlob()}. The same value must be included
+     * {@code KeyChainSnapshot.getEncryptedRecoveryKeyBlob()}. The same value must be included
      * in vaultParams {@link #startRecoverySession}
      *
      * @param serverParams included in recovery key blob.
@@ -233,6 +223,7 @@ public class RecoveryController {
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
      */
+    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     public void setServerParams(byte[] serverParams) throws InternalRecoveryServiceException {
         try {
             mBinder.setServerParams(serverParams);
@@ -244,21 +235,42 @@ public class RecoveryController {
     }
 
     /**
-     * Updates recovery status for given keys. It is used to notify keystore that key was
+     * Gets aliases of recoverable keys for the application.
+     * @param packageName which recoverable keys' aliases will be returned.
+     *
+     * @return {@code List} of all aliases.
+     */
+    public List<String> getAliases(@Nullable String packageName)
+            throws RemoteException, InternalRecoveryServiceException {
+        try {
+            // TODO: update aidl
+            Map<String, Integer> allStatuses = mBinder.getRecoveryStatus(packageName);
+            return new ArrayList<>(allStatuses.keySet());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (ServiceSpecificException e) {
+            throw wrapUnexpectedServiceSpecificException(e);
+        }
+    }
+
+    /**
+     * Updates recovery status for given key. It is used to notify keystore that key was
      * successfully stored on the server or there were an error. Application can check this value
      * using {@code getRecoveyStatus}.
      *
-     * @param packageName Application whose recoverable keys' statuses are to be updated.
-     * @param aliases List of application-specific key aliases. If the array is empty, updates the
-     *     status for all existing recoverable keys.
+     * @param packageName Application whose recoverable key's status are to be updated.
+     * @param alias Application-specific key alias.
      * @param status Status specific to recovery agent.
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
      */
+    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
     public void setRecoveryStatus(
-            @NonNull String packageName, @Nullable String[] aliases, int status)
+            @NonNull String packageName, String alias, int status)
             throws NameNotFoundException, InternalRecoveryServiceException {
         try {
+            // TODO: update aidl
+            String[] aliases = alias == null ? null : new String[]{alias};
             mBinder.setRecoveryStatus(packageName, aliases, status);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -268,7 +280,7 @@ public class RecoveryController {
     }
 
     /**
-     * Returns a {@code Map} from Application's KeyStore key aliases to their recovery status.
+     * Returns recovery status for Application's KeyStore key.
      * Negative status values are reserved for recovery agent specific codes. List of common codes:
      *
      * <ul>
@@ -278,18 +290,24 @@ public class RecoveryController {
      *   <li>{@link #RECOVERY_STATUS_PERMANENT_FAILURE}
      * </ul>
      *
-     * @return {@code Map} from KeyStore alias to recovery status.
+     * @param packageName Application whose recoverable key status is returned.
+     * @param alias Application-specific key alias.
+     * @return Recovery status.
      * @see #setRecoveryStatus
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
      */
-    public Map<String, Integer> getRecoveryStatus() throws InternalRecoveryServiceException {
+    public int getRecoveryStatus(String packageName, String alias)
+            throws InternalRecoveryServiceException {
         try {
-            // IPC doesn't support generic Maps.
-            @SuppressWarnings("unchecked")
-            Map<String, Integer> result =
-                    (Map<String, Integer>) mBinder.getRecoveryStatus(/*packageName=*/ null);
-            return result;
+            // TODO: update aidl
+            Map<String, Integer> allStatuses = mBinder.getRecoveryStatus(packageName);
+            Integer status = allStatuses.get(alias);
+            if (status == null) {
+                return RecoveryController.RECOVERY_STATUS_PERMANENT_FAILURE;
+            } else {
+                return status;
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
@@ -301,13 +319,13 @@ public class RecoveryController {
      * Specifies a set of secret types used for end-to-end keystore encryption. Knowing all of them
      * is necessary to recover data.
      *
-     * @param secretTypes {@link KeychainProtectionParams#TYPE_LOCKSCREEN} or {@link
-     *     KeychainProtectionParams#TYPE_CUSTOM_PASSWORD}
+     * @param secretTypes {@link KeyChainProtectionParams#TYPE_LOCKSCREEN} or {@link
+     *     KeyChainProtectionParams#TYPE_CUSTOM_PASSWORD}
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
      */
     public void setRecoverySecretTypes(
-            @NonNull @KeychainProtectionParams.UserSecretType int[] secretTypes)
+            @NonNull @KeyChainProtectionParams.UserSecretType int[] secretTypes)
             throws InternalRecoveryServiceException {
         try {
             mBinder.setRecoverySecretTypes(secretTypes);
@@ -320,14 +338,14 @@ public class RecoveryController {
 
     /**
      * Defines a set of secret types used for end-to-end keystore encryption. Knowing all of them is
-     * necessary to generate KeychainSnapshot.
+     * necessary to generate KeyChainSnapshot.
      *
      * @return list of recovery secret types
-     * @see KeychainSnapshot
+     * @see KeyChainSnapshot
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
      */
-    public @NonNull @KeychainProtectionParams.UserSecretType int[] getRecoverySecretTypes()
+    public @NonNull @KeyChainProtectionParams.UserSecretType int[] getRecoverySecretTypes()
             throws InternalRecoveryServiceException {
         try {
             return mBinder.getRecoverySecretTypes();
@@ -348,7 +366,7 @@ public class RecoveryController {
      *     service.
      */
     @NonNull
-    public @KeychainProtectionParams.UserSecretType int[] getPendingRecoverySecretTypes()
+    public @KeyChainProtectionParams.UserSecretType int[] getPendingRecoverySecretTypes()
             throws InternalRecoveryServiceException {
         try {
             return mBinder.getPendingRecoverySecretTypes();
@@ -362,7 +380,7 @@ public class RecoveryController {
     /**
      * Method notifies KeyStore that a user-generated secret is available. This method generates a
      * symmetric session key which a trusted remote device can use to return a recovery key. Caller
-     * should use {@link KeychainProtectionParams#clearSecret} to override the secret value in
+     * should use {@link KeyChainProtectionParams#clearSecret} to override the secret value in
      * memory.
      *
      * @param recoverySecret user generated secret together with parameters necessary to regenerate
@@ -370,7 +388,7 @@ public class RecoveryController {
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
      */
-    public void recoverySecretAvailable(@NonNull KeychainProtectionParams recoverySecret)
+    public void recoverySecretAvailable(@NonNull KeyChainProtectionParams recoverySecret)
             throws InternalRecoveryServiceException {
         try {
             mBinder.recoverySecretAvailable(recoverySecret);
@@ -382,117 +400,21 @@ public class RecoveryController {
     }
 
     /**
-     * Initializes recovery session and returns a blob with proof of recovery secrets possession.
-     * The method generates symmetric key for a session, which trusted remote device can use to
-     * return recovery key.
-     *
-     * @param verifierPublicKey Encoded {@code java.security.cert.X509Certificate} with Public key
-     * used to create the recovery blob on the source device.
-     * Keystore will verify the certificate using root of trust.
-     * @param vaultParams Must match the parameters in the corresponding field in the recovery blob.
-     *     Used to limit number of guesses.
-     * @param vaultChallenge Data passed from server for this recovery session and used to prevent
-     *     replay attacks
-     * @param secrets Secrets provided by user, the method only uses type and secret fields.
-     * @return The recovery claim. Claim provides a b binary blob with recovery claim. It is
-     *     encrypted with verifierPublicKey and contains a proof of user secrets, session symmetric
-     *     key and parameters necessary to identify the counter with the number of failed recovery
-     *     attempts.
-     * @throws BadCertificateFormatException if the {@code verifierPublicKey} is in an incorrect
-     *     format.
-     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
-     *     service.
-     */
-    @NonNull public RecoveryClaim startRecoverySession(
-            @NonNull byte[] verifierPublicKey,
-            @NonNull byte[] vaultParams,
-            @NonNull byte[] vaultChallenge,
-            @NonNull List<KeychainProtectionParams> secrets)
-            throws BadCertificateFormatException, InternalRecoveryServiceException {
-        try {
-            RecoverySession recoverySession = RecoverySession.newInstance(this);
-            byte[] recoveryClaim =
-                    mBinder.startRecoverySession(
-                            recoverySession.getSessionId(),
-                            verifierPublicKey,
-                            vaultParams,
-                            vaultChallenge,
-                            secrets);
-            return new RecoveryClaim(recoverySession, recoveryClaim);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ERROR_BAD_CERTIFICATE_FORMAT) {
-                throw new BadCertificateFormatException(e.getMessage());
-            }
-            throw wrapUnexpectedServiceSpecificException(e);
-        }
-    }
-
-    /**
-     * Imports keys.
-     *
-     * @param session Related recovery session, as originally created by invoking
-     *        {@link #startRecoverySession(byte[], byte[], byte[], List)}.
-     * @param recoveryKeyBlob Recovery blob encrypted by symmetric key generated for this session.
-     * @param applicationKeys Application keys. Key material can be decrypted using recoveryKeyBlob
-     *     and session. KeyStore only uses package names from the application info in {@link
-     *     WrappedApplicationKey}. Caller is responsibility to perform certificates check.
-     * @return Map from alias to raw key material.
-     * @throws SessionExpiredException if {@code session} has since been closed.
-     * @throws DecryptionFailedException if unable to decrypt the snapshot.
-     * @throws InternalRecoveryServiceException if an error occurs internal to the recovery service.
-     */
-    public Map<String, byte[]> recoverKeys(
-            @NonNull RecoverySession session,
-            @NonNull byte[] recoveryKeyBlob,
-            @NonNull List<WrappedApplicationKey> applicationKeys)
-            throws SessionExpiredException, DecryptionFailedException,
-            InternalRecoveryServiceException {
-        try {
-            return (Map<String, byte[]>) mBinder.recoverKeys(
-                    session.getSessionId(), recoveryKeyBlob, applicationKeys);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        } catch (ServiceSpecificException e) {
-            if (e.errorCode == ERROR_DECRYPTION_FAILED) {
-                throw new DecryptionFailedException(e.getMessage());
-            }
-            if (e.errorCode == ERROR_SESSION_EXPIRED) {
-                throw new SessionExpiredException(e.getMessage());
-            }
-            throw wrapUnexpectedServiceSpecificException(e);
-        }
-    }
-
-    /**
-     * Deletes all data associated with {@code session}. Should not be invoked directly but via
-     * {@link RecoverySession#close()}.
-     *
-     * @hide
-     */
-    void closeSession(RecoverySession session) {
-        try {
-            mBinder.closeSession(session.getSessionId());
-        } catch (RemoteException | ServiceSpecificException e) {
-            Log.e(TAG, "Unexpected error trying to close session", e);
-        }
-    }
-
-    /**
      * Generates a key called {@code alias} and loads it into the recoverable key store. Returns the
      * raw material of the key.
      *
      * @param alias The key alias.
+     * @param account The account associated with the key
      * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
      *     service.
      * @throws LockScreenRequiredException if the user has not set a lock screen. This is required
      *     to generate recoverable keys, as the snapshots are encrypted using a key derived from the
      *     lock screen.
      */
-    public byte[] generateAndStoreKey(@NonNull String alias)
+    public byte[] generateAndStoreKey(@NonNull String alias, byte[] account)
             throws InternalRecoveryServiceException, LockScreenRequiredException {
         try {
+            // TODO: add account
             return mBinder.generateAndStoreKey(alias);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -521,7 +443,7 @@ public class RecoveryController {
         }
     }
 
-    private InternalRecoveryServiceException wrapUnexpectedServiceSpecificException(
+    InternalRecoveryServiceException wrapUnexpectedServiceSpecificException(
             ServiceSpecificException e) {
         if (e.errorCode == ERROR_SERVICE_INTERNAL_ERROR) {
             return new InternalRecoveryServiceException(e.getMessage());

@@ -16,15 +16,24 @@
 
 package android.security.keystore.recovery;
 
+import android.annotation.NonNull;
+import android.os.RemoteException;
+import android.os.ServiceSpecificException;
+import android.util.Log;
+
 import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.util.List;
+import java.util.Map;
 
 /**
- * Session to recover a {@link KeychainSnapshot} from the remote trusted hardware, initiated by a
+ * Session to recover a {@link KeyChainSnapshot} from the remote trusted hardware, initiated by a
  * recovery agent.
  *
  * @hide
  */
 public class RecoverySession implements AutoCloseable {
+    private static final String TAG = "RecoverySession";
 
     private static final int SESSION_ID_LENGTH_BYTES = 16;
 
@@ -58,14 +67,106 @@ public class RecoverySession implements AutoCloseable {
     }
 
     /**
+     * Starts a recovery session and returns a blob with proof of recovery secret possession.
+     * The method generates a symmetric key for a session, which trusted remote device can use to
+     * return recovery key.
+     *
+     * @param verifierPublicKey Encoded {@code java.security.cert.X509Certificate} with Public key
+     *     used to create the recovery blob on the source device.
+     *     Keystore will verify the certificate using root of trust.
+     * @param vaultParams Must match the parameters in the corresponding field in the recovery blob.
+     *     Used to limit number of guesses.
+     * @param vaultChallenge Data passed from server for this recovery session and used to prevent
+     *     replay attacks
+     * @param secrets Secrets provided by user, the method only uses type and secret fields.
+     * @return The recovery claim. Claim provides a b binary blob with recovery claim. It is
+     *     encrypted with verifierPublicKey and contains a proof of user secrets, session symmetric
+     *     key and parameters necessary to identify the counter with the number of failed recovery
+     *     attempts.
+     * @throws CertificateException if the {@code verifierPublicKey} is in an incorrect
+     *     format.
+     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
+     *     service.
+     */
+    @NonNull public byte[] start(
+            @NonNull byte[] verifierPublicKey,
+            @NonNull byte[] vaultParams,
+            @NonNull byte[] vaultChallenge,
+            @NonNull List<KeyChainProtectionParams> secrets)
+            throws CertificateException, InternalRecoveryServiceException {
+        try {
+            byte[] recoveryClaim =
+                    mRecoveryController.getBinder().startRecoverySession(
+                            mSessionId,
+                            verifierPublicKey,
+                            vaultParams,
+                            vaultChallenge,
+                            secrets);
+            return recoveryClaim;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == RecoveryController.ERROR_BAD_CERTIFICATE_FORMAT) {
+                throw new CertificateException(e.getMessage());
+            }
+            throw mRecoveryController.wrapUnexpectedServiceSpecificException(e);
+        }
+    }
+
+    /**
+     * Imports keys.
+     *
+     * @param recoveryKeyBlob Recovery blob encrypted by symmetric key generated for this session.
+     * @param applicationKeys Application keys. Key material can be decrypted using recoveryKeyBlob
+     *     and session. KeyStore only uses package names from the application info in {@link
+     *     WrappedApplicationKey}. Caller is responsibility to perform certificates check.
+     * @return Map from alias to raw key material.
+     * @throws SessionExpiredException if {@code session} has since been closed.
+     * @throws DecryptionFailedException if unable to decrypt the snapshot.
+     * @throws InternalRecoveryServiceException if an error occurs internal to the recovery service.
+     */
+    public Map<String, byte[]> recoverKeys(
+            @NonNull byte[] recoveryKeyBlob,
+            @NonNull List<WrappedApplicationKey> applicationKeys)
+            throws SessionExpiredException, DecryptionFailedException,
+            InternalRecoveryServiceException {
+        try {
+            return (Map<String, byte[]>) mRecoveryController.getBinder().recoverKeys(
+                    mSessionId, recoveryKeyBlob, applicationKeys);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == RecoveryController.ERROR_DECRYPTION_FAILED) {
+                throw new DecryptionFailedException(e.getMessage());
+            }
+            if (e.errorCode == RecoveryController.ERROR_SESSION_EXPIRED) {
+                throw new SessionExpiredException(e.getMessage());
+            }
+            throw mRecoveryController.wrapUnexpectedServiceSpecificException(e);
+        }
+    }
+
+    /**
      * An internal session ID, used by the framework to match recovery claims to snapshot responses.
+     *
+     * @hide
      */
     String getSessionId() {
         return mSessionId;
     }
 
+    /**
+     * Deletes all data associated with {@code session}. Should not be invoked directly but via
+     * {@link RecoverySession#close()}.
+     *
+     * @hide
+     */
     @Override
     public void close() {
-        mRecoveryController.closeSession(this);
+        try {
+            mRecoveryController.getBinder().closeSession(mSessionId);
+        } catch (RemoteException | ServiceSpecificException e) {
+            Log.e(TAG, "Unexpected error trying to close session", e);
+        }
     }
 }
