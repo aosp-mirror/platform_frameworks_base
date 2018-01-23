@@ -215,6 +215,30 @@ public final class NetworkStats implements AutoCloseable {
          */
         public static final int ROAMING_YES = 0x2;
 
+        /** @hide */
+        @IntDef(prefix = { "DEFAULT_NETWORK_" }, value = {
+                DEFAULT_NETWORK_ALL,
+                DEFAULT_NETWORK_NO,
+                DEFAULT_NETWORK_YES
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface DefaultNetwork {}
+
+        /**
+         * Combined usage for this network regardless of whether it was the active default network.
+         */
+        public static final int DEFAULT_NETWORK_ALL = -1;
+
+        /**
+         * Usage that occurs while this network is not the active default network.
+         */
+        public static final int DEFAULT_NETWORK_NO = 0x1;
+
+        /**
+         * Usage that occurs while this network is the active default network.
+         */
+        public static final int DEFAULT_NETWORK_YES = 0x2;
+
         /**
          * Special TAG value for total data across all tags
          */
@@ -223,6 +247,7 @@ public final class NetworkStats implements AutoCloseable {
         private int mUid;
         private int mTag;
         private int mState;
+        private int mDefaultNetwork;
         private int mMetered;
         private int mRoaming;
         private long mBeginTimeStamp;
@@ -270,6 +295,15 @@ public final class NetworkStats implements AutoCloseable {
                 case android.net.NetworkStats.ROAMING_ALL : return ROAMING_ALL;
                 case android.net.NetworkStats.ROAMING_NO: return ROAMING_NO;
                 case android.net.NetworkStats.ROAMING_YES: return ROAMING_YES;
+            }
+            return 0;
+        }
+
+        private static @DefaultNetwork int convertDefaultNetwork(int defaultNetwork) {
+            switch (defaultNetwork) {
+                case android.net.NetworkStats.DEFAULT_NETWORK_ALL : return DEFAULT_NETWORK_ALL;
+                case android.net.NetworkStats.DEFAULT_NETWORK_NO: return DEFAULT_NETWORK_NO;
+                case android.net.NetworkStats.DEFAULT_NETWORK_YES: return DEFAULT_NETWORK_YES;
             }
             return 0;
         }
@@ -336,6 +370,21 @@ public final class NetworkStats implements AutoCloseable {
          */
         public @Roaming int getRoaming() {
             return mRoaming;
+        }
+
+        /**
+         * Default network state. One of the following values:<p/>
+         * <ul>
+         * <li>{@link #DEFAULT_NETWORK_ALL}</li>
+         * <li>{@link #DEFAULT_NETWORK_NO}</li>
+         * <li>{@link #DEFAULT_NETWORK_YES}</li>
+         * </ul>
+         * <p>Indicates whether the network usage occurred on the system default network for this
+         * type of traffic, or whether the application chose to send this traffic on a network that
+         * was not the one selected by the system.
+         */
+        public @DefaultNetwork int getDefaultNetwork() {
+            return mDefaultNetwork;
         }
 
         /**
@@ -539,6 +588,8 @@ public final class NetworkStats implements AutoCloseable {
         bucketOut.mUid = Bucket.convertUid(mRecycledSummaryEntry.uid);
         bucketOut.mTag = Bucket.convertTag(mRecycledSummaryEntry.tag);
         bucketOut.mState = Bucket.convertState(mRecycledSummaryEntry.set);
+        bucketOut.mDefaultNetwork = Bucket.convertDefaultNetwork(
+                mRecycledSummaryEntry.defaultNetwork);
         bucketOut.mMetered = Bucket.convertMetered(mRecycledSummaryEntry.metered);
         bucketOut.mRoaming = Bucket.convertRoaming(mRecycledSummaryEntry.roaming);
         bucketOut.mBeginTimeStamp = mStartTimeStamp;
@@ -588,6 +639,7 @@ public final class NetworkStats implements AutoCloseable {
                 bucketOut.mUid = Bucket.convertUid(getUid());
                 bucketOut.mTag = Bucket.convertTag(mTag);
                 bucketOut.mState = Bucket.STATE_ALL;
+                bucketOut.mDefaultNetwork = Bucket.DEFAULT_NETWORK_ALL;
                 bucketOut.mMetered = Bucket.METERED_ALL;
                 bucketOut.mRoaming = Bucket.ROAMING_ALL;
                 bucketOut.mBeginTimeStamp = mRecycledHistoryEntry.bucketStart;
