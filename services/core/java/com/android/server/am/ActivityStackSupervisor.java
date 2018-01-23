@@ -3752,6 +3752,15 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
+    public void dumpDisplays(PrintWriter pw) {
+        for (int i = mActivityDisplays.size() - 1; i >= 0; --i) {
+            final ActivityDisplay display = mActivityDisplays.valueAt(i);
+            pw.print("[id:" + display.mDisplayId + " stacks:");
+            display.dumpStacks(pw);
+            pw.print("]");
+        }
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mFocusedStack=" + mFocusedStack);
                 pw.print(" mLastFocusedStack="); pw.println(mLastFocusedStack);

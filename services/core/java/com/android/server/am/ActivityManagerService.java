@@ -21482,6 +21482,17 @@ public class ActivityManagerService extends IActivityManager.Stub
     private void resizeStackWithBoundsFromWindowManager(int stackId, boolean deferResume) {
         final Rect newStackBounds = new Rect();
         final ActivityStack stack = mStackSupervisor.getStack(stackId);
+
+        // TODO(b/71548119): Revert CL introducing below once cause of mismatch is found.
+        if (stack == null) {
+            final StringWriter writer = new StringWriter();
+            final PrintWriter printWriter = new PrintWriter(writer);
+            mStackSupervisor.dumpDisplays(printWriter);
+            printWriter.flush();
+
+            Log.wtf(TAG, "stack not found:" + stackId + " displays:" + writer);
+        }
+
         stack.getBoundsForNewConfiguration(newStackBounds);
         mStackSupervisor.resizeStackLocked(
                 stack, !newStackBounds.isEmpty() ? newStackBounds : null /* bounds */,
