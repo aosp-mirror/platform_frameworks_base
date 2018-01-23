@@ -156,7 +156,7 @@ private:
     // This field is used when statsD wants to create log event object and write fields to it. After
     // calling init() function, this object would be destroyed to save memory usage.
     // When the log event is created from log msg, this field is never initiated.
-    android_log_context mContext;
+    android_log_context mContext = NULL;
 
     uint64_t mTimestampNs;
 
