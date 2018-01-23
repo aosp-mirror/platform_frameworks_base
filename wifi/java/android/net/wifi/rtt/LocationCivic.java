@@ -32,8 +32,6 @@ import java.util.Objects;
  * returns an instance of this class) it is possibly Self Reported (by the peer). In such a case
  * the information is NOT validated - use with caution. Consider validating it with other sources
  * of information before using it.
- *
- * @hide
  */
 public final class LocationCivic implements Parcelable {
     private final byte[] mData;
@@ -77,7 +75,6 @@ public final class LocationCivic implements Parcelable {
         dest.writeByteArray(mData);
     }
 
-    /** @hide */
     public static final Parcelable.Creator<LocationCivic> CREATOR =
             new Parcelable.Creator<LocationCivic>() {
                 @Override
