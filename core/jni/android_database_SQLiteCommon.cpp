@@ -223,8 +223,8 @@ void throw_sqlite3_exception(JNIEnv* env, int errcode,
     if (sqlite3Message) {
         String8 fullMessage;
         fullMessage.append(sqlite3Message);
-        const char* errcode_msg = sqlite3_error_code_to_msg(errcode).c_str();
-        fullMessage.appendFormat(" (code %s)", errcode_msg); // print extended error code
+        std::string errcode_msg = sqlite3_error_code_to_msg(errcode);
+        fullMessage.appendFormat(" (code %s)", errcode_msg.c_str()); // print extended error code
         if (message) {
             fullMessage.append(": ");
             fullMessage.append(message);
