@@ -16,7 +16,10 @@
 package com.android.statsd.dogfood;
 
 import android.app.Activity;
+import android.app.PendingIntent;
+import android.app.IntentService;
 import android.app.StatsManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -48,69 +51,69 @@ public class MainActivity extends Activity {
 
         findViewById(R.id.app_a_wake_lock_acquire1).setOnClickListener(
                 new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onWakeLockAcquire(0, "wl_1");
-            }
-        });
+                    @Override
+                    public void onClick(View view) {
+                        onWakeLockAcquire(0, "wl_1");
+                    }
+                });
 
         findViewById(R.id.app_b_wake_lock_acquire1).setOnClickListener(
                 new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onWakeLockAcquire(1, "wl_1");
-            }
-        });
+                    @Override
+                    public void onClick(View view) {
+                        onWakeLockAcquire(1, "wl_1");
+                    }
+                });
 
         findViewById(R.id.app_a_wake_lock_acquire2).setOnClickListener(
                 new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onWakeLockAcquire(0, "wl_2");
-            }
-        });
+                    @Override
+                    public void onClick(View view) {
+                        onWakeLockAcquire(0, "wl_2");
+                    }
+                });
 
         findViewById(R.id.app_b_wake_lock_acquire2).setOnClickListener(
                 new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onWakeLockAcquire(1, "wl_2");
-            }
-        });
+                    @Override
+                    public void onClick(View view) {
+                        onWakeLockAcquire(1, "wl_2");
+                    }
+                });
 
         findViewById(R.id.app_a_wake_lock_release1).setOnClickListener(
                 new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onWakeLockRelease(0, "wl_1");
-            }
-        });
+                    @Override
+                    public void onClick(View view) {
+                        onWakeLockRelease(0, "wl_1");
+                    }
+                });
 
 
         findViewById(R.id.app_b_wake_lock_release1).setOnClickListener(
                 new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onWakeLockRelease(1, "wl_1");
-            }
-        });
+                    @Override
+                    public void onClick(View view) {
+                        onWakeLockRelease(1, "wl_1");
+                    }
+                });
 
         findViewById(R.id.app_a_wake_lock_release2).setOnClickListener(
                 new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onWakeLockRelease(0, "wl_2");
-            }
-        });
+                    @Override
+                    public void onClick(View view) {
+                        onWakeLockRelease(0, "wl_2");
+                    }
+                });
 
 
         findViewById(R.id.app_b_wake_lock_release2).setOnClickListener(
                 new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onWakeLockRelease(1, "wl_2");
-            }
-        });
+                    @Override
+                    public void onClick(View view) {
+                        onWakeLockRelease(1, "wl_2");
+                    }
+                });
 
 
         findViewById(R.id.plug).setOnClickListener(new View.OnClickListener() {
@@ -191,8 +194,7 @@ public class MainActivity extends Activity {
                     byte[] config = new byte[inputStream.available()];
                     inputStream.read(config);
                     if (mStatsManager != null) {
-                        if (mStatsManager.addConfiguration(CONFIG_ID,
-                                config, getPackageName(), MainActivity.this.getClass().getName())) {
+                        if (mStatsManager.addConfiguration(CONFIG_ID, config)) {
                             Toast.makeText(
                                     MainActivity.this, "Config pushed", Toast.LENGTH_LONG).show();
                         } else {
@@ -202,6 +204,55 @@ public class MainActivity extends Activity {
                     }
                 } catch (Exception e) {
                     Toast.makeText(MainActivity.this, "failed to read config", Toast.LENGTH_LONG);
+                }
+            }
+        });
+
+        PendingIntent pi = PendingIntent.getService(this, 0,
+                new Intent(this, ReceiverIntentService.class), PendingIntent.FLAG_UPDATE_CURRENT);
+        findViewById(R.id.set_receiver).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    if (!statsdRunning()) {
+                        return;
+                    }
+                    if (mStatsManager != null) {
+                        if (mStatsManager.setDataFetchOperation(CONFIG_ID, pi)) {
+                            Toast.makeText(MainActivity.this,
+                                    "Receiver specified to pending intent", Toast.LENGTH_LONG)
+                                    .show();
+                        } else {
+                            Toast.makeText(MainActivity.this, "Statsd did not set receiver",
+                                    Toast.LENGTH_LONG)
+                                    .show();
+                        }
+                    }
+                } catch (Exception e) {
+                    Toast.makeText(MainActivity.this, "failed to set receiver", Toast.LENGTH_LONG);
+                }
+            }
+        });
+        findViewById(R.id.remove_receiver).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    if (!statsdRunning()) {
+                        return;
+                    }
+                    if (mStatsManager != null) {
+                        if (mStatsManager.setDataFetchOperation(CONFIG_ID, null)) {
+                            Toast.makeText(MainActivity.this, "Receiver remove", Toast.LENGTH_LONG)
+                                    .show();
+                        } else {
+                            Toast.makeText(MainActivity.this, "Statsd did not remove receiver",
+                                    Toast.LENGTH_LONG)
+                                    .show();
+                        }
+                    }
+                } catch (Exception e) {
+                    Toast.makeText(
+                            MainActivity.this, "failed to remove receiver", Toast.LENGTH_LONG);
                 }
             }
         });
@@ -257,8 +308,8 @@ public class MainActivity extends Activity {
             Log.d(TAG, "invalid pkg id");
             return;
         }
-        int[] uids = new int[] {mUids[id]};
-        String[] tags  = new String[] {"acquire"};
+        int[] uids = new int[]{mUids[id]};
+        String[] tags = new String[]{"acquire"};
         StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, uids, tags,
                 StatsLog.WAKELOCK_STATE_CHANGED__LEVEL__PARTIAL_WAKE_LOCK, name,
                 StatsLog.WAKELOCK_STATE_CHANGED__STATE__ACQUIRE);
@@ -273,8 +324,8 @@ public class MainActivity extends Activity {
             Log.d(TAG, "invalid pkg id");
             return;
         }
-        int[] uids = new int[] {mUids[id]};
-        String[] tags  = new String[] {"release"};
+        int[] uids = new int[]{mUids[id]};
+        String[] tags = new String[]{"release"};
         StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, uids, tags,
                 StatsLog.WAKELOCK_STATE_CHANGED__LEVEL__PARTIAL_WAKE_LOCK, name,
                 StatsLog.WAKELOCK_STATE_CHANGED__STATE__RELEASE);
@@ -282,5 +333,21 @@ public class MainActivity extends Activity {
         sb.append("StagsLog.write(10, ").append(mUids[id]).append(", ").append(0)
                 .append(", ").append(name).append(", 0);");
         Toast.makeText(this, sb.toString(), Toast.LENGTH_LONG).show();
+    }
+
+    public static class ReceiverIntentService extends IntentService {
+        public ReceiverIntentService() {
+            super("ReceiverIntentService");
+        }
+
+        /**
+         * The IntentService calls this method from the default worker thread with
+         * the intent that started the service. When this method returns, IntentService
+         * stops the service, as appropriate.
+         */
+        @Override
+        protected void onHandleIntent(Intent intent) {
+            Log.i(TAG, "Received notification that we should call getData");
+        }
     }
 }

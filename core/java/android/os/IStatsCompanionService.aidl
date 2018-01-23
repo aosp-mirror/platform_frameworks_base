@@ -55,9 +55,8 @@ interface IStatsCompanionService {
     /** Pull the specified data. Results will be sent to statsd when complete. */
     StatsLogEventWrapper[] pullData(int pullCode);
 
-    /** Send a broadcast to the specified pkg and class that it should getData now. */
-    // TODO: Rename this and use a pending intent instead.
-    oneway void sendBroadcast(String pkg, String cls);
+    /** Send a broadcast to the specified PendingIntent's as IBinder that it should getData now. */
+    oneway void sendDataBroadcast(in IBinder intentSender);
 
     /**
      * Requests StatsCompanionService to send a broadcast using the given intentSender

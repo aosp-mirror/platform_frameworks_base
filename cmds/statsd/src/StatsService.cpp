@@ -83,12 +83,11 @@ StatsService::StatsService(const sp<Looper>& handlerLooper)
         auto receiver = mConfigManager->GetConfigReceiver(key);
         if (sc == nullptr) {
             VLOG("Could not find StatsCompanionService");
-        } else if (receiver.first.size() == 0) {
+        } else if (receiver == nullptr) {
             VLOG("Statscompanion could not find a broadcast receiver for %s",
                  key.ToString().c_str());
         } else {
-            sc->sendBroadcast(String16(receiver.first.c_str()),
-                              String16(receiver.second.c_str()));
+            sc->sendDataBroadcast(receiver);
         }
     });
 
@@ -366,12 +365,14 @@ status_t StatsService::cmd_trigger_broadcast(FILE* out, Vector<String8>& args) {
     }
     auto receiver = mConfigManager->GetConfigReceiver(ConfigKey(uid, StrToInt64(name)));
     sp<IStatsCompanionService> sc = getStatsCompanionService();
-    if (sc != nullptr) {
-        sc->sendBroadcast(String16(receiver.first.c_str()), String16(receiver.second.c_str()));
+    if (sc == nullptr) {
+        VLOG("Could not access statsCompanion");
+    } else if (receiver == nullptr) {
+        VLOG("Could not find receiver for %s, %s", args[1].c_str(), args[2].c_str())
+    } else {
+        sc->sendDataBroadcast(receiver);
         VLOG("StatsService::trigger broadcast succeeded to %s, %s", args[1].c_str(),
              args[2].c_str());
-    } else {
-        VLOG("Could not access statsCompanion");
     }
 
     return NO_ERROR;
@@ -799,7 +800,6 @@ Status StatsService::getMetadata(vector<uint8_t>* output) {
 
 Status StatsService::addConfiguration(int64_t key,
                                       const vector <uint8_t>& config,
-                                      const String16& package, const String16& cls,
                                       bool* success) {
     IPCThreadState* ipc = IPCThreadState::self();
     if (checkCallingPermission(String16(kPermissionDump))) {
@@ -810,8 +810,33 @@ Status StatsService::addConfiguration(int64_t key,
             return Status::ok();
         }
         mConfigManager->UpdateConfig(configKey, cfg);
-        mConfigManager->SetConfigReceiver(configKey, string(String8(package).string()),
-                                          string(String8(cls).string()));
+        *success = true;
+        return Status::ok();
+    } else {
+        *success = false;
+        return Status::fromExceptionCode(binder::Status::EX_SECURITY);
+    }
+}
+
+Status StatsService::removeDataFetchOperation(int64_t key, bool* success) {
+    IPCThreadState* ipc = IPCThreadState::self();
+    if (checkCallingPermission(String16(kPermissionDump))) {
+        ConfigKey configKey(ipc->getCallingUid(), key);
+        mConfigManager->RemoveConfigReceiver(configKey);
+        *success = true;
+        return Status::ok();
+    } else {
+        *success = false;
+        return Status::fromExceptionCode(binder::Status::EX_SECURITY);
+    }
+}
+
+Status StatsService::setDataFetchOperation(int64_t key, const sp<android::IBinder>& intentSender,
+                                           bool* success) {
+    IPCThreadState* ipc = IPCThreadState::self();
+    if (checkCallingPermission(String16(kPermissionDump))) {
+        ConfigKey configKey(ipc->getCallingUid(), key);
+        mConfigManager->SetConfigReceiver(configKey, intentSender);
         *success = true;
         return Status::ok();
     } else {

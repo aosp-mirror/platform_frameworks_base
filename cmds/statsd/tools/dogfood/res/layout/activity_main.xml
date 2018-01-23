@@ -31,6 +31,18 @@
             android:layout_height="wrap_content"
             android:background="@android:color/holo_green_light"
             android:text="@string/push_config"/>
+        <Button
+                android:id="@+id/set_receiver"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/holo_green_light"
+                android:text="@string/set_receiver"/>
+        <Button
+                android:id="@+id/remove_receiver"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/holo_green_light"
+                android:text="@string/remove_receiver"/>
 
         <LinearLayout android:layout_width="wrap_content"
             android:layout_height="wrap_content"
