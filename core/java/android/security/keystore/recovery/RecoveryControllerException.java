@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,23 @@
  * limitations under the License.
  */
 
-package android.security.keystore;
+package android.security.keystore.recovery;
 
-/* @hide */
-parcelable KeychainProtectionParams;
+import java.security.GeneralSecurityException;
+
+/**
+ * Base exception for errors thrown by {@link RecoveryController}.
+ *
+ * @hide
+ */
+public abstract class RecoveryControllerException extends GeneralSecurityException {
+    RecoveryControllerException() { }
+
+    RecoveryControllerException(String msg) {
+        super(msg);
+    }
+
+    public RecoveryControllerException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}

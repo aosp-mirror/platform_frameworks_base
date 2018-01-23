@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.security.keystore;
+package android.security.keystore.recovery;
 
 /* @hide */
-parcelable WrappedApplicationKey;
+parcelable KeyDerivationParams;

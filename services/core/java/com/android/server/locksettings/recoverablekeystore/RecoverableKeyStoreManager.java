@@ -33,10 +33,10 @@ import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 
-import android.security.keystore.KeychainProtectionParams;
-import android.security.keystore.KeychainSnapshot;
-import android.security.keystore.RecoveryController;
-import android.security.keystore.WrappedApplicationKey;
+import android.security.keystore.recovery.KeychainProtectionParams;
+import android.security.keystore.recovery.KeychainSnapshot;
+import android.security.keystore.recovery.RecoveryController;
+import android.security.keystore.recovery.WrappedApplicationKey;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;

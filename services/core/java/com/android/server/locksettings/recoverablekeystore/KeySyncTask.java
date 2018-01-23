@@ -16,14 +16,14 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
-import static android.security.keystore.KeychainProtectionParams.TYPE_LOCKSCREEN;
+import static android.security.keystore.recovery.KeychainProtectionParams.TYPE_LOCKSCREEN;
 
 import android.annotation.Nullable;
 import android.content.Context;
-import android.security.keystore.KeyDerivationParams;
-import android.security.keystore.KeychainProtectionParams;
-import android.security.keystore.KeychainSnapshot;
-import android.security.keystore.WrappedApplicationKey;
+import android.security.keystore.recovery.KeyDerivationParams;
+import android.security.keystore.recovery.KeychainProtectionParams;
+import android.security.keystore.recovery.KeychainSnapshot;
+import android.security.keystore.recovery.WrappedApplicationKey;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
