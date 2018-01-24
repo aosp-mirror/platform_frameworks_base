@@ -2742,7 +2742,7 @@ public class Paint {
      * @param offset index of caret position
      * @return width measurement between start and offset
      */
-    public float getRunAdvance(@NonNull CharSequence text, int start, int end, int contextStart,
+    public float getRunAdvance(CharSequence text, int start, int end, int contextStart,
             int contextEnd, boolean isRtl, int offset) {
         if (text == null) {
             throw new IllegalArgumentException("text cannot be null");
