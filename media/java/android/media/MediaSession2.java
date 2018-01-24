@@ -19,6 +19,7 @@ package android.media;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.media.MediaPlayerBase.PlaybackListener;
 import android.media.session.MediaSession;
 import android.media.session.MediaSession.Callback;
 import android.media.session.PlaybackState;
@@ -74,7 +75,7 @@ import java.util.List;
 // TODO(jaewan): Should we make APIs for MediaSessionService2 public? It's helpful for
 //               developers that doesn't want to override from Browser, but user may not use this
 //               correctly.
-public class MediaSession2 extends MediaPlayerBase {
+public class MediaSession2 implements AutoCloseable {
     private final MediaSession2Provider mProvider;
 
     // Note: Do not define IntDef because subclass can add more command code on top of these.
@@ -340,10 +341,6 @@ public class MediaSession2 extends MediaPlayerBase {
             }
             if (player == null) {
                 throw new IllegalArgumentException("player shouldn't be null");
-            }
-            if (player instanceof MediaSession2 || player instanceof MediaController2) {
-                throw new IllegalArgumentException("player doesn't accept MediaSession2 nor"
-                        + " MediaController2");
             }
             mContext = context;
             mPlayer = player;
@@ -698,12 +695,15 @@ public class MediaSession2 extends MediaPlayerBase {
      *
      * @param player a {@link MediaPlayerBase} that handles actual media playback in your app.
      *      It shouldn't be {@link MediaSession2} nor {@link MediaController2}.
-     * @throws IllegalArgumentException if the player is either {@link MediaSession2}
-     *      or {@link MediaController2}.
+     * @throws IllegalArgumentException if the player is {@code null}.
      */
-    // TODO(jaewan): Add release instead of setPlayer(null).
-    public void setPlayer(MediaPlayerBase player) throws IllegalArgumentException {
+    public void setPlayer(@NonNull MediaPlayerBase player) throws IllegalArgumentException {
         mProvider.setPlayer_impl(player);
+    }
+
+    @Override
+    public void close() {
+        mProvider.close_impl();
     }
 
     /**
@@ -749,32 +749,41 @@ public class MediaSession2 extends MediaPlayerBase {
         mProvider.setCustomLayout_impl(controller, layout);
     }
 
-    @Override
+    /**
+     * Play playback
+     */
     public void play() {
         mProvider.play_impl();
     }
 
-    @Override
+    /**
+     * Pause playback
+     */
     public void pause() {
         mProvider.pause_impl();
     }
 
-    @Override
+    /**
+     * Stop playback
+     */
     public void stop() {
         mProvider.stop_impl();
     }
 
-    @Override
+    /**
+     * Rewind playback
+     */
     public void skipToPrevious() {
         mProvider.skipToPrevious_impl();
     }
 
-    @Override
+    /**
+     * Rewind playback
+     */
     public void skipToNext() {
         mProvider.skipToNext_impl();
     }
 
-    @Override
     public @NonNull PlaybackState getPlaybackState() {
         return mProvider.getPlaybackState_impl();
     }
@@ -791,7 +800,6 @@ public class MediaSession2 extends MediaPlayerBase {
      * @throws IllegalArgumentException when either the listener or handler is {@code null}.
      */
     // TODO(jaewan): Can handler be null? Follow API guideline after it's finalized.
-    @Override
     public void addPlaybackListener(@NonNull PlaybackListener listener, @NonNull Handler handler) {
         mProvider.addPlaybackListener_impl(listener, handler);
     }
@@ -802,7 +810,6 @@ public class MediaSession2 extends MediaPlayerBase {
      * @param listener the listener to be removed
      * @throws IllegalArgumentException if the listener is {@code null}.
      */
-    @Override
     public void removePlaybackListener(PlaybackListener listener) {
         mProvider.removePlaybackListener_impl(listener);
     }

@@ -20,13 +20,16 @@ import android.media.MediaPlayerBase;
 import android.media.MediaSession2.CommandButton;
 import android.media.MediaSession2.ControllerInfo;
 import android.media.SessionToken;
+import android.media.session.PlaybackState;
+import android.os.Handler;
 
 import java.util.List;
 
 /**
  * @hide
  */
-public interface MediaSession2Provider extends MediaPlayerBaseProvider {
+public interface MediaSession2Provider extends TransportControlProvider {
+    void close_impl();
     void setPlayer_impl(MediaPlayerBase player) throws IllegalArgumentException;
     MediaPlayerBase getPlayer_impl();
     SessionToken getToken_impl();

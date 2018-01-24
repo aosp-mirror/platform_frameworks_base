@@ -19,6 +19,7 @@ package android.media;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.media.MediaPlayerBase.PlaybackListener;
 import android.media.MediaSession2.CommandButton;
 import android.media.MediaSession2.CommandGroup;
 import android.media.MediaSession2.ControllerInfo;
@@ -61,7 +62,7 @@ import java.util.concurrent.Executor;
  */
 // TODO(jaewan): Unhide
 // TODO(jaewan): Revisit comments. Currently MediaBrowser case is missing.
-public class MediaController2 extends MediaPlayerBase {
+public class MediaController2 implements AutoCloseable {
     /**
      * Interface for listening to change in activeness of the {@link MediaSession2}.  It's
      * active if and only if it has set a player.
@@ -80,8 +81,8 @@ public class MediaController2 extends MediaPlayerBase {
          * the session. The controller becomes unavailable afterwards and the callback wouldn't
          * be called.
          * <p>
-         * It will be also called after the {@link #release()}, so you can put clean up code here.
-         * You don't need to call {@link #release()} after this.
+         * It will be also called after the {@link #close()}, so you can put clean up code here.
+         * You don't need to call {@link #close()} after this.
          */
         public void onDisconnected() { }
 
@@ -131,8 +132,9 @@ public class MediaController2 extends MediaPlayerBase {
      * Release this object, and disconnect from the session. After this, callbacks wouldn't be
      * received.
      */
-    public void release() {
-        mProvider.release_impl();
+    @Override
+    public void close() {
+        mProvider.close_impl();
     }
 
     /**
@@ -157,32 +159,27 @@ public class MediaController2 extends MediaPlayerBase {
         return mProvider.isConnected_impl();
     }
 
-    @Override
     public void play() {
         mProvider.play_impl();
     }
 
-    @Override
     public void pause() {
         mProvider.pause_impl();
     }
 
-    @Override
     public void stop() {
         mProvider.stop_impl();
     }
 
-    @Override
     public void skipToPrevious() {
         mProvider.skipToPrevious_impl();
     }
 
-    @Override
     public void skipToNext() {
         mProvider.skipToNext_impl();
     }
 
-    @Override
+
     public @Nullable PlaybackState getPlaybackState() {
         return mProvider.getPlaybackState_impl();
     }
@@ -198,7 +195,6 @@ public class MediaController2 extends MediaPlayerBase {
     // TODO(jaewan): Match with the addSessionAvailabilityListener() that tells the current state
     //               through the listener.
     // TODO(jaewan): Can handler be null? Follow the API guideline after it's finalized.
-    @Override
     public void addPlaybackListener(@NonNull PlaybackListener listener, @NonNull Handler handler) {
         mProvider.addPlaybackListener_impl(listener, handler);
     }
@@ -209,7 +205,6 @@ public class MediaController2 extends MediaPlayerBase {
      * @param listener the listener to be removed
      * @throws IllegalArgumentException if the listener is {@code null}.
      */
-    @Override
     public void removePlaybackListener(@NonNull PlaybackListener listener) {
         mProvider.removePlaybackListener_impl(listener);
     }

@@ -81,7 +81,7 @@ class MediaSession2Record {
     public void onSessionDestroyed() {
         if (mController != null) {
             mControllerCallback.destroy();
-            mController.release();
+            mController.close();
             mController = null;
         }
         mSessionPid = 0;

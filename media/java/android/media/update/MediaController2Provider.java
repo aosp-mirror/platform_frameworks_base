@@ -16,13 +16,20 @@
 
 package android.media.update;
 
+import android.media.MediaPlayerBase;
 import android.media.SessionToken;
+import android.media.session.PlaybackState;
+import android.os.Handler;
 
 /**
  * @hide
  */
-public interface MediaController2Provider extends MediaPlayerBaseProvider {
-    void release_impl();
+public interface MediaController2Provider extends TransportControlProvider {
+    void close_impl();
     SessionToken getSessionToken_impl();
     boolean isConnected_impl();
+
+    PlaybackState getPlaybackState_impl();
+    void addPlaybackListener_impl(MediaPlayerBase.PlaybackListener listener, Handler handler);
+    void removePlaybackListener_impl(MediaPlayerBase.PlaybackListener listener);
 }
