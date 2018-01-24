@@ -45,6 +45,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -10908,8 +10909,20 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
 
                 if (toTop) {
+                    // Caller wants the current split-screen primary stack to be the top stack after
+                    // it goes fullscreen, so move it to the front.
                     stack.moveToFront("dismissSplitScreenMode");
+                } else if (mStackSupervisor.isFocusedStack(stack)) {
+                    // In this case the current split-screen primary stack shouldn't be the top
+                    // stack after it goes fullscreen, but it current has focus, so we move the
+                    // focus to the top-most split-screen secondary stack next to it.
+                    final ActivityStack otherStack = stack.getDisplay().getTopStackInWindowingMode(
+                            WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+                    if (otherStack != null) {
+                        otherStack.moveToFront("dismissSplitScreenMode_other");
+                    }
                 }
+
                 stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
             }
         } finally {
