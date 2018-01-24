@@ -137,6 +137,7 @@ import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.connectivity.KeepaliveTracker;
 import com.android.server.connectivity.LingerMonitor;
 import com.android.server.connectivity.MockableSystemProperties;
+import com.android.server.connectivity.MultipathPolicyTracker;
 import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkDiagnostics;
 import com.android.server.connectivity.NetworkMonitor;
@@ -506,6 +507,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @VisibleForTesting
     final MultinetworkPolicyTracker mMultinetworkPolicyTracker;
+
+    @VisibleForTesting
+    final MultipathPolicyTracker mMultipathPolicyTracker;
 
     /**
      * Implements support for the legacy "one network per network type" model.
@@ -889,6 +893,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mMultinetworkPolicyTracker = createMultinetworkPolicyTracker(
                 mContext, mHandler, () -> rematchForAvoidBadWifiUpdate());
         mMultinetworkPolicyTracker.start();
+
+        mMultipathPolicyTracker = new MultipathPolicyTracker(mContext, mHandler);
 
         mDnsManager = new DnsManager(mContext, mNetd, mSystemProperties);
         registerPrivateDnsSettingsCallbacks();
@@ -1966,6 +1972,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         pw.println();
         dumpAvoidBadWifiSettings(pw);
 
+        pw.println();
+        mMultipathPolicyTracker.dump(pw);
+
         if (argsContain(args, SHORT_ARG) == false) {
             pw.println();
             synchronized (mValidationLogs) {
@@ -2901,6 +2910,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return ConnectivityManager.MULTIPATH_PREFERENCE_UNMETERED;
         }
 
+        Integer networkPreference = mMultipathPolicyTracker.getMultipathPreference(network);
+        if (networkPreference != null) {
+            return networkPreference;
+        }
+
         return mMultinetworkPolicyTracker.getMeteredMultipathPreference();
     }
 
@@ -2994,6 +3008,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     for (NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
                         nai.networkMonitor.systemReady = true;
                     }
+                    mMultipathPolicyTracker.start();
                     break;
                 }
                 case EVENT_REVALIDATE_NETWORK: {
