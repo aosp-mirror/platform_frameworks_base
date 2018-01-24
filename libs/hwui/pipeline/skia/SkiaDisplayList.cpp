@@ -31,6 +31,9 @@ void SkiaDisplayList::syncContents() {
     for (auto& functor : mChildFunctors) {
         functor.syncFunctor();
     }
+    for (auto& animatedImage : mAnimatedImages) {
+        animatedImage->syncProperties();
+    }
     for (auto& vectorDrawable : mVectorDrawables) {
         vectorDrawable->syncProperties();
     }
@@ -89,6 +92,18 @@ bool SkiaDisplayList::prepareListAndChildren(
     }
 
     bool isDirty = false;
+    for (auto& animatedImage : mAnimatedImages) {
+        // If any animated image in the display list needs updated, then damage the node.
+        if (animatedImage->isDirty()) {
+            isDirty = true;
+        }
+        if (animatedImage->isRunning()) {
+            static_cast<SkiaPipeline*>(info.canvasContext.getRenderPipeline())
+                    ->scheduleDeferredUpdate(animatedImage);
+            info.out.hasAnimations = true;
+        }
+    }
+
     for (auto& vectorDrawable : mVectorDrawables) {
         // If any vector drawable in the display list needs update, damage the node.
         if (vectorDrawable->isDirty()) {
@@ -109,6 +124,7 @@ void SkiaDisplayList::reset() {
 
     mMutableImages.clear();
     mVectorDrawables.clear();
+    mAnimatedImages.clear();
     mChildFunctors.clear();
     mChildNodes.clear();
 

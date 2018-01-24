@@ -118,9 +118,12 @@ public class AnimatedImageDrawable extends Drawable implements Animatable {
 
     @Override
     public void draw(@NonNull Canvas canvas) {
-        long nextUpdate = nDraw(mNativePtr, canvas.getNativeCanvasWrapper(),
-                SystemClock.uptimeMillis());
-        scheduleSelf(mRunnable, nextUpdate);
+        long nextUpdate = nDraw(mNativePtr, canvas.getNativeCanvasWrapper());
+        // a value <= 0 indicates that the drawable is stopped or that renderThread
+        // will manage the animation
+        if (nextUpdate > 0) {
+            scheduleSelf(mRunnable, nextUpdate);
+        }
     }
 
     @Override
@@ -130,6 +133,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable {
                    + " 255! provided " + alpha);
         }
         nSetAlpha(mNativePtr, alpha);
+        invalidateSelf();
     }
 
     @Override
@@ -141,6 +145,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable {
     public void setColorFilter(@Nullable ColorFilter colorFilter) {
         long nativeFilter = colorFilter == null ? 0 : colorFilter.getNativeInstance();
         nSetColorFilter(mNativePtr, nativeFilter);
+        invalidateSelf();
     }
 
     @Override
@@ -161,7 +166,10 @@ public class AnimatedImageDrawable extends Drawable implements Animatable {
 
     @Override
     public void start() {
-        nStart(mNativePtr);
+        if (isRunning() == false) {
+            nStart(mNativePtr);
+            invalidateSelf();
+        }
     }
 
     @Override
@@ -173,7 +181,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable {
             @Nullable ImageDecoder decoder, int width, int height, Rect cropRect)
         throws IOException;
     private static native long nGetNativeFinalizer();
-    private static native long nDraw(long nativePtr, long canvasNativePtr, long msecs);
+    private static native long nDraw(long nativePtr, long canvasNativePtr);
     private static native void nSetAlpha(long nativePtr, int alpha);
     private static native int nGetAlpha(long nativePtr);
     private static native void nSetColorFilter(long nativePtr, long nativeFilter);

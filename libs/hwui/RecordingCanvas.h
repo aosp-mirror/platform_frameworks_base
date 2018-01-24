@@ -183,8 +183,7 @@ public:
     virtual void drawNinePatch(Bitmap& bitmap, const android::Res_png_9patch& chunk, float dstLeft,
                                float dstTop, float dstRight, float dstBottom,
                                const SkPaint* paint) override;
-    virtual void drawAnimatedImage(SkAnimatedImage*, float left, float top,
-                                   const SkPaint* paint) override;
+    virtual double drawAnimatedImage(AnimatedImageDrawable*) override;
 
     // Text
     virtual bool drawTextAbsolutePos() const override { return false; }

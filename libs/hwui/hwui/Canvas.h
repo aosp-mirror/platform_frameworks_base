@@ -73,6 +73,7 @@ typedef uirenderer::VectorDrawable::Tree VectorDrawableRoot;
 
 typedef std::function<void(uint16_t* text, float* positions)> ReadGlyphFunc;
 
+class AnimatedImageDrawable;
 class Bitmap;
 class Paint;
 struct Typeface;
@@ -238,8 +239,7 @@ public:
                                float dstTop, float dstRight, float dstBottom,
                                const SkPaint* paint) = 0;
 
-    virtual void drawAnimatedImage(SkAnimatedImage*, float left, float top,
-                                   const SkPaint* paint) = 0;
+    virtual double drawAnimatedImage(AnimatedImageDrawable* imgDrawable) = 0;
 
     /**
      * Specifies if the positions passed to ::drawText are absolute or relative
