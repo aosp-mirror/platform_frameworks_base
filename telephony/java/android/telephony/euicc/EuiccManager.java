@@ -19,6 +19,7 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -598,7 +599,11 @@ public class EuiccManager {
         }
     }
 
-    private static IEuiccController getIEuiccController() {
+    /**
+     * @hide
+     */
+    @TestApi
+    protected IEuiccController getIEuiccController() {
         return IEuiccController.Stub.asInterface(ServiceManager.getService("econtroller"));
     }
 }
