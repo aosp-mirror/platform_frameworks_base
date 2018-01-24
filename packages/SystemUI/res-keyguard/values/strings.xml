@@ -124,6 +124,10 @@
     <string name="keyboardview_keycode_delete">Delete</string>
     <!-- Description of the button used to disable current carrier when the device supported embedded SIM. [CHAR LIMIT=30] -->
     <string name="disable_carrier_button_text">Disable eSIM</string>
+    <!-- Title of Error message when disabling current carrier failed for the device supported embedded SIM. [CHAR LIMIT=80] -->
+    <string name="error_disable_esim_title">Can\u2019t disable eSIM</string>
+    <!-- Description of Error message when disabling current carrier failed for the device supported embedded SIM. [CHAR LIMIT=80] -->
+    <string name="error_disable_esim_msg">The eSIM can\u2019t be disabled due to an error.</string>
     <!-- Description of the Enter button in a KeyboardView. [CHAR LIMIT=NONE] -->
     <string name="keyboardview_keycode_enter">Enter</string>
 
@@ -146,8 +150,8 @@
     <string name="kg_sim_pin_instructions">Enter SIM PIN.</string>
     <!-- Instructions for using the SIM PIN unlock screen when there's more than one SIM -->
     <string name="kg_sim_pin_instructions_multi">Enter SIM PIN for \"<xliff:g id="carrier" example="CARD 1">%1$s</xliff:g>\".</string>
-    <!-- Instructions for disabling eSIM carrier to unlock the phone with embedded SIM -->
-    <string name="kg_sim_lock_instructions_esim">Disable eSIM to use device without mobile service.</string>
+    <!-- Instructions for disabling eSIM carrier to unlock the phone with embedded SIM. This message follows the original SIM PIN/PUK message of device without embedded SIM. -->
+    <string name="kg_sim_lock_esim_instructions"><xliff:g id="previous_msg" example="Enter SIM PIN.">%1$s</xliff:g> Disable eSIM to use device without mobile service.</string>
     <!-- Instructions for using the PIN unlock screen -->
     <string name="kg_pin_instructions">Enter PIN</string>
     <!-- Instructions for using the password unlock screen -->
