@@ -49,6 +49,12 @@ using V1_1::ProgramListResult;
 using V1_1::ProgramSelector;
 using V1_1::VendorKeyValue;
 
+// HAL 2.0 flags that have equivalent HAL 1.x fields
+enum class ProgramInfoFlagsExt {
+    TUNED = 1 << 4,
+    STEREO = 1 << 5,
+};
+
 static JavaRef<jobject> BandDescriptorFromHal(JNIEnv *env, const RegionalBandConfig &config);
 static JavaRef<jobject> BandDescriptorFromHal(JNIEnv *env, const V1_0::BandConfig &config, Region region);
 
@@ -614,9 +620,14 @@ static JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_0::ProgramInfo 
     auto jVendorInfo = info11 ? VendorInfoFromHal(env, info11->vendorInfo) : nullptr;
     auto jSelector = ProgramSelectorFromHal(env, selector);
 
+    jint flags = info11 ? info11->flags : 0;
+    if (info10.tuned) flags |= static_cast<jint>(ProgramInfoFlagsExt::TUNED);
+    if (info10.stereo) flags |= static_cast<jint>(ProgramInfoFlagsExt::STEREO);
+    // info10.digital is dropped, because it has no equivalent in the new APIs
+
     return make_javaref(env, env->NewObject(gjni.ProgramInfo.clazz, gjni.ProgramInfo.cstor,
-            jSelector.get(), info10.tuned, info10.stereo, info10.digital, info10.signalStrength,
-            jMetadata.get(), info11 ? info11->flags : 0, jVendorInfo.get()));
+            jSelector.get(), nullptr, nullptr, nullptr, flags, info10.signalStrength,
+            jMetadata.get(), jVendorInfo.get()));
 }
 
 JavaRef<jobject> ProgramInfoFromHal(JNIEnv *env, const V1_0::ProgramInfo &info, V1_0::Band band) {
@@ -705,9 +716,15 @@ void register_android_server_broadcastradio_convert(JNIEnv *env) {
 
     auto programInfoClass = FindClassOrDie(env, "android/hardware/radio/RadioManager$ProgramInfo");
     gjni.ProgramInfo.clazz = MakeGlobalRefOrDie(env, programInfoClass);
-    gjni.ProgramInfo.cstor = GetMethodIDOrDie(env, programInfoClass, "<init>",
-            "(Landroid/hardware/radio/ProgramSelector;ZZZILandroid/hardware/radio/RadioMetadata;I"
-            "Ljava/util/Map;)V");
+    gjni.ProgramInfo.cstor = GetMethodIDOrDie(env, programInfoClass, "<init>", "("
+            "Landroid/hardware/radio/ProgramSelector;"
+            "Landroid/hardware/radio/ProgramSelector$Identifier;"
+            "Landroid/hardware/radio/ProgramSelector$Identifier;"
+            "Ljava/util/Collection;"  // relatedContent
+            "II"  // flags, signalQuality
+            "Landroid/hardware/radio/RadioMetadata;"
+            "Ljava/util/Map;"  // vendorInfo
+            ")V");
 
     auto programSelectorClass = FindClassOrDie(env, "android/hardware/radio/ProgramSelector");
     gjni.ProgramSelector.clazz = MakeGlobalRefOrDie(env, programSelectorClass);

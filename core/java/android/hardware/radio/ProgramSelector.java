@@ -27,6 +27,7 @@ import android.os.Parcelable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -360,6 +361,38 @@ public final class ProgramSelector implements Parcelable {
     @Deprecated
     public @NonNull long[] getVendorIds() {
         return mVendorIds;
+    }
+
+    /**
+     * Creates an equivalent ProgramSelector with a given secondary identifier preferred.
+     *
+     * Used to point to a specific physical identifier for technologies that may broadcast the same
+     * program on different channels. For example, with a DAB program broadcasted over multiple
+     * ensembles, the radio hardware may select the one with the strongest signal. The UI may select
+     * preferred ensemble though, so the radio hardware may try to use it in the first place.
+     *
+     * This is a best-effort hint for the tuner, not a guaranteed behavior.
+     *
+     * Setting the given secondary identifier as preferred means filtering out other secondary
+     * identifiers of its type and adding it to the list.
+     *
+     * @param preferred preferred secondary identifier
+     * @return a new ProgramSelector with a given secondary identifier preferred
+     */
+    public @NonNull ProgramSelector withSecondaryPreferred(@NonNull Identifier preferred) {
+        int preferredType = preferred.getType();
+        Identifier[] secondaryIds = Stream.concat(
+            // remove other identifiers of that type
+            Arrays.stream(mSecondaryIds).filter(id -> id.getType() != preferredType),
+            // add preferred identifier instead
+            Stream.of(preferred)).toArray(Identifier[]::new);
+
+        return new ProgramSelector(
+            mProgramType,
+            mPrimaryId,
+            secondaryIds,
+            mVendorIds
+        );
     }
 
     /**

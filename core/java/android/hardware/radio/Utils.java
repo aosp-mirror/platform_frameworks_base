@@ -20,7 +20,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -28,6 +31,8 @@ import java.util.Objects;
 import java.util.Set;
 
 final class Utils {
+    private static final String TAG = "BroadcastRadio.utils";
+
     static void writeStringMap(@NonNull Parcel dest, @Nullable Map<String, String> map) {
         if (map == null) {
             dest.writeInt(0);
@@ -88,5 +93,26 @@ final class Utils {
                 return new Integer[size];
             }
         });
+    }
+
+    static <T extends Parcelable> void writeTypedCollection(@NonNull Parcel dest,
+            @Nullable Collection<T> coll) {
+        ArrayList<T> list = null;
+        if (coll != null) {
+            if (coll instanceof ArrayList) {
+                list = (ArrayList) coll;
+            } else {
+                list = new ArrayList<>(coll);
+            }
+        }
+        dest.writeTypedList(list);
+    }
+
+    static void close(ICloseHandle handle) {
+        try {
+            handle.close();
+        } catch (RemoteException ex) {
+            ex.rethrowFromSystemServer();
+        }
     }
 }

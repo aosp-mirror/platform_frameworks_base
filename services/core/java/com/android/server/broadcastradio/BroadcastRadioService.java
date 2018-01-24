@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.radio.IAnnouncementListener;
+import android.hardware.radio.ICloseHandle;
 import android.hardware.radio.IRadioService;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
@@ -28,14 +30,18 @@ import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.internal.util.Preconditions;
 import com.android.server.SystemService;
+import com.android.server.broadcastradio.hal2.AnnouncementAggregator;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.OptionalInt;
 
 public class BroadcastRadioService extends SystemService {
     private static final String TAG = "BcRadioSrv";
+    private static final boolean DEBUG = false;
 
     private final ServiceImpl mServiceImpl = new ServiceImpl();
 
@@ -88,7 +94,7 @@ public class BroadcastRadioService extends SystemService {
         @Override
         public ITuner openTuner(int moduleId, RadioManager.BandConfig bandConfig,
                 boolean withAudio, ITunerCallback callback) throws RemoteException {
-            Slog.i(TAG, "openTuner(" + moduleId + ", _, " + withAudio + ", _)");
+            if (DEBUG) Slog.i(TAG, "Opening module " + moduleId);
             enforcePolicyAccess();
             if (callback == null) {
                 throw new IllegalArgumentException("Callback must not be empty");
@@ -99,6 +105,26 @@ public class BroadcastRadioService extends SystemService {
                 } else {
                     return mHal1.openTuner(moduleId, bandConfig, withAudio, callback);
                 }
+            }
+        }
+
+        @Override
+        public ICloseHandle addAnnouncementListener(int[] enabledTypes,
+                IAnnouncementListener listener) {
+            if (DEBUG) {
+                Slog.i(TAG, "Adding announcement listener for " + Arrays.toString(enabledTypes));
+            }
+            Objects.requireNonNull(enabledTypes);
+            Objects.requireNonNull(listener);
+            enforcePolicyAccess();
+
+            synchronized (mLock) {
+                if (!mHal2.hasAnyModules()) {
+                    Slog.i(TAG, "There are no HAL 2.x modules registered");
+                    return new AnnouncementAggregator(listener);
+                }
+
+                return mHal2.addAnnouncementListener(enabledTypes, listener);
             }
         }
     }
