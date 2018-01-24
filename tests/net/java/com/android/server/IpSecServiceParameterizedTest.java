@@ -19,7 +19,6 @@ package com.android.server;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -229,7 +228,7 @@ public class IpSecServiceParameterizedTest {
                         anyInt(),
                         anyString(),
                         anyString(),
-                        anyLong(),
+                        anyInt(),
                         eq(TEST_SPI),
                         anyInt(),
                         anyInt(),
@@ -264,7 +263,7 @@ public class IpSecServiceParameterizedTest {
                         anyInt(),
                         anyString(),
                         anyString(),
-                        anyLong(),
+                        anyInt(),
                         eq(TEST_SPI),
                         anyInt(),
                         anyInt(),
