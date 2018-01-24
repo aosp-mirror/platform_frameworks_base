@@ -125,6 +125,9 @@ void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
     VLOG("gauge metric %lld report now...", (long long)mMetricId);
 
     flushIfNeededLocked(dumpTimeNs);
+    if (mPastBuckets.empty()) {
+        return;
+    }
 
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, (long long)mStartTimeNs);
