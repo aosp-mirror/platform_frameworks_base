@@ -17,6 +17,7 @@
 package android.media.update;
 
 import android.media.MediaPlayerBase;
+import android.media.MediaSession2.CommandButton;
 import android.media.MediaSession2.ControllerInfo;
 import android.media.SessionToken;
 
@@ -30,6 +31,7 @@ public interface MediaSession2Provider extends MediaPlayerBaseProvider {
     MediaPlayerBase getPlayer_impl();
     SessionToken getToken_impl();
     List<ControllerInfo> getConnectedControllers_impl();
+    void setCustomLayout_impl(ControllerInfo controller, List<CommandButton> layout);
 
     /**
      * @hide
