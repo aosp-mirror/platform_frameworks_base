@@ -195,6 +195,10 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         return mOverviewProxy;
     }
 
+    public ComponentName getLauncherComponent() {
+        return mLauncherComponentName;
+    }
+
     private void disconnectFromLauncherService() {
         if (mOverviewProxy != null) {
             mOverviewProxy.asBinder().unlinkToDeath(mOverviewServiceDeathRcpt, 0);
