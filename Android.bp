@@ -490,6 +490,8 @@ java_library {
         "telephony/java/android/telephony/mbms/IStreamingServiceCallback.aidl",
         "telephony/java/android/telephony/mbms/vendor/IMbmsDownloadService.aidl",
         "telephony/java/android/telephony/mbms/vendor/IMbmsStreamingService.aidl",
+        "telephony/java/android/telephony/INetworkService.aidl",
+        "telephony/java/android/telephony/INetworkServiceCallback.aidl",
         "telephony/java/com/android/ims/internal/IImsCallSession.aidl",
         "telephony/java/com/android/ims/internal/IImsCallSessionListener.aidl",
         "telephony/java/com/android/ims/internal/IImsConfig.aidl",
