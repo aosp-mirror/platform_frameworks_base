@@ -1761,6 +1761,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.BACKUP_MANAGER_CONSTANTS,
                 SecureSettingsProto.BACKUP_MANAGER_CONSTANTS);
+        dumpSetting(s, p,
+                Settings.Secure.BLUETOOTH_ON_WHILE_DRIVING,
+                SecureSettingsProto.BLUETOOTH_ON_WHILE_DRIVING);
     }
 
     private static void dumpProtoSystemSettingsLocked(

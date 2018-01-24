@@ -598,8 +598,9 @@ message SecureSettingsProto {
     optional SettingProto lockdown_in_power_menu = 194;
     optional SettingProto backup_manager_constants = 169;
     optional SettingProto show_first_crash_dialog_dev_option = 195;
+    optional SettingProto bluetooth_on_while_driving = 196;
 
-    // Next tag = 196
+    // Next tag = 197
 }
 
 message SystemSettingsProto {

@@ -540,7 +540,8 @@ public class SettingsBackupTest {
                  Settings.Secure.BACKUP_MANAGER_CONSTANTS,
                  Settings.Secure.KEYGUARD_SLICE_URI,
                  Settings.Secure.PARENTAL_CONTROL_ENABLED,
-                 Settings.Secure.PARENTAL_CONTROL_REDIRECT_URL);
+                 Settings.Secure.PARENTAL_CONTROL_REDIRECT_URL,
+                 Settings.Secure.BLUETOOTH_ON_WHILE_DRIVING);
 
     @Test
     public void systemSettingsBackedUpOrBlacklisted() {
