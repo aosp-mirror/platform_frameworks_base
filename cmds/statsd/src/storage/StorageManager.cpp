@@ -78,7 +78,7 @@ void StorageManager::deleteAllFiles(const char* path) {
     }
 }
 
-void StorageManager::deletePrefixedFiles(const char* path, const char* prefix) {
+void StorageManager::deleteSuffixedFiles(const char* path, const char* suffix) {
     unique_ptr<DIR, decltype(&closedir)> dir(opendir(path), closedir);
     if (dir == NULL) {
         VLOG("Directory does not exist: %s", path);
@@ -88,10 +88,14 @@ void StorageManager::deletePrefixedFiles(const char* path, const char* prefix) {
     dirent* de;
     while ((de = readdir(dir.get()))) {
         char* name = de->d_name;
-        if (name[0] == '.' || strncmp(name, prefix, strlen(prefix)) != 0) {
+        if (name[0] == '.') {
             continue;
         }
-        deleteFile(StringPrintf("%s/%s", path, name).c_str());
+        size_t nameLen = strlen(name);
+        size_t suffixLen = strlen(suffix);
+        if (suffixLen <= nameLen && strncmp(name + nameLen - suffixLen, suffix, suffixLen) == 0) {
+            deleteFile(StringPrintf("%s/%s", path, name).c_str());
+        }
     }
 }
 
