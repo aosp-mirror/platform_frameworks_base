@@ -895,4 +895,12 @@
     <dimen name="fingerprint_dialog_icon_size">44dp</dimen>
     <dimen name="fingerprint_dialog_fp_icon_size">60dp</dimen>
     <dimen name="fingerprint_dialog_animation_translation_offset">350dp</dimen>
+
+    <!-- WirelessCharging Animation values -->
+    <!-- Starting text size of batteryLevel for wireless charging animation -->
+    <dimen name="config_batteryLevelTextSizeStart" format="float">5.0</dimen>
+    <!-- Ending text size of batteryLevel for wireless charging animation -->
+    <dimen name="config_batteryLevelTextSizeEnd" format="float">32.0</dimen>
+    <!-- Wireless Charging battery level text animation duration -->
+    <integer name="config_batteryLevelTextAnimationDuration">400</integer>
 </resources>

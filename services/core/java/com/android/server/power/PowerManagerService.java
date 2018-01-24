@@ -16,6 +16,11 @@
 
 package com.android.server.power;
 
+import static android.os.PowerManagerInternal.WAKEFULNESS_ASLEEP;
+import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
+import static android.os.PowerManagerInternal.WAKEFULNESS_DOZING;
+import static android.os.PowerManagerInternal.WAKEFULNESS_DREAMING;
+
 import android.annotation.IntDef;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -103,11 +108,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static android.os.PowerManagerInternal.WAKEFULNESS_ASLEEP;
-import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
-import static android.os.PowerManagerInternal.WAKEFULNESS_DOZING;
-import static android.os.PowerManagerInternal.WAKEFULNESS_DREAMING;
-
 /**
  * The power manager service is responsible for coordinating power management
  * functions on the device.
@@ -118,6 +118,9 @@ public final class PowerManagerService extends SystemService
 
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_SPEW = DEBUG && true;
+
+    // if DEBUG_WIRELESS=true, plays wireless charging animation w/ sound on every plug + unplug
+    private static final boolean DEBUG_WIRELESS = false;
 
     // Message: Sent when a user activity timeout occurs to update the power state.
     private static final int MSG_USER_ACTIVITY_TIMEOUT = 1;
@@ -1794,8 +1797,8 @@ public final class PowerManagerService extends SystemService
 
                 // Tell the notifier whether wireless charging has started so that
                 // it can provide feedback to the user.
-                if (dockedOnWirelessCharger) {
-                    mNotifier.onWirelessChargingStarted();
+                if (dockedOnWirelessCharger || DEBUG_WIRELESS) {
+                    mNotifier.onWirelessChargingStarted(mBatteryLevel);
                 }
             }
 

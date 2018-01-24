@@ -14,6 +14,10 @@
 
 package com.android.systemui.globalactions;
 
+import android.content.Context;
+import android.os.RemoteException;
+import android.os.ServiceManager;
+
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysUiServiceProvider;
@@ -24,10 +28,6 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.ExtensionController.Extension;
-
-import android.content.Context;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 
 public class GlobalActionsComponent extends SystemUI implements Callbacks, GlobalActionsManager {
 
