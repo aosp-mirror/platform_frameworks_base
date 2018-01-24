@@ -26,6 +26,7 @@ import android.media.update.ViewProvider;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.View;
 
 /**
  * A View that contains the controls for MediaPlayer2.
@@ -47,6 +48,19 @@ import android.view.MotionEvent;
  * @hide
  */
 public class MediaControlView2 extends FrameLayout {
+    // TODO: should overflow button be included?
+    public static final int BUTTON_PLAY_PAUSE = 1;
+    public static final int BUTTON_FFWD = 2;
+    public static final int BUTTON_REW = 3;
+    public static final int BUTTON_NEXT = 4;
+    public static final int BUTTON_PREV = 5;
+    public static final int BUTTON_SUBTITLE = 6;
+    public static final int BUTTON_FULL_SCREEN = 7;
+    public static final int BUTTON_OVERFLOW = 8;
+    public static final int BUTTON_MUTE = 9;
+    public static final int BUTTON_ASPECT_RATIO = 10;
+    public static final int BUTTON_SETTINGS = 11;
+
     private final MediaControlView2Provider mProvider;
 
     public MediaControlView2(@NonNull Context context) {
@@ -172,10 +186,33 @@ public class MediaControlView2 extends FrameLayout {
         mProvider.hideSubtitle_impl();
     }
 
+    /**
+     * Set listeners for previous and next buttons to customize the behavior of clicking them.
+     * The UI for these buttons are provided as default and will be automatically displayed when
+     * this method is called.
+     *
+     * @param next Listener for clicking next button
+     * @param prev Listener for clicking previous button
+     */
+    public void setPrevNextListeners(View.OnClickListener next, View.OnClickListener prev) {
+        mProvider.setPrevNextListeners_impl(next, prev);
+    }
+
+    /**
+     * Hides the specified button from view.
+     *
+     * @param button the constant integer assigned to individual buttons
+     * @param visible whether the button should be visible or not
+     */
+    public void setButtonVisibility(int button, boolean visible) {
+        mProvider.setButtonVisibility_impl(button, visible);
+    }
+
     @Override
     protected void onAttachedToWindow() {
         mProvider.onAttachedToWindow_impl();
     }
+
     @Override
     protected void onDetachedFromWindow() {
         mProvider.onDetachedFromWindow_impl();
