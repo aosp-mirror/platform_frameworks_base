@@ -52,6 +52,7 @@ public interface VideoView2Provider extends ViewProvider {
     int getAudioSessionId_impl();
     void showSubtitle_impl();
     void hideSubtitle_impl();
+    void setFullScreen_impl(boolean fullScreen);
     void setSpeed_impl(float speed);
     float getSpeed_impl();
     void setAudioFocusRequest_impl(int focusGain);
@@ -68,4 +69,5 @@ public interface VideoView2Provider extends ViewProvider {
     void setOnErrorListener_impl(VideoView2.OnErrorListener l);
     void setOnInfoListener_impl(VideoView2.OnInfoListener l);
     void setOnViewTypeChangedListener_impl(VideoView2.OnViewTypeChangedListener l);
+    void setFullScreenChangedListener_impl(VideoView2.OnFullScreenChangedListener l);
 }

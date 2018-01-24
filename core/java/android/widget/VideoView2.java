@@ -237,6 +237,13 @@ public class VideoView2 extends FrameLayout {
         mProvider.hideSubtitle_impl();
     }
 
+    /**
+     * Sets full screen mode.
+     */
+    public void setFullScreen(boolean fullScreen) {
+        mProvider.setFullScreen_impl(fullScreen);
+    }
+
     // TODO: This should be revised after integration with MediaPlayer2.
     /**
      * Sets playback speed.
@@ -417,6 +424,13 @@ public class VideoView2 extends FrameLayout {
     }
 
     /**
+     * Registers a callback to be invoked when the fullscreen mode should be changed.
+     */
+    public void setFullScreenChangedListener(OnFullScreenChangedListener l) {
+        mProvider.setFullScreenChangedListener_impl(l);
+    }
+
+    /**
      * Interface definition of a callback to be invoked when the viw type has been changed.
      */
     public interface OnViewTypeChangedListener {
@@ -482,6 +496,16 @@ public class VideoView2 extends FrameLayout {
          * @see MediaPlayer#OnInfoListener
          */
         void onInfo(int what, int extra);
+    }
+
+    /**
+     * Interface definition of a callback to be invoked to inform the fullscreen mode is changed.
+     */
+    public interface OnFullScreenChangedListener {
+        /**
+         * Called to indicate a fullscreen mode change.
+         */
+        void onFullScreenChanged(boolean fullScreen);
     }
 
     @Override

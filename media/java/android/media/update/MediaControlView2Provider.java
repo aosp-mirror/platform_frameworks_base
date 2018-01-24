@@ -48,4 +48,6 @@ public interface MediaControlView2Provider extends ViewProvider {
     boolean canSeekForward_impl();
     void showSubtitle_impl();
     void hideSubtitle_impl();
+    void setPrevNextListeners_impl(View.OnClickListener next, View.OnClickListener prev);
+    void setButtonVisibility_impl(int button, boolean visible);
 }
