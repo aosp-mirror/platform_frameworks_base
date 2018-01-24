@@ -20,6 +20,7 @@ import android.annotation.SystemApi;
 import android.content.pm.PackageManager;
 import android.net.IpConfiguration;
 import android.net.IpConfiguration.ProxySettings;
+import android.net.MacAddress;
 import android.net.ProxyInfo;
 import android.net.StaticIpConfiguration;
 import android.net.Uri;
@@ -851,6 +852,52 @@ public class WifiConfiguration implements Parcelable {
      */
     @SystemApi
     public int numAssociation;
+
+    /**
+     * @hide
+     * Randomized MAC address to use with this particular network
+     */
+    private MacAddress mRandomizedMacAddress;
+
+    /**
+     * @hide
+     * Checks if the given MAC address can be used for Connected Mac Randomization
+     * by verifying that it is non-null, unicast, and locally assigned.
+     * @param mac MacAddress to check
+     * @return true if mac is good to use
+     */
+    private boolean isValidMacAddressForRandomization(MacAddress mac) {
+        return mac != null && !mac.isMulticastAddress() && mac.isLocallyAssigned();
+    }
+
+    /**
+     * @hide
+     * Returns Randomized MAC address to use with the network.
+     * If it is not set/valid, create a new randomized address.
+     */
+    public MacAddress getOrCreateRandomizedMacAddress() {
+        if (!isValidMacAddressForRandomization(mRandomizedMacAddress)) {
+            mRandomizedMacAddress = MacAddress.createRandomUnicastAddress();
+        }
+        return mRandomizedMacAddress;
+    }
+
+    /**
+     * @hide
+     * Returns MAC address set to be the local randomized MAC address.
+     * Does not guarantee that the returned address is valid for use.
+     */
+    public MacAddress getRandomizedMacAddress() {
+        return mRandomizedMacAddress;
+    }
+
+    /**
+     * @hide
+     * @param mac MacAddress to change into
+     */
+    public void setRandomizedMacAddress(MacAddress mac) {
+        mRandomizedMacAddress = mac;
+    }
 
     /** @hide
      * Boost given to RSSI on a home network for the purpose of calculating the score
@@ -2124,6 +2171,7 @@ public class WifiConfiguration implements Parcelable {
             updateTime = source.updateTime;
             shared = source.shared;
             recentFailure.setAssociationStatus(source.recentFailure.getAssociationStatus());
+            mRandomizedMacAddress = source.mRandomizedMacAddress;
         }
     }
 
@@ -2191,6 +2239,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeInt(shared ? 1 : 0);
         dest.writeString(mPasspointManagementObjectTree);
         dest.writeInt(recentFailure.getAssociationStatus());
+        dest.writeParcelable(mRandomizedMacAddress, flags);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -2259,6 +2308,7 @@ public class WifiConfiguration implements Parcelable {
                 config.shared = in.readInt() != 0;
                 config.mPasspointManagementObjectTree = in.readString();
                 config.recentFailure.setAssociationStatus(in.readInt());
+                config.mRandomizedMacAddress = in.readParcelable(null);
                 return config;
             }
 
