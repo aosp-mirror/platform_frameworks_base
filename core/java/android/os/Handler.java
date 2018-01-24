@@ -202,7 +202,8 @@ public class Handler {
         mLooper = Looper.myLooper();
         if (mLooper == null) {
             throw new RuntimeException(
-                "Can't create handler inside thread that has not called Looper.prepare()");
+                "Can't create handler inside thread " + Thread.currentThread()
+                        + " that has not called Looper.prepare()");
         }
         mQueue = mLooper.mQueue;
         mCallback = callback;

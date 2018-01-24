@@ -23,6 +23,8 @@ import static android.view.MotionEvent.ACTION_POINTER_UP;
 
 import static com.android.server.testutils.TestUtils.strictMock;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -32,6 +34,7 @@ import static org.mockito.Mockito.verify;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.os.Handler;
 import android.os.Message;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
@@ -46,7 +49,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.IntConsumer;
+import java.util.function.Supplier;
 
 
 /**
@@ -130,7 +135,7 @@ public class MagnificationGestureHandlerTest {
     }
 
     @NonNull
-    public MagnificationGestureHandler newInstance(boolean detectTripleTap,
+    private MagnificationGestureHandler newInstance(boolean detectTripleTap,
             boolean detectShortcutTrigger) {
         MagnificationGestureHandler h = new MagnificationGestureHandler(
                 mContext, mMagnificationController,
@@ -190,6 +195,16 @@ public class MagnificationGestureHandlerTest {
                 }
             });
         });
+    }
+
+    @Test
+    public void testTransitionToDelegatingStateAndClear_preservesShortcutTriggeredState() {
+        mMgh.mDetectingState.transitionToDelegatingStateAndClear();
+        assertFalse(mMgh.mDetectingState.mShortcutTriggered);
+
+        goFromStateIdleTo(STATE_SHORTCUT_TRIGGERED);
+        mMgh.mDetectingState.transitionToDelegatingStateAndClear();
+        assertTrue(mMgh.mDetectingState.mShortcutTriggered);
     }
 
     /**
@@ -510,14 +525,20 @@ public class MagnificationGestureHandlerTest {
         fastForward(1);
     }
 
+    private static MotionEvent fromTouchscreen(MotionEvent ev) {
+        ev.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+        return ev;
+    }
+
     private MotionEvent moveEvent(float x, float y) {
-        return MotionEvent.obtain(mLastDownTime, mClock.now(), ACTION_MOVE, x, y, 0);
+        return fromTouchscreen(
+        	    MotionEvent.obtain(mLastDownTime, mClock.now(), ACTION_MOVE, x, y, 0));
     }
 
     private MotionEvent downEvent() {
         mLastDownTime = mClock.now();
-        return MotionEvent.obtain(mLastDownTime, mLastDownTime,
-                ACTION_DOWN, DEFAULT_X, DEFAULT_Y, 0);
+        return fromTouchscreen(MotionEvent.obtain(mLastDownTime, mLastDownTime,
+                ACTION_DOWN, DEFAULT_X, DEFAULT_Y, 0));
     }
 
     private MotionEvent upEvent() {
@@ -525,8 +546,8 @@ public class MagnificationGestureHandlerTest {
     }
 
     private MotionEvent upEvent(long downTime) {
-        return MotionEvent.obtain(downTime, mClock.now(),
-                MotionEvent.ACTION_UP, DEFAULT_X, DEFAULT_Y, 0);
+        return fromTouchscreen(MotionEvent.obtain(downTime, mClock.now(),
+                MotionEvent.ACTION_UP, DEFAULT_X, DEFAULT_Y, 0));
     }
 
     private MotionEvent pointerEvent(int action, float x, float y) {
