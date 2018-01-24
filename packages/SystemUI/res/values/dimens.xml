@@ -889,4 +889,7 @@
     <dimen name="smart_reply_button_spacing">8dp</dimen>
     <dimen name="smart_reply_button_padding_vertical">4dp</dimen>
     <dimen name="smart_reply_button_font_size">14sp</dimen>
+
+    <dimen name="fingerprint_dialog_icon_size">44dp</dimen>
+    <dimen name="fingerprint_dialog_fp_icon_size">60dp</dimen>
 </resources>

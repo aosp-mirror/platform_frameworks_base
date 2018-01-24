@@ -16,6 +16,11 @@
 
 package android.hardware.fingerprint;
 
+import static android.Manifest.permission.INTERACT_ACROSS_USERS;
+import static android.Manifest.permission.MANAGE_FINGERPRINT;
+import static android.Manifest.permission.USE_FINGERPRINT;
+
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -23,6 +28,7 @@ import android.annotation.SystemService;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.CancellationSignal.OnCancelListener;
 import android.os.Handler;
@@ -38,13 +44,10 @@ import android.util.Slog;
 
 import java.security.Signature;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
-
-import static android.Manifest.permission.INTERACT_ACROSS_USERS;
-import static android.Manifest.permission.MANAGE_FINGERPRINT;
-import static android.Manifest.permission.USE_FINGERPRINT;
 
 /**
  * A class that coordinates access to the fingerprint hardware.
@@ -204,6 +207,7 @@ public class FingerprintManager {
     private CryptoObject mCryptoObject;
     private Fingerprint mRemovalFingerprint;
     private Handler mHandler;
+    private Executor mExecutor;
 
     private class OnEnrollCancelListener implements OnCancelListener {
         @Override
@@ -505,7 +509,9 @@ public class FingerprintManager {
     }
 
     /**
-     * Per-user version
+     * Per-user version, see {@link FingerprintManager#authenticate(CryptoObject,
+     * CancellationSignal, int, AuthenticationCallback, Handler)}
+     * @param userId the user ID that the fingerprint hardware will authenticate for.
      * @hide
      */
     @RequiresPermission(USE_FINGERPRINT)
@@ -530,7 +536,7 @@ public class FingerprintManager {
             mCryptoObject = crypto;
             long sessionId = crypto != null ? crypto.getOpId() : 0;
             mService.authenticate(mToken, sessionId, userId, mServiceReceiver, flags,
-                    mContext.getOpPackageName());
+                    mContext.getOpPackageName(), null /* bundle */, null /* receiver */);
         } catch (RemoteException e) {
             Log.w(TAG, "Remote exception while authenticating: ", e);
             if (callback != null) {
@@ -540,6 +546,112 @@ public class FingerprintManager {
                         getErrorString(FINGERPRINT_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */));
             }
         }
+    }
+
+    /**
+     * Per-user version, see {@link FingerprintManager#authenticate(CryptoObject,
+     * CancellationSignal, Bundle, Executor, IFingerprintDialogReceiver, AuthenticationCallback)}
+     * @param userId the user ID that the fingerprint hardware will authenticate for.
+     * @hide
+     */
+    public void authenticate(int userId,
+            @Nullable CryptoObject crypto,
+            @NonNull CancellationSignal cancel,
+            @NonNull Bundle bundle,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull IFingerprintDialogReceiver receiver,
+            @NonNull AuthenticationCallback callback) {
+        mCryptoObject = crypto;
+        if (cancel.isCanceled()) {
+            Log.w(TAG, "authentication already canceled");
+            return;
+        } else {
+            cancel.setOnCancelListener(new OnAuthenticationCancelListener(crypto));
+        }
+
+        if (mService != null) {
+            try {
+                mExecutor = executor;
+                mAuthenticationCallback = callback;
+                final long sessionId = crypto != null ? crypto.getOpId() : 0;
+                mService.authenticate(mToken, sessionId, userId, mServiceReceiver,
+                        0 /* flags */, mContext.getOpPackageName(), bundle, receiver);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Remote exception while authenticating", e);
+                mExecutor.execute(() -> {
+                    callback.onAuthenticationError(FINGERPRINT_ERROR_HW_UNAVAILABLE,
+                            getErrorString(FINGERPRINT_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */));
+                });
+            }
+        }
+    }
+
+    /**
+     * Private method, see {@link FingerprintDialog#authenticate(CancellationSignal, Executor,
+     * AuthenticationCallback)}
+     * @param cancel
+     * @param executor
+     * @param callback
+     * @hide
+     */
+    public void authenticate(
+            @NonNull CancellationSignal cancel,
+            @NonNull Bundle bundle,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull IFingerprintDialogReceiver receiver,
+            @NonNull AuthenticationCallback callback) {
+        if (cancel == null) {
+            throw new IllegalArgumentException("Must supply a cancellation signal");
+        }
+        if (bundle == null) {
+            throw new IllegalArgumentException("Must supply a bundle");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException("Must supply an executor");
+        }
+        if (receiver == null) {
+            throw new IllegalArgumentException("Must supply a receiver");
+        }
+        if (callback == null) {
+            throw new IllegalArgumentException("Must supply a calback");
+        }
+        authenticate(UserHandle.myUserId(), null, cancel, bundle, executor, receiver, callback);
+    }
+
+    /**
+     * Private method, see {@link FingerprintDialog#authenticate(CryptoObject, CancellationSignal,
+     * Executor, AuthenticationCallback)}
+     * @param crypto
+     * @param cancel
+     * @param executor
+     * @param callback
+     * @hide
+     */
+    public void authenticate(@NonNull CryptoObject crypto,
+            @NonNull CancellationSignal cancel,
+            @NonNull Bundle bundle,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull IFingerprintDialogReceiver receiver,
+            @NonNull AuthenticationCallback callback) {
+        if (crypto == null) {
+            throw new IllegalArgumentException("Must supply a crypto object");
+        }
+        if (cancel == null) {
+            throw new IllegalArgumentException("Must supply a cancellation signal");
+        }
+        if (bundle == null) {
+            throw new IllegalArgumentException("Must supply a bundle");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException("Must supply an executor");
+        }
+        if (receiver == null) {
+            throw new IllegalArgumentException("Must supply a receiver");
+        }
+        if (callback == null) {
+            throw new IllegalArgumentException("Must supply a calback");
+        }
+        authenticate(UserHandle.myUserId(), crypto, cancel, bundle, executor, receiver, callback);
     }
 
     /**
@@ -929,63 +1041,63 @@ public class FingerprintManager {
             }
         }
 
-        private void sendErrorResult(long deviceId, int errMsgId, int vendorCode) {
-            // emulate HAL 2.1 behavior and send real errMsgId
-            final int clientErrMsgId = errMsgId == FINGERPRINT_ERROR_VENDOR
-                    ? (vendorCode + FINGERPRINT_ERROR_VENDOR_BASE) : errMsgId;
-            if (mEnrollmentCallback != null) {
-                mEnrollmentCallback.onEnrollmentError(clientErrMsgId,
-                        getErrorString(errMsgId, vendorCode));
-            } else if (mAuthenticationCallback != null) {
-                mAuthenticationCallback.onAuthenticationError(clientErrMsgId,
-                        getErrorString(errMsgId, vendorCode));
-            } else if (mRemovalCallback != null) {
-                mRemovalCallback.onRemovalError(mRemovalFingerprint, clientErrMsgId,
-                        getErrorString(errMsgId, vendorCode));
-            } else if (mEnumerateCallback != null) {
-                mEnumerateCallback.onEnumerateError(clientErrMsgId,
-                        getErrorString(errMsgId, vendorCode));
-            }
-        }
-
         private void sendEnrollResult(Fingerprint fp, int remaining) {
             if (mEnrollmentCallback != null) {
                 mEnrollmentCallback.onEnrollmentProgress(remaining);
             }
         }
-
-        private void sendAuthenticatedSucceeded(Fingerprint fp, int userId) {
-            if (mAuthenticationCallback != null) {
-                final AuthenticationResult result =
-                        new AuthenticationResult(mCryptoObject, fp, userId);
-                mAuthenticationCallback.onAuthenticationSucceeded(result);
-            }
-        }
-
-        private void sendAuthenticatedFailed() {
-            if (mAuthenticationCallback != null) {
-                mAuthenticationCallback.onAuthenticationFailed();
-            }
-        }
-
-        private void sendAcquiredResult(long deviceId, int acquireInfo, int vendorCode) {
-            if (mAuthenticationCallback != null) {
-                mAuthenticationCallback.onAuthenticationAcquired(acquireInfo);
-            }
-            final String msg = getAcquiredString(acquireInfo, vendorCode);
-            if (msg == null) {
-                return;
-            }
-            // emulate HAL 2.1 behavior and send real acquiredInfo
-            final int clientInfo = acquireInfo == FINGERPRINT_ACQUIRED_VENDOR
-                    ? (vendorCode + FINGERPRINT_ACQUIRED_VENDOR_BASE) : acquireInfo;
-            if (mEnrollmentCallback != null) {
-                mEnrollmentCallback.onEnrollmentHelp(clientInfo, msg);
-            } else if (mAuthenticationCallback != null) {
-                mAuthenticationCallback.onAuthenticationHelp(clientInfo, msg);
-            }
-        }
     };
+
+    private void sendAuthenticatedSucceeded(Fingerprint fp, int userId) {
+        if (mAuthenticationCallback != null) {
+            final AuthenticationResult result =
+                    new AuthenticationResult(mCryptoObject, fp, userId);
+            mAuthenticationCallback.onAuthenticationSucceeded(result);
+        }
+    }
+
+    private void sendAuthenticatedFailed() {
+        if (mAuthenticationCallback != null) {
+            mAuthenticationCallback.onAuthenticationFailed();
+        }
+    }
+
+    private void sendAcquiredResult(long deviceId, int acquireInfo, int vendorCode) {
+        if (mAuthenticationCallback != null) {
+            mAuthenticationCallback.onAuthenticationAcquired(acquireInfo);
+        }
+        final String msg = getAcquiredString(acquireInfo, vendorCode);
+        if (msg == null) {
+            return;
+        }
+        // emulate HAL 2.1 behavior and send real acquiredInfo
+        final int clientInfo = acquireInfo == FINGERPRINT_ACQUIRED_VENDOR
+                ? (vendorCode + FINGERPRINT_ACQUIRED_VENDOR_BASE) : acquireInfo;
+        if (mEnrollmentCallback != null) {
+            mEnrollmentCallback.onEnrollmentHelp(clientInfo, msg);
+        } else if (mAuthenticationCallback != null) {
+            mAuthenticationCallback.onAuthenticationHelp(clientInfo, msg);
+        }
+    }
+
+    private void sendErrorResult(long deviceId, int errMsgId, int vendorCode) {
+        // emulate HAL 2.1 behavior and send real errMsgId
+        final int clientErrMsgId = errMsgId == FINGERPRINT_ERROR_VENDOR
+                ? (vendorCode + FINGERPRINT_ERROR_VENDOR_BASE) : errMsgId;
+        if (mEnrollmentCallback != null) {
+            mEnrollmentCallback.onEnrollmentError(clientErrMsgId,
+                    getErrorString(errMsgId, vendorCode));
+        } else if (mAuthenticationCallback != null) {
+            mAuthenticationCallback.onAuthenticationError(clientErrMsgId,
+                    getErrorString(errMsgId, vendorCode));
+        } else if (mRemovalCallback != null) {
+            mRemovalCallback.onRemovalError(mRemovalFingerprint, clientErrMsgId,
+                    getErrorString(errMsgId, vendorCode));
+        } else if (mEnumerateCallback != null) {
+            mEnumerateCallback.onEnumerateError(clientErrMsgId,
+                    getErrorString(errMsgId, vendorCode));
+        }
+    }
 
     /**
      * @hide
@@ -1023,7 +1135,10 @@ public class FingerprintManager {
         }
     }
 
-    private String getErrorString(int errMsg, int vendorCode) {
+    /**
+     * @hide
+     */
+    public String getErrorString(int errMsg, int vendorCode) {
         switch (errMsg) {
             case FINGERPRINT_ERROR_UNABLE_TO_PROCESS:
                 return mContext.getString(
@@ -1043,6 +1158,9 @@ public class FingerprintManager {
             case FINGERPRINT_ERROR_LOCKOUT_PERMANENT:
                 return mContext.getString(
                         com.android.internal.R.string.fingerprint_error_lockout_permanent);
+            case FINGERPRINT_ERROR_USER_CANCELED:
+                return mContext.getString(
+                        com.android.internal.R.string.fingerprint_error_user_canceled);
             case FINGERPRINT_ERROR_VENDOR: {
                     String[] msgArray = mContext.getResources().getStringArray(
                             com.android.internal.R.array.fingerprint_error_vendor);
@@ -1055,7 +1173,10 @@ public class FingerprintManager {
         return null;
     }
 
-    private String getAcquiredString(int acquireInfo, int vendorCode) {
+    /**
+     * @hide
+     */
+    public String getAcquiredString(int acquireInfo, int vendorCode) {
         switch (acquireInfo) {
             case FINGERPRINT_ACQUIRED_GOOD:
                 return null;
@@ -1096,22 +1217,47 @@ public class FingerprintManager {
 
         @Override // binder call
         public void onAcquired(long deviceId, int acquireInfo, int vendorCode) {
-            mHandler.obtainMessage(MSG_ACQUIRED, acquireInfo, vendorCode, deviceId).sendToTarget();
+            if (mExecutor != null) {
+                mExecutor.execute(() -> {
+                    sendAcquiredResult(deviceId, acquireInfo, vendorCode);
+                });
+            } else {
+                mHandler.obtainMessage(MSG_ACQUIRED, acquireInfo, vendorCode,
+                        deviceId).sendToTarget();
+            }
         }
 
         @Override // binder call
         public void onAuthenticationSucceeded(long deviceId, Fingerprint fp, int userId) {
-            mHandler.obtainMessage(MSG_AUTHENTICATION_SUCCEEDED, userId, 0, fp).sendToTarget();
+            if (mExecutor != null) {
+                mExecutor.execute(() -> {
+                    sendAuthenticatedSucceeded(fp, userId);
+                });
+            } else {
+                mHandler.obtainMessage(MSG_AUTHENTICATION_SUCCEEDED, userId, 0, fp).sendToTarget();
+            }
         }
 
         @Override // binder call
         public void onAuthenticationFailed(long deviceId) {
-            mHandler.obtainMessage(MSG_AUTHENTICATION_FAILED).sendToTarget();
+            if (mExecutor != null) {
+                mExecutor.execute(() -> {
+                    sendAuthenticatedFailed();
+                });
+            } else {
+                mHandler.obtainMessage(MSG_AUTHENTICATION_FAILED).sendToTarget();
+            }
         }
 
         @Override // binder call
         public void onError(long deviceId, int error, int vendorCode) {
-            mHandler.obtainMessage(MSG_ERROR, error, vendorCode, deviceId).sendToTarget();
+            if (mExecutor != null) {
+                mExecutor.execute(() -> {
+                    sendErrorResult(deviceId, error, vendorCode);
+                });
+            } else {
+                mHandler.obtainMessage(MSG_ERROR, error, vendorCode, deviceId).sendToTarget();
+            }
         }
 
         @Override // binder call

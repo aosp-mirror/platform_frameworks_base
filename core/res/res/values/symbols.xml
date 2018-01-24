@@ -2341,9 +2341,11 @@
   <java-symbol type="string" name="fingerprint_acquired_too_fast" />
   <java-symbol type="array" name="fingerprint_acquired_vendor" />
   <java-symbol type="string" name="fingerprint_error_canceled" />
+  <java-symbol type="string" name="fingerprint_error_user_canceled" />
   <java-symbol type="string" name="fingerprint_error_lockout" />
   <java-symbol type="string" name="fingerprint_error_lockout_permanent" />
   <java-symbol type="string" name="fingerprint_name_template" />
+  <java-symbol type="string" name="fingerprint_not_recognized" />
 
   <!-- Fingerprint config -->
   <java-symbol type="integer" name="config_fingerprintMaxTemplatesPerUser"/>
