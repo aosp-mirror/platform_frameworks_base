@@ -650,11 +650,11 @@
     <!-- Label for the Android system components when they are shown to the user. -->
     <string name="android_system_label">Android System</string>
 
-    <!-- Label for the user owner in the intent forwarding app. -->
-    <string name="user_owner_label">Switch to Personal</string>
+    <!-- "Switch" is a verb; it means to change user profile by tapping another user profile name. -->
+    <string name="user_owner_label">Switch to personal profile</string>
 
-    <!-- Label for a corporate profile in the intent forwarding app. -->
-    <string name="managed_profile_label">Switch to Work</string>
+    <!-- "Switch" is a verb; it means to change user profile by tapping another user profile name. -->
+    <string name="managed_profile_label">Switch to work profile</string>
 
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_contacts">Contacts</string>
@@ -4609,11 +4609,10 @@
     <!-- Menu item in the locale menu  [CHAR LIMIT=30] -->
     <string name="locale_search_menu">Search</string>
 
-    <!-- Title for dialog displayed when work profile is turned off. [CHAR LIMIT=30] -->
-    <string name="work_mode_off_title">Turn on work mode?</string>
-    <!-- Message displayed in dialog when work profile is turned off. [CHAR LIMIT=NONE] -->
-    <string name="work_mode_off_message">This will turn on your work profile, including apps,
-        background sync, and related features</string>
+    <!-- Title of a dialog. The string is asking if the user wants to turn on their work profile, which contains work apps that are managed by their employer. "Work" is an adjective. [CHAR LIMIT=30] -->
+    <string name="work_mode_off_title">Turn on work profile?</string>
+    <!-- Text in a dialog. This string describes what will happen if a user decides to turn on their work profile. "Work profile" is used as an adjective. [CHAR LIMIT=NONE] -->
+    <string name="work_mode_off_message">Your work apps, notifications, data, and other work profile features will be turned on</string>
     <!-- Title for button to turn on work profile. [CHAR LIMIT=NONE] -->
     <string name="work_mode_turn_on">Turn on</string>
 
