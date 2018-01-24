@@ -1857,6 +1857,36 @@ public final class DisplayManagerService extends SystemService {
             }
         }
 
+        @Override // Binder call
+        public void setTemporaryBrightness(int brightness) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS,
+                    "Permission required to set the display's brightness");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mSyncRoot) {
+                    mDisplayPowerController.setTemporaryBrightness(brightness);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
+        public void setTemporaryAutoBrightnessAdjustment(float adjustment) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS,
+                    "Permission required to set the display's auto brightness adjustment");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mSyncRoot) {
+                    mDisplayPowerController.setTemporaryAutoBrightnessAdjustment(adjustment);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
         private boolean validatePackageName(int uid, String packageName) {
             if (packageName != null) {
                 String[] packageNames = mContext.getPackageManager().getPackagesForUid(uid);

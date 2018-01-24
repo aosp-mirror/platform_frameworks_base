@@ -70,6 +70,7 @@ import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.util.EventLog;
 import android.util.KeyValueListParser;
+import android.util.MathUtils;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -458,18 +459,10 @@ public final class PowerManagerService extends SystemService
     private int mScreenBrightnessSettingMinimum;
     private int mScreenBrightnessSettingMaximum;
     private int mScreenBrightnessSettingDefault;
-    private int mScreenBrightnessForVrSettingDefault;
 
     // The screen brightness setting, from 0 to 255.
     // Use -1 if no value has been set.
     private int mScreenBrightnessSetting;
-
-    // The screen brightness setting, from 0 to 255, to be used while in VR Mode.
-    private int mScreenBrightnessForVrSetting;
-
-    // The screen auto-brightness adjustment setting, from -1 to 1.
-    // Use 0 if there is no adjustment.
-    private float mScreenAutoBrightnessAdjustmentSetting;
 
     // The screen brightness mode.
     // One of the Settings.System.SCREEN_BRIGHTNESS_MODE_* constants.
@@ -492,17 +485,6 @@ public final class PowerManagerService extends SystemService
     // to allow the current foreground activity to override the user activity timeout.
     // Use -1 to disable.
     private long mUserActivityTimeoutOverrideFromWindowManager = -1;
-
-    // The screen brightness setting override from the settings application
-    // to temporarily adjust the brightness until next updated,
-    // Use -1 to disable.
-    private int mTemporaryScreenBrightnessSettingOverride = -1;
-
-    // The screen brightness adjustment setting override from the settings
-    // application to temporarily adjust the auto-brightness adjustment factor
-    // until next updated, in the range -1..1.
-    // Use NaN to disable.
-    private float mTemporaryScreenAutoBrightnessAdjustmentSettingOverride = Float.NaN;
 
     // The screen state to use while dozing.
     private int mDozeScreenStateOverrideFromDreamManager = Display.STATE_UNKNOWN;
@@ -774,7 +756,6 @@ public final class PowerManagerService extends SystemService
             mScreenBrightnessSettingMinimum = pm.getMinimumScreenBrightnessSetting();
             mScreenBrightnessSettingMaximum = pm.getMaximumScreenBrightnessSetting();
             mScreenBrightnessSettingDefault = pm.getDefaultScreenBrightnessSetting();
-            mScreenBrightnessForVrSettingDefault = pm.getDefaultScreenBrightnessForVrSetting();
 
             SensorManager sensorManager = new SystemSensorManager(mContext, mHandler.getLooper());
 
@@ -835,12 +816,6 @@ public final class PowerManagerService extends SystemService
                 false, mSettingsObserver, UserHandle.USER_ALL);
         resolver.registerContentObserver(Settings.Global.getUriFor(
                 Settings.Global.STAY_ON_WHILE_PLUGGED_IN),
-                false, mSettingsObserver, UserHandle.USER_ALL);
-        resolver.registerContentObserver(Settings.System.getUriFor(
-                Settings.System.SCREEN_BRIGHTNESS),
-                false, mSettingsObserver, UserHandle.USER_ALL);
-        resolver.registerContentObserver(Settings.System.getUriFor(
-                Settings.System.SCREEN_BRIGHTNESS_FOR_VR),
                 false, mSettingsObserver, UserHandle.USER_ALL);
         resolver.registerContentObserver(Settings.System.getUriFor(
                 Settings.System.SCREEN_BRIGHTNESS_MODE),
@@ -978,29 +953,6 @@ public final class PowerManagerService extends SystemService
             SystemProperties.set(SYSTEM_PROPERTY_RETAIL_DEMO_ENABLED, retailDemoValue);
         }
 
-        final int oldScreenBrightnessSetting = getCurrentBrightnessSettingLocked();
-
-        mScreenBrightnessForVrSetting = Settings.System.getIntForUser(resolver,
-                Settings.System.SCREEN_BRIGHTNESS_FOR_VR, mScreenBrightnessForVrSettingDefault,
-                UserHandle.USER_CURRENT);
-
-        mScreenBrightnessSetting = Settings.System.getIntForUser(resolver,
-                Settings.System.SCREEN_BRIGHTNESS, mScreenBrightnessSettingDefault,
-                UserHandle.USER_CURRENT);
-
-        if (oldScreenBrightnessSetting != getCurrentBrightnessSettingLocked()) {
-            mTemporaryScreenBrightnessSettingOverride = -1;
-        }
-
-        final float oldScreenAutoBrightnessAdjustmentSetting =
-                mScreenAutoBrightnessAdjustmentSetting;
-        mScreenAutoBrightnessAdjustmentSetting = Settings.System.getFloatForUser(resolver,
-                Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, 0.0f,
-                UserHandle.USER_CURRENT);
-        if (oldScreenAutoBrightnessAdjustmentSetting != mScreenAutoBrightnessAdjustmentSetting) {
-            mTemporaryScreenAutoBrightnessAdjustmentSettingOverride = Float.NaN;
-        }
-
         mScreenBrightnessModeSetting = Settings.System.getIntForUser(resolver,
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
                 Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL, UserHandle.USER_CURRENT);
@@ -1017,10 +969,6 @@ public final class PowerManagerService extends SystemService
         }
 
         mDirty |= DIRTY_SETTINGS;
-    }
-
-    private int getCurrentBrightnessSettingLocked() {
-        return mIsVrModeEnabled ? mScreenBrightnessForVrSetting : mScreenBrightnessSetting;
     }
 
     private void postAfterBootCompleted(Runnable r) {
@@ -2450,53 +2398,24 @@ public final class PowerManagerService extends SystemService
             mDisplayPowerRequest.policy = getDesiredScreenPolicyLocked();
 
             // Determine appropriate screen brightness and auto-brightness adjustments.
-            boolean brightnessSetByUser = true;
-            int screenBrightness = mScreenBrightnessSettingDefault;
-            float screenAutoBrightnessAdjustment = 0.0f;
-            boolean autoBrightness = (mScreenBrightnessModeSetting ==
-                    Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
-            boolean brightnessIsTemporary = false;
+            final boolean autoBrightness;
+            final int screenBrightnessOverride;
             if (!mBootCompleted) {
                 // Keep the brightness steady during boot. This requires the
                 // bootloader brightness and the default brightness to be identical.
                 autoBrightness = false;
-                brightnessSetByUser = false;
-            } else if (mIsVrModeEnabled) {
-                screenBrightness = mScreenBrightnessForVrSetting;
-                autoBrightness = false;
+                screenBrightnessOverride = mScreenBrightnessSettingDefault;
             } else if (isValidBrightness(mScreenBrightnessOverrideFromWindowManager)) {
-                screenBrightness = mScreenBrightnessOverrideFromWindowManager;
                 autoBrightness = false;
-                brightnessSetByUser = false;
-            } else if (isValidBrightness(mTemporaryScreenBrightnessSettingOverride)) {
-                screenBrightness = mTemporaryScreenBrightnessSettingOverride;
-                brightnessIsTemporary = true;
-            } else if (isValidBrightness(mScreenBrightnessSetting)) {
-                screenBrightness = mScreenBrightnessSetting;
+                screenBrightnessOverride = mScreenBrightnessOverrideFromWindowManager;
+            } else {
+                autoBrightness = (mScreenBrightnessModeSetting ==
+                        Settings.System.SCREEN_BRIGHTNESS_MODE_AUTOMATIC);
+                screenBrightnessOverride = -1;
             }
-            if (autoBrightness) {
-                screenBrightness = mScreenBrightnessSettingDefault;
-                if (isValidAutoBrightnessAdjustment(
-                        mTemporaryScreenAutoBrightnessAdjustmentSettingOverride)) {
-                    screenAutoBrightnessAdjustment =
-                            mTemporaryScreenAutoBrightnessAdjustmentSettingOverride;
-                    brightnessIsTemporary = true;
-                } else if (isValidAutoBrightnessAdjustment(
-                        mScreenAutoBrightnessAdjustmentSetting)) {
-                    screenAutoBrightnessAdjustment = mScreenAutoBrightnessAdjustmentSetting;
-                }
-            }
-            screenBrightness = Math.max(Math.min(screenBrightness,
-                    mScreenBrightnessSettingMaximum), mScreenBrightnessSettingMinimum);
-            screenAutoBrightnessAdjustment = Math.max(Math.min(
-                    screenAutoBrightnessAdjustment, 1.0f), -1.0f);
 
             // Update display power request.
-            mDisplayPowerRequest.screenBrightness = screenBrightness;
-            mDisplayPowerRequest.screenAutoBrightnessAdjustment =
-                    screenAutoBrightnessAdjustment;
-            mDisplayPowerRequest.brightnessSetByUser = brightnessSetByUser;
-            mDisplayPowerRequest.brightnessIsTemporary = brightnessIsTemporary;
+            mDisplayPowerRequest.screenBrightnessOverride = screenBrightnessOverride;
             mDisplayPowerRequest.useAutoBrightness = autoBrightness;
             mDisplayPowerRequest.useProximitySensor = shouldUseProximitySensorLocked();
             mDisplayPowerRequest.boostScreenBrightness = shouldBoostScreenBrightness();
@@ -2534,6 +2453,8 @@ public final class PowerManagerService extends SystemService
                         + ", mWakeLockSummary=0x" + Integer.toHexString(mWakeLockSummary)
                         + ", mUserActivitySummary=0x" + Integer.toHexString(mUserActivitySummary)
                         + ", mBootCompleted=" + mBootCompleted
+                        + ", screenBrightnessOverride=" + screenBrightnessOverride
+                        + ", useAutoBrightness=" + autoBrightness
                         + ", mScreenBrightnessBoostInProgress=" + mScreenBrightnessBoostInProgress
                         + ", mIsVrModeEnabled= " + mIsVrModeEnabled
                         + ", sQuiescent=" + sQuiescent);
@@ -2571,11 +2492,6 @@ public final class PowerManagerService extends SystemService
 
     private static boolean isValidBrightness(int value) {
         return value >= 0 && value <= 255;
-    }
-
-    private static boolean isValidAutoBrightnessAdjustment(float value) {
-        // Handles NaN by always returning false.
-        return value >= -1.0f && value <= 1.0f;
     }
 
     @VisibleForTesting
@@ -3247,28 +3163,6 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    private void setTemporaryScreenBrightnessSettingOverrideInternal(int brightness) {
-        synchronized (mLock) {
-            if (mTemporaryScreenBrightnessSettingOverride != brightness) {
-                mTemporaryScreenBrightnessSettingOverride = brightness;
-                mDirty |= DIRTY_SETTINGS;
-                updatePowerStateLocked();
-            }
-        }
-    }
-
-    private void setTemporaryScreenAutoBrightnessAdjustmentSettingOverrideInternal(float adj) {
-        synchronized (mLock) {
-            // Note: This condition handles NaN because NaN is not equal to any other
-            // value, including itself.
-            if (mTemporaryScreenAutoBrightnessAdjustmentSettingOverride != adj) {
-                mTemporaryScreenAutoBrightnessAdjustmentSettingOverride = adj;
-                mDirty |= DIRTY_SETTINGS;
-                updatePowerStateLocked();
-            }
-        }
-    }
-
     private void setDozeOverrideFromDreamManagerInternal(
             int screenState, int screenBrightness) {
         synchronized (mLock) {
@@ -3478,8 +3372,6 @@ public final class PowerManagerService extends SystemService
                     + isMaximumScreenOffTimeoutFromDeviceAdminEnforcedLocked() + ")");
             pw.println("  mStayOnWhilePluggedInSetting=" + mStayOnWhilePluggedInSetting);
             pw.println("  mScreenBrightnessSetting=" + mScreenBrightnessSetting);
-            pw.println("  mScreenAutoBrightnessAdjustmentSetting="
-                    + mScreenAutoBrightnessAdjustmentSetting);
             pw.println("  mScreenBrightnessModeSetting=" + mScreenBrightnessModeSetting);
             pw.println("  mScreenBrightnessOverrideFromWindowManager="
                     + mScreenBrightnessOverrideFromWindowManager);
@@ -3487,10 +3379,6 @@ public final class PowerManagerService extends SystemService
                     + mUserActivityTimeoutOverrideFromWindowManager);
             pw.println("  mUserInactiveOverrideFromWindowManager="
                     + mUserInactiveOverrideFromWindowManager);
-            pw.println("  mTemporaryScreenBrightnessSettingOverride="
-                    + mTemporaryScreenBrightnessSettingOverride);
-            pw.println("  mTemporaryScreenAutoBrightnessAdjustmentSettingOverride="
-                    + mTemporaryScreenAutoBrightnessAdjustmentSettingOverride);
             pw.println("  mDozeScreenStateOverrideFromDreamManager="
                     + mDozeScreenStateOverrideFromDreamManager);
             pw.println("  mDozeScreenBrightnessOverrideFromDreamManager="
@@ -3498,9 +3386,6 @@ public final class PowerManagerService extends SystemService
             pw.println("  mScreenBrightnessSettingMinimum=" + mScreenBrightnessSettingMinimum);
             pw.println("  mScreenBrightnessSettingMaximum=" + mScreenBrightnessSettingMaximum);
             pw.println("  mScreenBrightnessSettingDefault=" + mScreenBrightnessSettingDefault);
-            pw.println("  mScreenBrightnessForVrSettingDefault="
-                    + mScreenBrightnessForVrSettingDefault);
-            pw.println("  mScreenBrightnessForVrSetting=" + mScreenBrightnessForVrSetting);
             pw.println("  mDoubleTapWakeEnabled=" + mDoubleTapWakeEnabled);
             pw.println("  mIsVrModeEnabled=" + mIsVrModeEnabled);
             pw.println("  mForegroundProfile=" + mForegroundProfile);
@@ -3812,13 +3697,6 @@ public final class PowerManagerService extends SystemService
             proto.end(stayOnWhilePluggedInToken);
 
             proto.write(
-                    PowerServiceSettingsAndConfigurationDumpProto.SCREEN_BRIGHTNESS_SETTING,
-                    mScreenBrightnessSetting);
-            proto.write(
-                    PowerServiceSettingsAndConfigurationDumpProto
-                            .SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT_SETTING,
-                    mScreenAutoBrightnessAdjustmentSetting);
-            proto.write(
                     PowerServiceSettingsAndConfigurationDumpProto.SCREEN_BRIGHTNESS_MODE_SETTING,
                     mScreenBrightnessModeSetting);
             proto.write(
@@ -3833,14 +3711,6 @@ public final class PowerManagerService extends SystemService
                     PowerServiceSettingsAndConfigurationDumpProto
                             .IS_USER_INACTIVE_OVERRIDE_FROM_WINDOW_MANAGER,
                     mUserInactiveOverrideFromWindowManager);
-            proto.write(
-                    PowerServiceSettingsAndConfigurationDumpProto
-                            .TEMPORARY_SCREEN_BRIGHTNESS_SETTING_OVERRIDE,
-                    mTemporaryScreenBrightnessSettingOverride);
-            proto.write(
-                    PowerServiceSettingsAndConfigurationDumpProto
-                            .TEMPORARY_SCREEN_AUTO_BRIGHTNESS_ADJUSTMENT_SETTING_OVERRIDE,
-                    mTemporaryScreenAutoBrightnessAdjustmentSettingOverride);
             proto.write(
                     PowerServiceSettingsAndConfigurationDumpProto
                             .DOZE_SCREEN_STATE_OVERRIDE_FROM_DREAM_MANAGER,
@@ -3866,15 +3736,8 @@ public final class PowerManagerService extends SystemService
                     PowerServiceSettingsAndConfigurationDumpProto.ScreenBrightnessSettingLimitsProto
                             .SETTING_DEFAULT,
                     mScreenBrightnessSettingDefault);
-            proto.write(
-                    PowerServiceSettingsAndConfigurationDumpProto.ScreenBrightnessSettingLimitsProto
-                            .SETTING_FOR_VR_DEFAULT,
-                    mScreenBrightnessForVrSettingDefault);
             proto.end(screenBrightnessSettingLimitsToken);
 
-            proto.write(
-                    PowerServiceSettingsAndConfigurationDumpProto.SCREEN_BRIGHTNESS_FOR_VR_SETTING,
-                    mScreenBrightnessForVrSetting);
             proto.write(
                     PowerServiceSettingsAndConfigurationDumpProto.IS_DOUBLE_TAP_WAKE_ENABLED,
                     mDoubleTapWakeEnabled);
@@ -4703,56 +4566,6 @@ public final class PowerManagerService extends SystemService
             final long ident = Binder.clearCallingIdentity();
             try {
                 setStayOnSettingInternal(val);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-
-        /**
-         * Used by the settings application and brightness control widgets to
-         * temporarily override the current screen brightness setting so that the
-         * user can observe the effect of an intended settings change without applying
-         * it immediately.
-         *
-         * The override will be canceled when the setting value is next updated.
-         *
-         * @param brightness The overridden brightness.
-         *
-         * @see android.provider.Settings.System#SCREEN_BRIGHTNESS
-         */
-        @Override // Binder call
-        public void setTemporaryScreenBrightnessSettingOverride(int brightness) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.DEVICE_POWER, null);
-
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                setTemporaryScreenBrightnessSettingOverrideInternal(brightness);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
-
-        /**
-         * Used by the settings application and brightness control widgets to
-         * temporarily override the current screen auto-brightness adjustment setting so that the
-         * user can observe the effect of an intended settings change without applying
-         * it immediately.
-         *
-         * The override will be canceled when the setting value is next updated.
-         *
-         * @param adj The overridden brightness, or Float.NaN to disable the override.
-         *
-         * @see android.provider.Settings.System#SCREEN_AUTO_BRIGHTNESS_ADJ
-         */
-        @Override // Binder call
-        public void setTemporaryScreenAutoBrightnessAdjustmentSettingOverride(float adj) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.DEVICE_POWER, null);
-
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                setTemporaryScreenAutoBrightnessAdjustmentSettingOverrideInternal(adj);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

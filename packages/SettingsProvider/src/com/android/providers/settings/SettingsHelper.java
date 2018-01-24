@@ -30,6 +30,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.hardware.display.DisplayManager;
 import android.icu.util.ULocale;
 import android.location.LocationManager;
 import android.media.AudioManager;
@@ -306,15 +307,7 @@ public class SettingsHelper {
     }
 
     private void setBrightness(int brightness) {
-        try {
-            IPowerManager power = IPowerManager.Stub.asInterface(
-                    ServiceManager.getService("power"));
-            if (power != null) {
-                power.setTemporaryScreenBrightnessSettingOverride(brightness);
-            }
-        } catch (RemoteException doe) {
-
-        }
+        mContext.getSystemService(DisplayManager.class).setTemporaryBrightness(brightness);
     }
 
     /* package */ byte[] getLocaleData() {
