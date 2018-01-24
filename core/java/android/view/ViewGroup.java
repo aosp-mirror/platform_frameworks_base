@@ -57,6 +57,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
+import android.view.autofill.Helper;
 
 import com.android.internal.R;
 
@@ -3474,8 +3475,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         if (!isLaidOut()) {
-            Log.v(VIEW_LOG_TAG, "dispatchProvideStructure(): not laid out, ignoring "
-                    + childrenCount + " children of " + getAccessibilityViewId());
+            if (Helper.sVerbose) {
+                Log.v(VIEW_LOG_TAG, "dispatchProvideStructure(): not laid out, ignoring "
+                        + childrenCount + " children of " + getAccessibilityViewId());
+            }
             return;
         }
 

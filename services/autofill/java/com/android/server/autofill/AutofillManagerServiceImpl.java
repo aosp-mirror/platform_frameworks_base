@@ -43,7 +43,6 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -116,6 +115,7 @@ final class AutofillManagerServiceImpl {
 
     private final LocalLog mRequestsHistory;
     private final LocalLog mUiLatencyHistory;
+    private final LocalLog mWtfHistory;
     private final FieldClassificationStrategy mFieldClassificationStrategy;
 
     /**
@@ -179,11 +179,13 @@ final class AutofillManagerServiceImpl {
     private long mLastPrune = 0;
 
     AutofillManagerServiceImpl(Context context, Object lock, LocalLog requestsHistory,
-            LocalLog uiLatencyHistory, int userId, AutoFillUI ui, boolean disabled) {
+            LocalLog uiLatencyHistory, LocalLog wtfHistory, int userId, AutoFillUI ui,
+            boolean disabled) {
         mContext = context;
         mLock = lock;
         mRequestsHistory = requestsHistory;
         mUiLatencyHistory = uiLatencyHistory;
+        mWtfHistory = wtfHistory;
         mUserId = userId;
         mUi = ui;
         mFieldClassificationStrategy = new FieldClassificationStrategy(context, userId);
@@ -484,8 +486,8 @@ final class AutofillManagerServiceImpl {
         assertCallerLocked(componentName);
 
         final Session newSession = new Session(this, mUi, mContext, mHandlerCaller, mUserId, mLock,
-                sessionId, uid, activityToken, appCallbackToken, hasCallback,
-                mUiLatencyHistory, mInfo.getServiceInfo().getComponentName(), componentName, flags);
+                sessionId, uid, activityToken, appCallbackToken, hasCallback, mUiLatencyHistory,
+                mWtfHistory, mInfo.getServiceInfo().getComponentName(), componentName, flags);
         mSessions.put(newSession.id, newSession);
 
         return newSession;
