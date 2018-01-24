@@ -1647,6 +1647,15 @@ public class SettingsProvider extends ContentProvider {
                 restriction = UserManager.DISALLOW_AIRPLANE_MODE;
                 break;
 
+            case Settings.Secure.DOZE_ENABLED:
+            case Settings.Secure.DOZE_ALWAYS_ON:
+            case Settings.Secure.DOZE_PULSE_ON_PICK_UP:
+            case Settings.Secure.DOZE_PULSE_ON_LONG_PRESS:
+            case Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP:
+                if ("0".equals(value)) return false;
+                restriction = UserManager.DISALLOW_AMBIENT_DISPLAY;
+                break;
+
             default:
                 if (setting != null && setting.startsWith(Settings.Global.DATA_ROAMING)) {
                     if ("0".equals(value)) return false;
