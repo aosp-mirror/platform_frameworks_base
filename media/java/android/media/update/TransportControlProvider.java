@@ -31,7 +31,9 @@ public interface TransportControlProvider {
     void skipToPrevious_impl();
     void skipToNext_impl();
 
-    PlaybackState getPlaybackState_impl();
-    void addPlaybackListener_impl(MediaPlayerBase.PlaybackListener listener, Handler handler);
-    void removePlaybackListener_impl(MediaPlayerBase.PlaybackListener listener);
+    void prepare_impl();
+    void fastForward_impl();
+    void rewind_impl();
+    void seekTo_impl(long pos);
+    void setCurrentPlaylistItem_impl(int index);
 }

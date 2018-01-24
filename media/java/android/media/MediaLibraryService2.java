@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.media.MediaSession2.BuilderBase;
 import android.media.MediaSession2.ControllerInfo;
@@ -59,9 +60,11 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
      * Session for the media library service.
      */
     public class MediaLibrarySession extends MediaSession2 {
+
         MediaLibrarySession(Context context, MediaPlayerBase player, String id,
-                SessionCallback callback) {
-            super(context, player, id, callback);
+                SessionCallback callback, VolumeProvider volumeProvider,
+                int ratingType, PendingIntent sessionActivity) {
+            super(context, player, id, callback, volumeProvider, ratingType, sessionActivity);
         }
         // TODO(jaewan): Place public methods here.
     }
@@ -113,7 +116,8 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
 
         @Override
         public MediaLibrarySession build() throws IllegalStateException {
-            return new MediaLibrarySession(mContext, mPlayer, mId, mCallback);
+            return new MediaLibrarySession(mContext, mPlayer, mId, mCallback,
+                    mVolumeProvider, mRatingType, mSessionActivity);
         }
     }
 

@@ -17,6 +17,7 @@
 package android.media.update;
 
 import android.annotation.Nullable;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.media.IMediaSession2Callback;
 import android.media.MediaBrowser2;
@@ -26,8 +27,10 @@ import android.media.MediaController2.ControllerCallback;
 import android.media.MediaLibraryService2;
 import android.media.MediaPlayerBase;
 import android.media.MediaSession2;
+import android.media.MediaSession2.SessionCallback;
 import android.media.MediaSessionService2;
 import android.media.SessionToken;
+import android.media.VolumeProvider;
 import android.util.AttributeSet;
 import android.widget.MediaControlView2;
 import android.widget.VideoView2;
@@ -51,7 +54,9 @@ public interface StaticProvider {
             @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes);
 
     MediaSession2Provider createMediaSession2(MediaSession2 mediaSession2, Context context,
-            MediaPlayerBase player, String id, MediaSession2.SessionCallback callback);
+            MediaPlayerBase player, String id, SessionCallback callback,
+            VolumeProvider volumeProvider, int ratingType,
+            PendingIntent sessionActivity);
     MediaSession2Provider.ControllerInfoProvider createMediaSession2ControllerInfoProvider(
             MediaSession2.ControllerInfo instance, Context context, int uid, int pid,
             String packageName, IMediaSession2Callback callback);
