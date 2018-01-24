@@ -29,7 +29,7 @@ import android.media.IMediaSession2;
  * @hide
  */
 oneway interface IMediaSession2Callback {
-    void onPlaybackStateChanged(in PlaybackState state);
+    void onPlaybackStateChanged(in Bundle state);
 
     /**
      * Called only when the controller is created with service's token.

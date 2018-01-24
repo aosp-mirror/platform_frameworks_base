@@ -28,8 +28,7 @@ import android.media.IMediaSession2;
 import android.media.IRemoteVolumeController;
 import android.media.MediaSession2;
 import android.media.MediaSessionService2;
-import android.media.SessionToken;
-import android.media.session.ISessionManager;
+import android.media.SessionToken2;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -342,11 +341,11 @@ public final class MediaSessionManager {
      * @hide
      */
     // TODO(jaewan): System API
-    public SessionToken createSessionToken(@NonNull String callingPackage, @NonNull String id,
+    public SessionToken2 createSessionToken(@NonNull String callingPackage, @NonNull String id,
             @NonNull IMediaSession2 binder) {
         try {
             Bundle bundle = mService.createSessionToken(callingPackage, id, binder);
-            return SessionToken.fromBundle(bundle);
+            return SessionToken2.fromBundle(bundle);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Cannot communicate with the service.", e);
         }
@@ -354,7 +353,7 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Get {@link List} of {@link SessionToken} whose sessions are active now. This list represents
+     * Get {@link List} of {@link SessionToken2} whose sessions are active now. This list represents
      * active sessions regardless of whether they're {@link MediaSession2} or
      * {@link MediaSessionService2}.
      *
@@ -364,7 +363,7 @@ public final class MediaSessionManager {
     // TODO(jaewan): Unhide
     // TODO(jaewan): Protect this with permission.
     // TODO(jaewna): Add listener for change in lists.
-    public List<SessionToken> getActiveSessionTokens() {
+    public List<SessionToken2> getActiveSessionTokens() {
         try {
             List<Bundle> bundles = mService.getSessionTokens(
                     /* activeSessionOnly */ true, /* sessionServiceOnly */ false);
@@ -376,7 +375,7 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Get {@link List} of {@link SessionToken} for {@link MediaSessionService2} regardless of their
+     * Get {@link List} of {@link SessionToken2} for {@link MediaSessionService2} regardless of their
      * activeness. This list represents media apps that support background playback.
      *
      * @return list of Tokens
@@ -384,7 +383,7 @@ public final class MediaSessionManager {
      */
     // TODO(jaewan): Unhide
     // TODO(jaewna): Add listener for change in lists.
-    public List<SessionToken> getSessionServiceTokens() {
+    public List<SessionToken2> getSessionServiceTokens() {
         try {
             List<Bundle> bundles = mService.getSessionTokens(
                     /* activeSessionOnly */ false, /* sessionServiceOnly */ true);
@@ -396,7 +395,7 @@ public final class MediaSessionManager {
     }
 
     /**
-     * Get all {@link SessionToken}s. This is the combined list of {@link #getActiveSessionTokens()}
+     * Get all {@link SessionToken2}s. This is the combined list of {@link #getActiveSessionTokens()}
      * and {@link #getSessionServiceTokens}.
      *
      * @return list of Tokens
@@ -407,7 +406,7 @@ public final class MediaSessionManager {
     // TODO(jaewan): Unhide
     // TODO(jaewan): Protect this with permission.
     // TODO(jaewna): Add listener for change in lists.
-    public List<SessionToken> getAllSessionTokens() {
+    public List<SessionToken2> getAllSessionTokens() {
         try {
             List<Bundle> bundles = mService.getSessionTokens(
                     /* activeSessionOnly */ false, /* sessionServiceOnly */ false);
@@ -418,11 +417,11 @@ public final class MediaSessionManager {
         }
     }
 
-    private static List<SessionToken> toTokenList(List<Bundle> bundles) {
-        List<SessionToken> tokens = new ArrayList<>();
+    private static List<SessionToken2> toTokenList(List<Bundle> bundles) {
+        List<SessionToken2> tokens = new ArrayList<>();
         if (bundles != null) {
             for (int i = 0; i < bundles.size(); i++) {
-                SessionToken token = SessionToken.fromBundle(bundles.get(i));
+                SessionToken2 token = SessionToken2.fromBundle(bundles.get(i));
                 if (token != null) {
                     tokens.add(token);
                 }

@@ -40,7 +40,7 @@ import android.media.IMediaSession2;
 import android.media.IRemoteVolumeController;
 import android.media.MediaLibraryService2;
 import android.media.MediaSessionService2;
-import android.media.SessionToken;
+import android.media.SessionToken2;
 import android.media.session.IActiveSessionsListener;
 import android.media.session.ICallback;
 import android.media.session.IOnMediaKeyListener;
@@ -481,7 +481,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                             + serviceInfo.packageName + "/" + serviceInfo.name);
                 } else {
                     int type = (libraryServices.contains(services.get(i)))
-                            ? SessionToken.TYPE_LIBRARY_SERVICE : SessionToken.TYPE_SESSION_SERVICE;
+                            ? SessionToken2.TYPE_LIBRARY_SERVICE : SessionToken2.TYPE_SESSION_SERVICE;
                     MediaSessionService2Record record =
                             new MediaSessionService2Record(getContext(), mSessionDestroyedListener,
                                     type, serviceInfo.packageName, serviceInfo.name, id);
@@ -1416,7 +1416,7 @@ public class MediaSessionService extends SystemService implements Monitor {
             int pid = Binder.getCallingPid();
 
             MediaSession2Record record;
-            SessionToken token;
+            SessionToken2 token;
             // TODO(jaewan): Add sanity check for the token if calling package is from uid.
             synchronized (mLock) {
                 record = getSessionRecordLocked(sessionPackage, id);
@@ -1448,7 +1448,7 @@ public class MediaSessionService extends SystemService implements Monitor {
                     boolean isActive = record.getSessionPid() != 0;
                     if ((!activeSessionOnly && isSessionService)
                             || (!sessionServiceOnly && isActive)) {
-                        SessionToken token = record.getToken();
+                        SessionToken2 token = record.getToken();
                         if (token != null) {
                             tokens.add(token.toBundle());
                         } else {

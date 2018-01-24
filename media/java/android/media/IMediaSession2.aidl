@@ -16,7 +16,6 @@
 
 package android.media;
 
-import android.media.session.PlaybackState;
 import android.media.IMediaSession2Callback;
 import android.os.Bundle;
 
@@ -44,7 +43,7 @@ interface IMediaSession2 {
     //////////////////////////////////////////////////////////////////////////////////////////////
     oneway void sendCommand(IMediaSession2Callback caller, in Bundle command, in Bundle args);
 
-    PlaybackState getPlaybackState();
+    Bundle getPlaybackState();
 
     //////////////////////////////////////////////////////////////////////////////////////////////
     // Get library service specific

@@ -16,49 +16,52 @@
 
 package android.media;
 
+import android.media.MediaSession2.PlaylistParam;
 import android.media.session.PlaybackState;
 import android.os.Handler;
 
+import java.util.List;
+import java.util.concurrent.Executor;
+
 /**
- * Tentative interface for all media players that want media session.
- * APIs are named to avoid conflicts with MediaPlayer APIs.
- * All calls should be asynchrounous.
+ * Base interfaces for all media players that want media session.
  *
  * @hide
  */
-// TODO(wjia) Finalize the list of MediaPlayer2, which MediaPlayerBase's APIs will be come from.
 public abstract class MediaPlayerBase {
     /**
-     * Listens change in {@link PlaybackState}.
+     * Listens change in {@link PlaybackState2}.
      */
     public interface PlaybackListener {
         /**
-         * Called when {@link PlaybackState} for this player is changed.
+         * Called when {@link PlaybackState2} for this player is changed.
          */
-        void onPlaybackChanged(PlaybackState state);
+        void onPlaybackChanged(PlaybackState2 state);
     }
 
-    // TODO(jaewan): setDataSources()?
-    // TODO(jaewan): Add release() or do that in stop()?
-
-    // TODO(jaewan): Add set/getSupportedActions().
     public abstract void play();
+    public abstract void prepare();
     public abstract void pause();
     public abstract void stop();
     public abstract void skipToPrevious();
     public abstract void skipToNext();
+    public abstract void seekTo(long pos);
+    public abstract void fastFoward();
+    public abstract void rewind();
 
-    // Currently PlaybackState's error message is the content title (for testing only)
-    // TODO(jaewan): Add metadata support
-    public abstract PlaybackState getPlaybackState();
+    public abstract PlaybackState2 getPlaybackState();
+    public abstract AudioAttributes getAudioAttributes();
+
+    public abstract void setPlaylist(List<MediaItem2> item, PlaylistParam param);
+    public abstract void setCurrentPlaylistItem(int index);
 
     /**
      * Add a {@link PlaybackListener} to be invoked when the playback state is changed.
      *
+     * @param executor the Handler that will receive the listener
      * @param listener the listener that will be run
-     * @param handler the Handler that will receive the listener
      */
-    public abstract void addPlaybackListener(PlaybackListener listener, Handler handler);
+    public abstract void addPlaybackListener(Executor executor, PlaybackListener listener);
 
     /**
      * Remove previously added {@link PlaybackListener}.

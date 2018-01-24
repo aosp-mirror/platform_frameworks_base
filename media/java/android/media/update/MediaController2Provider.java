@@ -23,7 +23,7 @@ import android.media.MediaSession2.Command;
 import android.media.MediaSession2.PlaylistParam;
 import android.media.PlaybackState2;
 import android.media.Rating2;
-import android.media.SessionToken;
+import android.media.SessionToken2;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ResultReceiver;
@@ -35,7 +35,7 @@ import java.util.List;
  */
 public interface MediaController2Provider extends TransportControlProvider {
     void close_impl();
-    SessionToken getSessionToken_impl();
+    SessionToken2 getSessionToken_impl();
     boolean isConnected_impl();
 
     PendingIntent getSessionActivity_impl();

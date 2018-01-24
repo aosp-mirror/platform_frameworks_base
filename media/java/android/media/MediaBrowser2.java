@@ -99,14 +99,14 @@ public class MediaBrowser2 extends MediaController2 {
                 @Nullable Bundle options, @Nullable List<MediaItem2> result) { }
     }
 
-    public MediaBrowser2(Context context, SessionToken token, BrowserCallback callback,
+    public MediaBrowser2(Context context, SessionToken2 token, BrowserCallback callback,
             Executor executor) {
         super(context, token, callback, executor);
         mProvider = (MediaBrowser2Provider) getProvider();
     }
 
     @Override
-    MediaBrowser2Provider createProvider(Context context, SessionToken token,
+    MediaBrowser2Provider createProvider(Context context, SessionToken2 token,
             ControllerCallback callback, Executor executor) {
         return ApiLoader.getProvider(context)
                 .createMediaBrowser2(this, context, token, (BrowserCallback) callback, executor);

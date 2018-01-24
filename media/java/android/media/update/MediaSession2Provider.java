@@ -24,12 +24,9 @@ import android.media.MediaSession2.Command;
 import android.media.MediaSession2.CommandButton;
 import android.media.MediaSession2.CommandGroup;
 import android.media.MediaSession2.ControllerInfo;
-import android.media.MediaSession2.PlaylistParam;
-import android.media.SessionToken;
+import android.media.SessionToken2;
 import android.media.VolumeProvider;
-import android.media.session.PlaybackState;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.ResultReceiver;
 
 import java.util.List;
@@ -42,7 +39,7 @@ public interface MediaSession2Provider extends TransportControlProvider {
     void setPlayer_impl(MediaPlayerBase player);
     void setPlayer_impl(MediaPlayerBase player, VolumeProvider volumeProvider);
     MediaPlayerBase getPlayer_impl();
-    SessionToken getToken_impl();
+    SessionToken2 getToken_impl();
     List<ControllerInfo> getConnectedControllers_impl();
     void setCustomLayout_impl(ControllerInfo controller, List<CommandButton> layout);
     void setAudioAttributes_impl(AudioAttributes attributes);
