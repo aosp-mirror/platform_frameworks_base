@@ -281,20 +281,10 @@ int UidMap::getHostUidOrSelf(int uid) const {
 
 void UidMap::clearOutput() {
     mOutput.Clear();
-    // Re-initialize the initial state for the outputs. This results in extra data being uploaded
-    // but helps ensure we can re-construct the UID->app name, versionCode mapping in server.
-    auto snapshot = mOutput.add_snapshots();
-    for (auto it : mMap) {
-        auto t = snapshot->add_package_info();
-        t->set_name(it.second.packageName);
-        t->set_version(it.second.versionCode);
-        t->set_uid(it.first);
-    }
-
     // Also update the guardrail trackers.
     StatsdStats::getInstance().setUidMapChanges(0);
     StatsdStats::getInstance().setUidMapSnapshots(1);
-    mBytesUsed = snapshot->ByteSize();
+    mBytesUsed = 0;
     StatsdStats::getInstance().setCurrentUidMapMemory(mBytesUsed);
 }
 
@@ -346,6 +336,19 @@ UidMapping UidMap::getOutput(const int64_t& timestamp, const ConfigKey& key) {
                 it_deltas = deltas->erase(it_deltas);
             } else {
                 ++it_deltas;
+            }
+        }
+
+        if (mOutput.snapshots_size() == 0) {
+            // Produce another snapshot. This results in extra data being uploaded but helps
+            // ensure we can re-construct the UID->app name, versionCode mapping in server.
+            auto snapshot = mOutput.add_snapshots();
+            snapshot->set_timestamp_nanos(timestamp);
+            for (auto it : mMap) {
+                auto t = snapshot->add_package_info();
+                t->set_name(it.second.packageName);
+                t->set_version(it.second.versionCode);
+                t->set_uid(it.first);
             }
         }
     }
