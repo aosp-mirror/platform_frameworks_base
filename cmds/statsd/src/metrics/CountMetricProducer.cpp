@@ -112,6 +112,9 @@ void CountMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs, StatsLog
 void CountMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                                              ProtoOutputStream* protoOutput) {
     flushIfNeededLocked(dumpTimeNs);
+    if (mPastBuckets.empty()) {
+        return;
+    }
 
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, (long long)mStartTimeNs);
