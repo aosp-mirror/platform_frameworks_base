@@ -2570,7 +2570,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         // Check INTERACT_ACROSS_USERS permission if userId is not current user id.
         checkInteractAcrossUsersPermission(userId);
 
-        // enable all location providers
+        // Enable or disable all location providers
         synchronized (mLock) {
             for(String provider : getAllProviders()) {
                 setProviderEnabledForUser(provider, enabled, userId);
@@ -2586,10 +2586,10 @@ public class LocationManagerService extends ILocationManager.Stub {
      */
     @Override
     public boolean isLocationEnabledForUser(int userId) {
-
         // Check INTERACT_ACROSS_USERS permission if userId is not current user id.
         checkInteractAcrossUsersPermission(userId);
 
+        // If at least one location provider is enabled, return true
         synchronized (mLock) {
             for (String provider : getAllProviders()) {
                 if (isProviderEnabledForUser(provider, userId)) {
@@ -2602,7 +2602,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public boolean isProviderEnabled(String provider) {
-        return isProviderEnabledForUser(provider, UserHandle.myUserId());
+        return isProviderEnabledForUser(provider, UserHandle.getCallingUserId());
     }
 
     /**
