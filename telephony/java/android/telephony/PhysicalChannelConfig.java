@@ -27,8 +27,9 @@ import java.lang.annotation.RetentionPolicy;
  */
 public final class PhysicalChannelConfig implements Parcelable {
 
+    // TODO(b/72993578) consolidate these enums in a central location.
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({CONNECTION_PRIMARY_SERVING, CONNECTION_SECONDARY_SERVING})
+    @IntDef({CONNECTION_PRIMARY_SERVING, CONNECTION_SECONDARY_SERVING, CONNECTION_UNKNOWN})
     public @interface ConnectionStatus {}
 
     /**
@@ -40,6 +41,9 @@ public final class PhysicalChannelConfig implements Parcelable {
      * UE has connection to cell for data (3GPP 36.331, 25.331).
      */
     public static final int CONNECTION_SECONDARY_SERVING = 2;
+
+    /** Connection status is unknown. */
+    public static final int CONNECTION_UNKNOWN = Integer.MAX_VALUE;
 
     /**
      * Connection status of the cell.
@@ -86,6 +90,7 @@ public final class PhysicalChannelConfig implements Parcelable {
      *
      * @see #CONNECTION_PRIMARY_SERVING
      * @see #CONNECTION_SECONDARY_SERVING
+     * @see #CONNECTION_UNKNOWN
      *
      * @return Connection status of the cell
      */
