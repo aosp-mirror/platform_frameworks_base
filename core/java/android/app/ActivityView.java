@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.NonNull;
+import android.app.ActivityManager.StackInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.display.DisplayManager;
@@ -38,6 +39,8 @@ import android.view.WindowManagerGlobal;
 
 import dalvik.system.CloseGuard;
 
+import java.util.List;
+
 /**
  * Activity container that allows launching activities into itself and does input forwarding.
  * <p>Creation of this view is only allowed to callers who have
@@ -58,9 +61,12 @@ public class ActivityView extends ViewGroup {
     private final SurfaceCallback mSurfaceCallback;
     private StateCallback mActivityViewCallback;
 
+    private IActivityManager mActivityManager;
     private IInputForwarder mInputForwarder;
     // Temp container to store view coordinates on screen.
     private final int[] mLocationOnScreen = new int[2];
+
+    private TaskStackListener mTaskStackListener;
 
     private final CloseGuard mGuard = CloseGuard.get();
     private boolean mOpened; // Protected by mGuard.
@@ -76,6 +82,7 @@ public class ActivityView extends ViewGroup {
     public ActivityView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
+        mActivityManager = ActivityManager.getService();
         mSurfaceView = new SurfaceView(context);
         mSurfaceCallback = new SurfaceCallback();
         mSurfaceView.getHolder().addCallback(mSurfaceCallback);
@@ -303,6 +310,12 @@ public class ActivityView extends ViewGroup {
 
         mInputForwarder = InputManager.getInstance().createInputForwarder(
                 mVirtualDisplay.getDisplay().getDisplayId());
+        mTaskStackListener = new TaskBackgroundChangeListener();
+        try {
+            mActivityManager.registerTaskStackListener(mTaskStackListener);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to register task stack listener", e);
+        }
     }
 
     private void performRelease() {
@@ -316,6 +329,15 @@ public class ActivityView extends ViewGroup {
             mInputForwarder = null;
         }
         cleanTapExcludeRegion();
+
+        if (mTaskStackListener != null) {
+            try {
+                mActivityManager.unregisterTaskStackListener(mTaskStackListener);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to unregister task stack listener", e);
+            }
+            mTaskStackListener = null;
+        }
 
         final boolean displayReleased;
         if (mVirtualDisplay != null) {
@@ -369,4 +391,42 @@ public class ActivityView extends ViewGroup {
             super.finalize();
         }
     }
+
+    /**
+     * A task change listener that detects background color change of the topmost stack on our
+     * virtual display and updates the background of the surface view. This background will be shown
+     * when surface view is resized, but the app hasn't drawn its content in new size yet.
+     */
+    private class TaskBackgroundChangeListener extends TaskStackListener {
+
+        @Override
+        public void onTaskDescriptionChanged(int taskId, ActivityManager.TaskDescription td)
+                throws RemoteException {
+            if (mVirtualDisplay == null) {
+                return;
+            }
+
+            // Find the topmost task on our virtual display - it will define the background
+            // color of the surface view during resizing.
+            final int displayId = mVirtualDisplay.getDisplay().getDisplayId();
+            final List<StackInfo> stackInfoList = mActivityManager.getAllStackInfos();
+
+            // Iterate through stacks from top to bottom.
+            final int stackCount = stackInfoList.size();
+            for (int i = 0; i < stackCount; i++) {
+                final StackInfo stackInfo = stackInfoList.get(i);
+                // Only look for stacks on our virtual display.
+                if (stackInfo.displayId != displayId) {
+                    continue;
+                }
+                // Found the topmost stack on target display. Now check if the topmost task's
+                // description changed.
+                if (taskId == stackInfo.taskIds[stackInfo.taskIds.length - 1]) {
+                    mSurfaceView.setResizeBackgroundColor(td.getBackgroundColor());
+                }
+                break;
+            }
+        }
+    }
+
 }
