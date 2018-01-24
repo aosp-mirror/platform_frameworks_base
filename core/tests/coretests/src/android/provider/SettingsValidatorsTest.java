@@ -17,6 +17,8 @@
 package android.provider;
 
 import static org.junit.Assert.fail;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import android.platform.test.annotations.Presubmit;
 import android.provider.SettingsValidators.Validator;
@@ -28,11 +30,99 @@ import org.junit.runner.RunWith;
 
 import java.util.Map;
 
-/** Tests that ensure all backed up settings have non-null validators. */
+/**
+ * Tests that ensure all backed up settings have non-null validators. Also, common validators
+ * are tested.
+ */
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class SettingsValidatorsTest {
+
+    @Test
+    public void testNonNegativeIntegerValidator() {
+        assertTrue(SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR.validate("1"));
+        assertTrue(SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR.validate("0"));
+        assertFalse(SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR.validate("-1"));
+        assertFalse(SettingsValidators.NON_NEGATIVE_INTEGER_VALIDATOR.validate("rectangle"));
+    }
+
+    @Test
+    public void testAnyIntegerValidator() {
+        assertTrue(SettingsValidators.ANY_INTEGER_VALIDATOR.validate("1"));
+        assertTrue(SettingsValidators.ANY_INTEGER_VALIDATOR.validate("0"));
+        assertTrue(SettingsValidators.ANY_INTEGER_VALIDATOR.validate("-1"));
+        assertFalse(SettingsValidators.ANY_INTEGER_VALIDATOR.validate("rectangle"));
+    }
+
+    @Test
+    public void testComponentNameValidator() {
+        assertTrue(SettingsValidators.COMPONENT_NAME_VALIDATOR.validate(
+                "android/com.android.internal.backup.LocalTransport"));
+        assertFalse(SettingsValidators.COMPONENT_NAME_VALIDATOR.validate("rectangle"));
+    }
+
+    @Test
+    public void testLocaleValidator() {
+        assertTrue(SettingsValidators.LOCALE_VALIDATOR.validate("en_US"));
+        assertTrue(SettingsValidators.LOCALE_VALIDATOR.validate("es"));
+        assertFalse(SettingsValidators.LOCALE_VALIDATOR.validate("rectangle"));
+    }
+
+    @Test
+    public void testPackageNameValidator() {
+        assertTrue(SettingsValidators.PACKAGE_NAME_VALIDATOR.validate(
+                "com.google.android"));
+        assertFalse(SettingsValidators.PACKAGE_NAME_VALIDATOR.validate("com.google.@android"));
+        assertFalse(SettingsValidators.PACKAGE_NAME_VALIDATOR.validate(".com.google.android"));
+        assertFalse(SettingsValidators.PACKAGE_NAME_VALIDATOR.validate(".com.google.5android"));
+    }
+
+    @Test
+    public void testDiscreteValueValidator() {
+        String[] beerTypes = new String[]{"Ale", "American IPA", "Stout"};
+        Validator v = new SettingsValidators.DiscreteValueValidator(beerTypes);
+        assertTrue(v.validate("Ale"));
+        assertTrue(v.validate("American IPA"));
+        assertTrue(v.validate("Stout"));
+        assertFalse(v.validate("Cider")); // just juice pretending to be beer
+    }
+
+    @Test
+    public void testInclusiveIntegerRangeValidator() {
+        Validator v = new SettingsValidators.InclusiveIntegerRangeValidator(0, 5);
+        assertTrue(v.validate("0"));
+        assertTrue(v.validate("2"));
+        assertTrue(v.validate("5"));
+        assertFalse(v.validate("-1"));
+        assertFalse(v.validate("6"));
+    }
+
+    @Test
+    public void testInclusiveFloatRangeValidator() {
+        Validator v = new SettingsValidators.InclusiveFloatRangeValidator(0.0f, 5.0f);
+        assertTrue(v.validate("0.0"));
+        assertTrue(v.validate("2.0"));
+        assertTrue(v.validate("5.0"));
+        assertFalse(v.validate("-1.0"));
+        assertFalse(v.validate("6.0"));
+    }
+
+    @Test
+    public void testComponentNameListValidator() {
+        Validator v = new SettingsValidators.ComponentNameListValidator(",");
+        assertTrue(v.validate("android/com.android.internal.backup.LocalTransport,"
+                + "com.google.android.gms/.backup.migrate.service.D2dTransport"));
+        assertFalse(v.validate("com.google.5android,android"));
+    }
+
+    @Test
+    public void testPackageNameListValidator() {
+        Validator v = new SettingsValidators.PackageNameListValidator(",");
+        assertTrue(v.validate("com.android.internal.backup.LocalTransport,com.google.android.gms"));
+        assertFalse(v.validate("5com.android.internal.backup.LocalTransport,android"));
+    }
+
 
     @Test
     public void ensureAllBackedUpSystemSettingsHaveValidators() {

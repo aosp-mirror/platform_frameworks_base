@@ -100,7 +100,7 @@ public class SettingsValidators {
             String[] subparts = value.split("\\.");
             boolean isValidPackageName = true;
             for (String subpart : subparts) {
-                isValidPackageName |= isSubpartValidForPackageName(subpart);
+                isValidPackageName &= isSubpartValidForPackageName(subpart);
                 if (!isValidPackageName) break;
             }
             return isValidPackageName;
@@ -110,7 +110,7 @@ public class SettingsValidators {
             if (subpart.length() == 0) return false;
             boolean isValidSubpart = Character.isLetter(subpart.charAt(0));
             for (int i = 1; i < subpart.length(); i++) {
-                isValidSubpart |= (Character.isLetterOrDigit(subpart.charAt(i))
+                isValidSubpart &= (Character.isLetterOrDigit(subpart.charAt(i))
                                 || (subpart.charAt(i) == '_'));
                 if (!isValidSubpart) break;
             }
