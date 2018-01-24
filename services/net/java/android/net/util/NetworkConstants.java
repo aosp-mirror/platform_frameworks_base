@@ -121,6 +121,14 @@ public final class NetworkConstants {
     public static final int ICMP_ECHO_DATA_OFFSET = 8;
 
     /**
+     * ICMPv4 constants.
+     *
+     * See also:
+     *     - https://tools.ietf.org/html/rfc792
+     */
+    public static final int ICMPV4_ECHO_REQUEST_TYPE = 8;
+
+    /**
      * ICMPv6 constants.
      *
      * See also:
@@ -139,6 +147,8 @@ public final class NetworkConstants {
     public static final int ICMPV6_ND_OPTION_TLLA = 2;
     public static final int ICMPV6_ND_OPTION_MTU  = 5;
 
+    public static final int ICMPV6_ECHO_REQUEST_TYPE = 128;
+
     /**
      * UDP constants.
      *
@@ -155,6 +165,14 @@ public final class NetworkConstants {
      */
     public static final int DHCP4_SERVER_PORT = 67;
     public static final int DHCP4_CLIENT_PORT = 68;
+
+    /**
+     * DNS constants.
+     *
+     * See also:
+     *     - https://tools.ietf.org/html/rfc1035
+     */
+    public static final int DNS_SERVER_PORT = 53;
 
     /**
      * Utility functions.

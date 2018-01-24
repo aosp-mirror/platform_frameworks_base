@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -29,6 +30,7 @@ import com.android.internal.util.Preconditions;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
+import java.util.Set;
 import java.util.StringJoiner;
 
 /**
@@ -47,6 +49,7 @@ import java.util.StringJoiner;
  */
 public final class NetworkCapabilities implements Parcelable {
     private static final String TAG = "NetworkCapabilities";
+    private static final int INVALID_UID = -1;
 
     /**
      * @hide
@@ -64,6 +67,8 @@ public final class NetworkCapabilities implements Parcelable {
             mLinkDownBandwidthKbps = nc.mLinkDownBandwidthKbps;
             mNetworkSpecifier = nc.mNetworkSpecifier;
             mSignalStrength = nc.mSignalStrength;
+            mUids = nc.mUids;
+            mEstablishingVpnAppUid = nc.mEstablishingVpnAppUid;
         }
     }
 
@@ -77,6 +82,8 @@ public final class NetworkCapabilities implements Parcelable {
         mLinkUpBandwidthKbps = mLinkDownBandwidthKbps = LINK_BANDWIDTH_UNSPECIFIED;
         mNetworkSpecifier = null;
         mSignalStrength = SIGNAL_STRENGTH_UNSPECIFIED;
+        mUids = null;
+        mEstablishingVpnAppUid = INVALID_UID;
     }
 
     /**
@@ -619,6 +626,29 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /**
+     * UID of the app that manages this network, or INVALID_UID if none/unknown.
+     *
+     * This field keeps track of the UID of the app that created this network and is in charge
+     * of managing it. In the practice, it is used to store the UID of VPN apps so it is named
+     * accordingly, but it may be renamed if other mechanisms are offered for third party apps
+     * to create networks.
+     *
+     * Because this field is only used in the services side (and to avoid apps being able to
+     * set this to whatever they want), this field is not parcelled and will not be conserved
+     * across the IPC boundary.
+     * @hide
+     */
+    private int mEstablishingVpnAppUid = INVALID_UID;
+
+    /**
+     * Set the UID of the managing app.
+     * @hide
+     */
+    public void setEstablishingVpnAppUid(final int uid) {
+        mEstablishingVpnAppUid = uid;
+    }
+
+    /**
      * Value indicating that link bandwidth is unspecified.
      * @hide
      */
@@ -837,6 +867,174 @@ public final class NetworkCapabilities implements Parcelable {
     }
 
     /**
+     * List of UIDs this network applies to. No restriction if null.
+     * <p>
+     * This is typically (and at this time, only) used by VPN. This network is only available to
+     * the UIDs in this list, and it is their default network. Apps in this list that wish to
+     * bypass the VPN can do so iff the VPN app allows them to or if they are privileged. If this
+     * member is null, then the network is not restricted by app UID. If it's an empty list, then
+     * it means nobody can use it.
+     * As a special exception, the app managing this network (as identified by its UID stored in
+     * mEstablishingVpnAppUid) can always see this network. This is embodied by a special check in
+     * satisfiedByUids. That still does not mean the network necessarily <strong>applies</strong>
+     * to the app that manages it as determined by #appliesToUid.
+     * <p>
+     * Please note that in principle a single app can be associated with multiple UIDs because
+     * each app will have a different UID when it's run as a different (macro-)user. A single
+     * macro user can only have a single active VPN app at any given time however.
+     * <p>
+     * Also please be aware this class does not try to enforce any normalization on this. Callers
+     * can only alter the UIDs by setting them wholesale : this class does not provide any utility
+     * to add or remove individual UIDs or ranges. If callers have any normalization needs on
+     * their own (like requiring sortedness or no overlap) they need to enforce it
+     * themselves. Some of the internal methods also assume this is normalized as in no adjacent
+     * or overlapping ranges are present.
+     *
+     * @hide
+     */
+    private Set<UidRange> mUids = null;
+
+    /**
+     * Convenience method to set the UIDs this network applies to to a single UID.
+     * @hide
+     */
+    public NetworkCapabilities setSingleUid(int uid) {
+        final ArraySet<UidRange> identity = new ArraySet<>(1);
+        identity.add(new UidRange(uid, uid));
+        setUids(identity);
+        return this;
+    }
+
+    /**
+     * Set the list of UIDs this network applies to.
+     * This makes a copy of the set so that callers can't modify it after the call.
+     * @hide
+     */
+    public NetworkCapabilities setUids(Set<UidRange> uids) {
+        if (null == uids) {
+            mUids = null;
+        } else {
+            mUids = new ArraySet<>(uids);
+        }
+        return this;
+    }
+
+    /**
+     * Get the list of UIDs this network applies to.
+     * This returns a copy of the set so that callers can't modify the original object.
+     * @hide
+     */
+    public Set<UidRange> getUids() {
+        return null == mUids ? null : new ArraySet<>(mUids);
+    }
+
+    /**
+     * Test whether this network applies to this UID.
+     * @hide
+     */
+    public boolean appliesToUid(int uid) {
+        if (null == mUids) return true;
+        for (UidRange range : mUids) {
+            if (range.contains(uid)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Tests if the set of UIDs that this network applies to is the same of the passed set of UIDs.
+     * <p>
+     * This test only checks whether equal range objects are in both sets. It will
+     * return false if the ranges are not exactly the same, even if the covered UIDs
+     * are for an equivalent result.
+     * <p>
+     * Note that this method is not very optimized, which is fine as long as it's not used very
+     * often.
+     * <p>
+     * nc is assumed nonnull.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public boolean equalsUids(NetworkCapabilities nc) {
+        Set<UidRange> comparedUids = nc.mUids;
+        if (null == comparedUids) return null == mUids;
+        if (null == mUids) return false;
+        // Make a copy so it can be mutated to check that all ranges in mUids
+        // also are in uids.
+        final Set<UidRange> uids = new ArraySet<>(mUids);
+        for (UidRange range : comparedUids) {
+            if (!uids.contains(range)) {
+                return false;
+            }
+            uids.remove(range);
+        }
+        return uids.isEmpty();
+    }
+
+    /**
+     * Test whether the passed NetworkCapabilities satisfies the UIDs this capabilities require.
+     *
+     * This method is called on the NetworkCapabilities embedded in a request with the
+     * capabilities of an available network. It checks whether all the UIDs from this listen
+     * (representing the UIDs that must have access to the network) are satisfied by the UIDs
+     * in the passed nc (representing the UIDs that this network is available to).
+     * <p>
+     * As a special exception, the UID that created the passed network (as represented by its
+     * mEstablishingVpnAppUid field) always satisfies a NetworkRequest requiring it (of LISTEN
+     * or REQUEST types alike), even if the network does not apply to it. That is so a VPN app
+     * can see its own network when it listens for it.
+     * <p>
+     * nc is assumed nonnull. Else, NPE.
+     * @see #appliesToUid
+     * @hide
+     */
+    public boolean satisfiedByUids(NetworkCapabilities nc) {
+        if (null == nc.mUids) return true; // The network satisfies everything.
+        if (null == mUids) return false; // Not everything allowed but requires everything
+        for (UidRange requiredRange : mUids) {
+            if (requiredRange.contains(nc.mEstablishingVpnAppUid)) return true;
+            if (!nc.appliesToUidRange(requiredRange)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Returns whether this network applies to the passed ranges.
+     * This assumes that to apply, the passed range has to be entirely contained
+     * within one of the ranges this network applies to. If the ranges are not normalized,
+     * this method may return false even though all required UIDs are covered because no
+     * single range contained them all.
+     * @hide
+     */
+    @VisibleForTesting
+    public boolean appliesToUidRange(UidRange requiredRange) {
+        if (null == mUids) return true;
+        for (UidRange uidRange : mUids) {
+            if (uidRange.containsRange(requiredRange)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Combine the UIDs this network currently applies to with the UIDs the passed
+     * NetworkCapabilities apply to.
+     * nc is assumed nonnull.
+     */
+    private void combineUids(NetworkCapabilities nc) {
+        if (null == nc.mUids || null == mUids) {
+            mUids = null;
+            return;
+        }
+        mUids.addAll(nc.mUids);
+    }
+
+    /**
      * Combine a set of Capabilities to this one.  Useful for coming up with the complete set
      * @hide
      */
@@ -846,6 +1044,7 @@ public final class NetworkCapabilities implements Parcelable {
         combineLinkBandwidths(nc);
         combineSpecifiers(nc);
         combineSignalStrength(nc);
+        combineUids(nc);
     }
 
     /**
@@ -858,12 +1057,13 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     private boolean satisfiedByNetworkCapabilities(NetworkCapabilities nc, boolean onlyImmutable) {
-        return (nc != null &&
-                satisfiedByNetCapabilities(nc, onlyImmutable) &&
-                satisfiedByTransportTypes(nc) &&
-                (onlyImmutable || satisfiedByLinkBandwidths(nc)) &&
-                satisfiedBySpecifier(nc) &&
-                (onlyImmutable || satisfiedBySignalStrength(nc)));
+        return (nc != null
+                && satisfiedByNetCapabilities(nc, onlyImmutable)
+                && satisfiedByTransportTypes(nc)
+                && (onlyImmutable || satisfiedByLinkBandwidths(nc))
+                && satisfiedBySpecifier(nc)
+                && (onlyImmutable || satisfiedBySignalStrength(nc))
+                && (onlyImmutable || satisfiedByUids(nc)));
     }
 
     /**
@@ -944,24 +1144,26 @@ public final class NetworkCapabilities implements Parcelable {
     @Override
     public boolean equals(Object obj) {
         if (obj == null || (obj instanceof NetworkCapabilities == false)) return false;
-        NetworkCapabilities that = (NetworkCapabilities)obj;
-        return (equalsNetCapabilities(that) &&
-                equalsTransportTypes(that) &&
-                equalsLinkBandwidths(that) &&
-                equalsSignalStrength(that) &&
-                equalsSpecifier(that));
+        NetworkCapabilities that = (NetworkCapabilities) obj;
+        return (equalsNetCapabilities(that)
+                && equalsTransportTypes(that)
+                && equalsLinkBandwidths(that)
+                && equalsSignalStrength(that)
+                && equalsSpecifier(that)
+                && equalsUids(that));
     }
 
     @Override
     public int hashCode() {
-        return ((int)(mNetworkCapabilities & 0xFFFFFFFF) +
-                ((int)(mNetworkCapabilities >> 32) * 3) +
-                ((int)(mTransportTypes & 0xFFFFFFFF) * 5) +
-                ((int)(mTransportTypes >> 32) * 7) +
-                (mLinkUpBandwidthKbps * 11) +
-                (mLinkDownBandwidthKbps * 13) +
-                Objects.hashCode(mNetworkSpecifier) * 17 +
-                (mSignalStrength * 19));
+        return ((int) (mNetworkCapabilities & 0xFFFFFFFF)
+                + ((int) (mNetworkCapabilities >> 32) * 3)
+                + ((int) (mTransportTypes & 0xFFFFFFFF) * 5)
+                + ((int) (mTransportTypes >> 32) * 7)
+                + (mLinkUpBandwidthKbps * 11)
+                + (mLinkDownBandwidthKbps * 13)
+                + Objects.hashCode(mNetworkSpecifier) * 17
+                + (mSignalStrength * 19)
+                + Objects.hashCode(mUids) * 23);
     }
 
     @Override
@@ -976,6 +1178,7 @@ public final class NetworkCapabilities implements Parcelable {
         dest.writeInt(mLinkDownBandwidthKbps);
         dest.writeParcelable((Parcelable) mNetworkSpecifier, flags);
         dest.writeInt(mSignalStrength);
+        dest.writeArraySet(new ArraySet<>(mUids));
     }
 
     public static final Creator<NetworkCapabilities> CREATOR =
@@ -990,6 +1193,8 @@ public final class NetworkCapabilities implements Parcelable {
                 netCap.mLinkDownBandwidthKbps = in.readInt();
                 netCap.mNetworkSpecifier = in.readParcelable(null);
                 netCap.mSignalStrength = in.readInt();
+                netCap.mUids = (ArraySet<UidRange>) in.readArraySet(
+                        null /* ClassLoader, null for default */);
                 return netCap;
             }
             @Override
@@ -1022,7 +1227,12 @@ public final class NetworkCapabilities implements Parcelable {
 
         String signalStrength = (hasSignalStrength() ? " SignalStrength: " + mSignalStrength : "");
 
-        return "[" + transports + capabilities + upBand + dnBand + specifier + signalStrength + "]";
+        String uids = (null != mUids ? " Uids: <" + mUids + ">" : "");
+
+        String establishingAppUid = " EstablishingAppUid: " + mEstablishingVpnAppUid;
+
+        return "[" + transports + capabilities + upBand + dnBand + specifier + signalStrength
+            + uids + establishingAppUid + "]";
     }
 
     /** @hide */
