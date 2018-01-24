@@ -118,6 +118,25 @@ class WatchlistLoggingHandler extends Handler {
     }
 
     /**
+     * Return if a given package has testOnly is true.
+     */
+    private boolean isPackageTestOnly(int uid) {
+        final ApplicationInfo ai;
+        try {
+            final String[] packageNames = mPm.getPackagesForUid(uid);
+            if (packageNames == null || packageNames.length == 0) {
+                Slog.e(TAG, "Couldn't find package: " + packageNames);
+                return false;
+            }
+            ai = mPm.getApplicationInfo(packageNames[0],0);
+        } catch (NameNotFoundException e) {
+            // Should not happen.
+            return false;
+        }
+        return (ai.flags & ApplicationInfo.FLAG_TEST_ONLY) != 0;
+    }
+
+     /**
      * Report network watchlist records if we collected enough data.
      */
     public void reportWatchlistIfNecessary() {
@@ -146,16 +165,21 @@ class WatchlistLoggingHandler extends Handler {
         }
         final String cncDomain = searchAllSubDomainsInWatchlist(hostname);
         if (cncDomain != null) {
-            insertRecord(getDigestFromUid(uid), cncDomain, timestamp);
+            insertRecord(uid, cncDomain, timestamp);
         } else {
             final String cncIp = searchIpInWatchlist(ipAddresses);
             if (cncIp != null) {
-                insertRecord(getDigestFromUid(uid), cncIp, timestamp);
+                insertRecord(uid, cncIp, timestamp);
             }
         }
     }
 
-    private boolean insertRecord(byte[] digest, String cncHost, long timestamp) {
+    private boolean insertRecord(int uid, String cncHost, long timestamp) {
+        if (!mConfig.isConfigSecure() && !isPackageTestOnly(uid)) {
+            // Skip package if config is not secure and package is not TestOnly app.
+            return true;
+        }
+        final byte[] digest = getDigestFromUid(uid);
         final boolean result = mDbHelper.insertNewRecord(digest, cncHost, timestamp);
         tryAggregateRecords();
         return result;
