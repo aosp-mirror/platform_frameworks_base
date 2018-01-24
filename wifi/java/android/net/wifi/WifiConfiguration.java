@@ -84,6 +84,9 @@ public class WifiConfiguration implements Parcelable {
         /** WPA is not used; plaintext or static WEP could be used. */
         public static final int NONE = 0;
         /** WPA pre-shared key (requires {@code preSharedKey} to be specified). */
+        /** @deprecated Due to security and performance limitations, use of WPA-1 networks
+         * is discouraged. WPA-2 (RSN) should be used instead. */
+        @Deprecated
         public static final int WPA_PSK = 1;
         /** WPA using EAP authentication. Generally used with an external authentication server. */
         public static final int WPA_EAP = 2;
@@ -117,8 +120,8 @@ public class WifiConfiguration implements Parcelable {
 
         public static final String varName = "key_mgmt";
 
-        public static final String[] strings = { "NONE", "WPA_PSK", "WPA_EAP", "IEEE8021X",
-                "WPA2_PSK", "OSEN", "FT_PSK", "FT_EAP" };
+        public static final String[] strings = { "NONE", /* deprecated */ "WPA_PSK", "WPA_EAP",
+                "IEEE8021X", "WPA2_PSK", "OSEN", "FT_PSK", "FT_EAP" };
     }
 
     /**
@@ -127,7 +130,10 @@ public class WifiConfiguration implements Parcelable {
     public static class Protocol {
         private Protocol() { }
 
-        /** WPA/IEEE 802.11i/D3.0 */
+        /** WPA/IEEE 802.11i/D3.0
+         * @deprecated Due to security and performance limitations, use of WPA-1 networks
+         * is discouraged. WPA-2 (RSN) should be used instead. */
+        @Deprecated
         public static final int WPA = 0;
         /** WPA2/IEEE 802.11i */
         public static final int RSN = 1;
@@ -170,7 +176,10 @@ public class WifiConfiguration implements Parcelable {
 
         /** Use only Group keys (deprecated) */
         public static final int NONE = 0;
-        /** Temporal Key Integrity Protocol [IEEE 802.11i/D7.0] */
+        /** Temporal Key Integrity Protocol [IEEE 802.11i/D7.0]
+         * @deprecated Due to security and performance limitations, use of WPA-1 networks
+         * is discouraged. WPA-2 (RSN) should be used instead. */
+        @Deprecated
         public static final int TKIP = 1;
         /** AES in Counter mode with CBC-MAC [RFC 3610, IEEE 802.11i/D7.0] */
         public static final int CCMP = 2;
