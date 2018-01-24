@@ -30,6 +30,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 
@@ -105,6 +106,7 @@ import android.security.Credentials;
 import android.security.KeyStore;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.LocalLog;
 import android.util.LocalLog.ReadOnlyLocalLog;
 import android.util.Log;
@@ -174,6 +176,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -709,12 +712,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mSystemProperties = getSystemProperties();
 
         mMetricsLog = logger;
-        mDefaultRequest = createInternetRequestForTransport(-1, NetworkRequest.Type.REQUEST);
+        mDefaultRequest = createDefaultInternetRequestForTransport(-1, NetworkRequest.Type.REQUEST);
         NetworkRequestInfo defaultNRI = new NetworkRequestInfo(null, mDefaultRequest, new Binder());
         mNetworkRequests.put(mDefaultRequest, defaultNRI);
         mNetworkRequestInfoLogs.log("REGISTER " + defaultNRI);
 
-        mDefaultMobileDataRequest = createInternetRequestForTransport(
+        mDefaultMobileDataRequest = createDefaultInternetRequestForTransport(
                 NetworkCapabilities.TRANSPORT_CELLULAR, NetworkRequest.Type.BACKGROUND_REQUEST);
 
         mHandlerThread = new HandlerThread("ConnectivityServiceThread");
@@ -879,7 +882,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 deps);
     }
 
-    private NetworkRequest createInternetRequestForTransport(
+    private NetworkRequest createDefaultInternetRequestForTransport(
             int transportType, NetworkRequest.Type type) {
         NetworkCapabilities netCap = new NetworkCapabilities();
         netCap.addCapability(NET_CAPABILITY_INTERNET);
@@ -1257,7 +1260,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         for (Network network : networks) {
                             nai = getNetworkAgentInfoForNetwork(network);
                             nc = getNetworkCapabilitiesInternal(nai);
+                            // nc is a copy of the capabilities in nai, so it's fine to mutate it
+                            // TODO : don't remove the UIDs when communicating with processes
+                            // that have the NETWORK_SETTINGS permission.
                             if (nc != null) {
+                                nc.setSingleUid(userId);
                                 result.put(network, nc);
                             }
                         }
@@ -2048,24 +2055,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 case NetworkAgent.EVENT_NETWORK_SCORE_CHANGED: {
                     Integer score = (Integer) msg.obj;
                     if (score != null) updateNetworkScore(nai, score.intValue());
-                    break;
-                }
-                case NetworkAgent.EVENT_UID_RANGES_ADDED: {
-                    try {
-                        mNetd.addVpnUidRanges(nai.network.netId, (UidRange[])msg.obj);
-                    } catch (Exception e) {
-                        // Never crash!
-                        loge("Exception in addVpnUidRanges: " + e);
-                    }
-                    break;
-                }
-                case NetworkAgent.EVENT_UID_RANGES_REMOVED: {
-                    try {
-                        mNetd.removeVpnUidRanges(nai.network.netId, (UidRange[])msg.obj);
-                    } catch (Exception e) {
-                        // Never crash!
-                        loge("Exception in removeVpnUidRanges: " + e);
-                    }
                     break;
                 }
                 case NetworkAgent.EVENT_SET_EXPLICITLY_SELECTED: {
@@ -4206,6 +4195,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // the system default network.
         if (type == NetworkRequest.Type.TRACK_DEFAULT) {
             networkCapabilities = new NetworkCapabilities(mDefaultRequest.networkCapabilities);
+            networkCapabilities.removeCapability(NET_CAPABILITY_NOT_VPN);
             enforceAccessPermission();
         } else {
             networkCapabilities = new NetworkCapabilities(networkCapabilities);
@@ -4216,6 +4206,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
             enforceMeteredApnPolicy(networkCapabilities);
         }
         ensureRequestableCapabilities(networkCapabilities);
+        // Set the UID range for this request to the single UID of the requester.
+        // This will overwrite any allowed UIDs in the requested capabilities. Though there
+        // are no visible methods to set the UIDs, an app could use reflection to try and get
+        // networks for other apps so it's essential that the UIDs are overwritten.
+        // TODO : don't forcefully set the UID when communicating with processes
+        // that have the NETWORK_SETTINGS permission.
+        networkCapabilities.setSingleUid(Binder.getCallingUid());
 
         if (timeoutMs < 0) {
             throw new IllegalArgumentException("Bad timeout specified");
@@ -4289,6 +4286,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         enforceMeteredApnPolicy(networkCapabilities);
         ensureRequestableCapabilities(networkCapabilities);
         ensureValidNetworkSpecifier(networkCapabilities);
+        // TODO : don't forcefully set the UID when communicating with processes
+        // that have the NETWORK_SETTINGS permission.
+        networkCapabilities.setSingleUid(Binder.getCallingUid());
 
         NetworkRequest networkRequest = new NetworkRequest(networkCapabilities, TYPE_NONE,
                 nextNetworkRequestId(), NetworkRequest.Type.REQUEST);
@@ -4342,6 +4342,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         NetworkCapabilities nc = new NetworkCapabilities(networkCapabilities);
+        // TODO : don't forcefully set the UIDs when communicating with processes
+        // that have the NETWORK_SETTINGS permission.
+        nc.setSingleUid(Binder.getCallingUid());
         if (!ConnectivityManager.checkChangePermission(mContext)) {
             // Apps without the CHANGE_NETWORK_STATE permission can't use background networks, so
             // make all their listens include NET_CAPABILITY_FOREGROUND. That way, they will get
@@ -4370,8 +4373,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         ensureValidNetworkSpecifier(networkCapabilities);
 
-        NetworkRequest networkRequest = new NetworkRequest(
-                new NetworkCapabilities(networkCapabilities), TYPE_NONE, nextNetworkRequestId(),
+        final NetworkCapabilities nc = new NetworkCapabilities(networkCapabilities);
+        // TODO : don't forcefully set the UIDs when communicating with processes
+        // that have the NETWORK_SETTINGS permission.
+        nc.setSingleUid(Binder.getCallingUid());
+
+        NetworkRequest networkRequest = new NetworkRequest(nc, TYPE_NONE, nextNetworkRequestId(),
                 NetworkRequest.Type.LISTEN);
         NetworkRequestInfo nri = new NetworkRequestInfo(networkRequest, operation);
         if (VDBG) log("pendingListenForNetwork for " + nri);
@@ -4514,6 +4521,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         NetworkInfo networkInfo = na.networkInfo;
         na.networkInfo = null;
         updateNetworkInfo(na, networkInfo);
+        updateUids(na, null, na.networkCapabilities);
     }
 
     private void updateLinkProperties(NetworkAgentInfo networkAgent, LinkProperties oldLp) {
@@ -4762,6 +4770,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             nai.networkCapabilities = newNc;
         }
 
+        updateUids(nai, prevNc, newNc);
+
         if (nai.getCurrentScore() == oldScore && newNc.equalRequestableCapabilities(prevNc)) {
             // If the requestable capabilities haven't changed, and the score hasn't changed, then
             // the change we're processing can't affect any requests, it can only affect the listens
@@ -4795,6 +4805,34 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     vpn.updateCapabilities();
                 }
             }
+        }
+    }
+
+    private void updateUids(NetworkAgentInfo nai, NetworkCapabilities prevNc,
+            NetworkCapabilities newNc) {
+        Set<UidRange> prevRanges = null == prevNc ? null : prevNc.getUids();
+        Set<UidRange> newRanges = null == newNc ? null : newNc.getUids();
+        if (null == prevRanges) prevRanges = new ArraySet<>();
+        if (null == newRanges) newRanges = new ArraySet<>();
+        final Set<UidRange> prevRangesCopy = new ArraySet<>(prevRanges);
+
+        prevRanges.removeAll(newRanges);
+        newRanges.removeAll(prevRangesCopy);
+
+        try {
+            if (!newRanges.isEmpty()) {
+                final UidRange[] addedRangesArray = new UidRange[newRanges.size()];
+                newRanges.toArray(addedRangesArray);
+                mNetd.addVpnUidRanges(nai.network.netId, addedRangesArray);
+            }
+            if (!prevRanges.isEmpty()) {
+                final UidRange[] removedRangesArray = new UidRange[prevRanges.size()];
+                prevRanges.toArray(removedRangesArray);
+                mNetd.removeVpnUidRanges(nai.network.netId, removedRangesArray);
+            }
+        } catch (Exception e) {
+            // Never crash!
+            loge("Exception in updateUids: " + e);
         }
     }
 
@@ -4889,7 +4927,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 break;
             }
             case ConnectivityManager.CALLBACK_CAP_CHANGED: {
-                putParcelable(bundle, new NetworkCapabilities(networkAgent.networkCapabilities));
+                final NetworkCapabilities nc =
+                        new NetworkCapabilities(networkAgent.networkCapabilities);
+                // TODO : don't remove the UIDs when communicating with processes
+                // that have the NETWORK_SETTINGS permission.
+                nc.setSingleUid(nri.mUid);
+                putParcelable(bundle, nc);
                 break;
             }
             case ConnectivityManager.CALLBACK_IP_CHANGED: {
@@ -5413,6 +5456,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         }
                     }
                 }
+                updateUids(networkAgent, networkAgent.networkCapabilities, null);
             }
         } else if ((oldInfo != null && oldInfo.getState() == NetworkInfo.State.SUSPENDED) ||
                 state == NetworkInfo.State.SUSPENDED) {

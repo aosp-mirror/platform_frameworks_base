@@ -44,6 +44,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_WIFI_P2P;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_XCAP;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_ETHERNET;
+import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI_AWARE;
 
@@ -101,6 +102,7 @@ import android.net.NetworkSpecifier;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.StringNetworkSpecifier;
+import android.net.UidRange;
 import android.net.metrics.IpConnectivityLog;
 import android.net.util.MultinetworkPolicyTracker;
 import android.os.ConditionVariable;
@@ -126,11 +128,13 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.WakeupMessage;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.server.connectivity.ConnectivityConstants;
 import com.android.server.connectivity.DefaultNetworkMetrics;
 import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.connectivity.MockableSystemProperties;
 import com.android.server.connectivity.NetworkAgentInfo;
 import com.android.server.connectivity.NetworkMonitor;
+import com.android.server.connectivity.Vpn;
 import com.android.server.net.NetworkPinner;
 import com.android.server.net.NetworkPolicyManagerInternal;
 
@@ -360,7 +364,7 @@ public class ConnectivityServiceTest {
 
         MockNetworkAgent(int transport, LinkProperties linkProperties) {
             final int type = transportToLegacyType(transport);
-            final String typeName = ConnectivityManager.getNetworkTypeName(type);
+            final String typeName = ConnectivityManager.getNetworkTypeName(transport);
             mNetworkInfo = new NetworkInfo(type, 0, typeName, "Mock");
             mNetworkCapabilities = new NetworkCapabilities();
             mNetworkCapabilities.addTransportType(transport);
@@ -376,6 +380,9 @@ public class ConnectivityServiceTest {
                     break;
                 case TRANSPORT_WIFI_AWARE:
                     mScore = 20;
+                    break;
+                case TRANSPORT_VPN:
+                    mScore = ConnectivityConstants.VPN_DEFAULT_SCORE;
                     break;
                 default:
                     throw new UnsupportedOperationException("unimplemented network type");
@@ -435,6 +442,11 @@ public class ConnectivityServiceTest {
 
         public void removeCapability(int capability) {
             mNetworkCapabilities.removeCapability(capability);
+            mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
+        }
+
+        public void setUids(Set<UidRange> uids) {
+            mNetworkCapabilities.setUids(uids);
             mNetworkAgent.sendNetworkCapabilities(mNetworkCapabilities);
         }
 
@@ -1461,6 +1473,11 @@ public class ConnectivityServiceTest {
             NetworkCapabilities nc = (NetworkCapabilities) cbi.arg;
             assertFalse(nc.hasCapability(capability));
             return nc;
+        }
+
+        void expectCapabilitiesLike(Predicate<NetworkCapabilities> fn, MockNetworkAgent agent) {
+            CallbackInfo cbi = expectCallback(CallbackState.NETWORK_CAPABILITIES, agent);
+            assertTrue(fn.test((NetworkCapabilities) cbi.arg));
         }
 
         void assertNoCallback() {
@@ -3624,5 +3641,77 @@ public class ConnectivityServiceTest {
             }
             return;
         }
+    }
+
+    @Test
+    public void testVpnNetworkActive() {
+        final int uid = Process.myUid();
+
+        final TestNetworkCallback genericNetworkCallback = new TestNetworkCallback();
+        final TestNetworkCallback wifiNetworkCallback = new TestNetworkCallback();
+        final TestNetworkCallback vpnNetworkCallback = new TestNetworkCallback();
+        final NetworkRequest genericRequest = new NetworkRequest.Builder().build();
+        final NetworkRequest wifiRequest = new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_WIFI).build();
+        final NetworkRequest vpnNetworkRequest = new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_VPN).build();
+        mCm.registerNetworkCallback(genericRequest, genericNetworkCallback);
+        mCm.registerNetworkCallback(wifiRequest, wifiNetworkCallback);
+        mCm.registerNetworkCallback(vpnNetworkRequest, vpnNetworkCallback);
+
+        mWiFiNetworkAgent = new MockNetworkAgent(TRANSPORT_WIFI);
+        mWiFiNetworkAgent.connect(false);
+
+        genericNetworkCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        wifiNetworkCallback.expectAvailableCallbacksUnvalidated(mWiFiNetworkAgent);
+        vpnNetworkCallback.assertNoCallback();
+
+        // TODO : check callbacks agree with the return value of mCm.getActiveNetwork().
+        // Right now this is not possible because establish() is not adequately instrumented
+        // in this test.
+
+        final MockNetworkAgent vpnNetworkAgent = new MockNetworkAgent(TRANSPORT_VPN);
+        final ArraySet<UidRange> ranges = new ArraySet<>();
+        ranges.add(new UidRange(uid, uid));
+        vpnNetworkAgent.setUids(ranges);
+        vpnNetworkAgent.connect(false);
+
+        genericNetworkCallback.expectAvailableCallbacksUnvalidated(vpnNetworkAgent);
+        wifiNetworkCallback.assertNoCallback();
+        vpnNetworkCallback.expectAvailableCallbacksUnvalidated(vpnNetworkAgent);
+
+        genericNetworkCallback.expectCallback(CallbackState.NETWORK_CAPABILITIES, vpnNetworkAgent);
+        vpnNetworkCallback.expectCapabilitiesLike(
+                nc -> nc.appliesToUid(uid) && !nc.appliesToUid(uid + 1), vpnNetworkAgent);
+
+        ranges.clear();
+        vpnNetworkAgent.setUids(ranges);
+
+        genericNetworkCallback.expectCallback(CallbackState.LOST, vpnNetworkAgent);
+        wifiNetworkCallback.assertNoCallback();
+        vpnNetworkCallback.expectCallback(CallbackState.LOST, vpnNetworkAgent);
+
+        ranges.add(new UidRange(uid, uid));
+        vpnNetworkAgent.setUids(ranges);
+
+        genericNetworkCallback.expectAvailableCallbacksValidated(vpnNetworkAgent);
+        wifiNetworkCallback.assertNoCallback();
+        vpnNetworkCallback.expectAvailableCallbacksValidated(vpnNetworkAgent);
+
+        mWiFiNetworkAgent.disconnect();
+
+        genericNetworkCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+        wifiNetworkCallback.expectCallback(CallbackState.LOST, mWiFiNetworkAgent);
+        vpnNetworkCallback.assertNoCallback();
+
+        vpnNetworkAgent.disconnect();
+
+        genericNetworkCallback.expectCallback(CallbackState.LOST, vpnNetworkAgent);
+        wifiNetworkCallback.assertNoCallback();
+        vpnNetworkCallback.expectCallback(CallbackState.LOST, vpnNetworkAgent);
+
+        mCm.unregisterNetworkCallback(genericNetworkCallback);
+        mCm.unregisterNetworkCallback(wifiNetworkCallback);
+        mCm.unregisterNetworkCallback(vpnNetworkCallback);
     }
 }
