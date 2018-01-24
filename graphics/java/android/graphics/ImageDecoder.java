@@ -920,10 +920,6 @@ public final class ImageDecoder implements AutoCloseable {
             Resources res = src.getResources();
             byte[] np = bm.getNinePatchChunk();
             if (np != null && NinePatch.isNinePatchChunk(np)) {
-                if (res != null) {
-                    bm.setDensity(res.getDisplayMetrics().densityDpi);
-                }
-
                 Rect opticalInsets = new Rect();
                 bm.getOpticalInsets(opticalInsets);
                 Rect padding = new Rect();
