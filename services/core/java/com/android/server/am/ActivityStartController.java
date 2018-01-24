@@ -220,7 +220,7 @@ public class ActivityStartController {
         }
     }
 
-    final int startActivityInPackage(int uid, int realCallingUid, int realCallingPid,
+    final int startActivityInPackage(int uid, int realCallingPid, int realCallingUid,
             String callingPackage, Intent intent, String resolvedType, IBinder resultTo,
             String resultWho, int requestCode, int startFlags, SafeActivityOptions options,
             int userId, TaskRecord inTask, String reason) {
