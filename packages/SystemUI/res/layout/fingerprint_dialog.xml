@@ -99,6 +99,7 @@
             android:layout_height="@dimen/fingerprint_dialog_fp_icon_size"
             android:layout_gravity="center_horizontal"
             android:scaleType="centerInside"
+            android:contentDescription="@string/accessibility_fingerprint_dialog_fingerprint_icon"
             android:src="@drawable/fingerprint_icon"/>
 
         <TextView
@@ -112,6 +113,8 @@
             android:textSize="12sp"
             android:visibility="invisible"
             android:gravity="center_horizontal"
+            android:accessibilityLiveRegion="polite"
+            android:contentDescription="@string/accessibility_fingerprint_dialog_help_area"
             android:textColor="@color/fingerprint_error_message_color"/>
 
         <LinearLayout android:id="@+id/buttonPanel"

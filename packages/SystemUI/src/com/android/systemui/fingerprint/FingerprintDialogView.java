@@ -146,7 +146,7 @@ public class FingerprintDialogView extends LinearLayout {
         subtitle.setText(mBundle.getCharSequence(FingerprintDialog.KEY_SUBTITLE));
         description.setText(mBundle.getCharSequence(FingerprintDialog.KEY_DESCRIPTION));
         negative.setText(mBundle.getCharSequence(FingerprintDialog.KEY_NEGATIVE_TEXT));
-        image.setImageDrawable(getAppIcon());
+        setAppIcon(image);
 
         final CharSequence positiveText =
                 mBundle.getCharSequence(FingerprintDialog.KEY_POSITIVE_TEXT);
@@ -190,6 +190,7 @@ public class FingerprintDialogView extends LinearLayout {
     private void showMessage(String message) {
         mHandler.removeMessages(FingerprintDialogImpl.MSG_CLEAR_MESSAGE);
         mErrorText.setText(message);
+        mErrorText.setContentDescription(message);
         mErrorText.setVisibility(View.VISIBLE);
         mHandler.sendMessageDelayed(mHandler.obtainMessage(FingerprintDialogImpl.MSG_CLEAR_MESSAGE),
                 FingerprintDialog.HIDE_DIALOG_DELAY);
@@ -205,12 +206,16 @@ public class FingerprintDialogView extends LinearLayout {
                 false /* userCanceled */), FingerprintDialog.HIDE_DIALOG_DELAY);
     }
 
-    private Drawable getAppIcon() {
+    private void setAppIcon(ImageView image) {
         final ActivityManager.RunningTaskInfo taskInfo = mActivityManagerWrapper.getRunningTask();
         final ComponentName cn = taskInfo.topActivity;
         final int userId = mActivityManagerWrapper.getCurrentUserId();
         final ActivityInfo activityInfo = mPackageManageWrapper.getActivityInfo(cn, userId);
-        return mActivityManagerWrapper.getBadgedActivityIcon(activityInfo, userId);
+        image.setImageDrawable(mActivityManagerWrapper.getBadgedActivityIcon(activityInfo, userId));
+        image.setContentDescription(
+                getResources().getString(R.string.accessibility_fingerprint_dialog_app_icon)
+                        + " "
+                        + mActivityManagerWrapper.getBadgedActivityLabel(activityInfo, userId));
     }
 
     public WindowManager.LayoutParams getLayoutParams() {
