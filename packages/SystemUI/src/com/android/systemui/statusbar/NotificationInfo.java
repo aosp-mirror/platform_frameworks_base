@@ -79,6 +79,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private OnSettingsClickListener mOnSettingsClickListener;
     private OnAppSettingsClickListener mAppSettingsClickListener;
     private NotificationGuts mGutsContainer;
+    private boolean mNegativeUserSentiment;
 
     private OnClickListener mOnKeepShowing = v -> {
         closeControls(v);
@@ -122,6 +123,22 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             final OnAppSettingsClickListener onAppSettingsClick,
             final Set<String> nonBlockablePkgs)
             throws RemoteException {
+        bindNotification(pm, iNotificationManager, pkg, notificationChannel, numChannels, sbn,
+                checkSaveListener, onSettingsClick, onAppSettingsClick, nonBlockablePkgs,
+                false /* negative sentiment */);
+    }
+
+    public void bindNotification(final PackageManager pm,
+            final INotificationManager iNotificationManager,
+            final String pkg,
+            final NotificationChannel notificationChannel,
+            final int numChannels,
+            final StatusBarNotification sbn,
+            final CheckSaveListener checkSaveListener,
+            final OnSettingsClickListener onSettingsClick,
+            final OnAppSettingsClickListener onAppSettingsClick,
+            final Set<String> nonBlockablePkgs,
+            boolean negativeUserSentiment)  throws RemoteException {
         mINotificationManager = iNotificationManager;
         mPkg = pkg;
         mNumNotificationChannels = numChannels;
@@ -133,6 +150,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         mOnSettingsClickListener = onSettingsClick;
         mSingleNotificationChannel = notificationChannel;
         mStartingUserImportance = mChosenImportance = mSingleNotificationChannel.getImportance();
+        mNegativeUserSentiment = negativeUserSentiment;
 
         int numTotalChannels = mINotificationManager.getNumNotificationChannelsForPackage(
                 pkg, mAppUid, false /* includeDeleted */);
@@ -227,24 +245,27 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     }
 
     private void bindPrompt() {
-        final TextView channelName = findViewById(R.id.channel_name);
         final TextView blockPrompt = findViewById(R.id.block_prompt);
+        bindName();
         if (mNonblockable) {
-            if (mIsSingleDefaultChannel || mNumNotificationChannels > 1) {
-                channelName.setVisibility(View.GONE);
-            } else {
-                channelName.setText(mSingleNotificationChannel.getName());
-            }
-
             blockPrompt.setText(R.string.notification_unblockable_desc);
         } else {
-            if (mIsSingleDefaultChannel || mNumNotificationChannels > 1) {
-                channelName.setVisibility(View.GONE);
+            if (mNegativeUserSentiment) {
+                blockPrompt.setText(R.string.inline_blocking_helper);
+            }  else if (mIsSingleDefaultChannel || mNumNotificationChannels > 1) {
                 blockPrompt.setText(R.string.inline_keep_showing_app);
             } else {
-                channelName.setText(mSingleNotificationChannel.getName());
                 blockPrompt.setText(R.string.inline_keep_showing);
             }
+        }
+    }
+
+    private void bindName() {
+        final TextView channelName = findViewById(R.id.channel_name);
+        if (mIsSingleDefaultChannel || mNumNotificationChannels > 1) {
+            channelName.setVisibility(View.GONE);
+        } else {
+            channelName.setText(mSingleNotificationChannel.getName());
         }
     }
 

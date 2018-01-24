@@ -1497,6 +1497,10 @@
     <string name="notification_channel_disabled">You won\'t see these notifications anymore</string>
 
     <!-- Notification Inline controls: continue receiving notifications prompt, channel level -->
+    <string name="inline_blocking_helper">You usually dismiss these notifications.
+    \nKeep showing them?</string>
+
+    <!-- Notification Inline controls: continue receiving notifications prompt, channel level -->
     <string name="inline_keep_showing">Keep showing these notifications?</string>
 
     <!-- Notification inline controls: block notifications button -->

@@ -15,6 +15,9 @@
  */
 package com.android.systemui.statusbar;
 
+import static android.service.notification.NotificationListenerService.Ranking
+        .USER_SENTIMENT_NEGATIVE;
+
 import android.app.INotificationManager;
 import android.app.NotificationChannel;
 import android.content.Context;
@@ -231,7 +234,8 @@ public class NotificationGutsManager implements Dumpable {
             try {
                 info.bindNotification(pmUser, iNotificationManager, pkg, row.getEntry().channel,
                         channels.size(), sbn, mCheckSaveListener, onSettingsClick,
-                        onAppSettingsClick, mNonBlockablePkgs);
+                        onAppSettingsClick, mNonBlockablePkgs,
+                        row.getEntry().userSentiment == USER_SENTIMENT_NEGATIVE);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }

@@ -281,6 +281,16 @@ public class NotificationInfoTest extends SysuiTestCase {
     }
 
     @Test
+    public void testbindNotification_BlockingHelper() throws Exception {
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null,
+                null, null, true);
+        final TextView view = mNotificationInfo.findViewById(R.id.block_prompt);
+        assertEquals(View.VISIBLE, view.getVisibility());
+        assertEquals(mContext.getString(R.string.inline_blocking_helper), view.getText());
+    }
+
+    @Test
     public void testbindNotification_UnblockableTextVisibleWhenAppUnblockable() throws Exception {
         mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
                 TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null,
