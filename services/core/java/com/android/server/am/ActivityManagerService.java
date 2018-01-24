@@ -428,7 +428,6 @@ import com.android.server.SystemServiceManager;
 import com.android.server.ThreadPriorityBooster;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;
-import com.android.server.am.EventLogTags;
 import com.android.server.am.proto.ActivityManagerServiceProto;
 import com.android.server.am.proto.BroadcastProto;
 import com.android.server.am.proto.GrantUriProto;
@@ -8849,7 +8848,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             case AppOpsManager.MODE_ALLOWED:
                 // If force-background-check is enabled, restrict all apps that aren't whitelisted.
                 if (mForceBackgroundCheck &&
-                        UserHandle.isApp(uid) &&
+                        !UserHandle.isCore(uid) &&
                         !isOnDeviceIdleWhitelistLocked(uid)) {
                     if (DEBUG_BACKGROUND_CHECK) {
                         Slog.i(TAG, "Force background check: " +
@@ -24120,7 +24119,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int size = mActiveUids.size();
         for (int i = 0; i < size; i++) {
             final int uid = mActiveUids.keyAt(i);
-            if (!UserHandle.isApp(uid)) {
+            if (UserHandle.isCore(uid)) {
                 continue;
             }
             final UidRecord uidRec = mActiveUids.valueAt(i);

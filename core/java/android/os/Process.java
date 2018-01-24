@@ -574,6 +574,14 @@ public class Process {
     }
 
     /**
+     * Returns whether the given uid belongs to a system core component or not.
+     * @hide
+     */
+    public static boolean isCoreUid(int uid) {
+        return UserHandle.isCore(uid);
+    }
+
+    /**
      * Returns whether the given uid belongs to an application.
      * @param uid A kernel uid.
      * @return Whether the uid corresponds to an application sandbox running in

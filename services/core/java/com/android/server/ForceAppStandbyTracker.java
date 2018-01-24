@@ -504,7 +504,7 @@ public class ForceAppStandbyTracker {
      */
     void uidToForeground(int uid) {
         synchronized (mLock) {
-            if (!UserHandle.isApp(uid)) {
+            if (UserHandle.isCore(uid)) {
                 return;
             }
             // TODO This can be optimized by calling indexOfKey and sharing the index for get and
@@ -522,7 +522,7 @@ public class ForceAppStandbyTracker {
      */
     void uidToBackground(int uid, boolean remove) {
         synchronized (mLock) {
-            if (!UserHandle.isApp(uid)) {
+            if (UserHandle.isCore(uid)) {
                 return;
             }
             // TODO This can be optimized by calling indexOfKey and sharing the index for get and
@@ -864,7 +864,7 @@ public class ForceAppStandbyTracker {
      * Note clients normally shouldn't need to access it. It's only for dumpsys.
      */
     public boolean isInForeground(int uid) {
-        if (!UserHandle.isApp(uid)) {
+        if (UserHandle.isCore(uid)) {
             return true;
         }
         synchronized (mLock) {
