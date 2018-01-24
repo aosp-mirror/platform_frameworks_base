@@ -16,6 +16,7 @@
 
 package android.text.style;
 
+import android.annotation.NonNull;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Parcel;
@@ -24,42 +25,59 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 
 /**
- * Changes the typeface family of the text to which the span is attached.
+ * Changes the typeface family of the text to which the span is attached. Examples of typeface
+ * family include "monospace", "serif", and "sans-serif".
+ * <p>
+ * For example, change the typeface of a text to "monospace" like this:
+ * <pre>
+ * SpannableString string = new SpannableString("Text with typeface span");
+ * string.setSpan(new TypefaceSpan("monospace"), 10, 18, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+ * </pre>
+ * <img src="{@docRoot}reference/android/images/text/style/typefacespan.png" />
+ * <figcaption>Text with "monospace" typeface family.</figcaption>
  */
 public class TypefaceSpan extends MetricAffectingSpan implements ParcelableSpan {
+
     private final String mFamily;
 
     /**
-     * @param family The font family for this typeface.  Examples include
-     * "monospace", "serif", and "sans-serif".
+     * Constructs a {@link TypefaceSpan} based on a font family.
+     *
+     * @param family The font family for this typeface. Examples include
+     *               "monospace", "serif", and "sans-serif".
      */
     public TypefaceSpan(String family) {
         mFamily = family;
     }
 
-    public TypefaceSpan(Parcel src) {
+    public TypefaceSpan(@NonNull Parcel src) {
         mFamily = src.readString();
     }
-    
+
+    @Override
     public int getSpanTypeId() {
         return getSpanTypeIdInternal();
     }
 
     /** @hide */
+    @Override
     public int getSpanTypeIdInternal() {
         return TextUtils.TYPEFACE_SPAN;
     }
-    
+
+    @Override
     public int describeContents() {
         return 0;
     }
 
-    public void writeToParcel(Parcel dest, int flags) {
+    @Override
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         writeToParcelInternal(dest, flags);
     }
 
     /** @hide */
-    public void writeToParcelInternal(Parcel dest, int flags) {
+    @Override
+    public void writeToParcelInternal(@NonNull Parcel dest, int flags) {
         dest.writeString(mFamily);
     }
 
@@ -71,16 +89,16 @@ public class TypefaceSpan extends MetricAffectingSpan implements ParcelableSpan 
     }
 
     @Override
-    public void updateDrawState(TextPaint ds) {
-        apply(ds, mFamily);
+    public void updateDrawState(@NonNull TextPaint textPaint) {
+        apply(textPaint, mFamily);
     }
 
     @Override
-    public void updateMeasureState(TextPaint paint) {
-        apply(paint, mFamily);
+    public void updateMeasureState(@NonNull TextPaint textPaint) {
+        apply(textPaint, mFamily);
     }
 
-    private static void apply(Paint paint, String family) {
+    private static void apply(@NonNull Paint paint, String family) {
         int oldStyle;
 
         Typeface old = paint.getTypeface();
