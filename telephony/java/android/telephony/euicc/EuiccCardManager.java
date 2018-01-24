@@ -142,11 +142,12 @@ public class EuiccCardManager {
     /**
      * Gets all the profiles on eUicc.
      *
+     * @param cardId The Id of the eUICC.
      * @param callback The callback to get the result code and all the profiles.
      */
-    public void getAllProfiles(ResultCallback<EuiccProfileInfo[]> callback) {
+    public void getAllProfiles(String cardId, ResultCallback<EuiccProfileInfo[]> callback) {
         try {
-            getIEuiccCardController().getAllProfiles(mContext.getOpPackageName(),
+            getIEuiccCardController().getAllProfiles(mContext.getOpPackageName(), cardId,
                     new IGetAllProfilesCallback.Stub() {
                         @Override
                         public void onComplete(int resultCode, EuiccProfileInfo[] profiles) {
@@ -162,12 +163,13 @@ public class EuiccCardManager {
     /**
      * Gets the profile of the given iccid.
      *
+     * @param cardId The Id of the eUICC.
      * @param iccid The iccid of the profile.
      * @param callback The callback to get the result code and profile.
      */
-    public void getProfile(String iccid, ResultCallback<EuiccProfileInfo> callback) {
+    public void getProfile(String cardId, String iccid, ResultCallback<EuiccProfileInfo> callback) {
         try {
-            getIEuiccCardController().getProfile(mContext.getOpPackageName(), iccid,
+            getIEuiccCardController().getProfile(mContext.getOpPackageName(), cardId, iccid,
                     new IGetProfileCallback.Stub() {
                         @Override
                         public void onComplete(int resultCode, EuiccProfileInfo profile) {
@@ -183,14 +185,16 @@ public class EuiccCardManager {
     /**
      * Disables the profile of the given iccid.
      *
+     * @param cardId The Id of the eUICC.
      * @param iccid The iccid of the profile.
      * @param refresh Whether sending the REFRESH command to modem.
      * @param callback The callback to get the result code.
      */
-    public void disableProfile(String iccid, boolean refresh, ResultCallback<Void> callback) {
+    public void disableProfile(String cardId, String iccid, boolean refresh,
+            ResultCallback<Void> callback) {
         try {
-            getIEuiccCardController().disableProfile(mContext.getOpPackageName(), iccid, refresh,
-                    new IDisableProfileCallback.Stub() {
+            getIEuiccCardController().disableProfile(mContext.getOpPackageName(), cardId, iccid,
+                    refresh, new IDisableProfileCallback.Stub() {
                         @Override
                         public void onComplete(int resultCode) {
                             callback.onComplete(resultCode, null);
@@ -206,15 +210,16 @@ public class EuiccCardManager {
      * Switches from the current profile to another profile. The current profile will be disabled
      * and the specified profile will be enabled.
      *
+     * @param cardId The Id of the eUICC.
      * @param iccid The iccid of the profile to switch to.
      * @param refresh Whether sending the REFRESH command to modem.
      * @param callback The callback to get the result code and the EuiccProfileInfo enabled.
      */
-    public void switchToProfile(String iccid, boolean refresh,
+    public void switchToProfile(String cardId, String iccid, boolean refresh,
             ResultCallback<EuiccProfileInfo> callback) {
         try {
-            getIEuiccCardController().switchToProfile(mContext.getOpPackageName(), iccid, refresh,
-                    new ISwitchToProfileCallback.Stub() {
+            getIEuiccCardController().switchToProfile(mContext.getOpPackageName(), cardId, iccid,
+                    refresh, new ISwitchToProfileCallback.Stub() {
                         @Override
                         public void onComplete(int resultCode, EuiccProfileInfo profile) {
                             callback.onComplete(resultCode, profile);
@@ -227,30 +232,18 @@ public class EuiccCardManager {
     }
 
     /**
-     * Gets the EID of the eUICC.
-     *
-     * @return The EID.
-     */
-    public String getEid() {
-        try {
-            return getIEuiccCardController().getEid();
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling getEid", e);
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Sets the nickname of the profile of the given iccid.
      *
+     * @param cardId The Id of the eUICC.
      * @param iccid The iccid of the profile.
      * @param nickname The nickname of the profile.
      * @param callback The callback to get the result code.
      */
-    public void setNickname(String iccid, String nickname, ResultCallback<Void> callback) {
+    public void setNickname(String cardId, String iccid, String nickname,
+            ResultCallback<Void> callback) {
         try {
-            getIEuiccCardController().setNickname(mContext.getOpPackageName(), iccid, nickname,
-                    new ISetNicknameCallback.Stub() {
+            getIEuiccCardController().setNickname(mContext.getOpPackageName(), cardId, iccid,
+                    nickname, new ISetNicknameCallback.Stub() {
                         @Override
                         public void onComplete(int resultCode) {
                             callback.onComplete(resultCode, null);
@@ -265,12 +258,13 @@ public class EuiccCardManager {
     /**
      * Deletes the profile of the given iccid from eUICC.
      *
+     * @param cardId The Id of the eUICC.
      * @param iccid The iccid of the profile.
      * @param callback The callback to get the result code.
      */
-    public void deleteProfile(String iccid, ResultCallback<Void> callback) {
+    public void deleteProfile(String cardId, String iccid, ResultCallback<Void> callback) {
         try {
-            getIEuiccCardController().deleteProfile(mContext.getOpPackageName(), iccid,
+            getIEuiccCardController().deleteProfile(mContext.getOpPackageName(), cardId, iccid,
                     new IDeleteProfileCallback.Stub() {
                         @Override
                         public void onComplete(int resultCode) {
@@ -286,13 +280,14 @@ public class EuiccCardManager {
     /**
      * Resets the eUICC memory.
      *
+     * @param cardId The Id of the eUICC.
      * @param options Bits of the options of resetting which parts of the eUICC memory. See
      *     EuiccCard for details.
      * @param callback The callback to get the result code.
      */
-    public void resetMemory(@ResetOption int options, ResultCallback<Void> callback) {
+    public void resetMemory(String cardId, @ResetOption int options, ResultCallback<Void> callback) {
         try {
-            getIEuiccCardController().resetMemory(mContext.getOpPackageName(), options,
+            getIEuiccCardController().resetMemory(mContext.getOpPackageName(), cardId, options,
                     new IResetMemoryCallback.Stub() {
                         @Override
                         public void onComplete(int resultCode) {
@@ -308,11 +303,12 @@ public class EuiccCardManager {
     /**
      * Gets the default SM-DP+ address from eUICC.
      *
+     * @param cardId The Id of the eUICC.
      * @param callback The callback to get the result code and the default SM-DP+ address.
      */
-    public void getDefaultSmdpAddress(ResultCallback<String> callback) {
+    public void getDefaultSmdpAddress(String cardId, ResultCallback<String> callback) {
         try {
-            getIEuiccCardController().getDefaultSmdpAddress(mContext.getOpPackageName(),
+            getIEuiccCardController().getDefaultSmdpAddress(mContext.getOpPackageName(), cardId,
                     new IGetDefaultSmdpAddressCallback.Stub() {
                         @Override
                         public void onComplete(int resultCode, String address) {
@@ -328,11 +324,12 @@ public class EuiccCardManager {
     /**
      * Gets the SM-DS address from eUICC.
      *
+     * @param cardId The Id of the eUICC.
      * @param callback The callback to get the result code and the SM-DS address.
      */
-    public void getSmdsAddress(ResultCallback<String> callback) {
+    public void getSmdsAddress(String cardId, ResultCallback<String> callback) {
         try {
-            getIEuiccCardController().getSmdsAddress(mContext.getOpPackageName(),
+            getIEuiccCardController().getSmdsAddress(mContext.getOpPackageName(), cardId,
                     new IGetSmdsAddressCallback.Stub() {
                         @Override
                         public void onComplete(int resultCode, String address) {
@@ -348,12 +345,13 @@ public class EuiccCardManager {
     /**
      * Sets the default SM-DP+ address of eUICC.
      *
+     * @param cardId The Id of the eUICC.
      * @param defaultSmdpAddress The default SM-DP+ address to set.
      * @param callback The callback to get the result code.
      */
-    public void setDefaultSmdpAddress(String defaultSmdpAddress, ResultCallback<Void> callback) {
+    public void setDefaultSmdpAddress(String cardId, String defaultSmdpAddress, ResultCallback<Void> callback) {
         try {
-            getIEuiccCardController().setDefaultSmdpAddress(mContext.getOpPackageName(),
+            getIEuiccCardController().setDefaultSmdpAddress(mContext.getOpPackageName(), cardId,
                     defaultSmdpAddress,
                     new ISetDefaultSmdpAddressCallback.Stub() {
                         @Override
@@ -370,11 +368,12 @@ public class EuiccCardManager {
     /**
      * Gets Rules Authorisation Table.
      *
+     * @param cardId The Id of the eUICC.
      * @param callback the callback to get the result code and the rule authorisation table.
      */
-    public void getRulesAuthTable(ResultCallback<EuiccRulesAuthTable> callback) {
+    public void getRulesAuthTable(String cardId, ResultCallback<EuiccRulesAuthTable> callback) {
         try {
-            getIEuiccCardController().getRulesAuthTable(mContext.getOpPackageName(),
+            getIEuiccCardController().getRulesAuthTable(mContext.getOpPackageName(), cardId,
                     new IGetRulesAuthTableCallback.Stub() {
                         @Override
                         public void onComplete(int resultCode, EuiccRulesAuthTable rat) {
@@ -390,11 +389,12 @@ public class EuiccCardManager {
     /**
      * Gets the eUICC challenge for new profile downloading.
      *
+     * @param cardId The Id of the eUICC.
      * @param callback the callback to get the result code and the challenge.
      */
-    public void getEuiccChallenge(ResultCallback<byte[]> callback) {
+    public void getEuiccChallenge(String cardId, ResultCallback<byte[]> callback) {
         try {
-            getIEuiccCardController().getEuiccChallenge(mContext.getOpPackageName(),
+            getIEuiccCardController().getEuiccChallenge(mContext.getOpPackageName(), cardId,
                     new IGetEuiccChallengeCallback.Stub() {
                         @Override
                         public void onComplete(int resultCode, byte[] challenge) {
@@ -410,11 +410,12 @@ public class EuiccCardManager {
     /**
      * Gets the eUICC info1 defined in GSMA RSP v2.0+ for new profile downloading.
      *
+     * @param cardId The Id of the eUICC.
      * @param callback the callback to get the result code and the info1.
      */
-    public void getEuiccInfo1(ResultCallback<byte[]> callback) {
+    public void getEuiccInfo1(String cardId, ResultCallback<byte[]> callback) {
         try {
-            getIEuiccCardController().getEuiccInfo1(mContext.getOpPackageName(),
+            getIEuiccCardController().getEuiccInfo1(mContext.getOpPackageName(), cardId,
                     new IGetEuiccInfo1Callback.Stub() {
                         @Override
                         public void onComplete(int resultCode, byte[] info) {
@@ -430,11 +431,12 @@ public class EuiccCardManager {
     /**
      * Gets the eUICC info2 defined in GSMA RSP v2.0+ for new profile downloading.
      *
+     * @param cardId The Id of the eUICC.
      * @param callback the callback to get the result code and the info2.
      */
-    public void getEuiccInfo2(ResultCallback<byte[]> callback) {
+    public void getEuiccInfo2(String cardId, ResultCallback<byte[]> callback) {
         try {
-            getIEuiccCardController().getEuiccInfo2(mContext.getOpPackageName(),
+            getIEuiccCardController().getEuiccInfo2(mContext.getOpPackageName(), cardId,
                     new IGetEuiccInfo2Callback.Stub() {
                         @Override
                         public void onComplete(int resultCode, byte[] info) {
@@ -450,6 +452,7 @@ public class EuiccCardManager {
     /**
      * Authenticates the SM-DP+ server by the eUICC.
      *
+     * @param cardId The Id of the eUICC.
      * @param matchingId the activation code token defined in GSMA RSP v2.0+ or empty when it is not
      *     required.
      * @param serverSigned1 ASN.1 data in byte array signed and returned by the SM-DP+ server.
@@ -463,12 +466,13 @@ public class EuiccCardManager {
      * @param callback the callback to get the result code and a byte array which represents a
      *     {@code AuthenticateServerResponse} defined in GSMA RSP v2.0+.
      */
-    public void authenticateServer(String matchingId, byte[] serverSigned1,
+    public void authenticateServer(String cardId, String matchingId, byte[] serverSigned1,
             byte[] serverSignature1, byte[] euiccCiPkIdToBeUsed, byte[] serverCertificate,
             ResultCallback<byte[]> callback) {
         try {
             getIEuiccCardController().authenticateServer(
                     mContext.getOpPackageName(),
+                    cardId,
                     matchingId,
                     serverSigned1,
                     serverSignature1,
@@ -489,6 +493,7 @@ public class EuiccCardManager {
     /**
      * Prepares the profile download request sent to SM-DP+.
      *
+     * @param cardId The Id of the eUICC.
      * @param hashCc the hash of confirmation code. It can be null if there is no confirmation code
      *     required.
      * @param smdpSigned2 ASN.1 data in byte array indicating the data to be signed by the SM-DP+
@@ -500,11 +505,12 @@ public class EuiccCardManager {
      * @param callback the callback to get the result code and a byte array which represents a
      *     {@code PrepareDownloadResponse} defined in GSMA RSP v2.0+
      */
-    public void prepareDownload(@Nullable byte[] hashCc, byte[] smdpSigned2,
+    public void prepareDownload(String cardId, @Nullable byte[] hashCc, byte[] smdpSigned2,
             byte[] smdpSignature2, byte[] smdpCertificate, ResultCallback<byte[]> callback) {
         try {
             getIEuiccCardController().prepareDownload(
                     mContext.getOpPackageName(),
+                    cardId,
                     hashCc,
                     smdpSigned2,
                     smdpSignature2,
@@ -524,15 +530,17 @@ public class EuiccCardManager {
     /**
      * Loads a downloaded bound profile package onto the eUICC.
      *
+     * @param cardId The Id of the eUICC.
      * @param boundProfilePackage the Bound Profile Package data returned by SM-DP+ server.
      * @param callback the callback to get the result code and a byte array which represents a
      *     {@code LoadBoundProfilePackageResponse} defined in GSMA RSP v2.0+.
      */
-    public void loadBoundProfilePackage(byte[] boundProfilePackage,
+    public void loadBoundProfilePackage(String cardId, byte[] boundProfilePackage,
             ResultCallback<byte[]> callback) {
         try {
             getIEuiccCardController().loadBoundProfilePackage(
                     mContext.getOpPackageName(),
+                    cardId,
                     boundProfilePackage,
                     new ILoadBoundProfilePackageCallback.Stub() {
                         @Override
@@ -549,16 +557,18 @@ public class EuiccCardManager {
     /**
      * Cancels the current profile download session.
      *
+     * @param cardId The Id of the eUICC.
      * @param transactionId the transaction ID returned by SM-DP+ server.
      * @param reason the cancel reason.
      * @param callback the callback to get the result code and an byte[] which represents a
      *     {@code CancelSessionResponse} defined in GSMA RSP v2.0+.
      */
-    public void cancelSession(byte[] transactionId, @CancelReason int reason,
+    public void cancelSession(String cardId, byte[] transactionId, @CancelReason int reason,
             ResultCallback<byte[]> callback) {
         try {
             getIEuiccCardController().cancelSession(
                     mContext.getOpPackageName(),
+                    cardId,
                     transactionId,
                     reason,
                     new ICancelSessionCallback.Stub() {
@@ -576,13 +586,14 @@ public class EuiccCardManager {
     /**
      * Lists all notifications of the given {@code notificationEvents}.
      *
+     * @param cardId The Id of the eUICC.
      * @param events bits of the event types ({@link EuiccNotification.Event}) to list.
      * @param callback the callback to get the result code and the list of notifications.
      */
-    public void listNotifications(@EuiccNotification.Event int events,
+    public void listNotifications(String cardId, @EuiccNotification.Event int events,
             ResultCallback<EuiccNotification[]> callback) {
         try {
-            getIEuiccCardController().listNotifications(mContext.getOpPackageName(), events,
+            getIEuiccCardController().listNotifications(mContext.getOpPackageName(), cardId, events,
                     new IListNotificationsCallback.Stub() {
                         @Override
                         public void onComplete(int resultCode, EuiccNotification[] notifications) {
@@ -598,14 +609,15 @@ public class EuiccCardManager {
     /**
      * Retrieves contents of all notification of the given {@code events}.
      *
+     * @param cardId The Id of the eUICC.
      * @param events bits of the event types ({@link EuiccNotification.Event}) to list.
      * @param callback the callback to get the result code and the list of notifications.
      */
-    public void retrieveNotificationList(@EuiccNotification.Event int events,
+    public void retrieveNotificationList(String cardId, @EuiccNotification.Event int events,
             ResultCallback<EuiccNotification[]> callback) {
         try {
-            getIEuiccCardController().retrieveNotificationList(mContext.getOpPackageName(), events,
-                    new IRetrieveNotificationListCallback.Stub() {
+            getIEuiccCardController().retrieveNotificationList(mContext.getOpPackageName(), cardId,
+                    events, new IRetrieveNotificationListCallback.Stub() {
                         @Override
                         public void onComplete(int resultCode, EuiccNotification[] notifications) {
                             callback.onComplete(resultCode, notifications);
@@ -620,13 +632,15 @@ public class EuiccCardManager {
     /**
      * Retrieves the content of a notification of the given {@code seqNumber}.
      *
+     * @param cardId The Id of the eUICC.
      * @param seqNumber the sequence number of the notification.
      * @param callback the callback to get the result code and the notification.
      */
-    public void retrieveNotification(int seqNumber, ResultCallback<EuiccNotification> callback) {
+    public void retrieveNotification(String cardId, int seqNumber,
+            ResultCallback<EuiccNotification> callback) {
         try {
-            getIEuiccCardController().retrieveNotification(mContext.getOpPackageName(), seqNumber,
-                    new IRetrieveNotificationCallback.Stub() {
+            getIEuiccCardController().retrieveNotification(mContext.getOpPackageName(), cardId,
+                    seqNumber, new IRetrieveNotificationCallback.Stub() {
                         @Override
                         public void onComplete(int resultCode, EuiccNotification notification) {
                             callback.onComplete(resultCode, notification);
@@ -641,13 +655,16 @@ public class EuiccCardManager {
     /**
      * Removes a notification from eUICC.
      *
+     * @param cardId The Id of the eUICC.
      * @param seqNumber the sequence number of the notification.
      * @param callback the callback to get the result code.
      */
-    public void removeNotificationFromList(int seqNumber, ResultCallback<Void> callback) {
+    public void removeNotificationFromList(String cardId, int seqNumber,
+            ResultCallback<Void> callback) {
         try {
             getIEuiccCardController().removeNotificationFromList(
                     mContext.getOpPackageName(),
+                    cardId,
                     seqNumber,
                     new IRemoveNotificationFromListCallback.Stub() {
                         @Override
