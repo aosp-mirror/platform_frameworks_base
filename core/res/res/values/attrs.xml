@@ -1897,6 +1897,7 @@
         <enum name="KEYCODE_SYSTEM_NAVIGATION_LEFT" value="282" />
         <enum name="KEYCODE_SYSTEM_NAVIGATION_RIGHT" value="283" />
         <enum name="KEYCODE_ALL_APPS" value="284" />
+        <enum name="KEYCODE_REFRESH" value="285" />
     </attr>
 
     <!-- ***************************************************************** -->

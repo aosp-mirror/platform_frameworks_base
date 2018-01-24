@@ -192,7 +192,7 @@ key 169   CALL
 # key 170 "KEY_ISO"
 key 171   MUSIC
 key 172   HOME
-# key 173 "KEY_REFRESH"
+key 173   REFRESH
 # key 174 "KEY_EXIT"
 # key 175 "KEY_MOVE"
 # key 176 "KEY_EDIT"
