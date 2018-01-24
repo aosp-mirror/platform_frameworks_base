@@ -6211,8 +6211,20 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @Override public long getGpsBatteryDrainMaMs() {
-        //TODO: Add GPS power computation (b/67213967)
-        return 0;
+        final double opVolt = mPowerProfile.getAveragePower(
+            PowerProfile.POWER_GPS_OPERATING_VOLTAGE) / 1000.0;
+        if (opVolt == 0) {
+            return 0;
+        }
+        double energyUsedMaMs = 0.0;
+        final int which = STATS_SINCE_CHARGED;
+        final long rawRealtime = SystemClock.elapsedRealtime() * 1000;
+        for(int i=0; i < GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS; i++) {
+            energyUsedMaMs
+                += mPowerProfile.getAveragePower(PowerProfile.POWER_GPS_SIGNAL_QUALITY_BASED, i)
+                * (getGpsSignalQualityTime(i, rawRealtime, which) / 1000);
+        }
+        return (long) energyUsedMaMs;
     }
 
     @Override public long getPhoneOnTime(long elapsedRealtimeUs, int which) {

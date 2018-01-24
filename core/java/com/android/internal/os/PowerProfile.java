@@ -104,10 +104,16 @@ public class PowerProfile {
     public static final String POWER_MODEM_CONTROLLER_OPERATING_VOLTAGE =
             "modem.controller.voltage";
 
-    /**
+     /**
      * Power consumption when GPS is on.
      */
     public static final String POWER_GPS_ON = "gps.on";
+
+    /**
+     * GPS power parameters based on signal quality
+     */
+    public static final String POWER_GPS_SIGNAL_QUALITY_BASED = "gps.signalqualitybased";
+    public static final String POWER_GPS_OPERATING_VOLTAGE = "gps.voltage";
 
     /**
      * Power consumption when Bluetooth driver is on.

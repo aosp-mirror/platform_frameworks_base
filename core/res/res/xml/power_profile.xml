@@ -127,4 +127,11 @@
   </array>
   <item name="modem.controller.voltage">0</item>
 
+  <!-- GPS related values. Default is 0.-->
+  <array name="gps.signalqualitybased"> <!-- Strength 0 to 1 -->
+    <value>0</value>
+    <value>0</value>
+  </array>
+  <item name="gps.voltage">0</item>
+
 </device>
