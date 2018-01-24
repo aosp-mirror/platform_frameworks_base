@@ -23,7 +23,8 @@ import android.os.Handler;
 /**
  * @hide
  */
-public interface MediaPlayerBaseProvider {
+// TODO(jaewan): SystemApi
+public interface TransportControlProvider {
     void play_impl();
     void pause_impl();
     void stop_impl();
