@@ -887,17 +887,21 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @Override
     public long getUidStats(int uid, int type) {
-        return nativeGetUidStat(uid, type);
+        return nativeGetUidStat(uid, type, checkBpfStatsEnable());
     }
 
     @Override
     public long getIfaceStats(String iface, int type) {
-        return nativeGetIfaceStat(iface, type);
+        return nativeGetIfaceStat(iface, type, checkBpfStatsEnable());
     }
 
     @Override
     public long getTotalStats(int type) {
-        return nativeGetTotalStat(type);
+        return nativeGetTotalStat(type, checkBpfStatsEnable());
+    }
+
+    private boolean checkBpfStatsEnable() {
+        return new File("/sys/fs/bpf/traffic_uid_stats_map").exists();
     }
 
     /**
@@ -1668,7 +1672,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private static int TYPE_TCP_RX_PACKETS;
     private static int TYPE_TCP_TX_PACKETS;
 
-    private static native long nativeGetTotalStat(int type);
-    private static native long nativeGetIfaceStat(String iface, int type);
-    private static native long nativeGetUidStat(int uid, int type);
+    private static native long nativeGetTotalStat(int type, boolean useBpfStats);
+    private static native long nativeGetIfaceStat(String iface, int type, boolean useBpfStats);
+    private static native long nativeGetUidStat(int uid, int type, boolean useBpfStats);
 }

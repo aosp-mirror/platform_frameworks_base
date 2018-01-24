@@ -53,7 +53,7 @@ public class NetworkStatsFactoryBenchmark {
                     stats, mStats.getAbsolutePath(), NetworkStats.UID_ALL,
                     // Looks like this was broken by change d0c5b9abed60b7bc056d026bf0f2b2235410fb70
                     // Fixed compilation problem but needs addressing properly.
-                    new String[0], 999);
+                    new String[0], 999, false);
         }
     }
 }

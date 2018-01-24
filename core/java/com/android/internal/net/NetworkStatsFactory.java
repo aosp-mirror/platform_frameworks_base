@@ -31,13 +31,17 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ProcFileReader;
+import com.google.android.collect.Lists;
 
 import libcore.io.IoUtils;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.ProtocolException;
+import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -55,12 +59,16 @@ public class NetworkStatsFactory {
     // Used for correct stats accounting on clatd interfaces.
     private static final int IPV4V6_HEADER_DELTA = 20;
 
+    /** Path to {@code /proc/net/dev}. */
+    private final File mStatsIfaceDev;
     /** Path to {@code /proc/net/xt_qtaguid/iface_stat_all}. */
     private final File mStatsXtIfaceAll;
     /** Path to {@code /proc/net/xt_qtaguid/iface_stat_fmt}. */
     private final File mStatsXtIfaceFmt;
     /** Path to {@code /proc/net/xt_qtaguid/stats}. */
     private final File mStatsXtUid;
+
+    private boolean mUseBpfStats;
 
     // TODO: to improve testability and avoid global state, do not use a static variable.
     @GuardedBy("sStackedIfaces")
@@ -77,14 +85,54 @@ public class NetworkStatsFactory {
     }
 
     public NetworkStatsFactory() {
-        this(new File("/proc/"));
+        this(new File("/proc/"), new File("/sys/fs/bpf/traffic_uid_stats_map").exists());
     }
 
     @VisibleForTesting
-    public NetworkStatsFactory(File procRoot) {
+    public NetworkStatsFactory(File procRoot, boolean useBpfStats) {
+        mStatsIfaceDev = new File(procRoot, "net/dev");
         mStatsXtIfaceAll = new File(procRoot, "net/xt_qtaguid/iface_stat_all");
         mStatsXtIfaceFmt = new File(procRoot, "net/xt_qtaguid/iface_stat_fmt");
         mStatsXtUid = new File(procRoot, "net/xt_qtaguid/stats");
+        mUseBpfStats = useBpfStats;
+    }
+
+    @VisibleForTesting
+    public NetworkStats readNetworkStatsIfaceDev() throws IOException {
+        final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
+
+        final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 6);
+        final NetworkStats.Entry entry = new NetworkStats.Entry();
+
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader(mStatsIfaceDev));
+
+            // skip first two header lines
+            reader.readLine();
+            reader.readLine();
+
+            // parse remaining lines
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] values = line.trim().split("\\:?\\s+");
+                entry.iface = values[0];
+                entry.uid = UID_ALL;
+                entry.set = SET_ALL;
+                entry.tag = TAG_NONE;
+                entry.rxBytes = Long.parseLong(values[1]);
+                entry.rxPackets = Long.parseLong(values[2]);
+                entry.txBytes = Long.parseLong(values[9]);
+                entry.txPackets = Long.parseLong(values[10]);
+                stats.addValues(entry);
+            }
+        } catch (NullPointerException|NumberFormatException e) {
+            throw new ProtocolException("problem parsing stats", e);
+        } finally {
+            IoUtils.closeQuietly(reader);
+            StrictMode.setThreadPolicy(savedPolicy);
+        }
+        return stats;
     }
 
     /**
@@ -96,6 +144,11 @@ public class NetworkStatsFactory {
      * @throws IllegalStateException when problem parsing stats.
      */
     public NetworkStats readNetworkStatsSummaryDev() throws IOException {
+
+        // Return the stats get from /proc/net/dev if switched to bpf module.
+        if (mUseBpfStats)
+            return readNetworkStatsIfaceDev();
+
         final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
 
         final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 6);
@@ -147,6 +200,11 @@ public class NetworkStatsFactory {
      * @throws IllegalStateException when problem parsing stats.
      */
     public NetworkStats readNetworkStatsSummaryXt() throws IOException {
+
+        // Return the stats get from /proc/net/dev if qtaguid  module is replaced.
+        if (mUseBpfStats)
+            return readNetworkStatsIfaceDev();
+
         final StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
 
         // return null when kernel doesn't support
@@ -252,7 +310,7 @@ public class NetworkStatsFactory {
                 stats = new NetworkStats(SystemClock.elapsedRealtime(), -1);
             }
             if (nativeReadNetworkStatsDetail(stats, mStatsXtUid.getAbsolutePath(), limitUid,
-                    limitIfaces, limitTag) != 0) {
+                    limitIfaces, limitTag, mUseBpfStats) != 0) {
                 throw new IOException("Failed to parse network stats");
             }
             if (SANITY_CHECK_NATIVE) {
@@ -346,6 +404,6 @@ public class NetworkStatsFactory {
      * are expected to monotonically increase since device boot.
      */
     @VisibleForTesting
-    public static native int nativeReadNetworkStatsDetail(
-            NetworkStats stats, String path, int limitUid, String[] limitIfaces, int limitTag);
+    public static native int nativeReadNetworkStatsDetail(NetworkStats stats, String path,
+        int limitUid, String[] limitIfaces, int limitTag, boolean useBpfStats);
 }
