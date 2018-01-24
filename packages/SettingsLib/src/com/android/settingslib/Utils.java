@@ -1,6 +1,7 @@
 package com.android.settingslib;
 
 import android.annotation.ColorInt;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -17,10 +18,13 @@ import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.os.BatteryManager;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.print.PrintManager;
 import android.provider.Settings;
+
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.drawable.UserIconDrawable;
 import com.android.settingslib.wrapper.LocationManagerWrapper;
@@ -30,6 +34,9 @@ public class Utils {
 
     private static final String CURRENT_MODE_KEY = "CURRENT_MODE";
     private static final String NEW_MODE_KEY = "NEW_MODE";
+    @VisibleForTesting
+    static final String STORAGE_MANAGER_SHOW_OPT_IN_PROPERTY =
+            "ro.storage_manager.show_opt_in";
 
     private static Signature[] sSystemSignature;
     private static String sPermissionControllerPackageName;
@@ -37,11 +44,11 @@ public class Utils {
     private static String sSharedSystemSharedLibPackageName;
 
     static final int[] WIFI_PIE = {
-        com.android.internal.R.drawable.ic_wifi_signal_0,
-        com.android.internal.R.drawable.ic_wifi_signal_1,
-        com.android.internal.R.drawable.ic_wifi_signal_2,
-        com.android.internal.R.drawable.ic_wifi_signal_3,
-        com.android.internal.R.drawable.ic_wifi_signal_4
+            com.android.internal.R.drawable.ic_wifi_signal_0,
+            com.android.internal.R.drawable.ic_wifi_signal_1,
+            com.android.internal.R.drawable.ic_wifi_signal_2,
+            com.android.internal.R.drawable.ic_wifi_signal_3,
+            com.android.internal.R.drawable.ic_wifi_signal_4
     };
 
     public static void updateLocationEnabled(Context context, boolean enabled, int userId,
@@ -262,7 +269,7 @@ public class Utils {
      */
     public static boolean isSystemPackage(Resources resources, PackageManager pm, PackageInfo pkg) {
         if (sSystemSignature == null) {
-            sSystemSignature = new Signature[]{ getSystemSignature(pm) };
+            sSystemSignature = new Signature[]{getSystemSignature(pm)};
         }
         if (sPermissionControllerPackageName == null) {
             sPermissionControllerPackageName = pm.getPermissionControllerPackageName();
@@ -274,7 +281,7 @@ public class Utils {
             sSharedSystemSharedLibPackageName = pm.getSharedSystemSharedLibraryPackageName();
         }
         return (sSystemSignature[0] != null
-                        && sSystemSignature[0].equals(getFirstSignature(pkg)))
+                && sSystemSignature[0].equals(getFirstSignature(pkg)))
                 || pkg.packageName.equals(sPermissionControllerPackageName)
                 || pkg.packageName.equals(sServicesSystemSharedLibPackageName)
                 || pkg.packageName.equals(sSharedSystemSharedLibPackageName)
@@ -312,7 +319,6 @@ public class Utils {
      * Returns the Wifi icon resource for a given RSSI level.
      *
      * @param level The number of bars to show (0-4)
-     *
      * @throws IllegalArgumentException if an invalid RSSI level is given.
      */
     public static int getWifiIconResource(int level) {
@@ -341,5 +347,20 @@ public class Utils {
     public static boolean isWifiOnly(Context context) {
         return !context.getSystemService(ConnectivityManager.class)
                 .isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
+    }
+
+    /** Returns if the automatic storage management feature is turned on or not. **/
+    public static boolean isStorageManagerEnabled(Context context) {
+        boolean isDefaultOn;
+        try {
+            // Turn off by default if the opt-in was shown.
+            isDefaultOn = !SystemProperties.getBoolean(STORAGE_MANAGER_SHOW_OPT_IN_PROPERTY, true);
+        } catch (Resources.NotFoundException e) {
+            isDefaultOn = false;
+        }
+        return Settings.Secure.getInt(context.getContentResolver(),
+                Settings.Secure.AUTOMATIC_STORAGE_MANAGER_ENABLED,
+                isDefaultOn ? 1 : 0)
+                != 0;
     }
 }
