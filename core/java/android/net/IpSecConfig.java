@@ -65,6 +65,10 @@ public final class IpSecConfig implements Parcelable {
     // An interval, in seconds between the NattKeepalive packets
     private int mNattKeepaliveInterval;
 
+    // XFRM mark and mask
+    private int mMarkValue;
+    private int mMarkMask;
+
     /** Set the mode for this IPsec transform */
     public void setMode(int mode) {
         mMode = mode;
@@ -121,6 +125,14 @@ public final class IpSecConfig implements Parcelable {
         mNattKeepaliveInterval = interval;
     }
 
+    public void setMarkValue(int mark) {
+        mMarkValue = mark;
+    }
+
+    public void setMarkMask(int mask) {
+        mMarkMask = mask;
+    }
+
     // Transport or Tunnel
     public int getMode() {
         return mMode;
@@ -170,6 +182,14 @@ public final class IpSecConfig implements Parcelable {
         return mNattKeepaliveInterval;
     }
 
+    public int getMarkValue() {
+        return mMarkValue;
+    }
+
+    public int getMarkMask() {
+        return mMarkMask;
+    }
+
     // Parcelable Methods
 
     @Override
@@ -191,6 +211,8 @@ public final class IpSecConfig implements Parcelable {
         out.writeInt(mEncapSocketResourceId);
         out.writeInt(mEncapRemotePort);
         out.writeInt(mNattKeepaliveInterval);
+        out.writeInt(mMarkValue);
+        out.writeInt(mMarkMask);
     }
 
     @VisibleForTesting
@@ -212,6 +234,8 @@ public final class IpSecConfig implements Parcelable {
         mEncapSocketResourceId = in.readInt();
         mEncapRemotePort = in.readInt();
         mNattKeepaliveInterval = in.readInt();
+        mMarkValue = in.readInt();
+        mMarkMask = in.readInt();
     }
 
     @Override
@@ -242,6 +266,10 @@ public final class IpSecConfig implements Parcelable {
                 .append(mAuthentication)
                 .append(", mAuthenticatedEncryption=")
                 .append(mAuthenticatedEncryption)
+                .append(", mMarkValue=")
+                .append(mMarkValue)
+                .append(", mMarkMask=")
+                .append(mMarkMask)
                 .append("}");
 
         return strBuilder.toString();
@@ -275,6 +303,8 @@ public final class IpSecConfig implements Parcelable {
                 && IpSecAlgorithm.equals(lhs.mEncryption, rhs.mEncryption)
                 && IpSecAlgorithm.equals(
                         lhs.mAuthenticatedEncryption, rhs.mAuthenticatedEncryption)
-                && IpSecAlgorithm.equals(lhs.mAuthentication, rhs.mAuthentication));
+                && IpSecAlgorithm.equals(lhs.mAuthentication, rhs.mAuthentication)
+                && lhs.mMarkValue == rhs.mMarkValue
+                && lhs.mMarkMask == rhs.mMarkMask);
     }
 }
