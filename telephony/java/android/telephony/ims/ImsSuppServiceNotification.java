@@ -46,6 +46,17 @@ public final class ImsSuppServiceNotification implements Parcelable {
     /** List of forwarded numbers, if any */
     public final String[] history;
 
+
+    public ImsSuppServiceNotification(int notificationType, int code, int index, int type,
+            String number, String[] history) {
+        this.notificationType = notificationType;
+        this.code = code;
+        this.index = index;
+        this.type = type;
+        this.number = number;
+        this.history = history;
+    }
+
     /** @hide */
     public ImsSuppServiceNotification(Parcel in) {
         notificationType = in.readInt();
