@@ -24,6 +24,7 @@ import "frameworks/base/core/proto/android/app/notification_channel.proto";
 import "frameworks/base/core/proto/android/app/notification_channel_group.proto";
 import "frameworks/base/core/proto/android/app/notificationmanager.proto";
 import "frameworks/base/core/proto/android/content/component_name.proto";
+import "frameworks/base/core/proto/android/media/audioattributes.proto";
 
 message NotificationServiceDumpProto {
     repeated NotificationRecordProto records = 1;
@@ -55,7 +56,7 @@ message NotificationRecordProto {
     optional int32 flags = 3;
     optional string channelId = 4;
     optional string sound = 5;
-    optional int32 sound_usage = 6;
+    optional .android.media.AudioAttributesProto audio_attributes = 6;
     optional bool can_vibrate = 7;
     optional bool can_show_light = 8;
     optional string group_key = 9;

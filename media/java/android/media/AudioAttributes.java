@@ -880,7 +880,9 @@ public final class AudioAttributes implements Parcelable {
     }
 
     /** @hide */
-    public void toProto(ProtoOutputStream proto) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+
         proto.write(AudioAttributesProto.USAGE, mUsage);
         proto.write(AudioAttributesProto.CONTENT_TYPE, mContentType);
         proto.write(AudioAttributesProto.FLAGS, mFlags);
@@ -892,6 +894,8 @@ public final class AudioAttributes implements Parcelable {
             }
         }
         // TODO: is the data in mBundle useful for debugging?
+
+        proto.end(token);
     }
 
     /** @hide */

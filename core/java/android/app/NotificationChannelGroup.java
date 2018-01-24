@@ -298,13 +298,17 @@ public final class NotificationChannelGroup implements Parcelable {
     }
 
     /** @hide */
-    public void toProto(ProtoOutputStream proto) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+
         proto.write(NotificationChannelGroupProto.ID, mId);
         proto.write(NotificationChannelGroupProto.NAME, mName.toString());
         proto.write(NotificationChannelGroupProto.DESCRIPTION, mDescription);
         proto.write(NotificationChannelGroupProto.IS_BLOCKED, mBlocked);
         for (NotificationChannel channel : mChannels) {
-            channel.toProto(proto);
+            channel.writeToProto(proto, NotificationChannelGroupProto.CHANNELS);
         }
+
+        proto.end(token);
     }
 }
