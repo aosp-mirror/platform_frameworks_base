@@ -92,7 +92,7 @@ public class FingerprintDialogImpl extends SystemUI implements CommandQueue.Call
             return;
         }
         getComponent(CommandQueue.class).addCallbacks(this);
-        mWindowManager =  (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mDialogView = new FingerprintDialogView(mContext, mHandler);
     }
 
