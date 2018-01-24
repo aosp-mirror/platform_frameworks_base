@@ -16,6 +16,8 @@
 
 package android.security.keystore.recovery;
 
+import java.security.GeneralSecurityException;
+
 /**
  * Error thrown when trying to generate keys for a profile that has no lock screen set.
  *
@@ -23,7 +25,7 @@ package android.security.keystore.recovery;
  *
  * @hide
  */
-public class LockScreenRequiredException extends RecoveryControllerException {
+public class LockScreenRequiredException extends GeneralSecurityException {
     public LockScreenRequiredException(String msg) {
         super(msg);
     }

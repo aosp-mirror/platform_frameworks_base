@@ -16,13 +16,15 @@
 
 package android.security.keystore.recovery;
 
+import java.security.GeneralSecurityException;
+
 /**
  * Error thrown when decryption failed, due to an agent error. i.e., using the incorrect key,
  * trying to decrypt garbage data, trying to decrypt data that has somehow been corrupted, etc.
  *
  * @hide
  */
-public class DecryptionFailedException extends RecoveryControllerException {
+public class DecryptionFailedException extends GeneralSecurityException {
 
     public DecryptionFailedException(String msg) {
         super(msg);

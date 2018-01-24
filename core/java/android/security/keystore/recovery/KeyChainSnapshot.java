@@ -42,7 +42,7 @@ import java.util.List;
  *
  * @hide
  */
-public final class KeychainSnapshot implements Parcelable {
+public final class KeyChainSnapshot implements Parcelable {
     private static final int DEFAULT_MAX_ATTEMPTS = 10;
     private static final long DEFAULT_COUNTER_ID = 1L;
 
@@ -51,7 +51,7 @@ public final class KeychainSnapshot implements Parcelable {
     private long mCounterId = DEFAULT_COUNTER_ID;
     private byte[] mServerParams;
     private byte[] mPublicKey;
-    private List<KeychainProtectionParams> mKeychainProtectionParams;
+    private List<KeyChainProtectionParams> mKeyChainProtectionParams;
     private List<WrappedApplicationKey> mEntryRecoveryData;
     private byte[] mEncryptedRecoveryKeyBlob;
 
@@ -59,21 +59,21 @@ public final class KeychainSnapshot implements Parcelable {
      * @hide
      * Deprecated, consider using builder.
      */
-    public KeychainSnapshot(
+    public KeyChainSnapshot(
             int snapshotVersion,
-            @NonNull List<KeychainProtectionParams> keychainProtectionParams,
+            @NonNull List<KeyChainProtectionParams> keyChainProtectionParams,
             @NonNull List<WrappedApplicationKey> wrappedApplicationKeys,
             @NonNull byte[] encryptedRecoveryKeyBlob) {
         mSnapshotVersion = snapshotVersion;
-        mKeychainProtectionParams =
-                Preconditions.checkCollectionElementsNotNull(keychainProtectionParams,
-                        "keychainProtectionParams");
+        mKeyChainProtectionParams =
+                Preconditions.checkCollectionElementsNotNull(keyChainProtectionParams,
+                        "KeyChainProtectionParams");
         mEntryRecoveryData = Preconditions.checkCollectionElementsNotNull(wrappedApplicationKeys,
                 "wrappedApplicationKeys");
         mEncryptedRecoveryKeyBlob = Preconditions.checkNotNull(encryptedRecoveryKeyBlob);
     }
 
-    private KeychainSnapshot() {
+    private KeyChainSnapshot() {
 
     }
 
@@ -119,8 +119,8 @@ public final class KeychainSnapshot implements Parcelable {
     /**
      * UI and key derivation parameters. Note that combination of secrets may be used.
      */
-    public @NonNull List<KeychainProtectionParams> getKeychainProtectionParams() {
-        return mKeychainProtectionParams;
+    public @NonNull List<KeyChainProtectionParams> getKeyChainProtectionParams() {
+        return mKeyChainProtectionParams;
     }
 
     /**
@@ -138,23 +138,23 @@ public final class KeychainSnapshot implements Parcelable {
         return mEncryptedRecoveryKeyBlob;
     }
 
-    public static final Creator<KeychainSnapshot> CREATOR =
-            new Creator<KeychainSnapshot>() {
-        public KeychainSnapshot createFromParcel(Parcel in) {
-            return new KeychainSnapshot(in);
+    public static final Creator<KeyChainSnapshot> CREATOR =
+            new Creator<KeyChainSnapshot>() {
+        public KeyChainSnapshot createFromParcel(Parcel in) {
+            return new KeyChainSnapshot(in);
         }
 
-        public KeychainSnapshot[] newArray(int length) {
-            return new KeychainSnapshot[length];
+        public KeyChainSnapshot[] newArray(int length) {
+            return new KeyChainSnapshot[length];
         }
     };
 
     /**
-     * Builder for creating {@link KeychainSnapshot}.
+     * Builder for creating {@link KeyChainSnapshot}.
      */
     public static class Builder {
-        private KeychainSnapshot
-                mInstance = new KeychainSnapshot();
+        private KeyChainSnapshot
+                mInstance = new KeyChainSnapshot();
 
         /**
          * Snapshot version for given account.
@@ -217,9 +217,9 @@ public final class KeychainSnapshot implements Parcelable {
          * @param recoveryMetadata The UI and key derivation parameters
          * @return This builder.
          */
-        public Builder setKeychainProtectionParams(
-                @NonNull List<KeychainProtectionParams> recoveryMetadata) {
-            mInstance.mKeychainProtectionParams = recoveryMetadata;
+        public Builder setKeyChainProtectionParams(
+                @NonNull List<KeyChainProtectionParams> recoveryMetadata) {
+            mInstance.mKeyChainProtectionParams = recoveryMetadata;
             return this;
         }
 
@@ -247,13 +247,13 @@ public final class KeychainSnapshot implements Parcelable {
 
 
         /**
-         * Creates a new {@link KeychainSnapshot} instance.
+         * Creates a new {@link KeyChainSnapshot} instance.
          *
          * @return new instance
          * @throws NullPointerException if some required fields were not set.
          */
-        @NonNull public KeychainSnapshot build() {
-            Preconditions.checkCollectionElementsNotNull(mInstance.mKeychainProtectionParams,
+        @NonNull public KeyChainSnapshot build() {
+            Preconditions.checkCollectionElementsNotNull(mInstance.mKeyChainProtectionParams,
                     "recoveryMetadata");
             Preconditions.checkCollectionElementsNotNull(mInstance.mEntryRecoveryData,
                     "entryRecoveryData");
@@ -270,7 +270,7 @@ public final class KeychainSnapshot implements Parcelable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mSnapshotVersion);
-        out.writeTypedList(mKeychainProtectionParams);
+        out.writeTypedList(mKeyChainProtectionParams);
         out.writeByteArray(mEncryptedRecoveryKeyBlob);
         out.writeTypedList(mEntryRecoveryData);
         out.writeInt(mMaxAttempts);
@@ -282,9 +282,9 @@ public final class KeychainSnapshot implements Parcelable {
     /**
      * @hide
      */
-    protected KeychainSnapshot(Parcel in) {
+    protected KeyChainSnapshot(Parcel in) {
         mSnapshotVersion = in.readInt();
-        mKeychainProtectionParams = in.createTypedArrayList(KeychainProtectionParams.CREATOR);
+        mKeyChainProtectionParams = in.createTypedArrayList(KeyChainProtectionParams.CREATOR);
         mEncryptedRecoveryKeyBlob = in.createByteArray();
         mEntryRecoveryData = in.createTypedArrayList(WrappedApplicationKey.CREATOR);
         mMaxAttempts = in.readInt();

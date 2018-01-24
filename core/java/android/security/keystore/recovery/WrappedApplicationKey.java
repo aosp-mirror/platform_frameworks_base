@@ -27,6 +27,7 @@ import com.android.internal.util.Preconditions;
  *
  * <ul>
  *   <li>Alias - Keystore alias of the key.
+ *   <li>Account Recovery Agent specific account associated with the key.
  *   <li>Encrypted key material.
  * </ul>
  *
@@ -39,13 +40,13 @@ public final class WrappedApplicationKey implements Parcelable {
     private String mAlias;
     // The only supported format is AES-256 symmetric key.
     private byte[] mEncryptedKeyMaterial;
+    private byte[] mAccount;
 
     /**
      * Builder for creating {@link WrappedApplicationKey}.
      */
     public static class Builder {
-        private WrappedApplicationKey
-                mInstance = new WrappedApplicationKey();
+        private WrappedApplicationKey mInstance = new WrappedApplicationKey();
 
         /**
          * Sets Application-specific alias of the key.
@@ -55,6 +56,17 @@ public final class WrappedApplicationKey implements Parcelable {
          */
         public Builder setAlias(@NonNull String alias) {
             mInstance.mAlias = alias;
+            return this;
+        }
+
+        /**
+         * Sets Recovery agent specific account.
+         *
+         * @param account The account.
+         * @return This builder.
+         */
+        public Builder setAccount(@NonNull byte[] account) {
+            mInstance.mAccount = account;
             return this;
         }
 
@@ -79,12 +91,14 @@ public final class WrappedApplicationKey implements Parcelable {
         @NonNull public WrappedApplicationKey build() {
             Preconditions.checkNotNull(mInstance.mAlias);
             Preconditions.checkNotNull(mInstance.mEncryptedKeyMaterial);
+            if (mInstance.mAccount == null) {
+                mInstance.mAccount = new byte[]{};
+            }
             return mInstance;
         }
     }
 
     private WrappedApplicationKey() {
-
     }
 
     /**
@@ -110,8 +124,16 @@ public final class WrappedApplicationKey implements Parcelable {
         return mEncryptedKeyMaterial;
     }
 
-    public static final Creator<WrappedApplicationKey> CREATOR =
-            new Creator<WrappedApplicationKey>() {
+    /** Account, default value is empty array */
+    public @NonNull byte[] getAccount() {
+        if (mAccount == null) {
+            return new byte[]{};
+        }
+        return mAccount;
+    }
+
+    public static final Parcelable.Creator<WrappedApplicationKey> CREATOR =
+            new Parcelable.Creator<WrappedApplicationKey>() {
                 public WrappedApplicationKey createFromParcel(Parcel in) {
                     return new WrappedApplicationKey(in);
                 }
@@ -128,6 +150,7 @@ public final class WrappedApplicationKey implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(mAlias);
         out.writeByteArray(mEncryptedKeyMaterial);
+        out.writeByteArray(mAccount);
     }
 
     /**
@@ -136,6 +159,7 @@ public final class WrappedApplicationKey implements Parcelable {
     protected WrappedApplicationKey(Parcel in) {
         mAlias = in.readString();
         mEncryptedKeyMaterial = in.createByteArray();
+        mAccount = in.createByteArray();
     }
 
     @Override
