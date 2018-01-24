@@ -1066,7 +1066,7 @@ final class AutofillManagerServiceImpl {
             int intDuration = duration > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) duration;
             mMetricsLogger.write(Helper.newLogMaker(MetricsEvent.AUTOFILL_SERVICE_DISABLED_APP,
                     packageName, getServicePackageName())
-                    .setCounterValue(intDuration));
+                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_DURATION, intDuration));
         }
     }
 
@@ -1090,7 +1090,7 @@ final class AutofillManagerServiceImpl {
             mMetricsLogger.write(new LogMaker(MetricsEvent.AUTOFILL_SERVICE_DISABLED_ACTIVITY)
                     .setComponentName(componentName)
                     .addTaggedData(MetricsEvent.FIELD_AUTOFILL_SERVICE, getServicePackageName())
-                    .setCounterValue(intDuration));
+                    .addTaggedData(MetricsEvent.FIELD_AUTOFILL_DURATION, intDuration));
         }
     }
 
