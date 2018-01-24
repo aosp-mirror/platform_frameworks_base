@@ -18,6 +18,8 @@ syntax = "proto2";
 option java_package = "android.app";
 option java_multiple_files = true;
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 package android.app;
 
 /**
@@ -25,13 +27,15 @@ package android.app;
  * Deprecated fields are not included in the proto.
  */
 message NotificationProto {
-    optional string channel_id = 1;
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional string channel_id = 1 [ (.android.privacy).dest = DEST_EXPLICIT ];
     optional bool has_ticker_text = 2;
     optional int32 flags = 3;
     optional int32 color = 4;
-    optional string category = 5;
-    optional string group_key = 6;
-    optional string sort_key = 7;
+    optional string category = 5 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional string group_key = 6 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional string sort_key = 7 [ (.android.privacy).dest = DEST_EXPLICIT ];
     optional int32 action_length = 8;
 
     // If this field is not set, then the value is unknown.

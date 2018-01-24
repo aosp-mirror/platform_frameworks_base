@@ -17,10 +17,14 @@
 syntax = "proto2";
 package android.service.diskstats;
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 option java_multiple_files = true;
 option java_outer_classname = "DiskStatsServiceProto";
 
 message DiskStatsServiceDumpProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     enum EncryptionType {
         // Unknown encryption type
         ENCRYPTION_UNKNOWN = 0;
@@ -34,7 +38,7 @@ message DiskStatsServiceDumpProto {
     // Whether the latency test resulted in an error
     optional bool has_test_error = 1;
     // If the test errored, error message is contained here
-    optional string error_message = 2;
+    optional string error_message = 2 [ (android.privacy).dest = DEST_EXPLICIT ];
     // 512B write latency in milliseconds, if the test was successful
     optional int32 write_512b_latency_millis = 3;
     // Free Space in the major partitions
@@ -48,6 +52,8 @@ message DiskStatsServiceDumpProto {
 }
 
 message DiskStatsCachedValuesProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Total app code size, in kilobytes
     optional int64 agg_apps_size = 1;
     // Total app cache size, in kilobytes
@@ -71,6 +77,8 @@ message DiskStatsCachedValuesProto {
 }
 
 message DiskStatsAppSizesProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Name of the package
     optional string package_name = 1;
     // App's code size in kilobytes
@@ -82,6 +90,8 @@ message DiskStatsAppSizesProto {
 }
 
 message DiskStatsFreeSpaceProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     enum Folder {
         // Data folder
         FOLDER_DATA = 0;

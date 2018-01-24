@@ -134,6 +134,8 @@ message SystemPropertiesProto {
     optional bool   hal_instrumentation_enable = 11;
 
     message InitSvc {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
         enum Status {
             STATUS_UNKNOWN = 0;
             STATUS_RUNNING = 1;
@@ -230,7 +232,7 @@ message SystemPropertiesProto {
 
     // Read only properites on the device.
     message Ro {
-        optional bool  adb_secure = 1;
+        optional bool  adb_secure = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional string arch = 2;
         optional bool   audio_ignore_effects = 3;
         optional bool   audio_monitorRotation = 4;
@@ -265,6 +267,8 @@ message SystemPropertiesProto {
 
         // boot.img's properties.
         message BootImage {
+            option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
             // When the boot.img is built.
             optional string build_date = 1;
             // UTC timestamp of build date.
@@ -278,12 +282,14 @@ message SystemPropertiesProto {
         optional BootImage bootimage = 8;
 
         // Version of bootloader on device.
-        optional string bootloader = 9;
+        optional string bootloader = 9  [ (android.privacy).dest = DEST_AUTOMATIC ];
         // Kernel bootmode, e.g. charger.
-        optional string bootmode = 10;
+        optional string bootmode = 10  [ (android.privacy).dest = DEST_AUTOMATIC ];
 
         // Android Platform build metadata.
         message Build {
+            option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
             optional string date = 1;
             optional int64  date_utc = 2;
             optional string description = 3;
@@ -297,6 +303,8 @@ message SystemPropertiesProto {
             optional string user = 11;
 
             message Version {
+                option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
                 optional string base_os = 1;
                 optional string codename = 2;
                 optional string incremental = 3;
@@ -313,10 +321,10 @@ message SystemPropertiesProto {
         }
         optional Build build = 11;
 
-        optional bool   camera_notify_nfc = 12;
+        optional bool   camera_notify_nfc = 12  [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional string carrier = 13;
-        optional bool   com_android_dataroaming = 14;
-        optional bool   com_android_prov_mobiledata = 15;
+        optional bool   com_android_dataroaming = 14  [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional bool   com_android_prov_mobiledata = 15  [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional string com_google_clientidbase = 16;
 
         message Config {
@@ -341,6 +349,8 @@ message SystemPropertiesProto {
         optional string gfx_driver_0 = 26;
 
         message Hardware {
+            option (android.msg_privacy).dest = DEST_LOCAL;
+
             optional string value = 1; // value of ro.hardware itself
 
             optional string activity_recognition = 2;
@@ -392,6 +402,8 @@ message SystemPropertiesProto {
         optional int32  opengles_version = 31;
 
         message Product {
+            option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
             optional string board = 1;
             optional string brand = 2;
             optional string cpu_abi = 3;
@@ -405,6 +417,8 @@ message SystemPropertiesProto {
             optional string name = 11;
 
             message Vendor {
+                option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
                 optional string brand = 1;
                 optional string device = 2;
                 optional string manufacturer = 3;

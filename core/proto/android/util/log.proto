@@ -17,11 +17,15 @@
 syntax = "proto2";
 package android.util;
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 option java_multiple_files = true;
 
 // Represents a Text Log in logd
 // Next Tag: 9
 message TextLogEntry {
+    option (android.msg_privacy).dest = DEST_EXPLICIT;
+
     optional uint64 sec = 1;
     optional uint64 nanosec = 2;
 
@@ -47,6 +51,8 @@ message TextLogEntry {
 // Represents a Binary Log in logd, need to look event-log-tags for more info.
 // Next Tag: 8
 message BinaryLogEntry {
+    option (android.msg_privacy).dest = DEST_EXPLICIT;
+
     optional uint64 sec = 1;
     optional uint64 nanosec = 2;
     optional int32 uid = 3;
@@ -81,6 +87,8 @@ message BinaryLogEntry {
 }
 
 message LogProto {
+    option (android.msg_privacy).dest = DEST_EXPLICIT;
+
     repeated TextLogEntry text_logs = 1;
 
     repeated BinaryLogEntry binary_logs = 2;

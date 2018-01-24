@@ -17,11 +17,15 @@
 syntax = "proto2";
 package android.service;
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 option java_multiple_files = true;
 option java_outer_classname = "NetworkStatsServiceProto";
 
 // Represents dumpsys from NetworkStatsService (netstats).
 message NetworkStatsServiceDumpProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     repeated NetworkInterfaceProto active_interfaces = 1;
 
     repeated NetworkInterfaceProto active_uid_interfaces = 2;
@@ -41,6 +45,8 @@ message NetworkStatsServiceDumpProto {
 
 // Corresponds to NetworkStatsService.mActiveIfaces/mActiveUidIfaces.
 message NetworkInterfaceProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     optional string interface = 1;
 
     optional NetworkIdentitySetProto identities = 2;
@@ -48,17 +54,21 @@ message NetworkInterfaceProto {
 
 // Corresponds to NetworkIdentitySet.
 message NetworkIdentitySetProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     repeated NetworkIdentityProto identities = 1;
 }
 
 // Corresponds to NetworkIdentity.
 message NetworkIdentityProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Constats from ConnectivityManager.TYPE_*.
     optional int32 type = 1;
 
-    optional string subscriber_id = 2;
+    optional string subscriber_id = 2 [ (android.privacy).dest = DEST_EXPLICIT ];
 
-    optional string network_id = 3;
+    optional string network_id = 3 [ (android.privacy).dest = DEST_EXPLICIT ];
 
     optional bool roaming = 4;
 
@@ -69,6 +79,8 @@ message NetworkIdentityProto {
 
 // Corresponds to NetworkStatsRecorder.
 message NetworkStatsRecorderProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     optional int64 pending_total_bytes = 1;
 
     optional NetworkStatsCollectionProto complete_history = 2;
@@ -76,11 +88,15 @@ message NetworkStatsRecorderProto {
 
 // Corresponds to NetworkStatsCollection.
 message NetworkStatsCollectionProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     repeated NetworkStatsCollectionStatsProto stats = 1;
 }
 
 // Corresponds to NetworkStatsCollection.mStats.
 message NetworkStatsCollectionStatsProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     optional NetworkStatsCollectionKeyProto key = 1;
 
     optional NetworkStatsHistoryProto history = 2;
@@ -88,6 +104,8 @@ message NetworkStatsCollectionStatsProto {
 
 // Corresponds to NetworkStatsCollection.Key.
 message NetworkStatsCollectionKeyProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     optional NetworkIdentitySetProto identity = 1;
 
     optional int32 uid = 2;
@@ -99,6 +117,8 @@ message NetworkStatsCollectionKeyProto {
 
 // Corresponds to NetworkStatsHistory.
 message NetworkStatsHistoryProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Duration for this bucket in milliseconds.
     optional int64 bucket_duration_ms = 1;
 
@@ -107,6 +127,8 @@ message NetworkStatsHistoryProto {
 
 // Corresponds to each bucket in NetworkStatsHistory.
 message NetworkStatsHistoryBucketProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Bucket start time in milliseconds since epoch.
     optional int64 bucket_start_ms = 1;
 

@@ -26,12 +26,15 @@ import "frameworks/base/core/proto/android/view/displaycutout.proto";
 import "frameworks/base/core/proto/android/view/displayinfo.proto";
 import "frameworks/base/core/proto/android/view/surface.proto";
 import "frameworks/base/core/proto/android/view/windowlayoutparams.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 package com.android.server.wm.proto;
 
 option java_multiple_files = true;
 
 message WindowManagerServiceProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional WindowManagerPolicyProto policy = 1;
   /* window hierarchy root */
   optional RootWindowContainerProto root_window_container = 2;
@@ -46,6 +49,8 @@ message WindowManagerServiceProto {
 
 /* represents DisplayContent */
 message RootWindowContainerProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional WindowContainerProto window_container = 1;
   repeated DisplayProto displays = 2;
   /* window references in top down z order */
@@ -53,16 +58,22 @@ message RootWindowContainerProto {
 }
 
 message BarControllerProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional .android.app.StatusBarManagerProto.WindowState state = 1;
   optional .android.app.StatusBarManagerProto.TransientWindowState transient_state = 2;
 }
 
 message WindowOrientationListenerProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional bool enabled = 1;
   optional .android.view.SurfaceProto.Rotation rotation = 2;
 }
 
 message KeyguardServiceDelegateProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional bool showing = 1;
   optional bool occluded = 2;
   optional bool secure = 3;
@@ -84,6 +95,8 @@ message KeyguardServiceDelegateProto {
 
 /* represents PhoneWindowManager */
 message WindowManagerPolicyProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional int32 last_system_ui_flags = 1;
   enum UserRotationMode {
     USER_ROTATION_FREE = 0;
@@ -112,6 +125,8 @@ message WindowManagerPolicyProto {
 
 /* represents AppTransition */
 message AppTransitionProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   enum AppState {
     APP_STATE_IDLE = 0;
     APP_STATE_READY = 1;
@@ -147,6 +162,8 @@ message AppTransitionProto {
 
 /* represents DisplayContent */
 message DisplayProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional WindowContainerProto window_container = 1;
   optional int32 id = 2;
   repeated StackProto stacks = 3;
@@ -165,22 +182,30 @@ message DisplayProto {
 
 /* represents DisplayFrames */
 message DisplayFramesProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional .android.graphics.RectProto stable_bounds = 1;
 }
 
 /* represents DockedStackDividerController */
 message DockedStackDividerControllerProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional bool minimized_dock = 1;
 }
 
 /* represents PinnedStackController */
 message PinnedStackControllerProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional .android.graphics.RectProto default_bounds = 1;
   optional .android.graphics.RectProto movement_bounds = 2;
 }
 
 /* represents TaskStack */
 message StackProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional WindowContainerProto window_container = 1;
   optional int32 id = 2;
   repeated TaskProto tasks = 3;
@@ -197,6 +222,8 @@ message StackProto {
 
 /* represents Task */
 message TaskProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional WindowContainerProto window_container = 1;
   optional int32 id = 2;
   repeated AppWindowTokenProto app_window_tokens = 3;
@@ -208,8 +235,10 @@ message TaskProto {
 
 /* represents AppWindowToken */
 message AppWindowTokenProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   /* obtained from ActivityRecord */
-  optional string name = 1;
+  optional string name = 1 [ (.android.privacy).dest = DEST_EXPLICIT ];
   optional WindowTokenProto window_token = 2;
   optional bool last_surface_showing = 3;
   optional bool is_waiting_for_transition_start =  4;
@@ -236,6 +265,8 @@ message AppWindowTokenProto {
 
 /* represents WindowToken */
 message WindowTokenProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional WindowContainerProto window_container = 1;
   optional int32 hash_code = 2;
   repeated WindowStateProto windows = 3;
@@ -246,6 +277,8 @@ message WindowTokenProto {
 
 /* represents WindowState */
 message WindowStateProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional WindowContainerProto window_container = 1;
   optional IdentifierProto identifier = 2;
   optional int32 display_id = 3;
@@ -287,13 +320,17 @@ message WindowStateProto {
 }
 
 message IdentifierProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional int32 hash_code = 1;
   optional int32 user_id = 2;
-  optional string title = 3;
+  optional string title = 3  [ (.android.privacy).dest = DEST_EXPLICIT ];
 }
 
 /* represents WindowStateAnimator */
 message WindowStateAnimatorProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional .android.graphics.RectProto last_clip_rect = 1;
   optional WindowSurfaceControllerProto surface = 2;
   enum DrawState {
@@ -309,18 +346,24 @@ message WindowStateAnimatorProto {
 
 /* represents WindowSurfaceController */
 message WindowSurfaceControllerProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional bool shown = 1;
   optional int32 layer = 2;
 }
 
 /* represents ScreenRotationAnimation */
 message ScreenRotationAnimationProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional bool started = 1;
   optional bool animation_running = 2;
 }
 
 /* represents WindowContainer */
 message WindowContainerProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional ConfigurationContainerProto configuration_container = 1;
   optional int32 orientation = 2;
   optional bool visible = 3;
@@ -329,6 +372,8 @@ message WindowContainerProto {
 
 /* represents ConfigurationContainer */
 message ConfigurationContainerProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional .android.content.ConfigurationProto override_configuration = 1;
   optional .android.content.ConfigurationProto full_configuration = 2;
   optional .android.content.ConfigurationProto merged_override_configuration = 3;
