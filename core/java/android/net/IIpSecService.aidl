@@ -21,6 +21,7 @@ import android.net.IpSecConfig;
 import android.net.IpSecUdpEncapResponse;
 import android.net.IpSecSpiResponse;
 import android.net.IpSecTransformResponse;
+import android.net.IpSecTunnelInterfaceResponse;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
@@ -39,11 +40,29 @@ interface IIpSecService
 
     void closeUdpEncapsulationSocket(int resourceId);
 
+    IpSecTunnelInterfaceResponse createTunnelInterface(
+            in String localAddr,
+            in String remoteAddr,
+            in Network underlyingNetwork,
+            in IBinder binder);
+
+    void addAddressToTunnelInterface(
+            int tunnelResourceId,
+            String localAddr);
+
+    void removeAddressFromTunnelInterface(
+            int tunnelResourceId,
+            String localAddr);
+
+    void deleteTunnelInterface(int resourceId);
+
     IpSecTransformResponse createTransform(in IpSecConfig c, in IBinder binder);
 
     void deleteTransform(int transformId);
 
     void applyTransportModeTransform(in ParcelFileDescriptor socket, int direction, int transformId);
+
+    void applyTunnelModeTransform(int tunnelResourceId, int direction, int transformResourceId);
 
     void removeTransportModeTransforms(in ParcelFileDescriptor socket);
 }
