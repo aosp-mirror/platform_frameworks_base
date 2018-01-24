@@ -664,7 +664,9 @@ java_library {
     ],
 
     // Loaded with System.loadLibrary by android.view.textclassifier
-    required: ["libtextclassifier"],
+    required: [
+        "libtextclassifier",
+        "libmedia2_jni",],
 
     javac_shard_size: 150,
 
