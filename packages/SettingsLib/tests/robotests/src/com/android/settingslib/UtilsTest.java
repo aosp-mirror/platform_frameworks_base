@@ -84,23 +84,31 @@ public class UtilsTest {
                 mContext,
                 Secure.LOCATION_MODE_OFF,
                 Secure.LOCATION_MODE_HIGH_ACCURACY,
-                currentUserId);
+                currentUserId,
+                Settings.Secure.LOCATION_CHANGER_QUICK_SETTINGS);
 
         verify(mContext).sendBroadcastAsUser(
                 argThat(actionMatches(LocationManager.MODE_CHANGING_ACTION)),
                 ArgumentMatchers.eq(UserHandle.of(currentUserId)),
                 ArgumentMatchers.eq(WRITE_SECURE_SETTINGS));
+        assertThat(Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.LOCATION_CHANGER, Settings.Secure.LOCATION_CHANGER_UNKNOWN))
+                .isEqualTo(Settings.Secure.LOCATION_CHANGER_QUICK_SETTINGS);
     }
 
     @Test
     public void testUpdateLocationEnabled_sendBroadcast() {
         int currentUserId = ActivityManager.getCurrentUser();
-        Utils.updateLocationEnabled(mContext, true, currentUserId);
+        Utils.updateLocationEnabled(mContext, true, currentUserId,
+                Settings.Secure.LOCATION_CHANGER_QUICK_SETTINGS);
 
         verify(mContext).sendBroadcastAsUser(
             argThat(actionMatches(LocationManager.MODE_CHANGING_ACTION)),
             ArgumentMatchers.eq(UserHandle.of(currentUserId)),
             ArgumentMatchers.eq(WRITE_SECURE_SETTINGS));
+        assertThat(Settings.Secure.getInt(mContext.getContentResolver(),
+                Settings.Secure.LOCATION_CHANGER, Settings.Secure.LOCATION_CHANGER_UNKNOWN))
+                .isEqualTo(Settings.Secure.LOCATION_CHANGER_QUICK_SETTINGS);
     }
 
     @Test

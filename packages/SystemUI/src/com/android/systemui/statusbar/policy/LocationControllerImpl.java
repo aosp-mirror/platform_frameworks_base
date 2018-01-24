@@ -32,6 +32,7 @@ import android.os.Message;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.support.annotation.VisibleForTesting;
 import com.android.systemui.util.Utils;
 import java.util.ArrayList;
@@ -105,7 +106,8 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         }
         // When enabling location, a user consent dialog will pop up, and the
         // setting won't be fully enabled until the user accepts the agreement.
-        updateLocationEnabled(mContext, enabled, currentUserId);
+        updateLocationEnabled(mContext, enabled, currentUserId,
+                Settings.Secure.LOCATION_CHANGER_QUICK_SETTINGS);
         return true;
     }
 
