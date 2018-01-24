@@ -19,6 +19,7 @@ package android.media;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.media.MediaSession2.CommandButton;
 import android.media.MediaSession2.CommandGroup;
 import android.media.MediaSession2.ControllerInfo;
 import android.media.session.MediaSessionManager;
@@ -26,6 +27,8 @@ import android.media.session.PlaybackState;
 import android.media.update.ApiLoader;
 import android.media.update.MediaController2Provider;
 import android.os.Handler;
+
+import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
@@ -81,6 +84,16 @@ public class MediaController2 extends MediaPlayerBase {
          * You don't need to call {@link #release()} after this.
          */
         public void onDisconnected() { }
+
+        /**
+         * Called when the session sets the custom layout through the
+         * {@link MediaSession2#setCustomLayout(ControllerInfo, List)}.
+         * <p>
+         * Can be called before {@link #onConnected(CommandGroup)} is called.
+         *
+         * @param layout
+         */
+        public void onCustomLayoutChanged(List<CommandButton> layout) { }
     }
 
     private final MediaController2Provider mProvider;
