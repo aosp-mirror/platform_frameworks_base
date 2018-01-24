@@ -18,8 +18,11 @@ package android.media.update;
 
 import android.annotation.SystemApi;
 import android.media.AudioAttributes;
+import android.media.DataSourceDesc;
+import android.media.MediaItem2;
 import android.media.MediaMetadata2;
 import android.media.MediaPlayerBase;
+import android.media.SessionToken2;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
 import android.media.session.MediaSession;
@@ -53,7 +56,11 @@ public interface VideoView2Provider extends ViewGroupProvider {
 
     void setMediaControlView2_impl(MediaControlView2 mediaControlView, long intervalMs);
     void setMediaMetadata_impl(MediaMetadata2 metadata);
+    /**
+     * @hide TODO: remove
+     */
     MediaController getMediaController_impl();
+    SessionToken2 getMediaSessionToken_impl();
     MediaControlView2 getMediaControlView2_impl();
     MediaMetadata2 getMediaMetadata_impl();
     void setSubtitleEnabled_impl(boolean enable);
@@ -66,13 +73,31 @@ public interface VideoView2Provider extends ViewGroupProvider {
      * @hide
      */
     void setRouteAttributes_impl(List<String> routeCategories, MediaPlayerBase player);
+    /**
+     * @hide
+     */
     // TODO: remove setRouteAttributes_impl with MediaSession.Callback once MediaSession2 is ready.
     void setRouteAttributes_impl(List<String> routeCategories, MediaSession.Callback sessionPlayer);
+
+    /**
+     * @hide TODO: remove
+     */
     void setVideoPath_impl(String path);
+    /**
+     * @hide TODO: remove
+     */
     void setVideoUri_impl(Uri uri);
+    /**
+     * @hide TODO: remove
+     */
     void setVideoUri_impl(Uri uri, Map<String, String> headers);
+    void setMediaItem_impl(MediaItem2 mediaItem);
+    void setDataSource_impl(DataSourceDesc dsd);
     void setViewType_impl(int viewType);
     int getViewType_impl();
+    /**
+     * @hide TODO: remove
+     */
     void setCustomActions_impl(List<PlaybackState.CustomAction> actionList,
             Executor executor, VideoView2.OnCustomActionListener listener);
     /**
@@ -80,5 +105,8 @@ public interface VideoView2Provider extends ViewGroupProvider {
      */
     @VisibleForTesting
     void setOnViewTypeChangedListener_impl(VideoView2.OnViewTypeChangedListener l);
+    /**
+     * @hide TODO: remove
+     */
     void setFullScreenRequestListener_impl(VideoView2.OnFullScreenRequestListener l);
 }
