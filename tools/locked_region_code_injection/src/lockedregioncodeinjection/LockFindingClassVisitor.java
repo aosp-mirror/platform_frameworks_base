@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.TryCatchBlockSorter;
@@ -101,7 +100,7 @@ class LockFindingClassVisitor extends ClassVisitor {
             try {
                 a.analyze(owner, mn);
             } catch (AnalyzerException e) {
-                e.printStackTrace();
+                throw new RuntimeException("Locked region code injection: " + e.getMessage(), e);
             }
             InsnList instructions = mn.instructions;
 
