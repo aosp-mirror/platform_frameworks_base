@@ -181,6 +181,9 @@ easier.
         <item name="actionBarStyle">@style/Widget.DeviceDefault.ActionBar.Solid</item>
         <item name="actionModePopupWindowStyle">@style/Widget.DeviceDefault.PopupWindow.ActionMode</item>
 
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
+
         <item name="buttonBarStyle">@style/DeviceDefault.ButtonBar</item>
         <item name="segmentedButtonStyle">@style/DeviceDefault.SegmentedButton</item>
 
@@ -233,6 +236,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault} with no action bar and no status bar.  This theme
@@ -257,6 +263,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault} with no action bar and no status bar and
@@ -283,6 +292,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault} that has no title bar and translucent
@@ -308,6 +320,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- DeviceDefault theme for dialog windows and activities. This changes the window to be
@@ -341,6 +356,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Dialog} that has a nice minimum width for a
@@ -365,6 +383,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Dialog} without an action bar -->
@@ -388,6 +409,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Dialog_NoActionBar} that has a nice minimum width
@@ -412,6 +436,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- Variant of Theme.DeviceDefault.Dialog that has a fixed size. -->
@@ -452,6 +479,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- DeviceDefault theme for a window without an action bar that will be displayed either
@@ -477,6 +507,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- DeviceDefault theme for a presentation window on a secondary display. -->
@@ -500,6 +533,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- DeviceDefault theme for panel windows. This removes all extraneous window
@@ -525,6 +561,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- DeviceDefault theme for windows that want to have the user's selected wallpaper appear
@@ -549,6 +588,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- DeviceDefault theme for windows that want to have the user's selected wallpaper appear
@@ -573,6 +615,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- DeviceDefault style for input methods, which is used by the
@@ -597,6 +642,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- DeviceDefault style for input methods, which is used by the
@@ -621,6 +669,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <style name="Theme.DeviceDefault.Dialog.Alert" parent="Theme.Material.Dialog.Alert">
@@ -645,6 +696,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <style name="Theme.DeviceDefault.SearchBar" parent="Theme.Material.SearchBar">
@@ -667,6 +721,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <style name="Theme.DeviceDefault.Dialog.NoFrame" parent="Theme.Material.Dialog.NoFrame">
@@ -689,6 +746,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault} with a light-colored style -->
@@ -822,6 +882,9 @@ easier.
         <item name="actionBarStyle">@style/Widget.DeviceDefault.Light.ActionBar.Solid</item>
         <item name="actionModePopupWindowStyle">@style/Widget.DeviceDefault.Light.PopupWindow.ActionMode</item>
 
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
+
         <item name="buttonBarStyle">@style/DeviceDefault.Light.ButtonBar</item>
         <item name="segmentedButtonStyle">@style/DeviceDefault.Light.SegmentedButton</item>
 
@@ -869,6 +932,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light} with no action bar -->
@@ -892,6 +958,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light} with no action bar and no status bar.
@@ -916,6 +985,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light} with no action bar and no status bar
@@ -942,6 +1014,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light} that has no title bar and translucent
@@ -967,6 +1042,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- DeviceDefault light theme for dialog windows and activities. This changes the window to be
@@ -998,6 +1076,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light_Dialog} that has a nice minimum width for a
@@ -1022,6 +1103,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
      <!-- Variant of {@link #Theme_DeviceDefault_Light_Dialog} without an action bar -->
@@ -1045,6 +1129,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Light_Dialog_NoActionBar} that has a nice minimum
@@ -1069,6 +1156,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- Variant of Theme.DeviceDefault.Dialog that has a fixed size. -->
@@ -1119,6 +1209,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- DeviceDefault light theme for a window without an action bar that will be displayed either
@@ -1144,6 +1237,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- DeviceDefault light theme for a presentation window on a secondary display. -->
@@ -1167,6 +1263,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- DeviceDefault light theme for panel windows. This removes all extraneous window
@@ -1192,6 +1291,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <style name="Theme.DeviceDefault.Light.Dialog.Alert" parent="Theme.Material.Light.Dialog.Alert">
@@ -1216,6 +1318,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <style name="Theme.DeviceDefault.Light.SearchBar" parent="Theme.Material.Light.SearchBar">
@@ -1238,6 +1343,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <style name="Theme.DeviceDefault.Light.Voice" parent="Theme.Material.Light.Voice">
@@ -1260,11 +1368,15 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- DeviceDefault theme for a window that should look like the Settings app.  -->
     <style name="Theme.DeviceDefault.Settings" parent="Theme.Material.Settings">
         <!-- action bar -->
+        <item name="actionBarStyle">@style/Widget.DeviceDefault.Light.ActionBar.Solid</item>
         <item name="actionBarTheme">@style/ThemeOverlay.DeviceDefault.ActionBar.Accent</item>
         <item name="popupTheme">@style/ThemeOverlay.DeviceDefault.Popup.Light</item>
 
@@ -1295,6 +1407,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- @hide DeviceDefault theme for a window that should use Settings theme colors
@@ -1319,6 +1434,9 @@ easier.
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
 
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
+
         <!-- volume background -->
         <item name="panelColorBackground">@color/primary_material_light</item>
     </style>
@@ -1334,6 +1452,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- Variant of {@link #Theme_DeviceDefault_Settings_Dark} with no action bar -->
@@ -1358,6 +1479,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <style name="Theme.DeviceDefault.Settings.Dialog" parent="Theme.Material.Settings.Dialog">
@@ -1381,6 +1505,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <style name="Theme.DeviceDefault.Settings.DialogWhenLarge" parent="Theme.Material.Settings.DialogWhenLarge">
@@ -1404,6 +1531,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <style name="Theme.DeviceDefault.Settings.Dialog.Alert" parent="Theme.Material.Settings.Dialog.Alert">
@@ -1427,6 +1557,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <style name="Theme.DeviceDefault.Settings.Dialog.NoActionBar" parent="Theme.DeviceDefault.Light.Dialog.NoActionBar" />
@@ -1461,6 +1594,9 @@ easier.
         <!-- Progress bar attributes -->
         <item name="colorProgressBackgroundNormal">@color/config_progress_background_tint</item>
         <item name="progressBarCornerRadius">@dimen/config_progressBarCornerRadius</item>
+
+        <!-- Toolbar attributes -->
+        <item name="toolbarStyle">@style/Widget.DeviceDefault.Toolbar</item>
     </style>
 
     <!-- DeviceDefault theme for the default system theme.  -->
