@@ -122,22 +122,6 @@ public class NetworkMonitor extends StateMachine {
         }
     }
 
-    public static final String ACTION_NETWORK_CONDITIONS_MEASURED =
-            "android.net.conn.NETWORK_CONDITIONS_MEASURED";
-    public static final String EXTRA_CONNECTIVITY_TYPE = "extra_connectivity_type";
-    public static final String EXTRA_NETWORK_TYPE = "extra_network_type";
-    public static final String EXTRA_RESPONSE_RECEIVED = "extra_response_received";
-    public static final String EXTRA_IS_CAPTIVE_PORTAL = "extra_is_captive_portal";
-    public static final String EXTRA_CELL_ID = "extra_cellid";
-    public static final String EXTRA_SSID = "extra_ssid";
-    public static final String EXTRA_BSSID = "extra_bssid";
-    /** real time since boot */
-    public static final String EXTRA_REQUEST_TIMESTAMP_MS = "extra_request_timestamp_ms";
-    public static final String EXTRA_RESPONSE_TIMESTAMP_MS = "extra_response_timestamp_ms";
-
-    private static final String PERMISSION_ACCESS_NETWORK_CONDITIONS =
-            "android.permission.ACCESS_NETWORK_CONDITIONS";
-
     // After a network has been tested this result can be sent with EVENT_NETWORK_TESTED.
     // The network should be used as a default internet connection.  It was found to be:
     // 1. a functioning network providing internet access, or
@@ -1136,7 +1120,8 @@ public class NetworkMonitor extends StateMachine {
             return;
         }
 
-        Intent latencyBroadcast = new Intent(ACTION_NETWORK_CONDITIONS_MEASURED);
+        Intent latencyBroadcast =
+                new Intent(ConnectivityConstants.ACTION_NETWORK_CONDITIONS_MEASURED);
         switch (mNetworkAgentInfo.networkInfo.getType()) {
             case ConnectivityManager.TYPE_WIFI:
                 WifiInfo currentWifiInfo = mWifiManager.getConnectionInfo();
@@ -1148,15 +1133,18 @@ public class NetworkMonitor extends StateMachine {
                     // not change it here as it would become impossible to tell whether the SSID is
                     // simply being surrounded by quotes due to the API, or whether those quotes
                     // are actually part of the SSID.
-                    latencyBroadcast.putExtra(EXTRA_SSID, currentWifiInfo.getSSID());
-                    latencyBroadcast.putExtra(EXTRA_BSSID, currentWifiInfo.getBSSID());
+                    latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_SSID,
+                            currentWifiInfo.getSSID());
+                    latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_BSSID,
+                            currentWifiInfo.getBSSID());
                 } else {
                     if (VDBG) logw("network info is TYPE_WIFI but no ConnectionInfo found");
                     return;
                 }
                 break;
             case ConnectivityManager.TYPE_MOBILE:
-                latencyBroadcast.putExtra(EXTRA_NETWORK_TYPE, mTelephonyManager.getNetworkType());
+                latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_NETWORK_TYPE,
+                        mTelephonyManager.getNetworkType());
                 List<CellInfo> info = mTelephonyManager.getAllCellInfo();
                 if (info == null) return;
                 int numRegisteredCellInfo = 0;
@@ -1170,16 +1158,16 @@ public class NetworkMonitor extends StateMachine {
                         }
                         if (cellInfo instanceof CellInfoCdma) {
                             CellIdentityCdma cellId = ((CellInfoCdma) cellInfo).getCellIdentity();
-                            latencyBroadcast.putExtra(EXTRA_CELL_ID, cellId);
+                            latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_CELL_ID, cellId);
                         } else if (cellInfo instanceof CellInfoGsm) {
                             CellIdentityGsm cellId = ((CellInfoGsm) cellInfo).getCellIdentity();
-                            latencyBroadcast.putExtra(EXTRA_CELL_ID, cellId);
+                            latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_CELL_ID, cellId);
                         } else if (cellInfo instanceof CellInfoLte) {
                             CellIdentityLte cellId = ((CellInfoLte) cellInfo).getCellIdentity();
-                            latencyBroadcast.putExtra(EXTRA_CELL_ID, cellId);
+                            latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_CELL_ID, cellId);
                         } else if (cellInfo instanceof CellInfoWcdma) {
                             CellIdentityWcdma cellId = ((CellInfoWcdma) cellInfo).getCellIdentity();
-                            latencyBroadcast.putExtra(EXTRA_CELL_ID, cellId);
+                            latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_CELL_ID, cellId);
                         } else {
                             if (VDBG) logw("Registered cellinfo is unrecognized");
                             return;
@@ -1190,16 +1178,21 @@ public class NetworkMonitor extends StateMachine {
             default:
                 return;
         }
-        latencyBroadcast.putExtra(EXTRA_CONNECTIVITY_TYPE, mNetworkAgentInfo.networkInfo.getType());
-        latencyBroadcast.putExtra(EXTRA_RESPONSE_RECEIVED, responseReceived);
-        latencyBroadcast.putExtra(EXTRA_REQUEST_TIMESTAMP_MS, requestTimestampMs);
+        latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_CONNECTIVITY_TYPE,
+                mNetworkAgentInfo.networkInfo.getType());
+        latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_RESPONSE_RECEIVED,
+                responseReceived);
+        latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_REQUEST_TIMESTAMP_MS,
+                requestTimestampMs);
 
         if (responseReceived) {
-            latencyBroadcast.putExtra(EXTRA_IS_CAPTIVE_PORTAL, isCaptivePortal);
-            latencyBroadcast.putExtra(EXTRA_RESPONSE_TIMESTAMP_MS, responseTimestampMs);
+            latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_IS_CAPTIVE_PORTAL,
+                    isCaptivePortal);
+            latencyBroadcast.putExtra(ConnectivityConstants.EXTRA_RESPONSE_TIMESTAMP_MS,
+                    responseTimestampMs);
         }
         mContext.sendBroadcastAsUser(latencyBroadcast, UserHandle.CURRENT,
-                PERMISSION_ACCESS_NETWORK_CONDITIONS);
+                ConnectivityConstants.PERMISSION_ACCESS_NETWORK_CONDITIONS);
     }
 
     private void logNetworkEvent(int evtype) {
