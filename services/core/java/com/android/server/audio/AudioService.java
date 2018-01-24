@@ -6635,7 +6635,19 @@ public class AudioService extends IAudioService.Stub
     // Inform AudioFlinger of our device's low RAM attribute
     private static void readAndSetLowRamDevice()
     {
-        int status = AudioSystem.setLowRamDevice(ActivityManager.isLowRamDeviceStatic());
+        boolean isLowRamDevice = ActivityManager.isLowRamDeviceStatic();
+        long totalMemory = 1024 * 1024 * 1024; // 1GB is the default if ActivityManager fails.
+
+        try {
+            final ActivityManager.MemoryInfo info = new ActivityManager.MemoryInfo();
+            ActivityManager.getService().getMemoryInfo(info);
+            totalMemory = info.totalMem;
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot obtain MemoryInfo from ActivityManager, assume low memory device");
+            isLowRamDevice = true;
+        }
+
+        final int status = AudioSystem.setLowRamDevice(isLowRamDevice, totalMemory);
         if (status != 0) {
             Log.w(TAG, "AudioFlinger informed of device's low RAM attribute; status " + status);
         }
