@@ -9144,9 +9144,13 @@ public class DevicePolicyManager {
      *     <li>A profile owner can only be transferred to a new profile owner</li>
      * </ul>
      *
-     * <p>Use the {@code bundle} parameter to pass data to the new administrator. The parameters
+     * <p>Use the {@code bundle} parameter to pass data to the new administrator. The data
      * will be received in the
-     * {@link DeviceAdminReceiver#onTransferOwnershipComplete(Context, PersistableBundle)} callback.
+     * {@link DeviceAdminReceiver#onTransferOwnershipComplete(Context, PersistableBundle)}
+     * callback of the new administrator.
+     *
+     * <p>The transfer has failed if the original administrator is still the corresponding owner
+     * after calling this method.
      *
      * <p>The incoming target administrator must have the
      * {@link DeviceAdminReceiver#SUPPORT_TRANSFER_OWNERSHIP_META_DATA} <code>meta-data</code> tag
@@ -9157,11 +9161,11 @@ public class DevicePolicyManager {
      * @param target which {@link DeviceAdminReceiver} we want the new administrator to be
      * @param bundle data to be sent to the new administrator
      * @throws SecurityException if {@code admin} is not a device owner nor a profile owner
-     * @throws IllegalArgumentException if {@code admin} or {@code target} is {@code null},
-     * both are components in the same package or {@code target} is not an active admin
+     * @throws IllegalArgumentException if {@code admin} or {@code target} is {@code null}, they
+     * are components in the same package or {@code target} is not an active admin
      */
     public void transferOwnership(@NonNull ComponentName admin, @NonNull ComponentName target,
-            PersistableBundle bundle) {
+            @Nullable PersistableBundle bundle) {
         throwIfParentInstance("transferOwnership");
         try {
             mService.transferOwnership(admin, target, bundle);
@@ -9417,5 +9421,25 @@ public class DevicePolicyManager {
             }
         }
         return false;
+    }
+
+    /**
+     * Returns the data passed from the current administrator to the new administrator during an
+     * ownership transfer. This is the same {@code bundle} passed in
+     * {@link #transferOwnership(ComponentName, ComponentName, PersistableBundle)}.
+     *
+     * <p>Returns <code>null</code> if no ownership transfer was started for the calling user.
+     *
+     * @see #transferOwnership
+     * @see DeviceAdminReceiver#onTransferOwnershipComplete(Context, PersistableBundle)
+     */
+    @Nullable
+    public PersistableBundle getTransferOwnershipBundle() {
+        throwIfParentInstance("getTransferOwnershipBundle");
+        try {
+            return mService.getTransferOwnershipBundle();
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
     }
 }
