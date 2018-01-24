@@ -3903,6 +3903,120 @@ package android.security.keystore {
 
 }
 
+package android.security.keystore.recovery {
+
+  public class DecryptionFailedException extends java.security.GeneralSecurityException {
+    ctor public DecryptionFailedException(java.lang.String);
+  }
+
+  public class InternalRecoveryServiceException extends java.security.GeneralSecurityException {
+    ctor public InternalRecoveryServiceException(java.lang.String);
+    ctor public InternalRecoveryServiceException(java.lang.String, java.lang.Throwable);
+  }
+
+  public final class KeyChainProtectionParams implements android.os.Parcelable {
+    method public void clearSecret();
+    method public int describeContents();
+    method public android.security.keystore.recovery.KeyDerivationParams getKeyDerivationParams();
+    method public int getLockScreenUiFormat();
+    method public byte[] getSecret();
+    method public int getUserSecretType();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.security.keystore.recovery.KeyChainProtectionParams> CREATOR;
+    field public static final int TYPE_CUSTOM_PASSWORD = 101; // 0x65
+    field public static final int TYPE_LOCKSCREEN = 100; // 0x64
+    field public static final int UI_FORMAT_PASSWORD = 2; // 0x2
+    field public static final int UI_FORMAT_PATTERN = 3; // 0x3
+    field public static final int UI_FORMAT_PIN = 1; // 0x1
+  }
+
+  public static class KeyChainProtectionParams.Builder {
+    ctor public KeyChainProtectionParams.Builder();
+    method public android.security.keystore.recovery.KeyChainProtectionParams build();
+    method public android.security.keystore.recovery.KeyChainProtectionParams.Builder setKeyDerivationParams(android.security.keystore.recovery.KeyDerivationParams);
+    method public android.security.keystore.recovery.KeyChainProtectionParams.Builder setLockScreenUiFormat(int);
+    method public android.security.keystore.recovery.KeyChainProtectionParams.Builder setSecret(byte[]);
+    method public android.security.keystore.recovery.KeyChainProtectionParams.Builder setUserSecretType(int);
+  }
+
+  public final class KeyChainSnapshot implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getCounterId();
+    method public byte[] getEncryptedRecoveryKeyBlob();
+    method public java.util.List<android.security.keystore.recovery.KeyChainProtectionParams> getKeyChainProtectionParams();
+    method public int getMaxAttempts();
+    method public byte[] getServerParams();
+    method public int getSnapshotVersion();
+    method public byte[] getTrustedHardwarePublicKey();
+    method public java.util.List<android.security.keystore.recovery.WrappedApplicationKey> getWrappedApplicationKeys();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.security.keystore.recovery.KeyChainSnapshot> CREATOR;
+  }
+
+  public final class KeyDerivationParams implements android.os.Parcelable {
+    method public static android.security.keystore.recovery.KeyDerivationParams createSha256Params(byte[]);
+    method public int describeContents();
+    method public int getAlgorithm();
+    method public byte[] getSalt();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int ALGORITHM_SHA256 = 1; // 0x1
+    field public static final android.os.Parcelable.Creator<android.security.keystore.recovery.KeyDerivationParams> CREATOR;
+  }
+
+  public class LockScreenRequiredException extends java.security.GeneralSecurityException {
+    ctor public LockScreenRequiredException(java.lang.String);
+  }
+
+  public class RecoveryController {
+    method public byte[] generateAndStoreKey(java.lang.String, byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.LockScreenRequiredException;
+    method public java.util.List<java.lang.String> getAliases(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public static android.security.keystore.recovery.RecoveryController getInstance(android.content.Context);
+    method public int[] getPendingRecoverySecretTypes() throws android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public android.security.keystore.recovery.KeyChainSnapshot getRecoveryData() throws android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public int[] getRecoverySecretTypes() throws android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public int getRecoveryStatus(java.lang.String, java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public void initRecoveryService(java.lang.String, byte[]) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public void recoverySecretAvailable(android.security.keystore.recovery.KeyChainProtectionParams) throws android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public void removeKey(java.lang.String) throws android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public void setRecoverySecretTypes(int[]) throws android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public void setRecoveryStatus(java.lang.String, java.lang.String, int) throws android.security.keystore.recovery.InternalRecoveryServiceException, android.content.pm.PackageManager.NameNotFoundException;
+    method public void setServerParams(byte[]) throws android.security.keystore.recovery.InternalRecoveryServiceException;
+    method public void setSnapshotCreatedPendingIntent(android.app.PendingIntent) throws android.security.keystore.recovery.InternalRecoveryServiceException;
+    field public static final int RECOVERY_STATUS_MISSING_ACCOUNT = 2; // 0x2
+    field public static final int RECOVERY_STATUS_PERMANENT_FAILURE = 3; // 0x3
+    field public static final int RECOVERY_STATUS_SYNCED = 0; // 0x0
+    field public static final int RECOVERY_STATUS_SYNC_IN_PROGRESS = 1; // 0x1
+  }
+
+  public class RecoverySession implements java.lang.AutoCloseable {
+    method public void close();
+    method public java.util.Map<java.lang.String, byte[]> recoverKeys(byte[], java.util.List<android.security.keystore.recovery.WrappedApplicationKey>) throws android.security.keystore.recovery.DecryptionFailedException, android.security.keystore.recovery.InternalRecoveryServiceException, android.security.keystore.recovery.SessionExpiredException;
+    method public byte[] start(byte[], byte[], byte[], java.util.List<android.security.keystore.recovery.KeyChainProtectionParams>) throws java.security.cert.CertificateException, android.security.keystore.recovery.InternalRecoveryServiceException;
+  }
+
+  public class SessionExpiredException extends java.security.GeneralSecurityException {
+    ctor public SessionExpiredException(java.lang.String);
+  }
+
+  public final class WrappedApplicationKey implements android.os.Parcelable {
+    method public int describeContents();
+    method public byte[] getAccount();
+    method public java.lang.String getAlias();
+    method public byte[] getEncryptedKeyMaterial();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.security.keystore.recovery.WrappedApplicationKey> CREATOR;
+  }
+
+  public static class WrappedApplicationKey.Builder {
+    ctor public WrappedApplicationKey.Builder();
+    method public android.security.keystore.recovery.WrappedApplicationKey build();
+    method public android.security.keystore.recovery.WrappedApplicationKey.Builder setAccount(byte[]);
+    method public android.security.keystore.recovery.WrappedApplicationKey.Builder setAlias(java.lang.String);
+    method public android.security.keystore.recovery.WrappedApplicationKey.Builder setEncryptedKeyMaterial(byte[]);
+  }
+
+}
+
 package android.service.autofill {
 
   public abstract class AutofillFieldClassificationService extends android.app.Service {

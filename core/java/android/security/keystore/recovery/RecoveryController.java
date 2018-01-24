@@ -19,6 +19,7 @@ package android.security.keystore.recovery;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -52,6 +53,7 @@ import java.util.Map;
  *
  * @hide
  */
+@SystemApi
 public class RecoveryController {
     private static final String TAG = "RecoveryController";
 
@@ -236,12 +238,13 @@ public class RecoveryController {
 
     /**
      * Gets aliases of recoverable keys for the application.
+     *
      * @param packageName which recoverable keys' aliases will be returned.
      *
      * @return {@code List} of all aliases.
      */
     public List<String> getAliases(@Nullable String packageName)
-            throws RemoteException, InternalRecoveryServiceException {
+            throws InternalRecoveryServiceException {
         try {
             // TODO: update aidl
             Map<String, Integer> allStatuses = mBinder.getRecoveryStatus(packageName);
@@ -400,8 +403,8 @@ public class RecoveryController {
     }
 
     /**
-     * Generates a key called {@code alias} and loads it into the recoverable key store. Returns the
-     * raw material of the key.
+     * Generates a AES256/GCM/NoPADDING key called {@code alias} and loads it into the recoverable
+     * key store. Returns the raw material of the key.
      *
      * @param alias The key alias.
      * @param account The account associated with the key

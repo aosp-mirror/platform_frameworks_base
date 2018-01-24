@@ -18,8 +18,10 @@ package android.security.keystore.recovery;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+
 
 import com.android.internal.util.Preconditions;
 
@@ -32,6 +34,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
+@SystemApi
 public final class KeyDerivationParams implements Parcelable {
     private final int mAlgorithm;
     private byte[] mSalt;
@@ -61,6 +64,9 @@ public final class KeyDerivationParams implements Parcelable {
         return new KeyDerivationParams(ALGORITHM_SHA256, salt);
     }
 
+    /**
+     * @hide
+     */
     // TODO: Make private once legacy API is removed
     public KeyDerivationParams(@KeyDerivationAlgorithm int algorithm, @NonNull byte[] salt) {
         mAlgorithm = algorithm;
@@ -92,9 +98,6 @@ public final class KeyDerivationParams implements Parcelable {
         }
     };
 
-    /**
-     * @hide
-     */
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mAlgorithm);

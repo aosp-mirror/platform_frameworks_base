@@ -18,6 +18,7 @@ package android.security.keystore.recovery;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -47,6 +48,7 @@ import java.util.Arrays;
  *
  * @hide
  */
+@SystemApi
 public final class KeyChainProtectionParams implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -260,9 +262,6 @@ public final class KeyChainProtectionParams implements Parcelable {
         }
     };
 
-    /**
-     * @hide
-     */
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mUserSecretType);

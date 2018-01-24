@@ -17,6 +17,7 @@
 package android.security.keystore.recovery;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -42,6 +43,7 @@ import java.util.List;
  *
  * @hide
  */
+@SystemApi
 public final class KeyChainSnapshot implements Parcelable {
     private static final int DEFAULT_MAX_ATTEMPTS = 10;
     private static final long DEFAULT_COUNTER_ID = 1L;
@@ -151,10 +153,10 @@ public final class KeyChainSnapshot implements Parcelable {
 
     /**
      * Builder for creating {@link KeyChainSnapshot}.
+     * @hide
      */
     public static class Builder {
-        private KeyChainSnapshot
-                mInstance = new KeyChainSnapshot();
+        private KeyChainSnapshot mInstance = new KeyChainSnapshot();
 
         /**
          * Snapshot version for given account.
@@ -264,9 +266,6 @@ public final class KeyChainSnapshot implements Parcelable {
         }
     }
 
-    /**
-     * @hide
-     */
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mSnapshotVersion);
