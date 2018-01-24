@@ -92,6 +92,17 @@ class IntervalStats {
         return false;
     }
 
+    /**
+     * Returns whether the event type is one caused by user visible
+     * interaction. Excludes those that are internally generated.
+     * @param eventType
+     * @return
+     */
+    private boolean isUserVisibleEvent(int eventType) {
+        return eventType != UsageEvents.Event.SYSTEM_INTERACTION
+                && eventType != UsageEvents.Event.STANDBY_BUCKET_CHANGED;
+    }
+
     void update(String packageName, long timeStamp, int eventType) {
         UsageStats usageStats = getOrCreateUsageStats(packageName);
 
@@ -109,7 +120,7 @@ class IntervalStats {
             usageStats.mLastEvent = eventType;
         }
 
-        if (eventType != UsageEvents.Event.SYSTEM_INTERACTION) {
+        if (isUserVisibleEvent(eventType)) {
             usageStats.mLastTimeUsed = timeStamp;
         }
         usageStats.mEndTimeStamp = timeStamp;

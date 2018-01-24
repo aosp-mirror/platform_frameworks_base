@@ -115,6 +115,26 @@ public class UsageStatsService extends SystemService implements
 
     AppStandbyController mAppStandby;
 
+    private UsageStatsManagerInternal.AppIdleStateChangeListener mStandbyChangeListener =
+            new UsageStatsManagerInternal.AppIdleStateChangeListener() {
+                @Override
+                public void onAppIdleStateChanged(String packageName, int userId, boolean idle,
+                        int bucket) {
+                    Event event = new Event();
+                    event.mEventType = Event.STANDBY_BUCKET_CHANGED;
+                    event.mBucket = bucket;
+                    event.mPackage = packageName;
+                    // This will later be converted to system time.
+                    event.mTimeStamp = SystemClock.elapsedRealtime();
+                    mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
+                }
+
+                @Override
+                public void onParoleStateChanged(boolean isParoleOn) {
+
+                }
+            };
+
     public UsageStatsService(Context context) {
         super(context);
     }
@@ -129,6 +149,7 @@ public class UsageStatsService extends SystemService implements
 
         mAppStandby = new AppStandbyController(getContext(), BackgroundThread.get().getLooper());
 
+        mAppStandby.addListener(mStandbyChangeListener);
         File systemDataDir = new File(Environment.getDataDirectory(), "system");
         mUsageStatsDir = new File(systemDataDir, "usagestats");
         mUsageStatsDir.mkdirs();

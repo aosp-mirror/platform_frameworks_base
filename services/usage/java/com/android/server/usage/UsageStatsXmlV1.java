@@ -64,6 +64,7 @@ final class UsageStatsXmlV1 {
     private static final String LAST_EVENT_ATTR = "lastEvent";
     private static final String TYPE_ATTR = "type";
     private static final String SHORTCUT_ID_ATTR = "shortcutId";
+    private static final String STANDBY_BUCKET_ATTR = "standbyBucket";
 
     // Time attributes stored as an offset of the beginTime.
     private static final String LAST_TIME_ACTIVE_ATTR = "lastTimeActive";
@@ -173,6 +174,9 @@ final class UsageStatsXmlV1 {
                 final String id = XmlUtils.readStringAttribute(parser, SHORTCUT_ID_ATTR);
                 event.mShortcutId = (id != null) ? id.intern() : null;
                 break;
+            case UsageEvents.Event.STANDBY_BUCKET_CHANGED:
+                event.mBucket = XmlUtils.readIntAttribute(parser, STANDBY_BUCKET_ATTR, 0);
+                break;
         }
 
         if (statsOut.events == null) {
@@ -276,6 +280,10 @@ final class UsageStatsXmlV1 {
                     XmlUtils.writeStringAttribute(xml, SHORTCUT_ID_ATTR, event.mShortcutId);
                 }
                 break;
+            case UsageEvents.Event.STANDBY_BUCKET_CHANGED:
+                if (event.mBucket != 0) {
+                    XmlUtils.writeIntAttribute(xml, STANDBY_BUCKET_ATTR, event.mBucket);
+                }
         }
 
         xml.endTag(null, EVENT_TAG);

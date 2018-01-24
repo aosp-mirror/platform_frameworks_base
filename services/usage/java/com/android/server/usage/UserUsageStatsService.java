@@ -599,6 +599,9 @@ class UserUsageStatsService {
             if (event.mShortcutId != null) {
                 pw.printPair("shortcutId", event.mShortcutId);
             }
+            if (event.mEventType == UsageEvents.Event.STANDBY_BUCKET_CHANGED) {
+                pw.printPair("standbyBucket", event.mBucket);
+            }
             pw.printHexPair("flags", event.mFlags);
             pw.println();
         }
@@ -645,6 +648,8 @@ class UserUsageStatsService {
                 return "CHOOSER_ACTION";
             case UsageEvents.Event.NOTIFICATION_SEEN:
                 return "NOTIFICATION_SEEN";
+            case UsageEvents.Event.STANDBY_BUCKET_CHANGED:
+                return "STANDBY_BUCKET_CHANGED";
             default:
                 return "UNKNOWN";
         }
