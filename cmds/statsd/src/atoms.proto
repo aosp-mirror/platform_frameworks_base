@@ -104,7 +104,7 @@ message Atom {
         CpuTimePerUidFreq cpu_time_per_uid_freq = 10010;
         WifiActivityEnergyInfo wifi_activity_energy_info = 10011;
         ModemActivityInfo modem_activity_info = 10012;
-        MemoryStat memory_stat = 10013;
+        ProcessMemoryStat process_memory_stat = 10013;
         CpuSuspendTime cpu_suspend_time = 10014;
         CpuIdleTime cpu_idle_time = 10015;
         CpuActiveTime cpu_active_time = 10016;
@@ -1233,12 +1233,12 @@ message ModemActivityInfo {
 /*
  * Logs the memory stats for a process
  */
-message MemoryStat {
+message ProcessMemoryStat {
     // The uid if available. -1 means not available.
     optional int32 uid = 1;
 
-    // The app package name.
-    optional string pkg_name = 2;
+    // The process name.
+    optional string process_name = 2;
 
     // # of page-faults
     optional int64 pgfault = 3;
@@ -1259,19 +1259,20 @@ message LmkEventOccurred {
     // The uid if available. -1 means not available.
     optional int32 uid = 1;
 
-    // The app package name.
-    optional string pkg_name = 2;
+    // The process name.
+    optional string process_name = 2;
 
     // oom adj score.
     optional int32 oom_score = 3;
 
-    // Used as start/stop boundaries for the event
-    enum State {
-        UNKNOWN = 0;
-        START = 1;
-        END = 2;
-    }
-    optional State state = 4;
+    // # of page-faults
+    optional int64 pgfault = 4;
+
+    // # of major page-faults
+    optional int64 pgmajfault = 5;
+
+    // RSS+CACHE(+SWAP)
+    optional int64 usage_in_bytes = 6;
 }
 
 /*
