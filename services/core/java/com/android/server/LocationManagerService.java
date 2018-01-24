@@ -16,11 +16,64 @@
 
 package com.android.server;
 
-import android.app.ActivityManager;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
 import android.annotation.NonNull;
+import android.app.ActivityManager;
+import android.app.AppOpsManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
+import android.content.pm.ResolveInfo;
+import android.content.pm.Signature;
+import android.content.res.Resources;
+import android.database.ContentObserver;
+import android.hardware.location.ActivityRecognitionHardware;
+import android.location.Address;
+import android.location.Criteria;
+import android.location.GeocoderParams;
+import android.location.Geofence;
+import android.location.IBatchedLocationCallback;
+import android.location.IGnssMeasurementsListener;
+import android.location.IGnssNavigationMessageListener;
+import android.location.IGnssStatusListener;
+import android.location.IGnssStatusProvider;
+import android.location.IGpsGeofenceHardware;
+import android.location.ILocationListener;
+import android.location.ILocationManager;
+import android.location.INetInitiatedListener;
+import android.location.Location;
+import android.location.LocationManager;
+import android.location.LocationProvider;
+import android.location.LocationRequest;
+import android.os.Binder;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
+import android.os.PowerManager;
+import android.os.Process;
+import android.os.RemoteException;
+import android.os.SystemClock;
+import android.os.UserHandle;
+import android.os.UserManager;
+import android.os.WorkSource;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-
+import android.util.EventLog;
+import android.util.Log;
+import android.util.Slog;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
@@ -45,60 +98,6 @@ import com.android.server.location.LocationRequestStatistics.PackageProviderKey;
 import com.android.server.location.LocationRequestStatistics.PackageStatistics;
 import com.android.server.location.MockProvider;
 import com.android.server.location.PassiveProvider;
-
-import android.app.AppOpsManager;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.content.pm.ResolveInfo;
-import android.content.pm.Signature;
-import android.content.res.Resources;
-import android.database.ContentObserver;
-import android.hardware.location.ActivityRecognitionHardware;
-import android.location.Address;
-import android.location.Criteria;
-import android.location.GeocoderParams;
-import android.location.Geofence;
-import android.location.IBatchedLocationCallback;
-import android.location.IGnssMeasurementsListener;
-import android.location.IGnssStatusListener;
-import android.location.IGnssStatusProvider;
-import android.location.IGpsGeofenceHardware;
-import android.location.IGnssNavigationMessageListener;
-import android.location.ILocationListener;
-import android.location.ILocationManager;
-import android.location.INetInitiatedListener;
-import android.location.Location;
-import android.location.LocationManager;
-import android.location.LocationProvider;
-import android.location.LocationRequest;
-import android.os.Binder;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
-import android.os.PowerManager;
-import android.os.Process;
-import android.os.RemoteException;
-import android.os.SystemClock;
-import android.os.UserHandle;
-import android.os.UserManager;
-import android.os.WorkSource;
-import android.provider.Settings;
-import android.text.TextUtils;
-import android.util.EventLog;
-import android.util.Log;
-import android.util.Slog;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -1378,10 +1377,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         if (mDisabledProviders.contains(provider)) {
             return false;
         }
-        // Use system settings
-        ContentResolver resolver = mContext.getContentResolver();
-
-        return Settings.Secure.isLocationProviderEnabledForUser(resolver, provider, mCurrentUserId);
+        return isLocationProviderEnabledForUser(provider, mCurrentUserId);
     }
 
     /**
@@ -1397,6 +1393,23 @@ public class LocationManagerService extends ILocationManager.Stub {
             return false;
         }
         return isAllowedByCurrentUserSettingsLocked(provider);
+    }
+
+    /**
+     * Returns "true" if access to the specified location provider is allowed by the specified
+     * user's settings. Access to all location providers is forbidden to non-location-provider
+     * processes belonging to background users.
+     *
+     * @param provider the name of the location provider
+     * @param uid      the requestor's UID
+     * @param userId   the user id to query
+     */
+    private boolean isAllowedByUserSettingsLockedForUser(
+            String provider, int uid, int userId) {
+        if (!isCurrentProfile(UserHandle.getUserId(uid)) && !isUidALocationProvider(uid)) {
+            return false;
+        }
+        return isLocationProviderEnabledForUser(provider, userId);
     }
 
     /**
@@ -1425,10 +1438,10 @@ public class LocationManagerService extends ILocationManager.Stub {
      */
     private int getAllowedResolutionLevel(int pid, int uid) {
         if (mContext.checkPermission(android.Manifest.permission.ACCESS_FINE_LOCATION,
-                pid, uid) == PackageManager.PERMISSION_GRANTED) {
+                pid, uid) == PERMISSION_GRANTED) {
             return RESOLUTION_LEVEL_FINE;
         } else if (mContext.checkPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION,
-                pid, uid) == PackageManager.PERMISSION_GRANTED) {
+                pid, uid) == PERMISSION_GRANTED) {
             return RESOLUTION_LEVEL_COARSE;
         } else {
             return RESOLUTION_LEVEL_NONE;
@@ -2053,7 +2066,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
         boolean callerHasLocationHardwarePermission =
                 mContext.checkCallingPermission(android.Manifest.permission.LOCATION_HARDWARE)
-                        == PackageManager.PERMISSION_GRANTED;
+                        == PERMISSION_GRANTED;
         LocationRequest sanitizedRequest = createSanitizedRequest(request, allowedResolutionLevel,
                 callerHasLocationHardwarePermission);
 
@@ -2326,7 +2339,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         // Require that caller can manage given document
         boolean callerHasLocationHardwarePermission =
                 mContext.checkCallingPermission(android.Manifest.permission.LOCATION_HARDWARE)
-                        == PackageManager.PERMISSION_GRANTED;
+                        == PERMISSION_GRANTED;
         LocationRequest sanitizedRequest = createSanitizedRequest(request, allowedResolutionLevel,
                 callerHasLocationHardwarePermission);
 
@@ -2476,7 +2489,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         // and check for ACCESS_LOCATION_EXTRA_COMMANDS
         if ((mContext.checkCallingOrSelfPermission(ACCESS_LOCATION_EXTRA_COMMANDS)
-                != PackageManager.PERMISSION_GRANTED)) {
+                != PERMISSION_GRANTED)) {
             throw new SecurityException("Requires ACCESS_LOCATION_EXTRA_COMMANDS permission");
         }
 
@@ -2546,8 +2559,64 @@ public class LocationManagerService extends ILocationManager.Stub {
         return null;
     }
 
+    /**
+     * Method for enabling or disabling location.
+     *
+     * @param enabled true to enable location. false to disable location
+     * @param userId the user id to set
+     */
+    @Override
+    public void setLocationEnabledForUser(boolean enabled, int userId) {
+        // Check INTERACT_ACROSS_USERS permission if userId is not current user id.
+        checkInteractAcrossUsersPermission(userId);
+
+        // enable all location providers
+        synchronized (mLock) {
+            for(String provider : getAllProviders()) {
+                setProviderEnabledForUser(provider, enabled, userId);
+            }
+        }
+    }
+
+    /**
+     * Returns the current enabled/disabled status of location
+     *
+     * @param userId the user id to query
+     * @return true if location is enabled. false if location is disabled.
+     */
+    @Override
+    public boolean isLocationEnabledForUser(int userId) {
+
+        // Check INTERACT_ACROSS_USERS permission if userId is not current user id.
+        checkInteractAcrossUsersPermission(userId);
+
+        synchronized (mLock) {
+            for (String provider : getAllProviders()) {
+                if (isProviderEnabledForUser(provider, userId)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
     @Override
     public boolean isProviderEnabled(String provider) {
+        return isProviderEnabledForUser(provider, UserHandle.myUserId());
+    }
+
+    /**
+     * Method for determining if a location provider is enabled.
+     *
+     * @param provider the location provider to query
+     * @param userId the user id to query
+     * @return true if the provider is enabled
+     */
+    @Override
+    public boolean isProviderEnabledForUser(String provider, int userId) {
+        // Check INTERACT_ACROSS_USERS permission if userId is not current user id.
+        checkInteractAcrossUsersPermission(userId);
+
         // Fused provider is accessed indirectly via criteria rather than the provider-based APIs,
         // so we discourage its use
         if (LocationManager.FUSED_PROVIDER.equals(provider)) return false;
@@ -2557,10 +2626,88 @@ public class LocationManagerService extends ILocationManager.Stub {
         try {
             synchronized (mLock) {
                 LocationProviderInterface p = mProvidersByName.get(provider);
-                return p != null && isAllowedByUserSettingsLocked(provider, uid);
+                return p != null
+                    && isAllowedByUserSettingsLockedForUser(provider, uid, userId);
             }
         } finally {
             Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Method for enabling or disabling a single location provider.
+     *
+     * @param provider the name of the provider
+     * @param enabled true to enable the provider. false to disable the provider
+     * @param userId the user id to set
+     * @return true if the value was set successfully. false on failure.
+     */
+    @Override
+    public boolean setProviderEnabledForUser(
+            String provider, boolean enabled, int userId) {
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.WRITE_SECURE_SETTINGS,
+                "Requires WRITE_SECURE_SETTINGS permission");
+
+        // Check INTERACT_ACROSS_USERS permission if userId is not current user id.
+        checkInteractAcrossUsersPermission(userId);
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                // to ensure thread safety, we write the provider name with a '+' or '-'
+                // and let the SettingsProvider handle it rather than reading and modifying
+                // the list of enabled providers.
+                if (enabled) {
+                    provider = "+" + provider;
+                } else {
+                    provider = "-" + provider;
+                }
+                return Settings.Secure.putStringForUser(
+                        mContext.getContentResolver(),
+                        Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                        provider,
+                        userId);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Read location provider status from Settings.Secure
+     *
+     * @param provider the location provider to query
+     * @param userId the user id to query
+     * @return true if the provider is enabled
+     */
+    private boolean isLocationProviderEnabledForUser(String provider, int userId) {
+        long identity = Binder.clearCallingIdentity();
+        try {
+            // Use system settings
+            ContentResolver cr = mContext.getContentResolver();
+            String allowedProviders = Settings.Secure.getStringForUser(
+                    cr, Settings.Secure.LOCATION_PROVIDERS_ALLOWED, userId);
+            return TextUtils.delimitedStringContains(allowedProviders, ',', provider);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    /**
+     * Method for checking INTERACT_ACROSS_USERS permission if specified user id is not the same as
+     * current user id
+     *
+     * @param userId the user id to get or set value
+     */
+    private void checkInteractAcrossUsersPermission(int userId) {
+        int uid = Binder.getCallingUid();
+        if (UserHandle.getUserId(uid) != userId) {
+            if (ActivityManager.checkComponentPermission(
+                android.Manifest.permission.INTERACT_ACROSS_USERS, uid, -1, true)
+                != PERMISSION_GRANTED) {
+                throw new SecurityException("Requires INTERACT_ACROSS_USERS permission");
+            }
         }
     }
 
@@ -2585,7 +2732,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private void checkCallerIsProvider() {
         if (mContext.checkCallingOrSelfPermission(INSTALL_LOCATION_PROVIDER)
-                == PackageManager.PERMISSION_GRANTED) {
+                == PERMISSION_GRANTED) {
             return;
         }
 

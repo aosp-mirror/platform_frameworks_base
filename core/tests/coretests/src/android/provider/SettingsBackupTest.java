@@ -481,7 +481,6 @@ public class SettingsBackupTest {
                  Settings.Secure.INSTALL_NON_MARKET_APPS,
                  Settings.Secure.LAST_SETUP_SHOWN,
                  Settings.Secure.LOCATION_MODE,
-                 Settings.Secure.LOCATION_PREVIOUS_MODE,
                  Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, // Candidate?
                  Settings.Secure.LOCK_SCREEN_ALLOW_REMOTE_INPUT, // Candidate?
                  Settings.Secure.LOCK_SCREEN_LOCK_AFTER_TIMEOUT,

@@ -16,11 +16,12 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static com.android.settingslib.Utils.updateLocationEnabled;
+
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -28,18 +29,13 @@ import android.location.LocationManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.support.annotation.VisibleForTesting;
-
-import com.android.systemui.R;
 import com.android.systemui.util.Utils;
-
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.android.settingslib.Utils.updateLocationMode;
 
 /**
  * A controller to manage changes of location related states and update the views accordingly.
@@ -101,32 +97,27 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
      * @return true if attempt to change setting was successful.
      */
     public boolean setLocationEnabled(boolean enabled) {
+        // QuickSettings always runs as the owner, so specifically set the settings
+        // for the current foreground user.
         int currentUserId = ActivityManager.getCurrentUser();
         if (isUserLocationRestricted(currentUserId)) {
             return false;
         }
-        final ContentResolver cr = mContext.getContentResolver();
         // When enabling location, a user consent dialog will pop up, and the
         // setting won't be fully enabled until the user accepts the agreement.
-        int currentMode = Settings.Secure.getIntForUser(cr, Settings.Secure.LOCATION_MODE, 
-                Settings.Secure.LOCATION_MODE_OFF, currentUserId);
-        int mode = enabled
-                ? Settings.Secure.LOCATION_MODE_PREVIOUS : Settings.Secure.LOCATION_MODE_OFF;
-        // QuickSettings always runs as the owner, so specifically set the settings
-        // for the current foreground user.
-        return updateLocationMode(mContext, currentMode, mode, currentUserId);
+        updateLocationEnabled(mContext, enabled, currentUserId);
+        return true;
     }
 
     /**
-     * Returns true if location isn't disabled in settings.
+     * Returns true if location is enabled in settings.
      */
     public boolean isLocationEnabled() {
-        ContentResolver resolver = mContext.getContentResolver();
         // QuickSettings always runs as the owner, so specifically retrieve the settings
         // for the current foreground user.
-        int mode = Settings.Secure.getIntForUser(resolver, Settings.Secure.LOCATION_MODE,
-                Settings.Secure.LOCATION_MODE_OFF, ActivityManager.getCurrentUser());
-        return mode != Settings.Secure.LOCATION_MODE_OFF;
+        LocationManager locationManager =
+                (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+        return locationManager.isLocationEnabledForUser(Process.myUserHandle());
     }
 
     @Override

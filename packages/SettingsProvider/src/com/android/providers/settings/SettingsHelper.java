@@ -16,6 +16,7 @@
 
 package com.android.providers.settings;
 
+import android.os.Process;
 import com.android.internal.R;
 import com.android.internal.app.LocalePicker;
 import com.android.internal.annotations.VisibleForTesting;
@@ -288,12 +289,12 @@ public class SettingsHelper {
         }
         final String GPS = LocationManager.GPS_PROVIDER;
         boolean enabled =
-                GPS.equals(value) ||
+            GPS.equals(value) ||
                 value.startsWith(GPS + ",") ||
                 value.endsWith("," + GPS) ||
                 value.contains("," + GPS + ",");
-        Settings.Secure.setLocationProviderEnabled(
-                mContext.getContentResolver(), GPS, enabled);
+        LocationManager lm = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+        lm.setProviderEnabledForUser(GPS, enabled, Process.myUserHandle());
     }
 
     private void setSoundEffects(boolean enable) {
