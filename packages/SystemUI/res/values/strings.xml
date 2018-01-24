@@ -764,8 +764,10 @@
     <string name="quick_settings_tethering_label">Tethering</string>
     <!-- QuickSettings: Hotspot. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_hotspot_label">Hotspot</string>
+    <!-- QuickSettings: Hotspot. Secondary label shown when the hotspot is being enabled [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_hotspot_secondary_label_transient">Turning on...</string>
     <!-- QuickSettings: Hotspot: Secondary label for how many devices are connected to the hotspot [CHAR LIMIT=NONE] -->
-    <plurals name="quick_settings_hotspot_num_devices">
+    <plurals name="quick_settings_hotspot_secondary_label_num_devices">
         <item quantity="one">%d device</item>
         <item quantity="other">%d devices</item>
     </plurals>
