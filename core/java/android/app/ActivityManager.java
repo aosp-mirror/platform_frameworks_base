@@ -181,7 +181,8 @@ public class ActivityManager {
             BUGREPORT_OPTION_INTERACTIVE,
             BUGREPORT_OPTION_REMOTE,
             BUGREPORT_OPTION_WEAR,
-            BUGREPORT_OPTION_TELEPHONY
+            BUGREPORT_OPTION_TELEPHONY,
+            BUGREPORT_OPTION_WIFI
     })
     public @interface BugreportMode {}
     /**
@@ -214,6 +215,12 @@ public class ActivityManager {
      * @hide
      */
     public static final int BUGREPORT_OPTION_TELEPHONY = 4;
+
+    /**
+     * Takes a lightweight bugreport that only includes a few sections related to Wifi.
+     * @hide
+     */
+    public static final int BUGREPORT_OPTION_WIFI = 5;
 
     /**
      * <a href="{@docRoot}guide/topics/manifest/meta-data-element.html">{@code

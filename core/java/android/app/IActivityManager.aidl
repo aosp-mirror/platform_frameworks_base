@@ -357,6 +357,20 @@ interface IActivityManager {
      */
     void requestTelephonyBugReport(in String shareTitle, in String shareDescription);
 
+    /**
+     *  Deprecated - This method is only used by Wifi, and it will soon be replaced by a proper
+     *  bug report API.
+     *
+     *  Takes a minimal bugreport of Wifi-related state.
+     *
+     *  @param shareTitle should be a valid legible string less than 50 chars long
+     *  @param shareDescription should be less than 91 bytes when encoded into UTF-8 format
+     *
+     *  @throws IllegalArgumentException if shareTitle or shareDescription is too big or if the
+     *          parameters cannot be encoding to an UTF-8 charset.
+     */
+    void requestWifiBugReport(in String shareTitle, in String shareDescription);
+
     long inputDispatchingTimedOut(int pid, boolean aboveSystem, in String reason);
     void clearPendingBackup();
     Intent getIntentForIntentSender(in IIntentSender sender);
