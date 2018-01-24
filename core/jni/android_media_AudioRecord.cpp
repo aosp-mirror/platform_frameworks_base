@@ -31,6 +31,7 @@
 #include "android_media_AudioFormat.h"
 #include "android_media_AudioErrors.h"
 #include "android_media_DeviceCallback.h"
+#include "android_media_MediaMetricsJNI.h"
 
 // ----------------------------------------------------------------------------
 
@@ -751,6 +752,39 @@ static jint android_media_AudioRecord_get_timestamp(JNIEnv *env, jobject thiz,
 }
 
 // ----------------------------------------------------------------------------
+static jobject
+android_media_AudioRecord_native_getMetrics(JNIEnv *env, jobject thiz)
+{
+    ALOGV("android_media_AudioRecord_native_getMetrics");
+
+    sp<AudioRecord> lpRecord = getAudioRecord(env, thiz);
+
+    if (lpRecord == NULL) {
+        ALOGE("Unable to retrieve AudioRecord pointer for getMetrics()");
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return (jobject) NULL;
+    }
+
+    // get what we have for the metrics from the record session
+    MediaAnalyticsItem *item = NULL;
+
+    status_t err = lpRecord->getMetrics(item);
+    if (err != OK) {
+        ALOGE("getMetrics failed");
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return (jobject) NULL;
+    }
+
+    jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item, NULL /* mybundle */);
+
+    // housekeeping
+    delete item;
+    item = NULL;
+
+    return mybundle;
+}
+
+// ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 static const JNINativeMethod gMethods[] = {
     // name,               signature,  funcPtr
@@ -781,6 +815,8 @@ static const JNINativeMethod gMethods[] = {
                              "()I",    (void *)android_media_AudioRecord_get_pos_update_period},
     {"native_get_min_buff_size",
                              "(III)I",   (void *)android_media_AudioRecord_get_min_buff_size},
+    {"native_getMetrics",    "()Landroid/os/PersistableBundle;",
+                                         (void *)android_media_AudioRecord_native_getMetrics},
     {"native_setInputDevice", "(I)Z", (void *)android_media_AudioRecord_setInputDevice},
     {"native_getRoutedDeviceId", "()I", (void *)android_media_AudioRecord_getRoutedDeviceId},
     {"native_enableDeviceCallback", "()V", (void *)android_media_AudioRecord_enableDeviceCallback},
