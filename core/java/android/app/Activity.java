@@ -128,6 +128,8 @@ import com.android.internal.app.WindowDecorActionBar;
 import com.android.internal.policy.DecorView;
 import com.android.internal.policy.PhoneWindow;
 
+import dalvik.system.VMRuntime;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -7039,10 +7041,11 @@ public class Activity extends ContextThemeWrapper
         mFragments.dispatchStart();
         mFragments.reportLoaderStart();
 
-        // This property is set for all builds except final release
-        boolean isDlwarningEnabled = SystemProperties.getInt("ro.bionic.ld.warning", 0) == 1;
         boolean isAppDebuggable =
                 (mApplication.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+
+        // This property is set for all builds except final release
+        boolean isDlwarningEnabled = SystemProperties.getInt("ro.bionic.ld.warning", 0) == 1;
 
         if (isAppDebuggable || isDlwarningEnabled) {
             String dlwarning = getDlWarning();
@@ -7058,6 +7061,28 @@ public class Activity extends ContextThemeWrapper
                           setPositiveButton(android.R.string.ok, null).
                           setCancelable(false).
                           show();
+                } else {
+                    Toast.makeText(this, appName + "\n" + warning, Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+
+        // We might disable this for final builds.
+        boolean isApiWarningEnabled = true;
+
+        if (isAppDebuggable || isApiWarningEnabled) {
+            if (VMRuntime.getRuntime().hasUsedHiddenApi()) {
+                String appName = getApplicationInfo().loadLabel(getPackageManager())
+                        .toString();
+                String warning = "Detected problems with API compatiblity\n"
+                                 + "(please consult log for detail)";
+                if (isAppDebuggable) {
+                    new AlertDialog.Builder(this)
+                        .setTitle(appName)
+                        .setMessage(warning)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .setCancelable(false)
+                        .show();
                 } else {
                     Toast.makeText(this, appName + "\n" + warning, Toast.LENGTH_LONG).show();
                 }
