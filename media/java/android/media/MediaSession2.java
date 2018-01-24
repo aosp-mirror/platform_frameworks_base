@@ -19,6 +19,8 @@ package android.media;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.MediaPlayerBase.PlaybackListener;
 import android.media.session.MediaSession;
 import android.media.session.MediaSession.Callback;
@@ -723,6 +725,34 @@ public class MediaSession2 implements AutoCloseable {
 
     public @NonNull List<ControllerInfo> getConnectedControllers() {
         return mProvider.getConnectedControllers_impl();
+    }
+
+    /**
+     * Sets the {@link AudioAttributes} to be used during the playback of the video.
+     *
+     * @param attributes non-null <code>AudioAttributes</code>.
+     */
+    public void setAudioAttributes(@NonNull AudioAttributes attributes) {
+        mProvider.setAudioAttributes_impl(attributes);
+    }
+
+    /**
+     * Sets which type of audio focus will be requested during the playback, or configures playback
+     * to not request audio focus. Valid values for focus requests are
+     * {@link AudioManager#AUDIOFOCUS_GAIN}, {@link AudioManager#AUDIOFOCUS_GAIN_TRANSIENT},
+     * {@link AudioManager#AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK}, and
+     * {@link AudioManager#AUDIOFOCUS_GAIN_TRANSIENT_EXCLUSIVE}. Or use
+     * {@link AudioManager#AUDIOFOCUS_NONE} to express that audio focus should not be
+     * requested when playback starts. You can for instance use this when playing a silent animation
+     * through this class, and you don't want to affect other audio applications playing in the
+     * background.
+     *
+     * @param focusGain the type of audio focus gain that will be requested, or
+     *                  {@link AudioManager#AUDIOFOCUS_NONE} to disable the use audio focus during
+     *                  playback.
+     */
+    public void setAudioFocusRequest(int focusGain) {
+        mProvider.setAudioFocusRequest_impl(focusGain);
     }
 
     /**

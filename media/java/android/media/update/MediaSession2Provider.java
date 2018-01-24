@@ -16,6 +16,7 @@
 
 package android.media.update;
 
+import android.media.AudioAttributes;
 import android.media.MediaPlayerBase;
 import android.media.MediaSession2.CommandButton;
 import android.media.MediaSession2.ControllerInfo;
@@ -35,6 +36,8 @@ public interface MediaSession2Provider extends TransportControlProvider {
     SessionToken getToken_impl();
     List<ControllerInfo> getConnectedControllers_impl();
     void setCustomLayout_impl(ControllerInfo controller, List<CommandButton> layout);
+    void setAudioAttributes_impl(AudioAttributes attributes);
+    void setAudioFocusRequest_impl(int focusGain);
 
     /**
      * @hide
