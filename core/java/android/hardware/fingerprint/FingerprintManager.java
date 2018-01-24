@@ -552,9 +552,8 @@ public class FingerprintManager {
      * Per-user version, see {@link FingerprintManager#authenticate(CryptoObject,
      * CancellationSignal, Bundle, Executor, IFingerprintDialogReceiver, AuthenticationCallback)}
      * @param userId the user ID that the fingerprint hardware will authenticate for.
-     * @hide
      */
-    public void authenticate(int userId,
+    private void authenticate(int userId,
             @Nullable CryptoObject crypto,
             @NonNull CancellationSignal cancel,
             @NonNull Bundle bundle,

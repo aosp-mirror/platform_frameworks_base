@@ -16,7 +16,6 @@
 
 package com.android.systemui.fingerprint;
 
-import android.animation.Animator;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -28,21 +27,19 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewPropertyAnimator;
 import android.view.WindowManager;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.PackageManagerWrapper;
@@ -56,33 +53,30 @@ public class FingerprintDialogView extends LinearLayout {
 
     private static final String TAG = "FingerprintDialogView";
 
-    private static final int ANIMATION_VERTICAL_OFFSET_DP = 96;
     private static final int ANIMATION_DURATION = 250; // ms
 
     private final IBinder mWindowToken = new Binder();
-    private final WindowManager mWindowManager;
     private final ActivityManagerWrapper mActivityManagerWrapper;
     private final PackageManagerWrapper mPackageManageWrapper;
     private final Interpolator mLinearOutSlowIn;
     private final Interpolator mFastOutLinearIn;
+    private final float mAnimationTranslationOffset;
 
     private ViewGroup mLayout;
     private final TextView mErrorText;
     private Handler mHandler;
     private Bundle mBundle;
-    private final float mDensity;
     private final LinearLayout mDialog;
 
     public FingerprintDialogView(Context context, Handler handler) {
         super(context);
         mHandler = handler;
-        mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mActivityManagerWrapper = ActivityManagerWrapper.getInstance();
         mPackageManageWrapper = PackageManagerWrapper.getInstance();
-        mLinearOutSlowIn = AnimationUtils
-                .loadInterpolator(getContext(), android.R.interpolator.linear_out_slow_in);
-        mFastOutLinearIn = AnimationUtils
-                .loadInterpolator(getContext(), android.R.interpolator.fast_out_linear_in);
+        mLinearOutSlowIn = Interpolators.LINEAR_OUT_SLOW_IN;
+        mFastOutLinearIn = Interpolators.FAST_OUT_LINEAR_IN;
+        mAnimationTranslationOffset = getResources()
+                .getDimension(R.dimen.fingerprint_dialog_animation_translation_offset);
 
         // Create the dialog
         LayoutInflater factory = LayoutInflater.from(getContext());
@@ -90,9 +84,6 @@ public class FingerprintDialogView extends LinearLayout {
         addView(mLayout);
 
         mDialog = mLayout.findViewById(R.id.dialog);
-        DisplayMetrics metrics = new DisplayMetrics();
-        mWindowManager.getDefaultDisplay().getMetrics(metrics);
-        mDensity = metrics.density;
 
         mErrorText = mLayout.findViewById(R.id.error);
 
@@ -167,7 +158,7 @@ public class FingerprintDialogView extends LinearLayout {
         }
 
         // Dim the background and slide the dialog up
-        mDialog.setTranslationY(ANIMATION_VERTICAL_OFFSET_DP * mDensity);
+        mDialog.setTranslationY(mAnimationTranslationOffset);
         mLayout.setAlpha(0f);
         postOnAnimation(new Runnable() {
             @Override

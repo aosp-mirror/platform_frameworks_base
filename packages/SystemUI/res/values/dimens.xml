@@ -892,4 +892,5 @@
 
     <dimen name="fingerprint_dialog_icon_size">44dp</dimen>
     <dimen name="fingerprint_dialog_fp_icon_size">60dp</dimen>
+    <dimen name="fingerprint_dialog_animation_translation_offset">350dp</dimen>
 </resources>
