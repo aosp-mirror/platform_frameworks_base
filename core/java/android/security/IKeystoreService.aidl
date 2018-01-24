@@ -81,4 +81,7 @@ interface IKeystoreService {
         in String wrappingKeyAlias, in byte[] maskingKey, in KeymasterArguments arguments,
         in long rootSid, in long fingerprintSid,
         out KeyCharacteristics characteristics);
+    int presentConfirmationPrompt(IBinder listener, String promptText, in byte[] extraData,
+        in String locale, in int uiOptionsAsFlags);
+    int cancelConfirmationPrompt(IBinder listener);
 }
