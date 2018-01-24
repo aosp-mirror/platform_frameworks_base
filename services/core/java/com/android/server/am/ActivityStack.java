@@ -277,12 +277,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     final ArrayList<ActivityRecord> mLRUActivities = new ArrayList<>();
 
     /**
-     * Animations that for the current transition have requested not to
-     * be considered for the transition animation.
-     */
-    final ArrayList<ActivityRecord> mNoAnimActivities = new ArrayList<>();
-
-    /**
      * When we are in the process of pausing an activity, before starting the
      * next one, this variable holds the activity that is currently being paused.
      */
@@ -550,7 +544,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         wm.deferSurfaceLayout();
         try {
             if (!animate && topActivity != null) {
-                mNoAnimActivities.add(topActivity);
+                mStackSupervisor.mNoAnimActivities.add(topActivity);
             }
             super.setWindowingMode(windowingMode);
 
@@ -2460,7 +2454,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             if (prev.finishing) {
                 if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
                         "Prepare close transition: prev=" + prev);
-                if (mNoAnimActivities.contains(prev)) {
+                if (mStackSupervisor.mNoAnimActivities.contains(prev)) {
                     anim = false;
                     mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
                 } else {
@@ -2472,7 +2466,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             } else {
                 if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
                         "Prepare open transition: prev=" + prev);
-                if (mNoAnimActivities.contains(next)) {
+                if (mStackSupervisor.mNoAnimActivities.contains(next)) {
                     anim = false;
                     mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
                 } else {
@@ -2485,7 +2479,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             }
         } else {
             if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare open transition: no previous");
-            if (mNoAnimActivities.contains(next)) {
+            if (mStackSupervisor.mNoAnimActivities.contains(next)) {
                 anim = false;
                 mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
             } else {
@@ -2493,16 +2487,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             }
         }
 
-        Bundle resumeAnimOptions = null;
         if (anim) {
-            ActivityOptions opts = next.getOptionsForTargetActivityLocked();
-            if (opts != null) {
-                resumeAnimOptions = opts.toBundle();
-            }
             next.applyOptionsLocked();
         } else {
             next.clearOptionsLocked();
         }
+
+        mStackSupervisor.mNoAnimActivities.clear();
 
         ActivityStack lastStack = mStackSupervisor.getLastStack();
         if (next.app != null && next.app.thread != null) {
@@ -2859,7 +2850,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     "Prepare open transition: starting " + r);
             if ((r.intent.getFlags() & Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
                 mWindowManager.prepareAppTransition(TRANSIT_NONE, keepCurTransition);
-                mNoAnimActivities.add(r);
+                mStackSupervisor.mNoAnimActivities.add(r);
             } else {
                 int transit = TRANSIT_ACTIVITY_OPEN;
                 if (newTask) {
@@ -2878,7 +2869,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     }
                 }
                 mWindowManager.prepareAppTransition(transit, keepCurTransition);
-                mNoAnimActivities.remove(r);
+                mStackSupervisor.mNoAnimActivities.remove(r);
             }
             boolean doShow = true;
             if (newTask) {
@@ -4497,7 +4488,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (noAnimation) {
             mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
             if (r != null) {
-                mNoAnimActivities.add(r);
+                mStackSupervisor.mNoAnimActivities.add(r);
             }
             ActivityOptions.abort(options);
         } else {
@@ -5190,7 +5181,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     void executeAppTransition(ActivityOptions options) {
         mWindowManager.executeAppTransition();
-        mNoAnimActivities.clear();
         ActivityOptions.abort(options);
     }
 
