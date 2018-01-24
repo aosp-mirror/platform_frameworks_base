@@ -36,18 +36,27 @@ void AnimatedImageDrawable::syncProperties() {
     mColorFilter = mStagingColorFilter;
 }
 
-void AnimatedImageDrawable::start() {
+bool AnimatedImageDrawable::start() {
     SkAutoExclusive lock(mLock);
+    if (mSkAnimatedImage->isRunning()) {
+        return false;
+    }
 
-    mSnapshot.reset(mSkAnimatedImage->newPictureSnapshot());
+    if (!mSnapshot) {
+        mSnapshot.reset(mSkAnimatedImage->newPictureSnapshot());
+    }
 
+    // While stopped, update() does not decode, but it does advance the time.
+    // This prevents us from skipping ahead when we resume.
+    const double currentTime = SkTime::GetMSecs();
+    mSkAnimatedImage->update(currentTime);
     mSkAnimatedImage->start();
+    return mSkAnimatedImage->isRunning();
 }
 
 void AnimatedImageDrawable::stop() {
     SkAutoExclusive lock(mLock);
     mSkAnimatedImage->stop();
-    mSnapshot.reset(nullptr);
 }
 
 bool AnimatedImageDrawable::isRunning() {
@@ -120,7 +129,7 @@ void AnimatedImageDrawable::onDraw(SkCanvas* canvas) {
     }
 
     SkAutoExclusive lock(mLock);
-    if (mSkAnimatedImage->isRunning()) {
+    if (mSnapshot) {
         canvas->drawPicture(mSnapshot, nullptr, lazyPaint.getMaybeNull());
     } else {
         // TODO: we could potentially keep the cached surface around if there is a paint and we know

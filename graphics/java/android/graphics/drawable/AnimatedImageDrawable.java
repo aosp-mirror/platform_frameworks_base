@@ -166,8 +166,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable {
 
     @Override
     public void start() {
-        if (isRunning() == false) {
-            nStart(mNativePtr);
+        if (nStart(mNativePtr)) {
             invalidateSelf();
         }
     }
@@ -186,7 +185,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable {
     private static native int nGetAlpha(long nativePtr);
     private static native void nSetColorFilter(long nativePtr, long nativeFilter);
     private static native boolean nIsRunning(long nativePtr);
-    private static native void nStart(long nativePtr);
+    private static native boolean nStart(long nativePtr);
     private static native void nStop(long nativePtr);
     private static native long nNativeByteSize(long nativePtr);
 }
