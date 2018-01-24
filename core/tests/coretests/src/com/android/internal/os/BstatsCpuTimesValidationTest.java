@@ -772,7 +772,8 @@ public class BstatsCpuTimesValidationTest {
                 latch.countDown();
             }
         });
-        launchIntent.putExtras(extras);
+        launchIntent.putExtras(extras)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         sContext.startActivity(launchIntent);
         if (latch.await(START_ACTIVITY_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
             if (binders[0] == null) {
