@@ -3653,15 +3653,47 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         MoreAsserts.assertEmpty(targetUsers);
     }
 
+    private void verifyLockTaskState(int userId) throws Exception {
+        verifyLockTaskState(userId, new String[0], DevicePolicyManager.LOCK_TASK_FEATURE_NONE);
+    }
+
+    private void verifyLockTaskState(int userId, String[] packages, int flags) throws Exception {
+        verify(getServices().iactivityManager).updateLockTaskPackages(userId, packages);
+        verify(getServices().iactivityManager).updateLockTaskFeatures(userId, flags);
+    }
+
+    private void verifyCanSetLockTask(int uid, int userId, ComponentName who, String[] packages,
+            int flags) throws Exception {
+        mContext.binder.callingUid = uid;
+        dpm.setLockTaskPackages(who, packages);
+        MoreAsserts.assertEquals(packages, dpm.getLockTaskPackages(who));
+        for (String p : packages) {
+            assertTrue(dpm.isLockTaskPermitted(p));
+        }
+        assertFalse(dpm.isLockTaskPermitted("anotherPackage"));
+        // Test to see if set lock task features can be set
+        dpm.setLockTaskFeatures(who, flags);
+        verifyLockTaskState(userId, packages, flags);
+    }
+
+    private void verifyCanNotSetLockTask(int uid, ComponentName who, String[] packages,
+            int flags) throws Exception {
+        mContext.binder.callingUid = uid;
+        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
+                () -> dpm.setLockTaskPackages(who, packages));
+        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
+                () -> dpm.getLockTaskPackages(who));
+        assertFalse(dpm.isLockTaskPermitted("doPackage1"));
+        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
+                () -> dpm.setLockTaskFeatures(who, flags));
+    }
+
     public void testLockTaskPolicyAllowedForAffiliatedUsers() throws Exception {
         // Setup a device owner.
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
         // Lock task policy is updated when loading user data.
-        verify(getServices().iactivityManager).updateLockTaskPackages(
-                UserHandle.USER_SYSTEM, new String[0]);
-        verify(getServices().iactivityManager).updateLockTaskFeatures(
-                UserHandle.USER_SYSTEM, DevicePolicyManager.LOCK_TASK_FEATURE_NONE);
+        verifyLockTaskState(UserHandle.USER_SYSTEM);
 
         // Set up a managed profile managed by different package (package name shouldn't matter)
         final int MANAGED_PROFILE_USER_ID = 15;
@@ -3669,40 +3701,30 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         final ComponentName adminDifferentPackage =
                 new ComponentName("another.package", "whatever.class");
         addManagedProfile(adminDifferentPackage, MANAGED_PROFILE_ADMIN_UID, admin2);
-        verify(getServices().iactivityManager).updateLockTaskPackages(
-                MANAGED_PROFILE_USER_ID, new String[0]);
-        verify(getServices().iactivityManager).updateLockTaskFeatures(
-                MANAGED_PROFILE_USER_ID, DevicePolicyManager.LOCK_TASK_FEATURE_NONE);
+        verifyLockTaskState(MANAGED_PROFILE_USER_ID);
+
+        // Setup a PO on the secondary user
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        setAsProfileOwner(admin3);
+        verifyLockTaskState(DpmMockContext.CALLER_USER_HANDLE);
 
         // The DO can still set lock task packages
-        mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         final String[] doPackages = {"doPackage1", "doPackage2"};
-        dpm.setLockTaskPackages(admin1, doPackages);
-        MoreAsserts.assertEquals(doPackages, dpm.getLockTaskPackages(admin1));
-        assertTrue(dpm.isLockTaskPermitted("doPackage1"));
-        assertFalse(dpm.isLockTaskPermitted("anotherPackage"));
-        verify(getServices().iactivityManager).updateLockTaskPackages(
-                UserHandle.USER_SYSTEM, doPackages);
-        // And the DO can still set lock task features
-        final int doFlags = DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS
+        final int flags = DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS
                 | DevicePolicyManager.LOCK_TASK_FEATURE_RECENTS;
-        dpm.setLockTaskFeatures(admin1, doFlags);
-        verify(getServices().iactivityManager).updateLockTaskFeatures(
-                UserHandle.USER_SYSTEM, doFlags);
+        verifyCanSetLockTask(DpmMockContext.CALLER_SYSTEM_USER_UID, UserHandle.USER_SYSTEM, admin1, doPackages, flags);
+
+        final String[] secondaryPoPackages = {"secondaryPoPackage1", "secondaryPoPackage2"};
+        final int secondaryPoFlags = DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS
+                | DevicePolicyManager.LOCK_TASK_FEATURE_RECENTS;
+        verifyCanNotSetLockTask(DpmMockContext.CALLER_UID, admin3, secondaryPoPackages, secondaryPoFlags);
 
         // Managed profile is unaffiliated - shouldn't be able to setLockTaskPackages.
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
         final String[] poPackages = {"poPackage1", "poPackage2"};
-        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
-                () -> dpm.setLockTaskPackages(adminDifferentPackage, poPackages));
-        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
-                () -> dpm.getLockTaskPackages(adminDifferentPackage));
-        assertFalse(dpm.isLockTaskPermitted("doPackage1"));
-        // And it shouldn't be able to setLockTaskFeatures.
         final int poFlags = DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS
                 | DevicePolicyManager.LOCK_TASK_FEATURE_RECENTS;
-        assertExpectException(SecurityException.class, /* messageRegex =*/ null,
-                () -> dpm.setLockTaskFeatures(adminDifferentPackage, poFlags));
+        verifyCanNotSetLockTask(MANAGED_PROFILE_ADMIN_UID, adminDifferentPackage, poPackages, poFlags);
 
         // Setting same affiliation ids
         final Set<String> userAffiliationIds = Collections.singleton("some-affiliation-id");
@@ -3717,12 +3739,9 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         MoreAsserts.assertEquals(poPackages, dpm.getLockTaskPackages(adminDifferentPackage));
         assertTrue(dpm.isLockTaskPermitted("poPackage1"));
         assertFalse(dpm.isLockTaskPermitted("doPackage2"));
-        verify(getServices().iactivityManager).updateLockTaskPackages(
-                MANAGED_PROFILE_USER_ID, poPackages);
         // And it can set lock task features.
         dpm.setLockTaskFeatures(adminDifferentPackage, poFlags);
-        verify(getServices().iactivityManager).updateLockTaskFeatures(
-                MANAGED_PROFILE_USER_ID, poFlags);
+        verifyLockTaskState(MANAGED_PROFILE_USER_ID, poPackages, poFlags);
 
         // Unaffiliate the profile, lock task mode no longer available on the profile.
         dpm.setAffiliationIds(adminDifferentPackage, Collections.emptySet());
@@ -3733,8 +3752,38 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         verify(getServices().iactivityManager, times(2)).updateLockTaskFeatures(
                 MANAGED_PROFILE_USER_ID, DevicePolicyManager.LOCK_TASK_FEATURE_NONE);
 
+        // Verify that lock task packages were not cleared for the DO
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         assertTrue(dpm.isLockTaskPermitted("doPackage1"));
+
+    }
+
+    public void testLockTaskPolicyForProfileOwner() throws Exception {
+        // Setup a PO
+        mContext.binder.callingUid = DpmMockContext.CALLER_UID;
+        setAsProfileOwner(admin1);
+        verifyLockTaskState(DpmMockContext.CALLER_USER_HANDLE);
+
+        final String[] poPackages = {"poPackage1", "poPackage2"};
+        final int poFlags = DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS
+                | DevicePolicyManager.LOCK_TASK_FEATURE_RECENTS;
+        verifyCanSetLockTask(DpmMockContext.CALLER_UID, DpmMockContext.CALLER_USER_HANDLE, admin1,
+                poPackages, poFlags);
+
+        // Set up a managed profile managed by different package (package name shouldn't matter)
+        final int MANAGED_PROFILE_USER_ID = 15;
+        final int MANAGED_PROFILE_ADMIN_UID = UserHandle.getUid(MANAGED_PROFILE_USER_ID, 20456);
+        final ComponentName adminDifferentPackage =
+                new ComponentName("another.package", "whatever.class");
+        addManagedProfile(adminDifferentPackage, MANAGED_PROFILE_ADMIN_UID, admin2);
+        verifyLockTaskState(MANAGED_PROFILE_USER_ID);
+
+        // Managed profile is unaffiliated - shouldn't be able to setLockTaskPackages.
+        mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
+        final String[] mpoPackages = {"poPackage1", "poPackage2"};
+        final int mpoFlags = DevicePolicyManager.LOCK_TASK_FEATURE_NOTIFICATIONS
+                | DevicePolicyManager.LOCK_TASK_FEATURE_RECENTS;
+        verifyCanNotSetLockTask(MANAGED_PROFILE_ADMIN_UID, adminDifferentPackage, mpoPackages, mpoFlags);
     }
 
     public void testIsDeviceManaged() throws Exception {

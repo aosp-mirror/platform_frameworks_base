@@ -7902,6 +7902,37 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         enforceSystemUserOrPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
     }
 
+    private boolean canUserUseLockTaskLocked(int userId) {
+        if (isUserAffiliatedWithDeviceLocked(userId)) {
+            return true;
+        }
+
+        // Unaffiliated profile owners are not allowed to use lock when there is a device owner.
+        if (mOwners.hasDeviceOwner()) {
+            return false;
+        }
+
+        final ComponentName profileOwner = getProfileOwner(userId);
+        if (profileOwner == null) {
+            return false;
+        }
+
+        // Managed profiles are not allowed to use lock task
+        if (isManagedProfile(userId)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void enforceCanCallLockTaskLocked(ComponentName who) {
+        getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+        final int userId =  mInjector.userHandleGetCallingUserId();
+        if (!canUserUseLockTaskLocked(userId)) {
+            throw new SecurityException("User " + userId + " is not allowed to use lock task");
+        }
+    }
+
     private void ensureCallerPackage(@Nullable String packageName) {
         if (packageName == null) {
             Preconditions.checkState(isCallerWithSystemUid(),
@@ -9608,14 +9639,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkNotNull(packages, "packages is null");
 
         synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            enforceCanCallLockTaskLocked(who);
             final int userHandle = mInjector.userHandleGetCallingUserId();
-            if (isUserAffiliatedWithDeviceLocked(userHandle)) {
-                setLockTaskPackagesLocked(userHandle, new ArrayList<>(Arrays.asList(packages)));
-            } else {
-                throw new SecurityException("Admin " + who +
-                    " is neither the device owner or affiliated user's profile owner.");
-            }
+            setLockTaskPackagesLocked(userHandle, new ArrayList<>(Arrays.asList(packages)));
         }
     }
 
@@ -9634,12 +9660,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final int userHandle = mInjector.binderGetCallingUserHandle().getIdentifier();
         synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            if (!isUserAffiliatedWithDeviceLocked(userHandle)) {
-                throw new SecurityException("Admin " + who +
-                    " is neither the device owner or affiliated user's profile owner.");
-            }
-
+            enforceCanCallLockTaskLocked(who);
             final List<String> packages = getUserData(userHandle).mLockTaskPackages;
             return packages.toArray(new String[packages.size()]);
         }
@@ -9658,11 +9679,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = mInjector.userHandleGetCallingUserId();
         synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            if (!isUserAffiliatedWithDeviceLocked(userHandle)) {
-                throw new SecurityException("Admin " + who +
-                        " is neither the device owner or affiliated user's profile owner.");
-            }
+            enforceCanCallLockTaskLocked(who);
             setLockTaskFeaturesLocked(userHandle, flags);
         }
     }
@@ -9679,11 +9696,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = mInjector.userHandleGetCallingUserId();
         synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            if (!isUserAffiliatedWithDeviceLocked(userHandle)) {
-                throw new SecurityException("Admin " + who +
-                        " is neither the device owner or affiliated user's profile owner.");
-            }
+            enforceCanCallLockTaskLocked(who);
             return getUserData(userHandle).mLockTaskFeatures;
         }
     }
@@ -9694,7 +9707,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final List<UserInfo> userInfos = mUserManager.getUsers(/*excludeDying=*/ true);
             for (int i = userInfos.size() - 1; i >= 0; i--) {
                 int userId = userInfos.get(i).id;
-                if (isUserAffiliatedWithDeviceLocked(userId)) {
+                if (canUserUseLockTaskLocked(userId)) {
                     continue;
                 }
 
@@ -11232,10 +11245,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // of a split user device.
             return true;
         }
+
         final ComponentName profileOwner = getProfileOwner(userId);
         if (profileOwner == null) {
             return false;
         }
+        
         final Set<String> userAffiliationIds = getUserData(userId).mAffiliationIds;
         final Set<String> deviceAffiliationIds =
                 getUserData(UserHandle.USER_SYSTEM).mAffiliationIds;
