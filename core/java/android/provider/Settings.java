@@ -8652,13 +8652,52 @@ public final class Settings {
         public static final String RECOMMENDED_NETWORK_EVALUATOR_CACHE_EXPIRY_MS =
                 "recommended_network_evaluator_cache_expiry_ms";
 
-       /**
+        /**
         * Settings to allow BLE scans to be enabled even when Bluetooth is turned off for
         * connectivity.
         * @hide
         */
-       public static final String BLE_SCAN_ALWAYS_AVAILABLE =
-               "ble_scan_always_enabled";
+        public static final String BLE_SCAN_ALWAYS_AVAILABLE = "ble_scan_always_enabled";
+
+        /**
+         * The length in milliseconds of a BLE scan window in a low-power scan mode.
+         * @hide
+         */
+        public static final String BLE_SCAN_LOW_POWER_WINDOW_MS = "ble_scan_low_power_window_ms";
+
+        /**
+         * The length in milliseconds of a BLE scan window in a balanced scan mode.
+         * @hide
+         */
+        public static final String BLE_SCAN_BALANCED_WINDOW_MS = "ble_scan_balanced_window_ms";
+
+        /**
+         * The length in milliseconds of a BLE scan window in a low-latency scan mode.
+         * @hide
+         */
+        public static final String BLE_SCAN_LOW_LATENCY_WINDOW_MS =
+                "ble_scan_low_latency_window_ms";
+
+        /**
+         * The length in milliseconds of a BLE scan interval in a low-power scan mode.
+         * @hide
+         */
+        public static final String BLE_SCAN_LOW_POWER_INTERVAL_MS =
+                "ble_scan_low_power_interval_ms";
+
+        /**
+         * The length in milliseconds of a BLE scan interval in a balanced scan mode.
+         * @hide
+         */
+        public static final String BLE_SCAN_BALANCED_INTERVAL_MS =
+                "ble_scan_balanced_interval_ms";
+
+        /**
+         * The length in milliseconds of a BLE scan interval in a low-latency scan mode.
+         * @hide
+         */
+        public static final String BLE_SCAN_LOW_LATENCY_INTERVAL_MS =
+                "ble_scan_low_latency_interval_ms";
 
        /**
         * Used to save the Wifi_ON state prior to tethering.
