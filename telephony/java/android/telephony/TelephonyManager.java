@@ -22,8 +22,8 @@ import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
-import android.annotation.SuppressLint;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.WorkerThread;
@@ -61,7 +61,6 @@ import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.ITelephonyRegistry;
-import com.android.internal.telephony.OperatorInfo;
 import com.android.internal.telephony.PhoneConstants;
 import com.android.internal.telephony.RILConstants;
 import com.android.internal.telephony.TelephonyProperties;
@@ -2596,6 +2595,53 @@ public class TelephonyManager {
         } catch (NullPointerException ex) {
             // This could happen before phone restarts due to crashing
             return PhoneConstants.LTE_ON_CDMA_UNKNOWN;
+        }
+    }
+
+    /**
+     * Gets all the UICC slots.
+     *
+     * @return UiccSlotInfo array.
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public UiccSlotInfo[] getUiccSlotsInfo() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                return null;
+            }
+            return telephony.getUiccSlotsInfo();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Map logicalSlot to physicalSlot, and activate the physicalSlot if it is inactive. For
+     * example, passing the physicalSlots array [1, 0] means mapping the first item 1, which is
+     * physical slot index 1, to the logical slot 0; and mapping the second item 0, which is
+     * physical slot index 0, to the logical slot 1. The index of the array means the index of the
+     * logical slots.
+     *
+     * @param physicalSlots Index i in the array representing physical slot for phone i. The array
+     *        size should be same as {@link #getPhoneCount()}.
+     * @return boolean Return true if the switch succeeds, false if the switch fails.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public boolean switchSlots(int[] physicalSlots) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                return false;
+            }
+            return telephony.switchSlots(physicalSlots);
+        } catch (RemoteException e) {
+            return false;
         }
     }
 
