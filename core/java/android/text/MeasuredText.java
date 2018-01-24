@@ -155,6 +155,11 @@ public class MeasuredText implements Spanned {
          * @return the measured text.
          */
         public @NonNull MeasuredText build() {
+            return build(true /* build full layout result */);
+        }
+
+        /** @hide */
+        public @NonNull MeasuredText build(boolean computeLayout) {
             final boolean needHyphenation = mBreakStrategy != Layout.BREAK_STRATEGY_SIMPLE
                     && mHyphenationFrequency != Layout.HYPHENATION_FREQUENCY_NONE;
 
@@ -175,7 +180,7 @@ public class MeasuredText implements Spanned {
                 paragraphEnds.add(paraEnd);
                 measuredTexts.add(MeasuredParagraph.buildForStaticLayout(
                         mPaint, mText, paraStart, paraEnd, mTextDir, needHyphenation,
-                        null /* no recycle */));
+                        computeLayout, null /* no recycle */));
             }
 
             return new MeasuredText(mText, mStart, mEnd, mPaint, mTextDir, mBreakStrategy,
@@ -198,7 +203,8 @@ public class MeasuredText implements Spanned {
         mText = text;
         mStart = start;
         mEnd = end;
-        mPaint = paint;
+        // Copy the paint so that we can keep the reference of typeface in native layout result.
+        mPaint = new TextPaint(paint);
         mMeasuredParagraphs = measuredTexts;
         mParagraphBreakPoints = paragraphBreakPoints;
         mTextDir = textDir;
@@ -281,6 +287,50 @@ public class MeasuredText implements Spanned {
      */
     public @Layout.HyphenationFrequency int getHyphenationFrequency() {
         return mHyphenationFrequency;
+    }
+
+    /**
+     * Returns true if the given TextPaint gives the same result of text layout for this text.
+     * @hide
+     */
+    public boolean canUseMeasuredResult(@NonNull TextPaint paint) {
+        return mPaint.getTextSize() == paint.getTextSize()
+            && mPaint.getTextSkewX() == paint.getTextSkewX()
+            && mPaint.getTextScaleX() == paint.getTextScaleX()
+            && mPaint.getLetterSpacing() == paint.getLetterSpacing()
+            && mPaint.getWordSpacing() == paint.getWordSpacing()
+            && mPaint.getFlags() == paint.getFlags()  // Maybe not all flag affects text layout.
+            && mPaint.getTextLocales() == paint.getTextLocales()  // need to be equals?
+            && mPaint.getFontVariationSettings() == paint.getFontVariationSettings()
+            && mPaint.getTypeface() == paint.getTypeface()
+            && TextUtils.equals(mPaint.getFontFeatureSettings(), paint.getFontFeatureSettings());
+    }
+
+    /** @hide */
+    public int findParaIndex(@IntRange(from = 0) int pos) {
+        // TODO: Maybe good to remove paragraph concept from MeasuredText and add substring layout
+        //       support to StaticLayout.
+        for (int i = 0; i < mParagraphBreakPoints.length; ++i) {
+            if (pos < mParagraphBreakPoints[i]) {
+                return i;
+            }
+        }
+        throw new IndexOutOfBoundsException(
+            "pos must be less than " + mParagraphBreakPoints[mParagraphBreakPoints.length - 1]
+            + ", gave " + pos);
+    }
+
+    /** @hide */
+    public float getWidth(@IntRange(from = 0) int start, @IntRange(from = 0) int end) {
+        final int paraIndex = findParaIndex(start);
+        final int paraStart = getParagraphStart(paraIndex);
+        final int paraEnd = getParagraphEnd(paraIndex);
+        if (start < paraStart || paraEnd < end) {
+            throw new RuntimeException("Cannot measured across the paragraph:"
+                + "para: (" + paraStart + ", " + paraEnd + "), "
+                + "request: (" + start + ", " + end + ")");
+        }
+        return getMeasuredParagraph(paraIndex).getWidth(start - paraStart, end - paraStart);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////

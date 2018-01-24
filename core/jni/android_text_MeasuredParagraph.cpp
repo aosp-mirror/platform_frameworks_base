@@ -85,17 +85,29 @@ static void nAddReplacementRun(JNIEnv* /* unused */, jclass /* unused */, jlong 
 
 // Regular JNI
 static jlong nBuildNativeMeasuredParagraph(JNIEnv* env, jclass /* unused */, jlong builderPtr,
-                                      jcharArray javaText, jboolean computeHyphenation) {
+                                      jcharArray javaText, jboolean computeHyphenation,
+                                      jboolean computeLayout) {
     ScopedCharArrayRO text(env, javaText);
     const minikin::U16StringPiece textBuffer(text.get(), text.size());
 
     // Pass the ownership to Java.
-    return toJLong(toBuilder(builderPtr)->build(textBuffer, computeHyphenation).release());
+    return toJLong(toBuilder(builderPtr)->build(textBuffer, computeHyphenation,
+                                                computeLayout).release());
 }
 
 // Regular JNI
 static void nFreeBuilder(JNIEnv* env, jclass /* unused */, jlong builderPtr) {
     delete toBuilder(builderPtr);
+}
+
+// CriticalNative
+static jfloat nGetWidth(jlong ptr, jint start, jint end) {
+    minikin::MeasuredText* mt = toMeasuredParagraph(ptr);
+    float r = 0.0f;
+    for (int i = start; i < end; ++i) {
+        r += mt->widths[i];
+    }
+    return r;
 }
 
 // CriticalNative
@@ -108,10 +120,11 @@ static const JNINativeMethod gMethods[] = {
     {"nInitBuilder", "()J", (void*) nInitBuilder},
     {"nAddStyleRun", "(JJIIZ)V", (void*) nAddStyleRun},
     {"nAddReplacementRun", "(JJIIF)V", (void*) nAddReplacementRun},
-    {"nBuildNativeMeasuredParagraph", "(J[CZ)J", (void*) nBuildNativeMeasuredParagraph},
+    {"nBuildNativeMeasuredParagraph", "(J[CZZ)J", (void*) nBuildNativeMeasuredParagraph},
     {"nFreeBuilder", "(J)V", (void*) nFreeBuilder},
 
     // MeasuredParagraph native functions.
+    {"nGetWidth", "(JII)F", (void*) nGetWidth},  // Critical Natives
     {"nGetReleaseFunc", "()J", (void*) nGetReleaseFunc},  // Critical Natives
 };
 

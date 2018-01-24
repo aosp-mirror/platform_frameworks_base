@@ -347,7 +347,14 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
         TextLine line = TextLine.obtain();
         line.set(paint, text, 0, textLength, Layout.DIR_LEFT_TO_RIGHT,
                 Layout.DIRS_ALL_LEFT_TO_RIGHT, false, null);
-        fm.width = (int) Math.ceil(line.metrics(fm));
+        if (text instanceof MeasuredText) {
+            MeasuredText mt = (MeasuredText) text;
+            // Reaching here means there is only one paragraph.
+            MeasuredParagraph mp = mt.getMeasuredParagraph(0);
+            fm.width = (int) Math.ceil(mp.getWidth(0, mp.getTextLength()));
+        } else {
+            fm.width = (int) Math.ceil(line.metrics(fm));
+        }
         TextLine.recycle(line);
 
         return fm;
