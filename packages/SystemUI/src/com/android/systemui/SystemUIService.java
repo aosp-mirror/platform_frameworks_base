@@ -20,10 +20,14 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.SystemProperties;
+import android.util.Slog;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+
+import com.android.internal.os.BinderInternal;
 
 public class SystemUIService extends Service {
 
@@ -35,6 +39,21 @@ public class SystemUIService extends Service {
         // For debugging RescueParty
         if (Build.IS_DEBUGGABLE && SystemProperties.getBoolean("debug.crash_sysui", false)) {
             throw new RuntimeException();
+        }
+
+        if (Build.IS_DEBUGGABLE) {
+            // b/71353150 - looking for leaked binder proxies
+            BinderInternal.nSetBinderProxyCountEnabled(true);
+            BinderInternal.nSetBinderProxyCountWatermarks(1000,900);
+            BinderInternal.setBinderProxyCountCallback(
+                    new BinderInternal.BinderProxyLimitListener() {
+                        @Override
+                        public void onLimitReached(int uid) {
+                            Slog.w(SystemUIApplication.TAG,
+                                    "uid " + uid + " sent too many Binder proxies to uid "
+                                    + Process.myUid());
+                        }
+                    }, Dependency.get(Dependency.MAIN_HANDLER));
         }
     }
 
