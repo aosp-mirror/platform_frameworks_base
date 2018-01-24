@@ -594,7 +594,9 @@ public class IpSecService extends IIpSecService.Stub {
                                 mResourceId,
                                 mConfig.getSourceAddress(),
                                 mConfig.getDestinationAddress(),
-                                spi);
+                                spi,
+                                mConfig.getMarkValue(),
+                                mConfig.getMarkMask());
             } catch (ServiceSpecificException e) {
                 // FIXME: get the error code and throw is at an IOException from Errno Exception
             } catch (RemoteException e) {
@@ -657,7 +659,7 @@ public class IpSecService extends IIpSecService.Stub {
                 mSrvConfig
                         .getNetdInstance()
                         .ipSecDeleteSecurityAssociation(
-                                mResourceId, mSourceAddress, mDestinationAddress, mSpi);
+                                mResourceId, mSourceAddress, mDestinationAddress, mSpi, 0, 0);
             } catch (ServiceSpecificException e) {
                 // FIXME: get the error code and throw is at an IOException from Errno Exception
             } catch (RemoteException e) {
@@ -1190,6 +1192,8 @@ public class IpSecService extends IIpSecService.Stub {
                             c.getDestinationAddress(),
                             (c.getNetwork() != null) ? c.getNetwork().netId : 0,
                             spiRecord.getSpi(),
+                            c.getMarkValue(),
+                            c.getMarkMask(),
                             (auth != null) ? auth.getName() : "",
                             (auth != null) ? auth.getKey() : new byte[] {},
                             (auth != null) ? auth.getTruncationLengthBits() : 0,
