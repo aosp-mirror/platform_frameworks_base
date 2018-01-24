@@ -75,6 +75,8 @@ private:
 
     sp<AnomalyMonitor> mAnomalyMonitor;
 
+    void onDumpReportLocked(const ConfigKey& key, vector<uint8_t>* outData);
+
     /* Check if we should send a broadcast if approaching memory limits and if we're over, we
      * actually delete the data. */
     void flushIfNecessaryLocked(uint64_t timestampNs, const ConfigKey& key,

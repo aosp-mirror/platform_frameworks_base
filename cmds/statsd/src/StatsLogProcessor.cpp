@@ -211,6 +211,10 @@ void StatsLogProcessor::onDumpReport(const ConfigKey& key, const uint64_t& dumpT
 
 void StatsLogProcessor::onDumpReport(const ConfigKey& key, vector<uint8_t>* outData) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
+    onDumpReportLocked(key, outData);
+}
+
+void StatsLogProcessor::onDumpReportLocked(const ConfigKey& key, vector<uint8_t>* outData) {
     auto it = mMetricsManagers.find(key);
     if (it == mMetricsManagers.end()) {
         ALOGW("Config source %s does not exist", key.ToString().c_str());
@@ -319,7 +323,7 @@ void StatsLogProcessor::WriteDataToDisk() {
     for (auto& pair : mMetricsManagers) {
         const ConfigKey& key = pair.first;
         vector<uint8_t> data;
-        onDumpReport(key, &data);
+        onDumpReportLocked(key, &data);
         // TODO: Add a guardrail to prevent accumulation of file on disk.
         string file_name = StringPrintf("%s/%d-%lld-%ld", STATS_DATA_DIR, key.GetUid(),
                                         (long long)key.GetId(), time(nullptr));
