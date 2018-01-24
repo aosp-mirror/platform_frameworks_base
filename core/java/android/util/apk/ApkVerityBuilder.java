@@ -68,31 +68,78 @@ abstract class ApkVerityBuilder {
     static ApkVerityResult generateApkVerity(RandomAccessFile apk,
             SignatureInfo signatureInfo, ByteBufferFactory bufferFactory)
             throws IOException, SecurityException, NoSuchAlgorithmException, DigestException {
+        long signingBlockSize =
+                signatureInfo.centralDirOffset - signatureInfo.apkSigningBlockOffset;
+        long dataSize = apk.length() - signingBlockSize - ZIP_EOCD_CENTRAL_DIR_OFFSET_FIELD_SIZE;
+        int[] levelOffset = calculateVerityLevelOffset(dataSize);
+
+        ByteBuffer output = bufferFactory.create(
+                CHUNK_SIZE_BYTES +  // fsverity header + extensions + padding
+                levelOffset[levelOffset.length - 1]);  // Merkle tree size
+        output.order(ByteOrder.LITTLE_ENDIAN);
+
+        ByteBuffer header = slice(output, 0, FSVERITY_HEADER_SIZE_BYTES);
+        ByteBuffer extensions = slice(output, FSVERITY_HEADER_SIZE_BYTES, CHUNK_SIZE_BYTES);
+        ByteBuffer tree = slice(output, CHUNK_SIZE_BYTES, output.limit());
+        byte[] apkDigestBytes = new byte[DIGEST_SIZE_BYTES];
+        ByteBuffer apkDigest = ByteBuffer.wrap(apkDigestBytes);
+        apkDigest.order(ByteOrder.LITTLE_ENDIAN);
+
+        calculateFsveritySignatureInternal(apk, signatureInfo, tree, apkDigest, header, extensions);
+
+        output.rewind();
+        return new ApkVerityResult(output, apkDigestBytes);
+    }
+
+    /**
+     * Calculates the fsverity root hash for integrity measurement.  This needs to be consistent to
+     * what kernel returns.
+     */
+    static byte[] generateFsverityRootHash(RandomAccessFile apk, ByteBuffer apkDigest,
+            SignatureInfo signatureInfo)
+            throws NoSuchAlgorithmException, DigestException, IOException {
+        ByteBuffer verityBlock = ByteBuffer.allocate(CHUNK_SIZE_BYTES)
+                .order(ByteOrder.LITTLE_ENDIAN);
+        ByteBuffer header = slice(verityBlock, 0, FSVERITY_HEADER_SIZE_BYTES);
+        ByteBuffer extensions = slice(verityBlock, FSVERITY_HEADER_SIZE_BYTES, CHUNK_SIZE_BYTES);
+
+        calculateFsveritySignatureInternal(apk, signatureInfo, null, null, header, extensions);
+
+        MessageDigest md = MessageDigest.getInstance(JCA_DIGEST_ALGORITHM);
+        md.update(DEFAULT_SALT);
+        md.update(verityBlock);
+        md.update(apkDigest);
+        return md.digest();
+    }
+
+    private static void calculateFsveritySignatureInternal(
+            RandomAccessFile apk, SignatureInfo signatureInfo, ByteBuffer treeOutput,
+            ByteBuffer rootHashOutput, ByteBuffer headerOutput, ByteBuffer extensionsOutput)
+            throws IOException, NoSuchAlgorithmException, DigestException {
         assertSigningBlockAlignedAndHasFullPages(signatureInfo);
 
         long signingBlockSize =
                 signatureInfo.centralDirOffset - signatureInfo.apkSigningBlockOffset;
         long dataSize = apk.length() - signingBlockSize - ZIP_EOCD_CENTRAL_DIR_OFFSET_FIELD_SIZE;
         int[] levelOffset = calculateVerityLevelOffset(dataSize);
-        ByteBuffer output = bufferFactory.create(
-                CHUNK_SIZE_BYTES +  // fsverity header + extensions + padding
-                levelOffset[levelOffset.length - 1] +  // Merkle tree size
-                FSVERITY_HEADER_SIZE_BYTES);  // second fsverity header (verbatim copy)
 
-        // Start generating the tree from the block boundary as the kernel will expect.
-        ByteBuffer treeOutput = slice(output, CHUNK_SIZE_BYTES,
-                output.limit() - FSVERITY_HEADER_SIZE_BYTES);
-        byte[] rootHash = generateApkVerityTree(apk, signatureInfo, DEFAULT_SALT, levelOffset,
-                treeOutput);
+        if (treeOutput != null) {
+            byte[] apkRootHash = generateApkVerityTree(apk, signatureInfo, DEFAULT_SALT,
+                    levelOffset, treeOutput);
+            if (rootHashOutput != null) {
+                rootHashOutput.put(apkRootHash);
+            }
+        }
 
-        ByteBuffer integrityHeader = generateFsverityHeader(apk.length(), DEFAULT_SALT);
-        output.put(integrityHeader);
-        output.put(generateFsverityExtensions());
+        if (headerOutput != null) {
+            generateFsverityHeader(headerOutput, apk.length(), levelOffset.length - 1,
+                    DEFAULT_SALT);
+        }
 
-        integrityHeader.rewind();
-        output.put(integrityHeader);
-        output.rewind();
-        return new ApkVerityResult(output, rootHash);
+        if (extensionsOutput != null) {
+            generateFsverityExtensions(extensionsOutput, signatureInfo.apkSigningBlockOffset,
+                    signingBlockSize, signatureInfo.eocdOffset);
+        }
     }
 
     /**
@@ -211,7 +258,7 @@ abstract class ApkVerityBuilder {
                     eocdCdOffsetFieldPosition - signatureInfo.centralDirOffset),
                 MMAP_REGION_SIZE_BYTES);
 
-        // 3. Fill up the rest of buffer with 0s.
+        // 3. Consume offset of Signing Block as an alternative EoCD.
         ByteBuffer alternativeCentralDirOffset = ByteBuffer.allocate(
                 ZIP_EOCD_CENTRAL_DIR_OFFSET_FIELD_SIZE).order(ByteOrder.LITTLE_ENDIAN);
         alternativeCentralDirOffset.putInt(Math.toIntExact(signatureInfo.apkSigningBlockOffset));
@@ -259,36 +306,109 @@ abstract class ApkVerityBuilder {
         return rootHash;
     }
 
-    private static ByteBuffer generateFsverityHeader(long fileSize, byte[] salt) {
+    private static ByteBuffer generateFsverityHeader(ByteBuffer buffer, long fileSize, int depth,
+            byte[] salt) {
         if (salt.length != 8) {
             throw new IllegalArgumentException("salt is not 8 bytes long");
         }
 
-        ByteBuffer buffer = ByteBuffer.allocate(FSVERITY_HEADER_SIZE_BYTES);
-        buffer.order(ByteOrder.LITTLE_ENDIAN);
-
-        // TODO(b/30972906): insert a reference when there is a public one.
+        // TODO(b/30972906): update the reference when there is a better one in public.
         buffer.put("TrueBrew".getBytes());  // magic
+
         buffer.put((byte) 1);        // major version
         buffer.put((byte) 0);        // minor version
-        buffer.put((byte) 12);       // log2(block-size) == log2(4096)
-        buffer.put((byte) 7);        // log2(leaves-per-node) == log2(block-size / digest-size)
-                                     //                       == log2(4096 / 32)
-        buffer.putShort((short) 1);  // meta algorithm, 1: SHA-256 FIXME finalize constant
-        buffer.putShort((short) 1);  // data algorithm, 1: SHA-256 FIXME finalize constant
-        buffer.putInt(0x1);          // flags, 0x1: has extension, FIXME also hide it
-        buffer.putInt(0);            // reserved
-        buffer.putLong(fileSize);    // original i_size
-        buffer.put(salt);            // salt (8 bytes)
+        buffer.put((byte) 12);       // log2(block-size): log2(4096)
+        buffer.put((byte) 7);        // log2(leaves-per-node): log2(4096 / 32)
 
-        // TODO(b/30972906): Add extension.
+        buffer.putShort((short) 1);  // meta algorithm, SHA256_MODE == 1
+        buffer.putShort((short) 1);  // data algorithm, SHA256_MODE == 1
+
+        buffer.putInt(0x1);          // flags, 0x1: has extension
+        buffer.putInt(0);            // reserved
+
+        buffer.putLong(fileSize);    // original file size
+
+        buffer.put((byte) 0);        // auth block offset, disabled here
+        buffer.put(salt);            // salt (8 bytes)
+        // skip(buffer, 22);            // reserved
 
         buffer.rewind();
         return buffer;
     }
 
-    private static ByteBuffer generateFsverityExtensions() {
-        return ByteBuffer.allocate(64); // TODO(b/30972906): implement this.
+    private static ByteBuffer generateFsverityExtensions(ByteBuffer buffer, long signingBlockOffset,
+            long signingBlockSize, long eocdOffset) {
+        // Snapshot of the FSVerity structs (subject to change once upstreamed).
+        //
+        // struct fsverity_header_extension {
+        //   u8 extension_count;
+        //   u8 reserved[7];
+        // };
+        //
+        // struct fsverity_extension {
+        //   __le16 length;
+        //   u8 type;
+        //   u8 reserved[5];
+        // };
+        //
+        // struct fsverity_extension_elide {
+        //   __le64 offset;
+        //   __le64 length;
+        // }
+        //
+        // struct fsverity_extension_patch {
+        //   __le64 offset;
+        //   u8 length;
+        //   u8 reserved[7];
+        //   u8 databytes[];
+        // };
+
+        // struct fsverity_header_extension
+        buffer.put((byte) 2);        // extension count
+        skip(buffer, 3);             // reserved
+
+        final int kSizeOfFsverityExtensionHeader = 8;
+
+        {
+            // struct fsverity_extension #1
+            final int kSizeOfFsverityElidedExtension = 16;
+
+            buffer.putShort((short)  // total size of extension, padded to 64-bit alignment
+                    (kSizeOfFsverityExtensionHeader + kSizeOfFsverityElidedExtension));
+            buffer.put((byte) 0);    // ID of elide extension
+            skip(buffer, 5);         // reserved
+
+            // struct fsverity_extension_elide
+            buffer.putLong(signingBlockOffset);
+            buffer.putLong(signingBlockSize);
+        }
+
+        {
+            // struct fsverity_extension #2
+            final int kSizeOfFsverityPatchExtension =
+                    8 +  // offset size
+                    1 +  // size of length from offset (up to 255)
+                    7 +  // reserved
+                    ZIP_EOCD_CENTRAL_DIR_OFFSET_FIELD_SIZE;
+            final int kPadding = (int) divideRoundup(kSizeOfFsverityPatchExtension % 8, 8);
+
+            buffer.putShort((short)  // total size of extension, padded to 64-bit alignment
+                    (kSizeOfFsverityExtensionHeader + kSizeOfFsverityPatchExtension + kPadding));
+            buffer.put((byte) 1);    // ID of patch extension
+            skip(buffer, 5);         // reserved
+
+            // struct fsverity_extension_patch
+            buffer.putLong(eocdOffset);                                 // offset
+            buffer.put((byte) ZIP_EOCD_CENTRAL_DIR_OFFSET_FIELD_SIZE);  // length
+            skip(buffer, 7);                                            // reserved
+            buffer.putInt(Math.toIntExact(signingBlockOffset));         // databytes
+
+            // There are extra kPadding bytes of 0s here, included in the total size field of the
+            // extension header. The output ByteBuffer is assumed to be initialized to 0.
+        }
+
+        buffer.rewind();
+        return buffer;
     }
 
     /**
@@ -342,6 +462,11 @@ abstract class ApkVerityBuilder {
         b.limit(end);
         b.position(begin);
         return b.slice();
+    }
+
+    /** Skip the {@code ByteBuffer} position by {@code bytes}. */
+    private static void skip(ByteBuffer buffer, int bytes) {
+        buffer.position(buffer.position() + bytes);
     }
 
     /** Divides a number and round up to the closest integer. */
