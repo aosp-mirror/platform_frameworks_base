@@ -24,6 +24,7 @@ import android.annotation.SystemApi;
 public final class AccessNetworkConstants {
 
     public static final class AccessNetworkType {
+        public static final int UNKNOWN = 0;
         public static final int GERAN = 1;
         public static final int UTRAN = 2;
         public static final int EUTRAN = 3;
