@@ -228,6 +228,7 @@ import android.app.ApplicationThreadConstants;
 import android.app.BroadcastOptions;
 import android.app.ContentProviderHolder;
 import android.app.Dialog;
+import android.app.GrantedUriPermission;
 import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
@@ -10204,7 +10205,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (perms == null) {
                     Slog.w(TAG, "No permission grants found for " + packageName);
                 } else {
-                    for (UriPermission perm : perms.values()) {
+                    for (int j = 0; j < perms.size(); j++) {
+                        final UriPermission perm = perms.valueAt(j);
                         if (packageName.equals(perm.targetPkg) && perm.persistedModeFlags != 0) {
                             result.add(perm.buildPersistedPublicApiObject());
                         }
@@ -10215,7 +10217,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 for (int i = 0; i < size; i++) {
                     final ArrayMap<GrantUri, UriPermission> perms =
                             mGrantedUriPermissions.valueAt(i);
-                    for (UriPermission perm : perms.values()) {
+                    for (int j = 0; j < perms.size(); j++) {
+                        final UriPermission perm = perms.valueAt(j);
                         if (packageName.equals(perm.sourcePkg) && perm.persistedModeFlags != 0) {
                             result.add(perm.buildPersistedPublicApiObject());
                         }
@@ -10227,25 +10230,27 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public ParceledListSlice<android.content.UriPermission> getGrantedUriPermissions(
-            String packageName, int userId) {
+    public ParceledListSlice<GrantedUriPermission> getGrantedUriPermissions(
+            @Nullable String packageName, int userId) {
         enforceCallingPermission(android.Manifest.permission.GET_APP_GRANTED_URI_PERMISSIONS,
                 "getGrantedUriPermissions");
 
-        final ArrayList<android.content.UriPermission> result = Lists.newArrayList();
+        final List<GrantedUriPermission> result = new ArrayList<>();
         synchronized (this) {
             final int size = mGrantedUriPermissions.size();
             for (int i = 0; i < size; i++) {
                 final ArrayMap<GrantUri, UriPermission> perms = mGrantedUriPermissions.valueAt(i);
-                for (UriPermission perm : perms.values()) {
-                    if (packageName.equals(perm.targetPkg) && perm.targetUserId == userId
+                for (int j = 0; j < perms.size(); j++) {
+                    final UriPermission perm = perms.valueAt(j);
+                    if ((packageName == null || packageName.equals(perm.targetPkg))
+                            && perm.targetUserId == userId
                             && perm.persistedModeFlags != 0) {
-                        result.add(perm.buildPersistedPublicApiObject());
+                        result.add(perm.buildGrantedUriPermission());
                     }
                 }
             }
         }
-        return new ParceledListSlice<android.content.UriPermission>(result);
+        return new ParceledListSlice<>(result);
     }
 
     @Override
