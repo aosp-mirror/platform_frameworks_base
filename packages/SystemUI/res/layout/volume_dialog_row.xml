@@ -38,23 +38,34 @@
             android:maxLines="1"
             android:textColor="?android:attr/colorControlNormal"
             android:textAppearance="?android:attr/textAppearanceSmall" />
-        <TextView
-            android:id="@+id/volume_row_connected_device"
-            android:visibility="gone"
+        <LinearLayout
+            android:id="@+id/output_chooser"
+            android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textAppearance="@style/TextAppearance.QS.DetailItemSecondary" />
-        <com.android.keyguard.AlphaOptimizedImageButton
-            android:id="@+id/output_chooser"
-            style="@style/VolumeButtons"
+            android:minWidth="48dp"
+            android:minHeight="48dp"
+            android:paddingTop="10dp"
             android:background="?android:selectableItemBackgroundBorderless"
-            android:layout_width="@dimen/volume_button_size"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_volume_expand_animation"
-            android:soundEffectsEnabled="false" />
+            android:gravity="center">
+            <TextView
+                android:id="@+id/volume_row_connected_device"
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="@style/TextAppearance.QS.DetailItemSecondary" />
+            <com.android.keyguard.AlphaOptimizedImageButton
+                android:id="@+id/output_chooser_button"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="?android:selectableItemBackgroundBorderless"
+                style="@style/VolumeButtons"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_swap"
+                android:soundEffectsEnabled="false" />
+        </LinearLayout>
     </LinearLayout>
     <FrameLayout
         android:id="@+id/volume_row_slider_frame"

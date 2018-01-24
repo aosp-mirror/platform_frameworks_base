@@ -48,6 +48,7 @@ import android.os.SystemClock;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.support.v7.media.MediaRouter;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -73,6 +74,7 @@ import android.widget.TextView;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.VolumeDialog;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.VolumeDialogController.State;
@@ -332,8 +334,11 @@ public class VolumeDialogImpl implements VolumeDialog {
         row.slider.setOnSeekBarChangeListener(new VolumeSeekBarChangeListener(row));
         row.anim = null;
 
-        ImageButton outputChooser = row.view.findViewById(R.id.output_chooser);
-        outputChooser.setOnClickListener(mClickOutputChooser);
+        row.outputChooser = row.view.findViewById(R.id.output_chooser);
+        row.outputChooser.setOnClickListener(mClickOutputChooser);
+        row.outputChooser.findViewById(R.id.output_chooser_button)
+                .setOnClickListener(mClickOutputChooser);
+        row.connectedDevice = row.view.findViewById(R.id.volume_row_connected_device);
 
         // forward events above the slider into the slider
         row.view.setOnTouchListener(new OnTouchListener() {
@@ -422,7 +427,7 @@ public class VolumeDialogImpl implements VolumeDialog {
             Intent intent = new Intent(Settings.ACTION_SOUND_SETTINGS);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             dismissH(DISMISS_REASON_SETTINGS_CLICKED);
-            mContext.startActivity(intent);
+            Dependency.get(ActivityStarter.class).startActivity(intent, true /* dismissShade */);
             return true;
         });
         updateRingerH();
@@ -543,6 +548,13 @@ public class VolumeDialogImpl implements VolumeDialog {
             if (row.view.isShown()) {
                 updateVolumeRowSliderTintH(row, isActive);
             }
+        }
+    }
+
+    protected void updateConnectedDeviceH(String deviceName) {
+        for (final VolumeRow row : mRows) {
+            row.connectedDevice.setText(deviceName);
+            Util.setVisOrGone(row.connectedDevice, !TextUtils.isEmpty(deviceName));
         }
     }
 
@@ -957,6 +969,11 @@ public class VolumeDialogImpl implements VolumeDialog {
             }
 
         }
+
+        @Override
+        public void onConnectedDeviceChanged(String deviceName) {
+            updateConnectedDeviceH(deviceName);
+        }
     };
 
     private final class H extends Handler {
@@ -1155,5 +1172,7 @@ public class VolumeDialogImpl implements VolumeDialog {
         private ObjectAnimator anim;  // slider progress animation for non-touch-related updates
         private int animTargetProgress;
         private int lastAudibleLevel = 1;
+        private View outputChooser;
+        private TextView connectedDevice;
     }
 }
