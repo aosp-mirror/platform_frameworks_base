@@ -18,13 +18,18 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.media.MediaSession2.BuilderBase;
 import android.media.MediaSession2.ControllerInfo;
 import android.media.update.ApiLoader;
+import android.media.update.MediaLibraryService2Provider.MediaLibrarySessionProvider;
+import android.media.update.MediaSession2Provider;
 import android.media.update.MediaSessionService2Provider;
 import android.os.Bundle;
 import android.service.media.MediaBrowserService.BrowserRoot;
+
+import java.util.List;
 
 /**
  * Base class for media library services.
@@ -59,14 +64,50 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
      * Session for the media library service.
      */
     public class MediaLibrarySession extends MediaSession2 {
+        private final MediaLibrarySessionProvider mProvider;
+
         MediaLibrarySession(Context context, MediaPlayerBase player, String id,
-                SessionCallback callback) {
-            super(context, player, id, callback);
+                SessionCallback callback, VolumeProvider volumeProvider,
+                int ratingType, PendingIntent sessionActivity) {
+            super(context, player, id, callback, volumeProvider, ratingType, sessionActivity);
+            mProvider = (MediaLibrarySessionProvider) getProvider();
         }
-        // TODO(jaewan): Place public methods here.
+
+        @Override
+        MediaSession2Provider createProvider(Context context, MediaPlayerBase player, String id,
+                SessionCallback callback, VolumeProvider volumeProvider, int ratingType,
+                PendingIntent sessionActivity) {
+            return ApiLoader.getProvider(context)
+                    .createMediaLibraryService2MediaLibrarySession(this, context, player, id,
+                            (MediaLibrarySessionCallback) callback, volumeProvider, ratingType,
+                            sessionActivity);
+        }
+
+        /**
+         * Notify subscribed controller about change in a parent's children.
+         *
+         * @param controller controller to notify
+         * @param parentId
+         * @param options
+         */
+        public void notifyChildrenChanged(@NonNull ControllerInfo controller,
+                @NonNull String parentId, @NonNull Bundle options) {
+            mProvider.notifyChildrenChanged_impl(controller, parentId, options);
+        }
+
+        /**
+         * Notify subscribed controller about change in a parent's children.
+         *
+         * @param parentId parent id
+         * @param options optional bundle
+         */
+        // This is for the backward compatibility.
+        public void notifyChildrenChanged(@NonNull String parentId, @Nullable Bundle options) {
+            mProvider.notifyChildrenChanged_impl(parentId, options);
+        }
     }
 
-    public static abstract class MediaLibrarySessionCallback extends MediaSession2.SessionCallback {
+    public static class MediaLibrarySessionCallback extends MediaSession2.SessionCallback {
         /**
          * Called to get the root information for browsing by a particular client.
          * <p>
@@ -85,8 +126,76 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          * @see BrowserRoot#EXTRA_OFFLINE
          * @see BrowserRoot#EXTRA_SUGGESTED
          */
-        public abstract @Nullable BrowserRoot onGetRoot(
-                @NonNull ControllerInfo controllerInfo, @Nullable Bundle rootHints);
+        public @Nullable BrowserRoot onGetRoot(@NonNull ControllerInfo controllerInfo,
+                @Nullable Bundle rootHints) {
+            return null;
+        }
+
+        /**
+         * Called to get the search result. Return search result here for the browser.
+         * <p>
+         * Return an empty list for no search result, and return {@code null} for the error.
+         *
+         * @param query The search query sent from the media browser. It contains keywords separated
+         *            by space.
+         * @param extras The bundle of service-specific arguments sent from the media browser.
+         * @return search result. {@code null} for error.
+         */
+        public @Nullable List<MediaItem2> onSearch(@NonNull ControllerInfo controllerInfo,
+                @NonNull String query, @Nullable Bundle extras) {
+            return null;
+        }
+
+        /**
+         * Called to get the search result . Return result here for the browser.
+         * <p>
+         * Return an empty list for no search result, and return {@code null} for the error.
+         *
+         * @param itemId item id to get media item.
+         * @return media item2. {@code null} for error.
+         */
+        public @Nullable MediaItem2 onLoadItem(@NonNull ControllerInfo controllerInfo,
+                @NonNull String itemId) {
+            return null;
+        }
+
+        /**
+         * Called to get the search result. Return search result here for the browser.
+         * <p>
+         * Return an empty list for no search result, and return {@code null} for the error.
+         *
+         * @param parentId parent id to get children
+         * @param page number of page
+         * @param pageSize size of the page
+         * @param options
+         * @return list of children. Can be {@code null}.
+         */
+        public @Nullable List<MediaItem2> onLoadChildren(@NonNull ControllerInfo controller,
+                @NonNull String parentId, int page, int pageSize, @Nullable Bundle options) {
+            return null;
+        }
+
+        /**
+         * Called when a controller subscribes to the parent.
+         *
+         * @param controller controller
+         * @param parentId parent id
+         * @param options optional bundle
+         */
+        public void onSubscribed(@NonNull ControllerInfo controller,
+                String parentId, @Nullable Bundle options) {
+        }
+
+        /**
+         * Called when a controller unsubscribes to the parent.
+         *
+         * @param controller controller
+         * @param parentId parent id
+         * @param options optional bundle
+         */
+        public void onUnsubscribed(@NonNull ControllerInfo controller,
+                String parentId, @Nullable Bundle options) {
+        }
     }
 
     /**
@@ -113,7 +222,8 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
 
         @Override
         public MediaLibrarySession build() throws IllegalStateException {
-            return new MediaLibrarySession(mContext, mPlayer, mId, mCallback);
+            return new MediaLibrarySession(mContext, mPlayer, mId, mCallback,
+                    mVolumeProvider, mRatingType, mSessionActivity);
         }
     }
 
@@ -141,4 +251,95 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
      */
     @Override
     public @NonNull abstract MediaLibrarySession onCreateSession(String sessionId);
+
+    /**
+     * Contains information that the browser service needs to send to the client
+     * when first connected.
+     */
+    public static final class BrowserRoot {
+        /**
+         * The lookup key for a boolean that indicates whether the browser service should return a
+         * browser root for recently played media items.
+         *
+         * <p>When creating a media browser for a given media browser service, this key can be
+         * supplied as a root hint for retrieving media items that are recently played.
+         * If the media browser service can provide such media items, the implementation must return
+         * the key in the root hint when
+         * {@link MediaLibrarySessionCallback#onGetRoot(ControllerInfo, Bundle)} is called back.
+         *
+         * <p>The root hint may contain multiple keys.
+         *
+         * @see #EXTRA_OFFLINE
+         * @see #EXTRA_SUGGESTED
+         */
+        public static final String EXTRA_RECENT = "android.service.media.extra.RECENT";
+
+        /**
+         * The lookup key for a boolean that indicates whether the browser service should return a
+         * browser root for offline media items.
+         *
+         * <p>When creating a media browser for a given media browser service, this key can be
+         * supplied as a root hint for retrieving media items that are can be played without an
+         * internet connection.
+         * If the media browser service can provide such media items, the implementation must return
+         * the key in the root hint when
+         * {@link MediaLibrarySessionCallback#onGetRoot(ControllerInfo, Bundle)} is called back.
+         *
+         * <p>The root hint may contain multiple keys.
+         *
+         * @see #EXTRA_RECENT
+         * @see #EXTRA_SUGGESTED
+         */
+        public static final String EXTRA_OFFLINE = "android.service.media.extra.OFFLINE";
+
+        /**
+         * The lookup key for a boolean that indicates whether the browser service should return a
+         * browser root for suggested media items.
+         *
+         * <p>When creating a media browser for a given media browser service, this key can be
+         * supplied as a root hint for retrieving the media items suggested by the media browser
+         * service. The list of media items passed in {@link android.media.browse.MediaBrowser.SubscriptionCallback#onChildrenLoaded(String, List)}
+         * is considered ordered by relevance, first being the top suggestion.
+         * If the media browser service can provide such media items, the implementation must return
+         * the key in the root hint when
+         * {@link MediaLibrarySessionCallback#onGetRoot(ControllerInfo, Bundle)} is called back.
+         *
+         * <p>The root hint may contain multiple keys.
+         *
+         * @see #EXTRA_RECENT
+         * @see #EXTRA_OFFLINE
+         */
+        public static final String EXTRA_SUGGESTED = "android.service.media.extra.SUGGESTED";
+
+        final private String mRootId;
+        final private Bundle mExtras;
+
+        /**
+         * Constructs a browser root.
+         * @param rootId The root id for browsing.
+         * @param extras Any extras about the browser service.
+         */
+        public BrowserRoot(@NonNull String rootId, @Nullable Bundle extras) {
+            if (rootId == null) {
+                throw new IllegalArgumentException("The root id in BrowserRoot cannot be null. " +
+                        "Use null for BrowserRoot instead.");
+            }
+            mRootId = rootId;
+            mExtras = extras;
+        }
+
+        /**
+         * Gets the root id for browsing.
+         */
+        public String getRootId() {
+            return mRootId;
+        }
+
+        /**
+         * Gets any extras about the browser service.
+         */
+        public Bundle getExtras() {
+            return mExtras;
+        }
+    }
 }

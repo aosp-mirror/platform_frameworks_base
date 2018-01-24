@@ -18,16 +18,19 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.PendingIntent;
 import android.content.Context;
-import android.media.MediaPlayerBase.PlaybackListener;
+import android.media.MediaSession2.Command;
 import android.media.MediaSession2.CommandButton;
 import android.media.MediaSession2.CommandGroup;
 import android.media.MediaSession2.ControllerInfo;
+import android.media.MediaSession2.PlaylistParam;
 import android.media.session.MediaSessionManager;
-import android.media.session.PlaybackState;
 import android.media.update.ApiLoader;
 import android.media.update.MediaController2Provider;
-import android.os.Handler;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.ResultReceiver;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -37,7 +40,7 @@ import java.util.concurrent.Executor;
  * {@link MediaSessionService2} in any status. Media buttons and other commands can be sent to
  * the session.
  * <p>
- * When you're done, use {@link #release()} to clean up resources. This also helps session service
+ * When you're done, use {@link #close()} to clean up resources. This also helps session service
  * to be destroyed when there's no controller associated with it.
  * <p>
  * When controlling {@link MediaSession2}, the controller will be available immediately after
@@ -87,7 +90,7 @@ public class MediaController2 implements AutoCloseable {
         public void onDisconnected() { }
 
         /**
-         * Called when the session sets the custom layout through the
+         * Called when the session set the custom layout through the
          * {@link MediaSession2#setCustomLayout(ControllerInfo, List)}.
          * <p>
          * Can be called before {@link #onConnected(CommandGroup)} is called.
@@ -95,6 +98,137 @@ public class MediaController2 implements AutoCloseable {
          * @param layout
          */
         public void onCustomLayoutChanged(List<CommandButton> layout) { }
+
+        /**
+         * Called when the session has changed anything related with the {@link PlaybackInfo}.
+         *
+         * @param info new playback info
+         */
+        public void onAudioInfoChanged(PlaybackInfo info) { }
+
+        /**
+         * Called when the allowed commands are changed by session.
+         *
+         * @param commands newly allowed commands
+         */
+        public void onAllowedCommandsChanged(CommandGroup commands) { }
+
+        /**
+         * Called when the session sent a custom command.
+         *
+         * @param command
+         * @param args
+         * @param receiver
+         */
+        public void onCustomCommand(Command command, @Nullable Bundle args,
+                @Nullable ResultReceiver receiver) { }
+
+        /**
+         * Called when the playlist is changed.
+         *
+         * @param list
+         * @param param
+         */
+        public void onPlaylistChanged(
+                @NonNull List<MediaItem2> list, @NonNull PlaylistParam param) { }
+
+        /**
+         * Called when the playback state is changed.
+         *
+         * @param state
+         */
+        public void onPlaybackStateChanged(@NonNull PlaybackState2 state) { }
+    }
+
+    /**
+     * Holds information about the current playback and how audio is handled for
+     * this session.
+     */
+    // The same as MediaController.PlaybackInfo
+    public static final class PlaybackInfo {
+        /**
+         * The session uses remote playback.
+         */
+        public static final int PLAYBACK_TYPE_REMOTE = 2;
+        /**
+         * The session uses local playback.
+         */
+        public static final int PLAYBACK_TYPE_LOCAL = 1;
+
+        private final int mVolumeType;
+        private final int mVolumeControl;
+        private final int mMaxVolume;
+        private final int mCurrentVolume;
+        private final AudioAttributes mAudioAttrs;
+
+        /**
+         * @hide
+         */
+        public PlaybackInfo(int type, AudioAttributes attrs, int control, int max, int current) {
+            mVolumeType = type;
+            mAudioAttrs = attrs;
+            mVolumeControl = control;
+            mMaxVolume = max;
+            mCurrentVolume = current;
+        }
+
+        /**
+         * Get the type of playback which affects volume handling. One of:
+         * <ul>
+         * <li>{@link #PLAYBACK_TYPE_LOCAL}</li>
+         * <li>{@link #PLAYBACK_TYPE_REMOTE}</li>
+         * </ul>
+         *
+         * @return The type of playback this session is using.
+         */
+        public int getPlaybackType() {
+            return mVolumeType;
+        }
+
+        /**
+         * Get the audio attributes for this session. The attributes will affect
+         * volume handling for the session. When the volume type is
+         * {@link PlaybackInfo#PLAYBACK_TYPE_REMOTE} these may be ignored by the
+         * remote volume handler.
+         *
+         * @return The attributes for this session.
+         */
+        public AudioAttributes getAudioAttributes() {
+            return mAudioAttrs;
+        }
+
+        /**
+         * Get the type of volume control that can be used. One of:
+         * <ul>
+         * <li>{@link VolumeProvider#VOLUME_CONTROL_ABSOLUTE}</li>
+         * <li>{@link VolumeProvider#VOLUME_CONTROL_RELATIVE}</li>
+         * <li>{@link VolumeProvider#VOLUME_CONTROL_FIXED}</li>
+         * </ul>
+         *
+         * @return The type of volume control that may be used with this
+         *         session.
+         */
+        public int getVolumeControl() {
+            return mVolumeControl;
+        }
+
+        /**
+         * Get the maximum volume that may be set for this session.
+         *
+         * @return The maximum allowed volume where this session is playing.
+         */
+        public int getMaxVolume() {
+            return mMaxVolume;
+        }
+
+        /**
+         * Get the current volume for this session.
+         *
+         * @return The current volume where this session is playing.
+         */
+        public int getCurrentVolume() {
+            return mCurrentVolume;
+        }
     }
 
     private final MediaController2Provider mProvider;
@@ -147,8 +281,7 @@ public class MediaController2 implements AutoCloseable {
     /**
      * @return token
      */
-    public @NonNull
-    SessionToken getSessionToken() {
+    public @NonNull SessionToken getSessionToken() {
         return mProvider.getSessionToken_impl();
     }
 
@@ -179,33 +312,304 @@ public class MediaController2 implements AutoCloseable {
         mProvider.skipToNext_impl();
     }
 
+    /**
+     * Request that the player prepare its playback. In other words, other sessions can continue
+     * to play during the preparation of this session. This method can be used to speed up the
+     * start of the playback. Once the preparation is done, the session will change its playback
+     * state to {@link PlaybackState2#STATE_PAUSED}. Afterwards, {@link #play} can be called to
+     * start playback.
+     */
+    public void prepare() {
+        mProvider.prepare_impl();
+    }
 
-    public @Nullable PlaybackState getPlaybackState() {
+    /**
+     * Start fast forwarding. If playback is already fast forwarding this
+     * may increase the rate.
+     */
+    public void fastForward() {
+        mProvider.fastForward_impl();
+    }
+
+    /**
+     * Start rewinding. If playback is already rewinding this may increase
+     * the rate.
+     */
+    public void rewind() {
+        mProvider.rewind_impl();
+    }
+
+    /**
+     * Move to a new location in the media stream.
+     *
+     * @param pos Position to move to, in milliseconds.
+     */
+    public void seekTo(long pos) {
+        mProvider.seekTo_impl(pos);
+    }
+
+    /**
+     * Sets the index of current DataSourceDesc in the play list to be played.
+     *
+     * @param index the index of DataSourceDesc in the play list you want to play
+     * @throws IllegalArgumentException if the play list is null
+     * @throws NullPointerException if index is outside play list range
+     */
+    public void setCurrentPlaylistItem(int index) {
+        mProvider.setCurrentPlaylistItem_impl(index);
+    }
+
+    /**
+     * @hide
+     */
+    public void skipForward() {
+        // To match with KEYCODE_MEDIA_SKIP_FORWARD
+    }
+
+    /**
+     * @hide
+     */
+    public void skipBackward() {
+        // To match with KEYCODE_MEDIA_SKIP_BACKWARD
+    }
+
+    /**
+     * Request that the player start playback for a specific media id.
+     *
+     * @param mediaId The id of the requested media.
+     * @param extras Optional extras that can include extra information about the media item
+     *               to be played.
+     */
+    public void playFromMediaId(@NonNull String mediaId, @Nullable Bundle extras) {
+        mProvider.playFromMediaId_impl(mediaId, extras);
+    }
+
+    /**
+     * Request that the player start playback for a specific search query.
+     * An empty or null query should be treated as a request to play any
+     * music.
+     *
+     * @param query The search query.
+     * @param extras Optional extras that can include extra information
+     *               about the query.
+     */
+    public void playFromSearch(@NonNull String query, @Nullable Bundle extras) {
+        mProvider.playFromSearch_impl(query, extras);
+    }
+
+    /**
+     * Request that the player start playback for a specific {@link Uri}.
+     *
+     * @param uri The URI of the requested media.
+     * @param extras Optional extras that can include extra information about the media item
+     *               to be played.
+     */
+    public void playFromUri(@NonNull String uri, @Nullable Bundle extras) {
+        mProvider.playFromUri_impl(uri, extras);
+    }
+
+
+    /**
+     * Request that the player prepare playback for a specific media id. In other words, other
+     * sessions can continue to play during the preparation of this session. This method can be
+     * used to speed up the start of the playback. Once the preparation is done, the session
+     * will change its playback state to {@link PlaybackState2#STATE_PAUSED}. Afterwards,
+     * {@link #play} can be called to start playback. If the preparation is not needed,
+     * {@link #playFromMediaId} can be directly called without this method.
+     *
+     * @param mediaId The id of the requested media.
+     * @param extras Optional extras that can include extra information about the media item
+     *               to be prepared.
+     */
+    public void prepareFromMediaId(@NonNull String mediaId, @Nullable Bundle extras) {
+        mProvider.prepareMediaId_impl(mediaId, extras);
+    }
+
+    /**
+     * Request that the player prepare playback for a specific search query. An empty or null
+     * query should be treated as a request to prepare any music. In other words, other sessions
+     * can continue to play during the preparation of this session. This method can be used to
+     * speed up the start of the playback. Once the preparation is done, the session will
+     * change its playback state to {@link PlaybackState2#STATE_PAUSED}. Afterwards,
+     * {@link #play} can be called to start playback. If the preparation is not needed,
+     * {@link #playFromSearch} can be directly called without this method.
+     *
+     * @param query The search query.
+     * @param extras Optional extras that can include extra information
+     *               about the query.
+     */
+    public void prepareFromSearch(@NonNull String query, @Nullable Bundle extras) {
+        mProvider.prepareFromSearch_impl(query, extras);
+    }
+
+    /**
+     * Request that the player prepare playback for a specific {@link Uri}. In other words,
+     * other sessions can continue to play during the preparation of this session. This method
+     * can be used to speed up the start of the playback. Once the preparation is done, the
+     * session will change its playback state to {@link PlaybackState2#STATE_PAUSED}. Afterwards,
+     * {@link #play} can be called to start playback. If the preparation is not needed,
+     * {@link #playFromUri} can be directly called without this method.
+     *
+     * @param uri The URI of the requested media.
+     * @param extras Optional extras that can include extra information about the media item
+     *               to be prepared.
+     */
+    public void prepareFromUri(@NonNull Uri uri, @Nullable Bundle extras) {
+        mProvider.prepareFromUri_impl(uri, extras);
+    }
+
+    /**
+     * Set the volume of the output this session is playing on. The command will be ignored if it
+     * does not support {@link VolumeProvider#VOLUME_CONTROL_ABSOLUTE}.
+     * <p>
+     * If the session is local playback, this changes the device's volume with the stream that
+     * session's player is using. Flags will be specified for the {@link AudioManager}.
+     * <p>
+     * If the session is remote player (i.e. session has set volume provider), its volume provider
+     * will receive this request instead.
+     *
+     * @see #getPlaybackInfo()
+     * @param value The value to set it to, between 0 and the reported max.
+     * @param flags flags from {@link AudioManager} to include with the volume request for local
+     *              playback
+     */
+    public void setVolumeTo(int value, int flags) {
+        mProvider.setVolumeTo_impl(value, flags);
+    }
+
+    /**
+     * Adjust the volume of the output this session is playing on. The direction
+     * must be one of {@link AudioManager#ADJUST_LOWER},
+     * {@link AudioManager#ADJUST_RAISE}, or {@link AudioManager#ADJUST_SAME}.
+     * The command will be ignored if the session does not support
+     * {@link VolumeProvider#VOLUME_CONTROL_RELATIVE} or
+     * {@link VolumeProvider#VOLUME_CONTROL_ABSOLUTE}.
+     * <p>
+     * If the session is local playback, this changes the device's volume with the stream that
+     * session's player is using. Flags will be specified for the {@link AudioManager}.
+     * <p>
+     * If the session is remote player (i.e. session has set volume provider), its volume provider
+     * will receive this request instead.
+     *
+     * @see #getPlaybackInfo()
+     * @param direction The direction to adjust the volume in.
+     * @param flags flags from {@link AudioManager} to include with the volume request for local
+     *              playback
+     */
+    public void adjustVolume(int direction, int flags) {
+        mProvider.adjustVolume_impl(direction, flags);
+    }
+
+    /**
+     * Get the rating type supported by the session. One of:
+     * <ul>
+     * <li>{@link Rating2#RATING_NONE}</li>
+     * <li>{@link Rating2#RATING_HEART}</li>
+     * <li>{@link Rating2#RATING_THUMB_UP_DOWN}</li>
+     * <li>{@link Rating2#RATING_3_STARS}</li>
+     * <li>{@link Rating2#RATING_4_STARS}</li>
+     * <li>{@link Rating2#RATING_5_STARS}</li>
+     * <li>{@link Rating2#RATING_PERCENTAGE}</li>
+     * </ul>
+     *
+     * @return The supported rating type
+     */
+    public int getRatingType() {
+        return mProvider.getRatingType_impl();
+    }
+
+    /**
+     * Get an intent for launching UI associated with this session if one exists.
+     *
+     * @return A {@link PendingIntent} to launch UI or null.
+     */
+    public @Nullable PendingIntent getSessionActivity() {
+        return mProvider.getSessionActivity_impl();
+    }
+
+    /**
+     * Get the latest {@link PlaybackState2} from the session.
+     *
+     * @return a playback state
+     */
+    public PlaybackState2 getPlaybackState() {
         return mProvider.getPlaybackState_impl();
     }
 
     /**
-     * Add a {@link PlaybackListener} to listen changes in the
-     * {@link MediaSession2}.
+     * Get the current playback info for this session.
      *
-     * @param listener the listener that will be run
-     * @param handler the Handler that will receive the listener
-     * @throws IllegalArgumentException Called when either the listener or handler is {@code null}.
+     * @return The current playback info or null.
      */
-    // TODO(jaewan): Match with the addSessionAvailabilityListener() that tells the current state
-    //               through the listener.
-    // TODO(jaewan): Can handler be null? Follow the API guideline after it's finalized.
-    public void addPlaybackListener(@NonNull PlaybackListener listener, @NonNull Handler handler) {
-        mProvider.addPlaybackListener_impl(listener, handler);
+    public @Nullable PlaybackInfo getPlaybackInfo() {
+        return mProvider.getPlaybackInfo_impl();
     }
 
     /**
-     * Remove previously added {@link PlaybackListener}.
+     * Rate the current content. This will cause the rating to be set for
+     * the current user. The Rating type must match the type returned by
+     * {@link #getRatingType()}.
      *
-     * @param listener the listener to be removed
-     * @throws IllegalArgumentException if the listener is {@code null}.
+     * @param rating The rating to set for the current content
      */
-    public void removePlaybackListener(@NonNull PlaybackListener listener) {
-        mProvider.removePlaybackListener_impl(listener);
+    public void setRating(Rating2 rating) {
+        mProvider.setRating_impl(rating);
+    }
+
+    /**
+     * Send custom command to the session
+     *
+     * @param command custom command
+     * @param args optional argument
+     * @param cb optional result receiver
+     */
+    public void sendCustomCommand(@NonNull Command command, @Nullable Bundle args,
+            @Nullable ResultReceiver cb) {
+        mProvider.sendCustomCommand_impl(command, args, cb);
+    }
+
+    /**
+     * Return playlist from the session.
+     *
+     * @return playlist. Can be {@code null} if the controller doesn't have enough permission.
+     */
+    public @Nullable List<MediaItem2> getPlaylist() {
+        return mProvider.getPlaylist_impl();
+    }
+
+    public @Nullable PlaylistParam getPlaylistParam() {
+        return mProvider.getPlaylistParam_impl();
+    }
+
+    /**
+     * Removes the media item at index in the play list.
+     *<p>
+     * If index is same as the current index of the playlist, current playback
+     * will be stopped and playback moves to next source in the list.
+     *
+     * @return the removed DataSourceDesc at index in the play list
+     * @throws IllegalArgumentException if the play list is null
+     * @throws IndexOutOfBoundsException if index is outside play list range
+     */
+    // TODO(jaewan): Remove with index was previously rejected by council (b/36524925)
+    // TODO(jaewan): Should we also add movePlaylistItem from index to index?
+    public void removePlaylistItem(MediaItem2 item) {
+        mProvider.removePlaylistItem_impl(item);
+    }
+
+    /**
+     * Inserts the media item to the play list at position index.
+     * <p>
+     * This will not change the currently playing media item.
+     * If index is less than or equal to the current index of the play list,
+     * the current index of the play list will be incremented correspondingly.
+     *
+     * @param index the index you want to add dsd to the play list
+     * @param item the media item you want to add to the play list
+     * @throws IndexOutOfBoundsException if index is outside play list range
+     * @throws NullPointerException if dsd is null
+     */
+    public void addPlaylistItem(int index, MediaItem2 item) {
+        mProvider.addPlaylistItem_impl(index, item);
     }
 }

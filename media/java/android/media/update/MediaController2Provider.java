@@ -16,10 +16,19 @@
 
 package android.media.update;
 
-import android.media.MediaPlayerBase;
+import android.app.PendingIntent;
+import android.media.MediaController2.PlaybackInfo;
+import android.media.MediaItem2;
+import android.media.MediaSession2.Command;
+import android.media.MediaSession2.PlaylistParam;
+import android.media.PlaybackState2;
+import android.media.Rating2;
 import android.media.SessionToken;
-import android.media.session.PlaybackState;
-import android.os.Handler;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.ResultReceiver;
+
+import java.util.List;
 
 /**
  * @hide
@@ -29,7 +38,27 @@ public interface MediaController2Provider extends TransportControlProvider {
     SessionToken getSessionToken_impl();
     boolean isConnected_impl();
 
-    PlaybackState getPlaybackState_impl();
-    void addPlaybackListener_impl(MediaPlayerBase.PlaybackListener listener, Handler handler);
-    void removePlaybackListener_impl(MediaPlayerBase.PlaybackListener listener);
+    PendingIntent getSessionActivity_impl();
+    int getRatingType_impl();
+
+    void setVolumeTo_impl(int value, int flags);
+    void adjustVolume_impl(int direction, int flags);
+    PlaybackInfo getPlaybackInfo_impl();
+
+    void prepareFromUri_impl(Uri uri, Bundle extras);
+    void prepareFromSearch_impl(String query, Bundle extras);
+    void prepareMediaId_impl(String mediaId, Bundle extras);
+    void playFromSearch_impl(String query, Bundle extras);
+    void playFromUri_impl(String uri, Bundle extras);
+    void playFromMediaId_impl(String mediaId, Bundle extras);
+
+    void setRating_impl(Rating2 rating);
+    void sendCustomCommand_impl(Command command, Bundle args, ResultReceiver cb);
+    List<MediaItem2> getPlaylist_impl();
+
+    void removePlaylistItem_impl(MediaItem2 index);
+    void addPlaylistItem_impl(int index, MediaItem2 item);
+
+    PlaylistParam getPlaylistParam_impl();
+    PlaybackState2 getPlaybackState_impl();
 }
