@@ -392,8 +392,10 @@ message GlobalSettingsProto {
     optional SettingProto enable_smart_replies_in_notifications = 348;
     optional SettingProto show_first_crash_dialog = 349;
     optional SettingProto wifi_connected_mac_randomization_enabled = 350;
+    optional SettingProto show_restart_in_crash_dialog = 351;
+    optional SettingProto show_mute_in_crash_dialog = 352;
 
-    // Next tag = 351;
+    // Next tag = 353;
 }
 
 message SecureSettingsProto {
