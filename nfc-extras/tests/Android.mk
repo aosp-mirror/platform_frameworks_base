@@ -19,7 +19,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_JAVA_LIBRARIES := \
-    android.test.runner \
+    android.test.runner.stubs \
     com.android.nfc_extras \
     android.test.base.stubs
 
