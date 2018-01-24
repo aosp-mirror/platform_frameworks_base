@@ -196,7 +196,6 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"ネットワーク"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ワイヤレスディスプレイ認証"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi-Fi詳細ログの有効化"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Wi-Fi を強制的にモバイル接続に切り替える"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fiローミングスキャンを常に許可する"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"モバイルデータを常に ON にする"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"テザリング時のハードウェア アクセラレーション"</string>
@@ -223,7 +222,6 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS プロバイダのホスト名を入力"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ワイヤレスディスプレイ認証のオプションを表示"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi-Fiログレベルを上げて、Wi-Fi選択ツールでSSID RSSIごとに表示します"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"ON にすると、Wi-Fi の電波強度が弱い場合は強制的にモバイルデータ接続に切り替わるようになります"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"インターフェースのデータトラフィック量に基づいたWi-Fiローミングスキャンを許可するかしないかを設定できます"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ログバッファのサイズ"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"各ログバッファのログサイズを選択"</string>

@@ -289,11 +289,13 @@ public class RulesManagerServiceTest {
 
         // Request the rules state while the async operation is "happening".
         RulesState actualRulesState = mRulesManagerService.getRulesState();
+        DistroRulesVersion expectedInstalledDistroRulesVersion =
+                new DistroRulesVersion(installedRulesVersion, revision);
         RulesState expectedRuleState = new RulesState(
                 systemRulesVersion, RulesManagerService.DISTRO_FORMAT_VERSION_SUPPORTED,
                 true /* operationInProgress */,
                 RulesState.STAGED_OPERATION_UNKNOWN, null /* stagedDistroRulesVersion */,
-                RulesState.DISTRO_STATUS_UNKNOWN, null /* installedDistroRulesVersion */);
+                RulesState.DISTRO_STATUS_INSTALLED, expectedInstalledDistroRulesVersion);
         assertEquals(expectedRuleState, actualRulesState);
     }
 

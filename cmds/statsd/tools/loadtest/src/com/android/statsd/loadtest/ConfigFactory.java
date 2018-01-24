@@ -19,7 +19,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.util.Log;
 
-import com.android.internal.os.StatsdConfigProto.Bucket;
 import com.android.internal.os.StatsdConfigProto.Predicate;
 import com.android.internal.os.StatsdConfigProto.CountMetric;
 import com.android.internal.os.StatsdConfigProto.DurationMetric;

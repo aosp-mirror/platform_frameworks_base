@@ -15,27 +15,40 @@
      limitations under the License.
 -->
 
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+    android:clipChildren="false"
+    android:alpha="0"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:gravity="center" >
+    android:layout_height="@dimen/car_fullscreen_user_pod_height"
+    android:layout_gravity="center_horizontal|bottom" >
 
     <ImageView android:id="@+id/user_avatar"
-        android:layout_gravity="center"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="@dimen/car_fullscreen_user_pod_margin_image_top"
         android:layout_width="@dimen/car_fullscreen_user_pod_image_avatar_width"
-        android:layout_height="@dimen/car_fullscreen_user_pod_image_avatar_height" />
+        android:layout_height="@dimen/car_fullscreen_user_pod_image_avatar_height"
+        android:layout_above="@id/user_name" />
 
     <TextView android:id="@+id/user_name"
         android:layout_width="@dimen/car_fullscreen_user_pod_width"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/car_fullscreen_user_pod_margin_name_top"
         android:layout_marginBottom="@dimen/car_fullscreen_user_pod_margin_name_bottom"
-        android:textSize="@dimen/car_fullscreen_user_pod_text_size"
+        android:textSize="@dimen/car_fullscreen_user_pod_name_text_size"
         android:textColor="@color/qs_user_detail_name"
         android:ellipsize="end"
         android:singleLine="true"
         android:gravity="center_horizontal"
-        android:layout_gravity="center_horizontal" />
-</LinearLayout>
+        android:layout_above="@id/device_name" />
+
+    <TextView android:id="@+id/device_name"
+        android:layout_width="@dimen/car_fullscreen_user_pod_width"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/car_fullscreen_user_pod_device_text_size"
+        android:textColor="@color/qs_user_detail_name"
+        android:ellipsize="end"
+        android:singleLine="true"
+        android:gravity="center_horizontal"
+        android:layout_alignParentBottom="true" />
+</RelativeLayout>

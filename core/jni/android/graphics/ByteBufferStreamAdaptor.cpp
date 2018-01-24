@@ -67,7 +67,7 @@ public:
         }
 
         if (!buffer) {
-            return this->setPosition(mPosition + size);
+            return this->setPosition(mPosition + size) ? size : 0;
         }
 
         auto* env = get_env_or_die(mJvm);

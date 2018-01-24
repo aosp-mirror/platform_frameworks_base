@@ -558,4 +558,6 @@ message JobStatusDumpProto {
 
     optional int64 last_successful_run_time = 22;
     optional int64 last_failed_run_time = 23;
+
+    optional int64 internal_flags = 24;
 }

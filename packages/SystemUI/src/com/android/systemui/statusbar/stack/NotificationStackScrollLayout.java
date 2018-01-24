@@ -399,6 +399,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private final int mSeparatorWidth;
     private final int mSeparatorThickness;
     private final Rect mTmpRect = new Rect();
+    private int mClockBottom;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -510,7 +511,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         final int darkTop = (int) (mRegularTopPadding + mSeparatorThickness / 2f);
         final int darkBottom = darkTop + mSeparatorThickness;
 
-        if (mAmbientState.isDark()) {
+        if (mAmbientState.hasPulsingNotifications()) {
+            // TODO draw divider between notification and shelf
+        } else if (mAmbientState.isDark()) {
             // Only draw divider on AOD if we actually have notifications
             if (mFirstVisibleBackgroundChild != null) {
                 canvas.drawRect(darkLeft, darkTop, darkRight, darkBottom, mBackgroundPaint);
@@ -684,7 +687,11 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateAlgorithmHeightAndPadding() {
-        mTopPadding = mAmbientState.isDark() ? mDarkTopPadding : mRegularTopPadding;
+        if (mPulsing != null) {
+            mTopPadding = mClockBottom;
+        } else {
+            mTopPadding = mAmbientState.isDark() ? mDarkTopPadding : mRegularTopPadding;
+        }
         mAmbientState.setLayoutHeight(getLayoutHeight());
         updateAlgorithmLayoutMinHeight();
         mAmbientState.setTopPadding(mTopPadding);
@@ -4322,13 +4329,15 @@ public class NotificationStackScrollLayout extends ViewGroup
         return mIsExpanded;
     }
 
-    public void setPulsing(Collection<HeadsUpManager.HeadsUpEntry> pulsing) {
+    public void setPulsing(Collection<HeadsUpManager.HeadsUpEntry> pulsing, int clockBottom) {
         if (mPulsing == null && pulsing == null) {
             return;
         }
         mPulsing = pulsing;
+        mClockBottom = clockBottom;
         mAmbientState.setPulsing(pulsing);
         updateNotificationAnimationStates();
+        updateAlgorithmHeightAndPadding();
         updateContentHeight();
         notifyHeightChangeListener(mShelf);
         requestChildrenUpdate();

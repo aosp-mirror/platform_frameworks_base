@@ -5149,6 +5149,11 @@ message MetricsEvent {
     // OS: P
     FUELGAUGE_RESTRICTED_APP_DETAILS = 1285;
 
+    // OPEN: Settings > Sound & notification > Do Not Disturb > Turn on now
+    // CATEGORY: SETTINGS
+    // OS: P
+    NOTIFICATION_ZEN_MODE_ENABLE_DIALOG = 1286;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS

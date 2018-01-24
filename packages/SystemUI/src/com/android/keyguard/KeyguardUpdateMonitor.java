@@ -1257,7 +1257,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 mFingerprintCancelSignal.cancel();
             }
             mFingerprintCancelSignal = new CancellationSignal();
-            mFpm.authenticate(null, mFingerprintCancelSignal, 0, mAuthenticationCallback, null, userId);
+            mFpm.authenticate(null, mFingerprintCancelSignal, 0, mAuthenticationCallback, null,
+                    userId);
             setFingerprintRunningState(FINGERPRINT_STATE_RUNNING);
         }
     }

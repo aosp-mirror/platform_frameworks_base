@@ -51,5 +51,4 @@ struct ImageDecoder {
 // Creates a Java Canvas object from canvas, calls jimageDecoder's PostProcess on it, and then
 // releases the Canvas.
 // Caller needs to check for exceptions.
-jint postProcessAndRelease(JNIEnv* env, jobject jimageDecoder, std::unique_ptr<Canvas> canvas,
-                           int width, int height);
+jint postProcessAndRelease(JNIEnv* env, jobject jimageDecoder, std::unique_ptr<Canvas> canvas);

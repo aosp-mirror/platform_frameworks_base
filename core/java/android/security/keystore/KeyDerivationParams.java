@@ -61,7 +61,7 @@ public final class KeyDerivationParams implements Parcelable {
         return new KeyDerivationParams(ALGORITHM_SHA256, salt);
     }
 
-    private KeyDerivationParams(@KeyDerivationAlgorithm int algorithm, @NonNull byte[] salt) {
+    KeyDerivationParams(@KeyDerivationAlgorithm int algorithm, @NonNull byte[] salt) {
         mAlgorithm = algorithm;
         mSalt = Preconditions.checkNotNull(salt);
     }

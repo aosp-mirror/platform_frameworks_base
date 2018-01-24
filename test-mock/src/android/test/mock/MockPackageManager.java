@@ -108,6 +108,12 @@ public class MockPackageManager extends PackageManager {
         throw new UnsupportedOperationException();
     }
 
+    /** @hide */
+    @Override
+    public Intent getCarLaunchIntentForPackage(String packageName) {
+        throw new UnsupportedOperationException();
+    }
+
     @Override
     public int[] getPackageGids(String packageName) throws NameNotFoundException {
         throw new UnsupportedOperationException();
@@ -1190,4 +1196,17 @@ public class MockPackageManager extends PackageManager {
     public CharSequence getHarmfulAppWarning(String packageName) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public boolean hasSigningCertificate(
+            String packageName, byte[] certificate, @PackageManager.CertificateInputType int type) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean hasSigningCertificate(
+            int uid, byte[] certificate, @PackageManager.CertificateInputType int type) {
+        throw new UnsupportedOperationException();
+    }
+
 }

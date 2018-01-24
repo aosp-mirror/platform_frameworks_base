@@ -196,7 +196,6 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Мережі"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Сертифікація бездрот. екрана"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Докладний запис у журнал Wi-Fi"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Перемикатися з Wi-Fi на мобільну мережу"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Завжди шукати мережі Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Не вимикати мобільне передавання даних"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Апаратне прискорення під час використання телефона в режимі модема"</string>
@@ -223,7 +222,6 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Введіть ім’я хосту постачальника послуг DNS"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Показати параметри сертифікації бездротового екрана"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Показувати в журналі RSSI для кожного SSID під час вибору Wi-Fi"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Примусово перемикатися на мобільну мережу, коли сигнал Wi-Fi слабкий"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Дозволити чи заборонити Wi-Fi шукати роумінг на основі обсягу трафіку даних в інтерфейсі"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Розміри буфера журналу"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Виберіть розміри буфера журналу"</string>

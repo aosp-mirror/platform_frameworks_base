@@ -23,6 +23,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.util.Log;
+import android.util.proto.ProtoOutputStream;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -1649,6 +1650,21 @@ public final class PowerManager {
                 return "WakeLock{"
                     + Integer.toHexString(System.identityHashCode(this))
                     + " held=" + mHeld + ", refCount=" + mInternalCount + "}";
+            }
+        }
+
+        /** @hide */
+        public void writeToProto(ProtoOutputStream proto, long fieldId) {
+            synchronized (mToken) {
+                final long token = proto.start(fieldId);
+                proto.write(PowerManagerProto.WakeLockProto.HEX_STRING,
+                        Integer.toHexString(System.identityHashCode(this)));
+                proto.write(PowerManagerProto.WakeLockProto.HELD, mHeld);
+                proto.write(PowerManagerProto.WakeLockProto.INTERNAL_COUNT, mInternalCount);
+                if (mWorkSource != null) {
+                    mWorkSource.writeToProto(proto, PowerManagerProto.WakeLockProto.WORK_SOURCE);
+                }
+                proto.end(token);
             }
         }
 

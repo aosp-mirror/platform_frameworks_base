@@ -19,6 +19,8 @@ package com.android.server.net;
 import android.net.Network;
 import android.telephony.SubscriptionPlan;
 
+import java.util.Set;
+
 /**
  * Network Policy Manager local system service interface.
  *
@@ -71,4 +73,21 @@ public abstract class NetworkPolicyManagerInternal {
      * Informs that admin data is loaded and available.
      */
     public abstract void onAdminDataAvailable();
+
+    /**
+     * Sets a list of packages which are restricted by admin from accessing metered data.
+     *
+     * @param packageNames the list of restricted packages.
+     * @param userId the userId in which {@param packagesNames} are restricted.
+     */
+    public abstract void setMeteredRestrictedPackages(
+            Set<String> packageNames, int userId);
+
+
+    /**
+     * Similar to {@link #setMeteredRestrictedPackages(Set, int)} but updates the restricted
+     * packages list asynchronously.
+     */
+    public abstract void setMeteredRestrictedPackagesAsync(
+            Set<String> packageNames, int userId);
 }

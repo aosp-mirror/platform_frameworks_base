@@ -462,8 +462,6 @@ public class SubscriptionManager {
      * <p>
      * Contains {@link #EXTRA_SUBSCRIPTION_INDEX} to indicate which subscription
      * the user is interested in.
-     *
-     * @hide
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     @SystemApi
@@ -481,8 +479,6 @@ public class SubscriptionManager {
      * <p>
      * Contains {@link #EXTRA_SUBSCRIPTION_INDEX} to indicate which subscription
      * the user is interested in.
-     *
-     * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @SystemApi
@@ -1698,7 +1694,6 @@ public class SubscriptionManager {
      * </ul>
      *
      * @param subId the subscriber this relationship applies to
-     * @hide
      */
     @SystemApi
     public @NonNull List<SubscriptionPlan> getSubscriptionPlans(int subId) {
@@ -1728,7 +1723,6 @@ public class SubscriptionManager {
      * @param plans the list of plans. The first plan is always the primary and
      *            most important plan. Any additional plans are secondary and
      *            may not be displayed or used by decision making logic.
-     * @hide
      */
     @SystemApi
     public void setSubscriptionPlans(int subId, @NonNull List<SubscriptionPlan> plans) {
@@ -1769,7 +1763,6 @@ public class SubscriptionManager {
      *            be automatically cleared, or {@code 0} to leave in the
      *            requested state until explicitly cleared, or the next reboot,
      *            whichever happens first.
-     * @hide
      */
     @SystemApi
     public void setSubscriptionOverrideUnmetered(int subId, boolean overrideUnmetered,
@@ -1804,7 +1797,6 @@ public class SubscriptionManager {
      *            be automatically cleared, or {@code 0} to leave in the
      *            requested state until explicitly cleared, or the next reboot,
      *            whichever happens first.
-     * @hide
      */
     @SystemApi
     public void setSubscriptionOverrideCongested(int subId, boolean overrideCongested,

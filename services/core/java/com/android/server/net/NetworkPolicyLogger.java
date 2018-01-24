@@ -37,6 +37,7 @@ import com.android.server.am.ProcessList;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Set;
 
 public class NetworkPolicyLogger {
     static final String TAG = "NetworkPolicy";
@@ -62,6 +63,7 @@ public class NetworkPolicyLogger {
     private static final int EVENT_TEMP_POWER_SAVE_WL_CHANGED = 10;
     private static final int EVENT_UID_FIREWALL_RULE_CHANGED = 11;
     private static final int EVENT_FIREWALL_CHAIN_ENABLED = 12;
+    private static final int EVENT_UPDATE_METERED_RESTRICTED_PKGS = 13;
 
     static final int NTWK_BLOCKED_POWER = 0;
     static final int NTWK_ALLOWED_NON_METERED = 1;
@@ -174,6 +176,14 @@ public class NetworkPolicyLogger {
         synchronized (mLock) {
             final String log = "Firewall rules changed for " + getFirewallChainName(chain)
                     + "; uids=" + Arrays.toString(uids) + "; rules=" + Arrays.toString(rules);
+            if (LOGD) Slog.d(TAG, log);
+            mEventsBuffer.event(log);
+        }
+    }
+
+    void meteredRestrictedPkgsChanged(Set<Integer> restrictedUids) {
+        synchronized (mLock) {
+            final String log = "Metered restricted uids: " + restrictedUids;
             if (LOGD) Slog.d(TAG, log);
             mEventsBuffer.event(log);
         }

@@ -794,8 +794,6 @@ package android.content {
     field public static final java.lang.String ACTION_QUERY_PACKAGE_RESTART = "android.intent.action.QUERY_PACKAGE_RESTART";
     field public static final java.lang.String ACTION_RESOLVE_INSTANT_APP_PACKAGE = "android.intent.action.RESOLVE_INSTANT_APP_PACKAGE";
     field public static final java.lang.String ACTION_REVIEW_PERMISSIONS = "android.intent.action.REVIEW_PERMISSIONS";
-    field public static final java.lang.String ACTION_SIM_APPLICATION_STATE_CHANGED = "android.intent.action.SIM_APPLICATION_STATE_CHANGED";
-    field public static final java.lang.String ACTION_SIM_CARD_STATE_CHANGED = "android.intent.action.SIM_CARD_STATE_CHANGED";
     field public static final deprecated java.lang.String ACTION_SIM_STATE_CHANGED = "android.intent.action.SIM_STATE_CHANGED";
     field public static final java.lang.String ACTION_UPGRADE_SETUP = "android.intent.action.UPGRADE_SETUP";
     field public static final java.lang.String ACTION_USER_REMOVED = "android.intent.action.USER_REMOVED";
@@ -2335,11 +2333,15 @@ package android.location {
     method public deprecated boolean addGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
     method public void flushGnssBatch();
     method public int getGnssBatchSize();
+    method public boolean isLocationEnabledForUser(android.os.UserHandle);
+    method public boolean isProviderEnabledForUser(java.lang.String, android.os.UserHandle);
     method public boolean registerGnssBatchedLocationCallback(long, boolean, android.location.BatchedLocationCallback, android.os.Handler);
     method public deprecated void removeGpsMeasurementListener(android.location.GpsMeasurementsEvent.Listener);
     method public deprecated void removeGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
     method public void requestLocationUpdates(android.location.LocationRequest, android.location.LocationListener, android.os.Looper);
     method public void requestLocationUpdates(android.location.LocationRequest, android.app.PendingIntent);
+    method public void setLocationEnabledForUser(boolean, android.os.UserHandle);
+    method public boolean setProviderEnabledForUser(java.lang.String, boolean, android.os.UserHandle);
     method public boolean unregisterGnssBatchedLocationCallback(android.location.BatchedLocationCallback);
   }
 
@@ -2869,6 +2871,7 @@ package android.net {
   }
 
   public final class IpSecManager {
+    method public void applyTunnelModeTransform(android.net.IpSecManager.IpSecTunnelInterface, int, android.net.IpSecTransform) throws java.io.IOException;
     method public android.net.IpSecManager.IpSecTunnelInterface createIpSecTunnelInterface(java.net.InetAddress, java.net.InetAddress, android.net.Network) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException;
   }
 
@@ -3447,6 +3450,7 @@ package android.os {
     field public static final java.lang.String ACTION_UPDATE_CT_LOGS = "android.intent.action.UPDATE_CT_LOGS";
     field public static final java.lang.String ACTION_UPDATE_INTENT_FIREWALL = "android.intent.action.UPDATE_INTENT_FIREWALL";
     field public static final java.lang.String ACTION_UPDATE_LANG_ID = "android.intent.action.UPDATE_LANG_ID";
+    field public static final java.lang.String ACTION_UPDATE_NETWORK_WATCHLIST = "android.intent.action.UPDATE_NETWORK_WATCHLIST";
     field public static final java.lang.String ACTION_UPDATE_PINS = "android.intent.action.UPDATE_PINS";
     field public static final java.lang.String ACTION_UPDATE_SMART_SELECTION = "android.intent.action.UPDATE_SMART_SELECTION";
     field public static final java.lang.String ACTION_UPDATE_SMS_SHORT_CODES = "android.intent.action.UPDATE_SMS_SHORT_CODES";
@@ -4391,6 +4395,12 @@ package android.telecom {
 
 package android.telephony {
 
+  public static final class AccessNetworkConstants.TransportType {
+    ctor public AccessNetworkConstants.TransportType();
+    field public static final int WLAN = 2; // 0x2
+    field public static final int WWAN = 1; // 0x1
+  }
+
   public class CarrierConfigManager {
     method public static android.os.PersistableBundle getDefaultConfig();
     method public void updateConfigForPhoneId(int, java.lang.String);
@@ -4526,6 +4536,9 @@ package android.telephony {
     method public int[] supplyPukReportResult(java.lang.String, java.lang.String);
     method public void toggleRadioOnOff();
     method public void updateServiceLocation();
+    field public static final java.lang.String ACTION_SIM_APPLICATION_STATE_CHANGED = "android.telephony.action.SIM_APPLICATION_STATE_CHANGED";
+    field public static final java.lang.String ACTION_SIM_CARD_STATE_CHANGED = "android.telephony.action.SIM_CARD_STATE_CHANGED";
+    field public static final java.lang.String ACTION_SIM_SLOT_STATUS_CHANGED = "android.telephony.action.SIM_SLOT_STATUS_CHANGED";
     field public static final int CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES = -2; // 0xfffffffe
     field public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1; // 0x1
     field public static final int CARRIER_PRIVILEGE_STATUS_NO_ACCESS = 0; // 0x0
@@ -4603,18 +4616,21 @@ package android.telephony.data {
     method public abstract android.telephony.data.DataService.DataServiceProvider createDataServiceProvider(int);
     field public static final java.lang.String DATA_SERVICE_EXTRA_SLOT_ID = "android.telephony.data.extra.SLOT_ID";
     field public static final java.lang.String DATA_SERVICE_INTERFACE = "android.telephony.data.DataService";
+    field public static final int REQUEST_REASON_HANDOVER = 3; // 0x3
+    field public static final int REQUEST_REASON_NORMAL = 1; // 0x1
+    field public static final int REQUEST_REASON_SHUTDOWN = 2; // 0x2
   }
 
   public class DataService.DataServiceProvider {
     ctor public DataService.DataServiceProvider(int);
-    method public void deactivateDataCall(int, boolean, boolean, android.telephony.data.DataServiceCallback);
+    method public void deactivateDataCall(int, int, android.telephony.data.DataServiceCallback);
     method public void getDataCallList(android.telephony.data.DataServiceCallback);
     method public final int getSlotId();
     method public final void notifyDataCallListChanged(java.util.List<android.telephony.data.DataCallResponse>);
     method protected void onDestroy();
     method public void setDataProfile(java.util.List<android.telephony.data.DataProfile>, boolean, android.telephony.data.DataServiceCallback);
     method public void setInitialAttachApn(android.telephony.data.DataProfile, boolean, android.telephony.data.DataServiceCallback);
-    method public void setupDataCall(int, android.telephony.data.DataProfile, boolean, boolean, boolean, android.net.LinkProperties, android.telephony.data.DataServiceCallback);
+    method public void setupDataCall(int, android.telephony.data.DataProfile, boolean, boolean, int, android.net.LinkProperties, android.telephony.data.DataServiceCallback);
   }
 
   public class DataServiceCallback {

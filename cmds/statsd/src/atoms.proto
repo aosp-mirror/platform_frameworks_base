@@ -86,6 +86,7 @@ message Atom {
         AppStartFullyDrawnChanged app_start_fully_drawn_changed = 50;
         LmkEventOccurred lmk_event_occurred = 51;
         PictureInPictureStateChanged picture_in_picture_state_changed = 52;
+        WifiMulticastLockStateChanged wifi_multicast_lock_state_changed = 53;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
@@ -697,6 +698,22 @@ message WifiSignalStrengthChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message WifiScanStateChanged {
+    repeated AttributionNode attribution_node = 1;
+
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 2;
+}
+
+/**
+ * Logs wifi multicast locks held by an app
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message WifiMulticastLockStateChanged {
     repeated AttributionNode attribution_node = 1;
 
     enum State {

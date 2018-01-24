@@ -143,6 +143,26 @@ public final class RulesManagerService extends IRulesManager.Stub {
                 return null;
             }
 
+            // Determine the installed distro state. This should be possible regardless of whether
+            // there's an operation in progress.
+            DistroVersion installedDistroVersion;
+            int distroStatus = DISTRO_STATUS_UNKNOWN;
+            DistroRulesVersion installedDistroRulesVersion = null;
+            try {
+                installedDistroVersion = mInstaller.getInstalledDistroVersion();
+                if (installedDistroVersion == null) {
+                    distroStatus = DISTRO_STATUS_NONE;
+                    installedDistroRulesVersion = null;
+                } else {
+                    distroStatus = DISTRO_STATUS_INSTALLED;
+                    installedDistroRulesVersion = new DistroRulesVersion(
+                            installedDistroVersion.rulesVersion,
+                            installedDistroVersion.revision);
+                }
+            } catch (DistroException | IOException e) {
+                Slog.w(TAG, "Failed to read installed distro.", e);
+            }
+
             boolean operationInProgress = this.mOperationInProgress.get();
 
             // Determine the staged operation status, if possible.
@@ -166,27 +186,6 @@ public final class RulesManagerService extends IRulesManager.Stub {
                     }
                 } catch (DistroException | IOException e) {
                     Slog.w(TAG, "Failed to read staged distro.", e);
-                }
-            }
-
-            // Determine the installed distro state, if possible.
-            DistroVersion installedDistroVersion;
-            int distroStatus = DISTRO_STATUS_UNKNOWN;
-            DistroRulesVersion installedDistroRulesVersion = null;
-            if (!operationInProgress) {
-                try {
-                    installedDistroVersion = mInstaller.getInstalledDistroVersion();
-                    if (installedDistroVersion == null) {
-                        distroStatus = DISTRO_STATUS_NONE;
-                        installedDistroRulesVersion = null;
-                    } else {
-                        distroStatus = DISTRO_STATUS_INSTALLED;
-                        installedDistroRulesVersion = new DistroRulesVersion(
-                                installedDistroVersion.rulesVersion,
-                                installedDistroVersion.revision);
-                    }
-                } catch (DistroException | IOException e) {
-                    Slog.w(TAG, "Failed to read installed distro.", e);
                 }
             }
             return new RulesState(systemRulesVersion, DISTRO_FORMAT_VERSION_SUPPORTED,

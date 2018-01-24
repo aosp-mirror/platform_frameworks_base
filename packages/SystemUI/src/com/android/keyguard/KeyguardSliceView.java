@@ -333,6 +333,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
      */
     private class KeyguardSliceButton extends Button {
 
+        private static final float SEPARATOR_HEIGHT = 0.7f;
         private final Paint mPaint;
         private boolean mHasDivider;
 
@@ -369,7 +370,9 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             super.onDraw(canvas);
             if (mHasDivider) {
                 final int lineX = getLayoutDirection() == LAYOUT_DIRECTION_RTL ? 0 : getWidth();
-                canvas.drawLine(lineX, 0, lineX, getHeight(), mPaint);
+                final int height = (int) (getHeight() * SEPARATOR_HEIGHT);
+                final int startY = getHeight() / 2 - height / 2;
+                canvas.drawLine(lineX, startY, lineX, startY + height, mPaint);
             }
         }
     }

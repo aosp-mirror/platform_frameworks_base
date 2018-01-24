@@ -165,8 +165,8 @@ public class BitmapDrawable extends Drawable {
         Bitmap bitmap = null;
         try (FileInputStream stream = new FileInputStream(filepath)) {
             bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(res, stream),
-                    (info, decoder) -> {
-                decoder.setAllocator(ImageDecoder.SOFTWARE_ALLOCATOR);
+                    (decoder, info, src) -> {
+                decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
             });
         } catch (Exception e) {
             /*  do nothing. This matches the behavior of BitmapFactory.decodeFile()
@@ -198,8 +198,8 @@ public class BitmapDrawable extends Drawable {
         Bitmap bitmap = null;
         try {
             bitmap = ImageDecoder.decodeBitmap(ImageDecoder.createSource(res, is),
-                    (info, decoder) -> {
-                decoder.setAllocator(ImageDecoder.SOFTWARE_ALLOCATOR);
+                    (decoder, info, src) -> {
+                decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
             });
         } catch (Exception e) {
             /*  do nothing. This matches the behavior of BitmapFactory.decodeStream()
@@ -838,8 +838,8 @@ public class BitmapDrawable extends Drawable {
             Bitmap bitmap = null;
             try (InputStream is = r.openRawResource(srcResId, value)) {
                 ImageDecoder.Source source = ImageDecoder.createSource(r, is, density);
-                bitmap = ImageDecoder.decodeBitmap(source, (info, decoder) -> {
-                    decoder.setAllocator(ImageDecoder.SOFTWARE_ALLOCATOR);
+                bitmap = ImageDecoder.decodeBitmap(source, (decoder, info, src) -> {
+                    decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
                 });
             } catch (Exception e) {
                 // Do nothing and pick up the error below.

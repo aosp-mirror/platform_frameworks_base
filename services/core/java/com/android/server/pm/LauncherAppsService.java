@@ -560,7 +560,6 @@ public class LauncherAppsService extends SystemService {
         private boolean startShortcutIntentsAsPublisher(@NonNull Intent[] intents,
                 @NonNull String publisherPackage, Bundle startActivityOptions, int userId) {
             final int code;
-            final long ident = injectClearCallingIdentity();
             try {
                 code = mActivityManagerInternal.startActivitiesAsPackage(publisherPackage,
                         userId, intents, startActivityOptions);
@@ -575,8 +574,6 @@ public class LauncherAppsService extends SystemService {
                     Slog.d(TAG, "SecurityException while launching intent", e);
                 }
                 return false;
-            } finally {
-                injectRestoreCallingIdentity(ident);
             }
         }
 

@@ -226,7 +226,10 @@ message IncidentProto {
         (section).args = "activity --proto service"
     ];
 
-    optional com.android.server.am.proto.ProcessProto amprocesses = 3015;
+    optional com.android.server.am.proto.ProcessesProto amprocesses = 3015 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "activity --proto processes"
+    ];
 
     optional com.android.server.AlarmManagerServiceProto alarm = 3016 [
         (section).type = SECTION_DUMPSYS,

@@ -185,7 +185,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
 
         // The public notification will show similar info but with the actual screenshot omitted
         mPublicNotificationBuilder =
-                new Notification.Builder(context, NotificationChannels.SCREENSHOTS)
+                new Notification.Builder(context, NotificationChannels.SCREENSHOTS_HEADSUP)
                         .setContentTitle(r.getString(R.string.screenshot_saving_title))
                         .setContentText(r.getString(R.string.screenshot_saving_text))
                         .setSmallIcon(R.drawable.stat_notify_image)
@@ -196,7 +196,8 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                                 com.android.internal.R.color.system_notification_accent_color));
         SystemUI.overrideNotificationAppName(context, mPublicNotificationBuilder);
 
-        mNotificationBuilder = new Notification.Builder(context, NotificationChannels.SCREENSHOTS)
+        mNotificationBuilder = new Notification.Builder(context,
+                NotificationChannels.SCREENSHOTS_HEADSUP)
             .setTicker(r.getString(R.string.screenshot_saving_ticker)
                     + (mTickerAddSpace ? " " : ""))
             .setContentTitle(r.getString(R.string.screenshot_saving_title))

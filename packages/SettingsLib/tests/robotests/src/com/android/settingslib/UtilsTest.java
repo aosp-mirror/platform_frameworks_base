@@ -15,28 +15,8 @@
  */
 package com.android.settingslib;
 
-import android.app.ActivityManager;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.Intent;
-import android.location.LocationManager;
-import android.os.UserHandle;
-import android.provider.Settings;
-import android.provider.Settings.Secure;
-import android.text.TextUtils;
-import java.util.HashMap;
-import java.util.Map;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatcher;
-import org.mockito.ArgumentMatchers;
-import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
-
 import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -44,7 +24,28 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
+import android.location.LocationManager;
+import android.os.UserHandle;
+import android.provider.Settings;
+import android.provider.Settings.Secure;
+import android.text.TextUtils;
+import com.android.settingslib.wrapper.LocationManagerWrapper;
+import java.util.HashMap;
+import java.util.Map;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatcher;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;
 import org.robolectric.shadows.ShadowSettings;
@@ -53,7 +54,9 @@ import org.robolectric.shadows.ShadowSettings;
 @Config(
         manifest = TestConfig.MANIFEST_PATH,
         sdk = TestConfig.SDK_VERSION,
-        shadows = {UtilsTest.ShadowSecure.class})
+        shadows = {
+            UtilsTest.ShadowSecure.class,
+            UtilsTest.ShadowLocationManagerWrapper.class})
 public class UtilsTest {
     private static final double[] TEST_PERCENTAGES = {0, 0.4, 0.5, 0.6, 49, 49.3, 49.8, 50, 100};
     private static final String PERCENTAGE_0 = "0%";
@@ -63,10 +66,14 @@ public class UtilsTest {
     private static final String PERCENTAGE_100 = "100%";
 
     private Context mContext;
+    @Mock
+    private LocationManager mLocationManager;
 
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
         mContext = spy(RuntimeEnvironment.application);
+        when(mContext.getSystemService(Context.LOCATION_SERVICE)).thenReturn(mLocationManager);
         ShadowSecure.reset();
     }
 
@@ -83,6 +90,17 @@ public class UtilsTest {
                 argThat(actionMatches(LocationManager.MODE_CHANGING_ACTION)),
                 ArgumentMatchers.eq(UserHandle.of(currentUserId)),
                 ArgumentMatchers.eq(WRITE_SECURE_SETTINGS));
+    }
+
+    @Test
+    public void testUpdateLocationEnabled_sendBroadcast() {
+        int currentUserId = ActivityManager.getCurrentUser();
+        Utils.updateLocationEnabled(mContext, true, currentUserId);
+
+        verify(mContext).sendBroadcastAsUser(
+            argThat(actionMatches(LocationManager.MODE_CHANGING_ACTION)),
+            ArgumentMatchers.eq(UserHandle.of(currentUserId)),
+            ArgumentMatchers.eq(WRITE_SECURE_SETTINGS));
     }
 
     @Test
@@ -137,8 +155,26 @@ public class UtilsTest {
             return true;
         }
 
+        @Implementation
+        public static int getIntForUser(ContentResolver cr, String name, int def, int userHandle) {
+            if (map.containsKey(name)) {
+                return map.get(name);
+            } else {
+                return def;
+            }
+        }
+
         public static void reset() {
             map.clear();
+        }
+    }
+
+    @Implements(value = LocationManagerWrapper.class)
+    public static class ShadowLocationManagerWrapper {
+
+        @Implementation
+        public void setLocationEnabledForUser(boolean enabled, UserHandle userHandle) {
+            // Do nothing
         }
     }
 }

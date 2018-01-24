@@ -143,7 +143,7 @@ public class Process {
      * Defines the UID/GID for the WebView zygote process.
      * @hide
      */
-    public static final int WEBVIEW_ZYGOTE_UID = 1051;
+    public static final int WEBVIEW_ZYGOTE_UID = 1053;
 
     /**
      * Defines the UID used for resource tracking for OTA updates.
@@ -571,6 +571,14 @@ public class Process {
      */
     public static UserHandle myUserHandle() {
         return UserHandle.of(UserHandle.getUserId(myUid()));
+    }
+
+    /**
+     * Returns whether the given uid belongs to a system core component or not.
+     * @hide
+     */
+    public static boolean isCoreUid(int uid) {
+        return UserHandle.isCore(uid);
     }
 
     /**

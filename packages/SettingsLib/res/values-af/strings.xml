@@ -196,7 +196,6 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Inligtingruiling"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Draadlose skermsertifisering"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Aktiveer Wi-Fi-woordryke aanmelding"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"Aggressiewe Wi‑Fi-na-mobiel-oorhandiging"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Laat altyd Wi-Fi-swerfskanderings toe"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobiele data is altyd aktief"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardewareversnelling vir verbinding"</string>
@@ -223,7 +222,6 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Voer gasheernaam van DNS-verskaffer in"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Wys opsies vir draadlose skermsertifisering"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Verhoog Wi-Fi-aantekeningvlak, wys per SSID RSSI in Wi‑Fi-kieser"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Wanneer dit geaktiveer is, sal Wi-Fi die dataverbinding aggressiewer na mobiel oordra wanneer die Wi-Fi-sein swak is"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Laat toe of verbied Wi-Fi-swerfskanderings op grond van die hoeveelheid dataverkeer wat op die koppelvlak teenwoordig is"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Loggerbuffer se groottes"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Kies loggergroottes per logbuffer"</string>

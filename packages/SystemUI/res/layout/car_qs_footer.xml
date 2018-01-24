@@ -35,7 +35,6 @@
         android:layout_centerVertical="true"
         android:layout_width="@dimen/car_qs_footer_icon_width"
         android:layout_height="@dimen/car_qs_footer_icon_height"
-        android:layout_marginRight="@dimen/car_qs_footer_user_switch_margin_right"
         android:background="@drawable/ripple_drawable"
         android:focusable="true">
 
@@ -47,6 +46,18 @@
             android:scaleType="fitCenter"/>
     </com.android.systemui.statusbar.phone.MultiUserSwitch>
 
+    <ImageView
+        android:id="@+id/user_switch_expand_icon"
+        android:layout_height="match_parent"
+        android:layout_width="@dimen/car_qs_footer_user_switch_icon_width"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@+id/multi_user_switch"
+        android:layout_marginLeft="@dimen/car_qs_footer_user_switch_icon_margin"
+        android:layout_marginRight="@dimen/car_qs_footer_user_switch_icon_margin"
+        android:src="@drawable/car_ic_arrow_drop_up"
+        android:scaleType="fitCenter">
+    </ImageView>
+
     <TextView android:id="@+id/user_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -54,7 +65,7 @@
         android:textColor="@color/car_qs_footer_user_name_color"
         android:gravity="start|center_vertical"
         android:layout_centerVertical="true"
-        android:layout_toEndOf="@id/multi_user_switch" />
+        android:layout_toEndOf="@id/user_switch_expand_icon" />
 
     <com.android.systemui.statusbar.phone.SettingsButton
         android:id="@+id/settings_button"

@@ -156,10 +156,11 @@ public final class Slice implements Parcelable {
      */
     public static final String HINT_SEE_MORE = "see_more";
     /**
-     * A hint to tell the system that this slice cares about the return value of
-     * {@link SliceProvider#getBindingPackage} and should not cache the result
-     * for multiple apps.
-     * @hide
+     * A hint used when implementing app-specific slice permissions.
+     * Tells the system that for this slice the return value of
+     * {@link SliceProvider#onBindSlice(Uri, List)} may be different depending on
+     * {@link SliceProvider#getBindingPackage} and should not be cached for multiple
+     * apps.
      */
     public static final String HINT_CALLER_NEEDED = "caller_needed";
     /**
@@ -423,28 +424,6 @@ public final class Slice implements Parcelable {
             mItems.add(new SliceItem(remoteInput, SliceItem.FORMAT_REMOTE_INPUT,
                     subType, hints));
             return this;
-        }
-
-        /**
-         * Add a color to the slice being constructed
-         * @param subType Optional template-specific type information
-         * @see {@link SliceItem#getSubType()}
-         * @deprecated will be removed once supportlib updates
-         */
-        public Builder addColor(int color, @Nullable String subType, @SliceHint String... hints) {
-            mItems.add(new SliceItem(color, SliceItem.FORMAT_INT, subType, hints));
-            return this;
-        }
-
-        /**
-         * Add a color to the slice being constructed
-         * @param subType Optional template-specific type information
-         * @see {@link SliceItem#getSubType()}
-         * @deprecated will be removed once supportlib updates
-         */
-        public Builder addColor(int color, @Nullable String subType,
-                @SliceHint List<String> hints) {
-            return addColor(color, subType, hints.toArray(new String[hints.size()]));
         }
 
         /**

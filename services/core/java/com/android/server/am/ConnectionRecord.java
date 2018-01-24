@@ -20,6 +20,7 @@ import android.app.IServiceConnection;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.util.proto.ProtoOutputStream;
+import android.util.proto.ProtoUtils;
 
 import com.android.server.am.proto.ConnectionRecordProto;
 
@@ -37,7 +38,43 @@ final class ConnectionRecord {
     final PendingIntent clientIntent; // How to launch the client.
     String stringName;              // Caching of toString.
     boolean serviceDead;            // Well is it?
-    
+
+    // Please keep the following two enum list synced.
+    private static int[] BIND_ORIG_ENUMS = new int[] {
+            Context.BIND_AUTO_CREATE,
+            Context.BIND_DEBUG_UNBIND,
+            Context.BIND_NOT_FOREGROUND,
+            Context.BIND_IMPORTANT_BACKGROUND,
+            Context.BIND_ABOVE_CLIENT,
+            Context.BIND_ALLOW_OOM_MANAGEMENT,
+            Context.BIND_WAIVE_PRIORITY,
+            Context.BIND_IMPORTANT,
+            Context.BIND_ADJUST_WITH_ACTIVITY,
+            Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE,
+            Context.BIND_FOREGROUND_SERVICE,
+            Context.BIND_TREAT_LIKE_ACTIVITY,
+            Context.BIND_VISIBLE,
+            Context.BIND_SHOWING_UI,
+            Context.BIND_NOT_VISIBLE,
+    };
+    private static int[] BIND_PROTO_ENUMS = new int[] {
+            ConnectionRecordProto.AUTO_CREATE,
+            ConnectionRecordProto.DEBUG_UNBIND,
+            ConnectionRecordProto.NOT_FG,
+            ConnectionRecordProto.IMPORTANT_BG,
+            ConnectionRecordProto.ABOVE_CLIENT,
+            ConnectionRecordProto.ALLOW_OOM_MANAGEMENT,
+            ConnectionRecordProto.WAIVE_PRIORITY,
+            ConnectionRecordProto.IMPORTANT,
+            ConnectionRecordProto.ADJUST_WITH_ACTIVITY,
+            ConnectionRecordProto.FG_SERVICE_WHILE_AWAKE,
+            ConnectionRecordProto.FG_SERVICE,
+            ConnectionRecordProto.TREAT_LIKE_ACTIVITY,
+            ConnectionRecordProto.VISIBLE,
+            ConnectionRecordProto.SHOWING_UI,
+            ConnectionRecordProto.NOT_VISIBLE,
+    };
+
     void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + "binding=" + binding);
         if (activity != null) {
@@ -46,7 +83,7 @@ final class ConnectionRecord {
         pw.println(prefix + "conn=" + conn.asBinder()
                 + " flags=0x" + Integer.toHexString(flags));
     }
-    
+
     ConnectionRecord(AppBindRecord _binding, ActivityRecord _activity,
                IServiceConnection _conn, int _flags,
                int _clientLabel, PendingIntent _clientIntent) {
@@ -131,51 +168,8 @@ final class ConnectionRecord {
         if (binding.client != null) {
             proto.write(ConnectionRecordProto.USER_ID, binding.client.userId);
         }
-        if ((flags&Context.BIND_AUTO_CREATE) != 0) {
-            proto.write(ConnectionRecordProto.FLAGS, ConnectionRecordProto.AUTO_CREATE);
-        }
-        if ((flags&Context.BIND_DEBUG_UNBIND) != 0) {
-            proto.write(ConnectionRecordProto.FLAGS, ConnectionRecordProto.DEBUG_UNBIND);
-        }
-        if ((flags&Context.BIND_NOT_FOREGROUND) != 0) {
-            proto.write(ConnectionRecordProto.FLAGS, ConnectionRecordProto.NOT_FG);
-        }
-        if ((flags&Context.BIND_IMPORTANT_BACKGROUND) != 0) {
-            proto.write(ConnectionRecordProto.FLAGS, ConnectionRecordProto.IMPORTANT_BG);
-        }
-        if ((flags&Context.BIND_ABOVE_CLIENT) != 0) {
-            proto.write(ConnectionRecordProto.FLAGS, ConnectionRecordProto.ABOVE_CLIENT);
-        }
-        if ((flags&Context.BIND_ALLOW_OOM_MANAGEMENT) != 0) {
-            proto.write(ConnectionRecordProto.FLAGS, ConnectionRecordProto.ALLOW_OOM_MANAGEMENT);
-        }
-        if ((flags&Context.BIND_WAIVE_PRIORITY) != 0) {
-            proto.write(ConnectionRecordProto.FLAGS, ConnectionRecordProto.WAIVE_PRIORITY);
-        }
-        if ((flags&Context.BIND_IMPORTANT) != 0) {
-            proto.write(ConnectionRecordProto.FLAGS, ConnectionRecordProto.IMPORTANT);
-        }
-        if ((flags&Context.BIND_ADJUST_WITH_ACTIVITY) != 0) {
-            proto.write(ConnectionRecordProto.FLAGS, ConnectionRecordProto.ADJUST_WITH_ACTIVITY);
-        }
-        if ((flags&Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE) != 0) {
-            proto.write(ConnectionRecordProto.FLAGS, ConnectionRecordProto.FG_SERVICE_WHILE_WAKE);
-        }
-        if ((flags&Context.BIND_FOREGROUND_SERVICE) != 0) {
-            proto.write(ConnectionRecordProto.FLAGS, ConnectionRecordProto.FG_SERVICE);
-        }
-        if ((flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
-            proto.write(ConnectionRecordProto.FLAGS, ConnectionRecordProto.TREAT_LIKE_ACTIVITY);
-        }
-        if ((flags&Context.BIND_VISIBLE) != 0) {
-            proto.write(ConnectionRecordProto.FLAGS, ConnectionRecordProto.VISIBLE);
-        }
-        if ((flags&Context.BIND_SHOWING_UI) != 0) {
-            proto.write(ConnectionRecordProto.FLAGS, ConnectionRecordProto.SHOWING_UI);
-        }
-        if ((flags&Context.BIND_NOT_VISIBLE) != 0) {
-            proto.write(ConnectionRecordProto.FLAGS, ConnectionRecordProto.NOT_VISIBLE);
-        }
+        ProtoUtils.writeBitWiseFlagsToProtoEnum(proto, ConnectionRecordProto.FLAGS,
+                flags, BIND_ORIG_ENUMS, BIND_PROTO_ENUMS);
         if (serviceDead) {
             proto.write(ConnectionRecordProto.FLAGS, ConnectionRecordProto.DEAD);
         }

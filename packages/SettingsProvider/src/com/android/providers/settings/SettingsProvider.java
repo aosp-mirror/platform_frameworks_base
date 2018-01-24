@@ -2892,11 +2892,14 @@ public class SettingsProvider extends ContentProvider {
             for (int i = 0; i < users.size(); i++) {
                 final int userId = users.get(i).id;
 
+                // Do we have to increment the generation for users that are not running?
+                // Yeah let's assume so...
+                final int key = makeKey(SETTINGS_TYPE_SECURE, userId);
+                mGenerationRegistry.incrementGeneration(key);
+
                 if (!mUserManager.isUserRunning(UserHandle.of(userId))) {
                     continue;
                 }
-
-                final int key = makeKey(SETTINGS_TYPE_GLOBAL, userId);
                 final Uri uri = getNotificationUriFor(key, Secure.LOCATION_PROVIDERS_ALLOWED);
 
                 mHandler.obtainMessage(MyHandler.MSG_NOTIFY_URI_CHANGED,

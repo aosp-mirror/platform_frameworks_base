@@ -24,6 +24,8 @@ import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.REQUEST_DELETE_PACKAGES;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_MEDIA_STORAGE;
+import static android.content.pm.PackageManager.CERT_INPUT_RAW_X509;
+import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED;
@@ -108,6 +110,8 @@ import static com.android.server.pm.PackageManagerServiceUtils.dumpCriticalInfo;
 import static com.android.server.pm.PackageManagerServiceUtils.getCompressedFiles;
 import static com.android.server.pm.PackageManagerServiceUtils.getLastModifiedTime;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
+import static com.android.server.pm.PackageManagerServiceUtils.signingDetailsHasCertificate;
+import static com.android.server.pm.PackageManagerServiceUtils.signingDetailsHasSha256Certificate;
 import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
 import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_FAILURE;
 import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_SUCCESS;
@@ -5421,13 +5425,13 @@ Slog.e("TODD",
                     if (isCallerInstantApp) {
                         return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
                     }
-                    s1 = ((SharedUserSetting)obj).signatures.mSignatures;
+                    s1 = ((SharedUserSetting)obj).signatures.mSigningDetails.signatures;
                 } else if (obj instanceof PackageSetting) {
                     final PackageSetting ps = (PackageSetting) obj;
                     if (filterAppAccessLPr(ps, callingUid, callingUserId)) {
                         return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
                     }
-                    s1 = ps.signatures.mSignatures;
+                    s1 = ps.signatures.mSigningDetails.signatures;
                 } else {
                     return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
                 }
@@ -5440,13 +5444,13 @@ Slog.e("TODD",
                     if (isCallerInstantApp) {
                         return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
                     }
-                    s2 = ((SharedUserSetting)obj).signatures.mSignatures;
+                    s2 = ((SharedUserSetting)obj).signatures.mSigningDetails.signatures;
                 } else if (obj instanceof PackageSetting) {
                     final PackageSetting ps = (PackageSetting) obj;
                     if (filterAppAccessLPr(ps, callingUid, callingUserId)) {
                         return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
                     }
-                    s2 = ps.signatures.mSignatures;
+                    s2 = ps.signatures.mSigningDetails.signatures;
                 } else {
                     return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
                 }
@@ -5454,6 +5458,73 @@ Slog.e("TODD",
                 return PackageManager.SIGNATURE_UNKNOWN_PACKAGE;
             }
             return compareSignatures(s1, s2);
+        }
+    }
+
+    @Override
+    public boolean hasSigningCertificate(
+            String packageName, byte[] certificate, @PackageManager.CertificateInputType int type) {
+
+        synchronized (mPackages) {
+            final PackageParser.Package p = mPackages.get(packageName);
+            if (p == null || p.mExtras == null) {
+                return false;
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int callingUserId = UserHandle.getUserId(callingUid);
+            final PackageSetting ps = (PackageSetting) p.mExtras;
+            if (filterAppAccessLPr(ps, callingUid, callingUserId)) {
+                return false;
+            }
+            switch (type) {
+                case CERT_INPUT_RAW_X509:
+                    return signingDetailsHasCertificate(certificate, p.mSigningDetails);
+                case CERT_INPUT_SHA256:
+                    return signingDetailsHasSha256Certificate(certificate, p.mSigningDetails);
+                default:
+                    return false;
+            }
+        }
+    }
+
+    @Override
+    public boolean hasUidSigningCertificate(
+            int uid, byte[] certificate, @PackageManager.CertificateInputType int type) {
+        final int callingUid = Binder.getCallingUid();
+        final int callingUserId = UserHandle.getUserId(callingUid);
+        // Map to base uids.
+        uid = UserHandle.getAppId(uid);
+        // reader
+        synchronized (mPackages) {
+            final PackageParser.SigningDetails signingDetails;
+            final Object obj = mSettings.getUserIdLPr(uid);
+            if (obj != null) {
+                if (obj instanceof SharedUserSetting) {
+                    final boolean isCallerInstantApp = getInstantAppPackageName(callingUid) != null;
+                    if (isCallerInstantApp) {
+                        return false;
+                    }
+                    signingDetails = ((SharedUserSetting)obj).signatures.mSigningDetails;
+                } else if (obj instanceof PackageSetting) {
+                    final PackageSetting ps = (PackageSetting) obj;
+                    if (filterAppAccessLPr(ps, callingUid, callingUserId)) {
+                        return false;
+                    }
+                    signingDetails = ps.signatures.mSigningDetails;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+            switch (type) {
+                case CERT_INPUT_RAW_X509:
+                    return signingDetailsHasCertificate(certificate, signingDetails);
+                case CERT_INPUT_SHA256:
+                    return signingDetailsHasSha256Certificate(certificate, signingDetails);
+                default:
+                    return false;
+            }
         }
     }
 
@@ -8233,19 +8304,15 @@ Slog.e("TODD",
                 && ps.timeStamp == lastModifiedTime
                 && !isCompatSignatureUpdateNeeded(pkg)
                 && !isRecoverSignatureUpdateNeeded(pkg)) {
-            if (ps.signatures.mSignatures != null
-                    && ps.signatures.mSignatures.length != 0
-                    && ps.signatures.mSignatureSchemeVersion != SignatureSchemeVersion.UNKNOWN) {
+            if (ps.signatures.mSigningDetails.signatures != null
+                    && ps.signatures.mSigningDetails.signatures.length != 0
+                    && ps.signatures.mSigningDetails.signatureSchemeVersion
+                            != SignatureSchemeVersion.UNKNOWN) {
                 // Optimization: reuse the existing cached signing data
                 // if the package appears to be unchanged.
-                try {
-                    pkg.mSigningDetails = new PackageParser.SigningDetails(ps.signatures.mSignatures,
-                            ps.signatures.mSignatureSchemeVersion);
-                    return;
-                } catch (CertificateException e) {
-                    Slog.e(TAG, "Attempt to read public keys from persisted signatures failed for "
-                                    + ps.name, e);
-                }
+                pkg.mSigningDetails =
+                        new PackageParser.SigningDetails(ps.signatures.mSigningDetails);
+                return;
             }
 
             Slog.w(TAG, "PackageSetting for " + ps.name
@@ -8573,8 +8640,9 @@ Slog.e("TODD",
         if (scanSystemPartition && !isSystemPkgUpdated && pkgAlreadyExists
                 && !pkgSetting.isSystem()) {
             // if the signatures don't match, wipe the installed application and its data
-            if (compareSignatures(pkgSetting.signatures.mSignatures, pkg.mSigningDetails.signatures)
-                    != PackageManager.SIGNATURE_MATCH) {
+            if (compareSignatures(pkgSetting.signatures.mSigningDetails.signatures,
+                    pkg.mSigningDetails.signatures)
+                            != PackageManager.SIGNATURE_MATCH) {
                 logCriticalInfo(Log.WARN,
                         "System package signature mismatch;"
                         + " name: " + pkgSetting.name);
@@ -9936,14 +10004,14 @@ Slog.e("TODD",
             if (ksms.checkUpgradeKeySetLocked(signatureCheckPs, pkg)) {
                 // We just determined the app is signed correctly, so bring
                 // over the latest parsed certs.
-                pkgSetting.signatures.mSignatures = pkg.mSigningDetails.signatures;
+                pkgSetting.signatures.mSigningDetails = pkg.mSigningDetails;
             } else {
                 if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
                     throw new PackageManagerException(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
                             "Package " + pkg.packageName + " upgrade keys do not match the "
                                     + "previously installed version");
                 } else {
-                    pkgSetting.signatures.mSignatures = pkg.mSigningDetails.signatures;
+                    pkgSetting.signatures.mSigningDetails = pkg.mSigningDetails;
                     String msg = "System package " + pkg.packageName
                             + " signature changed; retaining data.";
                     reportSettingsProblem(Log.WARN, msg);
@@ -9963,21 +10031,22 @@ Slog.e("TODD",
                 }
                 // We just determined the app is signed correctly, so bring
                 // over the latest parsed certs.
-                pkgSetting.signatures.mSignatures = pkg.mSigningDetails.signatures;
+                pkgSetting.signatures.mSigningDetails = pkg.mSigningDetails;
             } catch (PackageManagerException e) {
                 if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
                     throw e;
                 }
                 // The signature has changed, but this package is in the system
                 // image...  let's recover!
-                pkgSetting.signatures.mSignatures = pkg.mSigningDetails.signatures;
+                pkgSetting.signatures.mSigningDetails = pkg.mSigningDetails;
                 // However...  if this package is part of a shared user, but it
                 // doesn't match the signature of the shared user, let's fail.
                 // What this means is that you can't change the signatures
                 // associated with an overall shared user, which doesn't seem all
                 // that unreasonable.
                 if (signatureCheckPs.sharedUser != null) {
-                    if (compareSignatures(signatureCheckPs.sharedUser.signatures.mSignatures,
+                    if (compareSignatures(
+                            signatureCheckPs.sharedUser.signatures.mSigningDetails.signatures,
                             pkg.mSigningDetails.signatures) != PackageManager.SIGNATURE_MATCH) {
                         throw new PackageManagerException(
                                 INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
@@ -10804,9 +10873,12 @@ Slog.e("TODD",
                 if (sharedUserSetting != null && sharedUserSetting.isPrivileged()) {
                     // Exempt SharedUsers signed with the platform key.
                     PackageSetting platformPkgSetting = mSettings.mPackages.get("android");
-                    if ((platformPkgSetting.signatures.mSignatures != null) &&
-                            (compareSignatures(platformPkgSetting.signatures.mSignatures,
-                                pkg.mSigningDetails.signatures) != PackageManager.SIGNATURE_MATCH)) {
+                    if ((platformPkgSetting.signatures.mSigningDetails
+                            != PackageParser.SigningDetails.UNKNOWN)
+                            && (compareSignatures(
+                                    platformPkgSetting.signatures.mSigningDetails.signatures,
+                                    pkg.mSigningDetails.signatures)
+                                            != PackageManager.SIGNATURE_MATCH)) {
                         throw new PackageManagerException("Apps that share a user with a " +
                                 "privileged app must themselves be marked as privileged. " +
                                 pkg.packageName + " shares privileged user " +
@@ -14248,9 +14320,10 @@ Slog.e("TODD",
             Object obj = mSettings.getUserIdLPr(callingUid);
             if (obj != null) {
                 if (obj instanceof SharedUserSetting) {
-                    callerSignature = ((SharedUserSetting)obj).signatures.mSignatures;
+                    callerSignature =
+                            ((SharedUserSetting)obj).signatures.mSigningDetails.signatures;
                 } else if (obj instanceof PackageSetting) {
-                    callerSignature = ((PackageSetting)obj).signatures.mSignatures;
+                    callerSignature = ((PackageSetting)obj).signatures.mSigningDetails.signatures;
                 } else {
                     throw new SecurityException("Bad object " + obj + " for uid " + callingUid);
                 }
@@ -14262,7 +14335,7 @@ Slog.e("TODD",
             // not signed with the same cert as the caller.
             if (installerPackageSetting != null) {
                 if (compareSignatures(callerSignature,
-                        installerPackageSetting.signatures.mSignatures)
+                        installerPackageSetting.signatures.mSigningDetails.signatures)
                         != PackageManager.SIGNATURE_MATCH) {
                     throw new SecurityException(
                             "Caller does not have same cert as new installer package "
@@ -14279,7 +14352,7 @@ Slog.e("TODD",
                 // okay to change it.
                 if (setting != null) {
                     if (compareSignatures(callerSignature,
-                            setting.signatures.mSignatures)
+                            setting.signatures.mSigningDetails.signatures)
                             != PackageManager.SIGNATURE_MATCH) {
                         throw new SecurityException(
                                 "Caller does not have same cert as old installer package "
@@ -16787,7 +16860,8 @@ Slog.e("TODD",
                                     sourcePackageSetting, scanFlags))) {
                         sigsOk = ksms.checkUpgradeKeySetLocked(sourcePackageSetting, pkg);
                     } else {
-                        sigsOk = compareSignatures(sourcePackageSetting.signatures.mSignatures,
+                        sigsOk = compareSignatures(
+                                sourcePackageSetting.signatures.mSigningDetails.signatures,
                                 pkg.mSigningDetails.signatures) == PackageManager.SIGNATURE_MATCH;
                     }
                     if (!sigsOk) {

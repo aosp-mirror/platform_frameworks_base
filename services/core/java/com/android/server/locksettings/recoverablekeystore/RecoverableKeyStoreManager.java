@@ -33,10 +33,10 @@ import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
 
-import android.security.keystore.KeychainProtectionParams;
-import android.security.keystore.KeychainSnapshot;
-import android.security.keystore.RecoveryController;
-import android.security.keystore.WrappedApplicationKey;
+import android.security.keystore.recovery.KeyChainProtectionParams;
+import android.security.keystore.recovery.KeyChainSnapshot;
+import android.security.keystore.recovery.RecoveryController;
+import android.security.keystore.recovery.WrappedApplicationKey;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -170,11 +170,11 @@ public class RecoverableKeyStoreManager {
      * @hide
      */
     public @NonNull
-    KeychainSnapshot getRecoveryData(@NonNull byte[] account)
+    KeyChainSnapshot getRecoveryData(@NonNull byte[] account)
             throws RemoteException {
         checkRecoverKeyStorePermission();
         int uid = Binder.getCallingUid();
-        KeychainSnapshot snapshot = mSnapshotStorage.get(uid);
+        KeyChainSnapshot snapshot = mSnapshotStorage.get(uid);
         if (snapshot == null) {
             throw new ServiceSpecificException(ERROR_NO_SNAPSHOT_PENDING);
         }
@@ -256,7 +256,7 @@ public class RecoverableKeyStoreManager {
      * @hide
      */
     public void setRecoverySecretTypes(
-            @NonNull @KeychainProtectionParams.UserSecretType int[] secretTypes)
+            @NonNull @KeyChainProtectionParams.UserSecretType int[] secretTypes)
             throws RemoteException {
         checkRecoverKeyStorePermission();
         int userId = UserHandle.getCallingUserId();
@@ -291,9 +291,9 @@ public class RecoverableKeyStoreManager {
     }
 
     public void recoverySecretAvailable(
-            @NonNull KeychainProtectionParams recoverySecret) throws RemoteException {
+            @NonNull KeyChainProtectionParams recoverySecret) throws RemoteException {
         int uid = Binder.getCallingUid();
-        if (recoverySecret.getLockScreenUiFormat() == KeychainProtectionParams.TYPE_LOCKSCREEN) {
+        if (recoverySecret.getLockScreenUiFormat() == KeyChainProtectionParams.TYPE_LOCKSCREEN) {
             throw new SecurityException(
                     "Caller " + uid + " is not allowed to set lock screen secret");
         }
@@ -319,14 +319,14 @@ public class RecoverableKeyStoreManager {
             @NonNull byte[] verifierPublicKey,
             @NonNull byte[] vaultParams,
             @NonNull byte[] vaultChallenge,
-            @NonNull List<KeychainProtectionParams> secrets)
+            @NonNull List<KeyChainProtectionParams> secrets)
             throws RemoteException {
         checkRecoverKeyStorePermission();
         int uid = Binder.getCallingUid();
 
         if (secrets.size() != 1) {
             throw new UnsupportedOperationException(
-                    "Only a single KeychainProtectionParams is supported");
+                    "Only a single KeyChainProtectionParams is supported");
         }
 
         PublicKey publicKey;

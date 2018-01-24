@@ -220,43 +220,44 @@ public class ActivityStartController {
         }
     }
 
-    final int startActivityInPackage(int uid, String callingPackage,
-            Intent intent, String resolvedType, IBinder resultTo,
-            String resultWho, int requestCode, int startFlags, Bundle bOptions, int userId,
-            TaskRecord inTask, String reason) {
+    final int startActivityInPackage(int uid, int realCallingUid, int realCallingPid,
+            String callingPackage, Intent intent, String resolvedType, IBinder resultTo,
+            String resultWho, int requestCode, int startFlags, SafeActivityOptions options,
+            int userId, TaskRecord inTask, String reason) {
 
-        userId = mService.mUserController.handleIncomingUser(Binder.getCallingPid(),
-                Binder.getCallingUid(), userId, false, ALLOW_FULL_ONLY, "startActivityInPackage",
-                null);
+        userId = mService.mUserController.handleIncomingUser(realCallingPid, realCallingUid, userId,
+                false, ALLOW_FULL_ONLY, "startActivityInPackage", null);
 
         // TODO: Switch to user app stacks here.
         return obtainStarter(intent, reason)
                 .setCallingUid(uid)
+                .setRealCallingPid(realCallingPid)
+                .setRealCallingUid(realCallingUid)
                 .setCallingPackage(callingPackage)
                 .setResolvedType(resolvedType)
                 .setResultTo(resultTo)
                 .setResultWho(resultWho)
                 .setRequestCode(requestCode)
                 .setStartFlags(startFlags)
-                .setMayWait(bOptions, userId)
+                .setActivityOptions(options)
+                .setMayWait(userId)
                 .setInTask(inTask)
                 .execute();
     }
 
     final int startActivitiesInPackage(int uid, String callingPackage, Intent[] intents,
-            String[] resolvedTypes, IBinder resultTo, Bundle bOptions, int userId) {
+            String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId) {
         final String reason = "startActivityInPackage";
         userId = mService.mUserController.handleIncomingUser(Binder.getCallingPid(),
                 Binder.getCallingUid(), userId, false, ALLOW_FULL_ONLY, reason, null);
         // TODO: Switch to user app stacks here.
-        int ret = startActivities(null, uid, callingPackage, intents, resolvedTypes, resultTo,
-                bOptions, userId, reason);
-        return ret;
+        return startActivities(null, uid, callingPackage, intents, resolvedTypes, resultTo, options,
+                userId, reason);
     }
 
     int startActivities(IApplicationThread caller, int callingUid, String callingPackage,
-            Intent[] intents, String[] resolvedTypes, IBinder resultTo, Bundle bOptions, int userId,
-            String reason) {
+            Intent[] intents, String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options,
+            int userId, String reason) {
         if (intents == null) {
             throw new NullPointerException("intents is null");
         }
@@ -312,9 +313,9 @@ public class ActivityStartController {
                                 "FLAG_CANT_SAVE_STATE not supported here");
                     }
 
-                    ActivityOptions options = ActivityOptions.fromBundle(
-                            i == intents.length - 1 ? bOptions : null);
-
+                    final SafeActivityOptions checkedOptions = i == intents.length - 1
+                            ? options
+                            : null;
                     final int res = obtainStarter(intent, reason)
                             .setCaller(caller)
                             .setResolvedType(resolvedTypes[i])
@@ -326,7 +327,7 @@ public class ActivityStartController {
                             .setCallingPackage(callingPackage)
                             .setRealCallingPid(realCallingPid)
                             .setRealCallingUid(realCallingUid)
-                            .setActivityOptions(options)
+                            .setActivityOptions(checkedOptions)
                             .setComponentSpecified(componentSpecified)
                             .setOutActivity(outActivity)
                             .execute();

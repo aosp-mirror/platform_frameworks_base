@@ -34,6 +34,7 @@ import android.os.storage.StorageManager;
 import android.text.TextUtils;
 import android.util.Printer;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.ArrayUtils;
 
@@ -1181,6 +1182,105 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             }
         }
         super.dumpBack(pw, prefix);
+    }
+
+    /** {@hide} */
+    public void writeToProto(ProtoOutputStream proto, long fieldId, int dumpFlags) {
+        long token = proto.start(fieldId);
+        super.writeToProto(proto, ApplicationInfoProto.PACKAGE);
+        proto.write(ApplicationInfoProto.PERMISSION, permission);
+        proto.write(ApplicationInfoProto.PROCESS_NAME, processName);
+        proto.write(ApplicationInfoProto.UID, uid);
+        proto.write(ApplicationInfoProto.FLAGS, flags);
+        proto.write(ApplicationInfoProto.PRIVATE_FLAGS, privateFlags);
+        proto.write(ApplicationInfoProto.THEME, theme);
+        proto.write(ApplicationInfoProto.SOURCE_DIR, sourceDir);
+        if (!Objects.equals(sourceDir, publicSourceDir)) {
+            proto.write(ApplicationInfoProto.PUBLIC_SOURCE_DIR, publicSourceDir);
+        }
+        if (!ArrayUtils.isEmpty(splitSourceDirs)) {
+            for (String dir : splitSourceDirs) {
+                proto.write(ApplicationInfoProto.SPLIT_SOURCE_DIRS, dir);
+            }
+        }
+        if (!ArrayUtils.isEmpty(splitPublicSourceDirs)
+                && !Arrays.equals(splitSourceDirs, splitPublicSourceDirs)) {
+            for (String dir : splitPublicSourceDirs) {
+                proto.write(ApplicationInfoProto.SPLIT_PUBLIC_SOURCE_DIRS, dir);
+            }
+        }
+        if (resourceDirs != null) {
+            for (String dir : resourceDirs) {
+                proto.write(ApplicationInfoProto.RESOURCE_DIRS, dir);
+            }
+        }
+        proto.write(ApplicationInfoProto.DATA_DIR, dataDir);
+        proto.write(ApplicationInfoProto.CLASS_LOADER_NAME, classLoaderName);
+        if (!ArrayUtils.isEmpty(splitClassLoaderNames)) {
+            for (String name : splitClassLoaderNames) {
+                proto.write(ApplicationInfoProto.SPLIT_CLASS_LOADER_NAMES, name);
+            }
+        }
+
+        long versionToken = proto.start(ApplicationInfoProto.VERSION);
+        proto.write(ApplicationInfoProto.Version.ENABLED, enabled);
+        proto.write(ApplicationInfoProto.Version.MIN_SDK_VERSION, minSdkVersion);
+        proto.write(ApplicationInfoProto.Version.TARGET_SDK_VERSION, targetSdkVersion);
+        proto.write(ApplicationInfoProto.Version.VERSION_CODE, versionCode);
+        proto.write(ApplicationInfoProto.Version.TARGET_SANDBOX_VERSION, targetSandboxVersion);
+        proto.end(versionToken);
+
+        if ((dumpFlags & DUMP_FLAG_DETAILS) != 0) {
+            long detailToken = proto.start(ApplicationInfoProto.DETAIL);
+            if (className != null) {
+                proto.write(ApplicationInfoProto.Detail.CLASS_NAME, className);
+            }
+            proto.write(ApplicationInfoProto.Detail.TASK_AFFINITY, taskAffinity);
+            proto.write(ApplicationInfoProto.Detail.REQUIRES_SMALLEST_WIDTH_DP,
+                    requiresSmallestWidthDp);
+            proto.write(ApplicationInfoProto.Detail.COMPATIBLE_WIDTH_LIMIT_DP,
+                    compatibleWidthLimitDp);
+            proto.write(ApplicationInfoProto.Detail.LARGEST_WIDTH_LIMIT_DP,
+                    largestWidthLimitDp);
+            if (seInfo != null) {
+                proto.write(ApplicationInfoProto.Detail.SEINFO, seInfo);
+                proto.write(ApplicationInfoProto.Detail.SEINFO_USER, seInfoUser);
+            }
+            proto.write(ApplicationInfoProto.Detail.DEVICE_PROTECTED_DATA_DIR,
+                    deviceProtectedDataDir);
+            proto.write(ApplicationInfoProto.Detail.CREDENTIAL_PROTECTED_DATA_DIR,
+                    credentialProtectedDataDir);
+            if (sharedLibraryFiles != null) {
+                for (String f : sharedLibraryFiles) {
+                    proto.write(ApplicationInfoProto.Detail.SHARED_LIBRARY_FILES, f);
+                }
+            }
+            if (manageSpaceActivityName != null) {
+                proto.write(ApplicationInfoProto.Detail.MANAGE_SPACE_ACTIVITY_NAME,
+                        manageSpaceActivityName);
+            }
+            if (descriptionRes != 0) {
+                proto.write(ApplicationInfoProto.Detail.DESCRIPTION_RES, descriptionRes);
+            }
+            if (uiOptions != 0) {
+                proto.write(ApplicationInfoProto.Detail.UI_OPTIONS, uiOptions);
+            }
+            proto.write(ApplicationInfoProto.Detail.SUPPORTS_RTL, hasRtlSupport());
+            if (fullBackupContent > 0) {
+                proto.write(ApplicationInfoProto.Detail.CONTENT, "@xml/" + fullBackupContent);
+            } else {
+                proto.write(ApplicationInfoProto.Detail.IS_FULL_BACKUP, fullBackupContent == 0);
+            }
+            if (networkSecurityConfigRes != 0) {
+                proto.write(ApplicationInfoProto.Detail.NETWORK_SECURITY_CONFIG_RES,
+                        networkSecurityConfigRes);
+            }
+            if (category != CATEGORY_UNDEFINED) {
+                proto.write(ApplicationInfoProto.Detail.CATEGORY, category);
+            }
+            proto.end(detailToken);
+        }
+        proto.end(token);
     }
 
     /**

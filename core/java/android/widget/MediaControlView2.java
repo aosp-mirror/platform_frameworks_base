@@ -28,6 +28,21 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 
 /**
+ * A View that contains the controls for MediaPlayer2.
+ * It provides a wide range of UI including buttons such as "Play/Pause", "Rewind", "Fast Forward",
+ * "Subtitle", "Full Screen", and it is also possible to add multiple custom buttons.
+ *
+ * <p>
+ * <em> MediaControlView2 can be initialized in two different ways: </em>
+ * 1) When VideoView2 is initialized, it automatically initializes a MediaControlView2 instance and
+ * adds it to the view.
+ * 2) Initialize MediaControlView2 programmatically and add it to a ViewGroup instance.
+ *
+ * In the first option, VideoView2 automatically connects MediaControlView2 to MediaController2,
+ * which is necessary to communicate with MediaSession2. In the second option, however, the
+ * developer needs to manually retrieve a MediaController2 instance and set it to MediaControlView2
+ * by calling setController(MediaController2 controller).
+ *
  * TODO PUBLIC API
  * @hide
  */
@@ -55,106 +70,115 @@ public class MediaControlView2 extends FrameLayout {
                 .createMediaControlView2(this, new SuperProvider());
     }
 
+    /**
+     * @hide
+     */
     public MediaControlView2Provider getProvider() {
         return mProvider;
     }
 
     /**
-     * TODO: add docs
+     * Sets MediaController2 instance to control corresponding MediaSession2.
      */
     public void setController(MediaController controller) {
         mProvider.setController_impl(controller);
     }
 
     /**
-     * TODO: add docs
+     * Shows the control view on screen. It will disappear automatically after 3 seconds of
+     * inactivity.
      */
     public void show() {
         mProvider.show_impl();
     }
 
     /**
-     * TODO: add docs
+     * Shows the control view on screen. It will disappear automatically after {@code timeout}
+     * milliseconds of inactivity.
      */
     public void show(int timeout) {
         mProvider.show_impl(timeout);
     }
 
     /**
-     * TODO: add docs
+     * Returns whether the control view is currently shown or hidden.
      */
     public boolean isShowing() {
         return mProvider.isShowing_impl();
     }
 
     /**
-     * TODO: add docs
+     * Hide the control view from the screen.
      */
     public void hide() {
         mProvider.hide_impl();
     }
 
     /**
-     * TODO: add docs
-     */
-    public void showCCButton() {
-        mProvider.showCCButton_impl();
-    }
-
-    /**
-     * TODO: add docs
+     * Returns whether the media is currently playing or not.
      */
     public boolean isPlaying() {
         return mProvider.isPlaying_impl();
     }
 
     /**
-     * TODO: add docs
+     * Returns the current position of the media in milliseconds.
      */
     public int getCurrentPosition() {
         return mProvider.getCurrentPosition_impl();
     }
 
     /**
-     * TODO: add docs
+     * Returns the percentage of how much of the media is currently buffered in storage.
      */
     public int getBufferPercentage() {
         return mProvider.getBufferPercentage_impl();
     }
 
     /**
-     * TODO: add docs
+     * Returns whether the media can be paused or not.
      */
     public boolean canPause() {
         return mProvider.canPause_impl();
     }
 
     /**
-     * TODO: add docs
+     * Returns whether the media can be rewound or not.
      */
     public boolean canSeekBackward() {
         return mProvider.canSeekBackward_impl();
     }
 
     /**
-     * TODO: add docs
+     * Returns whether the media can be fast-forwarded or not.
      */
     public boolean canSeekForward() {
         return mProvider.canSeekForward_impl();
     }
 
     /**
-     * TODO: add docs
+     * If the media selected has a subtitle track, calling this method will display the subtitle at
+     * the bottom of the view. If a media has multiple subtitle tracks, this method will select the
+     * first one of them.
      */
     public void showSubtitle() {
         mProvider.showSubtitle_impl();
     }
 
     /**
-     * TODO: add docs
+     * Hides the currently displayed subtitle.
      */
     public void hideSubtitle() {
         mProvider.hideSubtitle_impl();
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        mProvider.onAttachedToWindow_impl();
+    }
+    @Override
+    protected void onDetachedFromWindow() {
+        mProvider.onDetachedFromWindow_impl();
     }
 
     @Override
@@ -193,6 +217,16 @@ public class MediaControlView2 extends FrameLayout {
     }
 
     private class SuperProvider implements ViewProvider {
+        @Override
+        public void onAttachedToWindow_impl() {
+            MediaControlView2.super.onAttachedToWindow();
+        }
+
+        @Override
+        public void onDetachedFromWindow_impl() {
+            MediaControlView2.super.onDetachedFromWindow();
+        }
+
         @Override
         public CharSequence getAccessibilityClassName_impl() {
             return MediaControlView2.super.getAccessibilityClassName();

@@ -404,7 +404,7 @@ public class RecoverableKeyStoreDb {
     /**
      * Updates the list of user secret types used for end-to-end encryption.
      * If no secret types are set, recovery snapshot will not be created.
-     * See {@code KeychainProtectionParams}
+     * See {@code KeyChainProtectionParams}
      *
      * @param userId The userId of the profile the application is running under.
      * @param uid The uid of the application.

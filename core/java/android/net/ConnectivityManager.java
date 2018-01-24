@@ -3763,4 +3763,20 @@ public class ConnectivityManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * The network watchlist is a list of domains and IP addresses that are associated with
+     * potentially harmful apps. This method returns the hash of the watchlist currently
+     * used by the system.
+     *
+     * @return Hash of network watchlist config file. Null if config does not exist.
+     */
+    public byte[] getNetworkWatchlistConfigHash() {
+        try {
+            return mService.getNetworkWatchlistConfigHash();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to get watchlist config hash");
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

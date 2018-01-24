@@ -32,8 +32,6 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.Preconditions;
 
-import com.android.internal.util.Preconditions;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
@@ -936,7 +934,9 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /** @hide */
-    public void toProto(ProtoOutputStream proto) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+
         proto.write(NotificationChannelProto.ID, mId);
         proto.write(NotificationChannelProto.NAME, mName);
         proto.write(NotificationChannelProto.DESCRIPTION, mDesc);
@@ -959,10 +959,10 @@ public final class NotificationChannel implements Parcelable {
         proto.write(NotificationChannelProto.IS_DELETED, mDeleted);
         proto.write(NotificationChannelProto.GROUP, mGroup);
         if (mAudioAttributes != null) {
-            long aToken = proto.start(NotificationChannelProto.AUDIO_ATTRIBUTES);
-            mAudioAttributes.toProto(proto);
-            proto.end(aToken);
+            mAudioAttributes.writeToProto(proto, NotificationChannelProto.AUDIO_ATTRIBUTES);
         }
         proto.write(NotificationChannelProto.IS_BLOCKABLE_SYSTEM, mBlockableSystem);
+
+        proto.end(token);
     }
 }

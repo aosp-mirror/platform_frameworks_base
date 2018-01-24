@@ -53,6 +53,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.database.sqlite.SQLiteDatabase;
+import android.hardware.authsecret.V1_0.IAuthSecret;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -77,10 +78,10 @@ import android.security.KeyStore;
 import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.KeyProperties;
 import android.security.keystore.KeyProtection;
-import android.security.keystore.KeychainProtectionParams;
 import android.security.keystore.UserNotAuthenticatedException;
-import android.security.keystore.WrappedApplicationKey;
-import android.security.keystore.KeychainSnapshot;
+import android.security.keystore.recovery.KeyChainProtectionParams;
+import android.security.keystore.recovery.WrappedApplicationKey;
+import android.security.keystore.recovery.KeyChainSnapshot;
 import android.service.gatekeeper.GateKeeperResponse;
 import android.service.gatekeeper.IGateKeeperService;
 import android.text.TextUtils;
@@ -126,8 +127,10 @@ import java.security.SecureRandom;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -183,6 +186,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private boolean mFirstCallToVold;
     protected IGateKeeperService mGateKeeperService;
+    protected IAuthSecret mAuthSecretService;
 
     /**
      * The UIDs that are used for system credential storage in keystore.
@@ -612,6 +616,14 @@ public class LockSettingsService extends ILockSettings.Stub {
             mSpManager.initWeaverService();
         } catch (RemoteException e) {
             Slog.e(TAG, "Failure retrieving IGateKeeperService", e);
+        }
+        // Find the AuthSecret HAL
+        try {
+            mAuthSecretService = IAuthSecret.getService();
+        } catch (NoSuchElementException e) {
+            Slog.i(TAG, "Device doesn't implement AuthSecret HAL");
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to get AuthSecret HAL", e);
         }
         mDeviceProvisionedObserver.onSystemReady();
         // TODO: maybe skip this for split system user mode.
@@ -1586,8 +1598,10 @@ public class LockSettingsService extends ILockSettings.Stub {
                 userId, progressCallback);
         // The user employs synthetic password based credential.
         if (response != null) {
-            mRecoverableKeyStoreManager.lockScreenSecretAvailable(credentialType, credential,
-                    userId);
+            if (response.getResponseCode() == VerifyCredentialResponse.RESPONSE_OK) {
+                mRecoverableKeyStoreManager.lockScreenSecretAvailable(credentialType, credential,
+                        userId);
+            }
             return response;
         }
 
@@ -1968,7 +1982,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public KeychainSnapshot getRecoveryData(@NonNull byte[] account) throws RemoteException {
+    public KeyChainSnapshot getRecoveryData(@NonNull byte[] account) throws RemoteException {
         return mRecoverableKeyStoreManager.getRecoveryData(account);
     }
 
@@ -1997,7 +2011,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public void setRecoverySecretTypes(@NonNull @KeychainProtectionParams.UserSecretType
+    public void setRecoverySecretTypes(@NonNull @KeyChainProtectionParams.UserSecretType
             int[] secretTypes) throws RemoteException {
         mRecoverableKeyStoreManager.setRecoverySecretTypes(secretTypes);
     }
@@ -2014,7 +2028,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public void recoverySecretAvailable(@NonNull KeychainProtectionParams recoverySecret)
+    public void recoverySecretAvailable(@NonNull KeyChainProtectionParams recoverySecret)
             throws RemoteException {
         mRecoverableKeyStoreManager.recoverySecretAvailable(recoverySecret);
     }
@@ -2022,7 +2036,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public byte[] startRecoverySession(@NonNull String sessionId,
             @NonNull byte[] verifierPublicKey, @NonNull byte[] vaultParams,
-            @NonNull byte[] vaultChallenge, @NonNull List<KeychainProtectionParams> secrets)
+            @NonNull byte[] vaultChallenge, @NonNull List<KeyChainProtectionParams> secrets)
             throws RemoteException {
         return mRecoverableKeyStoreManager.startRecoverySession(sessionId, verifierPublicKey,
                 vaultParams, vaultChallenge, secrets);
@@ -2127,6 +2141,20 @@ public class LockSettingsService extends ILockSettings.Stub {
     private SparseArray<AuthenticationToken> mSpCache = new SparseArray();
 
     private void onAuthTokenKnownForUser(@UserIdInt int userId, AuthenticationToken auth) {
+        // Pass the primary user's auth secret to the HAL
+        if (mAuthSecretService != null && mUserManager.getUserInfo(userId).isPrimary()) {
+            try {
+                final byte[] rawSecret = auth.deriveVendorAuthSecret();
+                final ArrayList<Byte> secret = new ArrayList<>(rawSecret.length);
+                for (int i = 0; i < rawSecret.length; ++i) {
+                    secret.add(rawSecret[i]);
+                }
+                mAuthSecretService.primaryUserCredential(secret);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to pass primary user secret to AuthSecret HAL", e);
+            }
+        }
+
         // Update the SP cache, removing the entry when allowed
         synchronized (mSpManager) {
             if (shouldCacheSpForUser(userId)) {

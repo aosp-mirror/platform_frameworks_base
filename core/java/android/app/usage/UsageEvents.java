@@ -106,6 +106,12 @@ public final class UsageEvents implements Parcelable {
          */
         public static final int NOTIFICATION_SEEN = 10;
 
+        /**
+         * An event type denoting a change in App Standby Bucket.
+         * @hide
+         */
+        public static final int STANDBY_BUCKET_CHANGED = 11;
+
         /** @hide */
         public static final int FLAG_IS_PACKAGE_INSTANT_APP = 1 << 0;
 
@@ -170,6 +176,13 @@ public final class UsageEvents implements Parcelable {
          */
         public String[] mContentAnnotations;
 
+        /**
+         * The app standby bucket assigned.
+         * Only present for {@link #STANDBY_BUCKET_CHANGED} event types
+         * {@hide}
+         */
+        public int mBucket;
+
         /** @hide */
         @EventFlags
         public int mFlags;
@@ -189,6 +202,7 @@ public final class UsageEvents implements Parcelable {
             mContentType = orig.mContentType;
             mContentAnnotations = orig.mContentAnnotations;
             mFlags = orig.mFlags;
+            mBucket = orig.mBucket;
         }
 
         /**
@@ -399,6 +413,9 @@ public final class UsageEvents implements Parcelable {
                 p.writeString(event.mContentType);
                 p.writeStringArray(event.mContentAnnotations);
                 break;
+            case Event.STANDBY_BUCKET_CHANGED:
+                p.writeInt(event.mBucket);
+                break;
         }
     }
 
@@ -441,6 +458,9 @@ public final class UsageEvents implements Parcelable {
                 eventOut.mAction = p.readString();
                 eventOut.mContentType = p.readString();
                 eventOut.mContentAnnotations = p.createStringArray();
+                break;
+            case Event.STANDBY_BUCKET_CHANGED:
+                eventOut.mBucket = p.readInt();
                 break;
         }
     }

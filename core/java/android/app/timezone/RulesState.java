@@ -126,9 +126,6 @@ public final class RulesState implements Parcelable {
                 mStagedOperationType == STAGED_OPERATION_INSTALL /* requireNotNull */,
                 "stagedDistroRulesVersion", stagedDistroRulesVersion);
 
-        if (operationInProgress && distroStatus != DISTRO_STATUS_UNKNOWN) {
-            throw new IllegalArgumentException("distroInstalled != DISTRO_STATUS_UNKNOWN");
-        }
         this.mDistroStatus = validateDistroStatus(distroStatus);
         this.mInstalledDistroRulesVersion = validateConditionalNull(
                 mDistroStatus == DISTRO_STATUS_INSTALLED/* requireNotNull */,

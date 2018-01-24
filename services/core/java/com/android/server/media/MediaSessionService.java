@@ -28,13 +28,19 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioSystem;
 import android.media.IAudioService;
+import android.media.IMediaSession2;
 import android.media.IRemoteVolumeController;
+import android.media.MediaLibraryService2;
+import android.media.MediaSessionService2;
+import android.media.SessionToken;
 import android.media.session.IActiveSessionsListener;
 import android.media.session.ICallback;
 import android.media.session.IOnMediaKeyListener;
@@ -118,6 +124,24 @@ public class MediaSessionService extends SystemService implements Monitor {
     // better way to handle this.
     private IRemoteVolumeController mRvc;
 
+    // MediaSession2 support
+    // TODO(jaewan): Support multi-user and managed profile.
+    // TODO(jaewan): Make it priority list for handling volume/media key.
+    private final List<MediaSession2Record> mSessions = new ArrayList<>();
+
+    private final MediaSession2Record.SessionDestroyedListener mSessionDestroyedListener =
+            (MediaSession2Record record) -> {
+                synchronized (mLock) {
+                    if (DEBUG) {
+                        Log.d(TAG, record.toString() + " becomes inactive");
+                    }
+                    record.onSessionDestroyed();
+                    if (!(record instanceof MediaSessionService2Record)) {
+                        mSessions.remove(record);
+                    }
+                }
+            };
+
     public MediaSessionService(Context context) {
         super(context);
         mSessionManagerImpl = new SessionManagerImpl();
@@ -158,6 +182,11 @@ public class MediaSessionService extends SystemService implements Monitor {
                 PackageManager.FEATURE_LEANBACK);
 
         updateUser();
+
+        // TODO(jaewan): Query per users
+        // TODO(jaewan): Add listener to know changes in list of services.
+        //               Refer TvInputManagerService.registerBroadcastReceivers()
+        buildMediaSessionService2List();
     }
 
     private IAudioService getAudioService() {
@@ -409,6 +438,74 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
         session.onDestroy();
         mHandler.postSessionsChanged(session.getUserId());
+    }
+
+    private void buildMediaSessionService2List() {
+        if (DEBUG) {
+            Log.d(TAG, "buildMediaSessionService2List");
+        }
+
+        // TODO(jaewan): Query per users.
+        List<ResolveInfo> services = new ArrayList<>();
+        // If multiple actions are declared for a service, browser gets higher priority.
+        List<ResolveInfo> libraryServices = getContext().getPackageManager().queryIntentServices(
+                new Intent(MediaLibraryService2.SERVICE_INTERFACE), PackageManager.GET_META_DATA);
+        if (libraryServices != null) {
+            services.addAll(libraryServices);
+        }
+        List<ResolveInfo> sessionServices = getContext().getPackageManager().queryIntentServices(
+                new Intent(MediaSessionService2.SERVICE_INTERFACE), PackageManager.GET_META_DATA);
+        if (sessionServices != null) {
+            services.addAll(sessionServices);
+        }
+        synchronized (mLock) {
+            mSessions.clear();
+            if (services == null) {
+                return;
+            }
+            for (int i = 0; i < services.size(); i++) {
+                if (services.get(i) == null || services.get(i).serviceInfo == null) {
+                    continue;
+                }
+                ServiceInfo serviceInfo = services.get(i).serviceInfo;
+                String id = (serviceInfo.metaData != null) ? serviceInfo.metaData.getString(
+                        MediaSessionService2.SERVICE_META_DATA) : null;
+                // Do basic sanity check
+                // TODO(jaewan): also santity check if it's protected with the system|privileged
+                //               permission
+                boolean conflict = (getSessionRecordLocked(serviceInfo.name, id) != null);
+                if (conflict) {
+                    Log.w(TAG, serviceInfo.packageName + " contains multiple"
+                            + " MediaSessionService2s declared in the manifest with"
+                            + " the same ID=" + id + ". Ignoring "
+                            + serviceInfo.packageName + "/" + serviceInfo.name);
+                } else {
+                    int type = (libraryServices.contains(services.get(i)))
+                            ? SessionToken.TYPE_LIBRARY_SERVICE : SessionToken.TYPE_SESSION_SERVICE;
+                    MediaSessionService2Record record =
+                            new MediaSessionService2Record(getContext(), mSessionDestroyedListener,
+                                    type, serviceInfo.packageName, serviceInfo.name, id);
+                    mSessions.add(record);
+                }
+            }
+        }
+        if (DEBUG) {
+            Log.d(TAG, "Found " + mSessions.size() + " session services");
+            for (int i = 0; i < mSessions.size(); i++) {
+                Log.d(TAG, "   " + mSessions.get(i).getToken());
+            }
+        }
+    }
+
+    MediaSession2Record getSessionRecordLocked(String packageName, String id) {
+        for (int i = 0; i < mSessions.size(); i++) {
+            MediaSession2Record record = mSessions.get(i);
+            if (record.getToken().getPackageName().equals(packageName)
+                    && record.getToken().getId().equals(id)) {
+                return record;
+            }
+        }
+        return null;
     }
 
     private void enforcePackageName(String packageName, int uid) {
@@ -1310,6 +1407,57 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
                 mAudioPlayerStateMonitor.dump(getContext(), pw, "");
             }
+        }
+
+        @Override
+        public Bundle createSessionToken(String sessionPackage, String id,
+                IMediaSession2 sessionBinder) throws RemoteException {
+            int uid = Binder.getCallingUid();
+            int pid = Binder.getCallingPid();
+
+            MediaSession2Record record;
+            SessionToken token;
+            // TODO(jaewan): Add sanity check for the token if calling package is from uid.
+            synchronized (mLock) {
+                record = getSessionRecordLocked(sessionPackage, id);
+                if (record == null) {
+                    record = new MediaSession2Record(getContext(), mSessionDestroyedListener);
+                    mSessions.add(record);
+                }
+                token = record.createSessionToken(pid, sessionPackage, id, sessionBinder);
+                if (token == null) {
+                    Log.d(TAG, "failed to create session token for " + sessionPackage
+                            + " from pid=" + pid + ". Previously " + record);
+                } else {
+                    Log.d(TAG, "session " + token + " is created");
+                }
+            }
+            return token == null ? null : token.toBundle();
+        }
+
+        // TODO(jaewan): Protect this API with permission
+        // TODO(jaewan): Add listeners for change in operations..
+        @Override
+        public List<Bundle> getSessionTokens(boolean activeSessionOnly,
+                boolean sessionServiceOnly) throws RemoteException {
+            List<Bundle> tokens = new ArrayList<>();
+            synchronized (mLock) {
+                for (int i = 0; i < mSessions.size(); i++) {
+                    MediaSession2Record record = mSessions.get(i);
+                    boolean isSessionService = (record instanceof MediaSessionService2Record);
+                    boolean isActive = record.getSessionPid() != 0;
+                    if ((!activeSessionOnly && isSessionService)
+                            || (!sessionServiceOnly && isActive)) {
+                        SessionToken token = record.getToken();
+                        if (token != null) {
+                            tokens.add(token.toBundle());
+                        } else {
+                            Log.wtf(TAG, "Null token for record=" + record);
+                        }
+                    }
+                }
+            }
+            return tokens;
         }
 
         private int verifySessionsRequest(ComponentName componentName, int userId, final int pid,

@@ -725,7 +725,7 @@ Status StatsService::addConfiguration(int64_t key,
     if (checkCallingPermission(String16(kPermissionDump))) {
         ConfigKey configKey(ipc->getCallingUid(), key);
         StatsdConfig cfg;
-        if (!cfg.ParseFromArray(&config[0], config.size())) {
+        if (config.empty() || !cfg.ParseFromArray(&config[0], config.size())) {
             *success = false;
             return Status::ok();
         }

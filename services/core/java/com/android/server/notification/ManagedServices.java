@@ -254,13 +254,11 @@ abstract public class ManagedServices {
 
         for (ComponentName cmpt : mEnabledServicesForCurrentProfiles) {
             if (filter != null && !filter.matches(cmpt)) continue;
-
             cmpt.writeToProto(proto, ManagedServicesProto.ENABLED);
         }
 
         for (ManagedServiceInfo info : mServices) {
             if (filter != null && !filter.matches(info.component)) continue;
-
             info.writeToProto(proto, ManagedServicesProto.LIVE_SERVICES, this);
         }
 
@@ -1145,13 +1143,11 @@ abstract public class ManagedServices {
 
         public void writeToProto(ProtoOutputStream proto, long fieldId, ManagedServices host) {
             final long token = proto.start(fieldId);
-
             component.writeToProto(proto, ManagedServiceInfoProto.COMPONENT);
             proto.write(ManagedServiceInfoProto.USER_ID, userid);
             proto.write(ManagedServiceInfoProto.SERVICE, service.getClass().getName());
             proto.write(ManagedServiceInfoProto.IS_SYSTEM, isSystem);
             proto.write(ManagedServiceInfoProto.IS_GUEST, isGuest(host));
-
             proto.end(token);
         }
 

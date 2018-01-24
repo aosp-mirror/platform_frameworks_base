@@ -1591,7 +1591,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     boolean checkStartAnyActivityPermission(Intent intent, ActivityInfo aInfo,
             String resultWho, int requestCode, int callingPid, int callingUid,
             String callingPackage, boolean ignoreTargetSecurity, ProcessRecord callerApp,
-            ActivityRecord resultRecord, ActivityStack resultStack, ActivityOptions options) {
+            ActivityRecord resultRecord, ActivityStack resultStack) {
         final int startAnyPerm = mService.checkPermission(START_ANY_ACTIVITY, callingPid,
                 callingUid);
         if (startAnyPerm == PERMISSION_GRANTED) {
@@ -1644,57 +1644,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     + " requires appop " + AppOpsManager.permissionToOp(aInfo.permission);
             Slog.w(TAG, message);
             return false;
-        }
-        if (options != null) {
-            // If a launch task id is specified, then ensure that the caller is the recents
-            // component or has the START_TASKS_FROM_RECENTS permission
-            if (options.getLaunchTaskId() != INVALID_TASK_ID
-                    && !mRecentTasks.isCallerRecents(callingUid)) {
-                final int startInTaskPerm = mService.checkPermission(START_TASKS_FROM_RECENTS,
-                        callingPid, callingUid);
-                if (startInTaskPerm == PERMISSION_DENIED) {
-                    final String msg = "Permission Denial: starting " + intent.toString()
-                            + " from " + callerApp + " (pid=" + callingPid
-                            + ", uid=" + callingUid + ") with launchTaskId="
-                            + options.getLaunchTaskId();
-                    Slog.w(TAG, msg);
-                    throw new SecurityException(msg);
-                }
-            }
-            // Check if someone tries to launch an activity on a private display with a different
-            // owner.
-            final int launchDisplayId = options.getLaunchDisplayId();
-            if (launchDisplayId != INVALID_DISPLAY && !isCallerAllowedToLaunchOnDisplay(callingPid,
-                    callingUid, launchDisplayId, aInfo)) {
-                final String msg = "Permission Denial: starting " + intent.toString()
-                        + " from " + callerApp + " (pid=" + callingPid
-                        + ", uid=" + callingUid + ") with launchDisplayId="
-                        + launchDisplayId;
-                Slog.w(TAG, msg);
-                throw new SecurityException(msg);
-            }
-            // Check if someone tries to launch an unwhitelisted activity into LockTask mode.
-            final boolean lockTaskMode = options.getLockTaskMode();
-            if (lockTaskMode && !mService.mLockTaskController.isPackageWhitelisted(
-                    UserHandle.getUserId(callingUid), aInfo.packageName)) {
-                final String msg = "Permission Denial: starting " + intent.toString()
-                        + " from " + callerApp + " (pid=" + callingPid
-                        + ", uid=" + callingUid + ") with lockTaskMode=true";
-                Slog.w(TAG, msg);
-                throw new SecurityException(msg);
-            }
-
-            // Check permission for remote animations
-            final RemoteAnimationAdapter adapter = options.getRemoteAnimationAdapter();
-            if (adapter != null && mService.checkPermission(
-                    CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS, callingPid, callingUid)
-                            != PERMISSION_GRANTED) {
-                final String msg = "Permission Denial: starting " + intent.toString()
-                        + " from " + callerApp + " (pid=" + callingPid
-                        + ", uid=" + callingUid + ") with remoteAnimationAdapter";
-                Slog.w(TAG, msg);
-                throw new SecurityException(msg);
-            }
         }
 
         return true;
@@ -2166,8 +2115,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
-    void findTaskToMoveToFront(TaskRecord task, int flags, ActivityOptions options,
-            String reason, boolean forceNonResizeable) {
+    void findTaskToMoveToFront(TaskRecord task, int flags, ActivityOptions options, String reason,
+            boolean forceNonResizeable) {
         final ActivityStack currentStack = task.getStack();
         if (currentStack == null) {
             Slog.e(TAG, "findTaskToMoveToFront: can't move task="
@@ -4546,16 +4495,17 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         task.setTaskDockedResizing(true);
     }
 
-    int startActivityFromRecents(int taskId, Bundle bOptions) {
+    int startActivityFromRecents(int callingPid, int callingUid, int taskId,
+            SafeActivityOptions options) {
         final TaskRecord task;
-        final int callingUid;
         final String callingPackage;
         final Intent intent;
         final int userId;
         int activityType = ACTIVITY_TYPE_UNDEFINED;
         int windowingMode = WINDOWING_MODE_UNDEFINED;
-        final ActivityOptions activityOptions = (bOptions != null)
-                ? new ActivityOptions(bOptions) : null;
+        final ActivityOptions activityOptions = options != null
+                ? options.getOptions(this)
+                : null;
         if (activityOptions != null) {
             activityType = activityOptions.getLaunchActivityType();
             windowingMode = activityOptions.getLaunchWindowingMode();
@@ -4603,7 +4553,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 sendPowerHintForLaunchStartIfNeeded(true /* forceSend */, targetActivity);
                 mActivityMetricsLogger.notifyActivityLaunching();
                 try {
-                    mService.moveTaskToFrontLocked(task.taskId, 0, bOptions,
+                    mService.moveTaskToFrontLocked(task.taskId, 0, options,
                             true /* fromRecents */);
                 } finally {
                     mActivityMetricsLogger.notifyActivityLaunched(START_TASK_TO_FRONT,
@@ -4622,13 +4572,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                         task.getStack());
                 return ActivityManager.START_TASK_TO_FRONT;
             }
-            callingUid = task.mCallingUid;
             callingPackage = task.mCallingPackage;
             intent = task.intent;
             intent.addFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
             userId = task.userId;
-            int result = mService.getActivityStartController().startActivityInPackage(callingUid,
-                    callingPackage, intent, null, null, null, 0, 0, bOptions, userId, task,
+            int result = mService.getActivityStartController().startActivityInPackage(
+                    task.mCallingUid, callingPid, callingUid, callingPackage, intent, null, null,
+                    null, 0, 0, options, userId, task,
                     "startActivityFromRecents");
             if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
                 setResizingDuringAnimation(task);

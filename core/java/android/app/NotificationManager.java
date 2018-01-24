@@ -1133,7 +1133,7 @@ public class NotificationManager {
         }
 
         /** @hide */
-        public void toProto(ProtoOutputStream proto, long fieldId) {
+        public void writeToProto(ProtoOutputStream proto, long fieldId) {
             final long pToken = proto.start(fieldId);
 
             bitwiseToProtoEnum(proto, PolicyProto.PRIORITY_CATEGORIES, priorityCategories);

@@ -867,19 +867,30 @@ public final class PendingIntent implements Parcelable {
             @Nullable OnFinished onFinished, @Nullable Handler handler,
             @Nullable String requiredPermission, @Nullable Bundle options)
             throws CanceledException {
+        if (sendAndReturnResult(context, code, intent, onFinished, handler, requiredPermission,
+                options) < 0) {
+            throw new CanceledException();
+        }
+    }
+
+    /**
+     * Like {@link #send}, but returns the result
+     * @hide
+     */
+    public int sendAndReturnResult(Context context, int code, @Nullable Intent intent,
+            @Nullable OnFinished onFinished, @Nullable Handler handler,
+            @Nullable String requiredPermission, @Nullable Bundle options)
+            throws CanceledException {
         try {
             String resolvedType = intent != null ?
                     intent.resolveTypeIfNeeded(context.getContentResolver())
                     : null;
-            int res = ActivityManager.getService().sendIntentSender(
+            return ActivityManager.getService().sendIntentSender(
                     mTarget, mWhitelistToken, code, intent, resolvedType,
                     onFinished != null
                             ? new FinishedDispatcher(this, onFinished, handler)
                             : null,
                     requiredPermission, options);
-            if (res < 0) {
-                throw new CanceledException();
-            }
         } catch (RemoteException e) {
             throw new CanceledException(e);
         }

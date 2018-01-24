@@ -173,6 +173,18 @@ TEST(ConfigLocaleTest, IsMoreSpecificThan) {
     fillIn("en", "US", NULL, "POSIX", &r);
     EXPECT_FALSE(l.isMoreSpecificThan(r));
     EXPECT_TRUE(r.isMoreSpecificThan(l));
+
+    fillIn("ar", "EG", NULL, NULL, &l);
+    fillIn("ar", "EG", NULL, NULL, &r);
+    memcpy(&r.localeNumberingSystem, "latn", 4);
+    EXPECT_FALSE(l.isMoreSpecificThan(r));
+    EXPECT_TRUE(r.isMoreSpecificThan(l));
+
+    fillIn("en", "US", NULL, NULL, &l);
+    fillIn("es", "ES", NULL, NULL, &r);
+
+    EXPECT_FALSE(l.isMoreSpecificThan(r));
+    EXPECT_FALSE(r.isMoreSpecificThan(l));
 }
 
 TEST(ConfigLocaleTest, setLocale) {
@@ -321,6 +333,22 @@ TEST(ConfigLocaleTest, getBcp47Locale_script) {
     EXPECT_EQ(0, strcmp("en", out));
 }
 
+TEST(ConfigLocaleTest, getBcp47Locale_numberingSystem) {
+    ResTable_config config;
+    fillIn("en", NULL, NULL, NULL, &config);
+
+    char out[RESTABLE_MAX_LOCALE_LEN];
+
+    memcpy(&config.localeNumberingSystem, "latn", 4);
+    config.getBcp47Locale(out);
+    EXPECT_EQ(0, strcmp("en-u-nu-latn", out));
+
+    fillIn("sr", "SR", "Latn", NULL, &config);
+    memcpy(&config.localeNumberingSystem, "latn", 4);
+    config.getBcp47Locale(out);
+    EXPECT_EQ(0, strcmp("sr-Latn-SR-u-nu-latn", out));
+}
+
 TEST(ConfigLocaleTest, getBcp47Locale_canonicalize) {
     ResTable_config config;
     char out[RESTABLE_MAX_LOCALE_LEN];
@@ -432,6 +460,11 @@ TEST(ConfigLocaleTest, match) {
     fillIn("ar", "XB", NULL, NULL, &supported);
     fillIn("ar", "XB", NULL, NULL, &requested);
     // Even if they are pseudo-locales, exactly equal locales match.
+    EXPECT_TRUE(supported.match(requested));
+
+    fillIn("ar", "EG", NULL, NULL, &supported);
+    fillIn("ar", "TN", NULL, NULL, &requested);
+    memcpy(&supported.localeNumberingSystem, "latn", 4);
     EXPECT_TRUE(supported.match(requested));
 }
 
@@ -756,6 +789,26 @@ TEST(ConfigLocaleTest, isLocaleBetterThan_regionComparison) {
     // letters are better than numbers.
     EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
     EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
+}
+
+TEST(ConfigLocaleTest, isLocaleBetterThan_numberingSystem) {
+    ResTable_config config1, config2, request;
+
+    fillIn("ar", "EG", NULL, NULL, &request);
+    memcpy(&request.localeNumberingSystem, "latn", 4);
+    fillIn("ar", NULL, NULL, NULL, &config1);
+    memcpy(&config1.localeNumberingSystem, "latn", 4);
+    fillIn("ar", NULL, NULL, NULL, &config2);
+    EXPECT_TRUE(config1.isLocaleBetterThan(config2, &request));
+    EXPECT_FALSE(config2.isLocaleBetterThan(config1, &request));
+
+    fillIn("ar", "EG", NULL, NULL, &request);
+    memcpy(&request.localeNumberingSystem, "latn", 4);
+    fillIn("ar", "TN", NULL, NULL, &config1);
+    memcpy(&config1.localeNumberingSystem, "latn", 4);
+    fillIn("ar", NULL, NULL, NULL, &config2);
+    EXPECT_TRUE(config2.isLocaleBetterThan(config1, &request));
+    EXPECT_FALSE(config1.isLocaleBetterThan(config2, &request));
 }
 
 // Default resources are considered better matches for US English

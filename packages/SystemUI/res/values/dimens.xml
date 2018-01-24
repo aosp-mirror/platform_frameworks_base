@@ -579,7 +579,7 @@
     <dimen name="keyguard_affordance_icon_width">24dp</dimen>
 
     <dimen name="keyguard_indication_margin_bottom">65dp</dimen>
-    <dimen name="keyguard_indication_margin_bottom_ambient">30dp</dimen>
+    <dimen name="keyguard_indication_margin_bottom_ambient">16dp</dimen>
 
     <!-- The text size for battery level -->
     <dimen name="battery_level_text_size">12sp</dimen>
@@ -889,4 +889,8 @@
     <dimen name="smart_reply_button_spacing">8dp</dimen>
     <dimen name="smart_reply_button_padding_vertical">4dp</dimen>
     <dimen name="smart_reply_button_font_size">14sp</dimen>
+
+    <dimen name="fingerprint_dialog_icon_size">44dp</dimen>
+    <dimen name="fingerprint_dialog_fp_icon_size">60dp</dimen>
+    <dimen name="fingerprint_dialog_animation_translation_offset">350dp</dimen>
 </resources>

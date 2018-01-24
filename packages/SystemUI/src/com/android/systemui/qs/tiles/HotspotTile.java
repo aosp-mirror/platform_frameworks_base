@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles;
 
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -37,7 +38,7 @@ import com.android.systemui.statusbar.policy.HotspotController;
 /** Quick settings tile: Hotspot **/
 public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
     static final Intent TETHER_SETTINGS = new Intent().setComponent(new ComponentName(
-             "com.android.settings", "com.android.settings.TetherSettings"));
+            "com.android.settings", "com.android.settings.TetherSettings"));
 
     private final Icon mEnabledStatic = ResourceIcon.get(R.drawable.ic_hotspot);
     private final Icon mUnavailable = ResourceIcon.get(R.drawable.ic_hotspot_unavailable);
@@ -115,11 +116,19 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
         state.label = mContext.getString(R.string.quick_settings_hotspot_label);
 
         checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_CONFIG_TETHERING);
-        if (arg instanceof Boolean) {
-            state.value = (boolean) arg;
+
+        final int numConnectedDevices;
+        if (arg instanceof CallbackInfo) {
+            CallbackInfo info = (CallbackInfo) arg;
+            state.value = info.enabled;
+            numConnectedDevices = info.numConnectedDevices;
         } else {
             state.value = mController.isHotspotEnabled();
+            numConnectedDevices = mController.getNumConnectedDevices();
         }
+
+        state.secondaryLabel = getSecondaryLabel(state.value, numConnectedDevices);
+
         state.icon = mEnabledStatic;
         state.isAirplaneMode = mAirplaneMode.getValue() != 0;
         state.isTransient = mController.isHotspotTransient();
@@ -131,6 +140,18 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
         state.contentDescription = state.label;
         state.state = state.isAirplaneMode ? Tile.STATE_UNAVAILABLE
                 : state.value || state.isTransient ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
+    }
+
+    @Nullable
+    private String getSecondaryLabel(boolean enabled, int numConnectedDevices) {
+        if (numConnectedDevices > 0 && enabled) {
+            return mContext.getResources().getQuantityString(
+                    R.plurals.quick_settings_hotspot_num_devices,
+                    numConnectedDevices,
+                    numConnectedDevices);
+        }
+
+        return null;
     }
 
     @Override
@@ -148,9 +169,30 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
     }
 
     private final class Callback implements HotspotController.Callback {
+        final CallbackInfo mCallbackInfo = new CallbackInfo();
+
         @Override
-        public void onHotspotChanged(boolean enabled) {
-            refreshState(enabled);
+        public void onHotspotChanged(boolean enabled, int numConnectedDevices) {
+            mCallbackInfo.enabled = enabled;
+            mCallbackInfo.numConnectedDevices = numConnectedDevices;
+            refreshState(mCallbackInfo);
         }
-    };
+    }
+
+    /**
+     * Holder for any hotspot state info that needs to passed from the callback to
+     * {@link #handleUpdateState(State, Object)}.
+     */
+    protected static final class CallbackInfo {
+        boolean enabled;
+        int numConnectedDevices;
+
+        @Override
+        public String toString() {
+            return new StringBuilder("CallbackInfo[")
+                    .append("enabled=").append(enabled)
+                    .append(",numConnectedDevices=").append(numConnectedDevices)
+                    .append(']').toString();
+        }
+    }
 }

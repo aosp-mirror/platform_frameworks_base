@@ -16,9 +16,6 @@
 
 package com.android.systemui.statusbar.car;
 
-import android.animation.Animator;
-import android.animation.Animator.AnimatorListener;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -29,62 +26,110 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.qs.car.CarQSFragment;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.policy.UserInfoController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Vector;
 
 /**
  * Displays a ViewPager with icons for the users in the system to allow switching between users.
  * One of the uses of this is for the lock screen in auto.
  */
-public class UserGridView extends ViewPager {
-    private static final int EXPAND_ANIMATION_TIME_MS = 200;
-    private static final int HIDE_ANIMATION_TIME_MS = 133;
-
+public class UserGridView extends ViewPager implements
+        UserInfoController.OnUserInfoChangedListener {
     private StatusBar mStatusBar;
     private UserSwitcherController mUserSwitcherController;
     private Adapter mAdapter;
     private UserSelectionListener mUserSelectionListener;
-    private ValueAnimator mHeightAnimator;
-    private int mTargetHeight;
-    private int mHeightChildren;
-    private boolean mShowing;
+    private UserInfoController mUserInfoController;
+    private Vector mUserContainers;
+    private int mContainerWidth;
+    private boolean mOverrideAlpha;
+    private CarQSFragment.UserSwitchCallback mUserSwitchCallback;
 
     public UserGridView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
     public void init(StatusBar statusBar, UserSwitcherController userSwitcherController,
-            boolean showInitially) {
+            boolean overrideAlpha) {
         mStatusBar = statusBar;
         mUserSwitcherController = userSwitcherController;
         mAdapter = new Adapter(mUserSwitcherController);
-        addOnLayoutChangeListener(mAdapter);
+        mUserInfoController = Dependency.get(UserInfoController.class);
+        mOverrideAlpha = overrideAlpha;
+        // Whenever the container width changes, the containers must be refreshed. Instead of
+        // doing an initial refreshContainers() to populate the containers, this listener will
+        // refresh them on layout change because that affects how the users are split into
+        // containers. Furthermore, at this point, the container width is unknown, so
+        // refreshContainers() cannot populate any containers.
+        addOnLayoutChangeListener(
+                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                    int newWidth = Math.max(left - right, right - left);
+                    if (mContainerWidth != newWidth) {
+                        mContainerWidth = newWidth;
+                        refreshContainers();
+                    }
+                });
+    }
+
+    private void refreshContainers() {
+        mUserContainers = new Vector();
+
+        Context context = getContext();
+        LayoutInflater inflater = LayoutInflater.from(context);
+
+        for (int i = 0; i < mAdapter.getCount(); i++) {
+            ViewGroup pods = (ViewGroup) inflater.inflate(
+                    R.layout.car_fullscreen_user_pod_container, null);
+
+            int iconsPerPage = mAdapter.getIconsPerPage();
+            int limit = Math.min(mUserSwitcherController.getUsers().size(), (i + 1) * iconsPerPage);
+            for (int j = i * iconsPerPage; j < limit; j++) {
+                View v = mAdapter.makeUserPod(inflater, context, j, pods);
+                if (mOverrideAlpha) {
+                    v.setAlpha(1f);
+                }
+                pods.addView(v);
+                // This is hacky, but the dividers on the pod container LinearLayout don't seem
+                // to work for whatever reason.  Instead, set a right margin on the pod if it's not
+                // the right-most pod and there is more than one pod in the container.
+                if (i < limit - 1 && limit > 1) {
+                    ViewGroup.MarginLayoutParams params =
+                            (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+                    params.setMargins(0, 0, getResources().getDimensionPixelSize(
+                            R.dimen.car_fullscreen_user_pod_margin_between), 0);
+                    v.setLayoutParams(params);
+                }
+            }
+            mUserContainers.add(pods);
+        }
+
+        mAdapter = new Adapter(mUserSwitcherController);
         setAdapter(mAdapter);
-        mShowing = showInitially;
     }
 
-    public boolean isShowing() {
-        return mShowing;
+    @Override
+    public void onUserInfoChanged(String name, Drawable picture, String userAccount) {
+        refreshContainers();
     }
 
-    public void show() {
-        mShowing = true;
-        animateHeightChange(getMeasuredHeight(), mHeightChildren);
-    }
-
-    public void hide() {
-        mShowing = false;
-        animateHeightChange(getMeasuredHeight(), 0);
+    public void setUserSwitchCallback(CarQSFragment.UserSwitchCallback callback) {
+        mUserSwitchCallback = callback;
     }
 
     public void onUserSwitched(int newUserId) {
@@ -94,6 +139,14 @@ public class UserGridView extends ViewPager {
 
     public void setUserSelectionListener(UserSelectionListener userSelectionListener) {
         mUserSelectionListener = userSelectionListener;
+    }
+
+    public void setListening(boolean listening) {
+        if (listening) {
+            mUserInfoController.addCallback(this);
+        } else {
+            mUserInfoController.removeCallback(this);
+        }
     }
 
     void showOfflineAuthUi() {
@@ -115,13 +168,6 @@ public class UserGridView extends ViewPager {
                 height = Math.max(child.getMeasuredHeight(), height);
             }
 
-            mHeightChildren = height;
-
-            // Override the height if it's not showing.
-            if (!mShowing) {
-                height = 0;
-            }
-
             // Respect the AT_MOST request from parent.
             if (MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.AT_MOST) {
                 height = Math.min(MeasureSpec.getSize(heightMeasureSpec), height);
@@ -132,72 +178,19 @@ public class UserGridView extends ViewPager {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
-    private void animateHeightChange(int oldHeight, int newHeight) {
-        // If there is no change in height or an animation is already in progress towards the
-        // desired height, then there's no need to make any changes.
-        if (oldHeight == newHeight || newHeight == mTargetHeight) {
-            return;
-        }
-
-        // Animation in progress is not going towards the new target, so cancel it.
-        if (mHeightAnimator != null){
-            mHeightAnimator.cancel();
-        }
-
-        mTargetHeight = newHeight;
-        mHeightAnimator = ValueAnimator.ofInt(oldHeight, mTargetHeight);
-        mHeightAnimator.addUpdateListener(valueAnimator -> {
-            ViewGroup.LayoutParams layoutParams = getLayoutParams();
-            layoutParams.height = (Integer) valueAnimator.getAnimatedValue();
-            requestLayout();
-        });
-        mHeightAnimator.addListener(new AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animator) {}
-
-            @Override
-            public void onAnimationEnd(Animator animator) {
-                // ValueAnimator does not guarantee that the update listener will get an update
-                // to the final value, so here, the final value is set.  Though the final calculated
-                // height (mTargetHeight) could be set, WRAP_CONTENT is more appropriate.
-                ViewGroup.LayoutParams layoutParams = getLayoutParams();
-                layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                requestLayout();
-                mHeightAnimator = null;
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animator) {}
-
-            @Override
-            public void onAnimationRepeat(Animator animator) {}
-        });
-
-        mHeightAnimator.setInterpolator(new FastOutSlowInInterpolator());
-        if (oldHeight < newHeight) {
-            // Expanding
-            mHeightAnimator.setDuration(EXPAND_ANIMATION_TIME_MS);
-        } else {
-            // Hiding
-            mHeightAnimator.setDuration(HIDE_ANIMATION_TIME_MS);
-        }
-        mHeightAnimator.start();
-    }
-
     /**
      * This is a ViewPager.PagerAdapter which deletegates the work to a
      * UserSwitcherController.BaseUserAdapter. Java doesn't support multiple inheritance so we have
      * to use composition instead to achieve the same goal since both the base classes are abstract
      * classes and not interfaces.
      */
-    private final class Adapter extends PagerAdapter implements View.OnLayoutChangeListener {
+    private final class Adapter extends PagerAdapter {
         private final int mPodWidth;
         private final int mPodMarginBetween;
         private final int mPodImageAvatarWidth;
         private final int mPodImageAvatarHeight;
 
         private final WrappedBaseUserAdapter mUserAdapter;
-        private int mContainerWidth;
 
         public Adapter(UserSwitcherController controller) {
             super();
@@ -229,30 +222,20 @@ public class UserGridView extends ViewPager {
         }
 
         @Override
-        public Object instantiateItem(ViewGroup container, int position) {
-            Context context = getContext();
-            LayoutInflater inflater = LayoutInflater.from(context);
-
-            ViewGroup pods = (ViewGroup) inflater.inflate(
-                    R.layout.car_fullscreen_user_pod_container, null);
-
-            int iconsPerPage = getIconsPerPage();
-            int limit = Math.min(mUserAdapter.getCount(), (position + 1) * iconsPerPage);
-            for (int i = position * iconsPerPage; i < limit; i++) {
-                View v = makeUserPod(inflater, context, i, pods);
-                pods.addView(v);
-                // This is hacky, but the dividers on the pod container LinearLayout don't seem
-                // to work for whatever reason.  Instead, set a right margin on the pod if it's not
-                // the right-most pod and there is more than one pod in the container.
-                if (i < limit - 1 && limit > 1) {
-                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                            LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-                    params.setMargins(0, 0, mPodMarginBetween, 0);
-                    v.setLayoutParams(params);
-                }
+        public void finishUpdate(ViewGroup container) {
+            if (mUserSwitchCallback != null) {
+                mUserSwitchCallback.resetShowing();
             }
-            container.addView(pods);
-            return pods;
+        }
+
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+            if (position < mUserContainers.size()) {
+                container.addView((View) mUserContainers.get(position));
+                return mUserContainers.get(position);
+            } else {
+                return null;
+            }
         }
 
         /**
@@ -353,17 +336,10 @@ public class UserGridView extends ViewPager {
         public boolean isViewFromObject(View view, Object object) {
             return view == object;
         }
-
-        @Override
-        public void onLayoutChange(View v, int left, int top, int right, int bottom,
-                int oldLeft, int oldTop, int oldRight, int oldBottom) {
-            mContainerWidth = Math.max(left - right, right - left);
-            notifyDataSetChanged();
-        }
     }
 
     private final class WrappedBaseUserAdapter extends UserSwitcherController.BaseUserAdapter {
-        private Adapter mContainer;
+        private final Adapter mContainer;
 
         public WrappedBaseUserAdapter(UserSwitcherController controller, Adapter container) {
             super(controller);

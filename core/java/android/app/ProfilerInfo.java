@@ -20,6 +20,7 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -122,6 +123,20 @@ public class ProfilerInfo implements Parcelable {
         out.writeInt(streamingOutput ? 1 : 0);
         out.writeString(agent);
         out.writeBoolean(attachAgentDuringBind);
+    }
+
+    /** @hide */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        proto.write(ProfilerInfoProto.PROFILE_FILE, profileFile);
+        if (profileFd != null) {
+            proto.write(ProfilerInfoProto.PROFILE_FD, profileFd.getFd());
+        }
+        proto.write(ProfilerInfoProto.SAMPLING_INTERVAL, samplingInterval);
+        proto.write(ProfilerInfoProto.AUTO_STOP_PROFILER, autoStopProfiler);
+        proto.write(ProfilerInfoProto.STREAMING_OUTPUT, streamingOutput);
+        proto.write(ProfilerInfoProto.AGENT, agent);
+        proto.end(token);
     }
 
     public static final Parcelable.Creator<ProfilerInfo> CREATOR =

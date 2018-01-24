@@ -127,7 +127,7 @@ public class AutoTileManager {
 
     private final HotspotController.Callback mHotspotCallback = new Callback() {
         @Override
-        public void onHotspotChanged(boolean enabled) {
+        public void onHotspotChanged(boolean enabled, int numDevices) {
             if (mAutoTracker.isAdded(HOTSPOT)) return;
             if (enabled) {
                 mHost.addTile(HOTSPOT);

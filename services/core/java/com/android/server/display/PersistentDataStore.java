@@ -598,14 +598,20 @@ final class PersistentDataStore {
         private boolean setBrightnessConfigurationForUser(BrightnessConfiguration c,
                 int userSerial, String packageName) {
             BrightnessConfiguration currentConfig = mConfigurations.get(userSerial);
-            if (currentConfig == null || !currentConfig.equals(c)) {
-                if (packageName == null) {
-                    mPackageNames.remove(userSerial);
+            if (currentConfig != c && (currentConfig == null || !currentConfig.equals(c))) {
+                if (c != null) {
+                    if (packageName == null) {
+                        mPackageNames.remove(userSerial);
+                    } else {
+                        mPackageNames.put(userSerial, packageName);
+                    }
+                    mTimeStamps.put(userSerial, System.currentTimeMillis());
+                    mConfigurations.put(userSerial, c);
                 } else {
-                    mPackageNames.put(userSerial, packageName);
+                    mPackageNames.remove(userSerial);
+                    mTimeStamps.delete(userSerial);
+                    mConfigurations.remove(userSerial);
                 }
-                mTimeStamps.put(userSerial, System.currentTimeMillis());
-                mConfigurations.put(userSerial, c);
                 return true;
             }
             return false;

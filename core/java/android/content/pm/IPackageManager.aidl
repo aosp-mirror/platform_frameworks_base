@@ -656,4 +656,8 @@ interface IPackageManager {
     void setHarmfulAppWarning(String packageName, CharSequence warning, int userId);
 
     CharSequence getHarmfulAppWarning(String packageName, int userId);
+
+    boolean hasSigningCertificate(String packageName, in byte[] signingCertificate, int flags);
+
+    boolean hasUidSigningCertificate(int uid, in byte[] signingCertificate, int flags);
 }

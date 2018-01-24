@@ -222,9 +222,18 @@ public class ApplicationPackageManager extends PackageManager {
 
     @Override
     public Intent getLeanbackLaunchIntentForPackage(String packageName) {
-        // Try to find a main leanback_launcher activity.
+        return getLaunchIntentForPackageAndCategory(packageName, Intent.CATEGORY_LEANBACK_LAUNCHER);
+    }
+
+    @Override
+    public Intent getCarLaunchIntentForPackage(String packageName) {
+        return getLaunchIntentForPackageAndCategory(packageName, Intent.CATEGORY_CAR_LAUNCHER);
+    }
+
+    private Intent getLaunchIntentForPackageAndCategory(String packageName, String category) {
+        // Try to find a main launcher activity for the given categories.
         Intent intentToResolve = new Intent(Intent.ACTION_MAIN);
-        intentToResolve.addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER);
+        intentToResolve.addCategory(category);
         intentToResolve.setPackage(packageName);
         List<ResolveInfo> ris = queryIntentActivities(intentToResolve, 0);
 
@@ -684,6 +693,26 @@ public class ApplicationPackageManager extends PackageManager {
     public int checkSignatures(int uid1, int uid2) {
         try {
             return mPM.checkUidSignatures(uid1, uid2);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public boolean hasSigningCertificate(
+            String packageName, byte[] certificate, @PackageManager.CertificateInputType int type) {
+        try {
+            return mPM.hasSigningCertificate(packageName, certificate, type);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public boolean hasSigningCertificate(
+            int uid, byte[] certificate, @PackageManager.CertificateInputType int type) {
+        try {
+            return mPM.hasUidSigningCertificate(uid, certificate, type);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

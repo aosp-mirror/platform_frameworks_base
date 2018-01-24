@@ -21,10 +21,9 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.print.PrintManager;
 import android.provider.Settings;
-
 import com.android.internal.util.UserIcons;
 import com.android.settingslib.drawable.UserIconDrawable;
-
+import com.android.settingslib.wrapper.LocationManagerWrapper;
 import java.text.NumberFormat;
 
 public class Utils {
@@ -44,6 +43,24 @@ public class Utils {
         com.android.internal.R.drawable.ic_wifi_signal_3,
         com.android.internal.R.drawable.ic_wifi_signal_4
     };
+
+    public static void updateLocationEnabled(Context context, boolean enabled, int userId) {
+        Intent intent = new Intent(LocationManager.MODE_CHANGING_ACTION);
+
+        final int oldMode = Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.LOCATION_MODE, Settings.Secure.LOCATION_MODE_OFF, userId);
+        final int newMode = enabled
+                ? Settings.Secure.LOCATION_MODE_HIGH_ACCURACY
+                : Settings.Secure.LOCATION_MODE_OFF;
+        intent.putExtra(CURRENT_MODE_KEY, oldMode);
+        intent.putExtra(NEW_MODE_KEY, newMode);
+        context.sendBroadcastAsUser(
+                intent, UserHandle.of(userId), android.Manifest.permission.WRITE_SECURE_SETTINGS);
+        LocationManager locationManager =
+                (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        LocationManagerWrapper wrapper = new LocationManagerWrapper(locationManager);
+        wrapper.setLocationEnabledForUser(enabled, UserHandle.of(userId));
+    }
 
     public static boolean updateLocationMode(Context context, int oldMode, int newMode, int userId) {
         Intent intent = new Intent(LocationManager.MODE_CHANGING_ACTION);

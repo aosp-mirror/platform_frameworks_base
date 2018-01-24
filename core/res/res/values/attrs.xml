@@ -1897,6 +1897,7 @@
         <enum name="KEYCODE_SYSTEM_NAVIGATION_LEFT" value="282" />
         <enum name="KEYCODE_SYSTEM_NAVIGATION_RIGHT" value="283" />
         <enum name="KEYCODE_ALL_APPS" value="284" />
+        <enum name="KEYCODE_REFRESH" value="285" />
     </attr>
 
     <!-- ***************************************************************** -->
@@ -2066,7 +2067,8 @@
              <p>For this to take effect, the window must be drawing the system bar backgrounds with
              {@link android.R.attr#windowDrawsSystemBarBackgrounds} and the navigation bar must not
              have been requested to be translucent with
-             {@link android.R.attr#windowTranslucentNavigation}. -->
+             {@link android.R.attr#windowTranslucentNavigation}.
+             Corresponds to {@link android.view.Window#setNavigationBarDividerColor(int)}. -->
         <attr name="navigationBarDividerColor" format="color" />
 
         <!-- The duration, in milliseconds, of the window background fade duration
@@ -6334,6 +6336,17 @@
     <declare-styleable name="AlphaAnimation">
         <attr name="fromAlpha" format="float" />
         <attr name="toAlpha" format="float" />
+    </declare-styleable>
+
+    <declare-styleable name="ClipRectAnimation">
+        <attr name="fromLeft" format="fraction" />
+        <attr name="fromTop" format="fraction" />
+        <attr name="fromRight" format="fraction" />
+        <attr name="fromBottom" format="fraction" />
+        <attr name="toLeft" format="fraction" />
+        <attr name="toTop" format="fraction" />
+        <attr name="toRight" format="fraction" />
+        <attr name="toBottom" format="fraction" />
     </declare-styleable>
 
     <declare-styleable name="LayoutAnimation">

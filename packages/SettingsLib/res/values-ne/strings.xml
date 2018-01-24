@@ -196,7 +196,6 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"नेटवर्किङ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ताररहित प्रदर्शन प्रमाणीकरण"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi-Fi वर्बोज लग सक्षम पार्नुहोस्"</string>
-    <string name="wifi_aggressive_handover" msgid="5309131983693661320">"आक्रामक ढंगले Wi‑Fi बाट मोबाइलमा हस्तान्तरण"</string>
     <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi-Fi घुम्ने स्क्यान गर्न सधैँ अनुमति दिनुहोस्"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"मोबाइल डेटा सधैँ सक्रिय राख्नुहोस्"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"टेदरिङको लागि हार्डवेयरको प्रवेग"</string>
@@ -223,7 +222,6 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS प्रदायकको होस्टनाम प्रविष्ट गर्नुहोस्"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ताररहित प्रदर्शन प्रमाणीकरणका लागि विकल्पहरू देखाउनुहोस्"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi-Fi लग स्तर बढाउनुहोस्, Wi-Fi चयनकर्तामा प्रति SSID RSSI देखाइन्छ"</string>
-    <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"सक्षम गरिएको अवस्थामा, Wi-Fi सिग्नल न्यून हुँदा, Wi-Fi ले बढी आक्रामक ढंगले मोबाइलमा डेटा जडान हस्तान्तरण गर्नेछ"</string>
     <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Wi-Fi घुम्ने स्क्यान इन्टरफेसमा रहेको डेटा यातायातको मात्रामा आधारित अनुमति दिनुहोस्/नदिनुहोस्"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"लगर बफर आकारहरू"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"लग बफर प्रति लगर आकार चयन गर्नुहोस्"</string>

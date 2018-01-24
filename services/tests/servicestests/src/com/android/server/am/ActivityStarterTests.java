@@ -228,8 +228,8 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         if (containsConditions(preconditions,PRECONDITION_CANNOT_START_ANY_ACTIVITY)) {
             doReturn(false).when(service.mStackSupervisor).checkStartAnyActivityPermission(
-                    any(), any(), any(), anyInt(), anyInt(), anyInt(), any(), anyBoolean(),
-                    any(), any(), any(), any());
+                    any(), any(), any(), anyInt(), anyInt(), anyInt(), any(),
+                    anyBoolean(), any(), any(), any());
         }
 
         try {
@@ -278,7 +278,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
                     .setResultTo(resultTo)
                     .setRequestCode(requestCode)
                     .setReason("testLaunchActivityPermissionDenied")
-                    .setActivityOptions(options)
+                    .setActivityOptions(new SafeActivityOptions(options))
                     .execute();
             verify(options, times(1)).abort();
         }

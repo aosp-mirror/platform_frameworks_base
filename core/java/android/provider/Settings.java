@@ -41,7 +41,6 @@ import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.Application;
 import android.app.NotificationChannel;
-import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.app.SearchManager;
 import android.app.WallpaperManager;
@@ -75,7 +74,6 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.provider.SettingsValidators;
 import android.provider.SettingsValidators.Validator;
 import android.speech.tts.TextToSpeech;
 import android.telephony.SubscriptionManager;
@@ -1345,18 +1343,6 @@ public final class Settings {
             = "android.settings.CHANNEL_NOTIFICATION_SETTINGS";
 
     /**
-     * Activity Action: Show notification settings for a single {@link NotificationChannelGroup}.
-     * <p>
-     *     Input: {@link #EXTRA_APP_PACKAGE}, the package containing the channel group to display.
-     *     Input: {@link #EXTRA_CHANNEL_GROUP_ID}, the id of the channel group to display.
-     * <p>
-     * Output: Nothing.
-     */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_CHANNEL_GROUP_NOTIFICATION_SETTINGS =
-            "android.settings.CHANNEL_GROUP_NOTIFICATION_SETTINGS";
-
-    /**
      * Activity Extra: The package owner of the notification channel settings to display.
      * <p>
      * This must be passed as an extra field to the {@link #ACTION_CHANNEL_NOTIFICATION_SETTINGS}.
@@ -1370,15 +1356,6 @@ public final class Settings {
      * This must be passed as an extra field to the {@link #ACTION_CHANNEL_NOTIFICATION_SETTINGS}.
      */
     public static final String EXTRA_CHANNEL_ID = "android.provider.extra.CHANNEL_ID";
-
-    /**
-     * Activity Extra: The {@link NotificationChannelGroup#getId()} of the notification channel
-     * group settings to display.
-     * <p>
-     * This must be passed as an extra field to the
-     * {@link #ACTION_CHANNEL_GROUP_NOTIFICATION_SETTINGS}.
-     */
-    public static final String EXTRA_CHANNEL_GROUP_ID = "android.provider.extra.CHANNEL_GROUP_ID";
 
     /**
      * Activity Action: Show notification redaction settings.
@@ -1501,6 +1478,21 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_REQUEST_SET_AUTOFILL_SERVICE =
             "android.settings.REQUEST_SET_AUTOFILL_SERVICE";
+
+    /**
+     * Activity Action: Show screen for controlling which apps have access on volume directories.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * <p>
+     * Applications typically use this action to ask the user to revert the "Do not ask again"
+     * status of directory access requests made by
+     * {@link android.os.storage.StorageVolume#createAccessIntent(String)}.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_STORAGE_VOLUME_ACCESS_SETTINGS =
+            "android.settings.STORAGE_VOLUME_ACCESS_SETTINGS";
 
     // End of Intent actions for Settings
 
@@ -5509,37 +5501,54 @@ public final class Settings {
          * Note: do not rely on this value being present in settings.db or on ContentObserver
          * notifications for the corresponding Uri. Use {@link LocationManager#MODE_CHANGED_ACTION}
          * to receive changes in this value.
+         *
+         * @deprecated To check location status, use {@link LocationManager#isLocationEnabled()}. To
+         *             get the status of a location provider, use
+         *             {@link LocationManager#isProviderEnabled(String)}.
          */
+        @Deprecated
         public static final String LOCATION_MODE = "location_mode";
-        /**
-         * Stores the previous location mode when {@link #LOCATION_MODE} is set to
-         * {@link #LOCATION_MODE_OFF}
-         * @hide
-         */
-        public static final String LOCATION_PREVIOUS_MODE = "location_previous_mode";
 
         /**
-         * Sets all location providers to the previous states before location was turned off.
-         * @hide
-         */
-        public static final int LOCATION_MODE_PREVIOUS = -1;
-        /**
          * Location access disabled.
+         *
+         * @deprecated To check location status, use {@link LocationManager#isLocationEnabled()}. To
+         *             get the status of a location provider, use
+         *             {@link LocationManager#isProviderEnabled(String)}.
          */
+        @Deprecated
         public static final int LOCATION_MODE_OFF = 0;
+
         /**
          * Network Location Provider disabled, but GPS and other sensors enabled.
+         *
+         * @deprecated To check location status, use {@link LocationManager#isLocationEnabled()}. To
+         *             get the status of a location provider, use
+         *             {@link LocationManager#isProviderEnabled(String)}.
          */
+        @Deprecated
         public static final int LOCATION_MODE_SENSORS_ONLY = 1;
+
         /**
          * Reduced power usage, such as limiting the number of GPS updates per hour. Requests
          * with {@link android.location.Criteria#POWER_HIGH} may be downgraded to
          * {@link android.location.Criteria#POWER_MEDIUM}.
+         *
+         * @deprecated To check location status, use {@link LocationManager#isLocationEnabled()}. To
+         *             get the status of a location provider, use
+         *             {@link LocationManager#isProviderEnabled(String)}.
          */
+        @Deprecated
         public static final int LOCATION_MODE_BATTERY_SAVING = 2;
+
         /**
          * Best-effort location computation allowed.
+         *
+         * @deprecated To check location status, use {@link LocationManager#isLocationEnabled()}. To
+         *             get the status of a location provider, use
+         *             {@link LocationManager#isProviderEnabled(String)}.
          */
+        @Deprecated
         public static final int LOCATION_MODE_HIGH_ACCURACY = 3;
 
         /**
@@ -7866,7 +7875,6 @@ public final class Settings {
             CLONE_TO_MANAGED_PROFILE.add(ENABLED_ACCESSIBILITY_SERVICES);
             CLONE_TO_MANAGED_PROFILE.add(ENABLED_INPUT_METHODS);
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_MODE);
-            CLONE_TO_MANAGED_PROFILE.add(LOCATION_PREVIOUS_MODE);
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_PROVIDERS_ALLOWED);
             CLONE_TO_MANAGED_PROFILE.add(SELECTED_INPUT_METHOD_SUBTYPE);
         }
@@ -7917,8 +7925,7 @@ public final class Settings {
          * @param provider the location provider to query
          * @return true if the provider is enabled
          *
-         * @deprecated use {@link #LOCATION_MODE} or
-         *             {@link LocationManager#isProviderEnabled(String)}
+         * @deprecated use {@link LocationManager#isProviderEnabled(String)}
          */
         @Deprecated
         public static final boolean isLocationProviderEnabled(ContentResolver cr, String provider) {
@@ -7931,12 +7938,13 @@ public final class Settings {
          * @param provider the location provider to query
          * @param userId the userId to query
          * @return true if the provider is enabled
-         * @deprecated use {@link #LOCATION_MODE} or
-         *             {@link LocationManager#isProviderEnabled(String)}
+         *
+         * @deprecated use {@link LocationManager#isProviderEnabled(String)}
          * @hide
          */
         @Deprecated
-        public static final boolean isLocationProviderEnabledForUser(ContentResolver cr, String provider, int userId) {
+        public static final boolean isLocationProviderEnabledForUser(
+                ContentResolver cr, String provider, int userId) {
             String allowedProviders = Settings.Secure.getStringForUser(cr,
                     LOCATION_PROVIDERS_ALLOWED, userId);
             return TextUtils.delimitedStringContains(allowedProviders, ',', provider);
@@ -7947,7 +7955,8 @@ public final class Settings {
          * @param cr the content resolver to use
          * @param provider the location provider to enable or disable
          * @param enabled true if the provider should be enabled
-         * @deprecated use {@link #putInt(ContentResolver, String, int)} and {@link #LOCATION_MODE}
+         * @deprecated This API is deprecated. It requires WRITE_SECURE_SETTINGS permission to
+         *             change location settings.
          */
         @Deprecated
         public static final void setLocationProviderEnabled(ContentResolver cr,
@@ -7963,8 +7972,8 @@ public final class Settings {
          * @param enabled true if the provider should be enabled
          * @param userId the userId for which to enable/disable providers
          * @return true if the value was set, false on database errors
-         * @deprecated use {@link #putIntForUser(ContentResolver, String, int, int)} and
-         *             {@link #LOCATION_MODE}
+         *
+         * @deprecated use {@link LocationManager#setProviderEnabledForUser(String, boolean, int)}
          * @hide
          */
         @Deprecated
@@ -7985,28 +7994,6 @@ public final class Settings {
         }
 
         /**
-         * Saves the current location mode into {@link #LOCATION_PREVIOUS_MODE}.
-         */
-        private static final boolean saveLocationModeForUser(ContentResolver cr, int userId) {
-            final int mode = getLocationModeForUser(cr, userId);
-            return putIntForUser(cr, Settings.Secure.LOCATION_PREVIOUS_MODE, mode, userId);
-        }
-
-        /**
-         * Restores the current location mode from {@link #LOCATION_PREVIOUS_MODE}.
-         */
-        private static final boolean restoreLocationModeForUser(ContentResolver cr, int userId) {
-            int mode = getIntForUser(cr, Settings.Secure.LOCATION_PREVIOUS_MODE,
-                    LOCATION_MODE_HIGH_ACCURACY, userId);
-            // Make sure that the previous mode is never "off". Otherwise the user won't be able to
-            // turn on location any longer.
-            if (mode == LOCATION_MODE_OFF) {
-                mode = LOCATION_MODE_HIGH_ACCURACY;
-            }
-            return setLocationModeForUser(cr, mode, userId);
-        }
-
-        /**
          * Thread-safe method for setting the location mode to one of
          * {@link #LOCATION_MODE_HIGH_ACCURACY}, {@link #LOCATION_MODE_SENSORS_ONLY},
          * {@link #LOCATION_MODE_BATTERY_SAVING}, or {@link #LOCATION_MODE_OFF}.
@@ -8019,18 +8006,20 @@ public final class Settings {
          * @return true if the value was set, false on database errors
          *
          * @throws IllegalArgumentException if mode is not one of the supported values
+         *
+         * @deprecated To enable/disable location, use
+         *             {@link LocationManager#setLocationEnabledForUser(boolean, int)}.
+         *             To enable/disable a specific location provider, use
+         *             {@link LocationManager#setProviderEnabledForUser(String, boolean, int)}.
          */
-        private static final boolean setLocationModeForUser(ContentResolver cr, int mode,
-                int userId) {
+        @Deprecated
+        private static boolean setLocationModeForUser(
+                ContentResolver cr, int mode, int userId) {
             synchronized (mLocationSettingsLock) {
                 boolean gps = false;
                 boolean network = false;
                 switch (mode) {
-                    case LOCATION_MODE_PREVIOUS:
-                        // Retrieve the actual mode and set to that mode.
-                        return restoreLocationModeForUser(cr, userId);
                     case LOCATION_MODE_OFF:
-                        saveLocationModeForUser(cr, userId);
                         break;
                     case LOCATION_MODE_SENSORS_ONLY:
                         gps = true;
@@ -8045,15 +8034,7 @@ public final class Settings {
                     default:
                         throw new IllegalArgumentException("Invalid location mode: " + mode);
                 }
-                // Note it's important that we set the NLP mode first. The Google implementation
-                // of NLP clears its NLP consent setting any time it receives a
-                // LocationManager.PROVIDERS_CHANGED_ACTION broadcast and NLP is disabled. Also,
-                // it shows an NLP consent dialog any time it receives the broadcast, NLP is
-                // enabled, and the NLP consent is not set. If 1) we were to enable GPS first,
-                // 2) a setup wizard has its own NLP consent UI that sets the NLP consent setting,
-                // and 3) the receiver happened to complete before we enabled NLP, then the Google
-                // NLP would detect the attempt to enable NLP and show a redundant NLP consent
-                // dialog. Then the people who wrote the setup wizard would be sad.
+
                 boolean nlpSuccess = Settings.Secure.setLocationProviderEnabledForUser(
                         cr, LocationManager.NETWORK_PROVIDER, network, userId);
                 boolean gpsSuccess = Settings.Secure.setLocationProviderEnabledForUser(
@@ -9423,6 +9404,14 @@ public final class Settings {
         */
        public static final String WIFI_VERBOSE_LOGGING_ENABLED =
                "wifi_verbose_logging_enabled";
+
+        /**
+         * Setting to enable connected MAC randomization in Wi-Fi; disabled by default, and
+         * setting to 1 will enable it. In the future, additional values may be supported.
+         * @hide
+         */
+        public static final String WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED =
+                "wifi_connected_mac_randomization_enabled";
 
        /**
         * The maximum number of times we will retry a connection to an access
@@ -11185,6 +11174,7 @@ public final class Settings {
          *
          * @hide
          */
+        @TestApi
         public static final String LOCATION_GLOBAL_KILL_SWITCH =
                 "location_global_kill_switch";
 

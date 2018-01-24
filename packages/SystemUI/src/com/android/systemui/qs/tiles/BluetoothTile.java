@@ -18,7 +18,9 @@ package com.android.systemui.qs.tiles;
 
 import static com.android.settingslib.graph.BluetoothDeviceLayerDrawable.createLayerDrawable;
 
+import android.annotation.Nullable;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
@@ -26,7 +28,6 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
-import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Switch;
@@ -35,6 +36,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
+import com.android.settingslib.graph.BluetoothDeviceLayerDrawable;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
@@ -126,21 +128,25 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         }
         state.slash.isSlashed = !enabled;
         state.label = mContext.getString(R.string.quick_settings_bluetooth_label);
+
         if (enabled) {
             if (connected) {
                 state.icon = ResourceIcon.get(R.drawable.ic_qs_bluetooth_connected);
-                state.secondaryLabel = mController.getLastDeviceName();
-                CachedBluetoothDevice lastDevice = mController.getLastDevice();
+                state.contentDescription = mContext.getString(
+                        R.string.accessibility_bluetooth_name, state.label);
+
+                final CachedBluetoothDevice lastDevice = mController.getLastDevice();
                 if (lastDevice != null) {
-                    int batteryLevel = lastDevice.getBatteryLevel();
+                    final int batteryLevel = lastDevice.getBatteryLevel();
                     if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
-                        state.icon = new BluetoothBatteryTileIcon(lastDevice,
+                        state.icon = new BluetoothBatteryTileIcon(
+                                batteryLevel,
                                 mContext.getResources().getFraction(
                                         R.fraction.bt_battery_scale_fraction, 1, 1));
                     }
                 }
-                state.contentDescription = mContext.getString(
-                        R.string.accessibility_bluetooth_name, state.secondaryLabel);
+
+                state.label = mController.getLastDeviceName();
             } else if (state.isTransient) {
                 state.icon = ResourceIcon.get(R.drawable.ic_bluetooth_transient_animation);
                 state.contentDescription = mContext.getString(
@@ -159,9 +165,51 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
             state.state = Tile.STATE_INACTIVE;
         }
 
+        state.secondaryLabel = getSecondaryLabel(enabled, connected);
+
         state.dualLabelContentDescription = mContext.getResources().getString(
                 R.string.accessibility_quick_settings_open_settings, getTileLabel());
         state.expandedAccessibilityClassName = Switch.class.getName();
+    }
+
+    /**
+     * Returns the secondary label to use for the given bluetooth connection in the form of the
+     * battery level or bluetooth profile name. If the bluetooth is disabled, there's no connected
+     * devices, or we can't map the bluetooth class to a profile, this instead returns {@code null}.
+     *
+     * @param enabled whether bluetooth is enabled
+     * @param connected whether there's a device connected via bluetooth
+     */
+    @Nullable
+    private String getSecondaryLabel(boolean enabled, boolean connected) {
+        final CachedBluetoothDevice lastDevice = mController.getLastDevice();
+
+        if (enabled && connected && lastDevice != null) {
+            final int batteryLevel = lastDevice.getBatteryLevel();
+
+            if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
+                return mContext.getString(
+                        R.string.quick_settings_bluetooth_secondary_label_battery_level,
+                        Utils.formatPercentage(batteryLevel));
+
+            } else {
+                final BluetoothClass bluetoothClass = lastDevice.getBtClass();
+                if (bluetoothClass != null) {
+                    if (bluetoothClass.doesClassMatch(BluetoothClass.PROFILE_A2DP)) {
+                        return mContext.getString(
+                                R.string.quick_settings_bluetooth_secondary_label_audio);
+                    } else if (bluetoothClass.doesClassMatch(BluetoothClass.PROFILE_HEADSET)) {
+                        return mContext.getString(
+                                R.string.quick_settings_bluetooth_secondary_label_headset);
+                    } else if (bluetoothClass.doesClassMatch(BluetoothClass.PROFILE_HID)) {
+                        return mContext.getString(
+                                R.string.quick_settings_bluetooth_secondary_label_input);
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     @Override
@@ -207,20 +255,29 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
         return new BluetoothDetailAdapter();
     }
 
+    /**
+     * Bluetooth icon wrapper for Quick Settings with a battery indicator that reflects the
+     * connected device's battery level. This is used instead of
+     * {@link com.android.systemui.qs.tileimpl.QSTileImpl.DrawableIcon} in order to use a context
+     * that reflects dark/light theme attributes.
+     */
     private class BluetoothBatteryTileIcon extends Icon {
+        private int mBatteryLevel;
         private float mIconScale;
-        private CachedBluetoothDevice mDevice;
 
-        BluetoothBatteryTileIcon(CachedBluetoothDevice device, float iconScale) {
+        BluetoothBatteryTileIcon(int batteryLevel, float iconScale) {
+            mBatteryLevel = batteryLevel;
             mIconScale = iconScale;
-            mDevice = device;
         }
 
         @Override
         public Drawable getDrawable(Context context) {
             // This method returns Pair<Drawable, String> while first value is the drawable
-            return com.android.settingslib.bluetooth.Utils.getBtClassDrawableWithDescription(
-                    context, mDevice, mIconScale).first;
+            return BluetoothDeviceLayerDrawable.createLayerDrawable(
+                    context,
+                    R.drawable.ic_qs_bluetooth_connected,
+                    mBatteryLevel,
+                    mIconScale);
         }
     }
 
@@ -302,8 +359,7 @@ public class BluetoothTile extends QSTileImpl<BooleanState> {
                         item.iconResId = R.drawable.ic_qs_bluetooth_connected;
                         int batteryLevel = device.getBatteryLevel();
                         if (batteryLevel != BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
-                            item.icon = new BluetoothBatteryTileIcon(device,
-                                    1 /* iconScale */);
+                            item.icon = new BluetoothBatteryTileIcon(batteryLevel,1 /* iconScale */);
                             item.line2 = mContext.getString(
                                     R.string.quick_settings_connected_battery_level,
                                     Utils.formatPercentage(batteryLevel));

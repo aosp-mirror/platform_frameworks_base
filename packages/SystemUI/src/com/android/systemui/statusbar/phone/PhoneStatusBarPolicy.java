@@ -665,7 +665,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
 
     private final HotspotController.Callback mHotspotCallback = new HotspotController.Callback() {
         @Override
-        public void onHotspotChanged(boolean enabled) {
+        public void onHotspotChanged(boolean enabled, int numDevices) {
             mIconController.setIconVisibility(mSlotHotspot, enabled);
         }
     };

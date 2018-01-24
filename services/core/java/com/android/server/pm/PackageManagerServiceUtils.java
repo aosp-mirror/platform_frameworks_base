@@ -54,6 +54,7 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.PackageUtils;
 import android.util.Slog;
 import android.util.jar.StrictJarFile;
 import android.util.proto.ProtoOutputStream;
@@ -74,6 +75,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.text.SimpleDateFormat;
@@ -509,7 +512,7 @@ public class PackageManagerServiceUtils {
     private static boolean matchSignaturesCompat(String packageName,
             PackageSignatures packageSignatures, PackageParser.SigningDetails parsedSignatures) {
         ArraySet<Signature> existingSet = new ArraySet<Signature>();
-        for (Signature sig : packageSignatures.mSignatures) {
+        for (Signature sig : packageSignatures.mSigningDetails.signatures) {
             existingSet.add(sig);
         }
         ArraySet<Signature> scannedCompatSet = new ArraySet<Signature>();
@@ -526,7 +529,7 @@ public class PackageManagerServiceUtils {
         // make sure the expanded scanned set contains all signatures in the existing one
         if (scannedCompatSet.equals(existingSet)) {
             // migrate the old signatures to the new scheme
-            packageSignatures.assignSignatures(parsedSignatures);
+            packageSignatures.mSigningDetails = parsedSignatures;
             return true;
         }
         return false;
@@ -561,8 +564,8 @@ public class PackageManagerServiceUtils {
         try {
             PackageParser.collectCertificates(disabledPkgSetting.pkg,
                     PackageParser.PARSE_IS_SYSTEM_DIR);
-            if (compareSignatures(pkgSetting.signatures.mSignatures,
-                        disabledPkgSetting.signatures.mSignatures)
+            if (compareSignatures(pkgSetting.signatures.mSigningDetails.signatures,
+                        disabledPkgSetting.signatures.mSigningDetails.signatures)
                     != PackageManager.SIGNATURE_MATCH) {
                 logCriticalInfo(Log.ERROR, "Updated system app mismatches cert on /system: " +
                         pkgSetting.name);
@@ -574,6 +577,69 @@ public class PackageManagerServiceUtils {
             return false;
         }
         return true;
+    }
+
+
+    /**
+     * Checks the signing certificates to see if the provided certificate is a member.  Invalid for
+     * {@code SigningDetails} with multiple signing certificates.
+     * @param certificate certificate to check for membership
+     * @param signingDetails signing certificates record whose members are to be searched
+     * @return true if {@code certificate} is in {@code signingDetails}
+     */
+    public static boolean signingDetailsHasCertificate(
+            byte[] certificate, PackageParser.SigningDetails signingDetails) {
+        if (signingDetails == PackageParser.SigningDetails.UNKNOWN) {
+            return false;
+        }
+        Signature signature = new Signature(certificate);
+        if (signingDetails.hasPastSigningCertificates()) {
+            for (int i = 0; i < signingDetails.pastSigningCertificates.length; i++) {
+                if (signingDetails.pastSigningCertificates[i].equals(signature)) {
+                    return true;
+                }
+            }
+        } else {
+            // no signing history, just check the current signer
+            if (signingDetails.signatures.length == 1
+                    && signingDetails.signatures[0].equals(signature)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks the signing certificates to see if the provided certificate is a member.  Invalid for
+     * {@code SigningDetails} with multiple signing certificaes.
+     * @param sha256Certificate certificate to check for membership
+     * @param signingDetails signing certificates record whose members are to be searched
+     * @return true if {@code certificate} is in {@code signingDetails}
+     */
+    public static boolean signingDetailsHasSha256Certificate(
+            byte[] sha256Certificate, PackageParser.SigningDetails signingDetails ) {
+        if (signingDetails == PackageParser.SigningDetails.UNKNOWN) {
+            return false;
+        }
+        if (signingDetails.hasPastSigningCertificates()) {
+            for (int i = 0; i < signingDetails.pastSigningCertificates.length; i++) {
+                byte[] digest = PackageUtils.computeSha256DigestBytes(
+                        signingDetails.pastSigningCertificates[i].toByteArray());
+                if (Arrays.equals(sha256Certificate, digest)) {
+                    return true;
+                }
+            }
+        } else {
+            // no signing history, just check the current signer
+            if (signingDetails.signatures.length == 1) {
+                byte[] digest = PackageUtils.computeSha256DigestBytes(
+                        signingDetails.signatures[0].toByteArray());
+                if (Arrays.equals(sha256Certificate, digest)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /** Returns true to force apk verification if the updated package (in /data) is a priv app. */
@@ -593,9 +659,9 @@ public class PackageManagerServiceUtils {
             throws PackageManagerException {
         final String packageName = pkgSetting.name;
         boolean compatMatch = false;
-        if (pkgSetting.signatures.mSignatures != null) {
+        if (pkgSetting.signatures.mSigningDetails.signatures != null) {
             // Already existing package. Make sure signatures match
-            boolean match = compareSignatures(pkgSetting.signatures.mSignatures,
+            boolean match = compareSignatures(pkgSetting.signatures.mSigningDetails.signatures,
                     parsedSignatures.signatures)
                     == PackageManager.SIGNATURE_MATCH;
             if (!match && compareCompat) {
@@ -605,7 +671,7 @@ public class PackageManagerServiceUtils {
             }
             if (!match && compareRecover) {
                 match = matchSignaturesRecover(
-                        packageName, pkgSetting.signatures.mSignatures,
+                        packageName, pkgSetting.signatures.mSigningDetails.signatures,
                         parsedSignatures.signatures);
             }
 
@@ -620,17 +686,21 @@ public class PackageManagerServiceUtils {
             }
         }
         // Check for shared user signatures
-        if (pkgSetting.sharedUser != null && pkgSetting.sharedUser.signatures.mSignatures != null) {
+        if (pkgSetting.sharedUser != null
+                && pkgSetting.sharedUser.signatures.mSigningDetails.signatures != null) {
             // Already existing package. Make sure signatures match
-            boolean match = compareSignatures(pkgSetting.sharedUser.signatures.mSignatures,
-                    parsedSignatures.signatures) == PackageManager.SIGNATURE_MATCH;
+            boolean match =
+                    compareSignatures(
+                            pkgSetting.sharedUser.signatures.mSigningDetails.signatures,
+                            parsedSignatures.signatures) == PackageManager.SIGNATURE_MATCH;
             if (!match && compareCompat) {
                 match = matchSignaturesCompat(
                         packageName, pkgSetting.sharedUser.signatures, parsedSignatures);
             }
             if (!match && compareRecover) {
                 match = matchSignaturesRecover(packageName,
-                        pkgSetting.sharedUser.signatures.mSignatures, parsedSignatures.signatures);
+                        pkgSetting.sharedUser.signatures.mSigningDetails.signatures,
+                        parsedSignatures.signatures);
                 compatMatch |= match;
             }
             if (!match) {

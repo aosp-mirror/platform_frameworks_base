@@ -806,8 +806,10 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int KEYCODE_SYSTEM_NAVIGATION_RIGHT = 283;
     /** Key code constant: Show all apps */
     public static final int KEYCODE_ALL_APPS = 284;
+    /** Key code constant: Refresh key. */
+    public static final int KEYCODE_REFRESH = 285;
 
-    private static final int LAST_KEYCODE = KEYCODE_ALL_APPS;
+    private static final int LAST_KEYCODE = KEYCODE_REFRESH;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()

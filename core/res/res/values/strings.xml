@@ -1321,6 +1321,9 @@
     <string-array name="fingerprint_acquired_vendor">
     </string-array>
 
+    <!-- Message shown by the fingerprint dialog when fingerprint is not recognized -->
+    <string name="fingerprint_not_recognized">Not recognized</string>
+
     <!-- Error message shown when the fingerprint hardware can't be accessed -->
     <string name="fingerprint_error_hw_not_available">Fingerprint hardware not available.</string>
     <!-- Error message shown when the fingerprint hardware has run out of room for storing fingerprints -->
@@ -1329,6 +1332,8 @@
     <string name="fingerprint_error_timeout">Fingerprint time out reached. Try again.</string>
     <!-- Generic error message shown when the fingerprint operation (e.g. enrollment or authentication) is canceled. Generally not shown to the user-->
     <string name="fingerprint_error_canceled">Fingerprint operation canceled.</string>
+    <!-- Generic error message shown when the fingerprint authentication operation is canceled due to user input. Generally not shown to the user -->
+    <string name="fingerprint_error_user_canceled">Fingerprint operation canceled by user.</string>
     <!-- Generic error message shown when the fingerprint operation fails because too many attempts have been made. -->
     <string name="fingerprint_error_lockout">Too many attempts. Try again later.</string>
     <!-- Generic error message shown when the fingerprint operation fails because strong authentication is required -->
@@ -4480,7 +4485,7 @@
     <string name="zen_mode_alarm">Until <xliff:g id="formattedTime" example="10:00 PM">%1$s</xliff:g> (next alarm)</string>
 
     <!-- Zen mode condition: no exit criteria. [CHAR LIMIT=NONE] -->
-    <string name="zen_mode_forever">Until you turn off Do Not Disturb</string>
+    <string name="zen_mode_forever">Until you turn off</string>
 
     <!-- Zen mode condition: no exit criteria, includes the name of the feature for emphasis. [CHAR LIMIT=NONE] -->
     <string name="zen_mode_forever_dnd">Until you turn off Do Not Disturb</string>
