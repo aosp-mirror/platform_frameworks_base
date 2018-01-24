@@ -889,7 +889,14 @@ public class MediaSession2 implements AutoCloseable {
             SessionCallback callback, VolumeProvider volumeProvider, int ratingType,
             PendingIntent sessionActivity) {
         super();
-        mProvider = ApiLoader.getProvider(context)
+        mProvider = createProvider(context, player, id, callback,
+                volumeProvider, ratingType, sessionActivity);
+    }
+
+    MediaSession2Provider createProvider(Context context, MediaPlayerBase player, String id,
+            SessionCallback callback, VolumeProvider volumeProvider, int ratingType,
+            PendingIntent sessionActivity) {
+        return ApiLoader.getProvider(context)
                 .createMediaSession2(this, context, player, id, callback,
                         volumeProvider, ratingType, sessionActivity);
     }
