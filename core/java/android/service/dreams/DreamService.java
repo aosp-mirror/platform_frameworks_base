@@ -17,6 +17,7 @@ package android.service.dreams;
 
 import android.annotation.IdRes;
 import android.annotation.LayoutRes;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -54,7 +55,6 @@ import com.android.internal.util.DumpUtils.Dump;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.List;
 
 /**
  * Extend this class to implement a custom dream (available to the user as a "Daydream").
@@ -458,12 +458,47 @@ public class DreamService extends Service implements Window.Callback {
      * was processed in {@link #onCreate}.
      *
      * <p>Note: Requires a window, do not call before {@link #onAttachedToWindow()}</p>
+     * <p>
+     * <strong>Note:</strong> In most cases -- depending on compiler support --
+     * the resulting view is automatically cast to the target class type. If
+     * the target class type is unconstrained, an explicit cast may be
+     * necessary.
      *
+     * @param id the ID to search for
      * @return The view if found or null otherwise.
+     * @see View#findViewById(int)
+     * @see DreamService#requireViewById(int)
      */
     @Nullable
     public <T extends View> T findViewById(@IdRes int id) {
         return getWindow().findViewById(id);
+    }
+
+    /**
+     * Finds a view that was identified by the id attribute from the XML that was processed in
+     * {@link #onCreate}, or throws an IllegalArgumentException if the ID is invalid or there is no
+     * matching view in the hierarchy.
+     *
+     * <p>Note: Requires a window, do not call before {@link #onAttachedToWindow()}</p>
+     * <p>
+     * <strong>Note:</strong> In most cases -- depending on compiler support --
+     * the resulting view is automatically cast to the target class type. If
+     * the target class type is unconstrained, an explicit cast may be
+     * necessary.
+     *
+     * @param id the ID to search for
+     * @return a view with given ID
+     * @see View#requireViewById(int)
+     * @see DreamService#findViewById(int)
+     */
+    @NonNull
+    public final <T extends View> T requireViewById(@IdRes int id) {
+        T view = findViewById(id);
+        if (view == null) {
+            throw new IllegalArgumentException(
+                    "ID does not reference a View inside this DreamService");
+        }
+        return view;
     }
 
     /**

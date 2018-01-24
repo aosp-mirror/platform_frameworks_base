@@ -16,10 +16,6 @@
 
 package android.app;
 
-import com.android.internal.R;
-import com.android.internal.app.WindowDecorActionBar;
-import com.android.internal.policy.PhoneWindow;
-
 import android.annotation.CallSuper;
 import android.annotation.DrawableRes;
 import android.annotation.IdRes;
@@ -32,8 +28,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.DialogInterface;
-import android.content.res.Configuration;
 import android.content.pm.ApplicationInfo;
+import android.content.res.Configuration;
 import android.content.res.ResourceId;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -61,6 +57,10 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
+
+import com.android.internal.R;
+import com.android.internal.app.WindowDecorActionBar;
+import com.android.internal.policy.PhoneWindow;
 
 import java.lang.ref.WeakReference;
 
@@ -512,10 +512,35 @@ public class Dialog implements DialogInterface, Window.Callback,
      * @param id the ID to search for
      * @return a view with given ID if found, or {@code null} otherwise
      * @see View#findViewById(int)
+     * @see Dialog#requireViewById(int)
      */
     @Nullable
     public <T extends View> T findViewById(@IdRes int id) {
         return mWindow.findViewById(id);
+    }
+
+    /**
+     * Finds the first descendant view with the given ID or throws an IllegalArgumentException if
+     * the ID is invalid (< 0), there is no matching view in the hierarchy, or the dialog has not
+     * yet been fully created (for example, via {@link #show()} or {@link #create()}).
+     * <p>
+     * <strong>Note:</strong> In most cases -- depending on compiler support --
+     * the resulting view is automatically cast to the target class type. If
+     * the target class type is unconstrained, an explicit cast may be
+     * necessary.
+     *
+     * @param id the ID to search for
+     * @return a view with given ID
+     * @see View#requireViewById(int)
+     * @see Dialog#findViewById(int)
+     */
+    @NonNull
+    public final <T extends View> T requireViewById(@IdRes int id) {
+        T view = findViewById(id);
+        if (view == null) {
+            throw new IllegalArgumentException("ID does not reference a View inside this Dialog");
+        }
+        return view;
     }
 
     /**
