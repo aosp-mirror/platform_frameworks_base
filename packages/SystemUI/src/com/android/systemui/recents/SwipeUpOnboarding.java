@@ -57,7 +57,7 @@ public class SwipeUpOnboarding {
     private static final long SHOW_DELAY_MS = 500;
     private static final long SHOW_HIDE_DURATION_MS = 300;
     // Don't show the onboarding until the user has launched this number of apps.
-    private static final int SHOW_ON_APP_LAUNCH = 3;
+    private static final int SHOW_ON_APP_LAUNCH = 2;
 
     private final Context mContext;
     private final WindowManager mWindowManager;
