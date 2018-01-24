@@ -1030,4 +1030,17 @@
     <!-- Content description of zen mode time condition minus button (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_manual_zen_less_time">Less time.</string>
 
+    <!--  Do not disturb: Label for button in enable zen dialog that will turn on zen mode. [CHAR LIMIT=30] -->
+    <string name="zen_mode_enable_dialog_turn_on">Turn on</string>
+    <!-- Button label for generic cancel action [CHAR LIMIT=20] -->
+    <string name="cancel">Cancel</string>
+    <!-- Do not disturb: Title for the Do not Disturb dialog to turn on Do not disturb. [CHAR LIMIT=50]-->
+    <string name="zen_mode_settings_turn_on_dialog_title">Turn on Do Not Disturb</string>
+    <!-- Sound: Summary for the Do not Disturb option when there is no automatic rules turned on. [CHAR LIMIT=NONE]-->
+    <string name="zen_mode_settings_summary_off">Never</string>
+    <!--[CHAR LIMIT=40] Zen Interruption level: Priority.  -->
+    <string name="zen_interruption_level_priority">Priority only</string>
+    <!-- [CHAR LIMIT=20] Accessibility string for current zen mode and selected exit condition. A template that simply concatenates existing mode string and the current condition description.  -->
+    <string name="zen_mode_and_condition"><xliff:g id="zen_mode" example="Priority interruptions only">%1$s</xliff:g>. <xliff:g id="exit_condition" example="For one hour">%2$s</xliff:g></string>
+
 </resources>

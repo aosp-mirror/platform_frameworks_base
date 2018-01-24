@@ -21,6 +21,7 @@ import static android.provider.Settings.Global.ZEN_MODE_OFF;
 
 import android.app.AlarmManager;
 import android.app.AlarmManager.AlarmClockInfo;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -42,11 +43,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Switch;
 import android.widget.Toast;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.settingslib.notification.EnableZenModeDialog;
 import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
@@ -57,6 +60,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.volume.ZenModePanel;
 
@@ -133,11 +137,25 @@ public class DndTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleClick() {
+        // Zen is currently on
         if (mState.value) {
             mController.setZen(ZEN_MODE_OFF, null, TAG);
         } else {
-            mController.setZen(Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG);
+            showDetail(true);
         }
+    }
+
+    @Override
+    public void showDetail(boolean show) {
+        mUiHandler.post(() -> {
+            Dialog mDialog = new EnableZenModeDialog(mContext).createDialog();
+            mDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+            SystemUIDialog.setShowForAllUsers(mDialog, true);
+            SystemUIDialog.registerDismissListener(mDialog);
+            SystemUIDialog.setWindowOnTop(mDialog);
+            mUiHandler.post(() -> mDialog.show());
+            mHost.collapsePanels();
+        });
     }
 
     @Override
