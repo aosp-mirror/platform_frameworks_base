@@ -57,7 +57,7 @@
                 android:singleLine="true"
                 android:ellipsize="marquee"
                 android:fadingEdge="horizontal"
-                android:textSize="20sp"
+                android:textSize="24sp"
                 android:textColor="#ffffffff"
             />
             <TextView android:id="@+id/text"
