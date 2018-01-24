@@ -9286,22 +9286,6 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Returns error message to be displayed when printing is disabled.
-     *
-     * Used only by PrintService.
-     * @return Localized error message.
-     * @hide
-     */
-    @SystemApi
-    public CharSequence getPrintingDisabledReason() {
-        try {
-            return mService.getPrintingDisabledReason();
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Called by device owner to add an override APN.
      *
      * @param admin which {@link DeviceAdminReceiver} this request is associated with
