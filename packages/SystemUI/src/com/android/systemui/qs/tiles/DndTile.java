@@ -177,29 +177,26 @@ public class DndTile extends QSTileImpl<BooleanState> {
         state.value = newValue;
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.slash.isSlashed = !state.value;
+        state.label = getTileLabel();
         checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_ADJUST_VOLUME);
         switch (zen) {
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
                 state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on);
-                state.label = mContext.getString(R.string.quick_settings_dnd_priority_label);
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_dnd_priority_on);
                 break;
             case Global.ZEN_MODE_NO_INTERRUPTIONS:
                 state.icon = TOTAL_SILENCE;
-                state.label = mContext.getString(R.string.quick_settings_dnd_none_label);
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_dnd_none_on);
                 break;
             case ZEN_MODE_ALARMS:
                 state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on);
-                state.label = mContext.getString(R.string.quick_settings_dnd_alarms_label);
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_dnd_alarms_on);
                 break;
             default:
                 state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on);
-                state.label = mContext.getString(R.string.quick_settings_dnd_label);
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_dnd);
                 break;
