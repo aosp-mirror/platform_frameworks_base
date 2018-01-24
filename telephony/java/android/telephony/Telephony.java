@@ -1102,6 +1102,16 @@ public final class Telephony {
                 "android.provider.Telephony.MMS_DOWNLOADED";
 
             /**
+             * Broadcast Action: A debug code has been entered in the dialer. These "secret codes"
+             * are used to activate developer menus by dialing certain codes. And they are of the
+             * form {@code *#*#&lt;code&gt;#*#*}. The intent will have the data URI:
+             * {@code android_secret_code://&lt;code&gt;}.
+             */
+            @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+            public static final String SECRET_CODE_ACTION =
+                    "android.provider.Telephony.SECRET_CODE";
+
+            /**
              * Broadcast action: When the default SMS package changes,
              * the previous default SMS package and the new default SMS
              * package are sent this broadcast to notify them of the change.
