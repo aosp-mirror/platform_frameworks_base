@@ -133,6 +133,7 @@ public abstract class PackageManager {
             GET_SERVICES,
             GET_SHARED_LIBRARY_FILES,
             GET_SIGNATURES,
+            GET_SIGNING_CERTIFICATES,
             GET_URI_PERMISSION_PATTERNS,
             MATCH_UNINSTALLED_PACKAGES,
             MATCH_DISABLED_COMPONENTS,
@@ -272,7 +273,10 @@ public abstract class PackageManager {
     /**
      * {@link PackageInfo} flag: return information about the
      * signatures included in the package.
+     *
+     * @deprecated use {@code GET_SIGNING_CERTIFICATES} instead
      */
+    @Deprecated
     public static final int GET_SIGNATURES          = 0x00000040;
 
     /**
@@ -486,6 +490,14 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int MATCH_STATIC_SHARED_LIBRARIES = 0x04000000;
+
+    /**
+     * {@link PackageInfo} flag: return the signing certificates associated with
+     * this package.  Each entry is a signing certificate that the package
+     * has proven it is authorized to use, usually a past signing certificate from
+     * which it has rotated.
+     */
+    public static final int GET_SIGNING_CERTIFICATES = 0x08000000;
 
     /**
      * Internal flag used to indicate that a system component has done their
@@ -3781,7 +3793,7 @@ public abstract class PackageManager {
     public abstract int getInstantAppCookieMaxBytes();
 
     /**
-     * @deprecated
+     * deprecated
      * @hide
      */
     public abstract int getInstantAppCookieMaxSize();
@@ -5913,5 +5925,61 @@ public abstract class PackageManager {
     @SystemApi
     public CharSequence getHarmfulAppWarning(@NonNull String packageName) {
         throw new UnsupportedOperationException("getHarmfulAppWarning not implemented in subclass");
+    }
+
+    /** @hide */
+    @IntDef(prefix = { "CERT_INPUT_" }, value = {
+            CERT_INPUT_RAW_X509,
+            CERT_INPUT_SHA256
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CertificateInputType {}
+
+    /**
+     * Certificate input bytes: the input bytes represent an encoded X.509 Certificate which could
+     * be generated using an {@code CertificateFactory}
+     */
+    public static final int CERT_INPUT_RAW_X509 = 0;
+
+    /**
+     * Certificate input bytes: the input bytes represent the SHA256 output of an encoded X.509
+     * Certificate.
+     */
+    public static final int CERT_INPUT_SHA256 = 1;
+
+    /**
+     * Searches the set of signing certificates by which the given package has proven to have been
+     * signed.  This should be used instead of {@code getPackageInfo} with {@code GET_SIGNATURES}
+     * since it takes into account the possibility of signing certificate rotation, except in the
+     * case of packages that are signed by multiple certificates, for which signing certificate
+     * rotation is not supported.
+     *
+     * @param packageName package whose signing certificates to check
+     * @param certificate signing certificate for which to search
+     * @param type representation of the {@code certificate}
+     * @return true if this package was or is signed by exactly the certificate {@code certificate}
+     */
+    public boolean hasSigningCertificate(
+            String packageName, byte[] certificate, @CertificateInputType int type) {
+        throw new UnsupportedOperationException(
+                "hasSigningCertificate not implemented in subclass");
+    }
+
+    /**
+     * Searches the set of signing certificates by which the given uid has proven to have been
+     * signed.  This should be used instead of {@code getPackageInfo} with {@code GET_SIGNATURES}
+     * since it takes into account the possibility of signing certificate rotation, except in the
+     * case of packages that are signed by multiple certificates, for which signing certificate
+     * rotation is not supported.
+     *
+     * @param uid package whose signing certificates to check
+     * @param certificate signing certificate for which to search
+     * @param type representation of the {@code certificate}
+     * @return true if this package was or is signed by exactly the certificate {@code certificate}
+     */
+    public boolean hasSigningCertificate(
+            int uid, byte[] certificate, @CertificateInputType int type) {
+        throw new UnsupportedOperationException(
+                "hasSigningCertificate not implemented in subclass");
     }
 }

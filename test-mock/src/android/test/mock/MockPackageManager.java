@@ -1196,4 +1196,17 @@ public class MockPackageManager extends PackageManager {
     public CharSequence getHarmfulAppWarning(String packageName) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public boolean hasSigningCertificate(
+            String packageName, byte[] certificate, @PackageManager.CertificateInputType int type) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean hasSigningCertificate(
+            int uid, byte[] certificate, @PackageManager.CertificateInputType int type) {
+        throw new UnsupportedOperationException();
+    }
+
 }

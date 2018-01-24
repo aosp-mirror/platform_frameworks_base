@@ -801,11 +801,38 @@ public class PackageParser {
                 }
             }
         }
+        // deprecated method of getting signing certificates
         if ((flags&PackageManager.GET_SIGNATURES) != 0) {
-            if (p.mSigningDetails.hasSignatures()) {
+            if (p.mSigningDetails.hasPastSigningCertificates()) {
+                // Package has included signing certificate rotation information.  Return the oldest
+                // cert so that programmatic checks keep working even if unaware of key rotation.
+                pi.signatures = new Signature[1];
+                pi.signatures[0] = p.mSigningDetails.pastSigningCertificates[0];
+            } else if (p.mSigningDetails.hasSignatures()) {
+                // otherwise keep old behavior
                 int numberOfSigs = p.mSigningDetails.signatures.length;
                 pi.signatures = new Signature[numberOfSigs];
                 System.arraycopy(p.mSigningDetails.signatures, 0, pi.signatures, 0, numberOfSigs);
+            }
+        }
+
+        // replacement for GET_SIGNATURES
+        if ((flags & PackageManager.GET_SIGNING_CERTIFICATES) != 0) {
+            if (p.mSigningDetails.hasPastSigningCertificates()) {
+                // Package has included signing certificate rotation information.  Convert each
+                // entry to an array
+                int numberOfSigs = p.mSigningDetails.pastSigningCertificates.length;
+                pi.signingCertificateHistory = new Signature[numberOfSigs][];
+                for (int i = 0; i < numberOfSigs; i++) {
+                    pi.signingCertificateHistory[i] =
+                            new Signature[] { p.mSigningDetails.pastSigningCertificates[i] };
+                }
+            } else if (p.mSigningDetails.hasSignatures()) {
+                // otherwise keep old behavior
+                int numberOfSigs = p.mSigningDetails.signatures.length;
+                pi.signingCertificateHistory = new Signature[1][numberOfSigs];
+                System.arraycopy(p.mSigningDetails.signatures, 0,
+                        pi.signingCertificateHistory[0], 0, numberOfSigs);
             }
         }
         return pi;
@@ -5757,6 +5784,11 @@ public class PackageParser {
         /** Returns true if the signing details have one or more signatures. */
         public boolean hasSignatures() {
             return signatures != null && signatures.length > 0;
+        }
+
+        /** Returns true if the signing details have past signing certificates. */
+        public boolean hasPastSigningCertificates() {
+            return pastSigningCertificates != null && pastSigningCertificates.length > 0;
         }
 
         /** Returns true if the signatures in this and other match exactly. */
