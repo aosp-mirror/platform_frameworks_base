@@ -4053,7 +4053,6 @@ package android.telephony {
     method public int getSimApplicationState();
     method public int getSimCardState();
     method public java.util.List<android.telephony.TelephonyHistogram> getTelephonyHistograms();
-    method public android.telephony.UiccSlotInfo[] getUiccSlotsInfo();
     method public android.os.Bundle getVisualVoicemailSettings();
     method public boolean handlePinMmi(java.lang.String);
     method public boolean handlePinMmiForSubscriber(int, java.lang.String);
@@ -4075,7 +4074,6 @@ package android.telephony {
     method public int[] supplyPinReportResult(java.lang.String);
     method public boolean supplyPuk(java.lang.String, java.lang.String);
     method public int[] supplyPukReportResult(java.lang.String, java.lang.String);
-    method public boolean switchSlots(int[]);
     method public void toggleRadioOnOff();
     method public void updateServiceLocation();
     field public static final java.lang.String ACTION_SIM_APPLICATION_STATE_CHANGED = "android.telephony.action.SIM_APPLICATION_STATE_CHANGED";
@@ -4090,25 +4088,6 @@ package android.telephony {
     field public static final java.lang.String EXTRA_VOICEMAIL_SCRAMBLED_PIN_STRING = "android.telephony.extra.VOICEMAIL_SCRAMBLED_PIN_STRING";
     field public static final int SIM_STATE_LOADED = 10; // 0xa
     field public static final int SIM_STATE_PRESENT = 11; // 0xb
-  }
-
-  public class UiccSlotInfo implements android.os.Parcelable {
-    ctor public UiccSlotInfo(boolean, boolean, java.lang.String, int);
-    method public int describeContents();
-    method public java.lang.String getCardId();
-    method public int getCardStateInfo();
-    method public boolean getIsActive();
-    method public boolean getIsEuicc();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final int CARD_STATE_INFO_ABSENT = 1; // 0x1
-    field public static final int CARD_STATE_INFO_ERROR = 3; // 0x3
-    field public static final int CARD_STATE_INFO_PRESENT = 2; // 0x2
-    field public static final int CARD_STATE_INFO_RESTRICTED = 4; // 0x4
-    field public static final android.os.Parcelable.Creator<android.telephony.UiccSlotInfo> CREATOR;
-    field public final java.lang.String cardId;
-    field public final int cardStateInfo;
-    field public final boolean isActive;
-    field public final boolean isEuicc;
   }
 
   public abstract class VisualVoicemailService extends android.app.Service {

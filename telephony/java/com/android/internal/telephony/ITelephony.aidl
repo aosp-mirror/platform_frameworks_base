@@ -47,7 +47,6 @@ import com.android.internal.telephony.OperatorInfo;
 
 import java.util.List;
 
-import android.telephony.UiccSlotInfo;
 
 /**
  * Interface used to interact with the phone.  Mostly this is used by the
@@ -1445,19 +1444,4 @@ interface ITelephony {
      * @hide
      */
     SignalStrength getSignalStrength(int subId);
-
-    /**
-     * Get slot info for all the UICC slots.
-     * @return UiccSlotInfo array.
-     * @hide
-     */
-    UiccSlotInfo[] getUiccSlotsInfo();
-
-    /**
-     * Map logicalSlot to physicalSlot, and activate the physicalSlot if it is inactive.
-     * @param physicalSlots Index i in the array representing physical slot for phone i. The array
-     *        size should be same as getPhoneCount().
-     * @return boolean Return true if the switch succeeds, false if the switch fails.
-     */
-    boolean switchSlots(in int[] physicalSlots);
 }
