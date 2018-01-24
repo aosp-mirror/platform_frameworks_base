@@ -216,6 +216,7 @@ import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerInternal.ScreenObserver;
 import android.app.ActivityManagerInternal.SleepToken;
+import android.app.ActivityManagerProto;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.AlertDialog;
@@ -372,6 +373,7 @@ import android.util.TimeUtils;
 import android.util.TimingsTraceLog;
 import android.util.Xml;
 import android.util.proto.ProtoOutputStream;
+import android.util.proto.ProtoUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.RemoteAnimationDefinition;
@@ -431,8 +433,13 @@ import com.android.server.am.ActivityStack.ActivityState;
 import com.android.server.am.proto.ActivityManagerServiceProto;
 import com.android.server.am.proto.BroadcastProto;
 import com.android.server.am.proto.GrantUriProto;
+import com.android.server.am.proto.ImportanceTokenProto;
 import com.android.server.am.proto.MemInfoProto;
 import com.android.server.am.proto.NeededUriGrantsProto;
+import com.android.server.am.proto.ProcessOomProto;
+import com.android.server.am.proto.ProcessToGcProto;
+import com.android.server.am.proto.ProcessesProto;
+import com.android.server.am.proto.ProcessesProto.UidObserverRegistrationProto;
 import com.android.server.am.proto.StickyBroadcastProto;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.job.JobSchedulerInternal;
@@ -938,6 +945,16 @@ public class ActivityManagerService extends IActivityManager.Stub
             return "ImportanceToken { " + Integer.toHexString(System.identityHashCode(this))
                     + " " + reason + " " + pid + " " + token + " }";
         }
+
+        void writeToProto(ProtoOutputStream proto, long fieldId) {
+            final long pToken = proto.start(fieldId);
+            proto.write(ImportanceTokenProto.PID, pid);
+            if (token != null) {
+                proto.write(ImportanceTokenProto.TOKEN, token.toString());
+            }
+            proto.write(ImportanceTokenProto.REASON, reason);
+            proto.end(pToken);
+        }
     }
     final SparseArray<ImportanceToken> mImportantProcesses = new SparseArray<ImportanceToken>();
 
@@ -1316,6 +1333,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             duration = _duration;
             tag = _tag;
         }
+
+        void writeToProto(ProtoOutputStream proto, long fieldId) {
+            final long token = proto.start(fieldId);
+            proto.write(ProcessesProto.PendingTempWhitelist.TARGET_UID, targetUid);
+            proto.write(ProcessesProto.PendingTempWhitelist.DURATION_MS, duration);
+            proto.write(ProcessesProto.PendingTempWhitelist.TAG, tag);
+            proto.end(token);
+        }
     }
 
     final SparseArray<PendingTempWhitelist> mPendingTempWhitelist = new SparseArray<>();
@@ -1640,6 +1665,20 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         final SparseIntArray lastProcStates;
 
+        // Please keep the enum lists in sync
+        private static int[] ORIG_ENUMS = new int[]{
+                ActivityManager.UID_OBSERVER_IDLE,
+                ActivityManager.UID_OBSERVER_ACTIVE,
+                ActivityManager.UID_OBSERVER_GONE,
+                ActivityManager.UID_OBSERVER_PROCSTATE,
+        };
+        private static int[] PROTO_ENUMS = new int[]{
+                ActivityManagerProto.UID_OBSERVER_FLAG_IDLE,
+                ActivityManagerProto.UID_OBSERVER_FLAG_ACTIVE,
+                ActivityManagerProto.UID_OBSERVER_FLAG_GONE,
+                ActivityManagerProto.UID_OBSERVER_FLAG_PROCSTATE,
+        };
+
         UidObserverRegistration(int _uid, String _pkg, int _which, int _cutpoint) {
             uid = _uid;
             pkg = _pkg;
@@ -1650,6 +1689,25 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else {
                 lastProcStates = null;
             }
+        }
+
+        void writeToProto(ProtoOutputStream proto, long fieldId) {
+            final long token = proto.start(fieldId);
+            proto.write(UidObserverRegistrationProto.UID, uid);
+            proto.write(UidObserverRegistrationProto.PACKAGE, pkg);
+            ProtoUtils.writeBitWiseFlagsToProtoEnum(proto, UidObserverRegistrationProto.FLAGS,
+                    which, ORIG_ENUMS, PROTO_ENUMS);
+            proto.write(UidObserverRegistrationProto.CUT_POINT, cutpoint);
+            if (lastProcStates != null) {
+                final int NI = lastProcStates.size();
+                for (int i=0; i<NI; i++) {
+                    final long pToken = proto.start(UidObserverRegistrationProto.LAST_PROC_STATES);
+                    proto.write(UidObserverRegistrationProto.ProcState.UID, lastProcStates.keyAt(i));
+                    proto.write(UidObserverRegistrationProto.ProcState.STATE, lastProcStates.valueAt(i));
+                    proto.end(pToken);
+                }
+            }
+            proto.end(token);
         }
     }
 
@@ -15250,7 +15308,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean dumpVisibleStacksOnly = false;
         boolean dumpFocusedStackOnly = false;
         String dumpPackage = null;
-        int dumpAppId = -1;
 
         int opti = 0;
         while (opti < args.length) {
@@ -15324,6 +15381,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             } else if ("service".equals(cmd)) {
                 mServices.writeToProto(proto);
+            } else if ("processes".equals(cmd) || "p".equals(cmd)) {
+                if (opti < args.length) {
+                    dumpPackage = args[opti];
+                    opti++;
+                }
+                // output proto is ProcessProto
+                synchronized (this) {
+                    writeProcessesToProtoLocked(proto, dumpPackage);
+                }
             } else {
                 // default option, dump everything, output is ActivityManagerServiceProto
                 synchronized (this) {
@@ -15338,6 +15404,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     long serviceToken = proto.start(ActivityManagerServiceProto.SERVICES);
                     mServices.writeToProto(proto);
                     proto.end(serviceToken);
+
+                    long processToken = proto.start(ActivityManagerServiceProto.PROCESSES);
+                    writeProcessesToProtoLocked(proto, dumpPackage);
+                    proto.end(processToken);
                 }
             }
             proto.flush();
@@ -15345,16 +15415,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             return;
         }
 
-        if (dumpPackage != null) {
-            try {
-                ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(
-                        dumpPackage, 0);
-                dumpAppId = UserHandle.getAppId(info.uid);
-            } catch (NameNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
-
+        int dumpAppId = getAppId(dumpPackage);
         boolean more = false;
         // Is the caller requesting to dump a particular piece of data?
         if (opti < args.length) {
@@ -15396,33 +15457,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.println(BinderInternal.nGetBinderProxyCount(Integer.parseInt(uid)));
                 }
             } else if ("broadcasts".equals(cmd) || "b".equals(cmd)) {
-                String[] newArgs;
-                String name;
-                if (opti >= args.length) {
-                    name = null;
-                    newArgs = EMPTY_STRING_ARRAY;
-                } else {
+                if (opti < args.length) {
                     dumpPackage = args[opti];
                     opti++;
-                    newArgs = new String[args.length - opti];
-                    if (args.length > 2) System.arraycopy(args, opti, newArgs, 0,
-                            args.length - opti);
                 }
                 synchronized (this) {
                     dumpBroadcastsLocked(fd, pw, args, opti, true, dumpPackage);
                 }
             } else if ("broadcast-stats".equals(cmd)) {
-                String[] newArgs;
-                String name;
-                if (opti >= args.length) {
-                    name = null;
-                    newArgs = EMPTY_STRING_ARRAY;
-                } else {
+                if (opti < args.length) {
                     dumpPackage = args[opti];
                     opti++;
-                    newArgs = new String[args.length - opti];
-                    if (args.length > 2) System.arraycopy(args, opti, newArgs, 0,
-                            args.length - opti);
                 }
                 synchronized (this) {
                     if (dumpCheckinFormat) {
@@ -15433,33 +15478,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
             } else if ("intents".equals(cmd) || "i".equals(cmd)) {
-                String[] newArgs;
-                String name;
-                if (opti >= args.length) {
-                    name = null;
-                    newArgs = EMPTY_STRING_ARRAY;
-                } else {
+                if (opti < args.length) {
                     dumpPackage = args[opti];
                     opti++;
-                    newArgs = new String[args.length - opti];
-                    if (args.length > 2) System.arraycopy(args, opti, newArgs, 0,
-                            args.length - opti);
                 }
                 synchronized (this) {
                     dumpPendingIntentsLocked(fd, pw, args, opti, true, dumpPackage);
                 }
             } else if ("processes".equals(cmd) || "p".equals(cmd)) {
-                String[] newArgs;
-                String name;
-                if (opti >= args.length) {
-                    name = null;
-                    newArgs = EMPTY_STRING_ARRAY;
-                } else {
+                if (opti < args.length) {
                     dumpPackage = args[opti];
                     opti++;
-                    newArgs = new String[args.length - opti];
-                    if (args.length > 2) System.arraycopy(args, opti, newArgs, 0,
-                            args.length - opti);
                 }
                 synchronized (this) {
                     dumpProcessesLocked(fd, pw, args, opti, true, dumpPackage, dumpAppId);
@@ -15880,8 +15909,21 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    private int getAppId(String dumpPackage) {
+        if (dumpPackage != null) {
+            try {
+                ApplicationInfo info = mContext.getPackageManager().getApplicationInfo(
+                        dumpPackage, 0);
+                return UserHandle.getAppId(info.uid);
+            } catch (NameNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        return -1;
+    }
+
     boolean dumpUids(PrintWriter pw, String dumpPackage, int dumpAppId, SparseArray<UidRecord> uids,
-            String header, boolean needSep) {
+                String header, boolean needSep) {
         boolean printed = false;
         for (int i=0; i<uids.size(); i++) {
             UidRecord uidRec = uids.valueAt(i);
@@ -16099,7 +16141,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     "OnHold Norm", "OnHold PERS", dumpPackage);
         }
 
-        needSep = dumpProcessesToGc(fd, pw, args, opti, needSep, dumpAll, dumpPackage);
+        needSep = dumpProcessesToGc(pw, needSep, dumpPackage);
 
         needSep = mAppErrors.dumpLocked(fd, pw, needSep, dumpPackage);
 
@@ -16384,8 +16426,327 @@ public class ActivityManagerService extends IActivityManager.Stub
         pw.println("  mForceBackgroundCheck=" + mForceBackgroundCheck);
     }
 
-    boolean dumpProcessesToGc(FileDescriptor fd, PrintWriter pw, String[] args,
-            int opti, boolean needSep, boolean dumpAll, String dumpPackage) {
+    void writeProcessesToProtoLocked(ProtoOutputStream proto, String dumpPackage) {
+        int numPers = 0;
+
+        final int NP = mProcessNames.getMap().size();
+        for (int ip=0; ip<NP; ip++) {
+            SparseArray<ProcessRecord> procs = mProcessNames.getMap().valueAt(ip);
+            final int NA = procs.size();
+            for (int ia = 0; ia<NA; ia++) {
+                ProcessRecord r = procs.valueAt(ia);
+                if (dumpPackage != null && !r.pkgList.containsKey(dumpPackage)) {
+                    continue;
+                }
+                r.writeToProto(proto, ProcessesProto.PROCS);
+                if (r.persistent) {
+                    numPers++;
+                }
+            }
+        }
+
+        for (int i=0; i<mIsolatedProcesses.size(); i++) {
+            ProcessRecord r = mIsolatedProcesses.valueAt(i);
+            if (dumpPackage != null && !r.pkgList.containsKey(dumpPackage)) {
+                continue;
+            }
+            r.writeToProto(proto, ProcessesProto.ISOLATED_PROCS);
+        }
+
+        for (int i=0; i<mActiveInstrumentation.size(); i++) {
+            ActiveInstrumentation ai = mActiveInstrumentation.get(i);
+            if (dumpPackage != null && !ai.mClass.getPackageName().equals(dumpPackage)
+                    && !ai.mTargetInfo.packageName.equals(dumpPackage)) {
+                continue;
+            }
+            ai.writeToProto(proto, ProcessesProto.ACTIVE_INSTRUMENTATIONS);
+        }
+
+        int whichAppId = getAppId(dumpPackage);
+        for (int i=0; i<mActiveUids.size(); i++) {
+            UidRecord uidRec = mActiveUids.valueAt(i);
+            if (dumpPackage != null && UserHandle.getAppId(uidRec.uid) != whichAppId) {
+                continue;
+            }
+            uidRec.writeToProto(proto, ProcessesProto.ACTIVE_UIDS);
+        }
+
+        for (int i=0; i<mValidateUids.size(); i++) {
+            UidRecord uidRec = mValidateUids.valueAt(i);
+            if (dumpPackage != null && UserHandle.getAppId(uidRec.uid) != whichAppId) {
+                continue;
+            }
+            uidRec.writeToProto(proto, ProcessesProto.VALIDATE_UIDS);
+        }
+
+        if (mLruProcesses.size() > 0) {
+            long lruToken = proto.start(ProcessesProto.LRU_PROCS);
+            int total = mLruProcesses.size();
+            proto.write(ProcessesProto.LruProcesses.SIZE, total);
+            proto.write(ProcessesProto.LruProcesses.NON_ACT_AT, total-mLruProcessActivityStart);
+            proto.write(ProcessesProto.LruProcesses.NON_SVC_AT, total-mLruProcessServiceStart);
+            writeProcessOomListToProto(proto, ProcessesProto.LruProcesses.LIST, this,
+                    mLruProcesses,false, dumpPackage);
+            proto.end(lruToken);
+        }
+
+        if (dumpPackage != null) {
+            synchronized (mPidsSelfLocked) {
+                for (int i=0; i<mPidsSelfLocked.size(); i++) {
+                    ProcessRecord r = mPidsSelfLocked.valueAt(i);
+                    if (!r.pkgList.containsKey(dumpPackage)) {
+                        continue;
+                    }
+                    r.writeToProto(proto, ProcessesProto.PIDS_SELF_LOCKED);
+                }
+            }
+        }
+
+        if (mImportantProcesses.size() > 0) {
+            synchronized (mPidsSelfLocked) {
+                for (int i=0; i<mImportantProcesses.size(); i++) {
+                    ImportanceToken it = mImportantProcesses.valueAt(i);
+                    ProcessRecord r = mPidsSelfLocked.get(it.pid);
+                    if (dumpPackage != null && (r == null
+                            || !r.pkgList.containsKey(dumpPackage))) {
+                        continue;
+                    }
+                    it.writeToProto(proto, ProcessesProto.IMPORTANT_PROCS);
+                }
+            }
+        }
+
+        for (int i=0; i<mPersistentStartingProcesses.size(); i++) {
+            ProcessRecord r = mPersistentStartingProcesses.get(i);
+            if (dumpPackage != null && !dumpPackage.equals(r.info.packageName)) {
+                continue;
+            }
+            r.writeToProto(proto, ProcessesProto.PERSISTENT_STARTING_PROCS);
+        }
+
+        for (int i=0; i<mRemovedProcesses.size(); i++) {
+            ProcessRecord r = mRemovedProcesses.get(i);
+            if (dumpPackage != null && !dumpPackage.equals(r.info.packageName)) {
+                continue;
+            }
+            r.writeToProto(proto, ProcessesProto.REMOVED_PROCS);
+        }
+
+        for (int i=0; i<mProcessesOnHold.size(); i++) {
+            ProcessRecord r = mProcessesOnHold.get(i);
+            if (dumpPackage != null && !dumpPackage.equals(r.info.packageName)) {
+                continue;
+            }
+            r.writeToProto(proto, ProcessesProto.ON_HOLD_PROCS);
+        }
+
+        writeProcessesToGcToProto(proto, ProcessesProto.GC_PROCS, dumpPackage);
+        mAppErrors.writeToProto(proto, ProcessesProto.APP_ERRORS, dumpPackage);
+
+        if (dumpPackage == null) {
+            mUserController.writeToProto(proto, ProcessesProto.USER_CONTROLLER);
+            getGlobalConfiguration().writeToProto(proto, ProcessesProto.GLOBAL_CONFIGURATION);
+            proto.write(ProcessesProto.CONFIG_WILL_CHANGE, getFocusedStack().mConfigWillChange);
+        }
+
+        if (mHomeProcess != null && (dumpPackage == null
+                || mHomeProcess.pkgList.containsKey(dumpPackage))) {
+            mHomeProcess.writeToProto(proto, ProcessesProto.HOME_PROC);
+        }
+
+        if (mPreviousProcess != null && (dumpPackage == null
+                || mPreviousProcess.pkgList.containsKey(dumpPackage))) {
+            mPreviousProcess.writeToProto(proto, ProcessesProto.PREVIOUS_PROC);
+            proto.write(ProcessesProto.PREVIOUS_PROC_VISIBLE_TIME_MS, mPreviousProcessVisibleTime);
+        }
+
+        if (mHeavyWeightProcess != null && (dumpPackage == null
+                || mHeavyWeightProcess.pkgList.containsKey(dumpPackage))) {
+            mHeavyWeightProcess.writeToProto(proto, ProcessesProto.HEAVY_WEIGHT_PROC);
+        }
+
+        for (Map.Entry<String, Integer> entry : mCompatModePackages.getPackages().entrySet()) {
+            String pkg = entry.getKey();
+            int mode = entry.getValue();
+            if (dumpPackage == null || dumpPackage.equals(pkg)) {
+                long compatToken = proto.start(ProcessesProto.SCREEN_COMPAT_PACKAGES);
+                proto.write(ProcessesProto.ScreenCompatPackage.PACKAGE, pkg);
+                proto.write(ProcessesProto.ScreenCompatPackage.MODE, mode);
+                proto.end(compatToken);
+            }
+        }
+
+        final int NI = mUidObservers.getRegisteredCallbackCount();
+        for (int i=0; i<NI; i++) {
+            final UidObserverRegistration reg = (UidObserverRegistration)
+                    mUidObservers.getRegisteredCallbackCookie(i);
+            if (dumpPackage == null || dumpPackage.equals(reg.pkg)) {
+                reg.writeToProto(proto, ProcessesProto.UID_OBSERVERS);
+            }
+        }
+
+        for (int v : mDeviceIdleWhitelist) {
+            proto.write(ProcessesProto.DEVICE_IDLE_WHITELIST, v);
+        }
+
+        for (int v : mDeviceIdleTempWhitelist) {
+            proto.write(ProcessesProto.DEVICE_IDLE_TEMP_WHITELIST, v);
+        }
+
+        if (mPendingTempWhitelist.size() > 0) {
+            for (int i=0; i < mPendingTempWhitelist.size(); i++) {
+                mPendingTempWhitelist.valueAt(i).writeToProto(proto,
+                        ProcessesProto.PENDING_TEMP_WHITELIST);
+            }
+        }
+
+        if (dumpPackage == null) {
+            final long sleepToken = proto.start(ProcessesProto.SLEEP_STATUS);
+            proto.write(ProcessesProto.SleepStatus.WAKEFULNESS,
+                    PowerManagerInternal.wakefulnessToProtoEnum(mWakefulness));
+            for (SleepToken st : mStackSupervisor.mSleepTokens) {
+                proto.write(ProcessesProto.SleepStatus.SLEEP_TOKENS, st.toString());
+            }
+            proto.write(ProcessesProto.SleepStatus.SLEEPING, mSleeping);
+            proto.write(ProcessesProto.SleepStatus.SHUTTING_DOWN, mShuttingDown);
+            proto.write(ProcessesProto.SleepStatus.TEST_PSS_MODE, mTestPssMode);
+            proto.end(sleepToken);
+
+            if (mRunningVoice != null) {
+                final long vrToken = proto.start(ProcessesProto.RUNNING_VOICE);
+                proto.write(ProcessesProto.VoiceProto.SESSION, mRunningVoice.toString());
+                mVoiceWakeLock.writeToProto(proto, ProcessesProto.VoiceProto.WAKELOCK);
+                proto.end(vrToken);
+            }
+
+            mVrController.writeToProto(proto, ProcessesProto.VR_CONTROLLER);
+        }
+
+        if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
+                || mOrigWaitForDebugger) {
+            if (dumpPackage == null || dumpPackage.equals(mDebugApp)
+                    || dumpPackage.equals(mOrigDebugApp)) {
+                final long debugAppToken = proto.start(ProcessesProto.DEBUG);
+                proto.write(ProcessesProto.DebugApp.DEBUG_APP, mDebugApp);
+                proto.write(ProcessesProto.DebugApp.ORIG_DEBUG_APP, mOrigDebugApp);
+                proto.write(ProcessesProto.DebugApp.DEBUG_TRANSIENT, mDebugTransient);
+                proto.write(ProcessesProto.DebugApp.ORIG_WAIT_FOR_DEBUGGER, mOrigWaitForDebugger);
+                proto.end(debugAppToken);
+            }
+        }
+
+        if (mCurAppTimeTracker != null) {
+            mCurAppTimeTracker.writeToProto(proto, ProcessesProto.CURRENT_TRACKER, true);
+        }
+
+        if (mMemWatchProcesses.getMap().size() > 0) {
+            final long token = proto.start(ProcessesProto.MEM_WATCH_PROCESSES);
+            ArrayMap<String, SparseArray<Pair<Long, String>>> procs = mMemWatchProcesses.getMap();
+            for (int i=0; i<procs.size(); i++) {
+                final String proc = procs.keyAt(i);
+                final SparseArray<Pair<Long, String>> uids = procs.valueAt(i);
+                final long ptoken = proto.start(ProcessesProto.MemWatchProcess.PROCS);
+                proto.write(ProcessesProto.MemWatchProcess.Process.NAME, proc);
+                for (int j=0; j<uids.size(); j++) {
+                    final long utoken = proto.start(ProcessesProto.MemWatchProcess.Process.MEM_STATS);
+                    Pair<Long, String> val = uids.valueAt(j);
+                    proto.write(ProcessesProto.MemWatchProcess.Process.MemStats.UID, uids.keyAt(j));
+                    proto.write(ProcessesProto.MemWatchProcess.Process.MemStats.SIZE,
+                            DebugUtils.sizeValueToString(val.first, new StringBuilder()));
+                    proto.write(ProcessesProto.MemWatchProcess.Process.MemStats.REPORT_TO, val.second);
+                    proto.end(utoken);
+                }
+                proto.end(ptoken);
+            }
+
+            final long dtoken = proto.start(ProcessesProto.MemWatchProcess.DUMP);
+            proto.write(ProcessesProto.MemWatchProcess.Dump.PROC_NAME, mMemWatchDumpProcName);
+            proto.write(ProcessesProto.MemWatchProcess.Dump.FILE, mMemWatchDumpFile);
+            proto.write(ProcessesProto.MemWatchProcess.Dump.PID, mMemWatchDumpPid);
+            proto.write(ProcessesProto.MemWatchProcess.Dump.UID, mMemWatchDumpUid);
+            proto.end(dtoken);
+
+            proto.end(token);
+        }
+
+        if (mTrackAllocationApp != null) {
+            if (dumpPackage == null || dumpPackage.equals(mTrackAllocationApp)) {
+                proto.write(ProcessesProto.TRACK_ALLOCATION_APP, mTrackAllocationApp);
+            }
+        }
+
+        if (mProfileApp != null || mProfileProc != null || (mProfilerInfo != null &&
+                (mProfilerInfo.profileFile != null || mProfilerInfo.profileFd != null))) {
+            if (dumpPackage == null || dumpPackage.equals(mProfileApp)) {
+                final long token = proto.start(ProcessesProto.PROFILE);
+                proto.write(ProcessesProto.Profile.APP_NAME, mProfileApp);
+                mProfileProc.writeToProto(proto,ProcessesProto.Profile.PROC);
+                if (mProfilerInfo != null) {
+                    mProfilerInfo.writeToProto(proto, ProcessesProto.Profile.INFO);
+                    proto.write(ProcessesProto.Profile.TYPE, mProfileType);
+                }
+                proto.end(token);
+            }
+        }
+
+        if (dumpPackage == null || dumpPackage.equals(mNativeDebuggingApp)) {
+            proto.write(ProcessesProto.NATIVE_DEBUGGING_APP, mNativeDebuggingApp);
+        }
+
+        if (dumpPackage == null) {
+            proto.write(ProcessesProto.ALWAYS_FINISH_ACTIVITIES, mAlwaysFinishActivities);
+            if (mController != null) {
+                final long token = proto.start(ProcessesProto.CONTROLLER);
+                proto.write(ProcessesProto.Controller.CONTROLLER, mController.toString());
+                proto.write(ProcessesProto.Controller.IS_A_MONKEY, mControllerIsAMonkey);
+                proto.end(token);
+            }
+            proto.write(ProcessesProto.TOTAL_PERSISTENT_PROCS, numPers);
+            proto.write(ProcessesProto.PROCESSES_READY, mProcessesReady);
+            proto.write(ProcessesProto.SYSTEM_READY, mSystemReady);
+            proto.write(ProcessesProto.BOOTED, mBooted);
+            proto.write(ProcessesProto.FACTORY_TEST, mFactoryTest);
+            proto.write(ProcessesProto.BOOTING, mBooting);
+            proto.write(ProcessesProto.CALL_FINISH_BOOTING, mCallFinishBooting);
+            proto.write(ProcessesProto.BOOT_ANIMATION_COMPLETE, mBootAnimationComplete);
+            proto.write(ProcessesProto.LAST_POWER_CHECK_UPTIME_MS, mLastPowerCheckUptime);
+            mStackSupervisor.mGoingToSleep.writeToProto(proto, ProcessesProto.GOING_TO_SLEEP);
+            mStackSupervisor.mLaunchingActivity.writeToProto(proto, ProcessesProto.LAUNCHING_ACTIVITY);
+            proto.write(ProcessesProto.ADJ_SEQ, mAdjSeq);
+            proto.write(ProcessesProto.LRU_SEQ, mLruSeq);
+            proto.write(ProcessesProto.NUM_NON_CACHED_PROCS, mNumNonCachedProcs);
+            proto.write(ProcessesProto.NUM_SERVICE_PROCS, mNumServiceProcs);
+            proto.write(ProcessesProto.NEW_NUM_SERVICE_PROCS, mNewNumServiceProcs);
+            proto.write(ProcessesProto.ALLOW_LOWER_MEM_LEVEL, mAllowLowerMemLevel);
+            proto.write(ProcessesProto.LAST_MEMORY_LEVEL, mLastMemoryLevel);
+            proto.write(ProcessesProto.LAST_NUM_PROCESSES, mLastNumProcesses);
+            long now = SystemClock.uptimeMillis();
+            ProtoUtils.toDuration(proto, ProcessesProto.LAST_IDLE_TIME, mLastIdleTime, now);
+            proto.write(ProcessesProto.LOW_RAM_SINCE_LAST_IDLE_MS, getLowRamTimeSinceIdle(now));
+        }
+
+    }
+
+    void writeProcessesToGcToProto(ProtoOutputStream proto, long fieldId, String dumpPackage) {
+        if (mProcessesToGc.size() > 0) {
+            long now = SystemClock.uptimeMillis();
+            for (int i=0; i<mProcessesToGc.size(); i++) {
+                ProcessRecord r = mProcessesToGc.get(i);
+                if (dumpPackage != null && !dumpPackage.equals(r.info.packageName)) {
+                    continue;
+                }
+                final long token = proto.start(fieldId);
+                r.writeToProto(proto, ProcessToGcProto.PROC);
+                proto.write(ProcessToGcProto.REPORT_LOW_MEMORY, r.reportLowMemory);
+                proto.write(ProcessToGcProto.NOW_UPTIME_MS, now);
+                proto.write(ProcessToGcProto.LAST_GCED_MS, r.lastRequestedGc);
+                proto.write(ProcessToGcProto.LAST_LOW_MEMORY_MS, r.lastLowMemory);
+                proto.end(token);
+            }
+        }
+    }
+
+    boolean dumpProcessesToGc(PrintWriter pw, boolean needSep, String dumpPackage) {
         if (mProcessesToGc.size() > 0) {
             boolean printed = false;
             long now = SystemClock.uptimeMillis();
@@ -16463,7 +16824,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             needSep = true;
         }
 
-        dumpProcessesToGc(fd, pw, args, opti, needSep, dumpAll, null);
+        dumpProcessesToGc(pw, needSep, null);
 
         pw.println();
         pw.println("  mHomeProcess: " + mHomeProcess);
@@ -17014,11 +17375,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         return numPers;
     }
 
-    private static final boolean dumpProcessOomList(PrintWriter pw,
-            ActivityManagerService service, List<ProcessRecord> origList,
-            String prefix, String normalLabel, String persistentLabel,
-            boolean inclDetails, String dumpPackage) {
-
+    private static final ArrayList<Pair<ProcessRecord, Integer>>
+        sortProcessOomList(List<ProcessRecord> origList, String dumpPackage) {
         ArrayList<Pair<ProcessRecord, Integer>> list
                 = new ArrayList<Pair<ProcessRecord, Integer>>(origList.size());
         for (int i=0; i<origList.size(); i++) {
@@ -17027,10 +17385,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 continue;
             }
             list.add(new Pair<ProcessRecord, Integer>(origList.get(i), i));
-        }
-
-        if (list.size() <= 0) {
-            return false;
         }
 
         Comparator<Pair<ProcessRecord, Integer>> comparator
@@ -17052,6 +17406,113 @@ public class ActivityManagerService extends IActivityManager.Stub
         };
 
         Collections.sort(list, comparator);
+        return list;
+    }
+
+    private static final boolean writeProcessOomListToProto(ProtoOutputStream proto, long fieldId,
+            ActivityManagerService service, List<ProcessRecord> origList,
+            boolean inclDetails, String dumpPackage) {
+        ArrayList<Pair<ProcessRecord, Integer>> list = sortProcessOomList(origList, dumpPackage);
+        if (list.isEmpty()) return false;
+
+        final long curUptime = SystemClock.uptimeMillis();
+
+        for (int i = list.size() - 1; i >= 0; i--) {
+            ProcessRecord r = list.get(i).first;
+            long token = proto.start(fieldId);
+            String oomAdj = ProcessList.makeOomAdjString(r.setAdj);
+            proto.write(ProcessOomProto.PERSISTENT, r.persistent);
+            proto.write(ProcessOomProto.NUM, (origList.size()-1)-list.get(i).second);
+            proto.write(ProcessOomProto.OOM_ADJ, oomAdj);
+            int schedGroup = ProcessOomProto.SCHED_GROUP_UNKNOWN;
+            switch (r.setSchedGroup) {
+                case ProcessList.SCHED_GROUP_BACKGROUND:
+                    schedGroup = ProcessOomProto.SCHED_GROUP_BACKGROUND;
+                    break;
+                case ProcessList.SCHED_GROUP_DEFAULT:
+                    schedGroup = ProcessOomProto.SCHED_GROUP_DEFAULT;
+                    break;
+                case ProcessList.SCHED_GROUP_TOP_APP:
+                    schedGroup = ProcessOomProto.SCHED_GROUP_TOP_APP;
+                    break;
+                case ProcessList.SCHED_GROUP_TOP_APP_BOUND:
+                    schedGroup = ProcessOomProto.SCHED_GROUP_TOP_APP_BOUND;
+                    break;
+            }
+            if (schedGroup != ProcessOomProto.SCHED_GROUP_UNKNOWN) {
+                proto.write(ProcessOomProto.SCHED_GROUP, schedGroup);
+            }
+            if (r.foregroundActivities) {
+                proto.write(ProcessOomProto.ACTIVITIES, true);
+            } else if (r.foregroundServices) {
+                proto.write(ProcessOomProto.SERVICES, true);
+            }
+            proto.write(ProcessOomProto.STATE, ProcessList.makeProcStateProtoEnum(r.curProcState));
+            proto.write(ProcessOomProto.TRIM_MEMORY_LEVEL, r.trimMemoryLevel);
+            r.writeToProto(proto, ProcessOomProto.PROC);
+            proto.write(ProcessOomProto.ADJ_TYPE, r.adjType);
+            if (r.adjSource != null || r.adjTarget != null) {
+                if (r.adjTarget instanceof  ComponentName) {
+                    ComponentName cn = (ComponentName) r.adjTarget;
+                    cn.writeToProto(proto, ProcessOomProto.ADJ_TARGET_COMPONENT_NAME);
+                } else if (r.adjTarget != null) {
+                    proto.write(ProcessOomProto.ADJ_TARGET_OBJECT, r.adjTarget.toString());
+                }
+                if (r.adjSource instanceof ProcessRecord) {
+                    ProcessRecord p = (ProcessRecord) r.adjSource;
+                    p.writeToProto(proto, ProcessOomProto.ADJ_SOURCE_PROC);
+                } else if (r.adjSource != null) {
+                    proto.write(ProcessOomProto.ADJ_SOURCE_OBJECT, r.adjSource.toString());
+                }
+            }
+            if (inclDetails) {
+                long detailToken = proto.start(ProcessOomProto.DETAIL);
+                proto.write(ProcessOomProto.Detail.MAX_ADJ, r.maxAdj);
+                proto.write(ProcessOomProto.Detail.CUR_RAW_ADJ, r.curRawAdj);
+                proto.write(ProcessOomProto.Detail.SET_RAW_ADJ, r.setRawAdj);
+                proto.write(ProcessOomProto.Detail.CUR_ADJ, r.curAdj);
+                proto.write(ProcessOomProto.Detail.SET_ADJ, r.setAdj);
+                proto.write(ProcessOomProto.Detail.CURRENT_STATE,
+                        ProcessList.makeProcStateProtoEnum(r.curProcState));
+                proto.write(ProcessOomProto.Detail.SET_STATE,
+                        ProcessList.makeProcStateProtoEnum(r.setProcState));
+                proto.write(ProcessOomProto.Detail.LAST_PSS, DebugUtils.sizeValueToString(
+                        r.lastPss*1024, new StringBuilder()));
+                proto.write(ProcessOomProto.Detail.LAST_SWAP_PSS, DebugUtils.sizeValueToString(
+                        r.lastSwapPss*1024, new StringBuilder()));
+                proto.write(ProcessOomProto.Detail.LAST_CACHED_PSS, DebugUtils.sizeValueToString(
+                        r.lastCachedPss*1024, new StringBuilder()));
+                proto.write(ProcessOomProto.Detail.CACHED, r.cached);
+                proto.write(ProcessOomProto.Detail.EMPTY, r.empty);
+                proto.write(ProcessOomProto.Detail.HAS_ABOVE_CLIENT, r.hasAboveClient);
+
+                if (r.setProcState >= ActivityManager.PROCESS_STATE_SERVICE) {
+                    if (r.lastCpuTime != 0) {
+                        long uptimeSince = curUptime - service.mLastPowerCheckUptime;
+                        long timeUsed = r.curCpuTime - r.lastCpuTime;
+                        long cpuTimeToken = proto.start(ProcessOomProto.Detail.SERVICE_RUN_TIME);
+                        proto.write(ProcessOomProto.Detail.CpuRunTime.OVER_MS, uptimeSince);
+                        proto.write(ProcessOomProto.Detail.CpuRunTime.USED_MS, timeUsed);
+                        proto.write(ProcessOomProto.Detail.CpuRunTime.ULTILIZATION,
+                                (100.0*timeUsed)/uptimeSince);
+                        proto.end(cpuTimeToken);
+                    }
+                }
+                proto.end(detailToken);
+            }
+            proto.end(token);
+        }
+
+        return true;
+    }
+
+    private static final boolean dumpProcessOomList(PrintWriter pw,
+            ActivityManagerService service, List<ProcessRecord> origList,
+            String prefix, String normalLabel, String persistentLabel,
+            boolean inclDetails, String dumpPackage) {
+
+        ArrayList<Pair<ProcessRecord, Integer>> list = sortProcessOomList(origList, dumpPackage);
+        if (list.isEmpty()) return false;
 
         final long curUptime = SystemClock.uptimeMillis();
         final long uptimeSince = curUptime - service.mLastPowerCheckUptime;

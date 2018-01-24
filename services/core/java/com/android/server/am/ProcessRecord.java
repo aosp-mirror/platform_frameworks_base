@@ -679,6 +679,7 @@ final class ProcessRecord {
                 proto.write(ProcessRecordProto.ISOLATED_APP_ID, UserHandle.getAppId(uid));
             }
         }
+        proto.write(ProcessRecordProto.PERSISTENT, persistent);
         proto.end(token);
     }
 

@@ -18,13 +18,17 @@ package com.android.server.am;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.app.ActivityManagerProto;
 import android.content.pm.PackageManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
+import android.util.proto.ProtoUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.am.proto.UidRecordProto;
 
 /**
  * Overall information about a uid that has actively running processes.
@@ -86,6 +90,22 @@ public final class UidRecord {
     static final int CHANGE_CACHED = 1<<3;
     static final int CHANGE_UNCACHED = 1<<4;
 
+    // Keep the enum lists in sync
+    private static int[] ORIG_ENUMS = new int[] {
+            CHANGE_GONE,
+            CHANGE_IDLE,
+            CHANGE_ACTIVE,
+            CHANGE_CACHED,
+            CHANGE_UNCACHED,
+    };
+    private static int[] PROTO_ENUMS = new int[] {
+            UidRecordProto.CHANGE_GONE,
+            UidRecordProto.CHANGE_IDLE,
+            UidRecordProto.CHANGE_ACTIVE,
+            UidRecordProto.CHANGE_CACHED,
+            UidRecordProto.CHANGE_UNCACHED,
+    };
+
     static final class ChangeItem {
         UidRecord uidRecord;
         int uid;
@@ -123,6 +143,34 @@ public final class UidRecord {
         if ((changeToDispatch & CHANGE_GONE) == 0) {
             lastDispatchedProcStateSeq = curProcStateSeq;
         }
+    }
+
+
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        long token = proto.start(fieldId);
+        proto.write(UidRecordProto.HEX_HASH, Integer.toHexString(System.identityHashCode(this)));
+        proto.write(UidRecordProto.UID, uid);
+        proto.write(UidRecordProto.CURRENT, ProcessList.makeProcStateProtoEnum(curProcState));
+        proto.write(UidRecordProto.EPHEMERAL, ephemeral);
+        proto.write(UidRecordProto.FG_SERVICES, foregroundServices);
+        proto.write(UidRecordProto.WHILELIST, curWhitelist);
+        ProtoUtils.toDuration(proto, UidRecordProto.LAST_BACKGROUND_TIME,
+                lastBackgroundTime, SystemClock.elapsedRealtime());
+        proto.write(UidRecordProto.IDLE, idle);
+        if (lastReportedChange != 0) {
+            ProtoUtils.writeBitWiseFlagsToProtoEnum(proto, UidRecordProto.LAST_REPORTED_CHANGES,
+                    lastReportedChange, ORIG_ENUMS, PROTO_ENUMS);
+        }
+        proto.write(UidRecordProto.NUM_PROCS, numProcs);
+
+        long seqToken = proto.start(UidRecordProto.NETWORK_STATE_UPDATE);
+        proto.write(UidRecordProto.ProcStateSequence.CURURENT, curProcStateSeq);
+        proto.write(UidRecordProto.ProcStateSequence.LAST_NETWORK_UPDATED,
+                lastNetworkUpdatedProcStateSeq);
+        proto.write(UidRecordProto.ProcStateSequence.LAST_DISPATCHED, lastDispatchedProcStateSeq);
+        proto.end(seqToken);
+
+        proto.end(token);
     }
 
     public String toString() {
