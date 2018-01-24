@@ -29,6 +29,15 @@
 #include <utils/misc.h>
 #include <utils/Log.h>
 
+#include "android-base/unique_fd.h"
+#include "bpf/BpfNetworkStats.h"
+#include "bpf/BpfUtils.h"
+
+using android::bpf::Stats;
+using android::bpf::hasBpfSupport;
+using android::bpf::bpfGetUidStats;
+using android::bpf::bpfGetIfaceStats;
+
 namespace android {
 
 static const char* QTAGUID_IFACE_STATS = "/proc/net/xt_qtaguid/iface_stat_fmt";
@@ -44,15 +53,6 @@ enum StatsType {
     TX_PACKETS = 3,
     TCP_RX_PACKETS = 4,
     TCP_TX_PACKETS = 5
-};
-
-struct Stats {
-    uint64_t rxBytes;
-    uint64_t rxPackets;
-    uint64_t txBytes;
-    uint64_t txPackets;
-    uint64_t tcpRxPackets;
-    uint64_t tcpTxPackets;
 };
 
 static uint64_t getStatsType(struct Stats* stats, StatsType type) {
@@ -150,9 +150,18 @@ static int parseUidStats(const uint32_t uid, struct Stats* stats) {
     return 0;
 }
 
-static jlong getTotalStat(JNIEnv* env, jclass clazz, jint type) {
+static jlong getTotalStat(JNIEnv* env, jclass clazz, jint type, jboolean useBpfStats) {
     struct Stats stats;
     memset(&stats, 0, sizeof(Stats));
+
+    if (useBpfStats) {
+        if (bpfGetIfaceStats(NULL, &stats) == 0) {
+            return getStatsType(&stats, (StatsType) type);
+        } else {
+            return UNKNOWN;
+        }
+    }
+
     if (parseIfaceStats(NULL, &stats) == 0) {
         return getStatsType(&stats, (StatsType) type);
     } else {
@@ -160,7 +169,8 @@ static jlong getTotalStat(JNIEnv* env, jclass clazz, jint type) {
     }
 }
 
-static jlong getIfaceStat(JNIEnv* env, jclass clazz, jstring iface, jint type) {
+static jlong getIfaceStat(JNIEnv* env, jclass clazz, jstring iface, jint type,
+                          jboolean useBpfStats) {
     ScopedUtfChars iface8(env, iface);
     if (iface8.c_str() == NULL) {
         return UNKNOWN;
@@ -168,6 +178,15 @@ static jlong getIfaceStat(JNIEnv* env, jclass clazz, jstring iface, jint type) {
 
     struct Stats stats;
     memset(&stats, 0, sizeof(Stats));
+
+    if (useBpfStats) {
+        if (bpfGetIfaceStats(iface8.c_str(), &stats) == 0) {
+            return getStatsType(&stats, (StatsType) type);
+        } else {
+            return UNKNOWN;
+        }
+    }
+
     if (parseIfaceStats(iface8.c_str(), &stats) == 0) {
         return getStatsType(&stats, (StatsType) type);
     } else {
@@ -175,9 +194,18 @@ static jlong getIfaceStat(JNIEnv* env, jclass clazz, jstring iface, jint type) {
     }
 }
 
-static jlong getUidStat(JNIEnv* env, jclass clazz, jint uid, jint type) {
+static jlong getUidStat(JNIEnv* env, jclass clazz, jint uid, jint type, jboolean useBpfStats) {
     struct Stats stats;
     memset(&stats, 0, sizeof(Stats));
+
+    if (useBpfStats) {
+        if (bpfGetUidStats(uid, &stats) == 0) {
+            return getStatsType(&stats, (StatsType) type);
+        } else {
+            return UNKNOWN;
+        }
+    }
+
     if (parseUidStats(uid, &stats) == 0) {
         return getStatsType(&stats, (StatsType) type);
     } else {
@@ -186,9 +214,9 @@ static jlong getUidStat(JNIEnv* env, jclass clazz, jint uid, jint type) {
 }
 
 static const JNINativeMethod gMethods[] = {
-    {"nativeGetTotalStat", "(I)J", (void*) getTotalStat},
-    {"nativeGetIfaceStat", "(Ljava/lang/String;I)J", (void*) getIfaceStat},
-    {"nativeGetUidStat", "(II)J", (void*) getUidStat},
+    {"nativeGetTotalStat", "(IZ)J", (void*) getTotalStat},
+    {"nativeGetIfaceStat", "(Ljava/lang/String;IZ)J", (void*) getIfaceStat},
+    {"nativeGetUidStat", "(IIZ)J", (void*) getUidStat},
 };
 
 int register_android_server_net_NetworkStatsService(JNIEnv* env) {

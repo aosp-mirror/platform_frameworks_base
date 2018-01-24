@@ -67,7 +67,7 @@ public class NetworkStatsFactoryTest {
             IoUtils.deleteContents(mTestProc);
         }
 
-        mFactory = new NetworkStatsFactory(mTestProc);
+        mFactory = new NetworkStatsFactory(mTestProc, false);
     }
 
     @After
@@ -113,6 +113,20 @@ public class NetworkStatsFactoryTest {
         assertStatsEntry(stats, "rmnet1", 10021, SET_DEFAULT, 0x30100000, 219110L, 578L, 227423L,
                 676L);
         assertStatsEntry(stats, "rmnet1", 10021, SET_FOREGROUND, 0x30100000, 742L, 3L, 1265L, 3L);
+    }
+
+    @Test
+    public void testNetworkStatsSummary() throws Exception {
+        stageFile(R.raw.net_dev_typical, file("net/dev"));
+
+        final NetworkStats stats = mFactory.readNetworkStatsIfaceDev();
+        assertEquals(6, stats.size());
+        assertStatsEntry(stats, "lo", UID_ALL, SET_ALL, TAG_NONE, 8308L, 8308L);
+        assertStatsEntry(stats, "rmnet0", UID_ALL, SET_ALL, TAG_NONE, 1507570L, 489339L);
+        assertStatsEntry(stats, "ifb0", UID_ALL, SET_ALL, TAG_NONE, 52454L, 0L);
+        assertStatsEntry(stats, "ifb1", UID_ALL, SET_ALL, TAG_NONE, 52454L, 0L);
+        assertStatsEntry(stats, "sit0", UID_ALL, SET_ALL, TAG_NONE, 0L, 0L);
+        assertStatsEntry(stats, "ip6tnl0", UID_ALL, SET_ALL, TAG_NONE, 0L, 0L);
     }
 
     @Test

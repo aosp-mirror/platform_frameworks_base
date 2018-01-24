@@ -104,6 +104,8 @@ cc_defaults {
         "libhwbinder",
         "libutils",
         "libhwui",
+        "libbpf",
+        "libnetdutils",
         "android.hardware.audio.common@2.0",
         "android.hardware.broadcastradio@1.0",
         "android.hardware.broadcastradio@1.1",
