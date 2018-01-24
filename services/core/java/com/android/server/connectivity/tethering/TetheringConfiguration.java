@@ -28,6 +28,8 @@ import android.net.ConnectivityManager;
 import android.telephony.TelephonyManager;
 import android.net.util.SharedLog;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -49,6 +51,7 @@ import java.util.StringJoiner;
 public class TetheringConfiguration {
     private static final String TAG = TetheringConfiguration.class.getSimpleName();
 
+    @VisibleForTesting
     public static final int DUN_NOT_REQUIRED = 0;
     public static final int DUN_REQUIRED = 1;
     public static final int DUN_UNSPECIFIED = 2;
