@@ -29,8 +29,12 @@ import android.os.FileUtils;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.test.AndroidTestCase;
+import android.util.Log;
+import android.util.Log.TerribleFailure;
+import android.util.Log.TerribleFailureHandler;
 
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.locksettings.LockSettingsStorage.CredentialHash;
 import com.android.server.locksettings.LockSettingsStorage.PersistentData;
 
@@ -52,7 +56,7 @@ public class LockSettingsStorageTests extends AndroidTestCase {
 
     public static final byte[] PAYLOAD = new byte[] {1, 2, -1, -2, 33};
 
-    LockSettingsStorage mStorage;
+    LockSettingsStorageTestable mStorage;
     File mStorageDir;
 
     private File mDb;
@@ -346,6 +350,39 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         assertEquals(null, mStorage.readSyntheticPasswordState(10, 1234L, "state"));
     }
 
+    public void testPersistentDataBlock_unavailable() {
+        mStorage.mPersistentDataBlock = null;
+
+        assertSame(PersistentData.NONE, mStorage.readPersistentDataBlock());
+    }
+
+    public void testPersistentDataBlock_empty() {
+        mStorage.mPersistentDataBlock = mock(PersistentDataBlockManagerInternal.class);
+
+        assertSame(PersistentData.NONE, mStorage.readPersistentDataBlock());
+    }
+
+    public void testPersistentDataBlock_withData() {
+        mStorage.mPersistentDataBlock = mock(PersistentDataBlockManagerInternal.class);
+        when(mStorage.mPersistentDataBlock.getFrpCredentialHandle())
+                .thenReturn(PersistentData.toBytes(PersistentData.TYPE_SP_WEAVER, SOME_USER_ID,
+                        DevicePolicyManager.PASSWORD_QUALITY_COMPLEX, PAYLOAD));
+
+        PersistentData data = mStorage.readPersistentDataBlock();
+
+        assertEquals(PersistentData.TYPE_SP_WEAVER, data.type);
+        assertEquals(SOME_USER_ID, data.userId);
+        assertEquals(DevicePolicyManager.PASSWORD_QUALITY_COMPLEX, data.qualityForUi);
+        assertArrayEquals(PAYLOAD, data.payload);
+    }
+
+    public void testPersistentDataBlock_exception() {
+        mStorage.mPersistentDataBlock = mock(PersistentDataBlockManagerInternal.class);
+        when(mStorage.mPersistentDataBlock.getFrpCredentialHandle())
+                .thenThrow(new IllegalStateException("oops"));
+        assertSame(PersistentData.NONE, mStorage.readPersistentDataBlock());
+    }
+
     public void testPersistentData_serializeUnserialize() {
         byte[] serialized = PersistentData.toBytes(PersistentData.TYPE_SP, SOME_USER_ID,
                 DevicePolicyManager.PASSWORD_QUALITY_COMPLEX, PAYLOAD);
@@ -364,6 +401,13 @@ public class LockSettingsStorageTests extends AndroidTestCase {
     public void testPersistentData_unserializeEmptyArray() {
         PersistentData deserialized = PersistentData.fromBytes(new byte[0]);
         assertSame(PersistentData.NONE, deserialized);
+    }
+
+    public void testPersistentData_unserializeInvalid() {
+        assertNotNull(suppressAndReturnWtf(() -> {
+            PersistentData deserialized = PersistentData.fromBytes(new byte[]{5});
+            assertSame(PersistentData.NONE, deserialized);
+        }));
     }
 
     public void testPersistentData_unserialize_version1() {
@@ -449,5 +493,20 @@ public class LockSettingsStorageTests extends AndroidTestCase {
         CredentialHash cred = mStorage.readCredentialHash(userId);
         assertEquals(LockPatternUtils.CREDENTIAL_TYPE_PATTERN, cred.type);
         assertArrayEquals(pattern, cred.hash);
+    }
+
+    /**
+     * Suppresses reporting of the WTF to system_server, so we don't pollute the dropbox with
+     * intentionally caused WTFs.
+     */
+    private TerribleFailure suppressAndReturnWtf(Runnable r) {
+        TerribleFailure[] captured = new TerribleFailure[1];
+        TerribleFailureHandler prevWtfHandler = Log.setWtfHandler((t, w, s) -> captured[0] = w);
+        try {
+            r.run();
+        } finally {
+            Log.setWtfHandler(prevWtfHandler);
+        }
+        return captured[0];
     }
 }

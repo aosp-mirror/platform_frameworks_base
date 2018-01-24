@@ -18,11 +18,14 @@ package com.android.server.locksettings;
 
 import android.content.Context;
 
+import com.android.server.PersistentDataBlockManagerInternal;
+
 import java.io.File;
 
 public class LockSettingsStorageTestable extends LockSettingsStorage {
 
     public File mStorageDir;
+    public PersistentDataBlockManagerInternal mPersistentDataBlock;
 
     public LockSettingsStorageTestable(Context context, File storageDir) {
         super(context);
@@ -51,6 +54,11 @@ public class LockSettingsStorageTestable extends LockSettingsStorage {
     protected File getSyntheticPasswordDirectoryForUser(int userId) {
         return makeDirs(mStorageDir, super.getSyntheticPasswordDirectoryForUser(
                 userId).getAbsolutePath());
+    }
+
+    @Override
+    public PersistentDataBlockManagerInternal getPersistentDataBlock() {
+        return mPersistentDataBlock;
     }
 
     private File makeDirs(File baseDir, String filePath) {

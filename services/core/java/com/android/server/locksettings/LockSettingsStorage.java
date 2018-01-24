@@ -627,7 +627,12 @@ class LockSettingsStorage {
         if (persistentDataBlock == null) {
             return PersistentData.NONE;
         }
-        return PersistentData.fromBytes(persistentDataBlock.getFrpCredentialHandle());
+        try {
+            return PersistentData.fromBytes(persistentDataBlock.getFrpCredentialHandle());
+        } catch (IllegalStateException e) {
+            Slog.e(TAG, "Error reading persistent data block", e);
+            return PersistentData.NONE;
+        }
     }
 
     public static class PersistentData {
@@ -670,11 +675,11 @@ class LockSettingsStorage {
                     return new PersistentData(type, userId, qualityForUi, payload);
                 } else {
                     Slog.wtf(TAG, "Unknown PersistentData version code: " + version);
-                    return null;
+                    return NONE;
                 }
             } catch (IOException e) {
                 Slog.wtf(TAG, "Could not parse PersistentData", e);
-                return null;
+                return NONE;
             }
         }
 
