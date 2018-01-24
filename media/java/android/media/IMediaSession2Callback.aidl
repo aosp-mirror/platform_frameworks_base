@@ -44,4 +44,9 @@ oneway interface IMediaSession2Callback {
     //               Follow-up TODO: Add similar functions to the session.
     // TODO(jaewan): Is term 'accepted/rejected' correct? For permission, 'grant' is used.
     void onConnectionChanged(IMediaSession2 sessionBinder, in Bundle commandGroup);
+
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    // Browser sepcific
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    void onGetRootResult(in Bundle rootHints, String rootMediaId, in Bundle rootExtra);
 }

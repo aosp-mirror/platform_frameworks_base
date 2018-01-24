@@ -104,7 +104,13 @@ public class MediaController2 extends MediaPlayerBase {
         // session whose session binder is only valid while it's active.
         // prevent a controller from reusable after the
         // session is released and recreated.
-        mProvider = ApiLoader.getProvider(context)
+        mProvider = createProvider(context, token, callback, executor);
+    }
+
+    MediaController2Provider createProvider(@NonNull Context context,
+            @NonNull SessionToken token, @NonNull ControllerCallback callback,
+            @NonNull Executor executor) {
+        return ApiLoader.getProvider(context)
                 .createMediaController2(this, context, token, callback, executor);
     }
 

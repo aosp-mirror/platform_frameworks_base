@@ -38,6 +38,7 @@ import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.IMediaSession2;
 import android.media.IRemoteVolumeController;
+import android.media.MediaLibraryService2;
 import android.media.MediaSessionService2;
 import android.media.SessionToken;
 import android.media.session.IActiveSessionsListener;
@@ -445,9 +446,18 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         // TODO(jaewan): Query per users.
-        List<ResolveInfo> services = getContext().getPackageManager().queryIntentServices(
-                new Intent(MediaSessionService2.SERVICE_INTERFACE),
-                PackageManager.GET_META_DATA);
+        List<ResolveInfo> services = new ArrayList<>();
+        // If multiple actions are declared for a service, browser gets higher priority.
+        List<ResolveInfo> libraryServices = getContext().getPackageManager().queryIntentServices(
+                new Intent(MediaLibraryService2.SERVICE_INTERFACE), PackageManager.GET_META_DATA);
+        if (libraryServices != null) {
+            services.addAll(libraryServices);
+        }
+        List<ResolveInfo> sessionServices = getContext().getPackageManager().queryIntentServices(
+                new Intent(MediaSessionService2.SERVICE_INTERFACE), PackageManager.GET_META_DATA);
+        if (sessionServices != null) {
+            services.addAll(sessionServices);
+        }
         synchronized (mLock) {
             mSessions.clear();
             if (services == null) {
@@ -470,10 +480,11 @@ public class MediaSessionService extends SystemService implements Monitor {
                             + " the same ID=" + id + ". Ignoring "
                             + serviceInfo.packageName + "/" + serviceInfo.name);
                 } else {
+                    int type = (libraryServices.contains(services.get(i)))
+                            ? SessionToken.TYPE_LIBRARY_SERVICE : SessionToken.TYPE_SESSION_SERVICE;
                     MediaSessionService2Record record =
                             new MediaSessionService2Record(getContext(), mSessionDestroyedListener,
-                                    SessionToken.TYPE_SESSION_SERVICE,
-                                    serviceInfo.packageName, serviceInfo.name, id);
+                                    type, serviceInfo.packageName, serviceInfo.name, id);
                     mSessions.add(record);
                 }
             }

@@ -16,7 +16,6 @@
 
 package android.media;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -29,12 +28,9 @@ import android.media.update.MediaSession2Provider.ControllerInfoProvider;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
-import android.os.Process;
 import android.text.TextUtils;
 import android.util.ArraySet;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,20 +51,17 @@ import java.util.List;
  * instead. With it, your playback can be revived even after you've finished playback. See
  * {@link MediaSessionService2} for details.
  * <p>
- * A session can be obtained by {@link #getInstance(Context, Handler)}. The owner of the session may
- * pass its session token to other processes to allow them to create a {@link MediaController2}
- * to interact with the session.
+ * A session can be obtained by {@link Builder}. The owner of the session may pass its session token
+ * to other processes to allow them to create a {@link MediaController2} to interact with the
+ * session.
  * <p>
- * To receive transport control commands, an underlying media player must be set with
- * {@link #setPlayer(MediaPlayerBase)}. Commands will be sent to the underlying player directly
- * on the thread that had been specified by {@link #getInstance(Context, Handler)}.
+ * When a session receive transport control commands, the session sends the commands directly to
+ * the the underlying media player set by {@link Builder} or {@link #setPlayer(MediaPlayerBase)}.
  * <p>
- * When an app is finished performing playback it must call
- * {@link #setPlayer(MediaPlayerBase)} with {@code null} to clean up the session and notify any
- * controllers. It's developers responsibility of cleaning the session and releasing resources.
+ * When an app is finished performing playback it must call {@link #close()} to clean up the session
+ * and notify any controllers.
  * <p>
- * MediaSession2 objects should be used on the handler's thread that is initially given by
- * {@link #getInstance(Context, Handler)}.
+ * {@link MediaSession2} objects should be used on the thread on the looper.
  *
  * @see MediaSessionService2
  * @hide
@@ -81,7 +74,7 @@ import java.util.List;
 // TODO(jaewan): Should we make APIs for MediaSessionService2 public? It's helpful for
 //               developers that doesn't want to override from Browser, but user may not use this
 //               correctly.
-public final class MediaSession2 extends MediaPlayerBase {
+public class MediaSession2 extends MediaPlayerBase {
     private final MediaSession2Provider mProvider;
 
     // Note: Do not define IntDef because subclass can add more command code on top of these.
@@ -321,19 +314,16 @@ public final class MediaSession2 extends MediaPlayerBase {
     };
 
     /**
-     * Builder for {@link MediaSession2}.
-     * <p>
-     * Any incoming event from the {@link MediaController2} will be handled on the thread
-     * that created session with the {@link Builder#build()}.
+     * Base builder class for MediaSession2 and its subclass.
+     *
+     * @hide
      */
-    // TODO(jaewan): Move this to updatable
-    // TODO(jaewan): Add setRatingType()
-    // TODO(jaewan): Add setSessionActivity()
-    public final static class Builder {
-        private final Context mContext;
-        private final MediaPlayerBase mPlayer;
-        private String mId;
-        private SessionCallback mCallback;
+    static abstract class BuilderBase
+            <T extends MediaSession2.BuilderBase<T, C>, C extends SessionCallback> {
+        final Context mContext;
+        final MediaPlayerBase mPlayer;
+        String mId;
+        C mCallback;
 
         /**
          * Constructor.
@@ -343,7 +333,8 @@ public final class MediaSession2 extends MediaPlayerBase {
          * @throws IllegalArgumentException if any parameter is null, or the player is a
          *      {@link MediaSession2} or {@link MediaController2}.
          */
-        public Builder(@NonNull Context context, @NonNull MediaPlayerBase player) {
+        // TODO(jaewan): Also need executor
+        public BuilderBase(@NonNull Context context, @NonNull MediaPlayerBase player) {
             if (context == null) {
                 throw new IllegalArgumentException("context shouldn't be null");
             }
@@ -370,12 +361,12 @@ public final class MediaSession2 extends MediaPlayerBase {
          * @throws IllegalArgumentException if id is {@code null}
          * @return
          */
-        public Builder setId(@NonNull String id) {
+        public T setId(@NonNull String id) {
             if (id == null) {
                 throw new IllegalArgumentException("id shouldn't be null");
             }
             mId = id;
-            return this;
+            return (T) this;
         }
 
         /**
@@ -384,9 +375,9 @@ public final class MediaSession2 extends MediaPlayerBase {
          * @param callback session callback.
          * @return
          */
-        public Builder setSessionCallback(@Nullable SessionCallback callback) {
+        public T setSessionCallback(@Nullable C callback) {
             mCallback = callback;
-            return this;
+            return (T) this;
         }
 
         /**
@@ -396,6 +387,24 @@ public final class MediaSession2 extends MediaPlayerBase {
          * @throws IllegalStateException if the session with the same id is already exists for the
          *      package.
          */
+        public abstract MediaSession2 build() throws IllegalStateException;
+    }
+
+    /**
+     * Builder for {@link MediaSession2}.
+     * <p>
+     * Any incoming event from the {@link MediaController2} will be handled on the thread
+     * that created session with the {@link Builder#build()}.
+     */
+    // TODO(jaewan): Move this to updatable
+    // TODO(jaewan): Add setRatingType()
+    // TODO(jaewan): Add setSessionActivity()
+    public static final class Builder extends BuilderBase<Builder, SessionCallback> {
+        public Builder(Context context, @NonNull MediaPlayerBase player) {
+            super(context, player);
+        }
+
+        @Override
         public MediaSession2 build() throws IllegalStateException {
             if (mCallback == null) {
                 mCallback = new SessionCallback();
@@ -492,7 +501,7 @@ public final class MediaSession2 extends MediaPlayerBase {
      *       framework had to add heuristics to figure out if an app is
      * @hide
      */
-    private MediaSession2(Context context, MediaPlayerBase player, String id,
+    MediaSession2(Context context, MediaPlayerBase player, String id,
             SessionCallback callback) {
         super();
         mProvider = ApiLoader.getProvider(context)
