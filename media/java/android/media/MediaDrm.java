@@ -1637,6 +1637,34 @@ public final class MediaDrm implements AutoCloseable {
             = "/drm/mediadrm/close_session/error/list";
 
         /**
+         * Key to extract the start times of sessions. Times are
+         * represented as milliseconds since epoch (1970-01-01T00:00:00Z).
+         * The start times are returned from the {@link PersistableBundle}
+         * from a {@link #getMetrics} call.
+         * The start times are returned as another {@link PersistableBundle}
+         * containing the session ids as keys and the start times as long
+         * values. Use {@link android.os.BaseBundle#keySet} to get the list of
+         * session ids, and then {@link android.os.BaseBundle#getLong} to get
+         * the start time for each session.
+         */
+        public static final String SESSION_START_TIMES_MS
+            = "/drm/mediadrm/session_start_times_ms";
+
+        /**
+         * Key to extract the end times of sessions. Times are
+         * represented as milliseconds since epoch (1970-01-01T00:00:00Z).
+         * The end times are returned from the {@link PersistableBundle}
+         * from a {@link #getMetrics} call.
+         * The end times are returned as another {@link PersistableBundle}
+         * containing the session ids as keys and the end times as long
+         * values. Use {@link android.os.BaseBundle#keySet} to get the list of
+         * session ids, and then {@link android.os.BaseBundle#getLong} to get
+         * the end time for each session.
+         */
+        public static final String SESSION_END_TIMES_MS
+            = "/drm/mediadrm/session_end_times_ms";
+
+        /**
          * Key to extract the number of successful {@link #getKeyRequest} calls
          * from the {@link PersistableBundle} returned by a
          * {@link #getMetrics} call.
