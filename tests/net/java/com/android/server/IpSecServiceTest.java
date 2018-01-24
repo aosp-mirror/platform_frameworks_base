@@ -635,4 +635,25 @@ public class IpSecServiceTest {
         verify(mMockNetd).ipSecSetEncapSocketOwner(argThat(fdMatcher), eq(Os.getuid()));
         mIpSecService.closeUdpEncapsulationSocket(udpEncapResp.resourceId);
     }
+
+    @Test
+    public void testReserveNetId() {
+        int start = mIpSecService.TUN_INTF_NETID_START;
+        for (int i = 0; i < mIpSecService.TUN_INTF_NETID_RANGE; i++) {
+            assertEquals(start + i, mIpSecService.reserveNetId());
+        }
+
+        // Check that resource exhaustion triggers an exception
+        try {
+            mIpSecService.reserveNetId();
+            fail("Did not throw error for all netIds reserved");
+        } catch (IllegalStateException expected) {
+        }
+
+        // Now release one and try again
+        int releasedNetId =
+                mIpSecService.TUN_INTF_NETID_START + mIpSecService.TUN_INTF_NETID_RANGE / 2;
+        mIpSecService.releaseNetId(releasedNetId);
+        assertEquals(releasedNetId, mIpSecService.reserveNetId());
+    }
 }
