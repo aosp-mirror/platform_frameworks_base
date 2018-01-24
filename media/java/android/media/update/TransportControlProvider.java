@@ -16,14 +16,9 @@
 
 package android.media.update;
 
-import android.media.MediaPlayerBase;
-import android.media.session.PlaybackState;
-import android.os.Handler;
-
 /**
  * @hide
  */
-// TODO(jaewan): SystemApi
 public interface TransportControlProvider {
     void play_impl();
     void pause_impl();

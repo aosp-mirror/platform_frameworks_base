@@ -37,9 +37,7 @@ import java.lang.annotation.RetentionPolicy;
  * It can be also obtained by {@link MediaSessionManager}.
  * @hide
  */
-// TODO(jaewan): Unhide. SessionToken2?
 // TODO(jaewan): Move Token to updatable!
-// TODO(jaewan): Find better name for this (SessionToken or Session2Token)
 public final class SessionToken2 {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(value = {TYPE_SESSION, TYPE_SESSION_SERVICE, TYPE_LIBRARY_SERVICE})
@@ -210,7 +208,6 @@ public final class SessionToken2 {
      * Create a {@link Bundle} from this token to share it across processes.
      *
      * @return Bundle
-     * @hide
      */
     public Bundle toBundle() {
         Bundle bundle = new Bundle();

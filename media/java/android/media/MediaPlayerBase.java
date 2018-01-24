@@ -16,16 +16,13 @@
 
 package android.media;
 
-import android.media.MediaSession2.PlaylistParam;
-import android.media.session.PlaybackState;
-import android.os.Handler;
+import android.media.MediaSession2.PlaylistParams;
 
 import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
  * Base interfaces for all media players that want media session.
- *
  * @hide
  */
 public abstract class MediaPlayerBase {
@@ -52,7 +49,7 @@ public abstract class MediaPlayerBase {
     public abstract PlaybackState2 getPlaybackState();
     public abstract AudioAttributes getAudioAttributes();
 
-    public abstract void setPlaylist(List<MediaItem2> item, PlaylistParam param);
+    public abstract void setPlaylist(List<MediaItem2> item, PlaylistParams param);
     public abstract void setCurrentPlaylistItem(int index);
 
     /**

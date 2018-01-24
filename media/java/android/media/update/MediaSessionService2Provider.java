@@ -16,6 +16,7 @@
 
 package android.media.update;
 
+import android.annotation.SystemApi;
 import android.content.Intent;
 import android.media.MediaSession2;
 import android.media.MediaSessionService2.MediaNotification;

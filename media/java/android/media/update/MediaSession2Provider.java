@@ -16,14 +16,15 @@
 
 package android.media.update;
 
+import android.annotation.SystemApi;
 import android.media.AudioAttributes;
 import android.media.MediaItem2;
 import android.media.MediaPlayerBase;
-import android.media.MediaSession2;
 import android.media.MediaSession2.Command;
 import android.media.MediaSession2.CommandButton;
 import android.media.MediaSession2.CommandGroup;
 import android.media.MediaSession2.ControllerInfo;
+import android.media.MediaSession2.PlaylistParams;
 import android.media.SessionToken2;
 import android.media.VolumeProvider;
 import android.os.Bundle;
@@ -50,11 +51,8 @@ public interface MediaSession2Provider extends TransportControlProvider {
     void sendCustomCommand_impl(ControllerInfo controller, Command command, Bundle args,
             ResultReceiver receiver);
     void sendCustomCommand_impl(Command command, Bundle args);
-    void setPlaylist_impl(List<MediaItem2> playlist, MediaSession2.PlaylistParam param);
+    void setPlaylist_impl(List<MediaItem2> playlist, PlaylistParams param);
 
-    /**
-     * @hide
-     */
     interface ControllerInfoProvider {
         String getPackageName_impl();
         int getUid_impl();

@@ -16,8 +16,11 @@
 
 package android.media.update;
 
+import android.annotation.SystemApi;
 import android.media.MediaSession2.ControllerInfo;
-import android.os.Bundle; /**
+import android.os.Bundle;
+
+/**
  * @hide
  */
 public interface MediaLibraryService2Provider extends MediaSessionService2Provider {
