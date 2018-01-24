@@ -4130,7 +4130,7 @@ public class Notification implements Parcelable
             final Bundle ex = mN.extras;
             updateBackgroundColor(contentView);
             bindNotificationHeader(contentView, p.ambient, p.headerTextSecondary);
-            bindLargeIcon(contentView, p.hideLargeIcon, p.alwaysShowReply);
+            bindLargeIcon(contentView, p.hideLargeIcon || p.ambient, p.alwaysShowReply);
             boolean showProgress = handleProgressBar(p.hasProgress, contentView, ex);
             if (p.title != null) {
                 contentView.setViewVisibility(R.id.title, View.VISIBLE);
