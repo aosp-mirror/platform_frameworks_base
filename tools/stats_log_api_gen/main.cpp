@@ -317,6 +317,7 @@ write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributio
     fprintf(out, "\n");
     fprintf(out, "#include <stdint.h>\n");
     fprintf(out, "#include <vector>\n");
+    fprintf(out, "#include <set>\n");
     fprintf(out, "\n");
 
     fprintf(out, "namespace android {\n");
@@ -358,6 +359,36 @@ write_stats_log_header(FILE* out, const Atoms& atoms, const AtomDecl &attributio
         i++;
     }
     fprintf(out, "\n");
+    fprintf(out, "};\n");
+    fprintf(out, "\n");
+
+    fprintf(out, "const static std::set<int> kAtomsWithUidField = {\n");
+    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
+        atom != atoms.decls.end(); atom++) {
+        for (vector<AtomField>::const_iterator field = atom->fields.begin();
+                field != atom->fields.end(); field++) {
+            if (field->name == "uid") {
+                string constant = make_constant_name(atom->name);
+                fprintf(out, " %s,\n", constant.c_str());
+                break;
+            }
+        }
+    }
+    fprintf(out, "};\n");
+    fprintf(out, "\n");
+
+    fprintf(out, "const static std::set<int> kAtomsWithAttributionChain = {\n");
+    for (set<AtomDecl>::const_iterator atom = atoms.decls.begin();
+        atom != atoms.decls.end(); atom++) {
+        for (vector<AtomField>::const_iterator field = atom->fields.begin();
+                field != atom->fields.end(); field++) {
+            if (field->javaType == JAVA_TYPE_ATTRIBUTION_CHAIN) {
+                string constant = make_constant_name(atom->name);
+                fprintf(out, " %s,\n", constant.c_str());
+                break;
+            }
+        }
+    }
     fprintf(out, "};\n");
     fprintf(out, "\n");
 
