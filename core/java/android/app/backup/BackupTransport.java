@@ -51,6 +51,20 @@ public class BackupTransport {
     public static final int AGENT_UNKNOWN = -1004;
     public static final int TRANSPORT_QUOTA_EXCEEDED = -1005;
 
+    /**
+     * Indicates that the transport cannot accept a diff backup for this package.
+     *
+     * <p>Backup manager should clear its state for this package and immediately retry a
+     * non-incremental backup. This might be used if the transport no longer has data for this
+     * package in its backing store.
+     *
+     * <p>This is only valid when backup manager called {@link
+     * #performBackup(PackageInfo, ParcelFileDescriptor, int)} with {@link #FLAG_INCREMENTAL}.
+     *
+     * @hide
+     */
+    public static final int TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED = -1006;
+
     // Indicates that operation was initiated by user, not a scheduled one.
     // Transport should ignore its own moratoriums for call with this flag set.
     public static final int FLAG_USER_INITIATED = 1;
@@ -252,6 +266,13 @@ public class BackupTransport {
      * set then {@link BackupTransport#FLAG_NON_INCREMENTAL} will be set. Before P neither flag will
      * be set regardless of whether the backup is incremental or not.
      *
+     * <p>If {@link BackupTransport#FLAG_INCREMENTAL} is set and the transport does not have data
+     * for this package in its storage backend then it cannot apply the incremental diff. Thus it
+     * should return {@link BackupTransport#TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED} to indicate
+     * that backup manager should delete its state and retry the package as a non-incremental
+     * backup. Before P, or if this is a non-incremental backup, then this return code is equivalent
+     * to {@link BackupTransport#TRANSPORT_ERROR}.
+     *
      * @param packageInfo The identity of the application whose data is being backed up.
      *   This specifically includes the signature list for the package.
      * @param inFd Descriptor of file with data that resulted from invoking the application's
@@ -262,9 +283,11 @@ public class BackupTransport {
      * @return one of {@link BackupTransport#TRANSPORT_OK} (OK so far),
      *  {@link BackupTransport#TRANSPORT_PACKAGE_REJECTED} (to suppress backup of this
      *  specific package, but allow others to proceed),
-     *  {@link BackupTransport#TRANSPORT_ERROR} (on network error or other failure), or
-     *  {@link BackupTransport#TRANSPORT_NOT_INITIALIZED} (if the backend dataset has
-     *  become lost due to inactivity purge or some other reason and needs re-initializing)
+     *  {@link BackupTransport#TRANSPORT_ERROR} (on network error or other failure), {@link
+     *  BackupTransport#TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED} (if the transport cannot accept
+     *  an incremental backup for this package), or {@link
+     *  BackupTransport#TRANSPORT_NOT_INITIALIZED} (if the backend dataset has become lost due to
+     *  inactivity purge or some other reason and needs re-initializing)
      */
     public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor inFd, int flags) {
         return performBackup(packageInfo, inFd);

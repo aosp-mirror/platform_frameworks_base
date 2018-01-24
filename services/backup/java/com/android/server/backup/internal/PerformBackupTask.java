@@ -930,6 +930,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                 TransportUtils.checkTransportNotNull(transport);
                 size = mBackupDataName.length();
                 if (size > 0) {
+                    boolean isNonIncremental = mSavedStateName.length() == 0;
                     if (mStatus == BackupTransport.TRANSPORT_OK) {
                         backupData = ParcelFileDescriptor.open(mBackupDataName,
                                 ParcelFileDescriptor.MODE_READ_ONLY);
@@ -938,12 +939,25 @@ public class PerformBackupTask implements BackupRestoreTask {
                         int userInitiatedFlag =
                                 mUserInitiated ? BackupTransport.FLAG_USER_INITIATED : 0;
                         int incrementalFlag =
-                                mSavedStateName.length() == 0
+                                isNonIncremental
                                     ? BackupTransport.FLAG_NON_INCREMENTAL
                                     : BackupTransport.FLAG_INCREMENTAL;
                         int flags = userInitiatedFlag | incrementalFlag;
 
                         mStatus = transport.performBackup(mCurrentPackage, backupData, flags);
+                    }
+
+                    if (isNonIncremental
+                        && mStatus == BackupTransport.TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED) {
+                        // TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED is only valid if the backup was
+                        // incremental, as if the backup is non-incremental there is no state to
+                        // clear. This avoids us ending up in a retry loop if the transport always
+                        // returns this code.
+                        Slog.w(TAG,
+                                "Transport requested non-incremental but already the case, error");
+                        backupManagerService.addBackupTrace(
+                                "Transport requested non-incremental but already the case, error");
+                        mStatus = BackupTransport.TRANSPORT_ERROR;
                     }
 
                     // TODO - We call finishBackup() for each application backed up, because
@@ -993,6 +1007,31 @@ public class PerformBackupTask implements BackupRestoreTask {
                     BackupObserverUtils.sendBackupOnPackageResult(mObserver, pkgName,
                             BackupManager.ERROR_TRANSPORT_QUOTA_EXCEEDED);
                     EventLog.writeEvent(EventLogTags.BACKUP_QUOTA_EXCEEDED, pkgName);
+
+                } else if (mStatus == BackupTransport.TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED) {
+                    Slog.i(TAG, "Transport lost data, retrying package");
+                    backupManagerService.addBackupTrace(
+                            "Transport lost data, retrying package:" + pkgName);
+                    BackupManagerMonitorUtils.monitorEvent(
+                            mMonitor,
+                            BackupManagerMonitor
+                                    .LOG_EVENT_ID_TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED,
+                            mCurrentPackage,
+                            BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT,
+                            /*extras=*/ null);
+
+                    mBackupDataName.delete();
+                    mSavedStateName.delete();
+                    mNewStateName.delete();
+
+                    // Immediately retry the package by adding it back to the front of the queue.
+                    // We cannot add @pm@ to the queue because we back it up separately at the start
+                    // of the backup pass in state BACKUP_PM. Instead we retry this state (see
+                    // below).
+                    if (!PACKAGE_MANAGER_SENTINEL.equals(pkgName)) {
+                        mQueue.add(0, new BackupRequest(pkgName));
+                    }
+
                 } else {
                     // Actual transport-level failure to communicate the data to the backend
                     BackupObserverUtils.sendBackupOnPackageResult(mObserver, pkgName,
@@ -1018,6 +1057,17 @@ public class PerformBackupTask implements BackupRestoreTask {
                 // Success or single-package rejection.  Proceed with the next app if any,
                 // otherwise we're done.
                 nextState = (mQueue.isEmpty()) ? BackupState.FINAL : BackupState.RUNNING_QUEUE;
+
+            } else if (mStatus == BackupTransport.TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED) {
+                // We want to immediately retry the current package.
+                if (PACKAGE_MANAGER_SENTINEL.equals(pkgName)) {
+                    nextState = BackupState.BACKUP_PM;
+                } else {
+                    // This is an ordinary package so we will have added it back into the queue
+                    // above. Thus, we proceed processing the queue.
+                    nextState = BackupState.RUNNING_QUEUE;
+                }
+
             } else if (mStatus == BackupTransport.TRANSPORT_QUOTA_EXCEEDED) {
                 if (MORE_DEBUG) {
                     Slog.d(TAG, "Package " + mCurrentPackage.packageName +
