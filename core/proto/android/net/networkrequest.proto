@@ -21,11 +21,14 @@ package android.net;
 option java_multiple_files = true;
 
 import "frameworks/base/core/proto/android/net/networkcapabilities.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 /**
  * An android.net.NetworkRequest object.
  */
 message NetworkRequestProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     enum Type {
         TYPE_UNKNOWN = 0;
         // Only used by applications. When an application creates a
