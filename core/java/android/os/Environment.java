@@ -292,6 +292,16 @@ public class Environment {
     }
 
     /** {@hide} */
+    public static File getDataVendorCeDirectory(int userId) {
+        return buildPath(getDataDirectory(), "vendor_ce", String.valueOf(userId));
+    }
+
+    /** {@hide} */
+    public static File getDataVendorDeDirectory(int userId) {
+        return buildPath(getDataDirectory(), "vendor_de", String.valueOf(userId));
+    }
+
+    /** {@hide} */
     public static File getProfileSnapshotPath(String packageName, String codePath) {
         return buildPath(buildPath(getDataDirectory(), "misc", "profiles", "ref", packageName,
                 "primary.prof.snapshot"));
