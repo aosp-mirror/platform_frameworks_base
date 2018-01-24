@@ -19,6 +19,7 @@
 #include <log/log.h>
 #include <thread>
 #include "FileBlobCache.h"
+#include "Properties.h"
 #include "utils/TraceUtils.h"
 
 namespace android {
@@ -43,7 +44,11 @@ ShaderCache& ShaderCache::get() {
 void ShaderCache::initShaderDiskCache() {
     ATRACE_NAME("initShaderDiskCache");
     std::lock_guard<std::mutex> lock(mMutex);
-    if (mFilename.length() > 0) {
+
+    // Emulators can switch between different renders either as part of config
+    // or snapshot migration. Also, program binaries may not work well on some
+    // desktop / laptop GPUs. Thus, disable the shader disk cache for emulator builds.
+    if (!Properties::runningInEmulator && mFilename.length() > 0) {
         mBlobCache.reset(new FileBlobCache(maxKeySize, maxValueSize, maxTotalSize, mFilename));
         mInitialized = true;
     }
