@@ -3244,6 +3244,10 @@
          or empty if the default should be used. -->
     <string translatable="false" name="config_deviceSpecificDevicePolicyManagerService"></string>
 
+    <!-- Class name of the device specific implementation to replace the AudioService
+         or empty if the default should be used. -->
+    <string translatable="false" name="config_deviceSpecificAudioService"></string>
+
     <!-- Component name of media projection permission dialog -->
     <string name="config_mediaProjectionPermissionDialogComponent" translateable="false">com.android.systemui/com.android.systemui.media.MediaProjectionPermissionActivity</string>
 
