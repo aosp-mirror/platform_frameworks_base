@@ -3256,8 +3256,8 @@
     <dimen name="config_buttonCornerRadius">@dimen/control_corner_material</dimen>
     <!-- Controls whether system buttons use all caps for text -->
     <bool name="config_buttonTextAllCaps">true</bool>
-    <!-- Name of the font family used for system buttons -->
-    <string name="config_fontFamilyButton">@string/font_family_button_material</string>
+    <!-- Name of the font family used for system surfaces where the font should use medium weight -->
+    <string name="config_headlineFontFamilyMedium">@string/font_family_button_material</string>
 
     <string translatable="false" name="config_batterySaverDeviceSpecificConfig"></string>
 
