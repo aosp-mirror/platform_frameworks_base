@@ -283,7 +283,7 @@ public class AudioService extends IAudioService.Stub
     private final int[][] SOUND_EFFECT_FILES_MAP = new int[AudioManager.NUM_SOUND_EFFECTS][2];
 
    /** Maximum volume index values for audio streams */
-    private static int[] MAX_STREAM_VOLUME = new int[] {
+    protected static int[] MAX_STREAM_VOLUME = new int[] {
         5,  // STREAM_VOICE_CALL
         7,  // STREAM_SYSTEM
         7,  // STREAM_RING
@@ -298,7 +298,7 @@ public class AudioService extends IAudioService.Stub
     };
 
     /** Minimum volume index values for audio streams */
-    private static int[] MIN_STREAM_VOLUME = new int[] {
+    protected static int[] MIN_STREAM_VOLUME = new int[] {
         1,  // STREAM_VOICE_CALL
         0,  // STREAM_SYSTEM
         0,  // STREAM_RING
@@ -1410,7 +1410,7 @@ public class AudioService extends IAudioService.Stub
                 Binder.getCallingUid());
     }
 
-    private void adjustStreamVolume(int streamType, int direction, int flags,
+    protected void adjustStreamVolume(int streamType, int direction, int flags,
             String callingPackage, String caller, int uid) {
         if (mUseFixedVolume) {
             return;
