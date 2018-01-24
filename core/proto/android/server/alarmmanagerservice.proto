@@ -47,6 +47,8 @@ message AlarmManagerServiceProto {
   // Only valid if is_interactive is false.
   optional int64 time_until_next_non_wakeup_delivery_ms = 11;
 
+  // Can be negative if the non-wakeup alarm time is in the past (non-wakeup
+  // alarms aren't delivered unil the next time the device wakes up).
   optional int64 time_until_next_non_wakeup_alarm_ms = 12;
   optional int64 time_until_next_wakeup_ms = 13;
   optional int64 time_since_last_wakeup_ms = 14;
