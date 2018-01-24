@@ -224,6 +224,10 @@ public class PerformBackupTask implements BackupRestoreTask {
                     beginBackup();
                     break;
 
+                case BACKUP_PM:
+                    backupPm();
+                    break;
+
                 case RUNNING_QUEUE:
                     invokeNextAgent();
                     break;
@@ -239,8 +243,7 @@ public class PerformBackupTask implements BackupRestoreTask {
         }
     }
 
-    // We're starting a backup pass.  Initialize the transport and send
-    // the PM metadata blob if we haven't already.
+    // We're starting a backup pass.  Initialize the transport if we haven't already.
     private void beginBackup() {
         if (DEBUG_BACKUP_TRACE) {
             backupManagerService.clearBackupTrace();
@@ -320,40 +323,21 @@ public class PerformBackupTask implements BackupRestoreTask {
                 Slog.d(TAG, "Skipping backup of package metadata.");
                 executeNextState(BackupState.RUNNING_QUEUE);
             } else {
-                // The package manager doesn't have a proper <application> etc, but since
-                // it's running here in the system process we can just set up its agent
-                // directly and use a synthetic BackupRequest.  We always run this pass
-                // because it's cheap and this way we guarantee that we don't get out of
-                // step even if we're selecting among various transports at run time.
+                // As the package manager is running here in the system process we can just set up
+                // its agent directly. Thus we always run this pass because it's cheap and this way
+                // we guarantee that we don't get out of step even if we're selecting among various
+                // transports at run time.
                 if (mStatus == BackupTransport.TRANSPORT_OK) {
-                    PackageManagerBackupAgent pmAgent = backupManagerService.makeMetadataAgent();
-                    mStatus = invokeAgentForBackup(
-                            PACKAGE_MANAGER_SENTINEL,
-                            IBackupAgent.Stub.asInterface(pmAgent.onBind()));
-                    backupManagerService.addBackupTrace("PMBA invoke: " + mStatus);
-
-                    // Because the PMBA is a local instance, it has already executed its
-                    // backup callback and returned.  Blow away the lingering (spurious)
-                    // pending timeout message for it.
-                    backupManagerService.getBackupHandler().removeMessages(
-                            MSG_BACKUP_OPERATION_TIMEOUT);
+                    executeNextState(BackupState.BACKUP_PM);
                 }
             }
-
-            if (mStatus == BackupTransport.TRANSPORT_NOT_INITIALIZED) {
-                // The backend reports that our dataset has been wiped.  Note this in
-                // the event log; the no-success code below will reset the backup
-                // state as well.
-                EventLog.writeEvent(EventLogTags.BACKUP_RESET, transportName);
-            }
         } catch (Exception e) {
-            Slog.e(TAG, "Error in backup thread", e);
-            backupManagerService.addBackupTrace("Exception in backup thread: " + e);
+            Slog.e(TAG, "Error in backup thread during init", e);
+            backupManagerService.addBackupTrace("Exception in backup thread during init: " + e);
             mStatus = BackupTransport.TRANSPORT_ERROR;
         } finally {
-            // If we've succeeded so far, invokeAgentForBackup() will have run the PM
-            // metadata and its completion/timeout callback will continue the state
-            // machine chain.  If it failed that won't happen; we handle that now.
+            // If we've succeeded so far, we will move to the BACKUP_PM state. If something has gone
+            // wrong then that won't have happen so cleanup.
             backupManagerService.addBackupTrace("exiting prelim: " + mStatus);
             if (mStatus != BackupTransport.TRANSPORT_OK) {
                 // if things went wrong at this point, we need to
@@ -364,6 +348,49 @@ public class PerformBackupTask implements BackupRestoreTask {
                         BackupManager.ERROR_TRANSPORT_ABORTED);
                 executeNextState(BackupState.FINAL);
             }
+        }
+    }
+
+    private void backupPm() {
+        try {
+            // The package manager doesn't have a proper <application> etc, but since it's running
+            // here in the system process we can just set up its agent directly and use a synthetic
+            // BackupRequest.
+            PackageManagerBackupAgent pmAgent = backupManagerService.makeMetadataAgent();
+            mStatus = invokeAgentForBackup(
+                    PACKAGE_MANAGER_SENTINEL,
+                    IBackupAgent.Stub.asInterface(pmAgent.onBind()));
+            backupManagerService.addBackupTrace("PMBA invoke: " + mStatus);
+
+            // Because the PMBA is a local instance, it has already executed its backup callback and
+            // returned.  Blow away the lingering (spurious) pending timeout message for it.
+            backupManagerService.getBackupHandler().removeMessages(
+                    MSG_BACKUP_OPERATION_TIMEOUT);
+        } catch (Exception e) {
+            Slog.e(TAG, "Error in backup thread during pm", e);
+            backupManagerService.addBackupTrace("Exception in backup thread during pm: " + e);
+            mStatus = BackupTransport.TRANSPORT_ERROR;
+        } finally {
+            // If we've succeeded so far, invokeAgentForBackup() will have run the PM
+            // metadata and its completion/timeout callback will continue the state
+            // machine chain.  If it failed that won't happen; we handle that now.
+            backupManagerService.addBackupTrace("exiting backupPm: " + mStatus);
+            if (mStatus != BackupTransport.TRANSPORT_OK) {
+                // if things went wrong at this point, we need to
+                // restage everything and try again later.
+                backupManagerService.resetBackupState(mStateDir);  // Just to make sure.
+                BackupObserverUtils.sendBackupFinished(mObserver,
+                        invokeAgentToObserverError(mStatus));
+                executeNextState(BackupState.FINAL);
+            }
+        }
+    }
+
+    private int invokeAgentToObserverError(int error) {
+        if (error == BackupTransport.AGENT_ERROR) {
+            return BackupManager.ERROR_AGENT_FAILURE;
+        } else {
+            return BackupManager.ERROR_TRANSPORT_ABORTED;
         }
     }
 
