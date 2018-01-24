@@ -40,12 +40,6 @@ public interface MediaControlView2Provider extends ViewProvider {
     void show_impl(int timeout);
     boolean isShowing_impl();
     void hide_impl();
-    boolean isPlaying_impl();
-    int getCurrentPosition_impl();
-    int getBufferPercentage_impl();
-    boolean canPause_impl();
-    boolean canSeekBackward_impl();
-    boolean canSeekForward_impl();
     void showSubtitle_impl();
     void hideSubtitle_impl();
     void setPrevNextListeners_impl(View.OnClickListener next, View.OnClickListener prev);

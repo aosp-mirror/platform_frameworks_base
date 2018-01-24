@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -28,6 +29,8 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 /**
  * A View that contains the controls for MediaPlayer2.
  * It provides a wide range of UI including buttons such as "Play/Pause", "Rewind", "Fast Forward",
@@ -48,7 +51,23 @@ import android.view.View;
  * @hide
  */
 public class MediaControlView2 extends FrameLayout {
-    // TODO: should overflow button be included?
+    /** @hide */
+    @IntDef({
+            BUTTON_PLAY_PAUSE,
+            BUTTON_FFWD,
+            BUTTON_REW,
+            BUTTON_NEXT,
+            BUTTON_PREV,
+            BUTTON_SUBTITLE,
+            BUTTON_FULL_SCREEN,
+            BUTTON_OVERFLOW,
+            BUTTON_MUTE,
+            BUTTON_ASPECT_RATIO,
+            BUTTON_SETTINGS
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Button {}
+
     public static final int BUTTON_PLAY_PAUSE = 1;
     public static final int BUTTON_FFWD = 2;
     public static final int BUTTON_REW = 3;
@@ -126,48 +145,6 @@ public class MediaControlView2 extends FrameLayout {
      */
     public void hide() {
         mProvider.hide_impl();
-    }
-
-    /**
-     * Returns whether the media is currently playing or not.
-     */
-    public boolean isPlaying() {
-        return mProvider.isPlaying_impl();
-    }
-
-    /**
-     * Returns the current position of the media in milliseconds.
-     */
-    public int getCurrentPosition() {
-        return mProvider.getCurrentPosition_impl();
-    }
-
-    /**
-     * Returns the percentage of how much of the media is currently buffered in storage.
-     */
-    public int getBufferPercentage() {
-        return mProvider.getBufferPercentage_impl();
-    }
-
-    /**
-     * Returns whether the media can be paused or not.
-     */
-    public boolean canPause() {
-        return mProvider.canPause_impl();
-    }
-
-    /**
-     * Returns whether the media can be rewound or not.
-     */
-    public boolean canSeekBackward() {
-        return mProvider.canSeekBackward_impl();
-    }
-
-    /**
-     * Returns whether the media can be fast-forwarded or not.
-     */
-    public boolean canSeekForward() {
-        return mProvider.canSeekForward_impl();
     }
 
     /**
