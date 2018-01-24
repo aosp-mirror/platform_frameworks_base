@@ -11159,6 +11159,7 @@ public final class Settings {
          *
          * @hide
          */
+        @TestApi
         public static final String LOCATION_GLOBAL_KILL_SWITCH =
                 "location_global_kill_switch";
 
