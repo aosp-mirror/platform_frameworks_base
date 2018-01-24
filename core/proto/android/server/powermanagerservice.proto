@@ -28,13 +28,20 @@ import "frameworks/base/core/proto/android/os/worksource.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
 import "frameworks/base/core/proto/android/server/wirelesschargerdetector.proto";
 import "frameworks/base/core/proto/android/view/display.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 message PowerManagerServiceDumpProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // A com.android.server.power.PowerManagerService.Constants object.
     message ConstantsProto {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
         optional bool is_no_cached_wake_locks = 1;
     }
     message ActiveWakeLocksProto {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
         optional bool is_cpu = 1;
         optional bool is_screen_bright = 2;
         optional bool is_screen_dim = 3;
@@ -46,12 +53,16 @@ message PowerManagerServiceDumpProto {
         optional bool is_draw = 8;
     }
     message UserActivityProto {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
         optional bool is_screen_bright = 1;
         optional bool is_screen_dim = 2;
         optional bool is_screen_dream = 3;
     }
     // A com.android.server.power.PowerManagerService.UidState object.
     message UidStateProto {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
         optional int32 uid = 1;
         optional string uid_string = 2;
         optional bool is_active = 3;
@@ -167,13 +178,19 @@ message PowerManagerServiceDumpProto {
 
 // A com.android.server.power.PowerManagerService.SuspendBlockerImpl object.
 message SuspendBlockerProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     optional string name = 1;
     optional int32 reference_count = 2;
 }
 
 // A com.android.server.power.PowerManagerService.WakeLock object.
 message WakeLockProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     message WakeLockFlagsProto {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
         // Turn the screen on when the wake lock is acquired.
         optional bool is_acquire_causes_wakeup = 1;
         // When this wake lock is released, poke the user activity timer
@@ -182,7 +199,7 @@ message WakeLockProto {
     }
 
     optional .android.os.PowerManagerProto.WakeLockLevel lock_level = 1;
-    optional string tag = 2;
+    optional string tag = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
     optional WakeLockFlagsProto flags = 3;
     optional bool is_disabled = 4;
     // Acquire time in ms
@@ -196,12 +213,18 @@ message WakeLockProto {
 }
 
 message PowerServiceSettingsAndConfigurationDumpProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     message StayOnWhilePluggedInProto {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
         optional bool is_stay_on_while_plugged_in_ac = 1;
         optional bool is_stay_on_while_plugged_in_usb = 2;
         optional bool is_stay_on_while_plugged_in_wireless = 3;
     }
     message ScreenBrightnessSettingLimitsProto {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
         optional int32 setting_minimum = 1;
         optional int32 setting_maximum = 2;
         optional int32 setting_default = 3;
