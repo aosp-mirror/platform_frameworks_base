@@ -16,16 +16,20 @@
 
 package android.os;
 
+import android.annotation.SystemApi;
+
 import libcore.util.NativeAllocationRegistry;
 
 import java.util.NoSuchElementException;
 
 /** @hide */
+@SystemApi
 public abstract class HwBinder implements IHwBinder {
     private static final String TAG = "HwBinder";
 
     private static final NativeAllocationRegistry sNativeRegistry;
 
+    /** @hide */
     public HwBinder() {
         native_setup();
 
@@ -34,33 +38,55 @@ public abstract class HwBinder implements IHwBinder {
                 mNativeContext);
     }
 
+    /** @hide */
     @Override
     public final native void transact(
             int code, HwParcel request, HwParcel reply, int flags)
         throws RemoteException;
 
+    /** @hide */
     public abstract void onTransact(
             int code, HwParcel request, HwParcel reply, int flags)
         throws RemoteException;
 
+    /** @hide */
     public native final void registerService(String serviceName)
         throws RemoteException;
 
+    /** @hide */
     public static final IHwBinder getService(
             String iface,
             String serviceName)
         throws RemoteException, NoSuchElementException {
         return getService(iface, serviceName, false /* retry */);
     }
+    /** @hide */
     public static native final IHwBinder getService(
             String iface,
             String serviceName,
             boolean retry)
         throws RemoteException, NoSuchElementException;
 
+    /**
+     * Configures how many threads the process-wide hwbinder threadpool
+     * has to process incoming requests.
+     *
+     * @hide
+     */
+    @SystemApi
     public static native final void configureRpcThreadpool(
             long maxThreads, boolean callerWillJoin);
 
+    /**
+     * Current thread will join hwbinder threadpool and process
+     * commands in the pool. Should be called after configuring
+     * a threadpool with callerWillJoin true and then registering
+     * the provided service if this thread doesn't need to do
+     * anything else.
+     *
+     * @hide
+     */
+    @SystemApi
     public static native final void joinRpcThreadpool();
 
     // Returns address of the "freeFunction".
@@ -83,6 +109,7 @@ public abstract class HwBinder implements IHwBinder {
 
     /**
      * Notifies listeners that a system property has changed
+     * @hide
      */
     public static void reportSyspropChanged() {
         native_report_sysprop_change();
