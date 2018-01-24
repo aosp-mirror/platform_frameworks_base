@@ -13623,7 +13623,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 int index = task.mActivities.lastIndexOf(r);
                 if (index > 0) {
                     ActivityRecord under = task.mActivities.get(index - 1);
-                    under.returningOptions = safeOptions.getOptions(r);
+                    under.returningOptions = safeOptions != null ? safeOptions.getOptions(r) : null;
                 }
                 final boolean translucentChanged = r.changeWindowTranslucency(false);
                 if (translucentChanged) {
