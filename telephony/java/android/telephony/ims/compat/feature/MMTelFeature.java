@@ -22,6 +22,7 @@ import android.os.RemoteException;
 
 import android.telephony.ims.ImsCallProfile;
 import com.android.ims.internal.IImsCallSession;
+import com.android.ims.internal.IImsCallSessionListener;
 import com.android.ims.internal.IImsConfig;
 import com.android.ims.internal.IImsEcbm;
 import com.android.ims.internal.IImsMMTelFeature;
@@ -29,6 +30,10 @@ import com.android.ims.internal.IImsMultiEndpoint;
 import com.android.ims.internal.IImsRegistrationListener;
 import com.android.ims.internal.IImsUt;
 import android.telephony.ims.ImsCallSession;
+import android.telephony.ims.compat.stub.ImsCallSessionImplBase;
+import android.telephony.ims.stub.ImsEcbmImplBase;
+import android.telephony.ims.stub.ImsMultiEndpointImplBase;
+import android.telephony.ims.stub.ImsUtImplBase;
 
 /**
  * Base implementation for MMTel.
@@ -110,7 +115,7 @@ public class MMTelFeature extends ImsFeature {
         public IImsCallSession createCallSession(int sessionId, ImsCallProfile profile)
                 throws RemoteException {
             synchronized (mLock) {
-                return MMTelFeature.this.createCallSession(sessionId, profile);
+                return MMTelFeature.this.createCallSession(sessionId, profile, null);
             }
         }
 
@@ -125,7 +130,8 @@ public class MMTelFeature extends ImsFeature {
         @Override
         public IImsUt getUtInterface() throws RemoteException {
             synchronized (mLock) {
-                return MMTelFeature.this.getUtInterface();
+                ImsUtImplBase implBase = MMTelFeature.this.getUtInterface();
+                return implBase != null ? implBase.getInterface() : null;
             }
         }
 
@@ -153,7 +159,8 @@ public class MMTelFeature extends ImsFeature {
         @Override
         public IImsEcbm getEcbmInterface() throws RemoteException {
             synchronized (mLock) {
-                return MMTelFeature.this.getEcbmInterface();
+                ImsEcbmImplBase implBase = MMTelFeature.this.getEcbmInterface();
+                return implBase != null ? implBase.getImsEcbm() : null;
             }
         }
 
@@ -167,7 +174,8 @@ public class MMTelFeature extends ImsFeature {
         @Override
         public IImsMultiEndpoint getMultiEndpointInterface() throws RemoteException {
             synchronized (mLock) {
-                return MMTelFeature.this.getMultiEndpointInterface();
+                ImsMultiEndpointImplBase implBase = MMTelFeature.this.getMultiEndpointInterface();
+                return implBase != null ? implBase.getIImsMultiEndpoint() : null;
             }
         }
     };
@@ -281,7 +289,8 @@ public class MMTelFeature extends ImsFeature {
      * @param sessionId a session id which is obtained from {@link #startSession}
      * @param profile a call profile to make the call
      */
-    public IImsCallSession createCallSession(int sessionId, ImsCallProfile profile) {
+    public IImsCallSession createCallSession(int sessionId, ImsCallProfile profile,
+            IImsCallSessionListener listener) {
         return null;
     }
 
@@ -298,7 +307,7 @@ public class MMTelFeature extends ImsFeature {
     /**
      * @return The Ut interface for the supplementary service configuration.
      */
-    public IImsUt getUtInterface() {
+    public ImsUtImplBase getUtInterface() {
         return null;
     }
 
@@ -324,7 +333,7 @@ public class MMTelFeature extends ImsFeature {
     /**
      * @return The Emergency call-back mode interface for emergency VoLTE calls that support it.
      */
-    public IImsEcbm getEcbmInterface() {
+    public ImsEcbmImplBase getEcbmInterface() {
         return null;
     }
 
@@ -339,7 +348,7 @@ public class MMTelFeature extends ImsFeature {
     /**
      * @return MultiEndpoint interface for DEP notifications
      */
-    public IImsMultiEndpoint getMultiEndpointInterface() {
+    public ImsMultiEndpointImplBase getMultiEndpointInterface() {
         return null;
     }
 
