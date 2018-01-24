@@ -685,7 +685,30 @@ public final class IpSecManager {
             mLocalAddress = localAddress;
             mRemoteAddress = remoteAddress;
             mUnderlyingNetwork = underlyingNetwork;
-            // TODO: Call IpSecService
+
+            try {
+                IpSecTunnelInterfaceResponse result =
+                        mService.createTunnelInterface(
+                                localAddress.getHostAddress(),
+                                remoteAddress.getHostAddress(),
+                                underlyingNetwork,
+                                new Binder());
+                switch (result.status) {
+                    case Status.OK:
+                        break;
+                    case Status.RESOURCE_UNAVAILABLE:
+                        throw new ResourceUnavailableException(
+                                "No more tunnel interfaces may be allocated by this requester.");
+                    default:
+                        throw new RuntimeException(
+                                "Unknown status returned by IpSecService: " + result.status);
+                }
+                mResourceId = result.resourceId;
+                mInterfaceName = result.interfaceName;
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+            mCloseGuard.open("constructor");
         }
 
         /**
@@ -697,12 +720,12 @@ public final class IpSecManager {
          */
         @Override
         public void close() {
-            // try {
-            // TODO: Call IpSecService
-            mResourceId = INVALID_RESOURCE_ID;
-            // } catch (RemoteException e) {
-            //    throw e.rethrowFromSystemServer();
-            // }
+            try {
+                mService.deleteTunnelInterface(mResourceId);
+                mResourceId = INVALID_RESOURCE_ID;
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
             mCloseGuard.close();
         }
 
@@ -714,10 +737,19 @@ public final class IpSecManager {
             }
             close();
         }
+
+        /** @hide */
+        @VisibleForTesting
+        public int getResourceId() {
+            return mResourceId;
+        }
     }
 
     /**
      * Create a new IpSecTunnelInterface as a local endpoint for tunneled IPsec traffic.
+     *
+     * <p>An application that creates tunnels is responsible for cleaning up the tunnel when the
+     * underlying network goes away, and the onLost() callback is received.
      *
      * @param localAddress The local addres of the tunnel
      * @param remoteAddress The local addres of the tunnel
@@ -750,7 +782,12 @@ public final class IpSecManager {
     @SystemApi
     public void applyTunnelModeTransform(IpSecTunnelInterface tunnel, int direction,
             IpSecTransform transform) throws IOException {
-        // TODO: call IpSecService
+        try {
+            mService.applyTunnelModeTransform(
+                    tunnel.getResourceId(), direction, transform.getResourceId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
     /**
      * Construct an instance of IpSecManager within an application context.
