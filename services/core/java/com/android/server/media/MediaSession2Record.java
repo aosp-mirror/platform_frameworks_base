@@ -23,7 +23,7 @@ import android.content.Context;
 import android.media.IMediaSession2;
 import android.media.MediaController2;
 import android.media.MediaSession2;
-import android.media.SessionToken;
+import android.media.SessionToken2;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -96,7 +96,7 @@ class MediaSession2Record {
     // TODO(jaewan): also add uid for multiuser support
     @CallSuper
     public @Nullable
-    SessionToken createSessionToken(int sessionPid, String packageName, String id,
+    SessionToken2 createSessionToken(int sessionPid, String packageName, String id,
             IMediaSession2 sessionBinder) {
         if (mController != null) {
             if (mSessionPid != sessionPid) {
@@ -130,12 +130,12 @@ class MediaSession2Record {
      */
     MediaController2 onCreateMediaController(
             String packageName, String id, IMediaSession2 sessionBinder) {
-        SessionToken token = new SessionToken(
-                SessionToken.TYPE_SESSION, packageName, id, null, sessionBinder);
+        SessionToken2 token = new SessionToken2(
+                SessionToken2.TYPE_SESSION, packageName, id, null, sessionBinder);
         return createMediaController(token);
     }
 
-    final MediaController2 createMediaController(SessionToken token) {
+    final MediaController2 createMediaController(SessionToken2 token) {
         mControllerCallback = new ControllerCallback();
         return new MediaController2(mContext, token, mControllerCallback, mMainExecutor);
     }
@@ -143,7 +143,7 @@ class MediaSession2Record {
     /**
      * @return controller. Note that framework can only call oneway calls.
      */
-    public SessionToken getToken() {
+    public SessionToken2 getToken() {
         return mController == null ? null : mController.getSessionToken();
     }
 

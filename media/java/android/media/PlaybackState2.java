@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.IntDef;
+import android.os.Bundle;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -28,9 +29,10 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 // TODO(jaewan): Move to updatable
-// TODO(jaewan): Add fromBundle() toBundle()
 public final class PlaybackState2 {
     private static final String TAG = "PlaybackState2";
+
+    private static final String KEY_STATE = "android.media.playbackstate2.state";
 
     // TODO(jaewan): Replace states from MediaPlayer2
     /**
@@ -97,7 +99,7 @@ public final class PlaybackState2 {
     private final long mUpdateTime;
     private final long mActiveItemId;
 
-    private PlaybackState2(int state, long position, long updateTime, float speed,
+    public PlaybackState2(int state, long position, long updateTime, float speed,
             long bufferedPosition, long activeItemId, CharSequence error) {
         mState = state;
         mPosition = position;
@@ -129,14 +131,8 @@ public final class PlaybackState2 {
      * <li> {@link PlaybackState2#STATE_STOPPED}</li>
      * <li> {@link PlaybackState2#STATE_PLAYING}</li>
      * <li> {@link PlaybackState2#STATE_PAUSED}</li>
-     * <li> {@link PlaybackState2#STATE_FAST_FORWARDING}</li>
-     * <li> {@link PlaybackState2#STATE_REWINDING}</li>
      * <li> {@link PlaybackState2#STATE_BUFFERING}</li>
      * <li> {@link PlaybackState2#STATE_ERROR}</li>
-     * <li> {@link PlaybackState2#STATE_CONNECTING}</li>
-     * <li> {@link PlaybackState2#STATE_SKIPPING_TO_PREVIOUS}</li>
-     * <li> {@link PlaybackState2#STATE_SKIPPING_TO_NEXT}</li>
-     * <li> {@link PlaybackState2#STATE_SKIPPING_TO_QUEUE_ITEM}</li>
      * </ul>
      */
     @State
@@ -196,5 +192,25 @@ public final class PlaybackState2 {
      */
     public long getCurrentPlaylistItemIndex() {
         return mActiveItemId;
+    }
+
+    /**
+     * @return Bundle object for this to share between processes.
+     */
+    public Bundle toBundle() {
+        // TODO(jaewan): Include other variables.
+        Bundle bundle = new Bundle();
+        bundle.putInt(KEY_STATE, mState);
+        return bundle;
+    }
+
+    /**
+     * @param bundle input
+     * @return
+     */
+    public static PlaybackState2 fromBundle(Bundle bundle) {
+        // TODO(jaewan): Include other variables.
+        final int state = bundle.getInt(KEY_STATE);
+        return new PlaybackState2(state, 0, 0, 0, 0, 0, null);
     }
 }

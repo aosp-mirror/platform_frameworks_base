@@ -54,7 +54,7 @@ import java.util.concurrent.Executor;
  * <p>
  * A controller can be created through token from {@link MediaSessionManager} if you hold the
  * signature|privileged permission "android.permission.MEDIA_CONTENT_CONTROL" permission or are
- * an enabled notification listener or by getting a {@link SessionToken} directly the
+ * an enabled notification listener or by getting a {@link SessionToken2} directly the
  * the session owner.
  * <p>
  * MediaController2 objects are thread-safe.
@@ -234,7 +234,7 @@ public class MediaController2 implements AutoCloseable {
     private final MediaController2Provider mProvider;
 
     /**
-     * Create a {@link MediaController2} from the {@link SessionToken}. This connects to the session
+     * Create a {@link MediaController2} from the {@link SessionToken2}. This connects to the session
      * and may wake up the service if it's not available.
      *
      * @param context Context
@@ -243,7 +243,7 @@ public class MediaController2 implements AutoCloseable {
      * @param executor executor to run callbacks on.
      */
     // TODO(jaewan): Put @CallbackExecutor to the constructor.
-    public MediaController2(@NonNull Context context, @NonNull SessionToken token,
+    public MediaController2(@NonNull Context context, @NonNull SessionToken2 token,
             @NonNull ControllerCallback callback, @NonNull Executor executor) {
         super();
 
@@ -256,7 +256,7 @@ public class MediaController2 implements AutoCloseable {
     }
 
     MediaController2Provider createProvider(@NonNull Context context,
-            @NonNull SessionToken token, @NonNull ControllerCallback callback,
+            @NonNull SessionToken2 token, @NonNull ControllerCallback callback,
             @NonNull Executor executor) {
         return ApiLoader.getProvider(context)
                 .createMediaController2(this, context, token, callback, executor);
@@ -281,7 +281,8 @@ public class MediaController2 implements AutoCloseable {
     /**
      * @return token
      */
-    public @NonNull SessionToken getSessionToken() {
+    public @NonNull
+    SessionToken2 getSessionToken() {
         return mProvider.getSessionToken_impl();
     }
 

@@ -16,6 +16,7 @@
 
 package android.media;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
@@ -30,6 +31,7 @@ import android.os.Bundle;
 import android.service.media.MediaBrowserService.BrowserRoot;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Base class for media library services.
@@ -67,20 +69,21 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
         private final MediaLibrarySessionProvider mProvider;
 
         MediaLibrarySession(Context context, MediaPlayerBase player, String id,
-                SessionCallback callback, VolumeProvider volumeProvider,
+                Executor callbackExecutor, SessionCallback callback, VolumeProvider volumeProvider,
                 int ratingType, PendingIntent sessionActivity) {
-            super(context, player, id, callback, volumeProvider, ratingType, sessionActivity);
+            super(context, player, id, callbackExecutor, callback, volumeProvider, ratingType,
+                    sessionActivity);
             mProvider = (MediaLibrarySessionProvider) getProvider();
         }
 
         @Override
         MediaSession2Provider createProvider(Context context, MediaPlayerBase player, String id,
-                SessionCallback callback, VolumeProvider volumeProvider, int ratingType,
-                PendingIntent sessionActivity) {
+                Executor callbackExecutor, SessionCallback callback, VolumeProvider volumeProvider,
+                int ratingType, PendingIntent sessionActivity) {
             return ApiLoader.getProvider(context)
                     .createMediaLibraryService2MediaLibrarySession(this, context, player, id,
-                            (MediaLibrarySessionCallback) callback, volumeProvider, ratingType,
-                            sessionActivity);
+                            callbackExecutor, (MediaLibrarySessionCallback) callback,
+                            volumeProvider, ratingType, sessionActivity);
         }
 
         /**
@@ -206,23 +209,25 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
             extends BuilderBase<MediaLibrarySessionBuilder, MediaLibrarySessionCallback> {
         public MediaLibrarySessionBuilder(
                 @NonNull Context context, @NonNull MediaPlayerBase player,
+                @NonNull @CallbackExecutor Executor callbackExecutor,
                 @NonNull MediaLibrarySessionCallback callback) {
             super(context, player);
-            setSessionCallback(callback);
+            setSessionCallback(callbackExecutor, callback);
         }
 
         @Override
         public MediaLibrarySessionBuilder setSessionCallback(
+                @NonNull @CallbackExecutor Executor callbackExecutor,
                 @NonNull MediaLibrarySessionCallback callback) {
             if (callback == null) {
                 throw new IllegalArgumentException("MediaLibrarySessionCallback cannot be null");
             }
-            return super.setSessionCallback(callback);
+            return super.setSessionCallback(callbackExecutor, callback);
         }
 
         @Override
         public MediaLibrarySession build() throws IllegalStateException {
-            return new MediaLibrarySession(mContext, mPlayer, mId, mCallback,
+            return new MediaLibrarySession(mContext, mPlayer, mId, mCallbackExecutor, mCallback,
                     mVolumeProvider, mRatingType, mSessionActivity);
         }
     }

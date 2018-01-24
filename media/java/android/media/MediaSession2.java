@@ -16,14 +16,14 @@
 
 package android.media;
 
+import android.annotation.CallbackExecutor;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioAttributes;
-import android.media.AudioManager;
 import android.media.MediaPlayerBase.PlaybackListener;
 import android.media.session.MediaSession;
 import android.media.session.MediaSession.Callback;
@@ -39,8 +39,11 @@ import android.os.ResultReceiver;
 import android.text.TextUtils;
 import android.util.ArraySet;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * Allows a media app to expose its transport controls and playback information in a process to
@@ -461,6 +464,7 @@ public class MediaSession2 implements AutoCloseable {
         final Context mContext;
         final MediaPlayerBase mPlayer;
         String mId;
+        Executor mCallbackExecutor;
         C mCallback;
         VolumeProvider mVolumeProvider;
         int mRatingType;
@@ -553,10 +557,19 @@ public class MediaSession2 implements AutoCloseable {
         /**
          * Set {@link SessionCallback}.
          *
+         * @param executor callback executor
          * @param callback session callback.
          * @return
          */
-        public T setSessionCallback(@Nullable C callback) {
+        public T setSessionCallback(@NonNull @CallbackExecutor Executor executor,
+                @NonNull C callback) {
+            if (executor == null) {
+                throw new IllegalArgumentException("executor shouldn't be null");
+            }
+            if (callback == null) {
+                throw new IllegalArgumentException("callback shouldn't be null");
+            }
+            mCallbackExecutor = executor;
             mCallback = callback;
             return (T) this;
         }
@@ -590,7 +603,7 @@ public class MediaSession2 implements AutoCloseable {
             if (mCallback == null) {
                 mCallback = new SessionCallback();
             }
-            return new MediaSession2(mContext, mPlayer, mId, mCallback,
+            return new MediaSession2(mContext, mPlayer, mId, mCallbackExecutor, mCallback,
                     mVolumeProvider, mRatingType, mSessionActivity);
         }
     }
@@ -842,28 +855,79 @@ public class MediaSession2 implements AutoCloseable {
      * Parameter for the playlist.
      */
     // TODO(jaewan): add fromBundle()/toBundle()
-    public class PlaylistParam {
+    public static class PlaylistParam {
+        /**
+         * @hide
+         */
+        @IntDef({REPEAT_MODE_NONE, REPEAT_MODE_ONE, REPEAT_MODE_ALL,
+                REPEAT_MODE_GROUP})
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface RepeatMode {}
+
+        /**
+         * Playback will be stopped at the end of the playing media list.
+         */
+        public static final int REPEAT_MODE_NONE = 0;
+
+        /**
+         * Playback of the current playing media item will be repeated.
+         */
+        public static final int REPEAT_MODE_ONE = 1;
+
+        /**
+         * Playing media list will be repeated.
+         */
+        public static final int REPEAT_MODE_ALL = 2;
+
+        /**
+         * Playback of the playing media group will be repeated.
+         * A group is a logical block of media items which is specified in the section 5.7 of the
+         * Bluetooth AVRCP 1.6.
+         */
+        public static final int REPEAT_MODE_GROUP = 3;
+
+        /**
+         * @hide
+         */
+        @IntDef({SHUFFLE_MODE_NONE, SHUFFLE_MODE_ALL, SHUFFLE_MODE_GROUP})
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface ShuffleMode {}
+
+        /**
+         * Media list will be played in order.
+         */
+        public static final int SHUFFLE_MODE_NONE = 0;
+
+        /**
+         * Media list will be played in shuffled order.
+         */
+        public static final int SHUFFLE_MODE_ALL = 1;
+
+        /**
+         * Media group will be played in shuffled order.
+         * A group is a logical block of media items which is specified in the section 5.7 of the
+         * Bluetooth AVRCP 1.6.
+         */
+        public static final int SHUFFLE_MODE_GROUP = 2;
+
+        private @RepeatMode int mRepeatMode;
+        private @ShuffleMode int mShuffleMode;
+
         private MediaMetadata2 mPlaylistMetadata;
 
-        // It's mixture of shuffle mode and repeat mode. Needs to be separated for avrcp 1.6 support
-        // PlaybackState#REPEAT_MODE_ALL
-        // PlaybackState#REPEAT_MODE_GROUP <- for avrcp 1.6
-        // PlaybackState#REPEAT_MODE_INVALID
-        // PlaybackState#REPEAT_MODE_NONE
-        // PlaybackState#REPEAT_MODE_ONE
-        // PlaybackState#SHUFFLE_MODE_ALL
-        // PlaybackState#SHUFFLE_MODE_GROUP <- for avrcp 1.6
-        // PlaybackState#SHUFFLE_MODE_INVALID
-        // PlaybackState#SHUFFLE_MODE_NONE
-        private int mLoopingMode;
-
-        public PlaylistParam(int loopingMode, @Nullable MediaMetadata2 playlistMetadata) {
-            mLoopingMode = loopingMode;
+        public PlaylistParam(@RepeatMode int repeatMode, @ShuffleMode int shuffleMode,
+                @Nullable MediaMetadata2 playlistMetadata) {
+            mRepeatMode = repeatMode;
+            mShuffleMode = shuffleMode;
             mPlaylistMetadata = playlistMetadata;
         }
 
-        public int getLoopingMode() {
-            return mLoopingMode;
+        public @RepeatMode int getRepeatMode() {
+            return mRepeatMode;
+        }
+
+        public @ShuffleMode int getShuffleMode() {
+            return mShuffleMode;
         }
 
         public MediaMetadata2 getPlaylistMetadata() {
@@ -885,20 +949,20 @@ public class MediaSession2 implements AutoCloseable {
      *       framework had to add heuristics to figure out if an app is
      * @hide
      */
-    MediaSession2(Context context, MediaPlayerBase player, String id,
+    MediaSession2(Context context, MediaPlayerBase player, String id, Executor callbackExecutor,
             SessionCallback callback, VolumeProvider volumeProvider, int ratingType,
             PendingIntent sessionActivity) {
         super();
-        mProvider = createProvider(context, player, id, callback,
+        mProvider = createProvider(context, player, id, callbackExecutor, callback,
                 volumeProvider, ratingType, sessionActivity);
     }
 
     MediaSession2Provider createProvider(Context context, MediaPlayerBase player, String id,
-            SessionCallback callback, VolumeProvider volumeProvider, int ratingType,
-            PendingIntent sessionActivity) {
+            Executor callbackExecutor, SessionCallback callback, VolumeProvider volumeProvider,
+            int ratingType, PendingIntent sessionActivity) {
         return ApiLoader.getProvider(context)
-                .createMediaSession2(this, context, player, id, callback,
-                        volumeProvider, ratingType, sessionActivity);
+                .createMediaSession2(this, context, player, id, callbackExecutor,
+                        callback, volumeProvider, ratingType, sessionActivity);
     }
 
     /**
@@ -954,10 +1018,10 @@ public class MediaSession2 implements AutoCloseable {
     }
 
     /**
-     * Returns the {@link SessionToken} for creating {@link MediaController2}.
+     * Returns the {@link SessionToken2} for creating {@link MediaController2}.
      */
     public @NonNull
-    SessionToken getToken() {
+    SessionToken2 getToken() {
         return mProvider.getToken_impl();
     }
 
