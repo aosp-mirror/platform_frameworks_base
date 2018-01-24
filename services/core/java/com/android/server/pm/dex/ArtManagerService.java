@@ -245,6 +245,14 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
      */
     public void prepareAppProfiles(PackageParser.Package pkg, @UserIdInt int user) {
         final int appId = UserHandle.getAppId(pkg.applicationInfo.uid);
+        if (user < 0) {
+            Slog.wtf(TAG, "Invalid user id: " + user);
+            return;
+        }
+        if (appId < 0) {
+            Slog.wtf(TAG, "Invalid app id: " + appId);
+            return;
+        }
         try {
             ArrayMap<String, String> codePathsProfileNames = getPackageProfileNames(pkg);
             for (int i = codePathsProfileNames.size() - 1; i >= 0; i--) {
@@ -263,6 +271,15 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             }
         } catch (InstallerException e) {
             Slog.e(TAG, "Failed to prepare profile for " + pkg.packageName, e);
+        }
+    }
+
+    /**
+     * Prepares the app profiles for a set of users. {@see ArtManagerService#prepareAppProfiles}.
+     */
+    public void prepareAppProfiles(PackageParser.Package pkg, int[] user) {
+        for (int i = 0; i < user.length; i++) {
+            prepareAppProfiles(pkg, user[i]);
         }
     }
 
