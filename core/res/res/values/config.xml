@@ -2283,7 +2283,10 @@
          Can be customized for other product types -->
     <string name="config_chooseTypeAndAccountActivity" translatable="false"
             >android/android.accounts.ChooseTypeAndAccountActivity</string>
-
+    <!-- Name of the activity that will handle requests to the system to choose an activity for
+         the purposes of resolving an intent. -->
+    <string name="config_chooserActivity" translatable="false"
+            >com.android.systemui/com.android.systemui.chooser.ChooserActivity</string>
     <!-- Component name of a custom ResolverActivity (Intent resolver) to be used instead of
          the default framework version. If left empty, then the framework version will be used.
          Example: com.google.android.myapp/.resolver.MyResolverActivity  -->

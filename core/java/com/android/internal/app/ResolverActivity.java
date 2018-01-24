@@ -43,6 +43,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.PatternMatcher;
 import android.os.RemoteException;
 import android.os.StrictMode;
@@ -857,6 +858,36 @@ public class ResolverActivity extends Activity {
         }
     }
 
+    public boolean startAsCallerImpl(Intent intent, Bundle options, boolean ignoreTargetSecurity,
+            int userId) {
+        // Pass intent to delegate chooser activity with permission token.
+        // TODO: This should move to a trampoline Activity in the system when the ChooserActivity
+        // moves into systemui
+        try {
+            // TODO: Once this is a small springboard activity, it can move off the UI process
+            // and we can move the request method to ActivityManagerInternal.
+            IBinder permissionToken = ActivityManager.getService()
+                    .requestStartActivityPermissionToken(getActivityToken());
+            final Intent chooserIntent = new Intent();
+            final ComponentName delegateActivity = ComponentName.unflattenFromString(
+                    Resources.getSystem().getString(R.string.config_chooserActivity));
+            chooserIntent.setClassName(delegateActivity.getPackageName(),
+                    delegateActivity.getClassName());
+            chooserIntent.putExtra(ActivityManager.EXTRA_PERMISSION_TOKEN, permissionToken);
+
+            // TODO: These extras will change as chooser activity moves into systemui
+            chooserIntent.putExtra(Intent.EXTRA_INTENT, intent);
+            chooserIntent.putExtra(ActivityManager.EXTRA_OPTIONS, options);
+            chooserIntent.putExtra(ActivityManager.EXTRA_IGNORE_TARGET_SECURITY,
+                    ignoreTargetSecurity);
+            chooserIntent.putExtra(Intent.EXTRA_USER_ID, userId);
+            startActivity(chooserIntent);
+        } catch (RemoteException e) {
+            Log.e(TAG, e.toString());
+        }
+        return true;
+    }
+
     public void onActivityStarted(TargetInfo cti) {
         // Do nothing
     }
@@ -1181,9 +1212,8 @@ public class ResolverActivity extends Activity {
         }
 
         @Override
-        public boolean startAsCaller(Activity activity, Bundle options, int userId) {
-            activity.startActivityAsCaller(mResolvedIntent, options, false, userId);
-            return true;
+        public boolean startAsCaller(ResolverActivity activity, Bundle options, int userId) {
+            return activity.startAsCallerImpl(mResolvedIntent, options, false, userId);
         }
 
         @Override
@@ -1242,7 +1272,7 @@ public class ResolverActivity extends Activity {
          * @param userId userId to start as or {@link UserHandle#USER_NULL} for activity's caller
          * @return true if the start completed successfully
          */
-        boolean startAsCaller(Activity activity, Bundle options, int userId);
+        boolean startAsCaller(ResolverActivity activity, Bundle options, int userId);
 
         /**
          * Start the activity referenced by this target as a given user.

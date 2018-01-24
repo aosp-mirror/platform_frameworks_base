@@ -1067,6 +1067,7 @@
   <java-symbol type="string" name="owner_name" />
   <java-symbol type="string" name="config_chooseAccountActivity" />
   <java-symbol type="string" name="config_chooseTypeAndAccountActivity" />
+  <java-symbol type="string" name="config_chooserActivity" />
   <java-symbol type="string" name="config_customResolverActivity" />
   <java-symbol type="string" name="config_appsAuthorizedForSharedAccounts" />
   <java-symbol type="string" name="error_message_title" />
