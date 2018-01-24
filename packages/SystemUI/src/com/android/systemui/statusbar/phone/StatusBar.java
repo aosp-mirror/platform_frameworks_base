@@ -4951,9 +4951,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                         mAssistManager.hideAssist();
                     }
                 }
-                if (mState != StatusBarState.SHADE
-                        || (launchResult != ActivityManager.START_TASK_TO_FRONT
-                        && launchResult != ActivityManager.START_SUCCESS)) {
+                if (shouldCollapse(launchResult)) {
                     if (Looper.getMainLooper().isCurrentThread()) {
                         collapsePanel();
                     } else {
@@ -4984,6 +4982,12 @@ public class StatusBar extends SystemUI implements DemoMode,
 
             return !mNotificationPanel.isFullyCollapsed();
         }, afterKeyguardGone);
+    }
+
+    private boolean shouldCollapse(int launchResult) {
+        return mState != StatusBarState.SHADE
+                || (launchResult != ActivityManager.START_TASK_TO_FRONT
+                        && launchResult != ActivityManager.START_SUCCESS);
     }
 
     public void onExpandAnimationFinished() {
@@ -5101,12 +5105,16 @@ public class StatusBar extends SystemUI implements DemoMode,
             ExpandableNotificationRow row) {
         dismissKeyguardThenExecute(() -> {
             AsyncTask.execute(() -> {
-                TaskStackBuilder.create(mContext)
+                int launchResult = TaskStackBuilder.create(mContext)
                         .addNextIntentWithParentStack(intent)
                         .startActivities(getActivityOptions(row),
                                 new UserHandle(UserHandle.getUserId(appUid)));
+                if (shouldCollapse(launchResult)) {
+                    // Putting it back on the main thread, since we're touching views
+                    mStatusBarWindow.post(() -> animateCollapsePanels(
+                            CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */));
+                }
             });
-            animateCollapsePanels(CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */);
             return true;
         }, false /* afterKeyguardGone */);
     }

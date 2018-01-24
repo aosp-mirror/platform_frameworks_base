@@ -1545,10 +1545,13 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     private void updateChildrenVisibility() {
-        mPrivateLayout.setVisibility(!shouldShowPublic() && !mIsSummaryWithChildren ? VISIBLE
-                : INVISIBLE);
+        boolean hideContentWhileLaunching = mExpandAnimationRunning && mGuts != null
+                && mGuts.isExposed();
+        mPrivateLayout.setVisibility(!shouldShowPublic() && !mIsSummaryWithChildren
+                && !hideContentWhileLaunching ? VISIBLE : INVISIBLE);
         if (mChildrenContainer != null) {
-            mChildrenContainer.setVisibility(!shouldShowPublic() && mIsSummaryWithChildren ? VISIBLE
+            mChildrenContainer.setVisibility(!shouldShowPublic() && mIsSummaryWithChildren
+                    && !hideContentWhileLaunching ? VISIBLE
                     : INVISIBLE);
         }
         // The limits might have changed if the view suddenly became a group or vice versa
@@ -1610,6 +1613,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             } else {
                 contentView = getShowingLayout();
             }
+            if (mGuts != null && mGuts.isExposed()) {
+                contentView = mGuts;
+            }
             contentView.animate()
                     .alpha(0f)
                     .setDuration(ActivityLaunchAnimator.ANIMATION_DURATION_FADE_CONTENT)
@@ -1621,8 +1627,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         } else {
             mExpandAnimationRunning = false;
             setAboveShelf(isAboveShelf());
+            if (mGuts != null) {
+                mGuts.setAlpha(1.0f);
+            }
         }
-        mExpandAnimationRunning = expandAnimationRunning;
+        updateChildrenVisibility();
         updateClipping();
         mBackgroundNormal.setExpandAnimationRunning(expandAnimationRunning);
     }

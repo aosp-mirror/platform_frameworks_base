@@ -32,6 +32,7 @@ import android.annotation.StyleableRes;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.VrManager;
@@ -1834,13 +1835,17 @@ public abstract class Context {
      * See {@link android.content.Context#startActivity(Intent, Bundle)}
      * Context.startActivity(Intent, Bundle)} for more details.
      *
+     * @return The corresponding flag {@link ActivityManager#START_CANCELED},
+     *         {@link ActivityManager#START_SUCCESS} etc. indicating whether the launch was
+     *         successful.
+     *
      * @throws ActivityNotFoundException &nbsp;
      *
      * @see #startActivities(Intent[])
      * @see PackageManager#resolveActivity
      */
     @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
-    public void startActivitiesAsUser(Intent[] intents, Bundle options, UserHandle userHandle) {
+    public int startActivitiesAsUser(Intent[] intents, Bundle options, UserHandle userHandle) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
