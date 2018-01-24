@@ -384,6 +384,13 @@ public class ImsReasonInfo implements Parcelable {
     /** Call/IMS registration is failed/dropped because of a network detach */
     public static final int CODE_NETWORK_DETACH = 1513;
 
+    /**
+     * Call failed due to SIP code 380 (Alternative Service response) while dialing an "undetected
+     * emergency number".  This scenario is important in some regions where the carrier network will
+     * identify other non-emergency help numbers (e.g. mountain rescue) when attempting to dial.
+     */
+    public static final int CODE_SIP_ALTERNATE_EMERGENCY_CALL = 1514;
+
     /* OEM specific error codes. To be used by OEMs when they don't want to
    reveal error code which would be replaced by ERROR_UNSPECIFIED */
     public static final int CODE_OEM_CAUSE_1 = 0xf001;
