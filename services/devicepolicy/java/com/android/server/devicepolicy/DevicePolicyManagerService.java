@@ -58,8 +58,15 @@ import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
-import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.PROVISIONING_ENTRY_POINT_ADB;
-import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
+import static android.provider.Telephony.Carriers.DPC_URI;
+import static android.provider.Telephony.Carriers.ENFORCE_KEY;
+import static android.provider.Telephony.Carriers.ENFORCE_MANAGED_URI;
+
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent
+        .PROVISIONING_ENTRY_POINT_ADB;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker
+        .STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
+
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.TEXT;
@@ -99,6 +106,7 @@ import android.app.trust.TrustManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -108,8 +116,8 @@ import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
@@ -118,6 +126,7 @@ import android.content.pm.StringParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.database.ContentObserver;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.media.AudioManager;
@@ -161,13 +170,14 @@ import android.security.IKeyChainAliasCallback;
 import android.security.IKeyChainService;
 import android.security.KeyChain;
 import android.security.KeyChain.KeyChainConnection;
+import android.security.KeyStore;
 import android.security.keymaster.KeymasterCertificateChain;
+import android.security.keystore.AttestationUtils;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
-import android.security.KeyStore;
-import android.security.keystore.AttestationUtils;
 import android.service.persistentdata.PersistentDataBlockManager;
 import android.telephony.TelephonyManager;
+import android.telephony.data.ApnSetting;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -217,7 +227,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.IllegalStateException;
 import java.lang.reflect.Constructor;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
@@ -228,8 +237,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -7283,6 +7292,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private void clearOverrideApnUnchecked() {
+        // Disable Override APNs and remove them from database.
+        setOverrideApnsEnabledUnchecked(false);
+        final List<ApnSetting> apns = getOverrideApnsUnchecked();
+        for (int i = 0; i < apns.size(); i ++) {
+            removeOverrideApnUnchecked(apns.get(i).getId());
+        }
+    }
+
     private void clearDeviceOwnerLocked(ActiveAdmin admin, int userId) {
         mDeviceAdminServiceController.stopServiceForOwner(userId, "clear-device-owner");
 
@@ -7303,6 +7321,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         systemPolicyData.mLastNetworkLogsRetrievalTime = -1;
         saveSettingsLocked(UserHandle.USER_SYSTEM);
         clearUserPoliciesLocked(userId);
+        clearOverrideApnUnchecked();
 
         mOwners.clearDeviceOwner();
         mOwners.writeDeviceOwner();
@@ -12508,5 +12527,186 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return ((Context) ActivityThread.currentActivityThread().getSystemUiContext())
                     .getResources().getString(R.string.printing_disabled_by, appLabel);
         }
+    }
+
+    @Override
+    public int addOverrideApn(@NonNull ComponentName who, @NonNull ApnSetting apnSetting) {
+        if (!mHasFeature) {
+            return -1;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null in addOverrideApn");
+        Preconditions.checkNotNull(apnSetting, "ApnSetting is null in addOverrideApn");
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        }
+
+        int operatedId = -1;
+        Uri resultUri;
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            resultUri = mContext.getContentResolver().insert(DPC_URI, apnSetting.toContentValues());
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
+        }
+        if (resultUri != null) {
+            try {
+                operatedId = Integer.parseInt(resultUri.getLastPathSegment());
+            } catch (NumberFormatException e) {
+                Slog.e(LOG_TAG, "Failed to parse inserted override APN id.", e);
+            }
+        }
+
+        return operatedId;
+    }
+
+    @Override
+    public boolean updateOverrideApn(@NonNull ComponentName who, int apnId,
+            @NonNull ApnSetting apnSetting) {
+        if (!mHasFeature) {
+            return false;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null in updateOverrideApn");
+        Preconditions.checkNotNull(apnSetting, "ApnSetting is null in updateOverrideApn");
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        }
+
+        if (apnId < 0) {
+            return false;
+        }
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            return mContext.getContentResolver().update(
+                    Uri.withAppendedPath(DPC_URI, Integer.toString(apnId)),
+                    apnSetting.toContentValues(), null, null) > 0;
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
+        }
+    }
+
+    @Override
+    public boolean removeOverrideApn(@NonNull ComponentName who, int apnId) {
+        if (!mHasFeature) {
+            return false;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null in removeOverrideApn");
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        }
+
+        return removeOverrideApnUnchecked(apnId);
+    }
+
+    private boolean removeOverrideApnUnchecked(int apnId) {
+        if(apnId < 0) {
+            return false;
+        }
+        int numDeleted = 0;
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            numDeleted = mContext.getContentResolver().delete(
+                    Uri.withAppendedPath(DPC_URI, Integer.toString(apnId)), null, null);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
+        }
+        return numDeleted > 0;
+    }
+
+    @Override
+    public List<ApnSetting> getOverrideApns(@NonNull ComponentName who) {
+        if (!mHasFeature) {
+            return Collections.emptyList();
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null in getOverrideApns");
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        }
+
+        return getOverrideApnsUnchecked();
+    }
+
+    private List<ApnSetting> getOverrideApnsUnchecked() {
+        final Cursor cursor;
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            cursor = mContext.getContentResolver().query(DPC_URI, null, null, null, null);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
+        }
+
+        if (cursor == null) {
+            return Collections.emptyList();
+        }
+        try {
+            List<ApnSetting> apnList = new ArrayList<ApnSetting>();
+            cursor.moveToPosition(-1);
+            while (cursor.moveToNext()) {
+                ApnSetting apn = ApnSetting.makeApnSetting(cursor);
+                apnList.add(apn);
+            }
+            return apnList;
+        } finally {
+            cursor.close();
+        }
+    }
+
+    @Override
+    public void setOverrideApnsEnabled(@NonNull ComponentName who, boolean enabled) {
+        if (!mHasFeature) {
+            return;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null in setOverrideApnEnabled");
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        }
+
+        setOverrideApnsEnabledUnchecked(enabled);
+    }
+
+    private void setOverrideApnsEnabledUnchecked(boolean enabled) {
+        ContentValues value = new ContentValues();
+        value.put(ENFORCE_KEY, enabled);
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            mContext.getContentResolver().update(
+                    ENFORCE_MANAGED_URI, value, null, null);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
+        }
+    }
+
+    @Override
+    public boolean isOverrideApnEnabled(@NonNull ComponentName who) {
+        if (!mHasFeature) {
+            return false;
+        }
+        Preconditions.checkNotNull(who, "ComponentName is null in isOverrideApnEnabled");
+        synchronized (this) {
+            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_DEVICE_OWNER);
+        }
+
+        Cursor enforceCursor;
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            enforceCursor = mContext.getContentResolver().query(
+                    ENFORCE_MANAGED_URI, null, null, null, null);
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
+        }
+
+        if (enforceCursor == null) {
+            return false;
+        }
+        try {
+            if (enforceCursor.moveToFirst()) {
+                return enforceCursor.getInt(enforceCursor.getColumnIndex(ENFORCE_KEY)) == 1;
+            }
+        } catch (IllegalArgumentException e) {
+            Slog.e(LOG_TAG, "Cursor returned from ENFORCE_MANAGED_URI doesn't contain "
+                    + "correct info.", e);
+        } finally {
+            enforceCursor.close();
+        }
+        return false;
     }
 }
