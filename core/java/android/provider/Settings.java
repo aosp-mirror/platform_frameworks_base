@@ -12097,6 +12097,28 @@ public final class Settings {
                 "enable_gnss_raw_meas_full_tracking";
 
         /**
+         * Whether the notification should be ongoing (persistent) when a carrier app install is
+         * required.
+         *
+         * The value is a boolean (1 or 0).
+         * @hide
+         */
+        @SystemApi
+        public static final String INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT =
+                "install_carrier_app_notification_persistent";
+
+        /**
+         * The amount of time (ms) to hide the install carrier app notification after the user has
+         * ignored it. After this time passes, the notification will be shown again
+         *
+         * The value is a long
+         * @hide
+         */
+        @SystemApi
+        public static final String INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS =
+                "install_carrier_app_notification_sleep_millis";
+
+        /**
          * Whether we've enabled zram on this device. Takes effect on
          * reboot. The value "1" enables zram; "0" disables it, and
          * everything else is unspecified.

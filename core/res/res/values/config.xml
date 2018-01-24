@@ -2328,6 +2328,10 @@
     <string name="config_customVpnAlwaysOnDisconnectedDialogComponent" translatable="false"
             >com.android.vpndialogs/com.android.vpndialogs.AlwaysOnDisconnectedDialog</string>
 
+    <!-- Name of the dialog that is used to install the carrier app when the SIM is inserted -->
+    <string name="config_carrierAppInstallDialogComponent" translatable="false"
+            >com.android.simappdialog/com.android.simappdialog.InstallCarrierAppActivity</string>
+
     <!-- Apps that are authorized to access shared accounts, overridden by product overlays -->
     <string name="config_appsAuthorizedForSharedAccounts" translatable="false">;com.android.settings;</string>
 

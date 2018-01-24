@@ -870,6 +870,12 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING,
                 GlobalSettingsProto.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING);
+        dumpSetting(s, p,
+                Settings.Global.INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT,
+                GlobalSettingsProto.INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT);
+        dumpSetting(s, p,
+                Settings.Global.INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS,
+                GlobalSettingsProto.INSTALL_CARRIER_APP_NOTIFICATION_SLEEP_MILLIS);
         // Settings.Global.SHOW_PROCESSES intentionally excluded since it's deprecated.
         dumpSetting(s, p,
                 Settings.Global.LOW_POWER_MODE,
