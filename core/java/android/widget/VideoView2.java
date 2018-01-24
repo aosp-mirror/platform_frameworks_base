@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
+import android.media.MediaPlayerBase;
 import android.media.update.ApiLoader;
 import android.media.update.VideoView2Provider;
 import android.media.update.ViewProvider;
@@ -32,6 +33,7 @@ import android.view.MotionEvent;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 import java.util.Map;
 
 // TODO: Use @link tag to refer MediaPlayer2 in docs once MediaPlayer2.java is submitted. Same to
@@ -271,7 +273,8 @@ public class VideoView2 extends FrameLayout {
      * background.
      *
      * @param focusGain the type of audio focus gain that will be requested, or
-     *     {@link AudioManager#AUDIOFOCUS_NONE} to disable the use audio focus during playback.
+     *                  {@link AudioManager#AUDIOFOCUS_NONE} to disable the use audio focus during
+     *                  playback.
      */
     public void setAudioFocusRequest(int focusGain) {
         mProvider.setAudioFocusRequest_impl(focusGain);
@@ -284,6 +287,21 @@ public class VideoView2 extends FrameLayout {
      */
     public void setAudioAttributes(@NonNull AudioAttributes attributes) {
         mProvider.setAudioAttributes_impl(attributes);
+    }
+
+    /**
+     * Sets a remote player for handling playback of the selected route from MediaControlView2.
+     * If this is not called, MediaCotrolView2 will not show the route button.
+     *
+     * @param routeCategories        the list of media control categories in
+     *                               {@link android.support.v7.media.MediaControlIntent}
+     * @param player                 the player to handle the selected route. If null, a default
+     *                               route player will be used.
+     * @throws IllegalStateException if MediaControlView2 is not set.
+     */
+    public void setRouteAttributes(@NonNull List<String> routeCategories,
+            @Nullable MediaPlayerBase player) {
+        mProvider.setRouteAttributes_impl(routeCategories, player);
     }
 
     /**
