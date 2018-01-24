@@ -146,7 +146,11 @@ public class LocaleStore {
 
         private String getLangScriptKey() {
             if (mLangScriptKey == null) {
-                Locale parentWithScript = getParent(LocaleHelper.addLikelySubtags(mLocale));
+                Locale baseLocale = new Locale.Builder()
+                    .setLocale(mLocale)
+                    .setExtension(Locale.UNICODE_LOCALE_EXTENSION, "")
+                    .build();
+                Locale parentWithScript = getParent(LocaleHelper.addLikelySubtags(baseLocale));
                 mLangScriptKey =
                         (parentWithScript == null)
                         ? mLocale.toLanguageTag()
