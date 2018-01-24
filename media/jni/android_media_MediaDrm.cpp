@@ -19,6 +19,7 @@
 #include <utils/Log.h>
 
 #include "android_media_MediaDrm.h"
+#include "android_media_MediaMetricsJNI.h"
 
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"
@@ -1603,6 +1604,31 @@ static jboolean android_media_MediaDrm_verifyNative(
     return match;
 }
 
+static jobject
+android_media_MediaDrm_native_getMetrics(JNIEnv *env, jobject thiz)
+{
+    sp<IDrm> drm = GetDrm(env, thiz);
+    if (drm == NULL ) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "MediaDrm obj is null");
+        return NULL;
+    }
+
+    // Retrieve current metrics snapshot from drm.
+    MediaAnalyticsItem item ;
+    status_t err = drm->getMetrics(&item);
+    if (err != OK) {
+        ALOGE("getMetrics failed: %d", (int)err);
+        return (jobject) NULL;
+    }
+
+    jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, &item, NULL);
+    if (mybundle == NULL) {
+        ALOGE("getMetrics metric conversion failed");
+    }
+
+    return mybundle;
+}
 
 static jbyteArray android_media_MediaDrm_signRSANative(
     JNIEnv *env, jobject /* thiz */, jobject jdrm, jbyteArray jsessionId,
@@ -1739,6 +1765,9 @@ static const JNINativeMethod gMethods[] = {
 
     { "signRSANative", "(Landroid/media/MediaDrm;[BLjava/lang/String;[B[B)[B",
       (void *)android_media_MediaDrm_signRSANative },
+
+    { "getMetricsNative", "()Landroid/os/PersistableBundle;",
+      (void *)android_media_MediaDrm_native_getMetrics },
 };
 
 int register_android_media_Drm(JNIEnv *env) {
