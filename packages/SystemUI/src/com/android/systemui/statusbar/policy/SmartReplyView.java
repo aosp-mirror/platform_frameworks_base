@@ -52,6 +52,7 @@ public class SmartReplyView extends LinearLayout {
             results.putString(remoteInput.getResultKey(), choice.toString());
             Intent intent = new Intent().addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
             RemoteInput.addResultsToIntent(new RemoteInput[]{remoteInput}, intent, results);
+            RemoteInput.setResultsSource(intent, RemoteInput.SOURCE_CHOICE);
             try {
                 pendingIntent.send(context, 0, intent);
             } catch (PendingIntent.CanceledException e) {
