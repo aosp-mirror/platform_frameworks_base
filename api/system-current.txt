@@ -360,6 +360,7 @@ package android.app {
     method public byte[] getMetadata();
     method public boolean removeConfiguration(long);
     method public boolean setBroadcastSubscriber(long, long, android.app.PendingIntent);
+    field public static final java.lang.String ACTION_STATSD_STARTED = "android.app.action.STATSD_STARTED";
     field public static final java.lang.String EXTRA_STATS_CONFIG_KEY = "android.app.extra.STATS_CONFIG_KEY";
     field public static final java.lang.String EXTRA_STATS_CONFIG_UID = "android.app.extra.STATS_CONFIG_UID";
     field public static final java.lang.String EXTRA_STATS_DIMENSIONS_VALUE = "android.app.extra.STATS_DIMENSIONS_VALUE";
