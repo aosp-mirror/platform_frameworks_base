@@ -16,6 +16,9 @@
 
 package android.security.keystore;
 
+import android.security.KeyStore;
+import android.security.KeyStoreException;
+
 import java.security.ProviderException;
 
 /**
@@ -24,5 +27,13 @@ import java.security.ProviderException;
  */
 public class StrongBoxUnavailableException extends ProviderException {
 
+    /**
+     * @hide
+     */
+    public StrongBoxUnavailableException(String message) {
+        super(message,
+                new KeyStoreException(KeyStore.HARDWARE_TYPE_UNAVAILABLE, "No StrongBox available")
+        );
+    }
 }
 

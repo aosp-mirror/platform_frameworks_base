@@ -38,6 +38,7 @@ import android.security.keymaster.OperationResult;
 import android.security.keystore.KeyExpiredException;
 import android.security.keystore.KeyNotYetValidException;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
+import android.security.keystore.StrongBoxUnavailableException;
 import android.security.keystore.UserNotAuthenticatedException;
 import android.util.Log;
 
@@ -65,6 +66,7 @@ public class KeyStore {
     public static final int VALUE_CORRUPTED = 8;
     public static final int UNDEFINED_ACTION = 9;
     public static final int WRONG_PASSWORD = 10;
+    public static final int HARDWARE_TYPE_UNAVAILABLE = -68;
 
     /**
      * Per operation authentication is needed before this operation is valid.
@@ -122,7 +124,6 @@ public class KeyStore {
      * Need to be in sync with KeyStoreFlag in system/security/keystore/include/keystore/keystore.h
      */
     public static final int FLAG_STRONGBOX = 1 << 4;
-
 
     // States
     public enum State { UNLOCKED, LOCKED, UNINITIALIZED };

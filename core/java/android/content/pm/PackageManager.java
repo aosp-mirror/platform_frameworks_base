@@ -2594,6 +2594,14 @@ public abstract class PackageManager {
     public static final String FEATURE_VR_HEADTRACKING = "android.hardware.vr.headtracking";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device has a StrongBox hardware-backed Keystore.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_STRONGBOX_KEYSTORE =
+            "android.hardware.strongbox_keystore";
+
+    /**
      * Action to external storage service to clean out removed apps.
      * @hide
      */
