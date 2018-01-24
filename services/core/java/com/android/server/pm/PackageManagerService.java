@@ -17022,7 +17022,7 @@ Slog.e("TODD",
         // Prepare the application profiles for the new code paths.
         // This needs to be done before invoking dexopt so that any install-time profile
         // can be used for optimizations.
-        mArtManagerService.prepareAppProfiles(pkg, args.user.getIdentifier());
+        mArtManagerService.prepareAppProfiles(pkg, resolveUserIds(args.user.getIdentifier()));
 
         // Check whether we need to dexopt the app.
         //
