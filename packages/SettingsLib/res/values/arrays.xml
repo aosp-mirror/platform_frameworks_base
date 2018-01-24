@@ -468,18 +468,6 @@
         <item>show_deuteranomaly</item>
     </string-array>
 
-    <!-- Titles for debug renderer preference. [CHAR LIMIT=50] -->
-    <string-array name="debug_hw_renderer_entries">
-        <item>OpenGL (Default)</item>
-        <item>OpenGL (Skia)</item>
-    </string-array>
-
-    <!-- Values for debug renderer preference. -->
-    <string-array name="debug_hw_renderer_values" translatable="false" >
-        <item>opengl</item>
-        <item>skiagl</item>
-    </string-array>
-
     <!-- Titles for app process limit preference. [CHAR LIMIT=35] -->
     <string-array name="app_process_limit_entries">
         <item>Standard limit</item>
