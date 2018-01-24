@@ -3877,6 +3877,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 runtimeFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;
             }
 
+            if (app.info.isAllowedToUseHiddenApi()) {
+                // This app is allowed to use undocumented and private APIs. Set
+                // up its runtime with the appropriate flag.
+                runtimeFlags |= Zygote.DISABLE_HIDDEN_API_CHECKS;
+            }
+
             String invokeWith = null;
             if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
                 // Debuggable apps may include a wrapper script with their library directory.
