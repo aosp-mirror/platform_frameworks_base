@@ -281,8 +281,6 @@ public class WifiTrackerTest {
         final WifiTracker wifiTracker = new WifiTracker(
                 mContext,
                 mockWifiListener,
-                true,
-                true,
                 mockWifiManager,
                 mockConnectivityManager,
                 mockNetworkScoreManager,

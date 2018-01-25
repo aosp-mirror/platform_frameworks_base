@@ -92,8 +92,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
      * and used so as to assist with in-the-field WiFi connectivity debugging  */
     public static boolean sVerboseLogging;
 
-    // TODO(b/36733768): Remove flag includeSaved
-
     // TODO: Allow control of this?
     // Combo scans can take 5-6s to complete - set to 10s.
     private static final int WIFI_RESCAN_INTERVAL_MS = 10 * 1000;
@@ -106,8 +104,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     private final NetworkRequest mNetworkRequest;
     private final AtomicBoolean mConnected = new AtomicBoolean(false);
     private final WifiListener mListener;
-    private final boolean mIncludeSaved;
-    private final boolean mIncludeScans;
     @VisibleForTesting MainHandler mMainHandler;
     @VisibleForTesting WorkHandler mWorkHandler;
     private HandlerThread mWorkThread;
@@ -189,16 +185,18 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     @Deprecated
     public WifiTracker(Context context, WifiListener wifiListener,
             boolean includeSaved, boolean includeScans) {
-        this(context, wifiListener, includeSaved, includeScans,
+        this(context, wifiListener,
                 context.getSystemService(WifiManager.class),
                 context.getSystemService(ConnectivityManager.class),
                 context.getSystemService(NetworkScoreManager.class),
                 newIntentFilter());
     }
 
+    // TODO(Sghuman): Clean up includeSaved and includeScans from all constructors and linked
+    // calling apps once IC window is complete
     public WifiTracker(Context context, WifiListener wifiListener,
             @NonNull Lifecycle lifecycle, boolean includeSaved, boolean includeScans) {
-        this(context, wifiListener, includeSaved, includeScans,
+        this(context, wifiListener,
                 context.getSystemService(WifiManager.class),
                 context.getSystemService(ConnectivityManager.class),
                 context.getSystemService(NetworkScoreManager.class),
@@ -208,18 +206,12 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
 
     @VisibleForTesting
     WifiTracker(Context context, WifiListener wifiListener,
-            boolean includeSaved, boolean includeScans,
             WifiManager wifiManager, ConnectivityManager connectivityManager,
             NetworkScoreManager networkScoreManager,
             IntentFilter filter) {
-        if (!includeSaved && !includeScans) {
-            throw new IllegalArgumentException("Must include either saved or scans");
-        }
         mContext = context;
         mMainHandler = new MainHandler(Looper.getMainLooper());
         mWifiManager = wifiManager;
-        mIncludeSaved = includeSaved;
-        mIncludeScans = includeScans;
         mListener = new WifiListenerWrapper(wifiListener);
         mConnectivityManager = connectivityManager;
 
@@ -571,26 +563,21 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                 if (mLastInfo != null && mLastNetworkInfo != null) {
                     accessPoint.update(connectionConfig, mLastInfo, mLastNetworkInfo);
                 }
-                if (mIncludeSaved) {
-                    // If saved network not present in scan result then set its Rssi to
-                    // UNREACHABLE_RSSI
-                    boolean apFound = false;
-                    for (ScanResult result : results) {
-                        if (result.SSID.equals(accessPoint.getSsidStr())) {
-                            apFound = true;
-                            break;
-                        }
+
+                // If saved network not present in scan result then set its Rssi to
+                // UNREACHABLE_RSSI
+                boolean apFound = false;
+                for (ScanResult result : results) {
+                    if (result.SSID.equals(accessPoint.getSsidStr())) {
+                        apFound = true;
+                        break;
                     }
-                    if (!apFound) {
-                        accessPoint.setUnreachable();
-                    }
-                    accessPoints.add(accessPoint);
-                    existingApMap.put(accessPoint.getSsidStr(), accessPoint);
-                } else {
-                    // If we aren't using saved networks, drop them into the cache so that
-                    // we have access to their saved info.
-                    cachedAccessPoints.add(accessPoint);
                 }
+                if (!apFound) {
+                    accessPoint.setUnreachable();
+                }
+                accessPoints.add(accessPoint);
+                existingApMap.put(accessPoint.getSsidStr(), accessPoint);
             }
         }
 
