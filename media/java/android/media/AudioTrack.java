@@ -36,6 +36,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -1718,6 +1719,23 @@ public class AudioTrack extends PlayerBase
          return ret;
      }
 
+    /**
+     *  Return Metrics data about the current AudioTrack instance.
+     *
+     * @return a {@link PersistableBundle} containing the set of attributes and values
+     * available for the media being handled by this instance of AudioTrack
+     * The attributes are descibed in {@link MetricsConstants}.
+     *
+     * Additional vendor-specific fields may also be present in
+     * the return value.
+     */
+    public PersistableBundle getMetrics() {
+        PersistableBundle bundle = native_getMetrics();
+        return bundle;
+    }
+
+    private native PersistableBundle native_getMetrics();
+
     //--------------------------------------------------------------------------
     // Initialization / configuration
     //--------------------
@@ -3238,5 +3256,47 @@ public class AudioTrack extends PlayerBase
 
     private static void loge(String msg) {
         Log.e(TAG, msg);
+    }
+
+    public final static class MetricsConstants
+    {
+        private MetricsConstants() {}
+
+        /**
+         * Key to extract the Stream Type for this track
+         * from the {@link AudioTrack#getMetrics} return value.
+         * The value is a String.
+         */
+        public static final String STREAMTYPE = "android.media.audiotrack.streamtype";
+
+        /**
+         * Key to extract the Content Type for this track
+         * from the {@link AudioTrack#getMetrics} return value.
+         * The value is a String.
+         */
+        public static final String CONTENTTYPE = "android.media.audiotrack.type";
+
+        /**
+         * Key to extract the Content Type for this track
+         * from the {@link AudioTrack#getMetrics} return value.
+         * The value is a String.
+         */
+        public static final String USAGE = "android.media.audiotrack.usage";
+
+        /**
+         * Key to extract the sample rate for this track in Hz
+         * from the {@link AudioTrack#getMetrics} return value.
+         * The value is an integer.
+         */
+        public static final String SAMPLERATE = "android.media.audiorecord.samplerate";
+
+        /**
+         * Key to extract the channel mask information for this track
+         * from the {@link AudioTrack#getMetrics} return value.
+         *
+         * The value is a Long integer.
+         */
+        public static final String CHANNELMASK = "android.media.audiorecord.channelmask";
+
     }
 }
