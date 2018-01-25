@@ -1052,13 +1052,18 @@ public final class JobStore {
             final ArraySet<JobStatus> jobs = mJobs.get(uid);
             final int sourceUid = job.getSourceUid();
             final ArraySet<JobStatus> jobsForSourceUid = mJobsPerSourceUid.get(sourceUid);
-            boolean didRemove = jobs != null && jobs.remove(job) && jobsForSourceUid.remove(job);
-            if (didRemove) {
-                if (jobs.size() == 0) {
-                    // no more jobs for this uid; let the now-empty set object be GC'd.
+            final boolean didRemove = jobs != null && jobs.remove(job);
+            final boolean sourceRemove = jobsForSourceUid != null && jobsForSourceUid.remove(job);
+            if (didRemove != sourceRemove) {
+                Slog.wtf(TAG, "Job presence mismatch; caller=" + didRemove
+                        + " source=" + sourceRemove);
+            }
+            if (didRemove || sourceRemove) {
+                // no more jobs for this uid?  let the now-empty set objects be GC'd.
+                if (jobs != null && jobs.size() == 0) {
                     mJobs.remove(uid);
                 }
-                if (jobsForSourceUid.size() == 0) {
+                if (jobsForSourceUid != null && jobsForSourceUid.size() == 0) {
                     mJobsPerSourceUid.remove(sourceUid);
                 }
                 return true;
