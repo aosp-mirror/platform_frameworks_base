@@ -74,6 +74,15 @@ public:
     // Default cooldown time for a puller
     static const long kDefaultPullerCooldown = 1;
 
+    // Maximum age (30 days) that files on disk can exist in seconds.
+    static const int kMaxAgeSecond = 60 * 60 * 24 * 30;
+
+    // Maximum number of files (1000) that can be in stats directory on disk.
+    static const int kMaxFileNumber = 1000;
+
+    // Maximum size of all files that can be written to stats directory on disk.
+    static const int kMaxFileSize = 50 * 1024 * 1024;
+
     /**
      * Report a new config has been received and report the static stats about the config.
      *

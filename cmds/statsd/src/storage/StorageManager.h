@@ -61,12 +61,18 @@ public:
      * Appends ConfigMetricsReport found on disk to the specific proto and
      * delete it.
      */
-    static void appendConfigMetricsReport(const char* path, ProtoOutputStream& proto);
+    static void appendConfigMetricsReport(ProtoOutputStream& proto);
 
     /**
      * Call to load the saved configs from disk.
      */
     static void readConfigFromDisk(std::map<ConfigKey, StatsdConfig>& configsMap);
+
+    /**
+     * Trims files in the provided directory to limit the total size, number of
+     * files, accumulation of outdated files.
+     */
+    static void trimToFit(const char* dir);
 };
 
 }  // namespace statsd

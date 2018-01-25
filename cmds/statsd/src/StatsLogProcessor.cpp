@@ -256,7 +256,7 @@ void StatsLogProcessor::onDumpReportLocked(const ConfigKey& key, vector<uint8_t>
 
     // Then, check stats-data directory to see there's any file containing
     // ConfigMetricsReport from previous shutdowns to concatenate to reports.
-    StorageManager::appendConfigMetricsReport(STATS_DATA_DIR, proto);
+    StorageManager::appendConfigMetricsReport(proto);
 
     if (outData != nullptr) {
         outData->clear();
@@ -327,8 +327,8 @@ void StatsLogProcessor::WriteDataToDisk() {
         vector<uint8_t> data;
         onDumpReportLocked(key, &data);
         // TODO: Add a guardrail to prevent accumulation of file on disk.
-        string file_name = StringPrintf("%s/%d-%lld-%ld", STATS_DATA_DIR, key.GetUid(),
-                                        (long long)key.GetId(), time(nullptr));
+        string file_name = StringPrintf("%s/%ld_%d_%lld", STATS_DATA_DIR, time(nullptr),
+                                        key.GetUid(), (long long)key.GetId());
         StorageManager::writeFile(file_name.c_str(), &data[0], data.size());
     }
 }
