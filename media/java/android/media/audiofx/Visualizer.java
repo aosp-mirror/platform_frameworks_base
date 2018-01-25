@@ -546,22 +546,39 @@ public class Visualizer {
         /**
          * Method called when a new waveform capture is available.
          * <p>Data in the waveform buffer is valid only within the scope of the callback.
-         * Applications which needs access to the waveform data after returning from the callback
+         * Applications which need access to the waveform data after returning from the callback
          * should make a copy of the data instead of holding a reference.
          * @param visualizer Visualizer object on which the listener is registered.
          * @param waveform array of bytes containing the waveform representation.
-         * @param samplingRate sampling rate of the audio visualized.
+         * @param samplingRate sampling rate of the visualized audio.
          */
         void onWaveFormDataCapture(Visualizer visualizer, byte[] waveform, int samplingRate);
 
         /**
          * Method called when a new frequency capture is available.
          * <p>Data in the fft buffer is valid only within the scope of the callback.
-         * Applications which needs access to the fft data after returning from the callback
+         * Applications which need access to the fft data after returning from the callback
          * should make a copy of the data instead of holding a reference.
+         *
+         * <p>In order to obtain magnitude and phase values the following formulas can
+         * be used:
+         *    <pre class="prettyprint">
+         *       for (int i = 0; i &lt; fft.size(); i += 2) {
+         *           float magnitude = (float)Math.hypot(fft[i], fft[i + 1]);
+         *           float phase = (float)Math.atan2(fft[i + 1], fft[i]);
+         *       }</pre>
          * @param visualizer Visualizer object on which the listener is registered.
          * @param fft array of bytes containing the frequency representation.
-         * @param samplingRate sampling rate of the audio visualized.
+         *    The fft array only contains the first half of the actual
+         *    FFT spectrum (frequencies up to Nyquist frequency), exploiting
+         *    the symmetry of the spectrum. For each frequencies bin <code>i</code>:
+         *    <ul>
+         *      <li>the element at index <code>2*i</code> in the array contains
+         *          the real part of a complex number,</li>
+         *      <li>the element at index <code>2*i+1</code> contains the imaginary
+         *          part of the complex number.</li>
+         *    </ul>
+         * @param samplingRate sampling rate of the visualized audio.
          */
         void onFftDataCapture(Visualizer visualizer, byte[] fft, int samplingRate);
     }
