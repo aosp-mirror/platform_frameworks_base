@@ -17,6 +17,7 @@
 package com.android.server.pm;
 
 import android.annotation.AppIdInt;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.Context;
@@ -485,6 +486,16 @@ public class Installer extends SystemService {
         if (!checkBeforeRemote()) return;
         try {
             mInstalld.installApkVerity(filePath, verityInput);
+        } catch (Exception e) {
+            throw InstallerException.from(e);
+        }
+    }
+
+    public void assertFsverityRootHashMatches(String filePath, @NonNull byte[] expectedHash)
+            throws InstallerException {
+        if (!checkBeforeRemote()) return;
+        try {
+            mInstalld.assertFsverityRootHashMatches(filePath, expectedHash);
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
