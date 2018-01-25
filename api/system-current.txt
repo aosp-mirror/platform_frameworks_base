@@ -5197,10 +5197,6 @@ package android.util {
 
 package android.view {
 
-  public abstract class Window {
-    method public void setDisableWallpaperTouchEvents(boolean);
-  }
-
   public abstract interface WindowManager implements android.view.ViewManager {
     method public abstract android.graphics.Region getCurrentImeTouchRegion();
   }
