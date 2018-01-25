@@ -285,17 +285,22 @@ public class QSFragment extends Fragment implements QS {
         int heightDiff = mQSPanel.getBottom() - mHeader.getBottom() + mHeader.getPaddingBottom()
                 + mFooter.getHeight();
         mQSPanel.setTranslationY(translationScaleY * heightDiff);
-        mQSDetail.setFullyExpanded(expansion == 1);
+        boolean fullyExpanded = expansion == 1;
+        mQSDetail.setFullyExpanded(fullyExpanded);
+        if (fullyExpanded) {
+            // Always draw within the bounds of the view when fully expanded.
+            mQSPanel.setClipBounds(null);
+        } else {
+            // Set bounds on the QS panel so it doesn't run over the header when animating.
+            mQsBounds.top = (int) -mQSPanel.getTranslationY();
+            mQsBounds.right = mQSPanel.getWidth();
+            mQsBounds.bottom = mQSPanel.getHeight();
+            mQSPanel.setClipBounds(mQsBounds);
+        }
 
         if (mQSAnimator != null) {
             mQSAnimator.setPosition(expansion);
         }
-
-        // Set bounds on the QS panel so it doesn't run over the header.
-        mQsBounds.top = (int) -mQSPanel.getTranslationY();
-        mQsBounds.right = mQSPanel.getWidth();
-        mQsBounds.bottom = mQSPanel.getHeight();
-        mQSPanel.setClipBounds(mQsBounds);
     }
 
     @Override
