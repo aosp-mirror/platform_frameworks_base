@@ -1582,6 +1582,7 @@ public final class MediaDrm implements AutoCloseable {
          * Key to extract the number of successful {@link #openSession} calls
          * from the {@link PersistableBundle} returned by a
          * {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String OPEN_SESSION_OK_COUNT
             = "/drm/mediadrm/open_session/ok/count";
@@ -1590,8 +1591,27 @@ public final class MediaDrm implements AutoCloseable {
          * Key to extract the number of failed {@link #openSession} calls
          * from the {@link PersistableBundle} returned by a
          * {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String OPEN_SESSION_ERROR_COUNT
             = "/drm/mediadrm/open_session/error/count";
+
+        /**
+         * Key to extract the number of successful {@link #getKeyRequest}
+         * calls from the {@link PersistableBundle} returned by a
+         * {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String GET_KEY_REQUEST_OK_COUNT
+            = "/drm/mediadrm/get_key_request/ok/count";
+
+        /**
+         * Key to extract the number of failed {@link #getKeyRequest}
+         * calls from the {@link PersistableBundle} returned by a
+         * {@link #getMetrics} call.
+         * The count is a Long value ({@link android.os.BaseBundle#getLong}).
+         */
+        public static final String GET_KEY_REQUEST_ERROR_COUNT
+            = "/drm/mediadrm/get_key_request/error/count";
     }
 }
