@@ -17,12 +17,14 @@
 package android.hardware.radio;
 
 import android.hardware.radio.ProgramList;
+import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioMetadata;
 
 /** {@hide} */
 oneway interface ITunerCallback {
     void onError(int status);
+    void onTuneFailed(int result, in ProgramSelector selector);
     void onConfigurationChanged(in RadioManager.BandConfig config);
     void onCurrentProgramInfoChanged(in RadioManager.ProgramInfo info);
     void onTrafficAnnouncement(boolean active);

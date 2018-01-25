@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.ProgramList;
+import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioMetadata;
 import android.hardware.radio.RadioTuner;
@@ -97,6 +98,11 @@ class TunerCallback implements ITunerCallback {
     @Override
     public void onError(int status) {
         dispatch(() -> mClientCallback.onError(status));
+    }
+
+    @Override
+    public void onTuneFailed(int result, ProgramSelector selector) {
+        Slog.e(TAG, "Not applicable for HAL 1.x");
     }
 
     @Override

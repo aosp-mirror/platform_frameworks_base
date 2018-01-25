@@ -37,8 +37,12 @@ class TunerCallbackAdapter extends ITunerCallback.Stub {
     @NonNull private final Handler mHandler;
 
     @Nullable ProgramList mProgramList;
-    @Nullable List<RadioManager.ProgramInfo> mLastCompleteList;  // for legacy getProgramList call
+
+    // cache for deprecated methods
+    boolean mIsAntennaConnected = true;
+    @Nullable List<RadioManager.ProgramInfo> mLastCompleteList;
     private boolean mDelayedCompleteCallback = false;
+    @Nullable RadioManager.ProgramInfo mCurrentProgramInfo;
 
     TunerCallbackAdapter(@NonNull RadioTuner.Callback callback, @Nullable Handler handler) {
         mCallback = callback;
@@ -92,9 +96,43 @@ class TunerCallbackAdapter extends ITunerCallback.Stub {
         }
     }
 
+    @Nullable RadioManager.ProgramInfo getCurrentProgramInformation() {
+        synchronized (mLock) {
+            return mCurrentProgramInfo;
+        }
+    }
+
+    boolean isAntennaConnected() {
+        return mIsAntennaConnected;
+    }
+
     @Override
     public void onError(int status) {
         mHandler.post(() -> mCallback.onError(status));
+    }
+
+    @Override
+    public void onTuneFailed(int status, @Nullable ProgramSelector selector) {
+        mHandler.post(() -> mCallback.onTuneFailed(status, selector));
+
+        int errorCode;
+        switch (status) {
+            case RadioManager.STATUS_PERMISSION_DENIED:
+            case RadioManager.STATUS_DEAD_OBJECT:
+                errorCode = RadioTuner.ERROR_SERVER_DIED;
+                break;
+            case RadioManager.STATUS_ERROR:
+            case RadioManager.STATUS_NO_INIT:
+            case RadioManager.STATUS_BAD_VALUE:
+            case RadioManager.STATUS_INVALID_OPERATION:
+                Log.i(TAG, "Got an error with no mapping to the legacy API (" + status
+                        + "), doing a best-effort conversion to ERROR_SCAN_TIMEOUT");
+            // fall through
+            case RadioManager.STATUS_TIMED_OUT:
+            default:
+                errorCode = RadioTuner.ERROR_SCAN_TIMEOUT;
+        }
+        mHandler.post(() -> mCallback.onError(errorCode));
     }
 
     @Override
@@ -107,6 +145,10 @@ class TunerCallbackAdapter extends ITunerCallback.Stub {
         if (info == null) {
             Log.e(TAG, "ProgramInfo must not be null");
             return;
+        }
+
+        synchronized (mLock) {
+            mCurrentProgramInfo = info;
         }
 
         mHandler.post(() -> {
@@ -129,6 +171,7 @@ class TunerCallbackAdapter extends ITunerCallback.Stub {
 
     @Override
     public void onAntennaState(boolean connected) {
+        mIsAntennaConnected = connected;
         mHandler.post(() -> mCallback.onAntennaState(connected));
     }
 

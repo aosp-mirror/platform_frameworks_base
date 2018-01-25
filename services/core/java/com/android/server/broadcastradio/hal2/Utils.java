@@ -16,6 +16,9 @@
 
 package com.android.server.broadcastradio.hal2;
 
+import android.annotation.NonNull;
+import android.os.RemoteException;
+
 enum FrequencyBand {
     UNKNOWN,
     FM,
@@ -36,5 +39,30 @@ class Utils {
         if (freq < 60000) return FrequencyBand.UNKNOWN;
         if (freq < 110000) return FrequencyBand.FM;
         return FrequencyBand.UNKNOWN;
+    }
+
+    interface FuncThrowingRemoteException<T> {
+        T exec() throws RemoteException;
+    }
+
+    static <T> T maybeRethrow(@NonNull FuncThrowingRemoteException<T> r) {
+        try {
+            return r.exec();
+        } catch (RemoteException ex) {
+            ex.rethrowFromSystemServer();
+            return null;  // unreachable
+        }
+    }
+
+    interface VoidFuncThrowingRemoteException {
+        void exec() throws RemoteException;
+    }
+
+    static void maybeRethrow(@NonNull VoidFuncThrowingRemoteException r) {
+        try {
+            r.exec();
+        } catch (RemoteException ex) {
+            ex.rethrowFromSystemServer();
+        }
     }
 }

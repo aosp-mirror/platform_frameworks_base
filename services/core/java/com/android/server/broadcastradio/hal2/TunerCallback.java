@@ -50,10 +50,14 @@ class TunerCallback extends ITunerCallback.Stub {
     }
 
     @Override
-    public void onTuneFailed(int result, ProgramSelector selector) {}
+    public void onTuneFailed(int result, ProgramSelector selector) {
+        dispatch(() -> mClientCb.onTuneFailed(result, Convert.programSelectorFromHal(selector)));
+    }
 
     @Override
-    public void onCurrentProgramInfoChanged(ProgramInfo info) {}
+    public void onCurrentProgramInfoChanged(ProgramInfo info) {
+        dispatch(() -> mClientCb.onCurrentProgramInfoChanged(Convert.programInfoFromHal(info)));
+    }
 
     @Override
     public void onProgramListUpdated(ProgramListChunk chunk) {
@@ -61,8 +65,12 @@ class TunerCallback extends ITunerCallback.Stub {
     }
 
     @Override
-    public void onAntennaStateChange(boolean connected) {}
+    public void onAntennaStateChange(boolean connected) {
+        dispatch(() -> mClientCb.onAntennaState(connected));
+    }
 
     @Override
-    public void onParametersUpdated(ArrayList<VendorKeyValue> parameters) {}
+    public void onParametersUpdated(ArrayList<VendorKeyValue> parameters) {
+        dispatch(() -> mClientCb.onParametersUpdated(Convert.vendorInfoFromHal(parameters)));
+    }
 }
