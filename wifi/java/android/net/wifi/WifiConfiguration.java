@@ -55,8 +55,10 @@ public class WifiConfiguration implements Parcelable {
     /** {@hide} */
     public static final String pskVarName = "psk";
     /** {@hide} */
+    @Deprecated
     public static final String[] wepKeyVarNames = { "wep_key0", "wep_key1", "wep_key2", "wep_key3" };
     /** {@hide} */
+    @Deprecated
     public static final String wepTxKeyIdxVarName = "wep_tx_keyidx";
     /** {@hide} */
     public static final String priorityVarName = "priority";
@@ -83,6 +85,9 @@ public class WifiConfiguration implements Parcelable {
         /** WPA is not used; plaintext or static WEP could be used. */
         public static final int NONE = 0;
         /** WPA pre-shared key (requires {@code preSharedKey} to be specified). */
+        /** @deprecated Due to security and performance limitations, use of WPA-1 networks
+         * is discouraged. WPA-2 (RSN) should be used instead. */
+        @Deprecated
         public static final int WPA_PSK = 1;
         /** WPA using EAP authentication. Generally used with an external authentication server. */
         public static final int WPA_EAP = 2;
@@ -116,8 +121,8 @@ public class WifiConfiguration implements Parcelable {
 
         public static final String varName = "key_mgmt";
 
-        public static final String[] strings = { "NONE", "WPA_PSK", "WPA_EAP", "IEEE8021X",
-                "WPA2_PSK", "OSEN", "FT_PSK", "FT_EAP" };
+        public static final String[] strings = { "NONE", /* deprecated */ "WPA_PSK", "WPA_EAP",
+                "IEEE8021X", "WPA2_PSK", "OSEN", "FT_PSK", "FT_EAP" };
     }
 
     /**
@@ -126,7 +131,10 @@ public class WifiConfiguration implements Parcelable {
     public static class Protocol {
         private Protocol() { }
 
-        /** WPA/IEEE 802.11i/D3.0 */
+        /** WPA/IEEE 802.11i/D3.0
+         * @deprecated Due to security and performance limitations, use of WPA-1 networks
+         * is discouraged. WPA-2 (RSN) should be used instead. */
+        @Deprecated
         public static final int WPA = 0;
         /** WPA2/IEEE 802.11i */
         public static final int RSN = 1;
@@ -148,7 +156,10 @@ public class WifiConfiguration implements Parcelable {
 
         /** Open System authentication (required for WPA/WPA2) */
         public static final int OPEN = 0;
-        /** Shared Key authentication (requires static WEP keys) */
+        /** Shared Key authentication (requires static WEP keys)
+         * @deprecated Due to security and performance limitations, use of WEP networks
+         * is discouraged. */
+        @Deprecated
         public static final int SHARED = 1;
         /** LEAP/Network EAP (only used with LEAP) */
         public static final int LEAP = 2;
@@ -166,7 +177,10 @@ public class WifiConfiguration implements Parcelable {
 
         /** Use only Group keys (deprecated) */
         public static final int NONE = 0;
-        /** Temporal Key Integrity Protocol [IEEE 802.11i/D7.0] */
+        /** Temporal Key Integrity Protocol [IEEE 802.11i/D7.0]
+         * @deprecated Due to security and performance limitations, use of WPA-1 networks
+         * is discouraged. WPA-2 (RSN) should be used instead. */
+        @Deprecated
         public static final int TKIP = 1;
         /** AES in Counter mode with CBC-MAC [RFC 3610, IEEE 802.11i/D7.0] */
         public static final int CCMP = 2;
@@ -188,9 +202,15 @@ public class WifiConfiguration implements Parcelable {
     public static class GroupCipher {
         private GroupCipher() { }
 
-        /** WEP40 = WEP (Wired Equivalent Privacy) with 40-bit key (original 802.11) */
+        /** WEP40 = WEP (Wired Equivalent Privacy) with 40-bit key (original 802.11)
+         * @deprecated Due to security and performance limitations, use of WEP networks
+         * is discouraged. */
+        @Deprecated
         public static final int WEP40 = 0;
-        /** WEP104 = WEP (Wired Equivalent Privacy) with 104-bit key */
+        /** WEP104 = WEP (Wired Equivalent Privacy) with 104-bit key
+         * @deprecated Due to security and performance limitations, use of WEP networks
+         * is discouraged. */
+        @Deprecated
         public static final int WEP104 = 1;
         /** Temporal Key Integrity Protocol [IEEE 802.11i/D7.0] */
         public static final int TKIP = 2;
@@ -204,7 +224,8 @@ public class WifiConfiguration implements Parcelable {
         public static final String varName = "group";
 
         public static final String[] strings =
-                { "WEP40", "WEP104", "TKIP", "CCMP", "GTK_NOT_USED" };
+                { /* deprecated */ "WEP40", /* deprecated */ "WEP104",
+                        "TKIP", "CCMP", "GTK_NOT_USED" };
     }
 
     /** Possible status of a network configuration. */
@@ -310,10 +331,16 @@ public class WifiConfiguration implements Parcelable {
      * When the value of one of these keys is read, the actual key is
      * not returned, just a "*" if the key has a value, or the null
      * string otherwise.
+     * @deprecated Due to security and performance limitations, use of WEP networks
+     * is discouraged.
      */
+    @Deprecated
     public String[] wepKeys;
 
-    /** Default WEP key index, ranging from 0 to 3. */
+    /** Default WEP key index, ranging from 0 to 3.
+     * @deprecated Due to security and performance limitations, use of WEP networks
+     * is discouraged. */
+    @Deprecated
     public int wepTxKeyIndex;
 
     /**
