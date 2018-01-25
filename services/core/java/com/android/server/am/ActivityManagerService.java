@@ -3466,6 +3466,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     final void showAppWarningsIfNeededLocked(ActivityRecord r) {
         mAppWarnings.showUnsupportedCompileSdkDialogIfNeeded(r);
         mAppWarnings.showUnsupportedDisplaySizeDialogIfNeeded(r);
+        mAppWarnings.showDeprecatedTargetDialogIfNeeded(r);
     }
 
     private int updateLruProcessInternalLocked(ProcessRecord app, long now, int index,
