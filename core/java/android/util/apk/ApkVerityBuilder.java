@@ -70,7 +70,7 @@ abstract class ApkVerityBuilder {
             throws IOException, SecurityException, NoSuchAlgorithmException, DigestException {
         long signingBlockSize =
                 signatureInfo.centralDirOffset - signatureInfo.apkSigningBlockOffset;
-        long dataSize = apk.length() - signingBlockSize - ZIP_EOCD_CENTRAL_DIR_OFFSET_FIELD_SIZE;
+        long dataSize = apk.length() - signingBlockSize;
         int[] levelOffset = calculateVerityLevelOffset(dataSize);
 
         ByteBuffer output = bufferFactory.create(
@@ -132,11 +132,13 @@ abstract class ApkVerityBuilder {
         }
 
         if (headerOutput != null) {
+            headerOutput.order(ByteOrder.LITTLE_ENDIAN);
             generateFsverityHeader(headerOutput, apk.length(), levelOffset.length - 1,
                     DEFAULT_SALT);
         }
 
         if (extensionsOutput != null) {
+            extensionsOutput.order(ByteOrder.LITTLE_ENDIAN);
             generateFsverityExtensions(extensionsOutput, signatureInfo.apkSigningBlockOffset,
                     signingBlockSize, signatureInfo.eocdOffset);
         }
@@ -306,6 +308,14 @@ abstract class ApkVerityBuilder {
         return rootHash;
     }
 
+    private static void bufferPut(ByteBuffer buffer, byte value) {
+        // FIXME(b/72459251): buffer.put(value) does NOT work surprisingly. The position() after put
+        // does NOT even change. This hack workaround the problem, but the root cause remains
+        // unkonwn yet.  This seems only happen when it goes through the apk install flow on my
+        // setup.
+        buffer.put(new byte[] { value });
+    }
+
     private static ByteBuffer generateFsverityHeader(ByteBuffer buffer, long fileSize, int depth,
             byte[] salt) {
         if (salt.length != 8) {
@@ -315,22 +325,23 @@ abstract class ApkVerityBuilder {
         // TODO(b/30972906): update the reference when there is a better one in public.
         buffer.put("TrueBrew".getBytes());  // magic
 
-        buffer.put((byte) 1);        // major version
-        buffer.put((byte) 0);        // minor version
-        buffer.put((byte) 12);       // log2(block-size): log2(4096)
-        buffer.put((byte) 7);        // log2(leaves-per-node): log2(4096 / 32)
+        bufferPut(buffer, (byte) 1);        // major version
+        bufferPut(buffer, (byte) 0);        // minor version
+        bufferPut(buffer, (byte) 12);       // log2(block-size): log2(4096)
+        bufferPut(buffer, (byte) 7);        // log2(leaves-per-node): log2(4096 / 32)
 
-        buffer.putShort((short) 1);  // meta algorithm, SHA256_MODE == 1
-        buffer.putShort((short) 1);  // data algorithm, SHA256_MODE == 1
+        buffer.putShort((short) 1);         // meta algorithm, SHA256_MODE == 1
+        buffer.putShort((short) 1);         // data algorithm, SHA256_MODE == 1
 
-        buffer.putInt(0x1);          // flags, 0x1: has extension
-        buffer.putInt(0);            // reserved
+        buffer.putInt(0x1);                 // flags, 0x1: has extension
+        buffer.putInt(0);                   // reserved
 
-        buffer.putLong(fileSize);    // original file size
+        buffer.putLong(fileSize);           // original file size
 
-        buffer.put((byte) 0);        // auth block offset, disabled here
-        buffer.put(salt);            // salt (8 bytes)
-        // skip(buffer, 22);            // reserved
+        bufferPut(buffer, (byte) 0);        // auth block offset, disabled here
+        bufferPut(buffer, (byte) 2);        // extension count
+        buffer.put(salt);                   // salt (8 bytes)
+        // skip(buffer, 22);                // reserved
 
         buffer.rewind();
         return buffer;
@@ -339,11 +350,6 @@ abstract class ApkVerityBuilder {
     private static ByteBuffer generateFsverityExtensions(ByteBuffer buffer, long signingBlockOffset,
             long signingBlockSize, long eocdOffset) {
         // Snapshot of the FSVerity structs (subject to change once upstreamed).
-        //
-        // struct fsverity_header_extension {
-        //   u8 extension_count;
-        //   u8 reserved[7];
-        // };
         //
         // struct fsverity_extension {
         //   __le16 length;
@@ -362,10 +368,6 @@ abstract class ApkVerityBuilder {
         //   u8 reserved[7];
         //   u8 databytes[];
         // };
-
-        // struct fsverity_header_extension
-        buffer.put((byte) 2);        // extension count
-        skip(buffer, 3);             // reserved
 
         final int kSizeOfFsverityExtensionHeader = 8;
 
