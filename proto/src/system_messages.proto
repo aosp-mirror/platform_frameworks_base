@@ -196,6 +196,10 @@ message SystemMessage {
     // Inform the user that unexpectedly rapid network usage is happening
     NOTE_NET_RAPID = 45;
 
+    // Notify the user that carrier Wi-Fi networks are available.
+    // Package: android
+    NOTE_CARRIER_NETWORK_AVAILABLE = 46;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release

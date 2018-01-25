@@ -3038,6 +3038,8 @@
 
     <!-- Notification title for a nearby open wireless network.-->
     <string name="wifi_available_title">Connect to open Wi\u2011Fi network</string>
+    <!-- Notification title for a nearby carrier wireless network.-->
+    <string name="wifi_available_carrier_network_title">Connect to carrier Wi\u2011Fi network</string>
     <!-- Notification title when the system is connecting to the specified open network. The network name is specified in the notification content. -->
     <string name="wifi_available_title_connecting">Connecting to open Wi\u2011Fi network</string>
     <!-- Notification title when the system has connected to the open network. The network name is specified in the notification content. -->
