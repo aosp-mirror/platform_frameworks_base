@@ -410,7 +410,8 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
                                 SHARED_BACKUP_AGENT_PACKAGE);
 
                 mBackupEngine = new FullBackupEngine(backupManagerService, out,
-                        null, pkg, mIncludeApks, this, Long.MAX_VALUE, mCurrentOpToken);
+                        null, pkg, mIncludeApks, this, Long.MAX_VALUE,
+                        mCurrentOpToken, /*transportFlags=*/ 0);
                 sendOnBackupPackage(isSharedStorage ? "Shared storage" : pkg.packageName);
 
                 // Don't need to check preflight result as there is no preflight hook.

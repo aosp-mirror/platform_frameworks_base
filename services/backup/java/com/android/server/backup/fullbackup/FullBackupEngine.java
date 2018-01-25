@@ -74,6 +74,7 @@ public class FullBackupEngine {
     PackageInfo mPkg;
     private final long mQuota;
     private final int mOpToken;
+    private final int mTransportFlags;
 
     class FullBackupRunner implements Runnable {
 
@@ -100,7 +101,8 @@ public class FullBackupEngine {
         @Override
         public void run() {
             try {
-                FullBackupDataOutput output = new FullBackupDataOutput(mPipe);
+                FullBackupDataOutput output = new FullBackupDataOutput(
+                        mPipe, -1, mTransportFlags);
 
                 if (mWriteManifest) {
                     final boolean writeWidgetData = mWidgetData != null;
@@ -147,7 +149,7 @@ public class FullBackupEngine {
                                 mTimeoutMonitor /* in parent class */,
                                 OP_TYPE_BACKUP_WAIT);
                 mAgent.doFullBackup(mPipe, mQuota, mToken,
-                        backupManagerService.getBackupManagerBinder());
+                        backupManagerService.getBackupManagerBinder(), mTransportFlags);
             } catch (IOException e) {
                 Slog.e(TAG, "Error running full backup for " + mPackage.packageName);
             } catch (RemoteException e) {
@@ -164,7 +166,8 @@ public class FullBackupEngine {
     public FullBackupEngine(RefactoredBackupManagerService backupManagerService,
             OutputStream output,
             FullBackupPreflight preflightHook, PackageInfo pkg,
-            boolean alsoApks, BackupRestoreTask timeoutMonitor, long quota, int opToken) {
+            boolean alsoApks, BackupRestoreTask timeoutMonitor, long quota, int opToken,
+            int transportFlags) {
         this.backupManagerService = backupManagerService;
         mOutput = output;
         mPreflightHook = preflightHook;
@@ -176,6 +179,7 @@ public class FullBackupEngine {
         mMetadataFile = new File(mFilesDir, BACKUP_METADATA_FILENAME);
         mQuota = quota;
         mOpToken = opToken;
+        mTransportFlags = transportFlags;
     }
 
     public int preflightCheck() throws RemoteException {

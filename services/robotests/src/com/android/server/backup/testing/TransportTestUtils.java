@@ -144,12 +144,14 @@ public class TransportTestUtils {
                 // Transport registered and available
                 IBackupTransport transportMock = mockTransportBinder(transport);
                 when(transportClientMock.connectOrThrow(any())).thenReturn(transportMock);
+                when(transportClientMock.connect(any())).thenReturn(transportMock);
 
                 return new TransportMock(transportClientMock, transportMock);
             } else {
                 // Transport registered but unavailable
                 when(transportClientMock.connectOrThrow(any()))
                         .thenThrow(TransportNotAvailableException.class);
+                when(transportClientMock.connect(any())).thenReturn(null);
 
                 return new TransportMock(transportClientMock, null);
             }

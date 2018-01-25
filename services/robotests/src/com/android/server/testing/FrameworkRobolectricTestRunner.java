@@ -16,6 +16,9 @@
 
 package com.android.server.testing;
 
+import com.android.server.backup.PerformBackupTaskTest;
+import com.android.server.backup.internal.PerformBackupTask;
+
 import com.google.common.collect.ImmutableSet;
 
 import org.junit.runners.model.FrameworkMethod;
@@ -30,6 +33,9 @@ import org.robolectric.util.Util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Enumeration;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -112,6 +118,27 @@ public class FrameworkRobolectricTestRunner extends RobolectricTestRunner {
                 }
             }
             return super.getByteCode(className);
+        }
+
+        /**
+         * HACK^2
+         * The framework Robolectric run configuration puts a prebuilt in front of us, so we try not
+         * to load the class from there, if possible.
+         */
+        @Override
+        public InputStream getResourceAsStream(String resource) {
+            try {
+                Enumeration<URL> urls = getResources(resource);
+                while (urls.hasMoreElements()) {
+                    URL url = urls.nextElement();
+                    if (!url.toString().toLowerCase().contains("prebuilt")) {
+                        return url.openStream();
+                    }
+                }
+            } catch (IOException e) {
+                // Fall through
+            }
+            return super.getResourceAsStream(resource);
         }
 
         /**

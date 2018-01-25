@@ -30,6 +30,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.util.Slog;
@@ -374,7 +375,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
         }
 
         // Stop the session timeout until we finalize the restore
-        BackupHandler backupHandler = mBackupManagerService.getBackupHandler();
+        Handler backupHandler = mBackupManagerService.getBackupHandler();
         backupHandler.removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
 
         PowerManager.WakeLock wakelock = mBackupManagerService.getWakelock();
