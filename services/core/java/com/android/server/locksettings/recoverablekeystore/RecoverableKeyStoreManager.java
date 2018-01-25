@@ -579,6 +579,7 @@ public class RecoverableKeyStoreManager {
 
     /**
      * This function can only be used inside LockSettingsService.
+     *
      * @param storedHashType from {@code CredentialHash}
      * @param credential - unencrypted String
      * @param userId for the user whose lock screen credentials were changed.
@@ -604,7 +605,7 @@ public class RecoverableKeyStoreManager {
         } catch (KeyStoreException e) {
             Log.e(TAG, "Key store error encountered during recoverable key sync", e);
         } catch (InsecureUserException e) {
-            Log.wtf(TAG, "Impossible - insecure user, but user just entered lock screen", e);
+            Log.e(TAG, "InsecureUserException during lock screen secret update", e);
         }
     }
 
