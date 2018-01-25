@@ -23,6 +23,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -48,6 +49,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.security.KeyStore;
+import java.security.UnrecoverableKeyException;
 import java.util.List;
 
 @SmallTest
@@ -254,6 +256,40 @@ public class PlatformKeyManagerTest {
 
         verify(mKeyStoreProxy).getKey(
                 eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"),
+                any());
+    }
+
+    @Test
+    public void getEncryptKey_generatesNewKeyIfOldOneIsInvalid() throws Exception {
+        doThrow(new UnrecoverableKeyException()).when(mKeyStoreProxy).getKey(
+                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/encrypt"),
+                any());
+
+        mPlatformKeyManager.getEncryptKey(USER_ID_FIXTURE);
+
+        verify(mKeyStoreProxy).getKey(
+                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/encrypt"),
+                any());
+        // Attempt to get regenerated key.
+        verify(mKeyStoreProxy).getKey(
+                eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/encrypt"),
+                any());
+    }
+
+    @Test
+    public void getDecryptKey_generatesNewKeyIfOldOneIsInvalid() throws Exception {
+        doThrow(new UnrecoverableKeyException()).when(mKeyStoreProxy).getKey(
+                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"),
+                any());
+
+        mPlatformKeyManager.getDecryptKey(USER_ID_FIXTURE);
+
+        verify(mKeyStoreProxy).getKey(
+                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"),
+                any());
+        // Attempt to get regenerated key.
+        verify(mKeyStoreProxy).getKey(
+                eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/decrypt"),
                 any());
     }
 

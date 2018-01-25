@@ -22,6 +22,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.security.keystore.recovery.RecoveryController;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -289,8 +290,27 @@ public class RecoverableKeyStoreDb {
         ContentValues values = new ContentValues();
         values.put(UserMetadataEntry.COLUMN_NAME_USER_ID, userId);
         values.put(UserMetadataEntry.COLUMN_NAME_PLATFORM_KEY_GENERATION_ID, generationId);
-        return db.replace(
+        long result = db.replace(
                 UserMetadataEntry.TABLE_NAME, /*nullColumnHack=*/ null, values);
+        if (result != -1) {
+            invalidateKeysWithOldGenerationId(userId, generationId);
+        }
+        return result;
+    }
+
+    /**
+     * Updates status of old keys to {@code RecoveryController.RECOVERY_STATUS_PERMANENT_FAILURE}.
+     */
+    public void invalidateKeysWithOldGenerationId(int userId, int newGenerationId) {
+        SQLiteDatabase db = mKeyStoreDbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(KeysEntry.COLUMN_NAME_RECOVERY_STATUS,
+                RecoveryController.RECOVERY_STATUS_PERMANENT_FAILURE);
+        String selection =
+                KeysEntry.COLUMN_NAME_USER_ID + " = ? AND "
+                + KeysEntry.COLUMN_NAME_GENERATION_ID + " < ?";
+        db.update(KeysEntry.TABLE_NAME, values, selection,
+            new String[] {String.valueOf(userId), String.valueOf(newGenerationId)});
     }
 
     /**

@@ -305,7 +305,7 @@ public class KeySyncTask implements Runnable {
             NoSuchAlgorithmException, NoSuchPaddingException, BadPlatformKeyException,
             InvalidKeyException, InvalidAlgorithmParameterException {
         PlatformKeyManager platformKeyManager = mPlatformKeyManagerFactory.newInstance();
-        PlatformDecryptionKey decryptKey = platformKeyManager.getDecryptKey(mUserId);
+        PlatformDecryptionKey decryptKey = platformKeyManager.getDecryptKey(mUserId);;
         Map<String, WrappedKey> wrappedKeys = mRecoverableKeyStoreDb.getAllKeys(
                 mUserId, recoveryAgentUid, decryptKey.getGenerationId());
         return WrappedKey.unwrapKeys(decryptKey, wrappedKeys);
