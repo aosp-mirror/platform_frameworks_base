@@ -24,8 +24,8 @@
     systemui:keyCode="4"
     android:scaleType="fitCenter"
     android:contentDescription="@string/accessibility_back"
-    android:paddingTop="15dp"
-    android:paddingBottom="15dp"
+    android:paddingTop="@dimen/home_padding"
+    android:paddingBottom="@dimen/home_padding"
     android:paddingStart="@dimen/navigation_key_padding"
     android:paddingEnd="@dimen/navigation_key_padding"
     />
