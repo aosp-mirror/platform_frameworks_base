@@ -220,7 +220,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         mWifiManager = wifiManager;
         mIncludeSaved = includeSaved;
         mIncludeScans = includeScans;
-        mListener = wifiListener;
+        mListener = new WifiListenerWrapper(wifiListener);
         mConnectivityManager = connectivityManager;
 
         // check if verbose logging has been turned on or off
@@ -1049,6 +1049,39 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                 store.put(key, curVals);
             }
             curVals.add(val);
+        }
+    }
+
+    /**
+     * Wraps the given {@link WifiListener} instance and executes it's methods on the Main Thread.
+     *
+     * <p>This mechanism allows us to no longer need a separate MainHandler and WorkHandler, which
+     * were previously both performing work, while avoiding errors which occur from executing
+     * callbacks which manipulate UI elements from a different thread than the MainThread.
+     */
+    private static class WifiListenerWrapper implements WifiListener {
+
+        private final Handler mHandler;
+        private final WifiListener mDelegatee;
+
+        public WifiListenerWrapper(WifiListener listener) {
+            mHandler = new Handler(Looper.getMainLooper());
+            mDelegatee = listener;
+        }
+
+        @Override
+        public void onWifiStateChanged(int state) {
+            mHandler.post(() -> mDelegatee.onWifiStateChanged(state));
+        }
+
+        @Override
+        public void onConnectedChanged() {
+            mHandler.post(() -> mDelegatee.onConnectedChanged());
+        }
+
+        @Override
+        public void onAccessPointsChanged() {
+            mHandler.post(() -> mDelegatee.onAccessPointsChanged());
         }
     }
 
