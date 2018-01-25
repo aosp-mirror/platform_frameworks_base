@@ -697,6 +697,28 @@ LOCAL_SRC_FILES := \
 include $(BUILD_HOST_JAVA_LIBRARY)
 
 
+# ==== hiddenapi lists =======================================
+
+# Generate light greylist as private API minus (blacklist plus dark greylist).
+
+$(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): PRIVATE_API := $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
+$(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): BLACKLIST := $(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST)
+$(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): DARK_GREYLIST := $(INTERNAL_PLATFORM_HIDDENAPI_DARK_GREYLIST)
+$(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE) \
+                                               $(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST) \
+                                               $(INTERNAL_PLATFORM_HIDDENAPI_DARK_GREYLIST)
+	if [ ! -z "`comm -12 <(sort $(BLACKLIST)) <(sort $(DARK_GREYLIST))`" ]; then \
+		echo "There should be no overlap between $(BLACKLIST) and $(DARK_GREYLIST)" 1>&2; \
+		exit 1; \
+	elif [ ! -z "`comm -13 <(sort $(PRIVATE_API)) <(sort $(BLACKLIST))`" ]; then \
+		echo "$(BLACKLIST) must be a subset of $(PRIVATE_API)" 1>&2; \
+		exit 2; \
+	elif [ ! -z "`comm -13 <(sort $(PRIVATE_API)) <(sort $(DARK_GREYLIST))`" ]; then \
+		echo "$(DARK_GREYLIST) must be a subset of $(PRIVATE_API)" 1>&2; \
+		exit 3; \
+	fi
+	comm -23 <(sort $(PRIVATE_API)) <(sort $(BLACKLIST) $(DARK_GREYLIST)) > $@
+
 # Include subdirectory makefiles
 # ============================================================
 
