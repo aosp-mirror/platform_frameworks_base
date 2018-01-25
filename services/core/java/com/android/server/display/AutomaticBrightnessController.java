@@ -237,8 +237,13 @@ class AutomaticBrightnessController {
         return mScreenAutoBrightness;
     }
 
+    public float getAutomaticScreenBrightnessAdjustment() {
+        return mScreenAutoBrightnessAdjustment;
+    }
+
     public void configure(boolean enable, @Nullable BrightnessConfiguration configuration,
-            float brightness, float adjustment, int displayPolicy, boolean userInitiatedChange) {
+            float brightness, boolean userChangedBrightness, float adjustment,
+            boolean userChangedAutoBrightnessAdjustment, int displayPolicy) {
         // While dozing, the application processor may be suspended which will prevent us from
         // receiving new information from the light sensor. On some devices, we may be able to
         // switch to a wake-up light sensor instead but for now we will simply disable the sensor
@@ -247,12 +252,17 @@ class AutomaticBrightnessController {
         boolean dozing = (displayPolicy == DisplayPowerRequest.POLICY_DOZE);
         boolean changed = setBrightnessConfiguration(configuration);
         changed |= setDisplayPolicy(displayPolicy);
-        if (userInitiatedChange && enable && !dozing) {
-            // Update the current brightness value.
+        changed |= setScreenAutoBrightnessAdjustment(adjustment);
+        if (userChangedBrightness && enable) {
+            // Update the brightness curve with the new user control point. It's critical this
+            // happens after we update the autobrightness adjustment since it may reset it.
             changed |= setScreenBrightnessByUser(brightness);
+        }
+        final boolean userInitiatedChange =
+                userChangedBrightness || userChangedAutoBrightnessAdjustment;
+        if (userInitiatedChange && enable && !dozing) {
             prepareBrightnessAdjustmentSample();
         }
-        changed |= setScreenAutoBrightnessAdjustment(adjustment);
         changed |= setLightSensorEnabled(enable && !dozing);
         if (changed) {
             updateAutoBrightness(false /*sendUpdate*/);
@@ -290,6 +300,9 @@ class AutomaticBrightnessController {
             return false;
         }
         mBrightnessMapper.addUserDataPoint(mAmbientLux, brightness);
+        // Reset the brightness adjustment so that the next time we're queried for brightness we
+        // return the value the user set.
+        mScreenAutoBrightnessAdjustment = 0.0f;
         return true;
     }
 

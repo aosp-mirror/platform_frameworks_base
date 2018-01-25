@@ -182,6 +182,10 @@ public abstract class BrightnessMappingStrategy {
     /**
      * Adds a user interaction data point to the brightness mapping.
      *
+     * This data point <b>must</b> exist on the brightness curve as a result of this call. This is
+     * so that the next time we come to query what the screen brightness should be, we get what the
+     * user requested rather than immediately changing to some other value.
+     *
      * Currently, we only keep track of one of these at a time to constrain what can happen to the
      * curve.
      */
