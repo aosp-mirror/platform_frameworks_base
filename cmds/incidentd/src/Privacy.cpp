@@ -67,8 +67,14 @@ PrivacySpec::RequireAll() const { return dest == android::os::DEST_LOCAL; }
 
 PrivacySpec new_spec_from_args(int dest)
 {
-  if (dest < 0) return PrivacySpec();
-  return PrivacySpec(dest);
+    switch (dest) {
+        case android::os::DEST_AUTOMATIC:
+        case android::os::DEST_EXPLICIT:
+        case android::os::DEST_LOCAL:
+            return PrivacySpec(dest);
+        default:
+            return PrivacySpec();
+    }
 }
 
 PrivacySpec get_default_dropbox_spec() { return PrivacySpec(android::os::DEST_AUTOMATIC); }

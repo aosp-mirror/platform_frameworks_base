@@ -452,9 +452,10 @@ main(int argc, char** argv)
     bool adbIncidentWorkaround = true;
     pid_t childPid = -1;
     vector<string> sections;
+    const char* privacy = NULL;
 
     int opt;
-    while ((opt = getopt(argc, argv, "bhi:o:s:tw")) != -1) {
+    while ((opt = getopt(argc, argv, "bhi:o:s:twp:")) != -1) {
         switch (opt) {
             case 'b':
                 outputFormat = OUTPUT_PROTO;
@@ -476,6 +477,9 @@ main(int argc, char** argv)
                 return 0;
             case 'w':
                 adbIncidentWorkaround = false;
+                break;
+            case 'p':
+                privacy = optarg;
                 break;
             default:
                 usage(stderr);
@@ -526,7 +530,7 @@ main(int argc, char** argv)
             }
 
             // TODO: This is what the real implementation will be...
-            char const** args = (char const**)malloc(sizeof(char*) * (6 + sections.size()));
+            char const** args = (char const**)malloc(sizeof(char*) * (8 + sections.size()));
             int argpos = 0;
             args[argpos++] = "adb";
             if (adbSerial != NULL) {
@@ -535,6 +539,10 @@ main(int argc, char** argv)
             }
             args[argpos++] = "shell";
             args[argpos++] = "incident";
+            if (privacy != NULL) {
+                args[argpos++] = "-p";
+                args[argpos++] = privacy;
+            }
             for (vector<string>::const_iterator it=sections.begin(); it!=sections.end(); it++) {
                 args[argpos++] = it->c_str();
             }
