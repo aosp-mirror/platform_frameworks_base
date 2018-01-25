@@ -306,6 +306,7 @@
         <item name="darkIconTheme">@style/DualToneDarkTheme</item>
         <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
         <item name="wallpaperTextColorSecondary">@*android:color/secondary_text_material_dark</item>
+        <item name="android:colorError">@*android:color/error_color_material_dark</item>
         <item name="android:colorControlHighlight">@*android:color/primary_text_material_dark</item>
         <item name="*android:lockPatternStyle">@style/LockPatternStyle</item>
         <item name="passwordStyle">@style/PasswordTheme</item>
@@ -317,6 +318,7 @@
     <style name="Theme.SystemUI.Light" parent="@*android:style/Theme.DeviceDefault.QuickSettings">
         <item name="wallpaperTextColor">@*android:color/primary_text_material_light</item>
         <item name="wallpaperTextColorSecondary">@*android:color/secondary_text_material_light</item>
+        <item name="android:colorError">@*android:color/error_color_material_light</item>
         <item name="android:colorControlHighlight">@*android:color/primary_text_material_light</item>
         <item name="passwordStyle">@style/PasswordTheme.Light</item>
     </style>
