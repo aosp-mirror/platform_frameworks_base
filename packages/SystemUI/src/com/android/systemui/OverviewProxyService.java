@@ -77,6 +77,15 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 Binder.restoreCallingIdentity(token);
             }
         }
+
+        public void onRecentsAnimationStarted() {
+            long token = Binder.clearCallingIdentity();
+            try {
+                notifyRecentsAnimationStarted();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
     };
 
     private final BroadcastReceiver mLauncherAddedReceiver = new BroadcastReceiver() {
@@ -214,6 +223,12 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
     }
 
+    private void notifyRecentsAnimationStarted() {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i).onRecentsAnimationStarted();
+        }
+    }
+
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println(TAG_OPS + " state:");
@@ -224,6 +239,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     }
 
     public interface OverviewProxyListener {
-        void onConnectionChanged(boolean isConnected);
+        default void onConnectionChanged(boolean isConnected) {}
+        default void onRecentsAnimationStarted() {}
     }
 }

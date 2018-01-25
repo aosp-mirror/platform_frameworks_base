@@ -32,6 +32,7 @@ import android.app.AppGlobals;
 import android.app.IAssistDataReceiver;
 import android.app.WindowConfiguration.ActivityType;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -48,7 +49,10 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.IconDrawableFactory;
 import android.util.Log;
+import android.view.IRecentsAnimationController;
+import android.view.IRecentsAnimationRunner;
 
+import android.view.RemoteAnimationTarget;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.recents.model.Task.TaskKey;
 import com.android.systemui.shared.recents.model.ThumbnailData;
@@ -243,10 +247,9 @@ public class ActivityManagerWrapper {
     /**
      * Starts the recents activity. The caller should manage the thread on which this is called.
      */
-    public void startRecentsActivity(AssistDataReceiverCompat assistDataReceiver, Bundle options,
-            ActivityOptions opts, int userId, Consumer<Boolean> resultCallback,
+    public void startRecentsActivity(Intent intent, AssistDataReceiver assistDataReceiver,
+            RecentsAnimationListener animationHandler, Consumer<Boolean> resultCallback,
             Handler resultCallbackHandler) {
-        Bundle activityOptions = opts != null ? opts.toBundle() : null;
         try {
             IAssistDataReceiver receiver = null;
             if (assistDataReceiver != null) {
@@ -259,8 +262,24 @@ public class ActivityManagerWrapper {
                     }
                 };
             }
-            ActivityManager.getService().startRecentsActivity(receiver, options, activityOptions,
-                    userId);
+            IRecentsAnimationRunner runner = null;
+            if (animationHandler != null) {
+                runner = new IRecentsAnimationRunner.Stub() {
+                    public void onAnimationStart(IRecentsAnimationController controller,
+                            RemoteAnimationTarget[] apps) {
+                        final RecentsAnimationControllerCompat controllerCompat =
+                                new RecentsAnimationControllerCompat(controller);
+                        final RemoteAnimationTargetCompat[] appsCompat =
+                                RemoteAnimationTargetCompat.wrap(apps);
+                        animationHandler.onAnimationStart(controllerCompat, appsCompat);
+                    }
+
+                    public void onAnimationCanceled() {
+                        animationHandler.onAnimationCanceled();
+                    }
+                };
+            }
+            ActivityManager.getService().startRecentsActivity(intent, receiver, runner);
             if (resultCallback != null) {
                 resultCallbackHandler.post(new Runnable() {
                     @Override
