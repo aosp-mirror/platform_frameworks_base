@@ -138,6 +138,11 @@
     <uses-permission android:name="android.permission.MANAGE_SENSORS" />
     <uses-permission android:name="android.permission.MANAGE_AUDIO_POLICY" />
     <uses-permission android:name="android.permission.MANAGE_CAMERA" />
+    <!-- Permission needed to enable/disable Bluetooth/Wifi when on permission review mode -->
+    <uses-permission
+        android:name="android.permission.MANAGE_BLUETOOTH_WHEN_PERMISSION_REVIEW_REQUIRED" />
+    <uses-permission
+        android:name="android.permission.MANAGE_WIFI_WHEN_PERMISSION_REVIEW_REQUIRED" />
 
     <application android:label="@string/app_label"
                  android:defaultToDeviceProtectedStorage="true"
