@@ -1449,6 +1449,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             return false;
         }
         if (mCurrentScreenBrightnessSetting == mPendingScreenBrightnessSetting) {
+            mPendingScreenBrightnessSetting = -1;
             return false;
         }
         mLastUserSetScreenBrightness = mPendingScreenBrightnessSetting;
