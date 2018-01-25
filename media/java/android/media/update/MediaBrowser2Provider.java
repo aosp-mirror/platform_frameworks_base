@@ -16,6 +16,7 @@
 
 package android.media.update;
 
+import android.annotation.SystemApi;
 import android.os.Bundle;
 
 /**

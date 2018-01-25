@@ -23,7 +23,6 @@ import android.app.Notification;
 import android.app.Service;
 import android.content.Intent;
 import android.media.MediaSession2.ControllerInfo;
-import android.media.session.PlaybackState;
 import android.media.update.ApiLoader;
 import android.media.update.MediaSessionService2Provider;
 import android.os.IBinder;
@@ -89,7 +88,7 @@ import android.os.IBinder;
  * rejected, the controller will unbind. If it's accepted, the controller will be available to use
  * and keep binding.
  * <p>
- * When playback is started for this session service, {@link #onUpdateNotification(PlaybackState)}
+ * When playback is started for this session service, {@link #onUpdateNotification(PlaybackState2)}
  * is called and service would become a foreground service. It's needed to keep playback after the
  * controller is destroyed. The session service becomes background service when the playback is
  * stopped.
@@ -99,20 +98,8 @@ import android.os.IBinder;
  * Any app can bind to the session service with controller, but the controller can be used only if
  * the session service accepted the connection request through
  * {@link MediaSession2.SessionCallback#onConnect(ControllerInfo)}.
- *
  * @hide
  */
-// TODO(jaewan): Unhide
-// TODO(jaewan): Can we clean up sessions in onDestroy() automatically instead?
-//               What about currently running SessionCallback when the onDestroy() is called?
-// TODO(jaewan): Protect this with system|privilleged permission - Q.
-// TODO(jaewan): Add permission check for the service to know incoming connection request.
-//               Follow-up questions: What about asking a XML for list of white/black packages for
-//                                    allowing enumeration?
-//                                    We can read the information even when the service is started,
-//                                    so SessionManager.getXXXXService() can only return apps
-//                                    TODO(jaewan): Will be the black/white listing persistent?
-//                                                  In other words, can we cache the rejection?
 public abstract class MediaSessionService2 extends Service {
     private final MediaSessionService2Provider mProvider;
 
@@ -213,7 +200,7 @@ public abstract class MediaSessionService2 extends Service {
     }
 
     /**
-     * Returned by {@link #onUpdateNotification(PlaybackState)} for making session service
+     * Returned by {@link #onUpdateNotification(PlaybackState2)} for making session service
      * foreground service to keep playback running in the background. It's highly recommended to
      * show media style notification here.
      */

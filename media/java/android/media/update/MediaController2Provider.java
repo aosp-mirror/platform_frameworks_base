@@ -16,11 +16,12 @@
 
 package android.media.update;
 
+import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.media.MediaController2.PlaybackInfo;
 import android.media.MediaItem2;
 import android.media.MediaSession2.Command;
-import android.media.MediaSession2.PlaylistParam;
+import android.media.MediaSession2.PlaylistParams;
 import android.media.PlaybackState2;
 import android.media.Rating2;
 import android.media.SessionToken2;
@@ -59,6 +60,6 @@ public interface MediaController2Provider extends TransportControlProvider {
     void removePlaylistItem_impl(MediaItem2 index);
     void addPlaylistItem_impl(int index, MediaItem2 item);
 
-    PlaylistParam getPlaylistParam_impl();
+    PlaylistParams getPlaylistParam_impl();
     PlaybackState2 getPlaybackState_impl();
 }

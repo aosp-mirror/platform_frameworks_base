@@ -137,7 +137,7 @@ class MediaSession2Record {
 
     final MediaController2 createMediaController(SessionToken2 token) {
         mControllerCallback = new ControllerCallback();
-        return new MediaController2(mContext, token, mControllerCallback, mMainExecutor);
+        return new MediaController2(mContext, token, mMainExecutor, mControllerCallback);
     }
 
     /**

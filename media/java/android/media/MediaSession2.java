@@ -20,7 +20,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.Activity;
+import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -77,12 +77,6 @@ import java.util.concurrent.Executor;
  * @see MediaSessionService2
  * @hide
  */
-// TODO(jaewan): Unhide
-// TODO(jaewan): Revisit comments. Currently it's borrowed from the MediaSession.
-// TODO(jaewan): Should we support thread safe? It may cause tricky issue such as b/63797089
-// TODO(jaewan): Should we make APIs for MediaSessionService2 public? It's helpful for
-//               developers that doesn't want to override from Browser, but user may not use this
-//               correctly.
 public class MediaSession2 implements AutoCloseable {
     private final MediaSession2Provider mProvider;
 
@@ -349,7 +343,8 @@ public class MediaSession2 implements AutoCloseable {
         /**
          * Called when a controller set rating on the currently playing contents.
          *
-         * @param
+         * @param controller controller information
+         * @param rating new rating from the controller
          */
         public void onSetRating(@NonNull ControllerInfo controller, @NonNull Rating2 rating) { }
 
@@ -429,7 +424,7 @@ public class MediaSession2 implements AutoCloseable {
         /**
          * Override to handle requests to play a specific media item represented by a URI.
          */
-        public void prepareFromUri(@NonNull ControllerInfo controller,
+        public void onPrepareFromUri(@NonNull ControllerInfo controller,
                 @NonNull Uri uri, @Nullable Bundle extras) { }
 
         /**
@@ -527,7 +522,7 @@ public class MediaSession2 implements AutoCloseable {
         /**
          * Set an intent for launching UI for this Session. This can be used as a
          * quick link to an ongoing media screen. The intent should be for an
-         * activity that may be started using {@link Activity#startActivity(Intent)}.
+         * activity that may be started using {@link Context#startActivity(Intent)}.
          *
          * @param pi The intent to launch to show UI for this session.
          */
@@ -555,7 +550,7 @@ public class MediaSession2 implements AutoCloseable {
         }
 
         /**
-         * Set {@link SessionCallback}.
+         * Set callback for the session.
          *
          * @param executor callback executor
          * @param callback session callback.
@@ -581,7 +576,7 @@ public class MediaSession2 implements AutoCloseable {
          * @throws IllegalStateException if the session with the same id is already exists for the
          *      package.
          */
-        public abstract MediaSession2 build() throws IllegalStateException;
+        public abstract MediaSession2 build();
     }
 
     /**
@@ -599,12 +594,12 @@ public class MediaSession2 implements AutoCloseable {
         }
 
         @Override
-        public MediaSession2 build() throws IllegalStateException {
+        public MediaSession2 build() {
             if (mCallback == null) {
                 mCallback = new SessionCallback();
             }
-            return new MediaSession2(mContext, mPlayer, mId, mCallbackExecutor, mCallback,
-                    mVolumeProvider, mRatingType, mSessionActivity);
+            return new MediaSession2(mContext, mPlayer, mId, mVolumeProvider, mRatingType,
+                    mSessionActivity, mCallbackExecutor, mCallback);
         }
     }
 
@@ -624,7 +619,7 @@ public class MediaSession2 implements AutoCloseable {
                 IMediaSession2Callback callback) {
             mProvider = ApiLoader.getProvider(context)
                     .createMediaSession2ControllerInfoProvider(
-                            this, context, uid, pid, packageName, callback);
+                            context, this, uid, pid, packageName, callback);
         }
 
         /**
@@ -652,11 +647,7 @@ public class MediaSession2 implements AutoCloseable {
             return mProvider.isTrusted_impl();
         }
 
-        /**
-         * @hide
-         * @return
-         */
-        // TODO(jaewan): SystemApi
+        @SystemApi
         public ControllerInfoProvider getProvider() {
             return mProvider;
         }
@@ -855,7 +846,7 @@ public class MediaSession2 implements AutoCloseable {
      * Parameter for the playlist.
      */
     // TODO(jaewan): add fromBundle()/toBundle()
-    public static class PlaylistParam {
+    public static class PlaylistParams {
         /**
          * @hide
          */
@@ -915,7 +906,7 @@ public class MediaSession2 implements AutoCloseable {
 
         private MediaMetadata2 mPlaylistMetadata;
 
-        public PlaylistParam(@RepeatMode int repeatMode, @ShuffleMode int shuffleMode,
+        public PlaylistParams(@RepeatMode int repeatMode, @ShuffleMode int shuffleMode,
                 @Nullable MediaMetadata2 playlistMetadata) {
             mRepeatMode = repeatMode;
             mShuffleMode = shuffleMode;
@@ -949,26 +940,25 @@ public class MediaSession2 implements AutoCloseable {
      *       framework had to add heuristics to figure out if an app is
      * @hide
      */
-    MediaSession2(Context context, MediaPlayerBase player, String id, Executor callbackExecutor,
-            SessionCallback callback, VolumeProvider volumeProvider, int ratingType,
-            PendingIntent sessionActivity) {
+
+    MediaSession2(Context context, MediaPlayerBase player, String id, VolumeProvider volumeProvider,
+            int ratingType, PendingIntent sessionActivity, Executor callbackExecutor,
+            SessionCallback callback) {
         super();
-        mProvider = createProvider(context, player, id, callbackExecutor, callback,
-                volumeProvider, ratingType, sessionActivity);
+        mProvider = createProvider(context, player, id, volumeProvider, ratingType, sessionActivity,
+                callbackExecutor, callback
+        );
     }
 
     MediaSession2Provider createProvider(Context context, MediaPlayerBase player, String id,
-            Executor callbackExecutor, SessionCallback callback, VolumeProvider volumeProvider,
-            int ratingType, PendingIntent sessionActivity) {
+            VolumeProvider volumeProvider, int ratingType, PendingIntent sessionActivity,
+            Executor callbackExecutor, SessionCallback callback) {
         return ApiLoader.getProvider(context)
-                .createMediaSession2(this, context, player, id, callbackExecutor,
-                        callback, volumeProvider, ratingType, sessionActivity);
+                .createMediaSession2(context, this, player, id, volumeProvider, ratingType,
+                        sessionActivity, callbackExecutor, callback);
     }
 
-    /**
-     * @hide
-     */
-    // TODO(jaewan): SystemApi
+    @SystemApi
     public MediaSession2Provider getProvider() {
         return mProvider;
     }
@@ -998,10 +988,8 @@ public class MediaSession2 implements AutoCloseable {
      * @param volumeProvider a volume provider
      * @see #setPlayer(MediaPlayerBase)
      * @see Builder#setVolumeProvider(VolumeProvider)
-     * @throws IllegalArgumentException if a parameter is {@code null}.
      */
-    public void setPlayer(@NonNull MediaPlayerBase player, @NonNull VolumeProvider volumeProvider)
-            throws IllegalArgumentException {
+    public void setPlayer(@NonNull MediaPlayerBase player, @NonNull VolumeProvider volumeProvider) {
         mProvider.setPlayer_impl(player, volumeProvider);
     }
 
@@ -1217,7 +1205,7 @@ public class MediaSession2 implements AutoCloseable {
         // To match with KEYCODE_MEDIA_SKIP_BACKWARD
     }
 
-    public void setPlaylist(@NonNull List<MediaItem2> playlist, @NonNull PlaylistParam param) {
+    public void setPlaylist(@NonNull List<MediaItem2> playlist, @NonNull PlaylistParams param) {
         mProvider.setPlaylist_impl(playlist, param);
     }
 }

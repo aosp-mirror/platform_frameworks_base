@@ -16,15 +16,17 @@
 
 package android.media;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.media.MediaSession2.Command;
 import android.media.MediaSession2.CommandButton;
 import android.media.MediaSession2.CommandGroup;
 import android.media.MediaSession2.ControllerInfo;
-import android.media.MediaSession2.PlaylistParam;
+import android.media.MediaSession2.PlaylistParams;
 import android.media.session.MediaSessionManager;
 import android.media.update.ApiLoader;
 import android.media.update.MediaController2Provider;
@@ -63,8 +65,6 @@ import java.util.concurrent.Executor;
  * @see MediaSessionService2
  * @hide
  */
-// TODO(jaewan): Unhide
-// TODO(jaewan): Revisit comments. Currently MediaBrowser case is missing.
 public class MediaController2 implements AutoCloseable {
     /**
      * Interface for listening to change in activeness of the {@link MediaSession2}.  It's
@@ -130,7 +130,7 @@ public class MediaController2 implements AutoCloseable {
          * @param param
          */
         public void onPlaylistChanged(
-                @NonNull List<MediaItem2> list, @NonNull PlaylistParam param) { }
+                @NonNull List<MediaItem2> list, @NonNull PlaylistParams param) { }
 
         /**
          * Called when the playback state is changed.
@@ -239,12 +239,12 @@ public class MediaController2 implements AutoCloseable {
      *
      * @param context Context
      * @param token token to connect to
-     * @param callback controller callback to receive changes in
      * @param executor executor to run callbacks on.
+     * @param callback controller callback to receive changes in
      */
     // TODO(jaewan): Put @CallbackExecutor to the constructor.
     public MediaController2(@NonNull Context context, @NonNull SessionToken2 token,
-            @NonNull ControllerCallback callback, @NonNull Executor executor) {
+            @NonNull @CallbackExecutor Executor executor, @NonNull ControllerCallback callback) {
         super();
 
         // This also connects to the token.
@@ -252,14 +252,14 @@ public class MediaController2 implements AutoCloseable {
         // session whose session binder is only valid while it's active.
         // prevent a controller from reusable after the
         // session is released and recreated.
-        mProvider = createProvider(context, token, callback, executor);
+        mProvider = createProvider(context, token, executor, callback);
     }
 
     MediaController2Provider createProvider(@NonNull Context context,
-            @NonNull SessionToken2 token, @NonNull ControllerCallback callback,
-            @NonNull Executor executor) {
+            @NonNull SessionToken2 token, @NonNull Executor executor,
+            @NonNull ControllerCallback callback) {
         return ApiLoader.getProvider(context)
-                .createMediaController2(this, context, token, callback, executor);
+                .createMediaController2(context, this, token, executor, callback);
     }
 
     /**
@@ -271,9 +271,7 @@ public class MediaController2 implements AutoCloseable {
         mProvider.close_impl();
     }
 
-    /**
-     * @hide
-     */
+    @SystemApi
     public MediaController2Provider getProvider() {
         return mProvider;
     }
@@ -578,7 +576,8 @@ public class MediaController2 implements AutoCloseable {
         return mProvider.getPlaylist_impl();
     }
 
-    public @Nullable PlaylistParam getPlaylistParam() {
+    public @Nullable
+    PlaylistParams getPlaylistParam() {
         return mProvider.getPlaylistParam_impl();
     }
 

@@ -28,7 +28,6 @@ import java.lang.annotation.RetentionPolicy;
  * the current playback position and extra.
  * @hide
  */
-// TODO(jaewan): Move to updatable
 public final class PlaybackState2 {
     private static final String TAG = "PlaybackState2";
 

@@ -19,6 +19,7 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.text.TextUtils;
 
@@ -32,15 +33,10 @@ import java.lang.annotation.RetentionPolicy;
  * When it's sent to a controller or browser, it's anonymized and data descriptor wouldn't be sent.
  * <p>
  * This object isn't a thread safe.
- *
  * @hide
  */
-// TODO(jaewan): Unhide and extends from DataSourceDesc.
-//               Note) Feels like an anti-pattern. We should anonymize MediaItem2 to remove *all*
-//                     information in the DataSourceDesc. Why it should extends from this?
-// TODO(jaewan): Move this to updatable
-// Previously MediaBrowser.MediaItem
 public class MediaItem2 {
+    // TODO(jaewan): Keep DataSourceDesc.
     private final int mFlags;
     private MediaMetadata2 mMetadata;
 

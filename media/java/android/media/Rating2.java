@@ -32,7 +32,6 @@ import java.lang.annotation.RetentionPolicy;
  * through one of the factory methods.
  * @hide
  */
-// TODO(jaewan): Move this to updatable
 public final class Rating2 {
     private static final String TAG = "Rating2";
 

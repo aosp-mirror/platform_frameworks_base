@@ -16,8 +16,10 @@
 
 package android.media;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.update.ApiLoader;
 import android.media.update.MediaBrowser2Provider;
@@ -99,17 +101,17 @@ public class MediaBrowser2 extends MediaController2 {
                 @Nullable Bundle options, @Nullable List<MediaItem2> result) { }
     }
 
-    public MediaBrowser2(Context context, SessionToken2 token, BrowserCallback callback,
-            Executor executor) {
-        super(context, token, callback, executor);
+    public MediaBrowser2(@NonNull Context context, @NonNull SessionToken2 token,
+            @NonNull @CallbackExecutor Executor executor, @NonNull BrowserCallback callback) {
+        super(context, token, executor, callback);
         mProvider = (MediaBrowser2Provider) getProvider();
     }
 
     @Override
     MediaBrowser2Provider createProvider(Context context, SessionToken2 token,
-            ControllerCallback callback, Executor executor) {
+            Executor executor, ControllerCallback callback) {
         return ApiLoader.getProvider(context)
-                .createMediaBrowser2(this, context, token, (BrowserCallback) callback, executor);
+                .createMediaBrowser2(context, this, token, executor, (BrowserCallback) callback);
     }
 
     public void getBrowserRoot(Bundle rootHints) {
