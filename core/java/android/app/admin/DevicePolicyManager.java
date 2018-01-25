@@ -9045,15 +9045,15 @@ public class DevicePolicyManager {
      * @param executor The executor through which the listener should be invoked.
      * @param listener A callback object that will inform the caller when the clearing is done.
      * @throws SecurityException if the caller is not the device owner/profile owner.
-     * @return whether the clearing succeeded.
      */
-    public boolean clearApplicationUserData(@NonNull ComponentName admin,
+    public void clearApplicationUserData(@NonNull ComponentName admin,
             @NonNull String packageName, @NonNull @CallbackExecutor Executor executor,
             @NonNull OnClearApplicationUserDataListener listener) {
         throwIfParentInstance("clearAppData");
         Preconditions.checkNotNull(executor);
+        Preconditions.checkNotNull(listener);
         try {
-            return mService.clearApplicationUserData(admin, packageName,
+            mService.clearApplicationUserData(admin, packageName,
                     new IPackageDataObserver.Stub() {
                         public void onRemoveCompleted(String pkg, boolean succeeded) {
                             executor.execute(() ->

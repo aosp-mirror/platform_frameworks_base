@@ -385,7 +385,7 @@ interface IDevicePolicyManager {
     boolean isCurrentInputMethodSetByOwner();
     StringParceledListSlice getOwnerInstalledCaCerts(in UserHandle user);
 
-    boolean clearApplicationUserData(in ComponentName admin, in String packageName, in IPackageDataObserver callback);
+    void clearApplicationUserData(in ComponentName admin, in String packageName, in IPackageDataObserver callback);
 
     void setLogoutEnabled(in ComponentName admin, boolean enabled);
     boolean isLogoutEnabled();

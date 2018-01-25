@@ -12301,9 +12301,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean clearApplicationUserData(ComponentName admin, String packageName,
+    public void clearApplicationUserData(ComponentName admin, String packageName,
             IPackageDataObserver callback) {
         Preconditions.checkNotNull(admin, "ComponentName is null");
+        Preconditions.checkNotNull(packageName, "packageName is null");
+        Preconditions.checkNotNull(callback, "callback is null");
         synchronized (this) {
             getActiveAdminForCallerLocked(admin, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
         }
@@ -12311,29 +12313,24 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         long ident = mInjector.binderClearCallingIdentity();
         try {
-            return ActivityManager.getService().clearApplicationUserData(packageName, false,
-                    callback, userId);
+            ActivityManager.getService().clearApplicationUserData(packageName, false, callback,
+                    userId);
         } catch(RemoteException re) {
             // Same process, should not happen.
         } catch (SecurityException se) {
             // This can happen e.g. for device admin packages, do not throw out the exception,
             // because callers have no means to know beforehand for which packages this might
-            // happen.
+            // happen. If so, we send back that removal failed.
             Slog.w(LOG_TAG, "Not allowed to clear application user data for package " + packageName,
                     se);
-        } finally {
-            mInjector.binderRestoreCallingIdentity(ident);
-        }
-
-        if (callback != null) {
             try {
-                // If there was a throw above, we send back that removal failed
                 callback.onRemoveCompleted(packageName, false);
             } catch (RemoteException re) {
                 // Caller is no longer available, ignore
             }
+        } finally {
+            mInjector.binderRestoreCallingIdentity(ident);
         }
-        return false;
     }
 
     @Override
