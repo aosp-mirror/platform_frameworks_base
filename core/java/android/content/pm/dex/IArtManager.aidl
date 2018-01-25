@@ -25,20 +25,34 @@ import android.content.pm.dex.ISnapshotRuntimeProfileCallback;
  */
 interface IArtManager {
     /**
-     * Snapshots the runtime profile for an apk belonging to the package {@param packageName}.
-     * The apk is identified by {@param codePath}. The calling process must have
-     * {@code android.permission.READ_RUNTIME_PROFILE} permission.
+     * Snapshots a runtime profile according to the {@code profileType} parameter.
      *
-     * The result will be posted on {@param callback} with the profile being available as a
-     * read-only {@link android.os.ParcelFileDescriptor}.
-     */
-    oneway void snapshotRuntimeProfile(in String packageName,
-        in String codePath, in ISnapshotRuntimeProfileCallback callback);
-
-    /**
-     * Returns true if runtime profiles are enabled, false otherwise.
+     * If {@code profileType} is {@link ArtManager#PROFILE_APPS} the method will snapshot
+     * the profile for for an apk belonging to the package {@code packageName}.
+     * The apk is identified by {@code codePath}.
+     *
+     * If {@code profileType} is {@code ArtManager.PROFILE_BOOT_IMAGE} the method will snapshot
+     * the profile for the boot image. In this case {@code codePath can be null}. The parameters
+     * {@code packageName} and {@code codePath} are ignored.
      *
      * The calling process must have {@code android.permission.READ_RUNTIME_PROFILE} permission.
+     *
+     * The result will be posted on the {@code executor} using the given {@code callback}.
+     * The profile will be available as a read-only {@link android.os.ParcelFileDescriptor}.
+     *
+     * This method will throw {@link IllegalStateException} if
+     * {@link ArtManager#isRuntimeProfilingEnabled(int)} does not return true for the given
+     * {@code profileType}.
      */
-    boolean isRuntimeProfilingEnabled();
+    oneway void snapshotRuntimeProfile(int profileType, in String packageName,
+        in String codePath, in ISnapshotRuntimeProfileCallback callback);
+
+     /**
+       * Returns true if runtime profiles are enabled for the given type, false otherwise.
+       * The type can be can be either {@code ArtManager.PROFILE_APPS}
+       * or {@code ArtManager.PROFILE_BOOT_IMAGE}.
+       *
+       * @param profileType
+       */
+    boolean isRuntimeProfilingEnabled(int profileType);
 }

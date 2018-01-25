@@ -23,8 +23,10 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.dex.ArtManager;
+import android.content.pm.dex.ArtManager.ProfileType;
 import android.content.pm.dex.DexMetadataHelper;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -32,6 +34,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.dex.ISnapshotRuntimeProfileCallback;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.system.Os;
 import android.util.ArrayMap;
 import android.util.Slog;
 
@@ -43,6 +46,9 @@ import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
 import java.io.File;
 import java.io.FileNotFoundException;
+import libcore.io.IoUtils;
+import libcore.util.NonNull;
+import libcore.util.Nullable;
 
 /**
  * A system service that provides access to runtime and compiler artifacts.
@@ -62,6 +68,12 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     private static boolean DEBUG = false;
     private static boolean DEBUG_IGNORE_PERMISSIONS = false;
 
+    // Package name used to create the profile directory layout when
+    // taking a snapshot of the boot image profile.
+    private static final String BOOT_IMAGE_ANDROID_PACKAGE = "android";
+    // Profile name used for the boot image profile.
+    private static final String BOOT_IMAGE_PROFILE_NAME = "android.prof";
+
     private final IPackageManager mPackageManager;
     private final Object mInstallLock;
     @GuardedBy("mInstallLock")
@@ -77,20 +89,36 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     }
 
     @Override
-    public void snapshotRuntimeProfile(String packageName, String codePath,
-            ISnapshotRuntimeProfileCallback callback) {
+    public void snapshotRuntimeProfile(@ProfileType int profileType, @Nullable String packageName,
+            @Nullable String codePath, @NonNull ISnapshotRuntimeProfileCallback callback) {
         // Sanity checks on the arguments.
-        Preconditions.checkStringNotEmpty(packageName);
-        Preconditions.checkStringNotEmpty(codePath);
         Preconditions.checkNotNull(callback);
 
-        // Verify that the caller has the right permissions.
-        checkReadRuntimeProfilePermission();
+        boolean bootImageProfile = profileType == ArtManager.PROFILE_BOOT_IMAGE;
+        if (!bootImageProfile) {
+            Preconditions.checkStringNotEmpty(codePath);
+            Preconditions.checkStringNotEmpty(packageName);
+        }
+
+        // Verify that the caller has the right permissions and that the runtime profiling is
+        // enabled. The call to isRuntimePermissions will checkReadRuntimeProfilePermission.
+        if (!isRuntimeProfilingEnabled(profileType)) {
+            throw new IllegalStateException("Runtime profiling is not enabled for " + profileType);
+        }
 
         if (DEBUG) {
             Slog.d(TAG, "Requested snapshot for " + packageName + ":" + codePath);
         }
 
+        if (bootImageProfile) {
+            snapshotBootImageProfile(callback);
+        } else {
+            snapshotAppProfile(packageName, codePath, callback);
+        }
+    }
+
+    private void snapshotAppProfile(String packageName, String codePath,
+            ISnapshotRuntimeProfileCallback callback) {
         PackageInfo info = null;
         try {
             // Note that we use the default user 0 to retrieve the package info.
@@ -127,18 +155,25 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         }
 
         // All good, create the profile snapshot.
-        createProfileSnapshot(packageName, splitName, callback, info);
+        int appId = UserHandle.getAppId(info.applicationInfo.uid);
+        if (appId < 0) {
+            postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
+            Slog.wtf(TAG, "AppId is -1 for package: " + packageName);
+            return;
+        }
+
+        createProfileSnapshot(packageName, ArtManager.getProfileName(splitName), codePath,
+                appId, callback);
         // Destroy the snapshot, we no longer need it.
-        destroyProfileSnapshot(packageName, splitName);
+        destroyProfileSnapshot(packageName, ArtManager.getProfileName(splitName));
     }
 
-    private void createProfileSnapshot(String packageName, String splitName,
-            ISnapshotRuntimeProfileCallback callback, PackageInfo info) {
+    private void createProfileSnapshot(String packageName, String profileName, String classpath,
+            int appId, ISnapshotRuntimeProfileCallback callback) {
         // Ask the installer to snapshot the profile.
         synchronized (mInstallLock) {
             try {
-                if (!mInstaller.createProfileSnapshot(UserHandle.getAppId(info.applicationInfo.uid),
-                        packageName, ArtManager.getProfileName(splitName))) {
+                if (!mInstaller.createProfileSnapshot(appId, packageName, profileName, classpath)) {
                     postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
                     return;
                 }
@@ -149,8 +184,9 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         }
 
         // Open the snapshot and invoke the callback.
-        File snapshotProfile = ArtManager.getProfileSnapshotFile(packageName, splitName);
-        ParcelFileDescriptor fd;
+        File snapshotProfile = ArtManager.getProfileSnapshotFileForName(packageName, profileName);
+
+        ParcelFileDescriptor fd = null;
         try {
             fd = ParcelFileDescriptor.open(snapshotProfile, ParcelFileDescriptor.MODE_READ_ONLY);
             postSuccess(packageName, fd, callback);
@@ -158,31 +194,54 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
             Slog.w(TAG, "Could not open snapshot profile for " + packageName + ":"
                     + snapshotProfile, e);
             postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
+        } finally {
+            IoUtils.closeQuietly(fd);
         }
     }
 
-    private void destroyProfileSnapshot(String packageName, String splitName) {
+    private void destroyProfileSnapshot(String packageName, String profileName) {
         if (DEBUG) {
-            Slog.d(TAG, "Destroying profile snapshot for" + packageName + ":" + splitName);
+            Slog.d(TAG, "Destroying profile snapshot for" + packageName + ":" + profileName);
         }
 
         synchronized (mInstallLock) {
             try {
-                mInstaller.destroyProfileSnapshot(packageName,
-                        ArtManager.getProfileName(splitName));
+                mInstaller.destroyProfileSnapshot(packageName, profileName);
             } catch (InstallerException e) {
                 Slog.e(TAG, "Failed to destroy profile snapshot for " +
-                    packageName + ":" + splitName, e);
+                    packageName + ":" + profileName, e);
             }
         }
     }
 
     @Override
-    public boolean isRuntimeProfilingEnabled() {
+    public boolean isRuntimeProfilingEnabled(@ProfileType int profileType) {
         // Verify that the caller has the right permissions.
         checkReadRuntimeProfilePermission();
 
-        return SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false);
+        switch (profileType) {
+            case ArtManager.PROFILE_APPS :
+                return SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false);
+            case ArtManager.PROFILE_BOOT_IMAGE:
+                return (Build.IS_USERDEBUG || Build.IS_ENG) &&
+                        SystemProperties.getBoolean("dalvik.vm.usejitprofiles", false) &&
+                        SystemProperties.getBoolean("dalvik.vm.profilebootimage", false);
+            default:
+                throw new IllegalArgumentException("Invalid profile type:" + profileType);
+        }
+    }
+
+    private void snapshotBootImageProfile(ISnapshotRuntimeProfileCallback callback) {
+        // Combine the profiles for boot classpath and system server classpath.
+        // This avoids having yet another type of profiles and simplifies the processing.
+        String classpath = String.join(":", Os.getenv("BOOTCLASSPATH"),
+                Os.getenv("SYSTEMSERVERCLASSPATH"));
+
+        // Create the snapshot.
+        createProfileSnapshot(BOOT_IMAGE_ANDROID_PACKAGE, BOOT_IMAGE_PROFILE_NAME, classpath,
+                /*appId*/ -1, callback);
+        // Destroy the snapshot, we no longer need it.
+        destroyProfileSnapshot(BOOT_IMAGE_ANDROID_PACKAGE, BOOT_IMAGE_PROFILE_NAME);
     }
 
     /**
