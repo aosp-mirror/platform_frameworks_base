@@ -507,22 +507,16 @@ class WebViewUpdater {
         if (systemInterface.systemIsDebuggable()) {
             return true;
         }
-        Signature[] packageSignatures;
         // If no signature is declared, instead check whether the package is included in the
         // system.
         if (provider.signatures == null || provider.signatures.length == 0) {
             return packageInfo.applicationInfo.isSystemApp();
         }
-        packageSignatures = packageInfo.signatures;
-        if (packageSignatures.length != 1)
-            return false;
+        if (packageInfo.signatures.length != 1) return false;
 
-        final byte[] packageSignature = packageSignatures[0].toByteArray();
         // Return whether the package signature matches any of the valid signatures
-        for (String signature : provider.signatures) {
-            final byte[] validSignature = Base64.decode(signature, Base64.DEFAULT);
-            if (Arrays.equals(packageSignature, validSignature))
-                return true;
+        for (Signature signature : provider.signatures) {
+            if (signature.equals(packageInfo.signatures[0])) return true;
         }
         return false;
     }
