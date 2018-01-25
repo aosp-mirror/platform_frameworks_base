@@ -16,9 +16,7 @@
 package com.android.systemui.statusbar;
 
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Handler;
-import android.service.notification.StatusBarNotification;
 import android.view.View;
 
 /**
@@ -48,7 +46,7 @@ public interface NotificationPresenter extends NotificationData.Environment,
      * Runs the given intent. The presenter may want to run some animations or close itself when
      * this happens.
      */
-    void startNotificationGutsIntent(Intent intent, int appUid);
+    void startNotificationGutsIntent(Intent intent, int appUid, ExpandableNotificationRow row);
 
     /**
      * Returns the Handler for NotificationPresenter.

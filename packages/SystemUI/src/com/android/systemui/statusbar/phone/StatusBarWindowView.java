@@ -88,6 +88,7 @@ public class StatusBarWindowView extends FrameLayout {
     private ViewTreeObserver.OnPreDrawListener mFloatingToolbarPreDrawListener;
     private boolean mTouchCancelled;
     private boolean mTouchActive;
+    private boolean mExpandAnimationRunning;
 
     public StatusBarWindowView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -267,7 +268,7 @@ public class StatusBarWindowView extends FrameLayout {
                 || ev.getActionMasked() == MotionEvent.ACTION_CANCEL) {
             setTouchActive(false);
         }
-        if (mTouchCancelled) {
+        if (mTouchCancelled || mExpandAnimationRunning) {
             return false;
         }
         mFalsingManager.onTouchEvent(ev, getWidth(), getHeight());
@@ -386,6 +387,10 @@ public class StatusBarWindowView extends FrameLayout {
             event.recycle();
             mTouchCancelled = true;
         }
+    }
+
+    public void setExpandAnimationRunning(boolean expandAnimationRunning) {
+        mExpandAnimationRunning = expandAnimationRunning;
     }
 
     public class LayoutParams extends FrameLayout.LayoutParams {

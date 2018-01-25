@@ -60,12 +60,15 @@ public abstract class PanelView extends FrameLayout {
     public static final String TAG = PanelView.class.getSimpleName();
     private static final int INITIAL_OPENING_PEEK_DURATION = 200;
     private static final int PEEK_ANIMATION_DURATION = 360;
+    private static final int NO_FIXED_DURATION = -1;
     private long mDownTime;
     private float mMinExpandHeight;
     private LockscreenGestureLogger mLockscreenGestureLogger = new LockscreenGestureLogger();
     private boolean mPanelUpdateWhenAnimatorEnds;
     private boolean mVibrateOnOpening;
     private boolean mVibrationEnabled;
+    protected boolean mLaunchingNotification;
+    private int mFixedDuration = NO_FIXED_DURATION;
 
     private final void logf(String fmt, Object... args) {
         Log.v(TAG, (mViewName != null ? (mViewName + ": ") : "") + String.format(fmt, args));
@@ -785,6 +788,9 @@ public abstract class PanelView extends FrameLayout {
             if (vel == 0) {
                 animator.setDuration((long) (animator.getDuration() / collapseSpeedUpFactor));
             }
+            if (mFixedDuration != NO_FIXED_DURATION) {
+                animator.setDuration(mFixedDuration);
+            }
         }
         animator.addListener(new AnimatorListenerAdapter() {
             private boolean mCancelled;
@@ -1248,5 +1254,15 @@ public abstract class PanelView extends FrameLayout {
 
     public void setHeadsUpManager(HeadsUpManager headsUpManager) {
         mHeadsUpManager = headsUpManager;
+    }
+
+    public void setLaunchingNotification(boolean launchingNotification) {
+        mLaunchingNotification = launchingNotification;
+    }
+
+    public void collapseWithDuration(int animationDuration) {
+        mFixedDuration = animationDuration;
+        collapse(false /* delayed */, 1.0f /* speedUpFactor */);
+        mFixedDuration = NO_FIXED_DURATION;
     }
 }

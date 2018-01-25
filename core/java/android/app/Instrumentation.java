@@ -1688,9 +1688,13 @@ public class Instrumentation {
      * {@link ActivityMonitor} objects only match against the first activity in
      * the array.
      *
+     * @return The corresponding flag {@link ActivityManager#START_CANCELED},
+     *         {@link ActivityManager#START_SUCCESS} etc. indicating whether the launch was
+     *         successful.
+     *
      * {@hide}
      */
-    public void execStartActivitiesAsUser(Context who, IBinder contextThread,
+    public int execStartActivitiesAsUser(Context who, IBinder contextThread,
             IBinder token, Activity target, Intent[] intents, Bundle options,
             int userId) {
         IApplicationThread whoThread = (IApplicationThread) contextThread;
@@ -1705,11 +1709,11 @@ public class Instrumentation {
                     }
                     if (result != null) {
                         am.mHits++;
-                        return;
+                        return ActivityManager.START_CANCELED;
                     } else if (am.match(who, null, intents[0])) {
                         am.mHits++;
                         if (am.isBlocking()) {
-                            return;
+                            return ActivityManager.START_CANCELED;
                         }
                         break;
                     }
@@ -1727,6 +1731,7 @@ public class Instrumentation {
                 .startActivities(whoThread, who.getBasePackageName(), intents, resolvedTypes,
                         token, options, userId);
             checkStartActivityResult(result, intents[0]);
+            return result;
         } catch (RemoteException e) {
             throw new RuntimeException("Failure from system", e);
         }

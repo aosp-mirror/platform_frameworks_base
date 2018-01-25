@@ -200,6 +200,16 @@ public class Notification implements Parcelable
      */
     private static final int MAX_REPLY_HISTORY = 5;
 
+
+    /**
+     * If the notification contained an unsent draft for a RemoteInput when the user clicked on it,
+     * we're adding the draft as a String extra to the {@link #contentIntent} using this key.
+     *
+     * <p>Apps may use this extra to prepopulate text fields in the app, where the user usually
+     * sends messages.</p>
+     */
+    public static final String EXTRA_REMOTE_INPUT_DRAFT = "android.remoteInputDraft";
+
     /**
      * A timestamp related to this notification, in milliseconds since the epoch.
      *

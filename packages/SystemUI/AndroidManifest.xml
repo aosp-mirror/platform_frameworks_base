@@ -200,6 +200,9 @@
     <!-- to access instant apps -->
     <uses-permission android:name="android.permission.ACCESS_INSTANT_APPS" />
 
+    <!-- to control remote app transitions -->
+    <uses-permission android:name="android.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS" />
+
     <!-- to change themes - light or dark -->
     <uses-permission android:name="android.permission.CHANGE_OVERLAY_PACKAGES" />
 

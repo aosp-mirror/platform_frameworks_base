@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
+
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -179,4 +181,11 @@ public interface NotificationListContainer {
      * @return true if has pulsing notifications
      */
     boolean hasPulsingNotifications();
+
+    /**
+     * Apply parameters of the expand animation to the layout
+     */
+    default void applyExpandAnimationParams(ExpandAnimationParameters params) {}
+
+    default void setExpandingNotification(ExpandableNotificationRow row) {}
 }
