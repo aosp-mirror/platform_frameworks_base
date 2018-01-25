@@ -5510,6 +5510,27 @@ public final class Settings {
         public static final String LOCATION_MODE = "location_mode";
 
         /**
+         * The App or module that changes the location mode.
+         * @hide
+         */
+        public static final String LOCATION_CHANGER = "location_changer";
+        /**
+         * The location changer is unknown or unable to detect.
+         * @hide
+         */
+        public static final int LOCATION_CHANGER_UNKNOWN = 0;
+        /**
+         * Location settings in system settings.
+         * @hide
+         */
+        public static final int LOCATION_CHANGER_SYSTEM_SETTINGS = 1;
+        /**
+         * The location icon in drop down notification drawer.
+         * @hide
+         */
+        public static final int LOCATION_CHANGER_QUICK_SETTINGS = 2;
+
+        /**
          * Location access disabled.
          *
          * @deprecated To check location status, use {@link LocationManager#isLocationEnabled()}. To
@@ -7881,6 +7902,7 @@ public final class Settings {
             CLONE_TO_MANAGED_PROFILE.add(DEFAULT_INPUT_METHOD);
             CLONE_TO_MANAGED_PROFILE.add(ENABLED_ACCESSIBILITY_SERVICES);
             CLONE_TO_MANAGED_PROFILE.add(ENABLED_INPUT_METHODS);
+            CLONE_TO_MANAGED_PROFILE.add(LOCATION_CHANGER);
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_MODE);
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_PROVIDERS_ALLOWED);
             CLONE_TO_MANAGED_PROFILE.add(SELECTED_INPUT_METHOD_SUBTYPE);

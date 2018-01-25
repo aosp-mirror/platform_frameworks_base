@@ -44,7 +44,11 @@ public class Utils {
         com.android.internal.R.drawable.ic_wifi_signal_4
     };
 
-    public static void updateLocationEnabled(Context context, boolean enabled, int userId) {
+    public static void updateLocationEnabled(Context context, boolean enabled, int userId,
+            int source) {
+        Settings.Secure.putIntForUser(
+                context.getContentResolver(), Settings.Secure.LOCATION_CHANGER, source,
+                userId);
         Intent intent = new Intent(LocationManager.MODE_CHANGING_ACTION);
 
         final int oldMode = Settings.Secure.getIntForUser(context.getContentResolver(),
@@ -62,7 +66,11 @@ public class Utils {
         wrapper.setLocationEnabledForUser(enabled, UserHandle.of(userId));
     }
 
-    public static boolean updateLocationMode(Context context, int oldMode, int newMode, int userId) {
+    public static boolean updateLocationMode(Context context, int oldMode, int newMode, int userId,
+            int source) {
+        Settings.Secure.putIntForUser(
+                context.getContentResolver(), Settings.Secure.LOCATION_CHANGER, source,
+                userId);
         Intent intent = new Intent(LocationManager.MODE_CHANGING_ACTION);
         intent.putExtra(CURRENT_MODE_KEY, oldMode);
         intent.putExtra(NEW_MODE_KEY, newMode);
