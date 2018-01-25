@@ -314,6 +314,7 @@ import com.android.server.pm.permission.DefaultPermissionGrantPolicy.DefaultPerm
 import com.android.server.pm.permission.PermissionManagerInternal.PermissionCallback;
 import com.android.server.pm.permission.PermissionsState;
 import com.android.server.pm.permission.PermissionsState.PermissionState;
+import com.android.server.security.VerityUtils;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 
 import dalvik.system.CloseGuard;
@@ -16985,6 +16986,43 @@ Slog.e("TODD",
         if (!args.doRename(res.returnCode, pkg, oldCodePath)) {
             res.setError(INSTALL_FAILED_INSUFFICIENT_STORAGE, "Failed rename");
             return;
+        }
+
+        if (PackageManagerServiceUtils.isApkVerityEnabled()) {
+            String apkPath = null;
+            synchronized (mPackages) {
+                // Note that if the attacker managed to skip verify setup, for example by tampering
+                // with the package settings, upon reboot we will do full apk verification when
+                // verity is not detected.
+                final PackageSetting ps = mSettings.mPackages.get(pkgName);
+                if (ps != null && ps.isPrivileged()) {
+                    apkPath = pkg.baseCodePath;
+                }
+            }
+
+            if (apkPath != null) {
+                final VerityUtils.SetupResult result =
+                        VerityUtils.generateApkVeritySetupData(apkPath);
+                if (result.isOk()) {
+                    if (Build.IS_DEBUGGABLE) Slog.i(TAG, "Enabling apk verity to " + apkPath);
+                    FileDescriptor fd = result.getUnownedFileDescriptor();
+                    try {
+                        mInstaller.installApkVerity(apkPath, fd);
+                    } catch (InstallerException e) {
+                        res.setError(INSTALL_FAILED_INTERNAL_ERROR,
+                                "Failed to set up verity: " + e);
+                        return;
+                    } finally {
+                        IoUtils.closeQuietly(fd);
+                    }
+                } else if (result.isFailed()) {
+                    res.setError(INSTALL_FAILED_INTERNAL_ERROR, "Failed to generate verity");
+                    return;
+                } else {
+                    // Do nothing if verity is skipped. Will fall back to full apk verification on
+                    // reboot.
+                }
+            }
         }
 
         if (!instantApp) {
