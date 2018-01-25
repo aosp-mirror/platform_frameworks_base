@@ -115,6 +115,10 @@ static jlong nGetReleaseFunc() {
     return toJLong(&releaseMeasuredParagraph);
 }
 
+static jint nGetMemoryUsage(jlong ptr) {
+    return static_cast<jint>(toMeasuredParagraph(ptr)->getMemoryUsage());
+}
+
 static const JNINativeMethod gMethods[] = {
     // MeasuredParagraphBuilder native functions.
     {"nInitBuilder", "()J", (void*) nInitBuilder},
@@ -126,6 +130,7 @@ static const JNINativeMethod gMethods[] = {
     // MeasuredParagraph native functions.
     {"nGetWidth", "(JII)F", (void*) nGetWidth},  // Critical Natives
     {"nGetReleaseFunc", "()J", (void*) nGetReleaseFunc},  // Critical Natives
+    {"nGetMemoryUsage", "(J)I", (void*) nGetMemoryUsage},  // Critical Native
 };
 
 int register_android_text_MeasuredParagraph(JNIEnv* env) {
