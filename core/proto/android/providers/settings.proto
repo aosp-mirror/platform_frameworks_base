@@ -208,7 +208,7 @@ message GlobalSettingsProto {
     optional SettingProto wifi_on = 136 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto wifi_scan_always_available = 137 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto wifi_wakeup_enabled = 138 [ (android.privacy).dest = DEST_AUTOMATIC ];
-    optional SettingProto wifi_wakeup_available = 305 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    reserved 305; // Removed wifi_wakeup_available
     optional SettingProto network_scoring_ui_enabled = 306 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto speed_label_cache_eviction_age_millis = 307 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto recommended_network_evaluator_cache_expiry_ms = 308 [ (android.privacy).dest = DEST_AUTOMATIC ];

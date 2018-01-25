@@ -436,7 +436,6 @@ public class SettingsBackupTest {
                     Settings.Global.WIFI_SUPPLICANT_SCAN_INTERVAL_MS,
                     Settings.Global.WIFI_SUSPEND_OPTIMIZATIONS_ENABLED,
                     Settings.Global.WIFI_VERBOSE_LOGGING_ENABLED,
-                    Settings.Global.WIFI_WAKEUP_AVAILABLE,
                     Settings.Global.WIFI_WATCHDOG_ON,
                     Settings.Global.WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON,
                     Settings.Global.WINDOW_ANIMATION_SCALE,
