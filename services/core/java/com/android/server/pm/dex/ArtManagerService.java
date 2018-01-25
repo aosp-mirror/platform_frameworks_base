@@ -25,7 +25,6 @@ import android.content.pm.PackageParser;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.os.Binder;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -111,11 +110,13 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         }
 
         boolean pathFound = info.applicationInfo.getBaseCodePath().equals(codePath);
+        String splitName = null;
         String[] splitCodePaths = info.applicationInfo.getSplitCodePaths();
         if (!pathFound && (splitCodePaths != null)) {
-            for (String path : splitCodePaths) {
-                if (path.equals(codePath)) {
+            for (int i = splitCodePaths.length - 1; i >= 0; i--) {
+                if (splitCodePaths[i].equals(codePath)) {
                     pathFound = true;
+                    splitName = info.applicationInfo.splitNames[i];
                     break;
                 }
             }
@@ -126,18 +127,18 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         }
 
         // All good, create the profile snapshot.
-        createProfileSnapshot(packageName, codePath, callback, info);
+        createProfileSnapshot(packageName, splitName, callback, info);
         // Destroy the snapshot, we no longer need it.
-        destroyProfileSnapshot(packageName, codePath);
+        destroyProfileSnapshot(packageName, splitName);
     }
 
-    private void createProfileSnapshot(String packageName, String codePath,
+    private void createProfileSnapshot(String packageName, String splitName,
             ISnapshotRuntimeProfileCallback callback, PackageInfo info) {
         // Ask the installer to snapshot the profile.
         synchronized (mInstallLock) {
             try {
                 if (!mInstaller.createProfileSnapshot(UserHandle.getAppId(info.applicationInfo.uid),
-                        packageName, codePath)) {
+                        packageName, ArtManager.getProfileName(splitName))) {
                     postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
                     return;
                 }
@@ -148,28 +149,30 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
         }
 
         // Open the snapshot and invoke the callback.
-        File snapshotProfile = Environment.getProfileSnapshotPath(packageName, codePath);
+        File snapshotProfile = ArtManager.getProfileSnapshotFile(packageName, splitName);
         ParcelFileDescriptor fd;
         try {
             fd = ParcelFileDescriptor.open(snapshotProfile, ParcelFileDescriptor.MODE_READ_ONLY);
             postSuccess(packageName, fd, callback);
         } catch (FileNotFoundException e) {
-            Slog.w(TAG, "Could not open snapshot profile for " + packageName + ":" + codePath, e);
+            Slog.w(TAG, "Could not open snapshot profile for " + packageName + ":"
+                    + snapshotProfile, e);
             postError(callback, packageName, ArtManager.SNAPSHOT_FAILED_INTERNAL_ERROR);
         }
     }
 
-    private void destroyProfileSnapshot(String packageName, String codePath) {
+    private void destroyProfileSnapshot(String packageName, String splitName) {
         if (DEBUG) {
-            Slog.d(TAG, "Destroying profile snapshot for" + packageName + ":" + codePath);
+            Slog.d(TAG, "Destroying profile snapshot for" + packageName + ":" + splitName);
         }
 
         synchronized (mInstallLock) {
             try {
-                mInstaller.destroyProfileSnapshot(packageName, codePath);
+                mInstaller.destroyProfileSnapshot(packageName,
+                        ArtManager.getProfileName(splitName));
             } catch (InstallerException e) {
                 Slog.e(TAG, "Failed to destroy profile snapshot for " +
-                    packageName + ":" + codePath, e);
+                    packageName + ":" + splitName, e);
             }
         }
     }
@@ -280,6 +283,40 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     public void prepareAppProfiles(PackageParser.Package pkg, int[] user) {
         for (int i = 0; i < user.length; i++) {
             prepareAppProfiles(pkg, user[i]);
+        }
+    }
+
+    /**
+     * Clear the profiles for the given package.
+     */
+    public void clearAppProfiles(PackageParser.Package pkg) {
+        try {
+            ArrayMap<String, String> packageProfileNames = getPackageProfileNames(pkg);
+            for (int i = packageProfileNames.size() - 1; i >= 0; i--) {
+                String profileName = packageProfileNames.valueAt(i);
+                mInstaller.clearAppProfiles(pkg.packageName, profileName);
+            }
+        } catch (InstallerException e) {
+            Slog.w(TAG, String.valueOf(e));
+        }
+    }
+
+    /**
+     * Dumps the profiles for the given package.
+     */
+    public void dumpProfiles(PackageParser.Package pkg) {
+        final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
+        try {
+            ArrayMap<String, String> packageProfileNames = getPackageProfileNames(pkg);
+            for (int i = packageProfileNames.size() - 1; i >= 0; i--) {
+                String codePath = packageProfileNames.keyAt(i);
+                String profileName = packageProfileNames.valueAt(i);
+                synchronized (mInstallLock) {
+                    mInstaller.dumpProfiles(sharedGid, pkg.packageName, profileName, codePath);
+                }
+            }
+        } catch (InstallerException e) {
+            Slog.w(TAG, "Failed to dump profiles", e);
         }
     }
 

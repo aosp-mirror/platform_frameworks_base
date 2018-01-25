@@ -193,6 +193,7 @@ import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VerifierInfo;
 import android.content.pm.VersionedPackage;
+import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
 import android.content.res.Resources;
@@ -8916,7 +8917,8 @@ Slog.e("TODD",
                         // PackageDexOptimizer to prevent this happening on first boot. The issue
                         // is that we don't have a good way to say "do this only once".
                         if (!mInstaller.copySystemProfile(profileFile.getAbsolutePath(),
-                                pkg.applicationInfo.uid, pkg.packageName)) {
+                                pkg.applicationInfo.uid, pkg.packageName,
+                                ArtManager.getProfileName(null))) {
                             Log.e(TAG, "Installer failed to copy system profile!");
                         } else {
                             // Disabled as this causes speed-profile compilation during first boot
@@ -8951,7 +8953,8 @@ Slog.e("TODD",
                                 // issue is that we don't have a good way to say "do this only
                                 // once".
                                 if (!mInstaller.copySystemProfile(profileFile.getAbsolutePath(),
-                                        pkg.applicationInfo.uid, pkg.packageName)) {
+                                        pkg.applicationInfo.uid, pkg.packageName,
+                                        ArtManager.getProfileName(null))) {
                                     Log.e(TAG, "Failed to copy system profile for stub package!");
                                 } else {
                                     useProfileForDexopt = true;
@@ -9376,14 +9379,7 @@ Slog.e("TODD",
 
         synchronized (mInstallLock) {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dump profiles");
-            final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
-            try {
-                List<String> allCodePaths = pkg.getAllCodePathsExcludingResourceOnly();
-                String codePaths = TextUtils.join(";", allCodePaths);
-                mInstaller.dumpProfiles(sharedGid, packageName, codePaths);
-            } catch (InstallerException e) {
-                Slog.w(TAG, "Failed to dump profiles", e);
-            }
+            mArtManagerService.dumpProfiles(pkg);
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
     }
@@ -9459,6 +9455,8 @@ Slog.e("TODD",
         for (int i = 0; i < childCount; i++) {
             clearAppDataLeafLIF(pkg.childPackages.get(i), userId, flags);
         }
+
+        clearAppProfilesLIF(pkg, UserHandle.USER_ALL);
     }
 
     private void clearAppDataLeafLIF(PackageParser.Package pkg, int userId, int flags) {
@@ -9531,18 +9529,10 @@ Slog.e("TODD",
             Slog.wtf(TAG, "Package was null!", new Throwable());
             return;
         }
-        clearAppProfilesLeafLIF(pkg);
+        mArtManagerService.clearAppProfiles(pkg);
         final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
         for (int i = 0; i < childCount; i++) {
-            clearAppProfilesLeafLIF(pkg.childPackages.get(i));
-        }
-    }
-
-    private void clearAppProfilesLeafLIF(PackageParser.Package pkg) {
-        try {
-            mInstaller.clearAppProfiles(pkg.packageName);
-        } catch (InstallerException e) {
-            Slog.w(TAG, String.valueOf(e));
+            mArtManagerService.clearAppProfiles(pkg.childPackages.get(i));
         }
     }
 
@@ -16202,7 +16192,6 @@ Slog.e("TODD",
 
             clearAppDataLIF(pkg, UserHandle.USER_ALL, StorageManager.FLAG_STORAGE_DE
                     | StorageManager.FLAG_STORAGE_CE | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
-            clearAppProfilesLIF(deletedPackage, UserHandle.USER_ALL);
 
             try {
                 final PackageParser.Package newPackage = scanPackageTracedLI(pkg, parseFlags,
@@ -16341,7 +16330,6 @@ Slog.e("TODD",
         // Successfully disabled the old package. Now proceed with re-installation
         clearAppDataLIF(pkg, UserHandle.USER_ALL, StorageManager.FLAG_STORAGE_DE
                 | StorageManager.FLAG_STORAGE_CE | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
-        clearAppProfilesLIF(deletedPackage, UserHandle.USER_ALL);
 
         res.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
         pkg.setApplicationInfoFlags(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP,
@@ -20414,7 +20402,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     }
                     clearAppDataLIF(pkg, UserHandle.USER_ALL, FLAG_STORAGE_DE
                             | FLAG_STORAGE_CE | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
-                    clearAppProfilesLIF(pkg, UserHandle.USER_ALL);
                     mDexManager.notifyPackageUpdated(pkg.packageName,
                             pkg.baseCodePath, pkg.splitCodePaths);
                 }
