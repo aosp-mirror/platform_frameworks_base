@@ -100,6 +100,8 @@ import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
+import android.text.SpannedString;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -4937,9 +4939,25 @@ public class StatusBar extends SystemUI implements DemoMode,
                             }
                         }
                     }
+                    Intent fillInIntent = null;
+                    Entry entry = row.getEntry();
+                    CharSequence remoteInputText = null;
+                    RemoteInputController controller = mRemoteInputManager.getController();
+                    if (controller.isRemoteInputActive(entry)) {
+                        remoteInputText = row.getActiveRemoteInputText();
+                    }
+                    if (TextUtils.isEmpty(remoteInputText)
+                            && !TextUtils.isEmpty(entry.remoteInputText)) {
+                        remoteInputText = entry.remoteInputText;
+                    }
+                    if (!TextUtils.isEmpty(remoteInputText)
+                            && !controller.isSpinning(entry.key)) {
+                        fillInIntent = new Intent().putExtra(Notification.EXTRA_REMOTE_INPUT_DRAFT,
+                                remoteInputText.toString());
+                    }
                     try {
-                        launchResult = intent.sendAndReturnResult(null, 0, null, null, null, null,
-                                getActivityOptions(row));
+                        launchResult = intent.sendAndReturnResult(mContext, 0, fillInIntent, null,
+                                null, null, getActivityOptions(row));
                     } catch (PendingIntent.CanceledException e) {
                         // the stack trace isn't very helpful here.
                         // Just log the exception message.

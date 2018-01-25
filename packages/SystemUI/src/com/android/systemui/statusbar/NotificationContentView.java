@@ -1563,4 +1563,14 @@ public class NotificationContentView extends FrameLayout {
         }
         return visibleWrapper.shouldClipToRounding(topRounded, bottomRounded);
     }
+
+    public CharSequence getActiveRemoteInputText() {
+        if (mExpandedRemoteInput != null && mExpandedRemoteInput.isActive()) {
+            return mExpandedRemoteInput.getText();
+        }
+        if (mHeadsUpRemoteInput != null && mHeadsUpRemoteInput.isActive()) {
+            return mHeadsUpRemoteInput.getText();
+        }
+        return null;
+    }
 }

@@ -1458,6 +1458,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mMenuRow.resetMenu();
     }
 
+    public CharSequence getActiveRemoteInputText() {
+        return mPrivateLayout.getActiveRemoteInputText();
+    }
+
+
     public void animateTranslateNotification(final float leftTarget) {
         if (mTranslateAnim != null) {
             mTranslateAnim.cancel();
