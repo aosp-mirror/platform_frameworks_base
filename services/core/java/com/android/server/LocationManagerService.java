@@ -1577,13 +1577,22 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     /**
-     * Returns all providers by name, including passive, but excluding
-     * fused, also including ones that are not permitted to
-     * be accessed by the calling activity or are currently disabled.
+     * Returns all providers by name, including passive and the ones that are not permitted to
+     * be accessed by the calling activity or are currently disabled, but excluding fused.
      */
     @Override
     public List<String> getAllProviders() {
-        List<String> out = getProviders(null /*criteria*/, false /*enabledOnly*/);
+        ArrayList<String> out;
+        synchronized (mLock) {
+            out = new ArrayList<>(mProviders.size());
+            for (LocationProviderInterface provider : mProviders) {
+                String name = provider.getName();
+                if (LocationManager.FUSED_PROVIDER.equals(name)) {
+                    continue;
+                }
+                out.add(name);
+            }
+        }
         if (D) Log.d(TAG, "getAllProviders()=" + out);
         return out;
     }
@@ -2586,9 +2595,10 @@ public class LocationManagerService extends ILocationManager.Stub {
         // Check INTERACT_ACROSS_USERS permission if userId is not current user id.
         checkInteractAcrossUsersPermission(userId);
 
-        // Enable or disable all location providers
+        // Enable or disable all location providers. Fused provider and passive provider are
+        // excluded.
         synchronized (mLock) {
-            for(String provider : getAllProviders()) {
+            for(String provider : getAllProvidersForLocationSettings()) {
                 setProviderEnabledForUser(provider, enabled, userId);
             }
         }
@@ -2605,9 +2615,10 @@ public class LocationManagerService extends ILocationManager.Stub {
         // Check INTERACT_ACROSS_USERS permission if userId is not current user id.
         checkInteractAcrossUsersPermission(userId);
 
-        // If at least one location provider is enabled, return true
+        // If at least one location provider is enabled, return true. Fused provider and passive
+        // provider are excluded.
         synchronized (mLock) {
-            for (String provider : getAllProviders()) {
+            for (String provider : getAllProvidersForLocationSettings()) {
                 if (isProviderEnabledForUser(provider, userId)) {
                     return true;
                 }
@@ -2688,6 +2699,26 @@ public class LocationManagerService extends ILocationManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    /**
+     * Return all location providers except fused provider and passive provider. These two
+     * providers are not generating location by themselves, but only echo locations from other
+     * providers.
+     *
+     * @return All location providers except fused provider and passive provider, including
+     *          providers that are not permitted to be accessed by the calling activity or are
+     *          currently disabled.
+     */
+    private List<String> getAllProvidersForLocationSettings() {
+        List<String> providersForSettings = new ArrayList<>(mProviders.size());
+        for (String provider : getAllProviders()) {
+            if (provider.equals(LocationManager.PASSIVE_PROVIDER)) {
+                continue;
+            }
+            providersForSettings.add(provider);
+        }
+        return providersForSettings;
     }
 
     /**

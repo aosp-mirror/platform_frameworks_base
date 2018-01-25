@@ -119,7 +119,8 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
         // for the current foreground user.
         LocationManager locationManager =
                 (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-        return locationManager.isLocationEnabledForUser(Process.myUserHandle());
+        return locationManager.isLocationEnabledForUser(
+                UserHandle.of(ActivityManager.getCurrentUser()));
     }
 
     @Override
