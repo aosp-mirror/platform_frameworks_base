@@ -96,6 +96,13 @@ public class NetworkMetrics {
         }
     }
 
+    /** Accumulate a single netd sock_diag poll result reported by netd. */
+    public void addTcpStatsResult(int sent, int lost, int rttUs, int sentAckDiffMs) {
+        pendingSummary.tcpLossRate.count(lost, sent);
+        pendingSummary.roundTripTimeUs.count(rttUs);
+        pendingSummary.sentAckTimeDiffenceMs.count(sentAckDiffMs);
+    }
+
     /** Represents running sums for dns and connect average error counts and average latencies. */
     public static class Summary {
 
@@ -109,6 +116,13 @@ public class NetworkMetrics {
         public final Metrics connectLatencies = new Metrics();
         // Blocking and non blocking connect error rate measured in percentage points.
         public final Metrics connectErrorRate = new Metrics();
+        // TCP socket packet loss stats collected from Netlink sock_diag.
+        public final Metrics tcpLossRate = new Metrics();
+        // TCP averaged microsecond round-trip-time stats collected from Netlink sock_diag.
+        public final Metrics roundTripTimeUs = new Metrics();
+        // TCP stats collected from Netlink sock_diag that averages millisecond per-socket
+        // differences between last packet sent timestamp and last ack received timestamp.
+        public final Metrics sentAckTimeDiffenceMs = new Metrics();
 
         public Summary(int netId, long transports) {
             this.netId = netId;
@@ -120,6 +134,7 @@ public class NetworkMetrics {
             dnsErrorRate.merge(that.dnsErrorRate);
             connectLatencies.merge(that.connectLatencies);
             connectErrorRate.merge(that.connectErrorRate);
+            tcpLossRate.merge(that.tcpLossRate);
         }
 
         @Override
@@ -135,6 +150,10 @@ public class NetworkMetrics {
             j.add(String.format("connect avg=%dms max=%dms err=%.1f%% tot=%d",
                     (int) connectLatencies.average(), (int) connectLatencies.max,
                     100 * connectErrorRate.average(), connectErrorRate.count));
+            j.add(String.format("tcp avg_loss=%.1f%% total_sent=%d total_lost=%d",
+                    100 * tcpLossRate.average(), tcpLossRate.count, (int) tcpLossRate.sum));
+            j.add(String.format("tcp rtt=%dms", (int) (roundTripTimeUs.average() / 1000)));
+            j.add(String.format("tcp sent-ack_diff=%dms", (int) sentAckTimeDiffenceMs.average()));
             return j.toString();
         }
     }
@@ -152,7 +171,11 @@ public class NetworkMetrics {
         }
 
         void count(double value) {
-            count++;
+            count(value, 1);
+        }
+
+        void count(double value, int subcount) {
+            count += subcount;
             sum += value;
             max = Math.max(max, value);
         }
