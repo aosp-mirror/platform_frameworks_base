@@ -3593,26 +3593,6 @@ public class WifiManager {
     }
 
     /**
-     * Deprecated
-     * Does nothing
-     * @hide
-     * @deprecated
-     */
-    public void setAllowScansWithTraffic(int enabled) {
-        return;
-    }
-
-    /**
-     * Deprecated
-     * returns value for 'disabled'
-     * @hide
-     * @deprecated
-     */
-    public int getAllowScansWithTraffic() {
-        return 0;
-    }
-
-    /**
      * Resets all wifi manager settings back to factory defaults.
      *
      * @hide
