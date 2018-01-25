@@ -506,6 +506,7 @@ public class Tethering extends BaseNetworkObserver {
         Intent intent = new Intent(Settings.ACTION_TETHER_PROVISIONING);
         intent.putExtra(ConnectivityManager.EXTRA_ADD_TETHER_TYPE, type);
         intent.putExtra(ConnectivityManager.EXTRA_PROVISION_CALLBACK, receiver);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         final long ident = Binder.clearCallingIdentity();
         try {
             mContext.startActivityAsUser(intent, UserHandle.CURRENT);
