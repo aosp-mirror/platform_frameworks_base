@@ -36,6 +36,7 @@ import android.view.textclassifier.TextClassifier.EntityType;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -592,6 +593,7 @@ public final class TextClassification {
     public static final class Options implements Parcelable {
 
         private @Nullable LocaleList mDefaultLocales;
+        private @Nullable Calendar mReferenceTime;
 
         public Options() {}
 
@@ -606,12 +608,31 @@ public final class TextClassification {
         }
 
         /**
+         * @param referenceTime reference time based on which relative dates (e.g. "tomorrow" should
+         *      be interpreted. This should usually be the time when the text was originally
+         *      composed. If no reference time is set, now is used.
+         */
+        public Options setReferenceTime(Calendar referenceTime) {
+            mReferenceTime = referenceTime;
+            return this;
+        }
+
+        /**
          * @return ordered list of locale preferences that can be used to disambiguate
          *      the provided text.
          */
         @Nullable
         public LocaleList getDefaultLocales() {
             return mDefaultLocales;
+        }
+
+        /**
+         * @return reference time based on which relative dates (e.g. "tomorrow") should be
+         *      interpreted.
+         */
+        @Nullable
+        public Calendar getReferenceTime() {
+            return mReferenceTime;
         }
 
         @Override
@@ -624,6 +645,10 @@ public final class TextClassification {
             dest.writeInt(mDefaultLocales != null ? 1 : 0);
             if (mDefaultLocales != null) {
                 mDefaultLocales.writeToParcel(dest, flags);
+            }
+            dest.writeInt(mReferenceTime != null ? 1 : 0);
+            if (mReferenceTime != null) {
+                dest.writeSerializable(mReferenceTime);
             }
         }
 
@@ -643,6 +668,9 @@ public final class TextClassification {
         private Options(Parcel in) {
             if (in.readInt() > 0) {
                 mDefaultLocales = LocaleList.CREATOR.createFromParcel(in);
+            }
+            if (in.readInt() > 0) {
+                mReferenceTime = (Calendar) in.readSerializable();
             }
         }
     }

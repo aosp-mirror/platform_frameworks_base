@@ -18,7 +18,9 @@ package android.view.textclassifier;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.SearchManager;
 import android.content.ComponentName;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -28,6 +30,7 @@ import android.net.Uri;
 import android.os.LocaleList;
 import android.os.ParcelFileDescriptor;
 import android.provider.Browser;
+import android.provider.CalendarContract;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.text.util.Linkify;
@@ -42,6 +45,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -49,6 +53,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -73,7 +78,10 @@ final class TextClassifierImpl implements TextClassifier {
                     TextClassifier.TYPE_ADDRESS,
                     TextClassifier.TYPE_EMAIL,
                     TextClassifier.TYPE_PHONE,
-                    TextClassifier.TYPE_URL));
+                    TextClassifier.TYPE_URL,
+                    TextClassifier.TYPE_DATE,
+                    TextClassifier.TYPE_DATE_TIME,
+                    TextClassifier.TYPE_FLIGHT_NUMBER));
     private static final List<String> ENTITY_TYPES_BASE =
             Collections.unmodifiableList(Arrays.asList(
                     TextClassifier.TYPE_ADDRESS,
@@ -167,9 +175,8 @@ final class TextClassifierImpl implements TextClassifier {
                         .classifyText(string, startIndex, endIndex,
                                 getHintFlags(string, startIndex, endIndex));
                 if (results.length > 0) {
-                    final TextClassification classificationResult =
-                            createClassificationResult(results, string, startIndex, endIndex);
-                    return classificationResult;
+                    return createClassificationResult(
+                            results, string, startIndex, endIndex, options.getReferenceTime());
                 }
             }
         } catch (Throwable t) {
@@ -410,18 +417,24 @@ final class TextClassifierImpl implements TextClassifier {
 
     private TextClassification createClassificationResult(
             SmartSelection.ClassificationResult[] classifications,
-            String text, int start, int end) {
+            String text, int start, int end, @Nullable Calendar referenceTime) {
         final String classifiedText = text.substring(start, end);
         final TextClassification.Builder builder = new TextClassification.Builder()
                 .setText(classifiedText);
 
         final int size = classifications.length;
+        SmartSelection.ClassificationResult highestScoringResult = null;
+        float highestScore = Float.MIN_VALUE;
         for (int i = 0; i < size; i++) {
             builder.setEntityType(classifications[i].mCollection, classifications[i].mScore);
+            if (classifications[i].mScore > highestScore) {
+                highestScoringResult = classifications[i];
+                highestScore = classifications[i].mScore;
+            }
         }
 
-        final String type = getHighestScoringType(classifications);
-        addActions(builder, IntentFactory.create(mContext, type, classifiedText));
+        addActions(builder, IntentFactory.create(
+                mContext, referenceTime, highestScoringResult, classifiedText));
 
         return builder.setSignature(getSignature(text, start, end)).build();
     }
@@ -441,11 +454,10 @@ final class TextClassifierImpl implements TextClassifier {
             }
             if (resolveInfo != null && resolveInfo.activityInfo != null) {
                 final String packageName = resolveInfo.activityInfo.packageName;
-                CharSequence label;
+                final String label = IntentFactory.getLabel(mContext, intent);
                 Drawable icon;
                 if ("android".equals(packageName)) {
                     // Requires the chooser to find an activity to handle the intent.
-                    label = IntentFactory.getLabel(mContext, intent);
                     icon = null;
                 } else {
                     // A default activity will handle the intent.
@@ -455,16 +467,11 @@ final class TextClassifierImpl implements TextClassifier {
                     if (icon == null) {
                         icon = resolveInfo.loadIcon(pm);
                     }
-                    label = resolveInfo.activityInfo.loadLabel(pm);
-                    if (label == null) {
-                        label = resolveInfo.loadLabel(pm);
-                    }
                 }
-                final String labelString = (label != null) ? label.toString() : null;
                 if (i == 0) {
-                    builder.setPrimaryAction(intent, labelString, icon);
+                    builder.setPrimaryAction(intent, label, icon);
                 } else {
-                    builder.addSecondaryAction(intent, labelString, icon);
+                    builder.addSecondaryAction(intent, label, icon);
                 }
             }
         }
@@ -483,23 +490,6 @@ final class TextClassifierImpl implements TextClassifier {
         return flag;
     }
 
-    private static String getHighestScoringType(SmartSelection.ClassificationResult[] types) {
-        if (types.length < 1) {
-            return "";
-        }
-
-        String type = types[0].mCollection;
-        float highestScore = types[0].mScore;
-        final int size = types.length;
-        for (int i = 1; i < size; i++) {
-            if (types[i].mScore > highestScore) {
-                type = types[i].mCollection;
-                highestScore = types[i].mScore;
-            }
-        }
-        return type;
-    }
-
     /**
      * Closes the ParcelFileDescriptor and logs any errors that occur.
      */
@@ -514,51 +504,130 @@ final class TextClassifierImpl implements TextClassifier {
     /**
      * Creates intents based on the classification type.
      */
-    private static final class IntentFactory {
+    static final class IntentFactory {
+
+        private static final long MIN_EVENT_FUTURE_MILLIS = TimeUnit.MINUTES.toMillis(5);
+        private static final long DEFAULT_EVENT_DURATION = TimeUnit.HOURS.toMillis(1);
 
         private IntentFactory() {}
 
         @NonNull
-        public static List<Intent> create(Context context, String type, String text) {
-            final List<Intent> intents = new ArrayList<>();
-            type = type.trim().toLowerCase(Locale.ENGLISH);
+        public static List<Intent> create(
+                Context context,
+                @Nullable Calendar referenceTime,
+                SmartSelection.ClassificationResult classification,
+                String text) {
+            final String type = classification.mCollection.trim().toLowerCase(Locale.ENGLISH);
             text = text.trim();
             switch (type) {
                 case TextClassifier.TYPE_EMAIL:
-                    intents.add(new Intent(Intent.ACTION_SENDTO)
-                            .setData(Uri.parse(String.format("mailto:%s", text))));
-                    intents.add(new Intent(Intent.ACTION_INSERT_OR_EDIT)
+                    return createForEmail(text);
+                case TextClassifier.TYPE_PHONE:
+                    return createForPhone(text);
+                case TextClassifier.TYPE_ADDRESS:
+                    return createForAddress(text);
+                case TextClassifier.TYPE_URL:
+                    return createForUrl(context, text);
+                case TextClassifier.TYPE_DATE:
+                case TextClassifier.TYPE_DATE_TIME:
+                    if (classification.mDatetime != null) {
+                        Calendar eventTime = Calendar.getInstance();
+                        eventTime.setTimeInMillis(classification.mDatetime.mMsSinceEpoch);
+                        return createForDatetime(type, referenceTime, eventTime);
+                    } else {
+                        return new ArrayList<>();
+                    }
+                case TextClassifier.TYPE_FLIGHT_NUMBER:
+                    return createForFlight(text);
+                default:
+                    return new ArrayList<>();
+            }
+        }
+
+        @NonNull
+        private static List<Intent> createForEmail(String text) {
+            return Arrays.asList(
+                    new Intent(Intent.ACTION_SENDTO)
+                            .setData(Uri.parse(String.format("mailto:%s", text))),
+                    new Intent(Intent.ACTION_INSERT_OR_EDIT)
                             .setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE)
                             .putExtra(ContactsContract.Intents.Insert.EMAIL, text));
-                    break;
-                case TextClassifier.TYPE_PHONE:
-                    intents.add(new Intent(Intent.ACTION_DIAL)
-                            .setData(Uri.parse(String.format("tel:%s", text))));
-                    intents.add(new Intent(Intent.ACTION_INSERT_OR_EDIT)
+        }
+
+        @NonNull
+        private static List<Intent> createForPhone(String text) {
+            return Arrays.asList(
+                    new Intent(Intent.ACTION_DIAL)
+                            .setData(Uri.parse(String.format("tel:%s", text))),
+                    new Intent(Intent.ACTION_INSERT_OR_EDIT)
                             .setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE)
-                            .putExtra(ContactsContract.Intents.Insert.PHONE, text));
-                    intents.add(new Intent(Intent.ACTION_SENDTO)
+                            .putExtra(ContactsContract.Intents.Insert.PHONE, text),
+                    new Intent(Intent.ACTION_SENDTO)
                             .setData(Uri.parse(String.format("smsto:%s", text))));
-                    break;
-                case TextClassifier.TYPE_ADDRESS:
-                    intents.add(new Intent(Intent.ACTION_VIEW)
-                            .setData(Uri.parse(String.format("geo:0,0?q=%s", text))));
-                    break;
-                case TextClassifier.TYPE_URL:
-                    final String httpPrefix = "http://";
-                    final String httpsPrefix = "https://";
-                    if (text.toLowerCase().startsWith(httpPrefix)) {
-                        text = httpPrefix + text.substring(httpPrefix.length());
-                    } else if (text.toLowerCase().startsWith(httpsPrefix)) {
-                        text = httpsPrefix + text.substring(httpsPrefix.length());
-                    } else {
-                        text = httpPrefix + text;
-                    }
-                    intents.add(new Intent(Intent.ACTION_VIEW, Uri.parse(text))
-                            .putExtra(Browser.EXTRA_APPLICATION_ID, context.getPackageName()));
-                    break;
+        }
+
+        @NonNull
+        private static List<Intent> createForAddress(String text) {
+            return Arrays.asList(new Intent(Intent.ACTION_VIEW)
+                    .setData(Uri.parse(String.format("geo:0,0?q=%s", text))));
+        }
+
+        @NonNull
+        private static List<Intent> createForUrl(Context context, String text) {
+            final String httpPrefix = "http://";
+            final String httpsPrefix = "https://";
+            if (text.toLowerCase().startsWith(httpPrefix)) {
+                text = httpPrefix + text.substring(httpPrefix.length());
+            } else if (text.toLowerCase().startsWith(httpsPrefix)) {
+                text = httpsPrefix + text.substring(httpsPrefix.length());
+            } else {
+                text = httpPrefix + text;
+            }
+            return Arrays.asList(new Intent(Intent.ACTION_VIEW, Uri.parse(text))
+                    .putExtra(Browser.EXTRA_APPLICATION_ID, context.getPackageName()));
+        }
+
+        @NonNull
+        private static List<Intent> createForDatetime(
+                String type, @Nullable Calendar referenceTime, Calendar eventTime) {
+            if (referenceTime == null) {
+                // If no reference time was given, use now.
+                referenceTime = Calendar.getInstance();
+            }
+            List<Intent> intents = new ArrayList<>();
+            intents.add(createCalendarViewIntent(eventTime));
+            final long millisSinceReference =
+                    eventTime.getTimeInMillis() - referenceTime.getTimeInMillis();
+            if (millisSinceReference > MIN_EVENT_FUTURE_MILLIS) {
+                intents.add(createCalendarCreateEventIntent(eventTime, type));
             }
             return intents;
+        }
+
+        @NonNull
+        private static List<Intent> createForFlight(String text) {
+            return Arrays.asList(new Intent(Intent.ACTION_WEB_SEARCH)
+                    .putExtra(SearchManager.QUERY, text));
+        }
+
+        @NonNull
+        private static Intent createCalendarViewIntent(Calendar eventTime) {
+            Uri.Builder builder = CalendarContract.CONTENT_URI.buildUpon();
+            builder.appendPath("time");
+            ContentUris.appendId(builder, eventTime.getTimeInMillis());
+            return new Intent(Intent.ACTION_VIEW).setData(builder.build());
+        }
+
+        @NonNull
+        private static Intent createCalendarCreateEventIntent(
+                Calendar eventTime, @EntityType String type) {
+            final boolean isAllDay = TextClassifier.TYPE_DATE.equals(type);
+            return new Intent(Intent.ACTION_INSERT)
+                    .setData(CalendarContract.Events.CONTENT_URI)
+                    .putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, isAllDay)
+                    .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, eventTime.getTimeInMillis())
+                    .putExtra(CalendarContract.EXTRA_EVENT_END_TIME,
+                            eventTime.getTimeInMillis() + DEFAULT_EVENT_DURATION);
         }
 
         @Nullable
@@ -566,6 +635,8 @@ final class TextClassifierImpl implements TextClassifier {
             if (intent == null || intent.getAction() == null) {
                 return null;
             }
+            final String authority =
+                    intent.getData() == null ? null : intent.getData().getAuthority();
             switch (intent.getAction()) {
                 case Intent.ACTION_DIAL:
                     return context.getString(com.android.internal.R.string.dial);
@@ -578,6 +649,11 @@ final class TextClassifierImpl implements TextClassifier {
                         default:
                             return null;
                     }
+                case Intent.ACTION_INSERT:
+                    if (CalendarContract.AUTHORITY.equals(authority)) {
+                        return context.getString(com.android.internal.R.string.add_calendar_event);
+                    }
+                    return null;
                 case Intent.ACTION_INSERT_OR_EDIT:
                     switch (intent.getDataString()) {
                         case ContactsContract.Contacts.CONTENT_ITEM_TYPE:
@@ -586,6 +662,9 @@ final class TextClassifierImpl implements TextClassifier {
                             return null;
                     }
                 case Intent.ACTION_VIEW:
+                    if (CalendarContract.AUTHORITY.equals(authority)) {
+                        return context.getString(com.android.internal.R.string.view_calendar);
+                    }
                     switch (intent.getScheme()) {
                         case "geo":
                             return context.getString(com.android.internal.R.string.map);
@@ -595,6 +674,8 @@ final class TextClassifierImpl implements TextClassifier {
                         default:
                             return null;
                     }
+                case Intent.ACTION_WEB_SEARCH:
+                    return context.getString(com.android.internal.R.string.view_flight);
                 default:
                     return null;
             }
