@@ -52,14 +52,14 @@ protected:
 TEST_F(CpuFreqParserTest, Success) {
     const string testFile = kTestDataPath + "cpufreq.txt";
     CpuFreqParser parser;
-    CpuFreq expected;
+    CpuFreqProto expected;
 
     long jiffyHz = sysconf(_SC_CLK_TCK);
     expected.set_jiffy_hz(jiffyHz);
 
-    CpuFreqStats::TimeInState* state;
+    CpuFreqProto::Stats::TimeInState* state;
 
-    CpuFreqStats* cpu0 = expected.add_cpu_freqs();
+    CpuFreqProto::Stats* cpu0 = expected.add_cpu_freqs();
     cpu0->set_cpu_name("cpu0");
     state = cpu0->add_times();
     state->set_state_khz(307200);
@@ -71,7 +71,7 @@ TEST_F(CpuFreqParserTest, Success) {
     state->set_state_khz(768000);
     state->set_time_jiffy(22652);
 
-    CpuFreqStats* cpu1 = expected.add_cpu_freqs();
+    CpuFreqProto::Stats* cpu1 = expected.add_cpu_freqs();
     cpu1->set_cpu_name("cpu1");
     state = cpu1->add_times();
     state->set_state_khz(307200);
@@ -83,7 +83,7 @@ TEST_F(CpuFreqParserTest, Success) {
     state->set_state_khz(768000);
     state->set_time_jiffy(22652);
 
-    CpuFreqStats* cpu2 = expected.add_cpu_freqs();
+    CpuFreqProto::Stats* cpu2 = expected.add_cpu_freqs();
     cpu2->set_cpu_name("cpu2");
     state = cpu2->add_times();
     state->set_state_khz(307200);
@@ -98,7 +98,7 @@ TEST_F(CpuFreqParserTest, Success) {
     state->set_state_khz(825600);
     state->set_time_jiffy(13173);
 
-    CpuFreqStats* cpu3 = expected.add_cpu_freqs();
+    CpuFreqProto::Stats* cpu3 = expected.add_cpu_freqs();
     cpu3->set_cpu_name("cpu3");
     state = cpu3->add_times();
     state->set_state_khz(307200);

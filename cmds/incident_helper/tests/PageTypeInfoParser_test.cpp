@@ -52,12 +52,12 @@ protected:
 TEST_F(PageTypeInfoParserTest, Success) {
     const string testFile = kTestDataPath + "pagetypeinfo.txt";
     PageTypeInfoParser parser;
-    PageTypeInfo expected;
+    PageTypeInfoProto expected;
 
     expected.set_page_block_order(10);
     expected.set_pages_per_block(1024);
 
-    MigrateTypeProto* mt1 = expected.add_migrate_types();
+    PageTypeInfoProto::MigrateType* mt1 = expected.add_migrate_types();
     mt1->set_node(0);
     mt1->set_zone("DMA");
     mt1->set_type("Unmovable");
@@ -66,7 +66,7 @@ TEST_F(PageTypeInfoParserTest, Success) {
         mt1->add_free_pages_count(arr1[i]);
     }
 
-    MigrateTypeProto* mt2 = expected.add_migrate_types();
+    PageTypeInfoProto::MigrateType* mt2 = expected.add_migrate_types();
     mt2->set_node(0);
     mt2->set_zone("Normal");
     mt2->set_type("Reclaimable");
@@ -75,7 +75,7 @@ TEST_F(PageTypeInfoParserTest, Success) {
         mt2->add_free_pages_count(arr2[i]);
     }
 
-    BlockProto* block1 = expected.add_blocks();
+    PageTypeInfoProto::Block* block1 = expected.add_blocks();
     block1->set_node(0);
     block1->set_zone("DMA");
     block1->set_unmovable(74);
@@ -86,7 +86,7 @@ TEST_F(PageTypeInfoParserTest, Success) {
     block1->set_isolate(0);
 
 
-    BlockProto* block2 = expected.add_blocks();
+    PageTypeInfoProto::Block* block2 = expected.add_blocks();
     block2->set_node(0);
     block2->set_zone("Normal");
     block2->set_unmovable(70);

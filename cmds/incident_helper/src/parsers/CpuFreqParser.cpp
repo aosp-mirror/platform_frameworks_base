@@ -62,15 +62,15 @@ CpuFreqParser::Parse(const int in, const int out) const
     ProtoOutputStream proto;
 
     long jiffyHz = sysconf(_SC_CLK_TCK);
-    proto.write(CpuFreq::JIFFY_HZ, (int)jiffyHz);
+    proto.write(CpuFreqProto::JIFFY_HZ, (int)jiffyHz);
 
     for (int i=0; i<numCpus; i++) {
-        long long token = proto.start(CpuFreq::CPU_FREQS);
-        proto.write(CpuFreqStats::CPU_NAME, header[i+1]);
+        long long token = proto.start(CpuFreqProto::CPU_FREQS);
+        proto.write(CpuFreqProto::Stats::CPU_NAME, header[i+1]);
         for (vector<pair<int, long long>>::iterator it = cpucores[i].begin(); it != cpucores[i].end(); it++) {
-            long long stateToken = proto.start(CpuFreqStats::TIMES);
-            proto.write(CpuFreqStats::TimeInState::STATE_KHZ, it->first);
-            proto.write(CpuFreqStats::TimeInState::TIME_JIFFY, it->second);
+            long long stateToken = proto.start(CpuFreqProto::Stats::TIMES);
+            proto.write(CpuFreqProto::Stats::TimeInState::STATE_KHZ, it->first);
+            proto.write(CpuFreqProto::Stats::TimeInState::TIME_JIFFY, it->second);
             proto.end(stateToken);
         }
         proto.end(token);

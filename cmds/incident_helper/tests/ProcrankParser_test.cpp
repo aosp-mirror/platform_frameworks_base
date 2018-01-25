@@ -52,9 +52,9 @@ protected:
 TEST_F(ProcrankParserTest, HasSwapInfo) {
     const string testFile = kTestDataPath + "procrank.txt";
     ProcrankParser parser;
-    Procrank expected;
+    ProcrankProto expected;
 
-    ProcessProto* process1 = expected.add_processes();
+    ProcrankProto::Process* process1 = expected.add_processes();
     process1->set_pid(1119);
     process1->set_vss(2607640);
     process1->set_rss(339564);
@@ -66,7 +66,7 @@ TEST_F(ProcrankParserTest, HasSwapInfo) {
     process1->set_zswap(10);
     process1->set_cmdline("system_server");
 
-    ProcessProto* process2 = expected.add_processes();
+    ProcrankProto::Process* process2 = expected.add_processes();
     process2->set_pid(649);
     process2->set_vss(11016);
     process2->set_rss(1448);
@@ -78,7 +78,7 @@ TEST_F(ProcrankParserTest, HasSwapInfo) {
     process2->set_zswap(75);
     process2->set_cmdline("/vendor/bin/qseecomd");
 
-    ProcessProto* total = expected.mutable_summary()->mutable_total();
+    ProcrankProto::Process* total = expected.mutable_summary()->mutable_total();
     total->set_pss(1201993);
     total->set_uss(935300);
     total->set_swap(88164);
@@ -104,9 +104,9 @@ TEST_F(ProcrankParserTest, HasSwapInfo) {
 TEST_F(ProcrankParserTest, NoSwapInfo) {
     const string testFile = kTestDataPath + "procrank_short.txt";
     ProcrankParser parser;
-    Procrank expected;
+    ProcrankProto expected;
 
-    ProcessProto* process1 = expected.add_processes();
+    ProcrankProto::Process* process1 = expected.add_processes();
     process1->set_pid(1119);
     process1->set_vss(2607640);
     process1->set_rss(339564);
@@ -114,7 +114,7 @@ TEST_F(ProcrankParserTest, NoSwapInfo) {
     process1->set_uss(114216);
     process1->set_cmdline("system_server");
 
-    ProcessProto* process2 = expected.add_processes();
+    ProcrankProto::Process* process2 = expected.add_processes();
     process2->set_pid(649);
     process2->set_vss(11016);
     process2->set_rss(1448);
@@ -122,7 +122,7 @@ TEST_F(ProcrankParserTest, NoSwapInfo) {
     process2->set_uss(48);
     process2->set_cmdline("/vendor/bin/qseecomd");
 
-    ProcessProto* total = expected.mutable_summary()->mutable_total();
+    ProcrankProto::Process* total = expected.mutable_summary()->mutable_total();
     total->set_pss(1201993);
     total->set_uss(935300);
     total->set_cmdline("TOTAL");

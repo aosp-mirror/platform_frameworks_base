@@ -33,12 +33,12 @@ status_t PsParser::Parse(const int in, const int out) const {
     int diff = 0;
 
     ProtoOutputStream proto;
-    Table table(PsDumpProto::Process::_FIELD_NAMES, PsDumpProto::Process::_FIELD_IDS, PsDumpProto::Process::_FIELD_COUNT);
+    Table table(PsProto::Process::_FIELD_NAMES, PsProto::Process::_FIELD_IDS, PsProto::Process::_FIELD_COUNT);
     const char* pcyNames[] = { "fg", "bg", "ta" };
-    const int pcyValues[] = {PsDumpProto::Process::POLICY_FG, PsDumpProto::Process::POLICY_BG, PsDumpProto::Process::POLICY_TA};
+    const int pcyValues[] = {PsProto::Process::POLICY_FG, PsProto::Process::POLICY_BG, PsProto::Process::POLICY_TA};
     table.addEnumTypeMap("pcy", pcyNames, pcyValues, 3);
     const char* sNames[] = { "D", "R", "S", "T", "t", "X", "Z" };
-    const int sValues[] = {PsDumpProto::Process::STATE_D, PsDumpProto::Process::STATE_R, PsDumpProto::Process::STATE_S, PsDumpProto::Process::STATE_T, PsDumpProto::Process::STATE_TRACING, PsDumpProto::Process::STATE_X, PsDumpProto::Process::STATE_Z};
+    const int sValues[] = {PsProto::Process::STATE_D, PsProto::Process::STATE_R, PsProto::Process::STATE_S, PsProto::Process::STATE_T, PsProto::Process::STATE_TRACING, PsProto::Process::STATE_X, PsProto::Process::STATE_Z};
     table.addEnumTypeMap("s", sNames, sValues, 7);
 
     // Parse line by line
@@ -71,7 +71,7 @@ status_t PsParser::Parse(const int in, const int out) const {
             continue;
         }
 
-        long long token = proto.start(PsDumpProto::PROCESSES);
+        long long token = proto.start(PsProto::PROCESSES);
         for (int i=0; i<(int)record.size(); i++) {
             if (!table.insertField(&proto, header[i], record[i])) {
                 fprintf(stderr, "[%s]Line %d has bad value %s of %s\n",
