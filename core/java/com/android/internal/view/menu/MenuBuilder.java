@@ -551,6 +551,7 @@ public class MenuBuilder implements Menu {
         mPreventDispatchingItemsChanged = true;
         clear();
         clearHeader();
+        mPresenters.clear();
         mPreventDispatchingItemsChanged = false;
         mItemsChangedWhileDispatchPrevented = false;
         onItemsChanged(true);
