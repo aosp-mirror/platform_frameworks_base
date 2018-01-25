@@ -19,6 +19,7 @@ package android.widget;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -2744,11 +2745,19 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private void drawSelector(Canvas canvas) {
-        if (!mSelectorRect.isEmpty()) {
+        if (shouldDrawSelector()) {
             final Drawable selector = mSelector;
             selector.setBounds(mSelectorRect);
             selector.draw(canvas);
         }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public final boolean shouldDrawSelector() {
+        return !mSelectorRect.isEmpty();
     }
 
     /**
