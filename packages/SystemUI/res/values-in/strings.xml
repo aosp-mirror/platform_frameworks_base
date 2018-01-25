@@ -331,7 +331,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> dinonaktifkan dalam mode aman."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Hapus semua"</string>
     <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Aplikasi tidak mendukung layar terpisah"</string>
-    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Seret ke sini untuk menggunakan layar terpisah"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Tarik ke sini untuk menggunakan layar terpisah"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Pisahkan Horizontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Pisahkan Vertikal"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Pisahkan Khusus"</string>
@@ -597,14 +597,14 @@
     <string name="no_home_message" msgid="5408485011659260911">"Tombol layar utama diperlukan agar dapat menavigasi perangkat ini. Tambahkan tombol layar uama sebelum menyimpan."</string>
     <string name="adjust_button_width" msgid="6138616087197632947">"Sesuaikan lebar tombol"</string>
     <string name="clipboard" msgid="1313879395099896312">"Papan klip"</string>
-    <string name="clipboard_description" msgid="3819919243940546364">"Papan klip memungkinkan item diseret langsung ke papan klip. Item juga dapat diseret langsung dari papan klik jika ada."</string>
+    <string name="clipboard_description" msgid="3819919243940546364">"Papan klip memungkinkan item ditarik langsung ke papan klip. Item juga dapat ditarik langsung dari papan klik jika ada."</string>
     <string name="accessibility_key" msgid="5701989859305675896">"Tombol navigasi khusus"</string>
     <string name="keycode" msgid="7335281375728356499">"Kode tombol"</string>
     <string name="keycode_description" msgid="1403795192716828949">"Tombol untuk kode tombol memungkinkan keyboard ditambahkan ke Bilah Navigasi. Jika ditekan, tombol ini mengemulasi tombol keyboard yang dipilih. Terlebih dahulu tombol harus dipilih, diikuti dengan gambar yang akan ditampilkan."</string>
     <string name="select_keycode" msgid="7413765103381924584">"Pilih Tombol Keyboard"</string>
     <string name="preview" msgid="9077832302472282938">"Pratinjau"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Seret untuk menambahkan ubin"</string>
-    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Seret ke sini untuk menghapus"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Tarik untuk menambahkan ubin"</string>
+    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Tarik ke sini untuk menghapus"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Edit"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Waktu"</string>
   <string-array name="clock_options">
