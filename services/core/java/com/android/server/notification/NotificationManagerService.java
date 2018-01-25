@@ -3421,7 +3421,7 @@ public class NotificationManagerService extends SystemService {
             long zenLog = proto.start(NotificationServiceDumpProto.ZEN);
             mZenModeHelper.dump(proto);
             for (ComponentName suppressor : mEffectsSuppressors) {
-                proto.write(ZenModeProto.SUPPRESSORS, suppressor.toString());
+                suppressor.writeToProto(proto, ZenModeProto.SUPPRESSORS);
             }
             proto.end(zenLog);
 

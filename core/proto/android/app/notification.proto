@@ -18,9 +18,9 @@ syntax = "proto2";
 option java_package = "android.app";
 option java_multiple_files = true;
 
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
-
 package android.app;
+
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 /**
  * An android.app.Notification object.
