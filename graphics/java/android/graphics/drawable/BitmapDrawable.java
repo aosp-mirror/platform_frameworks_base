@@ -163,7 +163,7 @@ public class BitmapDrawable extends Drawable {
     /**
      * Create a drawable by opening a given file path and decoding the bitmap.
      */
-    @SuppressWarnings("unused")
+    @SuppressWarnings({ "unused", "ChainingConstructorIgnoresParameter" })
     public BitmapDrawable(Resources res, String filepath) {
         this(new BitmapState(BitmapFactory.decodeFile(filepath)), null);
         mBitmapState.mTargetDensity = mTargetDensity;
@@ -188,7 +188,7 @@ public class BitmapDrawable extends Drawable {
     /**
      * Create a drawable by decoding a bitmap from the given input stream.
      */
-    @SuppressWarnings("unused")
+    @SuppressWarnings({ "unused", "ChainingConstructorIgnoresParameter" })
     public BitmapDrawable(Resources res, java.io.InputStream is) {
         this(new BitmapState(BitmapFactory.decodeStream(is)), null);
         mBitmapState.mTargetDensity = mTargetDensity;
