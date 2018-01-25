@@ -22,11 +22,14 @@ package android.content;
 
 import "frameworks/base/core/proto/android/app/window_configuration.proto";
 import "frameworks/base/core/proto/android/content/locale.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 /**
  * An android resource configuration.
  */
 message ConfigurationProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional float font_scale = 1;
   optional uint32 mcc = 2;
   optional uint32 mnc = 3;

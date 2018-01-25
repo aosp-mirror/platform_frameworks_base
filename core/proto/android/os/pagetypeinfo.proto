@@ -18,6 +18,8 @@ syntax = "proto2";
 option java_multiple_files = true;
 option java_outer_classname = "PageTypeInfoProto";
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 package android.os;
 
 /*
@@ -36,6 +38,7 @@ package android.os;
  *  Next tag: 5
  */
 message PageTypeInfo {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional int32 page_block_order = 1;
 
@@ -48,6 +51,7 @@ message PageTypeInfo {
 
 // Next tag: 5
 message MigrateTypeProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional int32 node = 1;
 
@@ -61,6 +65,7 @@ message MigrateTypeProto {
 
 // Next tag: 9
 message BlockProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional int32 node = 1;
 

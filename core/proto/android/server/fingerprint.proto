@@ -17,15 +17,21 @@
 syntax = "proto2";
 package com.android.server.fingerprint;
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 option java_multiple_files = true;
 option java_outer_classname = "FingerprintServiceProto";
 
 message FingerprintServiceDumpProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Each log may include multiple tuples of (user_id, num_fingerprints).
     repeated FingerprintUserStatsProto users = 1;
 }
 
 message FingerprintUserStatsProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Should be 0, 10, 11, 12, etc. where 0 is the owner.
     optional int32 user_id = 1;
 
@@ -42,6 +48,8 @@ message FingerprintUserStatsProto {
 
 // A com.android.server.fingerprint.FingerpintService.PerformanceStats object.
 message PerformanceStatsProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     // Number of accepted fingerprints.
     optional int32 accept = 1;
 

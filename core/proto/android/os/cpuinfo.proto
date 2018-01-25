@@ -18,6 +18,8 @@ syntax = "proto2";
 option java_multiple_files = true;
 option java_outer_classname = "CpuInfoProto";
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 package android.os;
 
 /**
@@ -27,8 +29,11 @@ package android.os;
  * Next Tag: 6
  */
 message CpuInfo {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     message TaskStats {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
         optional int32 total = 1;    // total number of cpu tasks
         optional int32 running = 2;  // number of running tasks
         optional int32 sleeping = 3; // number of sleeping tasks
@@ -38,6 +43,8 @@ message CpuInfo {
     optional TaskStats task_stats = 1;
 
     message MemStats { // unit in kB
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
         optional int32 total = 1;
         optional int32 used = 2;
         optional int32 free = 3;
@@ -48,6 +55,8 @@ message CpuInfo {
     optional MemStats swap = 3;
 
     message CpuUsage { // unit is percentage %
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
         optional int32 cpu = 1;   // 400% cpu indicates 4 cores
         optional int32 user = 2;
         optional int32 nice = 3;
@@ -62,9 +71,11 @@ message CpuInfo {
 
     // Next Tag: 13
     message Task {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
         optional int32 pid = 1;
         optional int32 tid = 2;
-        optional string user = 3;
+        optional string user = 3;   // the process name which uses cpu
         optional string pr = 4;     // priority of each task, using string type is because special value RT (real time)
         optional sint32 ni = 5;     // niceness value
         optional float cpu = 6;     // precentage of cpu usage of the task

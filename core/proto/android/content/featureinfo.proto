@@ -16,14 +16,20 @@
 
 syntax = "proto2";
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 option java_package = "android.content.pm";
 option java_multiple_files = true;
 
 package android.content.pm;
 
 message FeatureInfoProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Some hard coded feature name
     optional string name = 1;
     optional int32 version = 2;
+    // String representation of reqGlEsVersion.
     optional string gles_version = 3;
     optional int32 flags = 4;
 }

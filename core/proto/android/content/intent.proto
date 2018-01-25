@@ -21,9 +21,12 @@ option java_package = "android.content";
 option java_multiple_files = true;
 
 import "frameworks/base/core/proto/android/os/patternmatcher.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 // Next Tag: 13
 message IntentProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     enum DockState {
         // Used as an int value for Intent#EXTRA_DOCK_STATE to represent that
         // the phone is not in any dock.
@@ -48,13 +51,13 @@ message IntentProto {
 
     optional string action = 1;
     repeated string categories = 2;
-    optional string data = 3;
+    optional string data = 3  [ (.android.privacy).dest = DEST_EXPLICIT ];
     optional string type = 4;
     optional string flag = 5;
     optional string package = 6;
     optional string component = 7;
     optional string source_bounds = 8;
-    optional string clip_data = 9;
+    optional string clip_data = 9  [ (.android.privacy).dest = DEST_EXPLICIT ];
     optional string extras = 10;
     optional int32 content_user_hint = 11;
     optional string selector = 12;
@@ -62,9 +65,11 @@ message IntentProto {
 
 // Next Tag: 11
 message IntentFilterProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     repeated string actions = 1;
     repeated string categories = 2;
-    repeated string data_schemes = 3;
+    repeated string data_schemes = 3  [ (.android.privacy).dest = DEST_EXPLICIT ];
     repeated android.os.PatternMatcherProto data_scheme_specs = 4;
     repeated AuthorityEntryProto data_authorities = 5;
     repeated android.os.PatternMatcherProto data_paths = 6;
@@ -75,6 +80,8 @@ message IntentFilterProto {
 }
 
 message AuthorityEntryProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     optional string host = 1;
     optional bool wild = 2;
     optional int32 port = 3;

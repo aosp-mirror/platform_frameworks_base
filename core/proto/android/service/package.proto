@@ -18,18 +18,25 @@ syntax = "proto2";
 package android.service.pm;
 
 import "frameworks/base/core/proto/android/content/featureinfo.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 option java_multiple_files = true;
 option java_outer_classname = "PackageServiceProto";
 
 message PackageServiceDumpProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     message PackageShortProto {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
         // Name of package. e.g. "com.android.providers.telephony".
         optional string name = 1;
         // UID for this package as assigned by Android OS.
         optional int32 uid = 2;
     }
     message SharedLibraryProto {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
         optional string name = 1;
         // True if library path is not null (jar), false otherwise (apk)
         optional bool is_jar = 2;
@@ -39,8 +46,10 @@ message PackageServiceDumpProto {
         optional string apk = 4;
     }
     message SharedUserProto {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
         optional int32 user_id = 1;
-        optional string name = 2;
+        optional string name = 2 [ (android.privacy).dest = DEST_EXPLICIT ];
     }
 
     // Installed packages.
@@ -51,15 +60,22 @@ message PackageServiceDumpProto {
     repeated PackageProto packages = 5;
     repeated SharedUserProto shared_users = 6;
     // Messages from the settings problem file
-    repeated string messages = 7;
+    repeated string messages = 7 [ (android.privacy).dest = DEST_EXPLICIT ];
 }
 
 message PackageProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     message SplitProto {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
+        // The split name of package, e.g. base
         optional string name = 1;
         optional int32 revision_code = 2;
     }
     message UserInfoProto {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
         enum InstallType {
             NOT_INSTALLED_FOR_USER = 0;
             FULL_APP_INSTALL = 1;

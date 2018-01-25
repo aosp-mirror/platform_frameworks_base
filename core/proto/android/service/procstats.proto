@@ -19,6 +19,7 @@ option java_multiple_files = true;
 option java_outer_classname = "ProcessStatsServiceProto";
 
 import "frameworks/base/core/proto/android/util/common.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 package android.service.procstats;
 
@@ -28,6 +29,7 @@ package android.service.procstats;
  * Next Tag: 4
  */
 message ProcessStatsServiceDumpProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional ProcessStatsSectionProto procstats_now = 1;
 
@@ -43,6 +45,7 @@ message ProcessStatsServiceDumpProto {
  * Next Tag: 9
  */
 message ProcessStatsSectionProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     // Elapsed realtime at start of report.
     optional int64 start_realtime_ms = 1;
@@ -78,6 +81,7 @@ message ProcessStatsSectionProto {
 
 // Next Tag: 6
 message ProcessStatsProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     // Name of process.
     optional string process = 1;
@@ -87,6 +91,8 @@ message ProcessStatsProto {
 
     // Information about how often kills occurred
     message Kill {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
       // Count of excessive CPU kills
       optional int32 cpu = 1;
 
@@ -99,6 +105,8 @@ message ProcessStatsProto {
     optional Kill kill = 3;
 
     message State {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
         enum ScreenState {
             SCREEN_UNKNOWN = 0;
             OFF = 1;
@@ -115,6 +123,8 @@ message ProcessStatsProto {
         }
         optional MemoryState memory_state = 2;
 
+        // this enum list is from frameworks/base/core/java/com/android/internal/app/procstats/ProcessStats.java
+        // and not frameworks/base/core/java/android/app/ActivityManager.java
         enum ProcessState {
             PROCESS_UNKNOWN = 0;
             // Persistent system process.
@@ -127,14 +137,14 @@ message ProcessStatsProto {
             IMPORTANT_BACKGROUND = 4;
             // Performing backup operation.
             BACKUP = 5;
-            // Heavy-weight process (currently not used).
-            HEAVY_WEIGHT = 6;
             // Background process running a service.
-            SERVICE = 7;
+            SERVICE = 6;
             // Process not running, but would be if there was enough RAM.
-            SERVICE_RESTARTING = 8;
+            SERVICE_RESTARTING = 7;
             // Process running a receiver.
-            RECEIVER = 9;
+            RECEIVER = 8;
+            // Heavy-weight process (currently not used).
+            HEAVY_WEIGHT = 9;
             // Process hosting home/launcher app when not on top.
             HOME = 10;
             // Process hosting the last app the user was in.

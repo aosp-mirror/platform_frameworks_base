@@ -17,12 +17,15 @@
 syntax = "proto2";
 package android.util;
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 option java_multiple_files = true;
 
 /**
  * Very basic data structure used by aggregated stats.
  */
 message AggStats {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional int64 min = 1;
 
@@ -35,6 +38,7 @@ message AggStats {
  * Very basic data structure to represent Duration.
  */
 message Duration {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional int64 start_ms = 1;
 
