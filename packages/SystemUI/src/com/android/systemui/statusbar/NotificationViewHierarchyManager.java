@@ -18,6 +18,7 @@ package com.android.systemui.statusbar;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.service.notification.NotificationListenerService;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -338,6 +339,9 @@ public class NotificationViewHierarchyManager {
                     stack.push(notificationChildren.get(i));
                 }
             }
+
+            row.showBlockingHelper(entry.userSentiment ==
+                    NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE);
         }
 
         mPresenter.onUpdateRowStates();
