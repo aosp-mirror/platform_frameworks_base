@@ -50,7 +50,7 @@ public:
                                       const uint64_t currentTimestamp) const override;
 
 private:
-    std::map<HashableDimensionKey, DurationInfo> mInfos;
+    std::unordered_map<HashableDimensionKey, DurationInfo> mInfos;
 
     void noteConditionChanged(const HashableDimensionKey& key, bool conditionMet,
                               const uint64_t timestamp);

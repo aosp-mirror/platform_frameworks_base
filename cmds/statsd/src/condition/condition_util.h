@@ -40,8 +40,9 @@ ConditionState evaluateCombinationCondition(const std::vector<int>& children,
                                             const LogicalOperation& operation,
                                             const std::vector<ConditionState>& conditionCache);
 
-std::vector<HashableDimensionKey> getDimensionKeysForCondition(
-        const LogEvent& event, const MetricConditionLink& link);
+void getDimensionKeysForCondition(
+        const LogEvent& event, const MetricConditionLink& link,
+        std::vector<HashableDimensionKey> *dimensionKeys);
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

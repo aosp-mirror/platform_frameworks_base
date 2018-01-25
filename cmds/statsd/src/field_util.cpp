@@ -102,24 +102,13 @@ bool setFieldInLeafValueProto(const Field &field, DimensionsValue* leafValue) {
     }
 }
 
-Field buildAtomField(const int tagId, const Field &atomField) {
-    Field field;
-    *field.add_child() = atomField;
-    field.set_field(tagId);
-    return field;
+void buildSimpleAtomField(const int tagId, const int atomFieldNum, Field *field) {
+    field->set_field(tagId);
+    field->add_child()->set_field(atomFieldNum);
 }
 
-Field buildSimpleAtomField(const int tagId, const int atomFieldNum) {
-    Field field;
-    field.set_field(tagId);
-    field.add_child()->set_field(atomFieldNum);
-    return field;
-}
-
-Field buildSimpleAtomField(const int tagId) {
-    Field field;
-    field.set_field(tagId);
-    return field;
+void buildSimpleAtomField(const int tagId, Field *field) {
+    field->set_field(tagId);
 }
 
 void appendLeaf(Field *parent, int node_field_num) {
@@ -145,18 +134,6 @@ void appendLeaf(Field *parent, int node_field_num, int position) {
     }
 }
 
-
-void getNextField(Field* field) {
-    if (field->child_size() <= 0) {
-        field->set_field(field->field() + 1);
-        return;
-    }
-    if (field->child_size() != 1) {
-        return;
-    }
-    getNextField(field->mutable_child(0));
-}
-
 void increasePosition(Field *field) {
     if (!field->has_position_index()) {
         field->set_position_index(0);
@@ -176,34 +153,30 @@ int getPositionByReferenceField(const Field& ref, const Field& field_with_index)
     return getPositionByReferenceField(ref.child(0), field_with_index.child(0));
 }
 
-void setPositionForLeaf(Field *field, int index) {
-    if (field->child_size() <= 0) {
-        field->set_position_index(index);
-    } else {
-        setPositionForLeaf(field->mutable_child(0), index);
-    }
-}
-
 namespace {
+
 void findFields(
        const FieldValueMap& fieldValueMap,
        const FieldMatcher& matcher,
-       const Field& field,
-       std::vector<Field>* rootFields);
+       Field* rootField,
+       Field* leafField,
+       std::set<Field, FieldCmp>* rootFields);
 
 void findNonRepeatedFields(
        const FieldValueMap& fieldValueMap,
        const FieldMatcher& matcher,
-       const Field& field,
-       std::vector<Field>* rootFields) {
+       Field* rootField,
+       Field* leafField,
+       std::set<Field, FieldCmp>* rootFields) {
     if (matcher.child_size() > 0) {
+        Field* newLeafField = leafField->add_child();
         for (const auto& childMatcher : matcher.child()) {
-          Field childField = field;
-          appendLeaf(&childField, childMatcher.field());
-          findFields(fieldValueMap, childMatcher, childField, rootFields);
+            newLeafField->set_field(childMatcher.field());
+            findFields(fieldValueMap, childMatcher, rootField, newLeafField, rootFields);
         }
+        leafField->clear_child();
     } else {
-        auto ret = fieldValueMap.equal_range(field);
+        auto ret = fieldValueMap.equal_range(*rootField);
         int found = 0;
         for (auto it = ret.first; it != ret.second; ++it) {
             found++;
@@ -216,38 +189,42 @@ void findNonRepeatedFields(
             ALOGE("Found multiple values for optional field.");
             return;
         }
-        rootFields->push_back(ret.first->first);
+        rootFields->insert(ret.first->first);
     }
 }
 
 void findRepeatedFields(const FieldValueMap& fieldValueMap, const FieldMatcher& matcher,
-                        const Field& field, std::vector<Field>* rootFields) {
+                        Field* rootField, Field* leafField,
+                        std::set<Field, FieldCmp>* rootFields) {
     if (matcher.position() == Position::FIRST) {
-        Field first_field = field;
-        setPositionForLeaf(&first_field, 0);
-        findNonRepeatedFields(fieldValueMap, matcher, first_field, rootFields);
+        leafField->set_position_index(0);
+        findNonRepeatedFields(fieldValueMap, matcher, rootField, leafField, rootFields);
+        leafField->clear_position_index();
     } else {
-        auto itLower = fieldValueMap.lower_bound(field);
+        auto itLower = fieldValueMap.lower_bound(*rootField);
         if (itLower == fieldValueMap.end()) {
             return;
         }
-        Field next_field = field;
-        getNextField(&next_field);
-        auto itUpper = fieldValueMap.lower_bound(next_field);
+
+        const int leafFieldNum = leafField->field();
+        leafField->set_field(leafFieldNum + 1);
+        auto itUpper = fieldValueMap.lower_bound(*rootField);
+        // Resets the field number.
+        leafField->set_field(leafFieldNum);
 
         switch (matcher.position()) {
              case Position::LAST:
                  {
                      itUpper--;
                      if (itUpper != fieldValueMap.end()) {
-                         Field last_field = field;
-                         int last_index = getPositionByReferenceField(field, itUpper->first);
+                         int last_index = getPositionByReferenceField(*rootField, itUpper->first);
                          if (last_index < 0) {
                             return;
                          }
-                         setPositionForLeaf(&last_field, last_index);
+                         leafField->set_position_index(last_index);
                          findNonRepeatedFields(
-                            fieldValueMap, matcher, last_field, rootFields);
+                            fieldValueMap, matcher, rootField, leafField, rootFields);
+                         leafField->clear_position_index();
                      }
                  }
                  break;
@@ -255,17 +232,17 @@ void findRepeatedFields(const FieldValueMap& fieldValueMap, const FieldMatcher& 
                  {
                     std::set<int> indexes;
                     for (auto it = itLower; it != itUpper; ++it) {
-                        int index = getPositionByReferenceField(field, it->first);
+                        int index = getPositionByReferenceField(*rootField, it->first);
                         if (index >= 0) {
                             indexes.insert(index);
                         }
                     }
                     if (!indexes.empty()) {
-                        Field any_field = field;
                         for (const int index : indexes) {
-                             setPositionForLeaf(&any_field, index);
+                             leafField->set_position_index(index);
                              findNonRepeatedFields(
-                                fieldValueMap, matcher, any_field, rootFields);
+                                fieldValueMap, matcher, rootField, leafField, rootFields);
+                             leafField->clear_position_index();
                         }
                     }
                  }
@@ -279,12 +256,13 @@ void findRepeatedFields(const FieldValueMap& fieldValueMap, const FieldMatcher& 
 void findFields(
        const FieldValueMap& fieldValueMap,
        const FieldMatcher& matcher,
-       const Field& field,
-       std::vector<Field>* rootFields) {
+       Field* rootField,
+       Field* leafField,
+       std::set<Field, FieldCmp>* rootFields) {
     if (!matcher.has_position()) {
-        findNonRepeatedFields(fieldValueMap, matcher, field, rootFields);
+        findNonRepeatedFields(fieldValueMap, matcher, rootField, leafField, rootFields);
     } else {
-        findRepeatedFields(fieldValueMap, matcher, field, rootFields);
+        findRepeatedFields(fieldValueMap, matcher, rootField, leafField, rootFields);
     }
 }
 
@@ -293,17 +271,24 @@ void findFields(
 void findFields(
        const FieldValueMap& fieldValueMap,
        const FieldMatcher& matcher,
-       std::vector<Field>* rootFields) {
-    return findFields(fieldValueMap, matcher, buildSimpleAtomField(matcher.field()), rootFields);
+       std::set<Field, FieldCmp>* rootFields) {
+    if (!matcher.has_field() || fieldValueMap.empty()) {
+        return;
+    }
+    Field rootField;
+    buildSimpleAtomField(matcher.field(), &rootField);
+    return findFields(fieldValueMap, matcher, &rootField, &rootField, rootFields);
 }
 
 void filterFields(const FieldMatcher& matcher, FieldValueMap* fieldValueMap) {
-    std::vector<Field> rootFields;
+    if (!matcher.has_field()) {
+        return;
+    }
+    std::set<Field, FieldCmp> rootFields;
     findFields(*fieldValueMap, matcher, &rootFields);
-    std::set<Field, FieldCmp> rootFieldSet(rootFields.begin(), rootFields.end());
     auto it = fieldValueMap->begin();
     while (it != fieldValueMap->end()) {
-        if (rootFieldSet.find(it->first) == rootFieldSet.end()) {
+        if (rootFields.find(it->first) == rootFields.end()) {
             it = fieldValueMap->erase(it);
         } else {
             it++;

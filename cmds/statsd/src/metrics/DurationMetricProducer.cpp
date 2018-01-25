@@ -275,7 +275,8 @@ void DurationMetricProducer::onMatchedLogEventInternalLocked(
 
     auto it = mCurrentSlicedDuration.find(eventKey);
 
-    std::vector<DimensionsValue> values = getDimensionKeys(event, mInternalDimensions);
+    std::vector<DimensionsValue> values;
+    getDimensionKeys(event, mInternalDimensions, &values);
     if (values.empty()) {
         if (matcherIndex == mStartIndex) {
             it->second->noteStart(DEFAULT_DIMENSION_KEY, condition,

@@ -93,25 +93,28 @@ bool combinationMatch(const vector<int>& children, const LogicalOperation& opera
     return matched;
 }
 
-bool matchesNonRepeatedField(
-       const UidMap& uidMap,
-       const FieldValueMap& fieldMap,
-       const FieldValueMatcher&matcher,
-       const Field& field) {
+namespace {
+
+bool matchFieldSimple(const UidMap& uidMap, const FieldValueMap& fieldMap,
+                      const FieldValueMatcher&matcher, Field* rootField, Field* leafField);
+
+bool matchesNonRepeatedField(const UidMap& uidMap, const FieldValueMap& fieldMap,
+                             const FieldValueMatcher&matcher, Field* rootField, Field* leafField) {
     if (matcher.value_matcher_case() ==
             FieldValueMatcher::ValueMatcherCase::VALUE_MATCHER_NOT_SET) {
         return !fieldMap.empty() && fieldMap.begin()->first.field() == matcher.field();
     } else if (matcher.value_matcher_case() == FieldValueMatcher::ValueMatcherCase::kMatchesTuple) {
         bool allMatched = true;
+        Field* newLeafField = leafField->add_child();
         for (int i = 0; allMatched && i <  matcher.matches_tuple().field_value_matcher_size(); ++i) {
             const auto& childMatcher = matcher.matches_tuple().field_value_matcher(i);
-            Field childField = field;
-            appendLeaf(&childField, childMatcher.field());
-            allMatched &= matchFieldSimple(uidMap, fieldMap, childMatcher, childField);
+            newLeafField->set_field(childMatcher.field());
+            allMatched &= matchFieldSimple(uidMap, fieldMap, childMatcher, rootField, newLeafField);
         }
+        leafField->clear_child();
         return allMatched;
     } else {
-        auto ret = fieldMap.equal_range(field);
+        auto ret = fieldMap.equal_range(*rootField);
         int found = 0;
         for (auto it = ret.first; it != ret.second; ++it) {
             found++;
@@ -132,7 +135,7 @@ bool matchesNonRepeatedField(
                  break;
             case FieldValueMatcher::ValueMatcherCase::kEqString:
                  {
-                    if (IsAttributionUidField(field)) {
+                    if (IsAttributionUidField(*rootField)) {
                         const int uid = ret.first->second.value_int();
                         std::set<string> packageNames =
                             uidMap.getAppNamesFromUid(uid, true /* normalize*/);
@@ -171,19 +174,25 @@ bool matchesNonRepeatedField(
 }
 
 bool matchesRepeatedField(const UidMap& uidMap, const FieldValueMap& fieldMap,
-                          const FieldValueMatcher&matcher, const Field& field) {
+                          const FieldValueMatcher&matcher,
+                          Field* rootField, Field* leafField) {
     if (matcher.position() == Position::FIRST) {
-        Field first_field = field;
-        setPositionForLeaf(&first_field, 0);
-        return matchesNonRepeatedField(uidMap, fieldMap, matcher, first_field);
+        leafField->set_position_index(0);
+        bool res = matchesNonRepeatedField(uidMap, fieldMap, matcher, rootField, leafField);
+        leafField->clear_position_index();
+        return res;
     } else {
-        auto itLower = fieldMap.lower_bound(field);
+        auto itLower = fieldMap.lower_bound(*rootField);
         if (itLower == fieldMap.end()) {
             return false;
         }
-        Field next_field = field;
-        getNextField(&next_field);
-        auto itUpper = fieldMap.lower_bound(next_field);
+
+        const int leafFieldNum = leafField->field();
+        leafField->set_field(leafFieldNum + 1);
+        auto itUpper = fieldMap.lower_bound(*rootField);
+        // Resets the field number.
+        leafField->set_field(leafFieldNum);
+
         switch (matcher.position()) {
              case Position::LAST:
                  {
@@ -191,30 +200,30 @@ bool matchesRepeatedField(const UidMap& uidMap, const FieldValueMap& fieldMap,
                      if (itUpper == fieldMap.end()) {
                         return false;
                      } else {
-                         Field last_field = field;
-                         int last_index = getPositionByReferenceField(field, itUpper->first);
+                         int last_index = getPositionByReferenceField(*rootField, itUpper->first);
                          if (last_index < 0) {
                             return false;
                          }
-                         setPositionForLeaf(&last_field, last_index);
-                         return matchesNonRepeatedField(uidMap, fieldMap, matcher, last_field);
+                         leafField->set_position_index(last_index);
+                         bool res = matchesNonRepeatedField(uidMap, fieldMap, matcher, rootField, leafField);
+                         leafField->clear_position_index();
+                         return res;
                      }
                  }
                  break;
              case Position::ANY:
                  {
-                    std::set<int> indexes;
-                    for (auto it = itLower; it != itUpper; ++it) {
-                        int index = getPositionByReferenceField(field, it->first);
-                        if (index >= 0) {
-                            indexes.insert(index);
-                        }
-                    }
                     bool matched = false;
-                    for (const int index : indexes) {
-                         Field any_field = field;
-                         setPositionForLeaf(&any_field, index);
-                         matched |= matchesNonRepeatedField(uidMap, fieldMap, matcher, any_field);
+                    for (auto it = itLower; it != itUpper; ++it) {
+                        int index = getPositionByReferenceField(*rootField, it->first);
+                        if (index >= 0) {
+                             leafField->set_position_index(index);
+                             matched |= matchesNonRepeatedField(uidMap, fieldMap, matcher, rootField, leafField);
+                             leafField->clear_position_index();
+                             if (matched) {
+                                break;
+                             }
+                        }
                     }
                     return matched;
                  }
@@ -226,13 +235,15 @@ bool matchesRepeatedField(const UidMap& uidMap, const FieldValueMap& fieldMap,
 }
 
 bool matchFieldSimple(const UidMap& uidMap, const FieldValueMap& fieldMap,
-                      const FieldValueMatcher&matcher, const Field& field) {
+                      const FieldValueMatcher&matcher, Field* rootField, Field* leafField) {
     if (!matcher.has_position()) {
-        return matchesNonRepeatedField(uidMap, fieldMap, matcher, field);
+        return matchesNonRepeatedField(uidMap, fieldMap, matcher, rootField, leafField);
     } else {
-        return matchesRepeatedField(uidMap, fieldMap, matcher, field);
+        return matchesRepeatedField(uidMap, fieldMap, matcher, rootField, leafField);
     }
 }
+
+}  // namespace
 
 bool matchesSimple(const UidMap& uidMap, const SimpleAtomMatcher& simpleMatcher,
                    const LogEvent& event) {
@@ -247,13 +258,15 @@ bool matchesSimple(const UidMap& uidMap, const SimpleAtomMatcher& simpleMatcher,
         *root_field_matcher.mutable_matches_tuple()->add_field_value_matcher() =
             simpleMatcher.field_value_matcher(i);
     }
-    return matchFieldSimple(uidMap, event.getFieldValueMap(), root_field_matcher, root_field);
+    return matchFieldSimple(
+        uidMap, event.getFieldValueMap(), root_field_matcher, &root_field, &root_field);
 }
 
-vector<DimensionsValue> getDimensionKeys(const LogEvent& event, const FieldMatcher& matcher) {
-    vector<DimensionsValue> values;
-    findDimensionsValues(event.getFieldValueMap(), matcher, &values);
-    return values;
+void getDimensionKeys(const LogEvent& event, const FieldMatcher& matcher,
+                      std::vector<DimensionsValue> *dimensionKeys) {
+    if (matcher.has_field()) {
+        findDimensionsValues(event.getFieldValueMap(), matcher, dimensionKeys);
+    }
 }
 }  // namespace statsd
 }  // namespace os

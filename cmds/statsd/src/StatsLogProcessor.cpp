@@ -91,23 +91,22 @@ void StatsLogProcessor::onAnomalyAlarmFired(
 }
 
 void StatsLogProcessor::mapIsolatedUidToHostUidIfNecessaryLocked(LogEvent* event) const {
-    std::vector<Field> uidFields;
+    std::set<Field, FieldCmp> uidFields;
     if (android::util::kAtomsWithAttributionChain.find(event->GetTagId()) !=
         android::util::kAtomsWithAttributionChain.end()) {
-        findFields(
-            event->getFieldValueMap(),
-            buildAttributionUidFieldMatcher(event->GetTagId(), Position::ANY),
-            &uidFields);
+        FieldMatcher matcher;
+        buildAttributionUidFieldMatcher(event->GetTagId(), Position::ANY, &matcher);
+        findFields(event->getFieldValueMap(), matcher, &uidFields);
     } else if (android::util::kAtomsWithUidField.find(event->GetTagId()) !=
                android::util::kAtomsWithUidField.end()) {
-        findFields(
-            event->getFieldValueMap(),
-            buildSimpleAtomFieldMatcher(event->GetTagId(), 1 /* uid is always the 1st field. */),
-            &uidFields);
+        FieldMatcher matcher;
+        buildSimpleAtomFieldMatcher(
+            event->GetTagId(), 1 /* uid is always the 1st field. */, &matcher);
+        findFields(event->getFieldValueMap(), matcher, &uidFields);
     }
 
-    for (size_t i = 0; i < uidFields.size(); ++i) {
-        DimensionsValue* value = event->findFieldValueOrNull(uidFields[i]);
+    for (const auto& uidField : uidFields) {
+        DimensionsValue* value = event->findFieldValueOrNull(uidField);
         if (value != nullptr && value->value_case() == DimensionsValue::ValueCase::kValueInt) {
             const int uid = mUidMap->getHostUidOrSelf(value->value_int());
             value->set_value_int(uid);
