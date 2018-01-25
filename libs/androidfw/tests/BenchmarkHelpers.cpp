@@ -33,11 +33,11 @@ void GetResourceBenchmarkOld(const std::vector<std::string>& paths, const ResTab
     }
   }
 
-  // Make sure to force creation of the ResTable first, or else the configuration doesn't get set.
-  const ResTable& table = assetmanager.getResources(true);
   if (config != nullptr) {
     assetmanager.setConfiguration(*config);
   }
+
+  const ResTable& table = assetmanager.getResources(true);
 
   Res_value value;
   ResTable_config selected_config;
