@@ -23,7 +23,9 @@ import android.telephony.INetworkServiceCallback;
  */
 oneway interface INetworkService
 {
-    void getNetworkRegistrationState(int domain, INetworkServiceCallback callback);
-    void registerForNetworkRegistrationStateChanged(INetworkServiceCallback callback);
-    void unregisterForNetworkRegistrationStateChanged(INetworkServiceCallback callback);
+    void createNetworkServiceProvider(int slotId);
+    void removeNetworkServiceProvider(int slotId);
+    void getNetworkRegistrationState(int slotId, int domain, INetworkServiceCallback callback);
+    void registerForNetworkRegistrationStateChanged(int slotId, INetworkServiceCallback callback);
+    void unregisterForNetworkRegistrationStateChanged(int slotId, INetworkServiceCallback callback);
 }
