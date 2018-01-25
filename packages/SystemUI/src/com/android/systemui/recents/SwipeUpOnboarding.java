@@ -150,6 +150,11 @@ public class SwipeUpOnboarding {
     }
 
     public void onConnectedToLauncher(ComponentName launcherComponent) {
+        // TODO: re-enable this once we have the proper callback for when a swipe up was performed.
+        final boolean disableOnboarding = true;
+        if (disableOnboarding) {
+            return;
+        }
         mLauncherComponent = launcherComponent;
         boolean alreadyLearnedSwipeUpForRecents = Prefs.getBoolean(mContext,
                 Prefs.Key.HAS_SWIPED_UP_FOR_RECENTS, false);
