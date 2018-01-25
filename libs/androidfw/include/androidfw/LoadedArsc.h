@@ -41,32 +41,40 @@ class DynamicPackageEntry {
   int package_id = 0;
 };
 
-struct FindEntryResult {
-  // A pointer to the resource table entry for this resource.
-  // If the size of the entry is > sizeof(ResTable_entry), it can be cast to
-  // a ResTable_map_entry and processed as a bag/map.
-  const ResTable_entry* entry = nullptr;
+// TypeSpec is going to be immediately proceeded by
+// an array of Type structs, all in the same block of memory.
+struct TypeSpec {
+  // Pointer to the mmapped data where flags are kept.
+  // Flags denote whether the resource entry is public
+  // and under which configurations it varies.
+  const ResTable_typeSpec* type_spec;
 
-  // The configuration for which the resulting entry was defined.
-  const ResTable_config* config = nullptr;
+  // Pointer to the mmapped data where the IDMAP mappings for this type
+  // exist. May be nullptr if no IDMAP exists.
+  const IdmapEntry_header* idmap_entries;
 
-  // Stores the resulting bitmask of configuration axis with which the resource value varies.
-  uint32_t type_flags = 0u;
+  // The number of types that follow this struct.
+  // There is a type for each configuration that entries are defined for.
+  size_t type_count;
 
-  // The dynamic package ID map for the package from which this resource came from.
-  const DynamicRefTable* dynamic_ref_table = nullptr;
+  // Trick to easily access a variable number of Type structs
+  // proceeding this struct, and to ensure their alignment.
+  const ResTable_type* types[0];
 
-  // The string pool reference to the type's name. This uses a different string pool than
-  // the global string pool, but this is hidden from the caller.
-  StringPoolRef type_string_ref;
+  inline uint32_t GetFlagsForEntryIndex(uint16_t entry_index) const {
+    if (entry_index >= dtohl(type_spec->entryCount)) {
+      return 0u;
+    }
 
-  // The string pool reference to the entry's name. This uses a different string pool than
-  // the global string pool, but this is hidden from the caller.
-  StringPoolRef entry_string_ref;
+    const uint32_t* flags = reinterpret_cast<const uint32_t*>(type_spec + 1);
+    return flags[entry_index];
+  }
 };
 
-struct TypeSpec;
-class LoadedArsc;
+// TypeSpecPtr points to a block of memory that holds a TypeSpec struct, followed by an array of
+// ResTable_type pointers.
+// TypeSpecPtr is a managed pointer that knows how to delete itself.
+using TypeSpecPtr = util::unique_cptr<TypeSpec>;
 
 class LoadedPackage {
  public:
@@ -76,15 +84,18 @@ class LoadedPackage {
 
   ~LoadedPackage();
 
-  bool FindEntry(uint8_t type_idx, uint16_t entry_idx, const ResTable_config& config,
-                 FindEntryResult* out_entry) const;
-
   // Finds the entry with the specified type name and entry name. The names are in UTF-16 because
   // the underlying ResStringPool API expects this. For now this is acceptable, but since
   // the default policy in AAPT2 is to build UTF-8 string pools, this needs to change.
   // Returns a partial resource ID, with the package ID left as 0x00. The caller is responsible
   // for patching the correct package ID to the resource ID.
   uint32_t FindEntryByName(const std::u16string& type_name, const std::u16string& entry_name) const;
+
+  static const ResTable_entry* GetEntry(const ResTable_type* type_chunk, uint16_t entry_index);
+
+  static uint32_t GetEntryOffset(const ResTable_type* type_chunk, uint16_t entry_index);
+
+  static const ResTable_entry* GetEntryFromOffset(const ResTable_type* type_chunk, uint32_t offset);
 
   // Returns the string pool where type names are stored.
   inline const ResStringPool* GetTypeStringPool() const {
@@ -135,13 +146,31 @@ class LoadedPackage {
   // before being inserted into the set. This may cause some equivalent locales to de-dupe.
   void CollectLocales(bool canonicalize, std::set<std::string>* out_locales) const;
 
+  // type_idx is TT - 1 from 0xPPTTEEEE.
+  inline const TypeSpec* GetTypeSpecByTypeIndex(uint8_t type_index) const {
+    // If the type IDs are offset in this package, we need to take that into account when searching
+    // for a type.
+    return type_specs_[type_index - type_id_offset_].get();
+  }
+
+  template <typename Func>
+  void ForEachTypeSpec(Func f) const {
+    for (size_t i = 0; i < type_specs_.size(); i++) {
+      const TypeSpecPtr& ptr = type_specs_[i];
+      if (ptr != nullptr) {
+        uint8_t type_id = ptr->type_spec->id;
+        if (ptr->idmap_entries != nullptr) {
+          type_id = ptr->idmap_entries->target_type_id;
+        }
+        f(ptr.get(), type_id - 1);
+      }
+    }
+  }
+
  private:
   DISALLOW_COPY_AND_ASSIGN(LoadedPackage);
 
   LoadedPackage();
-
-  bool FindEntry(const util::unique_cptr<TypeSpec>& type_spec_ptr, uint16_t entry_idx,
-                 const ResTable_config& config, FindEntryResult* out_entry) const;
 
   ResStringPool type_string_pool_;
   ResStringPool key_string_pool_;
@@ -152,7 +181,7 @@ class LoadedPackage {
   bool system_ = false;
   bool overlay_ = false;
 
-  ByteBucketArray<util::unique_cptr<TypeSpec>> type_specs_;
+  ByteBucketArray<TypeSpecPtr> type_specs_;
   std::vector<DynamicPackageEntry> dynamic_package_map_;
 };
 
@@ -180,23 +209,18 @@ class LoadedArsc {
     return &global_string_pool_;
   }
 
-  // Finds the resource with ID `resid` with the best value for configuration `config`.
-  // The parameter `out_entry` will be filled with the resulting resource entry.
-  // The resource entry can be a simple entry (ResTable_entry) or a complex bag
-  // (ResTable_entry_map).
-  bool FindEntry(uint32_t resid, const ResTable_config& config, FindEntryResult* out_entry) const;
-
-  // Gets a pointer to the name of the package in `resid`, or nullptr if the package doesn't exist.
-  const LoadedPackage* GetPackageForId(uint32_t resid) const;
-
-  // Returns true if this is a system provided resource.
-  inline bool IsSystem() const {
-    return system_;
-  }
+  // Gets a pointer to the package with the specified package ID, or nullptr if no such package
+  // exists.
+  const LoadedPackage* GetPackageById(uint8_t package_id) const;
 
   // Returns a vector of LoadedPackage pointers, representing the packages in this LoadedArsc.
   inline const std::vector<std::unique_ptr<const LoadedPackage>>& GetPackages() const {
     return packages_;
+  }
+
+  // Returns true if this is a system provided resource.
+  inline bool IsSystem() const {
+    return system_;
   }
 
  private:

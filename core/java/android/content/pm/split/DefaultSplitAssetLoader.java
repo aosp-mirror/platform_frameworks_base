@@ -15,16 +15,21 @@
  */
 package android.content.pm.split;
 
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST;
+import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
 
 import android.content.pm.PackageParser;
+import android.content.pm.PackageParser.PackageParserException;
+import android.content.pm.PackageParser.ParseFlags;
+import android.content.res.ApkAssets;
 import android.content.res.AssetManager;
 import android.os.Build;
 
 import com.android.internal.util.ArrayUtils;
 
 import libcore.io.IoUtils;
+
+import java.io.IOException;
 
 /**
  * Loads the base and split APKs into a single AssetManager.
@@ -33,68 +38,66 @@ import libcore.io.IoUtils;
 public class DefaultSplitAssetLoader implements SplitAssetLoader {
     private final String mBaseCodePath;
     private final String[] mSplitCodePaths;
-    private final int mFlags;
-
+    private final @ParseFlags int mFlags;
     private AssetManager mCachedAssetManager;
 
-    public DefaultSplitAssetLoader(PackageParser.PackageLite pkg, int flags) {
+    public DefaultSplitAssetLoader(PackageParser.PackageLite pkg, @ParseFlags int flags) {
         mBaseCodePath = pkg.baseCodePath;
         mSplitCodePaths = pkg.splitCodePaths;
         mFlags = flags;
     }
 
-    private static void loadApkIntoAssetManager(AssetManager assets, String apkPath, int flags)
-            throws PackageParser.PackageParserException {
-        if ((flags & PackageParser.PARSE_MUST_BE_APK) != 0 && !PackageParser.isApkPath(apkPath)) {
-            throw new PackageParser.PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
-                    "Invalid package file: " + apkPath);
+    private static ApkAssets loadApkAssets(String path, @ParseFlags int flags)
+            throws PackageParserException {
+        if ((flags & PackageParser.PARSE_MUST_BE_APK) != 0 && !PackageParser.isApkPath(path)) {
+            throw new PackageParserException(INSTALL_PARSE_FAILED_NOT_APK,
+                    "Invalid package file: " + path);
         }
 
-        if (assets.addAssetPath(apkPath) == 0) {
-            throw new PackageParser.PackageParserException(
-                    INSTALL_PARSE_FAILED_BAD_MANIFEST,
-                    "Failed adding asset path: " + apkPath);
+        try {
+            return ApkAssets.loadFromPath(path);
+        } catch (IOException e) {
+            throw new PackageParserException(INSTALL_FAILED_INVALID_APK,
+                    "Failed to load APK at path " + path, e);
         }
     }
 
     @Override
-    public AssetManager getBaseAssetManager() throws PackageParser.PackageParserException {
+    public AssetManager getBaseAssetManager() throws PackageParserException {
         if (mCachedAssetManager != null) {
             return mCachedAssetManager;
         }
 
-        AssetManager assets = new AssetManager();
-        try {
-            assets.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    Build.VERSION.RESOURCES_SDK_INT);
-            loadApkIntoAssetManager(assets, mBaseCodePath, mFlags);
+        ApkAssets[] apkAssets = new ApkAssets[(mSplitCodePaths != null
+                ? mSplitCodePaths.length : 0) + 1];
 
-            if (!ArrayUtils.isEmpty(mSplitCodePaths)) {
-                for (String apkPath : mSplitCodePaths) {
-                    loadApkIntoAssetManager(assets, apkPath, mFlags);
-                }
-            }
+        // Load the base.
+        int splitIdx = 0;
+        apkAssets[splitIdx++] = loadApkAssets(mBaseCodePath, mFlags);
 
-            mCachedAssetManager = assets;
-            assets = null;
-            return mCachedAssetManager;
-        } finally {
-            if (assets != null) {
-                IoUtils.closeQuietly(assets);
+        // Load any splits.
+        if (!ArrayUtils.isEmpty(mSplitCodePaths)) {
+            for (String apkPath : mSplitCodePaths) {
+                apkAssets[splitIdx++] = loadApkAssets(apkPath, mFlags);
             }
         }
+
+        AssetManager assets = new AssetManager();
+        assets.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                Build.VERSION.RESOURCES_SDK_INT);
+        assets.setApkAssets(apkAssets, false /*invalidateCaches*/);
+
+        mCachedAssetManager = assets;
+        return mCachedAssetManager;
     }
 
     @Override
-    public AssetManager getSplitAssetManager(int splitIdx)
-            throws PackageParser.PackageParserException {
+    public AssetManager getSplitAssetManager(int splitIdx) throws PackageParserException {
         return getBaseAssetManager();
     }
 
     @Override
     public void close() throws Exception {
-        if (mCachedAssetManager != null) {
-            IoUtils.closeQuietly(mCachedAssetManager);
-        }
+        IoUtils.closeQuietly(mCachedAssetManager);
     }
 }
