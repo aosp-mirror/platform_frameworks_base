@@ -100,7 +100,6 @@ import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
-import android.text.SpannedString;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -589,7 +588,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private NavigationBarFragment mNavigationBar;
     private View mNavigationBarView;
-    private ActivityLaunchAnimator mActivityLaunchAnimator;
+    protected ActivityLaunchAnimator mActivityLaunchAnimator;
 
     @Override
     public void start() {
@@ -760,7 +759,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationPanel = mStatusBarWindow.findViewById(R.id.notification_panel);
         mStackScroller = mStatusBarWindow.findViewById(R.id.notification_stack_scroller);
         mActivityLaunchAnimator = new ActivityLaunchAnimator(mStatusBarWindow,
-                this::collapsePanel,
+                this,
                 mNotificationPanel,
                 mStackScroller);
         mGutsManager.setUpWithPresenter(this, mEntryManager, mStackScroller, mCheckSaveListener,
@@ -2051,6 +2050,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         if (shouldHideIconsForBouncer) {
             mBouncerWasShowingWhenHidden = mBouncerShowing;
+        }
+    }
+
+    public void onLaunchAnimationCancelled() {
+        if (!isCollapsing()) {
+            onClosingFinished();
         }
     }
 
@@ -3418,7 +3423,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public boolean isCollapsing() {
-        return mNotificationPanel.isCollapsing();
+        return mNotificationPanel.isCollapsing() || mActivityLaunchAnimator.isAnimationPending();
     }
 
     public void addPostCollapseAction(Runnable r) {
@@ -4959,6 +4964,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     try {
                         launchResult = intent.sendAndReturnResult(mContext, 0, fillInIntent, null,
                                 null, null, getActivityOptions(row));
+                        mActivityLaunchAnimator.setLaunchResult(launchResult);
                     } catch (PendingIntent.CanceledException e) {
                         // the stack trace isn't very helpful here.
                         // Just log the exception message.
@@ -4970,7 +4976,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                         mAssistManager.hideAssist();
                     }
                 }
-                if (shouldCollapse(launchResult)) {
+                if (shouldCollapse()) {
                     if (Looper.getMainLooper().isCurrentThread()) {
                         collapsePanel();
                     } else {
@@ -5003,17 +5009,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         }, afterKeyguardGone);
     }
 
-    private boolean shouldCollapse(int launchResult) {
-        return mState != StatusBarState.SHADE
-                || (launchResult != ActivityManager.START_TASK_TO_FRONT
-                        && launchResult != ActivityManager.START_SUCCESS);
-    }
-
-    public void onExpandAnimationFinished() {
-        if (!isPresenterFullyCollapsed()) {
-            instantCollapseNotificationPanel();
-            visibilityChanged(false);
-        }
+    private boolean shouldCollapse() {
+        return mState != StatusBarState.SHADE || !mActivityLaunchAnimator.isAnimationPending();
     }
 
     public void collapsePanel(boolean animate) {
@@ -5128,7 +5125,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                         .addNextIntentWithParentStack(intent)
                         .startActivities(getActivityOptions(row),
                                 new UserHandle(UserHandle.getUserId(appUid)));
-                if (shouldCollapse(launchResult)) {
+                mActivityLaunchAnimator.setLaunchResult(launchResult);
+                if (shouldCollapse()) {
                     // Putting it back on the main thread, since we're touching views
                     mStatusBarWindow.post(() -> animateCollapsePanels(
                             CommandQueue.FLAG_EXCLUDE_RECENTS_PANEL, true /* force */));

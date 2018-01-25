@@ -950,7 +950,7 @@ public abstract class PanelView extends FrameLayout {
     }
 
     public boolean isCollapsing() {
-        return mClosing;
+        return mClosing || mLaunchingNotification;
     }
 
     public boolean isTracking() {
