@@ -15,47 +15,56 @@
      limitations under the License.
 -->
 <!-- extends LinearLayout -->
-<com.android.systemui.volume.OutputChooserLayout
+<com.android.systemui.HardwareUiLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:sysui="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/output_chooser"
-    android:minWidth="320dp"
-    android:minHeight="320dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="20dp" >
-
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textDirection="locale"
-        android:textAppearance="@style/TextAppearance.QS.DetailHeader"
-        android:layout_marginBottom="20dp" />
-
-    <com.android.systemui.qs.AutoSizingList
-        android:id="@android:id/list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+    android:layout_marginBottom="0dp"
+    android:clipToPadding="false"
+    android:theme="@style/qs_theme"
+    android:clipChildren="false">
+    <com.android.systemui.volume.OutputChooserLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:sysui="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/output_chooser"
+        android:layout_width="@dimen/output_chooser_panel_width"
+        android:layout_height="@dimen/output_chooser_panel_width"
+        android:layout_gravity="center_vertical|end"
         android:orientation="vertical"
-        sysui:itemHeight="@dimen/qs_detail_item_height"
-        style="@style/AutoSizingList"/>
-
-    <LinearLayout
-        android:id="@android:id/empty"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:orientation="vertical">
+        android:translationZ="8dp"
+        android:padding="20dp" >
 
         <TextView
-            android:id="@+id/empty_text"
+            android:id="@+id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textDirection="locale"
-            android:layout_marginTop="20dp"
-            android:textAppearance="@style/TextAppearance.QS.DetailEmpty"/>
-    </LinearLayout>
-</com.android.systemui.volume.OutputChooserLayout>
+            android:textAppearance="@style/TextAppearance.QS.DetailHeader"
+            android:layout_marginBottom="20dp" />
+
+        <com.android.systemui.qs.AutoSizingList
+            android:id="@android:id/list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            sysui:itemHeight="@dimen/qs_detail_item_height"
+            style="@style/AutoSizingList"/>
+
+        <LinearLayout
+            android:id="@android:id/empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/empty_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textDirection="locale"
+                android:layout_marginTop="20dp"
+                android:textAppearance="@style/TextAppearance.QS.DetailEmpty"/>
+        </LinearLayout>
+    </com.android.systemui.volume.OutputChooserLayout>
+</com.android.systemui.HardwareUiLayout>

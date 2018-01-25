@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -26,7 +27,10 @@ import android.media.update.ViewProvider;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.View;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 /**
  * A View that contains the controls for MediaPlayer2.
  * It provides a wide range of UI including buttons such as "Play/Pause", "Rewind", "Fast Forward",
@@ -47,6 +51,35 @@ import android.view.MotionEvent;
  * @hide
  */
 public class MediaControlView2 extends FrameLayout {
+    /** @hide */
+    @IntDef({
+            BUTTON_PLAY_PAUSE,
+            BUTTON_FFWD,
+            BUTTON_REW,
+            BUTTON_NEXT,
+            BUTTON_PREV,
+            BUTTON_SUBTITLE,
+            BUTTON_FULL_SCREEN,
+            BUTTON_OVERFLOW,
+            BUTTON_MUTE,
+            BUTTON_ASPECT_RATIO,
+            BUTTON_SETTINGS
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Button {}
+
+    public static final int BUTTON_PLAY_PAUSE = 1;
+    public static final int BUTTON_FFWD = 2;
+    public static final int BUTTON_REW = 3;
+    public static final int BUTTON_NEXT = 4;
+    public static final int BUTTON_PREV = 5;
+    public static final int BUTTON_SUBTITLE = 6;
+    public static final int BUTTON_FULL_SCREEN = 7;
+    public static final int BUTTON_OVERFLOW = 8;
+    public static final int BUTTON_MUTE = 9;
+    public static final int BUTTON_ASPECT_RATIO = 10;
+    public static final int BUTTON_SETTINGS = 11;
+
     private final MediaControlView2Provider mProvider;
 
     public MediaControlView2(@NonNull Context context) {
@@ -115,48 +148,6 @@ public class MediaControlView2 extends FrameLayout {
     }
 
     /**
-     * Returns whether the media is currently playing or not.
-     */
-    public boolean isPlaying() {
-        return mProvider.isPlaying_impl();
-    }
-
-    /**
-     * Returns the current position of the media in milliseconds.
-     */
-    public int getCurrentPosition() {
-        return mProvider.getCurrentPosition_impl();
-    }
-
-    /**
-     * Returns the percentage of how much of the media is currently buffered in storage.
-     */
-    public int getBufferPercentage() {
-        return mProvider.getBufferPercentage_impl();
-    }
-
-    /**
-     * Returns whether the media can be paused or not.
-     */
-    public boolean canPause() {
-        return mProvider.canPause_impl();
-    }
-
-    /**
-     * Returns whether the media can be rewound or not.
-     */
-    public boolean canSeekBackward() {
-        return mProvider.canSeekBackward_impl();
-    }
-
-    /**
-     * Returns whether the media can be fast-forwarded or not.
-     */
-    public boolean canSeekForward() {
-        return mProvider.canSeekForward_impl();
-    }
-
-    /**
      * If the media selected has a subtitle track, calling this method will display the subtitle at
      * the bottom of the view. If a media has multiple subtitle tracks, this method will select the
      * first one of them.
@@ -172,10 +163,33 @@ public class MediaControlView2 extends FrameLayout {
         mProvider.hideSubtitle_impl();
     }
 
+    /**
+     * Set listeners for previous and next buttons to customize the behavior of clicking them.
+     * The UI for these buttons are provided as default and will be automatically displayed when
+     * this method is called.
+     *
+     * @param next Listener for clicking next button
+     * @param prev Listener for clicking previous button
+     */
+    public void setPrevNextListeners(View.OnClickListener next, View.OnClickListener prev) {
+        mProvider.setPrevNextListeners_impl(next, prev);
+    }
+
+    /**
+     * Hides the specified button from view.
+     *
+     * @param button the constant integer assigned to individual buttons
+     * @param visible whether the button should be visible or not
+     */
+    public void setButtonVisibility(int button, boolean visible) {
+        mProvider.setButtonVisibility_impl(button, visible);
+    }
+
     @Override
     protected void onAttachedToWindow() {
         mProvider.onAttachedToWindow_impl();
     }
+
     @Override
     protected void onDetachedFromWindow() {
         mProvider.onDetachedFromWindow_impl();

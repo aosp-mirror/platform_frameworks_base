@@ -23,6 +23,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.LocaleList;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
@@ -64,6 +65,7 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
     private static final int DO_REQUEST_UPDATE_CURSOR_ANCHOR_INFO = 140;
     private static final int DO_CLOSE_CONNECTION = 150;
     private static final int DO_COMMIT_CONTENT = 160;
+    private static final int DO_REPORT_LANGUAGE_HINT = 170;
 
     @GuardedBy("mLock")
     @Nullable
@@ -215,6 +217,10 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
             int seq, IInputContextCallback callback) {
         dispatchMessage(obtainMessageIOOSC(DO_COMMIT_CONTENT, flags, inputContentInfo, opts, seq,
                 callback));
+    }
+
+    public void reportLanguageHint(@NonNull LocaleList languageHint) {
+        dispatchMessage(obtainMessageO(DO_REPORT_LANGUAGE_HINT, languageHint));
     }
 
     void dispatchMessage(Message msg) {
@@ -575,6 +581,16 @@ public abstract class IInputConnectionWrapper extends IInputContext.Stub {
                 } finally {
                     args.recycle();
                 }
+                return;
+            }
+            case DO_REPORT_LANGUAGE_HINT: {
+                final LocaleList languageHint = (LocaleList) msg.obj;
+                final InputConnection ic = getInputConnection();
+                if (ic == null || !isActive()) {
+                    Log.w(TAG, "reportLanguageHint on inactive InputConnection");
+                    return;
+                }
+                ic.reportLanguageHint(languageHint);
                 return;
             }
         }

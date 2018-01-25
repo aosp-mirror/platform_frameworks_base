@@ -137,6 +137,7 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         Intent fillInIntent = new Intent().addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         RemoteInput.addResultsToIntent(mRemoteInputs, fillInIntent,
                 results);
+        RemoteInput.setResultsSource(fillInIntent, RemoteInput.SOURCE_FREE_FORM_INPUT);
 
         mEditText.setEnabled(false);
         mSendButton.setVisibility(INVISIBLE);

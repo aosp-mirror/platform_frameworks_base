@@ -16,7 +16,13 @@
 
 package android.os;
 
+import android.annotation.SystemApi;
 /** @hide */
+@SystemApi
 public interface IHwInterface {
+    /**
+     * Returns the binder object that corresponds to an interface.
+     */
+    @SystemApi
     public IHwBinder asBinder();
 }

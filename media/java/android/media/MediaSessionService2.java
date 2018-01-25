@@ -179,7 +179,7 @@ public abstract class MediaSessionService2 extends Service {
      * @return a {@link MediaNotification}. If it's {@code null}, notification wouldn't be shown.
      */
     // TODO(jaewan): Also add metadata
-    public MediaNotification onUpdateNotification(PlaybackState state) {
+    public MediaNotification onUpdateNotification(PlaybackState2 state) {
         return mProvider.onUpdateNotification_impl(state);
     }
 

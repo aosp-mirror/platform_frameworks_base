@@ -157,10 +157,8 @@ interface IWindowSession {
      * @param flags See {@code View#startDragAndDrop}
      * @param surface Surface containing drag shadow image
      * @param touchSource See {@code InputDevice#getSource()}
-     * @param touchX TODO (b/72072998): Fix the issue that the system server misuse the arguments as
-     *         initial touch point while the framework passes drag shadow size.
-     * @param touchY TODO (b/72072998): Fix the issue that the system server misuse the arguments as
-     *         initial touch point while the framework passes drag shadow size.
+     * @param touchX X coordinate of last touch point
+     * @param touchY Y coordinate of last touch point
      * @param thumbCenterX X coordinate for the position within the shadow image that should be
      *         underneath the touch point during the drag and drop operation.
      * @param thumbCenterY Y coordinate for the position within the shadow image that should be

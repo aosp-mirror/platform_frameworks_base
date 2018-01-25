@@ -16,6 +16,7 @@
 
 package com.android.server.net.watchlist;
 
+import android.annotation.Nullable;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -79,7 +80,7 @@ class WatchlistReportDbHelper extends SQLiteOpenHelper {
         final Set<String> appDigestList;
 
         // The c&c domain or ip visited before.
-        final String cncDomainVisited;
+        @Nullable final String cncDomainVisited;
 
         // A list of app digests and c&c domain visited.
         final HashMap<String, String> appDigestCNCList;
@@ -155,7 +156,7 @@ class WatchlistReportDbHelper extends SQLiteOpenHelper {
                     WhiteListReportContract.TABLE, DIGEST_DOMAIN_PROJECTION, selectStatement,
                     new String[]{"" + twoDaysBefore, "" + yesterday}, null, null,
                     null, null);
-            if (c == null || c.getCount() == 0) {
+            if (c == null) {
                 return null;
             }
             final HashSet<String> appDigestList = new HashSet<>();

@@ -58,14 +58,14 @@ public:
     /**
      * Get the timestamp associated with this event.
      */
-    uint64_t GetTimestampNs() const { return mTimestampNs; }
+    inline uint64_t GetTimestampNs() const { return mTimestampNs; }
 
     /**
      * Get the tag for this event.
      */
-    int GetTagId() const { return mTagId; }
+    inline int GetTagId() const { return mTagId; }
 
-    uint32_t GetUid() const {
+    inline uint32_t GetUid() const {
         return mLogUid;
     }
 
@@ -156,7 +156,7 @@ private:
     // This field is used when statsD wants to create log event object and write fields to it. After
     // calling init() function, this object would be destroyed to save memory usage.
     // When the log event is created from log msg, this field is never initiated.
-    android_log_context mContext;
+    android_log_context mContext = NULL;
 
     uint64_t mTimestampNs;
 

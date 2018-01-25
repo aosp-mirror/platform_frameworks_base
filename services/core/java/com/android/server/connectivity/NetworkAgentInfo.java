@@ -223,14 +223,6 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
 
     // This represents the last score received from the NetworkAgent.
     private int currentScore;
-    // Penalty applied to scores of Networks that have not been validated.
-    private static final int UNVALIDATED_SCORE_PENALTY = 40;
-
-    // Score for explicitly connected network.
-    //
-    // This ensures that a) the explicitly selected network is never trumped by anything else, and
-    // b) the explicitly selected network is never torn down.
-    private static final int MAXIMUM_NETWORK_SCORE = 100;
 
     // The list of NetworkRequests being satisfied by this Network.
     private final SparseArray<NetworkRequest> mNetworkRequests = new SparseArray<>();
@@ -428,12 +420,12 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         // down an explicitly selected network before the user gets a chance to prefer it when
         // a higher-scoring network (e.g., Ethernet) is available.
         if (networkMisc.explicitlySelected && (networkMisc.acceptUnvalidated || pretendValidated)) {
-            return MAXIMUM_NETWORK_SCORE;
+            return ConnectivityConstants.MAXIMUM_NETWORK_SCORE;
         }
 
         int score = currentScore;
         if (!lastValidated && !pretendValidated && !ignoreWifiUnvalidationPenalty()) {
-            score -= UNVALIDATED_SCORE_PENALTY;
+            score -= ConnectivityConstants.UNVALIDATED_SCORE_PENALTY;
         }
         if (score < 0) score = 0;
         return score;

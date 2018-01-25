@@ -62,6 +62,7 @@ statsd_common_src := \
     src/storage/StorageManager.cpp \
     src/StatsLogProcessor.cpp \
     src/StatsService.cpp \
+    src/subscriber/SubscriberReporter.cpp \
     src/HashableDimensionKey.cpp \
     src/guardrail/MemoryLeakTrackUtil.cpp \
     src/guardrail/StatsdStats.cpp
@@ -136,7 +137,7 @@ LOCAL_SHARED_LIBRARIES := $(statsd_common_shared_libraries) \
 
 LOCAL_MODULE_CLASS := EXECUTABLES
 
-#LOCAL_INIT_RC := statsd.rc
+LOCAL_INIT_RC := statsd.rc
 
 include $(BUILD_EXECUTABLE)
 
@@ -221,13 +222,49 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
+##############################
+# statsd micro benchmark
+##############################
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := statsd_benchmark
+
+LOCAL_SRC_FILES := $(statsd_common_src) \
+                   benchmark/main.cpp \
+                   benchmark/hello_world_benchmark.cpp \
+                   benchmark/log_event_benchmark.cpp
+
+LOCAL_C_INCLUDES := $(statsd_common_c_includes)
+
+LOCAL_CFLAGS := -Wall \
+                -Werror \
+                -Wno-unused-parameter \
+                -Wno-unused-variable \
+                -Wno-unused-function \
+
+# Bug: http://b/29823425 Disable -Wvarargs for Clang update to r271374
+LOCAL_CFLAGS += -Wno-varargs
+
+LOCAL_AIDL_INCLUDES := $(statsd_common_aidl_includes)
+
+LOCAL_STATIC_LIBRARIES := \
+    $(statsd_common_static_libraries)
+
+LOCAL_SHARED_LIBRARIES := $(statsd_common_shared_libraries) \
+    libgtest_prod
+
+LOCAL_PROTOC_OPTIMIZE_TYPE := lite
+
+LOCAL_MODULE_TAGS := eng tests
+
+include $(BUILD_NATIVE_BENCHMARK)
+
+
 statsd_common_src:=
 statsd_common_aidl_includes:=
 statsd_common_c_includes:=
 statsd_common_static_libraries:=
 statsd_common_shared_libraries:=
 
-
-##############################
 
 include $(call all-makefiles-under,$(LOCAL_PATH))

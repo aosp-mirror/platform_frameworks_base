@@ -29,7 +29,7 @@ import android.media.IMediaSession2;
  * @hide
  */
 oneway interface IMediaSession2Callback {
-    void onPlaybackStateChanged(in PlaybackState state);
+    void onPlaybackStateChanged(in Bundle state);
 
     /**
      * Called only when the controller is created with service's token.
@@ -44,6 +44,8 @@ oneway interface IMediaSession2Callback {
     //               Follow-up TODO: Add similar functions to the session.
     // TODO(jaewan): Is term 'accepted/rejected' correct? For permission, 'grant' is used.
     void onConnectionChanged(IMediaSession2 sessionBinder, in Bundle commandGroup);
+
+    void onCustomLayoutChanged(in List<Bundle> commandButtonlist);
 
     //////////////////////////////////////////////////////////////////////////////////////////////
     // Browser sepcific

@@ -53,6 +53,7 @@ public:
     virtual void drawNinePatch(Bitmap& hwuiBitmap, const android::Res_png_9patch& chunk,
                                float dstLeft, float dstTop, float dstRight, float dstBottom,
                                const SkPaint* paint) override;
+    virtual double drawAnimatedImage(AnimatedImageDrawable* animatedImage) override;
 
     virtual void drawRoundRect(uirenderer::CanvasPropertyPrimitive* left,
                                uirenderer::CanvasPropertyPrimitive* top,

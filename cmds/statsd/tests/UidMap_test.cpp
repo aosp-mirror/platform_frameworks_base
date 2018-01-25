@@ -178,16 +178,16 @@ TEST(UidMapTest, TestClearingOutput) {
     EXPECT_EQ(1, results.snapshots_size());
 
     // It should be cleared now
-    EXPECT_EQ(0, m.mOutput.snapshots_size());
+    EXPECT_EQ(1, m.mOutput.snapshots_size());
     results = m.getOutput(3, config1);
-    EXPECT_EQ(0, results.snapshots_size());
+    EXPECT_EQ(1, results.snapshots_size());
 
     // Now add another configuration.
     m.OnConfigUpdated(config2);
     m.updateApp(5, String16(kApp1.c_str()), 1000, 40);
     EXPECT_EQ(1, m.mOutput.changes_size());
     results = m.getOutput(6, config1);
-    EXPECT_EQ(0, results.snapshots_size());
+    EXPECT_EQ(1, results.snapshots_size());
     EXPECT_EQ(1, results.changes_size());
     EXPECT_EQ(1, m.mOutput.changes_size());
 
@@ -197,15 +197,15 @@ TEST(UidMapTest, TestClearingOutput) {
 
     // We still can't remove anything.
     results = m.getOutput(8, config1);
-    EXPECT_EQ(0, results.snapshots_size());
+    EXPECT_EQ(1, results.snapshots_size());
     EXPECT_EQ(2, results.changes_size());
     EXPECT_EQ(2, m.mOutput.changes_size());
 
     results = m.getOutput(9, config2);
-    EXPECT_EQ(0, results.snapshots_size());
+    EXPECT_EQ(1, results.snapshots_size());
     EXPECT_EQ(2, results.changes_size());
     // At this point both should be cleared.
-    EXPECT_EQ(0, m.mOutput.snapshots_size());
+    EXPECT_EQ(1, m.mOutput.snapshots_size());
     EXPECT_EQ(0, m.mOutput.changes_size());
 }
 
@@ -228,10 +228,8 @@ TEST(UidMapTest, TestMemoryComputed) {
 
     m.updateApp(3, String16(kApp1.c_str()), 1000, 40);
     EXPECT_TRUE(m.mBytesUsed > snapshot_bytes);
-    size_t bytesWithSnapshotChange = m.mBytesUsed;
 
     m.getOutput(2, config1);
-    EXPECT_TRUE(m.mBytesUsed < bytesWithSnapshotChange);
     size_t prevBytes = m.mBytesUsed;
 
     m.getOutput(4, config1);

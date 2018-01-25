@@ -99,6 +99,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     private long mWarningTriggerTimeMs;
 
     private Estimate mEstimate;
+    private long mLowWarningThreshold;
+    private long mSevereWarningThreshold;
     private boolean mWarning;
     private boolean mPlaySound;
     private boolean mInvalidCharger;
@@ -142,10 +144,17 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     @Override
     public void updateEstimate(Estimate estimate) {
         mEstimate = estimate;
-        if (estimate.estimateMillis <= PowerUI.THREE_HOURS_IN_MILLIS) {
+        if (estimate.estimateMillis <= mLowWarningThreshold) {
             mWarningTriggerTimeMs = System.currentTimeMillis();
         }
     }
+
+    @Override
+    public void updateThresholds(long lowThreshold, long severeThreshold) {
+        mLowWarningThreshold = lowThreshold;
+        mSevereWarningThreshold = severeThreshold;
+    }
+
 
     private void updateNotification() {
         if (DEBUG) Slog.d(TAG, "updateNotification mWarning=" + mWarning + " mPlaySound="
@@ -181,7 +190,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
     }
 
     protected void showWarningNotification() {
-        final String percentage = NumberFormat.getPercentInstance().format((double) mBatteryLevel / 100.0);
+        final String percentage = NumberFormat.getPercentInstance()
+                .format((double) mBatteryLevel / 100.0);
 
         // get standard notification copy
         String title = mContext.getString(R.string.battery_low_title);
@@ -214,7 +224,8 @@ public class PowerNotificationWarnings implements PowerUI.WarningsUI {
         }
         // Make the notification red if the percentage goes below a certain amount or the time
         // remaining estimate is disabled
-        if (mEstimate == null || mBucket < 0) {
+        if (mEstimate == null || mBucket < 0
+                || mEstimate.estimateMillis < mSevereWarningThreshold) {
             nb.setColor(Utils.getColorAttr(mContext, android.R.attr.colorError));
         }
         nb.addAction(0,

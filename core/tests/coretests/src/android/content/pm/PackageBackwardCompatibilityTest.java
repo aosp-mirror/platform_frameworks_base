@@ -73,9 +73,13 @@ public class PackageBackwardCompatibilityTest {
     public void targeted_at_O() {
         mPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.O;
         PackageBackwardCompatibility.modifySharedLibraries(mPackage);
-        assertEquals("usesLibraries not updated correctly",
-                arrayList(ORG_APACHE_HTTP_LEGACY),
-                mPackage.usesLibraries);
+        if (PackageBackwardCompatibility.removeOAHLFromBCP()) {
+            assertEquals("usesLibraries not updated correctly",
+                    arrayList(ORG_APACHE_HTTP_LEGACY),
+                    mPackage.usesLibraries);
+        } else {
+            assertNull("usesOptionalLibraries not updated correctly", mPackage.usesLibraries);
+        }
         assertNull("usesOptionalLibraries not updated correctly", mPackage.usesOptionalLibraries);
     }
 
@@ -84,10 +88,16 @@ public class PackageBackwardCompatibilityTest {
         mPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.O;
         mPackage.usesLibraries = arrayList(OTHER_LIBRARY);
         PackageBackwardCompatibility.modifySharedLibraries(mPackage);
-        // The org.apache.http.legacy jar should be added at the start of the list.
-        assertEquals("usesLibraries not updated correctly",
-                arrayList(ORG_APACHE_HTTP_LEGACY, OTHER_LIBRARY),
-                mPackage.usesLibraries);
+        if (PackageBackwardCompatibility.removeOAHLFromBCP()) {
+            // The org.apache.http.legacy jar should be added at the start of the list.
+            assertEquals("usesLibraries not updated correctly",
+                    arrayList(ORG_APACHE_HTTP_LEGACY, OTHER_LIBRARY),
+                    mPackage.usesLibraries);
+        } else {
+            assertEquals("usesLibraries not updated correctly",
+                    arrayList(OTHER_LIBRARY),
+                    mPackage.usesLibraries);
+        }
         assertNull("usesOptionalLibraries not updated correctly", mPackage.usesOptionalLibraries);
     }
 
@@ -96,9 +106,13 @@ public class PackageBackwardCompatibilityTest {
         mPackage.applicationInfo.targetSdkVersion = Build.VERSION_CODES.O;
         mPackage.usesLibraries = arrayList(ORG_APACHE_HTTP_LEGACY);
         PackageBackwardCompatibility.modifySharedLibraries(mPackage);
-        assertEquals("usesLibraries not updated correctly",
-                arrayList(ORG_APACHE_HTTP_LEGACY),
-                mPackage.usesLibraries);
+        if (PackageBackwardCompatibility.removeOAHLFromBCP()) {
+            assertEquals("usesLibraries not updated correctly",
+                    arrayList(ORG_APACHE_HTTP_LEGACY),
+                    mPackage.usesLibraries);
+        } else {
+            assertNull("usesLibraries not updated correctly", mPackage.usesLibraries);
+        }
         assertNull("usesOptionalLibraries not updated correctly", mPackage.usesOptionalLibraries);
     }
 
@@ -108,18 +122,27 @@ public class PackageBackwardCompatibilityTest {
         mPackage.usesOptionalLibraries = arrayList(ORG_APACHE_HTTP_LEGACY);
         PackageBackwardCompatibility.modifySharedLibraries(mPackage);
         assertNull("usesLibraries not updated correctly", mPackage.usesLibraries);
-        assertEquals("usesOptionalLibraries not updated correctly",
-                arrayList(ORG_APACHE_HTTP_LEGACY),
-                mPackage.usesOptionalLibraries);
+        if (PackageBackwardCompatibility.removeOAHLFromBCP()) {
+            assertEquals("usesOptionalLibraries not updated correctly",
+                    arrayList(ORG_APACHE_HTTP_LEGACY),
+                    mPackage.usesOptionalLibraries);
+        } else {
+            assertNull("usesOptionalLibraries not updated correctly",
+                    mPackage.usesOptionalLibraries);
+        }
     }
 
     @Test
     public void org_apache_http_legacy_in_usesLibraries() {
         mPackage.usesLibraries = arrayList(ORG_APACHE_HTTP_LEGACY);
         PackageBackwardCompatibility.modifySharedLibraries(mPackage);
-        assertEquals("usesLibraries not updated correctly",
-                arrayList(ORG_APACHE_HTTP_LEGACY),
-                mPackage.usesLibraries);
+        if (PackageBackwardCompatibility.removeOAHLFromBCP()) {
+            assertEquals("usesLibraries not updated correctly",
+                    arrayList(ORG_APACHE_HTTP_LEGACY),
+                    mPackage.usesLibraries);
+        } else {
+            assertNull("usesLibraries not updated correctly", mPackage.usesLibraries);
+        }
         assertNull("usesOptionalLibraries not updated correctly", mPackage.usesOptionalLibraries);
     }
 
@@ -128,9 +151,14 @@ public class PackageBackwardCompatibilityTest {
         mPackage.usesOptionalLibraries = arrayList(ORG_APACHE_HTTP_LEGACY);
         PackageBackwardCompatibility.modifySharedLibraries(mPackage);
         assertNull("usesLibraries not updated correctly", mPackage.usesLibraries);
-        assertEquals("usesOptionalLibraries not updated correctly",
-                arrayList(ORG_APACHE_HTTP_LEGACY),
-                mPackage.usesOptionalLibraries);
+        if (PackageBackwardCompatibility.removeOAHLFromBCP()) {
+            assertEquals("usesOptionalLibraries not updated correctly",
+                    arrayList(ORG_APACHE_HTTP_LEGACY),
+                    mPackage.usesOptionalLibraries);
+        } else {
+            assertNull("usesOptionalLibraries not updated correctly",
+                    mPackage.usesOptionalLibraries);
+        }
     }
 
     @Test

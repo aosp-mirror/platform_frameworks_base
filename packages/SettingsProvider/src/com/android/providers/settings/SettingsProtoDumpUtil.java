@@ -1120,8 +1120,8 @@ class SettingsProtoDumpUtil {
                 Settings.Global.NOTIFICATION_SNOOZE_OPTIONS,
                 GlobalSettingsProto.NOTIFICATION_SNOOZE_OPTIONS);
         dumpSetting(s, p,
-                    Settings.Global.ZRAM_ENABLED,
-                    GlobalSettingsProto.ZRAM_ENABLED);
+                Settings.Global.ZRAM_ENABLED,
+                GlobalSettingsProto.ZRAM_ENABLED);
         dumpSetting(s, p,
                 Settings.Global.ENABLE_SMART_REPLIES_IN_NOTIFICATIONS,
                 GlobalSettingsProto.ENABLE_SMART_REPLIES_IN_NOTIFICATIONS);
@@ -1129,8 +1129,14 @@ class SettingsProtoDumpUtil {
                 Settings.Global.SHOW_FIRST_CRASH_DIALOG,
                 GlobalSettingsProto.SHOW_FIRST_CRASH_DIALOG);
         dumpSetting(s, p,
-                    Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED,
-                    GlobalSettingsProto.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED);
+                Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED,
+                GlobalSettingsProto.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.SHOW_RESTART_IN_CRASH_DIALOG,
+                GlobalSettingsProto.SHOW_RESTART_IN_CRASH_DIALOG);
+        dumpSetting(s, p,
+                Settings.Global.SHOW_MUTE_IN_CRASH_DIALOG,
+                GlobalSettingsProto.SHOW_MUTE_IN_CRASH_DIALOG);
     }
 
     /** Dump a single {@link SettingsState.Setting} to a proto buf */
@@ -1755,6 +1761,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.BACKUP_MANAGER_CONSTANTS,
                 SecureSettingsProto.BACKUP_MANAGER_CONSTANTS);
+        dumpSetting(s, p,
+                Settings.Secure.BLUETOOTH_ON_WHILE_DRIVING,
+                SecureSettingsProto.BLUETOOTH_ON_WHILE_DRIVING);
     }
 
     private static void dumpProtoSystemSettingsLocked(

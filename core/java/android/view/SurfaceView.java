@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.res.CompatibilityInfo.Translator;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
@@ -114,7 +115,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
     final Rect mScreenRect = new Rect();
     SurfaceSession mSurfaceSession;
 
-    SurfaceControl mSurfaceControl;
+    SurfaceControlWithBackground mSurfaceControl;
     // In the case of format changes we switch out the surface in-place
     // we need to preserve the old one until the new one has drawn.
     SurfaceControl mDeferredDestroySurfaceControl;
@@ -925,6 +926,17 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         return mSubLayer >= 0;
     }
 
+    /**
+     * Set an opaque background color to use with this {@link SurfaceView} when it's being resized
+     * and size of the content hasn't updated yet. This color will fill the expanded area when the
+     * view becomes larger.
+     * @param bgColor An opaque color to fill the background. Alpha component will be ignored.
+     * @hide
+     */
+    public void setResizeBackgroundColor(int bgColor) {
+        mSurfaceControl.setBackgroundColor(bgColor);
+    }
+
     private final SurfaceHolder mSurfaceHolder = new SurfaceHolder() {
         private static final String LOG_TAG = "SurfaceHolder";
 
@@ -1217,6 +1229,19 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
         public void deferTransactionUntil(Surface barrier, long frame) {
             super.deferTransactionUntil(barrier, frame);
             mBackgroundControl.deferTransactionUntil(barrier, frame);
+        }
+
+        /** Set the color to fill the background with. */
+        private void setBackgroundColor(int bgColor) {
+            final float[] colorComponents = new float[] { Color.red(bgColor) / 255.f,
+                    Color.green(bgColor) / 255.f, Color.blue(bgColor) / 255.f };
+
+            SurfaceControl.openTransaction();
+            try {
+                mBackgroundControl.setColor(colorComponents);
+            } finally {
+                SurfaceControl.closeTransaction();
+            }
         }
 
         void updateBackgroundVisibility() {

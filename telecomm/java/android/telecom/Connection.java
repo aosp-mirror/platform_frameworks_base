@@ -2801,6 +2801,15 @@ public abstract class Connection extends Conferenceable {
     public void onCallEvent(String event, Bundle extras) {}
 
     /**
+     * Notifies this {@link Connection} that a handover has completed.
+     * <p>
+     * A handover is initiated with {@link android.telecom.Call#handoverTo(PhoneAccountHandle, int,
+     * Bundle)} on the initiating side of the handover, and
+     * {@link TelecomManager#acceptHandover(Uri, int, PhoneAccountHandle)}.
+     */
+    public void onHandoverComplete() {}
+
+    /**
      * Notifies this {@link Connection} of a change to the extras made outside the
      * {@link ConnectionService}.
      * <p>

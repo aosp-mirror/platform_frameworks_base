@@ -579,7 +579,6 @@ public class PackageManagerServiceUtils {
         return true;
     }
 
-
     /**
      * Checks the signing certificates to see if the provided certificate is a member.  Invalid for
      * {@code SigningDetails} with multiple signing certificates.
@@ -642,10 +641,14 @@ public class PackageManagerServiceUtils {
         return false;
     }
 
+    /** Returns true if APK Verity is enabled. */
+    static boolean isApkVerityEnabled() {
+        return SystemProperties.getInt("ro.apk_verity.mode", 0) != 0;
+    }
+
     /** Returns true to force apk verification if the updated package (in /data) is a priv app. */
     static boolean isApkVerificationForced(@Nullable PackageSetting disabledPs) {
-        return disabledPs != null && disabledPs.isPrivileged() &&
-                SystemProperties.getInt("ro.apk_verity.mode", 0) != 0;
+        return disabledPs != null && disabledPs.isPrivileged() && isApkVerityEnabled();
     }
 
     /**

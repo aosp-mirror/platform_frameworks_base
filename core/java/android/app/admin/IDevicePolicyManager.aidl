@@ -391,7 +391,9 @@ interface IDevicePolicyManager {
     boolean isLogoutEnabled();
 
     List<String> getDisallowedSystemApps(in ComponentName admin, int userId, String provisioningAction);
+
     void transferOwnership(in ComponentName admin, in ComponentName target, in PersistableBundle bundle);
+    PersistableBundle getTransferOwnershipBundle();
 
     void setStartUserSessionMessage(in ComponentName admin, in CharSequence startUserSessionMessage);
     void setEndUserSessionMessage(in ComponentName admin, in CharSequence endUserSessionMessage);
@@ -400,7 +402,6 @@ interface IDevicePolicyManager {
 
     void setPrintingEnabled(in ComponentName admin, boolean enabled);
     boolean isPrintingEnabled();
-    CharSequence getPrintingDisabledReason();
 
     List<String> setMeteredDataDisabled(in ComponentName admin, in List<String> packageNames);
     List<String> getMeteredDataDisabled(in ComponentName admin);

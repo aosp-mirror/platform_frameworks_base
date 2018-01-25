@@ -125,7 +125,7 @@ void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint
     SkPaint glyphPaint(paint);
     glyphPaint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
     canvas->drawText(utf16.get(), 0, strlen(text), strlen(text), x, y, minikin::Bidi::LTR,
-            glyphPaint, nullptr);
+            glyphPaint, nullptr, nullptr /* measured text */, 0 /* measured text offset */);
 }
 
 void TestUtils::drawUtf8ToCanvas(Canvas* canvas, const char* text, const SkPaint& paint,

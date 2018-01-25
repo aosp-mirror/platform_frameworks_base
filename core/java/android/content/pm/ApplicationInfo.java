@@ -1591,6 +1591,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /**
      * @hide
      */
+    public boolean isAllowedToUseHiddenApi() {
+        return isSystemApp();
+    }
+
+    /**
+     * @hide
+     */
     @Override
     public Drawable loadDefaultIcon(PackageManager pm) {
         if ((flags & FLAG_EXTERNAL_STORAGE) != 0

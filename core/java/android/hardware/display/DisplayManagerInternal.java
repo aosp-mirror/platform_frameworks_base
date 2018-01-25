@@ -214,23 +214,12 @@ public abstract class DisplayManagerInternal {
         // nearby, turning it off temporarily until the object is moved away.
         public boolean useProximitySensor;
 
-        // The desired screen brightness in the range 0 (minimum / off) to 255 (brightest).
-        // The display power controller may choose to clamp the brightness.
-        // When auto-brightness is enabled, this field should specify a nominal default
-        // value to use while waiting for the light sensor to report enough data.
-        public int screenBrightness;
+        // An override of the screen brightness. Set to -1 is used if there's no override.
+        public int screenBrightnessOverride;
 
-        // The screen auto-brightness adjustment factor in the range -1 (dimmer) to 1 (brighter).
-        public float screenAutoBrightnessAdjustment;
-
-        // Set to true if screenBrightness and screenAutoBrightnessAdjustment were both
-        // set by the user as opposed to being programmatically controlled by apps.
-        public boolean brightnessSetByUser;
-
-        // Set to true if screenBrightness or screenAutoBrightnessAdjustment are being set
-        // temporarily. This is typically set while the user has their finger on the brightness
-        // control, before they've selected the final brightness value.
-        public boolean brightnessIsTemporary;
+        // An override of the screen auto-brightness adjustment factor in the range -1 (dimmer) to
+        // 1 (brighter). Set to Float.NaN if there's no override.
+        public float screenAutoBrightnessAdjustmentOverride;
 
         // If true, enables automatic brightness control.
         public boolean useAutoBrightness;
@@ -262,10 +251,10 @@ public abstract class DisplayManagerInternal {
         public DisplayPowerRequest() {
             policy = POLICY_BRIGHT;
             useProximitySensor = false;
-            screenBrightness = PowerManager.BRIGHTNESS_ON;
-            screenAutoBrightnessAdjustment = 0.0f;
-            screenLowPowerBrightnessFactor = 0.5f;
+            screenBrightnessOverride = -1;
             useAutoBrightness = false;
+            screenAutoBrightnessAdjustmentOverride = Float.NaN;
+            screenLowPowerBrightnessFactor = 0.5f;
             blockScreenOn = false;
             dozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
             dozeScreenState = Display.STATE_UNKNOWN;
@@ -286,12 +275,10 @@ public abstract class DisplayManagerInternal {
         public void copyFrom(DisplayPowerRequest other) {
             policy = other.policy;
             useProximitySensor = other.useProximitySensor;
-            screenBrightness = other.screenBrightness;
-            screenAutoBrightnessAdjustment = other.screenAutoBrightnessAdjustment;
-            screenLowPowerBrightnessFactor = other.screenLowPowerBrightnessFactor;
-            brightnessSetByUser = other.brightnessSetByUser;
-            brightnessIsTemporary = other.brightnessIsTemporary;
+            screenBrightnessOverride = other.screenBrightnessOverride;
             useAutoBrightness = other.useAutoBrightness;
+            screenAutoBrightnessAdjustmentOverride = other.screenAutoBrightnessAdjustmentOverride;
+            screenLowPowerBrightnessFactor = other.screenLowPowerBrightnessFactor;
             blockScreenOn = other.blockScreenOn;
             lowPowerMode = other.lowPowerMode;
             boostScreenBrightness = other.boostScreenBrightness;
@@ -309,18 +296,21 @@ public abstract class DisplayManagerInternal {
             return other != null
                     && policy == other.policy
                     && useProximitySensor == other.useProximitySensor
-                    && screenBrightness == other.screenBrightness
-                    && screenAutoBrightnessAdjustment == other.screenAutoBrightnessAdjustment
+                    && screenBrightnessOverride == other.screenBrightnessOverride
+                    && useAutoBrightness == other.useAutoBrightness
+                    && floatEquals(screenAutoBrightnessAdjustmentOverride,
+                            other.screenAutoBrightnessAdjustmentOverride)
                     && screenLowPowerBrightnessFactor
                     == other.screenLowPowerBrightnessFactor
-                    && brightnessSetByUser == other.brightnessSetByUser
-                    && brightnessIsTemporary == other.brightnessIsTemporary
-                    && useAutoBrightness == other.useAutoBrightness
                     && blockScreenOn == other.blockScreenOn
                     && lowPowerMode == other.lowPowerMode
                     && boostScreenBrightness == other.boostScreenBrightness
                     && dozeScreenBrightness == other.dozeScreenBrightness
                     && dozeScreenState == other.dozeScreenState;
+        }
+
+        private boolean floatEquals(float f1, float f2) {
+            return f1 == f2 || Float.isNaN(f1) && Float.isNaN(f2);
         }
 
         @Override
@@ -332,12 +322,11 @@ public abstract class DisplayManagerInternal {
         public String toString() {
             return "policy=" + policyToString(policy)
                     + ", useProximitySensor=" + useProximitySensor
-                    + ", screenBrightness=" + screenBrightness
-                    + ", screenAutoBrightnessAdjustment=" + screenAutoBrightnessAdjustment
-                    + ", screenLowPowerBrightnessFactor=" + screenLowPowerBrightnessFactor
-                    + ", brightnessSetByUser=" + brightnessSetByUser
-                    + ", brightnessIsTemporary=" + brightnessIsTemporary
+                    + ", screenBrightnessOverride=" + screenBrightnessOverride
                     + ", useAutoBrightness=" + useAutoBrightness
+                    + ", screenAutoBrightnessAdjustmentOverride="
+                    + screenAutoBrightnessAdjustmentOverride
+                    + ", screenLowPowerBrightnessFactor=" + screenLowPowerBrightnessFactor
                     + ", blockScreenOn=" + blockScreenOn
                     + ", lowPowerMode=" + lowPowerMode
                     + ", boostScreenBrightness=" + boostScreenBrightness

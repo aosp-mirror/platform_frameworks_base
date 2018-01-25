@@ -137,6 +137,7 @@ cc_defaults {
     whole_static_libs: ["libskia"],
 
     srcs: [
+        "hwui/AnimatedImageDrawable.cpp",
         "hwui/Bitmap.cpp",
         "font/CacheTexture.cpp",
         "font/Font.cpp",

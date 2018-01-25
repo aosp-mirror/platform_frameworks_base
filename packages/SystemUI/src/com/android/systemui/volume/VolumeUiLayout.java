@@ -25,6 +25,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
+import android.util.Slog;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -127,17 +128,26 @@ public class VolumeUiLayout extends FrameLayout  {
         rotate(mChild, from, to, true);
         ViewGroup rows = mChild.findViewById(R.id.volume_dialog_rows);
         rotate(rows, from, to, true);
+        swapOrientation((LinearLayout) rows);
         int rowCount = rows.getChildCount();
         for (int i = 0; i < rowCount; i++) {
-            View child = rows.getChildAt(i);
+            View row = rows.getChildAt(i);
             if (to == ROTATION_SEASCAPE) {
-                rotateSeekBars(to, 0);
+                rotateSeekBars(row, to, 180);
             } else if (to == ROTATION_LANDSCAPE) {
-                rotateSeekBars(to, 180);
+                rotateSeekBars(row, to, 0);
             } else {
-                rotateSeekBars(to, 270);
+                rotateSeekBars(row, to, 270);
             }
-            rotate(child, from, to, true);
+            rotate(row, from, to, true);
+        }
+    }
+
+    private void swapOrientation(LinearLayout layout) {
+        if(layout.getOrientation() == LinearLayout.HORIZONTAL) {
+            layout.setOrientation(LinearLayout.VERTICAL);
+        } else {
+            layout.setOrientation(LinearLayout.HORIZONTAL);
         }
     }
 
@@ -152,13 +162,13 @@ public class VolumeUiLayout extends FrameLayout  {
         v.setLayoutParams(params);
     }
 
-    private void rotateSeekBars(int to, int rotation) {
-        SeekBar seekbar = mChild.findViewById(R.id.volume_row_slider);
+    private void rotateSeekBars(View row, int to, int rotation) {
+        SeekBar seekbar = row.findViewById(R.id.volume_row_slider);
         if (seekbar != null) {
             seekbar.setRotation((float) rotation);
         }
 
-        View parent = mChild.findViewById(R.id.volume_row_slider_frame);
+        View parent = row.findViewById(R.id.volume_row_slider_frame);
         swapDimens(parent);
         ViewGroup.LayoutParams params = seekbar.getLayoutParams();
         ViewGroup.LayoutParams parentParams = parent.getLayoutParams();

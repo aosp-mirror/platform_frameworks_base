@@ -21,6 +21,7 @@
 #include "external/Perfetto.h"
 #include "guardrail/StatsdStats.h"
 #include "frameworks/base/libs/incident/proto/android/os/header.pb.h"
+#include "subscriber/SubscriberReporter.h"
 
 #include <android/os/IIncidentManager.h>
 #include <android/os/IncidentReportArgs.h>
@@ -233,6 +234,7 @@ void AnomalyTracker::informSubscribers(const HashableDimensionKey& key) {
     }
 
     std::set<int> incidentdSections;
+
     for (const Subscription& subscription : mSubscriptions) {
         switch (subscription.subscriber_information_case()) {
             case Subscription::SubscriberInformationCase::kIncidentdDetails:
@@ -242,6 +244,10 @@ void AnomalyTracker::informSubscribers(const HashableDimensionKey& key) {
                 break;
             case Subscription::SubscriberInformationCase::kPerfettoDetails:
                 CollectPerfettoTraceAndUploadToDropbox(subscription.perfetto_details());
+                break;
+            case Subscription::SubscriberInformationCase::kBroadcastSubscriberDetails:
+                SubscriberReporter::getInstance()
+                        .alertBroadcastSubscriber(mConfigKey, subscription, key);
                 break;
             default:
                 break;

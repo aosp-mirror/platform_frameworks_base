@@ -207,6 +207,12 @@ public class ActivityOptions {
             "android.activity.taskOverlayCanResume";
 
     /**
+     * See {@link #setAvoidMoveToFront()}.
+     * @hide
+     */
+    private static final String KEY_AVOID_MOVE_TO_FRONT = "android.activity.avoidMoveToFront";
+
+    /**
      * Where the split-screen-primary stack should be positioned.
      * @hide
      */
@@ -307,6 +313,7 @@ public class ActivityOptions {
     private boolean mDisallowEnterPictureInPictureWhileLaunching;
     private boolean mTaskOverlay;
     private boolean mTaskOverlayCanResume;
+    private boolean mAvoidMoveToFront;
     private AppTransitionAnimationSpec mAnimSpecs[];
     private int mRotationAnimationHint = -1;
     private Bundle mAppVerificationBundle;
@@ -923,6 +930,7 @@ public class ActivityOptions {
         mLaunchTaskId = opts.getInt(KEY_LAUNCH_TASK_ID, -1);
         mTaskOverlay = opts.getBoolean(KEY_TASK_OVERLAY, false);
         mTaskOverlayCanResume = opts.getBoolean(KEY_TASK_OVERLAY_CAN_RESUME, false);
+        mAvoidMoveToFront = opts.getBoolean(KEY_AVOID_MOVE_TO_FRONT, false);
         mSplitScreenCreateMode = opts.getInt(KEY_SPLIT_SCREEN_CREATE_MODE,
                 SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT);
         mDisallowEnterPictureInPictureWhileLaunching = opts.getBoolean(
@@ -1239,6 +1247,25 @@ public class ActivityOptions {
         return mTaskOverlayCanResume;
     }
 
+    /**
+     * Sets whether the activity launched should not cause the activity stack it is contained in to
+     * be moved to the front as a part of launching.
+     *
+     * @hide
+     */
+    public void setAvoidMoveToFront() {
+        mAvoidMoveToFront = true;
+    }
+
+    /**
+     * @return whether the activity launch should prevent moving the associated activity stack to
+     *         the front.
+     * @hide
+     */
+    public boolean getAvoidMoveToFront() {
+        return mAvoidMoveToFront;
+    }
+
     /** @hide */
     public int getSplitScreenCreateMode() {
         return mSplitScreenCreateMode;
@@ -1416,6 +1443,7 @@ public class ActivityOptions {
         b.putInt(KEY_LAUNCH_TASK_ID, mLaunchTaskId);
         b.putBoolean(KEY_TASK_OVERLAY, mTaskOverlay);
         b.putBoolean(KEY_TASK_OVERLAY_CAN_RESUME, mTaskOverlayCanResume);
+        b.putBoolean(KEY_AVOID_MOVE_TO_FRONT, mAvoidMoveToFront);
         b.putInt(KEY_SPLIT_SCREEN_CREATE_MODE, mSplitScreenCreateMode);
         b.putBoolean(KEY_DISALLOW_ENTER_PICTURE_IN_PICTURE_WHILE_LAUNCHING,
                 mDisallowEnterPictureInPictureWhileLaunching);

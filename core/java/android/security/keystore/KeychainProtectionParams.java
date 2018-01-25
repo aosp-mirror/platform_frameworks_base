@@ -260,9 +260,6 @@ public final class KeychainProtectionParams implements Parcelable {
         }
     };
 
-    /**
-     * @hide
-     */
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mUserSecretType);

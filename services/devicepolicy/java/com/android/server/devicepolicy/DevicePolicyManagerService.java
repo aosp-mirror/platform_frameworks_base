@@ -20,7 +20,7 @@ import static android.Manifest.permission.BIND_DEVICE_ADMIN;
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.USER_OP_SUCCESS;
-import static android.app.admin.DeviceAdminReceiver.EXTRA_TRANSFER_OWNER_ADMIN_EXTRAS_BUNDLE;
+import static android.app.admin.DeviceAdminReceiver.EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_USER;
 import static android.app.admin.DevicePolicyManager.CODE_ACCOUNTS_NOT_EMPTY;
 import static android.app.admin.DevicePolicyManager.CODE_ADD_MANAGED_PROFILE_DISALLOWED;
@@ -58,6 +58,7 @@ import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
+
 import static android.provider.Telephony.Carriers.DPC_URI;
 import static android.provider.Telephony.Carriers.ENFORCE_KEY;
 import static android.provider.Telephony.Carriers.ENFORCE_MANAGED_URI;
@@ -66,6 +67,12 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent
         .PROVISIONING_ENTRY_POINT_ADB;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker
         .STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
+
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.PROVISIONING_ENTRY_POINT_ADB;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
+
+import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_DEVICE_OWNER;
+import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_PROFILE_OWNER;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
@@ -181,6 +188,7 @@ import android.telephony.data.ApnSetting;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -240,6 +248,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -255,6 +264,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final boolean VERBOSE_LOG = false; // DO NOT SUBMIT WITH TRUE
 
     private static final String DEVICE_POLICIES_XML = "device_policies.xml";
+
+    private static final String TRANSFER_OWNERSHIP_PARAMETERS_XML =
+            "transfer-ownership-parameters.xml";
 
     private static final String TAG_ACCEPTED_CA_CERTIFICATES = "accepted-ca-certificate";
 
@@ -459,6 +471,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private final AtomicBoolean mRemoteBugreportSharingAccepted = new AtomicBoolean();
 
     private SetupContentObserver mSetupContentObserver;
+
+    @VisibleForTesting
+    final TransferOwnershipMetadataManager mTransferOwnershipMetadataManager;
 
     private final Runnable mRemoteBugreportTimeoutRunnable = new Runnable() {
         @Override
@@ -2023,6 +2038,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         void postOnSystemServerInitThreadPool(Runnable runnable) {
             SystemServerInitThreadPool.get().submit(runnable, LOG_TAG);
         }
+
+        public TransferOwnershipMetadataManager newTransferOwnershipMetadataManager() {
+            return new TransferOwnershipMetadataManager();
+        }
     }
 
     /**
@@ -2066,6 +2085,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mDeviceAdminServiceController = new DeviceAdminServiceController(this, mConstants);
 
         mOverlayPackagesProvider = new OverlayPackagesProvider(mContext);
+
+        mTransferOwnershipMetadataManager = mInjector.newTransferOwnershipMetadataManager();
 
         if (!mHasFeature) {
             // Skip the rest of the initialization
@@ -3308,6 +3329,29 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 activityManagerInternal.setSwitchingToSystemUserMessage(
                         deviceOwner.endUserSessionMessage);
             }
+
+            revertTransferOwnershipIfNecessaryLocked();
+        }
+    }
+
+    private void revertTransferOwnershipIfNecessaryLocked() {
+        if (!mTransferOwnershipMetadataManager.metadataFileExists()) {
+            return;
+        }
+        Slog.e(LOG_TAG, "Owner transfer metadata file exists! Reverting transfer.");
+        final TransferOwnershipMetadataManager.Metadata metadata =
+                mTransferOwnershipMetadataManager.loadMetadataFile();
+        // Revert transfer
+        if (metadata.adminType.equals(ADMIN_TYPE_PROFILE_OWNER)) {
+            transferProfileOwnershipLocked(metadata.targetComponent, metadata.sourceComponent,
+                    metadata.userId);
+            deleteTransferOwnershipMetadataFileLocked();
+            deleteTransferOwnershipBundleLocked(metadata.userId);
+        } else if (metadata.adminType.equals(ADMIN_TYPE_DEVICE_OWNER)) {
+            transferDeviceOwnershipLocked(metadata.targetComponent, metadata.sourceComponent,
+                    metadata.userId);
+            deleteTransferOwnershipMetadataFileLocked();
+            deleteTransferOwnershipBundleLocked(metadata.userId);
         }
     }
 
@@ -3568,6 +3612,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private void transferActiveAdminUncheckedLocked(ComponentName incomingReceiver,
             ComponentName outgoingReceiver, int userHandle) {
         final DevicePolicyData policy = getUserData(userHandle);
+        if (!policy.mAdminMap.containsKey(outgoingReceiver)
+                && policy.mAdminMap.containsKey(incomingReceiver)) {
+            // Nothing to transfer - the incoming receiver is already the active admin.
+            return;
+        }
         final DeviceAdminInfo incomingDeviceInfo = findAdmin(incomingReceiver, userHandle,
             /* throwForMissingPermission= */ true);
         final ActiveAdmin adminToTransfer = policy.mAdminMap.get(outgoingReceiver);
@@ -3581,7 +3630,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
 
         saveSettingsLocked(userHandle);
-        //TODO: Make sure we revert back when we detect a failure.
         sendAdminCommandLocked(adminToTransfer, DeviceAdminReceiver.ACTION_DEVICE_ADMIN_ENABLED,
                 null, null);
     }
@@ -7331,6 +7379,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mInjector.securityLogSetLoggingEnabledProperty(false);
         mSecurityLogMonitor.stop();
         setNetworkLoggingActiveInternal(false);
+        deleteTransferOwnershipBundleLocked(userId);
 
         try {
             if (mInjector.getIBackupManager() != null) {
@@ -7433,6 +7482,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         clearUserPoliciesLocked(userId);
         mOwners.removeProfileOwner(userId);
         mOwners.writeProfileOwner(userId);
+        deleteTransferOwnershipBundleLocked(userId);
     }
 
     @Override
@@ -7900,6 +7950,37 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         // Otherwise, INTERACT_ACROSS_USERS_FULL permission, system UID or root UID is required.
         enforceSystemUserOrPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+    }
+
+    private boolean canUserUseLockTaskLocked(int userId) {
+        if (isUserAffiliatedWithDeviceLocked(userId)) {
+            return true;
+        }
+
+        // Unaffiliated profile owners are not allowed to use lock when there is a device owner.
+        if (mOwners.hasDeviceOwner()) {
+            return false;
+        }
+
+        final ComponentName profileOwner = getProfileOwner(userId);
+        if (profileOwner == null) {
+            return false;
+        }
+
+        // Managed profiles are not allowed to use lock task
+        if (isManagedProfile(userId)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void enforceCanCallLockTaskLocked(ComponentName who) {
+        getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+        final int userId =  mInjector.userHandleGetCallingUserId();
+        if (!canUserUseLockTaskLocked(userId)) {
+            throw new SecurityException("User " + userId + " is not allowed to use lock task");
+        }
     }
 
     private void ensureCallerPackage(@Nullable String packageName) {
@@ -9608,14 +9689,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkNotNull(packages, "packages is null");
 
         synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            enforceCanCallLockTaskLocked(who);
             final int userHandle = mInjector.userHandleGetCallingUserId();
-            if (isUserAffiliatedWithDeviceLocked(userHandle)) {
-                setLockTaskPackagesLocked(userHandle, new ArrayList<>(Arrays.asList(packages)));
-            } else {
-                throw new SecurityException("Admin " + who +
-                    " is neither the device owner or affiliated user's profile owner.");
-            }
+            setLockTaskPackagesLocked(userHandle, new ArrayList<>(Arrays.asList(packages)));
         }
     }
 
@@ -9634,12 +9710,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final int userHandle = mInjector.binderGetCallingUserHandle().getIdentifier();
         synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            if (!isUserAffiliatedWithDeviceLocked(userHandle)) {
-                throw new SecurityException("Admin " + who +
-                    " is neither the device owner or affiliated user's profile owner.");
-            }
-
+            enforceCanCallLockTaskLocked(who);
             final List<String> packages = getUserData(userHandle).mLockTaskPackages;
             return packages.toArray(new String[packages.size()]);
         }
@@ -9658,11 +9729,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = mInjector.userHandleGetCallingUserId();
         synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            if (!isUserAffiliatedWithDeviceLocked(userHandle)) {
-                throw new SecurityException("Admin " + who +
-                        " is neither the device owner or affiliated user's profile owner.");
-            }
+            enforceCanCallLockTaskLocked(who);
             setLockTaskFeaturesLocked(userHandle, flags);
         }
     }
@@ -9679,11 +9746,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkNotNull(who, "ComponentName is null");
         final int userHandle = mInjector.userHandleGetCallingUserId();
         synchronized (this) {
-            getActiveAdminForCallerLocked(who, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
-            if (!isUserAffiliatedWithDeviceLocked(userHandle)) {
-                throw new SecurityException("Admin " + who +
-                        " is neither the device owner or affiliated user's profile owner.");
-            }
+            enforceCanCallLockTaskLocked(who);
             return getUserData(userHandle).mLockTaskFeatures;
         }
     }
@@ -9694,7 +9757,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final List<UserInfo> userInfos = mUserManager.getUsers(/*excludeDying=*/ true);
             for (int i = userInfos.size() - 1; i >= 0; i--) {
                 int userId = userInfos.get(i).id;
-                if (isUserAffiliatedWithDeviceLocked(userId)) {
+                if (canUserUseLockTaskLocked(userId)) {
                     continue;
                 }
 
@@ -10250,6 +10313,45 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         @Override
         public boolean canUserHaveUntrustedCredentialReset(@UserIdInt int userId) {
             return DevicePolicyManagerService.this.canUserHaveUntrustedCredentialReset(userId);
+        }
+
+        @Override
+        public CharSequence getPrintingDisabledReasonForUser(@UserIdInt int userId) {
+            synchronized (DevicePolicyManagerService.this) {
+                DevicePolicyData policy = getUserData(userId);
+                if (policy.mPrintingEnabled) {
+                    Log.e(LOG_TAG, "printing is enabled");
+                    return null;
+                }
+                String ownerPackage = mOwners.getProfileOwnerPackage(userId);
+                if (ownerPackage == null) {
+                    ownerPackage = mOwners.getDeviceOwnerPackageName();
+                }
+                PackageManager pm = mInjector.getPackageManager();
+                PackageInfo packageInfo;
+                try {
+                    packageInfo = pm.getPackageInfo(ownerPackage, 0);
+                } catch (NameNotFoundException e) {
+                    Log.e(LOG_TAG, "getPackageInfo error", e);
+                    return null;
+                }
+                if (packageInfo == null) {
+                    Log.e(LOG_TAG, "packageInfo is inexplicably null");
+                    return null;
+                }
+                ApplicationInfo appInfo = packageInfo.applicationInfo;
+                if (appInfo == null) {
+                    Log.e(LOG_TAG, "appInfo is inexplicably null");
+                    return null;
+                }
+                CharSequence appLabel = pm.getApplicationLabel(appInfo);
+                if (appLabel == null) {
+                    Log.e(LOG_TAG, "appLabel is inexplicably null");
+                    return null;
+                }
+                return ((Context) ActivityThread.currentActivityThread().getSystemUiContext())
+                        .getResources().getString(R.string.printing_disabled_by, appLabel);
+            }
         }
     }
 
@@ -11232,10 +11334,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             // of a split user device.
             return true;
         }
+
         final ComponentName profileOwner = getProfileOwner(userId);
         if (profileOwner == null) {
             return false;
         }
+        
         final Set<String> userAffiliationIds = getUserData(userId).mAffiliationIds;
         final Set<String> deviceAffiliationIds =
                 getUserData(UserHandle.USER_SYSTEM).mAffiliationIds;
@@ -12271,10 +12375,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mOverlayPackagesProvider.getNonRequiredApps(admin, userId, provisioningAction));
     }
 
-    //TODO: Add callback information to the javadoc once it is completed.
-    //TODO: Make transferOwnership atomic.
     @Override
-    public void transferOwnership(ComponentName admin, ComponentName target, PersistableBundle bundle) {
+    public void transferOwnership(@NonNull ComponentName admin, @NonNull ComponentName target,
+            @Nullable PersistableBundle bundle) {
         if (!mHasFeature) {
             return;
         }
@@ -12307,12 +12410,41 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final long id = mInjector.binderClearCallingIdentity();
         try {
-            //STOPSHIP add support for COMP, edge cases when device is rebooted/work mode off
             synchronized (this) {
+                /*
+                * We must ensure the whole process is atomic to prevent the device from ending up
+                * in an invalid state (e.g. no active admin). This could happen if the device
+                * is rebooted or work mode is turned off mid-transfer.
+                * In order to guarantee atomicity, we:
+                *
+                * 1. Save an atomic journal file describing the transfer process
+                * 2. Perform the transfer itself
+                * 3. Delete the journal file
+                *
+                * That way if the journal file exists on device boot, we know that the transfer
+                * must be reverted back to the original administrator. This logic is implemented in
+                * revertTransferOwnershipIfNecessaryLocked.
+                * */
+                if (bundle == null) {
+                    bundle = new PersistableBundle();
+                }
                 if (isProfileOwner(admin, callingUserId)) {
-                    transferProfileOwnerLocked(admin, target, callingUserId, bundle);
+                    prepareTransfer(admin, target, bundle, callingUserId,
+                            ADMIN_TYPE_PROFILE_OWNER);
+                    transferProfileOwnershipLocked(admin, target, callingUserId);
+                    sendProfileOwnerCommand(DeviceAdminReceiver.ACTION_TRANSFER_OWNERSHIP_COMPLETE,
+                            getTransferOwnershipAdminExtras(bundle), callingUserId);
+                    postTransfer(DevicePolicyManager.ACTION_PROFILE_OWNER_CHANGED, callingUserId);
+                    if (isUserAffiliatedWithDeviceLocked(callingUserId)) {
+                        notifyAffiliatedProfileTransferOwnershipComplete(callingUserId);
+                    }
                 } else if (isDeviceOwner(admin, callingUserId)) {
-                    transferDeviceOwnerLocked(admin, target, callingUserId, bundle);
+                    prepareTransfer(admin, target, bundle, callingUserId,
+                            ADMIN_TYPE_DEVICE_OWNER);
+                    transferDeviceOwnershipLocked(admin, target, callingUserId);
+                    sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_TRANSFER_OWNERSHIP_COMPLETE,
+                            getTransferOwnershipAdminExtras(bundle));
+                    postTransfer(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED, callingUserId);
                 }
             }
         } finally {
@@ -12320,43 +12452,55 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private void prepareTransfer(ComponentName admin, ComponentName target,
+            PersistableBundle bundle, int callingUserId, String adminType) {
+        saveTransferOwnershipBundleLocked(bundle, callingUserId);
+        mTransferOwnershipMetadataManager.saveMetadataFile(
+                new TransferOwnershipMetadataManager.Metadata(admin, target,
+                        callingUserId, adminType));
+    }
+
+    private void postTransfer(String broadcast, int callingUserId) {
+        deleteTransferOwnershipMetadataFileLocked();
+        sendOwnerChangedBroadcast(broadcast, callingUserId);
+    }
+
+    private void notifyAffiliatedProfileTransferOwnershipComplete(int callingUserId) {
+        final Bundle extras = new Bundle();
+        extras.putParcelable(Intent.EXTRA_USER, UserHandle.of(callingUserId));
+        sendDeviceOwnerCommand(
+                DeviceAdminReceiver.ACTION_AFFILIATED_PROFILE_TRANSFER_OWNERSHIP_COMPLETE, extras);
+    }
+
     /**
      * Transfers the profile owner for user with id profileOwnerUserId from admin to target.
      */
-    private void transferProfileOwnerLocked(ComponentName admin, ComponentName target,
-            int profileOwnerUserId, PersistableBundle bundle) {
+    private void transferProfileOwnershipLocked(ComponentName admin, ComponentName target,
+            int profileOwnerUserId) {
         transferActiveAdminUncheckedLocked(target, admin, profileOwnerUserId);
         mOwners.transferProfileOwner(target, profileOwnerUserId);
         Slog.i(LOG_TAG, "Profile owner set: " + target + " on user " + profileOwnerUserId);
         mOwners.writeProfileOwner(profileOwnerUserId);
         mDeviceAdminServiceController.startServiceForOwner(
                 target.getPackageName(), profileOwnerUserId, "transfer-profile-owner");
-        sendProfileOwnerCommand(DeviceAdminReceiver.ACTION_TRANSFER_OWNERSHIP_COMPLETE,
-                getTransferOwnerAdminExtras(bundle), profileOwnerUserId);
-        sendOwnerChangedBroadcast(DevicePolicyManager.ACTION_PROFILE_OWNER_CHANGED,
-                profileOwnerUserId);
     }
 
     /**
      * Transfers the device owner for user with id userId from admin to target.
      */
-    private void transferDeviceOwnerLocked(ComponentName admin, ComponentName target, int userId,
-            PersistableBundle bundle) {
+    private void transferDeviceOwnershipLocked(ComponentName admin, ComponentName target, int userId) {
         transferActiveAdminUncheckedLocked(target, admin, userId);
-        mOwners.transferDeviceOwner(target);
+        mOwners.transferDeviceOwnership(target);
         Slog.i(LOG_TAG, "Device owner set: " + target + " on user " + userId);
         mOwners.writeDeviceOwner();
         mDeviceAdminServiceController.startServiceForOwner(
                 target.getPackageName(), userId, "transfer-device-owner");
-        sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_TRANSFER_OWNERSHIP_COMPLETE,
-                getTransferOwnerAdminExtras(bundle));
-        sendOwnerChangedBroadcast(DevicePolicyManager.ACTION_DEVICE_OWNER_CHANGED, userId);
     }
 
-    private Bundle getTransferOwnerAdminExtras(PersistableBundle bundle) {
+    private Bundle getTransferOwnershipAdminExtras(PersistableBundle bundle) {
         Bundle extras = new Bundle();
         if (bundle != null) {
-            extras.putParcelable(EXTRA_TRANSFER_OWNER_ADMIN_EXTRAS_BUNDLE, bundle);
+            extras.putParcelable(EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE, bundle);
         }
         return extras;
     }
@@ -12461,6 +12605,34 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    private void deleteTransferOwnershipMetadataFileLocked() {
+        mTransferOwnershipMetadataManager.deleteMetadataFile();
+    }
+
+    @Override
+    @Nullable
+    public PersistableBundle getTransferOwnershipBundle() {
+        synchronized (this) {
+            final int callingUserId = mInjector.userHandleGetCallingUserId();
+            getActiveAdminForCallerLocked(null, DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
+            final File bundleFile = new File(
+                    mInjector.environmentGetUserSystemDirectory(callingUserId),
+                    TRANSFER_OWNERSHIP_PARAMETERS_XML);
+            if (!bundleFile.exists()) {
+                return null;
+            }
+            try (FileInputStream stream = new FileInputStream(bundleFile)) {
+                XmlPullParser parser = Xml.newPullParser();
+                parser.setInput(stream, null);
+                return PersistableBundle.restoreFromXml(parser);
+            } catch (IOException | XmlPullParserException | IllegalArgumentException e) {
+                Slog.e(LOG_TAG, "Caught exception while trying to load the "
+                        + "owner transfer parameters from file " + bundleFile, e);
+                return null;
+            }
+        }
+    }
+
     /**
      * Returns whether printing is enabled for current user.
      * @hide
@@ -12477,55 +12649,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final int userHandle = mInjector.userHandleGetCallingUserId();
             DevicePolicyData policy = getUserData(userHandle);
             return policy.mPrintingEnabled;
-        }
-    }
-
-    /**
-     * Returns text of error message if printing is disabled.
-     * Only to be called by Print Service.
-     * @hide
-     */
-    @Override
-    public CharSequence getPrintingDisabledReason() {
-        if (!hasPrinting() || !mHasFeature) {
-            Log.e(LOG_TAG, "no printing or no management");
-            return null;
-        }
-        synchronized (this) {
-            final int userHandle = mInjector.userHandleGetCallingUserId();
-            DevicePolicyData policy = getUserData(userHandle);
-            if (policy.mPrintingEnabled) {
-                Log.e(LOG_TAG, "printing is enabled");
-                return null;
-            }
-            String ownerPackage = mOwners.getProfileOwnerPackage(userHandle);
-            if (ownerPackage == null) {
-                ownerPackage = mOwners.getDeviceOwnerPackageName();
-            }
-            PackageManager pm = mInjector.getPackageManager();
-            PackageInfo packageInfo;
-            try {
-                packageInfo = pm.getPackageInfo(ownerPackage, 0);
-            } catch (NameNotFoundException e) {
-                Log.e(LOG_TAG, "getPackageInfo error", e);
-                return null;
-            }
-            if (packageInfo == null) {
-                Log.e(LOG_TAG, "packageInfo is inexplicably null");
-                return null;
-            }
-            ApplicationInfo appInfo = packageInfo.applicationInfo;
-            if (appInfo == null) {
-                Log.e(LOG_TAG, "appInfo is inexplicably null");
-                return null;
-            }
-            CharSequence appLabel = pm.getApplicationLabel(appInfo);
-            if (appLabel == null) {
-                Log.e(LOG_TAG, "appLabel is inexplicably null");
-                return null;
-            }
-            return ((Context) ActivityThread.currentActivityThread().getSystemUiContext())
-                    .getResources().getString(R.string.printing_disabled_by, appLabel);
         }
     }
 
@@ -12708,5 +12831,33 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             enforceCursor.close();
         }
         return false;
+    }
+
+    @VisibleForTesting
+    void saveTransferOwnershipBundleLocked(PersistableBundle bundle, int userId) {
+        final File parametersFile = new File(
+                mInjector.environmentGetUserSystemDirectory(userId),
+                TRANSFER_OWNERSHIP_PARAMETERS_XML);
+        final AtomicFile atomicFile = new AtomicFile(parametersFile);
+        FileOutputStream stream = null;
+        try {
+            stream = atomicFile.startWrite();
+            final XmlSerializer serializer = new FastXmlSerializer();
+            serializer.setOutput(stream, StandardCharsets.UTF_8.name());
+            serializer.startDocument(null, true);
+            bundle.saveToXml(serializer);
+            atomicFile.finishWrite(stream);
+        } catch (IOException | XmlPullParserException e) {
+            Slog.e(LOG_TAG, "Caught exception while trying to save the "
+                    + "owner transfer parameters to file " + parametersFile, e);
+            parametersFile.delete();
+            atomicFile.failWrite(stream);
+        }
+    }
+
+    void deleteTransferOwnershipBundleLocked(int userId) {
+        final File parametersFile = new File(mInjector.environmentGetUserSystemDirectory(userId),
+                TRANSFER_OWNERSHIP_PARAMETERS_XML);
+        parametersFile.delete();
     }
 }

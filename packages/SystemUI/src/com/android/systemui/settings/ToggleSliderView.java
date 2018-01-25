@@ -126,6 +126,11 @@ public class ToggleSliderView extends RelativeLayout implements ToggleSlider {
     }
 
     @Override
+    public int getValue() {
+        return mSlider.getProgress();
+    }
+
+    @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (mMirror != null) {
             MotionEvent copy = ev.copy();

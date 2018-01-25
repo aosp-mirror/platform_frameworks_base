@@ -195,7 +195,6 @@ public class PackageParserTest {
         assertEquals(a.installLocation, b.installLocation);
         assertEquals(a.coreApp, b.coreApp);
         assertEquals(a.mRequiredForAllUsers, b.mRequiredForAllUsers);
-        assertEquals(a.mTrustedOverlay, b.mTrustedOverlay);
         assertEquals(a.mCompileSdkVersion, b.mCompileSdkVersion);
         assertEquals(a.mCompileSdkVersionCodename, b.mCompileSdkVersionCodename);
         assertEquals(a.use32bitAbi, b.use32bitAbi);
@@ -429,7 +428,6 @@ public class PackageParserTest {
         pkg.installLocation = 100;
         pkg.coreApp = true;
         pkg.mRequiredForAllUsers = true;
-        pkg.mTrustedOverlay = true;
         pkg.use32bitAbi = true;
         pkg.packageName = "foo";
         pkg.splitNames = new String[] { "foo2" };

@@ -47,9 +47,9 @@ public:
     static void deleteAllFiles(const char* path);
 
     /**
-     * Deletes all files whose name matches with a provided prefix.
+     * Deletes all files whose name matches with a provided suffix.
      */
-    static void deletePrefixedFiles(const char* path, const char* prefix);
+    static void deleteSuffixedFiles(const char* path, const char* suffix);
 
     /**
      * Send broadcasts to relevant receiver for each data stored on disk.
@@ -61,12 +61,18 @@ public:
      * Appends ConfigMetricsReport found on disk to the specific proto and
      * delete it.
      */
-    static void appendConfigMetricsReport(const char* path, ProtoOutputStream& proto);
+    static void appendConfigMetricsReport(ProtoOutputStream& proto);
 
     /**
      * Call to load the saved configs from disk.
      */
     static void readConfigFromDisk(std::map<ConfigKey, StatsdConfig>& configsMap);
+
+    /**
+     * Trims files in the provided directory to limit the total size, number of
+     * files, accumulation of outdated files.
+     */
+    static void trimToFit(const char* dir);
 };
 
 }  // namespace statsd

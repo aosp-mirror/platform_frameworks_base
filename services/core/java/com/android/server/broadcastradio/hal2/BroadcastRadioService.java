@@ -18,6 +18,8 @@ package com.android.server.broadcastradio.hal2;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.radio.IAnnouncementListener;
+import android.hardware.radio.ICloseHandle;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.ITunerCallback;
 import android.hardware.radio.RadioManager;
@@ -81,6 +83,10 @@ public class BroadcastRadioService {
         return mModules.containsKey(id);
     }
 
+    public boolean hasAnyModules() {
+        return !mModules.isEmpty();
+    }
+
     public ITuner openSession(int moduleId, @Nullable RadioManager.BandConfig legacyConfig,
         boolean withAudio, @NonNull ITunerCallback callback) throws RemoteException {
         Objects.requireNonNull(callback);
@@ -97,5 +103,23 @@ public class BroadcastRadioService {
         TunerSession session = module.openSession(callback);
         session.setConfiguration(legacyConfig);
         return session;
+    }
+
+    public ICloseHandle addAnnouncementListener(@NonNull int[] enabledTypes,
+            @NonNull IAnnouncementListener listener) {
+        AnnouncementAggregator aggregator = new AnnouncementAggregator(listener);
+        boolean anySupported = false;
+        for (RadioModule module : mModules.values()) {
+            try {
+                aggregator.watchModule(module, enabledTypes);
+                anySupported = true;
+            } catch (UnsupportedOperationException ex) {
+                Slog.v(TAG, "Announcements not supported for this module", ex);
+            }
+        }
+        if (!anySupported) {
+            Slog.i(TAG, "There are no HAL modules that support announcements");
+        }
+        return aggregator;
     }
 }

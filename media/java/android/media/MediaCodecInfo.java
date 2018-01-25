@@ -2639,7 +2639,8 @@ public final class MediaCodecInfo {
         /**
          * Returns the supported range of quality values.
          *
-         * @hide
+         * Quality is implementation-specific. As a general rule, a higher quality
+         * setting results in a better image quality and a lower compression ratio.
          */
         public Range<Integer> getQualityRange() {
             return mQualityRange;
@@ -2751,7 +2752,7 @@ public final class MediaCodecInfo {
             }
             if (info.containsKey("feature-bitrate-modes")) {
                 for (String mode: info.getString("feature-bitrate-modes").split(",")) {
-                    mBitControl |= parseBitrateMode(mode);
+                    mBitControl |= (1 << parseBitrateMode(mode));
                 }
             }
 

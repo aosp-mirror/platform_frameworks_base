@@ -39,7 +39,7 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
      * Pattern for {@link java.time.format.DateTimeFormatter} used to approximate the time to the
      * nearest hour and add on the AM/PM indicator.
      */
-    private static final String APPROXIMATE_HOUR_DATE_TIME_PATTERN = "H a";
+    private static final String APPROXIMATE_HOUR_DATE_TIME_PATTERN = "h a";
 
     private ColorDisplayController mController;
     private boolean mIsListening;

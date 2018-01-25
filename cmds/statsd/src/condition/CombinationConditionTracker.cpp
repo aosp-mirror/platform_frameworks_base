@@ -154,7 +154,7 @@ void CombinationConditionTracker::evaluateCondition(
             }
         }
         nonSlicedConditionCache[mIndex] = ConditionState::kUnknown;
-        ALOGD("CombinationPredicate %lld sliced may changed? %d", (long long)mConditionId,
+        VLOG("CombinationPredicate %lld sliced may changed? %d", (long long)mConditionId,
             conditionChangedCache[mIndex] == true);
     }
 }

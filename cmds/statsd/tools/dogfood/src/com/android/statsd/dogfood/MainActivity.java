@@ -16,12 +16,12 @@
 package com.android.statsd.dogfood;
 
 import android.app.Activity;
+import android.app.StatsManager;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.StatsLog;
-import android.util.StatsManager;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;

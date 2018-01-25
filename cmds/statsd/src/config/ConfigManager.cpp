@@ -101,8 +101,8 @@ void ConfigManager::RemoveConfig(const ConfigKey& key) {
 }
 
 void ConfigManager::remove_saved_configs(const ConfigKey& key) {
-    string prefix = StringPrintf("%d-%lld", key.GetUid(), (long long)key.GetId());
-    StorageManager::deletePrefixedFiles(STATS_SERVICE_DIR, prefix.c_str());
+    string suffix = StringPrintf("%d-%lld", key.GetUid(), (long long)key.GetId());
+    StorageManager::deleteSuffixedFiles(STATS_SERVICE_DIR, suffix.c_str());
 }
 
 void ConfigManager::RemoveConfigs(int uid) {
@@ -111,6 +111,7 @@ void ConfigManager::RemoveConfigs(int uid) {
     for (auto it = mConfigs.begin(); it != mConfigs.end();) {
         // Remove from map
         if (it->GetUid() == uid) {
+            remove_saved_configs(*it);
             removed.push_back(*it);
             mConfigReceivers.erase(*it);
             it = mConfigs.erase(it);
@@ -185,8 +186,8 @@ void ConfigManager::update_saved_configs(const ConfigKey& key, const StatsdConfi
     remove_saved_configs(key);
 
     // Then we save the latest config.
-    string file_name = StringPrintf("%s/%d-%lld-%ld", STATS_SERVICE_DIR, key.GetUid(),
-                                    (long long)key.GetId(), time(nullptr));
+    string file_name = StringPrintf("%s/%ld_%d_%lld", STATS_SERVICE_DIR, time(nullptr),
+                                    key.GetUid(), (long long)key.GetId());
     const int numBytes = config.ByteSize();
     vector<uint8_t> buffer(numBytes);
     config.SerializeToArray(&buffer[0], numBytes);

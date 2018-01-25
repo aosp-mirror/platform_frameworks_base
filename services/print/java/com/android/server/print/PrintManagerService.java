@@ -22,6 +22,7 @@ import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -64,6 +65,7 @@ import com.android.internal.print.DualDumpOutputStream;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
@@ -113,12 +115,12 @@ public final class PrintManagerService extends SystemService {
 
         private final SparseArray<UserState> mUserStates = new SparseArray<>();
 
-        private final DevicePolicyManager mDpc;
+        private final DevicePolicyManager mDpm;
 
         PrintManagerImpl(Context context) {
             mContext = context;
             mUserManager = (UserManager) context.getSystemService(Context.USER_SERVICE);
-            mDpc = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
+            mDpm = (DevicePolicyManager) context.getSystemService(Context.DEVICE_POLICY_SERVICE);
             registerContentObservers();
             registerBroadcastReceivers();
         }
@@ -128,7 +130,16 @@ public final class PrintManagerService extends SystemService {
                 PrintAttributes attributes, String packageName, int appId, int userId) {
             adapter = Preconditions.checkNotNull(adapter);
             if (!isPrintingEnabled()) {
-                final CharSequence disabledMessage = mDpc.getPrintingDisabledReason();
+                CharSequence disabledMessage = null;
+                DevicePolicyManagerInternal dpmi =
+                        LocalServices.getService(DevicePolicyManagerInternal.class);
+                final int callingUserId = UserHandle.getCallingUserId();
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    disabledMessage = dpmi.getPrintingDisabledReasonForUser(callingUserId);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
                 if (disabledMessage != null) {
                     Toast.makeText(mContext, Looper.getMainLooper(), disabledMessage,
                             Toast.LENGTH_LONG).show();
@@ -711,7 +722,7 @@ public final class PrintManagerService extends SystemService {
         }
 
         private boolean isPrintingEnabled() {
-            return mDpc == null || mDpc.isPrintingEnabled();
+            return mDpm == null || mDpm.isPrintingEnabled();
         }
 
         private void dump(@NonNull DualDumpOutputStream dumpStream,

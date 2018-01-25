@@ -85,6 +85,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
@@ -138,6 +139,7 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.ActivityStarterDelegate;
 import com.android.systemui.AutoReinflateContainer;
+import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.DemoMode;
 import com.android.systemui.Dependency;
 import com.android.systemui.EventLogTags;
@@ -1419,7 +1421,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mQSPanel.clickTile(tile);
     }
 
-
     private void updateClearAll() {
         if (!mClearAllEnabled) {
             return;
@@ -2420,6 +2421,18 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mLightBarController.onSystemUiVisibilityChanged(fullscreenStackVis, dockedStackVis,
                 mask, fullscreenStackBounds, dockedStackBounds, sbModeChanged, mStatusBarMode);
+    }
+
+    @Override
+    public void showChargingAnimation(int batteryLevel) {
+        if (mDozing) {
+            // ambient
+        } else if (mKeyguardManager.isKeyguardLocked()) {
+            // lockscreen
+        } else {
+            WirelessChargingAnimation.makeWirelessChargingAnimation(mContext, null,
+                    batteryLevel).show();
+        }
     }
 
     void touchAutoHide() {

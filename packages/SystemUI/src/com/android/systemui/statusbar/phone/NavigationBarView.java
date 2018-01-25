@@ -57,10 +57,11 @@ import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.phone.NavGesture;
 import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
+import com.android.systemui.recents.SwipeUpOnboarding;
 import com.android.systemui.stackdivider.Divider;
-import com.android.systemui.statusbar.policy.TintedKeyButtonDrawable;
 import com.android.systemui.statusbar.policy.DeadZone;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
+import com.android.systemui.statusbar.policy.TintedKeyButtonDrawable;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -103,6 +104,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private DeadZone mDeadZone;
     private final NavigationBarTransitions mBarTransitions;
     private final OverviewProxyService mOverviewProxyService;
+    private boolean mRecentsAnimationStarted;
 
     // workaround for LayoutTransitions leaving the nav buttons in a weird state (bug 5549288)
     final static boolean WORKAROUND_INVALID_LAYOUT = true;
@@ -124,6 +126,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private NavigationBarInflaterView mNavigationInflaterView;
     private RecentsComponent mRecentsComponent;
     private Divider mDivider;
+    private SwipeUpOnboarding mSwipeUpOnboarding;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -203,9 +206,18 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
     }
 
-    private final OverviewProxyListener mOverviewProxyListener = isConnected -> {
-        setSlippery(!isConnected);
-        setDisabledFlags(mDisabledFlags, true);
+    private final OverviewProxyListener mOverviewProxyListener = new OverviewProxyListener() {
+        @Override
+        public void onConnectionChanged(boolean isConnected) {
+            setSlippery(!isConnected);
+            setDisabledFlags(mDisabledFlags, true);
+            setUpSwipeUpOnboarding(isConnected);
+        }
+
+        @Override
+        public void onRecentsAnimationStarted() {
+            mRecentsAnimationStarted = true;
+        }
     };
 
     public NavigationBarView(Context context, AttributeSet attrs) {
@@ -237,6 +249,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 new ButtonDispatcher(R.id.rotate_suggestion));
 
         mOverviewProxyService = Dependency.get(OverviewProxyService.class);
+        mSwipeUpOnboarding = new SwipeUpOnboarding(context);
     }
 
     public BarTransitions getBarTransitions() {
@@ -266,12 +279,26 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (mGestureHelper.onTouchEvent(event)) {
             return true;
         }
-        return super.onTouchEvent(event);
+        return mRecentsAnimationStarted || super.onTouchEvent(event);
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        return mGestureHelper.onInterceptTouchEvent(event);
+        int action = event.getActionMasked();
+        if (action == MotionEvent.ACTION_DOWN) {
+            mRecentsAnimationStarted = false;
+        } else if (action == MotionEvent.ACTION_UP) {
+            // If the overview proxy service has not started the recents animation then clean up
+            // after it to ensure that the nav bar buttons still work
+            if (mOverviewProxyService.getProxy() != null && !mRecentsAnimationStarted) {
+                try {
+                    ActivityManager.getService().cancelRecentsAnimation();
+                } catch (RemoteException e) {
+                    Log.e(TAG, "Could not cancel recents animation");
+                }
+            }
+        }
+        return mRecentsAnimationStarted || mGestureHelper.onInterceptTouchEvent(event);
     }
 
     public void abortCurrentGesture() {
@@ -630,6 +657,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (mGestureHelper != null) {
             mGestureHelper.onDarkIntensityChange(intensity);
         }
+        if (mSwipeUpOnboarding != null) {
+            mSwipeUpOnboarding.setContentDarkIntensity(intensity);
+        }
     }
 
     @Override
@@ -740,6 +770,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         updateTaskSwitchHelper();
         updateIcons(getContext(), mConfiguration, newConfig);
         updateRecentsIcon();
+        mSwipeUpOnboarding.onConfigurationChanged(newConfig);
         if (uiCarModeChanged || mConfiguration.densityDpi != newConfig.densityDpi
                 || mConfiguration.getLayoutDirection() != newConfig.getLayoutDirection()) {
             // If car mode or density changes, we need to reset the icons.
@@ -829,6 +860,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         Dependency.get(PluginManager.class).addPluginListener(this,
                 NavGesture.class, false /* Only one */);
         mOverviewProxyService.addCallback(mOverviewProxyListener);
+        setUpSwipeUpOnboarding(mOverviewProxyService.getProxy() != null);
     }
 
     @Override
@@ -839,6 +871,15 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             mGestureHelper.destroy();
         }
         mOverviewProxyService.removeCallback(mOverviewProxyListener);
+        setUpSwipeUpOnboarding(false);
+    }
+
+    private void setUpSwipeUpOnboarding(boolean connectedToOverviewProxy) {
+        if (connectedToOverviewProxy) {
+            mSwipeUpOnboarding.onConnectedToLauncher(mOverviewProxyService.getLauncherComponent());
+        } else {
+            mSwipeUpOnboarding.onDisconnectedFromLauncher();
+        }
     }
 
     @Override

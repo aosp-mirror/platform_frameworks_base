@@ -40,7 +40,7 @@ import java.lang.annotation.RetentionPolicy;
 // TODO(jaewan): Unhide. SessionToken2?
 // TODO(jaewan): Move Token to updatable!
 // TODO(jaewan): Find better name for this (SessionToken or Session2Token)
-public final class SessionToken {
+public final class SessionToken2 {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(value = {TYPE_SESSION, TYPE_SESSION_SERVICE, TYPE_LIBRARY_SERVICE})
     public @interface TokenType {
@@ -75,7 +75,7 @@ public final class SessionToken {
      */
     // TODO(jaewan): UID is also needed.
     // TODO(jaewan): Unhide
-    public SessionToken(@TokenType int type, @NonNull String packageName, @NonNull String id,
+    public SessionToken2(@TokenType int type, @NonNull String packageName, @NonNull String id,
             @Nullable String serviceName, @Nullable IMediaSession2 sessionBinder) {
         // TODO(jaewan): Add sanity check.
         mType = type;
@@ -102,7 +102,7 @@ public final class SessionToken {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        SessionToken other = (SessionToken) obj;
+        SessionToken2 other = (SessionToken2) obj;
         if (!mPackageName.equals(other.getPackageName())
                 || !mServiceName.equals(other.getServiceName())
                 || !mId.equals(other.getId())
@@ -168,7 +168,7 @@ public final class SessionToken {
      * @param bundle
      * @return
      */
-    public static SessionToken fromBundle(@NonNull Bundle bundle) {
+    public static SessionToken2 fromBundle(@NonNull Bundle bundle) {
         if (bundle == null) {
             return null;
         }
@@ -202,7 +202,7 @@ public final class SessionToken {
         // TODO(jaewan): Revisit here when we add connection callback to the session for individual
         //               controller's permission check. With it, sessionBinder should be available
         //               if and only if for session, not session service.
-        return new SessionToken(type, packageName, id, serviceName,
+        return new SessionToken2(type, packageName, id, serviceName,
                 sessionBinder != null ? IMediaSession2.Stub.asInterface(sessionBinder) : null);
     }
 

@@ -70,6 +70,10 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
 
     public void transferOwnership(ComponentName admin, ComponentName target, PersistableBundle bundle) {}
 
+    public PersistableBundle getTransferOwnershipBundle() {
+        return null;
+    }
+
     public boolean generateKeyPair(ComponentName who, String callerPackage, String algorithm,
             ParcelableKeyGenParameterSpec keySpec, int idAttestationFlags,
             KeymasterCertificateChain attestationChain) {
@@ -132,11 +136,6 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     @Override
     public boolean isPrintingEnabled() {
         return true;
-    }
-
-    @Override
-    public CharSequence getPrintingDisabledReason() {
-        return null;
     }
 
     @Override

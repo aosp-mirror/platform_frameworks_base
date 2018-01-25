@@ -19,7 +19,6 @@ package com.android.server;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -136,7 +135,12 @@ public class IpSecServiceParameterizedTest {
 
         verify(mMockNetd)
                 .ipSecDeleteSecurityAssociation(
-                        eq(spiResp.resourceId), anyString(), anyString(), eq(TEST_SPI));
+                        eq(spiResp.resourceId),
+                        anyString(),
+                        anyString(),
+                        eq(TEST_SPI),
+                        anyInt(),
+                        anyInt());
 
         // Verify quota and RefcountedResource objects cleaned up
         IpSecService.UserRecord userRecord =
@@ -168,7 +172,12 @@ public class IpSecServiceParameterizedTest {
 
         verify(mMockNetd)
                 .ipSecDeleteSecurityAssociation(
-                        eq(spiResp.resourceId), anyString(), anyString(), eq(TEST_SPI));
+                        eq(spiResp.resourceId),
+                        anyString(),
+                        anyString(),
+                        eq(TEST_SPI),
+                        anyInt(),
+                        anyInt());
 
         // Verify quota and RefcountedResource objects cleaned up
         assertEquals(0, userRecord.mSpiQuotaTracker.mCurrent);
@@ -219,8 +228,10 @@ public class IpSecServiceParameterizedTest {
                         anyInt(),
                         anyString(),
                         anyString(),
-                        anyLong(),
+                        anyInt(),
                         eq(TEST_SPI),
+                        anyInt(),
+                        anyInt(),
                         eq(IpSecAlgorithm.AUTH_HMAC_SHA256),
                         eq(AUTH_KEY),
                         anyInt(),
@@ -252,8 +263,10 @@ public class IpSecServiceParameterizedTest {
                         anyInt(),
                         anyString(),
                         anyString(),
-                        anyLong(),
+                        anyInt(),
                         eq(TEST_SPI),
+                        anyInt(),
+                        anyInt(),
                         eq(""),
                         eq(new byte[] {}),
                         eq(0),
@@ -305,7 +318,12 @@ public class IpSecServiceParameterizedTest {
 
         verify(mMockNetd)
                 .ipSecDeleteSecurityAssociation(
-                        eq(createTransformResp.resourceId), anyString(), anyString(), eq(TEST_SPI));
+                        eq(createTransformResp.resourceId),
+                        anyString(),
+                        anyString(),
+                        eq(TEST_SPI),
+                        anyInt(),
+                        anyInt());
 
         // Verify quota and RefcountedResource objects cleaned up
         IpSecService.UserRecord userRecord =
@@ -339,7 +357,12 @@ public class IpSecServiceParameterizedTest {
 
         verify(mMockNetd)
                 .ipSecDeleteSecurityAssociation(
-                        eq(createTransformResp.resourceId), anyString(), anyString(), eq(TEST_SPI));
+                        eq(createTransformResp.resourceId),
+                        anyString(),
+                        anyString(),
+                        eq(TEST_SPI),
+                        anyInt(),
+                        anyInt());
 
         // Verify quota and RefcountedResource objects cleaned up
         assertEquals(0, userRecord.mTransformQuotaTracker.mCurrent);

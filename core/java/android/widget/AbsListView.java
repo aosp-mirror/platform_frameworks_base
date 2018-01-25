@@ -19,6 +19,7 @@ package android.widget;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -30,6 +31,7 @@ import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Handler;
+import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.StrictMode;
@@ -2744,11 +2746,19 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     }
 
     private void drawSelector(Canvas canvas) {
-        if (!mSelectorRect.isEmpty()) {
+        if (shouldDrawSelector()) {
             final Drawable selector = mSelector;
             selector.setBounds(mSelectorRect);
             selector.draw(canvas);
         }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public final boolean shouldDrawSelector() {
+        return !mSelectorRect.isEmpty();
     }
 
     /**
@@ -6025,6 +6035,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         @Override
         public boolean commitContent(InputContentInfo inputContentInfo, int flags, Bundle opts) {
             return getTarget().commitContent(inputContentInfo, flags, opts);
+        }
+
+        @Override
+        public void reportLanguageHint(@NonNull LocaleList languageHint) {
+            getTarget().reportLanguageHint(languageHint);
         }
     }
 

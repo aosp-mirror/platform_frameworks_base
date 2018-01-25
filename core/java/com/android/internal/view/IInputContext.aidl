@@ -17,6 +17,7 @@
 package com.android.internal.view;
 
 import android.os.Bundle;
+import android.os.LocaleList;
 import android.view.KeyEvent;
 import android.view.inputmethod.CompletionInfo;
 import android.view.inputmethod.CorrectionInfo;
@@ -78,4 +79,6 @@ import com.android.internal.view.IInputContextCallback;
 
     void commitContent(in InputContentInfo inputContentInfo, int flags, in Bundle opts, int sec,
             IInputContextCallback callback);
+
+    void reportLanguageHint(in LocaleList languageHint);
 }

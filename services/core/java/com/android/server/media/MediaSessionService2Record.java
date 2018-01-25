@@ -19,7 +19,7 @@ package com.android.server.media;
 import android.content.Context;
 import android.media.IMediaSession2;
 import android.media.MediaController2;
-import android.media.SessionToken;
+import android.media.SessionToken2;
 import android.media.MediaSessionService2;
 
 /**
@@ -33,7 +33,7 @@ class MediaSessionService2Record extends MediaSession2Record {
 
     private final int mType;
     private final String mServiceName;
-    private final SessionToken mToken;
+    private final SessionToken2 mToken;
 
     public MediaSessionService2Record(Context context,
             SessionDestroyedListener sessionDestroyedListener, int type,
@@ -41,7 +41,7 @@ class MediaSessionService2Record extends MediaSession2Record {
         super(context, sessionDestroyedListener);
         mType = type;
         mServiceName = serviceName;
-        mToken = new SessionToken(mType, packageName, id, mServiceName, null);
+        mToken = new SessionToken2(mType, packageName, id, mServiceName, null);
     }
 
     /**
@@ -51,7 +51,7 @@ class MediaSessionService2Record extends MediaSession2Record {
     @Override
     MediaController2 onCreateMediaController(
             String packageName, String id, IMediaSession2 sessionBinder) {
-        SessionToken token = new SessionToken(mType, packageName, id, mServiceName, sessionBinder);
+        SessionToken2 token = new SessionToken2(mType, packageName, id, mServiceName, sessionBinder);
         return createMediaController(token);
     }
 
@@ -59,7 +59,7 @@ class MediaSessionService2Record extends MediaSession2Record {
      * @return token with no session binder information.
      */
     @Override
-    public SessionToken getToken() {
+    public SessionToken2 getToken() {
         return mToken;
     }
 }

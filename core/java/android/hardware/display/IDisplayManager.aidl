@@ -92,4 +92,10 @@ interface IDisplayManager {
     // the same as the calling user.
     void setBrightnessConfigurationForUser(in BrightnessConfiguration c, int userId,
             String packageName);
+
+    // Temporarily sets the display brightness.
+    void setTemporaryBrightness(int brightness);
+
+    // Temporarily sets the auto brightness adjustment factor.
+    void setTemporaryAutoBrightnessAdjustment(float adjustment);
 }

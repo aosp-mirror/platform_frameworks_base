@@ -22,6 +22,8 @@ import android.annotation.Nullable;
 import android.annotation.Size;
 import android.graphics.Canvas.VertexMode;
 import android.text.GraphicsOperations;
+import android.text.MeasuredParagraph;
+import android.text.MeasuredText;
 import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.TextUtils;
@@ -453,7 +455,8 @@ public abstract class BaseCanvas {
 
         throwIfHasHwBitmapInSwMode(paint);
         nDrawTextRun(mNativeCanvasWrapper, text, index, count, contextIndex, contextCount,
-                x, y, isRtl, paint.getNativeInstance());
+                x, y, isRtl, paint.getNativeInstance(), 0 /* measured text */,
+                0 /* measured text offset */);
     }
 
     public void drawTextRun(@NonNull CharSequence text, int start, int end, int contextStart,
@@ -483,8 +486,20 @@ public abstract class BaseCanvas {
             int len = end - start;
             char[] buf = TemporaryBuffer.obtain(contextLen);
             TextUtils.getChars(text, contextStart, contextEnd, buf, 0);
+            long measuredTextPtr = 0;
+            int measuredTextOffset = 0;
+            if (text instanceof MeasuredText) {
+                MeasuredText mt = (MeasuredText) text;
+                int paraIndex = mt.findParaIndex(start);
+                if (end <= mt.getParagraphEnd(paraIndex)) {
+                    // Only suppor the same paragraph.
+                    measuredTextPtr = mt.getMeasuredParagraph(paraIndex).getNativePtr();
+                    measuredTextOffset = start - mt.getParagraphStart(paraIndex);
+                }
+            }
             nDrawTextRun(mNativeCanvasWrapper, buf, start - contextStart, len,
-                    0, contextLen, x, y, isRtl, paint.getNativeInstance());
+                    0, contextLen, x, y, isRtl, paint.getNativeInstance(),
+                    measuredTextPtr, measuredTextOffset);
             TemporaryBuffer.recycle(buf);
         }
     }
@@ -623,7 +638,8 @@ public abstract class BaseCanvas {
             int contextStart, int contextEnd, float x, float y, boolean isRtl, long nativePaint);
 
     private static native void nDrawTextRun(long nativeCanvas, char[] text, int start, int count,
-            int contextStart, int contextCount, float x, float y, boolean isRtl, long nativePaint);
+            int contextStart, int contextCount, float x, float y, boolean isRtl, long nativePaint,
+            long nativeMeasuredText, int measuredTextOffset);
 
     private static native void nDrawTextOnPath(long nativeCanvas, char[] text, int index, int count,
             long nativePath, float hOffset, float vOffset, int bidiFlags, long nativePaint);

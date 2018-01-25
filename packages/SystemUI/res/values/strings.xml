@@ -259,6 +259,13 @@
     <!-- Button name for "Cancel". [CHAR LIMIT=NONE] -->
     <string name="cancel">Cancel</string>
 
+    <!-- Content description of the fingerprint icon when the system-provided fingerprint dialog is showing, for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon">Fingerprint icon</string>
+    <!-- Content description of the application icon when the system-provided fingerprint dialog is showing, for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_fingerprint_dialog_app_icon">Application icon</string>
+    <!-- Content description for the error/help message are when the system-provided fingerprint dialog is showing, for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_fingerprint_dialog_help_area">Help message area</string>
+
     <!-- Content description of the compatibility zoom button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_compatibility_zoom_button">Compatibility zoom button.</string>
 
@@ -459,7 +466,7 @@
     <string name="accessibility_casting">@string/quick_settings_casting</string>
 
     <!-- Content description of the work mode icon in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_work_mode">Work mode</string>
+    <string name="accessibility_work_mode">@string/quick_settings_work_mode_on_label</string>
 
     <!-- Content description to tell the user that this button will remove an application from recents -->
     <string name="accessibility_recents_item_will_be_dismissed">Dismiss <xliff:g id="app" example="Calendar">%s</xliff:g>.</string>
@@ -787,8 +794,14 @@
     <string name="quick_settings_cellular_detail_data_limit"><xliff:g id="data_limit" example="2.0 GB">%s</xliff:g> limit</string>
     <!-- QuickSettings: Cellular detail panel, data warning format string [CHAR LIMIT=NONE] -->
     <string name="quick_settings_cellular_detail_data_warning"><xliff:g id="data_limit" example="2.0 GB">%s</xliff:g> warning</string>
-    <!-- QuickSettings: Work mode [CHAR LIMIT=NONE] -->
-    <string name="quick_settings_work_mode_label">Work mode</string>
+    <!-- QuickSettings: This string is in the easy-to-view settings that a user can pull down from
+    the top of their phone's screen. This is a label for a toggle to turn the work profile on and
+    off. "Work profile" means a separate profile on a user's phone that's specifically for their
+    work apps and managed by their company. "Work" is used as an adjective. [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_work_mode_on_label">Work profile</string>
+    <!-- QuickSettings: This is a label for a toggle to turn the work profile on and off and this is
+         shown when work profile is off. [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_work_mode_off_label">Notifications &amp; apps are off</string>
     <!-- QuickSettings: Label for the toggle to activate Night display (renamed "Night Light" with title caps). [CHAR LIMIT=20] -->
     <string name="quick_settings_night_display_label">Night Light</string>
     <!-- QuickSettings: Secondary text for when the Night Light will be enabled at sunset. [CHAR LIMIT=20] -->
@@ -825,6 +838,8 @@
     <string name="recents_stack_action_button_label">Clear all</string>
     <!-- Recents: Hint text that shows on the drop targets to start multiwindow. [CHAR LIMIT=NONE] -->
     <string name="recents_drag_hint_message">Drag here to use split screen</string>
+    <!-- Recents: Text that shows above the nav bar after launching a few apps. [CHAR LIMIT=NONE] -->
+    <string name="recents_swipe_up_onboarding">Swipe up to switch apps</string>
 
     <!-- Recents: MultiStack add stack split horizontal radio button. [CHAR LIMIT=NONE] -->
     <string name="recents_multistack_add_stack_dialog_split_horizontal">Split Horizontal</string>

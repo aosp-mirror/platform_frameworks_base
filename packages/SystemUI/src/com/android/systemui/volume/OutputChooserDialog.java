@@ -22,6 +22,7 @@ import static android.support.v7.media.MediaRouter.UNSELECT_REASON_DISCONNECTED;
 
 import static com.android.settingslib.bluetooth.Utils.getBtClassDrawableWithDescription;
 
+import android.app.Dialog;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
@@ -30,6 +31,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
@@ -43,12 +46,16 @@ import android.support.v7.media.MediaRouter;
 import android.telecom.TelecomManager;
 import android.util.Log;
 import android.util.Pair;
+import android.view.Window;
+import android.view.WindowManager;
 
 import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.systemui.Dependency;
+import com.android.systemui.HardwareUiLayout;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.statusbar.policy.BluetoothController;
 
 import java.io.IOException;
@@ -58,7 +65,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
-public class OutputChooserDialog extends SystemUIDialog
+public class OutputChooserDialog extends Dialog
         implements DialogInterface.OnDismissListener, OutputChooserLayout.Callback {
 
     private static final String TAG = Util.logTag(OutputChooserDialog.class);
@@ -82,9 +89,11 @@ public class OutputChooserDialog extends SystemUIDialog
     private Drawable mTvIcon;
     private Drawable mSpeakerIcon;
     private Drawable mSpeakerGroupIcon;
+    private HardwareUiLayout mHardwareLayout;
+    private final VolumeDialogController mController;
 
     public OutputChooserDialog(Context context, MediaRouterWrapper router) {
-        super(context);
+        super(context, com.android.systemui.R.style.qs_theme);
         mContext = context;
         mBluetoothController = Dependency.get(BluetoothController.class);
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
@@ -98,6 +107,22 @@ public class OutputChooserDialog extends SystemUIDialog
 
         final IntentFilter filter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
         context.registerReceiver(mReceiver, filter);
+
+        mController = Dependency.get(VolumeDialogController.class);
+
+        // Window initialization
+        Window window = getWindow();
+        window.requestFeature(Window.FEATURE_NO_TITLE);
+        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND
+                | WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR);
+        window.addFlags(
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
+                        | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
+                        | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                        | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+                        | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
+        window.setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
     }
 
     protected void setIsInCall(boolean inCall) {
@@ -112,6 +137,9 @@ public class OutputChooserDialog extends SystemUIDialog
         setOnDismissListener(this::onDismiss);
 
         mView = findViewById(R.id.output_chooser);
+        mHardwareLayout = HardwareUiLayout.get(mView);
+        mHardwareLayout.setOutsideTouchListener(view -> dismiss());
+        mHardwareLayout.setSwapOrientation(false);
         mView.setCallback(this);
 
         if (mIsInCall) {
@@ -151,6 +179,7 @@ public class OutputChooserDialog extends SystemUIDialog
                     MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN);
         }
         mBluetoothController.addCallback(mCallback);
+        mController.addCallback(mControllerCallbackH, mHandler);
         isAttached = true;
     }
 
@@ -158,6 +187,7 @@ public class OutputChooserDialog extends SystemUIDialog
     public void onDetachedFromWindow() {
         isAttached = false;
         mRouter.removeCallback(mRouterCallback);
+        mController.removeCallback(mControllerCallbackH);
         mBluetoothController.removeCallback(mCallback);
         super.onDetachedFromWindow();
     }
@@ -166,6 +196,38 @@ public class OutputChooserDialog extends SystemUIDialog
     public void onDismiss(DialogInterface unused) {
         mContext.unregisterReceiver(mReceiver);
         cleanUp();
+    }
+
+    @Override
+    public void show() {
+        super.show();
+        mHardwareLayout.setTranslationX(getAnimTranslation());
+        mHardwareLayout.setAlpha(0);
+        mHardwareLayout.animate()
+                .alpha(1)
+                .translationX(0)
+                .setDuration(300)
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                .withEndAction(() -> getWindow().getDecorView().requestAccessibilityFocus())
+                .start();
+    }
+
+    @Override
+    public void dismiss() {
+        mHardwareLayout.setTranslationX(0);
+        mHardwareLayout.setAlpha(1);
+        mHardwareLayout.animate()
+                .alpha(0)
+                .translationX(getAnimTranslation())
+                .setDuration(300)
+                .withEndAction(() -> super.dismiss())
+                .setInterpolator(new SystemUIInterpolators.LogAccelerateInterpolator())
+                .start();
+    }
+
+    private float getAnimTranslation() {
+        return getContext().getResources().getDimension(
+                com.android.systemui.R.dimen.output_chooser_panel_width) / 2;
     }
 
     @Override
@@ -415,5 +477,42 @@ public class OutputChooserDialog extends SystemUIDialog
                     break;
             }
         }
+    };
+
+    private final VolumeDialogController.Callbacks mControllerCallbackH
+            = new VolumeDialogController.Callbacks() {
+        @Override
+        public void onShowRequested(int reason) {
+            dismiss();
+        }
+
+        @Override
+        public void onDismissRequested(int reason) {}
+
+        @Override
+        public void onScreenOff() {
+            dismiss();
+        }
+
+        @Override
+        public void onStateChanged(VolumeDialogController.State state) {}
+
+        @Override
+        public void onLayoutDirectionChanged(int layoutDirection) {}
+
+        @Override
+        public void onConfigurationChanged() {}
+
+        @Override
+        public void onShowVibrateHint() {}
+
+        @Override
+        public void onShowSilentHint() {}
+
+        @Override
+        public void onShowSafetyWarning(int flags) {}
+
+        @Override
+        public void onAccessibilityModeChanged(Boolean showA11yStream) {}
     };
 }

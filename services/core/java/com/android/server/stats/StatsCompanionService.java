@@ -18,16 +18,19 @@ package com.android.server.stats;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.StatsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.IntentSender;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.net.NetworkStats;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiActivityEnergyInfo;
+import android.os.StatsDimensionsValue;
 import android.os.BatteryStatsInternal;
 import android.os.Binder;
 import android.os.Bundle;
@@ -80,8 +83,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     static final String TAG = "StatsCompanionService";
     static final boolean DEBUG = true;
+
     public static final String ACTION_TRIGGER_COLLECTION =
         "com.android.server.stats.action.TRIGGER_COLLECTION";
+
+    public static final int CODE_SUBSCRIBER_BROADCAST = 1;
 
     private final Context mContext;
     private final AlarmManager mAlarmManager;
@@ -151,8 +157,35 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     @Override
     public void sendBroadcast(String pkg, String cls) {
+        // TODO: Use a pending intent, and enfoceCallingPermission.
         mContext.sendBroadcastAsUser(new Intent(ACTION_TRIGGER_COLLECTION).setClassName(pkg, cls),
                 UserHandle.SYSTEM);
+    }
+
+    @Override
+    public void sendSubscriberBroadcast(IBinder intentSenderBinder, long configUid, long configKey,
+                                        long subscriptionId, long subscriptionRuleId,
+                                        StatsDimensionsValue dimensionsValue) {
+        if (DEBUG) Slog.d(TAG, "Statsd requested to sendSubscriberBroadcast.");
+        enforceCallingPermission();
+        IntentSender intentSender = new IntentSender(intentSenderBinder);
+        Intent intent = new Intent()
+                .putExtra(StatsManager.EXTRA_STATS_CONFIG_UID, configUid)
+                .putExtra(StatsManager.EXTRA_STATS_CONFIG_KEY, configKey)
+                .putExtra(StatsManager.EXTRA_STATS_SUBSCRIPTION_ID, subscriptionId)
+                .putExtra(StatsManager.EXTRA_STATS_SUBSCRIPTION_RULE_ID, subscriptionRuleId)
+                .putExtra(StatsManager.EXTRA_STATS_DIMENSIONS_VALUE, dimensionsValue);
+        try {
+            intentSender.sendIntent(mContext, CODE_SUBSCRIBER_BROADCAST, intent, null, null);
+        } catch (IntentSender.SendIntentException e) {
+            Slog.w(TAG, "Unable to send using IntentSender from uid " + configUid
+                    + "; presumably it had been cancelled.");
+            if (DEBUG) {
+                Slog.d(TAG, String.format("SubscriberBroadcast params {%d %d %d %d %s}",
+                        configUid, configKey, subscriptionId,
+                        subscriptionRuleId, dimensionsValue));
+            }
+        }
     }
 
     private final static int[] toIntArray(List<Integer> list) {

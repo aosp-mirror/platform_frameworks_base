@@ -186,6 +186,10 @@ class WatchlistLoggingHandler extends Handler {
                     System.currentTimeMillis());
             final WatchlistReportDbHelper.AggregatedResult aggregatedResult =
                     mDbHelper.getAggregatedRecords();
+            if (aggregatedResult == null) {
+                Slog.i(TAG, "Cannot get result from database");
+                return;
+            }
             // Get all digests for watchlist report, it should include all installed
             // application digests and previously recorded app digests.
             final List<String> digestsForReport = getAllDigestsForReport(aggregatedResult);

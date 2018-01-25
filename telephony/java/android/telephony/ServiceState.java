@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.annotation.IntDef;
+import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -24,6 +25,9 @@ import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Contains phone state and service related information.
@@ -286,6 +290,8 @@ public class ServiceState implements Parcelable {
      * Reference: 3GPP TS 36.104 5.4.3 */
     private int mLteEarfcnRsrpBoost = 0;
 
+    private List<NetworkRegistrationState> mNetworkRegistrationStates = new ArrayList<>();
+
     /**
      * get String description of roaming type
      * @hide
@@ -366,6 +372,7 @@ public class ServiceState implements Parcelable {
         mIsDataRoamingFromRegistration = s.mIsDataRoamingFromRegistration;
         mIsUsingCarrierAggregation = s.mIsUsingCarrierAggregation;
         mLteEarfcnRsrpBoost = s.mLteEarfcnRsrpBoost;
+        mNetworkRegistrationStates = new ArrayList<>(s.mNetworkRegistrationStates);
     }
 
     /**
@@ -396,6 +403,8 @@ public class ServiceState implements Parcelable {
         mIsDataRoamingFromRegistration = in.readInt() != 0;
         mIsUsingCarrierAggregation = in.readInt() != 0;
         mLteEarfcnRsrpBoost = in.readInt();
+        mNetworkRegistrationStates = new ArrayList<>();
+        in.readList(mNetworkRegistrationStates, NetworkRegistrationState.class.getClassLoader());
     }
 
     public void writeToParcel(Parcel out, int flags) {
@@ -423,6 +432,7 @@ public class ServiceState implements Parcelable {
         out.writeInt(mIsDataRoamingFromRegistration ? 1 : 0);
         out.writeInt(mIsUsingCarrierAggregation ? 1 : 0);
         out.writeInt(mLteEarfcnRsrpBoost);
+        out.writeList(mNetworkRegistrationStates);
     }
 
     public int describeContents() {
@@ -751,13 +761,14 @@ public class ServiceState implements Parcelable {
                         s.mCdmaDefaultRoamingIndicator)
                 && mIsEmergencyOnly == s.mIsEmergencyOnly
                 && mIsDataRoamingFromRegistration == s.mIsDataRoamingFromRegistration
-                && mIsUsingCarrierAggregation == s.mIsUsingCarrierAggregation);
+                && mIsUsingCarrierAggregation == s.mIsUsingCarrierAggregation)
+                && mNetworkRegistrationStates.containsAll(s.mNetworkRegistrationStates);
     }
 
     /**
      * Convert radio technology to String
      *
-     * @param radioTechnology
+     * @param rt radioTechnology
      * @return String representation of the RAT
      *
      * @hide
@@ -884,6 +895,7 @@ public class ServiceState implements Parcelable {
             .append(", mIsDataRoamingFromRegistration=").append(mIsDataRoamingFromRegistration)
             .append(", mIsUsingCarrierAggregation=").append(mIsUsingCarrierAggregation)
             .append(", mLteEarfcnRsrpBoost=").append(mLteEarfcnRsrpBoost)
+            .append(", mNetworkRegistrationStates=").append(mNetworkRegistrationStates)
             .append("}").toString();
     }
 
@@ -913,6 +925,7 @@ public class ServiceState implements Parcelable {
         mIsDataRoamingFromRegistration = false;
         mIsUsingCarrierAggregation = false;
         mLteEarfcnRsrpBoost = 0;
+        mNetworkRegistrationStates = new ArrayList<>();
     }
 
     public void setStateOutOfService() {
@@ -1393,5 +1406,53 @@ public class ServiceState implements Parcelable {
         newSs.mIsEmergencyOnly = false; // only get here if voice is IN_SERVICE
 
         return newSs;
+    }
+
+    /**
+     * Get all of the available network registration states.
+     *
+     * @return List of registration states
+     * @hide
+     */
+    @SystemApi
+    public List<NetworkRegistrationState> getNetworkRegistrationStates() {
+        return mNetworkRegistrationStates;
+    }
+
+    /**
+     * Get the network registration states with given transport type.
+     *
+     * @param transportType The transport type. See {@link AccessNetworkConstants.TransportType}
+     * @return List of registration states.
+     * @hide
+     */
+    @SystemApi
+    public List<NetworkRegistrationState> getNetworkRegistrationStates(int transportType) {
+        List<NetworkRegistrationState> list = new ArrayList<>();
+        for (NetworkRegistrationState networkRegistrationState : mNetworkRegistrationStates) {
+            if (networkRegistrationState.getTransportType() == transportType) {
+                list.add(networkRegistrationState);
+            }
+        }
+        return list;
+    }
+
+    /**
+     * Get the network registration states with given transport type and domain.
+     *
+     * @param transportType The transport type. See {@link AccessNetworkConstants.TransportType}
+     * @param domain The network domain. Must be DOMAIN_CS or DOMAIN_PS.
+     * @return The matching NetworkRegistrationState.
+     * @hide
+     */
+    @SystemApi
+    public NetworkRegistrationState getNetworkRegistrationStates(int transportType, int domain) {
+        for (NetworkRegistrationState networkRegistrationState : mNetworkRegistrationStates) {
+            if (networkRegistrationState.getTransportType() == transportType
+                    && networkRegistrationState.getDomain() == domain) {
+                return networkRegistrationState;
+            }
+        }
+        return null;
     }
 }

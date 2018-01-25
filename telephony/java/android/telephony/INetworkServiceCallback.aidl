@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Android Open Source Project
+ * Copyright 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,16 @@
  * limitations under the License.
  */
 
-package android.media.update;
+package android.telephony;
 
-import android.media.MediaPlayerBase;
-import android.media.session.PlaybackState;
-import android.os.Handler;
+import android.telephony.NetworkRegistrationState;
 
 /**
+ * Network service call back interface
  * @hide
  */
-public interface MediaPlayerBaseProvider {
-    void play_impl();
-    void pause_impl();
-    void stop_impl();
-    void skipToPrevious_impl();
-    void skipToNext_impl();
-
-    PlaybackState getPlaybackState_impl();
-    void addPlaybackListener_impl(MediaPlayerBase.PlaybackListener listener, Handler handler);
-    void removePlaybackListener_impl(MediaPlayerBase.PlaybackListener listener);
+oneway interface INetworkServiceCallback
+{
+    void onGetNetworkRegistrationStateComplete(int result, in NetworkRegistrationState state);
+    void onNetworkStateChanged();
 }

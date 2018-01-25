@@ -1960,6 +1960,15 @@ public final class Call {
         }
     }
 
+    /** {@hide} */
+    final void internalOnHandoverComplete() {
+        for (CallbackRecord<Callback> record : mCallbackRecords) {
+            final Call call = this;
+            final Callback callback = record.getCallback();
+            record.getHandler().post(() -> callback.onHandoverComplete(call));
+        }
+    }
+
     private void fireStateChanged(final int newState) {
         for (CallbackRecord<Callback> record : mCallbackRecords) {
             final Call call = this;

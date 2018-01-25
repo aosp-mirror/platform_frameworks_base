@@ -514,6 +514,7 @@
     <protected-broadcast android:name="android.os.action.ACTION_EFFECTS_SUPPRESSOR_CHANGED" />
     <protected-broadcast android:name="android.app.action.NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED" />
     <protected-broadcast android:name="android.app.action.NOTIFICATION_CHANNEL_GROUP_BLOCK_STATE_CHANGED" />
+    <protected-broadcast android:name="android.app.action.APP_BLOCK_STATE_CHANGED" />
 
     <protected-broadcast android:name="android.permission.GET_APP_GRANTED_URI_PERMISSIONS" />
     <protected-broadcast android:name="android.permission.CLEAR_APP_GRANTED_URI_PERMISSIONS" />
@@ -577,6 +578,7 @@
     <!-- Added in P -->
     <protected-broadcast android:name="android.app.action.PROFILE_OWNER_CHANGED" />
     <protected-broadcast android:name="android.app.action.TRANSFER_OWNERSHIP_COMPLETE" />
+    <protected-broadcast android:name="android.app.action.AFFILIATED_PROFILE_TRANSFER_OWNERSHIP_COMPLETE" />
     <protected-broadcast android:name="android.app.action.DATA_SHARING_RESTRICTION_CHANGED" />
 
     <!-- ====================================================================== -->
@@ -968,6 +970,23 @@
                 android:label="@string/permlab_manageOwnCalls"
                 android:description="@string/permdesc_manageOwnCalls"
                 android:protectionLevel="normal" />
+
+    <!-- Allows a calling app to continue a call which was started in another app.  An example is a
+         video calling app that wants to continue a voice call on the user's mobile network.<p>
+         When the handover of a call from one app to another takes place, there are two devices
+         which are involved in the handover; the initiating and receiving devices.  The initiating
+         device is where the request to handover the call was started, and the receiving device is
+         where the handover request is confirmed by the other party.<p>
+         This permission protects access to the
+         {@link android.telecom.TelecomManager#acceptHandover(Uri, int, PhoneAccountHandle)} which
+         the receiving side of the handover uses to accept a handover.
+         <p>Protection level: dangerous
+    -->
+    <permission android:name="android.permission.ACCEPT_HANDOVER"
+                android:permissionGroup="android.permission-group.PHONE"
+                android.label="@string/permlab_acceptHandover"
+                android:description="@string/permdesc_acceptHandovers"
+                android:protectionLevel="dangerous" />
 
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the device microphone                        -->
@@ -1931,6 +1950,12 @@
          protection or exported state.
          @hide -->
     <permission android:name="android.permission.START_ANY_ACTIVITY"
+        android:protectionLevel="signature" />
+
+    <!-- Allows an application to start an activity as another app, provided that app has been
+         granted a permissionToken from the ActivityManagerService.
+         @hide -->
+    <permission android:name="android.permission.START_ACTIVITY_AS_CALLER"
         android:protectionLevel="signature" />
 
     <!-- @deprecated The {@link android.app.ActivityManager#restartPackage}
@@ -2992,6 +3017,11 @@
     <permission android:name="android.permission.CONFIGURE_DISPLAY_BRIGHTNESS"
         android:protectionLevel="signature|privileged|development" />
 
+    <!-- Allows an application to control the system's display brightness
+         @hide -->
+    <permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS"
+        android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows an application to control VPN.
          <p>Not for use by third-party applications.</p>
          @hide -->
@@ -3709,6 +3739,15 @@
     <!-- Allows an instant app to create foreground services. -->
     <permission android:name="android.permission.INSTANT_APP_FOREGROUND_SERVICE"
         android:protectionLevel="signature|development|instant|appop" />
+
+    <!-- Allows a regular application to use {@link android.app.Service#startForeground
+         Service.startForeground}.
+         <p>Protection level: normal
+    -->
+    <permission android:name="android.permission.FOREGROUND_SERVICE"
+        android:description="@string/permdesc_foregroundService"
+        android:label="@string/permlab_foregroundService"
+        android:protectionLevel="normal|instant" />
 
     <!-- @hide Allows system components to access all app shortcuts. -->
     <permission android:name="android.permission.ACCESS_SHORTCUTS"

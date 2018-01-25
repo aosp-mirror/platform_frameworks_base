@@ -65,6 +65,7 @@ import android.os.PersistableBundle;
 import android.os.StrictMode;
 import android.os.WorkSource;
 import android.service.voice.IVoiceInteractionSession;
+import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationDefinition;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.IResultReceiver;
@@ -357,6 +358,20 @@ interface IActivityManager {
      */
     void requestTelephonyBugReport(in String shareTitle, in String shareDescription);
 
+    /**
+     *  Deprecated - This method is only used by Wifi, and it will soon be replaced by a proper
+     *  bug report API.
+     *
+     *  Takes a minimal bugreport of Wifi-related state.
+     *
+     *  @param shareTitle should be a valid legible string less than 50 chars long
+     *  @param shareDescription should be less than 91 bytes when encoded into UTF-8 format
+     *
+     *  @throws IllegalArgumentException if shareTitle or shareDescription is too big or if the
+     *          parameters cannot be encoding to an UTF-8 charset.
+     */
+    void requestWifiBugReport(in String shareTitle, in String shareDescription);
+
     long inputDispatchingTimedOut(int pid, boolean aboveSystem, in String reason);
     void clearPendingBackup();
     Intent getIntentForIntentSender(in IIntentSender sender);
@@ -427,8 +442,9 @@ interface IActivityManager {
             in Bundle options, int userId);
     int startAssistantActivity(in String callingPackage, int callingPid, int callingUid,
             in Intent intent, in String resolvedType, in Bundle options, int userId);
-    int startRecentsActivity(in IAssistDataReceiver assistDataReceiver, in Bundle options,
-            in Bundle activityOptions, int userId);
+    void startRecentsActivity(in Intent intent, in IAssistDataReceiver assistDataReceiver,
+            in IRecentsAnimationRunner recentsAnimationRunner);
+    void cancelRecentsAnimation();
     int startActivityFromRecents(int taskId, in Bundle options);
     Bundle getActivityOptions(in IBinder token);
     List<IBinder> getAppTasks(in String callingPackage);
@@ -438,10 +454,11 @@ interface IActivityManager {
     boolean isTopOfTask(in IBinder token);
     void notifyLaunchTaskBehindComplete(in IBinder token);
     void notifyEnterAnimationComplete(in IBinder token);
+    IBinder requestStartActivityPermissionToken(in IBinder delegatorToken);
     int startActivityAsCaller(in IApplicationThread caller, in String callingPackage,
             in Intent intent, in String resolvedType, in IBinder resultTo, in String resultWho,
             int requestCode, int flags, in ProfilerInfo profilerInfo, in Bundle options,
-            boolean ignoreTargetSecurity, int userId);
+            in IBinder permissionToken, boolean ignoreTargetSecurity, int userId);
     int addAppTask(in IBinder activityToken, in Intent intent,
             in ActivityManager.TaskDescription description, in Bitmap thumbnail);
     Point getAppTaskThumbnailSize();

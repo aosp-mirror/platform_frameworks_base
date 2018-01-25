@@ -841,7 +841,7 @@ public class ChooserActivity extends ResolverActivity {
         }
 
         @Override
-        public boolean startAsCaller(Activity activity, Bundle options, int userId) {
+        public boolean startAsCaller(ResolverActivity activity, Bundle options, int userId) {
             final Intent intent = getBaseIntentToSend();
             if (intent == null) {
                 return false;
@@ -860,8 +860,7 @@ public class ChooserActivity extends ResolverActivity {
             final boolean ignoreTargetSecurity = mSourceInfo != null
                     && mSourceInfo.getResolvedComponentName().getPackageName()
                     .equals(mChooserTarget.getComponentName().getPackageName());
-            activity.startActivityAsCaller(intent, options, ignoreTargetSecurity, userId);
-            return true;
+            return activity.startAsCallerImpl(intent, options, ignoreTargetSecurity, userId);
         }
 
         @Override

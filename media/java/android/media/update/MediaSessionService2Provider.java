@@ -19,8 +19,7 @@ package android.media.update;
 import android.content.Intent;
 import android.media.MediaSession2;
 import android.media.MediaSessionService2.MediaNotification;
-import android.media.session.PlaybackState;
-import android.os.Handler;
+import android.media.PlaybackState2;
 import android.os.IBinder;
 
 /**
@@ -28,7 +27,7 @@ import android.os.IBinder;
  */
 public interface MediaSessionService2Provider {
     MediaSession2 getSession_impl();
-    MediaNotification onUpdateNotification_impl(PlaybackState state);
+    MediaNotification onUpdateNotification_impl(PlaybackState2 state);
 
     // Service
     void onCreate_impl();

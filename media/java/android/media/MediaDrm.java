@@ -679,12 +679,14 @@ public final class MediaDrm implements AutoCloseable {
         private int mRequestType;
 
         /**
-         * Key request type is initial license request
+         * Key request type is initial license request. A license request
+         * is necessary to load keys.
          */
         public static final int REQUEST_TYPE_INITIAL = 0;
 
         /**
-         * Key request type is license renewal
+         * Key request type is license renewal. A license request is
+         * necessary to prevent the keys from expiring.
          */
         public static final int REQUEST_TYPE_RENEWAL = 1;
 
@@ -693,11 +695,25 @@ public final class MediaDrm implements AutoCloseable {
          */
         public static final int REQUEST_TYPE_RELEASE = 2;
 
+        /**
+         * Keys are already loaded. No license request is necessary, and no
+         * key request data is returned.
+         */
+        public static final int REQUEST_TYPE_NONE = 3;
+
+        /**
+         * Keys have been loaded but an additional license request is needed
+         * to update their values.
+         */
+        public static final int REQUEST_TYPE_UPDATE = 4;
+
         /** @hide */
         @IntDef({
             REQUEST_TYPE_INITIAL,
             REQUEST_TYPE_RENEWAL,
             REQUEST_TYPE_RELEASE,
+            REQUEST_TYPE_NONE,
+            REQUEST_TYPE_UPDATE,
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface RequestType {}
@@ -738,7 +754,8 @@ public final class MediaDrm implements AutoCloseable {
         /**
          * Get the type of the request
          * @return one of {@link #REQUEST_TYPE_INITIAL},
-         * {@link #REQUEST_TYPE_RENEWAL} or {@link #REQUEST_TYPE_RELEASE}
+         * {@link #REQUEST_TYPE_RENEWAL}, {@link #REQUEST_TYPE_RELEASE},
+         * {@link #REQUEST_TYPE_NONE} or {@link #REQUEST_TYPE_UPDATE}
          */
         @RequestType
         public int getRequestType() { return mRequestType; }

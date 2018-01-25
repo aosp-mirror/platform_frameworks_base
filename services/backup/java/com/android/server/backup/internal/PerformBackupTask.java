@@ -224,6 +224,10 @@ public class PerformBackupTask implements BackupRestoreTask {
                     beginBackup();
                     break;
 
+                case BACKUP_PM:
+                    backupPm();
+                    break;
+
                 case RUNNING_QUEUE:
                     invokeNextAgent();
                     break;
@@ -239,8 +243,7 @@ public class PerformBackupTask implements BackupRestoreTask {
         }
     }
 
-    // We're starting a backup pass.  Initialize the transport and send
-    // the PM metadata blob if we haven't already.
+    // We're starting a backup pass.  Initialize the transport if we haven't already.
     private void beginBackup() {
         if (DEBUG_BACKUP_TRACE) {
             backupManagerService.clearBackupTrace();
@@ -320,40 +323,21 @@ public class PerformBackupTask implements BackupRestoreTask {
                 Slog.d(TAG, "Skipping backup of package metadata.");
                 executeNextState(BackupState.RUNNING_QUEUE);
             } else {
-                // The package manager doesn't have a proper <application> etc, but since
-                // it's running here in the system process we can just set up its agent
-                // directly and use a synthetic BackupRequest.  We always run this pass
-                // because it's cheap and this way we guarantee that we don't get out of
-                // step even if we're selecting among various transports at run time.
+                // As the package manager is running here in the system process we can just set up
+                // its agent directly. Thus we always run this pass because it's cheap and this way
+                // we guarantee that we don't get out of step even if we're selecting among various
+                // transports at run time.
                 if (mStatus == BackupTransport.TRANSPORT_OK) {
-                    PackageManagerBackupAgent pmAgent = backupManagerService.makeMetadataAgent();
-                    mStatus = invokeAgentForBackup(
-                            PACKAGE_MANAGER_SENTINEL,
-                            IBackupAgent.Stub.asInterface(pmAgent.onBind()));
-                    backupManagerService.addBackupTrace("PMBA invoke: " + mStatus);
-
-                    // Because the PMBA is a local instance, it has already executed its
-                    // backup callback and returned.  Blow away the lingering (spurious)
-                    // pending timeout message for it.
-                    backupManagerService.getBackupHandler().removeMessages(
-                            MSG_BACKUP_OPERATION_TIMEOUT);
+                    executeNextState(BackupState.BACKUP_PM);
                 }
             }
-
-            if (mStatus == BackupTransport.TRANSPORT_NOT_INITIALIZED) {
-                // The backend reports that our dataset has been wiped.  Note this in
-                // the event log; the no-success code below will reset the backup
-                // state as well.
-                EventLog.writeEvent(EventLogTags.BACKUP_RESET, transportName);
-            }
         } catch (Exception e) {
-            Slog.e(TAG, "Error in backup thread", e);
-            backupManagerService.addBackupTrace("Exception in backup thread: " + e);
+            Slog.e(TAG, "Error in backup thread during init", e);
+            backupManagerService.addBackupTrace("Exception in backup thread during init: " + e);
             mStatus = BackupTransport.TRANSPORT_ERROR;
         } finally {
-            // If we've succeeded so far, invokeAgentForBackup() will have run the PM
-            // metadata and its completion/timeout callback will continue the state
-            // machine chain.  If it failed that won't happen; we handle that now.
+            // If we've succeeded so far, we will move to the BACKUP_PM state. If something has gone
+            // wrong then that won't have happen so cleanup.
             backupManagerService.addBackupTrace("exiting prelim: " + mStatus);
             if (mStatus != BackupTransport.TRANSPORT_OK) {
                 // if things went wrong at this point, we need to
@@ -364,6 +348,49 @@ public class PerformBackupTask implements BackupRestoreTask {
                         BackupManager.ERROR_TRANSPORT_ABORTED);
                 executeNextState(BackupState.FINAL);
             }
+        }
+    }
+
+    private void backupPm() {
+        try {
+            // The package manager doesn't have a proper <application> etc, but since it's running
+            // here in the system process we can just set up its agent directly and use a synthetic
+            // BackupRequest.
+            PackageManagerBackupAgent pmAgent = backupManagerService.makeMetadataAgent();
+            mStatus = invokeAgentForBackup(
+                    PACKAGE_MANAGER_SENTINEL,
+                    IBackupAgent.Stub.asInterface(pmAgent.onBind()));
+            backupManagerService.addBackupTrace("PMBA invoke: " + mStatus);
+
+            // Because the PMBA is a local instance, it has already executed its backup callback and
+            // returned.  Blow away the lingering (spurious) pending timeout message for it.
+            backupManagerService.getBackupHandler().removeMessages(
+                    MSG_BACKUP_OPERATION_TIMEOUT);
+        } catch (Exception e) {
+            Slog.e(TAG, "Error in backup thread during pm", e);
+            backupManagerService.addBackupTrace("Exception in backup thread during pm: " + e);
+            mStatus = BackupTransport.TRANSPORT_ERROR;
+        } finally {
+            // If we've succeeded so far, invokeAgentForBackup() will have run the PM
+            // metadata and its completion/timeout callback will continue the state
+            // machine chain.  If it failed that won't happen; we handle that now.
+            backupManagerService.addBackupTrace("exiting backupPm: " + mStatus);
+            if (mStatus != BackupTransport.TRANSPORT_OK) {
+                // if things went wrong at this point, we need to
+                // restage everything and try again later.
+                backupManagerService.resetBackupState(mStateDir);  // Just to make sure.
+                BackupObserverUtils.sendBackupFinished(mObserver,
+                        invokeAgentToObserverError(mStatus));
+                executeNextState(BackupState.FINAL);
+            }
+        }
+    }
+
+    private int invokeAgentToObserverError(int error) {
+        if (error == BackupTransport.AGENT_ERROR) {
+            return BackupManager.ERROR_AGENT_FAILURE;
+        } else {
+            return BackupManager.ERROR_TRANSPORT_ABORTED;
         }
     }
 
@@ -903,6 +930,7 @@ public class PerformBackupTask implements BackupRestoreTask {
                 TransportUtils.checkTransportNotNull(transport);
                 size = mBackupDataName.length();
                 if (size > 0) {
+                    boolean isNonIncremental = mSavedStateName.length() == 0;
                     if (mStatus == BackupTransport.TRANSPORT_OK) {
                         backupData = ParcelFileDescriptor.open(mBackupDataName,
                                 ParcelFileDescriptor.MODE_READ_ONLY);
@@ -911,12 +939,25 @@ public class PerformBackupTask implements BackupRestoreTask {
                         int userInitiatedFlag =
                                 mUserInitiated ? BackupTransport.FLAG_USER_INITIATED : 0;
                         int incrementalFlag =
-                                mSavedStateName.length() == 0
+                                isNonIncremental
                                     ? BackupTransport.FLAG_NON_INCREMENTAL
                                     : BackupTransport.FLAG_INCREMENTAL;
                         int flags = userInitiatedFlag | incrementalFlag;
 
                         mStatus = transport.performBackup(mCurrentPackage, backupData, flags);
+                    }
+
+                    if (isNonIncremental
+                        && mStatus == BackupTransport.TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED) {
+                        // TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED is only valid if the backup was
+                        // incremental, as if the backup is non-incremental there is no state to
+                        // clear. This avoids us ending up in a retry loop if the transport always
+                        // returns this code.
+                        Slog.w(TAG,
+                                "Transport requested non-incremental but already the case, error");
+                        backupManagerService.addBackupTrace(
+                                "Transport requested non-incremental but already the case, error");
+                        mStatus = BackupTransport.TRANSPORT_ERROR;
                     }
 
                     // TODO - We call finishBackup() for each application backed up, because
@@ -966,6 +1007,31 @@ public class PerformBackupTask implements BackupRestoreTask {
                     BackupObserverUtils.sendBackupOnPackageResult(mObserver, pkgName,
                             BackupManager.ERROR_TRANSPORT_QUOTA_EXCEEDED);
                     EventLog.writeEvent(EventLogTags.BACKUP_QUOTA_EXCEEDED, pkgName);
+
+                } else if (mStatus == BackupTransport.TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED) {
+                    Slog.i(TAG, "Transport lost data, retrying package");
+                    backupManagerService.addBackupTrace(
+                            "Transport lost data, retrying package:" + pkgName);
+                    BackupManagerMonitorUtils.monitorEvent(
+                            mMonitor,
+                            BackupManagerMonitor
+                                    .LOG_EVENT_ID_TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED,
+                            mCurrentPackage,
+                            BackupManagerMonitor.LOG_EVENT_CATEGORY_TRANSPORT,
+                            /*extras=*/ null);
+
+                    mBackupDataName.delete();
+                    mSavedStateName.delete();
+                    mNewStateName.delete();
+
+                    // Immediately retry the package by adding it back to the front of the queue.
+                    // We cannot add @pm@ to the queue because we back it up separately at the start
+                    // of the backup pass in state BACKUP_PM. Instead we retry this state (see
+                    // below).
+                    if (!PACKAGE_MANAGER_SENTINEL.equals(pkgName)) {
+                        mQueue.add(0, new BackupRequest(pkgName));
+                    }
+
                 } else {
                     // Actual transport-level failure to communicate the data to the backend
                     BackupObserverUtils.sendBackupOnPackageResult(mObserver, pkgName,
@@ -991,6 +1057,17 @@ public class PerformBackupTask implements BackupRestoreTask {
                 // Success or single-package rejection.  Proceed with the next app if any,
                 // otherwise we're done.
                 nextState = (mQueue.isEmpty()) ? BackupState.FINAL : BackupState.RUNNING_QUEUE;
+
+            } else if (mStatus == BackupTransport.TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED) {
+                // We want to immediately retry the current package.
+                if (PACKAGE_MANAGER_SENTINEL.equals(pkgName)) {
+                    nextState = BackupState.BACKUP_PM;
+                } else {
+                    // This is an ordinary package so we will have added it back into the queue
+                    // above. Thus, we proceed processing the queue.
+                    nextState = BackupState.RUNNING_QUEUE;
+                }
+
             } else if (mStatus == BackupTransport.TRANSPORT_QUOTA_EXCEEDED) {
                 if (MORE_DEBUG) {
                     Slog.d(TAG, "Package " + mCurrentPackage.packageName +

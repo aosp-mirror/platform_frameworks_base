@@ -1179,6 +1179,34 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testUpdateAppNotifyCreatorBlock() throws Exception {
+        mService.setRankingHelper(mRankingHelper);
+
+        mBinderService.setNotificationsEnabledForPackage(PKG, 0, false);
+        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
+        verify(mContext, times(1)).sendBroadcastAsUser(captor.capture(), any(), eq(null));
+
+        assertEquals(NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED,
+                captor.getValue().getAction());
+        assertEquals(PKG, captor.getValue().getPackage());
+        assertTrue(captor.getValue().getBooleanExtra(EXTRA_BLOCKED_STATE, false));
+    }
+
+    @Test
+    public void testUpdateAppNotifyCreatorUnblock() throws Exception {
+        mService.setRankingHelper(mRankingHelper);
+
+        mBinderService.setNotificationsEnabledForPackage(PKG, 0, true);
+        ArgumentCaptor<Intent> captor = ArgumentCaptor.forClass(Intent.class);
+        verify(mContext, times(1)).sendBroadcastAsUser(captor.capture(), any(), eq(null));
+
+        assertEquals(NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED,
+                captor.getValue().getAction());
+        assertEquals(PKG, captor.getValue().getPackage());
+        assertFalse(captor.getValue().getBooleanExtra(EXTRA_BLOCKED_STATE, true));
+    }
+
+    @Test
     public void testUpdateChannelNotifyCreatorBlock() throws Exception {
         mService.setRankingHelper(mRankingHelper);
         when(mRankingHelper.getNotificationChannel(eq(PKG), anyInt(),

@@ -63,15 +63,21 @@ class RippleBackground extends RippleComponent {
         }
     }
 
-    public void setState(boolean focused, boolean hovered, boolean animateChanged) {
+    public void setState(boolean focused, boolean hovered, boolean pressed) {
+        if (!mFocused) {
+            focused = focused && !pressed;
+        }
+        if (!mHovered) {
+            hovered = hovered && !pressed;
+        }
         if (mHovered != hovered || mFocused != focused) {
             mHovered = hovered;
             mFocused = focused;
-            onStateChanged(animateChanged);
+            onStateChanged();
         }
     }
 
-    private void onStateChanged(boolean animateChanged) {
+    private void onStateChanged() {
         float newOpacity = 0.0f;
         if (mHovered) newOpacity += .25f;
         if (mFocused) newOpacity += .75f;
@@ -79,14 +85,10 @@ class RippleBackground extends RippleComponent {
             mAnimator.cancel();
             mAnimator = null;
         }
-        if (animateChanged) {
-            mAnimator = ObjectAnimator.ofFloat(this, OPACITY, newOpacity);
-            mAnimator.setDuration(OPACITY_DURATION);
-            mAnimator.setInterpolator(LINEAR_INTERPOLATOR);
-            mAnimator.start();
-        } else {
-            mOpacity = newOpacity;
-        }
+        mAnimator = ObjectAnimator.ofFloat(this, OPACITY, newOpacity);
+        mAnimator.setDuration(OPACITY_DURATION);
+        mAnimator.setInterpolator(LINEAR_INTERPOLATOR);
+        mAnimator.start();
     }
 
     public void jumpToFinal() {

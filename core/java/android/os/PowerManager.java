@@ -1001,24 +1001,6 @@ public final class PowerManager {
         return false;
     }
 
-    /**
-     * Sets the brightness of the backlights (screen, keyboard, button).
-     * <p>
-     * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
-     * </p>
-     *
-     * @param brightness The brightness value from 0 to 255.
-     *
-     * @hide Requires signature permission.
-     */
-    public void setBacklightBrightness(int brightness) {
-        try {
-            mService.setTemporaryScreenBrightnessSettingOverride(brightness);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
    /**
      * Returns true if the specified wake lock level is supported.
      *

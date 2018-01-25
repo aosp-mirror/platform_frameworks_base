@@ -214,8 +214,11 @@ public class ForceAppStandbyTracker {
                 int uid, @NonNull String packageName) {
             updateJobsForUidPackage(uid, packageName);
 
-            if (!sender.areAlarmsRestricted(uid, packageName)) {
+            if (!sender.areAlarmsRestricted(uid, packageName, /*allowWhileIdle=*/ false)) {
                 unblockAlarmsForUidPackage(uid, packageName);
+            } else if (!sender.areAlarmsRestricted(uid, packageName, /*allowWhileIdle=*/ true)){
+                // we need to deliver the allow-while-idle alarms for this uid, package
+                unblockAllUnrestrictedAlarms();
             }
         }
 
@@ -706,7 +709,7 @@ public class ForceAppStandbyTracker {
                     synchronized (mLock) {
                         unblockAlarms = !mForcedAppStandbyEnabled && !mForceAllAppsStandby;
                     }
-                    for (Listener l: cloneListeners()) {
+                    for (Listener l : cloneListeners()) {
                         l.updateAllJobs();
                         if (unblockAlarms) {
                             l.unblockAllUnrestrictedAlarms();
@@ -818,9 +821,10 @@ public class ForceAppStandbyTracker {
     /**
      * @return whether alarms should be restricted for a UID package-name.
      */
-    public boolean areAlarmsRestricted(int uid, @NonNull String packageName) {
+    public boolean areAlarmsRestricted(int uid, @NonNull String packageName,
+            boolean allowWhileIdle) {
         return isRestricted(uid, packageName, /*useTempWhitelistToo=*/ false,
-                /* exemptOnBatterySaver =*/ false);
+                /* exemptOnBatterySaver =*/ allowWhileIdle);
     }
 
     /**
@@ -879,7 +883,6 @@ public class ForceAppStandbyTracker {
     /**
      * @return whether force all apps standby is enabled or not.
      *
-     * Note clients normally shouldn't need to access it.
      */
     boolean isForceAllAppsStandbyEnabled() {
         synchronized (mLock) {

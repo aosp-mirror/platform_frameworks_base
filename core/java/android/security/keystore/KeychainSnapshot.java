@@ -151,6 +151,8 @@ public final class KeychainSnapshot implements Parcelable {
 
     /**
      * Builder for creating {@link KeychainSnapshot}.
+     *
+     * @hide
      */
     public static class Builder {
         private KeychainSnapshot mInstance = new KeychainSnapshot();
@@ -263,9 +265,6 @@ public final class KeychainSnapshot implements Parcelable {
         }
     }
 
-    /**
-     * @hide
-     */
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mSnapshotVersion);

@@ -41,6 +41,7 @@
             android:paddingTop="12dp"
             android:paddingBottom="12dp"
             android:background="@drawable/rounded_bg_full"
+            android:translationZ="8dp"
             android:orientation="horizontal" >
                 <!-- volume rows added and removed here! :-) -->
         </LinearLayout>
@@ -57,6 +58,7 @@
             android:background="@drawable/rounded_bg_full"
             android:gravity="center"
             android:layout_gravity="end"
+            android:translationZ="8dp"
             android:orientation="vertical" >
 
             <TextView

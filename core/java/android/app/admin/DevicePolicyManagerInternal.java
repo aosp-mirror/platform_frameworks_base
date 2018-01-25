@@ -132,4 +132,13 @@ public abstract class DevicePolicyManagerInternal {
      * @param userId The user in question
      */
     public abstract boolean canUserHaveUntrustedCredentialReset(@UserIdInt int userId);
+
+    /**
+     * Return text of error message if printing is disabled.
+     * Called by Print Service when printing is disabled by PO or DO when printing is attempted.
+     *
+     * @param userId The user in question
+     * @return localized error message
+     */
+    public abstract CharSequence getPrintingDisabledReasonForUser(@UserIdInt int userId);
 }

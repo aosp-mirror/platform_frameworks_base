@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-package android.telephony.ims.internal.aidl;
+#include <benchmark/benchmark.h>
 
-/**
- * See MMTelFeature for more information.
- * {@hide}
- */
-interface IImsSmsListener {
-    void onSendSmsResult(in int token, in int messageRef, in int status, in int reason);
-    void onSmsStatusReportReceived(in int token, in int messageRef, in String format,
-            in byte[] pdu);
-    void onSmsReceived(in int token, in String format, in byte[] pdu);
-}
+BENCHMARK_MAIN();

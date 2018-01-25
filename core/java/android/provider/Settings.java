@@ -7602,6 +7602,13 @@ public final class Settings {
         public static final String BACKUP_MANAGER_CONSTANTS = "backup_manager_constants";
 
         /**
+         * Flag to set if the system should predictively attempt to re-enable Bluetooth while
+         * the user is driving.
+         * @hide
+         */
+        public static final String BLUETOOTH_ON_WHILE_DRIVING = "bluetooth_on_while_driving";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -9148,6 +9155,22 @@ public final class Settings {
                BOOLEAN_VALIDATOR;
 
        /**
+        * Whether to notify the user of carrier networks.
+        * <p>
+        * If not connected and the scan results have a carrier network, we will
+        * put this notification up. If we attempt to connect to a network or
+        * the carrier network(s) disappear, we remove the notification. When we
+        * show the notification, we will not show it again for
+        * {@link android.provider.Settings.Global#WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY} time.
+        * @hide
+        */
+       public static final String WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON =
+               "wifi_carrier_networks_available_notification_on";
+
+       private static final Validator WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON_VALIDATOR =
+               BOOLEAN_VALIDATOR;
+
+       /**
         * {@hide}
         */
        public static final String WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON =
@@ -9328,13 +9351,52 @@ public final class Settings {
         public static final String RECOMMENDED_NETWORK_EVALUATOR_CACHE_EXPIRY_MS =
                 "recommended_network_evaluator_cache_expiry_ms";
 
-       /**
+        /**
         * Settings to allow BLE scans to be enabled even when Bluetooth is turned off for
         * connectivity.
         * @hide
         */
-       public static final String BLE_SCAN_ALWAYS_AVAILABLE =
-               "ble_scan_always_enabled";
+        public static final String BLE_SCAN_ALWAYS_AVAILABLE = "ble_scan_always_enabled";
+
+        /**
+         * The length in milliseconds of a BLE scan window in a low-power scan mode.
+         * @hide
+         */
+        public static final String BLE_SCAN_LOW_POWER_WINDOW_MS = "ble_scan_low_power_window_ms";
+
+        /**
+         * The length in milliseconds of a BLE scan window in a balanced scan mode.
+         * @hide
+         */
+        public static final String BLE_SCAN_BALANCED_WINDOW_MS = "ble_scan_balanced_window_ms";
+
+        /**
+         * The length in milliseconds of a BLE scan window in a low-latency scan mode.
+         * @hide
+         */
+        public static final String BLE_SCAN_LOW_LATENCY_WINDOW_MS =
+                "ble_scan_low_latency_window_ms";
+
+        /**
+         * The length in milliseconds of a BLE scan interval in a low-power scan mode.
+         * @hide
+         */
+        public static final String BLE_SCAN_LOW_POWER_INTERVAL_MS =
+                "ble_scan_low_power_interval_ms";
+
+        /**
+         * The length in milliseconds of a BLE scan interval in a balanced scan mode.
+         * @hide
+         */
+        public static final String BLE_SCAN_BALANCED_INTERVAL_MS =
+                "ble_scan_balanced_interval_ms";
+
+        /**
+         * The length in milliseconds of a BLE scan interval in a low-latency scan mode.
+         * @hide
+         */
+        public static final String BLE_SCAN_LOW_LATENCY_INTERVAL_MS =
+                "ble_scan_low_latency_interval_ms";
 
        /**
         * Used to save the Wifi_ON state prior to tethering.
@@ -11179,6 +11241,15 @@ public final class Settings {
                 "location_global_kill_switch";
 
         /**
+         * If set to 1, SettingsProvider's restoreAnyVersion="true" attribute will be ignored
+         * and restoring to lower version of platform API will be skipped.
+         *
+         * @hide
+         */
+        public static final String OVERRIDE_SETTINGS_PROVIDER_RESTORE_ANY_VERSION =
+                "override_settings_provider_restore_any_version";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -11206,6 +11277,7 @@ public final class Settings {
             NETWORK_RECOMMENDATIONS_ENABLED,
             WIFI_WAKEUP_ENABLED,
             WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,
+            WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON,
             USE_OPEN_WIFI_PACKAGE,
             WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED,
             EMERGENCY_TONE,
@@ -11252,6 +11324,8 @@ public final class Settings {
             VALIDATORS.put(PRIVATE_DNS_MODE, PRIVATE_DNS_MODE_VALIDATOR);
             VALIDATORS.put(PRIVATE_DNS_SPECIFIER, PRIVATE_DNS_SPECIFIER_VALIDATOR);
             VALIDATORS.put(SOFT_AP_TIMEOUT_ENABLED, SOFT_AP_TIMEOUT_ENABLED_VALIDATOR);
+            VALIDATORS.put(WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON,
+                    WIFI_CARRIER_NETWORKS_AVAILABLE_NOTIFICATION_ON_VALIDATOR);
         }
 
         /**
@@ -11897,6 +11971,19 @@ public final class Settings {
          * @hide
          */
         public static final String SHOW_FIRST_CRASH_DIALOG = "show_first_crash_dialog";
+
+        /**
+         * If nonzero, crash dialogs will show an option to restart the app.
+         * @hide
+         */
+        public static final String SHOW_RESTART_IN_CRASH_DIALOG = "show_restart_in_crash_dialog";
+
+        /**
+         * If nonzero, crash dialogs will show an option to mute all future crash dialogs for
+         * this app.
+         * @hide
+         */
+        public static final String SHOW_MUTE_IN_CRASH_DIALOG = "show_mute_in_crash_dialog";
     }
 
     /**
