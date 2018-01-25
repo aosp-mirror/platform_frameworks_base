@@ -837,6 +837,13 @@ public class IccUtils {
     }
 
     /**
+     * Strip all the trailing 'F' characters of a string, e.g., an ICCID.
+     */
+    public static String stripTrailingFs(String s) {
+        return s == null ? null : s.replaceAll("(?i)f*$", "");
+    }
+
+    /**
      * Converts a character of [0-9a-aA-F] to its hex value in a byte. If the character is not a
      * hex number, 0 will be returned.
      */
