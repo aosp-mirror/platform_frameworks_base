@@ -110,6 +110,9 @@ cc_library_shared {
         "libhidlbase",  // VNDK???
         "libmediandk",  // NDK
         "libpowermanager",  // for JWakeLock. to be removed
+
+        "libutils",  // Have to use shared lib to make libandroid_runtime behave correctly.
+                     // Otherwise, AndroidRuntime::getJNIEnv() will return NULL.
     ],
 
     header_libs: ["libhardware_headers"],
@@ -143,7 +146,6 @@ cc_library_shared {
         "libstagefright_rtsp",
         "libstagefright_timedtext",
         "libunwindstack",
-        "libutils",
         "libutilscallstack",
         "libvndksupport",
         "libz",
