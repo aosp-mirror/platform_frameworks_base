@@ -25540,11 +25540,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             // "= 0" is needed because otherwise catch(RemoteException) would make it look like
             // packageUid may not be initialized.
             int packageUid = 0;
+            final long ident = Binder.clearCallingIdentity();
             try {
                 packageUid = AppGlobals.getPackageManager().getPackageUid(
                         packageName, PackageManager.MATCH_DEBUG_TRIAGED_MISSING, userId);
             } catch (RemoteException e) {
                 // Shouldn't happen.
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
 
             synchronized (ActivityManagerService.this) {
