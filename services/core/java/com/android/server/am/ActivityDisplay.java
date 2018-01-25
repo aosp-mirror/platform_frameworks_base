@@ -410,7 +410,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
             }
         } finally {
             final ActivityStack topFullscreenStack =
-                    getStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+                    getTopStackInWindowingMode(WINDOWING_MODE_FULLSCREEN);
             if (topFullscreenStack != null && mHomeStack != null && !isTopStack(mHomeStack)) {
                 // Whenever split-screen is dismissed we want the home stack directly behind the
                 // current top fullscreen stack so it shows up when the top stack is finished.
@@ -564,6 +564,16 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
             }
         }
         return false;
+    }
+
+    ActivityStack getTopStackInWindowingMode(int windowingMode) {
+        for (int i = mStacks.size() - 1; i >= 0; --i) {
+            final ActivityStack current = mStacks.get(i);
+            if (windowingMode == current.getWindowingMode()) {
+                return current;
+            }
+        }
+        return null;
     }
 
     int getIndexOf(ActivityStack stack) {
