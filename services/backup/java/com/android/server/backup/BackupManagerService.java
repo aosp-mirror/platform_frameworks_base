@@ -2638,7 +2638,7 @@ public class BackupManagerService implements BackupManagerServiceInterface {
             confIntent.setClassName("com.android.backupconfirm",
                     "com.android.backupconfirm.BackupRestoreConfirmation");
             confIntent.putExtra(FullBackup.CONF_TOKEN_INTENT_EXTRA, token);
-            confIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            confIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             mContext.startActivityAsUser(confIntent, UserHandle.SYSTEM);
         } catch (ActivityNotFoundException e) {
             return false;
