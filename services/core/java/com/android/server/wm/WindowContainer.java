@@ -100,6 +100,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     /** Total number of elements in this subtree, including our own hierarchy element. */
     private int mTreeWeight = 1;
 
+    /**
+     * Indicates whether we are animating and have committed the transaction to reparent our 
+     * surface to the animation leash
+     */
+    private boolean mCommittedReparentToAnimationLeash;
+
     WindowContainer(WindowManagerService service) {
         mService = service;
         mPendingTransaction = service.mTransactionFactory.make();
@@ -1025,9 +1031,21 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     void prepareSurfaces() {
         SurfaceControl.mergeToGlobalTransaction(getPendingTransaction());
+
+        // If a leash has been set when the transaction was committed, then the leash reparent has
+        // been committed.
+        mCommittedReparentToAnimationLeash = mSurfaceAnimator.hasLeash();
         for (int i = 0; i < mChildren.size(); i++) {
             mChildren.get(i).prepareSurfaces();
         }
+    }
+
+    /**
+     * @return true if the reparent to animation leash transaction has been committed, false
+     * otherwise.
+     */
+    boolean hasCommittedReparentToAnimationLeash() {
+        return mCommittedReparentToAnimationLeash;
     }
 
     /**

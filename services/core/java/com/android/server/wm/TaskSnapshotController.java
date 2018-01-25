@@ -223,6 +223,27 @@ class TaskSnapshotController {
             return null;
         }
 
+        if (top.hasCommittedReparentToAnimationLeash()) {
+            if (DEBUG_SCREENSHOT) {
+                Slog.w(TAG_WM, "Failed to take screenshot. App is animating " + top);
+            }
+            return null;
+        }
+
+        final boolean hasVisibleChild = top.forAllWindows(
+                // Ensure at least one window for the top app is visible before attempting to take
+                // a screenshot. Visible here means that the WSA surface is shown and has an alpha
+                // greater than 0.
+                ws -> ws.mWinAnimator != null && ws.mWinAnimator.getShown()
+                        && ws.mWinAnimator.mLastAlpha > 0f, true);
+
+        if (!hasVisibleChild) {
+            if (DEBUG_SCREENSHOT) {
+                Slog.w(TAG_WM, "Failed to take screenshot. No visible windows for " + task);
+            }
+            return null;
+        }
+
         final boolean isLowRamDevice = ActivityManager.isLowRamDeviceStatic();
         final float scaleFraction = isLowRamDevice ? REDUCED_SCALE : 1f;
         task.getBounds(mTmpRect);
@@ -233,7 +254,7 @@ class TaskSnapshotController {
 
         if (buffer == null || buffer.getWidth() <= 1 || buffer.getHeight() <= 1) {
             if (DEBUG_SCREENSHOT) {
-                Slog.w(TAG_WM, "Failed to take screenshot");
+                Slog.w(TAG_WM, "Failed to take screenshot for " + task);
             }
             return null;
         }
