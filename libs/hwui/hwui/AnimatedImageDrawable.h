@@ -58,7 +58,8 @@ public:
 
     double drawStaging(SkCanvas* canvas);
 
-    void start();
+    // Returns true if the animation was started; false otherwise (e.g. it was already running)
+    bool start();
     void stop();
     bool isRunning();
 

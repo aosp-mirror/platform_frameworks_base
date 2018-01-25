@@ -72,7 +72,6 @@ static jlong AnimatedImageDrawable_nCreate(JNIEnv* env, jobject /*clazz*/,
     }
 
     sk_sp<AnimatedImageDrawable> drawable(new AnimatedImageDrawable(animatedImg));
-    drawable->start();
     return reinterpret_cast<jlong>(drawable.release());
 }
 
@@ -114,9 +113,9 @@ static jboolean AnimatedImageDrawable_nIsRunning(JNIEnv* env, jobject /*clazz*/,
     return drawable->isRunning();
 }
 
-static void AnimatedImageDrawable_nStart(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
+static jboolean AnimatedImageDrawable_nStart(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
     auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
-    drawable->start();
+    return drawable->start();
 }
 
 static void AnimatedImageDrawable_nStop(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
@@ -138,7 +137,7 @@ static const JNINativeMethod gAnimatedImageDrawableMethods[] = {
     { "nGetAlpha",           "(J)I",                                                         (void*) AnimatedImageDrawable_nGetAlpha },
     { "nSetColorFilter",     "(JJ)V",                                                        (void*) AnimatedImageDrawable_nSetColorFilter },
     { "nIsRunning",          "(J)Z",                                                         (void*) AnimatedImageDrawable_nIsRunning },
-    { "nStart",              "(J)V",                                                         (void*) AnimatedImageDrawable_nStart },
+    { "nStart",              "(J)Z",                                                         (void*) AnimatedImageDrawable_nStart },
     { "nStop",               "(J)V",                                                         (void*) AnimatedImageDrawable_nStop },
     { "nNativeByteSize",     "(J)J",                                                         (void*) AnimatedImageDrawable_nNativeByteSize },
 };
