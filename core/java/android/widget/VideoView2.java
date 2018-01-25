@@ -23,6 +23,7 @@ import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayerBase;
+import android.media.session.MediaController;
 import android.media.update.ApiLoader;
 import android.media.update.VideoView2Provider;
 import android.media.update.ViewProvider;
@@ -76,8 +77,8 @@ import java.util.Map;
  * If a developer wants to attach a customed MediaControlView2, then set enableControlView attribute
  * to false and assign the customed media control widget using {@link #setMediaControlView2}.
  * <li> VideoView2 is integrated with MediaPlayer2 while VideoView is integrated with MediaPlayer.
- * <li> VideoView2 is integrated with MediaSession2 and so it responses with media key events.
- * A VideoView2 keeps a MediaSession2 instance internally and connects it to a corresponding
+ * <li> VideoView2 is integrated with MediaSession and so it responses with media key events.
+ * A VideoView2 keeps a MediaSession instance internally and connects it to a corresponding
  * MediaControlView2 instance.
  * </p>
  * </ul>
@@ -159,60 +160,18 @@ public class VideoView2 extends FrameLayout {
         return mProvider.getMediaControlView2_impl();
     }
 
-    /**
-     * Starts playback with the media contents specified by {@link #setVideoURI} and
-     * {@link #setVideoPath}.
-     * If it has been paused, this method will resume playback from the current position.
-     */
-    public void start() {
-        mProvider.start_impl();
-    }
 
     /**
-     * Pauses playback.
+     * Returns MediaController instance which is connected with MediaSession that VideoView2 is
+     * using. This method should be called when VideoView2 is attached to window, or it throws
+     * IllegalStateException, since internal MediaSession instance is not available until
+     * this view is attached to window. Please check {@link android.view.View#isAttachedToWindow}
+     * before calling this method.
+     *
+     * @throws IllegalStateException if interal MediaSession is not created yet.
      */
-    public void pause() {
-        mProvider.pause_impl();
-    }
-
-    /**
-     * Gets the duration of the media content specified by #setVideoURI and #setVideoPath
-     * in milliseconds.
-     */
-    public int getDuration() {
-        return mProvider.getDuration_impl();
-    }
-
-    /**
-     * Gets current playback position in milliseconds.
-     */
-    public int getCurrentPosition() {
-        return mProvider.getCurrentPosition_impl();
-    }
-
-    // TODO: mention about key-frame related behavior.
-    /**
-     * Moves the media by specified time position.
-     * @param msec the offset in milliseconds from the start to seek to.
-     */
-    public void seekTo(int msec) {
-        mProvider.seekTo_impl(msec);
-    }
-
-    /**
-     * Says if the media is currently playing.
-     * @return true if the media is playing, false if it is not (eg. paused or stopped).
-     */
-    public boolean isPlaying() {
-        return mProvider.isPlaying_impl();
-    }
-
-    // TODO: check what will return if it is a local media.
-    /**
-     * Gets the percentage (0-100) of the content that has been buffered or played so far.
-     */
-    public int getBufferPercentage() {
-        return mProvider.getBufferPercentage_impl();
+    public MediaController getMediaController() {
+        return mProvider.getMediaController_impl();
     }
 
     /**
@@ -244,7 +203,6 @@ public class VideoView2 extends FrameLayout {
         mProvider.setFullScreen_impl(fullScreen);
     }
 
-    // TODO: This should be revised after integration with MediaPlayer2.
     /**
      * Sets playback speed.
      *
@@ -254,18 +212,9 @@ public class VideoView2 extends FrameLayout {
      * be reset to the normal speed 1.0f.
      * @param speed the playback speed. It should be positive.
      */
+    // TODO: Support this via MediaController2.
     public void setSpeed(float speed) {
         mProvider.setSpeed_impl(speed);
-    }
-
-    /**
-     * Returns current speed setting.
-     *
-     * If setSpeed() has never been called, returns the default value 1.0f.
-     * @return current speed setting
-     */
-    public float getSpeed() {
-        return mProvider.getSpeed_impl();
     }
 
     /**
@@ -364,14 +313,6 @@ public class VideoView2 extends FrameLayout {
     @ViewType
     public int getViewType() {
         return mProvider.getViewType_impl();
-    }
-
-    /**
-     * Stops playback and release all the resources. This should be called whenever a VideoView2
-     * instance is no longer to be used.
-     */
-    public void stopPlayback() {
-        mProvider.stopPlayback_impl();
     }
 
     /**
