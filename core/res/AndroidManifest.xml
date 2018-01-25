@@ -971,6 +971,23 @@
                 android:description="@string/permdesc_manageOwnCalls"
                 android:protectionLevel="normal" />
 
+    <!-- Allows a calling app to continue a call which was started in another app.  An example is a
+         video calling app that wants to continue a voice call on the user's mobile network.<p>
+         When the handover of a call from one app to another takes place, there are two devices
+         which are involved in the handover; the initiating and receiving devices.  The initiating
+         device is where the request to handover the call was started, and the receiving device is
+         where the handover request is confirmed by the other party.<p>
+         This permission protects access to the
+         {@link android.telecom.TelecomManager#acceptHandover(Uri, int, PhoneAccountHandle)} which
+         the receiving side of the handover uses to accept a handover.
+         <p>Protection level: dangerous
+    -->
+    <permission android:name="android.permission.ACCEPT_HANDOVER"
+                android:permissionGroup="android.permission-group.PHONE"
+                android.label="@string/permlab_acceptHandover"
+                android:description="@string/permdesc_acceptHandovers"
+                android:protectionLevel="dangerous" />
+
     <!-- ====================================================================== -->
     <!-- Permissions for accessing the device microphone                        -->
     <!-- ====================================================================== -->

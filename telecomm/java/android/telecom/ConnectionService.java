@@ -140,6 +140,7 @@ public abstract class ConnectionService extends Service {
     private static final String SESSION_POST_DIAL_CONT = "CS.oPDC";
     private static final String SESSION_PULL_EXTERNAL_CALL = "CS.pEC";
     private static final String SESSION_SEND_CALL_EVENT = "CS.sCE";
+    private static final String SESSION_HANDOVER_COMPLETE = "CS.hC";
     private static final String SESSION_EXTRAS_CHANGED = "CS.oEC";
     private static final String SESSION_START_RTT = "CS.+RTT";
     private static final String SESSION_STOP_RTT = "CS.-RTT";
@@ -179,6 +180,7 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_CONNECTION_SERVICE_FOCUS_LOST = 30;
     private static final int MSG_CONNECTION_SERVICE_FOCUS_GAINED = 31;
     private static final int MSG_HANDOVER_FAILED = 32;
+    private static final int MSG_HANDOVER_COMPLETE = 33;
 
     private static Connection sNullConnection;
 
@@ -292,6 +294,19 @@ public abstract class ConnectionService extends Service {
                 args.arg3 = Log.createSubsession();
                 args.arg4 = reason;
                 mHandler.obtainMessage(MSG_HANDOVER_FAILED, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
+        }
+
+        @Override
+        public void handoverComplete(String callId, Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_HANDOVER_COMPLETE);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_HANDOVER_COMPLETE, args).sendToTarget();
             } finally {
                 Log.endSession();
             }
@@ -1028,6 +1043,19 @@ public abstract class ConnectionService extends Service {
                     }
                     break;
                 }
+                case MSG_HANDOVER_COMPLETE: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        Log.continueSession((Session) args.arg2,
+                                SESSION_HANDLER + SESSION_HANDOVER_COMPLETE);
+                        String callId = (String) args.arg1;
+                        notifyHandoverComplete(callId);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
+                    break;
+                }
                 case MSG_ON_EXTRAS_CHANGED: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
@@ -1445,19 +1473,24 @@ public abstract class ConnectionService extends Service {
             final ConnectionRequest request,
             boolean isIncoming,
             boolean isUnknown) {
+        boolean isLegacyHandover = request.getExtras() != null &&
+                request.getExtras().getBoolean(TelecomManager.EXTRA_IS_HANDOVER, false);
+        boolean isHandover = request.getExtras() != null && request.getExtras().getBoolean(
+                TelecomManager.EXTRA_IS_HANDOVER_CONNECTION, false);
         Log.d(this, "createConnection, callManagerAccount: %s, callId: %s, request: %s, " +
-                        "isIncoming: %b, isUnknown: %b", callManagerAccount, callId, request,
-                isIncoming,
-                isUnknown);
+                        "isIncoming: %b, isUnknown: %b, isLegacyHandover: %b, isHandover: %b",
+                callManagerAccount, callId, request, isIncoming, isUnknown, isLegacyHandover,
+                isHandover);
 
         Connection connection = null;
-        if (getApplicationContext().getApplicationInfo().targetSdkVersion >
-                Build.VERSION_CODES.O_MR1 && request.getExtras() != null &&
-                request.getExtras().getBoolean(TelecomManager.EXTRA_IS_HANDOVER,false)) {
+        if (isHandover) {
+            PhoneAccountHandle fromPhoneAccountHandle = request.getExtras() != null
+                    ? (PhoneAccountHandle) request.getExtras().getParcelable(
+                    TelecomManager.EXTRA_HANDOVER_FROM_PHONE_ACCOUNT) : null;
             if (!isIncoming) {
-                connection = onCreateOutgoingHandoverConnection(callManagerAccount, request);
+                connection = onCreateOutgoingHandoverConnection(fromPhoneAccountHandle, request);
             } else {
-                connection = onCreateIncomingHandoverConnection(callManagerAccount, request);
+                connection = onCreateIncomingHandoverConnection(fromPhoneAccountHandle, request);
             }
         } else {
             connection = isUnknown ? onCreateUnknownConnection(callManagerAccount, request)
@@ -1750,6 +1783,19 @@ public abstract class ConnectionService extends Service {
         Connection connection = findConnectionForAction(callId, "sendCallEvent");
         if (connection != null) {
             connection.onCallEvent(event, extras);
+        }
+    }
+
+    /**
+     * Notifies a {@link Connection} that a handover has completed.
+     *
+     * @param callId The ID of the call which completed handover.
+     */
+    private void notifyHandoverComplete(String callId) {
+        Log.d(this, "notifyHandoverComplete(%s)", callId);
+        Connection connection = findConnectionForAction(callId, "notifyHandoverComplete");
+        if (connection != null) {
+            connection.onHandoverComplete();
         }
     }
 

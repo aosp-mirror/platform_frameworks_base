@@ -1133,6 +1133,17 @@
     <string name="permdesc_manageOwnCalls">Allows the app to route its calls through the system in
         order to improve the calling experience.</string>
 
+    <!-- Title of an application permission.  When granted the user is giving access to a third
+         party app to continue a call which originated in another app.  For example, the user
+         could be in a voice call over their carrier's mobile network, and a third party video
+         calling app wants to continue that voice call as a video call. -->
+    <string name="permlab_acceptHandover">continue a call from another app</string>
+    <!-- Description of an application permission.  When granted the user is giving access to a
+         third party app to continue a call which originated in another app.  For example, the user
+         could be in a voice call over their carrier's mobile network, and a third party video
+         calling app wants to continue that voice call as a video call -->
+    <string name="permdesc_acceptHandovers">Allows the app to continue a call which was started in another app.</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readPhoneNumbers">read phone numbers</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->

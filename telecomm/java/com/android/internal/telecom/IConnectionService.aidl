@@ -107,4 +107,6 @@ oneway interface IConnectionService {
 
     void handoverFailed(String callId, in ConnectionRequest request,
             int error, in Session.Info sessionInfo);
+
+    void handoverComplete(String callId, in Session.Info sessionInfo);
 }

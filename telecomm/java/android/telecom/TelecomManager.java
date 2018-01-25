@@ -385,6 +385,17 @@ public class TelecomManager {
     public static final String EXTRA_IS_HANDOVER = "android.telecom.extra.IS_HANDOVER";
 
     /**
+     * When {@code true} indicates that a request to create a new connection is for the purpose of
+     * a handover.  Note: This is used with the
+     * {@link android.telecom.Call#handoverTo(PhoneAccountHandle, int, Bundle)} API as part of the
+     * internal communication mechanism with the {@link android.telecom.ConnectionService}.  It is
+     * not the same as the legacy {@link #EXTRA_IS_HANDOVER} extra.
+     * @hide
+     */
+    public static final String EXTRA_IS_HANDOVER_CONNECTION =
+            "android.telecom.extra.IS_HANDOVER_CONNECTION";
+
+    /**
      * Parcelable extra used with {@link #EXTRA_IS_HANDOVER} to indicate the source
      * {@link PhoneAccountHandle} when initiating a handover which {@link ConnectionService}
      * the handover is from.
