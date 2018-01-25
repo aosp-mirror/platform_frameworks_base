@@ -252,6 +252,8 @@ public class BackupManager {
     }
 
     /**
+     * @deprecated Since Android P app can no longer request restoring of its backup.
+     *
      * Restore the calling application from backup.  The data will be restored from the
      * current backup dataset if the application has stored data there, or from
      * the dataset used during the last full device setup operation if the current
@@ -269,6 +271,7 @@ public class BackupManager {
      *
      * @return Zero on success; nonzero on error.
      */
+    @Deprecated
     public int requestRestore(RestoreObserver observer) {
         return requestRestore(observer, null);
     }
@@ -276,6 +279,8 @@ public class BackupManager {
     // system APIs start here
 
     /**
+     * @deprecated Since Android P app can no longer request restoring of its backup.
+     *
      * Restore the calling application from backup.  The data will be restored from the
      * current backup dataset if the application has stored data there, or from
      * the dataset used during the last full device setup operation if the current
@@ -298,28 +303,12 @@ public class BackupManager {
      *
      * @hide
      */
+    @Deprecated
     @SystemApi
     public int requestRestore(RestoreObserver observer, BackupManagerMonitor monitor) {
-        int result = -1;
-        checkServiceBinder();
-        if (sService != null) {
-            RestoreSession session = null;
-            try {
-                IRestoreSession binder = sService.beginRestoreSession(mContext.getPackageName(),
-                    null);
-                if (binder != null) {
-                    session = new RestoreSession(mContext, binder);
-                    result = session.restorePackage(mContext.getPackageName(), observer, monitor);
-                }
-            } catch (RemoteException e) {
-                Log.e(TAG, "restoreSelf() unable to contact service");
-            } finally {
-                if (session != null) {
-                    session.endRestoreSession();
-                }
-            }
-        }
-        return result;
+        Log.w(TAG, "requestRestore(): Since Android P app can no longer request restoring"
+                + " of its backup.");
+        return -1;
     }
 
     /**
