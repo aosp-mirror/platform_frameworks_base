@@ -20,6 +20,7 @@
 
 #include <android-base/unique_fd.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -65,11 +66,26 @@ bool CollectPerfettoTraceAndUploadToDropbox(const PerfettoDetails& config) {
 
         // Replace stdin with |readPipe| so the main process can write into it.
         if (dup2(readPipe.get(), STDIN_FILENO) < 0) _exit(1);
+        readPipe.reset();
+
+        // Replace stdout/stderr with /dev/null and close any other file
+        // descriptor. This is to avoid SELinux complaining about perfetto
+        // trying to access files accidentally left open by statsd (i.e. files
+        // that have been opened without the O_CLOEXEC flag).
+        int devNullFd = open("/dev/null", O_RDWR | O_CLOEXEC);
+        if (dup2(devNullFd, STDOUT_FILENO) < 0) _exit(2);
+        if (dup2(devNullFd, STDERR_FILENO) < 0) _exit(3);
+        close(devNullFd);
+        for (int i = 0; i < 1024; i++) {
+            if (i != STDIN_FILENO && i != STDOUT_FILENO && i != STDERR_FILENO) close(i);
+        }
+
         execl("/system/bin/perfetto", "perfetto", "--background", "--config", "-", "--dropbox",
               kDropboxTag, nullptr);
 
-        // execl() doesn't return in case of success, if we get here something failed.
-        _exit(1);
+        // execl() doesn't return in case of success, if we get here something
+        // failed.
+        _exit(4);
     }
 
     // Main process.
@@ -93,8 +109,8 @@ bool CollectPerfettoTraceAndUploadToDropbox(const PerfettoDetails& config) {
         return false;
     }
 
-    // This does NOT wait for the full duration of the trace. It just waits until the process
-    // has read the config from stdin and detached.
+    // This does NOT wait for the full duration of the trace. It just waits until
+    // the process has read the config from stdin and detached.
     int childStatus = 0;
     waitpid(pid, &childStatus, 0);
     if (!WIFEXITED(childStatus) || WEXITSTATUS(childStatus) != 0) {
