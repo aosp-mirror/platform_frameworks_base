@@ -264,7 +264,7 @@
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Eskuratu leihoko edukia"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Arakatu irekita daukazun leihoko edukia."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Aktibatu \"Arakatu ukituta\""</string>
-    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Sakatutako elementuak ozen esango dira eta pantaila keinu bidez arakatu ahal izango da."</string>
+    <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"Sakatutako elementuak ozen irakurriko dira eta pantaila keinu bidez arakatu ahal izango da."</string>
     <string name="capability_title_canRequestEnhancedWebAccessibility" msgid="1739881766522594073">"Aktibatu web-erabilerraztasun hobetua"</string>
     <string name="capability_desc_canRequestEnhancedWebAccessibility" msgid="7881063961507511765">"Scriptak instala daitezke aplikazioaren edukia erabilerrazagoa egiteko."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"Behatu idazten duzun testua"</string>
@@ -396,9 +396,9 @@
     <string name="permdesc_setTimeZone" product="tv" msgid="888864653946175955">"Telebistaren ordu-zona aldatzea baimentzen die aplikazioei."</string>
     <string name="permdesc_setTimeZone" product="default" msgid="4499943488436633398">"Telefonoaren ordu-zona aldatzea baimentzen die aplikazioei."</string>
     <string name="permlab_getAccounts" msgid="1086795467760122114">"bilatu gailuko kontuak"</string>
-    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Tabletak ezagutzen dituen kontuen zerrenda lortzeko baimena ematen die aplikazioei. Instalatuta dituzun aplikazioek sortutako kontuak har daitezke barne."</string>
+    <string name="permdesc_getAccounts" product="tablet" msgid="2741496534769660027">"Tabletak ezagutzen dituen kontuen zerrenda lortzeko baimena ematen die aplikazioei. Instalatuta dituzun aplikazioek sortutako kontuak har daitezke barnean."</string>
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Telebistak ezagutzen dituen kontuen zerrenda lortzea baimentzen die aplikazioei. Instalatuta dituzun aplikazioek sortutako kontuak sar daitezke."</string>
-    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Telefonoak ezagutzen dituen kontuen zerrenda lortzeko baimena ematen die aplikazioei. Instalatuta dituzun aplikazioek sortutako kontuak har daitezke barne."</string>
+    <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Telefonoak ezagutzen dituen kontuen zerrenda lortzeko baimena ematen die aplikazioei. Instalatuta dituzun aplikazioek sortutako kontuak har daitezke barnean."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"ikusi sareko konexioak"</string>
     <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Sareko konexioei buruzko informazioa ikusteko baimena ematen die aplikazioei; adibidez, zer sare dauden eta zeintzuk dauden konektatuta."</string>
     <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"izan sarerako sarbide osoa"</string>
@@ -1329,7 +1329,7 @@
     <string name="storage_usb_drive_label" msgid="4501418548927759953">"<xliff:g id="MANUFACTURER">%s</xliff:g> USB unitatea"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB memoria"</string>
     <string name="extract_edit_menu_button" msgid="8940478730496610137">"Editatu"</string>
-    <string name="data_usage_warning_title" msgid="3620440638180218181">"Datuen erabilerari buruzko abisua"</string>
+    <string name="data_usage_warning_title" msgid="3620440638180218181">"Datuen erabilerari buruzko alerta"</string>
     <string name="data_usage_warning_body" msgid="6660692274311972007">"Sakatu erabilera eta ezarpenak ikusteko."</string>
     <string name="data_usage_3g_limit_title" msgid="4361523876818447683">"2-3 GB-ko mugara iritsi zara"</string>
     <string name="data_usage_4g_limit_title" msgid="4609566827219442376">"4 GB-ko mugara iritsi zara"</string>
