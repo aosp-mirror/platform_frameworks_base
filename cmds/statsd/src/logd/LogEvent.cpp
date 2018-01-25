@@ -42,6 +42,7 @@ LogEvent::LogEvent(log_msg& msg) {
     mLogUid = msg.entry_v4.uid;
     init(mContext);
     if (mContext) {
+        // android_log_destroy will set mContext to NULL
         android_log_destroy(&mContext);
     }
 }
@@ -64,12 +65,17 @@ void LogEvent::init() {
         mContext = create_android_log_parser(buffer, len);
         init(mContext);
         // destroy the context to save memory.
-        android_log_destroy(&mContext);
+        if (mContext) {
+            // android_log_destroy will set mContext to NULL
+            android_log_destroy(&mContext);
+        }
     }
 }
 
 LogEvent::~LogEvent() {
     if (mContext) {
+        // This is for the case when LogEvent is created using the test interface
+        // but init() isn't called.
         android_log_destroy(&mContext);
     }
 }
