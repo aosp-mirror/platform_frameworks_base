@@ -679,15 +679,7 @@ public class PackageParser {
         pi.requiredAccountType = p.mRequiredAccountType;
         pi.overlayTarget = p.mOverlayTarget;
         pi.overlayPriority = p.mOverlayPriority;
-
-        if (p.mIsStaticOverlay) {
-            pi.mOverlayFlags |= PackageInfo.FLAG_OVERLAY_STATIC;
-        }
-
-        if (p.mTrustedOverlay) {
-            pi.mOverlayFlags |= PackageInfo.FLAG_OVERLAY_TRUSTED;
-        }
-
+        pi.mOverlayIsStatic = p.mOverlayIsStatic;
         pi.compileSdkVersion = p.mCompileSdkVersion;
         pi.compileSdkVersionCodename = p.mCompileSdkVersionCodename;
         pi.firstInstallTime = firstInstallTime;
@@ -2085,7 +2077,7 @@ public class PackageParser {
                 pkg.mOverlayPriority = sa.getInt(
                         com.android.internal.R.styleable.AndroidManifestResourceOverlay_priority,
                         0);
-                pkg.mIsStaticOverlay = sa.getBoolean(
+                pkg.mOverlayIsStatic = sa.getBoolean(
                         com.android.internal.R.styleable.AndroidManifestResourceOverlay_isStatic,
                         false);
                 final String propName = sa.getString(
@@ -6094,8 +6086,7 @@ public class PackageParser {
 
         public String mOverlayTarget;
         public int mOverlayPriority;
-        public boolean mIsStaticOverlay;
-        public boolean mTrustedOverlay;
+        public boolean mOverlayIsStatic;
 
         public int mCompileSdkVersion;
         public String mCompileSdkVersionCodename;
@@ -6625,8 +6616,7 @@ public class PackageParser {
             mRequiredAccountType = dest.readString();
             mOverlayTarget = dest.readString();
             mOverlayPriority = dest.readInt();
-            mIsStaticOverlay = (dest.readInt() == 1);
-            mTrustedOverlay = (dest.readInt() == 1);
+            mOverlayIsStatic = (dest.readInt() == 1);
             mCompileSdkVersion = dest.readInt();
             mCompileSdkVersionCodename = dest.readString();
             mUpgradeKeySets = (ArraySet<String>) dest.readArraySet(boot);
@@ -6749,8 +6739,7 @@ public class PackageParser {
             dest.writeString(mRequiredAccountType);
             dest.writeString(mOverlayTarget);
             dest.writeInt(mOverlayPriority);
-            dest.writeInt(mIsStaticOverlay ? 1 : 0);
-            dest.writeInt(mTrustedOverlay ? 1 : 0);
+            dest.writeInt(mOverlayIsStatic ? 1 : 0);
             dest.writeInt(mCompileSdkVersion);
             dest.writeString(mCompileSdkVersionCodename);
             dest.writeArraySet(mUpgradeKeySets);
