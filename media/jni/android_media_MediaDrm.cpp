@@ -1134,6 +1134,27 @@ static jobject android_media_MediaDrm_getSecureStops(
     return ListOfVectorsToArrayListOfByteArray(env, secureStops);
 }
 
+static jobject android_media_MediaDrm_getSecureStopIds(
+    JNIEnv *env, jobject thiz) {
+    sp<IDrm> drm = GetDrm(env, thiz);
+
+    if (drm == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "MediaDrm obj is null");
+        return NULL;
+    }
+
+    List<Vector<uint8_t> > secureStopIds;
+
+    status_t err = drm->getSecureStopIds(secureStopIds);
+
+    if (throwExceptionAsNecessary(env, err, "Failed to get secure stop Ids")) {
+        return NULL;
+    }
+
+    return ListOfVectorsToArrayListOfByteArray(env, secureStopIds);
+}
+
 static jbyteArray android_media_MediaDrm_getSecureStop(
     JNIEnv *env, jobject thiz, jbyteArray ssid) {
     sp<IDrm> drm = GetDrm(env, thiz);
@@ -1168,7 +1189,22 @@ static void android_media_MediaDrm_releaseSecureStops(
     throwExceptionAsNecessary(env, err, "Failed to release secure stops");
 }
 
-static void android_media_MediaDrm_releaseAllSecureStops(
+static void android_media_MediaDrm_removeSecureStop(
+        JNIEnv *env, jobject thiz, jbyteArray ssid) {
+    sp<IDrm> drm = GetDrm(env, thiz);
+
+    if (drm == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                          "MediaDrm obj is null");
+        return;
+    }
+
+    status_t err = drm->removeSecureStop(JByteArrayToVector(env, ssid));
+
+    throwExceptionAsNecessary(env, err, "Failed to remove secure stop");
+}
+
+static void android_media_MediaDrm_removeAllSecureStops(
     JNIEnv *env, jobject thiz) {
     sp<IDrm> drm = GetDrm(env, thiz);
 
@@ -1176,9 +1212,9 @@ static void android_media_MediaDrm_releaseAllSecureStops(
         return;
     }
 
-    status_t err = drm->releaseAllSecureStops();
+    status_t err = drm->removeAllSecureStops();
 
-    throwExceptionAsNecessary(env, err, "Failed to release all secure stops");
+    throwExceptionAsNecessary(env, err, "Failed to remove all secure stops");
 }
 
 
@@ -1719,14 +1755,20 @@ static const JNINativeMethod gMethods[] = {
     { "getSecureStops", "()Ljava/util/List;",
       (void *)android_media_MediaDrm_getSecureStops },
 
+    { "getSecureStopIds", "()Ljava/util/List;",
+      (void *)android_media_MediaDrm_getSecureStopIds },
+
     { "getSecureStop", "([B)[B",
       (void *)android_media_MediaDrm_getSecureStop },
 
     { "releaseSecureStops", "([B)V",
       (void *)android_media_MediaDrm_releaseSecureStops },
 
-    { "releaseAllSecureStops", "()V",
-      (void *)android_media_MediaDrm_releaseAllSecureStops },
+    { "removeSecureStop", "([B)V",
+      (void *)android_media_MediaDrm_removeSecureStop },
+
+    { "removeAllSecureStops", "()V",
+      (void *)android_media_MediaDrm_removeAllSecureStops },
 
     { "getConnectedHdcpLevel", "()I",
       (void *)android_media_MediaDrm_getConnectedHdcpLevel },
