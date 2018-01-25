@@ -21,7 +21,7 @@ package android.os.statsd;
 option java_package = "com.android.os";
 option java_outer_classname = "AtomsProto";
 
-import "frameworks/base/core/proto/android/app/activitymanager.proto";
+import "frameworks/base/core/proto/android/app/enums.proto";
 
 /**
  * The master atom class. This message defines all of the available
@@ -44,7 +44,7 @@ message Atom {
         BleUnoptimizedScanStateChanged ble_unoptimized_scan_state_changed = 3;
         BleScanResultReceived ble_scan_result_received = 4;
         SensorStateChanged sensor_state_changed = 5;
-        GpsScanStateChanged gps_scan_state_changed = 6; // TODO: untested
+        GpsScanStateChanged gps_scan_state_changed = 6;
         SyncStateChanged sync_state_changed = 7;
         ScheduledJobStateChanged scheduled_job_state_changed = 8;
         ScreenBrightnessChanged screen_brightness_changed = 9;
@@ -185,9 +185,8 @@ message ScreenStateChanged {
 message UidProcessStateChanged {
     optional int32 uid = 1; // TODO: should be a string tagged w/ uid annotation
 
-    // The state.
-    // TODO: Use the real (mapped) process states.
-    optional android.app.ProcessState state = 2;
+    // The state, from frameworks/base/core/proto/android/app/enums.proto.
+    optional android.app.ProcessStateEnum state = 2;
 }
 
 /**
