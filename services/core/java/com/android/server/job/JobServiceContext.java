@@ -400,7 +400,7 @@ public final class JobServiceContext implements ServiceConnection {
                     (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
             PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                     runningJob.getTag());
-            wl.setWorkSource(new WorkSource(runningJob.getSourceUid()));
+            wl.setWorkSource(deriveWorkSource(runningJob));
             wl.setReferenceCounted(false);
             wl.acquire();
 
@@ -416,6 +416,19 @@ public final class JobServiceContext implements ServiceConnection {
             }
             mWakeLock = wl;
             doServiceBoundLocked();
+        }
+    }
+
+    private WorkSource deriveWorkSource(JobStatus runningJob) {
+        final int jobUid = runningJob.getSourceUid();
+        if (WorkSource.isChainedBatteryAttributionEnabled(mContext)) {
+            WorkSource workSource = new WorkSource();
+            workSource.createWorkChain()
+                    .addNode(jobUid, null)
+                    .addNode(android.os.Process.SYSTEM_UID, "JobScheduler");
+            return workSource;
+        } else {
+            return new WorkSource(jobUid);
         }
     }
 

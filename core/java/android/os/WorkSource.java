@@ -1,7 +1,10 @@
 package android.os;
 
 import android.annotation.Nullable;
+import android.content.Context;
 import android.os.WorkSourceProto;
+import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
@@ -107,6 +110,17 @@ public class WorkSource implements Parcelable {
         } else {
             mChains = null;
         }
+    }
+
+    /**
+     * Whether system services should create {@code WorkChains} (wherever possible) in the place
+     * of flat UID lists.
+     *
+     * @hide
+     */
+    public static boolean isChainedBatteryAttributionEnabled(Context context) {
+        return Settings.Global.getInt(context.getContentResolver(),
+                Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED, 0) == 1;
     }
 
     /** @hide */

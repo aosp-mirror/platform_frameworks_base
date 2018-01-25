@@ -394,8 +394,9 @@ message GlobalSettingsProto {
     optional SettingProto wifi_connected_mac_randomization_enabled = 350;
     optional SettingProto show_restart_in_crash_dialog = 351;
     optional SettingProto show_mute_in_crash_dialog = 352;
+    optional SettingProto chained_battery_attribution_enabled = 353;
 
-    // Next tag = 353;
+    // Next tag = 354;
 }
 
 message SecureSettingsProto {
