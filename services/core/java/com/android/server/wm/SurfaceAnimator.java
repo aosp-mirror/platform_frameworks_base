@@ -62,7 +62,7 @@ class SurfaceAnimator {
      * @param addAfterPrepareSurfaces Consumer that takes a runnable and executes it after preparing
      *                                surfaces in WM. Can be implemented differently during testing.
      */
-    SurfaceAnimator(Animatable animatable, Runnable animationFinishedCallback,
+    SurfaceAnimator(Animatable animatable, @Nullable Runnable animationFinishedCallback,
             Consumer<Runnable> addAfterPrepareSurfaces, WindowManagerService service) {
         mAnimatable = animatable;
         mService = service;
@@ -71,7 +71,8 @@ class SurfaceAnimator {
                 addAfterPrepareSurfaces);
     }
 
-    private OnAnimationFinishedCallback getFinishedCallback(Runnable animationFinishedCallback,
+    private OnAnimationFinishedCallback getFinishedCallback(
+            @Nullable Runnable animationFinishedCallback,
             Consumer<Runnable> addAfterPrepareSurfaces) {
         return anim -> {
             synchronized (mService.mWindowMap) {
@@ -97,7 +98,9 @@ class SurfaceAnimator {
                     SurfaceControl.openTransaction();
                     try {
                         reset(t, true /* destroyLeash */);
-                        animationFinishedCallback.run();
+                        if (animationFinishedCallback != null) {
+                            animationFinishedCallback.run();
+                        }
                     } finally {
                         SurfaceControl.mergeToGlobalTransaction(t);
                         SurfaceControl.closeTransaction();

@@ -1508,6 +1508,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mTaskStackContainers.getTopStack();
     }
 
+    ArrayList<Task> getVisibleTasks() {
+        return mTaskStackContainers.getVisibleTasks();
+    }
+
     void onStackWindowingModeChanged(TaskStack stack) {
         mTaskStackContainers.onStackWindowingModeChanged(stack);
     }
@@ -3258,6 +3262,16 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         TaskStack getSplitScreenPrimaryStack() {
             return mSplitScreenPrimaryStack;
+        }
+
+        ArrayList<Task> getVisibleTasks() {
+            final ArrayList<Task> visibleTasks = new ArrayList<>();
+            forAllTasks(task -> {
+                if (task.isVisible()) {
+                    visibleTasks.add(task);
+                }
+            });
+            return visibleTasks;
         }
 
         /**
