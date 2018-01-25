@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -25,6 +26,7 @@ import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +38,7 @@ import java.util.List;
  *
  * <ul>
  *   <li>Service state: IN_SERVICE, OUT_OF_SERVICE, EMERGENCY_ONLY, POWER_OFF
+ *   <li>Duplex mode: UNKNOWN, FDD, TDD
  *   <li>Roaming indicator
  *   <li>Operator name, short name and numeric id
  *   <li>Network selection mode
@@ -70,6 +73,26 @@ public class ServiceState implements Parcelable {
      * Radio of telephony is explicitly powered off.
      */
     public static final int STATE_POWER_OFF = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({DUPLEX_MODE_UNKNOWN, DUPLEX_MODE_FDD, DUPLEX_MODE_TDD})
+    public @interface DuplexMode {}
+
+    /**
+     * Duplex mode for the phone is unknown.
+     */
+    public static final int DUPLEX_MODE_UNKNOWN = 0;
+
+    /**
+     * Duplex mode for the phone is frequency-division duplexing.
+     */
+    public static final int DUPLEX_MODE_FDD = 1;
+
+    /**
+     * Duplex mode for the phone is time-division duplexing.
+     */
+    public static final int DUPLEX_MODE_TDD = 2;
 
     /**
      * RIL level registration state values from ril.h
@@ -286,6 +309,9 @@ public class ServiceState implements Parcelable {
 
     private boolean mIsUsingCarrierAggregation;
 
+    private int mChannelNumber;
+    private int[] mCellBandwidths = new int[0];
+
     /* EARFCN stands for E-UTRA Absolute Radio Frequency Channel Number,
      * Reference: 3GPP TS 36.104 5.4.3 */
     private int mLteEarfcnRsrpBoost = 0;
@@ -405,6 +431,8 @@ public class ServiceState implements Parcelable {
         mLteEarfcnRsrpBoost = in.readInt();
         mNetworkRegistrationStates = new ArrayList<>();
         in.readList(mNetworkRegistrationStates, NetworkRegistrationState.class.getClassLoader());
+        mChannelNumber = in.readInt();
+        mCellBandwidths = in.createIntArray();
     }
 
     public void writeToParcel(Parcel out, int flags) {
@@ -433,6 +461,8 @@ public class ServiceState implements Parcelable {
         out.writeInt(mIsUsingCarrierAggregation ? 1 : 0);
         out.writeInt(mLteEarfcnRsrpBoost);
         out.writeList(mNetworkRegistrationStates);
+        out.writeInt(mChannelNumber);
+        out.writeIntArray(mCellBandwidths);
     }
 
     public int describeContents() {
@@ -483,6 +513,43 @@ public class ServiceState implements Parcelable {
      */
     public int getDataRegState() {
         return mDataRegState;
+    }
+
+    /**
+     * Get the current duplex mode
+     *
+     * @see #DUPLEX_MODE_UNKNOWN
+     * @see #DUPLEX_MODE_FDD
+     * @see #DUPLEX_MODE_TDD
+     *
+     * @return Current {@code DuplexMode} for the phone
+     */
+    @DuplexMode
+    public int getDuplexMode() {
+        // TODO(b/72117602) determine duplex mode from channel number, using 3GPP 36.101 sections
+        // 5.7.3-1 and 5.5-1
+        return DUPLEX_MODE_UNKNOWN;
+    }
+
+    /**
+     * Get the channel number of the current primary serving cell, or -1 if unknown
+     *
+     * <p>This is EARFCN for LTE, UARFCN for UMTS, and ARFCN for GSM.
+     *
+     * @return Channel number of primary serving cell
+     */
+    public int getChannelNumber() {
+        return mChannelNumber;
+    }
+
+    /**
+     * Get an array of cell bandwidths (kHz) for the current serving cells
+     *
+     * @return Current serving cell bandwidths
+     */
+    @Nullable
+    public int[] getCellBandwidths() {
+        return mCellBandwidths;
     }
 
     /**
@@ -713,6 +780,8 @@ public class ServiceState implements Parcelable {
                 + (mDataRegState * 37)
                 + mVoiceRoamingType
                 + mDataRoamingType
+                + mChannelNumber
+                + Arrays.hashCode(mCellBandwidths)
                 + (mIsManualNetworkSelection ? 1 : 0)
                 + ((null == mVoiceOperatorAlphaLong) ? 0 : mVoiceOperatorAlphaLong.hashCode())
                 + ((null == mVoiceOperatorAlphaShort) ? 0 : mVoiceOperatorAlphaShort.hashCode())
@@ -745,6 +814,8 @@ public class ServiceState implements Parcelable {
                 && mIsManualNetworkSelection == s.mIsManualNetworkSelection
                 && mVoiceRoamingType == s.mVoiceRoamingType
                 && mDataRoamingType == s.mDataRoamingType
+                && mChannelNumber == s.mChannelNumber
+                && Arrays.equals(mCellBandwidths, s.mCellBandwidths)
                 && equalsHandlesNulls(mVoiceOperatorAlphaLong, s.mVoiceOperatorAlphaLong)
                 && equalsHandlesNulls(mVoiceOperatorAlphaShort, s.mVoiceOperatorAlphaShort)
                 && equalsHandlesNulls(mVoiceOperatorNumeric, s.mVoiceOperatorNumeric)
@@ -874,6 +945,8 @@ public class ServiceState implements Parcelable {
             .append("(" + rilServiceStateToString(mVoiceRegState) + ")")
             .append(", mDataRegState=").append(mDataRegState)
             .append("(" + rilServiceStateToString(mDataRegState) + ")")
+            .append(", mChannelNumber=").append(mChannelNumber)
+            .append(", mCellBandwidths=").append(Arrays.toString(mCellBandwidths))
             .append(", mVoiceRoamingType=").append(getRoamingLogString(mVoiceRoamingType))
             .append(", mDataRoamingType=").append(getRoamingLogString(mDataRoamingType))
             .append(", mVoiceOperatorAlphaLong=").append(mVoiceOperatorAlphaLong)
@@ -905,6 +978,8 @@ public class ServiceState implements Parcelable {
         mDataRegState = state;
         mVoiceRoamingType = ROAMING_TYPE_NOT_ROAMING;
         mDataRoamingType = ROAMING_TYPE_NOT_ROAMING;
+        mChannelNumber = -1;
+        mCellBandwidths = new int[0];
         mVoiceOperatorAlphaLong = null;
         mVoiceOperatorAlphaShort = null;
         mVoiceOperatorNumeric = null;
@@ -951,6 +1026,16 @@ public class ServiceState implements Parcelable {
     public void setDataRegState(int state) {
         mDataRegState = state;
         if (VDBG) Rlog.d(LOG_TAG, "[ServiceState] setDataRegState=" + mDataRegState);
+    }
+
+    /** @hide */
+    public void setCellBandwidths(int[] bandwidths) {
+        mCellBandwidths = bandwidths;
+    }
+
+    /** @hide */
+    public void setChannelNumber(int channelNumber) {
+        mChannelNumber = channelNumber;
     }
 
     public void setRoaming(boolean roaming) {
@@ -1101,6 +1186,8 @@ public class ServiceState implements Parcelable {
         mIsDataRoamingFromRegistration = m.getBoolean("isDataRoamingFromRegistration");
         mIsUsingCarrierAggregation = m.getBoolean("isUsingCarrierAggregation");
         mLteEarfcnRsrpBoost = m.getInt("LteEarfcnRsrpBoost");
+        mChannelNumber = m.getInt("ChannelNumber");
+        mCellBandwidths = m.getIntArray("CellBandwidths");
     }
 
     /**
@@ -1132,6 +1219,8 @@ public class ServiceState implements Parcelable {
         m.putBoolean("isDataRoamingFromRegistration", mIsDataRoamingFromRegistration);
         m.putBoolean("isUsingCarrierAggregation", mIsUsingCarrierAggregation);
         m.putInt("LteEarfcnRsrpBoost", mLteEarfcnRsrpBoost);
+        m.putInt("ChannelNumber", mChannelNumber);
+        m.putIntArray("CellBandwidths", mCellBandwidths);
     }
 
     /** @hide */
