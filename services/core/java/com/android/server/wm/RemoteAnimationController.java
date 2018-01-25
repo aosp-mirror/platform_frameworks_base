@@ -160,8 +160,7 @@ class RemoteAnimationController {
             return new RemoteAnimationTarget(task.mTaskId, getMode(),
                     mCapturedLeash, !mAppWindowToken.fillsParent(),
                     mainWindow.mWinAnimator.mLastClipRect,
-                    mAppWindowToken.getPrefixOrderIndex(), mPosition, mStackBounds,
-                    task.getWindowConfiguration());
+                    mAppWindowToken.getPrefixOrderIndex(), mPosition, mStackBounds);
         }
 
         private int getMode() {

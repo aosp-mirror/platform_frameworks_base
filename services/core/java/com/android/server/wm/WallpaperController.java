@@ -149,17 +149,8 @@ class WallpaperController {
             mFindResults.setUseTopWallpaperAsTarget(true);
         }
 
-        final RecentsAnimationController recentsAnimationController =
-                mService.getRecentsAnimationController();
         final boolean hasWallpaper = (w.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0;
-        final boolean isRecentsTransitionTarget = (recentsAnimationController != null
-                && recentsAnimationController.isWallpaperVisible(w));
-        if (isRecentsTransitionTarget) {
-            if (DEBUG_WALLPAPER) Slog.v(TAG, "Found recents animation wallpaper target: " + w);
-            mFindResults.setWallpaperTarget(w);
-            return true;
-        } else if (hasWallpaper && w.isOnScreen()
-                && (mWallpaperTarget == w || w.isDrawFinishedLw())) {
+        if (hasWallpaper && w.isOnScreen() && (mWallpaperTarget == w || w.isDrawFinishedLw())) {
             if (DEBUG_WALLPAPER) Slog.v(TAG, "Found wallpaper target: " + w);
             mFindResults.setWallpaperTarget(w);
             if (w == mWallpaperTarget && w.mWinAnimator.isAnimationSet()) {
@@ -208,22 +199,15 @@ class WallpaperController {
         }
     }
 
-    private final boolean isWallpaperVisible(WindowState wallpaperTarget) {
-        final RecentsAnimationController recentsAnimationController =
-                mService.getRecentsAnimationController();
-        boolean isAnimatingWithRecentsComponent = recentsAnimationController != null
-                && recentsAnimationController.isWallpaperVisible(wallpaperTarget);
+    private boolean isWallpaperVisible(WindowState wallpaperTarget) {
         if (DEBUG_WALLPAPER) Slog.v(TAG, "Wallpaper vis: target " + wallpaperTarget + ", obscured="
                 + (wallpaperTarget != null ? Boolean.toString(wallpaperTarget.mObscured) : "??")
                 + " animating=" + ((wallpaperTarget != null && wallpaperTarget.mAppToken != null)
                 ? wallpaperTarget.mAppToken.isSelfAnimating() : null)
-                + " prev=" + mPrevWallpaperTarget
-                + " recentsAnimationWallpaperVisible=" + isAnimatingWithRecentsComponent);
+                + " prev=" + mPrevWallpaperTarget);
         return (wallpaperTarget != null
-                && (!wallpaperTarget.mObscured
-                        || isAnimatingWithRecentsComponent
-                        || (wallpaperTarget.mAppToken != null
-                                && wallpaperTarget.mAppToken.isSelfAnimating())))
+                && (!wallpaperTarget.mObscured || (wallpaperTarget.mAppToken != null
+                && wallpaperTarget.mAppToken.isSelfAnimating())))
                 || mPrevWallpaperTarget != null;
     }
 
@@ -603,11 +587,6 @@ class WallpaperController {
             mWallpaperDrawState = WALLPAPER_DRAW_TIMEOUT;
             if (DEBUG_APP_TRANSITIONS || DEBUG_WALLPAPER) Slog.v(TAG,
                     "*** WALLPAPER DRAW TIMEOUT");
-
-            // If there was a recents animation in progress, cancel that animation
-            if (mService.getRecentsAnimationController() != null) {
-                mService.getRecentsAnimationController().cancelAnimation();
-            }
             return true;
         }
         return false;

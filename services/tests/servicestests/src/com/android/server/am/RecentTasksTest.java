@@ -573,8 +573,7 @@ public class RecentTasksTest extends ActivityTestsBase {
         assertSecurityException(expectCallable, () -> mService.getTaskDescription(0));
         assertSecurityException(expectCallable, () -> mService.cancelTaskWindowTransition(0));
         assertSecurityException(expectCallable, () -> mService.startRecentsActivity(null, null,
-                null));
-        assertSecurityException(expectCallable, () -> mService.cancelRecentsAnimation());
+                null, 0));
     }
 
     private void testGetTasksApis(boolean expectCallable) {

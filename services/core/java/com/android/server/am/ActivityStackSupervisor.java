@@ -297,7 +297,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     private RunningTasks mRunningTasks;
 
     final ActivityStackSupervisorHandler mHandler;
-    final Looper mLooper;
 
     /** Short cut */
     WindowManagerService mWindowManager;
@@ -582,7 +581,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     public ActivityStackSupervisor(ActivityManagerService service, Looper looper) {
         mService = service;
-        mLooper = looper;
         mHandler = new ActivityStackSupervisorHandler(looper);
     }
 
