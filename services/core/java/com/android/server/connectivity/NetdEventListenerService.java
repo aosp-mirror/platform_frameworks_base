@@ -252,6 +252,29 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
         addWakeupEvent(event);
     }
 
+    @Override
+    public synchronized void onTcpSocketStatsEvent(int[] networkIds,
+            int[] sentPackets, int[] lostPackets, int[] rttsUs, int[] sentAckDiffsMs) {
+        if (networkIds.length != sentPackets.length
+                || networkIds.length != lostPackets.length
+                || networkIds.length != rttsUs.length
+                || networkIds.length != sentAckDiffsMs.length) {
+            Log.e(TAG, "Mismatched lengths of TCP socket stats data arrays");
+            return;
+        }
+
+        long timestamp = System.currentTimeMillis();
+        for (int i = 0; i < networkIds.length; i++) {
+            int netId = networkIds[i];
+            int sent = sentPackets[i];
+            int lost = lostPackets[i];
+            int rttUs = rttsUs[i];
+            int sentAckDiffMs = sentAckDiffsMs[i];
+            getMetricsForNetwork(timestamp, netId)
+                    .addTcpStatsResult(sent, lost, rttUs, sentAckDiffMs);
+        }
+    }
+
     private void addWakeupEvent(WakeupEvent event) {
         String iface = event.iface;
         mWakeupEvents.append(event);
