@@ -290,6 +290,9 @@ public abstract class AndroidKeyStoreKeyGeneratorSpi extends KeyGeneratorSpi {
                 spec.isUserAuthenticationValidWhileOnBody(),
                 spec.isInvalidatedByBiometricEnrollment(),
                 GateKeeper.INVALID_SECURE_USER_ID /* boundToSpecificSecureUserId */);
+        if (spec.isTrustedUserPresenceRequired()) {
+            args.addBoolean(KeymasterDefs.KM_TAG_TRUSTED_USER_PRESENCE_REQUIRED);
+        }
         KeymasterUtils.addMinMacLengthAuthorizationIfNecessary(
                 args,
                 mKeymasterAlgorithm,
