@@ -24,10 +24,12 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayerBase;
 import android.media.session.MediaController;
+import android.media.session.PlaybackState;
 import android.media.update.ApiLoader;
 import android.media.update.VideoView2Provider;
 import android.media.update.ViewProvider;
 import android.net.Uri;
+import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -316,6 +318,19 @@ public class VideoView2 extends FrameLayout {
     }
 
     /**
+     * Sets custom actions which will be shown as custom buttons in {@link MediaControlView2}.
+     *
+     * @param actionList A list of {@link PlaybackState.CustomAction}. The return value of
+     *                   {@link PlaybackState.CustomAction#getIcon()} will be used to draw buttons
+     *                   in {@link MediaControlView2}.
+     * @param listener A listener to be called when a custom button is clicked.
+     */
+    public void setCustomActions(List<PlaybackState.CustomAction> actionList,
+            OnCustomActionListener listener) {
+        mProvider.setCustomActions_impl(actionList, listener);
+    }
+
+    /**
      * Registers a callback to be invoked when the media file is loaded and ready to go.
      *
      * @param l the callback that will be run.
@@ -447,6 +462,22 @@ public class VideoView2 extends FrameLayout {
          * Called to indicate a fullscreen mode change.
          */
         void onFullScreenChanged(boolean fullScreen);
+    }
+
+    /**
+     * Interface definition of a callback to be invoked to inform that a custom action is performed.
+     *
+     * TODO: When MediaSession2 is ready, modify the method to match the signature.
+     */
+    public interface OnCustomActionListener {
+        /**
+         * Called to indicate that a custom action is performed.
+         *
+         * @param action The action that was originally sent in the
+         *               {@link PlaybackState.CustomAction}.
+         * @param extras Optional extras.
+         */
+        void onCustomAction(String action, Bundle extras);
     }
 
     @Override

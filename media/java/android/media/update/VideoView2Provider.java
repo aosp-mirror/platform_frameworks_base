@@ -19,6 +19,7 @@ package android.media.update;
 import android.media.AudioAttributes;
 import android.media.MediaPlayerBase;
 import android.media.session.MediaController;
+import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.widget.MediaControlView2;
 import android.widget.VideoView2;
@@ -58,6 +59,8 @@ public interface VideoView2Provider extends ViewProvider {
     void setVideoURI_impl(Uri uri, Map<String, String> headers);
     void setViewType_impl(int viewType);
     int getViewType_impl();
+    void setCustomActions_impl(List<PlaybackState.CustomAction> actionList,
+            VideoView2.OnCustomActionListener listener);
     void setOnPreparedListener_impl(VideoView2.OnPreparedListener l);
     void setOnCompletionListener_impl(VideoView2.OnCompletionListener l);
     void setOnErrorListener_impl(VideoView2.OnErrorListener l);
