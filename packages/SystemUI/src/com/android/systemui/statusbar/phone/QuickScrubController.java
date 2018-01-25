@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.phone;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
+import android.animation.ArgbEvaluator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
@@ -82,7 +83,10 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
     private boolean mDragPositive;
     private boolean mIsVertical;
     private boolean mIsRTL;
-    private float mMaxTrackPaintAlpha;
+    private float mTrackAlpha;
+    private int mLightTrackColor;
+    private int mDarkTrackColor;
+    private float mDarkIntensity;
 
     private final Handler mHandler = new Handler();
     private final Interpolator mQuickScrubEndInterpolator = new DecelerateInterpolator();
@@ -98,9 +102,10 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
     private final ValueAnimator mButtonAnimator;
     private final AnimatorSet mQuickScrubEndAnimator;
     private final Context mContext;
+    private final ArgbEvaluator mTrackColorEvaluator = new ArgbEvaluator();
 
     private final AnimatorUpdateListener mTrackAnimatorListener = valueAnimator -> {
-        mTrackPaint.setAlpha(Math.round((float) valueAnimator.getAnimatedValue() * 255));
+        mTrackAlpha = (float) valueAnimator.getAnimatedValue();
         mNavigationBarView.invalidate();
     };
 
@@ -167,6 +172,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
         mGestureDetector = new GestureDetector(mContext, mGestureListener);
         mTrackThickness = getDimensionPixelSize(mContext, R.dimen.nav_quick_scrub_track_thickness);
         mTrackPadding = getDimensionPixelSize(mContext, R.dimen.nav_quick_scrub_track_edge_padding);
+        mTrackPaint.setAlpha(0);
 
         mTrackAnimator = ObjectAnimator.ofFloat();
         mTrackAnimator.addUpdateListener(mTrackAnimatorListener);
@@ -291,6 +297,10 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
 
     @Override
     public void onDraw(Canvas canvas) {
+        int color = (int) mTrackColorEvaluator.evaluate(mDarkIntensity, mLightTrackColor,
+                mDarkTrackColor);
+        mTrackPaint.setColor(color);
+        mTrackPaint.setAlpha((int) (mTrackPaint.getAlpha() * mTrackAlpha));
         canvas.drawRect(mTrackRect, mTrackPaint);
     }
 
@@ -326,13 +336,8 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
 
     @Override
     public void onDarkIntensityChange(float intensity) {
-        if (intensity == 0) {
-            mTrackPaint.setColor(mContext.getColor(R.color.quick_step_track_background_light));
-        } else if (intensity == 1) {
-            mTrackPaint.setColor(mContext.getColor(R.color.quick_step_track_background_dark));
-        }
-        mMaxTrackPaintAlpha = mTrackPaint.getAlpha() * 1f / 255;
-        mTrackPaint.setAlpha(0);
+        mDarkIntensity = intensity;
+        mNavigationBarView.invalidate();
     }
 
     @Override
@@ -365,7 +370,9 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
     private void startQuickScrub() {
         if (!mQuickScrubActive) {
             mQuickScrubActive = true;
-            mTrackAnimator.setFloatValues(0, mMaxTrackPaintAlpha);
+            mLightTrackColor = mContext.getColor(R.color.quick_step_track_background_light);
+            mDarkTrackColor = mContext.getColor(R.color.quick_step_track_background_dark);
+            mTrackAnimator.setFloatValues(0, 1);
             mTrackAnimator.start();
             try {
                 mOverviewEventSender.getProxy().onQuickScrubStart();
@@ -382,7 +389,7 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
         mHandler.removeCallbacks(mLongPressRunnable);
         if (mDraggingActive || mQuickScrubActive) {
             mButtonAnimator.setIntValues((int) mTranslation, 0);
-            mTrackAnimator.setFloatValues(mTrackPaint.getAlpha() * 1f / 255, 0);
+            mTrackAnimator.setFloatValues(mTrackAlpha, 0);
             mQuickScrubEndAnimator.start();
             try {
                 mOverviewEventSender.getProxy().onQuickScrubEnd();
