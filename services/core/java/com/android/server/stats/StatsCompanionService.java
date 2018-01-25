@@ -328,9 +328,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
              * Skip immediately if intent is not relevant to device shutdown.
              */
             if (!intent.getAction().equals(Intent.ACTION_REBOOT)
-                    && !intent.getAction().equals(Intent.ACTION_SHUTDOWN)) {
-                return;
+                && !(intent.getAction().equals(Intent.ACTION_SHUTDOWN)
+                       && (intent.getFlags() & Intent.FLAG_RECEIVER_FOREGROUND) != 0)) {
+              return;
             }
+
             Slog.i(TAG, "StatsCompanionService noticed a shutdown.");
             synchronized (sStatsdLock) {
                 if (sStatsd == null) {
