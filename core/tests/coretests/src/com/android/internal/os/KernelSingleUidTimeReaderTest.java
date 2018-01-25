@@ -115,6 +115,30 @@ public class KernelSingleUidTimeReaderTest {
     }
 
     @Test
+    public void readDelta_incorrectCount() {
+        assertTrue(mReader.singleUidCpuTimesAvailable());
+
+        long[] cpuTimes = new long[TEST_FREQ_COUNT - 1];
+        for (int i = 0; i < cpuTimes.length; ++i) {
+            cpuTimes[i] = 111 + i;
+        }
+        mInjector.setData(cpuTimes);
+        assertCpuTimesEqual(null, mReader.readDeltaMs(TEST_UID));
+        assertFalse(mReader.singleUidCpuTimesAvailable());
+
+        // Reset
+        mReader.setSingleUidCpuTimesAvailable(true);
+
+        cpuTimes = new long[TEST_FREQ_COUNT + 1];
+        for (int i = 0; i < cpuTimes.length; ++i) {
+            cpuTimes[i] = 222 + i;
+        }
+        mInjector.setData(cpuTimes);
+        assertCpuTimesEqual(null, mReader.readDeltaMs(TEST_UID));
+        assertFalse(mReader.singleUidCpuTimesAvailable());
+    }
+
+    @Test
     public void testComputeDelta() {
         // proc file not available
         mReader.setSingleUidCpuTimesAvailable(false);
