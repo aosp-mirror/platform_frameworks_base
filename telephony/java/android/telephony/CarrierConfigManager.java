@@ -39,13 +39,29 @@ public class CarrierConfigManager {
     private final static String TAG = "CarrierConfigManager";
 
     /**
+     * Extra included in {@link #ACTION_CARRIER_CONFIG_CHANGED} to indicate the slot index that the
+     * broadcast is for.
+     */
+    public static final String EXTRA_SLOT_INDEX = "android.telephony.extra.SLOT_INDEX";
+
+    /**
+     * Optional extra included in {@link #ACTION_CARRIER_CONFIG_CHANGED} to indicate the
+     * subscription index that the broadcast is for, if a valid one is available.
+     */
+    public static final String EXTRA_SUBSCRIPTION_INDEX =
+            SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX;
+
+    /**
      * @hide
      */
     public CarrierConfigManager() {
     }
 
     /**
-     * This intent is broadcast by the system when carrier config changes.
+     * This intent is broadcast by the system when carrier config changes. An int is specified in
+     * {@link #EXTRA_SLOT_INDEX} to indicate the slot index that this is for. An optional int extra
+     * {@link #EXTRA_SUBSCRIPTION_INDEX} is included to indicate the subscription index if a valid
+     * one is available for the slot index.
      */
     public static final String
             ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
