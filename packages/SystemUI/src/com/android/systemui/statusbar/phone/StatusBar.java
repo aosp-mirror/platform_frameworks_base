@@ -2760,6 +2760,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                         mStackScroller.requestDisallowDismiss();
                     }
                 });
+        mRemoteInputManager.getController().addCallback(mStatusBarWindowManager);
         mStatusBarWindowManager.add(mStatusBarWindow, getStatusBarHeight());
     }
 
