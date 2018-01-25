@@ -18,6 +18,7 @@ package android.media.update;
 
 import android.media.AudioAttributes;
 import android.media.MediaPlayerBase;
+import android.media.session.MediaController;
 import android.net.Uri;
 import android.widget.MediaControlView2;
 import android.widget.VideoView2;
@@ -41,20 +42,14 @@ import java.util.Map;
 // TODO @SystemApi
 public interface VideoView2Provider extends ViewProvider {
     void setMediaControlView2_impl(MediaControlView2 mediaControlView);
+    MediaController getMediaController_impl();
     MediaControlView2 getMediaControlView2_impl();
-    void start_impl();
-    void pause_impl();
-    int getDuration_impl();
-    int getCurrentPosition_impl();
-    void seekTo_impl(int msec);
-    boolean isPlaying_impl();
-    int getBufferPercentage_impl();
     int getAudioSessionId_impl();
     void showSubtitle_impl();
     void hideSubtitle_impl();
     void setFullScreen_impl(boolean fullScreen);
+    // TODO: remove setSpeed_impl once MediaController2 is ready.
     void setSpeed_impl(float speed);
-    float getSpeed_impl();
     void setAudioFocusRequest_impl(int focusGain);
     void setAudioAttributes_impl(AudioAttributes attributes);
     void setRouteAttributes_impl(List<String> routeCategories, MediaPlayerBase player);
@@ -63,7 +58,6 @@ public interface VideoView2Provider extends ViewProvider {
     void setVideoURI_impl(Uri uri, Map<String, String> headers);
     void setViewType_impl(int viewType);
     int getViewType_impl();
-    void stopPlayback_impl();
     void setOnPreparedListener_impl(VideoView2.OnPreparedListener l);
     void setOnCompletionListener_impl(VideoView2.OnCompletionListener l);
     void setOnErrorListener_impl(VideoView2.OnErrorListener l);
