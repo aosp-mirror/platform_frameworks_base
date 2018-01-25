@@ -34,7 +34,6 @@ struct R {
   struct layout {
     enum : uint32_t {
       main = 0x7f020000,
-      layoutt = 0x7f020001,
     };
   };
 
@@ -56,7 +55,6 @@ struct R {
       number2 = 0x7f040001,
       ref1 = 0x7f040002,
       ref2 = 0x7f040003,
-      deep_ref = 0x7f040004,
 
       // From feature
       number3 = 0x80030000,
