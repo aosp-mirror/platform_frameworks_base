@@ -65,7 +65,6 @@ import android.os.PersistableBundle;
 import android.os.StrictMode;
 import android.os.WorkSource;
 import android.service.voice.IVoiceInteractionSession;
-import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationDefinition;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.IResultReceiver;
@@ -442,9 +441,8 @@ interface IActivityManager {
             in Bundle options, int userId);
     int startAssistantActivity(in String callingPackage, int callingPid, int callingUid,
             in Intent intent, in String resolvedType, in Bundle options, int userId);
-    void startRecentsActivity(in Intent intent, in IAssistDataReceiver assistDataReceiver,
-            in IRecentsAnimationRunner recentsAnimationRunner);
-    void cancelRecentsAnimation();
+    int startRecentsActivity(in IAssistDataReceiver assistDataReceiver, in Bundle options,
+            in Bundle activityOptions, int userId);
     int startActivityFromRecents(int taskId, in Bundle options);
     Bundle getActivityOptions(in IBinder token);
     List<IBinder> getAppTasks(in String callingPackage);

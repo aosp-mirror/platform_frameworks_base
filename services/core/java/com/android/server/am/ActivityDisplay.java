@@ -16,7 +16,6 @@
 
 package com.android.server.am;
 
-import static android.app.ActivityManager.StackId.INVALID_STACK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -51,9 +50,7 @@ import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.ConfigurationContainer;
-import com.android.server.wm.DisplayWindowController;
 
-import com.android.server.wm.WindowContainerListener;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -61,8 +58,7 @@ import java.util.ArrayList;
  * Exactly one of these classes per Display in the system. Capable of holding zero or more
  * attached {@link ActivityStack}s.
  */
-class ActivityDisplay extends ConfigurationContainer<ActivityStack>
-        implements WindowContainerListener {
+class ActivityDisplay extends ConfigurationContainer<ActivityStack> {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityDisplay" : TAG_AM;
     private static final String TAG_STACK = TAG + POSTFIX_STACK;
 
@@ -104,8 +100,6 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     // Used in updating the display size
     private Point mTmpDisplaySize = new Point();
 
-    private DisplayWindowController mWindowContainerController;
-
     ActivityDisplay(ActivityStackSupervisor supervisor, int displayId) {
         mSupervisor = supervisor;
         mDisplayId = displayId;
@@ -114,13 +108,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
             throw new IllegalStateException("Display does not exist displayId=" + displayId);
         }
         mDisplay = display;
-        mWindowContainerController = createWindowContainerController();
 
         updateBounds();
-    }
-
-    protected DisplayWindowController createWindowContainerController() {
-        return new DisplayWindowController(mDisplayId, this);
     }
 
     void updateBounds() {
@@ -159,10 +148,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
 
     private void positionChildAt(ActivityStack stack, int position) {
         mStacks.remove(stack);
-        final int insertPosition = getTopInsertPosition(stack, position);
-        mStacks.add(insertPosition, stack);
-        mWindowContainerController.positionChildAt(stack.getWindowContainerController(),
-                insertPosition);
+        mStacks.add(getTopInsertPosition(stack, position), stack);
     }
 
     private int getTopInsertPosition(ActivityStack stack, int candidatePosition) {
@@ -663,64 +649,6 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     boolean shouldSleep() {
         return (mStacks.isEmpty() || !mAllSleepTokens.isEmpty())
                 && (mSupervisor.mService.mRunningVoice == null);
-    }
-
-    /**
-     * @return the stack currently above the home stack.  Can be null if there is no home stack, or
-     *         the home stack is already on top.
-     */
-    ActivityStack getStackAboveHome() {
-        if (mHomeStack == null) {
-            // Skip if there is no home stack
-            return null;
-        }
-
-        final int stackIndex = mStacks.indexOf(mHomeStack) + 1;
-        return (stackIndex < mStacks.size()) ? mStacks.get(stackIndex) : null;
-    }
-
-    /**
-     * Adjusts the home stack behind the last visible stack in the display if necessary. Generally
-     * used in conjunction with {@link #moveHomeStackBehindStack}.
-     */
-    void moveHomeStackBehindBottomMostVisibleStack() {
-        if (mHomeStack == null) {
-            // Skip if there is no home stack
-            return;
-        }
-
-        // Move the home stack to the bottom to not affect the following visibility checks
-        positionChildAtBottom(mHomeStack);
-
-        // Find the next position where the homes stack should be placed
-        final int numStacks = mStacks.size();
-        for (int stackNdx = 0; stackNdx < numStacks; stackNdx++) {
-            final ActivityStack stack = mStacks.get(stackNdx);
-            if (stack == mHomeStack) {
-                continue;
-            }
-            final int winMode = stack.getWindowingMode();
-            final boolean isValidWindowingMode = winMode == WINDOWING_MODE_FULLSCREEN ||
-                    winMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
-            if (stack.shouldBeVisible(null) && isValidWindowingMode) {
-                // Move the home stack to behind this stack
-                positionChildAt(mHomeStack, Math.max(0, stackNdx - 1));
-                break;
-            }
-        }
-    }
-
-    /**
-     * Moves the home stack behind the given {@param stack} if possible. If {@param stack} is not
-     * currently in the display, then then the home stack is moved to the back. Generally used in
-     * conjunction with {@link #moveHomeStackBehindBottomMostVisibleStack}.
-     */
-    void moveHomeStackBehindStack(ActivityStack behindStack) {
-        if (behindStack == null) {
-            return;
-        }
-
-        positionChildAt(mHomeStack, Math.max(0, mStacks.indexOf(behindStack) - 1));
     }
 
     boolean isSleeping() {

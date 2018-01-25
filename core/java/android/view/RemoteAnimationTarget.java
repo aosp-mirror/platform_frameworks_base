@@ -17,7 +17,6 @@
 package android.view;
 
 import android.annotation.IntDef;
-import android.app.WindowConfiguration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Parcel;
@@ -99,14 +98,8 @@ public class RemoteAnimationTarget implements Parcelable {
      */
     public final Rect sourceContainerBounds;
 
-    /**
-     * The window configuration for the target.
-     */
-    public final WindowConfiguration windowConfiguration;
-
     public RemoteAnimationTarget(int taskId, int mode, SurfaceControl leash, boolean isTranslucent,
-            Rect clipRect, int prefixOrderIndex, Point position, Rect sourceContainerBounds,
-            WindowConfiguration windowConfig) {
+            Rect clipRect, int prefixOrderIndex, Point position, Rect sourceContainerBounds) {
         this.mode = mode;
         this.taskId = taskId;
         this.leash = leash;
@@ -115,7 +108,6 @@ public class RemoteAnimationTarget implements Parcelable {
         this.prefixOrderIndex = prefixOrderIndex;
         this.position = new Point(position);
         this.sourceContainerBounds = new Rect(sourceContainerBounds);
-        this.windowConfiguration = windowConfig;
     }
 
     public RemoteAnimationTarget(Parcel in) {
@@ -127,7 +119,6 @@ public class RemoteAnimationTarget implements Parcelable {
         prefixOrderIndex = in.readInt();
         position = in.readParcelable(null);
         sourceContainerBounds = in.readParcelable(null);
-        windowConfiguration = in.readParcelable(null);
     }
 
     @Override
@@ -145,7 +136,6 @@ public class RemoteAnimationTarget implements Parcelable {
         dest.writeInt(prefixOrderIndex);
         dest.writeParcelable(position, 0 /* flags */);
         dest.writeParcelable(sourceContainerBounds, 0 /* flags */);
-        dest.writeParcelable(windowConfiguration, 0 /* flags */);
     }
 
     public static final Creator<RemoteAnimationTarget> CREATOR

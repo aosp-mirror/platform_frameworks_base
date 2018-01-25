@@ -16,10 +16,12 @@
 
 package com.android.systemui.pip.phone;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 
 import android.app.ActivityManager;
+import android.app.ActivityManager.StackInfo;
 import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -41,7 +43,6 @@ import com.android.systemui.recents.events.component.ExpandPipEvent;
 import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-import com.android.systemui.shared.system.InputConsumerController;
 
 import java.io.PrintWriter;
 
@@ -173,8 +174,7 @@ public class PipManager implements BasePipManager {
         }
         ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
 
-        mInputConsumerController = InputConsumerController.getPipInputConsumer();
-        mInputConsumerController.registerInputConsumer();
+        mInputConsumerController = new InputConsumerController(mWindowManager);
         mMediaController = new PipMediaController(context, mActivityManager);
         mMenuController = new PipMenuActivityController(context, mActivityManager, mMediaController,
                 mInputConsumerController);
