@@ -68,7 +68,7 @@ public class RunningTasksTest extends ActivityTestsBase {
         // Create a number of stacks with tasks (of incrementing active time)
         final ActivityStackSupervisor supervisor = mService.mStackSupervisor;
         final SparseArray<ActivityDisplay> displays = new SparseArray<>();
-        final ActivityDisplay display = new ActivityDisplay(supervisor, DEFAULT_DISPLAY);
+        final ActivityDisplay display = new TestActivityDisplay(supervisor, DEFAULT_DISPLAY);
         displays.put(DEFAULT_DISPLAY, display);
 
         final int numStacks = 2;

@@ -994,12 +994,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             insertTaskAtTop(task, null);
             return;
         }
-
-        task = topTask();
-        if (task != null) {
-            mWindowContainerController.positionChildAtTop(task.getWindowContainerController(),
-                    true /* includingParents */);
-        }
     }
 
     /**
@@ -1024,12 +1018,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (task != null) {
             insertTaskAtBottom(task);
             return;
-        } else {
-            task = bottomTask();
-            if (task != null) {
-                mWindowContainerController.positionChildAtBottom(
-                        task.getWindowContainerController(), true /* includingParents */);
-            }
         }
     }
 
