@@ -81,18 +81,17 @@ static void BM_AssetManagerLoadFrameworkAssetsOld(benchmark::State& state) {
 }
 BENCHMARK(BM_AssetManagerLoadFrameworkAssetsOld);
 
-static void BM_AssetManagerGetResource(benchmark::State& state, uint32_t resid) {
-  GetResourceBenchmark({GetTestDataPath() + "/basic/basic.apk"}, nullptr /*config*/, resid, state);
+static void BM_AssetManagerGetResource(benchmark::State& state) {
+  GetResourceBenchmark({GetTestDataPath() + "/basic/basic.apk"}, nullptr /*config*/,
+                       basic::R::integer::number1, state);
 }
-BENCHMARK_CAPTURE(BM_AssetManagerGetResource, number1, basic::R::integer::number1);
-BENCHMARK_CAPTURE(BM_AssetManagerGetResource, deep_ref, basic::R::integer::deep_ref);
+BENCHMARK(BM_AssetManagerGetResource);
 
-static void BM_AssetManagerGetResourceOld(benchmark::State& state, uint32_t resid) {
-  GetResourceBenchmarkOld({GetTestDataPath() + "/basic/basic.apk"}, nullptr /*config*/, resid,
-                          state);
+static void BM_AssetManagerGetResourceOld(benchmark::State& state) {
+  GetResourceBenchmarkOld({GetTestDataPath() + "/basic/basic.apk"}, nullptr /*config*/,
+                          basic::R::integer::number1, state);
 }
-BENCHMARK_CAPTURE(BM_AssetManagerGetResourceOld, number1, basic::R::integer::number1);
-BENCHMARK_CAPTURE(BM_AssetManagerGetResourceOld, deep_ref, basic::R::integer::deep_ref);
+BENCHMARK(BM_AssetManagerGetResourceOld);
 
 static void BM_AssetManagerGetLibraryResource(benchmark::State& state) {
   GetResourceBenchmark(
@@ -197,7 +196,7 @@ BENCHMARK(BM_AssetManagerGetResourceLocales);
 static void BM_AssetManagerGetResourceLocalesOld(benchmark::State& state) {
   AssetManager assets;
   if (!assets.addAssetPath(String8(kFrameworkPath), nullptr /*cookie*/, false /*appAsLib*/,
-                           true /*isSystemAssets*/)) {
+                           false /*isSystemAssets*/)) {
     state.SkipWithError("Failed to load assets");
     return;
   }
@@ -211,45 +210,5 @@ static void BM_AssetManagerGetResourceLocalesOld(benchmark::State& state) {
   }
 }
 BENCHMARK(BM_AssetManagerGetResourceLocalesOld);
-
-static void BM_AssetManagerSetConfigurationFramework(benchmark::State& state) {
-  std::unique_ptr<const ApkAssets> apk = ApkAssets::Load(kFrameworkPath);
-  if (apk == nullptr) {
-    state.SkipWithError("Failed to load assets");
-    return;
-  }
-
-  AssetManager2 assets;
-  assets.SetApkAssets({apk.get()});
-
-  ResTable_config config;
-  memset(&config, 0, sizeof(config));
-
-  while (state.KeepRunning()) {
-    config.sdkVersion = ~config.sdkVersion;
-    assets.SetConfiguration(config);
-  }
-}
-BENCHMARK(BM_AssetManagerSetConfigurationFramework);
-
-static void BM_AssetManagerSetConfigurationFrameworkOld(benchmark::State& state) {
-  AssetManager assets;
-  if (!assets.addAssetPath(String8(kFrameworkPath), nullptr /*cookie*/, false /*appAsLib*/,
-                           true /*isSystemAssets*/)) {
-    state.SkipWithError("Failed to load assets");
-    return;
-  }
-
-  const ResTable& table = assets.getResources(true);
-
-  ResTable_config config;
-  memset(&config, 0, sizeof(config));
-
-  while (state.KeepRunning()) {
-    config.sdkVersion = ~config.sdkVersion;
-    assets.setConfiguration(config);
-  }
-}
-BENCHMARK(BM_AssetManagerSetConfigurationFrameworkOld);
 
 }  // namespace android
