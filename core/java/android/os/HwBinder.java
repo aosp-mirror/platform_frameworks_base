@@ -108,7 +108,18 @@ public abstract class HwBinder implements IHwBinder {
     private static native void native_report_sysprop_change();
 
     /**
+     * Enable instrumentation if available.
+     * @hide
+     */
+    public static void enableInstrumentation() {
+        native_report_sysprop_change();
+    }
+
+    /**
      * Notifies listeners that a system property has changed
+     *
+     * TODO(b/72480743): remove this method
+     *
      * @hide
      */
     public static void reportSyspropChanged() {
