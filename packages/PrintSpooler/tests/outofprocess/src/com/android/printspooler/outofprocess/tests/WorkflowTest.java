@@ -154,16 +154,16 @@ public class WorkflowTest extends BasePrintTest {
 
     @AfterClass
     public static void enableAnimations() throws Exception {
-        if (sWindowAnimationScaleBefore != Float.NaN) {
+        if (!Float.isNaN(sWindowAnimationScaleBefore)) {
             runShellCommand(
                     "settings put global window_animation_scale " + sWindowAnimationScaleBefore);
         }
-        if (sTransitionAnimationScaleBefore != Float.NaN) {
+        if (!Float.isNaN(sTransitionAnimationScaleBefore)) {
             runShellCommand(
                     "settings put global transition_animation_scale " +
                             sTransitionAnimationScaleBefore);
         }
-        if (sAnimatiorDurationScaleBefore != Float.NaN) {
+        if (!Float.isNaN(sAnimatiorDurationScaleBefore)) {
             runShellCommand(
                     "settings put global animator_duration_scale " + sAnimatiorDurationScaleBefore);
         }
