@@ -514,5 +514,8 @@ public class OutputChooserDialog extends Dialog
 
         @Override
         public void onAccessibilityModeChanged(Boolean showA11yStream) {}
+
+        @Override
+        public void onConnectedDeviceChanged(String deviceName) {}
     };
 }
