@@ -250,6 +250,9 @@ public class PhoneStatusBarView extends PanelBar {
         super.panelExpansionChanged(frac, expanded);
         mPanelFraction = frac;
         updateScrimFraction();
+        if ((frac == 0 || frac == 1) && mBar.getNavigationBarView() != null) {
+            mBar.getNavigationBarView().onPanelExpandedChange(expanded);
+        }
     }
 
     private void updateScrimFraction() {
