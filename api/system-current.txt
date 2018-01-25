@@ -3826,6 +3826,20 @@ package android.os {
   public static abstract class UserManager.UserRestrictionSource implements java.lang.annotation.Annotation {
   }
 
+  public class WorkSource implements android.os.Parcelable {
+    method public android.os.WorkSource.WorkChain createWorkChain();
+  }
+
+  public static final class WorkSource.WorkChain implements android.os.Parcelable {
+    ctor public WorkSource.WorkChain();
+    method public android.os.WorkSource.WorkChain addNode(int, java.lang.String);
+    method public int describeContents();
+    method public java.lang.String getAttributionTag();
+    method public int getAttributionUid();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.os.WorkSource.WorkChain> CREATOR;
+  }
+
 }
 
 package android.os.storage {
