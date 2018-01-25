@@ -892,7 +892,7 @@ public final class NetworkCapabilities implements Parcelable {
      *
      * @hide
      */
-    private Set<UidRange> mUids = null;
+    private ArraySet<UidRange> mUids = null;
 
     /**
      * Convenience method to set the UIDs this network applies to to a single UID.
@@ -1180,7 +1180,7 @@ public final class NetworkCapabilities implements Parcelable {
         dest.writeInt(mLinkDownBandwidthKbps);
         dest.writeParcelable((Parcelable) mNetworkSpecifier, flags);
         dest.writeInt(mSignalStrength);
-        dest.writeArraySet(new ArraySet<>(mUids));
+        dest.writeArraySet(mUids);
     }
 
     public static final Creator<NetworkCapabilities> CREATOR =
