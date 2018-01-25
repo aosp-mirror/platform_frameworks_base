@@ -164,6 +164,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runDumpHeap(pw);
                 case "set-debug-app":
                     return runSetDebugApp(pw);
+                case "set-agent-app":
+                    return runSetAgentApp(pw);
                 case "clear-debug-app":
                     return runClearDebugApp(pw);
                 case "set-watch-heap":
@@ -859,6 +861,13 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
         String pkg = getNextArgRequired();
         mInterface.setDebugApp(pkg, wait, persistent);
+        return 0;
+    }
+
+    int runSetAgentApp(PrintWriter pw) throws RemoteException {
+        String pkg = getNextArgRequired();
+        String agent = getNextArg();
+        mInterface.setAgentApp(pkg, agent);
         return 0;
     }
 
