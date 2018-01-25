@@ -53,14 +53,30 @@ public abstract class HwBinder implements IHwBinder {
     public native final void registerService(String serviceName)
         throws RemoteException;
 
-    /** @hide */
+    /**
+     * Returns the specified service from the hwservicemanager. Does not retry.
+     *
+     * @param iface fully-qualified interface name for example foo.bar@1.3::IBaz
+     * @param serviceName the instance name of the service for example default.
+     * @throws NoSuchElementException when the service is unavailable
+     * @hide
+     */
+    @SystemApi
     public static final IHwBinder getService(
             String iface,
             String serviceName)
         throws RemoteException, NoSuchElementException {
         return getService(iface, serviceName, false /* retry */);
     }
-    /** @hide */
+    /**
+     * Returns the specified service from the hwservicemanager.
+     * @param iface fully-qualified interface name for example foo.bar@1.3::IBaz
+     * @param serviceName the instance name of the service for example default.
+     * @param retry whether to wait for the service to start if it's not already started
+     * @throws NoSuchElementException when the service is unavailable
+     * @hide
+     */
+    @SystemApi
     public static native final IHwBinder getService(
             String iface,
             String serviceName,
@@ -111,6 +127,7 @@ public abstract class HwBinder implements IHwBinder {
      * Enable instrumentation if available.
      * @hide
      */
+    @SystemApi
     public static void enableInstrumentation() {
         native_report_sysprop_change();
     }
