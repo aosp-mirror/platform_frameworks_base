@@ -85,6 +85,15 @@ public class ProfilerInfo implements Parcelable {
     }
 
     /**
+     * Return a new ProfilerInfo instance, with fields populated from this object,
+     * and {@link agent} and {@link attachAgentDuringBind} as given.
+     */
+    public ProfilerInfo setAgent(String agent, boolean attachAgentDuringBind) {
+        return new ProfilerInfo(this.profileFile, this.profileFd, this.samplingInterval,
+                this.autoStopProfiler, this.streamingOutput, agent, attachAgentDuringBind);
+    }
+
+    /**
      * Close profileFd, if it is open. The field will be null after a call to this function.
      */
     public void closeFd() {
