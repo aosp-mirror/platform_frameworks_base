@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.INPUT_CONSUMER_NAVIGATION;
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
+import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
 import static android.view.WindowManager.INPUT_CONSUMER_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS;
@@ -86,6 +87,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
     private boolean mAddInputConsumerHandle;
     private boolean mAddPipInputConsumerHandle;
     private boolean mAddWallpaperInputConsumerHandle;
+    private boolean mAddRecentsAnimationInputConsumerHandle;
     private boolean mDisableWallpaperTouchEvents;
     private final Rect mTmpRect = new Rect();
     private final UpdateInputForAllWindowsConsumer mUpdateInputForAllWindowsConsumer =
@@ -612,7 +614,7 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
         InputConsumerImpl navInputConsumer;
         InputConsumerImpl pipInputConsumer;
         InputConsumerImpl wallpaperInputConsumer;
-        Rect pipTouchableBounds;
+        InputConsumerImpl recentsAnimationInputConsumer;
         boolean inDrag;
         WallpaperController wallpaperController;
 
@@ -622,11 +624,13 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             navInputConsumer = getInputConsumer(INPUT_CONSUMER_NAVIGATION, DEFAULT_DISPLAY);
             pipInputConsumer = getInputConsumer(INPUT_CONSUMER_PIP, DEFAULT_DISPLAY);
             wallpaperInputConsumer = getInputConsumer(INPUT_CONSUMER_WALLPAPER, DEFAULT_DISPLAY);
+            recentsAnimationInputConsumer = getInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION,
+                    DEFAULT_DISPLAY);
             mAddInputConsumerHandle = navInputConsumer != null;
             mAddPipInputConsumerHandle = pipInputConsumer != null;
             mAddWallpaperInputConsumerHandle = wallpaperInputConsumer != null;
+            mAddRecentsAnimationInputConsumerHandle = recentsAnimationInputConsumer != null;
             mTmpRect.setEmpty();
-            pipTouchableBounds = mAddPipInputConsumerHandle ? mTmpRect : null;
             mDisableWallpaperTouchEvents = false;
             this.inDrag = inDrag;
             wallpaperController = mService.mRoot.mWallpaperController;
@@ -659,12 +663,28 @@ final class InputMonitor implements InputManagerService.WindowManagerCallbacks {
             final boolean hasFocus = w == mInputFocus;
             final boolean isVisible = w.isVisibleLw();
 
+            if (mAddRecentsAnimationInputConsumerHandle) {
+                final RecentsAnimationController recentsAnimationController =
+                        mService.getRecentsAnimationController();
+                if (recentsAnimationController != null
+                        && recentsAnimationController.hasInputConsumerForApp(w.mAppToken)) {
+                    if (recentsAnimationController.updateInputConsumerForApp(
+                            recentsAnimationInputConsumer, hasFocus)) {
+                        addInputWindowHandle(recentsAnimationInputConsumer.mWindowHandle);
+                        mAddRecentsAnimationInputConsumerHandle = false;
+                    }
+                    // Skip adding the window below regardless of whether there is an input consumer
+                    // to handle it
+                    return;
+                }
+            }
+
             if (w.inPinnedWindowingMode()) {
                 if (mAddPipInputConsumerHandle
                         && (inputWindowHandle.layer <= pipInputConsumer.mWindowHandle.layer)) {
                     // Update the bounds of the Pip input consumer to match the window bounds.
-                    w.getBounds(pipTouchableBounds);
-                    pipInputConsumer.mWindowHandle.touchableRegion.set(pipTouchableBounds);
+                    w.getBounds(mTmpRect);
+                    pipInputConsumer.mWindowHandle.touchableRegion.set(mTmpRect);
                     addInputWindowHandle(pipInputConsumer.mWindowHandle);
                     mAddPipInputConsumerHandle = false;
                 }

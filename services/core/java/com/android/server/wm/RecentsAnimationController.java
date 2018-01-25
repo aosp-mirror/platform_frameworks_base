@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
+import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -73,6 +74,8 @@ public class RecentsAnimationController {
     // Whether or not the input consumer is enabled. The input consumer must be both registered and
     // enabled for it to start intercepting touch events.
     private boolean mInputConsumerEnabled;
+
+    private Rect mTmpRect = new Rect();
 
     public interface RecentsAnimationCallbacks {
         void onAnimationFinished(boolean moveHomeToTop);
@@ -263,6 +266,7 @@ public class RecentsAnimationController {
 
         mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
         mService.scheduleAnimationLocked();
+        mService.destroyInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
     }
 
     void checkAnimationReady(WallpaperController wallpaperController) {
@@ -281,21 +285,33 @@ public class RecentsAnimationController {
                 && isHomeAppOverWallpaper();
     }
 
-    boolean isHomeAppOverWallpaper() {
+    boolean hasInputConsumerForApp(AppWindowToken appToken) {
+        return mInputConsumerEnabled && isAnimatingApp(appToken);
+    }
+
+    boolean updateInputConsumerForApp(InputConsumerImpl recentsAnimationInputConsumer,
+            boolean hasFocus) {
+        // Update the input consumer touchable region to match the home app main window
+        final WindowState homeAppMainWindow = mHomeAppToken != null
+                ? mHomeAppToken.findMainWindow()
+                : null;
+        if (homeAppMainWindow != null) {
+            homeAppMainWindow.getBounds(mTmpRect);
+            recentsAnimationInputConsumer.mWindowHandle.hasFocus = hasFocus;
+            recentsAnimationInputConsumer.mWindowHandle.touchableRegion.set(mTmpRect);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isHomeAppOverWallpaper() {
         if (mHomeAppToken == null) {
             return false;
         }
         return mHomeAppToken.windowsCanBeWallpaperTarget();
     }
 
-    WindowState getHomeAppMainWindow() {
-        if (mHomeAppToken == null) {
-            return null;
-        }
-        return mHomeAppToken.findMainWindow();
-    }
-
-    boolean isAnimatingApp(AppWindowToken appToken) {
+    private boolean isAnimatingApp(AppWindowToken appToken) {
         for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
             final Task task = mPendingAnimations.get(i).mTask;
             for (int j = task.getChildCount() - 1; j >= 0; j--) {
@@ -306,10 +322,6 @@ public class RecentsAnimationController {
             }
         }
         return false;
-    }
-
-    boolean isInputConsumerEnabled() {
-        return mInputConsumerEnabled;
     }
 
     private class TaskAnimationAdapter implements AnimationAdapter {
