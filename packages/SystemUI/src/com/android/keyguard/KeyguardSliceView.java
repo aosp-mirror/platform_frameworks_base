@@ -51,6 +51,8 @@ import java.util.function.Consumer;
 import androidx.app.slice.Slice;
 import androidx.app.slice.SliceItem;
 import androidx.app.slice.core.SliceQuery;
+import androidx.app.slice.widget.ListContent;
+import androidx.app.slice.widget.RowContent;
 import androidx.app.slice.widget.SliceLiveData;
 
 /**
@@ -115,25 +117,17 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
 
     private void showSlice(Slice slice) {
 
-        // Main area
-        SliceItem mainItem = SliceQuery.find(slice, android.app.slice.SliceItem.FORMAT_SLICE,
-                null /* hints */, new String[]{android.app.slice.Slice.HINT_LIST_ITEM});
-        mHasHeader = mainItem != null;
-
-        List<SliceItem> subItems = SliceQuery.findAll(slice,
-                android.app.slice.SliceItem.FORMAT_SLICE,
-                new String[]{android.app.slice.Slice.HINT_LIST_ITEM},
-                null /* nonHints */);
-
+        ListContent lc = new ListContent(slice);
+        mHasHeader = lc.hasHeader();
+        List<SliceItem> subItems = lc.getRowItems();
         if (!mHasHeader) {
             mTitle.setVisibility(GONE);
         } else {
             mTitle.setVisibility(VISIBLE);
-            SliceItem mainTitle = SliceQuery.find(mainItem.getSlice(),
-                    android.app.slice.SliceItem.FORMAT_TEXT,
-                    new String[]{android.app.slice.Slice.HINT_TITLE},
-                    null /* nonHints */);
-            CharSequence title = mainTitle.getText();
+            // If there's a header it'll be the first subitem
+            RowContent header = new RowContent(subItems.get(0), true /* showStartItem */);
+            SliceItem mainTitle = header.getTitleItem();
+            CharSequence title = mainTitle != null ? mainTitle.getText() : null;
             mTitle.setText(title);
 
             // Check if we're already ellipsizing the text.
@@ -152,9 +146,10 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         mClickActions.clear();
         final int subItemsCount = subItems.size();
         final int blendedColor = getTextColor();
-
-        for (int i = 0; i < subItemsCount; i++) {
+        final int startIndex = mHasHeader ? 1 : 0; // First item is header; skip it
+        for (int i = startIndex; i < subItemsCount; i++) {
             SliceItem item = subItems.get(i);
+            RowContent rc = new RowContent(item, true /* showStartItem */);
             final Uri itemTag = item.getSlice().getUri();
             // Try to reuse the view if already exists in the layout
             KeyguardSliceButton button = mRow.findViewWithTag(itemTag);
@@ -168,20 +163,13 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             button.setHasDivider(i < subItemsCount - 1);
             mRow.addView(button, i);
 
-            PendingIntent pendingIntent;
-            try {
-                pendingIntent = item.getAction();
-            } catch (RuntimeException e) {
-                Log.w(TAG, "Cannot retrieve action from keyguard slice", e);
-                pendingIntent = null;
+            PendingIntent pendingIntent = null;
+            if (rc.getContentIntent() != null) {
+                pendingIntent = rc.getContentIntent().getAction();
             }
             mClickActions.put(button, pendingIntent);
 
-            SliceItem title = SliceQuery.find(item.getSlice(),
-                    android.app.slice.SliceItem.FORMAT_TEXT,
-                    new String[]{android.app.slice.Slice.HINT_TITLE},
-                    null /* nonHints */);
-            button.setText(title.getText());
+            button.setText(rc.getTitleItem().getText());
 
             Drawable iconDrawable = null;
             SliceItem icon = SliceQuery.find(item.getSlice(),
