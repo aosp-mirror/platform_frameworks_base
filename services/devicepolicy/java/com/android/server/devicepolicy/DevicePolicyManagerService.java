@@ -305,8 +305,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private static final String TAG_PASSWORD_VALIDITY = "password-validity";
 
-    private static final String TAG_PRINTING_ENABLED = "printing-enabled";
-
     private static final String TAG_TRANSFER_OWNERSHIP_BUNDLE = "transfer-ownership-bundle";
 
     private static final int REQUEST_EXPIRE_PASSWORD = 5571;
@@ -614,8 +612,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         PersistableBundle mInitBundle = null;
 
         long mPasswordTokenHandle = 0;
-
-        boolean mPrintingEnabled = true;
 
         public DevicePolicyData(int userHandle) {
             mUserHandle = userHandle;
@@ -2948,12 +2944,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 out.endTag(null, TAG_CURRENT_INPUT_METHOD_SET);
             }
 
-            if (!policy.mPrintingEnabled) {
-                out.startTag(null, TAG_PRINTING_ENABLED);
-                out.attribute(null, ATTR_VALUE, Boolean.toString(policy.mPrintingEnabled));
-                out.endTag(null, TAG_PRINTING_ENABLED);
-            }
-
             for (final String cert : policy.mOwnerInstalledCaCerts) {
                 out.startTag(null, TAG_OWNER_INSTALLED_CA_CERT);
                 out.attribute(null, ATTR_ALIAS, cert);
@@ -3172,9 +3162,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     policy.mCurrentInputMethodSet = true;
                 } else if (TAG_OWNER_INSTALLED_CA_CERT.equals(tag)) {
                     policy.mOwnerInstalledCaCerts.add(parser.getAttributeValue(null, ATTR_ALIAS));
-                } else if (TAG_PRINTING_ENABLED.equals(tag)) {
-                    String enabled = parser.getAttributeValue(null, ATTR_VALUE);
-                    policy.mPrintingEnabled = Boolean.toString(true).equals(enabled);
                 } else {
                     Slog.w(LOG_TAG, "Unknown tag: " + tag);
                     XmlUtils.skipCurrentTag(parser);
@@ -10417,7 +10404,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         public CharSequence getPrintingDisabledReasonForUser(@UserIdInt int userId) {
             synchronized (DevicePolicyManagerService.this) {
                 DevicePolicyData policy = getUserData(userId);
-                if (policy.mPrintingEnabled) {
+                if (!mUserManager.hasUserRestriction(UserManager.DISALLOW_PRINTING)) {
                     Log.e(LOG_TAG, "printing is enabled");
                     return null;
                 }
@@ -12789,27 +12776,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private boolean hasPrinting() {
-        return mInjector.getPackageManager().hasSystemFeature(PackageManager.FEATURE_PRINTING);
-    }
-
-    @Override
-    public void setPrintingEnabled(ComponentName admin, boolean enabled) {
-        if (!mHasFeature || !hasPrinting()) {
-            return;
-        }
-        Preconditions.checkNotNull(admin, "Admin cannot be null.");
-        enforceProfileOrDeviceOwner(admin);
-        synchronized (this) {
-            final int userHandle = mInjector.userHandleGetCallingUserId();
-            DevicePolicyData policy = getUserData(userHandle);
-            if (policy.mPrintingEnabled != enabled) {
-                policy.mPrintingEnabled = enabled;
-                saveSettingsLocked(userHandle);
-            }
-        }
-    }
-
     private void deleteTransferOwnershipMetadataFileLocked() {
         mTransferOwnershipMetadataManager.deleteMetadataFile();
     }
@@ -12836,25 +12802,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         + "owner transfer parameters from file " + bundleFile, e);
                 return null;
             }
-        }
-    }
-
-    /**
-     * Returns whether printing is enabled for current user.
-     * @hide
-     */
-    @Override
-    public boolean isPrintingEnabled() {
-        if (!hasPrinting()) {
-            return false;
-        }
-        if (!mHasFeature) {
-            return true;
-        }
-        synchronized (this) {
-            final int userHandle = mInjector.userHandleGetCallingUserId();
-            DevicePolicyData policy = getUserData(userHandle);
-            return policy.mPrintingEnabled;
         }
     }
 
