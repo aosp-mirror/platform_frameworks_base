@@ -931,12 +931,12 @@ public abstract class WebSettings {
      * Note that this setting affects only JavaScript access to file scheme
      * resources. Other access to such resources, for example, from image HTML
      * elements, is unaffected. To prevent possible violation of same domain policy
-     * on {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH} and earlier
-     * devices, you should explicitly set this value to {@code false}.
+     * when targeting {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and earlier,
+     * you should explicitly set this value to {@code false}.
      * <p>
-     * The default value is {@code true} for API level
+     * The default value is {@code true} for apps targeting
      * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and below,
-     * and {@code false} for API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN}
+     * and {@code false} when targeting {@link android.os.Build.VERSION_CODES#JELLY_BEAN}
      * and above.
      *
      * @param flag whether JavaScript running in the context of a file scheme
@@ -947,18 +947,18 @@ public abstract class WebSettings {
     /**
      * Sets whether JavaScript running in the context of a file scheme URL
      * should be allowed to access content from other file scheme URLs. To
-     * enable the most restrictive, and therefore secure policy, this setting
+     * enable the most restrictive, and therefore secure, policy this setting
      * should be disabled. Note that the value of this setting is ignored if
      * the value of {@link #getAllowUniversalAccessFromFileURLs} is {@code true}.
      * Note too, that this setting affects only JavaScript access to file scheme
      * resources. Other access to such resources, for example, from image HTML
      * elements, is unaffected. To prevent possible violation of same domain policy
-     * on {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH} and earlier
-     * devices, you should explicitly set this value to {@code false}.
+     * when targeting {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and earlier,
+     * you should explicitly set this value to {@code false}.
      * <p>
-     * The default value is {@code true} for API level
+     * The default value is {@code true} for apps targeting
      * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and below,
-     * and {@code false} for API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN}
+     * and {@code false} when targeting {@link android.os.Build.VERSION_CODES#JELLY_BEAN}
      * and above.
      *
      * @param flag whether JavaScript running in the context of a file scheme
