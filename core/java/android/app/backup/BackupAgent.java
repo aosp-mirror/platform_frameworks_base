@@ -154,6 +154,15 @@ public abstract class BackupAgent extends ContextWrapper {
      */
     public static final int FLAG_CLIENT_SIDE_ENCRYPTION_ENABLED = 1;
 
+    /**
+     * Flag for {@link BackupDataOutput#getTransportFlags()} and
+     * {@link FullBackupDataOutput#getTransportFlags()} only.
+     *
+     * <p>The transport is for a device-to-device transfer. There is no third party or intermediate
+     * storage. The user's backup data is sent directly to another device over e.g., USB or WiFi.
+     */
+    public static final int FLAG_DEVICE_TO_DEVICE_TRANSFER = 2;
+
     Handler mHandler = null;
 
     Handler getHandler() {
