@@ -61,6 +61,8 @@ bool Properties::disableVsync = false;
 bool Properties::skpCaptureEnabled = false;
 bool Properties::enableRTAnimations = true;
 
+bool Properties::runningInEmulator = false;
+
 static int property_get_int(const char* key, int defaultValue) {
     char buf[PROPERTY_VALUE_MAX] = {
             '\0',
@@ -134,6 +136,8 @@ bool Properties::load() {
 
     skpCaptureEnabled = property_get_bool("ro.debuggable", false) &&
                         property_get_bool(PROPERTY_CAPTURE_SKP_ENABLED, false);
+
+    runningInEmulator = property_get_bool(PROPERTY_QEMU_KERNEL, false);
 
     return (prevDebugLayersUpdates != debugLayersUpdates) || (prevDebugOverdraw != debugOverdraw) ||
            (prevDebugStencilClip != debugStencilClip);

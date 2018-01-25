@@ -180,6 +180,11 @@ enum DebugLevel {
  */
 #define PROPERTY_CAPTURE_SKP_FILENAME "debug.hwui.skp_filename"
 
+/**
+ * Property for whether this is running in the emulator.
+ */
+#define PROPERTY_QEMU_KERNEL "ro.kernel.qemu"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Misc
 ///////////////////////////////////////////////////////////////////////////////
@@ -260,6 +265,8 @@ public:
 
     // Used for testing only to change the render pipeline.
     static void overrideRenderPipelineType(RenderPipelineType);
+
+    static bool runningInEmulator;
 
 private:
     static ProfileType sProfileType;
