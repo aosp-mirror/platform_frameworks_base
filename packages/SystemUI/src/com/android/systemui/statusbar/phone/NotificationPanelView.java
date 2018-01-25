@@ -2624,6 +2624,7 @@ public class NotificationPanelView extends PanelView implements
 
     public void setPulsing(Collection<HeadsUpManager.HeadsUpEntry> pulsing) {
         mKeyguardStatusView.setPulsing(pulsing != null);
+        positionClockAndNotifications();
         mNotificationStackScroller.setPulsing(pulsing, mKeyguardStatusView.getLocationOnScreen()[1]
                 + mKeyguardStatusView.getClockBottom());
     }
