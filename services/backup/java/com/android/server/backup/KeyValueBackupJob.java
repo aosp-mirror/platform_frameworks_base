@@ -71,7 +71,7 @@ public class KeyValueBackupJob extends JobService {
             if (delay <= 0) {
                 delay = interval + new Random().nextInt((int) fuzz);
             }
-            if (RefactoredBackupManagerService.DEBUG_SCHEDULING) {
+            if (BackupManagerService.DEBUG_SCHEDULING) {
                 Slog.v(TAG, "Scheduling k/v pass in " + (delay / 1000 / 60) + " minutes");
             }
             JobInfo.Builder builder = new JobInfo.Builder(JOB_ID, sKeyValueJobService)
@@ -110,7 +110,7 @@ public class KeyValueBackupJob extends JobService {
         }
 
         // Time to run a key/value backup!
-        Trampoline service = RefactoredBackupManagerService.getInstance();
+        Trampoline service = BackupManagerService.getInstance();
         try {
             service.backupNow();
         } catch (RemoteException e) {}

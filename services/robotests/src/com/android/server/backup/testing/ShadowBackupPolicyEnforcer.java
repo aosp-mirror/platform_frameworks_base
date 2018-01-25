@@ -3,7 +3,6 @@ package com.android.server.backup.testing;
 import android.content.ComponentName;
 
 import com.android.server.backup.BackupPolicyEnforcer;
-import com.android.server.backup.RefactoredBackupManagerService;
 
 import org.robolectric.annotation.Implementation;
 import org.robolectric.annotation.Implements;

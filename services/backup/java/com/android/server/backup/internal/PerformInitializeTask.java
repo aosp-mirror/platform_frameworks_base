@@ -16,7 +16,7 @@
 
 package com.android.server.backup.internal;
 
-import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.annotation.Nullable;
 import android.app.AlarmManager;
@@ -30,7 +30,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.EventLogTags;
-import com.android.server.backup.RefactoredBackupManagerService;
+import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.transport.TransportClient;
 
@@ -49,7 +49,7 @@ import java.util.List;
  * operation was successful then it's {@link BackupTransport#TRANSPORT_OK}.
  */
 public class PerformInitializeTask implements Runnable {
-    private final RefactoredBackupManagerService mBackupManagerService;
+    private final BackupManagerService mBackupManagerService;
     private final TransportManager mTransportManager;
     private final String[] mQueue;
     private final File mBaseStateDir;
@@ -57,7 +57,7 @@ public class PerformInitializeTask implements Runnable {
     @Nullable private IBackupObserver mObserver;
 
     public PerformInitializeTask(
-            RefactoredBackupManagerService backupManagerService,
+            BackupManagerService backupManagerService,
             String[] transportNames,
             @Nullable IBackupObserver observer,
             OnTaskFinishedListener listener) {
@@ -72,7 +72,7 @@ public class PerformInitializeTask implements Runnable {
 
     @VisibleForTesting
     PerformInitializeTask(
-            RefactoredBackupManagerService backupManagerService,
+            BackupManagerService backupManagerService,
             TransportManager transportManager,
             String[] transportNames,
             @Nullable IBackupObserver observer,

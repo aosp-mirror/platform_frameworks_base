@@ -16,12 +16,11 @@
 
 package com.android.server.backup.internal;
 
-import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
-import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.RefactoredBackupManagerService.TAG;
-import static com.android.server.backup.RefactoredBackupManagerService.TIMEOUT_RESTORE_INTERVAL;
+import static com.android.server.backup.BackupManagerService.DEBUG;
+import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.BackupManagerService.TAG;
+import static com.android.server.backup.BackupManagerService.TIMEOUT_RESTORE_INTERVAL;
 
-import android.app.AlarmManager;
 import android.app.backup.RestoreSet;
 import android.content.Intent;
 import android.os.Handler;
@@ -35,9 +34,9 @@ import android.util.Slog;
 
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.EventLogTags;
+import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.DataChangedJournal;
-import com.android.server.backup.RefactoredBackupManagerService;
 import com.android.server.backup.transport.TransportClient;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.fullbackup.PerformAdbBackupTask;
@@ -81,10 +80,9 @@ public class BackupHandler extends Handler {
     public static final int MSG_BACKUP_RESTORE_STEP = 20;
     public static final int MSG_OP_COMPLETE = 21;
 
-    private final RefactoredBackupManagerService backupManagerService;
+    private final BackupManagerService backupManagerService;
 
-    public BackupHandler(
-            RefactoredBackupManagerService backupManagerService, Looper looper) {
+    public BackupHandler(BackupManagerService backupManagerService, Looper looper) {
         super(looper);
         this.backupManagerService = backupManagerService;
     }

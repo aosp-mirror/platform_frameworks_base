@@ -42,7 +42,7 @@ import android.os.DeadObjectException;
 import android.platform.test.annotations.Presubmit;
 
 import com.android.internal.backup.IBackupTransport;
-import com.android.server.backup.RefactoredBackupManagerService;
+import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.testing.TransportTestUtils;
 import com.android.server.backup.testing.TransportData;
@@ -67,10 +67,14 @@ import java.util.stream.Stream;
 
 @RunWith(FrameworkRobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 26)
-@SystemLoaderClasses({PerformInitializeTaskTest.class, TransportManager.class})
+@SystemLoaderClasses({
+    BackupManagerService.class,
+    PerformInitializeTaskTest.class,
+    TransportManager.class
+})
 @Presubmit
 public class PerformInitializeTaskTest {
-    @Mock private RefactoredBackupManagerService mBackupManagerService;
+    @Mock private BackupManagerService mBackupManagerService;
     @Mock private TransportManager mTransportManager;
     @Mock private OnTaskFinishedListener mListener;
     @Mock private IBackupTransport mTransportBinder;

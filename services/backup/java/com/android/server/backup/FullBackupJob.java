@@ -61,7 +61,7 @@ public class FullBackupJob extends JobService {
     @Override
     public boolean onStartJob(JobParameters params) {
         mParams = params;
-        Trampoline service = RefactoredBackupManagerService.getInstance();
+        Trampoline service = BackupManagerService.getInstance();
         return service.beginFullBackup(this);
     }
 
@@ -69,7 +69,7 @@ public class FullBackupJob extends JobService {
     public boolean onStopJob(JobParameters params) {
         if (mParams != null) {
             mParams = null;
-            Trampoline service = RefactoredBackupManagerService.getInstance();
+            Trampoline service = BackupManagerService.getInstance();
             service.endFullBackup();
         }
         return false;
