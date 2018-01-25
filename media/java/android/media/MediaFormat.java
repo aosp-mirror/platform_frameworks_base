@@ -601,8 +601,6 @@ public final class MediaFormat {
      * codec specific, but lower values generally result in more efficient
      * (smaller-sized) encoding.
      *
-     * @hide
-     *
      * @see MediaCodecInfo.EncoderCapabilities#getQualityRange()
      */
     public static final String KEY_QUALITY = "quality";
