@@ -24,6 +24,8 @@ import static android.Manifest.permission.RESTRICTED_VR_ACCESS;
 import static android.app.ActivityManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.StatusBarManager.DISABLE_MASK;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_USER_HANDLE;
@@ -123,6 +125,7 @@ import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.IAssistDataReceiver;
+import android.app.WindowConfiguration;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -196,6 +199,7 @@ import android.view.IDockedStackListener;
 import android.view.IInputFilter;
 import android.view.IOnKeyguardExitResult;
 import android.view.IPinnedStackListener;
+import android.view.IRecentsAnimationRunner;
 import android.view.IRotationWatcher;
 import android.view.IWallpaperVisibilityListener;
 import android.view.IWindow;
@@ -528,6 +532,7 @@ public class WindowManagerService extends IWindowManager.Stub
     IInputMethodManager mInputMethodManager;
 
     AccessibilityController mAccessibilityController;
+    private RecentsAnimationController mRecentsAnimationController;
 
     Watermark mWatermark;
     StrictModeFlash mStrictModeFlash;
@@ -2666,6 +2671,39 @@ public class WindowManagerService extends IWindowManager.Stub
                 } finally {
                     Binder.restoreCallingIdentity(origId);
                 }
+            }
+        }
+    }
+
+    public void initializeRecentsAnimation(
+            IRecentsAnimationRunner recentsAnimationRunner,
+            RecentsAnimationController.RecentsAnimationCallbacks callbacks, int displayId) {
+        synchronized (mWindowMap) {
+            cancelRecentsAnimation();
+            mRecentsAnimationController = new RecentsAnimationController(this,
+                    recentsAnimationRunner, callbacks, displayId);
+        }
+    }
+
+    public RecentsAnimationController getRecentsAnimationController() {
+        return mRecentsAnimationController;
+    }
+
+    public void cancelRecentsAnimation() {
+        synchronized (mWindowMap) {
+            if (mRecentsAnimationController != null) {
+                // This call will call through to cleanupAnimation() below after the animation is
+                // canceled
+                mRecentsAnimationController.cancelAnimation();
+            }
+        }
+    }
+
+    public void cleanupRecentsAnimation() {
+        synchronized (mWindowMap) {
+            if (mRecentsAnimationController != null) {
+                mRecentsAnimationController.cleanupAnimation();
+                mRecentsAnimationController = null;
             }
         }
     }
@@ -6327,6 +6365,10 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.print("  mSkipAppTransitionAnimation=");pw.println(mSkipAppTransitionAnimation);
             pw.println("  mLayoutToAnim:");
             mAppTransition.dump(pw, "    ");
+            if (mRecentsAnimationController != null) {
+                pw.print("  mRecentsAnimationController="); pw.println(mRecentsAnimationController);
+                mRecentsAnimationController.dump(pw, "    ");
+            }
         }
     }
 

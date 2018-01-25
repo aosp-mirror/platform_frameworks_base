@@ -22,7 +22,7 @@ import android.os.Bundle;
 /**
  * Abstract class for assist data receivers.
  */
-public abstract class AssistDataReceiverCompat {
-    public abstract void onHandleAssistData(Bundle resultData);
-    public abstract void onHandleAssistScreenshot(Bitmap screenshot);
+public abstract class AssistDataReceiver {
+    public void onHandleAssistData(Bundle resultData) {}
+    public void onHandleAssistScreenshot(Bitmap screenshot) {}
 }

@@ -302,6 +302,7 @@ class ActivityStarter {
         SafeActivityOptions activityOptions;
         boolean ignoreTargetSecurity;
         boolean componentSpecified;
+        boolean avoidMoveToFront;
         ActivityRecord[] outActivity;
         TaskRecord inTask;
         String reason;
@@ -356,6 +357,7 @@ class ActivityStarter {
             userId = 0;
             waitResult = null;
             mayWait = false;
+            avoidMoveToFront = false;
         }
 
         /**
@@ -390,6 +392,7 @@ class ActivityStarter {
             userId = request.userId;
             waitResult = request.waitResult;
             mayWait = request.mayWait;
+            avoidMoveToFront = request.avoidMoveToFront;
         }
     }
 
@@ -1485,19 +1488,23 @@ class ActivityStarter {
             mDoResume = false;
         }
 
-        if (mOptions != null && mOptions.getLaunchTaskId() != -1
-                && mOptions.getTaskOverlay()) {
-            r.mTaskOverlay = true;
-            if (!mOptions.canTaskOverlayResume()) {
-                final TaskRecord task = mSupervisor.anyTaskForIdLocked(mOptions.getLaunchTaskId());
-                final ActivityRecord top = task != null ? task.getTopActivity() : null;
-                if (top != null && top.state != RESUMED) {
+        if (mOptions != null) {
+            if (mOptions.getLaunchTaskId() != -1 && mOptions.getTaskOverlay()) {
+                r.mTaskOverlay = true;
+                if (!mOptions.canTaskOverlayResume()) {
+                    final TaskRecord task = mSupervisor.anyTaskForIdLocked(
+                            mOptions.getLaunchTaskId());
+                    final ActivityRecord top = task != null ? task.getTopActivity() : null;
+                    if (top != null && top.state != RESUMED) {
 
-                    // The caller specifies that we'd like to be avoided to be moved to the front,
-                    // so be it!
-                    mDoResume = false;
-                    mAvoidMoveToFront = true;
+                        // The caller specifies that we'd like to be avoided to be moved to the
+                        // front, so be it!
+                        mDoResume = false;
+                        mAvoidMoveToFront = true;
+                    }
                 }
+            } else if (mOptions.getAvoidMoveToFront()) {
+                mAvoidMoveToFront = true;
             }
         }
 
@@ -1838,7 +1845,7 @@ class ActivityStarter {
         // Need to update mTargetStack because if task was moved out of it, the original stack may
         // be destroyed.
         mTargetStack = intentActivity.getStack();
-        if (!mMovedToFront && mDoResume) {
+        if (!mAvoidMoveToFront && !mMovedToFront && mDoResume) {
             if (DEBUG_TASKS) Slog.d(TAG_TASKS, "Bring to front target: " + mTargetStack
                     + " from " + intentActivity);
             mTargetStack.moveToFront("intentActivityFound");

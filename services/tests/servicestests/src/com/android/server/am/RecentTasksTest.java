@@ -573,7 +573,8 @@ public class RecentTasksTest extends ActivityTestsBase {
         assertSecurityException(expectCallable, () -> mService.getTaskDescription(0));
         assertSecurityException(expectCallable, () -> mService.cancelTaskWindowTransition(0));
         assertSecurityException(expectCallable, () -> mService.startRecentsActivity(null, null,
-                null, 0));
+                null));
+        assertSecurityException(expectCallable, () -> mService.cancelRecentsAnimation());
     }
 
     private void testGetTasksApis(boolean expectCallable) {
@@ -676,8 +677,8 @@ public class RecentTasksTest extends ActivityTestsBase {
         @Override
         public void initialize() {
             super.initialize();
-            mDisplay = new ActivityDisplay(this, DEFAULT_DISPLAY);
-            mOtherDisplay = new ActivityDisplay(this, DEFAULT_DISPLAY);
+            mDisplay = new TestActivityDisplay(this, DEFAULT_DISPLAY);
+            mOtherDisplay = new TestActivityDisplay(this, DEFAULT_DISPLAY);
             attachDisplay(mOtherDisplay);
             attachDisplay(mDisplay);
         }

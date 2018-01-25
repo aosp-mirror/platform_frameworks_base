@@ -337,9 +337,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /** Returns true if this window container has the input child. */
-    boolean hasChild(WindowContainer child) {
+    boolean hasChild(E child) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowContainer current = mChildren.get(i);
+            final E current = mChildren.get(i);
             if (current == child || current.hasChild(child)) {
                 return true;
             }

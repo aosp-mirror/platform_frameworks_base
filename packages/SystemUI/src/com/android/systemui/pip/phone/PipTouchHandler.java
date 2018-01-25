@@ -46,6 +46,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.internal.policy.PipSnapAlgorithm;
 import com.android.systemui.R;
+import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 
 import java.io.PrintWriter;
