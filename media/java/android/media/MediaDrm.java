@@ -1253,8 +1253,6 @@ public final class MediaDrm implements AutoCloseable {
      *
      * Additional vendor-specific fields may also be present in
      * the return value.
-     *
-     * @hide - not part of the public API at this time
      */
     public PersistableBundle getMetrics() {
         PersistableBundle bundle = getMetricsNative();
@@ -1571,8 +1569,6 @@ public final class MediaDrm implements AutoCloseable {
     /**
      * Definitions for the metrics that are reported via the
      * {@link #getMetrics} call.
-     *
-     * @hide - not part of the public API at this time
      */
     public final static class MetricsConstants
     {
@@ -1585,7 +1581,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String OPEN_SESSION_OK_COUNT
-            = "/drm/mediadrm/open_session/ok/count";
+            = "drm.mediadrm.open_session.ok.count";
 
         /**
          * Key to extract the number of failed {@link #openSession} calls
@@ -1594,7 +1590,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String OPEN_SESSION_ERROR_COUNT
-            = "/drm/mediadrm/open_session/error/count";
+            = "drm.mediadrm.open_session.error.count";
 
         /**
          * Key to extract the list of error codes that were returned from
@@ -1605,7 +1601,7 @@ public final class MediaDrm implements AutoCloseable {
          * ({@link android.os.BaseBundle#getLongArray}).
          */
         public static final String OPEN_SESSION_ERROR_LIST
-            = "/drm/mediadrm/open_session/error/list";
+            = "drm.mediadrm.open_session.error.list";
 
         /**
          * Key to extract the number of successful {@link #closeSession} calls
@@ -1614,7 +1610,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String CLOSE_SESSION_OK_COUNT
-            = "/drm/mediadrm/close_session/ok/count";
+            = "drm.mediadrm.close_session.ok.count";
 
         /**
          * Key to extract the number of failed {@link #closeSession} calls
@@ -1623,7 +1619,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String CLOSE_SESSION_ERROR_COUNT
-            = "/drm/mediadrm/close_session/error/count";
+            = "drm.mediadrm.close_session.error.count";
 
         /**
          * Key to extract the list of error codes that were returned from
@@ -1634,7 +1630,7 @@ public final class MediaDrm implements AutoCloseable {
          * ({@link android.os.BaseBundle#getLongArray}).
          */
         public static final String CLOSE_SESSION_ERROR_LIST
-            = "/drm/mediadrm/close_session/error/list";
+            = "drm.mediadrm.close_session.error.list";
 
         /**
          * Key to extract the start times of sessions. Times are
@@ -1648,7 +1644,7 @@ public final class MediaDrm implements AutoCloseable {
          * the start time for each session.
          */
         public static final String SESSION_START_TIMES_MS
-            = "/drm/mediadrm/session_start_times_ms";
+            = "drm.mediadrm.session_start_times_ms";
 
         /**
          * Key to extract the end times of sessions. Times are
@@ -1662,7 +1658,7 @@ public final class MediaDrm implements AutoCloseable {
          * the end time for each session.
          */
         public static final String SESSION_END_TIMES_MS
-            = "/drm/mediadrm/session_end_times_ms";
+            = "drm.mediadrm.session_end_times_ms";
 
         /**
          * Key to extract the number of successful {@link #getKeyRequest} calls
@@ -1671,7 +1667,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String GET_KEY_REQUEST_OK_COUNT
-            = "/drm/mediadrm/get_key_request/ok/count";
+            = "drm.mediadrm.get_key_request.ok.count";
 
         /**
          * Key to extract the number of failed {@link #getKeyRequest}
@@ -1680,7 +1676,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String GET_KEY_REQUEST_ERROR_COUNT
-            = "/drm/mediadrm/get_key_request/error/count";
+            = "drm.mediadrm.get_key_request.error.count";
 
         /**
          * Key to extract the list of error codes that were returned from
@@ -1691,7 +1687,7 @@ public final class MediaDrm implements AutoCloseable {
          * ({@link android.os.BaseBundle#getLongArray}).
          */
         public static final String GET_KEY_REQUEST_ERROR_LIST
-            = "/drm/mediadrm/get_key_request/error/list";
+            = "drm.mediadrm.get_key_request.error.list";
 
         /**
          * Key to extract the average time in microseconds of calls to
@@ -1700,7 +1696,7 @@ public final class MediaDrm implements AutoCloseable {
          * The time is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String GET_KEY_REQUEST_OK_TIME_MICROS
-            = "/drm/mediadrm/get_key_request/ok/average_time_micros";
+            = "drm.mediadrm.get_key_request.ok.average_time_micros";
 
         /**
          * Key to extract the number of successful {@link #provideKeyResponse}
@@ -1709,7 +1705,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String PROVIDE_KEY_RESPONSE_OK_COUNT
-            = "/drm/mediadrm/provide_key_response/ok/count";
+            = "drm.mediadrm.provide_key_response.ok.count";
 
         /**
          * Key to extract the number of failed {@link #provideKeyResponse}
@@ -1718,7 +1714,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String PROVIDE_KEY_RESPONSE_ERROR_COUNT
-            = "/drm/mediadrm/provide_key_response/error/count";
+            = "drm.mediadrm.provide_key_response.error.count";
 
         /**
          * Key to extract the list of error codes that were returned from
@@ -1729,7 +1725,7 @@ public final class MediaDrm implements AutoCloseable {
          * ({@link android.os.BaseBundle#getLongArray}).
          */
         public static final String PROVIDE_KEY_RESPONSE_ERROR_LIST
-            = "/drm/mediadrm/provide_key_response/error/list";
+            = "drm.mediadrm.provide_key_response.error.list";
 
         /**
          * Key to extract the average time in microseconds of calls to
@@ -1738,7 +1734,7 @@ public final class MediaDrm implements AutoCloseable {
          * The time is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String PROVIDE_KEY_RESPONSE_OK_TIME_MICROS
-            = "/drm/mediadrm/provide_key_response/ok/average_time_micros";
+            = "drm.mediadrm.provide_key_response.ok.average_time_micros";
 
         /**
          * Key to extract the number of successful {@link #getProvisionRequest}
@@ -1747,7 +1743,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String GET_PROVISION_REQUEST_OK_COUNT
-            = "/drm/mediadrm/get_provision_request/ok/count";
+            = "drm.mediadrm.get_provision_request.ok.count";
 
         /**
          * Key to extract the number of failed {@link #getProvisionRequest}
@@ -1756,7 +1752,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String GET_PROVISION_REQUEST_ERROR_COUNT
-            = "/drm/mediadrm/get_provision_request/error/count";
+            = "drm.mediadrm.get_provision_request.error.count";
 
         /**
          * Key to extract the list of error codes that were returned from
@@ -1767,7 +1763,7 @@ public final class MediaDrm implements AutoCloseable {
          * ({@link android.os.BaseBundle#getLongArray}).
          */
         public static final String GET_PROVISION_REQUEST_ERROR_LIST
-            = "/drm/mediadrm/get_provision_request/error/list";
+            = "drm.mediadrm.get_provision_request.error.list";
 
         /**
          * Key to extract the number of successful
@@ -1776,7 +1772,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String PROVIDE_PROVISION_RESPONSE_OK_COUNT
-            = "/drm/mediadrm/provide_provision_response/ok/count";
+            = "drm.mediadrm.provide_provision_response.ok.count";
 
         /**
          * Key to extract the number of failed
@@ -1785,7 +1781,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String PROVIDE_PROVISION_RESPONSE_ERROR_COUNT
-            = "/drm/mediadrm/provide_provision_response/error/count";
+            = "drm.mediadrm.provide_provision_response.error.count";
 
         /**
          * Key to extract the list of error codes that were returned from
@@ -1796,7 +1792,7 @@ public final class MediaDrm implements AutoCloseable {
          * ({@link android.os.BaseBundle#getLongArray}).
          */
         public static final String PROVIDE_PROVISION_RESPONSE_ERROR_LIST
-            = "/drm/mediadrm/provide_provision_response/error/list";
+            = "drm.mediadrm.provide_provision_response.error.list";
 
         /**
          * Key to extract the number of successful
@@ -1807,7 +1803,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String GET_DEVICE_UNIQUE_ID_OK_COUNT
-            = "/drm/mediadrm/get_device_unique_id/ok/count";
+            = "drm.mediadrm.get_device_unique_id.ok.count";
 
         /**
          * Key to extract the number of failed
@@ -1818,7 +1814,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String GET_DEVICE_UNIQUE_ID_ERROR_COUNT
-            = "/drm/mediadrm/get_device_unique_id/error/count";
+            = "drm.mediadrm.get_device_unique_id.error.count";
 
         /**
          * Key to extract the list of error codes that were returned from
@@ -1830,7 +1826,7 @@ public final class MediaDrm implements AutoCloseable {
          * ({@link android.os.BaseBundle#getLongArray}).
          */
         public static final String GET_DEVICE_UNIQUE_ID_ERROR_LIST
-            = "/drm/mediadrm/get_device_unique_id/error/list";
+            = "drm.mediadrm.get_device_unique_id.error.list";
 
         /**
          * Key to extraact the count of {@link KeyStatus#STATUS_EXPIRED} events
@@ -1839,7 +1835,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String KEY_STATUS_EXPIRED_COUNT
-            = "/drm/mediadrm/key_status/EXPIRED/count";
+            = "drm.mediadrm.key_status.EXPIRED.count";
 
         /**
          * Key to extract the count of {@link KeyStatus#STATUS_INTERNAL_ERROR}
@@ -1848,7 +1844,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String KEY_STATUS_INTERNAL_ERROR_COUNT
-            = "/drm/mediadrm/key_status/INTERNAL_ERROR/count";
+            = "drm.mediadrm.key_status.INTERNAL_ERROR.count";
 
         /**
          * Key to extract the count of
@@ -1858,7 +1854,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String KEY_STATUS_OUTPUT_NOT_ALLOWED_COUNT
-            = "/drm/mediadrm/key_status_change/OUTPUT_NOT_ALLOWED/count";
+            = "drm.mediadrm.key_status_change.OUTPUT_NOT_ALLOWED.count";
 
         /**
          * Key to extract the count of {@link KeyStatus#STATUS_PENDING}
@@ -1867,7 +1863,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String KEY_STATUS_PENDING_COUNT
-            = "/drm/mediadrm/key_status_change/PENDING/count";
+            = "drm.mediadrm.key_status_change.PENDING.count";
 
         /**
          * Key to extract the count of {@link KeyStatus#STATUS_USABLE}
@@ -1876,7 +1872,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String KEY_STATUS_USABLE_COUNT
-            = "/drm/mediadrm/key_status_change/USABLE/count";
+            = "drm.mediadrm.key_status_change.USABLE.count";
 
         /**
          * Key to extract the count of {@link OnEventListener#onEvent}
@@ -1886,7 +1882,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String EVENT_PROVISION_REQUIRED_COUNT
-            = "/drm/mediadrm/event/PROVISION_REQUIRED/count";
+            = "drm.mediadrm.event.PROVISION_REQUIRED.count";
 
         /**
          * Key to extract the count of {@link OnEventListener#onEvent}
@@ -1896,7 +1892,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String EVENT_KEY_NEEDED_COUNT
-            = "/drm/mediadrm/event/KEY_NEEDED/count";
+            = "drm.mediadrm.event.KEY_NEEDED.count";
 
         /**
          * Key to extract the count of {@link OnEventListener#onEvent}
@@ -1906,7 +1902,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String EVENT_KEY_EXPIRED_COUNT
-            = "/drm/mediadrm/event/KEY_EXPIRED/count";
+            = "drm.mediadrm.event.KEY_EXPIRED.count";
 
         /**
          * Key to extract the count of {@link OnEventListener#onEvent}
@@ -1916,7 +1912,7 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String EVENT_VENDOR_DEFINED_COUNT
-            = "/drm/mediadrm/event/VENDOR_DEFINED/count";
+            = "drm.mediadrm.event.VENDOR_DEFINED.count";
 
         /**
          * Key to extract the count of {@link OnEventListener#onEvent}
@@ -1926,6 +1922,6 @@ public final class MediaDrm implements AutoCloseable {
          * The count is a Long value ({@link android.os.BaseBundle#getLong}).
          */
         public static final String EVENT_SESSION_RECLAIMED_COUNT
-            = "/drm/mediadrm/event/SESSION_RECLAIMED/count";
+            = "drm.mediadrm.event.SESSION_RECLAIMED.count";
     }
 }
