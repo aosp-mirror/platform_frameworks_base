@@ -62,7 +62,7 @@
     <string name="empty" msgid="7858882803708117596">"Ez dago ezer"</string>
     <string name="no_results" msgid="6622510343880730446">"Ez da aurkitu ezer %1$s atalean"</string>
     <string name="toast_no_application" msgid="4632640357724698144">"Ezin da ireki fitxategia"</string>
-    <string name="toast_failed_delete" msgid="2180678019407244069">"Ezin izan dira dokumentu batzuk ezabatu"</string>
+    <string name="toast_failed_delete" msgid="2180678019407244069">"Ezin dira ezabatu dokumentu batzuk"</string>
     <string name="share_via" msgid="8966594246261344259">"Partekatu honen bidez:"</string>
     <string name="copy_notification_title" msgid="6374299806748219777">"Fitxategiak kopiatzen"</string>
     <string name="move_notification_title" msgid="6193835179777284805">"Fitxategiak mugitzea"</string>
