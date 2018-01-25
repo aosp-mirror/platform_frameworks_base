@@ -14,7 +14,7 @@
  * limitations under the License
  */
 
-package com.android.server.testing;
+package com.android.server.testing.shadows;
 
 import android.util.EventLog;
 
@@ -40,7 +40,8 @@ public class ShadowEventLog {
         return ENTRIES.contains(new Entry(tag, Arrays.asList(values)));
     }
 
-    public static void clearEvents() {
+    /** Clears the entries */
+    public static void setUp() {
         ENTRIES.clear();
     }
 

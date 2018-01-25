@@ -16,11 +16,28 @@
 
 package com.android.server.backup.testing;
 
+import static com.google.common.truth.Truth.assertThat;
+
+
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
+
+import org.robolectric.shadows.ShadowLog;
 
 import java.util.concurrent.Callable;
 
 public class TestUtils {
+    /** Reset logcat with {@link ShadowLog#reset()} before the test case */
+    public static void assertLogcatAtMost(String tag, int level) {
+        assertThat(ShadowLog.getLogsForTag(tag).stream().allMatch(logItem -> logItem.type <= level))
+                .isTrue();
+    }
+
+    /** Reset logcat with {@link ShadowLog#reset()} before the test case */
+    public static void assertLogcatAtLeast(String tag, int level) {
+        assertThat(ShadowLog.getLogsForTag(tag).stream().anyMatch(logItem -> logItem.type >= level))
+                .isTrue();
+    }
+
     /**
      * Calls {@link Runnable#run()} and returns if no exception is thrown. Otherwise, if the
      * exception is unchecked, rethrow it; if it's checked wrap in a {@link RuntimeException} and
