@@ -111,11 +111,6 @@ public class PackageDexOptimizer {
             return false;
         }
 
-        // We do not dexopt a priv-app package when pm.dexopt.priv-apps-oob is true.
-        if (pkg.isPrivileged()) {
-            return !SystemProperties.getBoolean("pm.dexopt.priv-apps-oob", false);
-        }
-
         return true;
     }
 
@@ -481,6 +476,11 @@ public class PackageDexOptimizer {
             boolean isUsedByOtherApps) {
         int flags = info.flags;
         boolean vmSafeMode = (flags & ApplicationInfo.FLAG_VM_SAFE_MODE) != 0;
+        // When pm.dexopt.priv-apps-oob is true, we only verify privileged apps.
+        if (info.isPrivilegedApp() &&
+            SystemProperties.getBoolean("pm.dexopt.priv-apps-oob", false)) {
+          return "verify";
+        }
         if (vmSafeMode) {
             return getSafeModeCompilerFilter(targetCompilerFilter);
         }
