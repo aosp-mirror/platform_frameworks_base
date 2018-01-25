@@ -90,6 +90,7 @@ public class Watchdog extends Thread {
         "media.metrics", // system/bin/mediametrics
         "media.codec", // vendor/bin/hw/android.hardware.media.omx@1.0-service
         "com.android.bluetooth",  // Bluetooth service
+        "statsd",  // Stats daemon
     };
 
     public static final List<String> HAL_INTERFACES_OF_INTEREST = Arrays.asList(
