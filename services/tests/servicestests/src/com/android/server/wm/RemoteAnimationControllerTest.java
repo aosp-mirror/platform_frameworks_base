@@ -20,6 +20,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -133,5 +134,11 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
 
         verify(mMockRunner).onAnimationCancelled();
         verify(mFinishedCallback).onAnimationFinished(eq(adapter));
+    }
+
+    @Test
+    public void testZeroAnimations() throws Exception {
+        mController.goodToGo();
+        verifyZeroInteractions(mMockRunner);
     }
 }
