@@ -568,6 +568,14 @@ public class DockedStackDividerController {
                 : null;
         final TaskStack dockedStack = mDisplayContent.getSplitScreenPrimaryStack();
         boolean visibleAndValid = visible && stack != null && dockedStack != null;
+
+        // Ensure an old dim that was shown for the docked stack divider is removed so we don't end
+        // up with dim layers that can no longer be removed.
+        if (mDimmedStack != null && mDimmedStack != stack) {
+            mDimmedStack.stopDimming();
+            mDimmedStack = null;
+        }
+
         if (visibleAndValid) {
             mDimmedStack = stack;
             stack.dim(alpha);
