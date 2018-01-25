@@ -16,6 +16,7 @@
 
 package android.os;
 
+import android.os.StatsDimensionsValue;
 import android.os.StatsLogEventWrapper;
 
 /**
@@ -55,7 +56,16 @@ interface IStatsCompanionService {
     StatsLogEventWrapper[] pullData(int pullCode);
 
     /** Send a broadcast to the specified pkg and class that it should getData now. */
+    // TODO: Rename this and use a pending intent instead.
     oneway void sendBroadcast(String pkg, String cls);
+
+    /**
+     * Requests StatsCompanionService to send a broadcast using the given intentSender
+     * (which should cast to an IIntentSender), along with the other information specified.
+     */
+    oneway void sendSubscriberBroadcast(in IBinder intentSender, long configUid, long configId,
+                                        long subscriptionId, long subscriptionRuleId,
+                                        in StatsDimensionsValue dimensionsValue);
 
     /** Tells StatsCompaionService to grab the uid map snapshot and send it to statsd. */
     oneway void triggerUidSnapshot();
