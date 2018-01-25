@@ -20,6 +20,7 @@ import android.media.AudioAttributes;
 import android.media.MediaPlayerInterface;
 import android.media.session.MediaController;
 import android.media.session.PlaybackState;
+import android.media.session.MediaSession;
 import android.net.Uri;
 import android.widget.MediaControlView2;
 import android.widget.VideoView2;
@@ -53,6 +54,8 @@ public interface VideoView2Provider extends ViewProvider {
     void setAudioFocusRequest_impl(int focusGain);
     void setAudioAttributes_impl(AudioAttributes attributes);
     void setRouteAttributes_impl(List<String> routeCategories, MediaPlayerInterface player);
+    // TODO: remove setRouteAttributes_impl with MediaSession.Callback once MediaSession2 is ready.
+    void setRouteAttributes_impl(List<String> routeCategories, MediaSession.Callback sessionPlayer);
     void setVideoPath_impl(String path);
     void setVideoUri_impl(Uri uri);
     void setVideoUri_impl(Uri uri, Map<String, String> headers);

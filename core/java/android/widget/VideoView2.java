@@ -24,6 +24,7 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayerInterface;
 import android.media.session.MediaController;
+import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.media.update.ApiLoader;
 import android.media.update.VideoView2Provider;
@@ -257,13 +258,31 @@ public class VideoView2 extends FrameLayout {
      *
      * @param routeCategories        the list of media control categories in
      *                               {@link android.support.v7.media.MediaControlIntent}
-     * @param player                 the player to handle the selected route. If null, a default
-     *                               route player will be used.
+     * @param player                 the player to handle playback of the selected route.
+     *                               If null, a default route player will be used.
      * @throws IllegalStateException if MediaControlView2 is not set.
+     * @hide
      */
     public void setRouteAttributes(@NonNull List<String> routeCategories,
             @Nullable MediaPlayerInterface player) {
         mProvider.setRouteAttributes_impl(routeCategories, player);
+    }
+
+    /**
+     * Sets a remote player for handling playback of the selected route from MediaControlView2.
+     * If this is not called, MediaCotrolView2 will not show the route button.
+     *
+     * @param routeCategories        the list of media control categories in
+     *                               {@link android.support.v7.media.MediaControlIntent}
+     * @param sessionPlayer          the player to handle playback of the selected route.
+     *                               If null, a default route player will be used.
+     * @throws IllegalStateException if MediaControlView2 is not set.
+     * @hide
+     */
+    // TODO: Use MediaPlayerBase once MediaSession2 APIs are ready.
+    public void setRouteAttributes(@NonNull List<String> routeCategories,
+            @Nullable MediaSession.Callback sessionPlayer) {
+        mProvider.setRouteAttributes_impl(routeCategories, sessionPlayer);
     }
 
     /**
