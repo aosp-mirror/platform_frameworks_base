@@ -738,7 +738,9 @@ public final class DocumentsContract {
     private static final String PATH_DOCUMENT = "document";
     private static final String PATH_CHILDREN = "children";
     private static final String PATH_SEARCH = "search";
-    private static final String PATH_TREE = "tree";
+    // TODO(b/72055774): make private again once ScopedAccessProvider is refactored
+    /** {@hide} */
+    public static final String PATH_TREE = "tree";
 
     private static final String PARAM_QUERY = "query";
     private static final String PARAM_MANAGE = "manage";

@@ -19,6 +19,7 @@ package android.app;
 import android.app.ActivityManager;
 import android.app.ApplicationErrorReport;
 import android.app.ContentProviderHolder;
+import android.app.GrantedUriPermission;
 import android.app.IApplicationThread;
 import android.app.IActivityController;
 import android.app.IAppTask;
@@ -569,7 +570,7 @@ interface IActivityManager {
             in Rect tempDockedTaskInsetBounds,
             in Rect tempOtherTaskBounds, in Rect tempOtherTaskInsetBounds);
     int setVrMode(in IBinder token, boolean enabled, in ComponentName packageName);
-    // Gets the URI permissions granted to an arbitrary package.
+    // Gets the URI permissions granted to an arbitrary package (or all packages if null)
     // NOTE: this is different from getPersistedUriPermissions(), which returns the URIs the package
     // granted to another packages (instead of those granted to it).
     ParceledListSlice getGrantedUriPermissions(in String packageName, int userId);

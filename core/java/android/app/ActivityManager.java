@@ -28,7 +28,6 @@ import android.annotation.TestApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.UriPermission;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
@@ -2686,17 +2685,22 @@ public class ActivityManager {
     /**
      * Permits an application to get the persistent URI permissions granted to another.
      *
-     * <p>Typically called by Settings.
+     * <p>Typically called by Settings or DocumentsUI, requires
+     * {@code GET_APP_GRANTED_URI_PERMISSIONS}.
      *
-     * @param packageName application to look for the granted permissions
+     * @param packageName application to look for the granted permissions, or {@code null} to get
+     * granted permissions for all applications
      * @return list of granted URI permissions
      *
      * @hide
      */
-    public ParceledListSlice<UriPermission> getGrantedUriPermissions(String packageName) {
+    public ParceledListSlice<GrantedUriPermission> getGrantedUriPermissions(
+            @Nullable String packageName) {
         try {
-            return getService().getGrantedUriPermissions(packageName,
-                    UserHandle.myUserId());
+            @SuppressWarnings("unchecked")
+            final ParceledListSlice<GrantedUriPermission> castedList = getService()
+                    .getGrantedUriPermissions(packageName, UserHandle.myUserId());
+            return castedList;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2705,7 +2709,7 @@ public class ActivityManager {
     /**
      * Permits an application to clear the persistent URI permissions granted to another.
      *
-     * <p>Typically called by Settings.
+     * <p>Typically called by Settings, requires {@code CLEAR_APP_GRANTED_URI_PERMISSIONS}.
      *
      * @param packageName application to clear its granted permissions
      *
