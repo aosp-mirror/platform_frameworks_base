@@ -626,6 +626,12 @@ final public class MediaExtractor {
      */
     public native long getSampleTime();
 
+    /**
+     * @return size of the current sample in bytes or -1 if no more
+     * samples are available.
+     */
+    public native long getSampleSize();
+
     // Keep these in sync with their equivalents in NuMediaExtractor.h
     /**
      * The sample is a sync sample (or in {@link MediaCodec}'s terminology
