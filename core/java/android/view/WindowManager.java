@@ -98,13 +98,11 @@ public interface WindowManager extends ViewManager {
     int DOCKED_BOTTOM = 4;
 
     /** @hide */
-    String INPUT_CONSUMER_PIP = "pip_input_consumer";
+    final static String INPUT_CONSUMER_PIP = "pip_input_consumer";
     /** @hide */
-    String INPUT_CONSUMER_NAVIGATION = "nav_input_consumer";
+    final static String INPUT_CONSUMER_NAVIGATION = "nav_input_consumer";
     /** @hide */
-    String INPUT_CONSUMER_WALLPAPER = "wallpaper_input_consumer";
-    /** @hide */
-    String INPUT_CONSUMER_RECENTS_ANIMATION = "recents_animation_input_consumer";
+    final static String INPUT_CONSUMER_WALLPAPER = "wallpaper_input_consumer";
 
     /**
      * Not set up for a transition.
