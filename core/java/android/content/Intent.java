@@ -9451,7 +9451,7 @@ public class Intent implements Parcelable, Cloneable {
             proto.write(IntentProto.PACKAGE, mPackage);
         }
         if (comp && mComponent != null) {
-            proto.write(IntentProto.COMPONENT, mComponent.flattenToShortString());
+            mComponent.writeToProto(proto, IntentProto.COMPONENT);
         }
         if (mSourceBounds != null) {
             proto.write(IntentProto.SOURCE_BOUNDS, mSourceBounds.toShortString());

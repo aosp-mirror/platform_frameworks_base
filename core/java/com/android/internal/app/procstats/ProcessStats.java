@@ -1776,10 +1776,11 @@ public final class ProcessStats implements Parcelable {
         }
     }
 
-    public void toProto(ProtoOutputStream proto, long now) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId, long now) {
         final ArrayMap<String, SparseArray<LongSparseArray<PackageState>>> pkgMap =
                 mPackages.getMap();
 
+        final long token = proto.start(fieldId);
         proto.write(ProcessStatsSectionProto.START_REALTIME_MS, mTimePeriodStartRealtime);
         proto.write(ProcessStatsSectionProto.END_REALTIME_MS,
                 mRunning ? SystemClock.elapsedRealtime() : mTimePeriodEndRealtime);
@@ -1811,11 +1812,10 @@ public final class ProcessStats implements Parcelable {
             for (int iu=0; iu<uids.size(); iu++) {
                 final int uid = uids.keyAt(iu);
                 final ProcessState procState = uids.valueAt(iu);
-                final long processStateToken = proto.start(ProcessStatsSectionProto.PROCESS_STATS);
-                procState.toProto(proto, procName, uid, now);
-                proto.end(processStateToken);
+                procState.writeToProto(proto, ProcessStatsSectionProto.PROCESS_STATS, procName, uid, now);
             }
         }
+        proto.end(token);
     }
 
     final public static class ProcessStateHolder {
