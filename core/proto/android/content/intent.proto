@@ -51,14 +51,14 @@ message IntentProto {
 
     optional string action = 1;
     repeated string categories = 2;
-    optional string data = 3  [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional string data = 3 [ (.android.privacy).dest = DEST_EXPLICIT ];
     optional string type = 4;
     optional string flag = 5;
     optional string package = 6;
     optional string component = 7;
     optional string source_bounds = 8;
-    optional string clip_data = 9  [ (.android.privacy).dest = DEST_EXPLICIT ];
-    optional string extras = 10;
+    optional string clip_data = 9 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional string extras = 10 [ (.android.privacy).dest = DEST_EXPLICIT ];
     optional int32 content_user_hint = 11;
     optional string selector = 12;
 }
