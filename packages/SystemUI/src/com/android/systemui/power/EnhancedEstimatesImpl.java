@@ -13,4 +13,14 @@ public class EnhancedEstimatesImpl implements EnhancedEstimates {
     public Estimate getEstimate() {
         return null;
     }
+
+    @Override
+    public long getLowWarningThreshold() {
+        return 0;
+    }
+
+    @Override
+    public long getSevereWarningThreshold() {
+        return 0;
+    }
 }

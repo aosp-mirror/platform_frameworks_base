@@ -44,6 +44,12 @@ import java.util.Set;
 public class SettingsBackupTest {
 
     /**
+     * see {@link com.google.android.systemui.power.EnhancedEstimatesGoogleImpl} for more details
+     */
+    public static final String HYBRID_SYSUI_BATTERY_WARNING_FLAGS =
+            "hybrid_sysui_battery_warning_flags";
+
+    /**
      * The following blacklists contain settings that should *not* be backed up and restored to
      * another device.  As a general rule, anything that is not user configurable should be
      * blacklisted (and conversely, things that *are* user configurable *should* be backed up)
@@ -232,6 +238,7 @@ public class SettingsBackupTest {
                     Settings.Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED,
                     Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
                     Settings.Global.HTTP_PROXY,
+                    HYBRID_SYSUI_BATTERY_WARNING_FLAGS,
                     Settings.Global.INET_CONDITION_DEBOUNCE_DOWN_DELAY,
                     Settings.Global.INET_CONDITION_DEBOUNCE_UP_DELAY,
                     Settings.Global.INSTANT_APP_DEXOPT_ENABLED,

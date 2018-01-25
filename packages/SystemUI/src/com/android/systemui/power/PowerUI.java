@@ -269,6 +269,8 @@ public class PowerUI extends SystemUI {
             if (estimate != null) {
                 mTimeRemaining = estimate.estimateMillis;
                 mWarnings.updateEstimate(estimate);
+                mWarnings.updateThresholds(mEnhancedEstimates.getLowWarningThreshold(),
+                        mEnhancedEstimates.getSevereWarningThreshold());
             }
         }
 
@@ -292,7 +294,7 @@ public class PowerUI extends SystemUI {
                 && !isPowerSaver
                 && (((bucket < oldBucket || oldPlugged) && bucket < 0)
                         || (mEnhancedEstimates.isHybridNotificationEnabled()
-                                && timeRemaining < THREE_HOURS_IN_MILLIS
+                                && timeRemaining < mEnhancedEstimates.getLowWarningThreshold()
                                 && isHourLess(oldTimeRemaining, timeRemaining)))
                 && mBatteryStatus != BatteryManager.BATTERY_STATUS_UNKNOWN;
     }
@@ -306,7 +308,7 @@ public class PowerUI extends SystemUI {
     boolean shouldDismissLowBatteryWarning(boolean plugged, int oldBucket, int bucket,
             long timeRemaining, boolean isPowerSaver) {
         final boolean hybridWouldDismiss = mEnhancedEstimates.isHybridNotificationEnabled()
-                && timeRemaining > THREE_HOURS_IN_MILLIS;
+                && timeRemaining > mEnhancedEstimates.getLowWarningThreshold();
         final boolean standardWouldDismiss = (bucket > oldBucket && bucket > 0);
         return isPowerSaver
                 || plugged
@@ -485,6 +487,7 @@ public class PowerUI extends SystemUI {
     public interface WarningsUI {
         void update(int batteryLevel, int bucket, long screenOffTime);
         void updateEstimate(Estimate estimate);
+        void updateThresholds(long lowThreshold, long severeThreshold);
         void dismissLowBatteryWarning();
         void showLowBatteryWarning(boolean playSound);
         void dismissInvalidChargerWarning();
