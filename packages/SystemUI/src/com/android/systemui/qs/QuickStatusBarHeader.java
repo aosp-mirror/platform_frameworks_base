@@ -166,7 +166,8 @@ public class QuickStatusBarHeader extends RelativeLayout
         if (disabled == mQsDisabled) return;
         mQsDisabled = disabled;
         mHeaderQsPanel.setDisabledByPolicy(disabled);
-        final int rawHeight = (int) getResources().getDimension(R.dimen.status_bar_header_height);
+        final int rawHeight = (int) getResources().getDimension(
+                com.android.internal.R.dimen.quick_qs_total_height);
         getLayoutParams().height = disabled ? (rawHeight - mHeaderQsPanel.getHeight()) : rawHeight;
     }
 

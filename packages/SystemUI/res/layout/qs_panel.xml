@@ -33,7 +33,7 @@
     <View
         android:id="@+id/quick_settings_status_bar_background"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/qs_header_system_icons_area_height"
+        android:layout_height="@*android:dimen/quick_qs_offset_height"
         android:clipToPadding="false"
         android:clipChildren="false"
         android:background="#ff000000" />
@@ -43,7 +43,7 @@
         android:id="@+id/quick_settings_gradient_view"
         android:layout_width="match_parent"
         android:layout_height="126dp"
-        android:layout_marginTop="@dimen/qs_header_system_icons_area_height"
+        android:layout_marginTop="@*android:dimen/quick_qs_offset_height"
         android:clipToPadding="false"
         android:clipChildren="false"
         android:background="@drawable/qs_bg_gradient" />
@@ -51,7 +51,7 @@
 
     <com.android.systemui.qs.QSPanel
         android:id="@+id/quick_settings_panel"
-        android:layout_marginTop="@dimen/qs_header_system_icons_area_height"
+        android:layout_marginTop="@*android:dimen/quick_qs_offset_height"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="48dp"

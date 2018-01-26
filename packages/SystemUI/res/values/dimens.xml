@@ -214,9 +214,6 @@
     <!-- Amount of close_handle that will NOT overlap the notification list -->
     <dimen name="close_handle_underlap">32dp</dimen>
 
-    <!-- Height of the status bar header bar -->
-    <dimen name="status_bar_header_height">178dp</dimen>
-
     <!-- Height of the status bar header bar in the car setting. -->
     <dimen name="car_status_bar_header_height">128dp</dimen>
 
