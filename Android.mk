@@ -699,6 +699,16 @@ include $(BUILD_HOST_JAVA_LIBRARY)
 
 # ==== hiddenapi lists =======================================
 
+# Copy blacklist and dark greylist over into the build folder.
+# This is for ART buildbots which need to mock these lists and have alternative
+# rules for building them. Other rules in the build system should depend on the
+# files in the build folder.
+
+$(eval $(call copy-one-file,frameworks/base/config/hiddenapi-blacklist.txt,\
+                            $(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST)))
+$(eval $(call copy-one-file,frameworks/base/config/hiddenapi-dark-greylist.txt,\
+                            $(INTERNAL_PLATFORM_HIDDENAPI_DARK_GREYLIST)))
+
 # Generate light greylist as private API minus (blacklist plus dark greylist).
 
 $(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST): PRIVATE_API := $(INTERNAL_PLATFORM_PRIVATE_DEX_API_FILE)
