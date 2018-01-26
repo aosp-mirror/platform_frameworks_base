@@ -117,3 +117,11 @@ jobject android::nullObjectReturn(const char msg[]) {
 bool android::isSeekable(int descriptor) {
     return ::lseek64(descriptor, 0, SEEK_CUR) != -1;
 }
+
+JNIEnv* android::get_env_or_die(JavaVM* jvm) {
+    JNIEnv* env;
+    if (jvm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        LOG_ALWAYS_FATAL("Failed to get JNIEnv for JavaVM: %p", jvm);
+    }
+    return env;
+}

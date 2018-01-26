@@ -17,6 +17,7 @@
 #include "GraphicsJNI.h"
 #include "ImageDecoder.h"
 #include "core_jni_helpers.h"
+#include "Utils.h"
 
 #include <hwui/AnimatedImageDrawable.h>
 #include <hwui/Canvas.h>
@@ -28,6 +29,7 @@
 
 using namespace android;
 
+static jmethodID gAnimatedImageDrawable_postOnAnimationEndMethodID;
 
 // Note: jpostProcess holds a handle to the ImageDecoder.
 static jlong AnimatedImageDrawable_nCreate(JNIEnv* env, jobject /*clazz*/,
@@ -113,6 +115,9 @@ static jboolean AnimatedImageDrawable_nIsRunning(JNIEnv* env, jobject /*clazz*/,
     return drawable->isRunning();
 }
 
+// Java's NOT_RUNNING relies on this being -2.0.
+static_assert(SkAnimatedImage::kNotRunning == -2.0);
+
 static jboolean AnimatedImageDrawable_nStart(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
     auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
     return drawable->start();
@@ -121,6 +126,44 @@ static jboolean AnimatedImageDrawable_nStart(JNIEnv* env, jobject /*clazz*/, jlo
 static void AnimatedImageDrawable_nStop(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
     auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
     drawable->stop();
+}
+
+// Java's LOOP_INFINITE relies on this being the same.
+static_assert(SkCodec::kRepetitionCountInfinite == -1);
+
+static void AnimatedImageDrawable_nSetLoopCount(JNIEnv* env, jobject /*clazz*/, jlong nativePtr,
+                                                jint loopCount) {
+    auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
+    drawable->setRepetitionCount(loopCount);
+}
+
+class JniAnimationEndListener : public OnAnimationEndListener {
+public:
+    JniAnimationEndListener(JNIEnv* env, jobject javaObject) {
+        LOG_ALWAYS_FATAL_IF(env->GetJavaVM(&mJvm) != JNI_OK);
+        mJavaObject = env->NewGlobalRef(javaObject);
+    }
+
+    ~JniAnimationEndListener() override {
+        auto* env = get_env_or_die(mJvm);
+        env->DeleteGlobalRef(mJavaObject);
+    }
+
+    void onAnimationEnd() override {
+        auto* env = get_env_or_die(mJvm);
+        env->CallVoidMethod(mJavaObject, gAnimatedImageDrawable_postOnAnimationEndMethodID);
+    }
+
+private:
+    JavaVM* mJvm;
+    jobject mJavaObject;
+};
+
+static void AnimatedImageDrawable_nSetOnAnimationEndListener(JNIEnv* env, jobject /*clazz*/,
+                                                             jlong nativePtr, jobject jdrawable) {
+    auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
+    drawable->setOnAnimationEndListener(std::unique_ptr<OnAnimationEndListener>(
+                new JniAnimationEndListener(env, jdrawable)));
 }
 
 static long AnimatedImageDrawable_nNativeByteSize(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
@@ -139,10 +182,15 @@ static const JNINativeMethod gAnimatedImageDrawableMethods[] = {
     { "nIsRunning",          "(J)Z",                                                         (void*) AnimatedImageDrawable_nIsRunning },
     { "nStart",              "(J)Z",                                                         (void*) AnimatedImageDrawable_nStart },
     { "nStop",               "(J)V",                                                         (void*) AnimatedImageDrawable_nStop },
+    { "nSetLoopCount",       "(JI)V",                                                        (void*) AnimatedImageDrawable_nSetLoopCount },
+    { "nSetOnAnimationEndListener", "(JLandroid/graphics/drawable/AnimatedImageDrawable;)V", (void*) AnimatedImageDrawable_nSetOnAnimationEndListener },
     { "nNativeByteSize",     "(J)J",                                                         (void*) AnimatedImageDrawable_nNativeByteSize },
 };
 
 int register_android_graphics_drawable_AnimatedImageDrawable(JNIEnv* env) {
+    jclass animatedImageDrawable_class = FindClassOrDie(env, "android/graphics/drawable/AnimatedImageDrawable");
+    gAnimatedImageDrawable_postOnAnimationEndMethodID = GetMethodIDOrDie(env, animatedImageDrawable_class, "postOnAnimationEnd", "()V");
+
     return android::RegisterMethodsOrDie(env, "android/graphics/drawable/AnimatedImageDrawable",
             gAnimatedImageDrawableMethods, NELEM(gAnimatedImageDrawableMethods));
 }

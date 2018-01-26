@@ -74,6 +74,8 @@ jobject nullObjectReturn(const char msg[]);
  */
 bool isSeekable(int descriptor);
 
+JNIEnv* get_env_or_die(JavaVM* jvm);
+
 }; // namespace android
 
 #endif  // _ANDROID_GRAPHICS_UTILS_H_
