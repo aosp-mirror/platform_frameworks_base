@@ -20,10 +20,14 @@ package android.net;
 
 option java_multiple_files = true;
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 /**
  * An android.net.NetworkCapabilities object.
  */
 message NetworkCapabilitiesProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     enum Transport {
         // Indicates this network uses a Cellular transport.
         TRANSPORT_CELLULAR = 0;
@@ -118,7 +122,7 @@ message NetworkCapabilitiesProto {
     optional int32 link_up_bandwidth_kbps = 3;
     optional int32 link_down_bandwidth_kbps = 4;
 
-    optional string network_specifier = 5;
+    optional string network_specifier = 5 [ (.android.privacy).dest = DEST_EXPLICIT ];
 
     // True if this object specifies a signal strength.
     optional bool can_report_signal_strength = 6;
