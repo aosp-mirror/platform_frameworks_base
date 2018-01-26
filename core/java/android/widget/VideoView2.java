@@ -31,6 +31,7 @@ import android.net.Uri;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.View;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -46,7 +47,7 @@ import java.util.Map;
  *
  * <p>
  * <em> Data sources that VideoView2 supports : </em>
- * VideoView2 can play video files and audio-only fiels as
+ * VideoView2 can play video files and audio-only files as
  * well. It can load from various sources such as resources or content providers. The supported
  * media file formats are the same as MediaPlayer2.
  *
@@ -109,7 +110,18 @@ public class VideoView2 extends FrameLayout {
     @Retention(RetentionPolicy.SOURCE)
     public @interface ViewType {}
 
+    /**
+     * Indicates video is rendering on SurfaceView
+     *
+     * @see #setViewType
+     */
     public static final int VIEW_TYPE_SURFACEVIEW = 1;
+
+    /**
+     * Indicates video is rendering on TextureView
+     *
+     * @see #setViewType
+     */
     public static final int VIEW_TYPE_TEXTUREVIEW = 2;
 
     private final VideoView2Provider mProvider;
@@ -172,13 +184,6 @@ public class VideoView2 extends FrameLayout {
      */
     public MediaController getMediaController() {
         return mProvider.getMediaController_impl();
-    }
-
-    /**
-     * Returns the audio session ID.
-     */
-    public int getAudioSessionId() {
-        return mProvider.getAudioSessionId_impl();
     }
 
     /**
@@ -274,8 +279,8 @@ public class VideoView2 extends FrameLayout {
      *
      * @param uri the URI of the video.
      */
-    public void setVideoURI(Uri uri) {
-        mProvider.setVideoURI_impl(uri);
+    public void setVideoUri(Uri uri) {
+        mProvider.setVideoUri_impl(uri);
     }
 
     /**
@@ -288,8 +293,8 @@ public class VideoView2 extends FrameLayout {
      *                "android-allow-cross-domain-redirect" as the key and "0" or "1" as the value
      *                to disallow or allow cross domain redirection.
      */
-    public void setVideoURI(Uri uri, Map<String, String> headers) {
-        mProvider.setVideoURI_impl(uri, headers);
+    public void setVideoUri(Uri uri, Map<String, String> headers) {
+        mProvider.setVideoUri_impl(uri, headers);
     }
 
     /**
@@ -372,19 +377,20 @@ public class VideoView2 extends FrameLayout {
     }
 
     /**
-     * Interface definition of a callback to be invoked when the viw type has been changed.
+     * Interface definition of a callback to be invoked when the view type has been changed.
      */
     public interface OnViewTypeChangedListener {
         /**
          * Called when the view type has been changed.
          * @see #setViewType(int)
+         * @param view the View whose view type is changed
          * @param viewType
          * <ul>
          * <li>{@link #VIEW_TYPE_SURFACEVIEW}
          * <li>{@link #VIEW_TYPE_TEXTUREVIEW}
          * </ul>
          */
-        void onViewTypeChanged(@ViewType int viewType);
+        void onViewTypeChanged(View view, @ViewType int viewType);
     }
 
     /**
@@ -394,7 +400,7 @@ public class VideoView2 extends FrameLayout {
         /**
          * Called when the media file is ready for playback.
          */
-        void onPrepared();
+        void onPrepared(View view);
     }
 
     /**
@@ -405,7 +411,7 @@ public class VideoView2 extends FrameLayout {
         /**
          * Called when the end of a media source is reached during playback.
          */
-        void onCompletion();
+        void onCompletion(View view);
     }
 
     /**
@@ -421,7 +427,7 @@ public class VideoView2 extends FrameLayout {
          * @return true if the method handled the error, false if it didn't.
          * @see MediaPlayer#OnErrorListener
          */
-        boolean onError(int what, int extra);
+        boolean onError(View view, int what, int extra);
     }
 
     /**
@@ -436,7 +442,7 @@ public class VideoView2 extends FrameLayout {
          *
          * @see MediaPlayer#OnInfoListener
          */
-        void onInfo(int what, int extra);
+        void onInfo(View view, int what, int extra);
     }
 
     /**
@@ -446,7 +452,7 @@ public class VideoView2 extends FrameLayout {
         /**
          * Called to indicate a fullscreen mode change.
          */
-        void onFullScreenChanged(boolean fullScreen);
+        void onFullScreenChanged(View view, boolean fullScreen);
     }
 
     @Override
