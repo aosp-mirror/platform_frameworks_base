@@ -5114,6 +5114,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         // as that method uses the same check on the activity config override as well.
         final boolean equivalent = config != null && mConfiguration != null
                 && (0 == mConfiguration.diffPublicOnly(config));
+        final Theme systemTheme = getSystemContext().getTheme();
+        final Theme systemUiTheme = getSystemUiContext().getTheme();
 
         synchronized (mResourcesManager) {
             if (mPendingConfiguration != null) {
@@ -5146,12 +5148,10 @@ public final class ActivityThread extends ClientTransactionHandler {
             configDiff = mConfiguration.updateFrom(config);
             config = applyCompatConfiguration(mCurDefaultDisplayDpi);
 
-            final Theme systemTheme = getSystemContext().getTheme();
             if ((systemTheme.getChangingConfigurations() & configDiff) != 0) {
                 systemTheme.rebase();
             }
 
-            final Theme systemUiTheme = getSystemUiContext().getTheme();
             if ((systemUiTheme.getChangingConfigurations() & configDiff) != 0) {
                 systemUiTheme.rebase();
             }
