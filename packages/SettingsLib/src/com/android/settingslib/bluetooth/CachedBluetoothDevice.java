@@ -105,6 +105,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     private static final long MAX_UUID_DELAY_FOR_AUTO_CONNECT = 5000;
     private static final long MAX_HOGP_DELAY_FOR_AUTO_CONNECT = 30000;
 
+    // Active device state
+    private boolean mIsActiveDeviceA2dp = false;
+    private boolean mIsActiveDeviceHeadset = false;
+
     /**
      * Describes the current device and profile for logging.
      *
@@ -156,6 +160,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             mRemovedProfiles.add(profile);
             mLocalNapRoleConnected = false;
         }
+        fetchActiveDevices();
     }
 
     CachedBluetoothDevice(Context context,
@@ -359,6 +364,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         fetchName();
         fetchBtClass();
         updateProfiles();
+        fetchActiveDevices();
         migratePhonebookPermissionChoice();
         migrateMessagePermissionChoice();
         fetchMessageRejectionCount();
@@ -454,6 +460,33 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         return mDevice.getBondState();
     }
 
+    /**
+     * Set the device status as active or non-active per Bluetooth profile.
+     *
+     * @param isActive true if the device is active
+     * @param bluetoothProfile the Bluetooth profile
+     */
+    public void setActiveDevice(boolean isActive, int bluetoothProfile) {
+        boolean changed = false;
+        switch (bluetoothProfile) {
+        case BluetoothProfile.A2DP:
+            changed = (mIsActiveDeviceA2dp != isActive);
+            mIsActiveDeviceA2dp = isActive;
+            break;
+        case BluetoothProfile.HEADSET:
+            changed = (mIsActiveDeviceHeadset != isActive);
+            mIsActiveDeviceHeadset = isActive;
+            break;
+        default:
+            Log.w(TAG, "setActiveDevice: unknown profile " + bluetoothProfile +
+                    " isActive " + isActive);
+            break;
+        }
+        if (changed) {
+            dispatchAttributesChanged();
+        }
+    }
+
     void setRssi(short rssi) {
         if (mRssi != rssi) {
             mRssi = rssi;
@@ -527,6 +560,17 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             }
         }
         return true;
+    }
+
+    private void fetchActiveDevices() {
+        A2dpProfile a2dpProfile = mProfileManager.getA2dpProfile();
+        if (a2dpProfile != null) {
+            mIsActiveDeviceA2dp = mDevice.equals(a2dpProfile.getActiveDevice());
+        }
+        HeadsetProfile headsetProfile = mProfileManager.getHeadsetProfile();
+        if (headsetProfile != null) {
+            mIsActiveDeviceHeadset = mDevice.equals(headsetProfile.getActiveDevice());
+        }
     }
 
     /**
@@ -896,37 +940,60 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                     com.android.settingslib.Utils.formatPercentage(batteryLevel);
         }
 
+        // TODO: A temporary workaround solution using string description the device is active.
+        // Issue tracked by b/72317067 .
+        // An alternative solution would be visual indication.
+        // Intentionally not adding the strings to strings.xml for now:
+        //  1) If this is just a short-term solution, no need to waste translation effort
+        //  2) The number of strings with all possible combinations becomes enormously large.
+        // If string description becomes part of the final solution, we MUST NOT
+        // concatenate the strings here: this does not translate well.
+        String activeString = null;
+        if (mIsActiveDeviceA2dp && mIsActiveDeviceHeadset) {
+            activeString = ", active";
+        } else {
+            if (mIsActiveDeviceA2dp) {
+                activeString = ", active(media)";
+            }
+            if (mIsActiveDeviceHeadset) {
+                activeString = ", active(phone)";
+            }
+        }
+        if (activeString == null) activeString = "";
+
         if (profileConnected) {
             if (a2dpNotConnected && hfpNotConnected) {
                 if (batteryLevelPercentageString != null) {
                     return mContext.getString(
                             R.string.bluetooth_connected_no_headset_no_a2dp_battery_level,
-                            batteryLevelPercentageString);
+                            batteryLevelPercentageString) + activeString;
                 } else {
-                    return mContext.getString(R.string.bluetooth_connected_no_headset_no_a2dp);
+                    return mContext.getString(R.string.bluetooth_connected_no_headset_no_a2dp) +
+                        activeString;
                 }
 
             } else if (a2dpNotConnected) {
                 if (batteryLevelPercentageString != null) {
                     return mContext.getString(R.string.bluetooth_connected_no_a2dp_battery_level,
-                            batteryLevelPercentageString);
+                            batteryLevelPercentageString) + activeString;
                 } else {
-                    return mContext.getString(R.string.bluetooth_connected_no_a2dp);
+                    return mContext.getString(R.string.bluetooth_connected_no_a2dp) + activeString;
                 }
 
             } else if (hfpNotConnected) {
                 if (batteryLevelPercentageString != null) {
                     return mContext.getString(R.string.bluetooth_connected_no_headset_battery_level,
-                            batteryLevelPercentageString);
+                            batteryLevelPercentageString) + activeString;
                 } else {
-                    return mContext.getString(R.string.bluetooth_connected_no_headset);
+                    return mContext.getString(R.string.bluetooth_connected_no_headset)
+                          + activeString;
                 }
             } else {
                 if (batteryLevelPercentageString != null) {
                     return mContext.getString(R.string.bluetooth_connected_battery_level,
-                            batteryLevelPercentageString);
+                            batteryLevelPercentageString) + activeString;
                 } else {
-                    return mContext.getString(R.string.bluetooth_connected);
+                    return mContext.getString(R.string.bluetooth_connected) + activeString;
                 }
             }
         }
