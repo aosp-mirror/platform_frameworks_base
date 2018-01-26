@@ -44,7 +44,7 @@ public interface MediaPlayerInterface {
     void skipToPrevious();
     void skipToNext();
     void seekTo(long pos);
-    void fastFoward();
+    void fastForward();
     void rewind();
 
     PlaybackState2 getPlaybackState();

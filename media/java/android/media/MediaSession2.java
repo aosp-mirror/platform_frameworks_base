@@ -230,6 +230,11 @@ public class MediaSession2 implements AutoCloseable {
             mCommands.add(new Command(COMMAND_CODE_PLAYBACK_STOP));
             mCommands.add(new Command(COMMAND_CODE_PLAYBACK_SKIP_NEXT_ITEM));
             mCommands.add(new Command(COMMAND_CODE_PLAYBACK_SKIP_PREV_ITEM));
+            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_PREPARE));
+            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_FAST_FORWARD));
+            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_REWIND));
+            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_SEEK_TO));
+            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_SET_CURRENT_PLAYLIST_ITEM));
         }
 
         public void removeCommand(Command command) {
