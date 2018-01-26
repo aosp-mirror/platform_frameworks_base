@@ -25,14 +25,17 @@ import android.telephony.data.IDataServiceCallback;
  */
 oneway interface IDataService
 {
-    void setupDataCall(int accessNetwork, in DataProfile dataProfile, boolean isRoaming,
+    void createDataServiceProvider(int slotId);
+    void removeDataServiceProvider(int slotId);
+    void setupDataCall(int slotId, int accessNetwork, in DataProfile dataProfile, boolean isRoaming,
                        boolean allowRoaming, int reason, in LinkProperties linkProperties,
                        IDataServiceCallback callback);
-    void deactivateDataCall(int cid, int reason, IDataServiceCallback callback);
-    void setInitialAttachApn(in DataProfile dataProfile, boolean isRoaming,
+    void deactivateDataCall(int slotId, int cid, int reason, IDataServiceCallback callback);
+    void setInitialAttachApn(int slotId, in DataProfile dataProfile, boolean isRoaming,
                              IDataServiceCallback callback);
-    void setDataProfile(in List<DataProfile> dps, boolean isRoaming, IDataServiceCallback callback);
-    void getDataCallList(IDataServiceCallback callback);
-    void registerForDataCallListChanged(IDataServiceCallback callback);
-    void unregisterForDataCallListChanged(IDataServiceCallback callback);
+    void setDataProfile(int slotId, in List<DataProfile> dps, boolean isRoaming,
+                        IDataServiceCallback callback);
+    void getDataCallList(int slotId, IDataServiceCallback callback);
+    void registerForDataCallListChanged(int slotId, IDataServiceCallback callback);
+    void unregisterForDataCallListChanged(int slotId, IDataServiceCallback callback);
 }
