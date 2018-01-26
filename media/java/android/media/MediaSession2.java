@@ -595,6 +595,9 @@ public class MediaSession2 implements AutoCloseable {
 
         @Override
         public MediaSession2 build() {
+            if (mCallbackExecutor == null) {
+                mCallbackExecutor = mContext.getMainExecutor();
+            }
             if (mCallback == null) {
                 mCallback = new SessionCallback();
             }

@@ -36,6 +36,7 @@ public abstract class MediaPlayerBase {
         void onPlaybackChanged(PlaybackState2 state);
     }
 
+    // Transport controls that session will send command directly to this player.
     public abstract void play();
     public abstract void prepare();
     public abstract void pause();
