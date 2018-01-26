@@ -146,7 +146,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
 
     // TODO(sghuman): Change this to be keyed on AccessPoint.getKey
     private final HashMap<String, ScanResult> mScanResultCache = new HashMap<>();
-    private Integer mScanId = 0;
 
     private NetworkInfo mLastNetworkInfo;
     private WifiInfo mLastInfo;
@@ -450,7 +449,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     private void handleResume() {
         mScanResultCache.clear();
         mSeenBssids.clear();
-        mScanId = 0;
     }
 
     private Collection<ScanResult> updateScanResultCache(final List<ScanResult> newResults) {
@@ -525,7 +523,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     /**
      * Update the internal list of access points.
      *
-     * <p>Do not called directly (except for forceUpdate), use {@link #updateAccessPoints()} which
+     * <p>Do not call directly (except for forceUpdate), use {@link #updateAccessPoints()} which
      * respects {@link #mStaleScanResults}.
      */
     @GuardedBy("mLock")
@@ -534,7 +532,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         WifiConfiguration connectionConfig = null;
         if (mLastInfo != null) {
             connectionConfig = getWifiConfigurationForNetworkId(
-                    mLastInfo.getNetworkId(), mWifiManager.getConfiguredNetworks());
+                    mLastInfo.getNetworkId(), configs);
         }
 
         // Swap the current access points into a cached list.
@@ -546,38 +544,12 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
             accessPoint.clearConfig();
         }
 
-    /* Lookup table to more quickly update AccessPoints by only considering objects with the
-     * correct SSID.  Maps SSID -> List of AccessPoints with the given SSID.  */
-        Multimap<String, AccessPoint> existingApMap = new Multimap<String, AccessPoint>();
-
         final Collection<ScanResult> results = updateScanResultCache(newScanResults);
 
-        // TODO(sghuman): This entire block only exists to populate the WifiConfiguration for
-        // APs, remove and refactor
+        final Map<String, WifiConfiguration> configsByKey = new ArrayMap(configs.size());
         if (configs != null) {
             for (WifiConfiguration config : configs) {
-                if (config.selfAdded && config.numAssociation == 0) {
-                    continue;
-                }
-                AccessPoint accessPoint = getCachedOrCreate(config, cachedAccessPoints);
-                if (mLastInfo != null && mLastNetworkInfo != null) {
-                    accessPoint.update(connectionConfig, mLastInfo, mLastNetworkInfo);
-                }
-
-                // If saved network not present in scan result then set its Rssi to
-                // UNREACHABLE_RSSI
-                boolean apFound = false;
-                for (ScanResult result : results) {
-                    if (result.SSID.equals(accessPoint.getSsidStr())) {
-                        apFound = true;
-                        break;
-                    }
-                }
-                if (!apFound) {
-                    accessPoint.setUnreachable();
-                }
-                accessPoints.add(accessPoint);
-                existingApMap.put(accessPoint.getSsidStr(), accessPoint);
+                configsByKey.put(AccessPoint.getKey(config), config);
             }
         }
 
@@ -613,40 +585,20 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
             for (Map.Entry<String, List<ScanResult>> entry : scanResultsByApKey.entrySet()) {
                 // List can not be empty as it is dynamically constructed on each iteration
                 ScanResult firstResult = entry.getValue().get(0);
-                boolean found = false;
-                for (AccessPoint accessPoint : existingApMap.getAll(firstResult.SSID)) {
-                    accessPoint.setScanResults(entry.getValue());
-                    found = true;
-                    break;
+
+                AccessPoint accessPoint =
+                        getCachedOrCreate(entry.getValue(), cachedAccessPoints);
+                if (mLastInfo != null && mLastNetworkInfo != null) {
+                    accessPoint.update(connectionConfig, mLastInfo, mLastNetworkInfo);
                 }
 
-                // Only create a new AP / add to the list if it wasn't already in the saved configs
-                if (!found) {
-                    AccessPoint accessPoint =
-                            getCachedOrCreate(entry.getValue(), cachedAccessPoints);
-                    if (mLastInfo != null && mLastNetworkInfo != null) {
-                        accessPoint.update(connectionConfig, mLastInfo, mLastNetworkInfo);
-                    }
-
-                    // TODO(sghuman): Move isPasspointNetwork logic into AccessPoint.java
-                    if (firstResult.isPasspointNetwork()) {
-                        // Retrieve a WifiConfiguration for a Passpoint provider that matches
-                        // the given ScanResult.  This is used for showing that a given AP
-                        // (ScanResult) is available via a Passpoint provider (provider friendly
-                        // name).
-                        try {
-                            WifiConfiguration config =
-                                    mWifiManager.getMatchingWifiConfig(firstResult);
-                            if (config != null) {
-                                accessPoint.update(config);
-                            }
-                        } catch (UnsupportedOperationException e) {
-                            // Passpoint not supported on the device.
-                        }
-                    }
-
-                    accessPoints.add(accessPoint);
+                // Update the matching config if there is one, to populate saved network info
+                WifiConfiguration config = configsByKey.get(entry.getKey());
+                if (config != null) {
+                    accessPoint.update(config);
                 }
+
+                accessPoints.add(accessPoint);
             }
         }
 

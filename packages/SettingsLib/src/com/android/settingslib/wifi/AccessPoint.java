@@ -622,6 +622,19 @@ public class AccessPoint implements Comparable<AccessPoint> {
         return builder.toString();
     }
 
+    public static String getKey(WifiConfiguration config) {
+        StringBuilder builder = new StringBuilder();
+
+        if (TextUtils.isEmpty(config.SSID)) {
+            builder.append(config.BSSID);
+        } else {
+            builder.append(removeDoubleQuotes(config.SSID));
+        }
+
+        builder.append(',').append(getSecurity(config));
+        return builder.toString();
+    }
+
     public String getKey() {
         return mKey;
     }

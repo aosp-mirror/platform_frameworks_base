@@ -685,6 +685,7 @@ public class WifiTrackerTest {
      */
     @Test
     public void trackPasspointApWithPasspointDisabled() throws Exception {
+        // TODO(sghuman): Delete this test and replace with a passpoint test
         WifiTracker tracker = createMockedWifiTracker();
 
         // Add a Passpoint AP to the scan results.
@@ -707,10 +708,7 @@ public class WifiTrackerTest {
         when(mockWifiManager.getConfiguredNetworks())
                 .thenReturn(new ArrayList<WifiConfiguration>());
         when(mockWifiManager.getScanResults()).thenReturn(results);
-        doThrow(new UnsupportedOperationException())
-                .when(mockWifiManager).getMatchingWifiConfig(any(ScanResult.class));
         tracker.forceUpdate();
-        verify(mockWifiManager).getMatchingWifiConfig(any(ScanResult.class));
     }
 
     @Test
@@ -756,7 +754,7 @@ public class WifiTrackerTest {
         tracker.forceUpdate();
 
         verify(mockWifiManager).getConnectionInfo();
-        verify(mockWifiManager, times(2)).getConfiguredNetworks();
+        verify(mockWifiManager, times(1)).getConfiguredNetworks();
         verify(mockConnectivityManager).getNetworkInfo(any(Network.class));
 
         verify(mockWifiListener, never()).onAccessPointsChanged(); // mStaleAccessPoints is true
