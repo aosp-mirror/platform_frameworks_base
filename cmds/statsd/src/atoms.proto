@@ -837,15 +837,7 @@ message AppStartChanged {
     // Device uptime when activity started.
     optional int64 activity_start_msec = 7;
 
-    // TODO: Update android/app/ActivityManagerInternal.java constants to depend on our proto enum.
-    enum TransitionReason {
-        APP_START_TRANSITION_REASON_UNKNOWN = 0;
-        SPLASH_SCREEN = 1;
-        WINDOWS_DRAWN = 2;
-        TIMEOUT = 3;
-        SNAPSHOT = 4;
-    }
-    optional TransitionReason reason = 8;
+    optional android.app.AppTransitionReasonEnum reason = 8;
 
     optional int32 transition_delay_msec = 9;
     // -1 if not set.
