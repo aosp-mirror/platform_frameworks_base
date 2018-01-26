@@ -41,6 +41,7 @@ public class Environment {
     private static final String ENV_OEM_ROOT = "OEM_ROOT";
     private static final String ENV_ODM_ROOT = "ODM_ROOT";
     private static final String ENV_VENDOR_ROOT = "VENDOR_ROOT";
+    private static final String ENV_PRODUCT_ROOT = "PRODUCT_ROOT";
 
     /** {@hide} */
     public static final String DIR_ANDROID = "Android";
@@ -62,6 +63,7 @@ public class Environment {
     private static final File DIR_OEM_ROOT = getDirectory(ENV_OEM_ROOT, "/oem");
     private static final File DIR_ODM_ROOT = getDirectory(ENV_ODM_ROOT, "/odm");
     private static final File DIR_VENDOR_ROOT = getDirectory(ENV_VENDOR_ROOT, "/vendor");
+    private static final File DIR_PRODUCT_ROOT = getDirectory(ENV_PRODUCT_ROOT, "/product");
 
     private static UserEnvironment sCurrentUser;
     private static boolean sUserRequired;
@@ -177,6 +179,16 @@ public class Environment {
      */
     public static File getVendorDirectory() {
         return DIR_VENDOR_ROOT;
+    }
+
+    /**
+     * Return root directory of the "product" partition holding product-specific
+     * customizations if any. If present, the partition is mounted read-only.
+     *
+     * @hide
+     */
+    public static File getProductDirectory() {
+        return DIR_PRODUCT_ROOT;
     }
 
     /**

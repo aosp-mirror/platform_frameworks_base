@@ -602,6 +602,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_VENDOR = 1 << 18;
 
+    /**
+     * Value for {@linl #privateFlags}: whether this app is pre-installed on the
+     * product partition of the system image.
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_PRODUCT = 1 << 19;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_" }, value = {
             PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE,
@@ -619,6 +626,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             PRIVATE_FLAG_OEM,
             PRIVATE_FLAG_PARTIALLY_DIRECT_BOOT_AWARE,
             PRIVATE_FLAG_PRIVILEGED,
+            PRIVATE_FLAG_PRODUCT,
             PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER,
             PRIVATE_FLAG_STATIC_SHARED_LIBRARY,
             PRIVATE_FLAG_VENDOR,
@@ -1697,6 +1705,11 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     /** @hide */
     public boolean isVendor() {
         return (privateFlags & ApplicationInfo.PRIVATE_FLAG_VENDOR) != 0;
+    }
+
+    /** @hide */
+    public boolean isProduct() {
+        return (privateFlags & ApplicationInfo.PRIVATE_FLAG_PRODUCT) != 0;
     }
 
     /**

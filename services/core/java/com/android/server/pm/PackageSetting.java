@@ -173,6 +173,10 @@ public final class PackageSetting extends PackageSettingBase {
         return (pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_VENDOR) != 0;
     }
 
+    public boolean isProduct() {
+        return (pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_PRODUCT) != 0;
+    }
+
     public boolean isForwardLocked() {
         return (pkgPrivateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0;
     }

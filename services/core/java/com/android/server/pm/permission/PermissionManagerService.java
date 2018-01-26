@@ -954,9 +954,16 @@ Slog.e(TAG, "TODD: Packages: " + Arrays.toString(packages));
      * <p>This handles parent/child apps.
      */
     private boolean hasPrivappWhitelistEntry(String perm, PackageParser.Package pkg) {
-        ArraySet<String> wlPermissions = pkg.isVendor() ?
-                SystemConfig.getInstance().getVendorPrivAppPermissions(pkg.packageName)
-                    : SystemConfig.getInstance().getPrivAppPermissions(pkg.packageName);
+        ArraySet<String> wlPermissions = null;
+        if (pkg.isVendor()) {
+            wlPermissions =
+                    SystemConfig.getInstance().getVendorPrivAppPermissions(pkg.packageName);
+        } else if (pkg.isProduct()) {
+            wlPermissions =
+                    SystemConfig.getInstance().getProductPrivAppPermissions(pkg.packageName);
+        } else {
+            wlPermissions = SystemConfig.getInstance().getPrivAppPermissions(pkg.packageName);
+        }
         // Let's check if this package is whitelisted...
         boolean whitelisted = wlPermissions != null && wlPermissions.contains(perm);
         // If it's not, we'll also tail-recurse to the parent.
@@ -979,11 +986,17 @@ Slog.e(TAG, "TODD: Packages: " + Arrays.toString(packages));
                 // Only report violations for apps on system image
                 if (!mSystemReady && !pkg.isUpdatedSystemApp()) {
                     // it's only a reportable violation if the permission isn't explicitly denied
-                    final ArraySet<String> deniedPermissions = pkg.isVendor() ?
-                            SystemConfig.getInstance()
-                                    .getVendorPrivAppDenyPermissions(pkg.packageName)
-                            : SystemConfig.getInstance()
-                                    .getPrivAppDenyPermissions(pkg.packageName);
+                    ArraySet<String> deniedPermissions = null;
+                    if (pkg.isVendor()) {
+                        deniedPermissions = SystemConfig.getInstance()
+                                .getVendorPrivAppDenyPermissions(pkg.packageName);
+                    } else if (pkg.isProduct()) {
+                        deniedPermissions = SystemConfig.getInstance()
+                                .getProductPrivAppDenyPermissions(pkg.packageName);
+                    } else {
+                        deniedPermissions = SystemConfig.getInstance()
+                                .getPrivAppDenyPermissions(pkg.packageName);
+                    }
                     final boolean permissionViolation =
                             deniedPermissions == null || !deniedPermissions.contains(perm);
                     if (permissionViolation) {

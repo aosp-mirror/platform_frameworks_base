@@ -60,6 +60,7 @@ public:
     static const char* RESOURCES_FILENAME;
     static const char* IDMAP_BIN;
     static const char* OVERLAY_DIR;
+    static const char* PRODUCT_OVERLAY_DIR;
     /*
      * If OVERLAY_THEME_DIR_PROPERTY is set, search for runtime resource overlay
      * APKs in OVERLAY_DIR/<value of OVERLAY_THEME_DIR_PROPERTY> in addition to
