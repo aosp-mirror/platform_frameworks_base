@@ -88,9 +88,11 @@ message Atom {
         AppStartChanged app_start_changed = 48;
         AppStartCancelChanged app_start_cancel_changed = 49;
         AppStartFullyDrawnChanged app_start_fully_drawn_changed = 50;
-        LmkEventOccurred lmk_event_occurred = 51;
+        LmkKillOccurred lmk_kill_occurred = 51;
         PictureInPictureStateChanged picture_in_picture_state_changed = 52;
         WifiMulticastLockStateChanged wifi_multicast_lock_state_changed = 53;
+        LmkStateChanged lmk_state_changed = 54;
+        AppStartMemoryStateCaptured app_start_memory_state_captured = 55;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
@@ -109,8 +111,8 @@ message Atom {
         CpuTimePerUidFreq cpu_time_per_uid_freq = 10010;
         WifiActivityEnergyInfo wifi_activity_energy_info = 10011;
         ModemActivityInfo modem_activity_info = 10012;
-        ProcessMemoryStat process_memory_stat = 10013;
         BluetoothActivityInfo bluetooth_activity_info = 10007;
+        ProcessMemoryState process_memory_state = 10013;
         SystemElapsedRealtime system_elapsed_realtime = 10014;
         SystemUptime system_uptime = 10015;
         CpuActiveTime cpu_active_time = 10016;
@@ -1192,31 +1194,74 @@ message BluetoothActivityInfo {
 }
 
 /*
- * Logs the memory stats for a process
+ * Logs the memory stats for an app on startup.
+ * Logged from:
+ *     frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
  */
-message ProcessMemoryStat {
+message AppStartMemoryStateCaptured {
     // The uid if available. -1 means not available.
     optional int32 uid = 1;
 
     // The process name.
     optional string process_name = 2;
 
+    // The activity name.
+    optional string activity_name = 3;
+
     // # of page-faults
-    optional int64 pgfault = 3;
+    optional int64 pgfault = 4;
 
     // # of major page-faults
-    optional int64 pgmajfault = 4;
+    optional int64 pgmajfault = 5;
 
     // RSS+CACHE(+SWAP)
-    optional int64 usage_in_bytes = 5;
+    optional int64 usage_in_bytes = 6;
 }
 
 /*
- * Logs the event when LMKD kills a process to reduce memory pressure
+ * Logs the memory stats for a process.
+ */
+message ProcessMemoryState {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1;
+
+    // The process name.
+    optional string process_name = 2;
+
+    // oom adj score.
+    optional int32 oom_score = 3;
+
+    // # of page-faults
+    optional int64 pgfault = 4;
+
+    // # of major page-faults
+    optional int64 pgmajfault = 5;
+
+    // RSS+CACHE(+SWAP)
+    optional int64 usage_in_bytes = 6;
+}
+
+/*
+ * Logs the change in Low Memory Killer Daemon (LMKD) state which is used as start/stop boundaries
+ * for LMK event.
  * Logged from:
  *      system/core/lmkd/lmkd.c
  */
-message LmkEventOccurred {
+message LmkStateChanged {
+    enum State {
+        UNKNOWN = 0;
+        START = 1;
+        STOP = 2;
+    }
+    optional State state = 1;
+}
+
+/*
+ * Logs the event when Low Memory Killer Daemon (LMKD) kills a process to reduce memory pressure.
+ * Logged from:
+ *      system/core/lmkd/lmkd.c
+ */
+message LmkKillOccurred {
     // The uid if available. -1 means not available.
     optional int32 uid = 1;
 
