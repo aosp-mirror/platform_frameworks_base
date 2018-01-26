@@ -453,6 +453,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mStackId = stackId;
         mCurrentUser = mService.mUserController.getCurrentUserId();
         mTmpRect2.setEmpty();
+        // Set display id before setting activity and window type to make sure it won't affect
+        // stacks on a wrong display.
+        mDisplayId = display.mDisplayId;
         setActivityType(activityType);
         setWindowingMode(windowingMode);
         mWindowContainerController = createStackWindowController(display.mDisplayId, onTop,
