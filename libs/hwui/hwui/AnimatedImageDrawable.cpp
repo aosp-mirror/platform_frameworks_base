@@ -48,8 +48,10 @@ bool AnimatedImageDrawable::start() {
     return true;
 }
 
-void AnimatedImageDrawable::stop() {
+bool AnimatedImageDrawable::stop() {
+    bool wasRunning = mRunning;
     mRunning = false;
+    return wasRunning;
 }
 
 bool AnimatedImageDrawable::isRunning() {
@@ -180,7 +182,6 @@ void AnimatedImageDrawable::onDraw(SkCanvas* canvas) {
     if (finalFrame) {
         if (mEndListener) {
             mEndListener->onAnimationEnd();
-            mEndListener = nullptr;
         }
     }
 }
