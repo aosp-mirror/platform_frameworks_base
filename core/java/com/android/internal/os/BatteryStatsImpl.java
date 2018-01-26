@@ -41,9 +41,11 @@ import android.os.Handler;
 import android.os.IBatteryPropertiesRegistrar;
 import android.os.Looper;
 import android.os.Message;
+import android.os.OsProtoEnums;
 import android.os.Parcel;
 import android.os.ParcelFormatException;
 import android.os.Parcelable;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -4252,11 +4254,11 @@ public class BatteryStatsImpl extends BatteryStats {
             getUidStatsLocked(uid).noteStartWakeLocked(pid, name, type, elapsedRealtime);
 
             if (wc != null) {
-                StatsLog.write(
-                        StatsLog.WAKELOCK_STATE_CHANGED, wc.getUids(), wc.getTags(), type, name, 1);
+                StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, wc.getUids(), wc.getTags(),
+                        getPowerManagerWakeLockLevel(type), name, 1);
             } else {
-                StatsLog.write_non_chained(StatsLog.WAKELOCK_STATE_CHANGED, uid, null, type, name,
-                        1);
+                StatsLog.write_non_chained(StatsLog.WAKELOCK_STATE_CHANGED, uid, null,
+                        getPowerManagerWakeLockLevel(type), name, 1);
             }
         }
     }
@@ -4295,12 +4297,42 @@ public class BatteryStatsImpl extends BatteryStats {
 
             getUidStatsLocked(uid).noteStopWakeLocked(pid, name, type, elapsedRealtime);
             if (wc != null) {
-                StatsLog.write(
-                        StatsLog.WAKELOCK_STATE_CHANGED, wc.getUids(), wc.getTags(), type, name, 0);
+                StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, wc.getUids(), wc.getTags(),
+                        getPowerManagerWakeLockLevel(type), name, 0);
             } else {
-                StatsLog.write_non_chained(StatsLog.WAKELOCK_STATE_CHANGED, uid, null, type, name,
-                        0);
+                StatsLog.write_non_chained(StatsLog.WAKELOCK_STATE_CHANGED, uid, null,
+                        getPowerManagerWakeLockLevel(type), name, 0);
             }
+        }
+    }
+
+    /**
+     * Converts BatteryStats wakelock types back into PowerManager wakelock levels.
+     * This is the inverse map of Notifier.getBatteryStatsWakeLockMonitorType().
+     * These are estimations, since batterystats loses some of the original data.
+     * TODO: Delete this. Instead, StatsLog.write should be called from PowerManager's Notifier.
+     */
+    private int getPowerManagerWakeLockLevel(int battertStatsWakelockType) {
+        switch (battertStatsWakelockType) {
+            // PowerManager.PARTIAL_WAKE_LOCK or PROXIMITY_SCREEN_OFF_WAKE_LOCK
+            case BatteryStats.WAKE_TYPE_PARTIAL:
+                return PowerManager.PARTIAL_WAKE_LOCK;
+
+            // PowerManager.SCREEN_DIM_WAKE_LOCK or SCREEN_BRIGHT_WAKE_LOCK
+            case BatteryStats.WAKE_TYPE_FULL:
+                return PowerManager.FULL_WAKE_LOCK;
+
+            case BatteryStats.WAKE_TYPE_DRAW:
+                return PowerManager.DRAW_WAKE_LOCK;
+
+            // It appears that nothing can ever make a Window and PowerManager lacks an equivalent.
+            case BatteryStats.WAKE_TYPE_WINDOW:
+                Slog.e(TAG, "Illegal window wakelock type observed in batterystats.");
+                return -1;
+
+            default:
+                Slog.e(TAG, "Illegal wakelock type in batterystats: " + battertStatsWakelockType);
+                return -1;
         }
     }
 
@@ -12215,7 +12247,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     // This should probably be exposed in the API, though it's not critical
-    public static final int BATTERY_PLUGGED_NONE = 0;
+    public static final int BATTERY_PLUGGED_NONE = OsProtoEnums.BATTERY_PLUGGED_NONE; // = 0
 
     public void setBatteryStateLocked(final int status, final int health, final int plugType,
             final int level, /* not final */ int temp, final int volt, final int chargeUAh,

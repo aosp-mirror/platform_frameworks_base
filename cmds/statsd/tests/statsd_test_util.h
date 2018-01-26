@@ -84,7 +84,7 @@ FieldMatcher CreateAttributionUidDimensions(const int atomId,
 
 // Create log event for screen state changed.
 std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(
-    const ScreenStateChanged::State state, uint64_t timestampNs);
+    const android::view::DisplayStateEnum state, uint64_t timestampNs);
 
 // Create log event for app moving to background.
 std::unique_ptr<LogEvent> CreateMoveToBackgroundEvent(const int uid, uint64_t timestampNs);

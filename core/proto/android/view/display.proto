@@ -20,24 +20,6 @@ package android.view;
 option java_multiple_files = true;
 
 message DisplayProto {
-    enum DisplayState {
-        // The display state is unknown.
-        DISPLAY_STATE_UNKNOWN = 0;
-        // The display state is off.
-        DISPLAY_STATE_OFF = 1;
-        // The display state is on.
-        DISPLAY_STATE_ON = 2;
-        // The display is dozing in a low power state; it is still on but is
-        // optimized for showing system-provided content while the device is
-        // non-interactive.
-        DISPLAY_STATE_DOZE = 3;
-        // The display is dozing in a suspended low power state; it is still on
-        // but is optimized for showing static system-provided content while the
-        // device is non-interactive.
-        DISPLAY_STATE_DOZE_SUSPEND = 4;
-        // The display is on and optimized for VR mode.
-        DISPLAY_STATE_VR = 5;
-    }
     enum ColorMode {
         COLOR_MODE_INVALID = -1;
         COLOR_MODE_BT601_625 = 1;

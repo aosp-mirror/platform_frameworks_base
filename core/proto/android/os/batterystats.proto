@@ -21,7 +21,7 @@ package android.os;
 
 import "frameworks/base/core/proto/android/app/jobparameters.proto";
 import "frameworks/base/core/proto/android/os/powermanager.proto";
-import "frameworks/base/core/proto/android/telephony/signalstrength.proto";
+import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 message BatteryStatsProto {
@@ -339,7 +339,7 @@ message SystemProto {
   message PhoneSignalStrength {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional android.telephony.SignalStrengthProto.StrengthName name = 1;
+    optional android.telephony.SignalStrengthEnum name = 1;
     optional TimerProto total = 2;
   };
   repeated PhoneSignalStrength phone_signal_strength = 16;

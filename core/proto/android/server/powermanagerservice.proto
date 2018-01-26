@@ -21,13 +21,13 @@ option java_multiple_files = true;
 
 import "frameworks/base/core/proto/android/app/enums.proto";
 import "frameworks/base/core/proto/android/content/intent.proto";
-import "frameworks/base/core/proto/android/os/batterymanager.proto";
+import "frameworks/base/core/proto/android/os/enums.proto";
 import "frameworks/base/core/proto/android/os/looper.proto";
 import "frameworks/base/core/proto/android/os/powermanager.proto";
 import "frameworks/base/core/proto/android/os/worksource.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
 import "frameworks/base/core/proto/android/server/wirelesschargerdetector.proto";
-import "frameworks/base/core/proto/android/view/display.proto";
+import "frameworks/base/core/proto/android/view/enums.proto";
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 message PowerManagerServiceDumpProto {
@@ -80,7 +80,7 @@ message PowerManagerServiceDumpProto {
     // True if the device is plugged into a power source.
     optional bool is_powered = 5;
     // The current plug type
-    optional .android.os.BatteryManagerProto.PlugType plug_type = 6;
+    optional .android.os.BatteryPluggedStateEnum plug_type = 6;
     // The current battery level percentage.
     optional int32 battery_level = 7;
     // The battery level percentage at the time the dream started.
@@ -197,7 +197,7 @@ message WakeLockProto {
         optional bool is_on_after_release = 2;
     }
 
-    optional .android.os.PowerManagerProto.WakeLockLevel lock_level = 1;
+    optional .android.os.WakeLockLevelEnum lock_level = 1;
     optional string tag = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
     optional WakeLockFlagsProto flags = 3;
     optional bool is_disabled = 4;
@@ -322,7 +322,7 @@ message PowerServiceSettingsAndConfigurationDumpProto {
     // Use NaN to disable.
     optional float temporary_screen_auto_brightness_adjustment_setting_override = 37;
     // The screen state to use while dozing.
-    optional .android.view.DisplayProto.DisplayState doze_screen_state_override_from_dream_manager = 38;
+    optional .android.view.DisplayStateEnum doze_screen_state_override_from_dream_manager = 38;
     // The screen brightness to use while dozing.
     optional float dozed_screen_brightness_override_from_dream_manager = 39;
     // Screen brightness settings limits.

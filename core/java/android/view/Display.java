@@ -267,21 +267,21 @@ public final class Display {
      *
      * @see #getState
      */
-    public static final int STATE_UNKNOWN = 0;
+    public static final int STATE_UNKNOWN = ViewProtoEnums.DISPLAY_STATE_UNKNOWN; // 0
 
     /**
      * Display state: The display is off.
      *
      * @see #getState
      */
-    public static final int STATE_OFF = 1;
+    public static final int STATE_OFF = ViewProtoEnums.DISPLAY_STATE_OFF; // 1
 
     /**
      * Display state: The display is on.
      *
      * @see #getState
      */
-    public static final int STATE_ON = 2;
+    public static final int STATE_ON = ViewProtoEnums.DISPLAY_STATE_ON; // 2
 
     /**
      * Display state: The display is dozing in a low power state; it is still
@@ -291,7 +291,7 @@ public final class Display {
      * @see #getState
      * @see android.os.PowerManager#isInteractive
      */
-    public static final int STATE_DOZE = 3;
+    public static final int STATE_DOZE = ViewProtoEnums.DISPLAY_STATE_DOZE; // 3
 
     /**
      * Display state: The display is dozing in a suspended low power state; it is still
@@ -303,7 +303,7 @@ public final class Display {
      * @see #getState
      * @see android.os.PowerManager#isInteractive
      */
-    public static final int STATE_DOZE_SUSPEND = 4;
+    public static final int STATE_DOZE_SUSPEND = ViewProtoEnums.DISPLAY_STATE_DOZE_SUSPEND; // 4
 
     /**
      * Display state: The display is on and optimized for VR mode.
@@ -311,7 +311,7 @@ public final class Display {
      * @see #getState
      * @see android.os.PowerManager#isInteractive
      */
-    public static final int STATE_VR = 5;
+    public static final int STATE_VR = ViewProtoEnums.DISPLAY_STATE_VR; // 5
 
     /**
      * Display state: The display is in a suspended full power state; it is still
@@ -323,7 +323,7 @@ public final class Display {
      * @see #getState
      * @see android.os.PowerManager#isInteractive
      */
-    public static final int STATE_ON_SUSPEND = 6;
+    public static final int STATE_ON_SUSPEND = ViewProtoEnums.DISPLAY_STATE_ON_SUSPEND; // 6
 
     /* The color mode constants defined below must be kept in sync with the ones in
      * system/core/include/system/graphics-base.h */
