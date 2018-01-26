@@ -35,6 +35,8 @@ import java.util.List;
  * @hide
  */
 public interface MediaSession2Provider extends TransportControlProvider {
+    void initialize();
+
     void close_impl();
     void setPlayer_impl(MediaPlayerInterface player);
     void setPlayer_impl(MediaPlayerInterface player, VolumeProvider volumeProvider);

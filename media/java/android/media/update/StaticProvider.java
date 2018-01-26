@@ -34,6 +34,7 @@ import android.media.SessionToken2;
 import android.media.VolumeProvider;
 import android.media.update.MediaLibraryService2Provider.MediaLibrarySessionProvider;
 import android.media.update.MediaSession2Provider.ControllerInfoProvider;
+import android.os.Bundle;
 import android.os.IInterface;
 import android.util.AttributeSet;
 import android.widget.MediaControlView2;
@@ -71,4 +72,8 @@ public interface StaticProvider {
             MediaLibrarySession instance, MediaPlayerInterface player, String id,
             VolumeProvider volumeProvider, int ratingType, PendingIntent sessionActivity,
             Executor executor, MediaLibrarySessionCallback callback);
+    SessionToken2Provider createSessionToken2(Context context, SessionToken2 instance,
+            int uid, int type, String packageName, String serviceName, String id,
+            IInterface sessionBinderInterface);
+    SessionToken2 SessionToken2_fromBundle(Context context, Bundle bundle);
 }

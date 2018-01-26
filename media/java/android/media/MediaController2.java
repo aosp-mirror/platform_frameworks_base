@@ -254,12 +254,13 @@ public class MediaController2 implements AutoCloseable {
             @NonNull @CallbackExecutor Executor executor, @NonNull ControllerCallback callback) {
         super();
 
+        mProvider = createProvider(context, token, executor, callback);
         // This also connects to the token.
         // Explicit connect() isn't added on purpose because retrying connect() is impossible with
         // session whose session binder is only valid while it's active.
         // prevent a controller from reusable after the
         // session is released and recreated.
-        mProvider = createProvider(context, token, executor, callback);
+        mProvider.initialize();
     }
 
     MediaController2Provider createProvider(@NonNull Context context,

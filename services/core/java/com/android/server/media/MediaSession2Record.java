@@ -44,138 +44,88 @@ class MediaSession2Record {
     private static final boolean DEBUG = true; // TODO(jaewan): Change
 
     private final Context mContext;
+    private final SessionToken2 mSessionToken;
     private final SessionDestroyedListener mSessionDestroyedListener;
 
     // TODO(jaewan): Replace these with the mContext.getMainExecutor()
-    private final Handler mMainHandler;
     private final Executor mMainExecutor;
 
     private MediaController2 mController;
-    private ControllerCallback mControllerCallback;
-
-    private int mSessionPid;
 
     /**
      * Constructor
      */
-    public MediaSession2Record(@NonNull Context context,
+    public MediaSession2Record(@NonNull Context context, @NonNull SessionToken2 token,
             @NonNull SessionDestroyedListener listener) {
         mContext = context;
+        mSessionToken = token;
         mSessionDestroyedListener = listener;
-
-        mMainHandler = new Handler(Looper.getMainLooper());
-        mMainExecutor = (runnable) -> {
-            mMainHandler.post(runnable);
-        };
-    }
-
-    public int getSessionPid() {
-        return mSessionPid;
+        mMainExecutor = (runnable) -> runnable.run();
     }
 
     public Context getContext() {
         return mContext;
     }
 
-    @CallSuper
     public void onSessionDestroyed() {
         if (mController != null) {
-            mControllerCallback.destroy();
             mController.close();
+            // close() triggers ControllerCallback.onDisconnected() here already.
             mController = null;
         }
-        mSessionPid = 0;
     }
 
-    /**
-     * Create session token and tell server that session is now active.
-     *
-     * @param sessionPid session's pid
-     * @return a token if successfully set, {@code null} if sanity check fails.
-     */
-    // TODO(jaewan): also add uid for multiuser support
-    @CallSuper
-    public @Nullable
-    SessionToken2 createSessionToken(int sessionPid, String packageName, String id,
-            IMediaSession2 sessionBinder) {
+    public boolean onSessionCreated(SessionToken2 token) {
         if (mController != null) {
-            if (mSessionPid != sessionPid) {
-                // A package uses the same id for session across the different process.
-                return null;
-            }
-            // If a session becomes inactive and then active again very quickly, previous 'inactive'
-            // may not have delivered yet. Check if it's the case and destroy controller before
-            // creating its session record to prevents getXXTokens() API from returning duplicated
-            // tokens.
-            // TODO(jaewan): Change this. If developer is really creating two sessions with the same
-            //               id, this will silently invalidate previous session and no way for
-            //               developers to know that.
-            //               Instead, keep the list of static session ids from our APIs.
-            //               Also change Controller2Impl.onConnectionChanged / getController.
-            //               Also clean up ControllerCallback#destroy().
-            if (DEBUG) {
-                Log.d(TAG, "Session is recreated almost immediately. " + this);
-            }
-            onSessionDestroyed();
+            // Disclaimer: This may fail if following happens for an app.
+            //             Step 1) Create a session in the process #1
+            //             Step 2) Process #1 is killed
+            //             Step 3) Before the death of process #1 is delivered,
+            //                     (i.e. ControllerCallback#onDisconnected is called),
+            //                     new process is started and create another session with the same
+            //                     id in the new process.
+            //             Step 4) fail!!! But this is tricky case that wouldn't happen in normal.
+            Log.w(TAG, "Cannot create a new session with the id=" + token.getId() + " in the"
+                    + " pkg=" + token.getPackageName() + ". ID should be unique in a package");
+            return false;
         }
-        mController = onCreateMediaController(packageName, id, sessionBinder);
-        mSessionPid = sessionPid;
-        return mController.getSessionToken();
+        mController = new MediaController2(mContext, token, mMainExecutor,
+                new ControllerCallback());
+        return true;
     }
 
     /**
-     * Called when session becomes active and needs controller to listen session's activeness.
-     * <p>
-     * Should be overridden by subclasses to create token with its own extra information.
-     */
-    MediaController2 onCreateMediaController(
-            String packageName, String id, IMediaSession2 sessionBinder) {
-        SessionToken2 token = new SessionToken2(
-                SessionToken2.TYPE_SESSION, packageName, id, null, sessionBinder);
-        return createMediaController(token);
-    }
-
-    final MediaController2 createMediaController(SessionToken2 token) {
-        mControllerCallback = new ControllerCallback();
-        return new MediaController2(mContext, token, mMainExecutor, mControllerCallback);
-    }
-
-    /**
-     * @return controller. Note that framework can only call oneway calls.
+     * @return token
      */
     public SessionToken2 getToken() {
-        return mController == null ? null : mController.getSessionToken();
+        return mSessionToken;
+    }
+
+    /**
+     * @return controller
+     */
+    public MediaController2 getController() {
+        return mController;
     }
 
     @Override
     public String toString() {
         return getToken() == null
-                ? "Token {null}"
-                : "SessionRecord {pid=" + mSessionPid + ", " + getToken().toString() + "}";
+                ? "Token {null}" : "SessionRecord {" + getToken().toString() + "}";
     }
 
     private class ControllerCallback extends MediaController2.ControllerCallback {
-        private final AtomicBoolean mIsActive = new AtomicBoolean(true);
-
-        // This is called on the main thread with no lock. So place ensure followings.
+        // This is called on the random thread with no lock. So place ensure followings.
         //   1. Don't touch anything in the parent class that needs synchronization.
         //      All other APIs in the MediaSession2Record assumes that server would use them with
         //      the lock hold.
-        //   2. This can be called after the controller registered is released.
+        //   2. This can be called after the controller registered is closed.
         @Override
         public void onDisconnected() {
-            if (!mIsActive.get()) {
-                return;
-            }
             if (DEBUG) {
                 Log.d(TAG, "onDisconnected, token=" + getToken());
             }
             mSessionDestroyedListener.onSessionDestroyed(MediaSession2Record.this);
-        }
-
-        // TODO(jaewan): Remove this API when we revisit createSessionToken()
-        public void destroy() {
-            mIsActive.set(false);
         }
     };
 }
