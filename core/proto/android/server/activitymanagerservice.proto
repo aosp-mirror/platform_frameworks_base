@@ -130,6 +130,8 @@ message BroadcastProto {
   repeated StickyBroadcastProto sticky_broadcasts = 4;
 
   message MainHandler {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     optional string handler = 1;
     optional .android.os.LooperProto looper = 2;
   }
@@ -663,7 +665,7 @@ message ProcessesProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional .android.os.PowerManagerInternalProto.Wakefulness wakefulness = 1;
-    repeated string sleep_tokens = 2;
+    repeated string sleep_tokens = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
     optional bool sleeping = 3;
     optional bool shutting_down = 4;
     optional bool test_pss_mode = 5;
@@ -671,7 +673,7 @@ message ProcessesProto {
   optional SleepStatus sleep_status = 27;
 
   message VoiceProto {
-    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+    option (.android.msg_privacy).dest = DEST_EXPLICIT;
 
     optional string session = 1;
     optional .android.os.PowerManagerProto.WakeLockProto wakelock = 2;
@@ -725,7 +727,7 @@ message ProcessesProto {
       option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
       optional string proc_name = 1;
-      optional string file = 2  [ (.android.privacy).dest = DEST_EXPLICIT ];
+      optional string file = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
       optional int32 pid = 3;
       optional int32 uid = 4;
     }
@@ -998,6 +1000,8 @@ message AppTimeTrackerProto {
   optional int64 total_duration_ms = 2;
 
   message PackageTime {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     optional string package = 1;
     optional int64 duration_ms = 2;
   }
