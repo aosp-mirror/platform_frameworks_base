@@ -239,4 +239,8 @@ public class LocalBluetoothAdapter {
     public BluetoothDevice getRemoteDevice(String address) {
         return mAdapter.getRemoteDevice(address);
     }
+
+    public int getMaxConnectedAudioDevices() {
+        return mAdapter.getMaxConnectedAudioDevices();
+    }
 }

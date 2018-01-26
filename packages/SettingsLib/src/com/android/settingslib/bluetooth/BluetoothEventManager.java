@@ -16,9 +16,12 @@
 
 package com.android.settingslib.bluetooth;
 
+import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHeadset;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -31,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -105,6 +109,12 @@ public class BluetoothEventManager {
 
         // Dock event broadcasts
         addHandler(Intent.ACTION_DOCK_EVENT, new DockEventHandler());
+
+        // Active device broadcasts
+        addHandler(BluetoothA2dp.ACTION_ACTIVE_DEVICE_CHANGED,
+                   new ActiveDeviceChangedHandler());
+        addHandler(BluetoothHeadset.ACTION_ACTIVE_DEVICE_CHANGED,
+                   new ActiveDeviceChangedHandler());
 
         mContext.registerReceiver(mBroadcastReceiver, mAdapterIntentFilter, null, mReceiverHandler);
         mContext.registerReceiver(mProfileBroadcastReceiver, mProfileIntentFilter, null, mReceiverHandler);
@@ -408,5 +418,36 @@ public class BluetoothEventManager {
         }
 
         return deviceAdded;
+    }
+
+    private class ActiveDeviceChangedHandler implements Handler {
+        @Override
+        public void onReceive(Context context, Intent intent, BluetoothDevice device) {
+            String action = intent.getAction();
+            if (action == null) {
+                Log.w(TAG, "ActiveDeviceChangedHandler: action is null");
+                return;
+            }
+            CachedBluetoothDevice activeDevice = mDeviceManager.findDevice(device);
+            int bluetoothProfile = 0;
+            if (Objects.equals(action, BluetoothA2dp.ACTION_ACTIVE_DEVICE_CHANGED)) {
+                bluetoothProfile = BluetoothProfile.A2DP;
+            } else if (Objects.equals(action, BluetoothHeadset.ACTION_ACTIVE_DEVICE_CHANGED)) {
+                bluetoothProfile = BluetoothProfile.HEADSET;
+            } else {
+                Log.w(TAG, "ActiveDeviceChangedHandler: unknown action " + action);
+                return;
+            }
+            dispatchActiveDeviceChanged(activeDevice, bluetoothProfile);
+        }
+    }
+
+    private void dispatchActiveDeviceChanged(CachedBluetoothDevice activeDevice,
+                                             int bluetoothProfile) {
+        synchronized (mCallbacks) {
+            for (BluetoothCallback callback : mCallbacks) {
+                callback.onActiveDeviceChanged(activeDevice, bluetoothProfile);
+            }
+        }
     }
 }
