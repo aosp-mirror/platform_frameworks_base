@@ -19,6 +19,7 @@ package com.android.server.job;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 
+import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -39,6 +40,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.Intent.UriFlags;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -2065,6 +2067,33 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
 
         /**
+         * Heartbeat ordinal for the given app.  This is typically the heartbeat at which
+         * the app last ran jobs, so that a newly-scheduled job in an app that hasn't run
+         * jobs in a long time is immediately runnable even if the app is bucketed into
+         * an infrequent time allocation.
+         */
+        public long baseHeartbeatForApp(String packageName, @UserIdInt int userId,
+                final int appStandbyBucket) {
+            if (appStandbyBucket == 0 ||
+                    appStandbyBucket >= mConstants.STANDBY_BEATS.length) {
+                // ACTIVE => everything can be run right away
+                // NEVER => we won't run them anyway, so let them go in the future
+                // as soon as the app enters normal use
+                return 0;
+            }
+
+            final long timeSinceLastJob = mStandbyTracker.getTimeSinceLastJobRun(
+                    packageName, userId);
+            final long bucketLength = mConstants.STANDBY_BEATS[appStandbyBucket];
+            final long bucketsAgo = timeSinceLastJob / bucketLength;
+
+            // If we haven't run any jobs for more than the app's current bucket period, just
+            // consider anything new to be immediately runnable.  Otherwise, base it on the
+            // bucket at which we last ran jobs.
+            return (bucketsAgo > bucketLength) ? 0 : (getCurrentHeartbeat() - bucketsAgo);
+        }
+
+        /**
          * Returns a list of all pending jobs. A running job is not considered pending. Periodic
          * jobs are always considered pending.
          */
@@ -2139,10 +2168,14 @@ public final class JobSchedulerService extends com.android.server.SystemService
             mUsageStats = usageStats;
         }
 
+        public long getTimeSinceLastJobRun(String packageName, final @UserIdInt int userId) {
+            return mUsageStats.getTimeSinceLastJobRun(packageName, userId);
+        }
+
         // AppIdleStateChangeListener interface for live updates
 
         @Override
-        public void onAppIdleStateChanged(final String packageName, final int userId,
+        public void onAppIdleStateChanged(final String packageName, final @UserIdInt int userId,
                 boolean idle, int bucket) {
             final int uid = mLocalPM.getPackageUid(packageName,
                     PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
