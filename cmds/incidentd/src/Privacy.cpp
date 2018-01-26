@@ -65,7 +65,7 @@ PrivacySpec::CheckPremission(const Privacy* privacy, const uint8_t defaultDest) 
 bool
 PrivacySpec::RequireAll() const { return dest == android::os::DEST_LOCAL; }
 
-PrivacySpec new_spec_from_args(int dest)
+PrivacySpec PrivacySpec::new_spec(int dest)
 {
     switch (dest) {
         case android::os::DEST_AUTOMATIC:
@@ -77,4 +77,7 @@ PrivacySpec new_spec_from_args(int dest)
     }
 }
 
-PrivacySpec get_default_dropbox_spec() { return PrivacySpec(android::os::DEST_AUTOMATIC); }
+PrivacySpec PrivacySpec::get_default_dropbox_spec()
+{
+    return PrivacySpec(android::os::DEST_AUTOMATIC);
+}

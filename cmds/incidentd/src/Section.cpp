@@ -152,36 +152,40 @@ write_report_requests(const int id, const FdBuffer& buffer, ReportRequestSet* re
 
     // The streaming ones, group requests by spec in order to save unnecessary strip operations
     map<PrivacySpec, vector<sp<ReportRequest>>> requestsBySpec;
-    for (ReportRequestSet::iterator it = requests->begin(); it != requests->end(); it++) {
+    for (auto it = requests->begin(); it != requests->end(); it++) {
         sp<ReportRequest> request = *it;
         if (!request->ok() || !request->args.containsSection(id)) {
             continue;  // skip invalid request
         }
-        PrivacySpec spec = new_spec_from_args(request->args.dest());
+        PrivacySpec spec = PrivacySpec::new_spec(request->args.dest());
         requestsBySpec[spec].push_back(request);
     }
 
-    for (map<PrivacySpec, vector<sp<ReportRequest>>>::iterator mit = requestsBySpec.begin(); mit != requestsBySpec.end(); mit++) {
+    for (auto mit = requestsBySpec.begin(); mit != requestsBySpec.end(); mit++) {
         PrivacySpec spec = mit->first;
         err = privacyBuffer.strip(spec);
         if (err != NO_ERROR) return err; // it means the privacyBuffer data is corrupted.
         if (privacyBuffer.size() == 0) continue;
 
-        for (vector<sp<ReportRequest>>::iterator it = mit->second.begin(); it != mit->second.end(); it++) {
+        for (auto it = mit->second.begin(); it != mit->second.end(); it++) {
             sp<ReportRequest> request = *it;
             err = write_section_header(request->fd, id, privacyBuffer.size());
             if (err != NO_ERROR) { request->err = err; continue; }
             err = privacyBuffer.flush(request->fd);
             if (err != NO_ERROR) { request->err = err; continue; }
             writeable++;
-            ALOGD("Section %d flushed %zu bytes to fd %d with spec %d", id, privacyBuffer.size(), request->fd, spec.dest);
+            ALOGD("Section %d flushed %zu bytes to fd %d with spec %d", id,
+                  privacyBuffer.size(), request->fd, spec.dest);
         }
         privacyBuffer.clear();
     }
 
     // The dropbox file
     if (requests->mainFd() >= 0) {
-        err = privacyBuffer.strip(get_default_dropbox_spec());
+        PrivacySpec spec = requests->mainDest() < 0 ?
+                PrivacySpec::get_default_dropbox_spec() :
+                PrivacySpec::new_spec(requests->mainDest());
+        err = privacyBuffer.strip(spec);
         if (err != NO_ERROR) return err; // the buffer data is corrupted.
         if (privacyBuffer.size() == 0) goto DONE;
 
@@ -190,7 +194,8 @@ write_report_requests(const int id, const FdBuffer& buffer, ReportRequestSet* re
         err = privacyBuffer.flush(requests->mainFd());
         if (err != NO_ERROR) { requests->setMainFd(-1); goto DONE; }
         writeable++;
-        ALOGD("Section %d flushed %zu bytes to dropbox %d", id, privacyBuffer.size(), requests->mainFd());
+        ALOGD("Section %d flushed %zu bytes to dropbox %d with spec %d", id,
+              privacyBuffer.size(), requests->mainFd(), spec.dest);
     }
 
 DONE:
