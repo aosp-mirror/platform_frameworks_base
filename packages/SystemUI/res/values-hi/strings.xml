@@ -44,13 +44,13 @@
     <string name="battery_saver_start_action" msgid="5576697451677486320">"बैटरी बचाएँ"</string>
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"सेटिंग"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"वाई-फ़ाई"</string>
-    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"स्‍क्रीन अपनेआप घुमाएं"</string>
+    <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"स्‍क्रीन अपने आप घुमाएं"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"म्यूट करें"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"स्वत:"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"सूचनाएं"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"ब्लूटूथ टीदर किया गया"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"इनपुट का तरीका सेट करें"</string>
-    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"भौतिक कीबोर्ड"</string>
+    <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"सामान्य कीबोर्ड"</string>
     <string name="usb_device_permission_prompt" msgid="834698001271562057">"ऐप्स  <xliff:g id="APPLICATION">%1$s</xliff:g> को USB डिवाइस तक पहुंचने दें?"</string>
     <string name="usb_accessory_permission_prompt" msgid="5171775411178865750">"ऐप्स  <xliff:g id="APPLICATION">%1$s</xliff:g> को USB सहायक डिवाइस तक पहुंचने दें?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"जब यह USB डिवाइस कनेक्ट किया जाए, तब <xliff:g id="ACTIVITY">%1$s</xliff:g> को खोलें?"</string>
@@ -334,7 +334,7 @@
     <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"स्क्रीन पिन करना"</string>
     <string name="recents_search_bar_label" msgid="8074997400187836677">"सर्च"</string>
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> प्रारंभ नहीं किया जा सका."</string>
-    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> को सुरक्षित-मोड में अक्षम किया गया."</string>
+    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> को सुरक्षित-मोड में बंद किया गया."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Clear all"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"स्क्रीन के दो हिस्से में बंट जाने, स्पिल्ट स्क्रीन, का इस्तेमाल करने के लिए यहां खींचें और छोडें"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"क्षैतिज रूप से विभाजित करें"</string>

@@ -227,8 +227,8 @@
     <string name="accessibility_quick_settings_flashlight_on" msgid="2003479320007841077">"Flasha aktibatuta dago."</string>
     <string name="accessibility_quick_settings_flashlight_changed_off" msgid="3303701786768224304">"Flasha desaktibatu egin da."</string>
     <string name="accessibility_quick_settings_flashlight_changed_on" msgid="6531793301533894686">"Flasha aktibatu egin da."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Koloreak alderantzikatzeko aukera desaktibatu egin da."</string>
-    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Koloreak alderantzikatzeko aukera aktibatu egin da."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_off" msgid="4406577213290173911">"Koloreen alderantzikatzea desaktibatu egin da."</string>
+    <string name="accessibility_quick_settings_color_inversion_changed_on" msgid="6897462320184911126">"Koloreen alderantzikatzea aktibatu egin da."</string>
     <string name="accessibility_quick_settings_hotspot_changed_off" msgid="5004708003447561394">"Konexioa partekatzeko aukera desaktibatu egin da."</string>
     <string name="accessibility_quick_settings_hotspot_changed_on" msgid="2890951609226476206">"Konexioa partekatzeko aukera aktibatu egin da."</string>
     <string name="accessibility_casting_turned_off" msgid="1430668982271976172">"Pantaila igortzeari utzi zaio."</string>
@@ -755,7 +755,7 @@
     <string name="tuner_right" msgid="6222734772467850156">"Eskuinera"</string>
     <string name="tuner_menu" msgid="191640047241552081">"Menua"</string>
     <string name="tuner_app" msgid="3507057938640108777">"<xliff:g id="APP">%1$s</xliff:g> aplikazioa"</string>
-    <string name="notification_channel_alerts" msgid="4496839309318519037">"Abisuak"</string>
+    <string name="notification_channel_alerts" msgid="4496839309318519037">"Alertak"</string>
     <string name="notification_channel_battery" msgid="5786118169182888462">"Bateria"</string>
     <string name="notification_channel_screenshot" msgid="6314080179230000938">"Pantaila-argazkiak"</string>
     <string name="notification_channel_general" msgid="4525309436693914482">"Mezu orokorrak"</string>

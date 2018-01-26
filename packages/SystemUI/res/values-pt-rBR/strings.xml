@@ -392,7 +392,7 @@
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"Todos os apps e dados nesta sessão serão excluídos."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"Remover"</string>
     <string name="guest_wipe_session_title" msgid="6419439912885956132">"Bem-vindo, convidado."</string>
-    <string name="guest_wipe_session_message" msgid="8476238178270112811">"Deseja continuar a sessão?"</string>
+    <string name="guest_wipe_session_message" msgid="8476238178270112811">"Quer continuar a sessão?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"Recomeçar"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"Sim, continuar"</string>
     <string name="guest_notification_title" msgid="1585278533840603063">"Usuário convidado"</string>

@@ -200,7 +200,7 @@
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Vliegtuigmodus ingeschakeld."</string>
     <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Niet storen aan, alleen prioriteit."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Niet storen aan, totale stilte."</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Niet storen aan, alleen alarmen."</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Niet storen aan, alleen wekkers."</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Niet storen."</string>
     <string name="accessibility_quick_settings_dnd_off" msgid="2371832603753738581">"Niet storen uit."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"Niet storen uitgeschakeld."</string>
@@ -216,7 +216,7 @@
     <string name="accessibility_quick_settings_location_on" msgid="5809937096590102036">"Locatiemelding aan."</string>
     <string name="accessibility_quick_settings_location_changed_off" msgid="8526845571503387376">"Locatiemelding uitgeschakeld."</string>
     <string name="accessibility_quick_settings_location_changed_on" msgid="339403053079338468">"Locatiemelding ingeschakeld."</string>
-    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Alarm is ingesteld op <xliff:g id="TIME">%s</xliff:g>."</string>
+    <string name="accessibility_quick_settings_alarm" msgid="3959908972897295660">"Wekker is ingesteld op <xliff:g id="TIME">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_close" msgid="3115847794692516306">"Paneel sluiten."</string>
     <string name="accessibility_quick_settings_more_time" msgid="3659274935356197708">"Meer tijd."</string>
     <string name="accessibility_quick_settings_less_time" msgid="2404728746293515623">"Minder tijd."</string>
@@ -268,7 +268,7 @@
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Niet storen"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Alleen prioriteit"</string>
-    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Alleen alarmen"</string>
+    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Alleen wekkers"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Totale stilte"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> apparaten)"</string>
@@ -353,11 +353,11 @@
     <string name="description_target_search" msgid="3091587249776033139">"Zoeken"</string>
     <string name="description_direction_up" msgid="7169032478259485180">"Veeg omhoog voor <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
     <string name="description_direction_left" msgid="7207478719805562165">"Veeg naar links voor <xliff:g id="TARGET_DESCRIPTION">%s</xliff:g>."</string>
-    <string name="zen_priority_introduction" msgid="1149025108714420281">"Je wordt niet gestoord door geluiden en trillingen, behalve bij alarmen, herinneringen, afspraken en specifieke bellers die je selecteert. Je kunt nog steeds alles horen wat je wilt afspelen, waaronder muziek, video\'s en games."</string>
-    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Je wordt niet gestoord door geluiden en trillingen, behalve bij alarmen. Je kunt nog steeds alles horen wat je wilt afspelen, waaronder muziek, video\'s en games."</string>
+    <string name="zen_priority_introduction" msgid="1149025108714420281">"Je wordt niet gestoord door geluiden en trillingen, behalve bij wekkers, herinneringen, afspraken en specifieke bellers die je selecteert. Je kunt nog steeds alles horen wat je wilt afspelen, waaronder muziek, video\'s en games."</string>
+    <string name="zen_alarms_introduction" msgid="4934328096749380201">"Je wordt niet gestoord door geluiden en trillingen, behalve bij wekkers. Je kunt nog steeds alles horen wat je wilt afspelen, waaronder muziek, video\'s en games."</string>
     <string name="zen_priority_customize_button" msgid="7948043278226955063">"Aanpassen"</string>
-    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Hiermee worden ALLE geluiden en trillingen geblokkeerd, waaronder die voor alarmen, muziek, video\'s en games. Je kunt wel nog steeds bellen."</string>
-    <string name="zen_silence_introduction" msgid="3137882381093271568">"Hiermee worden ALLE geluiden en trillingen geblokkeerd, waaronder die voor alarmen, muziek, video\'s en games."</string>
+    <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Hiermee worden ALLE geluiden en trillingen geblokkeerd, waaronder die voor wekkers, muziek, video\'s en games. Je kunt wel nog steeds bellen."</string>
+    <string name="zen_silence_introduction" msgid="3137882381093271568">"Hiermee worden ALLE geluiden en trillingen geblokkeerd, waaronder die voor wekkers, muziek, video\'s en games."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Minder urgente meldingen onderaan"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Tik nog eens om te openen"</string>
@@ -370,7 +370,7 @@
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Totale stilte. Hiermee worden schermlezers ook op stil gezet."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Totale stilte"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Alleen prioriteit"</string>
-    <string name="interruption_level_alarms" msgid="5226306993448328896">"Alleen alarmen"</string>
+    <string name="interruption_level_alarms" msgid="5226306993448328896">"Alleen wekkers"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Totale\nstilte"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Alleen\nprioriteit"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Alleen\nalarmen"</string>
@@ -492,7 +492,7 @@
     <string name="stream_system" msgid="7493299064422163147">"Systeem"</string>
     <string name="stream_ring" msgid="8213049469184048338">"Bellen"</string>
     <string name="stream_music" msgid="9086982948697544342">"Media"</string>
-    <string name="stream_alarm" msgid="5209444229227197703">"Alarm"</string>
+    <string name="stream_alarm" msgid="5209444229227197703">"Wekker"</string>
     <string name="stream_notification" msgid="2563720670905665031">"Melding"</string>
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"Frequentie voor tweevoudige multitoon"</string>
@@ -514,13 +514,13 @@
     <string name="enable_demo_mode" msgid="4844205668718636518">"Demomodus inschakelen"</string>
     <string name="show_demo_mode" msgid="2018336697782464029">"Demomodus weergeven"</string>
     <string name="status_bar_ethernet" msgid="5044290963549500128">"Ethernet"</string>
-    <string name="status_bar_alarm" msgid="8536256753575881818">"Alarm"</string>
+    <string name="status_bar_alarm" msgid="8536256753575881818">"Wekker"</string>
     <string name="status_bar_work" msgid="6022553324802866373">"Werkprofiel"</string>
     <string name="status_bar_airplane" msgid="7057575501472249002">"Vliegtuigmodus"</string>
     <string name="add_tile" msgid="2995389510240786221">"Tegel toevoegen"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"Tegel \'Uitzenden\'"</string>
-    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"U hoort je volgende alarm niet <xliff:g id="WHEN">%1$s</xliff:g> tenzij u dit voor die tijd uitschakelt"</string>
-    <string name="zen_alarm_warning" msgid="444533119582244293">"U hoort je volgende alarm niet <xliff:g id="WHEN">%1$s</xliff:g>"</string>
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"Je hoort je volgende wekker niet <xliff:g id="WHEN">%1$s</xliff:g> tenzij je dit voor die tijd uitschakelt"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"Je hoort je volgende wekker niet <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="3980063409350522735">"om <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"op <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"Snelle instellingen, <xliff:g id="TITLE">%s</xliff:g>."</string>
@@ -714,7 +714,7 @@
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Instellingen openen."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Snelle instellingen openen."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Snelle instellingen sluiten."</string>
-    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Alarm is ingesteld."</string>
+    <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Wekker is ingesteld."</string>
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Ingelogd als <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Geen internet."</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Details openen."</string>

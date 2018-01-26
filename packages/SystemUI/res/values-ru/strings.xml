@@ -202,7 +202,7 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="6406141469157599296">"Режим полета включен."</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Режим полета отключен."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Режим полета включен."</string>
-    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Режим \"Не беспокоить\" включен. Будут показаны только важные оповещения."</string>
+    <string name="accessibility_quick_settings_dnd_priority_on" msgid="1448402297221249355">"Режим \"Не беспокоить\" включен. Будут показаны только важные уведомления."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="6882582132662613537">"Не беспокоить, полная тишина."</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="9152834845587554157">"Не беспокоить – только будильник."</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Не беспокоить."</string>
@@ -365,7 +365,7 @@
     <string name="zen_silence_introduction_voice" msgid="3948778066295728085">"Этот режим заблокирует все звуки и вибрацию, в том числе для будильника, музыки, видео и игр. Вы сможете разговаривать по телефону."</string>
     <string name="zen_silence_introduction" msgid="3137882381093271568">"В этом режиме будут отключены вибросигнал и все звуки (в том числе для будильника, музыкального проигрывателя, игр и видео)."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
-    <string name="speed_bump_explanation" msgid="1288875699658819755">"Показать менее важные оповещения"</string>
+    <string name="speed_bump_explanation" msgid="1288875699658819755">"Показать менее важные уведомления"</string>
     <string name="notification_tap_again" msgid="7590196980943943842">"Нажмите ещё раз, чтобы открыть"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Проведите вверх, чтобы разблокировать"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Этим устройством управляет ваша организация"</string>
