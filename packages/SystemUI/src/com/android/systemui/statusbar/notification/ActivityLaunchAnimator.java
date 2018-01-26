@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.graphics.Matrix;
 import android.graphics.Rect;
@@ -35,10 +36,11 @@ import android.view.ViewRootImpl;
 import com.android.systemui.Interpolators;
 import com.android.systemui.statusbar.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationListContainer;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
-import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
 import java.util.function.Consumer;
 
@@ -57,16 +59,17 @@ public class ActivityLaunchAnimator {
     private final NotificationPanelView mNotificationPanel;
     private final NotificationListContainer mNotificationContainer;
     private final StatusBarWindowView mStatusBarWindow;
-    private final Consumer<Boolean> mPanelCollapser;
+    private final StatusBar mStatusBar;
+    private boolean mAnimationPending;
 
     public ActivityLaunchAnimator(StatusBarWindowView statusBarWindow,
-            Consumer<Boolean> panelCollapser,
+            StatusBar statusBar,
             NotificationPanelView notificationPanel,
             NotificationListContainer container) {
         mNotificationPanel = notificationPanel;
         mNotificationContainer = container;
         mStatusBarWindow = statusBarWindow;
-        mPanelCollapser = panelCollapser;
+        mStatusBar = statusBar;
     }
 
     public ActivityOptions getLaunchAnimation(
@@ -74,6 +77,21 @@ public class ActivityLaunchAnimator {
         AnimationRunner animationRunner = new AnimationRunner(sourceNofitication);
         return ActivityOptions.makeRemoteAnimation(
                 new RemoteAnimationAdapter(animationRunner, 1000 /* Duration */, 0 /* delay */));
+    }
+
+    public boolean isAnimationPending() {
+        return mAnimationPending;
+    }
+
+    public void setLaunchResult(int launchResult) {
+        setAnimationPending((launchResult == ActivityManager.START_TASK_TO_FRONT
+                || launchResult == ActivityManager.START_SUCCESS)
+                        && mStatusBar.getBarState() == StatusBarState.SHADE);
+    }
+
+    private void setAnimationPending(boolean pending) {
+        mAnimationPending = pending;
+        mStatusBarWindow.setExpandAnimationPending(pending);
     }
 
     class AnimationRunner extends IRemoteAnimationRunner.Stub {
@@ -94,7 +112,6 @@ public class ActivityLaunchAnimator {
                 IRemoteAnimationFinishedCallback iRemoteAnimationFinishedCallback)
                     throws RemoteException {
             mSourceNotification.post(() -> {
-                boolean first = true;
                 for (RemoteAnimationTarget app : remoteAnimationTargets) {
                     if (app.mode == RemoteAnimationTarget.MODE_OPENING) {
                         setExpandAnimationRunning(true);
@@ -139,7 +156,7 @@ public class ActivityLaunchAnimator {
                             public void onAnimationEnd(Animator animation) {
                                 setExpandAnimationRunning(false);
                                 if (mInstantCollapsePanel) {
-                                    mPanelCollapser.accept(false /* animate */);
+                                    mStatusBar.collapsePanel(false /* animate */);
                                 }
                                 try {
                                     iRemoteAnimationFinishedCallback.onAnimationFinished();
@@ -152,6 +169,7 @@ public class ActivityLaunchAnimator {
                         break;
                     }
                 }
+                setAnimationPending(false);
             });
         }
 
@@ -198,6 +216,10 @@ public class ActivityLaunchAnimator {
 
         @Override
         public void onAnimationCancelled() throws RemoteException {
+            mSourceNotification.post(() -> {
+                setAnimationPending(false);
+                mStatusBar.onLaunchAnimationCancelled();
+            });
         }
     };
 

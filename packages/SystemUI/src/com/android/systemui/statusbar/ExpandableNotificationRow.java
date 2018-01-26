@@ -1472,7 +1472,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mPrivateLayout.getActiveRemoteInputText();
     }
 
-
     public void animateTranslateNotification(final float leftTarget) {
         if (mTranslateAnim != null) {
             mTranslateAnim.cancel();
