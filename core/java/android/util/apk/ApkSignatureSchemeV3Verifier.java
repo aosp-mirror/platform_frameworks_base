@@ -477,6 +477,7 @@ public class ApkSignatureSchemeV3Verifier {
                     }
                 }
 
+                signedData.rewind();
                 byte[] encodedCert = readLengthPrefixedByteArray(signedData);
                 int signedSigAlgorithm = signedData.getInt();
                 if (lastCert != null && lastSigAlgorithm != signedSigAlgorithm) {
