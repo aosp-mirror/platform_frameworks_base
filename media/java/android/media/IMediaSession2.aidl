@@ -42,6 +42,8 @@ interface IMediaSession2 {
     // send command
     //////////////////////////////////////////////////////////////////////////////////////////////
     oneway void sendCommand(IMediaSession2Callback caller, in Bundle command, in Bundle args);
+    oneway void sendTransportControlCommand(IMediaSession2Callback caller,
+            int commandCode, long arg);
 
     Bundle getPlaybackState();
 

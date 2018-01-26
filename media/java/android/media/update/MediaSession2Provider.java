@@ -16,10 +16,9 @@
 
 package android.media.update;
 
-import android.annotation.SystemApi;
 import android.media.AudioAttributes;
 import android.media.MediaItem2;
-import android.media.MediaPlayerBase;
+import android.media.MediaPlayerInterface;
 import android.media.MediaSession2.Command;
 import android.media.MediaSession2.CommandButton;
 import android.media.MediaSession2.CommandGroup;
@@ -37,9 +36,9 @@ import java.util.List;
  */
 public interface MediaSession2Provider extends TransportControlProvider {
     void close_impl();
-    void setPlayer_impl(MediaPlayerBase player);
-    void setPlayer_impl(MediaPlayerBase player, VolumeProvider volumeProvider);
-    MediaPlayerBase getPlayer_impl();
+    void setPlayer_impl(MediaPlayerInterface player);
+    void setPlayer_impl(MediaPlayerInterface player, VolumeProvider volumeProvider);
+    MediaPlayerInterface getPlayer_impl();
     SessionToken2 getToken_impl();
     List<ControllerInfo> getConnectedControllers_impl();
     void setCustomLayout_impl(ControllerInfo controller, List<CommandButton> layout);

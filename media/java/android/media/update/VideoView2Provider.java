@@ -17,7 +17,7 @@
 package android.media.update;
 
 import android.media.AudioAttributes;
-import android.media.MediaPlayerBase;
+import android.media.MediaPlayerInterface;
 import android.media.session.MediaController;
 import android.net.Uri;
 import android.widget.MediaControlView2;
@@ -52,7 +52,7 @@ public interface VideoView2Provider extends ViewProvider {
     void setSpeed_impl(float speed);
     void setAudioFocusRequest_impl(int focusGain);
     void setAudioAttributes_impl(AudioAttributes attributes);
-    void setRouteAttributes_impl(List<String> routeCategories, MediaPlayerBase player);
+    void setRouteAttributes_impl(List<String> routeCategories, MediaPlayerInterface player);
     void setVideoPath_impl(String path);
     void setVideoURI_impl(Uri uri);
     void setVideoURI_impl(Uri uri, Map<String, String> headers);
