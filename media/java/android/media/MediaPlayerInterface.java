@@ -16,8 +16,6 @@
 
 package android.media;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.media.MediaSession2.PlaylistParams;
 
 import java.util.List;
@@ -50,18 +48,6 @@ public interface MediaPlayerInterface {
     void rewind();
 
     PlaybackState2 getPlaybackState();
-
-    /**
-     * Sets the {@link AudioAttributes} to be used during the playback of the media.
-     *
-     * @param attributes non-null <code>AudioAttributes</code>.
-     */
-    void setAudioAttributes(@NonNull AudioAttributes attributes);
-
-    /**
-     * Returns AudioAttributes that media player has.
-     */
-    @Nullable
     AudioAttributes getAudioAttributes();
 
     void setPlaylist(List<MediaItem2> item, PlaylistParams param);
