@@ -30,6 +30,7 @@ import android.media.IMediaSession2;
  */
 oneway interface IMediaSession2Callback {
     void onPlaybackStateChanged(in Bundle state);
+    void onPlaylistParamsChanged(in Bundle params);
 
     /**
      * Called only when the controller is created with service's token.

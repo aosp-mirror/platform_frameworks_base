@@ -61,5 +61,6 @@ public interface MediaController2Provider extends TransportControlProvider {
     void addPlaylistItem_impl(int index, MediaItem2 item);
 
     PlaylistParams getPlaylistParam_impl();
+    void setPlaylistParams_impl(PlaylistParams params);
     PlaybackState2 getPlaybackState_impl();
 }
