@@ -635,4 +635,26 @@
     <!-- Size of thumbnail used in the cross profile apps animation -->
     <dimen name="cross_profile_apps_thumbnail_size">72dp</dimen>
 
+    <!-- Padding between the title and content in the harmful app dialog -->
+    <dimen name="harmful_app_padding_top">10dp</dimen>
+    <!-- Bottom padding for the "app name" section of the harmful app dialog -->
+    <dimen name="harmful_app_name_padding_bottom">20dp</dimen>
+    <!-- Left padding for the "app name" section of the harmful app dialog -->
+    <dimen name="harmful_app_name_padding_left">24dp</dimen>
+    <!-- Right padding for the "app name" section of the harmful app dialog -->
+    <dimen name="harmful_app_name_padding_right">24dp</dimen>
+    <!-- Top padding for the "app name" section of the harmful app dialog -->
+    <dimen name="harmful_app_name_padding_top">8dp</dimen>
+    <!-- Padding between the icon and app name in the harmful app dialog -->
+    <dimen name="harmful_app_icon_name_padding">20dp</dimen>
+    <!-- The size of the icon on the harmful app dialog -->
+    <dimen name="harmful_app_icon_size">44dp</dimen>
+    <!-- Left padding for the message section of the harmful app dialog -->
+    <dimen name="harmful_app_message_padding_left">24dp</dimen>
+    <!-- Right padding for the message section of the harmful app dialog -->
+    <dimen name="harmful_app_message_padding_right">24dp</dimen>
+    <!-- Bottom padding for the message section of the harmful app dialog -->
+    <dimen name="harmful_app_message_padding_bottom">24dp</dimen>
+    <!-- Line spacing modifier for the message field of the harmful app dialog -->
+    <item name="harmful_app_message_line_spacing_modifier" type="dimen">1.22</item>
 </resources>
