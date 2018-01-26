@@ -148,9 +148,19 @@ find_section(const char* name)
 static int
 get_dest(const char* arg)
 {
-    if (strcmp(arg, "LOCAL") == 0) return 0;
-    if (strcmp(arg, "EXPLICIT") == 0) return 1;
-    if (strcmp(arg, "AUTOMATIC") == 0) return 2;
+    if (strcmp(arg, "L") == 0
+        || strcmp(arg, "LOCAL") == 0) {
+      return DEST_LOCAL;
+    }
+    if (strcmp(arg, "E") == 0
+        || strcmp(arg, "EXPLICIT") == 0) {
+      return DEST_EXPLICIT;
+    }
+    if (strcmp(arg, "A") == 0
+        || strcmp(arg, "AUTO") == 0
+        || strcmp(arg, "AUTOMATIC") == 0) {
+      return DEST_AUTOMATIC;
+    }
     return -1; // return the default value
 }
 
