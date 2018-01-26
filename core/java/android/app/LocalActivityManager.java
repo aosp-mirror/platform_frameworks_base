@@ -16,6 +16,8 @@
 
 package android.app;
 
+import android.app.ActivityThread.ActivityClientRecord;
+import android.app.servertransaction.PendingTransactionActions;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Binder;
@@ -141,6 +143,21 @@ public class LocalActivityManager {
             }
             r.window = r.activity.getWindow();
             r.instanceState = null;
+
+            final ActivityClientRecord clientRecord = mActivityThread.getActivityClient(r);
+            final PendingTransactionActions pendingActions;
+
+            if (!r.activity.mFinished) {
+                // This matches pending actions set in ActivityThread#handleLaunchActivity
+                pendingActions = new PendingTransactionActions();
+                pendingActions.setOldState(clientRecord.state);
+                pendingActions.setRestoreInstanceState(true);
+                pendingActions.setCallOnPostCreate(true);
+            } else {
+                pendingActions = null;
+            }
+
+            mActivityThread.handleStartActivity(clientRecord, pendingActions);
             r.curState = STARTED;
             
             if (desiredState == RESUMED) {
