@@ -30,6 +30,7 @@ import android.media.MediaPlayerInterface;
 import android.media.MediaSession2;
 import android.media.MediaSession2.SessionCallback;
 import android.media.MediaSessionService2;
+import android.media.SessionPlayer2;
 import android.media.SessionToken2;
 import android.media.VolumeProvider;
 import android.media.update.MediaLibraryService2Provider.MediaLibrarySessionProvider;
@@ -76,4 +77,6 @@ public interface StaticProvider {
             int uid, int type, String packageName, String serviceName, String id,
             IInterface sessionBinderInterface);
     SessionToken2 SessionToken2_fromBundle(Context context, Bundle bundle);
+
+    SessionPlayer2Provider createSessionPlayer2(Context context, SessionPlayer2 instance);
 }

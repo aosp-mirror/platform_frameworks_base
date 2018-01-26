@@ -64,7 +64,9 @@ public interface MediaPlayerInterface {
     @Nullable
     AudioAttributes getAudioAttributes();
 
-    void setPlaylist(List<MediaItem2> item, PlaylistParams param);
+    void setPlaylist(List<MediaItem2> list, PlaylistParams param);
+    List<MediaItem2> getPlaylist();
+
     void setCurrentPlaylistItem(int index);
     void setPlaylistParams(PlaylistParams params);
     PlaylistParams getPlaylistParams();

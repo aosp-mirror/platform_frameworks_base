@@ -1262,6 +1262,10 @@ public class MediaSession2 implements AutoCloseable {
         mProvider.setPlaylist_impl(playlist, param);
     }
 
+    public List<MediaItem2> getPlaylist() {
+        return mProvider.getPlaylist_impl();
+    }
+
     /**
      * Sets the {@link PlaylistParams} for the current play list. Repeat/shuffle mode and metadata
      * for the list can be set by calling this method.
