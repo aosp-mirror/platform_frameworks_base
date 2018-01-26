@@ -31,9 +31,9 @@
       <item quantity="other">‏%d מסכים ב’סקירה‘</item>
       <item quantity="one">מסך אחד ב’סקירה‘</item>
     </plurals>
-    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"אין התראות"</string>
+    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"אין הודעות"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"מתמשך"</string>
-    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"התראות"</string>
+    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"הודעות"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"עוצמת הסוללה נמוכה"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"נותרו <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"נותרו <xliff:g id="PERCENTAGE">%s</xliff:g>. הופעל שירות חיסכון בסוללה."</string>
@@ -49,7 +49,7 @@
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"סיבוב אוטומטי של המסך"</string>
     <string name="status_bar_settings_mute_label" msgid="554682549917429396">"השתק"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"אוטומטי"</string>
-    <string name="status_bar_settings_notifications" msgid="397146176280905137">"התראות"</string>
+    <string name="status_bar_settings_notifications" msgid="397146176280905137">"הודעות"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"‏Bluetooth קשור"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"הגדר שיטות קלט"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"מקלדת פיזית"</string>
@@ -166,7 +166,7 @@
     <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> אחוזים של סוללה."</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"טעינת סוללה, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> אחוז."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"הגדרות מערכת"</string>
-    <string name="accessibility_notifications_button" msgid="4498000369779421892">"התראות"</string>
+    <string name="accessibility_notifications_button" msgid="4498000369779421892">"הודעות"</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"הצגת כל ההודעות"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"נקה התראה"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"‏GPS מופעל."</string>
@@ -251,7 +251,7 @@
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"‏מחפש GPS"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"‏מיקום מוגדר על ידי GPS"</string>
     <string name="accessibility_location_active" msgid="2427290146138169014">"בקשות מיקום פעילות"</string>
-    <string name="accessibility_clear_all" msgid="5235938559247164925">"נקה את כל ההתראות."</string>
+    <string name="accessibility_clear_all" msgid="5235938559247164925">"נקה את כל ההודעות."</string>
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
       <item quantity="two">יש בפנים עוד <xliff:g id="NUMBER_1">%s</xliff:g> הודעות.</item>
@@ -376,7 +376,7 @@
     <string name="interruption_level_priority" msgid="6426766465363855505">"עדיפות בלבד"</string>
     <string name="interruption_level_alarms" msgid="5226306993448328896">"התראות בלבד"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"שקט\nמוחלט"</string>
-    <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"התראות בעדיפות\nבלבד"</string>
+    <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"הודעות בעדיפות\nבלבד"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"התראות\nבלבד"</string>
     <string name="keyguard_indication_charging_time" msgid="1757251776872835768">"טוען (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> עד לסיום)"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="9018981952053914986">"בטעינה מהירה (<xliff:g id="CHARGING_TIME_LEFT">%s</xliff:g> עד למילוי)"</string>
@@ -475,7 +475,7 @@
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"הנעילה בוטלה על ידי <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> פועל"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"המכשיר יישאר נעול עד שתבטל את נעילתו באופן ידני"</string>
-    <string name="hidden_notifications_title" msgid="7139628534207443290">"קבל התראות מהר יותר"</string>
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"קבל הודעות מהר יותר"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"צפה בהן לפני שתבטל נעילה"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"לא, תודה"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"הגדר"</string>
@@ -556,9 +556,9 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"בעזרת פקדים של הודעות הפעלה, תוכל להגדיר רמת חשיבות מ-0 עד 5 להודעות אפליקציה. \n\n"<b>"רמה 5"</b>" \n- הצג בראש רשימת ההודעות \n- אפשר הפרעה במסך מלא \n- תמיד אפשר הצצה \n\n"<b>"רמה 4"</b>" \n- מנע הפרעה במסך מלא \n- תמיד אפשר הצצה \n\n"<b>"רמה 3"</b>" \n- מנע הפרעה במסך מלא \n- אף פעם אל תאפשר הצצה \n\n"<b>"רמה 2"</b>" \n- מנע הפרעה במסך מלא \n- אף פעם אל תאפשר הצצה \n- אף פעם אל תאפשר קול ורטט \n\n"<b>"רמה 1"</b>" \n- מנע הפרעה במסך מלא \n- אף פעם אל תאפשר הצצה \n- אף פעם אל תאפשר קול ורטט \n- הסתר ממסך הנעילה ומשורת הסטטוס \n- הצג בתחתית רשימת ההודעות \n\n"<b>"רמה 0"</b>" \n- חסום את כל ההודעות מהאפליקציה"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"הודעות"</string>
     <string name="notification_channel_disabled" msgid="2139193533791840539">"לא תקבל את ההודעות האלה יותר"</string>
-    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> קטגוריות של התראות"</string>
+    <string name="notification_num_channels" msgid="2048144408999179471">"<xliff:g id="NUMBER">%d</xliff:g> קטגוריות של הודעות"</string>
     <string name="notification_default_channel_desc" msgid="2506053815870808359">"האפליקציה הזו לא תומכת בקטגוריות של הודעות"</string>
-    <string name="notification_unblockable_desc" msgid="3561016061737896906">"לא ניתן לכבות התראות של האפליקציה הזאת"</string>
+    <string name="notification_unblockable_desc" msgid="3561016061737896906">"לא ניתן לכבות הודעות של האפליקציה הזאת"</string>
     <plurals name="notification_num_channels_desc" formatted="false" msgid="5492793452274077663">
       <item quantity="two">קטגוריית הודעות אחת מתוך <xliff:g id="NUMBER_1">%s</xliff:g> מאפליקציה זו</item>
       <item quantity="many">קטגוריית הודעות אחת מתוך <xliff:g id="NUMBER_1">%s</xliff:g> מאפליקציה זו</item>

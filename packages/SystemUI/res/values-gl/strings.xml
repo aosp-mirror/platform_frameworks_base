@@ -283,7 +283,7 @@
     <string name="quick_settings_rotation_locked_label" msgid="6359205706154282377">"Rotación bloqueada"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="5102691921442135053">"Vertical"</string>
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Horizontal"</string>
-    <string name="quick_settings_ime_label" msgid="7073463064369468429">"Método de entrada"</string>
+    <string name="quick_settings_ime_label" msgid="7073463064369468429">"Método de introdución de texto"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Localización"</string>
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Localización desactivada"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Dispositivo multimedia"</string>

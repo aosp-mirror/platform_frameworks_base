@@ -64,7 +64,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Компүтердин RSA ачкычынын контролдук суммасы:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Бул компүтерден дайыма уруксат берилсин"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB мүчүлүштүктөрүн оңдоого уруксат жок"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Учурда бул түзмөккө каттоо эсеби менен кирген колдонуучу USB мүчүлүштүктөрүн оңдоо функциясын күйгүзө албай жатат. Бул функцияны колдонуу үчүн негизги колдонуучунун каттоо эсебине которулуңуз."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Учурда бул аккаунтта USB аркылуу мүчүлүштүктөрдү оңдоо функциясын иштетүүгө болбойт. Негизги колдонуучунун аккаунтуна кириңиз."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Экрнд тлтр ү. чен өлч өзг"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Экранды толтуруу ү-н чоюу"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Скриншот сакталууда…"</string>
@@ -715,7 +715,7 @@
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Ыкчам жөндөөлөрдү ачуу."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Ыкчам жөндөөлөрдү жабуу."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Ойготкуч коюлду."</string>
-    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> каттоо эсеби аркылуу кирди"</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> аккаунту менен кирди"</string>
     <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Интернет жок."</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Чоо-жайын ачуу."</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> жөндөөлөрүн ачуу."</string>

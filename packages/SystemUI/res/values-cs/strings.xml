@@ -650,9 +650,9 @@
     <string name="volume_up_silent" msgid="7141255269783588286">"Při zvýšení hlasitosti ukončit režim Nerušit"</string>
     <string name="battery" msgid="7498329822413202973">"Baterie"</string>
     <string name="clock" msgid="7416090374234785905">"Hodiny"</string>
-    <string name="headset" msgid="4534219457597457353">"Náhlavní souprava"</string>
+    <string name="headset" msgid="4534219457597457353">"Sluchátka"</string>
     <string name="accessibility_status_bar_headphones" msgid="9156307120060559989">"Sluchátka připojena"</string>
-    <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Náhlavní souprava připojena"</string>
+    <string name="accessibility_status_bar_headset" msgid="8666419213072449202">"Sluchátka připojena"</string>
     <string name="data_saver" msgid="5037565123367048522">"Spořič dat"</string>
     <string name="accessibility_data_saver_on" msgid="8454111686783887148">"Spořič dat je zapnutý"</string>
     <string name="accessibility_data_saver_off" msgid="8841582529453005337">"Spořič dat je vypnutý"</string>

@@ -137,7 +137,7 @@
     <string name="accessibility_desc_on" msgid="2385254693624345265">"चालू."</string>
     <string name="accessibility_desc_off" msgid="6475508157786853157">"बंद."</string>
     <string name="accessibility_desc_connected" msgid="8366256693719499665">"कनेक्‍ट केले."</string>
-    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"कनेक्ट करीत आहे."</string>
+    <string name="accessibility_desc_connecting" msgid="3812924520316280149">"कनेक्ट करत आहे."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_1x" msgid="994133468120244018">"1 X"</string>
     <string name="accessibility_data_connection_hspa" msgid="2032328855462645198">"HSPA"</string>
@@ -168,7 +168,7 @@
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"सर्व सूचना पहा"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"सूचना साफ करा."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS सक्षम केले."</string>
-    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS प्राप्त करीत आहे."</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS प्राप्त करत आहे."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter सक्षम केले."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"रिंगर कंपन."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"रिंगर मूक."</string>
@@ -179,7 +179,7 @@
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> डिसमिस केला."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"अलीकडील सर्व अॅप्लिकेशन डिसमिस झाले."</string>
     <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"<xliff:g id="APP">%s</xliff:g> अॅप्लिकेशन माहिती उघडा."</string>
-    <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g> प्रारंभ करीत आहे."</string>
+    <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g> प्रारंभ करत आहे."</string>
     <string name="accessibility_recents_task_header" msgid="1437183540924535457">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="ACTIVITY_LABEL">%2$s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"सूचना डिसमिस केल्या."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"सूचना शेड."</string>
@@ -311,7 +311,7 @@
     <string name="quick_settings_done" msgid="3402999958839153376">"पूर्ण झाले"</string>
     <string name="quick_settings_connected" msgid="1722253542984847487">"कनेक्ट केलेले"</string>
     <string name="quick_settings_connected_battery_level" msgid="4136051440381328892">"कनेक्ट केलेले आहे, बॅटरी <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="quick_settings_connecting" msgid="47623027419264404">"कनेक्ट करीत आहे..."</string>
+    <string name="quick_settings_connecting" msgid="47623027419264404">"कनेक्ट करत आहे..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"टेदरिंग"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"हॉटस्पॉट"</string>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"सूचना"</string>

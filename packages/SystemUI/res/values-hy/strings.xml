@@ -67,8 +67,8 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Ընթացիկ հաշվի օգտատերը չի կարող միացնել USB վրիպազերծումը: Այս գործառույթը միացնելու համար մուտք գործեք հիմնական օգտատիրոջ հաշվով:"</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Խոշորացնել` էկրանը լցնելու համար"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Ձգել` էկրանը լցնելու համար"</string>
-    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Պահում է էկրանի պատկերը…"</string>
-    <string name="screenshot_saving_title" msgid="8242282144535555697">"Պահում է էկրանի պատկերը..."</string>
+    <string name="screenshot_saving_ticker" msgid="7403652894056693515">"Էկրանի պատկերը պահվում է…"</string>
+    <string name="screenshot_saving_title" msgid="8242282144535555697">"Էկրանի պատկերը պահվում է..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Էկրանի պատկերը պահվում է:"</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Էկրանի պատկերը լուսանկարվել է:"</string>
     <string name="screenshot_saved_text" msgid="2685605830386712477">"Հպեք՝ էկրանի պատկերը տեսնելու համար:"</string>

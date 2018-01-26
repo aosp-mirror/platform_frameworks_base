@@ -71,7 +71,7 @@
     <string name="screenshot_saving_title" msgid="8242282144535555697">"Inahifadhi picha ya skrini..."</string>
     <string name="screenshot_saving_text" msgid="2419718443411738818">"Picha ya skrini inahifadhiwa"</string>
     <string name="screenshot_saved_title" msgid="6461865960961414961">"Picha ya skrini imenaswa."</string>
-    <string name="screenshot_saved_text" msgid="2685605830386712477">"Gonga ili utazame picha ya skrini uliyohifadhi."</string>
+    <string name="screenshot_saved_text" msgid="2685605830386712477">"Gusa ili utazame picha ya skrini uliyohifadhi."</string>
     <string name="screenshot_failed_title" msgid="705781116746922771">"Haikuweza kunasa picha ya skrini"</string>
     <string name="screenshot_failed_to_save_unknown_text" msgid="7887826345701753830">"Hitilafu imetokea wakati wa kuhifadhi picha ya skrini."</string>
     <string name="screenshot_failed_to_save_text" msgid="2592658083866306296">"Haina nafasi ya kutosha kuhifadhi picha ya skrini."</string>
@@ -79,7 +79,7 @@
     <string name="usb_preference_title" msgid="6551050377388882787">"Machaguo ya uhamisho wa faili la USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Angika kama kichezaji cha maudhui (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Angika kama kamera (PTP)"</string>
-    <string name="installer_cd_button_title" msgid="2312667578562201583">"Sakinisha programu ya Kuhamisha Faili ya Android ya Mac"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Weka programu ya Kuhamisha Faili inayotumika kwenye Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Nyuma"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Nyumbani"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menyu"</string>
@@ -360,7 +360,7 @@
     <string name="zen_silence_introduction" msgid="3137882381093271568">"Hatua hii huzuia sauti na mitetemo YOTE, ikiwa ni pamoja na ile inayotokana na kengele, muziki, video na michezo."</string>
     <string name="keyguard_more_overflow_text" msgid="9195222469041601365">"<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>+"</string>
     <string name="speed_bump_explanation" msgid="1288875699658819755">"Arifa zisizo za dharura sana ziko hapo chini"</string>
-    <string name="notification_tap_again" msgid="7590196980943943842">"Gonga tena ili ufungue"</string>
+    <string name="notification_tap_again" msgid="7590196980943943842">"Gusa tena ili ufungue"</string>
     <string name="keyguard_unlock" msgid="8043466894212841998">"Telezesha kidole ili ufungue"</string>
     <string name="do_disclosure_generic" msgid="5615898451805157556">"Kifaa hiki kinasimamiwa na shirika lako"</string>
     <string name="do_disclosure_with_name" msgid="5640615509915445501">"Kifaa hiki kinadhibitiwa na <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
@@ -497,11 +497,11 @@
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"Masafa ya ishara ya kampuni ya simu"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"Zana za walio na matatizo ya kuona au kusikia"</string>
-    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Gonga ili urejeshe."</string>
-    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Gonga ili uweke mtetemo. Huenda ikakomesha huduma za zana za walio na matatizo ya kuona au kusikia."</string>
-    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Gonga ili ukomeshe. Huenda ikakomesha huduma za zana za walio na matatizo ya kuona au kusikia."</string>
-    <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Gonga ili uweke mtetemo."</string>
-    <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Gonga ili usitishe."</string>
+    <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s. Gusa ili urejeshe."</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s. Gusa ili uweke mtetemo. Huenda ikakomesha huduma za zana za walio na matatizo ya kuona au kusikia."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Gusa ili ukomeshe. Huenda ikakomesha huduma za zana za walio na matatizo ya kuona au kusikia."</string>
+    <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"%1$s. Gusa ili uweke mtetemo."</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"%1$s. Gusa ili usitishe."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"Inaonyesha %s ya vidhibiti vya sauti. Telezesha kidole juu ili uondoe."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Imeficha vidhibiti vya sauti"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"Kirekebishi cha kiolesura cha mfumo"</string>
@@ -697,9 +697,9 @@
     <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"Juu 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"Juu 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"Skrini nzima ya chini"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Nafasi ya <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Gonga mara mbili ili ubadilishe."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Gonga mara mbili ili uongeze."</string>
-    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Nafasi ya <xliff:g id="POSITION">%1$d</xliff:g>. Gonga mara mbili ili uchague."</string>
+    <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"Nafasi ya <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Gusa mara mbili ili ubadilishe."</string>
+    <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Gusa mara mbili ili uongeze."</string>
+    <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"Nafasi ya <xliff:g id="POSITION">%1$d</xliff:g>. Gusa mara mbili ili uchague."</string>
     <string name="accessibility_qs_edit_move_tile" msgid="2461819993780159542">"Hamisha <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_remove_tile" msgid="7484493384665907197">"Ondoa <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_added" msgid="8050200862063548309">"<xliff:g id="TILE_NAME">%1$s</xliff:g> imeongezwa kwenye nafasi ya <xliff:g id="POSITION">%2$d</xliff:g>"</string>
@@ -773,7 +773,7 @@
     <string name="qs_dnd_keep" msgid="1825009164681928736">"Usibadilishe"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"Badilisha"</string>
     <string name="running_foreground_services_title" msgid="381024150898615683">"Programu zinatumika chinichini"</string>
-    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Gonga ili upate maelezo kuhusu betri na matumizi ya data"</string>
+    <string name="running_foreground_services_msg" msgid="6326247670075574355">"Gusa ili upate maelezo kuhusu betri na matumizi ya data"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Ungependa kuzima data ya mtandao wa simu?"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Kwa sababu programu nyingine inazuia ombi la ruhusa, hatuwezi kuthibitisha jibu lako katika Mipangilio."</string>
 </resources>

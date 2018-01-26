@@ -26,7 +26,7 @@
     <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"تظهر شاشاتك المعروضة مؤخرًا هنا"</string>
     <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"إزالة التطبيقات الحديثة"</string>
     <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="zero">‏ لا توجد أية شاشات (%d) في النظرة العامة</item>
+      <item quantity="zero">‏ لا توجد أي شاشات (%d) في النظرة العامة</item>
       <item quantity="two">‏شاشتان (%d) في النظرة العامة</item>
       <item quantity="few">‏%d شاشات في النظرة العامة</item>
       <item quantity="many">‏%d شاشة في النظرة العامة</item>
@@ -305,7 +305,7 @@
     <string name="quick_settings_wifi_no_network" msgid="2221993077220856376">"لا تتوفر شبكة"</string>
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"‏إيقاف Wi-Fi"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"‏تم تشغيل Wi-Fi"</string>
-    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"‏لا تتوفر أية شبكة Wi-Fi"</string>
+    <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"‏لا تتوفر أي شبكة Wi-Fi"</string>
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"إرسال"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"جارٍ الإرسال"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"جهاز لا يحمل اسمًا"</string>
