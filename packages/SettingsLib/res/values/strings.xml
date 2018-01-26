@@ -679,9 +679,6 @@
     <!-- UI debug setting: show the amount of overdraw in apps using the GPU [CHAR LIMIT=25] -->
     <string name="debug_hw_overdraw">Debug GPU overdraw</string>
 
-    <!-- UI debug setting: select the renderer to use by RenderThread [CHAR LIMIT=25] -->
-    <string name="debug_hw_renderer">Set GPU Renderer</string>
-
     <!-- UI debug setting: disable use of overlays? [CHAR LIMIT=25] -->
     <string name="disable_overlays">Disable HW overlays</string>
     <!-- UI debug setting: disable use of overlays summary [CHAR LIMIT=50] -->
