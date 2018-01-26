@@ -3969,8 +3969,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
 
             r.activity.mConfigChangeFlags |= configChanges;
-            performPauseActivity(token, finished, r.isPreHoneycomb(), "handlePauseActivity",
-                    pendingActions);
+            performPauseActivity(r, finished, "handlePauseActivity", pendingActions);
 
             // Make sure any pending writes are now committed.
             if (r.isPreHoneycomb()) {
@@ -3993,16 +3992,18 @@ public final class ActivityThread extends ClientTransactionHandler {
         mInstrumentation.callActivityOnUserLeaving(r.activity);
     }
 
-    final Bundle performPauseActivity(IBinder token, boolean finished,
-            boolean saveState, String reason, PendingTransactionActions pendingActions) {
+    final Bundle performPauseActivity(IBinder token, boolean finished, String reason,
+            PendingTransactionActions pendingActions) {
         ActivityClientRecord r = mActivities.get(token);
-        return r != null
-                ? performPauseActivity(r, finished, saveState, reason, pendingActions)
-                : null;
+        return r != null ? performPauseActivity(r, finished, reason, pendingActions) : null;
     }
 
-    private Bundle performPauseActivity(ActivityClientRecord r, boolean finished, boolean saveState,
-            String reason, PendingTransactionActions pendingActions) {
+    /**
+     * Pause the activity.
+     * @return Saved instance state for pre-Honeycomb apps if it was saved, {@code null} otherwise.
+     */
+    private Bundle performPauseActivity(ActivityClientRecord r, boolean finished, String reason,
+            PendingTransactionActions pendingActions) {
         if (r.paused) {
             if (r.activity.mFinished) {
                 // If we are finishing, we won't call onResume() in certain cases.
@@ -4019,9 +4020,10 @@ public final class ActivityThread extends ClientTransactionHandler {
             r.activity.mFinished = true;
         }
 
-        // Next have the activity save its current state and managed dialogs...
-        if (!r.activity.mFinished && saveState) {
-            callCallActivityOnSaveInstanceState(r);
+        // Pre-Honeycomb apps always save their state before pausing
+        final boolean shouldSaveState = !r.activity.mFinished && r.isPreHoneycomb();
+        if (shouldSaveState) {
+            callActivityOnSaveInstanceState(r);
         }
 
         performPauseActivityIfNeeded(r, reason);
@@ -4048,7 +4050,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
         }
 
-        return !r.activity.mFinished && saveState ? r.state : null;
+        return shouldSaveState ? r.state : null;
     }
 
     private void performPauseActivityIfNeeded(ActivityClientRecord r, String reason) {
@@ -4149,30 +4151,40 @@ public final class ActivityThread extends ClientTransactionHandler {
                 }
             }
 
-            // Next have the activity save its current state and managed dialogs...
-            if (!r.activity.mFinished && saveState) {
-                if (r.state == null) {
-                    callCallActivityOnSaveInstanceState(r);
-                }
-            }
-
             if (!keepShown) {
-                try {
-                    // Now we are idle.
-                    r.activity.performStop(false /*preserveWindow*/);
-                } catch (Exception e) {
-                    if (!mInstrumentation.onException(r.activity, e)) {
-                        throw new RuntimeException(
-                                "Unable to stop activity "
-                                + r.intent.getComponent().toShortString()
-                                + ": " + e.toString(), e);
-                    }
-                }
-                r.setState(ON_STOP);
-                EventLog.writeEvent(LOG_AM_ON_STOP_CALLED, UserHandle.myUserId(),
-                        r.activity.getComponentName().getClassName(), reason);
+                callActivityOnStop(r, saveState, reason);
             }
         }
+    }
+
+    /**
+     * Calls {@link Activity#onStop()} and {@link Activity#onSaveInstanceState(Bundle)}, and updates
+     * the client record's state.
+     * All calls to stop an activity must be done through this method to make sure that
+     * {@link Activity#onSaveInstanceState(Bundle)} is also executed in the same call.
+     */
+    private void callActivityOnStop(ActivityClientRecord r, boolean saveState, String reason) {
+        final boolean shouldSaveState = saveState && !r.activity.mFinished && r.state == null
+                && !r.isPreHoneycomb();
+        if (shouldSaveState) {
+            callActivityOnSaveInstanceState(r);
+        }
+
+        try {
+            r.activity.performStop(false /*preserveWindow*/);
+        } catch (SuperNotCalledException e) {
+            throw e;
+        } catch (Exception e) {
+            if (!mInstrumentation.onException(r.activity, e)) {
+                throw new RuntimeException(
+                        "Unable to stop activity "
+                                + r.intent.getComponent().toShortString()
+                                + ": " + e.toString(), e);
+            }
+        }
+        r.setState(ON_STOP);
+        EventLog.writeEvent(LOG_AM_ON_STOP_CALLED, UserHandle.myUserId(),
+                r.activity.getComponentName().getClassName(), reason);
     }
 
     private void updateVisibility(ActivityClientRecord r, boolean show) {
@@ -4292,24 +4304,7 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         if (sleeping) {
             if (!r.stopped && !r.isPreHoneycomb()) {
-                if (!r.activity.mFinished && r.state == null) {
-                    callCallActivityOnSaveInstanceState(r);
-                }
-
-                try {
-                    // Now we are idle.
-                    r.activity.performStop(false /*preserveWindow*/);
-                } catch (Exception e) {
-                    if (!mInstrumentation.onException(r.activity, e)) {
-                        throw new RuntimeException(
-                                "Unable to stop activity "
-                                + r.intent.getComponent().toShortString()
-                                + ": " + e.toString(), e);
-                    }
-                }
-                r.setState(ON_STOP);
-                EventLog.writeEvent(LOG_AM_ON_STOP_CALLED, UserHandle.myUserId(),
-                        r.activity.getComponentName().getClassName(), "sleeping");
+                callActivityOnStop(r, true /* saveState */, "sleeping");
             }
 
             // Make sure any pending writes are now committed.
@@ -4459,21 +4454,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             performPauseActivityIfNeeded(r, "destroy");
 
             if (!r.stopped) {
-                try {
-                    r.activity.performStop(r.mPreserveWindow);
-                } catch (SuperNotCalledException e) {
-                    throw e;
-                } catch (Exception e) {
-                    if (!mInstrumentation.onException(r.activity, e)) {
-                        throw new RuntimeException(
-                                "Unable to stop activity "
-                                + safeToComponentShortString(r.intent)
-                                + ": " + e.toString(), e);
-                    }
-                }
-                r.setState(ON_STOP);
-                EventLog.writeEvent(LOG_AM_ON_STOP_CALLED, UserHandle.myUserId(),
-                        r.activity.getComponentName().getClassName(), "destroy");
+                callActivityOnStop(r, false /* saveState */, "destroy");
             }
             if (getNonConfigInstance) {
                 try {
@@ -4779,11 +4760,11 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         // Need to ensure state is saved.
         if (!r.paused) {
-            performPauseActivity(r.token, false, r.isPreHoneycomb(), "handleRelaunchActivity",
+            performPauseActivity(r, false, "handleRelaunchActivity",
                     null /* pendingActions */);
         }
-        if (r.state == null && !r.stopped && !r.isPreHoneycomb()) {
-            callCallActivityOnSaveInstanceState(r);
+        if (!r.stopped) {
+            callActivityOnStop(r, true /* saveState */, "handleRelaunchActivity");
         }
 
         handleDestroyActivity(r.token, false, configChanges, true);
@@ -4816,8 +4797,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         handleStartActivity(r, pendingActions);
         handleResumeActivity(r.token, false /* clearHide */, r.isForward, "relaunch");
         if (r.startsNotResumed) {
-            performPauseActivity(r, false /* finished */, r.isPreHoneycomb(), "relaunch",
-                    pendingActions);
+            performPauseActivity(r, false /* finished */, "relaunch", pendingActions);
         }
 
         if (!tmp.onlyLocalRequest) {
@@ -4832,7 +4812,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
-    private void callCallActivityOnSaveInstanceState(ActivityClientRecord r) {
+    private void callActivityOnSaveInstanceState(ActivityClientRecord r) {
         r.state = new Bundle();
         r.state.setAllowFds(false);
         if (r.isPersistable()) {
