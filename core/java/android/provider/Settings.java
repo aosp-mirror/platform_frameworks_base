@@ -10503,6 +10503,15 @@ public final class Settings {
                 = "forced_app_standby_for_small_battery_enabled";
 
         /**
+         * Whether or not to enable Time Only Mode for watch type devices.
+         * Type: int (0 for false, 1 for true)
+         * Default: 0
+         * @hide
+         */
+        public static final String TIME_ONLY_MODE_ENABLED
+                = "time_only_mode_enabled";
+
+        /**
          * Whether or not Network Watchlist feature is enabled.
          * Type: int (0 for false, 1 for true)
          * Default: 0
