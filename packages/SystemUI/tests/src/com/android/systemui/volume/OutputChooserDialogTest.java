@@ -28,11 +28,12 @@ import static org.mockito.Mockito.when;
 
 import android.bluetooth.BluetoothProfile;
 import android.net.wifi.WifiManager;
-import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.v7.media.MediaRouter;
 import android.telecom.TelecomManager;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.widget.TextView;
 
 import com.android.settingslib.bluetooth.CachedBluetoothDevice;
@@ -49,7 +50,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @SmallTest
-@RunWith(AndroidJUnit4.class)
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
 public class OutputChooserDialogTest extends SysuiTestCase {
 
     OutputChooserDialog mDialog;
@@ -68,7 +70,6 @@ public class OutputChooserDialogTest extends SysuiTestCase {
 
 
     @Before
-    @UiThreadTest
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
@@ -82,8 +83,12 @@ public class OutputChooserDialogTest extends SysuiTestCase {
         mDialog = new OutputChooserDialog(getContext(), mRouter);
     }
 
+    @After
+    public void tearDown() throws Exception {
+        TestableLooper.get(this).processAllMessages();
+    }
+
     @Test
-    @UiThreadTest
     public void testClickMediaRouterItemConnectsMedia() {
         mDialog.show();
 
@@ -100,7 +105,6 @@ public class OutputChooserDialogTest extends SysuiTestCase {
     }
 
     @Test
-    @UiThreadTest
     public void testClickBtItemConnectsBt() {
         mDialog.show();
 
@@ -116,7 +120,6 @@ public class OutputChooserDialogTest extends SysuiTestCase {
     }
 
     @Test
-    @UiThreadTest
     public void testTitleNotInCall() {
         mDialog.show();
 
@@ -126,7 +129,6 @@ public class OutputChooserDialogTest extends SysuiTestCase {
     }
 
     @Test
-    @UiThreadTest
     public void testTitleInCall() {
         mDialog.setIsInCall(true);
         mDialog.show();
@@ -137,7 +139,6 @@ public class OutputChooserDialogTest extends SysuiTestCase {
     }
 
     @Test
-    @UiThreadTest
     public void testNoMediaScanIfInCall() {
         mDialog.setIsInCall(true);
         mDialog.onAttachedToWindow();
@@ -146,7 +147,6 @@ public class OutputChooserDialogTest extends SysuiTestCase {
     }
 
     @Test
-    @UiThreadTest
     public void testMediaScanIfNotInCall() {
         mDialog.setIsInCall(false);
         mDialog.onAttachedToWindow();
@@ -155,7 +155,6 @@ public class OutputChooserDialogTest extends SysuiTestCase {
     }
 
     @Test
-    @UiThreadTest
     public void testRegisterCallbacks() {
         mDialog.setIsInCall(false);
         mDialog.onAttachedToWindow();
@@ -166,7 +165,6 @@ public class OutputChooserDialogTest extends SysuiTestCase {
     }
 
     @Test
-    @UiThreadTest
     public void testUnregisterCallbacks() {
         mDialog.setIsInCall(false);
         mDialog.onDetachedFromWindow();
