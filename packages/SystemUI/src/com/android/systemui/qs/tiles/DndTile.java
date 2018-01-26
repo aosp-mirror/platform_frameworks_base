@@ -76,9 +76,6 @@ public class DndTile extends QSTileImpl<BooleanState> {
     private static final String ACTION_SET_VISIBLE = "com.android.systemui.dndtile.SET_VISIBLE";
     private static final String EXTRA_VISIBLE = "visible";
 
-    private static final QSTile.Icon TOTAL_SILENCE =
-            ResourceIcon.get(R.drawable.ic_qs_dnd_on_total_silence);
-
     private final ZenModeController mController;
     private final DndDetailAdapter mDetailAdapter;
 
@@ -201,25 +198,22 @@ public class DndTile extends QSTileImpl<BooleanState> {
         state.slash.isSlashed = !state.value;
         state.label = getTileLabel();
         state.secondaryLabel = getSecondaryLabel(zen != Global.ZEN_MODE_OFF);
+        state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on);
         checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_ADJUST_VOLUME);
         switch (zen) {
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
-                state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on);
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_dnd_priority_on);
                 break;
             case Global.ZEN_MODE_NO_INTERRUPTIONS:
-                state.icon = TOTAL_SILENCE;
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_dnd_none_on);
                 break;
             case ZEN_MODE_ALARMS:
-                state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on);
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_dnd_alarms_on);
                 break;
             default:
-                state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on);
                 state.contentDescription = mContext.getString(
                         R.string.accessibility_quick_settings_dnd);
                 break;
