@@ -19,6 +19,10 @@ package com.android.internal.util;
 
 option java_multiple_files = true;
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 message LocalLogProto {
+  option (.android.msg_privacy).dest = DEST_EXPLICIT;
+
   repeated string lines = 1;
 }
