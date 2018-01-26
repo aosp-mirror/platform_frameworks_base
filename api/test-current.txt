@@ -565,6 +565,14 @@ package android.service.autofill {
     method public void apply(android.service.autofill.ValueFinder, android.widget.RemoteViews, int) throws java.lang.Exception;
   }
 
+  public final class DateTransformation extends android.service.autofill.InternalTransformation implements android.os.Parcelable android.service.autofill.Transformation {
+    method public void apply(android.service.autofill.ValueFinder, android.widget.RemoteViews, int) throws java.lang.Exception;
+  }
+
+  public final class DateValueSanitizer extends android.service.autofill.InternalSanitizer implements android.os.Parcelable android.service.autofill.Sanitizer {
+    method public android.view.autofill.AutofillValue sanitize(android.view.autofill.AutofillValue);
+  }
+
   public final class FillResponse implements android.os.Parcelable {
     method public int getFlags();
   }
@@ -599,7 +607,8 @@ package android.service.autofill {
   }
 
   public abstract interface ValueFinder {
-    method public abstract java.lang.String findByAutofillId(android.view.autofill.AutofillId);
+    method public default java.lang.String findByAutofillId(android.view.autofill.AutofillId);
+    method public abstract android.view.autofill.AutofillValue findRawValueByAutofillId(android.view.autofill.AutofillId);
   }
 
 }

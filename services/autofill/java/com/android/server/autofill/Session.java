@@ -111,7 +111,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * until the user authenticates or it times out.
  */
 final class Session implements RemoteFillService.FillServiceCallbacks, ViewState.Listener,
-        AutoFillUI.AutoFillUiCallback {
+        AutoFillUI.AutoFillUiCallback, ValueFinder {
     private static final String TAG = "AutofillSession";
 
     private static final String EXTRA_REQUEST_ID = "android.service.autofill.extra.REQUEST_ID";
@@ -310,41 +310,54 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         return ids;
     }
 
-    /**
-     * Gets the value of a field, using either the {@code viewStates} or the {@code mContexts}, or
-     * {@code null} when not found on either of them.
-     */
+    @Override
     @Nullable
-    private String getValueAsString(@NonNull AutofillId id) {
-        AutofillValue value = null;
+    public String findByAutofillId(@NonNull AutofillId id) {
         synchronized (mLock) {
-            final ViewState state = mViewStates.get(id);
-            if (state == null) {
-                if (sDebug) Slog.d(TAG, "getValue(): no view state for " + id);
-                return null;
-            }
-            value = state.getCurrentValue();
-            if (value == null) {
-                if (sDebug) Slog.d(TAG, "getValue(): no current value for " + id);
-                value = getValueFromContextsLocked(id);
-            }
-        }
-        if (value != null) {
-            if (value.isText()) {
-                return value.getTextValue().toString();
-            }
-            if (value.isList()) {
-                final CharSequence[] options = getAutofillOptionsFromContextsLocked(id);
-                if (options != null) {
-                    final int index = value.getListValue();
-                    final CharSequence option = options[index];
-                    return option != null ? option.toString() : null;
-                } else {
-                    Slog.w(TAG, "getValueAsString(): no autofill options for id " + id);
+            AutofillValue value = findValueLocked(id);
+            if (value != null) {
+                if (value.isText()) {
+                    return value.getTextValue().toString();
+                }
+
+                if (value.isList()) {
+                    final CharSequence[] options = getAutofillOptionsFromContextsLocked(id);
+                    if (options != null) {
+                        final int index = value.getListValue();
+                        final CharSequence option = options[index];
+                        return option != null ? option.toString() : null;
+                    } else {
+                        Slog.w(TAG, "findByAutofillId(): no autofill options for id " + id);
+                    }
                 }
             }
         }
         return null;
+    }
+
+    @Override
+    public AutofillValue findRawValueByAutofillId(AutofillId id) {
+        synchronized (mLock) {
+            return findValueLocked(id);
+        }
+    }
+
+    /**
+     * <p>Gets the value of a field, using either the {@code viewStates} or the {@code mContexts},
+     * or {@code null} when not found on either of them.
+     */
+    private AutofillValue findValueLocked(@NonNull AutofillId id) {
+        final ViewState state = mViewStates.get(id);
+        if (state == null) {
+            if (sDebug) Slog.d(TAG, "findValueLocked(): no view state for " + id);
+            return null;
+        }
+        AutofillValue value = state.getCurrentValue();
+        if (value == null) {
+            if (sDebug) Slog.d(TAG, "findValueLocked(): no current value for " + id);
+            value = getValueFromContextsLocked(id);
+        }
+        return value;
     }
 
     /**
@@ -1355,14 +1368,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (sDebug) {
                     Slog.d(TAG, "at least one field changed, validate fields for save UI");
                 }
-                final ValueFinder valueFinder = (id) -> {return getValueAsString(id);};
-
                 final InternalValidator validator = saveInfo.getValidator();
                 if (validator != null) {
                     final LogMaker log = newLogMaker(MetricsEvent.AUTOFILL_SAVE_VALIDATION);
                     boolean isValid;
                     try {
-                        isValid = validator.isValid(valueFinder);
+                        isValid = validator.isValid(this);
                         if (sDebug) Slog.d(TAG, validator + " returned " + isValid);
                         log.setType(isValid
                                 ? MetricsEvent.TYPE_SUCCESS
@@ -1404,10 +1415,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                             }
                             final AutofillValue datasetValue = datasetValues.get(id);
                             if (!currentValue.equals(datasetValue)) {
-                                if (sDebug) Slog.d(TAG, "found a change on id " + id);
+                                if (sDebug) {
+                                    Slog.d(TAG, "found a dataset change on id " + id + ": from "
+                                            + datasetValue + " to " + currentValue);
+                                }
                                 continue datasets_loop;
                             }
-                            if (sVerbose) Slog.v(TAG, "no changes for id " + id);
+                            if (sVerbose) Slog.v(TAG, "no dataset changes for id " + id);
                         }
                         if (sDebug) {
                             Slog.d(TAG, "ignoring Save UI because all fields match contents of "
@@ -1425,7 +1439,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 final IAutoFillManagerClient client = getClient();
                 mPendingSaveUi = new PendingUi(mActivityToken, id, client);
                 getUiForShowing().showSaveUi(mService.getServiceLabel(), mService.getServiceIcon(),
-                        mService.getServicePackageName(), saveInfo, valueFinder,
+                        mService.getServicePackageName(), saveInfo, this,
                         mComponentName.getPackageName(), this,
                         mPendingSaveUi);
                 if (client != null) {
