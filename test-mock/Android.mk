@@ -31,7 +31,7 @@ ifeq (,$(TARGET_BUILD_APPS)$(filter true,$(TARGET_BUILD_PDK)))
 include $(CLEAR_VARS)
 LOCAL_SRC_FILES := $(android_test_mock_source_files)
 
-LOCAL_JAVA_LIBRARIES := core-oj core-libart framework
+LOCAL_JAVA_LIBRARIES := core-oj core-libart framework conscrypt okhttp bouncycastle
 LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 LOCAL_DROIDDOC_SOURCE_PATH := $(LOCAL_PATH)/src/android/test/mock
 
@@ -116,7 +116,7 @@ update-android-test-mock-api: $(ANDROID_TEST_MOCK_OUTPUT_API_FILE) | $(ACP)
 include $(CLEAR_VARS)
 LOCAL_SRC_FILES := $(android_test_mock_source_files)
 
-LOCAL_JAVA_LIBRARIES := core-oj core-libart framework
+LOCAL_JAVA_LIBRARIES := core-oj core-libart framework conscrypt okhttp bouncycastle
 LOCAL_MODULE_CLASS := JAVA_LIBRARIES
 LOCAL_DROIDDOC_SOURCE_PATH := $(LOCAL_PATH)/src/android/test/mock
 
