@@ -623,6 +623,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                         defaultDisplay.pendingLayoutChanges);
         }
 
+        // Defer starting the recents animation until the wallpaper has drawn
+        final RecentsAnimationController recentsAnimationController =
+            mService.getRecentsAnimationController();
+        if (recentsAnimationController != null) {
+            recentsAnimationController.checkAnimationReady(mWallpaperController);
+        }
+
         if (mWallpaperForceHidingChanged && defaultDisplay.pendingLayoutChanges == 0
                 && !mService.mAppTransition.isReady()) {
             // At this point, there was a window with a wallpaper that was force hiding other

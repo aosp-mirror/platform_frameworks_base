@@ -11,27 +11,21 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
 
-package com.android.systemui.shared.recents;
+package com.android.systemui.shared.system;
 
-import android.graphics.Rect;
-import com.android.systemui.shared.system.GraphicBufferCompat;
-
-/**
- * Temporary callbacks into SystemUI.
- */
-interface ISystemUiProxy {
+public interface RecentsAnimationListener {
 
     /**
-     * Proxies SurfaceControl.screenshotToBuffer().
+     * Called when the animation into Recents can start. This call is made on the binder thread.
      */
-    GraphicBufferCompat screenshot(in Rect sourceCrop, int width, int height, int minLayer,
-            int maxLayer, boolean useIdentityTransform, int rotation);
+    void onAnimationStart(RecentsAnimationControllerCompat controller,
+            RemoteAnimationTargetCompat[] apps);
 
     /**
-     * Called when the overview service has started the recents animation.
+     * Called when the animation into Recents was canceled. This call is made on the binder thread.
      */
-    void onRecentsAnimationStarted();
+    void onAnimationCanceled();
 }

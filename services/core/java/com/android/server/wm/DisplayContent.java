@@ -1508,6 +1508,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mTaskStackContainers.getTopStack();
     }
 
+    ArrayList<Task> getVisibleTasks() {
+        return mTaskStackContainers.getVisibleTasks();
+    }
+
     void onStackWindowingModeChanged(TaskStack stack) {
         mTaskStackContainers.onStackWindowingModeChanged(stack);
     }
@@ -1800,6 +1804,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // Children of the display are statically ordered, so the real intention here is to perform
         // the operation on the display and not the static direct children.
         getParent().positionChildAt(position, this, includingParents);
+    }
+
+    void positionStackAt(int position, TaskStack child) {
+        mTaskStackContainers.positionChildAt(position, child, false /* includingParents */);
+        layoutAndAssignWindowLayersIfNeeded();
     }
 
     int taskIdFromPoint(int x, int y) {
@@ -3253,6 +3262,16 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         TaskStack getSplitScreenPrimaryStack() {
             return mSplitScreenPrimaryStack;
+        }
+
+        ArrayList<Task> getVisibleTasks() {
+            final ArrayList<Task> visibleTasks = new ArrayList<>();
+            forAllTasks(task -> {
+                if (task.isVisible()) {
+                    visibleTasks.add(task);
+                }
+            });
+            return visibleTasks;
         }
 
         /**

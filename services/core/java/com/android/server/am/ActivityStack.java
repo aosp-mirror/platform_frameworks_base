@@ -642,7 +642,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // TODO: We should probably resolve the windowing mode for the stack on the new display here
         // so that it end up in a compatible mode in the new display. e.g. split-screen secondary.
         removeFromDisplay();
+        // Reparent the window container before we try to update the position when adding it to
+        // the new display below
         mTmpRect2.setEmpty();
+        mWindowContainerController.reparent(activityDisplay.mDisplayId, mTmpRect2, onTop);
         postAddToDisplay(activityDisplay, mTmpRect2.isEmpty() ? null : mTmpRect2, onTop);
         adjustFocusToNextFocusableStack("reparent", true /* allowFocusSelf */);
         mStackSupervisor.resumeFocusedStackTopActivityLocked();
@@ -650,7 +653,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // windows that are no longer visible.
         mStackSupervisor.ensureActivitiesVisibleLocked(null /* starting */, 0 /* configChanges */,
                 !PRESERVE_WINDOWS);
-        mWindowContainerController.reparent(activityDisplay.mDisplayId, mTmpRect2, onTop);
     }
 
     /**
@@ -994,12 +996,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             insertTaskAtTop(task, null);
             return;
         }
-
-        task = topTask();
-        if (task != null) {
-            mWindowContainerController.positionChildAtTop(task.getWindowContainerController(),
-                    true /* includingParents */);
-        }
     }
 
     /**
@@ -1024,12 +1020,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (task != null) {
             insertTaskAtBottom(task);
             return;
-        } else {
-            task = bottomTask();
-            if (task != null) {
-                mWindowContainerController.positionChildAtBottom(
-                        task.getWindowContainerController(), true /* includingParents */);
-            }
         }
     }
 
