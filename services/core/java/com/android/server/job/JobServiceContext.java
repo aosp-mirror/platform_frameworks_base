@@ -24,6 +24,7 @@ import android.app.job.IJobService;
 import android.app.job.JobInfo;
 import android.app.job.JobParameters;
 import android.app.job.JobWorkItem;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -46,6 +47,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.server.EventLogTags;
+import com.android.server.LocalServices;
 import com.android.server.job.controllers.JobStatus;
 
 /**
@@ -237,6 +239,11 @@ public final class JobServiceContext implements ServiceConnection {
                     Slog.v(TAG, sb.toString());
                 }
             }
+
+            UsageStatsManagerInternal usageStats =
+                    LocalServices.getService(UsageStatsManagerInternal.class);
+            usageStats.setLastJobRunTime(job.getSourcePackageName(), job.getSourceUserId(),
+                    mExecutionStartTimeElapsed);
 
             // Once we'e begun executing a job, we by definition no longer care whether
             // it was inflated from disk with not-yet-coherent delay/deadline bounds.
