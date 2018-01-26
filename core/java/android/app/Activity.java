@@ -2138,11 +2138,15 @@ public class Activity extends ContextThemeWrapper
      * @param params non-null parameters to be combined with previously set parameters when entering
      * picture-in-picture.
      *
-     * @return true if the system puts this activity into picture-in-picture mode or was already
-     * in picture-in-picture mode (@see {@link #isInPictureInPictureMode())
+     * @return true if the system successfully put this activity into picture-in-picture mode or was
+     * already in picture-in-picture mode (@see {@link #isInPictureInPictureMode()). If the device
+     * does not support picture-in-picture, return false.
      */
     public boolean enterPictureInPictureMode(@NonNull PictureInPictureParams params) {
         try {
+            if (!deviceSupportsPictureInPictureMode()) {
+                return false;
+            }
             if (params == null) {
                 throw new IllegalArgumentException("Expected non-null picture-in-picture params");
             }
@@ -2170,6 +2174,9 @@ public class Activity extends ContextThemeWrapper
      */
     public void setPictureInPictureParams(@NonNull PictureInPictureParams params) {
         try {
+            if (!deviceSupportsPictureInPictureMode()) {
+                return;
+            }
             if (params == null) {
                 throw new IllegalArgumentException("Expected non-null picture-in-picture params");
             }
@@ -2190,6 +2197,13 @@ public class Activity extends ContextThemeWrapper
         } catch (RemoteException e) {
             return 0;
         }
+    }
+
+    /**
+     * @return Whether this device supports picture-in-picture.
+     */
+    private boolean deviceSupportsPictureInPictureMode() {
+        return getPackageManager().hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE);
     }
 
     void dispatchMovedToDisplay(int displayId, Configuration config) {
