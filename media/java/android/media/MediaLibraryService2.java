@@ -66,7 +66,7 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
     public class MediaLibrarySession extends MediaSession2 {
         private final MediaLibrarySessionProvider mProvider;
 
-        MediaLibrarySession(Context context, MediaPlayerBase player, String id,
+        MediaLibrarySession(Context context, MediaPlayerInterface player, String id,
                 VolumeProvider volumeProvider, int ratingType, PendingIntent sessionActivity,
                 Executor callbackExecutor, SessionCallback callback) {
             super(context, player, id, volumeProvider, ratingType, sessionActivity,
@@ -75,9 +75,10 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
         }
 
         @Override
-        MediaSession2Provider createProvider(Context context, MediaPlayerBase player, String id,
-                VolumeProvider volumeProvider, int ratingType, PendingIntent sessionActivity,
-                Executor callbackExecutor, SessionCallback callback) {
+        MediaSession2Provider createProvider(Context context, MediaPlayerInterface player,
+                String id, VolumeProvider volumeProvider, int ratingType,
+                PendingIntent sessionActivity, Executor callbackExecutor,
+                SessionCallback callback) {
             return ApiLoader.getProvider(context)
                     .createMediaLibraryService2MediaLibrarySession(context, this, player, id,
                             volumeProvider, ratingType, sessionActivity,
@@ -206,7 +207,7 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
     public class MediaLibrarySessionBuilder
             extends BuilderBase<MediaLibrarySessionBuilder, MediaLibrarySessionCallback> {
         public MediaLibrarySessionBuilder(
-                @NonNull Context context, @NonNull MediaPlayerBase player,
+                @NonNull Context context, @NonNull MediaPlayerInterface player,
                 @NonNull @CallbackExecutor Executor callbackExecutor,
                 @NonNull MediaLibrarySessionCallback callback) {
             super(context, player);

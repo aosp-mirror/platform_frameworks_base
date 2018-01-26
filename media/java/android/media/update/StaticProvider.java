@@ -17,7 +17,6 @@
 package android.media.update;
 
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.media.MediaBrowser2;
@@ -27,7 +26,7 @@ import android.media.MediaController2.ControllerCallback;
 import android.media.MediaLibraryService2;
 import android.media.MediaLibraryService2.MediaLibrarySession;
 import android.media.MediaLibraryService2.MediaLibrarySessionCallback;
-import android.media.MediaPlayerBase;
+import android.media.MediaPlayerInterface;
 import android.media.MediaSession2;
 import android.media.MediaSession2.SessionCallback;
 import android.media.MediaSessionService2;
@@ -57,7 +56,7 @@ public interface StaticProvider {
             @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes);
 
     MediaSession2Provider createMediaSession2(Context context, MediaSession2 instance,
-            MediaPlayerBase player, String id, VolumeProvider volumeProvider, int ratingType,
+            MediaPlayerInterface player, String id, VolumeProvider volumeProvider, int ratingType,
             PendingIntent sessionActivity, Executor executor, SessionCallback callback);
     ControllerInfoProvider createMediaSession2ControllerInfoProvider(Context context,
             MediaSession2.ControllerInfo instance, int uid, int pid,
@@ -69,7 +68,7 @@ public interface StaticProvider {
     MediaSessionService2Provider createMediaSessionService2(MediaSessionService2 instance);
     MediaSessionService2Provider createMediaLibraryService2(MediaLibraryService2 instance);
     MediaLibrarySessionProvider createMediaLibraryService2MediaLibrarySession(Context context,
-            MediaLibrarySession instance, MediaPlayerBase player, String id,
+            MediaLibrarySession instance, MediaPlayerInterface player, String id,
             VolumeProvider volumeProvider, int ratingType, PendingIntent sessionActivity,
             Executor executor, MediaLibrarySessionCallback callback);
 }

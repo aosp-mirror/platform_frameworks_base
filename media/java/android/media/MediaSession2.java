@@ -24,7 +24,7 @@ import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaPlayerBase.PlaybackListener;
+import android.media.MediaPlayerInterface.PlaybackListener;
 import android.media.session.MediaSession;
 import android.media.session.MediaSession.Callback;
 import android.media.session.PlaybackState;
@@ -67,7 +67,8 @@ import java.util.concurrent.Executor;
  * session.
  * <p>
  * When a session receive transport control commands, the session sends the commands directly to
- * the the underlying media player set by {@link Builder} or {@link #setPlayer(MediaPlayerBase)}.
+ * the the underlying media player set by {@link Builder} or
+ * {@link #setPlayer(MediaPlayerInterface)}.
  * <p>
  * When an app is finished performing playback it must call {@link #close()} to clean up the session
  * and notify any controllers.
@@ -457,7 +458,7 @@ public class MediaSession2 implements AutoCloseable {
     static abstract class BuilderBase
             <T extends MediaSession2.BuilderBase<T, C>, C extends SessionCallback> {
         final Context mContext;
-        final MediaPlayerBase mPlayer;
+        final MediaPlayerInterface mPlayer;
         String mId;
         Executor mCallbackExecutor;
         C mCallback;
@@ -474,7 +475,7 @@ public class MediaSession2 implements AutoCloseable {
          *      {@link MediaSession2} or {@link MediaController2}.
          */
         // TODO(jaewan): Also need executor
-        public BuilderBase(@NonNull Context context, @NonNull MediaPlayerBase player) {
+        public BuilderBase(@NonNull Context context, @NonNull MediaPlayerInterface player) {
             if (context == null) {
                 throw new IllegalArgumentException("context shouldn't be null");
             }
@@ -589,7 +590,7 @@ public class MediaSession2 implements AutoCloseable {
     // TODO(jaewan): Add setRatingType()
     // TODO(jaewan): Add setSessionActivity()
     public static final class Builder extends BuilderBase<Builder, SessionCallback> {
-        public Builder(Context context, @NonNull MediaPlayerBase player) {
+        public Builder(Context context, @NonNull MediaPlayerInterface player) {
             super(context, player);
         }
 
@@ -944,16 +945,16 @@ public class MediaSession2 implements AutoCloseable {
      * @hide
      */
 
-    MediaSession2(Context context, MediaPlayerBase player, String id, VolumeProvider volumeProvider,
-            int ratingType, PendingIntent sessionActivity, Executor callbackExecutor,
-            SessionCallback callback) {
+    MediaSession2(Context context, MediaPlayerInterface player, String id,
+            VolumeProvider volumeProvider, int ratingType, PendingIntent sessionActivity,
+            Executor callbackExecutor, SessionCallback callback) {
         super();
         mProvider = createProvider(context, player, id, volumeProvider, ratingType, sessionActivity,
                 callbackExecutor, callback
         );
     }
 
-    MediaSession2Provider createProvider(Context context, MediaPlayerBase player, String id,
+    MediaSession2Provider createProvider(Context context, MediaPlayerInterface player, String id,
             VolumeProvider volumeProvider, int ratingType, PendingIntent sessionActivity,
             Executor callbackExecutor, SessionCallback callback) {
         return ApiLoader.getProvider(context)
@@ -967,8 +968,8 @@ public class MediaSession2 implements AutoCloseable {
     }
 
     /**
-     * Set the underlying {@link MediaPlayerBase} for this session to dispatch incoming event to.
-     * Events from the {@link MediaController2} will be sent directly to the underlying
+     * Set the underlying {@link MediaPlayerInterface} for this session to dispatch incoming event
+     * to. Events from the {@link MediaController2} will be sent directly to the underlying
      * player on the {@link Handler} where the session is created on.
      * <p>
      * If the new player is successfully set, {@link PlaybackListener}
@@ -977,22 +978,23 @@ public class MediaSession2 implements AutoCloseable {
      * You can also specify a volume provider. If so, playback in the player is considered as
      * remote playback.
      *
-     * @param player a {@link MediaPlayerBase} that handles actual media playback in your app.
+     * @param player a {@link MediaPlayerInterface} that handles actual media playback in your app.
      * @throws IllegalArgumentException if the player is {@code null}.
      */
-    public void setPlayer(@NonNull MediaPlayerBase player) {
+    public void setPlayer(@NonNull MediaPlayerInterface player) {
         mProvider.setPlayer_impl(player);
     }
 
     /**
-     * Set the underlying {@link MediaPlayerBase} with the volume provider for remote playback.
+     * Set the underlying {@link MediaPlayerInterface} with the volume provider for remote playback.
      *
-     * @param player a {@link MediaPlayerBase} that handles actual media playback in your app.
+     * @param player a {@link MediaPlayerInterface} that handles actual media playback in your app.
      * @param volumeProvider a volume provider
-     * @see #setPlayer(MediaPlayerBase)
+     * @see #setPlayer(MediaPlayerInterface)
      * @see Builder#setVolumeProvider(VolumeProvider)
      */
-    public void setPlayer(@NonNull MediaPlayerBase player, @NonNull VolumeProvider volumeProvider) {
+    public void setPlayer(@NonNull MediaPlayerInterface player,
+            @NonNull VolumeProvider volumeProvider) {
         mProvider.setPlayer_impl(player, volumeProvider);
     }
 
@@ -1004,7 +1006,8 @@ public class MediaSession2 implements AutoCloseable {
     /**
      * @return player
      */
-    public @Nullable MediaPlayerBase getPlayer() {
+    public @Nullable
+    MediaPlayerInterface getPlayer() {
         return mProvider.getPlayer_impl();
     }
 

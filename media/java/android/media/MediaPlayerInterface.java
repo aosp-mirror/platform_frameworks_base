@@ -25,11 +25,11 @@ import java.util.concurrent.Executor;
  * Base interfaces for all media players that want media session.
  * @hide
  */
-public abstract class MediaPlayerBase {
+public interface MediaPlayerInterface {
     /**
      * Listens change in {@link PlaybackState2}.
      */
-    public interface PlaybackListener {
+    interface PlaybackListener {
         /**
          * Called when {@link PlaybackState2} for this player is changed.
          */
@@ -37,21 +37,21 @@ public abstract class MediaPlayerBase {
     }
 
     // Transport controls that session will send command directly to this player.
-    public abstract void play();
-    public abstract void prepare();
-    public abstract void pause();
-    public abstract void stop();
-    public abstract void skipToPrevious();
-    public abstract void skipToNext();
-    public abstract void seekTo(long pos);
-    public abstract void fastFoward();
-    public abstract void rewind();
+    void play();
+    void prepare();
+    void pause();
+    void stop();
+    void skipToPrevious();
+    void skipToNext();
+    void seekTo(long pos);
+    void fastFoward();
+    void rewind();
 
-    public abstract PlaybackState2 getPlaybackState();
-    public abstract AudioAttributes getAudioAttributes();
+    PlaybackState2 getPlaybackState();
+    AudioAttributes getAudioAttributes();
 
-    public abstract void setPlaylist(List<MediaItem2> item, PlaylistParams param);
-    public abstract void setCurrentPlaylistItem(int index);
+    void setPlaylist(List<MediaItem2> item, PlaylistParams param);
+    void setCurrentPlaylistItem(int index);
 
     /**
      * Add a {@link PlaybackListener} to be invoked when the playback state is changed.
@@ -59,12 +59,12 @@ public abstract class MediaPlayerBase {
      * @param executor the Handler that will receive the listener
      * @param listener the listener that will be run
      */
-    public abstract void addPlaybackListener(Executor executor, PlaybackListener listener);
+    void addPlaybackListener(Executor executor, PlaybackListener listener);
 
     /**
      * Remove previously added {@link PlaybackListener}.
      *
      * @param listener the listener to be removed
      */
-    public abstract void removePlaybackListener(PlaybackListener listener);
+    void removePlaybackListener(PlaybackListener listener);
 }

@@ -22,7 +22,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
-import android.media.MediaPlayerBase;
+import android.media.MediaPlayerInterface;
 import android.media.session.MediaController;
 import android.media.update.ApiLoader;
 import android.media.update.VideoView2Provider;
@@ -256,7 +256,7 @@ public class VideoView2 extends FrameLayout {
      * @throws IllegalStateException if MediaControlView2 is not set.
      */
     public void setRouteAttributes(@NonNull List<String> routeCategories,
-            @Nullable MediaPlayerBase player) {
+            @Nullable MediaPlayerInterface player) {
         mProvider.setRouteAttributes_impl(routeCategories, player);
     }
 
