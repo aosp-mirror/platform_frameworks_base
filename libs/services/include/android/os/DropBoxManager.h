@@ -57,7 +57,11 @@ public:
     // and a handle will be passed to the system process, so no additional permissions
     // are required from the system process.  Returns NULL if the file can't be opened.
     Status addFile(const String16& tag, const string& filename, int flags);
-    
+
+    // Create a new Entry from an already opened file. Takes ownership of the
+    // file descriptor.
+    Status addFile(const String16& tag, int fd, int flags);
+
     class Entry : public virtual RefBase, public Parcelable {
     public:
         Entry();
