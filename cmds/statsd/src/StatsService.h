@@ -193,9 +193,10 @@ private:
     status_t cmd_write_data_to_disk(FILE* out);
 
     /**
-     * Write an AppHook event to the StatsLog buffer, as though StatsLog.write(APP_HOOK).
+     * Write an AppBreadcrumbReported event to the StatsLog buffer, as though StatsLog.write
+     * (APP_BREADCRUMB_REPORTED).
      */
-    status_t cmd_log_app_hook(FILE* out, const Vector<String8>& args);
+    status_t cmd_log_app_breadcrumb(FILE* out, const Vector<String8>& args);
 
     /**
      * Print contents of a pulled metrics source.

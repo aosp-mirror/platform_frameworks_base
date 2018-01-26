@@ -85,7 +85,7 @@ message Atom {
         PacketWakeupOccurred packet_wakeup_occurred = 44;
         DropboxErrorChanged dropbox_error_changed = 45;
         AnomalyDetected anomaly_detected = 46;
-        AppHook app_hook = 47;
+        AppBreadcrumbReported app_breadcrumb_reported = 47;
         AppStartChanged app_start_changed = 48;
         AppStartCancelChanged app_start_cancel_changed = 49;
         AppStartFullyDrawnChanged app_start_fully_drawn_changed = 50;
@@ -202,9 +202,10 @@ message UidProcessStateChanged {
  *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message ProcessLifeCycleStateChanged {
-    optional int32 uid = 1; // TODO: should be a string tagged w/ uid annotation
+    // TODO: should be a string tagged w/ uid annotation
+    optional int32 uid = 1;
 
-    // TODO: What is this?
+    // The process name (usually same as the app name).
     optional string name = 2;
 
     // What lifecycle state the process changed to.
@@ -312,7 +313,7 @@ message GpsScanStateChanged {
 message SyncStateChanged {
     repeated AttributionNode attribution_node = 1;
 
-    // Name of the sync (as named in the app)
+    // Name of the sync (as named in the app). Can be chosen at run-time.
     optional string name = 2;
 
     enum State {
@@ -615,7 +616,7 @@ message KernelWakeupReported {
     optional string wakeup_reason_name = 1;
 
     // Duration (in microseconds) for the wake-up interrupt to be serviced.
-    optional int64 duration_usec = 2;
+    optional int64 duration_micros = 2;
 }
 
 /**
@@ -692,10 +693,10 @@ message ShutdownSequenceReported {
 
     // Beginning of shutdown time in ms using wall clock time since unix epoch.
     // Default: 0 if no start time received.
-    optional int64 start_time_ms = 3;
+    optional int64 start_time_millis = 3;
 
     // Duration of shutdown in ms. Default: 0 if no duration received.
-    optional int64 duration_ms = 4;
+    optional int64 duration_millis = 4;
 }
 
 
@@ -715,13 +716,13 @@ message BootSequenceReported {
     optional string system_reason = 2;
 
     // End of boot time in ms from unix epoch using system wall clock.
-    optional int64 end_time_ms = 3;
+    optional int64 end_time_millis = 3;
 
     // Total boot duration in ms.
-    optional int64 total_duration_ms = 4;
+    optional int64 total_duration_millis = 4;
 
     // Bootloader duration in ms.
-    optional int64 bootloader_duration_ms = 5;
+    optional int64 bootloader_duration_millis = 5;
 
     // Time since last boot in ms. Default: 0 if not available.
     optional int64 time_since_last_boot = 6;
@@ -762,7 +763,7 @@ message CallStateChanged {
  */
 message DaveyOccurred {
     // Amount of time it took to render the frame. Should be >=700ms.
-    optional int64 jank_duration_ms = 1;
+    optional int64 jank_duration_millis = 1;
 }
 
 /**
@@ -863,7 +864,7 @@ message DropboxErrorChanged {
  * Logged from:
  *      frameworks/base/core/java/android/util/StatsLog.java
  */
-message AppHook {
+message AppBreadcrumbReported {
     // The uid of the application that sent this custom atom.
     optional int32 uid = 1;
 
@@ -924,16 +925,16 @@ message AppStartChanged {
     optional bool is_instant_app = 6;
 
     // Device uptime when activity started.
-    optional int64 activity_start_msec = 7;
+    optional int64 activity_start_millis = 7;
 
     optional android.app.AppTransitionReasonEnum reason = 8;
 
-    optional int32 transition_delay_msec = 9;
+    optional int32 transition_delay_millis = 9;
     // -1 if not set.
-    optional int32 starting_window_delay_msec = 10;
+    optional int32 starting_window_delay_millis = 10;
     // -1 if not set.
-    optional int32 bind_application_delay_msec = 11;
-    optional int32 windows_drawn_delay_msec = 12;
+    optional int32 bind_application_delay_millis = 11;
+    optional int32 windows_drawn_delay_millis = 12;
 
     // Empty if not set.
     optional string launch_token = 13;
@@ -981,7 +982,7 @@ message AppStartFullyDrawnChanged {
     optional bool transition_process_running = 5;
 
     // App startup time (until call to Activity#reportFullyDrawn()).
-    optional int64 app_startup_time_ms = 6;
+    optional int64 app_startup_time_millis = 6;
 }
 
 /**
@@ -1303,7 +1304,7 @@ message SubsystemSleepState {
     // The number of times it entered, or voted for entering the sleep state
     optional uint64 count = 3;
     // The length of time spent in, or spent voting for, the sleep state
-    optional uint64 timeMs = 4;
+    optional uint64 time_millis = 4;
 }
 
 /**
@@ -1316,7 +1317,7 @@ message SubsystemSleepState {
 message CpuTimePerFreq {
     optional uint32 cluster = 1;
     optional uint32 freq_index = 2;
-    optional uint64 time_ms = 3;
+    optional uint64 time_millis = 3;
 }
 
 /**
@@ -1325,8 +1326,8 @@ message CpuTimePerFreq {
  */
 message CpuTimePerUid {
     optional uint64 uid = 1;
-    optional uint64 user_time_ms = 2;
-    optional uint64 sys_time_ms = 3;
+    optional uint64 user_time_millis = 2;
+    optional uint64 sys_time_millis = 3;
 }
 
 /**
@@ -1337,7 +1338,7 @@ message CpuTimePerUid {
 message CpuTimePerUidFreq {
     optional uint64 uid = 1;
     optional uint64 freq_idx = 2;
-    optional uint64 time_ms = 3;
+    optional uint64 time_millis = 3;
 }
 
 /**
@@ -1345,16 +1346,16 @@ message CpuTimePerUidFreq {
  */
 message WifiActivityEnergyInfo {
     // timestamp(wall clock) of record creation
-    optional uint64 timestamp_ms = 1;
+    optional uint64 timestamp_millis = 1;
     // stack reported state
     // TODO: replace this with proto enum
     optional int32 stack_state = 2;
     // tx time in ms
-    optional uint64 controller_tx_time_ms = 3;
+    optional uint64 controller_tx_time_millis = 3;
     // rx time in ms
-    optional uint64 controller_rx_time_ms = 4;
+    optional uint64 controller_rx_time_millis = 4;
     // idle time in ms
-    optional uint64 controller_idle_time_ms = 5;
+    optional uint64 controller_idle_time_millis = 5;
     // product of current(mA), voltage(V) and time(ms)
     optional uint64 controller_energy_used = 6;
 }
@@ -1364,11 +1365,11 @@ message WifiActivityEnergyInfo {
  */
 message ModemActivityInfo {
     // timestamp(wall clock) of record creation
-    optional uint64 timestamp_ms = 1;
+    optional uint64 timestamp_millis = 1;
     // sleep time in ms.
-    optional uint64 sleep_time_ms = 2;
+    optional uint64 sleep_time_millis = 2;
     // idle time in ms
-    optional uint64 controller_idle_time_ms = 3;
+    optional uint64 controller_idle_time_millis = 3;
     /**
      * Tx power index
      * index 0 = tx_power < 0dBm
@@ -1378,17 +1379,17 @@ message ModemActivityInfo {
      * index 4 = tx_power > 20dBm
      */
     // tx time in ms at power level 0
-    optional uint64 controller_tx_time_pl0_ms = 4;
+    optional uint64 controller_tx_time_pl0_millis = 4;
     // tx time in ms at power level 1
-    optional uint64 controller_tx_time_pl1_ms = 5;
+    optional uint64 controller_tx_time_pl1_millis = 5;
     // tx time in ms at power level 2
-    optional uint64 controller_tx_time_pl2_ms = 6;
+    optional uint64 controller_tx_time_pl2_millis = 6;
     // tx time in ms at power level 3
-    optional uint64 controller_tx_time_pl3_ms = 7;
+    optional uint64 controller_tx_time_pl3_millis = 7;
     // tx time in ms at power level 4
-    optional uint64 controller_tx_time_pl4_ms = 8;
+    optional uint64 controller_tx_time_pl4_millis = 8;
     // rx time in ms at power level 5
-    optional uint64 controller_rx_time_ms = 9;
+    optional uint64 controller_rx_time_millis = 9;
     // product of current(mA), voltage(V) and time(ms)
     optional uint64 energy_used = 10;
 }
@@ -1399,15 +1400,15 @@ message ModemActivityInfo {
  */
 message BluetoothActivityInfo {
     // timestamp(wall clock) of record creation
-    optional uint64 timestamp_ms = 1;
+    optional uint64 timestamp_millis = 1;
     // bluetooth stack state
     optional int32 bluetooth_stack_state = 2;
     // tx time in ms
-    optional uint64 controller_tx_time_ms = 3;
+    optional uint64 controller_tx_time_millis = 3;
     // rx time in ms
-    optional uint64 controller_rx_time_ms = 4;
+    optional uint64 controller_rx_time_millis = 4;
     // idle time in ms
-    optional uint64 controller_idle_time_ms = 5;
+    optional uint64 controller_idle_time_millis = 5;
     // product of current(mA), voltage(V) and time(ms)
     optional uint64 energy_used = 6;
 }
@@ -1445,7 +1446,7 @@ message ProcessMemoryState {
  * Elapsed real time from SystemClock.
  */
 message SystemElapsedRealtime {
-    optional uint64 time_ms = 1;
+    optional uint64 time_millis = 1;
 }
 
 /*
@@ -1456,7 +1457,7 @@ message SystemUptime {
     // This clock stops when the system enters deep sleep (CPU off, display dark, device waiting
     // for external input).
     // It is not affected by clock scaling, idle, or other power saving mechanisms.
-    optional uint64 uptime_ms = 1;
+    optional uint64 uptime_millis = 1;
 }
 
 /*
@@ -1470,8 +1471,9 @@ message SystemUptime {
  */
 message CpuActiveTime {
     optional uint64 uid = 1;
-    optional uint64 idx = 2;
-    optional uint64 time_ms = 3;
+    optional uint32 cluster_number =2;
+    optional uint64 idx = 3;
+    optional uint64 time_millis = 4;
 }
 
 /**
@@ -1486,7 +1488,7 @@ message CpuActiveTime {
 message CpuClusterTime {
     optional uint64 uid = 1;
     optional uint64 idx = 2;
-    optional uint64 time_ms = 3;
+    optional uint64 time_millis = 3;
 }
 
 /*
