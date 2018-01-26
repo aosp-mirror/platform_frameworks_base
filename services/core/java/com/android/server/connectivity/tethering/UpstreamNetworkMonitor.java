@@ -24,6 +24,7 @@ import static android.net.ConnectivityManager.TYPE_MOBILE_HIPRI;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Process;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.net.IpPrefix;
@@ -476,6 +477,7 @@ public class UpstreamNetworkMonitor {
                        ConnectivityManager.getNetworkTypeName(type));
                 continue;
             }
+            nc.setSingleUid(Process.myUid());
 
             for (NetworkState value : netStates) {
                 if (!nc.satisfiedByNetworkCapabilities(value.networkCapabilities)) {
