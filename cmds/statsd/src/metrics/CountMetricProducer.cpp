@@ -151,8 +151,11 @@ void CountMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
     protoOutput->end(protoToken);
 
     mPastBuckets.clear();
+}
 
-    // TODO: Clear mDimensionKeyMap once the report is dumped.
+void CountMetricProducer::dropDataLocked(const uint64_t dropTimeNs) {
+    flushIfNeededLocked(dropTimeNs);
+    mPastBuckets.clear();
 }
 
 void CountMetricProducer::onConditionChangedLocked(const bool conditionMet,

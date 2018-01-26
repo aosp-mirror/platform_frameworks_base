@@ -106,6 +106,8 @@ private:
 
     void flushCurrentBucketLocked(const uint64_t& eventTimeNs) override;
 
+    void dropDataLocked(const uint64_t dropTimeNs) override;
+
     const FieldMatcher mValueField;
 
     std::shared_ptr<StatsPullerManager> mStatsPullerManager;

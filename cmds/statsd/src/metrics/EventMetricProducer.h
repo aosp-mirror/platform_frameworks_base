@@ -55,6 +55,8 @@ private:
     // Internal interface to handle sliced condition change.
     void onSlicedConditionMayChangeLocked(const uint64_t eventTime) override;
 
+    void dropDataLocked(const uint64_t dropTimeNs) override;
+
     // Internal function to calculate the current used bytes.
     size_t byteSizeLocked() const override;
 
