@@ -21,6 +21,7 @@ import android.app.ActivityManager;
 import android.content.Intent;
 import android.provider.Settings;
 import android.service.quicksettings.Tile;
+import android.support.annotation.StringRes;
 import android.widget.Switch;
 
 import com.android.internal.app.ColorDisplayController;
@@ -30,6 +31,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 public class NightDisplayTile extends QSTileImpl<BooleanState>
@@ -39,7 +41,9 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
      * Pattern for {@link java.time.format.DateTimeFormatter} used to approximate the time to the
      * nearest hour and add on the AM/PM indicator.
      */
-    private static final String APPROXIMATE_HOUR_DATE_TIME_PATTERN = "h a";
+    private static final String HOUR_MINUTE_DATE_TIME_PATTERN = "h a";
+    private static final String APPROXIMATE_HOUR_DATE_TIME_PATTERN = "h:m a";
+
 
     private ColorDisplayController mController;
     private boolean mIsListening;
@@ -110,17 +114,26 @@ public class NightDisplayTile extends QSTileImpl<BooleanState>
 
             case ColorDisplayController.AUTO_MODE_CUSTOM:
                 // User-specified time, approximated to the nearest hour.
-                return isNightLightActivated
-                        ? mContext.getString(
-                                R.string.quick_settings_night_secondary_label_until,
-                                mController.getCustomEndTime().format(
-                                        DateTimeFormatter.ofPattern(
-                                                APPROXIMATE_HOUR_DATE_TIME_PATTERN)))
-                        : mContext.getString(
-                                R.string.quick_settings_night_secondary_label_on_at,
-                                mController.getCustomStartTime().format(
-                                        DateTimeFormatter.ofPattern(
-                                                APPROXIMATE_HOUR_DATE_TIME_PATTERN)));
+                final @StringRes int toggleTimeStringRes;
+                final LocalTime toggleTime;
+                final DateTimeFormatter toggleTimeFormat;
+
+                if (isNightLightActivated) {
+                    toggleTime = mController.getCustomEndTime();
+                    toggleTimeStringRes = R.string.quick_settings_night_secondary_label_until;
+                } else {
+                    toggleTime = mController.getCustomStartTime();
+                    toggleTimeStringRes = R.string.quick_settings_night_secondary_label_on_at;
+                }
+
+                // Choose between just showing the hour or also showing the minutes (based on the
+                // user-selected toggle time). This helps reduce how much space the label takes.
+                toggleTimeFormat = DateTimeFormatter.ofPattern(
+                        toggleTime.getMinute() == 0
+                                ? HOUR_MINUTE_DATE_TIME_PATTERN
+                                : APPROXIMATE_HOUR_DATE_TIME_PATTERN);
+
+                return mContext.getString(toggleTimeStringRes, toggleTime.format(toggleTimeFormat));
 
             default:
                 // No secondary label when auto mode is disabled.
