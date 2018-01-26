@@ -39,7 +39,7 @@ public interface BluetoothA2dpWrapper {
     /**
      * Wraps {@code BluetoothA2dp.getCodecStatus}
      */
-    public BluetoothCodecStatus getCodecStatus();
+    public BluetoothCodecStatus getCodecStatus(BluetoothDevice device);
 
     /**
      * Wraps {@code BluetoothA2dp.supportsOptionalCodecs}
