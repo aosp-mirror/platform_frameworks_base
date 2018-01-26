@@ -22,9 +22,12 @@ import android.annotation.Nullable;
 import android.annotation.StyleRes;
 import android.app.Notification;
 import android.content.Context;
+import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.drawable.Icon;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Pools;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -61,6 +64,11 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
     private boolean mIsHidingAnimated;
     private boolean mNeedsGeneratedAvatar;
     private Notification.Person mSender;
+    private boolean mAvatarsAtEnd;
+    private ViewGroup mImageContainer;
+    private MessagingImageMessage mIsolatedMessage;
+    private boolean mTransformingImages;
+    private Point mDisplaySize = new Point();
 
     public MessagingGroup(@NonNull Context context) {
         super(context);
@@ -87,6 +95,35 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         mSenderName = findViewById(R.id.message_name);
         mSenderName.addOnLayoutChangeListener(MessagingLayout.MESSAGING_PROPERTY_ANIMATOR);
         mAvatarView = findViewById(R.id.message_icon);
+        mImageContainer = findViewById(R.id.messaging_group_icon_container);
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        mDisplaySize.x = displayMetrics.widthPixels;
+        mDisplaySize.y = displayMetrics.heightPixels;
+    }
+
+    public void updateClipRect() {
+        // We want to clip to the senderName if it's available, otherwise our images will come
+        // from a weird position
+        Rect clipRect;
+        if (mSenderName.getVisibility() != View.GONE && !mTransformingImages) {
+            ViewGroup parent = (ViewGroup) mSenderName.getParent();
+            int top = getDistanceFromParent(mSenderName, parent) - getDistanceFromParent(
+                    mMessageContainer, parent) + mSenderName.getHeight();
+            clipRect = new Rect(0, top, mDisplaySize.x, mDisplaySize.y);
+        } else {
+            clipRect = null;
+        }
+        mMessageContainer.setClipBounds(clipRect);
+    }
+
+    private int getDistanceFromParent(View searchedView, ViewGroup parent) {
+        int position = 0;
+        View view = searchedView;
+        while(view != parent) {
+            position += view.getTop() + view.getTranslationY();
+            view = (View) view.getParent();
+        }
+        return position;
     }
 
     public void setSender(Notification.Person sender, CharSequence nameOverride) {
@@ -129,12 +166,14 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
     }
 
     public void removeMessage(MessagingMessage messagingMessage) {
-        mMessageContainer.removeView(messagingMessage);
+        ViewGroup messageParent = (ViewGroup) messagingMessage.getView().getParent();
+        messageParent.removeView(messagingMessage.getView());
         Runnable recycleRunnable = () -> {
-            mMessageContainer.removeTransientView(messagingMessage);
+            messageParent.removeTransientView(messagingMessage.getView());
             messagingMessage.recycle();
             if (mMessageContainer.getChildCount() == 0
-                    && mMessageContainer.getTransientViewCount() == 0) {
+                    && mMessageContainer.getTransientViewCount() == 0
+                    && mImageContainer.getChildCount() == 0) {
                 ViewParent parent = getParent();
                 if (parent instanceof ViewGroup) {
                     ((ViewGroup) parent).removeView(MessagingGroup.this);
@@ -148,9 +187,10 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
             }
         };
         if (isShown()) {
-            mMessageContainer.addTransientView(messagingMessage, 0);
-            performRemoveAnimation(messagingMessage, recycleRunnable);
-            if (mMessageContainer.getChildCount() == 0) {
+            messageParent.addTransientView(messagingMessage.getView(), 0);
+            performRemoveAnimation(messagingMessage.getView(), recycleRunnable);
+            if (mMessageContainer.getChildCount() == 0
+                    && mImageContainer.getChildCount() == 0) {
                 removeGroupAnimated(null);
             }
         } else {
@@ -160,12 +200,8 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
     }
 
     private void removeGroupAnimated(Runnable endAction) {
-        MessagingPropertyAnimator.fadeOut(mAvatarView, null);
-        MessagingPropertyAnimator.startLocalTranslationTo(mAvatarView,
-                (int) (-getHeight() * 0.5f), MessagingLayout.FAST_OUT_LINEAR_IN);
-        MessagingPropertyAnimator.fadeOut(mSenderName, null);
-        MessagingPropertyAnimator.startLocalTranslationTo(mSenderName,
-                (int) (-getHeight() * 0.5f), MessagingLayout.FAST_OUT_LINEAR_IN);
+        performRemoveAnimation(mAvatarView, null);
+        performRemoveAnimation(mSenderName, null);
         boolean endActionTriggered = false;
         for (int i = mMessageContainer.getChildCount() - 1; i >= 0; i--) {
             View child = mMessageContainer.getChildAt(i);
@@ -182,14 +218,17 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
             performRemoveAnimation(child, childEndAction);
             endActionTriggered = true;
         }
+        if (mIsolatedMessage != null) {
+            performRemoveAnimation(mIsolatedMessage, !endActionTriggered ? endAction : null);
+            endActionTriggered = true;
+        }
         if (!endActionTriggered && endAction != null) {
             endAction.run();
         }
     }
 
-    public void performRemoveAnimation(View message,
-            Runnable recycleRunnable) {
-        MessagingPropertyAnimator.fadeOut(message, recycleRunnable);
+    public void performRemoveAnimation(View message, Runnable endAction) {
+        MessagingPropertyAnimator.fadeOut(message, endAction);
         MessagingPropertyAnimator.startLocalTranslationTo(message,
                 (int) (-getHeight() * 0.5f), MessagingLayout.FAST_OUT_LINEAR_IN);
     }
@@ -222,6 +261,9 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
                 }
             }
         }
+        if (mMessageContainer.getChildCount() == 0 && mIsolatedMessage != null) {
+            return mIsolatedMessage.getMeasuredType();
+        }
         return MEASURED_NORMAL;
     }
 
@@ -234,6 +276,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
                 result += ((MessagingLinearLayout.MessagingChild) child).getConsumedLines();
             }
         }
+        result = mIsolatedMessage != null ? Math.max(result, 1) : result;
         // A group is usually taking up quite some space with the padding and the name, let's add 1
         return result + 1;
     }
@@ -289,24 +332,65 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
 
     public void setMessages(List<MessagingMessage> group) {
         // Let's now make sure all children are added and in the correct order
+        int textMessageIndex = 0;
+        MessagingImageMessage isolatedMessage = null;
         for (int messageIndex = 0; messageIndex < group.size(); messageIndex++) {
             MessagingMessage message = group.get(messageIndex);
+            message.setColor(mTextColor);
             if (message.getGroup() != this) {
                 message.setMessagingGroup(this);
-                ViewParent parent = mMessageContainer.getParent();
-                if (parent instanceof ViewGroup) {
-                    ((ViewGroup) parent).removeView(message);
-                }
-                mMessageContainer.addView(message, messageIndex);
                 mAddedMessages.add(message);
             }
-            if (messageIndex != mMessageContainer.indexOfChild(message)) {
-                mMessageContainer.removeView(message);
-                mMessageContainer.addView(message, messageIndex);
+            boolean isImage = message instanceof MessagingImageMessage;
+            if (mAvatarsAtEnd && isImage) {
+                isolatedMessage = (MessagingImageMessage) message;
+            } else {
+                if (removeFromParentIfDifferent(message, mMessageContainer)) {
+                    ViewGroup.LayoutParams layoutParams = message.getView().getLayoutParams();
+                    if (layoutParams != null
+                            && !(layoutParams instanceof MessagingLinearLayout.LayoutParams)) {
+                        message.getView().setLayoutParams(
+                                mMessageContainer.generateDefaultLayoutParams());
+                    }
+                    mMessageContainer.addView(message.getView(), textMessageIndex);
+                }
+                if (isImage) {
+                    ((MessagingImageMessage) message).setIsolated(false);
+                }
+                // Let's sort them properly
+                if (textMessageIndex != mMessageContainer.indexOfChild(message.getView())) {
+                    mMessageContainer.removeView(message.getView());
+                    mMessageContainer.addView(message.getView(), textMessageIndex);
+                }
+                textMessageIndex++;
             }
-            message.setTextColor(mTextColor);
         }
+        if (isolatedMessage != null) {
+            if (removeFromParentIfDifferent(isolatedMessage, mImageContainer)) {
+                mImageContainer.removeAllViews();
+                mImageContainer.addView(isolatedMessage.getView());
+            }
+            isolatedMessage.setIsolated(true);
+        } else if (mIsolatedMessage != null) {
+            mImageContainer.removeAllViews();
+        }
+        mIsolatedMessage = isolatedMessage;
         mMessages = group;
+    }
+
+    /**
+     * Remove the message from the parent if the parent isn't the one provided
+     * @return whether the message was removed
+     */
+    private boolean removeFromParentIfDifferent(MessagingMessage message, ViewGroup newParent) {
+        ViewParent parent = message.getView().getParent();
+        if (parent != newParent) {
+            if (parent instanceof ViewGroup) {
+                ((ViewGroup) parent).removeView(message.getView());
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -317,13 +401,14 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
                 @Override
                 public boolean onPreDraw() {
                     for (MessagingMessage message : mAddedMessages) {
-                        if (!message.isShown()) {
+                        if (!message.getView().isShown()) {
                             continue;
                         }
-                        MessagingPropertyAnimator.fadeIn(message);
+                        MessagingPropertyAnimator.fadeIn(message.getView());
                         if (!mFirstLayout) {
-                            MessagingPropertyAnimator.startLocalTranslationFrom(message,
-                                    message.getHeight(), MessagingLayout.LINEAR_OUT_SLOW_IN);
+                            MessagingPropertyAnimator.startLocalTranslationFrom(message.getView(),
+                                    message.getView().getHeight(),
+                                    MessagingLayout.LINEAR_OUT_SLOW_IN);
                         }
                     }
                     mAddedMessages.clear();
@@ -333,6 +418,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
             });
         }
         mFirstLayout = false;
+        updateClipRect();
     }
 
     /**
@@ -372,11 +458,30 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         return mMessageContainer;
     }
 
+    public MessagingImageMessage getIsolatedMessage() {
+        return mIsolatedMessage;
+    }
+
     public boolean needsGeneratedAvatar() {
         return mNeedsGeneratedAvatar;
     }
 
     public Notification.Person getSender() {
         return mSender;
+    }
+
+    public void setTransformingImages(boolean transformingImages) {
+        mTransformingImages = transformingImages;
+    }
+
+    public void setDisplayAvatarsAtEnd(boolean atEnd) {
+        if (mAvatarsAtEnd != atEnd) {
+            mAvatarsAtEnd = atEnd;
+            mImageContainer.setVisibility(atEnd ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    public List<MessagingMessage> getMessages() {
+        return mMessages;
     }
 }

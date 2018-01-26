@@ -127,7 +127,7 @@ public class MessagingLinearLayoutTest {
         assertEquals(355, mView.getMeasuredHeight());;
     }
 
-    private class FakeImageFloatingTextView extends MessagingMessage {
+    private class FakeImageFloatingTextView extends MessagingTextMessage {
 
         public static final int LINE_HEIGHT = 50;
         private final int mNumLines;
