@@ -105,6 +105,11 @@ public class NetworkRegistrationState implements Parcelable {
     @Nullable
     private final CellIdentity mCellIdentity;
 
+    @Nullable
+    private VoiceSpecificRegistrationStates mVoiceSpecificStates;
+
+    @Nullable
+    private DataSpecificRegistrationStates mDataSpecificStates;
 
     /**
      * @param transportType Transport type. Must be {@link AccessNetworkConstants.TransportType}
@@ -128,6 +133,34 @@ public class NetworkRegistrationState implements Parcelable {
         mEmergencyOnly = emergencyOnly;
     }
 
+    /**
+     * Constructor for voice network registration states.
+     * @hide
+     */
+    public NetworkRegistrationState(int transportType, int domain, int regState,
+            int accessNetworkTechnology, int reasonForDenial, boolean emergencyOnly,
+            int[] availableServices, @Nullable CellIdentity cellIdentity, boolean cssSupported,
+            int roamingIndicator, int systemIsInPrl, int defaultRoamingIndicator) {
+        this(transportType, domain, regState, accessNetworkTechnology,
+                reasonForDenial, emergencyOnly, availableServices, cellIdentity);
+
+        mVoiceSpecificStates = new VoiceSpecificRegistrationStates(cssSupported, roamingIndicator,
+                systemIsInPrl, defaultRoamingIndicator);
+    }
+
+    /**
+     * Constructor for data network registration states.
+     * @hide
+     */
+    public NetworkRegistrationState(int transportType, int domain, int regState,
+            int accessNetworkTechnology, int reasonForDenial, boolean emergencyOnly,
+            int[] availableServices, @Nullable CellIdentity cellIdentity, int maxDataCalls) {
+        this(transportType, domain, regState, accessNetworkTechnology,
+                reasonForDenial, emergencyOnly, availableServices, cellIdentity);
+
+        mDataSpecificStates = new DataSpecificRegistrationStates(maxDataCalls);
+    }
+
     protected NetworkRegistrationState(Parcel source) {
         mTransportType = source.readInt();
         mDomain = source.readInt();
@@ -137,6 +170,10 @@ public class NetworkRegistrationState implements Parcelable {
         mEmergencyOnly = source.readBoolean();
         mAvailableServices = source.createIntArray();
         mCellIdentity = source.readParcelable(CellIdentity.class.getClassLoader());
+        mVoiceSpecificStates = source.readParcelable(
+                VoiceSpecificRegistrationStates.class.getClassLoader());
+        mDataSpecificStates = source.readParcelable(
+                DataSpecificRegistrationStates.class.getClassLoader());
     }
 
     /**
@@ -173,6 +210,36 @@ public class NetworkRegistrationState implements Parcelable {
         return mAccessNetworkTechnology;
     }
 
+    /**
+     * @return Reason for denial from network.
+     */
+    public int getReasonForDenial() {
+        return mReasonForDenial;
+    }
+
+    /**
+     * @return The cell information.
+     */
+    public CellIdentity getCellIdentity() {
+        return mCellIdentity;
+    }
+
+    /**
+     * @hide
+     */
+    @Nullable
+    public VoiceSpecificRegistrationStates getVoiceSpecificStates() {
+        return mVoiceSpecificStates;
+    }
+
+    /**
+     * @hide
+     */
+    @Nullable
+    public DataSpecificRegistrationStates getDataSpecificStates() {
+        return mDataSpecificStates;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -202,13 +269,16 @@ public class NetworkRegistrationState implements Parcelable {
                 .append(" emergencyEnabled=").append(mEmergencyOnly)
                 .append(" supportedServices=").append(mAvailableServices)
                 .append(" cellIdentity=").append(mCellIdentity)
+                .append(" voiceSpecificStates=").append(mVoiceSpecificStates)
+                .append(" dataSpecificStates=").append(mDataSpecificStates)
                 .append("}").toString();
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mTransportType, mDomain, mRegState, mAccessNetworkTechnology,
-                mReasonForDenial, mEmergencyOnly, mAvailableServices, mCellIdentity);
+                mReasonForDenial, mEmergencyOnly, mAvailableServices, mCellIdentity,
+                mVoiceSpecificStates, mDataSpecificStates);
     }
 
     @Override
@@ -228,7 +298,9 @@ public class NetworkRegistrationState implements Parcelable {
                 && mEmergencyOnly == other.mEmergencyOnly
                 && (mAvailableServices == other.mAvailableServices
                     || Arrays.equals(mAvailableServices, other.mAvailableServices))
-                && mCellIdentity == other.mCellIdentity;
+                && mCellIdentity == other.mCellIdentity
+                && mVoiceSpecificStates == other.mVoiceSpecificStates
+                && mDataSpecificStates == other.mDataSpecificStates;
     }
 
     @Override
@@ -241,6 +313,8 @@ public class NetworkRegistrationState implements Parcelable {
         dest.writeBoolean(mEmergencyOnly);
         dest.writeIntArray(mAvailableServices);
         dest.writeParcelable(mCellIdentity, 0);
+        dest.writeParcelable(mVoiceSpecificStates, 0);
+        dest.writeParcelable(mDataSpecificStates, 0);
     }
 
     public static final Parcelable.Creator<NetworkRegistrationState> CREATOR =
