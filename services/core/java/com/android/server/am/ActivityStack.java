@@ -481,7 +481,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     @Override
     public void setWindowingMode(int windowingMode) {
-        setWindowingMode(windowingMode, false /* animate */, true /* showRecents */,
+        setWindowingMode(windowingMode, false /* animate */, false /* showRecents */,
                 false /* enteringSplitScreenMode */);
     }
 
