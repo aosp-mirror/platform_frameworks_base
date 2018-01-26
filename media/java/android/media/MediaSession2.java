@@ -1074,15 +1074,6 @@ public class MediaSession2 implements AutoCloseable {
     }
 
     /**
-     * Sets the {@link AudioAttributes} to be used during the playback of the video.
-     *
-     * @param attributes non-null <code>AudioAttributes</code>.
-     */
-    public void setAudioAttributes(@NonNull AudioAttributes attributes) {
-        mProvider.setAudioAttributes_impl(attributes);
-    }
-
-    /**
      * Sets which type of audio focus will be requested during the playback, or configures playback
      * to not request audio focus. Valid values for focus requests are
      * {@link AudioManager#AUDIOFOCUS_GAIN}, {@link AudioManager#AUDIOFOCUS_GAIN_TRANSIENT},
