@@ -20,9 +20,7 @@ import android.app.PendingIntent;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.content.Context;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.Settings;
@@ -43,7 +41,6 @@ import com.android.systemui.R;
 import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.tuner.TunerService;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
@@ -160,8 +157,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
             } else {
                 mRow.removeView(button);
             }
-            button.setHasDivider(i < subItemsCount - 1);
-            mRow.addView(button, i);
+            mRow.addView(button);
 
             PendingIntent pendingIntent = null;
             if (rc.getContentIntent() != null) {
@@ -317,51 +313,20 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
 
     /**
      * Representation of an item that appears under the clock on main keyguard message.
-     * Shows optional separator.
      */
     private class KeyguardSliceButton extends Button {
 
-        private static final float SEPARATOR_HEIGHT = 0.7f;
-        private final Paint mPaint;
-        private boolean mHasDivider;
-
         public KeyguardSliceButton(Context context) {
-            super(context, null /* attrs */,
+            super(context, null /* attrs */, 0 /* styleAttr */,
                     com.android.keyguard.R.style.TextAppearance_Keyguard_Secondary);
-            mPaint = new Paint();
-            mPaint.setStyle(Paint.Style.STROKE);
-            float dividerWidth = context.getResources()
-                    .getDimension(R.dimen.widget_separator_thickness);
-            mPaint.setStrokeWidth(dividerWidth);
             int horizontalPadding = (int) context.getResources()
                     .getDimension(R.dimen.widget_horizontal_padding);
-            setPadding(horizontalPadding, 0, horizontalPadding, 0);
+            setPadding(horizontalPadding / 2, 0, horizontalPadding / 2, 0);
             setCompoundDrawablePadding((int) context.getResources()
                     .getDimension(R.dimen.widget_icon_padding));
             setMaxWidth(KeyguardSliceView.this.getWidth() / 2);
             setMaxLines(1);
             setEllipsize(TruncateAt.END);
-        }
-
-        public void setHasDivider(boolean hasDivider) {
-            mHasDivider = hasDivider;
-        }
-
-        @Override
-        public void setTextColor(int color) {
-            super.setTextColor(color);
-            mPaint.setColor(color);
-        }
-
-        @Override
-        protected void onDraw(Canvas canvas) {
-            super.onDraw(canvas);
-            if (mHasDivider) {
-                final int lineX = getLayoutDirection() == LAYOUT_DIRECTION_RTL ? 0 : getWidth();
-                final int height = (int) (getHeight() * SEPARATOR_HEIGHT);
-                final int startY = getHeight() / 2 - height / 2;
-                canvas.drawLine(lineX, startY, lineX, startY + height, mPaint);
-            }
         }
     }
 }
