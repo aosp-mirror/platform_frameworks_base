@@ -31,7 +31,6 @@ import android.media.update.ViewProvider;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.AttributeSet;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -512,18 +511,8 @@ public class VideoView2 extends FrameLayout {
     }
 
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        return mProvider.onKeyDown_impl(keyCode, event);
-    }
-
-    @Override
     public void onFinishInflate() {
         mProvider.onFinishInflate_impl();
-    }
-
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent event) {
-        return mProvider.dispatchKeyEvent_impl(event);
     }
 
     @Override
@@ -558,18 +547,8 @@ public class VideoView2 extends FrameLayout {
         }
 
         @Override
-        public boolean onKeyDown_impl(int keyCode, KeyEvent event) {
-            return VideoView2.super.onKeyDown(keyCode, event);
-        }
-
-        @Override
         public void onFinishInflate_impl() {
             VideoView2.super.onFinishInflate();
-        }
-
-        @Override
-        public boolean dispatchKeyEvent_impl(KeyEvent event) {
-            return VideoView2.super.dispatchKeyEvent(event);
         }
 
         @Override
