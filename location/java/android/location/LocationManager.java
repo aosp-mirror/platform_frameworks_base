@@ -38,9 +38,12 @@ import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 import com.android.internal.location.ProviderProperties;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -1191,10 +1194,11 @@ public class LocationManager {
     @SystemApi
     @RequiresPermission(WRITE_SECURE_SETTINGS)
     public void setLocationEnabledForUser(boolean enabled, UserHandle userHandle) {
-        try {
-            mService.setLocationEnabledForUser(enabled, userHandle.getIdentifier());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        for (String provider : getAllProviders()) {
+            if (provider.equals(PASSIVE_PROVIDER)) {
+                continue;
+            }
+            setProviderEnabledForUser(provider, enabled, userHandle);
         }
     }
 
@@ -1208,11 +1212,19 @@ public class LocationManager {
      */
     @SystemApi
     public boolean isLocationEnabledForUser(UserHandle userHandle) {
-        try {
-            return mService.isLocationEnabledForUser(userHandle.getIdentifier());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        final String allowedProviders = Settings.Secure.getStringForUser(
+                mContext.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
+                userHandle.getIdentifier());
+        final List<String> providerList = Arrays.asList(allowedProviders.split(","));
+        for(String provider : getAllProviders()) {
+            if (provider.equals(PASSIVE_PROVIDER)) {
+                continue;
+            }
+            if (providerList.contains(provider)) {
+                return true;
+            }
         }
+        return false;
     }
 
     /**
@@ -1236,13 +1248,7 @@ public class LocationManager {
      * @throws IllegalArgumentException if provider is null
      */
     public boolean isProviderEnabled(String provider) {
-        checkProvider(provider);
-
-        try {
-            return mService.isProviderEnabled(provider);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return isProviderEnabledForUser(provider, Process.myUserHandle());
     }
 
     /**
@@ -1270,12 +1276,9 @@ public class LocationManager {
     @SystemApi
     public boolean isProviderEnabledForUser(String provider, UserHandle userHandle) {
         checkProvider(provider);
-
-        try {
-            return mService.isProviderEnabledForUser(provider, userHandle.getIdentifier());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        String allowedProviders = Settings.Secure.getStringForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCATION_PROVIDERS_ALLOWED, userHandle.getIdentifier());
+        return TextUtils.delimitedStringContains(allowedProviders, ',', provider);
     }
 
     /**
@@ -1294,13 +1297,16 @@ public class LocationManager {
     public boolean setProviderEnabledForUser(
             String provider, boolean enabled, UserHandle userHandle) {
         checkProvider(provider);
-
-        try {
-            return mService.setProviderEnabledForUser(
-                    provider, enabled, userHandle.getIdentifier());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        // to ensure thread safety, we write the provider name with a '+' or '-'
+        // and let the SettingsProvider handle it rather than reading and modifying
+        // the list of enabled providers.
+        if (enabled) {
+            provider = "+" + provider;
+        } else {
+            provider = "-" + provider;
         }
+        return Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                Settings.Secure.LOCATION_PROVIDERS_ALLOWED, provider, userHandle.getIdentifier());
     }
 
     /**
