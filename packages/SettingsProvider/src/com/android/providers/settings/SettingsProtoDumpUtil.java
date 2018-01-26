@@ -1750,6 +1750,9 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.BACKUP_MANAGER_CONSTANTS,
                 SecureSettingsProto.BACKUP_MANAGER_CONSTANTS);
         dumpSetting(s, p,
+                Settings.Secure.BACKUP_LOCAL_TRANSPORT_PARAMETERS,
+                SecureSettingsProto.BACKUP_LOCAL_TRANSPORT_PARAMETERS);
+        dumpSetting(s, p,
                 Settings.Secure.BLUETOOTH_ON_WHILE_DRIVING,
                 SecureSettingsProto.BLUETOOTH_ON_WHILE_DRIVING);
 

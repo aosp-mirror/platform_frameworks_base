@@ -16,6 +16,7 @@
 
 package com.android.internal.backup;
 
+import android.app.backup.BackupAgent;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupTransport;
@@ -98,6 +99,7 @@ public class LocalTransport extends BackupTransport {
     private FileInputStream mCurFullRestoreStream;
     private FileOutputStream mFullRestoreSocketStream;
     private byte[] mFullRestoreBuffer;
+    private final LocalTransportParameters mParameters;
 
     private void makeDataDirs() {
         mCurrentSetDir.mkdirs();
@@ -105,9 +107,14 @@ public class LocalTransport extends BackupTransport {
         mCurrentSetIncrementalDir.mkdir();
     }
 
-    public LocalTransport(Context context) {
+    public LocalTransport(Context context, LocalTransportParameters parameters) {
         mContext = context;
+        mParameters = parameters;
         makeDataDirs();
+    }
+
+    LocalTransportParameters getParameters() {
+        return mParameters;
     }
 
     @Override
@@ -140,6 +147,17 @@ public class LocalTransport extends BackupTransport {
     @Override
     public String transportDirName() {
         return TRANSPORT_DIR_NAME;
+    }
+
+    @Override
+    public int getTransportFlags() {
+        int flags = super.getTransportFlags();
+        // Testing for a fake flag and having it set as a boolean in settings prevents anyone from
+        // using this it to pull data from the agent
+        if (mParameters.isFakeEncryptionFlag()) {
+            flags |= BackupAgent.FLAG_FAKE_CLIENT_SIDE_ENCRYPTION_ENABLED;
+        }
+        return flags;
     }
 
     @Override

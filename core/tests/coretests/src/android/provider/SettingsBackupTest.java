@@ -17,9 +17,11 @@
 package android.provider;
 
 import static com.google.android.collect.Sets.newHashSet;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+
 import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
@@ -556,6 +558,7 @@ public class SettingsBackupTest {
                  Settings.Secure.VOICE_RECOGNITION_SERVICE,
                  Settings.Secure.INSTANT_APPS_ENABLED,
                  Settings.Secure.BACKUP_MANAGER_CONSTANTS,
+                 Settings.Secure.BACKUP_LOCAL_TRANSPORT_PARAMETERS,
                  Settings.Secure.KEYGUARD_SLICE_URI,
                  Settings.Secure.PARENTAL_CONTROL_ENABLED,
                  Settings.Secure.PARENTAL_CONTROL_REDIRECT_URL,

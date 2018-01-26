@@ -662,10 +662,11 @@ message SecureSettingsProto {
     optional SettingProto backup_manager_constants = 169;
     optional SettingProto show_first_crash_dialog_dev_option = 195 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto bluetooth_on_while_driving = 196 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto backup_local_transport_parameters = 197;
 
     // Please insert fields in the same order as in
     // frameworks/base/core/java/android/provider/Settings.java.
-    // Next tag = 197
+    // Next tag = 198
 }
 
 message SystemSettingsProto {
