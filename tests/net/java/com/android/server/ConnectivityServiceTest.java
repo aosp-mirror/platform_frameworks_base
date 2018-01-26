@@ -3682,8 +3682,7 @@ public class ConnectivityServiceTest {
         vpnNetworkCallback.expectAvailableCallbacksUnvalidated(vpnNetworkAgent);
 
         genericNetworkCallback.expectCallback(CallbackState.NETWORK_CAPABILITIES, vpnNetworkAgent);
-        vpnNetworkCallback.expectCapabilitiesLike(
-                nc -> nc.appliesToUid(uid) && !nc.appliesToUid(uid + 1), vpnNetworkAgent);
+        vpnNetworkCallback.expectCapabilitiesLike(nc -> null == nc.getUids(), vpnNetworkAgent);
 
         ranges.clear();
         vpnNetworkAgent.setUids(ranges);

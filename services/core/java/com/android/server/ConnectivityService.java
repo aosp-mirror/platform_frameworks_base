@@ -1260,11 +1260,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         for (Network network : networks) {
                             nai = getNetworkAgentInfoForNetwork(network);
                             nc = getNetworkCapabilitiesInternal(nai);
-                            // nc is a copy of the capabilities in nai, so it's fine to mutate it
-                            // TODO : don't remove the UIDs when communicating with processes
-                            // that have the NETWORK_SETTINGS permission.
                             if (nc != null) {
-                                nc.setSingleUid(userId);
                                 result.put(network, nc);
                             }
                         }
@@ -1332,7 +1328,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (nai != null) {
             synchronized (nai) {
                 if (nai.networkCapabilities != null) {
-                    return new NetworkCapabilities(nai.networkCapabilities);
+                    // TODO : don't remove the UIDs when communicating with processes
+                    // that have the NETWORK_SETTINGS permission.
+                    return networkCapabilitiesWithoutUids(nai.networkCapabilities);
                 }
             }
         }
@@ -1345,6 +1343,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return getNetworkCapabilitiesInternal(getNetworkAgentInfoForNetwork(network));
     }
 
+    private NetworkCapabilities networkCapabilitiesWithoutUids(NetworkCapabilities nc) {
+        return new NetworkCapabilities(nc).setUids(null);
+    }
+
     @Override
     public NetworkState[] getAllNetworkState() {
         // Require internal since we're handing out IMSI details
@@ -1354,6 +1356,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
         for (Network network : getAllNetworks()) {
             final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
             if (nai != null) {
+                // TODO (b/73321673) : NetworkState contains a copy of the
+                // NetworkCapabilities, which may contain UIDs of apps to which the
+                // network applies. Should the UIDs be cleared so as not to leak or
+                // interfere ?
                 result.add(nai.getNetworkState());
             }
         }
@@ -4909,7 +4915,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         releasePendingNetworkRequestWithDelay(pendingIntent);
     }
 
-    private static void callCallbackForRequest(NetworkRequestInfo nri,
+    private void callCallbackForRequest(NetworkRequestInfo nri,
             NetworkAgentInfo networkAgent, int notificationType, int arg1) {
         if (nri.messenger == null) {
             return;  // Default request has no msgr
@@ -4927,11 +4933,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 break;
             }
             case ConnectivityManager.CALLBACK_CAP_CHANGED: {
+                // networkAgent can't be null as it has been accessed a few lines above.
                 final NetworkCapabilities nc =
-                        new NetworkCapabilities(networkAgent.networkCapabilities);
-                // TODO : don't remove the UIDs when communicating with processes
-                // that have the NETWORK_SETTINGS permission.
-                nc.setSingleUid(nri.mUid);
+                        networkCapabilitiesWithoutUids(networkAgent.networkCapabilities);
                 putParcelable(bundle, nc);
                 break;
             }
