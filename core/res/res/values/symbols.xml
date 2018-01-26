@@ -2986,6 +2986,8 @@
   <!-- com.android.server.autofill -->
   <java-symbol type="layout" name="autofill_save"/>
   <java-symbol type="layout" name="autofill_dataset_picker"/>
+  <java-symbol type="layout" name="autofill_dataset_picker_fullscreen"/>
+  <java-symbol type="id" name="autofill_dataset_container"/>
   <java-symbol type="id" name="autofill_dataset_list"/>
   <java-symbol type="id" name="autofill_dataset_picker"/>
   <java-symbol type="id" name="autofill" />
@@ -3014,7 +3016,8 @@
   <java-symbol type="drawable" name="autofill_dataset_picker_background" />
   <java-symbol type="style" name="AutofillDatasetPicker" />
   <java-symbol type="style" name="AutofillSaveAnimation" />
-  <java-symbol type="dimen" name="autofill_dataset_picker_max_size"/>
+  <java-symbol type="dimen" name="autofill_dataset_picker_max_width"/>
+  <java-symbol type="dimen" name="autofill_dataset_picker_max_height"/>
   <java-symbol type="dimen" name="autofill_save_custom_subtitle_max_height"/>
   <java-symbol type="dimen" name="autofill_save_icon_max_size"/>
 

@@ -451,8 +451,8 @@ please see themes_device_defaults.xml.
         <item name="tooltipBackgroundColor">@color/tooltip_background_light</item>
 
         <!-- Autofill: max width/height of the dataset picker as a fraction of screen size -->
-        <item name="autofillDatasetPickerMaxWidth">@dimen/autofill_dataset_picker_max_size</item>
-        <item name="autofillDatasetPickerMaxHeight">@dimen/autofill_dataset_picker_max_size</item>
+        <item name="autofillDatasetPickerMaxWidth">@dimen/autofill_dataset_picker_max_width</item>
+        <item name="autofillDatasetPickerMaxHeight">@dimen/autofill_dataset_picker_max_height</item>
 
         <!-- Autofill: max height of custom save subtitle as a fraction of screen size -->
         <item name="autofillSaveCustomSubtitleMaxHeight">@dimen/autofill_save_custom_subtitle_max_height</item>

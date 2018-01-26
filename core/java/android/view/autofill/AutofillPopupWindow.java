@@ -46,6 +46,7 @@ public class AutofillPopupWindow extends PopupWindow {
 
     private final WindowPresenter mWindowPresenter;
     private WindowManager.LayoutParams mWindowLayoutParams;
+    private boolean mFullScreen;
 
     private final View.OnAttachStateChangeListener mOnAttachStateChangeListener =
             new View.OnAttachStateChangeListener() {
@@ -104,12 +105,17 @@ public class AutofillPopupWindow extends PopupWindow {
      */
     public void update(View anchor, int offsetX, int offsetY, int width, int height,
             Rect virtualBounds) {
+        mFullScreen = width == LayoutParams.MATCH_PARENT && height == LayoutParams.MATCH_PARENT;
         // If we are showing the popup for a virtual view we use a fake view which
         // delegates to the anchor but present itself with the same bounds as the
         // virtual view. This ensures that the location logic in popup works
         // symmetrically when the dropdown is below and above the anchor.
         final View actualAnchor;
-        if (virtualBounds != null) {
+        if (mFullScreen) {
+            offsetX = 0;
+            offsetY = 0;
+            actualAnchor = anchor;
+        } else if (virtualBounds != null) {
             final int[] mLocationOnScreen = new int[] {virtualBounds.left, virtualBounds.top};
             actualAnchor = new View(anchor.getContext()) {
                 @Override
@@ -206,6 +212,17 @@ public class AutofillPopupWindow extends PopupWindow {
                 : View.LAYOUT_DIRECTION_LOCALE;
         mWindowPresenter.show(params, getTransitionEpicenter(), isLayoutInsetDecor(),
                 layoutDirection);
+    }
+
+    @Override
+    protected boolean findDropDownPosition(View anchor, LayoutParams outParams,
+            int xOffset, int yOffset, int width, int height, int gravity, boolean allowScroll) {
+        if (mFullScreen) {
+            // Do not patch LayoutParams if force full screen
+            return false;
+        }
+        return super.findDropDownPosition(anchor, outParams, xOffset, yOffset,
+                width, height, gravity, allowScroll);
     }
 
     @Override
