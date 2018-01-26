@@ -849,7 +849,6 @@ public class MediaSession2 implements AutoCloseable {
     /**
      * Parameter for the playlist.
      */
-    // TODO(jaewan): add fromBundle()/toBundle()
     public static class PlaylistParams {
         /**
          * @hide
@@ -905,6 +904,16 @@ public class MediaSession2 implements AutoCloseable {
          */
         public static final int SHUFFLE_MODE_GROUP = 2;
 
+        /**
+         * Keys used for converting a PlaylistParams object to a bundle object and vice versa.
+         */
+        private static final String KEY_REPEAT_MODE =
+                "android.media.session2.playlistparams2.repeat_mode";
+        private static final String KEY_SHUFFLE_MODE =
+                "android.media.session2.playlistparams2.shuffle_mode";
+        private static final String KEY_MEDIA_METADATA2_BUNDLE =
+                "android.media.session2.playlistparams2.metadata2_bundle";
+
         private @RepeatMode int mRepeatMode;
         private @ShuffleMode int mShuffleMode;
 
@@ -927,6 +936,47 @@ public class MediaSession2 implements AutoCloseable {
 
         public MediaMetadata2 getPlaylistMetadata() {
             return mPlaylistMetadata;
+        }
+
+        /**
+         * Returns this object as a bundle to share between processes.
+         *
+         * @hide
+         */
+        public Bundle toBundle() {
+            Bundle bundle = new Bundle();
+            bundle.putInt(KEY_REPEAT_MODE, mRepeatMode);
+            bundle.putInt(KEY_SHUFFLE_MODE, mShuffleMode);
+            if (mPlaylistMetadata != null) {
+                bundle.putBundle(KEY_MEDIA_METADATA2_BUNDLE, mPlaylistMetadata.getBundle());
+            }
+            return bundle;
+        }
+
+        /**
+         * Creates an instance from a bundle which is previously created by {@link #toBundle()}.
+         *
+         * @param bundle A bundle created by {@link #toBundle()}.
+         * @return A new {@link PlaylistParams} instance. Returns {@code null} if the given
+         *         {@param bundle} is null, or if the {@param bundle} has no playlist parameters.
+         * @hide
+         */
+        public static PlaylistParams fromBundle(Bundle bundle) {
+            if (bundle == null) {
+                return null;
+            }
+            if (!bundle.containsKey(KEY_REPEAT_MODE) || !bundle.containsKey(KEY_SHUFFLE_MODE)) {
+                return null;
+            }
+
+            Bundle metadataBundle = bundle.getBundle(KEY_MEDIA_METADATA2_BUNDLE);
+            MediaMetadata2 metadata =
+                    metadataBundle == null ? null : new MediaMetadata2(metadataBundle);
+
+            return new PlaylistParams(
+                    bundle.getInt(KEY_REPEAT_MODE),
+                    bundle.getInt(KEY_SHUFFLE_MODE),
+                    metadata);
         }
     }
 
