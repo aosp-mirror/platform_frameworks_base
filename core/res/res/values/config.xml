@@ -2482,9 +2482,9 @@
         <item>power</item>
         <item>restart</item>
         <item>logout</item>
+        <item>lockdown</item>
         <item>bugreport</item>
         <item>users</item>
-        <item>lockdown</item>
     </string-array>
 
     <!-- Number of milliseconds to hold a wake lock to ensure that drawing is fully
