@@ -17,21 +17,19 @@
 #pragma once
 
 #include <cutils/compiler.h>
+#include <utils/Macros.h>
 #include <utils/RefBase.h>
 
 #include <SkAnimatedImage.h>
 #include <SkCanvas.h>
 #include <SkColorFilter.h>
 #include <SkDrawable.h>
-#include <SkMutex.h>
+#include <SkPicture.h>
 
-class SkPicture;
+#include <future>
+#include <mutex>
 
 namespace android {
-
-namespace uirenderer {
-class TaskManager;
-}
 
 class OnAnimationEndListener {
 public:
@@ -41,68 +39,102 @@ public:
 };
 
 /**
- * Native component of android.graphics.drawable.AnimatedImageDrawables.java.  This class can be
- * drawn into Canvas.h and maintains the state needed to drive the animation from the RenderThread.
+ * Native component of android.graphics.drawable.AnimatedImageDrawables.java.
+ * This class can be drawn into Canvas.h and maintains the state needed to drive
+ * the animation from the RenderThread.
  */
 class ANDROID_API AnimatedImageDrawable : public SkDrawable {
 public:
     AnimatedImageDrawable(sk_sp<SkAnimatedImage> animatedImage);
 
     /**
-     * This returns true if the animation has updated and signals that the next draw will contain
-     * new content.
+     * This updates the internal time and returns true if the animation needs
+     * to be redrawn.
+     *
+     * This is called on RenderThread, while the UI thread is locked.
      */
-    bool isDirty() const { return mIsDirty; }
+    bool isDirty();
 
     int getStagingAlpha() const { return mStagingAlpha; }
     void setStagingAlpha(int alpha) { mStagingAlpha = alpha; }
     void setStagingColorFilter(sk_sp<SkColorFilter> filter) { mStagingColorFilter = filter; }
     void syncProperties();
 
-    virtual SkRect onGetBounds() override {
-        return mSkAnimatedImage->getBounds();
-    }
+    virtual SkRect onGetBounds() override { return mSkAnimatedImage->getBounds(); }
 
+    // Draw to software canvas, and return time to next draw.
     double drawStaging(SkCanvas* canvas);
 
-    // Returns true if the animation was started; false otherwise (e.g. it was already running)
+    // Returns true if the animation was started; false otherwise (e.g. it was
+    // already running)
     bool start();
     void stop();
     bool isRunning();
-    void setRepetitionCount(int count) {
-        mSkAnimatedImage->setRepetitionCount(count);
-    }
+    void setRepetitionCount(int count) { mSkAnimatedImage->setRepetitionCount(count); }
 
     void setOnAnimationEndListener(std::unique_ptr<OnAnimationEndListener> listener) {
         mEndListener = std::move(listener);
     }
 
-    void scheduleUpdate(uirenderer::TaskManager* taskManager);
+    void markInvisible() { mDidDraw = false; }
+
+    struct Snapshot {
+        sk_sp<SkPicture> mPic;
+        int mDuration;
+
+        Snapshot() = default;
+
+        Snapshot(Snapshot&&) = default;
+        Snapshot& operator=(Snapshot&&) = default;
+
+        PREVENT_COPY_AND_ASSIGN(Snapshot);
+    };
+
+    // These are only called on AnimatedImageThread.
+    Snapshot decodeNextFrame();
+    Snapshot reset();
 
 protected:
     virtual void onDraw(SkCanvas* canvas) override;
 
 private:
-    void update();
-
     sk_sp<SkAnimatedImage> mSkAnimatedImage;
-    sk_sp<SkPicture> mSnapshot;
-    SkMutex mLock;
+    bool mRunning = false;
+    bool mFinished = false;
+
+    // A snapshot of the current frame to draw.
+    Snapshot mSnapshot;
+
+    std::future<Snapshot> mNextSnapshot;
+
+    bool nextSnapshotReady() const;
+
+    // When to switch from mSnapshot to mNextSnapshot.
+    double mTimeToShowNextSnapshot = 0.0;
+
+    // The current time for the drawable itself.
+    double mCurrentTime = 0.0;
+
+    // The wall clock of the last time we called isDirty.
+    double mLastWallTime = 0.0;
+
+    // Whether we drew since the last call to isDirty.
+    bool mDidDraw = false;
+
+    // Locked when assigning snapshots and times. Operations while this is held
+    // should be short.
+    std::mutex mSwapLock;
+
+    // Locked when mSkAnimatedImage is being updated or drawn.
+    std::mutex mImageLock;
 
     int mStagingAlpha = SK_AlphaOPAQUE;
     sk_sp<SkColorFilter> mStagingColorFilter;
 
     int mAlpha = SK_AlphaOPAQUE;
     sk_sp<SkColorFilter> mColorFilter;
-    double mNextFrameTime = 0.0;
-    bool mIsDirty = false;
-
-    class AnimatedImageTask;
-    class AnimatedImageTaskProcessor;
-    sp<AnimatedImageTask> mDecodeTask;
-    sp<AnimatedImageTaskProcessor> mDecodeTaskProcessor;
 
     std::unique_ptr<OnAnimationEndListener> mEndListener;
 };
 
-};  // namespace android
+}  // namespace android
