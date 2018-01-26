@@ -363,7 +363,7 @@
     <string name="permdesc_writeCallLog" product="tablet" msgid="6661806062274119245">"Ermöglicht der App, die Anrufliste deines Tablets zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so deine Anrufliste löschen oder ändern."</string>
     <string name="permdesc_writeCallLog" product="tv" msgid="4225034892248398019">"Ermöglicht der App, die Anrufliste deines Fernsehers zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so deine Anrufliste löschen oder ändern."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="683941736352787842">"Ermöglicht der App, die Anrufliste deines Telefons zu ändern, einschließlich der Daten über ein- und ausgehende Anrufe. Schädliche Apps können so deine Anrufliste löschen oder ändern."</string>
-    <string name="permlab_bodySensors" msgid="4683341291818520277">"Auf Körpersensoren wie z. B. Herzfrequenzmesser zugreifen"</string>
+    <string name="permlab_bodySensors" msgid="4683341291818520277">"Auf Körpersensoren wie z. B. Pulsmesser zugreifen"</string>
     <string name="permdesc_bodySensors" product="default" msgid="4380015021754180431">"Ermöglicht der App, auf Daten von Sensoren zuzugreifen, die deine körperliche Verfassung überwachen, beispielsweise deinen Puls"</string>
     <string name="permlab_readCalendar" msgid="6716116972752441641">"Kalendertermine und Details lesen"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="4993979255403945892">"Diese App kann alle auf deinem Tablet gespeicherten Kalendertermine lesen und deine Kalenderdaten teilen oder speichern."</string>
@@ -533,8 +533,8 @@
     <string name="permdesc_handoverStatus" msgid="4788144087245714948">"Ermöglicht dieser App, Informationen zu aktuellen Android Beam-Übertragungen zu erhalten"</string>
     <string name="permlab_removeDrmCertificates" msgid="7044888287209892751">"DRM-Zertifikate entfernen"</string>
     <string name="permdesc_removeDrmCertificates" msgid="7272999075113400993">"Ermöglicht einer App das Entfernen von DRM-Zertifikaten. Sollte für normale Apps nie benötigt werden."</string>
-    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"An einen Mobilfunkanbieter-SMS/MMS-Dienst binden"</string>
-    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Ermöglicht dem Inhaber die Bindung an die Oberfläche eines Mobilfunkanbieter-SMS/MMS-Dienstes auf oberster Ebene. Für normale Apps sollte dies nie erforderlich sein."</string>
+    <string name="permlab_bindCarrierMessagingService" msgid="1490229371796969158">"An einen Mobilfunkanbieter-Messaging-Dienst binden"</string>
+    <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Ermöglicht dem Inhaber die Bindung an die Oberfläche eines Mobilfunkanbieter-Messaging-Dienstes auf oberster Ebene. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"An Mobilfunkanbieter-Dienste binden"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Ermöglicht dem Inhaber die Bindung an Mobilfunkanbieter-Dienste. Für normale Apps sollte dies nicht erforderlich sein."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"Auf \"Nicht stören\" zugreifen"</string>
@@ -1615,7 +1615,7 @@
     <string name="package_installed_device_owner" msgid="6875717669960212648">"Von deinem Administrator installiert"</string>
     <string name="package_updated_device_owner" msgid="1847154566357862089">"Von deinem Administrator aktualisiert"</string>
     <string name="package_deleted_device_owner" msgid="2307122077550236438">"Von deinem Administrator gelöscht"</string>
-    <string name="battery_saver_description" msgid="1960431123816253034">"Der Energiesparmodus schont den Akku, indem er die Leistung des Geräts reduziert und die Vibrationsfunktion, Standortdienste sowie die meisten Hintergrunddatenaktivitäten einschränkt. E-Mail, SMS/MMS und andere Apps, die auf deinem Gerät synchronisiert werden, werden möglicherweise erst nach dem Öffnen aktualisiert.\n\nDer Energiesparmodus wird automatisch deaktiviert, wenn dein Gerät aufgeladen wird."</string>
+    <string name="battery_saver_description" msgid="1960431123816253034">"Der Energiesparmodus schont den Akku, indem er die Leistung des Geräts reduziert und die Vibrationsfunktion, Standortdienste sowie die meisten Hintergrunddatenaktivitäten einschränkt. E-Mail, Messaging und andere Apps, die auf deinem Gerät synchronisiert werden, werden möglicherweise erst nach dem Öffnen aktualisiert.\n\nDer Energiesparmodus wird automatisch deaktiviert, wenn dein Gerät aufgeladen wird."</string>
     <string name="data_saver_description" msgid="6015391409098303235">"Mit dem Datensparmodus wird die Datennutzung verringert, indem verhindert wird, dass im Hintergrund Daten von Apps gesendet oder empfangen werden. Datenzugriffe sind mit einer aktiven App zwar möglich, erfolgen aber seltener. Als Folge davon könnten Bilder beispielsweise erst dann sichtbar werden, wenn sie angetippt werden."</string>
     <string name="data_saver_enable_title" msgid="4674073932722787417">"Datensparmodus aktivieren?"</string>
     <string name="data_saver_enable_button" msgid="7147735965247211818">"Aktivieren"</string>

@@ -1702,7 +1702,7 @@
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Washa"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Una ujumbe mpya"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Fungua programu ya SMS ili uweze kuangalia"</string>
-    <string name="user_encrypted_title" msgid="9054897468831672082">"Huenda baadhi ya utendaji ukawa vikwazo"</string>
+    <string name="user_encrypted_title" msgid="9054897468831672082">"Huenda baadhi ya vipengele havifanyi kazi"</string>
     <string name="user_encrypted_message" msgid="4923292604515744267">"Gusa ili ufungue"</string>
     <string name="user_encrypted_detail" msgid="5708447464349420392">"Data ya mtumiaji imefungwa"</string>
     <string name="profile_encrypted_detail" msgid="3700965619978314974">"Wasifu wa kazini umefungwa"</string>

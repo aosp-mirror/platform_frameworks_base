@@ -86,7 +86,7 @@
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Upozorenja"</string>
     <string name="notification_channel_call_forward" msgid="2419697808481833249">"Preusmjeravanje poziva"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Način rada za hitni povratni poziv"</string>
-    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Status mobilnih podataka"</string>
+    <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Status prijenosa podataka na mobilnoj mreži"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"SMS poruke"</string>
     <string name="notification_channel_voice_mail" msgid="3954099424160511919">"Poruke govorne pošte"</string>
     <string name="notification_channel_wfc" msgid="2130802501654254801">"Wi-Fi pozivanje"</string>
@@ -1132,7 +1132,7 @@
     <string name="network_switch_metered_detail" msgid="5325661434777870353">"Kada na uređaju <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nema pristup internetu, koristi se <xliff:g id="NEW_NETWORK">%1$s</xliff:g>. Moguća je naplata usluge."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Prebačeno iz mreže <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> u <xliff:g id="NEW_NETWORK">%2$s</xliff:g> mrežu"</string>
   <string-array name="network_switch_type_name">
-    <item msgid="3979506840912951943">"mobilni podaci"</item>
+    <item msgid="3979506840912951943">"prijenos podataka na mobilnoj mreži"</item>
     <item msgid="75483255295529161">"Wi-Fi"</item>
     <item msgid="6862614801537202646">"Bluetooth"</item>
     <item msgid="5447331121797802871">"Ethernet"</item>
