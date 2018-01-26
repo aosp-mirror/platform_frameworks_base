@@ -1574,7 +1574,7 @@
     <string name="write_fail_reason_cancelled" msgid="7091258378121627624">"रद्द केले"</string>
     <string name="write_fail_reason_cannot_write" msgid="8132505417935337724">"आशय लिहिण्‍यात एरर"</string>
     <string name="reason_unknown" msgid="6048913880184628119">"अज्ञात"</string>
-    <string name="reason_service_unavailable" msgid="7824008732243903268">"मुद्रण सेवा सक्षम केली नाही"</string>
+    <string name="reason_service_unavailable" msgid="7824008732243903268">"प्रिंट सेवा सक्षम केली नाही"</string>
     <string name="print_service_installed_title" msgid="2246317169444081628">"<xliff:g id="NAME">%s</xliff:g> सेवा स्‍थापित केली"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"सक्षम करण्यासाठी टॅप करा"</string>
     <string name="restr_pin_enter_admin_pin" msgid="8641662909467236832">"प्रशासक पिन एंटर करा"</string>

@@ -788,8 +788,8 @@
     <string name="granularity_label_link" msgid="5815508880782488267">"link"</string>
     <string name="granularity_label_line" msgid="5764267235026120888">"linha"</string>
     <string name="factorytest_failed" msgid="5410270329114212041">"O teste de fábrica falhou"</string>
-    <string name="factorytest_not_system" msgid="4435201656767276723">"A acção FACTORY_TEST apenas é suportada para pacotes instalados em /system/app."</string>
-    <string name="factorytest_no_action" msgid="872991874799998561">"Não foi localizado qualquer pacote que forneça a acção FACTORY_TEST."</string>
+    <string name="factorytest_not_system" msgid="4435201656767276723">"A ação FACTORY_TEST apenas é suportada para pacotes instalados em /system/app."</string>
+    <string name="factorytest_no_action" msgid="872991874799998561">"Não foi localizado qualquer pacote que forneça a ação FACTORY_TEST."</string>
     <string name="factorytest_reboot" msgid="6320168203050791643">"Reiniciar"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"A página em \"<xliff:g id="TITLE">%s</xliff:g>\" indica:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
@@ -939,7 +939,7 @@
       <item quantity="one">dentro de <xliff:g id="COUNT_0">%d</xliff:g> ano</item>
     </plurals>
     <string name="VideoView_error_title" msgid="3534509135438353077">"Problema com o vídeo"</string>
-    <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Este vídeo não é válido para transmissão em fluxo contínuo neste aparelho."</string>
+    <string name="VideoView_error_text_invalid_progressive_playback" msgid="3186670335938670444">"Este vídeo não é válido para transmissão neste aparelho."</string>
     <string name="VideoView_error_text_unknown" msgid="3450439155187810085">"Não é possível reproduzir este vídeo."</string>
     <string name="VideoView_error_button" msgid="2822238215100679592">"OK"</string>
     <string name="relative_time" msgid="1818557177829411417">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
@@ -1004,7 +1004,7 @@
     <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Capturar imagem com"</string>
     <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"Capturar imagem com o %1$s"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Capturar imagem"</string>
-    <string name="alwaysUse" msgid="4583018368000610438">"Utilizar por predefinição para esta acção."</string>
+    <string name="alwaysUse" msgid="4583018368000610438">"Utilizar por predefinição para esta ação."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Utilizar outra aplicação"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Limpar a predefinição nas Definições do Sistema &gt; Aplicações &gt; Transferidas."</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Escolha uma ação"</string>
