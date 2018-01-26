@@ -157,7 +157,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     @Override
     public void sendBroadcast(String pkg, String cls) {
-        // TODO: Use a pending intent, and enfoceCallingPermission.
+        // TODO: Use a pending intent.
+        enforceCallingPermission();
         mContext.sendBroadcastAsUser(new Intent(ACTION_TRIGGER_COLLECTION).setClassName(pkg, cls),
                 UserHandle.SYSTEM);
     }
@@ -235,7 +236,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    public final static class AppUpdateReceiver extends BroadcastReceiver {
+    private final static class AppUpdateReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             /**
@@ -280,7 +281,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    public final static class AnomalyAlarmReceiver extends BroadcastReceiver {
+    private final static class AnomalyAlarmReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             Slog.i(TAG, "StatsCompanionService believes an anomaly has occurred.");
@@ -300,7 +301,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
-    public final static class PullingAlarmReceiver extends BroadcastReceiver {
+    private final static class PullingAlarmReceiver extends BroadcastReceiver {
       @Override
       public void onReceive(Context context, Intent intent) {
         if (DEBUG)
@@ -321,7 +322,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
       }
     }
 
-    public final static class ShutdownEventReceiver extends BroadcastReceiver {
+    private final static class ShutdownEventReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             /**
