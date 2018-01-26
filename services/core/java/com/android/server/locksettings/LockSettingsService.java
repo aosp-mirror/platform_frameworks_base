@@ -1982,8 +1982,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     @Override
-    public KeyChainSnapshot getRecoveryData(@NonNull byte[] account) throws RemoteException {
-        return mRecoverableKeyStoreManager.getRecoveryData(account);
+    public KeyChainSnapshot getKeyChainSnapshot() throws RemoteException {
+        return mRecoverableKeyStoreManager.getKeyChainSnapshot();
     }
 
     public void setSnapshotCreatedPendingIntent(@Nullable PendingIntent intent)

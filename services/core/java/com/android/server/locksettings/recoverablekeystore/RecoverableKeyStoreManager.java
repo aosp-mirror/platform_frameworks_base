@@ -171,7 +171,7 @@ public class RecoverableKeyStoreManager {
      * @hide
      */
     public @NonNull
-    KeyChainSnapshot getRecoveryData(@NonNull byte[] account)
+    KeyChainSnapshot getKeyChainSnapshot()
             throws RemoteException {
         checkRecoverKeyStorePermission();
         int uid = Binder.getCallingUid();
