@@ -52,6 +52,8 @@ public interface MediaPlayerInterface {
 
     void setPlaylist(List<MediaItem2> item, PlaylistParams param);
     void setCurrentPlaylistItem(int index);
+    void setPlaylistParams(PlaylistParams params);
+    PlaylistParams getPlaylistParams();
 
     /**
      * Add a {@link PlaybackListener} to be invoked when the playback state is changed.

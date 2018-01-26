@@ -138,6 +138,13 @@ public class MediaController2 implements AutoCloseable {
          * @param state
          */
         public void onPlaybackStateChanged(@NonNull PlaybackState2 state) { }
+
+        /**
+         * Called when the playlist parameters are changed.
+         *
+         * @param params The new play list parameters.
+         */
+        public void onPlaylistParamsChanged(@NonNull PlaylistParams params) { }
     }
 
     /**
@@ -356,6 +363,17 @@ public class MediaController2 implements AutoCloseable {
      */
     public void setCurrentPlaylistItem(int index) {
         mProvider.setCurrentPlaylistItem_impl(index);
+    }
+
+    /**
+     * Sets the {@link PlaylistParams} for the current play list. Repeat/shuffle mode and metadata
+     * for the list can be set by calling this method.
+     *
+     * @param params A {@link PlaylistParams} object to set.
+     * @throws IllegalArgumentException if given {@param param} is null.
+     */
+    public void setPlaylistParams(PlaylistParams params) {
+        mProvider.setPlaylistParams_impl(params);
     }
 
     /**
