@@ -12,8 +12,6 @@
                  android:icon="@mipmap/ic_launcher_settings"
                  android:defaultToDeviceProtectedStorage="true"
                  android:directBootAware="true">
-        <uses-library android:name="android.test.runner" />
-
 
         <provider android:name="SettingsProvider"
                   android:authorities="settings"
