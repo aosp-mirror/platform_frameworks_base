@@ -10099,6 +10099,75 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     /**
+     * Updates (grants or revokes) a persitable URI permission.
+     *
+     * @param uri URI to be granted or revoked.
+     * @param prefix if {@code false}, permission apply to this specific URI; if {@code true}, it
+     * applies to all URIs that are prefixed by this URI.
+     * @param packageName target package.
+     * @param grant if {@code true} a new permission will be granted, otherwise an existing
+     * permission will be revoked.
+     * @param userId user handle
+     *
+     * @return whether or not the requested succeeded.
+     *
+     * @deprecated TODO(b/72055774): caller should use takePersistableUriPermission() or
+     * releasePersistableUriPermission() instead, but such change will be made in a separate CL
+     * so it can be easily reverted if it breaks existing functionality.
+     */
+    @Deprecated // STOPSHIP if not removed
+    @Override
+    public boolean updatePersistableUriPermission(Uri uri, boolean prefix, String packageName,
+            boolean grant, int userId) {
+        enforceCallingPermission(android.Manifest.permission.GET_APP_GRANTED_URI_PERMISSIONS,
+                "updatePersistableUriPermission");
+        final int uid = mPackageManagerInt.getPackageUid(packageName, 0, userId);
+
+        final GrantUri grantUri = new GrantUri(userId, uri, prefix);
+
+        boolean persistChanged = false;
+        synchronized (this) {
+            if (grant) { // Grant
+                final String authority = uri.getAuthority();
+                final ProviderInfo pi = getProviderInfoLocked(authority, userId, 0);
+                if (pi == null) {
+                    Slog.w(TAG, "No content provider found for authority " + authority);
+                    return false;
+                }
+                final UriPermission permission = findOrCreateUriPermissionLocked(pi.packageName,
+                        packageName, uid, grantUri);
+                if (permission.isNew()) {
+                    final int modeFlags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+                    permission.initPersistedModes(modeFlags, System.currentTimeMillis());
+                    persistChanged = true;
+                } else {
+                    // Caller should not try to grant permission that is already granted.
+                    Slog.w(TAG_URI_PERMISSION,
+                            "permission already granted for " + grantUri.toSafeString());
+                    return false;
+                }
+                persistChanged |= maybePrunePersistedUriGrantsLocked(uid);
+            } else { // Revoke
+                final UriPermission permission = findUriPermissionLocked(uid, grantUri);
+                if (permission == null) {
+                    // Caller should not try to revoke permission that is not granted.
+                    Slog.v(TAG_URI_PERMISSION, "no permission for " + grantUri.toSafeString());
+                    return false;
+                } else {
+                    permission.modeFlags = 0;
+                    removeUriPermissionIfNeededLocked(permission);
+                    persistChanged = true;
+                }
+            }
+            if (persistChanged) {
+                schedulePersistUriGrants();
+            }
+        }
+        return true;
+    }
+
+    /**
      * @param uri This uri must NOT contain an embedded userId.
      * @param userId The userId in which the uri is to be resolved.
      */

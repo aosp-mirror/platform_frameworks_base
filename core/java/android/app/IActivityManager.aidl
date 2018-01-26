@@ -423,6 +423,8 @@ interface IActivityManager {
     void restart();
     void performIdleMaintenance();
     void takePersistableUriPermission(in Uri uri, int modeFlags, int userId);
+    boolean updatePersistableUriPermission(in Uri uri, boolean prefix, String packageName,
+                                           boolean grant, int userId);
     void releasePersistableUriPermission(in Uri uri, int modeFlags, int userId);
     ParceledListSlice getPersistedUriPermissions(in String packageName, boolean incoming);
     void appNotRespondingViaProvider(in IBinder connection);
