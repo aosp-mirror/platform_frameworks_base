@@ -16,7 +16,11 @@
 
 package android.hardware.usb;
 
+import android.annotation.NonNull;
+import android.service.usb.UsbDeviceFilterProto;
 import android.util.Slog;
+
+import com.android.internal.util.dump.DualDumpOutputStream;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -309,5 +313,23 @@ public class DeviceFilter {
                 ",mProtocol=" + mProtocol + ",mManufacturerName=" + mManufacturerName +
                 ",mProductName=" + mProductName + ",mSerialNumber=" + mSerialNumber +
                 "]";
+    }
+
+    /**
+     * Write a description of the filter to a dump stream.
+     */
+    public void dump(@NonNull DualDumpOutputStream dump, String idName, long id) {
+        long token = dump.start(idName, id);
+
+        dump.write("vendor_id", UsbDeviceFilterProto.VENDOR_ID, mVendorId);
+        dump.write("product_id", UsbDeviceFilterProto.PRODUCT_ID, mProductId);
+        dump.write("class", UsbDeviceFilterProto.CLASS, mClass);
+        dump.write("subclass", UsbDeviceFilterProto.SUBCLASS, mSubclass);
+        dump.write("protocol", UsbDeviceFilterProto.PROTOCOL, mProtocol);
+        dump.write("manufacturer_name", UsbDeviceFilterProto.MANUFACTURER_NAME, mManufacturerName);
+        dump.write("product_name", UsbDeviceFilterProto.PRODUCT_NAME, mProductName);
+        dump.write("serial_number", UsbDeviceFilterProto.SERIAL_NUMBER, mSerialNumber);
+
+        dump.end(token);
     }
 }

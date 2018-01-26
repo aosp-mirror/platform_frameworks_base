@@ -16,8 +16,8 @@
 
 package com.android.server.print;
 
-import static com.android.internal.print.DumpUtils.writeComponentName;
 import static com.android.internal.print.DumpUtils.writePrinterId;
+import static com.android.internal.util.dump.DumpUtils.writeComponentName;
 
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
@@ -49,7 +49,7 @@ import android.service.print.ActivePrintServiceProto;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.print.DualDumpOutputStream;
+import com.android.internal.util.dump.DualDumpOutputStream;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;

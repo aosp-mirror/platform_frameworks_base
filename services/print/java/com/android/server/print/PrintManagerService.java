@@ -61,10 +61,10 @@ import android.widget.Toast;
 
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.print.DualDumpOutputStream;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
@@ -708,12 +708,12 @@ public final class PrintManagerService extends SystemService {
             final long identity = Binder.clearCallingIdentity();
             try {
                 if (dumpAsProto) {
-                    dump(new DualDumpOutputStream(new ProtoOutputStream(fd), null),
+                    dump(new DualDumpOutputStream(new ProtoOutputStream(fd)),
                             userStatesToDump);
                 } else {
                     pw.println("PRINT MANAGER STATE (dumpsys print)");
 
-                    dump(new DualDumpOutputStream(null, new IndentingPrintWriter(pw, "  ")),
+                    dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
                             userStatesToDump);
                 }
             } finally {

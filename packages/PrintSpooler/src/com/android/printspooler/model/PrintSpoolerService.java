@@ -16,8 +16,8 @@
 
 package com.android.printspooler.model;
 
-import static com.android.internal.print.DumpUtils.writeComponentName;
 import static com.android.internal.print.DumpUtils.writePrintJobInfo;
+import static com.android.internal.util.dump.DumpUtils.writeComponentName;
 
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
@@ -59,10 +59,10 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.os.HandlerCaller;
-import com.android.internal.print.DualDumpOutputStream;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.printspooler.R;
 import com.android.printspooler.util.ApprovedPrintServices;
 
@@ -214,12 +214,11 @@ public final class PrintSpoolerService extends Service {
         try {
             synchronized (mLock) {
                 if (dumpAsProto) {
-                    dumpLocked(new DualDumpOutputStream(new ProtoOutputStream(fd), null));
+                    dumpLocked(new DualDumpOutputStream(new ProtoOutputStream(fd)));
                 } else {
                     try (FileOutputStream out = new FileOutputStream(fd)) {
                         try (PrintWriter w = new PrintWriter(out)) {
-                            dumpLocked(new DualDumpOutputStream(null, new IndentingPrintWriter(w,
-                                    "  ")));
+                            dumpLocked(new DualDumpOutputStream(new IndentingPrintWriter(w, "  ")));
                         }
                     } catch (IOException ignored) {
                     }

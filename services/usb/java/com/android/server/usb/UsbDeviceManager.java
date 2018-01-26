@@ -16,6 +16,9 @@
 
 package com.android.server.usb;
 
+import static com.android.internal.usb.DumpUtils.writeAccessory;
+import static com.android.internal.util.dump.DumpUtils.writeStringIfNotNull;
+
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.KeyguardManager;
@@ -41,6 +44,7 @@ import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.hardware.usb.UsbPort;
 import android.hardware.usb.UsbPortStatus;
+import android.hardware.usb.gadget.V1_0.GadgetFunction;
 import android.hardware.usb.gadget.V1_0.IUsbGadget;
 import android.hardware.usb.gadget.V1_0.IUsbGadgetCallback;
 import android.hardware.usb.gadget.V1_0.Status;
@@ -63,6 +67,8 @@ import android.os.UserManager;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.provider.Settings;
+import android.service.usb.UsbDeviceManagerProto;
+import android.service.usb.UsbHandlerProto;
 import android.util.Pair;
 import android.util.Slog;
 
@@ -72,7 +78,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.SomeArgs;
-import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 
@@ -1244,32 +1250,66 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
             return mScreenUnlockedFunctions;
         }
 
+        /**
+         * Dump a functions mask either as proto-enums (if dumping to proto) or a string (if dumping
+         * to a print writer)
+         */
+        private void dumpFunctions(DualDumpOutputStream dump, String idName, long id,
+                long functions) {
+            // UsbHandlerProto.UsbFunction matches GadgetFunction
+            for (int i = 0; i < 63; i++) {
+                if ((functions & (1L << i)) != 0) {
+                    if (dump.isProto()) {
+                        dump.write(idName, id, 1L << i);
+                    } else {
+                        dump.write(idName, id, GadgetFunction.toString(1L << i));
+                    }
+                }
+            }
+        }
 
-        public void dump(IndentingPrintWriter pw) {
-            pw.println("USB Device State:");
-            pw.println("  mCurrentFunctions: " + mCurrentFunctions);
-            pw.println("  mCurrentFunctionsApplied: " + mCurrentFunctionsApplied);
-            pw.println("  mScreenUnlockedFunctions: " + mScreenUnlockedFunctions);
-            pw.println("  mScreenLocked: " + mScreenLocked);
-            pw.println("  mConnected: " + mConnected);
-            pw.println("  mConfigured: " + mConfigured);
-            pw.println("  mCurrentAccessory: " + mCurrentAccessory);
-            pw.println("  mHostConnected: " + mHostConnected);
-            pw.println("  mSourcePower: " + mSourcePower);
-            pw.println("  mSinkPower: " + mSinkPower);
-            pw.println("  mUsbCharging: " + mUsbCharging);
-            pw.println("  mHideUsbNotification: " + mHideUsbNotification);
-            pw.println("  mAudioAccessoryConnected: " + mAudioAccessoryConnected);
-            pw.println("  mAdbEnabled: " + mAdbEnabled);
+        public void dump(DualDumpOutputStream dump, String idName, long id) {
+            long token = dump.start(idName, id);
+
+            dumpFunctions(dump, "current_functions", UsbHandlerProto.CURRENT_FUNCTIONS,
+                    mCurrentFunctions);
+            dump.write("current_functions_applied", UsbHandlerProto.CURRENT_FUNCTIONS_APPLIED,
+                    mCurrentFunctionsApplied);
+            dumpFunctions(dump, "screen_unlocked_functions",
+                    UsbHandlerProto.SCREEN_UNLOCKED_FUNCTIONS, mScreenUnlockedFunctions);
+            dump.write("screen_locked", UsbHandlerProto.SCREEN_LOCKED, mScreenLocked);
+            dump.write("connected", UsbHandlerProto.CONNECTED, mConnected);
+            dump.write("configured", UsbHandlerProto.CONFIGURED, mConfigured);
+            if (mCurrentAccessory != null) {
+                writeAccessory(dump, "current_accessory", UsbHandlerProto.CURRENT_ACCESSORY,
+                        mCurrentAccessory);
+            }
+            dump.write("host_connected", UsbHandlerProto.HOST_CONNECTED, mHostConnected);
+            dump.write("source_power", UsbHandlerProto.SOURCE_POWER, mSourcePower);
+            dump.write("sink_power", UsbHandlerProto.SINK_POWER, mSinkPower);
+            dump.write("usb_charging", UsbHandlerProto.USB_CHARGING, mUsbCharging);
+            dump.write("hide_usb_notification", UsbHandlerProto.HIDE_USB_NOTIFICATION,
+                    mHideUsbNotification);
+            dump.write("audio_accessory_connected", UsbHandlerProto.AUDIO_ACCESSORY_CONNECTED,
+                    mAudioAccessoryConnected);
+            dump.write("adb_enabled", UsbHandlerProto.ADB_ENABLED, mAdbEnabled);
 
             try {
-                pw.println("  Kernel state: "
-                        + FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim());
-                pw.println("  Kernel function list: "
-                        + FileUtils.readTextFile(new File(FUNCTIONS_PATH), 0, null).trim());
-            } catch (IOException e) {
-                pw.println("IOException: " + e);
+                writeStringIfNotNull(dump, "kernel_state", UsbHandlerProto.KERNEL_STATE,
+                        FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim());
+            } catch (Exception e) {
+                Slog.e(TAG, "Could not read kernel state", e);
             }
+
+            try {
+                writeStringIfNotNull(dump, "kernel_function_list",
+                        UsbHandlerProto.KERNEL_FUNCTION_LIST,
+                        FileUtils.readTextFile(new File(FUNCTIONS_PATH), 0, null).trim());
+            } catch (Exception e) {
+                Slog.e(TAG, "Could not read kernel function list", e);
+            }
+
+            dump.end(token);
         }
 
         /**
@@ -2000,13 +2040,21 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
         }
     }
 
-    public void dump(IndentingPrintWriter pw) {
+    /**
+     * Write the state to a dump stream.
+     */
+    public void dump(DualDumpOutputStream dump, String idName, long id) {
+        long token = dump.start(idName, id);
+
         if (mHandler != null) {
-            mHandler.dump(pw);
+            mHandler.dump(dump, "handler", UsbDeviceManagerProto.HANDLER);
         }
         if (mDebuggingManager != null) {
-            mDebuggingManager.dump(pw);
+            mDebuggingManager.dump(dump, "debugging_manager",
+                    UsbDeviceManagerProto.DEBUGGING_MANAGER);
         }
+
+        dump.end(token);
     }
 
     private native String[] nativeGetAccessoryStrings();

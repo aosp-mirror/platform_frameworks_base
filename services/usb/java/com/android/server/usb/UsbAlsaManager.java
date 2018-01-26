@@ -27,10 +27,11 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
+import android.service.usb.UsbAlsaManagerProto;
 import android.util.Slog;
 
 import com.android.internal.alsa.AlsaCardsParser;
-import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.audio.AudioService;
 import com.android.server.usb.descriptors.UsbDescriptorParser;
 
@@ -304,22 +305,38 @@ public final class UsbAlsaManager {
    }
 
     //
-    // Logging
+    // Devices List
     //
-    // called by UsbService.dump
-    public void dump(IndentingPrintWriter pw) {
-        pw.println("Parsers Scan Status:");
-        pw.println("  Cards Parser: " + mCardsParser.getScanStatus());
-//        pw.println("  Devices Parser: " + mDevicesParser.getScanStatus());
-        pw.println("USB Audio Devices:");
+/*
+    //import java.util.ArrayList;
+    public ArrayList<UsbAudioDevice> getConnectedDevices() {
+        ArrayList<UsbAudioDevice> devices = new ArrayList<UsbAudioDevice>(mAudioDevices.size());
+        for (HashMap.Entry<UsbDevice,UsbAudioDevice> entry : mAudioDevices.entrySet()) {
+            devices.add(entry.getValue());
+        }
+        return devices;
+    }
+*/
+
+    /**
+     * Dump the USB alsa state.
+     */
+    public void dump(DualDumpOutputStream dump, String idName, long id) {
+        long token = dump.start(idName, id);
+
+        dump.write("cards_parser", UsbAlsaManagerProto.CARDS_PARSER, mCardsParser.getScanStatus());
+
         for (UsbAlsaDevice usbAlsaDevice : mAlsaDevices) {
-            pw.println("  " + usbAlsaDevice.getDeviceAddress() + ": " + usbAlsaDevice);
+            usbAlsaDevice.dump(dump, "alsa_devices", UsbAlsaManagerProto.ALSA_DEVICES);
         }
-        pw.println("USB MIDI Devices:");
+
         for (String deviceAddr : mMidiDevices.keySet()) {
-            UsbMidiDevice midiDevice = mMidiDevices.get(deviceAddr);
-            pw.println("  " + deviceAddr + ": " + midiDevice);
+            // A UsbMidiDevice does not have a handle to the UsbDevice anymore
+            mMidiDevices.get(deviceAddr).dump(deviceAddr, dump, "midi_devices",
+                    UsbAlsaManagerProto.MIDI_DEVICES);
         }
+
+        dump.end(token);
     }
 
 /*
