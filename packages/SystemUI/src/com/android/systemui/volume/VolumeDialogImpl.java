@@ -341,7 +341,8 @@ public class VolumeDialogImpl implements VolumeDialog {
         row.connectedDevice = row.view.findViewById(R.id.volume_row_connected_device);
 
         // forward events above the slider into the slider
-        row.view.setOnTouchListener(new OnTouchListener() {
+        row.view.findViewById(R.id.volume_row_slider_frame)
+                .setOnTouchListener(new OnTouchListener() {
             private final Rect mSliderHitRect = new Rect();
             private boolean mDragging;
 
