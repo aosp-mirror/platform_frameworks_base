@@ -108,6 +108,9 @@ public final class PlaybackState2 {
     private final long mActiveItemId;
     private final CharSequence mErrorMessage;
 
+    // TODO(jaewan): Better error handling?
+    //               E.g. media item at #2 has issue, but continue playing #3
+    //                    login error. fire intent xxx to login
     public PlaybackState2(int state, long position, long updateTime, float speed,
             long bufferedPosition, long activeItemId, CharSequence error) {
         mState = state;

@@ -19,6 +19,7 @@ package android.media.update;
 import android.media.AudioAttributes;
 import android.media.MediaItem2;
 import android.media.MediaPlayerInterface;
+import android.media.MediaPlayerInterface.PlaybackListener;
 import android.media.MediaSession2.Command;
 import android.media.MediaSession2.CommandButton;
 import android.media.MediaSession2.CommandGroup;
@@ -30,6 +31,7 @@ import android.os.Bundle;
 import android.os.ResultReceiver;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * @hide
@@ -55,6 +57,9 @@ public interface MediaSession2Provider extends TransportControlProvider {
     void setPlaylist_impl(List<MediaItem2> playlist, PlaylistParams param);
     void setPlaylistParams_impl(PlaylistParams params);
     PlaylistParams getPlaylistParams_impl();
+
+    void addPlaybackListener_impl(Executor executor, PlaybackListener listener);
+    void removePlaybackListener_impl(PlaybackListener listener);
 
     interface ControllerInfoProvider {
         String getPackageName_impl();
