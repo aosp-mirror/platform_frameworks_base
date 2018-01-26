@@ -97,6 +97,8 @@ public:
     // Predict the anomaly timestamp given the current status.
     virtual int64_t predictAnomalyTimestampNs(const DurationAnomalyTracker& anomalyTracker,
                                               const uint64_t currentTimestamp) const = 0;
+    // Dump internal states for debugging
+    virtual void dumpStates(FILE* out, bool verbose) const = 0;
 
 protected:
     // Starts the anomaly alarm.

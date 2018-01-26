@@ -83,6 +83,8 @@ private:
     // Internal function to calculate the current used bytes.
     size_t byteSizeLocked() const override;
 
+    void dumpStatesLocked(FILE* out, bool verbose) const override{};
+
     // Util function to flush the old packet.
     void flushIfNeededLocked(const uint64_t& eventTime);
 

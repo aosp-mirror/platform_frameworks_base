@@ -16,10 +16,11 @@
 
 #include "logd/LogReader.h"
 
-#include <utils/Errors.h>
+#include "guardrail/StatsdStats.h"
 
 #include <time.h>
 #include <unistd.h>
+#include <utils/Errors.h>
 
 using namespace android;
 using namespace std;
@@ -92,16 +93,15 @@ int LogReader::connect_and_read() {
 
     // Read forever
     if (eventLogger) {
-
+        log_msg msg;
         while (true) {
-            log_msg msg;
-
             // Read a message
             err = android_logger_list_read(loggers, &msg);
             // err = 0 - no content, unexpected connection drop or EOF.
             // err = +ive number - size of retrieved data from logger
             // err = -ive number, OS supplied error _except_ for -EAGAIN
             if (err <= 0) {
+                StatsdStats::getInstance().noteLoggerError(err);
                 fprintf(stderr, "logcat read failure: %s\n", strerror(err));
                 break;
             }

@@ -96,6 +96,11 @@ public:
         return onDumpReportLocked(dumpTimeNs, report);
     }
 
+    void dumpStates(FILE* out, bool verbose) const {
+        std::lock_guard<std::mutex> lock(mMutex);
+        dumpStatesLocked(out, verbose);
+    }
+
     // Returns the memory in bytes currently used to store this metric's data. Does not change
     // state.
     size_t byteSize() const {
@@ -128,6 +133,7 @@ protected:
                                     android::util::ProtoOutputStream* protoOutput) = 0;
     virtual void onDumpReportLocked(const uint64_t dumpTimeNs, StatsLogReport* report) = 0;
     virtual size_t byteSizeLocked() const = 0;
+    virtual void dumpStatesLocked(FILE* out, bool verbose) const = 0;
 
     const int64_t mMetricId;
 

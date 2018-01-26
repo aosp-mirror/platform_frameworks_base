@@ -61,6 +61,8 @@ public:
         return !mAllowedPkg.empty();
     }
 
+    void dumpStates(FILE* out, bool verbose);
+
     // Config source owner can call onDumpReport() to get all the metrics collected.
     virtual void onDumpReport(android::util::ProtoOutputStream* protoOutput);
     virtual void onDumpReport(const uint64_t& dumpTimeStampNs, ConfigMetricsReport* report);
@@ -68,7 +70,6 @@ public:
     // Computes the total byte size of all metrics managed by a single config source.
     // Does not change the state.
     virtual size_t byteSize();
-
 private:
     const ConfigKey mConfigKey;
 

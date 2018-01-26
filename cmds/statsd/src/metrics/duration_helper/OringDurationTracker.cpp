@@ -314,6 +314,12 @@ int64_t OringDurationTracker::predictAnomalyTimestampNs(
     return eventTimestampNs + thresholdNs;
 }
 
+void OringDurationTracker::dumpStates(FILE* out, bool verbose) const {
+    fprintf(out, "\t\t started count %lu\n", (unsigned long)mStarted.size());
+    fprintf(out, "\t\t paused count %lu\n", (unsigned long)mPaused.size());
+    fprintf(out, "\t\t current duration %lld\n", (long long)mDuration);
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

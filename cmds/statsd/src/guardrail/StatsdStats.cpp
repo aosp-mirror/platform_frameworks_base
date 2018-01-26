@@ -45,6 +45,8 @@ const int FIELD_ID_CONFIG_STATS = 3;
 const int FIELD_ID_ATOM_STATS = 7;
 const int FIELD_ID_UIDMAP_STATS = 8;
 const int FIELD_ID_ANOMALY_ALARM_STATS = 9;
+const int FIELD_ID_PULLED_ATOM_STATS = 10;
+const int FIELD_ID_LOGGER_ERROR_STATS = 11;
 
 const int FIELD_ID_MATCHER_STATS_NAME = 1;
 const int FIELD_ID_MATCHER_STATS_COUNT = 2;
@@ -59,6 +61,9 @@ const int FIELD_ID_ATOM_STATS_TAG = 1;
 const int FIELD_ID_ATOM_STATS_COUNT = 2;
 
 const int FIELD_ID_ANOMALY_ALARMS_REGISTERED = 1;
+
+const int FIELD_ID_LOGGER_STATS_TIME = 1;
+const int FIELD_ID_LOGGER_STATS_ERROR_CODE = 2;
 
 std::map<int, long> StatsdStats::kPullerCooldownMap = {
         {android::util::KERNEL_WAKELOCK, 1},
@@ -282,6 +287,15 @@ void StatsdStats::noteAtomLogged(int atomId, int32_t timeSec) {
     mPushedAtomStats[atomId]++;
 }
 
+void StatsdStats::noteLoggerError(int error) {
+    lock_guard<std::mutex> lock(mLock);
+    // grows strictly one at a time. so it won't > kMaxLoggerErrors
+    if (mLoggerErrors.size() == kMaxLoggerErrors) {
+        mLoggerErrors.pop_front();
+    }
+    mLoggerErrors.push_back(std::make_pair(time(nullptr), error));
+}
+
 void StatsdStats::reset() {
     lock_guard<std::mutex> lock(mLock);
     resetInternalLocked();
@@ -297,6 +311,7 @@ void StatsdStats::resetInternalLocked() {
     mAlertStats.clear();
     mAnomalyAlarmRegisteredStats = 0;
     mMatcherStats.clear();
+    mLoggerErrors.clear();
     for (auto& config : mConfigStats) {
         config.second.clear_broadcast_sent_time_sec();
         config.second.clear_data_drop_time_sec();
@@ -465,6 +480,14 @@ void StatsdStats::dumpStats(FILE* out) const {
             "lost=%d\n",
             mUidMapStats.bytes_used(), mUidMapStats.snapshots(), mUidMapStats.changes(),
             mUidMapStats.dropped_snapshots(), mUidMapStats.dropped_changes());
+
+    for (const auto& error : mLoggerErrors) {
+        time_t error_time = error.first;
+        struct tm* error_tm = localtime(&error_time);
+        char buffer[80];
+        strftime(buffer, sizeof(buffer), "%Y-%m-%d %I:%M%p\n", error_tm);
+        fprintf(out, "Logger error %d at %s\n", error.second, buffer);
+    }
 }
 
 void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
@@ -525,6 +548,14 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
     vector<char> buffer(numBytes);
     mUidMapStats.SerializeToArray(&buffer[0], numBytes);
     proto.write(FIELD_TYPE_MESSAGE | FIELD_ID_UIDMAP_STATS, &buffer[0], buffer.size());
+
+    for (const auto& error : mLoggerErrors) {
+        long long token = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_LOGGER_ERROR_STATS |
+                                      FIELD_COUNT_REPEATED);
+        proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOGGER_STATS_TIME, error.first);
+        proto.write(FIELD_TYPE_INT32 | FIELD_ID_LOGGER_STATS_ERROR_CODE, error.second);
+        proto.end(token);
+    }
 
     output->clear();
     size_t bufferSize = proto.size();

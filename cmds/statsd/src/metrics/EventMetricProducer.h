@@ -62,6 +62,8 @@ private:
     // Internal function to calculate the current used bytes.
     size_t byteSizeLocked() const override;
 
+    void dumpStatesLocked(FILE* out, bool verbose) const override{};
+
     // Maps to a EventMetricDataWrapper. Storing atom events in ProtoOutputStream
     // is more space efficient than storing LogEvent.
     std::unique_ptr<android::util::ProtoOutputStream> mProto;

@@ -233,6 +233,21 @@ void DurationMetricProducer::flushIfNeededLocked(const uint64_t& eventTime) {
     mCurrentBucketNum += numBucketsForward;
 }
 
+void DurationMetricProducer::dumpStatesLocked(FILE* out, bool verbose) const {
+    if (mCurrentSlicedDuration.size() == 0) {
+        return;
+    }
+
+    fprintf(out, "DurationMetric %lld dimension size %lu\n", (long long)mMetricId,
+            (unsigned long)mCurrentSlicedDuration.size());
+    if (verbose) {
+        for (const auto& slice : mCurrentSlicedDuration) {
+            fprintf(out, "\t%s\n", slice.first.c_str());
+            slice.second->dumpStates(out, verbose);
+        }
+    }
+}
+
 bool DurationMetricProducer::hitGuardRailLocked(const HashableDimensionKey& newKey) {
     // the key is not new, we are good.
     if (mCurrentSlicedDuration.find(newKey) != mCurrentSlicedDuration.end()) {

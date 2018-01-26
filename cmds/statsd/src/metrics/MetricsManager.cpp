@@ -154,6 +154,20 @@ void MetricsManager::onDumpReport(const uint64_t& dumpTimeStampNs, ConfigMetrics
     }
 }
 
+void MetricsManager::dumpStates(FILE* out, bool verbose) {
+    fprintf(out, "ConfigKey %s, allowed source:", mConfigKey.ToString().c_str());
+    {
+        std::lock_guard<std::mutex> lock(mAllowedLogSourcesMutex);
+        for (const auto& source : mAllowedLogSources) {
+            fprintf(out, "%d ", source);
+        }
+    }
+    fprintf(out, "\n");
+    for (const auto& producer : mAllMetricProducers) {
+        producer->dumpStates(out, verbose);
+    }
+}
+
 void MetricsManager::onDumpReport(ProtoOutputStream* protoOutput) {
     VLOG("=========================Metric Reports Start==========================");
     uint64_t dumpTimeStampNs = time(nullptr) * NS_PER_SEC;

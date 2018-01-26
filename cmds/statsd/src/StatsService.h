@@ -140,7 +140,7 @@ private:
     /**
      * Text output of dumpsys.
      */
-    void dump_impl(FILE* out);
+    void dump_impl(FILE* out, bool verbose);
 
     /**
      * Print usage information for the commands

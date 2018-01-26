@@ -262,4 +262,10 @@ message StatsdStatsReport {
     optional int64 min_pull_interval_sec = 4;
   }
   repeated PulledAtomStats pulled_atom_stats = 10;
+
+  message LoggerErrorStats {
+    optional int32 logger_disconnection_sec = 1;
+    optional int32 error_code = 2;
+  }
+  repeated LoggerErrorStats logger_error_stats = 11;
 }

@@ -49,6 +49,8 @@ public:
     // The max number of old config stats we keep.
     const static int kMaxIceBoxSize = 20;
 
+    const static int kMaxLoggerErrors = 10;
+
     const static int kMaxTimestampCount = 20;
 
     const static int kMaxLogSourceCount = 50;
@@ -185,6 +187,11 @@ public:
     void notePullFromCache(int pullAtomId);
 
     /**
+     * Records statsd met an error while reading from logd.
+     */
+    void noteLoggerError(int error);
+
+    /**
      * Reset the historical stats. Including all stats in icebox, and the tracked stats about
      * metrics, matchers, and atoms. The active configs will be kept and StatsdStats will continue
      * to collect stats after reset() has been called.
@@ -245,6 +252,9 @@ private:
 
     // Maps PullAtomId to its stats. The size is capped by the puller atom counts.
     std::map<int, PulledAtomStats> mPulledAtomStats;
+
+    // Logd errors. Size capped by kMaxLoggerErrors.
+    std::list<const std::pair<int, int>> mLoggerErrors;
 
     // Stores the number of times statsd modified the anomaly alarm registered with
     // StatsCompanionService.
