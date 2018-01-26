@@ -44,7 +44,6 @@ public interface VideoView2Provider extends ViewProvider {
     void setMediaControlView2_impl(MediaControlView2 mediaControlView);
     MediaController getMediaController_impl();
     MediaControlView2 getMediaControlView2_impl();
-    int getAudioSessionId_impl();
     void showSubtitle_impl();
     void hideSubtitle_impl();
     void setFullScreen_impl(boolean fullScreen);
@@ -54,8 +53,8 @@ public interface VideoView2Provider extends ViewProvider {
     void setAudioAttributes_impl(AudioAttributes attributes);
     void setRouteAttributes_impl(List<String> routeCategories, MediaPlayerInterface player);
     void setVideoPath_impl(String path);
-    void setVideoURI_impl(Uri uri);
-    void setVideoURI_impl(Uri uri, Map<String, String> headers);
+    void setVideoUri_impl(Uri uri);
+    void setVideoUri_impl(Uri uri, Map<String, String> headers);
     void setViewType_impl(int viewType);
     int getViewType_impl();
     void setOnPreparedListener_impl(VideoView2.OnPreparedListener l);
