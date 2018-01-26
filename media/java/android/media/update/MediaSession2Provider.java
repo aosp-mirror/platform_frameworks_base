@@ -42,7 +42,6 @@ public interface MediaSession2Provider extends TransportControlProvider {
     SessionToken2 getToken_impl();
     List<ControllerInfo> getConnectedControllers_impl();
     void setCustomLayout_impl(ControllerInfo controller, List<CommandButton> layout);
-    void setAudioAttributes_impl(AudioAttributes attributes);
     void setAudioFocusRequest_impl(int focusGain);
 
     void setAllowedCommands_impl(ControllerInfo controller, CommandGroup commands);
