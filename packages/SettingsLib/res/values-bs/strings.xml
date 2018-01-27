@@ -212,7 +212,7 @@
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Pokaži opcije za certifikaciju Bežičnog prikaza"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Povećajte nivo Wi-Fi zapisivanja, pokazati po SSID RSSI Wi-Fi Picker"</string>
     <string name="wifi_aggressive_handover_summary" msgid="7266329646559808827">"Kada je omogućeno, Wi-Fi veza će u slučaju slabog signala agresivnije predavati vezu za prijenos podataka na mobilnu vezu"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Dozvoli/Zabrani Wi-Fi lutajuće skeniranje na osnovu količine podatkovnog prometa prisutnog na sučelju"</string>
+    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Dozvoli/Zabrani Wi-Fi lutajuće skeniranje na osnovu količine podatkovnog saobraćaja prisutnog na interfejsu"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Veličine bafera za zapisnik"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Odaberite veličine za Logger prema međumemoriji evidencije"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Želite li izbrisati trajnu pohranu zapisivača?"</string>
@@ -224,7 +224,7 @@
     <string name="allow_mock_location" msgid="2787962564578664888">"Dozvoli lažne lokacije"</string>
     <string name="allow_mock_location_summary" msgid="317615105156345626">"Dozvoli lažne lokacije"</string>
     <string name="debug_view_attributes" msgid="6485448367803310384">"Omogući pregled atributa prikaza"</string>
-    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Uvijek drži mobilne podatke aktivnim, čak i kada je Wi-Fi je aktivan (za brzo prebacivanje između mreža)."</string>
+    <string name="mobile_data_always_on_summary" msgid="8149773901431697910">"Uvijek drži prijenos podataka na mobilnoj mreži aktivnim, čak i kada je Wi-Fi je aktivan (za brzo prebacivanje između mreža)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7726082075333346982">"Koristi hardversko ubrzavanje dijeljenja veze, ako je dostupno"</string>
     <string name="adb_warning_title" msgid="6234463310896563253">"Omogućiti otklanjanje grešaka putem uređaja spojenog na USB?"</string>
     <string name="adb_warning_message" msgid="7316799925425402244">"Otklanjanje grešaka putem uređaja spojenog na USB je namijenjeno samo u svrhe razvoja aplikacija. Koristite ga za kopiranje podataka između računara i uređaja, instaliranje aplikacija na uređaj bez obavještenja te čitanje podataka iz zapisnika."</string>
@@ -267,7 +267,7 @@
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Prikazi uz treptanje unutar prozora kada se crta koristeći GPU"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Prikaži dodatne informacije za ažuriranja za hardver"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Trepći hardverske slojeve zeleno kada se ažuriraju"</string>
-    <string name="debug_hw_overdraw" msgid="2968692419951565417">"Otkl. GPU overdraw greške"</string>
+    <string name="debug_hw_overdraw" msgid="2968692419951565417">"Otkl. greške GPU preklap."</string>
     <string name="debug_hw_renderer" msgid="7568529019431785816">"Postavite GPU renderer"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Onemog. HW preklapanja"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Uvijek koristi GPU za kompoziciju ekrana"</string>

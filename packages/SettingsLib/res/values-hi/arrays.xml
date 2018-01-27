@@ -49,14 +49,14 @@
     <item msgid="1805837518286731242">"खराब कनेक्शन को अस्थायी रूप से अनदेखा कर रहा है"</item>
   </string-array>
   <string-array name="hdcp_checking_titles">
-    <item msgid="441827799230089869">"कभी नही जांचें"</item>
-    <item msgid="6042769699089883931">"केवल DRM सामग्री जांचें"</item>
-    <item msgid="9174900380056846820">"हमेशा जांचें"</item>
+    <item msgid="441827799230089869">"कभी नही जाँचें"</item>
+    <item msgid="6042769699089883931">"केवल DRM सामग्री जाँचें"</item>
+    <item msgid="9174900380056846820">"हमेशा जाँचें"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">
-    <item msgid="505558545611516707">"कभी भी HDCP जांच का उपयोग न करें"</item>
-    <item msgid="3878793616631049349">"HDCP जांच का उपयोग केवल DRM सामग्री के लिए करें"</item>
-    <item msgid="45075631231212732">"हमेशा HDCP जांच का उपयोग करें"</item>
+    <item msgid="505558545611516707">"कभी भी HDCP जाँच का उपयोग न करें"</item>
+    <item msgid="3878793616631049349">"HDCP जाँच का उपयोग केवल DRM सामग्री के लिए करें"</item>
+    <item msgid="45075631231212732">"हमेशा HDCP जाँच का उपयोग करें"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="5347678900838034763">"AVRCP 1.4 (डिफ़ॉल्ट)"</item>

@@ -385,7 +385,7 @@
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Nhập mật khẩu để tiến hành khôi phục cài đặt gốc ở chế độ trình diễn"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Tiếp theo"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Yêu cầu mật khẩu"</string>
-    <string name="active_input_method_subtypes" msgid="3596398805424733238">"Phương pháp nhập liệu hoạt động"</string>
+    <string name="active_input_method_subtypes" msgid="3596398805424733238">"Phương thức nhập đang hoạt động"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Sử dụng ngôn ngữ hệ thống"</string>
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Không thể mở cài đặt cho <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
     <string name="ime_security_warning" msgid="4135828934735934248">"Phương thức nhập này có thể thu thập tất cả văn bản bạn nhập, bao gồm dữ liệu cá nhân như mật khẩu và số thẻ tín dụng. Phương thức nhập này đến từ ứng dụng <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Sử dụng phương thức nhập này?"</string>

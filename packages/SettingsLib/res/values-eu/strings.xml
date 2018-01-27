@@ -340,7 +340,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="5475532989673586329">"Daltonismoa (gorri-berdeak)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="8424148009038666065">"Protanopia (gorri-berdeak)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="481725854987912389">"Tritanopia (urdin-horia)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Kolore-zuzenketa"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="5800761362678707872">"Koloreen zuzenketa"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="3484969015295282911">"Eginbidea esperimentala da eta eragina izan dezake funtzionamenduan."</string>
     <string name="daltonizer_type_overridden" msgid="3116947244410245916">"<xliff:g id="TITLE">%1$s</xliff:g> hobespena gainjarri zaio"</string>
     <string name="power_remaining_duration_only" msgid="845431008899029842">"<xliff:g id="TIME">^1</xliff:g> inguru gelditzen dira"</string>
