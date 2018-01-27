@@ -112,16 +112,17 @@ final class TextClassifierImpl implements TextClassifier {
     @Override
     public TextSelection suggestSelection(
             @NonNull CharSequence text, int selectionStartIndex, int selectionEndIndex,
-            @NonNull TextSelection.Options options) {
+            @Nullable TextSelection.Options options) {
         Utils.validateInput(text, selectionStartIndex, selectionEndIndex);
         try {
             if (text.length() > 0) {
                 final LocaleList locales = (options == null) ? null : options.getDefaultLocales();
+                final boolean darkLaunchAllowed = options != null && options.isDarkLaunchAllowed();
                 final SmartSelection smartSelection = getSmartSelection(locales);
                 final String string = text.toString();
                 final int start;
                 final int end;
-                if (getSettings().isDarkLaunch() && !options.isDarkLaunchAllowed()) {
+                if (getSettings().isDarkLaunch() && !darkLaunchAllowed) {
                     start = selectionStartIndex;
                     end = selectionEndIndex;
                 } else {
@@ -130,7 +131,7 @@ final class TextClassifierImpl implements TextClassifier {
                     start = startEnd[0];
                     end = startEnd[1];
                 }
-                if (start <= end
+                if (start < end
                         && start >= 0 && end <= string.length()
                         && start <= selectionStartIndex && end >= selectionEndIndex) {
                     final TextSelection.Builder tsBuilder = new TextSelection.Builder(start, end);
@@ -165,18 +166,19 @@ final class TextClassifierImpl implements TextClassifier {
     @Override
     public TextClassification classifyText(
             @NonNull CharSequence text, int startIndex, int endIndex,
-            @NonNull TextClassification.Options options) {
+            @Nullable TextClassification.Options options) {
         Utils.validateInput(text, startIndex, endIndex);
         try {
             if (text.length() > 0) {
                 final String string = text.toString();
                 final LocaleList locales = (options == null) ? null : options.getDefaultLocales();
+                final Calendar refTime = (options == null) ? null : options.getReferenceTime();
                 final SmartSelection.ClassificationResult[] results = getSmartSelection(locales)
                         .classifyText(string, startIndex, endIndex,
                                 getHintFlags(string, startIndex, endIndex));
                 if (results.length > 0) {
                     return createClassificationResult(
-                            results, string, startIndex, endIndex, options.getReferenceTime());
+                            results, string, startIndex, endIndex, refTime);
                 }
             }
         } catch (Throwable t) {
@@ -641,13 +643,12 @@ final class TextClassifierImpl implements TextClassifier {
                 case Intent.ACTION_DIAL:
                     return context.getString(com.android.internal.R.string.dial);
                 case Intent.ACTION_SENDTO:
-                    switch (intent.getScheme()) {
-                        case "mailto":
-                            return context.getString(com.android.internal.R.string.email);
-                        case "smsto":
-                            return context.getString(com.android.internal.R.string.sms);
-                        default:
-                            return null;
+                    if ("mailto".equals(intent.getScheme())) {
+                        return context.getString(com.android.internal.R.string.email);
+                    } else if ("smsto".equals(intent.getScheme())) {
+                        return context.getString(com.android.internal.R.string.sms);
+                    } else {
+                        return null;
                     }
                 case Intent.ACTION_INSERT:
                     if (CalendarContract.AUTHORITY.equals(authority)) {
@@ -655,24 +656,22 @@ final class TextClassifierImpl implements TextClassifier {
                     }
                     return null;
                 case Intent.ACTION_INSERT_OR_EDIT:
-                    switch (intent.getDataString()) {
-                        case ContactsContract.Contacts.CONTENT_ITEM_TYPE:
-                            return context.getString(com.android.internal.R.string.add_contact);
-                        default:
-                            return null;
+                    if (ContactsContract.Contacts.CONTENT_ITEM_TYPE.equals(
+                            intent.getType())) {
+                        return context.getString(com.android.internal.R.string.add_contact);
+                    } else {
+                        return null;
                     }
                 case Intent.ACTION_VIEW:
                     if (CalendarContract.AUTHORITY.equals(authority)) {
                         return context.getString(com.android.internal.R.string.view_calendar);
-                    }
-                    switch (intent.getScheme()) {
-                        case "geo":
-                            return context.getString(com.android.internal.R.string.map);
-                        case "http": // fall through
-                        case "https":
-                            return context.getString(com.android.internal.R.string.browse);
-                        default:
-                            return null;
+                    } else if ("geo".equals(intent.getScheme())) {
+                        return context.getString(com.android.internal.R.string.map);
+                    } else if ("http".equals(intent.getScheme())
+                            || "https".equals(intent.getScheme())) {
+                        return context.getString(com.android.internal.R.string.browse);
+                    } else {
+                        return null;
                     }
                 case Intent.ACTION_WEB_SEARCH:
                     return context.getString(com.android.internal.R.string.view_flight);
