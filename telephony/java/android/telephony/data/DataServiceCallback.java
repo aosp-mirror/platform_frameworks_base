@@ -18,6 +18,7 @@ package android.telephony.data;
 
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
+import android.net.LinkProperties;
 import android.os.RemoteException;
 import android.telephony.Rlog;
 import android.telephony.data.DataService.DataServiceProvider;
@@ -46,7 +47,7 @@ public class DataServiceCallback {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({RESULT_SUCCESS, RESULT_ERROR_UNSUPPORTED, RESULT_ERROR_INVALID_ARG, RESULT_ERROR_BUSY,
             RESULT_ERROR_ILLEGAL_STATE})
-    public @interface Result {}
+    public @interface ResultCode {}
 
     /** Request is completed successfully */
     public static final int RESULT_SUCCESS              = 0;
@@ -68,12 +69,12 @@ public class DataServiceCallback {
 
     /**
      * Called to indicate result for the request {@link DataServiceProvider#setupDataCall(int,
-     * DataProfile, boolean, boolean, boolean, DataServiceCallback)}.
+     * DataProfile, boolean, boolean, int, LinkProperties, DataServiceCallback)} .
      *
-     * @param result The result code. Must be one of the {@link Result}.
+     * @param result The result code. Must be one of the {@link ResultCode}.
      * @param response Setup data call response.
      */
-    public void onSetupDataCallComplete(@Result int result, DataCallResponse response) {
+    public void onSetupDataCallComplete(@ResultCode int result, DataCallResponse response) {
         IDataServiceCallback callback = mCallback.get();
         if (callback != null) {
             try {
@@ -86,11 +87,11 @@ public class DataServiceCallback {
 
     /**
      * Called to indicate result for the request {@link DataServiceProvider#deactivateDataCall(int,
-     * boolean, boolean, DataServiceCallback)}.
+     * int, DataServiceCallback)}
      *
-     * @param result The result code. Must be one of the {@link Result}.
+     * @param result The result code. Must be one of the {@link ResultCode}.
      */
-    public void onDeactivateDataCallComplete(@Result int result) {
+    public void onDeactivateDataCallComplete(@ResultCode int result) {
         IDataServiceCallback callback = mCallback.get();
         if (callback != null) {
             try {
@@ -105,9 +106,9 @@ public class DataServiceCallback {
      * Called to indicate result for the request {@link DataServiceProvider#setInitialAttachApn(
      * DataProfile, boolean, DataServiceCallback)}.
      *
-     * @param result The result code. Must be one of the {@link Result}.
+     * @param result The result code. Must be one of the {@link ResultCode}.
      */
-    public void onSetInitialAttachApnComplete(@Result int result) {
+    public void onSetInitialAttachApnComplete(@ResultCode int result) {
         IDataServiceCallback callback = mCallback.get();
         if (callback != null) {
             try {
@@ -122,10 +123,10 @@ public class DataServiceCallback {
      * Called to indicate result for the request {@link DataServiceProvider#setDataProfile(List,
      * boolean, DataServiceCallback)}.
      *
-     * @param result The result code. Must be one of the {@link Result}.
+     * @param result The result code. Must be one of the {@link ResultCode}.
      */
     @SystemApi
-    public void onSetDataProfileComplete(@Result int result) {
+    public void onSetDataProfileComplete(@ResultCode int result) {
         IDataServiceCallback callback = mCallback.get();
         if (callback != null) {
             try {
@@ -140,10 +141,11 @@ public class DataServiceCallback {
      * Called to indicate result for the request {@link DataServiceProvider#getDataCallList(
      * DataServiceCallback)}.
      *
-     * @param result The result code. Must be one of the {@link Result}.
+     * @param result The result code. Must be one of the {@link ResultCode}.
      * @param dataCallList List of the current active data connection.
      */
-    public void onGetDataCallListComplete(@Result int result, List<DataCallResponse> dataCallList) {
+    public void onGetDataCallListComplete(@ResultCode int result,
+                                          List<DataCallResponse> dataCallList) {
         IDataServiceCallback callback = mCallback.get();
         if (callback != null) {
             try {
