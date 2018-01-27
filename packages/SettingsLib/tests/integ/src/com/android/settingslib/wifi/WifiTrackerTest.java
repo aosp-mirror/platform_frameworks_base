@@ -783,10 +783,6 @@ public class WifiTrackerTest {
         // Enqueue messages
         tracker.mMainHandler.sendEmptyMessage(
                 WifiTracker.MainHandler.MSG_ACCESS_POINT_CHANGED);
-        tracker.mMainHandler.sendEmptyMessage(
-                WifiTracker.MainHandler.MSG_CONNECTED_CHANGED);
-        tracker.mMainHandler.sendEmptyMessage(
-                WifiTracker.MainHandler.MSG_WIFI_STATE_CHANGED);
 
         try {
             ready.await(); // Make sure we have entered the first message handler
@@ -802,10 +798,6 @@ public class WifiTrackerTest {
 
         assertThat(tracker.mMainHandler.hasMessages(
                 WifiTracker.MainHandler.MSG_ACCESS_POINT_CHANGED)).isFalse();
-        assertThat(tracker.mMainHandler.hasMessages(
-                WifiTracker.MainHandler.MSG_CONNECTED_CHANGED)).isFalse();
-        assertThat(tracker.mMainHandler.hasMessages(
-                WifiTracker.MainHandler.MSG_WIFI_STATE_CHANGED)).isFalse();
 
         verifyNoMoreInteractions(mockWifiListener);
     }

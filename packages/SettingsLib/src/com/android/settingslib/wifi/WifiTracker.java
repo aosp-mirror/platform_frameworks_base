@@ -88,8 +88,17 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         return Log.isLoggable(TAG, Log.DEBUG);
     }
 
-    /** verbose logging flag. this flag is set thru developer debugging options
-     * and used so as to assist with in-the-field WiFi connectivity debugging  */
+    private static boolean isVerboseLoggingEnabled() {
+        return WifiTracker.sVerboseLogging || Log.isLoggable(TAG, Log.VERBOSE);
+    }
+
+    /**
+     * Verbose logging flag set thru developer debugging options and used so as to assist with
+     * in-the-field WiFi connectivity debugging.
+     *
+     * <p>{@link #isVerboseLoggingEnabled()} should be read rather than referencing this value
+     * directly, to ensure adb TAG level verbose settings are respected.
+     */
     public static boolean sVerboseLogging;
 
     // TODO: Allow control of this?
@@ -214,7 +223,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         mListener = new WifiListenerWrapper(wifiListener);
         mConnectivityManager = connectivityManager;
 
-        // check if verbose logging has been turned on or off
+        // check if verbose logging developer option has been turned on or off
         sVerboseLogging = (mWifiManager.getVerboseLoggingLevel() > 0);
 
         mFilter = filter;
@@ -270,7 +279,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
             mLastNetworkInfo = mConnectivityManager.getNetworkInfo(mWifiManager.getCurrentNetwork());
 
             final List<ScanResult> newScanResults = mWifiManager.getScanResults();
-            if (sVerboseLogging) {
+            if (isVerboseLoggingEnabled()) {
                 Log.i(TAG, "Fetched scan results: " + newScanResults);
             }
 
@@ -282,7 +291,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
             mMainHandler.removeMessages(MainHandler.MSG_ACCESS_POINT_CHANGED);
             mMainHandler.handleMessage(
                     Message.obtain(mMainHandler, MainHandler.MSG_ACCESS_POINT_CHANGED));
-            if (sVerboseLogging) {
+            if (isVerboseLoggingEnabled()) {
                 Log.i(TAG, "force update - external access point list:\n" + mAccessPoints);
             }
         }
@@ -290,11 +299,16 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
 
     /**
      * Temporarily stop scanning for wifi networks.
+     *
+     * <p>Sets {@link #mStaleScanResults} to true.
      */
-    public void pauseScanning() {
+    private void pauseScanning() {
         if (mScanner != null) {
             mScanner.pause();
             mScanner = null;
+        }
+        synchronized (mLock) {
+            mStaleScanResults = true;
         }
     }
 
@@ -387,11 +401,10 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                 mRegistered = false;
             }
             unregisterScoreCache();
-            pauseScanning();
+            pauseScanning(); // and set mStaleScanResults
 
             mWorkHandler.removePendingMessages();
             mMainHandler.removePendingMessages();
-            mStaleScanResults = true;
         }
     }
 
@@ -447,6 +460,8 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     }
 
     private void handleResume() {
+        // TODO(sghuman): Investigate removing this and replacing it with a cache eviction call
+        // instead.
         mScanResultCache.clear();
         mSeenBssids.clear();
     }
@@ -509,7 +524,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     private void updateAccessPoints() {
         List<WifiConfiguration> configs = mWifiManager.getConfiguredNetworks();
         final List<ScanResult> newScanResults = mWifiManager.getScanResults();
-        if (sVerboseLogging) {
+        if (isVerboseLoggingEnabled()) {
             Log.i(TAG, "Fetched scan results: " + newScanResults);
         }
 
@@ -781,7 +796,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
 
                 if(mConnected.get() != info.isConnected()) {
                     mConnected.set(info.isConnected());
-                    mMainHandler.sendEmptyMessage(MainHandler.MSG_CONNECTED_CHANGED);
+                    mListener.onConnectedChanged();
                 }
 
                 mWorkHandler.obtainMessage(WorkHandler.MSG_UPDATE_NETWORK_INFO, info)
@@ -809,11 +824,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
 
     @VisibleForTesting
     final class MainHandler extends Handler {
-        @VisibleForTesting static final int MSG_CONNECTED_CHANGED = 0;
-        @VisibleForTesting static final int MSG_WIFI_STATE_CHANGED = 1;
         @VisibleForTesting static final int MSG_ACCESS_POINT_CHANGED = 2;
-        private static final int MSG_RESUME_SCANNING = 3;
-        private static final int MSG_PAUSE_SCANNING = 4;
 
         public MainHandler(Looper looper) {
             super(looper);
@@ -825,12 +836,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                 return;
             }
             switch (msg.what) {
-                case MSG_CONNECTED_CHANGED:
-                    mListener.onConnectedChanged();
-                    break;
-                case MSG_WIFI_STATE_CHANGED:
-                    mListener.onWifiStateChanged(msg.arg1);
-                    break;
                 case MSG_ACCESS_POINT_CHANGED:
                     // Only notify listeners of changes if we have fresh scan results, otherwise the
                     // UI will be updated with stale results. We want to copy the APs regardless,
@@ -842,28 +847,11 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                         mListener.onAccessPointsChanged();
                     }
                     break;
-                case MSG_RESUME_SCANNING:
-                    if (mScanner != null) {
-                        mScanner.resume();
-                    }
-                    break;
-                case MSG_PAUSE_SCANNING:
-                    if (mScanner != null) {
-                        mScanner.pause();
-                    }
-                    synchronized (mLock) {
-                        mStaleScanResults = true;
-                    }
-                    break;
             }
         }
 
         void removePendingMessages() {
             removeMessages(MSG_ACCESS_POINT_CHANGED);
-            removeMessages(MSG_CONNECTED_CHANGED);
-            removeMessages(MSG_WIFI_STATE_CHANGED);
-            removeMessages(MSG_PAUSE_SCANNING);
-            removeMessages(MSG_RESUME_SCANNING);
         }
     }
 
@@ -920,8 +908,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                             mStaleScanResults = true;
                         }
                     }
-                    mMainHandler.obtainMessage(MainHandler.MSG_WIFI_STATE_CHANGED, msg.arg1, 0)
-                            .sendToTarget();
+                    mListener.onWifiStateChanged(msg.arg1);
                     break;
             }
         }
@@ -1010,16 +997,26 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
 
         @Override
         public void onWifiStateChanged(int state) {
+            if (isVerboseLoggingEnabled()) {
+                Log.i(TAG,
+                        String.format("Invoking onWifiStateChanged callback with state %d", state));
+            }
             mHandler.post(() -> mDelegatee.onWifiStateChanged(state));
         }
 
         @Override
         public void onConnectedChanged() {
+            if (isVerboseLoggingEnabled()) {
+                Log.i(TAG, "Invoking onConnectedChanged callback");
+            }
             mHandler.post(() -> mDelegatee.onConnectedChanged());
         }
 
         @Override
         public void onAccessPointsChanged() {
+            if (isVerboseLoggingEnabled()) {
+                Log.i(TAG, "Invoking onAccessPointsChanged callback");
+            }
             mHandler.post(() -> mDelegatee.onAccessPointsChanged());
         }
     }
@@ -1120,6 +1117,10 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         mAccessPoints.clear();
         mAccessPoints.addAll(updatedAccessPoints);
 
+        if (DBG()) {
+            Log.d(TAG, "External APs after copying: " + mAccessPoints);
+        }
+
         if (notificationMap != null && notificationMap.size() > 0) {
             for (AccessPoint accessPoint : updatedAccessPoints) {
                 int notificationType = notificationMap.get(accessPoint.mId);
@@ -1129,10 +1130,24 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                 }
 
                 if ((notificationType & AccessPointListenerAdapter.AP_CHANGED) != 0) {
+                    if (isVerboseLoggingEnabled()) {
+                        Log.i(TAG, String.format(
+                                "Invoking AccessPointListenerAdapter AP_CHANGED for AP key %s and "
+                                        + "listener %s ",
+                                accessPoint.getKey(),
+                                listener));
+                    }
                     listener.onAccessPointChanged(accessPoint);
                 }
 
                 if ((notificationType & AccessPointListenerAdapter.LEVEL_CHANGED) != 0) {
+                    if (isVerboseLoggingEnabled()) {
+                        Log.i(TAG, String.format(
+                                "Invoking AccessPointListenerAdapter LEVEL_CHANGED for AP key %s "
+                                        + "and listener %s ",
+                                accessPoint.getKey(),
+                                listener));
+                    }
                     listener.onLevelChanged(accessPoint);
                 }
             }

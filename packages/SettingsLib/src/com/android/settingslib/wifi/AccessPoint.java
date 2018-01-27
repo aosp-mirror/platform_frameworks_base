@@ -467,7 +467,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         }
         builder.append(",metered=").append(isMetered());
 
-        if (WifiTracker.sVerboseLogging) {
+        if (isVerboseLoggingEnabled()) {
             builder.append(",rssi=").append(mRssi);
             builder.append(",scan cache size=").append(mScanResults.size());
         }
@@ -546,7 +546,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
         mSpeed = generateAverageSpeedForSsid();
 
         boolean changed = oldSpeed != mSpeed;
-        if(WifiTracker.sVerboseLogging && changed) {
+        if(isVerboseLoggingEnabled() && changed) {
             Log.i(TAG, String.format("%s: Set speed to %d", ssid, mSpeed));
         }
         return changed;
@@ -577,7 +577,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
             }
         }
         int speed = count == 0 ? Speed.NONE : totalSpeed / count;
-        if (WifiTracker.sVerboseLogging) {
+        if (isVerboseLoggingEnabled()) {
             Log.i(TAG, String.format("%s generated fallback speed is: %d", getSsidStr(), speed));
         }
         return roundToClosestSpeedEnum(speed);
@@ -913,7 +913,7 @@ public class AccessPoint implements Comparable<AccessPoint> {
             }
         }
 
-        if (WifiTracker.sVerboseLogging) {
+        if (isVerboseLoggingEnabled()) {
             summary.append(WifiUtils.buildLoggingSummary(this, config));
         }
 
@@ -1336,5 +1336,9 @@ public class AccessPoint implements Comparable<AccessPoint> {
     public interface AccessPointListener {
         void onAccessPointChanged(AccessPoint accessPoint);
         void onLevelChanged(AccessPoint accessPoint);
+    }
+
+    private static boolean isVerboseLoggingEnabled() {
+        return WifiTracker.sVerboseLogging || Log.isLoggable(TAG, Log.VERBOSE);
     }
 }
