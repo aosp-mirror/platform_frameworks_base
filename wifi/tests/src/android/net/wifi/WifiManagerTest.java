@@ -599,6 +599,7 @@ public class WifiManagerTest {
     /**
      * Verify the watchLocalOnlyHotspot call goes to WifiServiceImpl.
      */
+    @Test
     public void testWatchLocalOnlyHotspot() throws Exception {
         TestLocalOnlyHotspotObserver observer = new TestLocalOnlyHotspotObserver();
 
