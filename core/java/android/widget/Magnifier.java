@@ -190,27 +190,34 @@ public final class Magnifier {
         }
     }
 
-    private void configureCoordinates(float xPosInView, float yPosInView) {
-        final float posX;
-        final float posY;
-
+    private void configureCoordinates(final float xPosInView, final float yPosInView) {
+        // Compute the coordinates of the center of the content going to be displayed in the
+        // magnifier. These are relative to the surface the content is copied from.
+        final float contentPosX;
+        final float contentPosY;
         if (mView instanceof SurfaceView) {
             // No offset required if the backing Surface matches the size of the SurfaceView.
-            posX = xPosInView;
-            posY = yPosInView;
+            contentPosX = xPosInView;
+            contentPosY = yPosInView;
         } else {
             mView.getLocationInSurface(mViewCoordinatesInSurface);
-            posX = xPosInView + mViewCoordinatesInSurface[0];
-            posY = yPosInView + mViewCoordinatesInSurface[1];
+            contentPosX = xPosInView + mViewCoordinatesInSurface[0];
+            contentPosY = yPosInView + mViewCoordinatesInSurface[1];
         }
+        mCenterZoomCoords.x = Math.round(contentPosX);
+        mCenterZoomCoords.y = Math.round(contentPosY);
 
-        mCenterZoomCoords.x = Math.round(posX);
-        mCenterZoomCoords.y = Math.round(posY);
-
-        final int verticalMagnifierOffset = mView.getContext().getResources().getDimensionPixelSize(
+        // Compute the position of the magnifier window. These have to be relative to the window
+        // of the view the magnifier is attached to, as the magnifier popup is a panel window
+        // attached to that window.
+        final int[] viewCoordinatesInWindow = new int[2];
+        mView.getLocationInWindow(viewCoordinatesInWindow);
+        final int verticalOffset = mView.getContext().getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.magnifier_offset);
-        mWindowCoords.x = mCenterZoomCoords.x - mWindowWidth / 2;
-        mWindowCoords.y = mCenterZoomCoords.y - mWindowHeight / 2 - verticalMagnifierOffset;
+        final float magnifierPosX = xPosInView + viewCoordinatesInWindow[0];
+        final float magnifierPosY = yPosInView + viewCoordinatesInWindow[1] - verticalOffset;
+        mWindowCoords.x = Math.round(magnifierPosX - mWindowWidth / 2);
+        mWindowCoords.y = Math.round(magnifierPosY - mWindowHeight / 2);
     }
 
     private void performPixelCopy(final int startXInSurface, final int startYInSurface) {
