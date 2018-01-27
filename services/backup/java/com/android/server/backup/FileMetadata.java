@@ -16,7 +16,7 @@
 
 package com.android.server.backup;
 
-import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.app.backup.BackupAgent;
 import android.util.Slog;

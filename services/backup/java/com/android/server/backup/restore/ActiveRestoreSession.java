@@ -16,8 +16,8 @@
 
 package com.android.server.backup.restore;
 
-import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
-import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.BackupManagerService.DEBUG;
+import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_SESSION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_GET_RESTORE_SETS;
 import static com.android.server.backup.internal.BackupHandler.MSG_RUN_RESTORE;
@@ -35,9 +35,8 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.util.Slog;
 
-import com.android.server.backup.RefactoredBackupManagerService;
+import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.TransportManager;
-import com.android.server.backup.internal.BackupHandler;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.params.RestoreGetSetsParams;
 import com.android.server.backup.params.RestoreParams;
@@ -53,13 +52,13 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
 
     private final TransportManager mTransportManager;
     private final String mTransportName;
-    private final RefactoredBackupManagerService mBackupManagerService;
+    private final BackupManagerService mBackupManagerService;
     private final String mPackageName;
     public RestoreSet[] mRestoreSets = null;
     boolean mEnded = false;
     boolean mTimedOut = false;
 
-    public ActiveRestoreSession(RefactoredBackupManagerService backupManagerService,
+    public ActiveRestoreSession(BackupManagerService backupManagerService,
             String packageName, String transportName) {
         mBackupManagerService = backupManagerService;
         mPackageName = packageName;
@@ -399,11 +398,10 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
     // Posted to the handler to tear down a restore session in a cleanly synchronized way
     public class EndRestoreRunnable implements Runnable {
 
-        RefactoredBackupManagerService mBackupManager;
+        BackupManagerService mBackupManager;
         ActiveRestoreSession mSession;
 
-        public EndRestoreRunnable(RefactoredBackupManagerService manager,
-                ActiveRestoreSession session) {
+        public EndRestoreRunnable(BackupManagerService manager, ActiveRestoreSession session) {
             mBackupManager = manager;
             mSession = session;
         }

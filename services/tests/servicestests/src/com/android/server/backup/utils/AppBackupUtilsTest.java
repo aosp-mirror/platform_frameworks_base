@@ -27,7 +27,7 @@ import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
-import com.android.server.backup.RefactoredBackupManagerService;
+import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.testutils.PackageManagerStub;
 
 import org.junit.Test;
@@ -82,7 +82,7 @@ public class AppBackupUtilsTest {
         applicationInfo.flags |= ApplicationInfo.FLAG_ALLOW_BACKUP;
         applicationInfo.uid = Process.SYSTEM_UID;
         applicationInfo.backupAgentName = CUSTOM_BACKUP_AGENT_NAME;
-        applicationInfo.packageName = RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
+        applicationInfo.packageName = BackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
 
         boolean isEligible = AppBackupUtils.appIsEligibleForBackup(applicationInfo,
                 mPackageManagerStub);

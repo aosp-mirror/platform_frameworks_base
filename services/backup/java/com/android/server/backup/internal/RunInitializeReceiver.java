@@ -16,9 +16,9 @@
 
 package com.android.server.backup.internal;
 
-import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
-import static com.android.server.backup.RefactoredBackupManagerService.RUN_INITIALIZE_ACTION;
-import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+import static com.android.server.backup.BackupManagerService.DEBUG;
+import static com.android.server.backup.BackupManagerService.RUN_INITIALIZE_ACTION;
+import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -27,12 +27,12 @@ import android.os.PowerManager;
 import android.util.ArraySet;
 import android.util.Slog;
 
-import com.android.server.backup.RefactoredBackupManagerService;
+import com.android.server.backup.BackupManagerService;
 
 public class RunInitializeReceiver extends BroadcastReceiver {
-    private final RefactoredBackupManagerService mBackupManagerService;
+    private final BackupManagerService mBackupManagerService;
 
-    public RunInitializeReceiver(RefactoredBackupManagerService backupManagerService) {
+    public RunInitializeReceiver(BackupManagerService backupManagerService) {
         mBackupManagerService = backupManagerService;
     }
 

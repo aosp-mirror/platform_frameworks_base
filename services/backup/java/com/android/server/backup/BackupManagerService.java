@@ -38,7 +38,6 @@ import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.IBackupAgent;
 import android.app.PendingIntent;
-import android.app.admin.DevicePolicyManager;
 import android.app.backup.BackupManager;
 import android.app.backup.BackupManagerMonitor;
 import android.app.backup.FullBackup;
@@ -158,7 +157,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class RefactoredBackupManagerService implements BackupManagerServiceInterface {
+public class BackupManagerService implements BackupManagerServiceInterface {
 
     public static final String TAG = "BackupManagerService";
     public static final boolean DEBUG = true;
@@ -628,7 +627,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
      * A BackupRestore task gets notified of ack/timeout for the operation via
      * BackupRestoreTask#handleCancel, BackupRestoreTask#operationComplete and notifyAll called
      * on the mCurrentOpLock.
-     * {@link RefactoredBackupManagerService#waitUntilOperationComplete(int)} is
+     * {@link BackupManagerService#waitUntilOperationComplete(int)} is
      * used in various places to 'wait' for notifyAll and detect change of pending state of an
      * operation. So typically, an operation will be removed from this array by:
      * - BackupRestoreTask#handleCancel and
@@ -739,7 +738,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
 
     // ----- Main service implementation -----
 
-    public static RefactoredBackupManagerService create(
+    public static BackupManagerService create(
             Context context,
             Trampoline parent,
             HandlerThread backupThread) {
@@ -772,7 +771,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
         // This dir on /cache is managed directly in init.rc
         File dataDir = new File(Environment.getDownloadCacheDirectory(), "backup_stage");
 
-        return new RefactoredBackupManagerService(
+        return new BackupManagerService(
                 context,
                 parent,
                 backupThread,
@@ -782,7 +781,7 @@ public class RefactoredBackupManagerService implements BackupManagerServiceInter
     }
 
     @VisibleForTesting
-    RefactoredBackupManagerService(
+    BackupManagerService(
             Context context,
             Trampoline parent,
             HandlerThread backupThread,

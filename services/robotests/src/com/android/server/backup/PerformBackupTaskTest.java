@@ -103,6 +103,7 @@ import java.util.stream.Stream;
     }
 )
 @SystemLoaderClasses({
+    BackupManagerService.class,
     PerformBackupTask.class,
     BackupDataOutput.class,
     FullBackupDataOutput.class,
@@ -117,7 +118,7 @@ public class PerformBackupTaskTest {
     private static final String PACKAGE_1 = "com.example.package1";
     private static final String PACKAGE_2 = "com.example.package2";
 
-    @Mock private RefactoredBackupManagerService mBackupManagerService;
+    @Mock private BackupManagerService mBackupManagerService;
     @Mock private TransportManager mTransportManager;
     @Mock private DataChangedJournal mDataChangedJournal;
     @Mock private IBackupObserver mObserver;

@@ -16,13 +16,13 @@
 
 package com.android.server.backup.fullbackup;
 
-import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
-import static com.android.server.backup.RefactoredBackupManagerService.DEBUG_SCHEDULING;
-import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.RefactoredBackupManagerService.OP_PENDING;
-import static com.android.server.backup.RefactoredBackupManagerService.OP_TYPE_BACKUP;
-import static com.android.server.backup.RefactoredBackupManagerService.OP_TYPE_BACKUP_WAIT;
-import static com.android.server.backup.RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL;
+import static com.android.server.backup.BackupManagerService.DEBUG;
+import static com.android.server.backup.BackupManagerService.DEBUG_SCHEDULING;
+import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.BackupManagerService.OP_PENDING;
+import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP;
+import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP_WAIT;
+import static com.android.server.backup.BackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL;
 
 import android.annotation.Nullable;
 import android.app.IBackupAgent;
@@ -46,7 +46,7 @@ import com.android.internal.backup.IBackupTransport;
 import com.android.server.EventLogTags;
 import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.FullBackupJob;
-import com.android.server.backup.RefactoredBackupManagerService;
+import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.internal.OnTaskFinishedListener;
 import com.android.server.backup.internal.Operation;
@@ -95,7 +95,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class PerformFullTransportBackupTask extends FullBackupTask implements BackupRestoreTask {
     public static PerformFullTransportBackupTask newWithCurrentTransport(
-            RefactoredBackupManagerService backupManagerService,
+            BackupManagerService backupManagerService,
             IFullBackupRestoreObserver observer,
             String[] whichPackages,
             boolean updateSchedule,
@@ -126,7 +126,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
 
     private static final String TAG = "PFTBT";
 
-    private RefactoredBackupManagerService backupManagerService;
+    private BackupManagerService backupManagerService;
     private final Object mCancelLock = new Object();
 
     ArrayList<PackageInfo> mPackages;
@@ -147,7 +147,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
     private volatile boolean mCancelAll;
     private final int mCurrentOpToken;
 
-    public PerformFullTransportBackupTask(RefactoredBackupManagerService backupManagerService,
+    public PerformFullTransportBackupTask(BackupManagerService backupManagerService,
             TransportClient transportClient,
             IFullBackupRestoreObserver observer,
             String[] whichPackages, boolean updateSchedule,

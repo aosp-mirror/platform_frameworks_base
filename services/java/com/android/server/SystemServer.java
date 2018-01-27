@@ -160,7 +160,7 @@ public final class SystemServer {
      * them from the build system somehow.
      */
     private static final String BACKUP_MANAGER_SERVICE_CLASS =
-            "com.android.server.backup.RefactoredBackupManagerService$Lifecycle";
+            "com.android.server.backup.BackupManagerService$Lifecycle";
     private static final String APPWIDGET_SERVICE_CLASS =
             "com.android.server.appwidget.AppWidgetService";
     private static final String VOICE_RECOGNITION_MANAGER_SERVICE_CLASS =

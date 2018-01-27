@@ -82,7 +82,7 @@ public class TrampolineTest {
     };
     private final int NON_USER_SYSTEM = UserHandle.USER_SYSTEM + 1;
 
-    @Mock private RefactoredBackupManagerService mBackupManagerServiceMock;
+    @Mock private BackupManagerService mBackupManagerServiceMock;
     @Mock private Context mContextMock;
     @Mock private File mSuppressFileMock;
     @Mock private File mSuppressFileParentMock;
@@ -101,7 +101,7 @@ public class TrampolineTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        TrampolineTestable.sRefactoredBackupManagerServiceMock = mBackupManagerServiceMock;
+        TrampolineTestable.sBackupManagerServiceMock = mBackupManagerServiceMock;
         TrampolineTestable.sSuppressFile = mSuppressFileMock;
         TrampolineTestable.sCallingUid = Process.SYSTEM_UID;
         TrampolineTestable.sBackupDisabled = false;
@@ -863,7 +863,7 @@ public class TrampolineTest {
         static boolean sBackupDisabled = false;
         static File sSuppressFile = null;
         static int sCallingUid = -1;
-        static RefactoredBackupManagerService sRefactoredBackupManagerServiceMock = null;
+        static BackupManagerService sBackupManagerServiceMock = null;
         private int mCreateServiceCallsCount = 0;
 
         TrampolineTestable(Context context) {
@@ -886,9 +886,9 @@ public class TrampolineTest {
         }
 
         @Override
-        protected BackupManagerServiceInterface createRefactoredBackupManagerService() {
+        protected BackupManagerServiceInterface createBackupManagerService() {
             mCreateServiceCallsCount++;
-            return sRefactoredBackupManagerServiceMock;
+            return sBackupManagerServiceMock;
         }
 
         int getCreateServiceCallsCount() {

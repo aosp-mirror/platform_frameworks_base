@@ -19,7 +19,6 @@ package com.android.server.backup;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.backup.RefactoredBackupManagerService;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -47,7 +46,7 @@ import java.util.Set;
 final class ProcessedPackagesJournal {
     private static final String TAG = "ProcessedPackagesJournal";
     private static final String JOURNAL_FILE_NAME = "processed";
-    private static final boolean DEBUG = RefactoredBackupManagerService.DEBUG || false;
+    private static final boolean DEBUG = BackupManagerService.DEBUG || false;
 
     // using HashSet instead of ArraySet since we expect 100-500 elements range
     @GuardedBy("mProcessedPackages")
