@@ -72,7 +72,7 @@ public class KeySyncTask implements Runnable {
     private final int mCredentialType;
     private final String mCredential;
     private final boolean mCredentialUpdated;
-    private final PlatformKeyManager.Factory mPlatformKeyManagerFactory;
+    private final PlatformKeyManager mPlatformKeyManager;
     private final RecoverySnapshotStorage mRecoverySnapshotStorage;
     private final RecoverySnapshotListenersStorage mSnapshotListenersStorage;
 
@@ -94,7 +94,7 @@ public class KeySyncTask implements Runnable {
                 credentialType,
                 credential,
                 credentialUpdated,
-                () -> PlatformKeyManager.getInstance(context, recoverableKeyStoreDb));
+                PlatformKeyManager.getInstance(context, recoverableKeyStoreDb));
     }
 
     /**
@@ -105,9 +105,7 @@ public class KeySyncTask implements Runnable {
      * @param credentialType The type of credential as defined in {@code LockPatternUtils}
      * @param credential The credential, encoded as a {@link String}.
      * @param credentialUpdated signals weather credentials were updated.
-     * @param platformKeyManagerFactory Instantiates a {@link PlatformKeyManager} for the user.
-     *     This is a factory to enable unit testing, as otherwise it would be impossible to test
-     *     without a screen unlock occurring!
+     * @param platformKeyManager platform key manager
      */
     @VisibleForTesting
     KeySyncTask(
@@ -118,14 +116,14 @@ public class KeySyncTask implements Runnable {
             int credentialType,
             String credential,
             boolean credentialUpdated,
-            PlatformKeyManager.Factory platformKeyManagerFactory) {
+            PlatformKeyManager platformKeyManager) {
         mSnapshotListenersStorage = recoverySnapshotListenersStorage;
         mRecoverableKeyStoreDb = recoverableKeyStoreDb;
         mUserId = userId;
         mCredentialType = credentialType;
         mCredential = credential;
         mCredentialUpdated = credentialUpdated;
-        mPlatformKeyManagerFactory = platformKeyManagerFactory;
+        mPlatformKeyManager = platformKeyManager;
         mRecoverySnapshotStorage = snapshotStorage;
     }
 
@@ -145,6 +143,8 @@ public class KeySyncTask implements Runnable {
         if (mCredentialType == LockPatternUtils.CREDENTIAL_TYPE_NONE) {
             // Application keys for the user will not be available for sync.
             Log.w(TAG, "Credentials are not set for user " + mUserId);
+            int generation = mPlatformKeyManager.getGenerationId(mUserId);
+            mPlatformKeyManager.invalidatePlatformKey(mUserId, generation);
             return;
         }
 
@@ -304,8 +304,7 @@ public class KeySyncTask implements Runnable {
             throws InsecureUserException, KeyStoreException, UnrecoverableKeyException,
             NoSuchAlgorithmException, NoSuchPaddingException, BadPlatformKeyException,
             InvalidKeyException, InvalidAlgorithmParameterException {
-        PlatformKeyManager platformKeyManager = mPlatformKeyManagerFactory.newInstance();
-        PlatformDecryptionKey decryptKey = platformKeyManager.getDecryptKey(mUserId);;
+        PlatformDecryptionKey decryptKey = mPlatformKeyManager.getDecryptKey(mUserId);;
         Map<String, WrappedKey> wrappedKeys = mRecoverableKeyStoreDb.getAllKeys(
                 mUserId, recoveryAgentUid, decryptKey.getGenerationId());
         return WrappedKey.unwrapKeys(decryptKey, wrappedKeys);

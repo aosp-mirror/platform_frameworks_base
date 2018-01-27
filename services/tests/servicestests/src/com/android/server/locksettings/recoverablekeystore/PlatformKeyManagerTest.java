@@ -252,6 +252,10 @@ public class PlatformKeyManagerTest {
 
     @Test
     public void getDecryptKey_getsDecryptKeyWithCorrectAlias() throws Exception {
+        when(mKeyStoreProxy
+                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
+                        + "platform/42/1/decrypt")).thenReturn(true);
+
         mPlatformKeyManager.getDecryptKey(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy).getKey(
@@ -264,6 +268,13 @@ public class PlatformKeyManagerTest {
         doThrow(new UnrecoverableKeyException()).when(mKeyStoreProxy).getKey(
                 eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/encrypt"),
                 any());
+
+        when(mKeyStoreProxy
+                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
+                        + "platform/42/1/encrypt")).thenReturn(true);
+        when(mKeyStoreProxy
+                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
+                        + "platform/42/2/encrypt")).thenReturn(true);
 
         mPlatformKeyManager.getEncryptKey(USER_ID_FIXTURE);
 
@@ -282,11 +293,18 @@ public class PlatformKeyManagerTest {
                 eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"),
                 any());
 
+        when(mKeyStoreProxy
+                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
+                        + "platform/42/1/decrypt")).thenReturn(false); // was removed.
+
+        when(mKeyStoreProxy
+                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
+                        + "platform/42/2/decrypt")).thenReturn(true); // new version is available
+
         mPlatformKeyManager.getDecryptKey(USER_ID_FIXTURE);
 
-        verify(mKeyStoreProxy).getKey(
-                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"),
-                any());
+        verify(mKeyStoreProxy).containsAlias(
+                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"));
         // Attempt to get regenerated key.
         verify(mKeyStoreProxy).getKey(
                 eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/decrypt"),
@@ -294,7 +312,31 @@ public class PlatformKeyManagerTest {
     }
 
     @Test
-    public void getEncryptKey_getsDecryptKeyWithCorrectAlias() throws Exception {
+    public void getEncryptKey_generatesNewKeyIfOldWasRemoved() throws Exception {
+        when(mKeyStoreProxy
+                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
+                        + "platform/42/1/encrypt")).thenReturn(false); // was removed.
+
+        when(mKeyStoreProxy
+                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
+                        + "platform/42/2/encrypt")).thenReturn(true); // new version is available
+
+        mPlatformKeyManager.getEncryptKey(USER_ID_FIXTURE);
+
+        verify(mKeyStoreProxy).containsAlias(
+                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/encrypt"));
+        // Attempt to get regenerated key.
+        verify(mKeyStoreProxy).getKey(
+                eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/encrypt"),
+                any());
+    }
+
+    @Test
+    public void getEncryptKey_getsEndryptKeyWithCorrectAlias() throws Exception {
+        when(mKeyStoreProxy
+                .containsAlias("com.android.server.locksettings.recoverablekeystore/"
+                        + "platform/42/1/encrypt")).thenReturn(true);
+
         mPlatformKeyManager.getEncryptKey(USER_ID_FIXTURE);
 
         verify(mKeyStoreProxy).getKey(
@@ -309,6 +351,26 @@ public class PlatformKeyManagerTest {
         mPlatformKeyManager.regenerate(USER_ID_FIXTURE);
 
         assertEquals(2, mPlatformKeyManager.getGenerationId(USER_ID_FIXTURE));
+    }
+
+    @Test
+    public void regenerate_deletesOldKeysFromKeystore() throws Exception {
+        mPlatformKeyManager.init(USER_ID_FIXTURE);
+
+        mPlatformKeyManager.regenerate(USER_ID_FIXTURE);
+
+        verify(mKeyStoreProxy).deleteEntry(
+                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/encrypt"));
+        verify(mKeyStoreProxy).deleteEntry(
+                eq("com.android.server.locksettings.recoverablekeystore/platform/42/1/decrypt"));
+
+        mPlatformKeyManager.regenerate(USER_ID_FIXTURE);
+
+        // Removes second generation keys.
+        verify(mKeyStoreProxy).deleteEntry(
+                eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/encrypt"));
+        verify(mKeyStoreProxy).deleteEntry(
+                eq("com.android.server.locksettings.recoverablekeystore/platform/42/2/decrypt"));
     }
 
     @Test

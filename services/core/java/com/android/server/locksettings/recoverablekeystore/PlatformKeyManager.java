@@ -129,6 +129,26 @@ public class PlatformKeyManager {
     }
 
     /**
+     * Removes the platform key from Android KeyStore.
+     * It is triggered when user disables lock screen.
+     *
+     * @param userId The ID of the user to whose lock screen the platform key must be bound.
+     * @param generationId Generation id.
+     *
+     * @hide
+     */
+    public void invalidatePlatformKey(int userId, int generationId) {
+        if (generationId != -1) {
+            try {
+                mKeyStore.deleteEntry(getEncryptAlias(userId, generationId));
+                mKeyStore.deleteEntry(getDecryptAlias(userId, generationId));
+            } catch (KeyStoreException e) {
+                // Ignore failed attempt to delete key.
+            }
+        }
+    }
+
+    /**
      * Generates a new key and increments the generation ID. Should be invoked if the platform key
      * is corrupted and needs to be rotated.
      * Updates status of old keys to {@code RecoveryController.RECOVERY_STATUS_PERMANENT_FAILURE}.
@@ -152,6 +172,7 @@ public class PlatformKeyManager {
         if (generationId == -1) {
             nextId = 1;
         } else {
+            invalidatePlatformKey(userId, generationId);
             nextId = generationId + 1;
         }
         generateAndLoadKey(userId, nextId);
@@ -197,8 +218,12 @@ public class PlatformKeyManager {
     private PlatformEncryptionKey getEncryptKeyInternal(int userId) throws KeyStoreException,
            UnrecoverableKeyException, NoSuchAlgorithmException, InsecureUserException {
         int generationId = getGenerationId(userId);
+        String alias = getEncryptAlias(userId, generationId);
+        if (!mKeyStore.containsAlias(alias)) {
+            throw new UnrecoverableKeyException("KeyStore doesn't contain key " + alias);
+        }
         AndroidKeyStoreSecretKey key = (AndroidKeyStoreSecretKey) mKeyStore.getKey(
-                getEncryptAlias(userId, generationId), /*password=*/ null);
+                alias, /*password=*/ null);
         return new PlatformEncryptionKey(generationId, key);
     }
 
@@ -242,8 +267,12 @@ public class PlatformKeyManager {
     private PlatformDecryptionKey getDecryptKeyInternal(int userId) throws KeyStoreException,
            UnrecoverableKeyException, NoSuchAlgorithmException, InsecureUserException {
         int generationId = getGenerationId(userId);
+        String alias = getDecryptAlias(userId, generationId);
+        if (!mKeyStore.containsAlias(alias)) {
+            throw new UnrecoverableKeyException("KeyStore doesn't contain key " + alias);
+        }
         AndroidKeyStoreSecretKey key = (AndroidKeyStoreSecretKey) mKeyStore.getKey(
-                getDecryptAlias(userId, generationId), /*password=*/ null);
+                alias, /*password=*/ null);
         return new PlatformDecryptionKey(generationId, key);
     }
 
@@ -405,16 +434,4 @@ public class PlatformKeyManager {
         return keyStore;
     }
 
-    /**
-     * @hide
-     */
-    public interface Factory {
-        /**
-         * New PlatformKeyManager instance.
-         *
-         * @hide
-         */
-        PlatformKeyManager newInstance()
-                throws NoSuchAlgorithmException, InsecureUserException, KeyStoreException;
-    }
 }
