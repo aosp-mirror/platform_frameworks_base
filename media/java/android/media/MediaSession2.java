@@ -83,6 +83,7 @@ public class MediaSession2 implements AutoCloseable {
 
     // Note: Do not define IntDef because subclass can add more command code on top of these.
     // TODO(jaewan): Shouldn't we pull out?
+    // TODO(jaewan): Should we also protect getPlaybackState()?
     public static final int COMMAND_CODE_CUSTOM = 0;
     public static final int COMMAND_CODE_PLAYBACK_START = 1;
     public static final int COMMAND_CODE_PLAYBACK_PAUSE = 2;
@@ -199,7 +200,8 @@ public class MediaSession2 implements AutoCloseable {
         @Override
         public int hashCode() {
             final int prime = 31;
-            return ((mCustomCommand != null) ? mCustomCommand.hashCode() : 0) * prime + mCommandCode;
+            return ((mCustomCommand != null)
+                    ? mCustomCommand.hashCode() : 0) * prime + mCommandCode;
         }
     }
 
@@ -999,14 +1001,13 @@ public class MediaSession2 implements AutoCloseable {
      *       framework had to add heuristics to figure out if an app is
      * @hide
      */
-
     MediaSession2(Context context, MediaPlayerInterface player, String id,
             VolumeProvider volumeProvider, int ratingType, PendingIntent sessionActivity,
             Executor callbackExecutor, SessionCallback callback) {
         super();
         mProvider = createProvider(context, player, id, volumeProvider, ratingType, sessionActivity,
-                callbackExecutor, callback
-        );
+                callbackExecutor, callback);
+        mProvider.initialize();
     }
 
     MediaSession2Provider createProvider(Context context, MediaPlayerInterface player, String id,
@@ -1076,15 +1077,6 @@ public class MediaSession2 implements AutoCloseable {
 
     public @NonNull List<ControllerInfo> getConnectedControllers() {
         return mProvider.getConnectedControllers_impl();
-    }
-
-    /**
-     * Sets the {@link AudioAttributes} to be used during the playback of the video.
-     *
-     * @param attributes non-null <code>AudioAttributes</code>.
-     */
-    public void setAudioAttributes(@NonNull AudioAttributes attributes) {
-        mProvider.setAudioAttributes_impl(attributes);
     }
 
     /**
@@ -1270,6 +1262,10 @@ public class MediaSession2 implements AutoCloseable {
         mProvider.setPlaylist_impl(playlist, param);
     }
 
+    public List<MediaItem2> getPlaylist() {
+        return mProvider.getPlaylist_impl();
+    }
+
     /**
      * Sets the {@link PlaylistParams} for the current play list. Repeat/shuffle mode and metadata
      * for the list can be set by calling this method.
@@ -1287,5 +1283,39 @@ public class MediaSession2 implements AutoCloseable {
      */
     public PlaylistParams getPlaylistParams() {
         return mProvider.getPlaylistParams_impl();
+    }
+
+    /*
+     * Add a {@link PlaybackListener} to listen changes in the underlying
+     * {@link MediaPlayerInterface}. Listener will be called immediately to tell the current value.
+     * <p>
+     * Added listeners will be also called when the underlying player is changed.
+     *
+     * @param executor the call listener
+     * @param listener the listener that will be run
+     * @throws IllegalArgumentException when either the listener or handler is {@code null}.
+     */
+    public void addPlaybackListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull PlaybackListener listener) {
+        mProvider.addPlaybackListener_impl(executor, listener);
+    }
+
+    /**
+     * Remove previously added {@link PlaybackListener}.
+     *
+     * @param listener the listener to be removed
+     * @throws IllegalArgumentException if the listener is {@code null}.
+     */
+    public void removePlaybackListener(@NonNull PlaybackListener listener) {
+        mProvider.removePlaybackListener_impl(listener);
+    }
+
+    /**
+     * Return the {@link PlaybackState2} from the player.
+     *
+     * @return playback state
+     */
+    public PlaybackState2 getPlaybackState() {
+        return mProvider.getPlaybackState_impl();
     }
 }

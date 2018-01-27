@@ -133,9 +133,9 @@ public class MediaController2 implements AutoCloseable {
                 @NonNull List<MediaItem2> list, @NonNull PlaylistParams param) { }
 
         /**
-         * Called when the playback state is changed.
+         * Called when the playback state is changed, or connection success.
          *
-         * @param state
+         * @param state latest playback state
          */
         public void onPlaybackStateChanged(@NonNull PlaybackState2 state) { }
 
@@ -254,12 +254,13 @@ public class MediaController2 implements AutoCloseable {
             @NonNull @CallbackExecutor Executor executor, @NonNull ControllerCallback callback) {
         super();
 
+        mProvider = createProvider(context, token, executor, callback);
         // This also connects to the token.
         // Explicit connect() isn't added on purpose because retrying connect() is impossible with
         // session whose session binder is only valid while it's active.
         // prevent a controller from reusable after the
         // session is released and recreated.
-        mProvider = createProvider(context, token, executor, callback);
+        mProvider.initialize();
     }
 
     MediaController2Provider createProvider(@NonNull Context context,
@@ -545,11 +546,15 @@ public class MediaController2 implements AutoCloseable {
     }
 
     /**
-     * Get the latest {@link PlaybackState2} from the session.
+     * Get the lastly cached {@link PlaybackState2} from
+     * {@link ControllerCallback#onPlaybackStateChanged(PlaybackState2)}.
+     * <p>
+     * It may return {@code null} before the first callback or session has sent {@code null}
+     * playback state.
      *
-     * @return a playback state
+     * @return a playback state. Can be {@code null}
      */
-    public PlaybackState2 getPlaybackState() {
+    public @Nullable PlaybackState2 getPlaybackState() {
         return mProvider.getPlaybackState_impl();
     }
 

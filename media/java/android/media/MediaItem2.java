@@ -36,9 +36,9 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 public class MediaItem2 {
-    // TODO(jaewan): Keep DataSourceDesc.
     private final int mFlags;
     private MediaMetadata2 mMetadata;
+    private DataSourceDesc mDataSourceDesc;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -64,8 +64,10 @@ public class MediaItem2 {
      * @param metadata metadata with the media id.
      * @param flags The flags for this item.
      */
-    public MediaItem2(@NonNull MediaMetadata2 metadata, @Flags int flags) {
+    public MediaItem2(@Nullable MediaMetadata2 metadata,
+            @Nullable DataSourceDesc data, @Flags int flags) {
         mFlags = flags;
+        mDataSourceDesc = data;
         setMetadata(metadata);
     }
 
@@ -138,5 +140,9 @@ public class MediaItem2 {
      */
     public @Nullable String getMediaId() {
         return mMetadata.getMediaId();
+    }
+
+    public @Nullable DataSourceDesc getDataSourceDesc() {
+        return mDataSourceDesc;
     }
 }

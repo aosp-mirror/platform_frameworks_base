@@ -16,23 +16,19 @@
 
 package android.media.update;
 
-import android.media.PlaybackState2;
+import android.os.Bundle;
 
 /**
  * @hide
  */
-public interface TransportControlProvider {
-    void play_impl();
-    void pause_impl();
-    void stop_impl();
-    void skipToPrevious_impl();
-    void skipToNext_impl();
+public interface SessionToken2Provider {
+    String getPackageName_impl();
+    String getId_imp();
+    int getType_impl();
+    int getUid_impl();
+    Bundle toBundle_impl();
 
-    void prepare_impl();
-    void fastForward_impl();
-    void rewind_impl();
-    void seekTo_impl(long pos);
-    void setCurrentPlaylistItem_impl(int index);
-
-    PlaybackState2 getPlaybackState_impl();
+    int hashCode_impl();
+    boolean equals_impl(Object obj);
+    String toString_impl();
 }

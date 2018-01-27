@@ -35,6 +35,8 @@ import java.util.List;
  * @hide
  */
 public interface MediaController2Provider extends TransportControlProvider {
+    void initialize();
+
     void close_impl();
     SessionToken2 getSessionToken_impl();
     boolean isConnected_impl();

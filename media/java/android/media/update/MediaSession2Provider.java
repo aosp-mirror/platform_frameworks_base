@@ -19,6 +19,7 @@ package android.media.update;
 import android.media.AudioAttributes;
 import android.media.MediaItem2;
 import android.media.MediaPlayerInterface;
+import android.media.MediaPlayerInterface.PlaybackListener;
 import android.media.MediaSession2.Command;
 import android.media.MediaSession2.CommandButton;
 import android.media.MediaSession2.CommandGroup;
@@ -30,11 +31,14 @@ import android.os.Bundle;
 import android.os.ResultReceiver;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * @hide
  */
 public interface MediaSession2Provider extends TransportControlProvider {
+    void initialize();
+
     void close_impl();
     void setPlayer_impl(MediaPlayerInterface player);
     void setPlayer_impl(MediaPlayerInterface player, VolumeProvider volumeProvider);
@@ -42,7 +46,6 @@ public interface MediaSession2Provider extends TransportControlProvider {
     SessionToken2 getToken_impl();
     List<ControllerInfo> getConnectedControllers_impl();
     void setCustomLayout_impl(ControllerInfo controller, List<CommandButton> layout);
-    void setAudioAttributes_impl(AudioAttributes attributes);
     void setAudioFocusRequest_impl(int focusGain);
 
     void setAllowedCommands_impl(ControllerInfo controller, CommandGroup commands);
@@ -51,8 +54,12 @@ public interface MediaSession2Provider extends TransportControlProvider {
             ResultReceiver receiver);
     void sendCustomCommand_impl(Command command, Bundle args);
     void setPlaylist_impl(List<MediaItem2> playlist, PlaylistParams param);
+    List<MediaItem2> getPlaylist_impl();
     void setPlaylistParams_impl(PlaylistParams params);
     PlaylistParams getPlaylistParams_impl();
+
+    void addPlaybackListener_impl(Executor executor, PlaybackListener listener);
+    void removePlaybackListener_impl(PlaybackListener listener);
 
     interface ControllerInfoProvider {
         String getPackageName_impl();

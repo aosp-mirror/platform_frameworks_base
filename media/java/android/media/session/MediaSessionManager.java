@@ -337,19 +337,34 @@ public final class MediaSessionManager {
 
     /**
      * Called when a {@link MediaSession2} is created.
-     *
      * @hide
      */
     // TODO(jaewan): System API
-    public SessionToken2 createSessionToken(@NonNull String callingPackage, @NonNull String id,
-            @NonNull IMediaSession2 binder) {
+    public boolean onSessionCreated(@NonNull SessionToken2 token) {
+        if (token == null) {
+            return false;
+        }
         try {
-            Bundle bundle = mService.createSessionToken(callingPackage, id, binder);
-            return SessionToken2.fromBundle(bundle);
+            return mService.onSessionCreated(token.toBundle());
         } catch (RemoteException e) {
             Log.wtf(TAG, "Cannot communicate with the service.", e);
         }
-        return null;
+        return false;
+    }
+
+    /** Called when a {@link MediaSession2} is destroyed.
+     * @hide
+     */
+    // TODO(jaewan): System API
+    public void onSessionDestroyed(@NonNull SessionToken2 token) {
+        if (token == null) {
+            return;
+        }
+        try {
+            mService.onSessionDestroyed(token.toBundle());
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Cannot communicate with the service.", e);
+        }
     }
 
     /**
@@ -367,7 +382,7 @@ public final class MediaSessionManager {
         try {
             List<Bundle> bundles = mService.getSessionTokens(
                     /* activeSessionOnly */ true, /* sessionServiceOnly */ false);
-            return toTokenList(bundles);
+            return toTokenList(mContext, bundles);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Cannot communicate with the service.", e);
             return Collections.emptyList();
@@ -387,7 +402,7 @@ public final class MediaSessionManager {
         try {
             List<Bundle> bundles = mService.getSessionTokens(
                     /* activeSessionOnly */ false, /* sessionServiceOnly */ true);
-            return toTokenList(bundles);
+            return toTokenList(mContext, bundles);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Cannot communicate with the service.", e);
             return Collections.emptyList();
@@ -410,18 +425,18 @@ public final class MediaSessionManager {
         try {
             List<Bundle> bundles = mService.getSessionTokens(
                     /* activeSessionOnly */ false, /* sessionServiceOnly */ false);
-            return toTokenList(bundles);
+            return toTokenList(mContext, bundles);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Cannot communicate with the service.", e);
             return Collections.emptyList();
         }
     }
 
-    private static List<SessionToken2> toTokenList(List<Bundle> bundles) {
+    private static List<SessionToken2> toTokenList(Context context, List<Bundle> bundles) {
         List<SessionToken2> tokens = new ArrayList<>();
         if (bundles != null) {
             for (int i = 0; i < bundles.size(); i++) {
-                SessionToken2 token = SessionToken2.fromBundle(bundles.get(i));
+                SessionToken2 token = SessionToken2.fromBundle(context, bundles.get(i));
                 if (token != null) {
                     tokens.add(token);
                 }
