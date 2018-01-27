@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Perangkaian"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Pensijilan paparan wayarles"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Dayakan Pengelogan Berjela-jela Wi-Fi"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Sentiasa benarkan Imbasan Perayauan Wi-Fi"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Perawakan MAC Tersambung"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Data mudah alih sentiasa aktif"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Pecutan perkakasan penambatan"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Tunjukkan peranti Bluetooth tanpa nama"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Masukkan nama hos pembekal DNS"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Tunjukkan pilihan untuk pensijilan paparan wayarles"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Tingkatkan tahap pengelogan Wi-Fi, tunjuk setiap SSID RSSI dalam Pemilih Wi-Fi"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Benarkan/Jangan benarkan Imbasan Perayauan Wi-Fi berdasarkan jumlah trafik data yang ada pada antara muka"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Rawakkan alamat MAC apabila menyambung ke rangkaian Wi‑Fi"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Saiz penimbal pengelog"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Pilih saiz Pengelog bagi setiap penimbal log"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Kosongkan storan gigih pengelog?"</string>
@@ -403,4 +403,10 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Berdaftar"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Tidak didaftarkan"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Tidak tersedia"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="other">%1$d peranti disambungkan</item>
+      <item quantity="one">%1$d peranti disambungkan</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Lagi masa."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Kurang masa."</string>
 </resources>

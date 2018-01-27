@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Võrgustik"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Juhtmeta ekraaniühenduse sertifitseerimine"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Luba WiFi paljusõnaline logimine"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Luba alati WiFi-rändluse skannimine"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Juhusliku MAC-aadressi määramine ühendamisel"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobiilne andmeside on alati aktiivne"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Jagamise riistvaraline kiirendus"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Kuva Bluetoothi seadmed ilma nimedeta"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Sisestage DNS-i teenusepakkuja hostinimi"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Juhtmeta ekraaniühenduse sertifitseerimisvalikute kuvamine"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Suurenda WiFi logimistaset, kuva WiFi valijas SSID RSSI järgi"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Luba/keela WiFi-rändluse skannimine liidese andmeliikluse põhjal"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Määra WiFi-võrkudega ühenduse loomisel juhuslik MAC-aadress"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Logija puhvri suurused"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Vali logija suur. logipuhvri kohta"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Kas kustutada logija püsivalt salvestatud andmed?"</string>
@@ -403,4 +403,10 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Registreeritud"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Ei ole registreeritud"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Pole saadaval"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="other">%1$d seadet on ühendatud</item>
+      <item quantity="one">%1$d seade on ühendatud</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Pikem aeg."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Lühem aeg."</string>
 </resources>

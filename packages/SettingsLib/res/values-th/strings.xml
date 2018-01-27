@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"เครือข่าย"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"การรับรองการแสดงผลแบบไร้สาย"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"เปิดใช้การบันทึกรายละเอียด Wi-Fi"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ใช้การสแกน Wi-Fi ข้ามเครือข่ายเสมอ"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"การสุ่ม MAC ที่เชื่อมต่อ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"เปิดใช้อินเทอร์เน็ตมือถือเสมอ"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"การเร่งฮาร์ดแวร์การเชื่อมต่ออินเทอร์เน็ตผ่านมือถือ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"แสดงอุปกรณ์บลูทูธที่ไม่มีชื่อ"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"ป้อนชื่อโฮสต์ของผู้ให้บริการ DNS"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"แสดงตัวเลือกสำหรับการรับรองการแสดงผล แบบไร้สาย"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"เพิ่มระดับการบันทึก Wi‑Fi แสดงต่อ SSID RSSI ในตัวเลือก Wi‑Fi"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"อนุญาต/ไม่อนุญาตการสแกน Wi-Fi ข้ามเครือข่าย ตามปริมาณข้อมูลการเข้าชมที่ปรากฏในอินเทอร์เฟซ"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"สุ่มที่อยู่ MAC เมื่อเชื่อมต่อกับเครือข่าย Wi‑Fi"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ขนาดบัฟเฟอร์ของ Logger"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"เลือกขนาด Logger ต่อบัฟเฟอร์ไฟล์บันทึก"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"ล้างพื้นที่เก็บข้อมูลถาวรของตัวบันทึกไหม"</string>
@@ -403,4 +403,10 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"ลงทะเบียนแล้ว"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"ไม่ได้ลงทะเบียน"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"ไม่ว่าง"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="other">มีอุปกรณ์ที่เชื่อมต่อ %1$d เครื่อง</item>
+      <item quantity="one">มีอุปกรณ์ที่เชื่อมต่อ %1$d เครื่อง</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"เวลามากขึ้น"</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"เวลาน้อยลง"</string>
 </resources>

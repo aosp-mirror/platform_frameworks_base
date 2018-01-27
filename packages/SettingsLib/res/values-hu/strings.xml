@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Hálózatok"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Vezeték nélküli kijelző tanúsítványa"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Részletes Wi-Fi-naplózás engedélyezése"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi-roaming ellenőrzésének engedélyezése mindig"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Csatlakoztatott MAC-címek randomizálása"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"A mobilhálózati kapcsolat mindig aktív"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Internetmegosztás hardveres gyorsítása"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Név nélküli Bluetooth-eszközök megjelenítése"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Adja meg a DNS-szolgáltató gazdagépnevét"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Vezeték nélküli kijelző tanúsítványával kapcsolatos lehetőségek megjelenítése"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi-naplózási szint növelése, RSSI/SSID megjelenítése a Wi‑Fi-választóban"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"A Wi-Fi-roaming ellenőrzésének engedélyezése vagy letiltása az interfészen jelen lévő adatforgalom mennyiségétől függően"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"MAC-cím véletlenszerű generálása Wi‑Fi-hálózatra való csatlakozáskor"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Naplózási puffer mérete"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Naplózási pufferméret kiválasztása"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Törli a naplózó program állandó tárhelyét?"</string>
@@ -403,4 +403,10 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Regisztrált"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Nem regisztrált"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Nem érhető el"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="other">%1$d eszköz csatlakozik</item>
+      <item quantity="one">%1$d eszköz csatlakozik</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Több idő."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Kevesebb idő."</string>
 </resources>

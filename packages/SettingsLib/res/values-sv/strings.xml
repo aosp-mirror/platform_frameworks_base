@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Nätverk"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certifiering för Wi-Fi-skärmdelning"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Aktivera utförlig loggning för Wi-Fi"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Tillåt alltid sökning efter Wi-Fi-roaming"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Ansluten MAC-slumpgenerering"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobildata alltid aktiverad"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Maskinvaruacceleration för internetdelning"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Visa namnlösa Bluetooth-enheter"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Ange värdnamn för DNS-leverantör"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Visa certifieringsalternativ för Wi-Fi-skärmdelning"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Öka loggningsnivån för Wi-Fi, visa per SSID RSSI i Wi‑Fi Picker"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Tillåt/tillåt inte sökning efter Wi-Fi-roaming utifrån mängden datatrafik i gränssnittet"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Generera en slumpmässig MAC-adress när du ansluter till Wi‑Fi-nätverk"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Buffertstorlekar för logg"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Välj loggstorlekar per loggbuffert"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Vill du rensa lagringsutrymmet för loggar?"</string>
@@ -403,4 +403,10 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Registrerad"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Ej registrerad"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Inte tillgängligt"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="other">%1$d enheter är anslutna</item>
+      <item quantity="one">%1$d enhet är ansluten</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Längre tid."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Kortare tid."</string>
 </resources>

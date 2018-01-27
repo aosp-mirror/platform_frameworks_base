@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Netkerfi"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Vottun þráðlausra skjáa"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Kveikja á ítarlegri skráningu Wi-Fi"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Leyfa alltaf reikileit með Wi-Fi"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Slembival MAC-vistfanga við tengingu"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Alltaf kveikt á farsímagögnum"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Vélbúnaðarhröðun fyrir tjóðrun"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Sýna Bluetooth-tæki án heita"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Slá inn hýsilheiti DNS-veitu"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Sýna valkosti fyrir vottun þráðlausra skjáa"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Auka skráningarstig Wi-Fi, sýna RSSI fyrir hvert SSID í Wi-Fi vali"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Leyfa/banna reikileit með Wi-Fi á grunni þess hversu mikil gagnaumferð er fyrir hendi í viðmótinu"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Velja MAC-vistfang af handahófi þegar tengst er við Wi‑Fi net"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Annálsritastærðir biðminna"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Veldu annálsritastærðir á biðminni"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Hreinsa varanlega geymslu annálsrita?"</string>
@@ -403,4 +403,10 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Skráð"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Ekki skráð"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Ekki tiltækt"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="one">%1$d tæki tengt</item>
+      <item quantity="other">%1$d tæki tengd</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Meiri tími."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Minni tími."</string>
 </resources>

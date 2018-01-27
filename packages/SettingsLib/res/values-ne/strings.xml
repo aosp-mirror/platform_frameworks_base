@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"नेटवर्किङ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ताररहित प्रदर्शन प्रमाणीकरण"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi-Fi वर्बोज लग सक्षम पार्नुहोस्"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi-Fi घुम्ने स्क्यान गर्न सधैँ अनुमति दिनुहोस्"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"जडान गरिएको MAC को अनियमितता"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"मोबाइल डेटा सधैँ सक्रिय राख्नुहोस्"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"टेदरिङको लागि हार्डवेयरको प्रवेग"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"नामकरण नगरिएका ब्लुटुथ यन्त्रहरू देखाउनुहोस्"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS प्रदायकको होस्टनाम प्रविष्ट गर्नुहोस्"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ताररहित प्रदर्शन प्रमाणीकरणका लागि विकल्पहरू देखाउनुहोस्"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi-Fi लग स्तर बढाउनुहोस्, Wi-Fi चयनकर्तामा प्रति SSID RSSI देखाइन्छ"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Wi-Fi घुम्ने स्क्यान इन्टरफेसमा रहेको डेटा यातायातको मात्रामा आधारित अनुमति दिनुहोस्/नदिनुहोस्"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Wi‑Fi नेटवर्कहरूमा जडान गर्ने बेला MAC को ठेगाना अनियमित गर्नुहोस्"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"लगर बफर आकारहरू"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"लग बफर प्रति लगर आकार चयन गर्नुहोस्"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"लगरको निरन्तर भण्डारणलाई खाली गर्ने हो?"</string>
@@ -403,4 +403,10 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"दर्ता गरिएको"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"दर्ता नगरिएको"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"अनुपलब्ध"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="other">%1$d यन्त्रहरू जडान गरिए</item>
+      <item quantity="one">%1$d यन्त्र जडान गरियो</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"थप समय।"</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"कम समय।"</string>
 </resources>
