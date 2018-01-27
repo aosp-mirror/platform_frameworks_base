@@ -1191,7 +1191,9 @@ public final class ProcessState {
         return sb.toString();
     }
 
-    public void toProto(ProtoOutputStream proto, String procName, int uid, long now) {
+    public void writeToProto(ProtoOutputStream proto, long fieldId,
+            String procName, int uid, long now) {
+        final long token = proto.start(fieldId);
         proto.write(ProcessStatsProto.PROCESS, procName);
         proto.write(ProcessStatsProto.UID, uid);
         if (mNumExcessiveCpu > 0 || mNumCachedKill > 0 ) {
@@ -1261,5 +1263,6 @@ public final class ProcessState {
             proto.write(ProcessStatsProto.State.DURATION_MS, entry.getValue());
             proto.end(stateToken);
         }
+        proto.end(token);
     }
 }
