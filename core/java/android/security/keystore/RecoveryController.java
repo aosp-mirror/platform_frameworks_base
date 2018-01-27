@@ -167,7 +167,7 @@ public class RecoveryController {
     public @NonNull KeychainSnapshot getRecoveryData(@NonNull byte[] account)
             throws InternalRecoveryServiceException {
         try {
-            return BackwardsCompat.toLegacyKeychainSnapshot(mBinder.getRecoveryData(account));
+            return BackwardsCompat.toLegacyKeychainSnapshot(mBinder.getKeyChainSnapshot());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {

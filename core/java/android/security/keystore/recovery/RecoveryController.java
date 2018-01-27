@@ -171,6 +171,8 @@ public class RecoveryController {
     }
 
     /**
+     * Deprecated - use getKeyChainSnapshot.
+     *
      * Returns data necessary to store all recoverable keys. Key material is
      * encrypted with user secret and recovery public key.
      *
@@ -179,10 +181,35 @@ public class RecoveryController {
      *     service.
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public @NonNull KeyChainSnapshot getRecoveryData()
+    public @Nullable KeyChainSnapshot getRecoveryData()
             throws InternalRecoveryServiceException {
         try {
-            return mBinder.getRecoveryData(/*account=*/ new byte[]{});
+            return mBinder.getKeyChainSnapshot();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ERROR_NO_SNAPSHOT_PENDING) {
+                return null;
+            }
+            throw wrapUnexpectedServiceSpecificException(e);
+        }
+    }
+
+    /**
+     * Returns data necessary to store all recoverable keys. Key material is
+     * encrypted with user secret and recovery public key.
+     *
+     * @return Data necessary to recover keystore or {@code null} if snapshot is not available.
+     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
+     *     service.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
+    public @Nullable KeyChainSnapshot getKeyChainSnapshot()
+            throws InternalRecoveryServiceException {
+        try {
+            return mBinder.getKeyChainSnapshot();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (ServiceSpecificException e) {
