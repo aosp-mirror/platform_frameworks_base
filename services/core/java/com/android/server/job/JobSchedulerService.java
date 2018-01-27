@@ -1814,7 +1814,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
         // If the app is in a non-active standby bucket, make sure we've waited
         // an appropriate amount of time since the last invocation.  During device-
         // wide parole, standby bucketing is ignored.
-        if (!mInParole) {
+        //
+        // But if a job has FLAG_EXEMPT_FROM_APP_STANDBY, don't check it.
+        if (!mInParole && !job.getJob().isExemptedFromAppStandby()) {
             final int bucket = job.getStandbyBucket();
             if (mHeartbeat < mNextBucketHeartbeat[bucket]) {
                 // Only skip this job if it's still waiting for the end of its (initial) nominal
@@ -2339,6 +2341,22 @@ public final class JobSchedulerService extends com.android.server.SystemService
             return canPersist;
         }
 
+        private void validateJobFlags(JobInfo job, int callingUid) {
+            if ((job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0) {
+                getContext().enforceCallingOrSelfPermission(
+                        android.Manifest.permission.CONNECTIVITY_INTERNAL, TAG);
+            }
+            if ((job.getFlags() & JobInfo.FLAG_EXEMPT_FROM_APP_STANDBY) != 0) {
+                if (callingUid != Process.SYSTEM_UID) {
+                    throw new SecurityException("Job has invalid flags");
+                }
+                if (job.hasLateConstraint() || job.hasEarlyConstraint()) {
+                    Slog.wtf(TAG, "Jobs with time-constraints mustn't have"
+                            +" FLAG_EXEMPT_FROM_APP_STANDBY. Job=" + job);
+                }
+            }
+        }
+
         // IJobScheduler implementation
         @Override
         public int schedule(JobInfo job) throws RemoteException {
@@ -2357,10 +2375,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 }
             }
 
-            if ((job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0) {
-                getContext().enforceCallingOrSelfPermission(
-                        android.Manifest.permission.CONNECTIVITY_INTERNAL, TAG);
-            }
+            validateJobFlags(job, uid);
 
             long ident = Binder.clearCallingIdentity();
             try {
@@ -2388,10 +2403,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 throw new NullPointerException("work is null");
             }
 
-            if ((job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0) {
-                getContext().enforceCallingOrSelfPermission(
-                        android.Manifest.permission.CONNECTIVITY_INTERNAL, TAG);
-            }
+            validateJobFlags(job, uid);
 
             long ident = Binder.clearCallingIdentity();
             try {
@@ -2422,10 +2434,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                         + " not permitted to schedule jobs for other apps");
             }
 
-            if ((job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0) {
-                getContext().enforceCallingOrSelfPermission(
-                        android.Manifest.permission.CONNECTIVITY_INTERNAL, TAG);
-            }
+            validateJobFlags(job, callerUid);
 
             long ident = Binder.clearCallingIdentity();
             try {
