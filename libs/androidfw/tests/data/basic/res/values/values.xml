@@ -22,7 +22,6 @@
     <attr name="attr2" format="reference|integer" />
 
     <public type="layout" name="main" id="0x7f020000" />
-    <public type="layout" name="layout" id="0x7f020001" />
 
     <public type="string" name="test1" id="0x7f030000" />
     <string name="test1">test1</string>
@@ -43,18 +42,6 @@
 
     <public type="integer" name="ref2" id="0x7f040003" />
     <integer name="ref2">12000</integer>
-
-    <public type="integer" name="deep_ref" id="0x7f040004" />
-    <integer name="deep_ref">@integer/deep_ref_1</integer>
-    <integer name="deep_ref_1">@integer/deep_ref_2</integer>
-    <integer name="deep_ref_2">@integer/deep_ref_3</integer>
-    <integer name="deep_ref_3">@integer/deep_ref_4</integer>
-    <integer name="deep_ref_4">@integer/deep_ref_5</integer>
-    <integer name="deep_ref_5">@integer/deep_ref_6</integer>
-    <integer name="deep_ref_6">@integer/deep_ref_7</integer>
-    <integer name="deep_ref_7">@integer/deep_ref_8</integer>
-    <integer name="deep_ref_8">@integer/deep_ref_9</integer>
-    <integer name="deep_ref_9">100</integer>
 
     <public type="style" name="Theme1" id="0x7f050000" />
     <style name="Theme1">

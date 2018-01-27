@@ -805,15 +805,20 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mAutomaticBrightnessController.configure(autoBrightnessEnabled,
                     mBrightnessConfiguration,
                     mLastUserSetScreenBrightness / (float) PowerManager.BRIGHTNESS_ON,
-                    autoBrightnessAdjustment, mPowerRequest.policy, userInitiatedChange);
+                    userSetBrightnessChanged, autoBrightnessAdjustment,
+                    autoBrightnessAdjustmentChanged, mPowerRequest.policy);
         }
 
         // Apply auto-brightness.
         boolean slowChange = false;
         if (brightness < 0) {
+            float newAutoBrightnessAdjustment = autoBrightnessAdjustment;
             if (autoBrightnessEnabled) {
                 brightness = mAutomaticBrightnessController.getAutomaticScreenBrightness();
+                newAutoBrightnessAdjustment =
+                        mAutomaticBrightnessController.getAutomaticScreenBrightnessAdjustment();
             }
+
             if (brightness >= 0) {
                 // Use current auto-brightness value and slowly adjust to changes.
                 brightness = clampScreenBrightness(brightness);
@@ -829,6 +834,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             } else {
                 mAppliedAutoBrightness = false;
             }
+            if (autoBrightnessAdjustment != newAutoBrightnessAdjustment) {
+                // If the autobrightness controller has decided to change the adjustment value
+                // used, make sure that's reflected in settings.
+                putAutoBrightnessAdjustmentSetting(newAutoBrightnessAdjustment);
+            }
         } else {
             mAppliedAutoBrightness = false;
         }
@@ -839,11 +849,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
 
         // Apply manual brightness.
-        // Use the current brightness setting from the request, which is expected
-        // provide a nominal default value for the case where auto-brightness
-        // is not ready yet.
         if (brightness < 0) {
-            brightness = clampScreenBrightness(mLastUserSetScreenBrightness);
+            brightness = clampScreenBrightness(mCurrentScreenBrightnessSetting);
         }
 
 
@@ -1428,8 +1435,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private void putScreenBrightnessSetting(int brightness) {
         mCurrentScreenBrightnessSetting = brightness;
         Settings.System.putIntForUser(mContext.getContentResolver(),
-                Settings.System.SCREEN_BRIGHTNESS, brightness,
-                UserHandle.USER_CURRENT);
+                Settings.System.SCREEN_BRIGHTNESS, brightness, UserHandle.USER_CURRENT);
+    }
+
+    private void putAutoBrightnessAdjustmentSetting(float adjustment) {
+        mAutoBrightnessAdjustment = adjustment;
+        Settings.System.putFloatForUser(mContext.getContentResolver(),
+                Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, adjustment, UserHandle.USER_CURRENT);
     }
 
     private boolean updateAutoBrightnessAdjustment() {
@@ -1449,6 +1461,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             return false;
         }
         if (mCurrentScreenBrightnessSetting == mPendingScreenBrightnessSetting) {
+            mPendingScreenBrightnessSetting = -1;
             return false;
         }
         mLastUserSetScreenBrightness = mPendingScreenBrightnessSetting;
