@@ -135,7 +135,7 @@
     <string name="tts_play_example_summary" msgid="8029071615047894486">"Reproduzir uma rápida demonstração da voz sintetizada"</string>
     <string name="tts_install_data_title" msgid="4264378440508149986">"Instalar dados de voz"</string>
     <string name="tts_install_data_summary" msgid="5742135732511822589">"É necessário instalar os dados de voz para a sintetização da fala"</string>
-    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Este mecanismo de síntese de fala pode coletar todo texto que será falado, inclusive dados pessoais como senhas e números de cartão de crédito. Ele é proveniente do mecanismo <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Deseja ativar o uso desse mecanismo de síntese de fala?"</string>
+    <string name="tts_engine_security_warning" msgid="8786238102020223650">"Este mecanismo de síntese de fala pode coletar todo texto que será falado, inclusive dados pessoais como senhas e números de cartão de crédito. Ele é proveniente do mecanismo <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>. Quer ativar o uso desse mecanismo de síntese de fala?"</string>
     <string name="tts_engine_network_required" msgid="1190837151485314743">"Este idioma requer uma conexão de rede ativa para a conversão de texto em voz."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Este é um exemplo de sintetização de voz."</string>
     <string name="tts_status_title" msgid="7268566550242584413">"Status de idioma padrão"</string>

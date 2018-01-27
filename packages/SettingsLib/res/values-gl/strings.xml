@@ -388,6 +388,6 @@
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"Métodos de entrada activos"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Usar idiomas do sistema"</string>
     <string name="failed_to_open_app_settings_toast" msgid="1251067459298072462">"Non se puido abrir a configuración de <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g>"</string>
-    <string name="ime_security_warning" msgid="4135828934735934248">"É posible que este método de entrada poida recompilar todo o texto que escribas, incluídos os datos persoais como os contrasinais e os números de tarxetas de crédito. Provén da aplicación <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Queres usar este método de entrada?"</string>
+    <string name="ime_security_warning" msgid="4135828934735934248">"Este método de introdución de texto pode recompilar todo o que escribas, incluídos os datos persoais como os contrasinais e os números de tarxetas de crédito. Provén da aplicación <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g>. Queres usar este método de introdución de texto?"</string>
     <string name="direct_boot_unaware_dialog_message" msgid="7870273558547549125">"Nota: Tras un reinicio, non se pode iniciar esta aplicación ata que desbloquees o teléfono"</string>
 </resources>

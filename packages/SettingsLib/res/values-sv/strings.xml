@@ -267,7 +267,7 @@
     <string name="show_hw_screen_updates_summary" msgid="1115593565980196197">"Visningar blinkar i fönster vid GPU-ritningar"</string>
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Visa maskinvaruskiktuppd."</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Låt maskinvaruskikt blinka grönt vid uppdateringar"</string>
-    <string name="debug_hw_overdraw" msgid="2968692419951565417">"Felsök överskriden GPU"</string>
+    <string name="debug_hw_overdraw" msgid="2968692419951565417">"Felsök GPU-överritning"</string>
     <string name="debug_hw_renderer" msgid="7568529019431785816">"Ange GPU-renderare"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Inaktivera HW-överlagringar"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Använd alltid GPU för skärmsammansättning"</string>

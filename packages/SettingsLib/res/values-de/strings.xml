@@ -121,8 +121,8 @@
     <string name="running_process_item_user_label" msgid="3129887865552025943">"Nutzer: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="313159469856372621">"Einige Standardeinstellungen festgelegt"</string>
     <string name="launch_defaults_none" msgid="4241129108140034876">"Keine Standardeinstellungen festgelegt"</string>
-    <string name="tts_settings" msgid="8186971894801348327">"Text-in-Sprache"</string>
-    <string name="tts_settings_title" msgid="1237820681016639683">"Text-in-Sprache-Ausgabe"</string>
+    <string name="tts_settings" msgid="8186971894801348327">"Sprachausgabe"</string>
+    <string name="tts_settings_title" msgid="1237820681016639683">"Sprachausgabe-Ausgabe"</string>
     <string name="tts_default_rate_title" msgid="6030550998379310088">"Sprechgeschwindigkeit"</string>
     <string name="tts_default_rate_summary" msgid="4061815292287182801">"Geschwindigkeit, mit der der Text gesprochen wird"</string>
     <string name="tts_default_pitch_title" msgid="6135942113172488671">"Tonlage"</string>
@@ -136,7 +136,7 @@
     <string name="tts_install_data_title" msgid="4264378440508149986">"Sprachdaten installieren"</string>
     <string name="tts_install_data_summary" msgid="5742135732511822589">"Sprachdaten für Sprachsynthese installieren"</string>
     <string name="tts_engine_security_warning" msgid="8786238102020223650">"Dieses Sprachsynthesemodul kann den gesamten gesprochenen Text erfassen, einschließlich personenbezogener Daten wie Passwörter und Kreditkartennummern. Es ist Teil der App \"<xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g>\". Möchtest du dieses Sprachsynthesemodul aktivieren?"</string>
-    <string name="tts_engine_network_required" msgid="1190837151485314743">"Für diese Sprache ist zur Text-in-Sprache-Ausgabe eine aktive Netzwerkverbindung erforderlich."</string>
+    <string name="tts_engine_network_required" msgid="1190837151485314743">"Für diese Sprache ist zur Sprachausgabe-Ausgabe eine aktive Netzwerkverbindung erforderlich."</string>
     <string name="tts_default_sample_string" msgid="4040835213373086322">"Dies ist ein Beispiel für Sprachsynthese."</string>
     <string name="tts_status_title" msgid="7268566550242584413">"Status der Standardsprache"</string>
     <string name="tts_status_ok" msgid="1309762510278029765">"<xliff:g id="LOCALE">%1$s</xliff:g> wird vollständig unterstützt."</string>
