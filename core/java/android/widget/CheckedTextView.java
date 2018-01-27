@@ -132,7 +132,7 @@ public class CheckedTextView extends TextView implements Checkable {
         if (mChecked != checked) {
             mChecked = checked;
             refreshDrawableState();
-            notifyAccessibilityStateChanged(
+            notifyViewAccessibilityStateChangedIfNeeded(
                     AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
         }
     }
