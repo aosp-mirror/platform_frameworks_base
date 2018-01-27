@@ -308,8 +308,13 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
     }
 
     public boolean onTouchEvent(MotionEvent event) {
+        // The same down event was just sent on intercept and therefore can be ignored here
+        boolean ignoreProxyDownEvent = event.getAction() == MotionEvent.ACTION_DOWN
+                && mOverviewEventSender.getProxy() != null;
         boolean result = mStatusBar.isPresenterFullyCollapsed()
-                && (mQuickScrubController.onTouchEvent(event) || proxyMotionEvents(event));
+                && (mQuickScrubController.onTouchEvent(event)
+                || ignoreProxyDownEvent
+                || proxyMotionEvents(event));
         if (mDockWindowEnabled) {
             result |= handleDockWindowEvent(event);
         }
