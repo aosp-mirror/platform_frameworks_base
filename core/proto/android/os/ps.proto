@@ -20,10 +20,17 @@ package android.os;
 
 option java_multiple_files = true;
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 message PsDumpProto {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
     message Process {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
         // Security label, most commonly used for SELinux context data.
         optional string label = 1;
+        // String representation of uid.
         optional string user = 2;
         // Process ID number.
         optional int32 pid = 3;
