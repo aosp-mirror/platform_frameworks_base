@@ -20,6 +20,7 @@ import android.app.ActivityManager;
 import android.app.job.JobParameters;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.server.ServerProtoEnums;
 import android.service.batterystats.BatteryStatsServiceDumpProto;
 import android.telephony.SignalStrength;
 import android.text.format.DateFormat;
@@ -2054,17 +2055,17 @@ public abstract class BatteryStats implements Parcelable {
     /**
      * Constant for device idle mode: not active.
      */
-    public static final int DEVICE_IDLE_MODE_OFF = 0;
+    public static final int DEVICE_IDLE_MODE_OFF = ServerProtoEnums.DEVICE_IDLE_MODE_OFF; // 0
 
     /**
      * Constant for device idle mode: active in lightweight mode.
      */
-    public static final int DEVICE_IDLE_MODE_LIGHT = 1;
+    public static final int DEVICE_IDLE_MODE_LIGHT = ServerProtoEnums.DEVICE_IDLE_MODE_LIGHT; // 1
 
     /**
      * Constant for device idle mode: active in full mode.
      */
-    public static final int DEVICE_IDLE_MODE_DEEP = 2;
+    public static final int DEVICE_IDLE_MODE_DEEP = ServerProtoEnums.DEVICE_IDLE_MODE_DEEP; // 2
 
     /**
      * Returns the time in microseconds that device has been in idle mode while
