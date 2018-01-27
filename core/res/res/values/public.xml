@@ -2881,6 +2881,9 @@
     <public-group type="string" first-id="0x0104001b">
     </public-group>
 
+    <!-- An interpolator which accelerates fast but decelerates extra slowly. -->
+    <public type="interpolator" name="fast_out_extra_slow_in" id="0x10c001a"/>
+
   <!-- ===============================================================
        DO NOT ADD UN-GROUPED ITEMS HERE
 
