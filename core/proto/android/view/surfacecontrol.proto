@@ -19,10 +19,14 @@ package android.view;
 
 option java_multiple_files = true;
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 /**
  * Represents a {@link android.view.SurfaceControl} object.
  */
 message SurfaceControlProto {
+  option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional int32 hash_code = 1;
-  optional string name = 2;
+  optional string name = 2 [ (android.privacy).dest = DEST_EXPLICIT ];
 }

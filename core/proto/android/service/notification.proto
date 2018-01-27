@@ -50,7 +50,7 @@ message NotificationServiceDumpProto {
 message NotificationRecordProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional string key = 1 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional string key = 1;
 
     enum State {
         ENQUEUED = 0;
@@ -88,7 +88,7 @@ message ManagedServiceInfoProto {
 message ManagedServicesProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional string caption = 1 [ (.android.privacy).dest = DEST_EXPLICIT ];
+    optional string caption = 1;
 
     message ServiceProto {
         option (android.msg_privacy).dest = DEST_AUTOMATIC;
