@@ -362,13 +362,6 @@ public class WifiTrackerTest {
         });
         assertTrue("Latch timed out while waiting for WorkerHandler",
                 workerLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
-
-        CountDownLatch mainLatch = new CountDownLatch(1);
-        tracker.mMainHandler.post(() -> {
-            mainLatch.countDown();
-        });
-        assertTrue("Latch timed out while waiting for MainHandler",
-                mainLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
     }
 
     private void switchToNetwork2(WifiTracker tracker) throws InterruptedException {
@@ -770,7 +763,7 @@ public class WifiTrackerTest {
         CountDownLatch ready = new CountDownLatch(1);
         CountDownLatch latch = new CountDownLatch(1);
         CountDownLatch lock = new CountDownLatch(1);
-        tracker.mMainHandler.post(() -> {
+        tracker.mWorkHandler.post(() -> {
             try {
                 ready.countDown();
                 lock.await();
@@ -781,8 +774,7 @@ public class WifiTrackerTest {
         });
 
         // Enqueue messages
-        tracker.mMainHandler.sendEmptyMessage(
-                WifiTracker.MainHandler.MSG_ACCESS_POINT_CHANGED);
+        tracker.mWorkHandler.sendEmptyMessage(WifiTracker.WorkHandler.MSG_UPDATE_ACCESS_POINTS);
 
         try {
             ready.await(); // Make sure we have entered the first message handler
@@ -796,8 +788,9 @@ public class WifiTrackerTest {
         lock.countDown();
         assertTrue("Latch timed out", latch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
 
-        assertThat(tracker.mMainHandler.hasMessages(
-                WifiTracker.MainHandler.MSG_ACCESS_POINT_CHANGED)).isFalse();
+        assertThat(tracker.mWorkHandler.hasMessages(
+                WifiTracker.WorkHandler.MSG_UPDATE_ACCESS_POINTS)).isFalse();
+        waitForHandlersToProcessCurrentlyEnqueuedMessages(tracker);
 
         verifyNoMoreInteractions(mockWifiListener);
     }
