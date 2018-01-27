@@ -37,7 +37,7 @@ import java.util.List;
 @SystemApi
 public class DataServiceCallback {
 
-    private static final String mTag = DataServiceCallback.class.getSimpleName();
+    private static final String TAG = DataServiceCallback.class.getSimpleName();
 
     /**
      * Result of data requests
@@ -79,7 +79,7 @@ public class DataServiceCallback {
             try {
                 callback.onSetupDataCallComplete(result, response);
             } catch (RemoteException e) {
-                Rlog.e(mTag, "Failed to onSetupDataCallComplete on the remote");
+                Rlog.e(TAG, "Failed to onSetupDataCallComplete on the remote");
             }
         }
     }
@@ -96,7 +96,7 @@ public class DataServiceCallback {
             try {
                 callback.onDeactivateDataCallComplete(result);
             } catch (RemoteException e) {
-                Rlog.e(mTag, "Failed to onDeactivateDataCallComplete on the remote");
+                Rlog.e(TAG, "Failed to onDeactivateDataCallComplete on the remote");
             }
         }
     }
@@ -113,7 +113,7 @@ public class DataServiceCallback {
             try {
                 callback.onSetInitialAttachApnComplete(result);
             } catch (RemoteException e) {
-                Rlog.e(mTag, "Failed to onSetInitialAttachApnComplete on the remote");
+                Rlog.e(TAG, "Failed to onSetInitialAttachApnComplete on the remote");
             }
         }
     }
@@ -131,7 +131,7 @@ public class DataServiceCallback {
             try {
                 callback.onSetDataProfileComplete(result);
             } catch (RemoteException e) {
-                Rlog.e(mTag, "Failed to onSetDataProfileComplete on the remote");
+                Rlog.e(TAG, "Failed to onSetDataProfileComplete on the remote");
             }
         }
     }
@@ -149,7 +149,7 @@ public class DataServiceCallback {
             try {
                 callback.onGetDataCallListComplete(result, dataCallList);
             } catch (RemoteException e) {
-                Rlog.e(mTag, "Failed to onGetDataCallListComplete on the remote");
+                Rlog.e(TAG, "Failed to onGetDataCallListComplete on the remote");
             }
         }
     }
@@ -165,7 +165,7 @@ public class DataServiceCallback {
             try {
                 callback.onDataCallListChanged(dataCallList);
             } catch (RemoteException e) {
-                Rlog.e(mTag, "Failed to onDataCallListChanged on the remote");
+                Rlog.e(TAG, "Failed to onDataCallListChanged on the remote");
             }
         }
     }
