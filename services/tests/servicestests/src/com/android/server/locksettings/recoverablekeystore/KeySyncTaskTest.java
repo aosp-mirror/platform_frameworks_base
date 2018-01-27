@@ -327,8 +327,7 @@ public class KeySyncTaskTest {
         mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
-        SecretKey applicationKey =
-                addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
+        addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
 
         mKeySyncTask.run();
 
@@ -340,6 +339,26 @@ public class KeySyncTaskTest {
 
         keyChainSnapshot = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
         assertThat(keyChainSnapshot.getSnapshotVersion()).isEqualTo(2); // Updated
+    }
+
+    @Test
+    public void run_recreatesMissingSnapshot() throws Exception {
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());
+        when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
+        addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
+
+        mKeySyncTask.run();
+
+        KeyChainSnapshot keyChainSnapshot = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
+        assertThat(keyChainSnapshot.getSnapshotVersion()).isEqualTo(1); // default value;
+
+        mRecoverySnapshotStorage.remove(TEST_RECOVERY_AGENT_UID); // corrupt snapshot.
+
+        mKeySyncTask.run();
+
+        keyChainSnapshot = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
+        assertThat(keyChainSnapshot.getSnapshotVersion()).isEqualTo(1); // Same version
     }
 
     @Test

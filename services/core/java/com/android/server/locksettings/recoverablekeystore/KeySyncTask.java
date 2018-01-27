@@ -158,9 +158,17 @@ public class KeySyncTask implements Runnable {
     }
 
     private void syncKeysForAgent(int recoveryAgentUid) {
+        boolean recreateCurrentVersion = false;
         if (!shoudCreateSnapshot(recoveryAgentUid)) {
-            Log.d(TAG, "Key sync not needed.");
-            return;
+            recreateCurrentVersion =
+                    (mRecoverableKeyStoreDb.getSnapshotVersion(mUserId, recoveryAgentUid) != null)
+                    && (mRecoverySnapshotStorage.get(recoveryAgentUid) == null);
+            if (recreateCurrentVersion) {
+                Log.d(TAG, "Recreating most recent snapshot");
+            } else {
+                Log.d(TAG, "Key sync not needed.");
+                return;
+            }
         }
 
         if (!mSnapshotListenersStorage.hasListener(recoveryAgentUid)) {
@@ -253,23 +261,21 @@ public class KeySyncTask implements Runnable {
             Log.e(TAG,"Could not encrypt with recovery key", e);
             return;
         }
-        // TODO: store raw data in RecoveryServiceMetadataEntry and generate Parcelables later
-        // TODO: use Builder.
-        KeyChainProtectionParams metadata = new KeyChainProtectionParams(
-                /*userSecretType=*/ TYPE_LOCKSCREEN,
-                /*lockScreenUiFormat=*/ getUiFormat(mCredentialType, mCredential),
-                /*keyDerivationParams=*/ KeyDerivationParams.createSha256Params(salt),
-                /*secret=*/ new byte[0]);
+        KeyChainProtectionParams metadata = new KeyChainProtectionParams.Builder()
+                .setUserSecretType(TYPE_LOCKSCREEN)
+                .setLockScreenUiFormat(getUiFormat(mCredentialType, mCredential))
+                .setKeyDerivationParams(KeyDerivationParams.createSha256Params(salt))
+                .setSecret(new byte[0])
+                .build();
+
         ArrayList<KeyChainProtectionParams> metadataList = new ArrayList<>();
         metadataList.add(metadata);
-
-        int snapshotVersion = incrementSnapshotVersion(recoveryAgentUid);
 
         // If application keys are not updated, snapshot will not be created on next unlock.
         mRecoverableKeyStoreDb.setShouldCreateSnapshot(mUserId, recoveryAgentUid, false);
 
         mRecoverySnapshotStorage.put(recoveryAgentUid, new KeyChainSnapshot.Builder()
-                .setSnapshotVersion(snapshotVersion)
+                .setSnapshotVersion(getSnapshotVersion(recoveryAgentUid, recreateCurrentVersion))
                 .setMaxAttempts(TRUSTED_HARDWARE_MAX_ATTEMPTS)
                 .setCounterId(counterId)
                 .setTrustedHardwarePublicKey(SecureBox.encodePublicKey(publicKey))
@@ -283,9 +289,14 @@ public class KeySyncTask implements Runnable {
     }
 
     @VisibleForTesting
-    int incrementSnapshotVersion(int recoveryAgentUid) {
+    int getSnapshotVersion(int recoveryAgentUid, boolean recreateCurrentVersion) {
         Long snapshotVersion = mRecoverableKeyStoreDb.getSnapshotVersion(mUserId, recoveryAgentUid);
-        snapshotVersion = snapshotVersion == null ? 1 : snapshotVersion + 1;
+        if (recreateCurrentVersion) {
+            // version shouldn't be null at this moment.
+            snapshotVersion = snapshotVersion == null ? 1 : snapshotVersion;
+        } else {
+            snapshotVersion = snapshotVersion == null ? 1 : snapshotVersion + 1;
+        }
         mRecoverableKeyStoreDb.setSnapshotVersion(mUserId, recoveryAgentUid, snapshotVersion);
 
         return snapshotVersion.intValue();
@@ -413,10 +424,10 @@ public class KeySyncTask implements Runnable {
             Map<String, byte[]> encryptedApplicationKeys) {
         ArrayList<WrappedApplicationKey> keyEntries = new ArrayList<>();
         for (String alias : encryptedApplicationKeys.keySet()) {
-            keyEntries.add(
-                    new WrappedApplicationKey(
-                            alias,
-                            encryptedApplicationKeys.get(alias)));
+            keyEntries.add(new WrappedApplicationKey.Builder()
+                    .setAlias(alias)
+                    .setEncryptedKeyMaterial(encryptedApplicationKeys.get(alias))
+                    .build());
         }
         return keyEntries;
     }
