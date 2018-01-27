@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Tarmoqlar"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Simsiz monitor sertifikatlari"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Batafsil Wi-Fi jurnali"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi-Fi tarmoqlarini qidirishga doim ruxsat"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Ulangan MAC randomizatsiyasi"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobil internet doim yoniq tursin"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Modem rejimida apparatli tezlashtirish"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Bluetooth qurilmalarini nomlarisiz ko‘rsatish"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS provayderining host nomini kiriting"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Simsiz monitorlarni sertifikatlash parametrini ko‘rsatish"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi-Fi ulanishini tanlashda har bir SSID uchun jurnalda ko‘rsatilsin"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Ma’lumotlarni uzatish vaqtida  trafik hajmiga qarab Wi-Fi tarmoqlarni qidirish funksiyasini yoqish yoki o‘chirish"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Wi-Fi tarmoqlarga ulanishda MAC manzilini tasodifiy tanlash"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Jurnal buferi hajmi"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Jurnal xotirasi hajmini tanlang"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Jurnalning doimiy xotirasi tozalansinmi?"</string>
@@ -403,4 +403,10 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Registratsiya qilingan"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Registratsiya qilinmagan"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Mavjud emas"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="other">%1$d ta qurilma ulangan</item>
+      <item quantity="one">%1$d ta qurilma ulangan</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Ko‘proq vaqt."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Kamroq vaqt."</string>
 </resources>

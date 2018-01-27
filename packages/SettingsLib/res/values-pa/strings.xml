@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"ਨੈੱਟਵਰਕਿੰਗ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ਵਾਇਰਲੈੱਸ ਡਿਸਪਲੇ ਪ੍ਰਮਾਣੀਕਰਨ"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"ਵਾਈ-ਫਾਈ ਵਰਬੋਸ ਲੌਗਿੰਗ ਚਾਲੂ ਕਰੋ"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ਹਮੇਸ਼ਾਂ ਵਾਈ‑ਫਾਈ ਰੋਮ ਸਕੈਨਾਂ ਦੀ ਆਗਿਆ ਦਿਓ"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"ਬੇਤਰਤੀਬਵਾਰ ਕਨੈਕਟ ਕੀਤਾ ਹੋਇਆ MAC ਪਤਾ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ਮੋਬਾਈਲ ਡਾਟਾ ਹਮੇਸ਼ਾਂ ਕਿਰਿਆਸ਼ੀਲ"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ਟੈਦਰਿੰਗ ਹਾਰਡਵੇਅਰ ਐਕਸੈੱਲਰੇਸ਼ਨ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"ਅਨਾਮ ਬਲੂਟੁੱਥ ਡੀਵਾਈਸਾਂ ਦਿਖਾਓ"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS ਪ੍ਰਦਾਨਕ ਦਾ ਹੋਸਟਨਾਮ ਦਾਖਲ ਕਰੋ"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ਵਾਇਰਲੈੱਸ ਡਿਸਪਲੇ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਚੋਣਾਂ ਪ੍ਰਦਰਸ਼ਿਤ ਕਰੋ"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ਵਾਈ‑ਫਾਈ ਲੌਗਿੰਗ ਪੱਧਰ ਵਧਾਓ, ਵਾਈ‑ਫਾਈ Picker ਵਿੱਚ ਪ੍ਰਤੀ SSID RSSI ਦਿਖਾਓ"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"ਇੰਟਰਫੇਸ ਤੇ ਮੌਜੂਦ ਡਾਟਾ ਟ੍ਰੈਫਿਕ ਦੀ ਮਾਤਰਾ ਦੇ ਆਧਾਰ ਤੇ ਵਾਈ-ਫਾਈ ਰੋਮ ਸਕੈਨ ਦੀ ਆਗਿਆ ਦਿਓ/ਅਸਵੀਕਾਰ ਕਰੋ"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕਾਂ ਨਾਲ ਕਨੈਕਟ ਹੋਣ \'ਤੇ MAC ਪਤਾ ਬੇਤਰਤੀਬਵਾਰ ਚੁਣੋ"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ਲੌਗਰ ਬਫ਼ਰ ਆਕਾਰ"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ਪ੍ਰਤੀ ਲੌਗ ਬਫ਼ਰ ਲੌਗਰ ਆਕਾਰ ਚੁਣੋ"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"ਕੀ ਲੌਗਰ ਪ੍ਰਸਿੱਸਟੈਂਟ ਸਟੋਰੇਜ ਨੂੰ ਸਾਫ਼ ਕਰਨਾ ਹੈ?"</string>
@@ -403,4 +403,10 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"ਰਜਿਸਟਰ ਕੀਤੀ ਗਈ"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"ਰਜਿਸਟਰ ਨਹੀਂ ਕੀਤੀ ਗਈ"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"ਅਣਉਪਲਬਧ"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="one">%1$d ਡੀਵਾਈਸ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ</item>
+      <item quantity="other">%1$d ਡੀਵਾਈਸ ਕਨੈਕਟ ਕੀਤੇ ਗਏ</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"ਹੋਰ ਸਮਾਂ।"</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"ਘੱਟ ਸਮਾਂ।"</string>
 </resources>

@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"നെറ്റ്‍വര്‍ക്കിംഗ്"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"വയർലെസ് ഡിസ്‌പ്ലേ സർട്ടിഫിക്കേഷൻ"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"വൈഫൈ വെർബോസ് ലോഗിംഗ് പ്രവർത്തനക്ഷമമാക്കുക"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"എപ്പോഴും വൈഫൈ റോം സ്‌‌കാൻ അനുവദിക്കൂ"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"കണക്‌റ്റ് ചെയ്‌ത MAC ക്രമരഹിതമാക്കൽ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"മൊബൈൽ ഡാറ്റ എല്ലായ്‌പ്പോഴും സജീവം"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ടെതറിംഗ് ഹാർഡ്‌വെയർ ത്വരിതപ്പെടുത്തൽ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"പേരില്ലാത്ത Bluetooth ഉപകരണങ്ങൾ കാണിക്കുക"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS ദാതാവിന്‍റെ ഹോസ്റ്റുനാമം നൽകുക"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"വയർലെസ് ഡിസ്‌പ്ലേ സർട്ടിഫിക്കേഷനായി ഓപ്‌ഷനുകൾ ദൃശ്യമാക്കുക"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"വൈഫൈ പിക്കറിൽ ഓരോ SSID RSSI പ്രകാരം കാണിക്കാൻ വൈഫൈ ലോഗിംഗ് നില വർദ്ധിപ്പിക്കുക"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"ഇന്റർഫേസിലെ ഡാറ്റ ട്രാഫിക്ക് സാന്നിദ്ധ്യത്തിന്റെ കണക്ക് അടിസ്ഥാനമാക്കി വൈഫൈ റോം സ്‌കാനുകൾ അനുവദിക്കുക/അനുവദിക്കാതിരിക്കുക"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"വൈഫൈ നെറ്റ്‌വർക്കുകളിലേക്ക് കണക്‌റ്റ് ചെയ്യുമ്പോൾ MAC വിലാസം ക്രമരഹിതമാക്കുക"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ലോഗർ ബഫർ വലുപ്പം"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ഓരോ ലോഗ് ബഫറിനും വലുപ്പം തിരഞ്ഞെടുക്കൂ"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"ലോഗർ സ്ഥിര സ്റ്റോറേജ് മായ്ക്കണോ?"</string>
@@ -403,4 +403,10 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"രജിസ്റ്റർ ചെയ്‌തു"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"രജിസ്‌റ്റർ ചെയ്‌തിട്ടില്ല"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"ലഭ്യമല്ല"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="other">%1$d ഉപകരണങ്ങൾ കണക്‌റ്റ് ചെയ്‌തു</item>
+      <item quantity="one">%1$d ഉപകരണം കണക്‌റ്റ് ചെയ്‌തു</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"കൂടുതൽ സമയം."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"കുറഞ്ഞ സമയം."</string>
 </resources>

@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Sítě"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certifikace bezdrát. displeje"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Podrobné protokolování Wi‑Fi"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Vždy povolit Wi-Fi roaming"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Náhodné adresy MAC při připojení"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobilní data jsou vždy aktivní"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardwarová akcelerace tetheringu"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Zobrazovat zařízení Bluetooth bez názvů"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Zadejte název hostitele poskytovatele DNS"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Zobrazit možnosti certifikace bezdrátového displeje"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Zvýšit úroveň protokolování Wi‑Fi zobrazenou v SSID a RSSI při výběru sítě Wi‑Fi."</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Povolí nebo zakáže Wi-Fi roaming na základě množství datového provozu na rozhraní."</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Při připojení k sítím Wi-Fi používat náhodnou adresu MAC"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Vyrovnávací paměť protokol. nástroje"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Velikost vyrovnávací paměti protokol. nástroje"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Vymazat trvalé úložiště protokolovacího nástroje?"</string>
@@ -403,4 +403,12 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Registrováno"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Neregistrováno"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Není k dispozici"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="few">Připojena %1$d zařízení</item>
+      <item quantity="many">Připojeno %1$d zařízení</item>
+      <item quantity="other">Připojeno %1$d zařízení</item>
+      <item quantity="one">Připojeno %1$d zařízení</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Delší doba"</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Kratší doba"</string>
 </resources>

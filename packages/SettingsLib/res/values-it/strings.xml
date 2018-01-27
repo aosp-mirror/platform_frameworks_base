@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Reti"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certificazione display wireless"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Attiva registrazione dettagliata Wi-Fi"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Consenti sempre scansioni roaming Wi-Fi"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Selezione casuale dell\'indirizzo MAC con connessione"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Dati mobili sempre attivi"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Tethering accelerazione hardware"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Mostra dispositivi Bluetooth senza nome"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Inserisci il nome host del provider DNS"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Mostra opzioni per la certificazione display wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Aumenta il livello di registrazione Wi-Fi, mostrando il SSID RSSI nel selettore Wi-Fi"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Consenti/vieta scansioni roaming Wi-Fi basate sulla quantità di traffico dati presente a livello di interfaccia"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Seleziona indirizzo MAC casuale con reti Wi-Fi collegate"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Dimensioni buffer Logger"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Seleziona dimensioni Logger per buffer log"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Cancellare i dati nello spazio di archiviazione permanente del logger?"</string>
@@ -403,4 +403,10 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Registrato"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Non registrato"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Non disponibile"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="other">%1$d dispositivi connessi</item>
+      <item quantity="one">%1$d dispositivo connesso</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Più tempo."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Meno tempo."</string>
 </resources>

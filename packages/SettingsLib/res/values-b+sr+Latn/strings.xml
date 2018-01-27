@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Umrežavanje"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Sertifikacija bežičnog ekrana"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Omogući detaljniju evidenciju za Wi‑Fi"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Uvek dozvoli skeniranje Wi‑Fi-ja u romingu"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Nasumičan izbor MAC adrese tokom povezivanja"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobilni podaci su uvek aktivni"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardversko ubrzanje privezivanja"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Prikaži Bluetooth uređaje bez naziva"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Unesite ime hosta dobavljača usluge DNS-a"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Prikaz opcija za sertifikaciju bežičnog ekrana"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Povećava nivo evidentiranja za Wi‑Fi. Prikaz po SSID RSSI-u u biraču Wi‑Fi mreže"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Dozvoli/zabrani skeniranje Wi-Fi-ja u romingu na osnovu prisutnog protoka podataka na interfejsu"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Izaberi nasumičnu MAC adresu tokom povezivanja na Wi‑Fi mreže"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Veličine bafera podataka u programu za evidentiranje"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Izaberite veličine po baferu evidencije"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Želite li da obrišete stalni memorijski prostor programa za evidentiranje?"</string>
@@ -403,4 +403,11 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Registrovan je"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Nije registrovan"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Nedostupno"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="one">Povezan je %1$d uređaj</item>
+      <item quantity="few">Povezana su %1$d uređaja</item>
+      <item quantity="other">Povezano je %1$d uređaja</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Više vremena."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Manje vremena."</string>
 </resources>

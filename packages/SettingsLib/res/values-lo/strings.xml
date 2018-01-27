@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"ການ​ສ້າງເຄືອຂ່າຍ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ສະແດງການຮັບຮອງຂອງລະບົບໄຮ້ສາຍ"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"​ເປີດ​ນຳ​ໃຊ້ການ​ເກັບ​ປະ​ຫວັດ​ Verbose Wi‑Fi"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ອະ​ນຸ​ຍາດ​ການ​ສະ​ແກນ​ການ​ໂຣມ Wi‑Fi ​ສະ​ເໝີ"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"ເຊື່ອມຕໍ່ການສຸ່ມ MAC ແລ້ວ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ເປີດໃຊ້ອິນເຕີເນັດມືຖືຕະຫຼອດເວລາ"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ເປີດໃຊ້ການເລັ່ງຄວາມໄວດ້ວຍຮາດແວ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"ສະແດງອຸປະກອນ Bluetooth ທີ່ບໍ່ມີຊື່"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"ລະບຸຊື່ໂຮສຂອງຜູ້ໃຫ້ບໍລິການ DNS"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ສະແດງໂຕເລືອກສຳລັບການສະແດງການຮັບຮອງລະບົບໄຮ້ສາຍ"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"ເພີ່ມ​ລະ​ດັບ​ການ​ເກັບ​ປະ​ຫວັດ Wi‑Fi, ສະ​ແດງ​ຕໍ່ SSID RSSI ​ໃນ​ Wi‑Fi Picker"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"​ອະ​ນຸ​ຍາດ/ບໍ່​ອະ​ນຸ​ຍາດການ​ສະ​ແກນ​ການ​ໂຣມ Wi-Fi ອີງ​ຕາມ​ຈຳ​ນວນ​ຂໍ້​ມູນທີ່​ເກີດ​ຂຶ້ນ​ໃນ​ລະ​ດັບ​ສ່ວນ​ຕິດ​ຕໍ່"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"ສຸ່ມທີ່ຢູ່ MAC ເມື່ອເຊື່ອມຕໍ່ຫາເຄືອຂ່າຍ Wi‑Fi"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ຂະ​ໜາດ​​ບັບ​ເຟີໂຕ​ລັອກ"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ເລືອກ​ຂະ​ໜາດ​ລັອກ​ຕໍ່​ບັບ​ເຟີ"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"ລຶບລ້າງບ່ອນຈັດເກັບຖາວອນຂອງຕົວບັນທຶກບໍ່?"</string>
@@ -403,4 +403,10 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"ລົງທະບຽນແລ້ວ"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"ບໍ່ໄດ້ລົງທະບຽນ"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"ບໍ່ມີຂໍ້ມູນ"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="other">ເຊື່ອມຕໍ່ %1$d ອຸປະກອນແລ້ວ</item>
+      <item quantity="one">ເຊື່ອມຕໍ່ %1$d ອຸປະກອນແລ້ວ</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"ເພີ່ມເວລາ."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"ຫຼຸດເວລາ."</string>
 </resources>

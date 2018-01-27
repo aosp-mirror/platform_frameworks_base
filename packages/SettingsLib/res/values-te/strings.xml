@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"నెట్‌వర్కింగ్"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"వైర్‌లెస్ ప్రదర్శన ప్రమాణీకరణ"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi విశదీకృత లాగింగ్‌ను ప్రారంభించండి"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi సంచార స్కాన్‌లను ఎల్లప్పుడూ అనుమతించు"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"MAC యాదృచ్ఛికతకు కనెక్ట్ చేయబడింది"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"మొబైల్ డేటాని ఎల్లప్పుడూ సక్రియంగా ఉంచు"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"టెథెరింగ్ హార్డ్‌వేర్ వేగవృద్ధి"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"పేర్లు లేని బ్లూటూత్ పరికరాలు  చూపించు"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS ప్రదాత యొక్క హోస్ట్‌పేరును నమోదు చేయండి"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"వైర్‌లెస్ ప్రదర్శన సర్టిఫికెట్ కోసం ఎంపికలను చూపు"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi ఎంపికలో SSID RSSI ప్రకారం చూపబడే Wi‑Fi లాగింగ్ స్థాయిని పెంచండి"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"ఇంటర్‌ఫేస్‌లో ఉండే డేటా ట్రాఫిక్ పరిమాణం ఆధారంగా Wi‑Fi సంచార స్కాన్‌లను అనుమతించు/నిరాకరించు"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Wi-Fi నెట్‌వర్క్‌కు కనెక్ట్ చేస్తున్నప్పుడు MAC చిరునామాను యాదృచ్ఛికం చేయండి"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"లాగర్ బఫర్ పరిమాణాలు"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"లాగ్ బఫర్‌కి లాగర్ పరిమా. ఎంచుకోండి"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"లాగర్ నిరంతర నిల్వలోని డేటాను తీసివేయాలా?"</string>
@@ -403,4 +403,10 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"నమోదు చేయబడింది"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"నమోదు కాలేదు"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"అందుబాటులో లేదు"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="other">%1$d పరికరాలు కనెక్ట్ చేయబడ్డాయి</item>
+      <item quantity="one">%1$d పరికరం కనెక్ట్ చేయబడింది</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"ఎక్కువ సమయం."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"తక్కువ సమయం."</string>
 </resources>

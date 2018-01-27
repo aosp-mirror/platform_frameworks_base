@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"网络"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"无线显示认证"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"启用WLAN详细日志记录功能"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"一律允许WLAN漫游扫描"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"连接时随机选择 MAC 网址"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"始终开启移动数据网络"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"网络共享硬件加速"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"显示没有名称的蓝牙设备"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"输入 DNS 提供商的主机名"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"显示无线显示认证选项"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"提升WLAN日志记录级别（在WLAN选择器中显示每个SSID的RSSI）"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"根据接口中目前的数据流量允许/禁止WLAN漫游扫描"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"连接到 WLAN 网络时随机选择 MAC 地址"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"日志记录器缓冲区大小"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"选择每个日志缓冲区的日志记录器大小"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"要清除永久存储的日志记录器数据吗？"</string>
@@ -403,4 +403,10 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"已注册"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"未注册"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"无法获取"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="other">已连接 %1$d 个设备</item>
+      <item quantity="one">已连接 %1$d 个设备</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"增加时间。"</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"减少时间。"</string>
 </resources>
