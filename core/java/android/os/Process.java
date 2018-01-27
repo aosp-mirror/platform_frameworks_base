@@ -151,6 +151,12 @@ public class Process {
      */
     public static final int OTA_UPDATE_UID = 1061;
 
+    /**
+     * Defines the UID/GID for the Secure Element service process.
+     * @hide
+     */
+    public static final int SE_UID = 1068;
+
     /** {@hide} */
     public static final int NOBODY_UID = 9999;
 
