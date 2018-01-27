@@ -64,12 +64,20 @@ StatsPullerManagerImpl::StatsPullerManagerImpl()
     mPullers.insert({android::util::CPU_TIME_PER_FREQ, make_shared<StatsCompanionServicePuller>(android::util::CPU_TIME_PER_FREQ)});
     mPullers.insert({android::util::CPU_TIME_PER_UID, make_shared<CpuTimePerUidPuller>()});
     mPullers.insert({android::util::CPU_TIME_PER_UID_FREQ, make_shared<CpuTimePerUidFreqPuller>()});
-    mPullers.insert({android::util::CPU_SUSPEND_TIME, make_shared<StatsCompanionServicePuller>(android::util::CPU_SUSPEND_TIME)});
-    mPullers.insert({android::util::CPU_IDLE_TIME, make_shared<StatsCompanionServicePuller>(android::util::CPU_IDLE_TIME)});
-    mPullers.insert({android::util::DISK_SPACE,
-                     make_shared<StatsCompanionServicePuller>(android::util::DISK_SPACE)});
+    mPullers.insert(
+            {android::util::SYSTEM_ELAPSED_REALTIME,
+             make_shared<StatsCompanionServicePuller>(android::util::SYSTEM_ELAPSED_REALTIME)});
     mPullers.insert({android::util::SYSTEM_UPTIME,
                      make_shared<StatsCompanionServicePuller>(android::util::SYSTEM_UPTIME)});
+    mPullers.insert({android::util::DISK_SPACE,
+                     make_shared<StatsCompanionServicePuller>(android::util::DISK_SPACE)});
+    mPullers.insert(
+            {android::util::BLUETOOTH_ACTIVITY_INFO,
+             make_shared<StatsCompanionServicePuller>(android::util::BLUETOOTH_ACTIVITY_INFO)});
+
+    mPullers.insert(
+            {android::util::BLUETOOTH_BYTES_TRANSFER,
+             make_shared<StatsCompanionServicePuller>(android::util::BLUETOOTH_BYTES_TRANSFER)});
     mPullers.insert(
             {android::util::WIFI_ACTIVITY_ENERGY_INFO,
              make_shared<StatsCompanionServicePuller>(android::util::WIFI_ACTIVITY_ENERGY_INFO)});
