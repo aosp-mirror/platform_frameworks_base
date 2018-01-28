@@ -88,6 +88,7 @@
     <string name="accessibility_home" msgid="8217216074895377641">"Ana səhifə"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menyu"</string>
     <string name="accessibility_accessibility_button" msgid="7601252764577607915">"Əlçatımlılıq"</string>
+    <string name="accessibility_rotate_button" msgid="7402949513740253006">"Ekranı fırladın"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"İcmal"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Axtar"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Kamera"</string>
@@ -102,6 +103,12 @@
     <string name="camera_label" msgid="7261107956054836961">"kemaranı açın"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Yeni tapşırıq sxemi seçin"</string>
     <string name="cancel" msgid="6442560571259935130">"Ləğv et"</string>
+    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
+    <skip />
+    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
+    <skip />
+    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
+    <skip />
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Uyğunluq zoom düyməsi."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Daha böyük ekranda uzaqlaşdır."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth qoşulub."</string>
@@ -178,7 +185,8 @@
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Zəngvuran səssiz."</string>
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />
-    <string name="accessibility_work_mode" msgid="2478631941714607225">"İş rejimi"</string>
+    <!-- no translation found for accessibility_work_mode (702887484664647430) -->
+    <skip />
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"<xliff:g id="APP">%s</xliff:g> kənarlaşdırın."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> çıxarıldı."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Bütün son tətbiqlər kənarlaşdırıldı."</string>
@@ -275,6 +283,10 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> Cihaz)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth bağlıdır"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Heç bir cütlənmiş cihaz əlçatan deyil"</string>
+    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="7106697106764717416">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> batareya"</string>
+    <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Audio"</string>
+    <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Qulaqlıq"</string>
+    <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Giriş"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Parlaqlıq"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Avtodönüş"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Ekran avtodönüşü"</string>
@@ -315,6 +327,9 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Qoşulur..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Birləşmə"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
+    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
+    <skip />
+    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Bildirişlər"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"İşartı"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Mobil data"</string>
@@ -324,8 +339,13 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> işlənib"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> limit"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> xəbərdarlığı"</string>
-    <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"İş rejimi"</string>
+    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"İş profili"</string>
+    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"Bildiriş və tətbiqlər deaktivdir"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Gecə işığı"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Qürubda aktiv ediləcək"</string>
+    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Şəfəq vaxtına qədər"</string>
+    <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> olduqda aktiv ediləcək"</string>
+    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"<xliff:g id="TIME">%s</xliff:g> vaxtına qədər"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC deaktiv edilib"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC aktiv edilib"</string>
@@ -338,6 +358,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> güvənli rejimdə deaktiv edildi."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Hamısını silin"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Ekranı bölmək üçün bura sürüşdürün"</string>
+    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Tətbiqi dəyişmək üçün yuxarı sürüşdürün"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Üfüqi Böl"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Şaquli Böl"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Fərdi Böl"</string>
@@ -562,6 +583,8 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Enerji bildiriş nəzarəti ilə, tətbiq bildirişləri üçün əhəmiyyət səviyyəsini 0-dan 5-ə kimi ayarlaya bilərsiniz. \n\n"<b>"Səviyyə 5"</b>" \n- Bildiriş siyahısının yuxarı hissəsində göstərin \n- Tam ekran kəsintisinə icazə verin \n- Hər zaman izləyin \n\n"<b>"Səviyyə 4"</b>" \n- Tam ekran kəsintisinin qarşısını alın \n- Hər zaman izləyin \n\n"<b>"Level 3"</b>" \n- Tam ekran kəsintisinin qarşısını alın \n- Heç vaxt izləməyin \n\n"<b>"Level 2"</b>" \n- Tam ekran kəsintisinin qarşısını alın \n- Heç vaxt izləməyin \n- Heç vaxt səsliyə və ya vibrasiyaya qoymayın \n\n"<b>"Səviyyə 1"</b>" \n- Prevent full screen interruption \n- Heç vaxt izləməyin \n- Heç vaxt səsliyə və ya vibrasiyaya qoymayın \n- Ekran kilidi və ya status panelindən gizlədin \n- Bildiriş siyahısının yuxarı hissəsində göstərin \n\n"<b>"Səviyyə 0"</b>" \n- Bütün bildirişləri tətbiqdən blok edin"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Bildirişlər"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Artıq bu bildirişləri görməyəcəkəsiniz"</string>
+    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
+    <skip />
     <string name="inline_keep_showing" msgid="8945102997083836858">"Bu bildirişlər göstərilməyə davam edilsin?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Bildirişləri dayandırın"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Göstərməyə davam edin"</string>
@@ -656,7 +679,8 @@
     <item msgid="1545641631806817203">"Mübadilə buferi"</item>
     <item msgid="5742013440802239414">"Açar kodu"</item>
     <item msgid="8802889973626281575">"Klaviatura dəyişdirici"</item>
-    <item msgid="8175437057325747277">"Heç bir"</item>
+    <item msgid="7095517796293767867">"Naviqasiya təklifləri"</item>
+    <item msgid="8494159969042135235">"Yoxdur"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"Normal"</item>
@@ -780,4 +804,10 @@
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Batareya və data istifadəsi haqqında ətraflı məlumat üçün klikləyin"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Mobil data söndürülsün?"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Tətbiq icazə sorğusunu gizlətdiyi üçün Ayarlar cavabınızı doğrulaya bilməz."</string>
+    <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_0">%1$s</xliff:g> tətbiqinə <xliff:g id="APP_2">%2$s</xliff:g> hissələrini göstərmək üçün icazə verilsin?"</string>
+    <string name="slice_permission_text_1" msgid="3514586565609596523">"- <xliff:g id="APP">%1$s</xliff:g> tətbiqindən məlumat oxuya bilər"</string>
+    <string name="slice_permission_text_2" msgid="3146758297471143723">"- <xliff:g id="APP">%1$s</xliff:g> daxilində əməliyyatlar edə bilər"</string>
+    <string name="slice_permission_checkbox" msgid="7986504458640562900">"<xliff:g id="APP">%1$s</xliff:g> tətbiqinə istənilən tətbiqdən hissə göstərmək icazəsi verin"</string>
+    <string name="slice_permission_allow" msgid="2340244901366722709">"İcazə verin"</string>
+    <string name="slice_permission_deny" msgid="7683681514008048807">"Rədd edin"</string>
 </resources>

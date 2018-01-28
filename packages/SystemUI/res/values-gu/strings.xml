@@ -33,13 +33,10 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ચાલુ"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"નોટિફિકેશનો"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"બૅટરી ઓછી છે"</string>
-    <!-- no translation found for battery_low_title_hybrid (6268991275887381595) -->
-    <skip />
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"બૅટરી ઓછી છે. બૅટરી સેવર ચાલુ કરો"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> બાકી"</string>
-    <!-- no translation found for battery_low_percent_format_hybrid (6838677459286775617) -->
-    <skip />
-    <!-- no translation found for battery_low_percent_format_hybrid_short (9025795469949145586) -->
-    <skip />
+    <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"<xliff:g id="PERCENTAGE">%s</xliff:g> બાકી, તમારા વપરાશના આધારે લગભગ <xliff:g id="TIME">%s</xliff:g> બાકી છે"</string>
+    <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"<xliff:g id="PERCENTAGE">%s</xliff:g> બાકી, લગભગ <xliff:g id="TIME">%s</xliff:g> બાકી"</string>
     <string name="battery_low_percent_format_saver_started" msgid="7879389868952879166">"<xliff:g id="PERCENTAGE">%s</xliff:g> બાકી. બૅટરી સેવર ચાલુ છે."</string>
     <string name="invalid_charger" msgid="4549105996740522523">"USB ચાર્જિંગ સમર્થિત નથી.\nફક્ત આપવામાં આવેલ ચાર્જરનો ઉપયોગ કરો."</string>
     <string name="invalid_charger_title" msgid="3515740382572798460">"USB ચાર્જિંગ સમર્થિત નથી."</string>
@@ -73,22 +70,15 @@
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"હાલમાં આ ઉપકરણમાં સાઇન ઇન થયેલ વપરાશકર્તા USB ડિબગીંગ ચાલુ કરી શકતા નથી. આ સુવિધાનો ઉપયોગ કરવા માટે પ્રાથમિક વપરાશકર્તા પર સ્વિચ કરો."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"સ્ક્રીન ભરવા માટે ઝૂમ કરો"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"સ્ક્રીન ભરવા માટે ખેંચો"</string>
-    <!-- no translation found for global_action_screenshot (8329831278085426283) -->
-    <skip />
+    <string name="global_action_screenshot" msgid="8329831278085426283">"સ્ક્રીનશૉટ"</string>
     <string name="screenshot_saving_ticker" msgid="7403652894056693515">"સ્ક્રીનશોટ સાચવી રહ્યું છે…"</string>
     <string name="screenshot_saving_title" msgid="8242282144535555697">"સ્ક્રીનશોટ સાચવી રહ્યું છે…"</string>
-    <!-- no translation found for screenshot_saving_text (2545047868936087248) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_title (5637073968117370753) -->
-    <skip />
-    <!-- no translation found for screenshot_saved_text (7574667448002050363) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_title (9096484883063264803) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_to_save_unknown_text (8844781948876286488) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_to_save_text (3041612585107107310) -->
-    <skip />
+    <string name="screenshot_saving_text" msgid="2545047868936087248">"સ્ક્રીનશૉટ સાચવવામાં આવી રહ્યો છે"</string>
+    <string name="screenshot_saved_title" msgid="5637073968117370753">"સ્ક્રીનશૉટ સાચવ્યો"</string>
+    <string name="screenshot_saved_text" msgid="7574667448002050363">"તમારા સ્ક્રીનશૉટને જોવા માટે ટૅપ કરો"</string>
+    <string name="screenshot_failed_title" msgid="9096484883063264803">"સ્ક્રીનશૉટ કૅપ્ચર કરી શકાયો નથી"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="8844781948876286488">"સ્ક્રીનશૉટ સાચવવામાં સમસ્યા આવી"</string>
+    <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"મર્યાદિત સ્ટોરેજ સ્પેસને કારણે સ્ક્રીનશૉટ સાચવી શકાતો નથી"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"ઍપ્લિકેશન કે તમારી સંસ્થા દ્વારા સ્ક્રીનશૉટ લેવાની મંજૂરી નથી"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ફાઇલ ટ્રાન્સફર વિકલ્પો"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"મીડિયા પ્લેયર તરીકે માઉન્ટ કરો (MTP)"</string>
@@ -98,6 +88,7 @@
     <string name="accessibility_home" msgid="8217216074895377641">"હોમ"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"મેનુ"</string>
     <string name="accessibility_accessibility_button" msgid="7601252764577607915">"ઍક્સેસિબિલિટી"</string>
+    <string name="accessibility_rotate_button" msgid="7402949513740253006">"સ્ક્રીન ફેરવો"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"ઝલક"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"શોધો"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"કૅમેરો"</string>
@@ -112,6 +103,12 @@
     <string name="camera_label" msgid="7261107956054836961">"કૅમેરો ખોલો"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"નવું કાર્ય લેઆઉટ પસંદ કરો"</string>
     <string name="cancel" msgid="6442560571259935130">"રદ કરો"</string>
+    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
+    <skip />
+    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
+    <skip />
+    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
+    <skip />
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"સુસંગતતા ઝૂમ બટન."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"નાનીથી મોટી સ્ક્રીન પર ઝૂમ કરો."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"બ્લૂટૂથ કનેક્ટ થયું."</string>
@@ -188,7 +185,8 @@
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"રિંગર શાંત છે."</string>
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />
-    <string name="accessibility_work_mode" msgid="2478631941714607225">"કાર્ય મોડ"</string>
+    <!-- no translation found for accessibility_work_mode (702887484664647430) -->
+    <skip />
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"<xliff:g id="APP">%s</xliff:g> કાઢી નાખો."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> કાઢી નાખી."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"તમામ તાજેતરની ઍપ્લિકેશનો કાઢી નાખી."</string>
@@ -285,6 +283,10 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"બ્લૂટૂથ (<xliff:g id="NUMBER">%d</xliff:g> ઉપકરણો)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"બ્લૂટૂથ બંધ"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"કોઈ જોડી કરેલ ઉપકરણો ઉપલબ્ધ નથી"</string>
+    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="7106697106764717416">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> બૅટરી"</string>
+    <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"ઑડિઓ"</string>
+    <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"હૅડસેટ"</string>
+    <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"ઇનપુટ"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"તેજ"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"આપમેળે ફેરવો"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"સ્ક્રીનને આપમેળે ફેરવો"</string>
@@ -325,6 +327,9 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"કનેક્ટ કરી રહ્યું છે..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"ટિથરિંગ"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"હૉટસ્પૉટ"</string>
+    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
+    <skip />
+    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"નોટિફિકેશનો"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ફ્લેશલાઇટ"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"મોબાઇલ ડેટા"</string>
@@ -334,8 +339,15 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> વાપર્યો"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> મર્યાદા"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ચેતવણી"</string>
-    <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"કાર્ય મોડ"</string>
+    <!-- no translation found for quick_settings_work_mode_on_label (3421274215098764735) -->
+    <skip />
+    <!-- no translation found for quick_settings_work_mode_off_label (8856918707867192186) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"રાત્રિ પ્રકાશ"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"સૂર્યાસ્ત વખતે"</string>
+    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"સૂર્યોદય સુધી"</string>
+    <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> વાગ્યે"</string>
+    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"<xliff:g id="TIME">%s</xliff:g> સુધી"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC અક્ષમ કરેલ છે"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC સક્ષમ કરેલ છે"</string>
@@ -348,6 +360,8 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"સુરક્ષિત મોડમાં <xliff:g id="APP">%s</xliff:g> અક્ષમ કરેલ છે."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"બધું સાફ કરો"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"વિભાજિત સ્ક્રીનનો ઉપયોગ કરવા માટે અહીં ખેંચો"</string>
+    <!-- no translation found for recents_swipe_up_onboarding (3824607135920170001) -->
+    <skip />
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"આડું વિભક્ત કરો"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ઊભું વિભક્ત કરો"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"કસ્ટમ વિભક્ત કરો"</string>
@@ -571,27 +585,21 @@
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"બંધ"</string>
     <string name="power_notification_controls_description" msgid="4372459941671353358">"પાવર સૂચના નિયંત્રણો સાથે, તમે ઍપની સૂચનાઓ માટે 0 થી 5 સુધીના મહત્વના સ્તરને સેટ કરી શકો છો. \n\n"<b>"સ્તર 5"</b>" \n- સૂચના સૂચિની ટોચ પર બતાવો \n- પૂર્ણ સ્ક્રીન અવરોધની મંજૂરી આપો \n- હંમેશાં ત્વરિત દૃષ્ટિ કરો \n\n"<b>"સ્તર 4"</b>" \n- પૂર્ણ સ્ક્રીન અવરોધ અટકાવો \n- હંમેશાં ત્વરિત દૃષ્ટિ કરો \n\n"<b>"સ્તર 3"</b>" \n- પૂર્ણ સ્ક્રીન અવરોધ અટકાવો \n- ક્યારેય ત્વરિત દૃષ્ટિ કરશો નહીં \n\n"<b>"સ્તર 2"</b>" \n- પૂર્ણ સ્ક્રીન અવરોધ અટકાવો \n- ક્યારેય ત્વરિત દૃષ્ટિ કરશો નહીં \n- ક્યારેય અવાજ અથવા વાઇબ્રેટ કરશો નહીં \n\n"<b>"સ્તર 1"</b>" \n- પૂર્ણ સ્ક્રીન અવરોધની મંજૂરી આપો \n- ક્યારેય ત્વરિત દૃષ્ટિ કરશો નહીં \n- ક્યારેય અવાજ અથવા વાઇબ્રેટ કરશો નહીં \n- લૉક સ્ક્રીન અને સ્ટેટસ બારથી છુપાવો \n- સૂચના સૂચિના તળિયા પર બતાવો \n\n"<b>"સ્તર 0"</b>" \n- ઍપની તમામ સૂચનાઓને બ્લૉક કરો"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"નોટિફિકેશનો"</string>
-    <!-- no translation found for notification_channel_disabled (344536703863700565) -->
+    <string name="notification_channel_disabled" msgid="344536703863700565">"તમને હવેથી આ નોટિફિકેશન દેખાશે નહીં"</string>
+    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
     <skip />
-    <!-- no translation found for inline_keep_showing (8945102997083836858) -->
-    <skip />
-    <!-- no translation found for inline_stop_button (4172980096860941033) -->
-    <skip />
-    <!-- no translation found for inline_keep_button (6665940297019018232) -->
-    <skip />
-    <!-- no translation found for inline_keep_showing_app (1723113469580031041) -->
-    <skip />
-    <!-- no translation found for notification_unblockable_desc (1037434112919403708) -->
-    <skip />
+    <string name="inline_keep_showing" msgid="8945102997083836858">"આ નોટિફિકેશન બતાવવાનું ચાલુ રાખીએ?"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"નોટિફિકેશન બંધ કરો"</string>
+    <string name="inline_keep_button" msgid="6665940297019018232">"બતાવવાનું ચાલુ રાખો"</string>
+    <string name="inline_keep_showing_app" msgid="1723113469580031041">"આ ઍપમાંથી નોટિફિકેશન બતાવવાનું ચાલુ રાખીએ?"</string>
+    <string name="notification_unblockable_desc" msgid="1037434112919403708">"આ નોટિફિકેશન બંધ કરી શકશો નહીં"</string>
     <string name="notification_channel_controls_opened_accessibility" msgid="6553950422055908113">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે સૂચના નિયંત્રણો ચાલુ છે"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="7521619812603693144">"<xliff:g id="APP_NAME">%1$s</xliff:g> માટે સૂચના નિયંત્રણો બંધ છે"</string>
     <string name="notification_channel_switch_accessibility" msgid="3420796005601900717">"આ ચૅનલની સૂચનાઓને મંજૂરી આપો"</string>
     <string name="notification_more_settings" msgid="816306283396553571">"વધુ સેટિંગ્સ"</string>
-    <!-- no translation found for notification_app_settings (420348114670768449) -->
-    <skip />
+    <string name="notification_app_settings" msgid="420348114670768449">"કસ્ટમાઇઝ કરો"</string>
     <string name="notification_done" msgid="5279426047273930175">"થઈ ગયું"</string>
-    <!-- no translation found for inline_undo (558916737624706010) -->
-    <skip />
+    <string name="inline_undo" msgid="558916737624706010">"રદ કરો"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"સૂચના નિયંત્રણો"</string>
     <string name="notification_menu_snooze_description" msgid="3653669438131034525">"સૂચના સ્નૂઝ કરવાના વિકલ્પો"</string>
@@ -674,7 +682,8 @@
     <item msgid="1545641631806817203">"ક્લિપબોર્ડ"</item>
     <item msgid="5742013440802239414">"કીકોડ"</item>
     <item msgid="8802889973626281575">"કીબોર્ડ સ્વિચર"</item>
-    <item msgid="8175437057325747277">"કોઈ નહીં"</item>
+    <item msgid="7095517796293767867">"રોટેશન માટે સૂચન"</item>
+    <item msgid="8494159969042135235">"કોઈ નહીં"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"સામાન્ય"</item>
@@ -798,4 +807,10 @@
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"બૅટરી અને ડેટા વપરાશ વિશેની વિગતો માટે ટૅપ કરો"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"મોબાઇલ ડેટા બંધ કરીએ?"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"એક ઍપ પરવાનગી વિનંતીને અસ્પષ્ટ કરતી હોવાને કારણે, સેટિંગ્સ તમારા પ્રતિસાદને ચકાસી શકતી નથી."</string>
+    <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_0">%1$s</xliff:g>ને <xliff:g id="APP_2">%2$s</xliff:g> સ્લાઇસ બતાવવાની મંજૂરી આપીએ?"</string>
+    <string name="slice_permission_text_1" msgid="3514586565609596523">"- મારાથી <xliff:g id="APP">%1$s</xliff:g>ની માહિતી વાંચી શકાતી નથી"</string>
+    <string name="slice_permission_text_2" msgid="3146758297471143723">"- મારાથી <xliff:g id="APP">%1$s</xliff:g>ની અંદર ક્રિયાઓ કરી શકાતી નથી"</string>
+    <string name="slice_permission_checkbox" msgid="7986504458640562900">"<xliff:g id="APP">%1$s</xliff:g>ને કોઈપણ ઍપના સ્લાઇસ બતાવવાની મંજૂરી આપો"</string>
+    <string name="slice_permission_allow" msgid="2340244901366722709">"મંજૂરી આપો"</string>
+    <string name="slice_permission_deny" msgid="7683681514008048807">"નકારો"</string>
 </resources>
