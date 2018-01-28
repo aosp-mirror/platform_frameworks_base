@@ -169,6 +169,10 @@ public class RemoteInputView extends LinearLayout implements View.OnClickListene
         }
     }
 
+    public CharSequence getText() {
+        return mEditText.getText();
+    }
+
     public static RemoteInputView inflate(Context context, ViewGroup root,
             NotificationData.Entry entry,
             RemoteInputController controller) {

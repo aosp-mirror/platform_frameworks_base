@@ -388,7 +388,8 @@ public class ConnOnActivityStartTest {
                 latch.countDown();
             }
         });
-        launchIntent.putExtras(extras);
+        launchIntent.putExtras(extras)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         mContext.startActivity(launchIntent);
         if (latch.await(NETWORK_CHECK_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
             if (errors[0] != null) {

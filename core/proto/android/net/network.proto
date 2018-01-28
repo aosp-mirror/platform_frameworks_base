@@ -19,9 +19,14 @@ option java_multiple_files = true;
 
 package android.net;
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 /**
  * An android.net.Network object.
  */
 message NetworkProto {
-    optional int32 net_id = 1;
+    // The netId is an implementation detail which might be changed in the
+    // future, or which alone (i.e. in the absence of some additional context)
+    // might not be sufficient to fully identify a Network.
+    optional int32 net_id = 1 [ (.android.privacy).dest = DEST_AUTOMATIC ];
 }

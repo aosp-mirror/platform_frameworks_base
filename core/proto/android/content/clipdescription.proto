@@ -20,11 +20,14 @@ package android.content;
 option java_multiple_files = true;
 
 import "frameworks/base/core/proto/android/os/persistablebundle.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 // An android.content.ClipDescription object.
 message ClipDescriptionProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     repeated string mime_types = 1;
-    optional string label = 2;
+    optional string label = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
     optional android.os.PersistableBundleProto extras = 3;
     optional int64 timestamp_ms = 4;
 }

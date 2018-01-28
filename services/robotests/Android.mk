@@ -13,9 +13,9 @@
 # limitations under the License.
 
 
-############################################################
-# FrameworksServicesLib app just for Robolectric test target.  #
-############################################################
+##############################################################
+# FrameworksServicesLib app just for Robolectric test target #
+##############################################################
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
@@ -31,14 +31,43 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 
 include $(BUILD_PACKAGE)
 
-#############################################
-# FrameworksServices Robolectric test target. #
-#############################################
+##############################################
+# FrameworksServices Robolectric test target #
+##############################################
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := $(call all-java-files-under, src)
+# Dependency platform-robolectric-android-all-stubs below contains a bunch of Android classes as
+# stubs that throw RuntimeExceptions when we use them. The goal is to include hidden APIs that
+# weren't included in Robolectric's Android jar files. However, we are testing the framework itself
+# here, so if we write stuff that is being used in the tests and exist in
+# platform-robolectric-android-all-stubs, the class loader is going to pick up the latter, and thus
+# we are going to test what we don't want. To solve this:
+#
+#   1. If the class being used should be visible to bundled apps:
+#      => Bypass the stubs target by including them in LOCAL_SRC_FILES and LOCAL_AIDL_INCLUDES
+#         (if aidl).
+#
+#   2. If it's not visible:
+#      => Remove the class from the stubs jar (common/robolectric/android-all/android-all-stubs.jar)
+#         and add the class path to
+#         common/robolectric/android-all/android-all-stubs_removed_classes.txt.
+#
 
-# Include the testing libraries (JUnit4 + Robolectric libs).
+INTERNAL_BACKUP := ../../core/java/com/android/internal/backup
+
+LOCAL_SRC_FILES := \
+    $(call all-java-files-under, src) \
+    $(call all-Iaidl-files-under, $(INTERNAL_BACKUP)) \
+    ../../core/java/android/content/pm/PackageInfo.java \
+    ../../core/java/android/app/backup/BackupAgent.java \
+    ../../core/java/android/app/backup/BackupDataOutput.java \
+    ../../core/java/android/app/backup/FullBackupDataOutput.java \
+    ../../core/java/android/app/IBackupAgent.aidl
+
+LOCAL_AIDL_INCLUDES := \
+    $(call all-Iaidl-files-under, $(INTERNAL_BACKUP)) \
+    ../../core/java/android/app/IBackupAgent.aidl
+
 LOCAL_STATIC_JAVA_LIBRARIES := \
     platform-robolectric-android-all-stubs \
     android-support-test \
@@ -58,9 +87,9 @@ LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
-#############################################################
-# FrameworksServices runner target to run the previous target. #
-#############################################################
+###############################################################
+# FrameworksServices runner target to run the previous target #
+###############################################################
 include $(CLEAR_VARS)
 
 LOCAL_MODULE := RunFrameworksServicesRoboTests

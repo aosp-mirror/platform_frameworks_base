@@ -67,6 +67,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
+import android.os.WorkSource.WorkChain;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -829,7 +830,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
             mAllowedResolutionLevel = getAllowedResolutionLevel(pid, uid);
             mIdentity = new Identity(uid, pid, packageName);
-            if (workSource != null && workSource.size() <= 0) {
+            if (workSource != null && workSource.isEmpty()) {
                 workSource = null;
             }
             mWorkSource = workSource;
@@ -1576,13 +1577,22 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     /**
-     * Returns all providers by name, including passive, but excluding
-     * fused, also including ones that are not permitted to
-     * be accessed by the calling activity or are currently disabled.
+     * Returns all providers by name, including passive and the ones that are not permitted to
+     * be accessed by the calling activity or are currently disabled, but excluding fused.
      */
     @Override
     public List<String> getAllProviders() {
-        List<String> out = getProviders(null /*criteria*/, false /*enabledOnly*/);
+        ArrayList<String> out;
+        synchronized (mLock) {
+            out = new ArrayList<>(mProviders.size());
+            for (LocationProviderInterface provider : mProviders) {
+                String name = provider.getName();
+                if (LocationManager.FUSED_PROVIDER.equals(name)) {
+                    continue;
+                }
+                out.add(name);
+            }
+        }
         if (D) Log.d(TAG, "getAllProviders()=" + out);
         return out;
     }
@@ -1814,13 +1824,11 @@ public class LocationManagerService extends ILocationManager.Stub {
 
                         if (locationRequest.getInterval() <= thresholdInterval) {
                             if (record.mReceiver.mWorkSource != null
-                                    && record.mReceiver.mWorkSource.size() > 0
-                                    && record.mReceiver.mWorkSource.getName(0) != null) {
-                                // Assign blame to another work source.
-                                // Can only assign blame if the WorkSource contains names.
+                                    && isValidWorkSource(record.mReceiver.mWorkSource)) {
                                 worksource.add(record.mReceiver.mWorkSource);
                             } else {
-                                // Assign blame to caller.
+                                // Assign blame to caller if there's no WorkSource associated with
+                                // the request or if it's invalid.
                                 worksource.add(
                                         record.mReceiver.mIdentity.mUid,
                                         record.mReceiver.mIdentity.mPackageName);
@@ -1833,6 +1841,23 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         if (D) Log.d(TAG, "provider request: " + provider + " " + providerRequest);
         p.setRequest(providerRequest, worksource);
+    }
+
+    /**
+     * Whether a given {@code WorkSource} associated with a Location request is valid.
+     */
+    private static boolean isValidWorkSource(WorkSource workSource) {
+        if (workSource.size() > 0) {
+            // If the WorkSource has one or more non-chained UIDs, make sure they're accompanied
+            // by tags.
+            return workSource.getName(0) != null;
+        } else {
+            // For now, make sure callers have supplied an attribution tag for use with
+            // AppOpsManager. This might be relaxed in the future.
+            final ArrayList<WorkChain> workChains = workSource.getWorkChains();
+            return workChains != null && !workChains.isEmpty() &&
+                    workChains.get(0).getAttributionTag() != null;
+        }
     }
 
     @Override
@@ -2057,7 +2082,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         checkResolutionLevelIsSufficientForProviderUse(allowedResolutionLevel,
                 request.getProvider());
         WorkSource workSource = request.getWorkSource();
-        if (workSource != null && workSource.size() > 0) {
+        if (workSource != null && !workSource.isEmpty()) {
             checkDeviceStatsAllowed();
         }
         boolean hideFromAppOps = request.getHideFromAppOps();
@@ -2570,9 +2595,10 @@ public class LocationManagerService extends ILocationManager.Stub {
         // Check INTERACT_ACROSS_USERS permission if userId is not current user id.
         checkInteractAcrossUsersPermission(userId);
 
-        // Enable or disable all location providers
+        // Enable or disable all location providers. Fused provider and passive provider are
+        // excluded.
         synchronized (mLock) {
-            for(String provider : getAllProviders()) {
+            for(String provider : getAllProvidersForLocationSettings()) {
                 setProviderEnabledForUser(provider, enabled, userId);
             }
         }
@@ -2589,9 +2615,10 @@ public class LocationManagerService extends ILocationManager.Stub {
         // Check INTERACT_ACROSS_USERS permission if userId is not current user id.
         checkInteractAcrossUsersPermission(userId);
 
-        // If at least one location provider is enabled, return true
+        // If at least one location provider is enabled, return true. Fused provider and passive
+        // provider are excluded.
         synchronized (mLock) {
-            for (String provider : getAllProviders()) {
+            for (String provider : getAllProvidersForLocationSettings()) {
                 if (isProviderEnabledForUser(provider, userId)) {
                     return true;
                 }
@@ -2672,6 +2699,26 @@ public class LocationManagerService extends ILocationManager.Stub {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    /**
+     * Return all location providers except fused provider and passive provider. These two
+     * providers are not generating location by themselves, but only echo locations from other
+     * providers.
+     *
+     * @return All location providers except fused provider and passive provider, including
+     *          providers that are not permitted to be accessed by the calling activity or are
+     *          currently disabled.
+     */
+    private List<String> getAllProvidersForLocationSettings() {
+        List<String> providersForSettings = new ArrayList<>(mProviders.size());
+        for (String provider : getAllProviders()) {
+            if (provider.equals(LocationManager.PASSIVE_PROVIDER)) {
+                continue;
+            }
+            providersForSettings.add(provider);
+        }
+        return providersForSettings;
     }
 
     /**

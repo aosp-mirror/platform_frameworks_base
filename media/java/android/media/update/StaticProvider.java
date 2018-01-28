@@ -19,7 +19,6 @@ package android.media.update;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.media.IMediaSession2Callback;
 import android.media.MediaBrowser2;
 import android.media.MediaBrowser2.BrowserCallback;
 import android.media.MediaController2;
@@ -27,14 +26,17 @@ import android.media.MediaController2.ControllerCallback;
 import android.media.MediaLibraryService2;
 import android.media.MediaLibraryService2.MediaLibrarySession;
 import android.media.MediaLibraryService2.MediaLibrarySessionCallback;
-import android.media.MediaPlayerBase;
+import android.media.MediaPlayerInterface;
 import android.media.MediaSession2;
 import android.media.MediaSession2.SessionCallback;
 import android.media.MediaSessionService2;
+import android.media.SessionPlayer2;
 import android.media.SessionToken2;
 import android.media.VolumeProvider;
 import android.media.update.MediaLibraryService2Provider.MediaLibrarySessionProvider;
 import android.media.update.MediaSession2Provider.ControllerInfoProvider;
+import android.os.Bundle;
+import android.os.IInterface;
 import android.util.AttributeSet;
 import android.widget.MediaControlView2;
 import android.widget.VideoView2;
@@ -46,10 +48,8 @@ import java.util.concurrent.Executor;
  *
  * This interface provides access to constructors and static methods that are otherwise not directly
  * accessible via an implementation object.
- *
  * @hide
  */
-// TODO @SystemApi
 public interface StaticProvider {
     MediaControlView2Provider createMediaControlView2(
             MediaControlView2 instance, ViewProvider superProvider);
@@ -57,25 +57,26 @@ public interface StaticProvider {
             VideoView2 instance, ViewProvider superProvider,
             @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes);
 
-    MediaSession2Provider createMediaSession2(MediaSession2 mediaSession2, Context context,
-            MediaPlayerBase player, String id, Executor callbackExecutor, SessionCallback callback,
-            VolumeProvider volumeProvider, int ratingType,
-            PendingIntent sessionActivity);
-    ControllerInfoProvider createMediaSession2ControllerInfoProvider(
-            MediaSession2.ControllerInfo instance, Context context, int uid, int pid,
-            String packageName, IMediaSession2Callback callback);
-    MediaController2Provider createMediaController2(
-            MediaController2 instance, Context context, SessionToken2 token,
-            ControllerCallback callback, Executor executor);
-    MediaBrowser2Provider createMediaBrowser2(
-            MediaBrowser2 instance, Context context, SessionToken2 token,
-            BrowserCallback callback, Executor executor);
-    MediaSessionService2Provider createMediaSessionService2(
-            MediaSessionService2 instance);
-    MediaSessionService2Provider createMediaLibraryService2(
-            MediaLibraryService2 instance);
-    MediaLibrarySessionProvider createMediaLibraryService2MediaLibrarySession(
-            MediaLibrarySession instance, Context context, MediaPlayerBase player, String id,
-            Executor callbackExecutor, MediaLibrarySessionCallback callback,
-            VolumeProvider volumeProvider, int ratingType, PendingIntent sessionActivity);
+    MediaSession2Provider createMediaSession2(Context context, MediaSession2 instance,
+            MediaPlayerInterface player, String id, VolumeProvider volumeProvider, int ratingType,
+            PendingIntent sessionActivity, Executor executor, SessionCallback callback);
+    ControllerInfoProvider createMediaSession2ControllerInfoProvider(Context context,
+            MediaSession2.ControllerInfo instance, int uid, int pid,
+            String packageName, IInterface callback);
+    MediaController2Provider createMediaController2(Context context, MediaController2 instance,
+            SessionToken2 token, Executor executor, ControllerCallback callback);
+    MediaBrowser2Provider createMediaBrowser2(Context context, MediaBrowser2 instance,
+            SessionToken2 token, Executor executor, BrowserCallback callback);
+    MediaSessionService2Provider createMediaSessionService2(MediaSessionService2 instance);
+    MediaSessionService2Provider createMediaLibraryService2(MediaLibraryService2 instance);
+    MediaLibrarySessionProvider createMediaLibraryService2MediaLibrarySession(Context context,
+            MediaLibrarySession instance, MediaPlayerInterface player, String id,
+            VolumeProvider volumeProvider, int ratingType, PendingIntent sessionActivity,
+            Executor executor, MediaLibrarySessionCallback callback);
+    SessionToken2Provider createSessionToken2(Context context, SessionToken2 instance,
+            int uid, int type, String packageName, String serviceName, String id,
+            IInterface sessionBinderInterface);
+    SessionToken2 SessionToken2_fromBundle(Context context, Bundle bundle);
+
+    SessionPlayer2Provider createSessionPlayer2(Context context, SessionPlayer2 instance);
 }

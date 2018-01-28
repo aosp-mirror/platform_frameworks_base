@@ -17,9 +17,12 @@
 syntax = "proto2";
 package android.os;
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 option java_multiple_files = true;
 
 message MessageProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     optional int64 when = 1;
     // Name of callback class.
     optional string callback = 2;
@@ -29,7 +32,7 @@ message MessageProto {
     optional int32 arg1 = 4;
     optional int32 arg2 = 5;
     // String representation of an arbitrary object to send to the recipient.
-    optional string obj = 6;
+    optional string obj = 6 [ (.android.privacy).dest = DEST_EXPLICIT ];
     // Name of target class.
     optional string target = 7;
     optional int32 barrier = 8;

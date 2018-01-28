@@ -53,11 +53,13 @@ public abstract class NetworkService extends Service {
     public static final String NETWORK_SERVICE_INTERFACE = "android.telephony.NetworkService";
     public static final String NETWORK_SERVICE_EXTRA_SLOT_ID = "android.telephony.extra.SLOT_ID";
 
-    private static final int NETWORK_SERVICE_INTERNAL_REQUEST_INITIALIZE_SERVICE       = 1;
-    private static final int NETWORK_SERVICE_GET_REGISTRATION_STATE                    = 2;
-    private static final int NETWORK_SERVICE_REGISTER_FOR_STATE_CHANGE                 = 3;
-    private static final int NETWORK_SERVICE_UNREGISTER_FOR_STATE_CHANGE               = 4;
-    private static final int NETWORK_SERVICE_INDICATION_NETWORK_STATE_CHANGED          = 5;
+    private static final int NETWORK_SERVICE_CREATE_NETWORK_SERVICE_PROVIDER                 = 1;
+    private static final int NETWORK_SERVICE_REMOVE_NETWORK_SERVICE_PROVIDER                 = 2;
+    private static final int NETWORK_SERVICE_REMOVE_ALL_NETWORK_SERVICE_PROVIDERS            = 3;
+    private static final int NETWORK_SERVICE_GET_REGISTRATION_STATE                          = 4;
+    private static final int NETWORK_SERVICE_REGISTER_FOR_STATE_CHANGE                       = 5;
+    private static final int NETWORK_SERVICE_UNREGISTER_FOR_STATE_CHANGE                     = 6;
+    private static final int NETWORK_SERVICE_INDICATION_NETWORK_STATE_CHANGED                = 7;
 
 
     private final HandlerThread mHandlerThread;
@@ -66,7 +68,7 @@ public abstract class NetworkService extends Service {
 
     private final SparseArray<NetworkServiceProvider> mServiceMap = new SparseArray<>();
 
-    private final SparseArray<INetworkServiceWrapper> mBinderMap = new SparseArray<>();
+    private final INetworkServiceWrapper mBinder = new INetworkServiceWrapper();
 
     /**
      * The abstract class of the actual network service implementation. The network service provider
@@ -147,37 +149,50 @@ public abstract class NetworkService extends Service {
         public void handleMessage(Message message) {
             final int slotId = message.arg1;
             final INetworkServiceCallback callback = (INetworkServiceCallback) message.obj;
-            NetworkServiceProvider service;
 
-            synchronized (mServiceMap) {
-                service = mServiceMap.get(slotId);
-            }
+            NetworkServiceProvider serviceProvider = mServiceMap.get(slotId);
 
             switch (message.what) {
-                case NETWORK_SERVICE_INTERNAL_REQUEST_INITIALIZE_SERVICE:
-                    service = createNetworkServiceProvider(message.arg1);
-                    if (service != null) {
-                        mServiceMap.put(slotId, service);
+                case NETWORK_SERVICE_CREATE_NETWORK_SERVICE_PROVIDER:
+                    // If the service provider doesn't exist yet, we try to create it.
+                    if (serviceProvider == null) {
+                        mServiceMap.put(slotId, createNetworkServiceProvider(slotId));
                     }
                     break;
+                case NETWORK_SERVICE_REMOVE_NETWORK_SERVICE_PROVIDER:
+                    // If the service provider doesn't exist yet, we try to create it.
+                    if (serviceProvider != null) {
+                        serviceProvider.onDestroy();
+                        mServiceMap.remove(slotId);
+                    }
+                    break;
+                case NETWORK_SERVICE_REMOVE_ALL_NETWORK_SERVICE_PROVIDERS:
+                    for (int i = 0; i < mServiceMap.size(); i++) {
+                        serviceProvider = mServiceMap.get(i);
+                        if (serviceProvider != null) {
+                            serviceProvider.onDestroy();
+                        }
+                    }
+                    mServiceMap.clear();
+                    break;
                 case NETWORK_SERVICE_GET_REGISTRATION_STATE:
-                    if (service == null) break;
+                    if (serviceProvider == null) break;
                     int domainId = message.arg2;
-                    service.getNetworkRegistrationState(domainId,
+                    serviceProvider.getNetworkRegistrationState(domainId,
                             new NetworkServiceCallback(callback));
 
                     break;
                 case NETWORK_SERVICE_REGISTER_FOR_STATE_CHANGE:
-                    if (service == null) break;
-                    service.registerForStateChanged(callback);
+                    if (serviceProvider == null) break;
+                    serviceProvider.registerForStateChanged(callback);
                     break;
                 case NETWORK_SERVICE_UNREGISTER_FOR_STATE_CHANGE:
-                    if (service == null) break;
-                    service.unregisterForStateChanged(callback);
+                    if (serviceProvider == null) break;
+                    serviceProvider.unregisterForStateChanged(callback);
                     break;
                 case NETWORK_SERVICE_INDICATION_NETWORK_STATE_CHANGED:
-                    if (service == null) break;
-                    service.notifyStateChangedToCallbacks();
+                    if (serviceProvider == null) break;
+                    serviceProvider.notifyStateChangedToCallbacks();
                     break;
                 default:
                     break;
@@ -212,47 +227,14 @@ public abstract class NetworkService extends Service {
             return null;
         }
 
-        int slotId = intent.getIntExtra(
-                NETWORK_SERVICE_EXTRA_SLOT_ID, SubscriptionManager.INVALID_SIM_SLOT_INDEX);
-
-        if (!SubscriptionManager.isValidSlotIndex(slotId)) {
-            loge("Invalid slot id " + slotId);
-            return null;
-        }
-
-        log("onBind: slot id=" + slotId);
-
-        INetworkServiceWrapper binder = mBinderMap.get(slotId);
-        if (binder == null) {
-            Message msg = mHandler.obtainMessage(
-                    NETWORK_SERVICE_INTERNAL_REQUEST_INITIALIZE_SERVICE);
-            msg.arg1 = slotId;
-            msg.sendToTarget();
-
-            binder = new INetworkServiceWrapper(slotId);
-            mBinderMap.put(slotId, binder);
-        }
-
-        return binder;
+        return mBinder;
     }
 
     /** @hide */
     @Override
     public boolean onUnbind(Intent intent) {
-        int slotId = intent.getIntExtra(NETWORK_SERVICE_EXTRA_SLOT_ID,
-                SubscriptionManager.INVALID_SIM_SLOT_INDEX);
-        if (mBinderMap.get(slotId) != null) {
-            NetworkServiceProvider serviceImpl;
-            synchronized (mServiceMap) {
-                serviceImpl = mServiceMap.get(slotId);
-            }
-            // We assume only one component might bind to the service. So if onUnbind is ever
-            // called, we destroy the serviceImpl.
-            if (serviceImpl != null) {
-                serviceImpl.onDestroy();
-            }
-            mBinderMap.remove(slotId);
-        }
+        mHandler.obtainMessage(NETWORK_SERVICE_REMOVE_ALL_NETWORK_SERVICE_PROVIDERS, 0,
+                0, null).sendToTarget();
 
         return false;
     }
@@ -260,16 +242,6 @@ public abstract class NetworkService extends Service {
     /** @hide */
     @Override
     public void onDestroy() {
-        synchronized (mServiceMap) {
-            for (int i = 0; i < mServiceMap.size(); i++) {
-                NetworkServiceProvider serviceImpl = mServiceMap.get(i);
-                if (serviceImpl != null) {
-                    serviceImpl.onDestroy();
-                }
-            }
-            mServiceMap.clear();
-        }
-
         mHandlerThread.quit();
     }
 
@@ -279,27 +251,36 @@ public abstract class NetworkService extends Service {
      */
     private class INetworkServiceWrapper extends INetworkService.Stub {
 
-        private final int mSlotId;
-
-        INetworkServiceWrapper(int slotId) {
-            mSlotId = slotId;
+        @Override
+        public void createNetworkServiceProvider(int slotId) {
+            mHandler.obtainMessage(NETWORK_SERVICE_CREATE_NETWORK_SERVICE_PROVIDER, slotId,
+                    0, null).sendToTarget();
         }
 
         @Override
-        public void getNetworkRegistrationState(int domain, INetworkServiceCallback callback) {
-            mHandler.obtainMessage(NETWORK_SERVICE_GET_REGISTRATION_STATE, mSlotId,
+        public void removeNetworkServiceProvider(int slotId) {
+            mHandler.obtainMessage(NETWORK_SERVICE_REMOVE_NETWORK_SERVICE_PROVIDER, slotId,
+                    0, null).sendToTarget();
+        }
+
+        @Override
+        public void getNetworkRegistrationState(
+                int slotId, int domain, INetworkServiceCallback callback) {
+            mHandler.obtainMessage(NETWORK_SERVICE_GET_REGISTRATION_STATE, slotId,
                     domain, callback).sendToTarget();
         }
 
         @Override
-        public void registerForNetworkRegistrationStateChanged(INetworkServiceCallback callback) {
-            mHandler.obtainMessage(NETWORK_SERVICE_REGISTER_FOR_STATE_CHANGE, mSlotId,
+        public void registerForNetworkRegistrationStateChanged(
+                int slotId, INetworkServiceCallback callback) {
+            mHandler.obtainMessage(NETWORK_SERVICE_REGISTER_FOR_STATE_CHANGE, slotId,
                     0, callback).sendToTarget();
         }
 
         @Override
-        public void unregisterForNetworkRegistrationStateChanged(INetworkServiceCallback callback) {
-            mHandler.obtainMessage(NETWORK_SERVICE_UNREGISTER_FOR_STATE_CHANGE, mSlotId,
+        public void unregisterForNetworkRegistrationStateChanged(
+                int slotId,INetworkServiceCallback callback) {
+            mHandler.obtainMessage(NETWORK_SERVICE_UNREGISTER_FOR_STATE_CHANGE, slotId,
                     0, callback).sendToTarget();
         }
     }

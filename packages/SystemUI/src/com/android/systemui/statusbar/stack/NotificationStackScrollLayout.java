@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.stack;
 
+import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -728,7 +730,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateClippingToTopRoundedCorner() {
-        Float clipStart = (float) mTopPadding;
+        Float clipStart = (float) mTopPadding + mAmbientState.getExpandAnimationTopChange();
         Float clipEnd = clipStart + mCornerRadius;
         boolean first = true;
         for (int i = 0; i < getChildCount(); i++) {
@@ -1019,33 +1021,15 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mHeadsUpManager.addSwipedOutNotification(row.getStatusBarNotification().getKey());
             }
         }
-        performDismiss(v, mGroupManager, false /* fromAccessibility */);
+        if (v instanceof ExpandableNotificationRow) {
+            ((ExpandableNotificationRow) v).performDismiss(false /* fromAccessibility */);
+        }
 
         mFalsingManager.onNotificationDismissed();
         if (mFalsingManager.shouldEnforceBouncer()) {
             mStatusBar.executeRunnableDismissingKeyguard(null, null /* cancelAction */,
                     false /* dismissShade */, true /* afterKeyguardGone */, false /* deferred */);
         }
-    }
-
-    public static void performDismiss(View v, NotificationGroupManager groupManager,
-            boolean fromAccessibility) {
-        if (!(v instanceof ExpandableNotificationRow)) {
-            return;
-        }
-        ExpandableNotificationRow row = (ExpandableNotificationRow) v;
-        if (groupManager.isOnlyChildInGroup(row.getStatusBarNotification())) {
-            ExpandableNotificationRow groupSummary =
-                    groupManager.getLogicalGroupSummary(row.getStatusBarNotification());
-            if (groupSummary.isClearable()) {
-                performDismiss(groupSummary, groupManager, fromAccessibility);
-            }
-        }
-        row.setDismissed(true, fromAccessibility);
-        if (row.isClearable()) {
-            row.performDismiss();
-        }
-        if (DEBUG) Log.v(TAG, "onChildDismissed: " + v);
     }
 
     @Override
@@ -3006,6 +2990,17 @@ public class NotificationStackScrollLayout extends ViewGroup
                 && (mIsExpanded || isPinnedHeadsUp(child)), child);
     }
 
+    @Override
+    public void setExpandingNotification(ExpandableNotificationRow row) {
+        mAmbientState.setExpandingNotification(row);
+        requestChildrenUpdate();
+    }
+
+    @Override
+    public void applyExpandAnimationParams(ExpandAnimationParameters params) {
+        mAmbientState.setExpandAnimationTopChange(params == null ? 0 : params.getTopChange());
+        requestChildrenUpdate();
+    }
 
     private void updateAnimationState(boolean running, View child) {
         if (child instanceof ExpandableNotificationRow) {

@@ -19,10 +19,13 @@ package android.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
+import android.content.Context;
 import android.media.session.MediaSessionManager;
+import android.media.update.ApiLoader;
+import android.media.update.SessionToken2Provider;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.text.TextUtils;
+import android.os.IInterface;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -37,9 +40,6 @@ import java.lang.annotation.RetentionPolicy;
  * It can be also obtained by {@link MediaSessionManager}.
  * @hide
  */
-// TODO(jaewan): Unhide. SessionToken2?
-// TODO(jaewan): Move Token to updatable!
-// TODO(jaewan): Find better name for this (SessionToken or Session2Token)
 public final class SessionToken2 {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(value = {TYPE_SESSION, TYPE_SESSION_SERVICE, TYPE_LIBRARY_SERVICE})
@@ -50,91 +50,81 @@ public final class SessionToken2 {
     public static final int TYPE_SESSION_SERVICE = 1;
     public static final int TYPE_LIBRARY_SERVICE = 2;
 
-    private static final String KEY_TYPE = "android.media.token.type";
-    private static final String KEY_PACKAGE_NAME = "android.media.token.package_name";
-    private static final String KEY_SERVICE_NAME = "android.media.token.service_name";
-    private static final String KEY_ID = "android.media.token.id";
-    private static final String KEY_SESSION_BINDER = "android.media.token.session_binder";
+    private final SessionToken2Provider mProvider;
 
-    private final @TokenType int mType;
-    private final String mPackageName;
-    private final String mServiceName;
-    private final String mId;
-    private final IMediaSession2 mSessionBinder;
+    /**
+     * Constructor for the token. You can only create token for session service or library service
+     * to use by {@link MediaController2} or {@link MediaBrowser2}.
+     *
+     * @param context context
+     * @param type type
+     * @param packageName package name
+     * @param serviceName name of service. Can be {@code null} if it's not an service.
+     */
+    public SessionToken2(@NonNull Context context, @TokenType int type, @NonNull String packageName,
+            @NonNull String serviceName) {
+        this(context, -1, type, packageName, serviceName, null, null);
+    }
 
     /**
      * Constructor for the token.
      *
-     * @hide
+     * @param context context
+     * @param uid uid
      * @param type type
      * @param packageName package name
-     * @param id id
      * @param serviceName name of service. Can be {@code null} if it's not an service.
-     * @param sessionBinder binder for this session. Can be {@code null} if it's service.
-     * @hide
+     * @param id id. Can be {@code null} if serviceName is specified.
+     * @param sessionBinderInterface sessionBinder. Required for the session.
      */
-    // TODO(jaewan): UID is also needed.
-    // TODO(jaewan): Unhide
-    public SessionToken2(@TokenType int type, @NonNull String packageName, @NonNull String id,
-            @Nullable String serviceName, @Nullable IMediaSession2 sessionBinder) {
-        // TODO(jaewan): Add sanity check.
-        mType = type;
-        mPackageName = packageName;
-        mId = id;
-        mServiceName = serviceName;
-        mSessionBinder = sessionBinder;
+    @SystemApi
+    public SessionToken2(@NonNull Context context, int uid, @TokenType int type,
+            @NonNull String packageName, @Nullable String serviceName, @Nullable String id,
+            @Nullable IInterface sessionBinderInterface) {
+        mProvider = ApiLoader.getProvider(context)
+                .createSessionToken2(context, this, uid, type, packageName,
+                        serviceName, id, sessionBinderInterface);
     }
 
+    @Override
     public int hashCode() {
-        final int prime = 31;
-        return mType
-                + prime * (mPackageName.hashCode()
-                + prime * (mId.hashCode()
-                + prime * ((mServiceName != null ? mServiceName.hashCode() : 0)
-                + prime * (mSessionBinder != null ? mSessionBinder.asBinder().hashCode() : 0))));
+        return mProvider.hashCode_impl();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        SessionToken2 other = (SessionToken2) obj;
-        if (!mPackageName.equals(other.getPackageName())
-                || !mServiceName.equals(other.getServiceName())
-                || !mId.equals(other.getId())
-                || mType != other.getType()) {
-            return false;
-        }
-        if (mSessionBinder == other.getSessionBinder()) {
-            return true;
-        } else if (mSessionBinder == null || other.getSessionBinder() == null) {
-            return false;
-        }
-        return mSessionBinder.asBinder().equals(other.getSessionBinder().asBinder());
+        return mProvider.equals_impl(obj);
     }
 
     @Override
     public String toString() {
-        return "SessionToken {pkg=" + mPackageName + " id=" + mId + " type=" + mType
-                + " service=" + mServiceName + " binder=" + mSessionBinder + "}";
+        return mProvider.toString_impl();
+    }
+
+    @SystemApi
+    public SessionToken2Provider getProvider() {
+        return mProvider;
+    }
+
+    /**
+     * @return uid of the session
+     */
+    public int getUid() {
+        return mProvider.getUid_impl();
     }
 
     /**
      * @return package name
      */
     public String getPackageName() {
-        return mPackageName;
+        return mProvider.getPackageName_impl();
     }
 
     /**
      * @return id
      */
     public String getId() {
-        return mId;
+        return mProvider.getId_imp();
     }
 
     /**
@@ -143,83 +133,23 @@ public final class SessionToken2 {
      * @see #TYPE_SESSION_SERVICE
      */
     public @TokenType int getType() {
-        return mType;
-    }
-
-    /**
-     * @return session binder.
-     * @hide
-     */
-    public @Nullable IMediaSession2 getSessionBinder() {
-        return mSessionBinder;
-    }
-
-    /**
-     * @return service name if it's session service.
-     * @hide
-     */
-    public @Nullable String getServiceName() {
-        return mServiceName;
+        return mProvider.getType_impl();
     }
 
     /**
      * Create a token from the bundle, exported by {@link #toBundle()}.
-     *
      * @param bundle
      * @return
      */
-    public static SessionToken2 fromBundle(@NonNull Bundle bundle) {
-        if (bundle == null) {
-            return null;
-        }
-        final @TokenType int type = bundle.getInt(KEY_TYPE, -1);
-        final String packageName = bundle.getString(KEY_PACKAGE_NAME);
-        final String serviceName = bundle.getString(KEY_SERVICE_NAME);
-        final String id = bundle.getString(KEY_ID);
-        final IBinder sessionBinder = bundle.getBinder(KEY_SESSION_BINDER);
-
-        // Sanity check.
-        switch (type) {
-            case TYPE_SESSION:
-                if (!(sessionBinder instanceof IMediaSession2)) {
-                    throw new IllegalArgumentException("Session needs sessionBinder");
-                }
-                break;
-            case TYPE_SESSION_SERVICE:
-                if (TextUtils.isEmpty(serviceName)) {
-                    throw new IllegalArgumentException("Session service needs service name");
-                }
-                if (sessionBinder != null && !(sessionBinder instanceof IMediaSession2)) {
-                    throw new IllegalArgumentException("Invalid session binder");
-                }
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid type");
-        }
-        if (TextUtils.isEmpty(packageName) || id == null) {
-            throw new IllegalArgumentException("Package name nor ID cannot be null.");
-        }
-        // TODO(jaewan): Revisit here when we add connection callback to the session for individual
-        //               controller's permission check. With it, sessionBinder should be available
-        //               if and only if for session, not session service.
-        return new SessionToken2(type, packageName, id, serviceName,
-                sessionBinder != null ? IMediaSession2.Stub.asInterface(sessionBinder) : null);
+    public static SessionToken2 fromBundle(@NonNull Context context, @NonNull Bundle bundle) {
+        return ApiLoader.getProvider(context).SessionToken2_fromBundle(context, bundle);
     }
 
     /**
      * Create a {@link Bundle} from this token to share it across processes.
-     *
      * @return Bundle
-     * @hide
      */
     public Bundle toBundle() {
-        Bundle bundle = new Bundle();
-        bundle.putString(KEY_PACKAGE_NAME, mPackageName);
-        bundle.putString(KEY_SERVICE_NAME, mServiceName);
-        bundle.putString(KEY_ID, mId);
-        bundle.putInt(KEY_TYPE, mType);
-        bundle.putBinder(KEY_SESSION_BINDER,
-                mSessionBinder != null ? mSessionBinder.asBinder() : null);
-        return bundle;
+        return mProvider.toBundle_impl();
     }
 }

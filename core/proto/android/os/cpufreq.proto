@@ -18,10 +18,13 @@ syntax = "proto2";
 option java_multiple_files = true;
 option java_outer_classname = "CpuFreqProto";
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 package android.os;
 
 // cpu frequency time from /sys/devices/system/cpu/cpufreq/all_time_in_state
 message CpuFreq {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional int32 jiffy_hz = 1; // obtain by system config.
 
@@ -30,10 +33,13 @@ message CpuFreq {
 
 // frequency time pre cpu, unit in jiffy, TODO: obtain jiffies.
 message CpuFreqStats {
+    option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional string cpu_name = 1;
 
     message TimeInState {
+        option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
         optional int32 state_khz = 1;  // cpu frequency
         optional int64 time_jiffy = 2; // number of jiffies
     }

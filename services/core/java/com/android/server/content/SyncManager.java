@@ -20,6 +20,8 @@ import android.accounts.Account;
 import android.accounts.AccountAndUser;
 import android.accounts.AccountManager;
 import android.accounts.AccountManagerInternal;
+import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.Notification;
@@ -32,6 +34,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.ISyncAdapter;
+import android.content.ISyncAdapterUnsyncableAccountCallback;
 import android.content.ISyncContext;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -211,6 +214,10 @@ public class SyncManager {
     private static final int SYNC_OP_STATE_VALID = 0;
     private static final int SYNC_OP_STATE_INVALID = 1;
     private static final int SYNC_OP_STATE_INVALID_NO_ACCOUNT_ACCESS = 2;
+
+    /** Flags used when connecting to a sync adapter service */
+    private static final int SYNC_ADAPTER_CONNECTION_FLAGS = Context.BIND_AUTO_CREATE
+            | Context.BIND_NOT_FOREGROUND | Context.BIND_ALLOW_OOM_MANAGEMENT;
 
     private Context mContext;
 
@@ -876,7 +883,7 @@ public class SyncManager {
     public void scheduleSync(Account requestedAccount, int userId, int reason,
                              String requestedAuthority, Bundle extras, int targetSyncState) {
         scheduleSync(requestedAccount, userId, reason, requestedAuthority, extras, targetSyncState,
-                0 /* min delay */);
+                0 /* min delay */, true /* checkIfAccountReady */);
     }
 
     /**
@@ -884,7 +891,7 @@ public class SyncManager {
      */
     private void scheduleSync(Account requestedAccount, int userId, int reason,
                              String requestedAuthority, Bundle extras, int targetSyncState,
-                             final long minDelayMillis) {
+                             final long minDelayMillis, boolean checkIfAccountReady) {
         final boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
         if (extras == null) {
             extras = new Bundle();
@@ -963,7 +970,8 @@ public class SyncManager {
             }
 
             for (String authority : syncableAuthorities) {
-                int isSyncable = computeSyncable(account.account, account.userId, authority);
+                int isSyncable = computeSyncable(account.account, account.userId, authority,
+                        !checkIfAccountReady);
 
                 if (isSyncable == AuthorityInfo.NOT_SYNCABLE) {
                     continue;
@@ -1000,7 +1008,8 @@ public class SyncManager {
                                 if (result != null
                                         && result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT)) {
                                     scheduleSync(account.account, userId, reason, authority,
-                                            finalExtras, targetSyncState, minDelayMillis);
+                                            finalExtras, targetSyncState, minDelayMillis,
+                                            true /* checkIfAccountReady */);
                                 }
                             }
                         ));
@@ -1009,7 +1018,7 @@ public class SyncManager {
 
                 final boolean allowParallelSyncs = syncAdapterInfo.type.allowParallelSyncs();
                 final boolean isAlwaysSyncable = syncAdapterInfo.type.isAlwaysSyncable();
-                if (isSyncable < 0 && isAlwaysSyncable) {
+                if (!checkIfAccountReady && isSyncable < 0 && isAlwaysSyncable) {
                     mSyncStorageEngine.setIsSyncable(
                             account.account, account.userId, authority, AuthorityInfo.SYNCABLE);
                     isSyncable = AuthorityInfo.SYNCABLE;
@@ -1045,25 +1054,34 @@ public class SyncManager {
                 final String owningPackage = syncAdapterInfo.componentName.getPackageName();
 
                 if (isSyncable == AuthorityInfo.NOT_INITIALIZED) {
-                    // Initialisation sync.
-                    Bundle newExtras = new Bundle();
-                    newExtras.putBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, true);
-                    if (isLoggable) {
-                        Slog.v(TAG, "schedule initialisation Sync:"
-                                + ", delay until " + delayUntil
-                                + ", run by " + 0
-                                + ", flexMillis " + 0
-                                + ", source " + source
-                                + ", account " + account
-                                + ", authority " + authority
-                                + ", extras " + newExtras);
+                    if (checkIfAccountReady) {
+                        Bundle finalExtras = new Bundle(extras);
+
+                        sendOnUnsyncableAccount(mContext, syncAdapterInfo, account.userId,
+                                () -> scheduleSync(account.account, account.userId, reason,
+                                        authority, finalExtras, targetSyncState, minDelayMillis,
+                                        false));
+                    } else {
+                        // Initialisation sync.
+                        Bundle newExtras = new Bundle();
+                        newExtras.putBoolean(ContentResolver.SYNC_EXTRAS_INITIALIZE, true);
+                        if (isLoggable) {
+                            Slog.v(TAG, "schedule initialisation Sync:"
+                                    + ", delay until " + delayUntil
+                                    + ", run by " + 0
+                                    + ", flexMillis " + 0
+                                    + ", source " + source
+                                    + ", account " + account
+                                    + ", authority " + authority
+                                    + ", extras " + newExtras);
+                        }
+                        postScheduleSyncMessage(
+                                new SyncOperation(account.account, account.userId,
+                                        owningUid, owningPackage, reason, source,
+                                        authority, newExtras, allowParallelSyncs),
+                                minDelayMillis
+                        );
                     }
-                    postScheduleSyncMessage(
-                            new SyncOperation(account.account, account.userId,
-                                    owningUid, owningPackage, reason, source,
-                                    authority, newExtras, allowParallelSyncs),
-                            minDelayMillis
-                    );
                 } else if (targetSyncState == AuthorityInfo.UNDEFINED
                         || targetSyncState == isSyncable) {
                     if (isLoggable) {
@@ -1083,10 +1101,6 @@ public class SyncManager {
                 }
             }
         }
-    }
-
-    private int computeSyncable(Account account, int userId, String authority) {
-        return computeSyncable(account, userId, authority, true);
     }
 
     public int computeSyncable(Account account, int userId, String authority,
@@ -1198,7 +1212,7 @@ public class SyncManager {
         final Bundle extras = new Bundle();
         extras.putBoolean(ContentResolver.SYNC_EXTRAS_UPLOAD, true);
         scheduleSync(account, userId, reason, authority, extras,
-                AuthorityInfo.UNDEFINED, LOCAL_SYNC_DELAY);
+                AuthorityInfo.UNDEFINED, LOCAL_SYNC_DELAY, true /* checkIfAccountReady */);
     }
 
     public SyncAdapterType[] getSyncAdapterTypes(int userId) {
@@ -1706,6 +1720,28 @@ public class SyncManager {
     }
 
     /**
+     * Construct intent used to bind to an adapter.
+     *
+     * @param context Context to create intent for
+     * @param syncAdapterComponent The adapter description
+     * @param userId The user the adapter belongs to
+     *
+     * @return The intent required to bind to the adapter
+     */
+    static @NonNull Intent getAdapterBindIntent(@NonNull Context context,
+            @NonNull ComponentName syncAdapterComponent, @UserIdInt int userId) {
+        final Intent intent = new Intent();
+        intent.setAction("android.content.SyncAdapter");
+        intent.setComponent(syncAdapterComponent);
+        intent.putExtra(Intent.EXTRA_CLIENT_LABEL,
+                com.android.internal.R.string.sync_binding_label);
+        intent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivityAsUser(context, 0,
+                new Intent(Settings.ACTION_SYNC_SETTINGS), 0, null, UserHandle.of(userId)));
+
+        return intent;
+    }
+
+    /**
      * @hide
      */
     class ActiveSyncContext extends ISyncContext.Stub
@@ -1793,19 +1829,11 @@ public class SyncManager {
             if (Log.isLoggable(TAG, Log.VERBOSE)) {
                 Log.d(TAG, "bindToSyncAdapter: " + serviceComponent + ", connection " + this);
             }
-            Intent intent = new Intent();
-            intent.setAction("android.content.SyncAdapter");
-            intent.setComponent(serviceComponent);
-            intent.putExtra(Intent.EXTRA_CLIENT_LABEL,
-                    com.android.internal.R.string.sync_binding_label);
-            intent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivityAsUser(
-                    mContext, 0, new Intent(Settings.ACTION_SYNC_SETTINGS), 0,
-                    null, new UserHandle(userId)));
+            Intent intent = getAdapterBindIntent(mContext, serviceComponent, userId);
+
             mBound = true;
             final boolean bindResult = mContext.bindServiceAsUser(intent, this,
-                    Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
-                            | Context.BIND_ALLOW_OOM_MANAGEMENT,
-                    new UserHandle(mSyncOperation.target.userId));
+                    SYNC_ADAPTER_CONNECTION_FLAGS, new UserHandle(mSyncOperation.target.userId));
             mLogger.log("bindService() returned=", mBound, " for ", this);
             if (!bindResult) {
                 mBound = false;
@@ -2528,6 +2556,92 @@ public class SyncManager {
         }
     }
 
+    interface OnReadyCallback {
+        void onReady();
+    }
+
+    static void sendOnUnsyncableAccount(@NonNull Context context,
+            @NonNull RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo,
+            @UserIdInt int userId, @NonNull OnReadyCallback onReadyCallback) {
+        OnUnsyncableAccountCheck connection = new OnUnsyncableAccountCheck(syncAdapterInfo,
+                onReadyCallback);
+
+        boolean isBound = context.bindServiceAsUser(
+                getAdapterBindIntent(context, syncAdapterInfo.componentName, userId),
+                connection, SYNC_ADAPTER_CONNECTION_FLAGS, UserHandle.of(userId));
+
+        if (isBound) {
+            // Unbind after SERVICE_BOUND_TIME_MILLIS to not leak the connection.
+            (new Handler(Looper.getMainLooper())).postDelayed(
+                    () -> context.unbindService(connection),
+                    OnUnsyncableAccountCheck.SERVICE_BOUND_TIME_MILLIS);
+        } else {
+                /*
+                 * The default implementation of adapter.onUnsyncableAccount returns true. Hence if
+                 * there the service cannot be bound, assume the default behavior.
+                 */
+            connection.onReady();
+        }
+    }
+
+
+    /**
+     * Helper class for calling ISyncAdapter.onUnsyncableAccountDone.
+     *
+     * If this returns {@code true} the onReadyCallback is called. Otherwise nothing happens.
+     */
+    private static class OnUnsyncableAccountCheck implements ServiceConnection {
+        static final long SERVICE_BOUND_TIME_MILLIS = 5000;
+
+        private final @NonNull OnReadyCallback mOnReadyCallback;
+        private final @NonNull RegisteredServicesCache.ServiceInfo<SyncAdapterType>
+                mSyncAdapterInfo;
+
+        OnUnsyncableAccountCheck(
+                @NonNull RegisteredServicesCache.ServiceInfo<SyncAdapterType> syncAdapterInfo,
+                @NonNull OnReadyCallback onReadyCallback) {
+            mSyncAdapterInfo = syncAdapterInfo;
+            mOnReadyCallback = onReadyCallback;
+        }
+
+        private void onReady() {
+            long identity = Binder.clearCallingIdentity();
+            try {
+                mOnReadyCallback.onReady();
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            final ISyncAdapter adapter = ISyncAdapter.Stub.asInterface(service);
+
+            try {
+                adapter.onUnsyncableAccount(new ISyncAdapterUnsyncableAccountCallback.Stub() {
+                    @Override
+                    public void onUnsyncableAccountDone(boolean isReady) {
+                        if (isReady) {
+                            onReady();
+                        }
+                    }
+                });
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Could not call onUnsyncableAccountDone " + mSyncAdapterInfo, e);
+                /*
+                 * The default implementation of adapter.onUnsyncableAccount returns true. Hence if
+                 * there is a crash in the implementation, assume the default behavior.
+                 */
+                onReady();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            // Wait until the service connects again
+        }
+    }
+
     /**
      * A helper object to keep track of the time we have spent syncing since the last boot
      */
@@ -3199,7 +3313,7 @@ public class SyncManager {
                 return SYNC_OP_STATE_INVALID;
             }
             // Drop this sync request if it isn't syncable.
-            state = computeSyncable(target.account, target.userId, target.provider);
+            state = computeSyncable(target.account, target.userId, target.provider, true);
             if (state == AuthorityInfo.SYNCABLE_NO_ACCOUNT_ACCESS) {
                 if (isLoggable) {
                     Slog.v(TAG, "    Dropping sync operation: "

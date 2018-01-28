@@ -16,12 +16,16 @@
 
 package com.android.server.backup.transport;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.os.DeadObjectException;
 import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.backup.IBackupTransport;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /** Utility methods for transport-related operations. */
 public class TransportUtils {
@@ -34,14 +38,16 @@ public class TransportUtils {
     public static IBackupTransport checkTransportNotNull(@Nullable IBackupTransport transport)
             throws TransportNotAvailableException {
         if (transport == null) {
-            log(Log.ERROR, TAG, "Transport not available");
+            log(Priority.ERROR, TAG, "Transport not available");
             throw new TransportNotAvailableException();
         }
         return transport;
     }
 
-    static void log(int priority, String tag, String message) {
-        if (Log.isLoggable(tag, priority)) {
+    static void log(@Priority int priority, String tag, String message) {
+        if (priority == Priority.WTF) {
+            Slog.wtf(tag, message);
+        } else if (Log.isLoggable(tag, priority)) {
             Slog.println(priority, tag, message);
         }
     }
@@ -55,6 +61,21 @@ public class TransportUtils {
             string.append("[").append(caller).append("] ");
         }
         return string.append(message).toString();
+    }
+
+    /**
+     * Create our own constants so we can log WTF using the same APIs. Except for {@link
+     * Priority#WTF} all the others have the same value, so can be used directly
+     */
+    @IntDef({Priority.VERBOSE, Priority.DEBUG, Priority.INFO, Priority.WARN, Priority.WTF})
+    @Retention(RetentionPolicy.SOURCE)
+    @interface Priority {
+        int VERBOSE = Log.VERBOSE;
+        int DEBUG = Log.DEBUG;
+        int INFO = Log.INFO;
+        int WARN = Log.WARN;
+        int ERROR = Log.ERROR;
+        int WTF = -1;
     }
 
     private TransportUtils() {}

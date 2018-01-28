@@ -1134,7 +1134,11 @@ public final class SmsManager {
 
     // SMS send failure result codes
 
-    /** No error. {@hide}*/
+    /**
+     * No error.
+     * @hide
+     */
+    @SystemApi
     static public final int RESULT_ERROR_NONE    = 0;
     /** Generic failure cause */
     static public final int RESULT_ERROR_GENERIC_FAILURE    = 1;
@@ -1146,12 +1150,113 @@ public final class SmsManager {
     static public final int RESULT_ERROR_NO_SERVICE         = 4;
     /** Failed because we reached the sending queue limit. */
     static public final int RESULT_ERROR_LIMIT_EXCEEDED     = 5;
-    /** Failed because FDN is enabled. {@hide} */
+    /**
+     * Failed because FDN is enabled.
+     * @hide
+     */
+    @SystemApi
     static public final int RESULT_ERROR_FDN_CHECK_FAILURE  = 6;
     /** Failed because user denied the sending of this short code. */
     static public final int RESULT_ERROR_SHORT_CODE_NOT_ALLOWED = 7;
     /** Failed because the user has denied this app ever send premium short codes. */
     static public final int RESULT_ERROR_SHORT_CODE_NEVER_ALLOWED = 8;
+    /**
+     * Failed because the radio was not available
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_RADIO_NOT_AVAILABLE = 9;
+    /**
+     * Failed because of network rejection
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_NETWORK_REJECT = 10;
+    /**
+     * Failed because of invalid arguments
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_INVALID_ARGUMENTS = 11;
+    /**
+     * Failed because of an invalid state
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_INVALID_STATE = 12;
+    /**
+     * Failed because there is no memory
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_NO_MEMORY = 13;
+    /**
+     * Failed because the sms format is not valid
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_INVALID_SMS_FORMAT = 14;
+    /**
+     * Failed because of a system error
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_SYSTEM_ERROR = 15;
+    /**
+     * Failed because of a modem error
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_MODEM_ERROR = 16;
+    /**
+     * Failed because of a network error
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_NETWORK_ERROR = 17;
+    /**
+     * Failed because of an encoding error
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_ENCODING_ERROR = 18;
+    /**
+     * Failed because of an invalid smsc address
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_INVALID_SMSC_ADDRESS = 19;
+    /**
+     * Failed because the operation is not allowed
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_OPERATION_NOT_ALLOWED = 20;
+    /**
+     * Failed because of an internal error
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_INTERNAL_ERROR = 21;
+    /**
+     * Failed because there are no resources
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_NO_RESOURCES = 22;
+    /**
+     * Failed because the operation was cancelled
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_CANCELLED = 23;
+    /**
+     * Failed because the request is not supported
+     * @hide
+     */
+    @SystemApi
+    static public final int RESULT_REQUEST_NOT_SUPPORTED = 24;
+
 
     static private final String PHONE_PACKAGE_NAME = "com.android.phone";
 

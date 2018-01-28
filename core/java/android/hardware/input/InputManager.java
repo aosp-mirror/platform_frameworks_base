@@ -1246,7 +1246,7 @@ public final class InputManager {
             int repeat;
             if (effect instanceof VibrationEffect.OneShot) {
                 VibrationEffect.OneShot oneShot = (VibrationEffect.OneShot) effect;
-                pattern = new long[] { 0, oneShot.getTiming() };
+                pattern = new long[] { 0, oneShot.getDuration() };
                 repeat = -1;
             } else if (effect instanceof VibrationEffect.Waveform) {
                 VibrationEffect.Waveform waveform = (VibrationEffect.Waveform) effect;

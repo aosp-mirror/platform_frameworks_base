@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.app.ActivityManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -353,10 +354,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
+    /** @param state Process state from ActivityManager.java. */
     void noteUidProcessState(int uid, int state) {
         synchronized (mStats) {
             // TODO: remove this once we figure out properly where and how
-            StatsLog.write(StatsLog.UID_PROCESS_STATE_CHANGED, uid, state);
+            StatsLog.write(StatsLog.UID_PROCESS_STATE_CHANGED, uid,
+                    ActivityManager.processStateAmToProto(state));
 
             mStats.noteUidProcessStateLocked(uid, state);
         }
@@ -582,17 +585,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    public void noteStartGps(int uid) {
+    @Override
+    public void noteGpsChanged(WorkSource oldWs, WorkSource newWs) {
         enforceCallingPermission();
         synchronized (mStats) {
-            mStats.noteStartGpsLocked(uid);
-        }
-    }
-
-    public void noteStopGps(int uid) {
-        enforceCallingPermission();
-        synchronized (mStats) {
-            mStats.noteStopGpsLocked(uid);
+            mStats.noteGpsChangedLocked(oldWs, newWs);
         }
     }
 

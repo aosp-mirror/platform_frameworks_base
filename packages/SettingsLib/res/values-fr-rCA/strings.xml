@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Réseautage"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certification de l\'affichage sans fil"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Autoriser enreg. données Wi-Fi détaillées"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Toujours autoriser la détection de réseaux Wi-Fi en itinérance"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Sélection aléatoire de l\'adresse MAC lors de la connexion"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Données cellulaires toujours actives"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Accélération matérielle pour le partage de connexion"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Afficher les appareils Bluetooth sans nom"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Entrez le nom d\'hôte du fournisseur DNS"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Afficher les options pour la certification d\'affichage sans fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Détailler davantage les données Wi-Fi, afficher par SSID RSSI dans sélect. Wi-Fi"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Autoriser ou non la détection de réseaux Wi-Fi en itinérance en fonction de l\'importance du transfert de données dans l\'interface"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Sélectionner l\'adresse MAC de manière aléatoire lors de la connexion aux réseaux Wi-Fi"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Tailles des mémoires tampons d\'enregistreur"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Tailles enreg. par tampon journal"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Supprimer les données de l\'enregistreur?"</string>
@@ -403,4 +403,10 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Enregistré"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Non enregistré"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Non accessible"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="one">%1$d appareil connecté</item>
+      <item quantity="other">%1$d appareils connectés</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Plus longtemps."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Moins longtemps."</string>
 </resources>

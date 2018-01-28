@@ -177,6 +177,9 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 && (keymasterSwEnforcedUserAuthenticators == 0);
         boolean userAuthenticationValidWhileOnBody =
                 keyCharacteristics.hwEnforced.getBoolean(KeymasterDefs.KM_TAG_ALLOW_WHILE_ON_BODY);
+        boolean trustedUserPresenceRequred =
+                keyCharacteristics.hwEnforced.getBoolean(
+                    KeymasterDefs.KM_TAG_TRUSTED_USER_PRESENCE_REQUIRED);
 
         boolean invalidatedByBiometricEnrollment = false;
         if (keymasterSwEnforcedUserAuthenticators == KeymasterDefs.HW_AUTH_FINGERPRINT
@@ -203,6 +206,7 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 (int) userAuthenticationValidityDurationSeconds,
                 userAuthenticationRequirementEnforcedBySecureHardware,
                 userAuthenticationValidWhileOnBody,
+                trustedUserPresenceRequred,
                 invalidatedByBiometricEnrollment);
     }
 

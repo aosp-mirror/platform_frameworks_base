@@ -16,15 +16,17 @@
 
 package android.media;
 
+import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.media.MediaSession2.Command;
 import android.media.MediaSession2.CommandButton;
 import android.media.MediaSession2.CommandGroup;
 import android.media.MediaSession2.ControllerInfo;
-import android.media.MediaSession2.PlaylistParam;
+import android.media.MediaSession2.PlaylistParams;
 import android.media.session.MediaSessionManager;
 import android.media.update.ApiLoader;
 import android.media.update.MediaController2Provider;
@@ -63,8 +65,6 @@ import java.util.concurrent.Executor;
  * @see MediaSessionService2
  * @hide
  */
-// TODO(jaewan): Unhide
-// TODO(jaewan): Revisit comments. Currently MediaBrowser case is missing.
 public class MediaController2 implements AutoCloseable {
     /**
      * Interface for listening to change in activeness of the {@link MediaSession2}.  It's
@@ -130,14 +130,21 @@ public class MediaController2 implements AutoCloseable {
          * @param param
          */
         public void onPlaylistChanged(
-                @NonNull List<MediaItem2> list, @NonNull PlaylistParam param) { }
+                @NonNull List<MediaItem2> list, @NonNull PlaylistParams param) { }
 
         /**
-         * Called when the playback state is changed.
+         * Called when the playback state is changed, or connection success.
          *
-         * @param state
+         * @param state latest playback state
          */
         public void onPlaybackStateChanged(@NonNull PlaybackState2 state) { }
+
+        /**
+         * Called when the playlist parameters are changed.
+         *
+         * @param params The new play list parameters.
+         */
+        public void onPlaylistParamsChanged(@NonNull PlaylistParams params) { }
     }
 
     /**
@@ -239,27 +246,28 @@ public class MediaController2 implements AutoCloseable {
      *
      * @param context Context
      * @param token token to connect to
-     * @param callback controller callback to receive changes in
      * @param executor executor to run callbacks on.
+     * @param callback controller callback to receive changes in
      */
     // TODO(jaewan): Put @CallbackExecutor to the constructor.
     public MediaController2(@NonNull Context context, @NonNull SessionToken2 token,
-            @NonNull ControllerCallback callback, @NonNull Executor executor) {
+            @NonNull @CallbackExecutor Executor executor, @NonNull ControllerCallback callback) {
         super();
 
+        mProvider = createProvider(context, token, executor, callback);
         // This also connects to the token.
         // Explicit connect() isn't added on purpose because retrying connect() is impossible with
         // session whose session binder is only valid while it's active.
         // prevent a controller from reusable after the
         // session is released and recreated.
-        mProvider = createProvider(context, token, callback, executor);
+        mProvider.initialize();
     }
 
     MediaController2Provider createProvider(@NonNull Context context,
-            @NonNull SessionToken2 token, @NonNull ControllerCallback callback,
-            @NonNull Executor executor) {
+            @NonNull SessionToken2 token, @NonNull Executor executor,
+            @NonNull ControllerCallback callback) {
         return ApiLoader.getProvider(context)
-                .createMediaController2(this, context, token, callback, executor);
+                .createMediaController2(context, this, token, executor, callback);
     }
 
     /**
@@ -271,9 +279,7 @@ public class MediaController2 implements AutoCloseable {
         mProvider.close_impl();
     }
 
-    /**
-     * @hide
-     */
+    @SystemApi
     public MediaController2Provider getProvider() {
         return mProvider;
     }
@@ -358,6 +364,17 @@ public class MediaController2 implements AutoCloseable {
      */
     public void setCurrentPlaylistItem(int index) {
         mProvider.setCurrentPlaylistItem_impl(index);
+    }
+
+    /**
+     * Sets the {@link PlaylistParams} for the current play list. Repeat/shuffle mode and metadata
+     * for the list can be set by calling this method.
+     *
+     * @param params A {@link PlaylistParams} object to set.
+     * @throws IllegalArgumentException if given {@param param} is null.
+     */
+    public void setPlaylistParams(PlaylistParams params) {
+        mProvider.setPlaylistParams_impl(params);
     }
 
     /**
@@ -529,11 +546,15 @@ public class MediaController2 implements AutoCloseable {
     }
 
     /**
-     * Get the latest {@link PlaybackState2} from the session.
+     * Get the lastly cached {@link PlaybackState2} from
+     * {@link ControllerCallback#onPlaybackStateChanged(PlaybackState2)}.
+     * <p>
+     * It may return {@code null} before the first callback or session has sent {@code null}
+     * playback state.
      *
-     * @return a playback state
+     * @return a playback state. Can be {@code null}
      */
-    public PlaybackState2 getPlaybackState() {
+    public @Nullable PlaybackState2 getPlaybackState() {
         return mProvider.getPlaybackState_impl();
     }
 
@@ -578,7 +599,8 @@ public class MediaController2 implements AutoCloseable {
         return mProvider.getPlaylist_impl();
     }
 
-    public @Nullable PlaylistParam getPlaylistParam() {
+    public @Nullable
+    PlaylistParams getPlaylistParam() {
         return mProvider.getPlaylistParam_impl();
     }
 

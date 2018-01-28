@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"תקשורת רשתות"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"‏אישור של תצוגת WiFi"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"‏הפעל רישום מפורט של Wi‑Fi ביומן"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"‏התר תמיד סריקות נדידה של Wi‑Fi"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"‏חיבור כתובת MAC אקראית"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"חבילת הגלישה פעילה תמיד"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"שיפור מהירות באמצעות חומרה לצורך שיתוף אינטרנט בין ניידים"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"‏הצגת מכשירי Bluetooth ללא שמות"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"‏צריך להזין את שם המארח של ספק DNS"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"‏הצג אפשרויות עבור אישור של תצוגת WiFi"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"‏העלה את רמת הרישום של Wi‑Fi ביומן, הצג לכל SSID RSSI ב-Wi‑Fi Picker"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"‏התר/מנע סריקות נדידה של Wi-Fi בהתבסס על נפח תנועת הנתונים הקיימת בממשק"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"‏יצירת כתובת MAC אקראית בהתחברות לרשתות Wi-Fi"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"גדלי מאגר של יומן רישום"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"בחר גדלים של יוצר יומן לכל מאגר יומן"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"האם למחוק את אחסון המתעד המתמיד?"</string>
@@ -403,4 +403,12 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"רשום"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"לא רשום"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"לא זמין"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="two">‏%1$d מכשירים מחוברים</item>
+      <item quantity="many">‏%1$d מכשירים מחוברים</item>
+      <item quantity="other">‏%1$d מכשירים מחוברים</item>
+      <item quantity="one">מכשיר אחד מחובר</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"יותר זמן."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"פחות זמן."</string>
 </resources>

@@ -1165,51 +1165,6 @@ android_media_MediaPlayer2_setNextMediaPlayer(JNIEnv *env, jobject thiz, jobject
     ;
 }
 
-// Pass through the arguments to the MediaServer player implementation.
-static jint android_media_MediaPlayer2_applyVolumeShaper(JNIEnv *env, jobject thiz,
-        jobject jconfig, jobject joperation) {
-    // NOTE: hard code here to prevent platform issues. Must match VolumeShaper.java
-    const int VOLUME_SHAPER_INVALID_OPERATION = -38;
-
-    sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
-    if (mp == nullptr) {
-        return (jint)VOLUME_SHAPER_INVALID_OPERATION;
-    }
-
-    sp<VolumeShaper::Configuration> configuration;
-    sp<VolumeShaper::Operation> operation;
-    if (jconfig != nullptr) {
-        configuration = VolumeShaperHelper::convertJobjectToConfiguration(
-                env, gVolumeShaperFields, jconfig);
-        ALOGV("applyVolumeShaper configuration: %s", configuration->toString().c_str());
-    }
-    if (joperation != nullptr) {
-        operation = VolumeShaperHelper::convertJobjectToOperation(
-                env, gVolumeShaperFields, joperation);
-        ALOGV("applyVolumeShaper operation: %s", operation->toString().c_str());
-    }
-    VolumeShaper::Status status = mp->applyVolumeShaper(configuration, operation);
-    if (status == INVALID_OPERATION) {
-        status = VOLUME_SHAPER_INVALID_OPERATION;
-    }
-    return (jint)status; // if status < 0 an error, else a VolumeShaper id
-}
-
-// Pass through the arguments to the MediaServer player implementation.
-static jobject android_media_MediaPlayer2_getVolumeShaperState(JNIEnv *env, jobject thiz,
-        jint id) {
-    sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
-    if (mp == nullptr) {
-        return (jobject)nullptr;
-    }
-
-    sp<VolumeShaper::State> state = mp->getVolumeShaperState((int)id);
-    if (state.get() == nullptr) {
-        return (jobject)nullptr;
-    }
-    return VolumeShaperHelper::convertStateToJobject(env, gVolumeShaperFields, state);
-}
-
 /////////////////////////////////////////////////////////////////////////////////////
 // Modular DRM begin
 
@@ -1465,12 +1420,6 @@ static const JNINativeMethod gMethods[] = {
     {"attachAuxEffect",     "(I)V",                             (void *)android_media_MediaPlayer2_attachAuxEffect},
     {"native_setRetransmitEndpoint", "(Ljava/lang/String;I)I",  (void *)android_media_MediaPlayer2_setRetransmitEndpoint},
     {"setNextMediaPlayer",  "(Landroid/media/MediaPlayer2;)V",  (void *)android_media_MediaPlayer2_setNextMediaPlayer},
-    {"native_applyVolumeShaper",
-                            "(Landroid/media/VolumeShaper$Configuration;Landroid/media/VolumeShaper$Operation;)I",
-                                                                (void *)android_media_MediaPlayer2_applyVolumeShaper},
-    {"native_getVolumeShaperState",
-                            "(I)Landroid/media/VolumeShaper$State;",
-                                                                (void *)android_media_MediaPlayer2_getVolumeShaperState},
     // Modular DRM
     { "_prepareDrm", "([B[B)V",                                 (void *)android_media_MediaPlayer2_prepareDrm },
     { "_releaseDrm", "()V",                                     (void *)android_media_MediaPlayer2_releaseDrm },

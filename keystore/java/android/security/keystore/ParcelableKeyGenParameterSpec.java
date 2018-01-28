@@ -101,6 +101,7 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
         out.writeBoolean(mSpec.isUniqueIdIncluded());
         out.writeBoolean(mSpec.isUserAuthenticationValidWhileOnBody());
         out.writeBoolean(mSpec.isInvalidatedByBiometricEnrollment());
+        out.writeBoolean(mSpec.isTrustedUserPresenceRequired());
     }
 
     private static Date readDateOrNull(Parcel in) {
@@ -164,6 +165,7 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
         builder.setUniqueIdIncluded(in.readBoolean());
         builder.setUserAuthenticationValidWhileOnBody(in.readBoolean());
         builder.setInvalidatedByBiometricEnrollment(in.readBoolean());
+        builder.setTrustedUserPresenceRequired(in.readBoolean());
         mSpec = builder.build();
     }
 

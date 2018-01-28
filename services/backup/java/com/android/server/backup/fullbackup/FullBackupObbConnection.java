@@ -16,10 +16,10 @@
 
 package com.android.server.backup.fullbackup;
 
-import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.RefactoredBackupManagerService.OP_TYPE_BACKUP_WAIT;
-import static com.android.server.backup.RefactoredBackupManagerService.TAG;
-import static com.android.server.backup.RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL;
+import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP_WAIT;
+import static com.android.server.backup.BackupManagerService.TAG;
+import static com.android.server.backup.BackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL;
 
 import android.app.backup.IBackupManager;
 import android.content.ComponentName;
@@ -33,7 +33,7 @@ import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.backup.IObbBackupService;
-import com.android.server.backup.RefactoredBackupManagerService;
+import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.utils.FullBackupUtils;
 
 import java.io.IOException;
@@ -44,10 +44,10 @@ import java.io.OutputStream;
  */
 public class FullBackupObbConnection implements ServiceConnection {
 
-    private RefactoredBackupManagerService backupManagerService;
+    private BackupManagerService backupManagerService;
     volatile IObbBackupService mService;
 
-    public FullBackupObbConnection(RefactoredBackupManagerService backupManagerService) {
+    public FullBackupObbConnection(BackupManagerService backupManagerService) {
         this.backupManagerService = backupManagerService;
         mService = null;
     }

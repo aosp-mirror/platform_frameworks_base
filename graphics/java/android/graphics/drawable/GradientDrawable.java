@@ -42,6 +42,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.SweepGradient;
+import android.graphics.Xfermode;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -812,6 +813,16 @@ public class GradientDrawable extends Drawable {
                 mStrokePaint.setAlpha(prevStrokeAlpha);
             }
         }
+    }
+
+    /**
+     * @param mode to draw this drawable with
+     * @hide
+     */
+    @Override
+    public void setXfermode(@Nullable Xfermode mode) {
+        super.setXfermode(mode);
+        mFillPaint.setXfermode(mode);
     }
 
     private void buildPathIfDirty() {

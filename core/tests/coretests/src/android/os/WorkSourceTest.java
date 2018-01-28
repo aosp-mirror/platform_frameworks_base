@@ -349,6 +349,15 @@ public class WorkSourceTest extends TestCase {
         assertEquals(100, wc.getAttributionUid());
     }
 
+    public void testGetAttributionTag() {
+        WorkSource ws1 = new WorkSource();
+        WorkChain wc = ws1.createWorkChain();
+        wc.addNode(100, "tag");
+        assertEquals("tag", wc.getAttributionTag());
+        wc.addNode(200, "tag2");
+        assertEquals("tag", wc.getAttributionTag());
+    }
+
     public void testRemove_fromChainedWorkSource() {
         WorkSource ws1 = new WorkSource();
         ws1.createWorkChain().addNode(50, "foo");
@@ -367,5 +376,26 @@ public class WorkSourceTest extends TestCase {
         assertTrue(ws1.remove(ws2));
         assertEquals(1, ws1.getWorkChains().size());
         assertEquals(75, ws1.getWorkChains().get(0).getAttributionUid());
+    }
+
+    public void testTransferWorkChains() {
+        WorkSource ws1 = new WorkSource();
+        WorkChain wc1 = ws1.createWorkChain().addNode(100, "tag");
+        WorkChain wc2 = ws1.createWorkChain().addNode(200, "tag2");
+
+        WorkSource ws2 = new WorkSource();
+        ws2.transferWorkChains(ws1);
+
+        assertEquals(0, ws1.getWorkChains().size());
+        assertEquals(2, ws2.getWorkChains().size());
+        assertSame(wc1, ws2.getWorkChains().get(0));
+        assertSame(wc2, ws2.getWorkChains().get(1));
+
+        ws1.clear();
+        ws1.createWorkChain().addNode(300, "tag3");
+        ws1.transferWorkChains(ws2);
+        assertEquals(0, ws2.getWorkChains().size());
+        assertSame(wc1, ws1.getWorkChains().get(0));
+        assertSame(wc2, ws1.getWorkChains().get(1));
     }
 }

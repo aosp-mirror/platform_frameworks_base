@@ -16,14 +16,11 @@
 
 package android.media.update;
 
-import android.media.MediaPlayerBase;
-import android.media.session.PlaybackState;
-import android.os.Handler;
+import android.media.PlaybackState2;
 
 /**
  * @hide
  */
-// TODO(jaewan): SystemApi
 public interface TransportControlProvider {
     void play_impl();
     void pause_impl();
@@ -36,4 +33,6 @@ public interface TransportControlProvider {
     void rewind_impl();
     void seekTo_impl(long pos);
     void setCurrentPlaylistItem_impl(int index);
+
+    PlaybackState2 getPlaybackState_impl();
 }

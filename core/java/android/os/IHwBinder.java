@@ -27,12 +27,22 @@ public interface IHwBinder {
     /** @hide */
     public static final int FLAG_ONEWAY = 1;
 
-    /** @hide */
+    /**
+     * Process a hwbinder transaction.
+     *
+     * @hide
+     */
+    @SystemApi
     public void transact(
             int code, HwParcel request, HwParcel reply, int flags)
         throws RemoteException;
 
-    /** @hide */
+    /**
+     * Return as IHwInterface instance only if this implements descriptor.
+     * @param descriptor for example foo.bar@1.0::IBaz
+     * @hide
+     */
+    @SystemApi
     public IHwInterface queryLocalInterface(String descriptor);
 
     /**

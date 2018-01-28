@@ -931,12 +931,12 @@ public abstract class WebSettings {
      * Note that this setting affects only JavaScript access to file scheme
      * resources. Other access to such resources, for example, from image HTML
      * elements, is unaffected. To prevent possible violation of same domain policy
-     * on {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH} and earlier
-     * devices, you should explicitly set this value to {@code false}.
+     * when targeting {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and earlier,
+     * you should explicitly set this value to {@code false}.
      * <p>
-     * The default value is {@code true} for API level
+     * The default value is {@code true} for apps targeting
      * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and below,
-     * and {@code false} for API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN}
+     * and {@code false} when targeting {@link android.os.Build.VERSION_CODES#JELLY_BEAN}
      * and above.
      *
      * @param flag whether JavaScript running in the context of a file scheme
@@ -947,18 +947,18 @@ public abstract class WebSettings {
     /**
      * Sets whether JavaScript running in the context of a file scheme URL
      * should be allowed to access content from other file scheme URLs. To
-     * enable the most restrictive, and therefore secure policy, this setting
+     * enable the most restrictive, and therefore secure, policy this setting
      * should be disabled. Note that the value of this setting is ignored if
      * the value of {@link #getAllowUniversalAccessFromFileURLs} is {@code true}.
      * Note too, that this setting affects only JavaScript access to file scheme
      * resources. Other access to such resources, for example, from image HTML
      * elements, is unaffected. To prevent possible violation of same domain policy
-     * on {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH} and earlier
-     * devices, you should explicitly set this value to {@code false}.
+     * when targeting {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and earlier,
+     * you should explicitly set this value to {@code false}.
      * <p>
-     * The default value is {@code true} for API level
+     * The default value is {@code true} for apps targeting
      * {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH_MR1} and below,
-     * and {@code false} for API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN}
+     * and {@code false} when targeting {@link android.os.Build.VERSION_CODES#JELLY_BEAN}
      * and above.
      *
      * @param flag whether JavaScript running in the context of a file scheme
@@ -1394,26 +1394,26 @@ public abstract class WebSettings {
 
 
     /**
-     * Sets whether Safe Browsing is enabled. Safe browsing allows WebView to
+     * Sets whether Safe Browsing is enabled. Safe Browsing allows WebView to
      * protect against malware and phishing attacks by verifying the links.
      *
      * <p>
-     * Safe browsing is disabled by default. The recommended way to enable Safe browsing is using a
-     * manifest tag to change the default value to enabled for all WebViews (read <a
-     * href="{@docRoot}reference/android/webkit/WebView.html">general Safe Browsing info</a>).
+     * Safe Browsing can be disabled for all WebViews using a manifest tag (read <a
+     * href="{@docRoot}reference/android/webkit/WebView.html">general Safe Browsing info</a>). The
+     * manifest tag has a lower precedence than this API.
      *
      * <p>
-     * This API overrides the manifest tag value for this WebView.
+     * Safe Browsing is enabled by default for devices which support it.
      *
-     * @param enabled Whether Safe browsing is enabled.
+     * @param enabled Whether Safe Browsing is enabled.
      */
     public abstract void setSafeBrowsingEnabled(boolean enabled);
 
     /**
-     * Gets whether Safe browsing is enabled.
+     * Gets whether Safe Browsing is enabled.
      * See {@link #setSafeBrowsingEnabled}.
      *
-     * @return {@code true} if Safe browsing is enabled and {@code false} otherwise.
+     * @return {@code true} if Safe Browsing is enabled and {@code false} otherwise.
      */
     public abstract boolean getSafeBrowsingEnabled();
 

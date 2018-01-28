@@ -47,6 +47,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -86,6 +87,7 @@ import static android.os.Process.ROOT_UID;
 import static android.os.Process.SCHED_FIFO;
 import static android.os.Process.SCHED_OTHER;
 import static android.os.Process.SCHED_RESET_ON_FORK;
+import static android.os.Process.SE_UID;
 import static android.os.Process.SHELL_UID;
 import static android.os.Process.SIGNAL_QUIT;
 import static android.os.Process.SIGNAL_USR1;
@@ -229,6 +231,7 @@ import android.app.ApplicationThreadConstants;
 import android.app.BroadcastOptions;
 import android.app.ContentProviderHolder;
 import android.app.Dialog;
+import android.app.GrantedUriPermission;
 import android.app.IActivityController;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
@@ -1636,6 +1639,14 @@ public class ActivityManagerService extends IActivityManager.Stub
     String mProfileApp = null;
     ProcessRecord mProfileProc = null;
     ProfilerInfo mProfilerInfo = null;
+
+    /**
+     * Stores a map of process name -> agent string. When a process is started and mAgentAppMap
+     * is not null, this map is checked and the mapped agent installed during bind-time. Note:
+     * A non-null agent in mProfileInfo overrides this.
+     */
+    private @Nullable Map<String, String> mAppAgentMap = null;
+
     int mProfileType = 0;
     final ProcessMap<Pair<Long, String>> mMemWatchProcesses = new ProcessMap<>();
     String mMemWatchDumpProcName;
@@ -3466,6 +3477,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     final void showAppWarningsIfNeededLocked(ActivityRecord r) {
         mAppWarnings.showUnsupportedCompileSdkDialogIfNeeded(r);
         mAppWarnings.showUnsupportedDisplaySizeDialogIfNeeded(r);
+        mAppWarnings.showDeprecatedTargetDialogIfNeeded(r);
     }
 
     private int updateLruProcessInternalLocked(ProcessRecord app, long now, int index,
@@ -4063,7 +4075,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             if (app.info.isPrivilegedApp() &&
                     SystemProperties.getBoolean("pm.dexopt.priv-apps-oob", false)) {
-                runtimeFlags |= Zygote.DISABLE_VERIFIER;
                 runtimeFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;
             }
 
@@ -7455,25 +7466,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
 
-            ProfilerInfo profilerInfo = null;
-            String preBindAgent = null;
-            if (mProfileApp != null && mProfileApp.equals(processName)) {
-                mProfileProc = app;
-                if (mProfilerInfo != null) {
-                    // Send a profiler info object to the app if either a file is given, or
-                    // an agent should be loaded at bind-time.
-                    boolean needsInfo = mProfilerInfo.profileFile != null
-                            || mProfilerInfo.attachAgentDuringBind;
-                    profilerInfo = needsInfo ? new ProfilerInfo(mProfilerInfo) : null;
-                    if (!mProfilerInfo.attachAgentDuringBind) {
-                        preBindAgent = mProfilerInfo.agent;
-                    }
-                }
-            } else if (app.instr != null && app.instr.mProfileFile != null) {
-                profilerInfo = new ProfilerInfo(app.instr.mProfileFile, null, 0, false, false,
-                        null, false);
-            }
-
             boolean enableTrackAllocation = false;
             if (mTrackAllocationApp != null && mTrackAllocationApp.equals(processName)) {
                 enableTrackAllocation = true;
@@ -7497,6 +7489,39 @@ public class ActivityManagerService extends IActivityManager.Stub
                     + processName + " with config " + getGlobalConfiguration());
             ApplicationInfo appInfo = app.instr != null ? app.instr.mTargetInfo : app.info;
             app.compat = compatibilityInfoForPackageLocked(appInfo);
+
+            ProfilerInfo profilerInfo = null;
+            String preBindAgent = null;
+            if (mProfileApp != null && mProfileApp.equals(processName)) {
+                mProfileProc = app;
+                if (mProfilerInfo != null) {
+                    // Send a profiler info object to the app if either a file is given, or
+                    // an agent should be loaded at bind-time.
+                    boolean needsInfo = mProfilerInfo.profileFile != null
+                            || mProfilerInfo.attachAgentDuringBind;
+                    profilerInfo = needsInfo ? new ProfilerInfo(mProfilerInfo) : null;
+                    if (mProfilerInfo.agent != null) {
+                        preBindAgent = mProfilerInfo.agent;
+                    }
+                }
+            } else if (app.instr != null && app.instr.mProfileFile != null) {
+                profilerInfo = new ProfilerInfo(app.instr.mProfileFile, null, 0, false, false,
+                        null, false);
+            }
+            if (mAppAgentMap != null && mAppAgentMap.containsKey(processName)) {
+                // We need to do a debuggable check here. See setAgentApp for why the check is
+                // postponed to here.
+                if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
+                    String agent = mAppAgentMap.get(processName);
+                    // Do not overwrite already requested agent.
+                    if (profilerInfo == null) {
+                        profilerInfo = new ProfilerInfo(null, null, 0, false, false,
+                                mAppAgentMap.get(processName), true);
+                    } else if (profilerInfo.agent == null) {
+                        profilerInfo = profilerInfo.setAgent(mAppAgentMap.get(processName), true);
+                    }
+                }
+            }
 
             if (profilerInfo != null && profilerInfo.profileFd != null) {
                 profilerInfo.profileFd = profilerInfo.profileFd.dup();
@@ -10193,7 +10218,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (perms == null) {
                     Slog.w(TAG, "No permission grants found for " + packageName);
                 } else {
-                    for (UriPermission perm : perms.values()) {
+                    for (int j = 0; j < perms.size(); j++) {
+                        final UriPermission perm = perms.valueAt(j);
                         if (packageName.equals(perm.targetPkg) && perm.persistedModeFlags != 0) {
                             result.add(perm.buildPersistedPublicApiObject());
                         }
@@ -10204,7 +10230,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 for (int i = 0; i < size; i++) {
                     final ArrayMap<GrantUri, UriPermission> perms =
                             mGrantedUriPermissions.valueAt(i);
-                    for (UriPermission perm : perms.values()) {
+                    for (int j = 0; j < perms.size(); j++) {
+                        final UriPermission perm = perms.valueAt(j);
                         if (packageName.equals(perm.sourcePkg) && perm.persistedModeFlags != 0) {
                             result.add(perm.buildPersistedPublicApiObject());
                         }
@@ -10216,25 +10243,27 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public ParceledListSlice<android.content.UriPermission> getGrantedUriPermissions(
-            String packageName, int userId) {
+    public ParceledListSlice<GrantedUriPermission> getGrantedUriPermissions(
+            @Nullable String packageName, int userId) {
         enforceCallingPermission(android.Manifest.permission.GET_APP_GRANTED_URI_PERMISSIONS,
                 "getGrantedUriPermissions");
 
-        final ArrayList<android.content.UriPermission> result = Lists.newArrayList();
+        final List<GrantedUriPermission> result = new ArrayList<>();
         synchronized (this) {
             final int size = mGrantedUriPermissions.size();
             for (int i = 0; i < size; i++) {
                 final ArrayMap<GrantUri, UriPermission> perms = mGrantedUriPermissions.valueAt(i);
-                for (UriPermission perm : perms.values()) {
-                    if (packageName.equals(perm.targetPkg) && perm.targetUserId == userId
+                for (int j = 0; j < perms.size(); j++) {
+                    final UriPermission perm = perms.valueAt(j);
+                    if ((packageName == null || packageName.equals(perm.targetPkg))
+                            && perm.targetUserId == userId
                             && perm.persistedModeFlags != 0) {
-                        result.add(perm.buildPersistedPublicApiObject());
+                        result.add(perm.buildGrantedUriPermission());
                     }
                 }
             }
         }
-        return new ParceledListSlice<android.content.UriPermission>(result);
+        return new ParceledListSlice<>(result);
     }
 
     @Override
@@ -11026,8 +11055,20 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
 
                 if (toTop) {
+                    // Caller wants the current split-screen primary stack to be the top stack after
+                    // it goes fullscreen, so move it to the front.
                     stack.moveToFront("dismissSplitScreenMode");
+                } else if (mStackSupervisor.isFocusedStack(stack)) {
+                    // In this case the current split-screen primary stack shouldn't be the top
+                    // stack after it goes fullscreen, but it current has focus, so we move the
+                    // focus to the top-most split-screen secondary stack next to it.
+                    final ActivityStack otherStack = stack.getDisplay().getTopStackInWindowingMode(
+                            WINDOWING_MODE_SPLIT_SCREEN_SECONDARY);
+                    if (otherStack != null) {
+                        otherStack.moveToFront("dismissSplitScreenMode_other");
+                    }
                 }
+
                 stack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
             }
         } finally {
@@ -12963,6 +13004,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             long ident = Binder.clearCallingIdentity();
             try {
                 mKeyguardController.setKeyguardShown(showing, secondaryDisplayShowing);
+                mLocalDeviceIdleController.keyguardShowing(showing);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -13133,6 +13175,52 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    /**
+     * Set or remove an agent to be run whenever an app with the given process name starts.
+     *
+     * This method will not check whether the given process name matches a debuggable app. That
+     * would require scanning all current packages, and a rescan when new packages are installed
+     * or updated.
+     *
+     * Instead, do the check when an application is started and matched to a stored agent.
+     *
+     * @param packageName the process name of the app.
+     * @param agent the agent string to be used, or null to remove any previously set agent.
+     */
+    @Override
+    public void setAgentApp(@NonNull String packageName, @Nullable String agent) {
+        synchronized (this) {
+            // note: hijacking SET_ACTIVITY_WATCHER, but should be changed to
+            // its own permission.
+            if (checkCallingPermission(
+                    android.Manifest.permission.SET_ACTIVITY_WATCHER) !=
+                        PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException(
+                        "Requires permission " + android.Manifest.permission.SET_ACTIVITY_WATCHER);
+            }
+
+            if (agent == null) {
+                if (mAppAgentMap != null) {
+                    mAppAgentMap.remove(packageName);
+                    if (mAppAgentMap.isEmpty()) {
+                        mAppAgentMap = null;
+                    }
+                }
+            } else {
+                if (mAppAgentMap == null) {
+                    mAppAgentMap = new HashMap<>();
+                }
+                if (mAppAgentMap.size() >= 100) {
+                    // Limit the size of the map, to avoid OOMEs.
+                    Slog.e(TAG, "App agent map has too many entries, cannot add " + packageName
+                            + "/" + agent);
+                    return;
+                }
+                mAppAgentMap.put(packageName, agent);
+            }
         }
     }
 
@@ -20639,6 +20727,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             case PHONE_UID:
             case BLUETOOTH_UID:
             case NFC_UID:
+            case SE_UID:
                 isCallerSystem = true;
                 break;
             default:

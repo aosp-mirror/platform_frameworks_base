@@ -38,6 +38,7 @@ import android.security.keymaster.OperationResult;
 import android.security.keystore.KeyExpiredException;
 import android.security.keystore.KeyNotYetValidException;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
+import android.security.keystore.StrongBoxUnavailableException;
 import android.security.keystore.UserNotAuthenticatedException;
 import android.util.Log;
 
@@ -65,6 +66,7 @@ public class KeyStore {
     public static final int VALUE_CORRUPTED = 8;
     public static final int UNDEFINED_ACTION = 9;
     public static final int WRONG_PASSWORD = 10;
+    public static final int HARDWARE_TYPE_UNAVAILABLE = -68;
 
     /**
      * Per operation authentication is needed before this operation is valid.
@@ -122,7 +124,6 @@ public class KeyStore {
      * Need to be in sync with KeyStoreFlag in system/security/keystore/include/keystore/keystore.h
      */
     public static final int FLAG_STRONGBOX = 1 << 4;
-
 
     // States
     public enum State { UNLOCKED, LOCKED, UNINITIALIZED };
@@ -727,6 +728,58 @@ public class KeyStore {
             mBinder.onDeviceOffBody();
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
+        }
+    }
+
+    // Keep in sync with confirmationui/1.0/types.hal.
+    public static final int CONFIRMATIONUI_OK = 0;
+    public static final int CONFIRMATIONUI_CANCELED = 1;
+    public static final int CONFIRMATIONUI_ABORTED = 2;
+    public static final int CONFIRMATIONUI_OPERATION_PENDING = 3;
+    public static final int CONFIRMATIONUI_IGNORED = 4;
+    public static final int CONFIRMATIONUI_SYSTEM_ERROR = 5;
+    public static final int CONFIRMATIONUI_UNIMPLEMENTED = 6;
+    public static final int CONFIRMATIONUI_UNEXPECTED = 7;
+    public static final int CONFIRMATIONUI_UIERROR = 0x10000;
+    public static final int CONFIRMATIONUI_UIERROR_MISSING_GLYPH = 0x10001;
+    public static final int CONFIRMATIONUI_UIERROR_MESSAGE_TOO_LONG = 0x10002;
+    public static final int CONFIRMATIONUI_UIERROR_MALFORMED_UTF8_ENCODING = 0x10003;
+
+    /**
+     * Requests keystore call into the confirmationui HAL to display a prompt.
+     *
+     * @param listener the binder to use for callbacks.
+     * @param promptText the prompt to display.
+     * @param extraData extra data / nonce from application.
+     * @param locale the locale as a BCP 47 langauge tag.
+     * @param uiOptionsAsFlags the UI options to use, as flags.
+     * @return one of the {@code CONFIRMATIONUI_*} constants, for
+     * example {@code KeyStore.CONFIRMATIONUI_OK}.
+     */
+    public int presentConfirmationPrompt(IBinder listener, String promptText, byte[] extraData,
+                                         String locale, int uiOptionsAsFlags) {
+        try {
+            return mBinder.presentConfirmationPrompt(listener, promptText, extraData, locale,
+                                                     uiOptionsAsFlags);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return CONFIRMATIONUI_SYSTEM_ERROR;
+        }
+    }
+
+    /**
+     * Requests keystore call into the confirmationui HAL to cancel displaying a prompt.
+     *
+     * @param listener the binder passed to the {@link #presentConfirmationPrompt} method.
+     * @return one of the {@code CONFIRMATIONUI_*} constants, for
+     * example {@code KeyStore.CONFIRMATIONUI_OK}.
+     */
+    public int cancelConfirmationPrompt(IBinder listener) {
+        try {
+            return mBinder.cancelConfirmationPrompt(listener);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Cannot connect to keystore", e);
+            return CONFIRMATIONUI_SYSTEM_ERROR;
         }
     }
 

@@ -1693,18 +1693,14 @@ public class WifiManager {
      * existing networks. You should assume the network IDs can be different
      * after calling this method.
      *
-     * @return {@code true} if the operation succeeded
+     * @return {@code false} Will always return true.
      * @deprecated There is no need to call this method -
      * {@link #addNetwork(WifiConfiguration)}, {@link #updateNetwork(WifiConfiguration)}
      * and {@link #removeNetwork(int)} already persist the configurations automatically.
      */
     @Deprecated
     public boolean saveConfiguration() {
-        try {
-            return mService.saveConfiguration(mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return true;
     }
 
     /**

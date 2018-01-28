@@ -553,16 +553,15 @@ public class ZenModeHelper {
     }
 
     void dump(ProtoOutputStream proto) {
-
         proto.write(ZenModeProto.ZEN_MODE, mZenMode);
         synchronized (mConfig) {
             if (mConfig.manualRule != null) {
-                proto.write(ZenModeProto.ENABLED_ACTIVE_CONDITIONS, mConfig.manualRule.toString());
+                mConfig.manualRule.writeToProto(proto, ZenModeProto.ENABLED_ACTIVE_CONDITIONS);
             }
             for (ZenRule rule : mConfig.automaticRules.values()) {
                 if (rule.enabled && rule.condition.state == Condition.STATE_TRUE
                         && !rule.snoozing) {
-                    proto.write(ZenModeProto.ENABLED_ACTIVE_CONDITIONS, rule.toString());
+                    rule.writeToProto(proto, ZenModeProto.ENABLED_ACTIVE_CONDITIONS);
                 }
             }
             mConfig.toNotificationPolicy().writeToProto(proto, ZenModeProto.POLICY);

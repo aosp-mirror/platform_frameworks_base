@@ -121,7 +121,7 @@ public class KeySyncTaskTest {
                 TEST_CREDENTIAL_TYPE,
                 TEST_CREDENTIAL,
                 /*credentialUpdated=*/ false,
-                () -> mPlatformKeyManager);
+                mPlatformKeyManager);
 
         mWrappingKey = generateAndroidKeyStoreKey();
         mEncryptKey = new PlatformEncryptionKey(TEST_GENERATION_ID, mWrappingKey);
@@ -327,8 +327,7 @@ public class KeySyncTaskTest {
         mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());
         when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
-        SecretKey applicationKey =
-                addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
+        addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
 
         mKeySyncTask.run();
 
@@ -343,6 +342,26 @@ public class KeySyncTaskTest {
     }
 
     @Test
+    public void run_recreatesMissingSnapshot() throws Exception {
+        mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());
+        when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
+        addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
+
+        mKeySyncTask.run();
+
+        KeyChainSnapshot keyChainSnapshot = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
+        assertThat(keyChainSnapshot.getSnapshotVersion()).isEqualTo(1); // default value;
+
+        mRecoverySnapshotStorage.remove(TEST_RECOVERY_AGENT_UID); // corrupt snapshot.
+
+        mKeySyncTask.run();
+
+        keyChainSnapshot = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
+        assertThat(keyChainSnapshot.getSnapshotVersion()).isEqualTo(1); // Same version
+    }
+
+    @Test
     public void run_setsCorrectTypeForPassword() throws Exception {
         mKeySyncTask = new KeySyncTask(
                 mRecoverableKeyStoreDb,
@@ -352,7 +371,7 @@ public class KeySyncTaskTest {
                 CREDENTIAL_TYPE_PASSWORD,
                 "password",
                 /*credentialUpdated=*/ false,
-                () -> mPlatformKeyManager);
+                mPlatformKeyManager);
 
         mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());
@@ -378,7 +397,7 @@ public class KeySyncTaskTest {
                 CREDENTIAL_TYPE_PASSWORD,
                 /*credential=*/ "1234",
                 /*credentialUpdated=*/ false,
-                () -> mPlatformKeyManager);
+                mPlatformKeyManager);
 
         mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());
@@ -405,7 +424,7 @@ public class KeySyncTaskTest {
                 CREDENTIAL_TYPE_PATTERN,
                 "12345",
                 /*credentialUpdated=*/ false,
-                () -> mPlatformKeyManager);
+                mPlatformKeyManager);
 
         mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());

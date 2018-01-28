@@ -256,6 +256,14 @@ public class JobInfo implements Parcelable {
     public static final int FLAG_IS_PREFETCH = 1 << 2;
 
     /**
+     * This job needs to be exempted from the app standby throttling. Only the system (UID 1000)
+     * can set it. Jobs with a time constrant must not have it.
+     *
+     * @hide
+     */
+    public static final int FLAG_EXEMPT_FROM_APP_STANDBY = 1 << 3;
+
+    /**
      * @hide
      */
     public static final int CONSTRAINT_FLAG_CHARGING = 1 << 0;
@@ -353,6 +361,13 @@ public class JobInfo implements Parcelable {
     /** @hide */
     public int getFlags() {
         return flags;
+    }
+
+    /** @hide */
+    public boolean isExemptedFromAppStandby() {
+        return ((flags & FLAG_EXEMPT_FROM_APP_STANDBY) != 0)
+                && !hasEarlyConstraint()
+                && !hasLateConstraint();
     }
 
     /**

@@ -23,16 +23,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Playback state for a {@link MediaPlayerBase}, to be shared between {@link MediaSession2} and
+ * Playback state for a {@link MediaPlayerInterface}, to be shared between {@link MediaSession2} and
  * {@link MediaController2}. This includes a playback state {@link #STATE_PLAYING},
  * the current playback position and extra.
  * @hide
  */
-// TODO(jaewan): Move to updatable
 public final class PlaybackState2 {
     private static final String TAG = "PlaybackState2";
-
-    private static final String KEY_STATE = "android.media.playbackstate2.state";
 
     // TODO(jaewan): Replace states from MediaPlayer2
     /**
@@ -91,14 +88,29 @@ public final class PlaybackState2 {
      */
     public final static long PLAYBACK_POSITION_UNKNOWN = -1;
 
+    /**
+     * Keys used for converting a PlaybackState2 to a bundle object and vice versa.
+     */
+    private static final String KEY_STATE = "android.media.playbackstate2.state";
+    private static final String KEY_POSITION = "android.media.playbackstate2.position";
+    private static final String KEY_BUFFERED_POSITION =
+            "android.media.playbackstate2.buffered_position";
+    private static final String KEY_SPEED = "android.media.playbackstate2.speed";
+    private static final String KEY_ERROR_MESSAGE = "android.media.playbackstate2.error_message";
+    private static final String KEY_UPDATE_TIME = "android.media.playbackstate2.update_time";
+    private static final String KEY_ACTIVE_ITEM_ID = "android.media.playbackstate2.active_item_id";
+
     private final int mState;
     private final long mPosition;
-    private final long mBufferedPosition;
-    private final float mSpeed;
-    private final CharSequence mErrorMessage;
     private final long mUpdateTime;
+    private final float mSpeed;
+    private final long mBufferedPosition;
     private final long mActiveItemId;
+    private final CharSequence mErrorMessage;
 
+    // TODO(jaewan): Better error handling?
+    //               E.g. media item at #2 has issue, but continue playing #3
+    //                    login error. fire intent xxx to login
     public PlaybackState2(int state, long position, long updateTime, float speed,
             long bufferedPosition, long activeItemId, CharSequence error) {
         mState = state;
@@ -195,22 +207,49 @@ public final class PlaybackState2 {
     }
 
     /**
-     * @return Bundle object for this to share between processes.
+     * Returns this object as a bundle to share between processes.
      */
     public Bundle toBundle() {
-        // TODO(jaewan): Include other variables.
         Bundle bundle = new Bundle();
         bundle.putInt(KEY_STATE, mState);
+        bundle.putLong(KEY_POSITION, mPosition);
+        bundle.putLong(KEY_UPDATE_TIME, mUpdateTime);
+        bundle.putFloat(KEY_SPEED, mSpeed);
+        bundle.putLong(KEY_BUFFERED_POSITION, mBufferedPosition);
+        bundle.putLong(KEY_ACTIVE_ITEM_ID, mActiveItemId);
+        bundle.putCharSequence(KEY_ERROR_MESSAGE, mErrorMessage);
         return bundle;
     }
 
     /**
-     * @param bundle input
-     * @return
+     * Creates an instance from a bundle which is previously created by {@link #toBundle()}.
+     *
+     * @param bundle A bundle created by {@link #toBundle()}.
+     * @return A new {@link PlaybackState2} instance. Returns {@code null} if the given
+     *         {@param bundle} is null, or if the {@param bundle} has no playback state parameters.
      */
     public static PlaybackState2 fromBundle(Bundle bundle) {
-        // TODO(jaewan): Include other variables.
-        final int state = bundle.getInt(KEY_STATE);
-        return new PlaybackState2(state, 0, 0, 0, 0, 0, null);
+        if (bundle == null) {
+            return null;
+        }
+
+        if (!bundle.containsKey(KEY_STATE)
+                || !bundle.containsKey(KEY_POSITION)
+                || !bundle.containsKey(KEY_UPDATE_TIME)
+                || !bundle.containsKey(KEY_SPEED)
+                || !bundle.containsKey(KEY_BUFFERED_POSITION)
+                || !bundle.containsKey(KEY_ACTIVE_ITEM_ID)
+                || !bundle.containsKey(KEY_ERROR_MESSAGE)) {
+            return null;
+        }
+
+        return new PlaybackState2(
+                bundle.getInt(KEY_STATE),
+                bundle.getLong(KEY_POSITION),
+                bundle.getLong(KEY_UPDATE_TIME),
+                bundle.getFloat(KEY_SPEED),
+                bundle.getLong(KEY_BUFFERED_POSITION),
+                bundle.getLong(KEY_ACTIVE_ITEM_ID),
+                bundle.getCharSequence(KEY_ERROR_MESSAGE));
     }
 }

@@ -16,15 +16,15 @@
 
 package com.android.server.backup.internal;
 
-import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
-import static com.android.server.backup.RefactoredBackupManagerService.DEBUG_BACKUP_TRACE;
-import static com.android.server.backup.RefactoredBackupManagerService.KEY_WIDGET_STATE;
-import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.RefactoredBackupManagerService.OP_PENDING;
-import static com.android.server.backup.RefactoredBackupManagerService.OP_TYPE_BACKUP;
-import static com.android.server.backup.RefactoredBackupManagerService.OP_TYPE_BACKUP_WAIT;
-import static com.android.server.backup.RefactoredBackupManagerService.PACKAGE_MANAGER_SENTINEL;
-import static com.android.server.backup.RefactoredBackupManagerService.TIMEOUT_BACKUP_INTERVAL;
+import static com.android.server.backup.BackupManagerService.DEBUG;
+import static com.android.server.backup.BackupManagerService.DEBUG_BACKUP_TRACE;
+import static com.android.server.backup.BackupManagerService.KEY_WIDGET_STATE;
+import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.BackupManagerService.OP_PENDING;
+import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP;
+import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP_WAIT;
+import static com.android.server.backup.BackupManagerService.PACKAGE_MANAGER_SENTINEL;
+import static com.android.server.backup.BackupManagerService.TIMEOUT_BACKUP_INTERVAL;
 import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_OPERATION_TIMEOUT;
 import static com.android.server.backup.internal.BackupHandler.MSG_BACKUP_RESTORE_STEP;
 
@@ -61,7 +61,7 @@ import com.android.server.backup.BackupRestoreTask;
 import com.android.server.backup.DataChangedJournal;
 import com.android.server.backup.KeyValueBackupJob;
 import com.android.server.backup.PackageManagerBackupAgent;
-import com.android.server.backup.RefactoredBackupManagerService;
+import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.fullbackup.PerformFullTransportBackupTask;
 import com.android.server.backup.transport.TransportClient;
 import com.android.server.backup.transport.TransportUtils;
@@ -111,7 +111,7 @@ import java.util.concurrent.CountDownLatch;
 public class PerformBackupTask implements BackupRestoreTask {
     private static final String TAG = "PerformBackupTask";
 
-    private RefactoredBackupManagerService backupManagerService;
+    private BackupManagerService backupManagerService;
     private final Object mCancelLock = new Object();
 
     private ArrayList<BackupRequest> mQueue;
@@ -145,7 +145,7 @@ public class PerformBackupTask implements BackupRestoreTask {
 
     private volatile boolean mCancelAll;
 
-    public PerformBackupTask(RefactoredBackupManagerService backupManagerService,
+    public PerformBackupTask(BackupManagerService backupManagerService,
             TransportClient transportClient, String dirName,
             ArrayList<BackupRequest> queue, @Nullable DataChangedJournal journal,
             IBackupObserver observer, IBackupManagerMonitor monitor,
@@ -714,8 +714,9 @@ public class PerformBackupTask implements BackupRestoreTask {
                     mEphemeralOpToken, TIMEOUT_BACKUP_INTERVAL, this, OP_TYPE_BACKUP_WAIT);
             backupManagerService.addBackupTrace("calling agent doBackup()");
 
-            agent.doBackup(mSavedState, mBackupData, mNewState, quota, mEphemeralOpToken,
-                    backupManagerService.getBackupManagerBinder());
+            agent.doBackup(
+                    mSavedState, mBackupData, mNewState, quota, mEphemeralOpToken,
+                    backupManagerService.getBackupManagerBinder(), transport.getTransportFlags());
         } catch (Exception e) {
             Slog.e(TAG, "Error invoking for backup on " + packageName + ". " + e);
             backupManagerService.addBackupTrace("exception: " + e);

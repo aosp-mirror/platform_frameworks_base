@@ -377,6 +377,7 @@ public class SettingsBackupTest {
                     Settings.Global.TETHER_SUPPORTED,
                     Settings.Global.TEXT_CLASSIFIER_CONSTANTS,
                     Settings.Global.THEATER_MODE_ON,
+                    Settings.Global.TIME_ONLY_MODE_ENABLED,
                     Settings.Global.TRANSITION_ANIMATION_SCALE,
                     Settings.Global.TRUSTED_SOUND,
                     Settings.Global.TZINFO_UPDATE_CONTENT_URL,
@@ -444,7 +445,8 @@ public class SettingsBackupTest {
                     Settings.Global.ZEN_MODE_CONFIG_ETAG,
                     Settings.Global.ZEN_MODE_RINGER_LEVEL,
                     Settings.Global.ZRAM_ENABLED,
-                    Settings.Global.OVERRIDE_SETTINGS_PROVIDER_RESTORE_ANY_VERSION);
+                    Settings.Global.OVERRIDE_SETTINGS_PROVIDER_RESTORE_ANY_VERSION,
+                    Settings.Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED);
 
     private static final Set<String> BACKUP_BLACKLISTED_SECURE_SETTINGS =
              newHashSet(
@@ -496,6 +498,7 @@ public class SettingsBackupTest {
                  Settings.Secure.INPUT_METHODS_SUBTYPE_HISTORY,
                  Settings.Secure.INSTALL_NON_MARKET_APPS,
                  Settings.Secure.LAST_SETUP_SHOWN,
+                 Settings.Secure.LOCATION_CHANGER,
                  Settings.Secure.LOCATION_MODE,
                  Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, // Candidate?
                  Settings.Secure.LOCK_SCREEN_ALLOW_REMOTE_INPUT, // Candidate?

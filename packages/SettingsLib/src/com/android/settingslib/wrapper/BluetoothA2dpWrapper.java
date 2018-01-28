@@ -43,8 +43,8 @@ public class BluetoothA2dpWrapper {
     /**
      * Wraps {@code BluetoothA2dp.getCodecStatus}
      */
-    public BluetoothCodecStatus getCodecStatus() {
-        return mService.getCodecStatus();
+    public BluetoothCodecStatus getCodecStatus(BluetoothDevice device) {
+        return mService.getCodecStatus(device);
     }
 
     /**

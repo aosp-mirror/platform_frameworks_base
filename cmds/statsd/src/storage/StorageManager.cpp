@@ -63,7 +63,7 @@ static void parseFileName(char* name, int64_t* result) {
 }
 
 static string getFilePath(const char* path, int64_t timestamp, int64_t uid, int64_t configID) {
-    return StringPrintf("%s/%lld-%d-%lld", path, (long long)timestamp, (int)uid,
+    return StringPrintf("%s/%lld_%d_%lld", path, (long long)timestamp, (int)uid,
                         (long long)configID);
 }
 

@@ -11,7 +11,8 @@ filegroup {
 // only used by key_store_service
 cc_library_shared {
     name: "libkeystore_aidl",
-    srcs: ["android/security/IKeystoreService.aidl"],
+    srcs: ["android/security/IKeystoreService.aidl",
+           "android/security/IConfirmationPromptCallback.aidl"],
     aidl: {
         export_aidl_headers: true,
         include_dirs: [

@@ -18,12 +18,16 @@ syntax = "proto2";
 option java_package = "android.app";
 option java_multiple_files = true;
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 package android.app;
 
 /**
  * An android.app.ProfilerInfo object.
  */
 message ProfilerInfoProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     optional string profile_file = 1;
     optional int32 profile_fd = 2;
     optional int32 sampling_interval = 3;

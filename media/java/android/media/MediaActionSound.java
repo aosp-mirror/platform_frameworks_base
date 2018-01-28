@@ -47,11 +47,16 @@ public class MediaActionSound {
     private SoundPool mSoundPool;
     private SoundState[] mSounds;
 
+    private static final String[] SOUND_DIRS = {
+        "/product/media/audio/ui/",
+        "/system/media/audio/ui/",
+    };
+
     private static final String[] SOUND_FILES = {
-        "/system/media/audio/ui/camera_click.ogg",
-        "/system/media/audio/ui/camera_focus.ogg",
-        "/system/media/audio/ui/VideoRecord.ogg",
-        "/system/media/audio/ui/VideoStop.ogg"
+        "camera_click.ogg",
+        "camera_focus.ogg",
+        "VideoRecord.ogg",
+        "VideoStop.ogg"
     };
 
     private static final String TAG = "MediaActionSound";
@@ -132,12 +137,16 @@ public class MediaActionSound {
     }
 
     private int loadSound(SoundState sound) {
-        int id = mSoundPool.load(SOUND_FILES[sound.name], 1);
-        if (id > 0) {
-            sound.state = STATE_LOADING;
-            sound.id = id;
+        final String soundFileName = SOUND_FILES[sound.name];
+        for (String soundDir : SOUND_DIRS) {
+            int id = mSoundPool.load(soundDir + soundFileName, 1);
+            if (id > 0) {
+                sound.state = STATE_LOADING;
+                sound.id = id;
+                return id;
+            }
         }
-        return id;
+        return 0;
     }
 
     /**

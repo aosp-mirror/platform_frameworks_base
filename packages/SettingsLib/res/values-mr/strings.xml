@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"नेटवर्किंग"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"वायरलेस डिस्प्ले प्रमाणीकरण"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"वाय-फाय व्हर्बोझ लॉगिंग सक्षम करा"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"वाय-फाय रोम स्‍कॅनला नेहमी अनुमती द्या"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"कनेक्ट केलेले MAC Randomization"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"मोबाइल डेटा नेहमी सक्रिय"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"टेदरिंग हार्डवेअर प्रवेग"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"नावांशिवाय ब्‍लूटूथ डिव्‍हाइस दाखवा"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS पुरवठादाराचे होस्टनाव टाका"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"वायरलेस डिस्प्ले प्रमाणिकरणाचे पर्याय दाखवा"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"वाय-फाय लॉगिंग स्‍तर वाढवा, वाय-फाय सिलेक्टरमध्‍ये प्रति SSID RSSI दर्शवा"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"वाय-फाय रोम स्‍कॅनला इंटरफेसवर उपस्‍थित असलेल्‍या रहदारी डेटाच्या प्रमाणावर आधारित अनुमती द्या/अनुमती देऊ नका"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"वाय-फाय नेटवर्कशी कनेक्ट करताना MAC अ‍ॅड्रेस रँडमाइझ करा"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"लॉगर बफर आकार"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"प्रति लॉग बफर लॉगर आकार निवडा"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"लॉगरवर सतत असणारा संचय साफ करायचा?"</string>
@@ -403,4 +403,10 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"नोंदवलेले"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"नोंदवलेले नाही"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"अनुपलब्ध"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="one">%1$d डिव्हाइस कनेक्ट केले आहे</item>
+      <item quantity="other">%1$d डिव्हाइस कनेक्ट केली आहेत</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"जास्त वेळ."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"कमी वेळ."</string>
 </resources>

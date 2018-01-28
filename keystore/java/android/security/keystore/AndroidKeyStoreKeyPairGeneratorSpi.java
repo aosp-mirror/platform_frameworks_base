@@ -21,6 +21,7 @@ import android.security.Credentials;
 import android.security.GateKeeper;
 import android.security.KeyPairGeneratorSpec;
 import android.security.KeyStore;
+import android.security.KeyStoreException;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterCertificateChain;
@@ -451,12 +452,16 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             throw new IllegalStateException("Not initialized");
         }
 
-        final int flags = (mEncryptionAtRestRequired) ? KeyStore.FLAG_ENCRYPTED : 0;
+        int flags = (mEncryptionAtRestRequired) ? KeyStore.FLAG_ENCRYPTED : 0;
         if (((flags & KeyStore.FLAG_ENCRYPTED) != 0)
                 && (mKeyStore.state() != KeyStore.State.UNLOCKED)) {
             throw new IllegalStateException(
                     "Encryption at rest using secure lock screen credential requested for key pair"
                     + ", but the user has not yet entered the credential");
+        }
+
+        if (mSpec.isStrongBoxBacked()) {
+            flags |= KeyStore.FLAG_STRONGBOX;
         }
 
         byte[] additionalEntropy =
@@ -501,8 +506,12 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         int errorCode = mKeyStore.generateKey(privateKeyAlias, args, additionalEntropy,
                 mEntryUid, flags, resultingKeyCharacteristics);
         if (errorCode != KeyStore.NO_ERROR) {
-            throw new ProviderException(
-                    "Failed to generate key pair", KeyStore.getKeyStoreException(errorCode));
+            if (errorCode == KeyStore.HARDWARE_TYPE_UNAVAILABLE) {
+                throw new StrongBoxUnavailableException("Failed to generate key pair");
+            } else {
+                throw new ProviderException(
+                        "Failed to generate key pair", KeyStore.getKeyStoreException(errorCode));
+            }
         }
     }
 

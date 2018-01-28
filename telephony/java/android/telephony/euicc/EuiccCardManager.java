@@ -110,6 +110,9 @@ public class EuiccCardManager {
     /** Result code of execution with no error. */
     public static final int RESULT_OK = 0;
 
+    /** Result code of an unknown error. */
+    public static final int RESULT_UNKNOWN_ERROR = -1;
+
     /**
      * Callback to receive the result of an eUICC card API.
      *

@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Ցանց"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Անլար էկրանի վկայագրում"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Միացնել Wi‑Fi մանրամասն գրանցամատյանները"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Միշտ թույլատրել Wi‑Fi ռոումինգի որոնումը"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"MAC հասցեների պատահական ընտրություն Wi-Fi-ին միանալիս"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Բջջային ինտերնետը միշտ ակտիվ է"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Սարքակազմի արագացման միացում"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Ցուցադրել Bluetooth սարքերն առանց անունների"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Մուտքագրեք DNS ծառայության մատակարարի խնամորդի անունը"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Ցույց տալ անլար էկրանի հավաստագրման ընտրանքները"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Բարձրացնել մակարդակը, Wi‑Fi ընտրիչում ամեն մի SSID-ի համար ցույց տալ RSSI"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Թույլատրել/արգելել Wi‑Fi ռոումինգի որոնումը՝ կախված միջերեսում տվյալների երթևեկի ծավալից"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Պատահականորեն ընտրել MAC հասցեն Wi-Fi ցանցերին միանալիս"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Տեղեկամատյանի պահնակի չափերը"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Ընտրեք տեղեկամատյանի չափը մեկ պահնակի համար"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Ջնջե՞լ մատյանի մշտական հիշողությունը:"</string>
@@ -403,4 +403,10 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Գրանցված է"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Գրանցված չէ"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Անհասանելի"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="one">Միացված է %1$d սարք</item>
+      <item quantity="other">Միացված է %1$d սարք</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Ավելացնել ժամանակը:"</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Պակասեցնել ժամանակը:"</string>
 </resources>

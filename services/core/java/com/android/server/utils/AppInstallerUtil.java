@@ -56,6 +56,7 @@ public class AppInstallerUtil {
         final Intent result = resolveIntent(context, intent);
         if (result != null) {
             result.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
+            result.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             return result;
         }
         return null;

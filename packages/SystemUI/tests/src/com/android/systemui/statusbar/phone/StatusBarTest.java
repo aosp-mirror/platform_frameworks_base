@@ -84,6 +84,7 @@ import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -188,7 +189,8 @@ public class StatusBarTest extends SysuiTestCase {
                 mKeyguardIndicationController, mStackScroller, mHeadsUpManager,
                 mPowerManager, mNotificationPanelView, mBarService, mNotificationListener,
                 mNotificationLogger, mVisualStabilityManager, mViewHierarchyManager,
-                mEntryManager, mScrimController, mFingerprintUnlockController);
+                mEntryManager, mScrimController, mFingerprintUnlockController,
+                mock(ActivityLaunchAnimator.class));
         mStatusBar.mContext = mContext;
         mStatusBar.mComponents = mContext.getComponents();
         mEntryManager.setUpForTest(mStatusBar, mStackScroller, mStatusBar, mHeadsUpManager,
@@ -593,7 +595,8 @@ public class StatusBarTest extends SysuiTestCase {
                 VisualStabilityManager visualStabilityManager,
                 NotificationViewHierarchyManager viewHierarchyManager,
                 TestableNotificationEntryManager entryManager, ScrimController scrimController,
-                FingerprintUnlockController fingerprintUnlockController) {
+                FingerprintUnlockController fingerprintUnlockController,
+                ActivityLaunchAnimator launchAnimator) {
             mStatusBarKeyguardViewManager = man;
             mUnlockMethodCache = unlock;
             mKeyguardIndicationController = key;
@@ -610,6 +613,7 @@ public class StatusBarTest extends SysuiTestCase {
             mEntryManager = entryManager;
             mScrimController = scrimController;
             mFingerprintUnlockController = fingerprintUnlockController;
+            mActivityLaunchAnimator = launchAnimator;
         }
 
         private WakefulnessLifecycle createAwakeWakefulnessLifecycle() {

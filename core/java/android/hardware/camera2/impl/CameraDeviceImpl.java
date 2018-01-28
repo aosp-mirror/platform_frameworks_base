@@ -1001,19 +1001,17 @@ public class CameraDeviceImpl extends CameraDevice
                     throw new IllegalArgumentException("Null Surface targets are not allowed");
                 }
 
-                if (!request.isReprocess()) {
-                    continue;
-                }
                 for (int i = 0; i < mConfiguredOutputs.size(); i++) {
                     OutputConfiguration configuration = mConfiguredOutputs.valueAt(i);
                     if (configuration.isForPhysicalCamera()
                             && configuration.getSurfaces().contains(surface)) {
-                        throw new IllegalArgumentException(
-                                "Reprocess request on physical stream is not allowed");
+                        if (request.isReprocess()) {
+                            throw new IllegalArgumentException(
+                                    "Reprocess request on physical stream is not allowed");
+                        }
                     }
                 }
             }
-
         }
 
         synchronized(mInterfaceLock) {
@@ -1966,7 +1964,8 @@ public class CameraDeviceImpl extends CameraDevice
 
         @Override
         public void onResultReceived(CameraMetadataNative result,
-                CaptureResultExtras resultExtras) throws RemoteException {
+                CaptureResultExtras resultExtras, PhysicalCaptureResultInfo physicalResults[])
+                throws RemoteException {
 
             int requestId = resultExtras.getRequestId();
             long frameNumber = resultExtras.getFrameNumber();
@@ -2073,7 +2072,8 @@ public class CameraDeviceImpl extends CameraDevice
                             request.get(CaptureRequest.CONTROL_AE_TARGET_FPS_RANGE);
                     final int subsequenceId = resultExtras.getSubsequenceId();
                     final TotalCaptureResult resultAsCapture = new TotalCaptureResult(result,
-                            request, resultExtras, partialResults, holder.getSessionId());
+                            request, resultExtras, partialResults, holder.getSessionId(),
+                            physicalResults);
                     // Final capture result
                     resultDispatch = new Runnable() {
                         @Override
@@ -2088,9 +2088,11 @@ public class CameraDeviceImpl extends CameraDevice
                                                 NANO_PER_SECOND/fpsRange.getUpper());
                                         CameraMetadataNative resultLocal =
                                                 new CameraMetadataNative(resultCopy);
+                                        // No logical multi-camera support for batched output mode.
                                         TotalCaptureResult resultInBatch = new TotalCaptureResult(
                                             resultLocal, holder.getRequest(i), resultExtras,
-                                            partialResults, holder.getSessionId());
+                                            partialResults, holder.getSessionId(),
+                                            new PhysicalCaptureResultInfo[0]);
 
                                         holder.getCallback().onCaptureCompleted(
                                             CameraDeviceImpl.this,

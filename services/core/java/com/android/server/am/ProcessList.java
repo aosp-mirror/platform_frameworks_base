@@ -24,7 +24,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 import android.app.ActivityManager;
-import android.app.ActivityManagerProto;
+import android.app.AppProtoEnums;
 import android.os.Build;
 import android.os.SystemClock;
 import com.android.internal.util.MemInfoReader;
@@ -420,47 +420,49 @@ public final class ProcessList {
     public static int makeProcStateProtoEnum(int curProcState) {
         switch (curProcState) {
             case ActivityManager.PROCESS_STATE_PERSISTENT:
-                return ActivityManagerProto.PROCESS_STATE_PERSISTENT;
+                return AppProtoEnums.PROCESS_STATE_PERSISTENT;
             case ActivityManager.PROCESS_STATE_PERSISTENT_UI:
-                return ActivityManagerProto.PROCESS_STATE_PERSISTENT_UI;
+                return AppProtoEnums.PROCESS_STATE_PERSISTENT_UI;
             case ActivityManager.PROCESS_STATE_TOP:
-                return ActivityManagerProto.PROCESS_STATE_TOP;
+                return AppProtoEnums.PROCESS_STATE_TOP;
             case ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE:
-                return ActivityManagerProto.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+                return AppProtoEnums.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
             case ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE:
-                return ActivityManagerProto.PROCESS_STATE_FOREGROUND_SERVICE;
+                return AppProtoEnums.PROCESS_STATE_FOREGROUND_SERVICE;
             case ActivityManager.PROCESS_STATE_TOP_SLEEPING:
-                return ActivityManagerProto.PROCESS_STATE_TOP_SLEEPING;
+                return AppProtoEnums.PROCESS_STATE_TOP_SLEEPING;
             case ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND:
-                return ActivityManagerProto.PROCESS_STATE_IMPORTANT_FOREGROUND;
+                return AppProtoEnums.PROCESS_STATE_IMPORTANT_FOREGROUND;
             case ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND:
-                return ActivityManagerProto.PROCESS_STATE_IMPORTANT_BACKGROUND;
+                return AppProtoEnums.PROCESS_STATE_IMPORTANT_BACKGROUND;
             case ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND:
-                return ActivityManagerProto.PROCESS_STATE_TRANSIENT_BACKGROUND;
+                return AppProtoEnums.PROCESS_STATE_TRANSIENT_BACKGROUND;
             case ActivityManager.PROCESS_STATE_BACKUP:
-                return ActivityManagerProto.PROCESS_STATE_BACKUP;
+                return AppProtoEnums.PROCESS_STATE_BACKUP;
             case ActivityManager.PROCESS_STATE_HEAVY_WEIGHT:
-                return ActivityManagerProto.PROCESS_STATE_HEAVY_WEIGHT;
+                return AppProtoEnums.PROCESS_STATE_HEAVY_WEIGHT;
             case ActivityManager.PROCESS_STATE_SERVICE:
-                return ActivityManagerProto.PROCESS_STATE_SERVICE;
+                return AppProtoEnums.PROCESS_STATE_SERVICE;
             case ActivityManager.PROCESS_STATE_RECEIVER:
-                return ActivityManagerProto.PROCESS_STATE_RECEIVER;
+                return AppProtoEnums.PROCESS_STATE_RECEIVER;
             case ActivityManager.PROCESS_STATE_HOME:
-                return ActivityManagerProto.PROCESS_STATE_HOME;
+                return AppProtoEnums.PROCESS_STATE_HOME;
             case ActivityManager.PROCESS_STATE_LAST_ACTIVITY:
-                return ActivityManagerProto.PROCESS_STATE_LAST_ACTIVITY;
+                return AppProtoEnums.PROCESS_STATE_LAST_ACTIVITY;
             case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY:
-                return ActivityManagerProto.PROCESS_STATE_CACHED_ACTIVITY;
+                return AppProtoEnums.PROCESS_STATE_CACHED_ACTIVITY;
             case ActivityManager.PROCESS_STATE_CACHED_ACTIVITY_CLIENT:
-                return ActivityManagerProto.PROCESS_STATE_CACHED_ACTIVITY_CLIENT;
+                return AppProtoEnums.PROCESS_STATE_CACHED_ACTIVITY_CLIENT;
             case ActivityManager.PROCESS_STATE_CACHED_RECENT:
-                return ActivityManagerProto.PROCESS_STATE_CACHED_RECENT;
+                return AppProtoEnums.PROCESS_STATE_CACHED_RECENT;
             case ActivityManager.PROCESS_STATE_CACHED_EMPTY:
-                return ActivityManagerProto.PROCESS_STATE_CACHED_EMPTY;
+                return AppProtoEnums.PROCESS_STATE_CACHED_EMPTY;
             case ActivityManager.PROCESS_STATE_NONEXISTENT:
-                return ActivityManagerProto.PROCESS_STATE_NONEXISTENT;
+                return AppProtoEnums.PROCESS_STATE_NONEXISTENT;
+            case ActivityManager.PROCESS_STATE_UNKNOWN:
+                return AppProtoEnums.PROCESS_STATE_UNKNOWN;
             default:
-                return -1;
+                return AppProtoEnums.PROCESS_STATE_UNKNOWN_TO_PROTO;
         }
     }
 

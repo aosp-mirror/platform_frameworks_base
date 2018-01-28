@@ -26,6 +26,7 @@ import android.hardware.camera2.ICameraDeviceCallbacks;
 import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.CaptureResultExtras;
+import android.hardware.camera2.impl.PhysicalCaptureResultInfo;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.utils.SubmitInfo;
 import android.os.ConditionVariable;
@@ -249,7 +250,8 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
 
         @Override
         public void onResultReceived(final CameraMetadataNative result,
-                final CaptureResultExtras resultExtras) {
+                final CaptureResultExtras resultExtras,
+                PhysicalCaptureResultInfo physicalResults[]) {
             Object[] resultArray = new Object[] { result, resultExtras };
             Message msg = getHandler().obtainMessage(RESULT_RECEIVED,
                     /*obj*/ resultArray);
@@ -320,7 +322,8 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
                             Object[] resultArray = (Object[]) msg.obj;
                             CameraMetadataNative result = (CameraMetadataNative) resultArray[0];
                             CaptureResultExtras resultExtras = (CaptureResultExtras) resultArray[1];
-                            mCallbacks.onResultReceived(result, resultExtras);
+                            mCallbacks.onResultReceived(result, resultExtras,
+                                    new PhysicalCaptureResultInfo[0]);
                             break;
                         }
                         case PREPARED: {

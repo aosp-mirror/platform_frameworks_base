@@ -214,9 +214,6 @@
     <!-- Amount of close_handle that will NOT overlap the notification list -->
     <dimen name="close_handle_underlap">32dp</dimen>
 
-    <!-- Height of the status bar header bar -->
-    <dimen name="status_bar_header_height">178dp</dimen>
-
     <!-- Height of the status bar header bar in the car setting. -->
     <dimen name="car_status_bar_header_height">128dp</dimen>
 
@@ -335,6 +332,8 @@
     <dimen name="qs_footer_padding_start">16dp</dimen>
     <dimen name="qs_footer_padding_end">24dp</dimen>
     <dimen name="qs_footer_icon_size">16dp</dimen>
+
+    <dimen name="qs_notif_collapsed_space">64dp</dimen>
 
     <!-- Desired qs icon overlay size. -->
     <dimen name="qs_detail_icon_overlay_size">24dp</dimen>

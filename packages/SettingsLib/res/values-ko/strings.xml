@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"네트워크"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"무선 디스플레이 인증서"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi-Fi 상세 로깅 사용"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi 로밍 스캔 항상 허용"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"연결된 MAC 임의 선택"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"항상 모바일 데이터 활성화"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"테더링 하드웨어 가속"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"이름이 없는 블루투스 기기 표시"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS 제공업체의 호스트 이름 입력"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"무선 디스플레이 인증서 옵션 표시"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi 로깅 수준을 높이고, Wi‑Fi 선택도구에서 SSID RSSI당 값을 표시합니다."</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"인터페이스에 표시되는 데이터 트래픽의 양을 기반으로 Wi-Fi 로밍 스캔을 허용하거나 허용하지 않습니다."</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Wi‑Fi 네트워크에 연결할 때 MAC 주소 임의 선택"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"로거 버퍼 크기"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"로그 버퍼당 로거 크기 선택"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"로거 영구 저장소를 삭제하시겠습니까?"</string>
@@ -403,4 +403,10 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"등록됨"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"등록되지 않음"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"사용할 수 없음"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="other">기기 %1$d개 연결됨</item>
+      <item quantity="one">기기 %1$d개 연결됨</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"시간 늘리기"</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"시간 줄이기"</string>
 </resources>

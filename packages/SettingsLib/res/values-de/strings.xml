@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Netzwerke"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Kabellose Übertragung"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Ausführliche WLAN-Protokolle aktivieren"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"WLAN-Roamingsuchen immer zulassen"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Verbundene randomisierte MAC-Adresse"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobile Datennutzung immer aktiviert"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardwarebeschleunigung für Tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Bluetooth-Geräte ohne Namen anzeigen"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Hostname des DNS-Anbieters eingeben"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Optionen zur Zertifizierung für kabellose Übertragung anzeigen"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Level für WLAN-Protokollierung erhöhen, in WiFi Picker pro SSID-RSSI anzeigen"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"WLAN-Roamingsuchen je nach Umfang des Datentraffics an der Schnittstelle zulassen bzw. nicht zulassen"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"MAC-Adresse randomisieren, wenn WLAN-Verbindungen hergestellt werden"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Logger-Puffergrößen"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Größe pro Protokollpuffer wählen"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Speicher der dauerhaften Protokollierung löschen?"</string>
@@ -403,4 +403,10 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Registriert"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Nicht registriert"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Nicht verfügbar"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="other">%1$d Geräte verbunden</item>
+      <item quantity="one">%1$d Gerät verbunden</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Mehr Zeit."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Weniger Zeit."</string>
 </resources>

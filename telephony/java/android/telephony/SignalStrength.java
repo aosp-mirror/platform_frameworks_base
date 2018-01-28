@@ -35,15 +35,20 @@ public class SignalStrength implements Parcelable {
     private static final boolean DBG = false;
 
     /** @hide */
-    public static final int SIGNAL_STRENGTH_NONE_OR_UNKNOWN = 0;
+    public static final int SIGNAL_STRENGTH_NONE_OR_UNKNOWN
+            = TelephonyProtoEnums.SIGNAL_STRENGTH_NONE_OR_UNKNOWN; // = 0
     /** @hide */
-    public static final int SIGNAL_STRENGTH_POOR = 1;
+    public static final int SIGNAL_STRENGTH_POOR
+            = TelephonyProtoEnums.SIGNAL_STRENGTH_POOR; // = 1
     /** @hide */
-    public static final int SIGNAL_STRENGTH_MODERATE = 2;
+    public static final int SIGNAL_STRENGTH_MODERATE
+            = TelephonyProtoEnums.SIGNAL_STRENGTH_MODERATE; // = 2
     /** @hide */
-    public static final int SIGNAL_STRENGTH_GOOD = 3;
+    public static final int SIGNAL_STRENGTH_GOOD
+            = TelephonyProtoEnums.SIGNAL_STRENGTH_GOOD; // = 3
     /** @hide */
-    public static final int SIGNAL_STRENGTH_GREAT = 4;
+    public static final int SIGNAL_STRENGTH_GREAT
+            = TelephonyProtoEnums.SIGNAL_STRENGTH_GREAT; // = 4
     /** @hide */
     public static final int NUM_SIGNAL_STRENGTH_BINS = 5;
     /** @hide */

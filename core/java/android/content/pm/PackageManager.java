@@ -1950,6 +1950,14 @@ public abstract class PackageManager {
      * <li>Minor version number in bits 21-12</li>
      * <li>Patch version number in bits 11-0</li>
      * </ul>
+     * A version of 1.1.0 or higher also indicates:
+     * <ul>
+     * <li>The {@code VK_ANDROID_external_memory_android_hardware_buffer} extension is
+     *     supported.</li>
+     * <li>{@code SYNC_FD} external semaphore and fence handles are supported.</li>
+     * <li>{@code VkPhysicalDeviceSamplerYcbcrConversionFeatures::samplerYcbcrConversion} is
+     *     supported.</li>
+     * </ul>
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_VULKAN_HARDWARE_VERSION = "android.hardware.vulkan.version";
@@ -2602,6 +2610,14 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_VR_HEADTRACKING = "android.hardware.vr.headtracking";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device has a StrongBox hardware-backed Keystore.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_STRONGBOX_KEYSTORE =
+            "android.hardware.strongbox_keystore";
 
     /**
      * Action to external storage service to clean out removed apps.
@@ -4750,7 +4766,7 @@ public abstract class PackageManager {
 
             PackageParser.Package pkg = parser.parseMonolithicPackage(apkFile, 0);
             if ((flags & GET_SIGNATURES) != 0) {
-                PackageParser.collectCertificates(pkg, 0);
+                PackageParser.collectCertificates(pkg, false /* skipVerify */);
             }
             PackageUserState state = new PackageUserState();
             return PackageParser.generatePackageInfo(pkg, null, flags, 0, 0, null, state);

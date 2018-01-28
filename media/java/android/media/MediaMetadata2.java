@@ -34,6 +34,7 @@ import java.util.Set;
 
 /**
  * Contains metadata about an item, such as the title, artist, etc.
+ *
  * @hide
  */
 // TODO(jaewan): Move this to updatable
@@ -218,7 +219,7 @@ public final class MediaMetadata2 {
     /**
      * A Uri formatted String representing the content. This value is specific to the
      * service providing the content. It may be used with
-     * {@link MediaController2#playFromUri(Uri, Bundle)}
+     * {@link MediaController2#playFromUri(String, Bundle)}
      * to initiate playback when provided by a {@link MediaBrowser2} connected to
      * the same app.
      */

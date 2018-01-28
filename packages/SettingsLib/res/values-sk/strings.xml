@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Siete"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certifikácia bezdrôtového zobrazenia"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Podrobné denníky Wi‑Fi"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Vždy povoliť funkciu Wi‑Fi Roam Scans"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Randomizácia pripojených adries MAC"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Mobilné dáta ponechať vždy aktívne"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Hardvérovú akcelerácia pre tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Zobrazovať zariadenia Bluetooth bez názvov"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Zadajte názov hostiteľa poskytovateľa DNS"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Zobraziť možnosti certifikácie bezdrôtového zobrazenia"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Zvýšiť úroveň denníkov Wi‑Fi, zobrazovať podľa SSID RSSI pri výbere siete Wi‑Fi"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Povoliť alebo zakázať funkciu Wifi Roam Scans na základe objemu prenosu údajov v rozhraní"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Randomizovať adresu MAC pri pripájaní k sieťam Wi-Fi"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Vyrovnávacia pamäť nástroja denníkov"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Veľkosť vyrovnávacej pamäte nástroja denníkov"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Vymazať trvalé úložisko zapisovača do denníka?"</string>
@@ -403,4 +403,12 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Registrované"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Neregistrované"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Nie je k dispozícii"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="few">%1$d pripojené zariadenia</item>
+      <item quantity="many">%1$d pripojeného zariadenia</item>
+      <item quantity="other">%1$d pripojených zariadení</item>
+      <item quantity="one">%1$d pripojené zariadenie</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Dlhší čas."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Kratší čas."</string>
 </resources>

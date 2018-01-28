@@ -4,8 +4,8 @@ import static android.os.ParcelFileDescriptor.MODE_CREATE;
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.ParcelFileDescriptor.MODE_TRUNCATE;
-import static com.android.server.backup.RefactoredBackupManagerService.OP_TYPE_BACKUP_WAIT;
-import static com.android.server.backup.RefactoredBackupManagerService.TIMEOUT_BACKUP_INTERVAL;
+import static com.android.server.backup.BackupManagerService.OP_TYPE_BACKUP_WAIT;
+import static com.android.server.backup.BackupManagerService.TIMEOUT_BACKUP_INTERVAL;
 
 import android.app.ApplicationThreadConstants;
 import android.app.IBackupAgent;
@@ -80,7 +80,7 @@ public class KeyValueAdbBackupEngine {
         mNewStateName = new File(mStateDir,
                 pkg + BACKUP_KEY_VALUE_NEW_STATE_FILENAME_SUFFIX);
 
-        mManifestFile = new File(mDataDir, RefactoredBackupManagerService.BACKUP_MANIFEST_FILENAME);
+        mManifestFile = new File(mDataDir, BackupManagerService.BACKUP_MANIFEST_FILENAME);
     }
 
     public void backupOnePackage() throws IOException {
@@ -153,8 +153,9 @@ public class KeyValueAdbBackupEngine {
                     OP_TYPE_BACKUP_WAIT);
 
             // Start backup and wait for BackupManagerService to get callback for success or timeout
-            agent.doBackup(mSavedState, mBackupData, mNewState, Long.MAX_VALUE, token,
-                    mBackupManagerService.getBackupManagerBinder());
+            agent.doBackup(
+                    mSavedState, mBackupData, mNewState, Long.MAX_VALUE, token,
+                    mBackupManagerService.getBackupManagerBinder(), /*transportFlags=*/ 0);
             if (!mBackupManagerService.waitUntilOperationComplete(token)) {
                 Slog.e(TAG, "Key-value backup failed on package " + packageName);
                 return false;

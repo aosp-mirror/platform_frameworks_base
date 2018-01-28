@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"ချိတ်ဆက်ဆောင်ရွက်ခြင်း"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ကြိုးမဲ့ပြသမှု အသိအမှတ်ပြုလက်မှတ်"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi Verbose မှတ်တမ်းတင်ခြင်းအား ဖွင့်မည်"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Wi‑Fi ရွမ်းရှာဖွေမှုကို အမြဲတမ်း ခွင့်ပြုမည်"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"MAC ကျပန်းပြုလုပ်မှုကို ချိတ်ဆက်ထားခြင်း"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"မိုဘိုင်းဒေတာကို အမြဲဖွင့်ထားရန်"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ဖုန်းကို မိုဒမ်အဖြစ်အသုံးပြုမှု စက်ပစ္စည်းဖြင့် အရှိန်မြှင့်တင်ခြင်း"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"အမည်မရှိသော ဘလူးတုသ်စက်ပစ္စည်းများကို ပြသရန်"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS ဝန်ဆောင်မှုပေးသူ၏ အင်တာနက်လက်ခံဝန်ဆောင်ပေးသူအမည်ကို ထည့်ပါ"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ကြိုးမဲ့ အခင်းအကျင်း အသိအမှတ်ပြုလက်မှတ်အတွက် ရွေးချယ်စရာများပြရန်"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi မှတ်တမ်းတင်ခြင်း နှုန်းအားမြင့်ကာ၊ Wi‑Fi ရွေးရာတွင် SSID RSSI ဖြင့်ပြပါ"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"မျက်နှာပြင်တွင် ဖော်ပြသည့် အချက်လက် အသွားအလာ ပမာဏပေါ်တွင် အခြေခံ၍ WIFI ရွမ်းရှာဖွေမှုအား ဖွင့်/ပိတ်မည်"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Wi‑Fi ကွန်ရက်များသို့ ချိတ်ဆက်သည့်အခါ MAC လိပ်စာ ကျပန်းပြုလုပ်ခြင်း"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"လော့ဂါး ဘာဖား ဆိုက်များ"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"လော့ ဘာဖားတွက် လော့ဂါးဆိုက် ရွေး"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"မှတ်တမ်းထိန်းသိမ်းပေးသည့် သိုလှောင်ခန်းကို ရှင်းလင်းမလား။"</string>
@@ -403,4 +403,10 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"မှတ်ပုံတင်ထားသည်"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"မှတ်ပုံတင်မထားပါ"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"မရရှိနိုင်ပါ။"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="other">စက် %1$d ခု ချိတ်ဆက်ထားသည်</item>
+      <item quantity="one">စက် %1$d ခု ချိတ်ဆက်ထားသည်</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"အချိန်တိုးရန်။"</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"အချိန်လျှော့ရန်။"</string>
 </resources>

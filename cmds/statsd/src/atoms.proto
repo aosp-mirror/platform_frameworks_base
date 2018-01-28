@@ -21,7 +21,11 @@ package android.os.statsd;
 option java_package = "com.android.os";
 option java_outer_classname = "AtomsProto";
 
-import "frameworks/base/core/proto/android/app/activitymanager.proto";
+import "frameworks/base/core/proto/android/app/enums.proto";
+import "frameworks/base/core/proto/android/os/enums.proto";
+import "frameworks/base/core/proto/android/server/enums.proto";
+import "frameworks/base/core/proto/android/telephony/enums.proto";
+import "frameworks/base/core/proto/android/view/enums.proto";
 
 /**
  * The master atom class. This message defines all of the available
@@ -44,7 +48,7 @@ message Atom {
         BleUnoptimizedScanStateChanged ble_unoptimized_scan_state_changed = 3;
         BleScanResultReceived ble_scan_result_received = 4;
         SensorStateChanged sensor_state_changed = 5;
-        GpsScanStateChanged gps_scan_state_changed = 6; // TODO: untested
+        GpsScanStateChanged gps_scan_state_changed = 6;
         SyncStateChanged sync_state_changed = 7;
         ScheduledJobStateChanged scheduled_job_state_changed = 8;
         ScreenBrightnessChanged screen_brightness_changed = 9;
@@ -84,33 +88,36 @@ message Atom {
         AppStartChanged app_start_changed = 48;
         AppStartCancelChanged app_start_cancel_changed = 49;
         AppStartFullyDrawnChanged app_start_fully_drawn_changed = 50;
-        LmkEventOccurred lmk_event_occurred = 51;
+        LmkKillOccurred lmk_kill_occurred = 51;
         PictureInPictureStateChanged picture_in_picture_state_changed = 52;
         WifiMulticastLockStateChanged wifi_multicast_lock_state_changed = 53;
+        LmkStateChanged lmk_state_changed = 54;
+        AppStartMemoryStateCaptured app_start_memory_state_captured = 55;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
     // Pulled events will start at field 10000.
+    // Next: 10019
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
         MobileBytesTransfer mobile_bytes_transfer = 10002;
         MobileBytesTransferByFgBg mobile_bytes_transfer_by_fg_bg = 10003;
+        BluetoothBytesTransfer bluetooth_bytes_transfer = 10006;
         KernelWakelock kernel_wakelock = 10004;
         SubsystemSleepState subsystem_sleep_state = 10005;
-        // 10006 and 10007 are free to use.
         CpuTimePerFreq cpu_time_per_freq = 10008;
         CpuTimePerUid cpu_time_per_uid = 10009;
         CpuTimePerUidFreq cpu_time_per_uid_freq = 10010;
         WifiActivityEnergyInfo wifi_activity_energy_info = 10011;
         ModemActivityInfo modem_activity_info = 10012;
-        ProcessMemoryStat process_memory_stat = 10013;
-        CpuSuspendTime cpu_suspend_time = 10014;
-        CpuIdleTime cpu_idle_time = 10015;
+        BluetoothActivityInfo bluetooth_activity_info = 10007;
+        ProcessMemoryState process_memory_state = 10013;
+        SystemElapsedRealtime system_elapsed_realtime = 10014;
+        SystemUptime system_uptime = 10015;
         CpuActiveTime cpu_active_time = 10016;
         CpuClusterTime cpu_cluster_time = 10017;
         DiskSpace disk_space = 10018;
-        SystemUptime system_uptime = 10019;
     }
 }
 
@@ -162,18 +169,8 @@ message AttributionNode {
  *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message ScreenStateChanged {
-    // TODO: Use the real screen state.
-    enum State {
-        STATE_UNKNOWN = 0;
-        STATE_OFF = 1;
-        STATE_ON = 2;
-        STATE_DOZE = 3;
-        STATE_DOZE_SUSPEND = 4;
-        STATE_VR = 5;
-        STATE_ON_SUSPEND = 6;
-    }
-    // New screen state.
-    optional State display_state = 1;
+    // New screen state, from frameworks/base/core/proto/android/view/enums.proto.
+    optional android.view.DisplayStateEnum state = 1;
 }
 
 /**
@@ -185,9 +182,8 @@ message ScreenStateChanged {
 message UidProcessStateChanged {
     optional int32 uid = 1; // TODO: should be a string tagged w/ uid annotation
 
-    // The state.
-    // TODO: Use the real (mapped) process states.
-    optional android.app.ProcessState state = 2;
+    // The state, from frameworks/base/core/proto/android/app/enums.proto.
+    optional android.app.ProcessStateEnum state = 2;
 }
 
 /**
@@ -197,7 +193,6 @@ message UidProcessStateChanged {
  *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message ProcessLifeCycleStateChanged {
-    // TODO: Use the real (mapped) process states.
     optional int32 uid = 1; // TODO: should be a string tagged w/ uid annotation
 
     // TODO: What is this?
@@ -413,13 +408,9 @@ message CameraStateChanged {
 message WakelockStateChanged {
     repeated AttributionNode attribution_node = 1;
 
-    // Type of wakelock.
-    enum Type {
-        PARTIAL = 0;
-        FULL = 1;
-        WINDOW = 2;
-    }
-    optional Type type = 2;
+    // The type (level) of the wakelock; e.g. a partial wakelock or a full wakelock.
+    // From frameworks/base/core/proto/android/os/enums.proto.
+    optional android.os.WakeLockLevelEnum level = 2;
 
     // The wakelock tag (Called tag in the Java API, sometimes name elsewhere).
     optional string tag = 3;
@@ -476,13 +467,7 @@ message BatterySaverModeStateChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message DeviceIdleModeStateChanged {
-    // TODO: Use the enum matching BatteryStats.DEVICE_IDLE_MODE_.
-    enum State {
-        DEVICE_IDLE_MODE_OFF = 0;
-        DEVICE_IDLE_MODE_LIGHT = 1;
-        DEVICE_IDLE_MODE_DEEP = 2;
-    }
-    optional State state = 1;
+    optional android.server.DeviceIdleModeEnum state = 1;
 }
 
 
@@ -493,13 +478,7 @@ message DeviceIdleModeStateChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message DeviceIdlingModeStateChanged {
-    // TODO: Use the enum matching BatteryStats.DEVICE_IDLE_MODE_.
-    enum State {
-        DEVICE_IDLE_MODE_OFF = 0;
-        DEVICE_IDLE_MODE_LIGHT = 1;
-        DEVICE_IDLE_MODE_DEEP = 2;
-    }
-    optional State state = 1;
+    optional android.server.DeviceIdleModeEnum state = 1;
 }
 
 /**
@@ -531,15 +510,8 @@ message BatteryLevelChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message ChargingStateChanged {
-    // TODO: Link directly to BatteryManager.java's constants (via a proto).
-    enum State {
-        BATTERY_STATUS_UNKNOWN = 1;
-        BATTERY_STATUS_CHARGING = 2;
-        BATTERY_STATUS_DISCHARGING = 3;
-        BATTERY_STATUS_NOT_CHARGING = 4;
-        BATTERY_STATUS_FULL = 5;
-    }
-    optional State charging_state = 1;
+    // State of the battery, from frameworks/base/core/proto/android/os/enums.proto.
+    optional android.os.BatteryStatusEnum state = 1;
 }
 
 /**
@@ -549,18 +521,8 @@ message ChargingStateChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message PluggedStateChanged {
-    // TODO: Link directly to BatteryManager.java's constants (via a proto).
-    enum State {
-        // Note that NONE is not in BatteryManager.java's constants.
-        BATTERY_PLUGGED_NONE = 0;
-        // Power source is an AC charger.
-        BATTERY_PLUGGED_AC = 1;
-        // Power source is a USB port.
-        BATTERY_PLUGGED_USB = 2;
-        // Power source is wireless.
-        BATTERY_PLUGGED_WIRELESS = 4;
-    }
-    optional State plugged_state = 1;
+    // Whether the device is plugged in, from frameworks/base/core/proto/android/os/enums.proto.
+    optional android.os.BatteryPluggedStateEnum state = 1;
 }
 
 /**
@@ -614,13 +576,8 @@ message MobileRadioPowerStateChanged {
     // TODO: Add attribution instead of uid?
     optional int32 uid = 1;
 
-    // TODO: Reference telephony/java/android/telephony/DataConnectionRealTimeInfo.java states.
-    enum PowerState {
-        DC_POWER_STATE_LOW = 1;
-        DC_POWER_STATE_MEDIUM = 2;
-        DC_POWER_STATE_HIGH = 3;
-    }
-    optional PowerState power_state = 2;
+    // Power state, from frameworks/base/core/proto/android/telephony/enums.proto.
+    optional android.telephony.DataConnectionPowerStateEnum state = 2;
 }
 
 /**
@@ -634,13 +591,8 @@ message WifiRadioPowerStateChanged {
     // TODO: Add attribution instead of uid?
     optional int32 uid = 1;
 
-    // TODO: Reference telephony/java/android/telephony/DataConnectionRealTimeInfo.java states.
-    enum PowerState {
-        DC_POWER_STATE_LOW = 1;
-        DC_POWER_STATE_MEDIUM = 2;
-        DC_POWER_STATE_HIGH = 3;
-    }
-    optional PowerState power_state = 2;
+    // Power state, from frameworks/base/core/proto/android/telephony/enums.proto.
+    optional android.telephony.DataConnectionPowerStateEnum state = 2;
 }
 
 /**
@@ -680,15 +632,8 @@ message WifiLockStateChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message WifiSignalStrengthChanged {
-    // TODO: Reference the actual telephony/java/android/telephony/SignalStrength.java states.
-    enum SignalStrength {
-        SIGNAL_STRENGTH_NONE_OR_UNKNOWN = 0;
-        SIGNAL_STRENGTH_POOR = 1;
-        SIGNAL_STRENGTH_MODERATE = 2;
-        SIGNAL_STRENGTH_GOOD = 3;
-        SIGNAL_STRENGTH_GREAT = 4;
-    }
-    optional SignalStrength signal_strength = 1;
+    // Signal strength, from frameworks/base/core/proto/android/telephony/enums.proto.
+    optional android.telephony.SignalStrengthEnum signal_strength = 1;
 }
 
 /**
@@ -730,15 +675,8 @@ message WifiMulticastLockStateChanged {
  *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
  */
 message PhoneSignalStrengthChanged {
-    // TODO: Reference the actual telephony/java/android/telephony/SignalStrength.java states.
-    enum SignalStrength {
-        SIGNAL_STRENGTH_NONE_OR_UNKNOWN = 0;
-        SIGNAL_STRENGTH_POOR = 1;
-        SIGNAL_STRENGTH_MODERATE = 2;
-        SIGNAL_STRENGTH_GOOD = 3;
-        SIGNAL_STRENGTH_GREAT = 4;
-    }
-    optional SignalStrength signal_strength = 1;
+    // Signal strength, from frameworks/base/core/proto/android/telephony/enums.proto.
+    optional android.telephony.SignalStrengthEnum signal_strength = 1;
 }
 
 /**
@@ -891,15 +829,7 @@ message AppStartChanged {
     // Device uptime when activity started.
     optional int64 activity_start_msec = 7;
 
-    // TODO: Update android/app/ActivityManagerInternal.java constants to depend on our proto enum.
-    enum TransitionReason {
-        APP_START_TRANSITION_REASON_UNKNOWN = 0;
-        SPLASH_SCREEN = 1;
-        WINDOWS_DRAWN = 2;
-        TIMEOUT = 3;
-        SNAPSHOT = 4;
-    }
-    optional TransitionReason reason = 8;
+    optional android.app.AppTransitionReasonEnum reason = 8;
 
     optional int32 transition_delay_msec = 9;
     // -1 if not set.
@@ -1058,6 +988,20 @@ message MobileBytesTransferByFgBg {
     optional int64 tx_bytes = 5;
 
     optional int64 tx_packets = 6;
+}
+
+/**
+ * Pulls bytes transferred via bluetooth. It is pulled from Bluetooth controller.
+ *
+ * Pulled from:
+ *   StatsCompanionService
+ */
+message BluetoothBytesTransfer {
+    optional int32 uid = 1;
+
+    optional int64 rx_bytes = 2;
+
+    optional int64 tx_bytes = 3;
 }
 
 /**
@@ -1230,32 +1174,54 @@ message ModemActivityInfo {
     optional uint64 energy_used = 10;
 }
 
-/*
- * Logs the memory stats for a process
+/**
+ * Pulls Bluetooth Activity Energy Info
+ * Note: BluetoothBytesTransfer is pulled at the same time from the controller.
  */
-message ProcessMemoryStat {
+message BluetoothActivityInfo {
+    // timestamp(wall clock) of record creation
+    optional uint64 timestamp_ms = 1;
+    // bluetooth stack state
+    optional int32 bluetooth_stack_state = 2;
+    // tx time in ms
+    optional uint64 controller_tx_time_ms = 3;
+    // rx time in ms
+    optional uint64 controller_rx_time_ms = 4;
+    // idle time in ms
+    optional uint64 controller_idle_time_ms = 5;
+    // product of current(mA), voltage(V) and time(ms)
+    optional uint64 energy_used = 6;
+}
+
+/*
+ * Logs the memory stats for an app on startup.
+ * Logged from:
+ *     frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+ */
+message AppStartMemoryStateCaptured {
     // The uid if available. -1 means not available.
     optional int32 uid = 1;
 
     // The process name.
     optional string process_name = 2;
 
+    // The activity name.
+    optional string activity_name = 3;
+
     // # of page-faults
-    optional int64 pgfault = 3;
+    optional int64 pgfault = 4;
 
     // # of major page-faults
-    optional int64 pgmajfault = 4;
+    optional int64 pgmajfault = 5;
 
     // RSS+CACHE(+SWAP)
-    optional int64 usage_in_bytes = 5;
+    optional int64 usage_in_bytes = 6;
 }
 
 /*
- * Logs the event when LMKD kills a process to reduce memory pressure
- * Logged from:
- *      system/core/lmkd/lmkd.c
+ * Logs the memory stats for a process.
  */
-message LmkEventOccurred {
+message ProcessMemoryState {
     // The uid if available. -1 means not available.
     optional int32 uid = 1;
 
@@ -1276,17 +1242,61 @@ message LmkEventOccurred {
 }
 
 /*
- * Cpu syspend time for cpu power calculation.
+ * Logs the change in Low Memory Killer Daemon (LMKD) state which is used as start/stop boundaries
+ * for LMK event.
+ * Logged from:
+ *      system/core/lmkd/lmkd.c
  */
-message CpuSuspendTime {
-    optional uint64 time = 1;
+message LmkStateChanged {
+    enum State {
+        UNKNOWN = 0;
+        START = 1;
+        STOP = 2;
+    }
+    optional State state = 1;
 }
 
 /*
- * Cpu idle time for cpu power calculation.
+ * Logs the event when Low Memory Killer Daemon (LMKD) kills a process to reduce memory pressure.
+ * Logged from:
+ *      system/core/lmkd/lmkd.c
  */
-message CpuIdleTime {
-    optional uint64 time = 1;
+message LmkKillOccurred {
+    // The uid if available. -1 means not available.
+    optional int32 uid = 1;
+
+    // The process name.
+    optional string process_name = 2;
+
+    // oom adj score.
+    optional int32 oom_score = 3;
+
+    // # of page-faults
+    optional int64 pgfault = 4;
+
+    // # of major page-faults
+    optional int64 pgmajfault = 5;
+
+    // RSS+CACHE(+SWAP)
+    optional int64 usage_in_bytes = 6;
+}
+
+/*
+ * Elapsed real time from SystemClock.
+ */
+message SystemElapsedRealtime {
+    optional uint64 time_ms = 1;
+}
+
+/*
+ * Up time from SystemClock.
+ */
+message SystemUptime {
+    // Milliseconds since the system was booted.
+    // This clock stops when the system enters deep sleep (CPU off, display dark, device waiting
+    // for external input).
+    // It is not affected by clock scaling, idle, or other power saving mechanisms.
+    optional uint64 uptime_ms = 1;
 }
 
 /*
@@ -1329,15 +1339,4 @@ message DiskSpace {
     optional uint64 system_available_bytes = 2;
     // available bytes in download cache or temp directories
     optional uint64 temp_available_bytes = 3;
-}
-
-/*
- * Pulls system up time.
- */
-message SystemUptime {
-    // Milliseconds since the system was booted.
-    // This clock stops when the system enters deep sleep (CPU off, display dark, device waiting
-    // for external input).
-    // It is not affected by clock scaling, idle, or other power saving mechanisms.
-    optional uint64 uptime_ms = 1;
 }

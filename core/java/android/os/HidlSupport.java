@@ -212,9 +212,10 @@ public class HidlSupport {
     }
 
     /**
-     * Return PID of process if sharable to clients.
+     * Return PID of process only if on a non-user build. For debugging purposes.
      * @hide
      */
+    @SystemApi
     public static native int getPidIfSharable();
 
     /** @hide */

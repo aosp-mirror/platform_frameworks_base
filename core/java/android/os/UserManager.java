@@ -2259,12 +2259,6 @@ public class UserManager {
         }
     }
 
-    /** @removed */
-    @Deprecated
-    public boolean trySetQuietModeEnabled(boolean enableQuietMode, @NonNull UserHandle userHandle) {
-        return requestQuietModeEnabled(enableQuietMode, userHandle);
-    }
-
     /**
      * Enables or disables quiet mode for a managed profile. If quiet mode is enabled, apps in a
      * managed profile don't run, generate notifications, or consume data or battery.

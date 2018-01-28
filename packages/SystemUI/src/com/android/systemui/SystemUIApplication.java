@@ -61,7 +61,7 @@ import java.util.Map;
  */
 public class SystemUIApplication extends Application implements SysUiServiceProvider {
 
-    private static final String TAG = "SystemUIService";
+    public static final String TAG = "SystemUIService";
     private static final boolean DEBUG = false;
 
     /**

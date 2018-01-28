@@ -16,8 +16,8 @@
 
 package com.android.server.backup.utils;
 
-import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_MANIFEST_VERSION;
-import static com.android.server.backup.RefactoredBackupManagerService.TAG;
+import static com.android.server.backup.BackupManagerService.BACKUP_MANIFEST_VERSION;
+import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;

@@ -17,6 +17,7 @@
 syntax = "proto2";
 
 import "frameworks/base/core/proto/android/app/pendingintent.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 option java_multiple_files = true;
 
@@ -47,6 +48,8 @@ message AlarmManagerProto {
 
 // An android.app.AlarmManager.AlarmClockInfo object.
 message AlarmClockInfoProto {
+  option (android.msg_privacy).dest = DEST_AUTOMATIC;
+
   // This value is UTC wall clock time in milliseconds, as returned by
   // System#currentTimeMillis() for example.
   optional int64 trigger_time_ms = 1;

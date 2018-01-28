@@ -80,6 +80,7 @@ public class KeyInfo implements KeySpec {
     private final int mUserAuthenticationValidityDurationSeconds;
     private final boolean mUserAuthenticationRequirementEnforcedBySecureHardware;
     private final boolean mUserAuthenticationValidWhileOnBody;
+    private final boolean mTrustedUserPresenceRequired;
     private final boolean mInvalidatedByBiometricEnrollment;
 
     /**
@@ -101,6 +102,7 @@ public class KeyInfo implements KeySpec {
             int userAuthenticationValidityDurationSeconds,
             boolean userAuthenticationRequirementEnforcedBySecureHardware,
             boolean userAuthenticationValidWhileOnBody,
+            boolean trustedUserPresenceRequired,
             boolean invalidatedByBiometricEnrollment) {
         mKeystoreAlias = keystoreKeyAlias;
         mInsideSecureHardware = insideSecureHardware;
@@ -121,6 +123,7 @@ public class KeyInfo implements KeySpec {
         mUserAuthenticationRequirementEnforcedBySecureHardware =
                 userAuthenticationRequirementEnforcedBySecureHardware;
         mUserAuthenticationValidWhileOnBody = userAuthenticationValidWhileOnBody;
+        mTrustedUserPresenceRequired = trustedUserPresenceRequired;
         mInvalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
     }
 
@@ -300,5 +303,13 @@ public class KeyInfo implements KeySpec {
      */
     public boolean isInvalidatedByBiometricEnrollment() {
         return mInvalidatedByBiometricEnrollment;
+    }
+
+    /**
+     * Returns {@code true} if the key can only be only be used if a test for user presence has
+     * succeeded since Signature.initSign() has been called.
+     */
+    public boolean isTrustedUserPresenceRequired() {
+        return mTrustedUserPresenceRequired;
     }
 }

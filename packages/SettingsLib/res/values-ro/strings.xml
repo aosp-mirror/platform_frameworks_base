@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Conectare la rețele"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Certificare Ecran wireless"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Înregistrare prin Wi-Fi de volume mari de date"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Se permite întotdeauna scanarea traficului Wi-Fi"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Afișare aleatorie a dispozitivului MAC conectat"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Date mobile permanent active"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"Accelerare hardware pentru tethering"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Afișați dispozitivele Bluetooth fără nume"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Introduceți numele de gazdă al furnizorului de DNS"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Afișați opțiunile pentru certificarea Ecran wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Măriți niv. de înr. prin Wi‑Fi, afișați în fcț. de SSID RSSI în Selectorul Wi‑Fi"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Permiteți/Nu permiteți scanarea traficului Wi-Fi în funcție de traficul de date din interfață"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Afișează aleatoriu adresa MAC când te conectezi la rețele Wi‑Fi"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Dimensiunile tamponului jurnalului"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Dimensiuni jurnal / tampon jurnal"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Ștergeți stocarea permanentă a jurnalului?"</string>
@@ -403,4 +403,11 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Înregistrat"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Neînregistrat"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Indisponibilă"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="few">%1$d dispozitive conectate</item>
+      <item quantity="other">%1$d de dispozitive conectate</item>
+      <item quantity="one">%1$d dispozitiv conectat</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Mai mult timp."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Mai puțin timp."</string>
 </resources>

@@ -202,7 +202,12 @@ DropBoxManager::addFile(const String16& tag, const string& filename, int flags)
         ALOGW("DropboxManager: %s", message.c_str());
         return Status::fromExceptionCode(Status::EX_ILLEGAL_STATE, message.c_str());
     }
+    return addFile(tag, fd, flags);
+}
 
+Status
+DropBoxManager::addFile(const String16& tag, int fd, int flags)
+{
     Entry entry(tag, flags, fd);
     return add(entry);
 }

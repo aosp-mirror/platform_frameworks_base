@@ -19,10 +19,14 @@ package android.os;
 
 option java_multiple_files = true;
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 // An android.os.PersistableBundle object.
 message PersistableBundleProto {
     oneof data {
-        int32 parcelled_data_size = 1;
-        string map_data = 2;
+        int32 parcelled_data_size = 1 [
+            (.android.privacy).dest = DEST_AUTOMATIC
+        ];
+        string map_data = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
     }
 }

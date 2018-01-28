@@ -142,7 +142,8 @@ public final class AudioDeviceInfo {
             TYPE_LINE_DIGITAL,
             TYPE_FM,
             TYPE_AUX_LINE,
-            TYPE_IP }
+            TYPE_IP,
+            TYPE_BUS }
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface AudioDeviceTypeOut {}
@@ -168,6 +169,7 @@ public final class AudioDeviceInfo {
             case TYPE_FM:
             case TYPE_AUX_LINE:
             case TYPE_IP:
+            case TYPE_BUS:
                 return true;
             default:
                 return false;

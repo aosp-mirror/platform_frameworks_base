@@ -174,7 +174,6 @@ public class BackupManagerMonitor {
 
     /**
      * The transport returned {@link BackupTransport#TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED}.
-     * @hide
      */
     public static final int LOG_EVENT_ID_TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED = 51;
 

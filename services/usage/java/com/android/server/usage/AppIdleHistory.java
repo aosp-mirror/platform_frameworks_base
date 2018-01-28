@@ -36,6 +36,8 @@ import android.util.Xml;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.LocalServices;
+import com.android.server.job.JobSchedulerInternal;
 
 import libcore.io.IoUtils;
 
@@ -202,27 +204,23 @@ public class AppIdleHistory {
      * that's in the future, then the usage event is temporary and keeps the app in the specified
      * bucket at least until the timeout is reached. This can be used to keep the app in an
      * elevated bucket for a while until some important task gets to run.
-     * @param packageName
-     * @param userId
-     * @param bucket the bucket to set the app to
+     * @param appUsageHistory the usage record for the app being updated
+     * @param packageName name of the app being updated, for logging purposes
+     * @param newBucket the bucket to set the app to
      * @param elapsedRealtime mark as used time if non-zero
      * @param timeout set the timeout of the specified bucket, if non-zero
      * @return
      */
-    public int reportUsage(String packageName, int userId, int bucket, long elapsedRealtime,
-            long timeout) {
-        ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
-        AppUsageHistory appUsageHistory = getPackageHistory(userHistory, packageName,
-                elapsedRealtime, true);
-
+    public AppUsageHistory reportUsage(AppUsageHistory appUsageHistory, String packageName,
+            int newBucket, long elapsedRealtime, long timeout) {
         if (elapsedRealtime != 0) {
             appUsageHistory.lastUsedElapsedTime = mElapsedDuration
                     + (elapsedRealtime - mElapsedSnapshot);
             appUsageHistory.lastUsedScreenTime = getScreenOnTime(elapsedRealtime);
         }
 
-        if (appUsageHistory.currentBucket > bucket) {
-            appUsageHistory.currentBucket = bucket;
+        if (appUsageHistory.currentBucket > newBucket) {
+            appUsageHistory.currentBucket = newBucket;
             if (DEBUG) {
                 Slog.d(TAG, "Moved " + packageName + " to bucket=" + appUsageHistory
                         .currentBucket
@@ -235,7 +233,26 @@ public class AppIdleHistory {
         }
         appUsageHistory.bucketingReason = REASON_USAGE;
 
-        return appUsageHistory.currentBucket;
+        return appUsageHistory;
+    }
+
+    /**
+     * Mark the app as used and update the bucket if necessary. If there is a timeout specified
+     * that's in the future, then the usage event is temporary and keeps the app in the specified
+     * bucket at least until the timeout is reached. This can be used to keep the app in an
+     * elevated bucket for a while until some important task gets to run.
+     * @param packageName
+     * @param userId
+     * @param newBucket the bucket to set the app to
+     * @param elapsedRealtime mark as used time if non-zero
+     * @param timeout set the timeout of the specified bucket, if non-zero
+     * @return
+     */
+    public AppUsageHistory reportUsage(String packageName, int userId, int newBucket,
+            long nowElapsed, long timeout) {
+        ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
+        AppUsageHistory history = getPackageHistory(userHistory, packageName, nowElapsed, true);
+        return reportUsage(history, packageName, newBucket, nowElapsed, timeout);
     }
 
     private ArrayMap<String, AppUsageHistory> getUserHistory(int userId) {

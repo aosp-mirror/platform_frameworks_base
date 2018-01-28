@@ -19,6 +19,7 @@ package com.android.providers.settings;
 import android.annotation.NonNull;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.providers.settings.GlobalSettingsProto;
 import android.providers.settings.SecureSettingsProto;
 import android.providers.settings.SettingProto;
@@ -101,21 +102,6 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.THEATER_MODE_ON,
                 GlobalSettingsProto.THEATER_MODE_ON);
-        dumpSetting(s, p,
-                Settings.Global.RADIO_BLUETOOTH,
-                GlobalSettingsProto.RADIO_BLUETOOTH);
-        dumpSetting(s, p,
-                Settings.Global.RADIO_WIFI,
-                GlobalSettingsProto.RADIO_WIFI);
-        dumpSetting(s, p,
-                Settings.Global.RADIO_WIMAX,
-                GlobalSettingsProto.RADIO_WIMAX);
-        dumpSetting(s, p,
-                Settings.Global.RADIO_CELL,
-                GlobalSettingsProto.RADIO_CELL);
-        dumpSetting(s, p,
-                Settings.Global.RADIO_NFC,
-                GlobalSettingsProto.RADIO_NFC);
         dumpSetting(s, p,
                 Settings.Global.AIRPLANE_MODE_RADIOS,
                 GlobalSettingsProto.AIRPLANE_MODE_RADIOS);
@@ -590,6 +576,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.WIFI_VERBOSE_LOGGING_ENABLED,
                 GlobalSettingsProto.WIFI_VERBOSE_LOGGING_ENABLED);
+        dumpSetting(s, p,
+                Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED,
+                GlobalSettingsProto.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED);
         dumpSetting(s, p,
                 Settings.Global.WIFI_MAX_DHCP_RETRY_COUNT,
                 GlobalSettingsProto.WIFI_MAX_DHCP_RETRY_COUNT);
@@ -1066,6 +1055,9 @@ class SettingsProtoDumpUtil {
                 Settings.Global.STORAGE_SETTINGS_CLOBBER_THRESHOLD,
                 GlobalSettingsProto.STORAGE_SETTINGS_CLOBBER_THRESHOLD);
         dumpSetting(s, p,
+                Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED,
+                GlobalSettingsProto.CHAINED_BATTERY_ATTRIBUTION_ENABLED);
+        dumpSetting(s, p,
                 Settings.Global.MULTI_SIM_VOICE_CALL_SUBSCRIPTION,
                 GlobalSettingsProto.MULTI_SIM_VOICE_CALL_SUBSCRIPTION);
         dumpSetting(s, p,
@@ -1129,14 +1121,13 @@ class SettingsProtoDumpUtil {
                 Settings.Global.SHOW_FIRST_CRASH_DIALOG,
                 GlobalSettingsProto.SHOW_FIRST_CRASH_DIALOG);
         dumpSetting(s, p,
-                Settings.Global.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED,
-                GlobalSettingsProto.WIFI_CONNECTED_MAC_RANDOMIZATION_ENABLED);
-        dumpSetting(s, p,
                 Settings.Global.SHOW_RESTART_IN_CRASH_DIALOG,
                 GlobalSettingsProto.SHOW_RESTART_IN_CRASH_DIALOG);
         dumpSetting(s, p,
                 Settings.Global.SHOW_MUTE_IN_CRASH_DIALOG,
                 GlobalSettingsProto.SHOW_MUTE_IN_CRASH_DIALOG);
+
+        // Please insert new settings using the same order as in Settings.Global.
     }
 
     /** Dump a single {@link SettingsState.Setting} to a proto buf */
@@ -1764,6 +1755,8 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.BLUETOOTH_ON_WHILE_DRIVING,
                 SecureSettingsProto.BLUETOOTH_ON_WHILE_DRIVING);
+
+        // Please insert new settings using the same order as in Settings.Secure.
     }
 
     private static void dumpProtoSystemSettingsLocked(
@@ -2022,5 +2015,7 @@ class SettingsProtoDumpUtil {
                 SystemSettingsProto.WHEN_TO_MAKE_WIFI_CALLS);
         // The rest of the settings were moved to Settings.Secure, and are thus excluded here since
         // they're deprecated from Settings.System.
+
+        // Please insert new settings using the same order as in Settings.System.
     }
 }

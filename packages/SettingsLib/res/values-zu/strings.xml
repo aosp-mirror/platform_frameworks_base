@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"Ukunethiwekha"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"Ukunikezwa isitifiketi sokubukeka okungenantambo"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Nika amandlaukungena kwe-Wi-Fi Verbose"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"Vumela njalo ukuskena kokuzula kwe-Wi-Fi"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"Okungahleliwe kwe-MAC exhunyiwe"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"Idatha yeselula ihlala isebenza"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"I-Tethering hardware acceleration"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"Bonisa amadivayisi e-Bluetooth ngaphandle kwamagama"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Faka igama lomsingathi womhlinzeki we-DNS"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Bonisa izinketho zokunikeza isitifiketi ukubukeka okungenantambo"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"khuphula izinga lokungena le-Wi-Fi, bonisa nge-SSID RSSI engayodwana kusikhethi se-Wi-Fi"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"Vumela/Ungavumeli ukuskena kokuzula kwe-Wi-Fi okususelwa kunani ledatha yethrafikhi ekhona ekusebenzisaneni"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"Ungahleli ikheli le-MAC uma kuxhumeke kumanethiwekhi e-Wi-Fi"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"Amasayizi weloga ngebhafa"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"Khetha amasayizi weloga ngebhafa ngayinye yelogu"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"Sula isitoreji seloga eqhubekayo?"</string>
@@ -403,4 +403,10 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"Kubhalisiwe"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"Akubhalisiwe"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"Ayitholakali"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="one">%1$d amadivayisi axhunyiwe</item>
+      <item quantity="other">%1$d amadivayisi axhunyiwe</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Isikhathi esiningi."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Isikhathi esincane."</string>
 </resources>

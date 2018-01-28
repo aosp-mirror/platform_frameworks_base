@@ -19,6 +19,7 @@ package com.android.server.job;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 
+import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -39,6 +40,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.Intent.UriFlags;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -1069,6 +1071,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
+    void reportAppUsage(String packageName, int userId) {
+        // This app just transitioned into interactive use or near equivalent, so we should
+        // take a look at its job state for feedback purposes.
+    }
+
     /**
      * Initializes the system service.
      * <p>
@@ -1807,7 +1814,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
         // If the app is in a non-active standby bucket, make sure we've waited
         // an appropriate amount of time since the last invocation.  During device-
         // wide parole, standby bucketing is ignored.
-        if (!mInParole) {
+        //
+        // But if a job has FLAG_EXEMPT_FROM_APP_STANDBY, don't check it.
+        if (!mInParole && !job.getJob().isExemptedFromAppStandby()) {
             final int bucket = job.getStandbyBucket();
             if (mHeartbeat < mNextBucketHeartbeat[bucket]) {
                 // Only skip this job if it's still waiting for the end of its (initial) nominal
@@ -2065,6 +2074,33 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
 
         /**
+         * Heartbeat ordinal for the given app.  This is typically the heartbeat at which
+         * the app last ran jobs, so that a newly-scheduled job in an app that hasn't run
+         * jobs in a long time is immediately runnable even if the app is bucketed into
+         * an infrequent time allocation.
+         */
+        public long baseHeartbeatForApp(String packageName, @UserIdInt int userId,
+                final int appStandbyBucket) {
+            if (appStandbyBucket == 0 ||
+                    appStandbyBucket >= mConstants.STANDBY_BEATS.length) {
+                // ACTIVE => everything can be run right away
+                // NEVER => we won't run them anyway, so let them go in the future
+                // as soon as the app enters normal use
+                return 0;
+            }
+
+            final long timeSinceLastJob = mStandbyTracker.getTimeSinceLastJobRun(
+                    packageName, userId);
+            final long bucketLength = mConstants.STANDBY_BEATS[appStandbyBucket];
+            final long bucketsAgo = timeSinceLastJob / bucketLength;
+
+            // If we haven't run any jobs for more than the app's current bucket period, just
+            // consider anything new to be immediately runnable.  Otherwise, base it on the
+            // bucket at which we last ran jobs.
+            return (bucketsAgo > bucketLength) ? 0 : (getCurrentHeartbeat() - bucketsAgo);
+        }
+
+        /**
          * Returns a list of all pending jobs. A running job is not considered pending. Periodic
          * jobs are always considered pending.
          */
@@ -2122,6 +2158,11 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
 
         @Override
+        public void reportAppUsage(String packageName, int userId) {
+            JobSchedulerService.this.reportAppUsage(packageName, userId);
+        }
+
+        @Override
         public JobStorePersistStats getPersistStats() {
             synchronized (mLock) {
                 return new JobStorePersistStats(mJobs.getPersistStats());
@@ -2139,10 +2180,14 @@ public final class JobSchedulerService extends com.android.server.SystemService
             mUsageStats = usageStats;
         }
 
+        public long getTimeSinceLastJobRun(String packageName, final @UserIdInt int userId) {
+            return mUsageStats.getTimeSinceLastJobRun(packageName, userId);
+        }
+
         // AppIdleStateChangeListener interface for live updates
 
         @Override
-        public void onAppIdleStateChanged(final String packageName, final int userId,
+        public void onAppIdleStateChanged(final String packageName, final @UserIdInt int userId,
                 boolean idle, int bucket) {
             final int uid = mLocalPM.getPackageUid(packageName,
                     PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
@@ -2178,6 +2223,40 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 Slog.i(TAG, "Global parole state now " + (isParoleOn ? "ON" : "OFF"));
             }
             mInParole = isParoleOn;
+        }
+
+        @Override
+        public void onUserInteractionStarted(String packageName, int userId) {
+            final int uid = mLocalPM.getPackageUid(packageName,
+                    PackageManager.MATCH_UNINSTALLED_PACKAGES, userId);
+            if (uid < 0) {
+                // Quietly ignore; the case is already logged elsewhere
+                return;
+            }
+
+            final long sinceLast = sElapsedRealtimeClock.millis() -
+                    mUsageStats.getTimeSinceLastJobRun(packageName, userId);
+            final DeferredJobCounter counter = new DeferredJobCounter();
+            synchronized (mLock) {
+                mJobs.forEachJobForSourceUid(uid, counter);
+            }
+
+            mUsageStats.reportAppJobState(packageName, userId, counter.numDeferred(), sinceLast);
+        }
+    }
+
+    static class DeferredJobCounter implements JobStatusFunctor {
+        private int mDeferred = 0;
+
+        public int numDeferred() {
+            return mDeferred;
+        }
+
+        @Override
+        public void process(JobStatus job) {
+            if (job.getWhenStandbyDeferred() > 0) {
+                mDeferred++;
+            }
         }
     }
 
@@ -2262,6 +2341,22 @@ public final class JobSchedulerService extends com.android.server.SystemService
             return canPersist;
         }
 
+        private void validateJobFlags(JobInfo job, int callingUid) {
+            if ((job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0) {
+                getContext().enforceCallingOrSelfPermission(
+                        android.Manifest.permission.CONNECTIVITY_INTERNAL, TAG);
+            }
+            if ((job.getFlags() & JobInfo.FLAG_EXEMPT_FROM_APP_STANDBY) != 0) {
+                if (callingUid != Process.SYSTEM_UID) {
+                    throw new SecurityException("Job has invalid flags");
+                }
+                if (job.hasLateConstraint() || job.hasEarlyConstraint()) {
+                    Slog.wtf(TAG, "Jobs with time-constraints mustn't have"
+                            +" FLAG_EXEMPT_FROM_APP_STANDBY. Job=" + job);
+                }
+            }
+        }
+
         // IJobScheduler implementation
         @Override
         public int schedule(JobInfo job) throws RemoteException {
@@ -2280,10 +2375,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 }
             }
 
-            if ((job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0) {
-                getContext().enforceCallingOrSelfPermission(
-                        android.Manifest.permission.CONNECTIVITY_INTERNAL, TAG);
-            }
+            validateJobFlags(job, uid);
 
             long ident = Binder.clearCallingIdentity();
             try {
@@ -2311,10 +2403,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 throw new NullPointerException("work is null");
             }
 
-            if ((job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0) {
-                getContext().enforceCallingOrSelfPermission(
-                        android.Manifest.permission.CONNECTIVITY_INTERNAL, TAG);
-            }
+            validateJobFlags(job, uid);
 
             long ident = Binder.clearCallingIdentity();
             try {
@@ -2345,10 +2434,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                         + " not permitted to schedule jobs for other apps");
             }
 
-            if ((job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0) {
-                getContext().enforceCallingOrSelfPermission(
-                        android.Manifest.permission.CONNECTIVITY_INTERNAL, TAG);
-            }
+            validateJobFlags(job, callerUid);
 
             long ident = Binder.clearCallingIdentity();
             try {

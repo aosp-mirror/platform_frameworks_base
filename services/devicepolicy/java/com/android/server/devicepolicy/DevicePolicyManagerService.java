@@ -311,6 +311,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private static final String TAG_PRINTING_ENABLED = "printing-enabled";
 
+    private static final String TAG_TRANSFER_OWNERSHIP_BUNDLE = "transfer-ownership-bundle";
+
     private static final int REQUEST_EXPIRE_PASSWORD = 5571;
 
     private static final long MS_PER_DAY = TimeUnit.DAYS.toMillis(1);
@@ -12624,6 +12626,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             try (FileInputStream stream = new FileInputStream(bundleFile)) {
                 XmlPullParser parser = Xml.newPullParser();
                 parser.setInput(stream, null);
+                parser.next();
                 return PersistableBundle.restoreFromXml(parser);
             } catch (IOException | XmlPullParserException | IllegalArgumentException e) {
                 Slog.e(LOG_TAG, "Caught exception while trying to load the "
@@ -12845,7 +12848,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final XmlSerializer serializer = new FastXmlSerializer();
             serializer.setOutput(stream, StandardCharsets.UTF_8.name());
             serializer.startDocument(null, true);
+            serializer.startTag(null, TAG_TRANSFER_OWNERSHIP_BUNDLE);
             bundle.saveToXml(serializer);
+            serializer.endTag(null, TAG_TRANSFER_OWNERSHIP_BUNDLE);
+            serializer.endDocument();
             atomicFile.finishWrite(stream);
         } catch (IOException | XmlPullParserException e) {
             Slog.e(LOG_TAG, "Caught exception while trying to save the "

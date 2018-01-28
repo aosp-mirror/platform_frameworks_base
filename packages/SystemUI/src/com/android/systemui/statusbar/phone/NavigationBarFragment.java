@@ -124,6 +124,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     private AccessibilityManager mAccessibilityManager;
     private MagnificationContentObserver mMagnificationObserver;
     private ContentResolver mContentResolver;
+    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
 
     private int mDisabledFlags1;
     private StatusBar mStatusBar;
@@ -224,7 +225,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         mNavigationBarView = (NavigationBarView) view;
 
         mNavigationBarView.setDisabledFlags(mDisabledFlags1);
-        mNavigationBarView.setComponents(mRecents, mDivider);
+        mNavigationBarView.setComponents(mRecents, mDivider, mStatusBar.getPanel());
         mNavigationBarView.setOnVerticalChangedListener(this::onVerticalChanged);
         mNavigationBarView.setOnTouchListener(this::onNavigationTouch);
         if (savedInstanceState != null) {
@@ -299,7 +300,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
             boolean showImeSwitcher) {
         boolean imeShown = (vis & InputMethodService.IME_VISIBLE) != 0;
         int hints = mNavigationIconHints;
-        if ((backDisposition == InputMethodService.BACK_DISPOSITION_WILL_DISMISS) || imeShown) {
+        if (imeShown && backDisposition != InputMethodService.BACK_DISPOSITION_WILL_NOT_DISMISS) {
             hints |= NAVIGATION_HINT_BACK_ALT;
         } else {
             hints &= ~NAVIGATION_HINT_BACK_ALT;
@@ -355,6 +356,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
             mLastRotationSuggestion = rotation; // Remember rotation for click
             setRotateSuggestionButtonState(true);
             rescheduleRotationTimeout(false);
+            mMetricsLogger.visible(MetricsEvent.ROTATION_SUGGESTION_SHOWN);
         }
     }
 
@@ -407,7 +409,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
         if (visible) { // Appear and change
             rotBtn.setVisibility(View.VISIBLE);
-            mNavigationBarView.notifyAccessibilitySubtreeChanged();
+            mNavigationBarView.notifySubtreeAccessibilityStateChangedIfNeeded();
 
             if (skipAnim) {
                 currentView.setAlpha(1f);
@@ -435,7 +437,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
             if (skipAnim) {
                 rotBtn.setVisibility(View.INVISIBLE);
-                mNavigationBarView.notifyAccessibilitySubtreeChanged();
+                mNavigationBarView.notifySubtreeAccessibilityStateChangedIfNeeded();
                 return;
             }
 
@@ -452,7 +454,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     rotBtn.setVisibility(View.INVISIBLE);
-                    mNavigationBarView.notifyAccessibilitySubtreeChanged();
+                    mNavigationBarView.notifySubtreeAccessibilityStateChangedIfNeeded();
                 }
             });
 
@@ -612,7 +614,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         if (shouldDisableNavbarGestures()) {
             return false;
         }
-        MetricsLogger.action(getContext(), MetricsEvent.ACTION_ASSIST_LONG_PRESS);
+        mMetricsLogger.action(MetricsEvent.ACTION_ASSIST_LONG_PRESS);
         mAssistManager.startAssist(new Bundle() /* args */);
         mStatusBar.awakenDreams();
 
@@ -768,6 +770,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     }
 
     private void onRotateSuggestionClick(View v) {
+        mMetricsLogger.action(MetricsEvent.ACTION_ROTATION_SUGGESTION_ACCEPTED);
         mRotationLockController.setRotationLockedAtAngle(true, mLastRotationSuggestion);
     }
 

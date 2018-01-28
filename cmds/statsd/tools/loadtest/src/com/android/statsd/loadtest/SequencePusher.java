@@ -90,7 +90,7 @@ public class SequencePusher {
             case 2:
             case 10:
                 StatsLog.write(StatsLog.CHARGING_STATE_CHANGED,
-                    StatsLog.CHARGING_STATE_CHANGED__CHARGING_STATE__BATTERY_STATUS_CHARGING
+                    StatsLog.CHARGING_STATE_CHANGED__STATE__BATTERY_STATUS_CHARGING
                     /* charging_state */);
                 break;
             case 3:
@@ -103,7 +103,7 @@ public class SequencePusher {
             case 4:
             case 12:
                 StatsLog.write(StatsLog.CHARGING_STATE_CHANGED,
-                    StatsLog.CHARGING_STATE_CHANGED__CHARGING_STATE__BATTERY_STATUS_NOT_CHARGING
+                    StatsLog.CHARGING_STATE_CHANGED__STATE__BATTERY_STATUS_NOT_CHARGING
                     /* charging_state */);
                 break;
             case 5:
@@ -115,7 +115,7 @@ public class SequencePusher {
                 break;
             case 6:
                 StatsLog.write(StatsLog.SCREEN_STATE_CHANGED,
-                    StatsLog.SCREEN_STATE_CHANGED__DISPLAY_STATE__STATE_ON /* display_state */);
+                    StatsLog.SCREEN_STATE_CHANGED__STATE__DISPLAY_STATE_ON /* display_state */);
                 break;
             case 7:
                 for (int i = 0; i < mBurst; i++) {
@@ -125,7 +125,7 @@ public class SequencePusher {
                 break;
             case 14:
                 StatsLog.write(StatsLog.SCREEN_STATE_CHANGED,
-                    StatsLog.SCREEN_STATE_CHANGED__DISPLAY_STATE__STATE_OFF /* display_state */);
+                    StatsLog.SCREEN_STATE_CHANGED__STATE__DISPLAY_STATE_OFF /* display_state */);
                 break;
             case 15:
                 for (int i = 0; i < mBurst; i++) {
@@ -147,14 +147,14 @@ public class SequencePusher {
     public void finish() {
         // Screen goes back to off. This will ensure that conditions get back to false.
         StatsLog.write(StatsLog.SCREEN_STATE_CHANGED,
-            StatsLog.SCREEN_STATE_CHANGED__DISPLAY_STATE__STATE_OFF /* display_state */);
+            StatsLog.SCREEN_STATE_CHANGED__STATE__DISPLAY_STATE_OFF /* display_state */);
         for (int i = 0; i < mBurst; i++) {
           StatsLog.write(StatsLog.AUDIO_STATE_CHANGED, i /* uid */,
               StatsLog.AUDIO_STATE_CHANGED__STATE__OFF /* state */);
         }
         // Stop charging, to ensure the corresponding durations are closed.
         StatsLog.write(StatsLog.CHARGING_STATE_CHANGED,
-            StatsLog.CHARGING_STATE_CHANGED__CHARGING_STATE__BATTERY_STATUS_NOT_CHARGING
+            StatsLog.CHARGING_STATE_CHANGED__STATE__BATTERY_STATUS_NOT_CHARGING
             /* charging_state */);
         // Stop scanning GPS, to ensure the corresponding conditions get back to false.
         for (int i = 0; i < mBurst; i++) {

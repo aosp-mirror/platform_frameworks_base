@@ -1555,6 +1555,15 @@ class PackageManagerShellCommand extends ShellCommand {
         }
     }
 
+    private boolean isProductApp(String pkg) {
+        try {
+            final PackageInfo info = mInterface.getPackageInfo(pkg, 0, UserHandle.USER_SYSTEM);
+            return info != null && info.applicationInfo.isProduct();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
     private int runGetPrivappPermissions() {
         final String pkg = getNextArg();
         if (pkg == null) {
@@ -1562,9 +1571,14 @@ class PackageManagerShellCommand extends ShellCommand {
             return 1;
         }
 
-        ArraySet<String> privAppPermissions = isVendorApp(pkg) ?
-                SystemConfig.getInstance().getVendorPrivAppPermissions(pkg)
-                    : SystemConfig.getInstance().getPrivAppPermissions(pkg);
+        ArraySet<String> privAppPermissions = null;
+        if (isVendorApp(pkg)) {
+            privAppPermissions = SystemConfig.getInstance().getVendorPrivAppPermissions(pkg);
+        } else if (isProductApp(pkg)) {
+            privAppPermissions = SystemConfig.getInstance().getProductPrivAppPermissions(pkg);
+        } else {
+            privAppPermissions = SystemConfig.getInstance().getPrivAppPermissions(pkg);
+        }
 
         getOutPrintWriter().println(privAppPermissions == null
                 ? "{}" : privAppPermissions.toString());
@@ -1578,9 +1592,14 @@ class PackageManagerShellCommand extends ShellCommand {
             return 1;
         }
 
-        ArraySet<String> privAppPermissions = isVendorApp(pkg) ?
-                SystemConfig.getInstance().getVendorPrivAppDenyPermissions(pkg)
-                    : SystemConfig.getInstance().getPrivAppDenyPermissions(pkg);
+        ArraySet<String> privAppPermissions = null;
+        if (isVendorApp(pkg)) {
+            privAppPermissions = SystemConfig.getInstance().getVendorPrivAppDenyPermissions(pkg);
+        } else if (isProductApp(pkg)) {
+            privAppPermissions = SystemConfig.getInstance().getProductPrivAppDenyPermissions(pkg);
+        } else {
+            privAppPermissions = SystemConfig.getInstance().getPrivAppDenyPermissions(pkg);
+        }
 
         getOutPrintWriter().println(privAppPermissions == null
                 ? "{}" : privAppPermissions.toString());

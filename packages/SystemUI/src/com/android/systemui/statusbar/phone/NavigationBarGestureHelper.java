@@ -34,6 +34,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.OverviewProxyService;
 import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
+import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.utilities.Utilities;
@@ -78,6 +79,7 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
     private final int mScrollTouchSlop;
     private final Matrix mTransformGlobalMatrix = new Matrix();
     private final Matrix mTransformLocalMatrix = new Matrix();
+    private final StatusBar mStatusBar;
     private int mTouchDownX;
     private int mTouchDownY;
     private boolean mDownOnRecents;
@@ -90,6 +92,7 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
 
     public NavigationBarGestureHelper(Context context) {
         mContext = context;
+        mStatusBar = SysUiServiceProvider.getComponent(context, StatusBar.class);
         Resources r = context.getResources();
         mScrollTouchSlop = r.getDimensionPixelSize(R.dimen.navigation_bar_min_swipe_distance);
         mQuickScrubController = new QuickScrubController(context);
@@ -146,7 +149,8 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
                 break;
             }
         }
-        if (!mQuickScrubController.onInterceptTouchEvent(event)) {
+        if (mStatusBar.isPresenterFullyCollapsed()
+                && !mQuickScrubController.onInterceptTouchEvent(event)) {
             proxyMotionEvents(event);
             return false;
         }
@@ -304,7 +308,13 @@ public class NavigationBarGestureHelper implements TunerService.Tunable, Gesture
     }
 
     public boolean onTouchEvent(MotionEvent event) {
-        boolean result = mQuickScrubController.onTouchEvent(event) || proxyMotionEvents(event);
+        // The same down event was just sent on intercept and therefore can be ignored here
+        boolean ignoreProxyDownEvent = event.getAction() == MotionEvent.ACTION_DOWN
+                && mOverviewEventSender.getProxy() != null;
+        boolean result = mStatusBar.isPresenterFullyCollapsed()
+                && (mQuickScrubController.onTouchEvent(event)
+                || ignoreProxyDownEvent
+                || proxyMotionEvents(event));
         if (mDockWindowEnabled) {
             result |= handleDockWindowEvent(event);
         }

@@ -166,18 +166,6 @@ public final class ThreadedRenderer {
     public static final String OVERDRAW_PROPERTY_SHOW = "show";
 
     /**
-     * Defines the rendering pipeline to be used by the ThreadedRenderer.
-     *
-     * Possible values:
-     * "opengl", will use the existing OpenGL renderer
-     * "skiagl", will use Skia's OpenGL renderer
-     * "skiavk", will use Skia's Vulkan renderer
-     *
-     * @hide
-     */
-    public static final String DEBUG_RENDERER_PROPERTY = "debug.hwui.renderer";
-
-    /**
      * Turn on to debug non-rectangular clip operations.
      *
      * Possible values:

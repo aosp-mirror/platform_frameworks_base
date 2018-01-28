@@ -17,11 +17,14 @@ package android.net;
 
 import static android.net.IpSecManager.INVALID_RESOURCE_ID;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -128,13 +131,6 @@ public final class IpSecTransform implements AutoCloseable {
                 int status = result.status;
                 checkResultStatus(status);
                 mResourceId = result.resourceId;
-
-                /* Keepalive will silently fail if not needed by the config; but, if needed and
-                 * it fails to start, we need to bail because a transform will not be reliable
-                 * to use if keepalive is expected to offload and fails.
-                 */
-                // FIXME: if keepalive fails, we need to fail spectacularly
-                startKeepalive(mContext);
                 Log.d(TAG, "Added Transform with Id " + mResourceId);
                 mCloseGuard.open("build");
             } catch (RemoteException e) {
@@ -164,13 +160,9 @@ public final class IpSecTransform implements AutoCloseable {
             return;
         }
         try {
-            /* Order matters here because the keepalive is best-effort but could fail in some
-             * horrible way to be removed if the wifi (or cell) subsystem has crashed, and we
-             * still want to clear out the transform.
-             */
             IIpSecService svc = getIpSecService();
             svc.deleteTransform(mResourceId);
-            stopKeepalive();
+            stopNattKeepalive();
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         } finally {
@@ -198,42 +190,35 @@ public final class IpSecTransform implements AutoCloseable {
     private final Context mContext;
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private ConnectivityManager.PacketKeepalive mKeepalive;
-    private int mKeepaliveStatus = ConnectivityManager.PacketKeepalive.NO_KEEPALIVE;
-    private Object mKeepaliveSyncLock = new Object();
-    private ConnectivityManager.PacketKeepaliveCallback mKeepaliveCallback =
+    private Handler mCallbackHandler;
+    private final ConnectivityManager.PacketKeepaliveCallback mKeepaliveCallback =
             new ConnectivityManager.PacketKeepaliveCallback() {
 
                 @Override
                 public void onStarted() {
-                    synchronized (mKeepaliveSyncLock) {
-                        mKeepaliveStatus = ConnectivityManager.PacketKeepalive.SUCCESS;
-                        mKeepaliveSyncLock.notifyAll();
+                    synchronized (this) {
+                        mCallbackHandler.post(() -> mUserKeepaliveCallback.onStarted());
                     }
                 }
 
                 @Override
                 public void onStopped() {
-                    synchronized (mKeepaliveSyncLock) {
-                        mKeepaliveStatus = ConnectivityManager.PacketKeepalive.NO_KEEPALIVE;
-                        mKeepaliveSyncLock.notifyAll();
+                    synchronized (this) {
+                        mKeepalive = null;
+                        mCallbackHandler.post(() -> mUserKeepaliveCallback.onStopped());
                     }
                 }
 
                 @Override
                 public void onError(int error) {
-                    synchronized (mKeepaliveSyncLock) {
-                        mKeepaliveStatus = error;
-                        mKeepaliveSyncLock.notifyAll();
+                    synchronized (this) {
+                        mKeepalive = null;
+                        mCallbackHandler.post(() -> mUserKeepaliveCallback.onError(error));
                     }
                 }
             };
 
-    /* Package */
-    void startKeepalive(Context c) {
-        if (mConfig.getNattKeepaliveInterval() != 0) {
-            Log.wtf(TAG, "Keepalive not yet supported.");
-        }
-    }
+    private NattKeepaliveCallback mUserKeepaliveCallback;
 
     /** @hide */
     @VisibleForTesting
@@ -241,9 +226,93 @@ public final class IpSecTransform implements AutoCloseable {
         return mResourceId;
     }
 
-    /* Package */
-    void stopKeepalive() {
-        return;
+    /**
+     * A callback class to provide status information regarding a NAT-T keepalive session
+     *
+     * <p>Use this callback to receive status information regarding a NAT-T keepalive session
+     * by registering it when calling {@link #startNattKeepalive}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static class NattKeepaliveCallback {
+        /** The specified {@code Network} is not connected. */
+        public static final int ERROR_INVALID_NETWORK = 1;
+        /** The hardware does not support this request. */
+        public static final int ERROR_HARDWARE_UNSUPPORTED = 2;
+        /** The hardware returned an error. */
+        public static final int ERROR_HARDWARE_ERROR = 3;
+
+        /** The requested keepalive was successfully started. */
+        public void onStarted() {}
+        /** The keepalive was successfully stopped. */
+        public void onStopped() {}
+        /** An error occurred. */
+        public void onError(int error) {}
+    }
+
+    /**
+     * Start a NAT-T keepalive session for the current transform.
+     *
+     * For a transform that is using UDP encapsulated IPv4, NAT-T offloading provides
+     * a power efficient mechanism of sending NAT-T packets at a specified interval.
+     *
+     * @param userCallback a {@link #NattKeepaliveCallback} to receive asynchronous status
+     *      information about the requested NAT-T keepalive session.
+     * @param intervalSeconds the interval between NAT-T keepalives being sent. The
+     *      the allowed range is between 20 and 3600 seconds.
+     * @param handler a handler on which to post callbacks when received.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void startNattKeepalive(@NonNull NattKeepaliveCallback userCallback,
+            int intervalSeconds, @NonNull Handler handler) throws IOException {
+        checkNotNull(userCallback);
+        if (intervalSeconds < 20 || intervalSeconds > 3600) {
+            throw new IllegalArgumentException("Invalid NAT-T keepalive interval");
+        }
+        checkNotNull(handler);
+        if (mResourceId == INVALID_RESOURCE_ID) {
+            throw new IllegalStateException(
+                    "Packet keepalive cannot be started for an inactive transform");
+        }
+
+        synchronized (mKeepaliveCallback) {
+            if (mKeepaliveCallback != null) {
+                throw new IllegalStateException("Keepalive already active");
+            }
+
+            mUserKeepaliveCallback = userCallback;
+            ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(
+                    Context.CONNECTIVITY_SERVICE);
+            mKeepalive = cm.startNattKeepalive(
+                    mConfig.getNetwork(), intervalSeconds, mKeepaliveCallback,
+                    NetworkUtils.numericToInetAddress(mConfig.getSourceAddress()),
+                    4500, // FIXME urgently, we need to get the port number from the Encap socket
+                    NetworkUtils.numericToInetAddress(mConfig.getDestinationAddress()));
+            mCallbackHandler = handler;
+        }
+    }
+
+    /**
+     * Stop an ongoing NAT-T keepalive session.
+     *
+     * Calling this API will request that an ongoing NAT-T keepalive session be terminated.
+     * If this API is not called when a Transform is closed, the underlying NAT-T session will
+     * be terminated automatically.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void stopNattKeepalive() {
+        synchronized (mKeepaliveCallback) {
+            if (mKeepalive == null) {
+                Log.e(TAG, "No active keepalive to stop");
+                return;
+            }
+            mKeepalive.stop();
+        }
     }
 
     /** This class is used to build {@link IpSecTransform} objects. */
@@ -320,26 +389,6 @@ public final class IpSecTransform implements AutoCloseable {
             }
             mConfig.setEncapSocketResourceId(localSocket.getResourceId());
             mConfig.setEncapRemotePort(remotePort);
-            return this;
-        }
-
-        // TODO: Decrease the minimum keepalive to maybe 10?
-        // TODO: Probably a better exception to throw for NATTKeepalive failure
-        // TODO: Specify the needed NATT keepalive permission.
-        /**
-         * Set NAT-T keepalives to be sent with a given interval.
-         *
-         * <p>This will set power-efficient keepalive packets to be sent by the system. If NAT-T
-         * keepalive is requested but cannot be activated, then creation of an {@link
-         * IpSecTransform} will fail when calling the build method.
-         *
-         * @param intervalSeconds the maximum number of seconds between keepalive packets. Must be
-         *     between 20s and 3600s.
-         * @hide
-         */
-        @SystemApi
-        public IpSecTransform.Builder setNattKeepalive(int intervalSeconds) {
-            mConfig.setNattKeepaliveInterval(intervalSeconds);
             return this;
         }
 

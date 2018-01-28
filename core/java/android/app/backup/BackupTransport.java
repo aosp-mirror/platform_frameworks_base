@@ -60,8 +60,6 @@ public class BackupTransport {
      *
      * <p>This is only valid when backup manager called {@link
      * #performBackup(PackageInfo, ParcelFileDescriptor, int)} with {@link #FLAG_INCREMENTAL}.
-     *
-     * @hide
      */
     public static final int TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED = -1006;
 
@@ -73,7 +71,7 @@ public class BackupTransport {
      * For key value backup, indicates that the backup data is a diff from a previous backup. The
      * transport must apply this diff to an existing backup to build the new backup set.
      *
-     * @hide
+     * @see #performBackup(PackageInfo, ParcelFileDescriptor, int)
      */
     public static final int FLAG_INCREMENTAL = 1 << 1;
 
@@ -81,7 +79,7 @@ public class BackupTransport {
      * For key value backup, indicates that the backup data is a complete set, not a diff from a
      * previous backup. The transport should clear any previous backup when storing this backup.
      *
-     * @hide
+     * @see #performBackup(PackageInfo, ParcelFileDescriptor, int)
      */
     public static final int FLAG_NON_INCREMENTAL = 1 << 2;
 
@@ -609,6 +607,15 @@ public class BackupTransport {
     }
 
     /**
+     * Returns flags with additional information about the transport, which is accessible to the
+     * {@link android.app.backup.BackupAgent}. This allows the agent to decide what to do based on
+     * properties of the transport.
+     */
+    public int getTransportFlags() {
+        return 0;
+    }
+
+    /**
      * Bridge between the actual IBackupTransport implementation and the stable API.  If the
      * binder interface needs to change, we use this layer to translate so that we can
      * (if appropriate) decouple those framework-side changes from the BackupTransport
@@ -737,6 +744,11 @@ public class BackupTransport {
         @Override
         public long getBackupQuota(String packageName, boolean isFullBackup) {
             return BackupTransport.this.getBackupQuota(packageName, isFullBackup);
+        }
+
+        @Override
+        public int getTransportFlags() {
+            return BackupTransport.this.getTransportFlags();
         }
 
         @Override

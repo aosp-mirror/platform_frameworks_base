@@ -34,6 +34,7 @@
 
 #include "android_media_AudioFormat.h"
 #include "android_media_AudioErrors.h"
+#include "android_media_MediaMetricsJNI.h"
 #include "android_media_PlaybackParams.h"
 #include "android_media_DeviceCallback.h"
 #include "android_media_VolumeShaper.h"
@@ -1011,6 +1012,39 @@ static jint android_media_AudioTrack_get_timestamp(JNIEnv *env,  jobject thiz, j
     return (jint) nativeToJavaStatus(status);
 }
 
+// ----------------------------------------------------------------------------
+static jobject
+android_media_AudioTrack_native_getMetrics(JNIEnv *env, jobject thiz)
+{
+    ALOGD("android_media_AudioTrack_native_getMetrics");
+
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+
+    if (lpTrack == NULL) {
+        ALOGE("Unable to retrieve AudioTrack pointer for getMetrics()");
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return (jobject) NULL;
+    }
+
+    // get what we have for the metrics from the track
+    MediaAnalyticsItem *item = NULL;
+
+    status_t err = lpTrack->getMetrics(item);
+    if (err != OK) {
+        ALOGE("getMetrics failed");
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        return (jobject) NULL;
+    }
+
+    jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, item, NULL /* mybundle */);
+
+    // housekeeping
+    delete item;
+    item = NULL;
+
+    return mybundle;
+}
+
 
 // ----------------------------------------------------------------------------
 static jint android_media_AudioTrack_set_loop(JNIEnv *env,  jobject thiz,
@@ -1275,6 +1309,8 @@ static const JNINativeMethod gMethods[] = {
     {"native_get_underrun_count", "()I",      (void *)android_media_AudioTrack_get_underrun_count},
     {"native_get_flags",     "()I",      (void *)android_media_AudioTrack_get_flags},
     {"native_get_timestamp", "([J)I",    (void *)android_media_AudioTrack_get_timestamp},
+    {"native_getMetrics",    "()Landroid/os/PersistableBundle;",
+                                         (void *)android_media_AudioTrack_native_getMetrics},
     {"native_set_loop",      "(III)I",   (void *)android_media_AudioTrack_set_loop},
     {"native_reload_static", "()I",      (void *)android_media_AudioTrack_reload},
     {"native_get_output_sample_rate",

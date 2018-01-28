@@ -28,7 +28,6 @@ import android.media.update.MediaLibraryService2Provider.MediaLibrarySessionProv
 import android.media.update.MediaSession2Provider;
 import android.media.update.MediaSessionService2Provider;
 import android.os.Bundle;
-import android.service.media.MediaBrowserService.BrowserRoot;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -54,7 +53,6 @@ import java.util.concurrent.Executor;
  * declare metadata in the manifest as follows.
  * @hide
  */
-// TODO(jaewan): Unhide
 public abstract class MediaLibraryService2 extends MediaSessionService2 {
     /**
      * This is the interface name that a service implementing a session service should say that it
@@ -68,22 +66,23 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
     public class MediaLibrarySession extends MediaSession2 {
         private final MediaLibrarySessionProvider mProvider;
 
-        MediaLibrarySession(Context context, MediaPlayerBase player, String id,
-                Executor callbackExecutor, SessionCallback callback, VolumeProvider volumeProvider,
-                int ratingType, PendingIntent sessionActivity) {
-            super(context, player, id, callbackExecutor, callback, volumeProvider, ratingType,
-                    sessionActivity);
+        MediaLibrarySession(Context context, MediaPlayerInterface player, String id,
+                VolumeProvider volumeProvider, int ratingType, PendingIntent sessionActivity,
+                Executor callbackExecutor, SessionCallback callback) {
+            super(context, player, id, volumeProvider, ratingType, sessionActivity,
+                    callbackExecutor, callback);
             mProvider = (MediaLibrarySessionProvider) getProvider();
         }
 
         @Override
-        MediaSession2Provider createProvider(Context context, MediaPlayerBase player, String id,
-                Executor callbackExecutor, SessionCallback callback, VolumeProvider volumeProvider,
-                int ratingType, PendingIntent sessionActivity) {
+        MediaSession2Provider createProvider(Context context, MediaPlayerInterface player,
+                String id, VolumeProvider volumeProvider, int ratingType,
+                PendingIntent sessionActivity, Executor callbackExecutor,
+                SessionCallback callback) {
             return ApiLoader.getProvider(context)
-                    .createMediaLibraryService2MediaLibrarySession(this, context, player, id,
-                            callbackExecutor, (MediaLibrarySessionCallback) callback,
-                            volumeProvider, ratingType, sessionActivity);
+                    .createMediaLibraryService2MediaLibrarySession(context, this, player, id,
+                            volumeProvider, ratingType, sessionActivity,
+                            callbackExecutor, (MediaLibrarySessionCallback) callback);
         }
 
         /**
@@ -208,7 +207,7 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
     public class MediaLibrarySessionBuilder
             extends BuilderBase<MediaLibrarySessionBuilder, MediaLibrarySessionCallback> {
         public MediaLibrarySessionBuilder(
-                @NonNull Context context, @NonNull MediaPlayerBase player,
+                @NonNull Context context, @NonNull MediaPlayerInterface player,
                 @NonNull @CallbackExecutor Executor callbackExecutor,
                 @NonNull MediaLibrarySessionCallback callback) {
             super(context, player);
@@ -226,9 +225,9 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
         }
 
         @Override
-        public MediaLibrarySession build() throws IllegalStateException {
-            return new MediaLibrarySession(mContext, mPlayer, mId, mCallbackExecutor, mCallback,
-                    mVolumeProvider, mRatingType, mSessionActivity);
+        public MediaLibrarySession build() {
+            return new MediaLibrarySession(mContext, mPlayer, mId, mVolumeProvider, mRatingType,
+                    mSessionActivity, mCallbackExecutor, mCallback);
         }
     }
 
@@ -277,7 +276,7 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          * @see #EXTRA_OFFLINE
          * @see #EXTRA_SUGGESTED
          */
-        public static final String EXTRA_RECENT = "android.service.media.extra.RECENT";
+        public static final String EXTRA_RECENT = "android.media.extra.RECENT";
 
         /**
          * The lookup key for a boolean that indicates whether the browser service should return a
@@ -295,7 +294,7 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          * @see #EXTRA_RECENT
          * @see #EXTRA_SUGGESTED
          */
-        public static final String EXTRA_OFFLINE = "android.service.media.extra.OFFLINE";
+        public static final String EXTRA_OFFLINE = "android.media.extra.OFFLINE";
 
         /**
          * The lookup key for a boolean that indicates whether the browser service should return a
@@ -303,8 +302,8 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          *
          * <p>When creating a media browser for a given media browser service, this key can be
          * supplied as a root hint for retrieving the media items suggested by the media browser
-         * service. The list of media items passed in {@link android.media.browse.MediaBrowser.SubscriptionCallback#onChildrenLoaded(String, List)}
-         * is considered ordered by relevance, first being the top suggestion.
+         * service. The list of media items is considered ordered by relevance, first being the top
+         * suggestion.
          * If the media browser service can provide such media items, the implementation must return
          * the key in the root hint when
          * {@link MediaLibrarySessionCallback#onGetRoot(ControllerInfo, Bundle)} is called back.
@@ -314,7 +313,7 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
          * @see #EXTRA_RECENT
          * @see #EXTRA_OFFLINE
          */
-        public static final String EXTRA_SUGGESTED = "android.service.media.extra.SUGGESTED";
+        public static final String EXTRA_SUGGESTED = "android.media.extra.SUGGESTED";
 
         final private String mRootId;
         final private Bundle mExtras;

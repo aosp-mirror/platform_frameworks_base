@@ -21,12 +21,15 @@ import "frameworks/base/core/proto/android/app/pendingintent.proto";
 import "frameworks/base/core/proto/android/internal/locallog.proto";
 import "frameworks/base/core/proto/android/os/worksource.proto";
 import "frameworks/base/core/proto/android/server/forceappstandbytracker.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 package com.android.server;
 
 option java_multiple_files = true;
 
 message AlarmManagerServiceProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional int64 current_time = 1;
   optional int64 elapsed_realtime = 2;
   optional int64 last_time_change_clock_time = 3;
@@ -106,6 +109,8 @@ message AlarmManagerServiceProto {
   optional int64 allow_while_idle_min_duration_ms = 35;
 
   message LastAllowWhileIdleDispatch {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     optional int32 uid = 1;
     // In the 'elapsed' timebase.
     optional int64 time_ms = 2;
@@ -117,6 +122,8 @@ message AlarmManagerServiceProto {
   optional com.android.internal.util.LocalLogProto recent_problems = 37;
 
   message TopAlarm {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     optional int32 uid = 1;
     optional string package_name = 2;
     optional FilterStatsProto filter = 3;
@@ -124,6 +131,8 @@ message AlarmManagerServiceProto {
   repeated TopAlarm top_alarms = 38;
 
   message AlarmStat {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     optional BroadcastStatsProto broadcast = 1;
     repeated FilterStatsProto filters = 2;
   }
@@ -136,6 +145,8 @@ message AlarmManagerServiceProto {
 // This is a soft wrapper for alarm clock information. It is not representative
 // of an android.app.AlarmManager.AlarmClockInfo object.
 message AlarmClockMetadataProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional int32 user = 1;
   optional bool is_pending_send = 2;
   // This value is UTC wall clock time in milliseconds, as returned by
@@ -145,7 +156,9 @@ message AlarmClockMetadataProto {
 
 // A com.android.server.AlarmManagerService.Alarm object.
 message AlarmProto {
-  optional string tag = 1;
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+  optional string tag = 1 [ (.android.privacy).dest = DEST_EXPLICIT ];
   optional .android.app.AlarmManagerProto.AlarmType type = 2;
   // How long until the alarm goes off, in the 'elapsed' timebase. Can be
   // negative if 'when' is in the past.
@@ -156,11 +169,13 @@ message AlarmProto {
   optional int32 flags = 7;
   optional .android.app.AlarmClockInfoProto alarm_clock = 8;
   optional .android.app.PendingIntentProto operation = 9;
-  optional string listener = 10;
+  optional string listener = 10 [ (.android.privacy).dest = DEST_EXPLICIT ];
 }
 
 // A com.android.server.AlarmManagerService.Batch object.
 message BatchProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   // Start time in terms of elapsed realtime.
   optional int64 start_realtime = 1;
   // End time in terms of elapsed realtime.
@@ -171,6 +186,8 @@ message BatchProto {
 
 // A com.android.server.AlarmManagerService.BroadcastStats object.
 message BroadcastStatsProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional int32 uid = 1;
   optional string package_name = 2;
   // The total amount of time this broadcast was in flight.
@@ -186,6 +203,8 @@ message BroadcastStatsProto {
 
 // A com.android.server.AlarmManagerService.Constants object.
 message ConstantsProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   // Minimum futurity of a new alarm.
   optional int64 min_futurity_duration_ms = 1;
   // Minimum alarm recurrence interval.
@@ -202,7 +221,9 @@ message ConstantsProto {
 
 // A com.android.server.AlarmManagerService.FilterStats object.
 message FilterStatsProto {
-  optional string tag = 1;
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+  optional string tag = 1 [ (.android.privacy).dest = DEST_EXPLICIT ];
   // The last time this filter when in flight, in terms of elapsed realtime.
   optional int64 last_flight_time_realtime = 2;
   // The total amount of time this filter was in flight.
@@ -218,9 +239,11 @@ message FilterStatsProto {
 
 // A com.android.server.AlarmManagerService.IdleDispatchEntry object.
 message IdleDispatchEntryProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional int32 uid = 1;
   optional string pkg = 2;
-  optional string tag = 3;
+  optional string tag = 3 [ (.android.privacy).dest = DEST_EXPLICIT ];
   optional string op = 4;
   // Time when this entry was created, in terms of elapsed realtime.
   optional int64 entry_creation_realtime = 5;
@@ -232,8 +255,10 @@ message IdleDispatchEntryProto {
 
 // A com.android.server.AlarmManagerService.InFlight object.
 message InFlightProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional int32 uid = 1;
-  optional string tag = 2;
+  optional string tag = 2 [ (.android.privacy).dest = DEST_EXPLICIT ];
   optional int64 when_elapsed_ms = 3;
   optional .android.app.AlarmManagerProto.AlarmType alarm_type = 4;
   optional .android.app.PendingIntentProto pending_intent = 5;
@@ -244,6 +269,8 @@ message InFlightProto {
 
 // A com.android.server.AlarmManagerService.WakeupEvent object.
 message WakeupEventProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional int32 uid = 1;
   optional string action = 2;
   optional int64 when = 3;

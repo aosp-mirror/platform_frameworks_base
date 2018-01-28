@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"ನೆಟ್‌ವರ್ಕಿಂಗ್"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"ವೈರ್‌ಲೆಸ್ ಪ್ರದರ್ಶನ ಪ್ರಮಾಣೀಕರಣ"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"Wi‑Fi ವೆರ್ಬೋಸ್ ಲಾಗಿಂಗ್ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
-    <string name="wifi_allow_scan_with_traffic" msgid="3601853081178265786">"ವೈ-ಫೈ ರೋಮ್ ಸ್ಕ್ಯಾನ್‌ಗಳನ್ನು ಯಾವಾಗಲೂ ಅನುಮತಿಸಿ"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"MAC ಯಾದೃಚ್ಛಿಕರಣವನ್ನು ಸಂಪರ್ಕಿಸಲಾಗಿದೆ"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"ಮೊಬೈಲ್ ಡೇಟಾ ಯಾವಾಗಲೂ ಸಕ್ರಿಯ"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ಹಾರ್ಡ್‌ವೇರ್‌ನ ವೇಗವರ್ಧನೆಯನ್ನು ಟೆಥರಿಂಗ್ ಮಾಡಿ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"ಹೆಸರುಗಳಿಲ್ಲದ ಬ್ಲೂಟೂತ್ ಸಾಧನಗಳನ್ನು ತೋರಿಸಿ"</string>
@@ -222,7 +222,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"DNS ಪೂರೈಕೆದಾರರ ಹೋಸ್ಟ್‌ಹೆಸರನ್ನು ನಮೂದಿಸಿ"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"ವೈರ್‌ಲೆಸ್‌‌‌ ಪ್ರದರ್ಶನ ಪ್ರಮಾಣೀಕರಣಕ್ಕಾಗಿ ಆಯ್ಕೆಗಳನ್ನು ತೋರಿಸು"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Wi‑Fi ಲಾಗಿಂಗ್ ಮಟ್ಟನ್ನು ಹೆಚ್ಚಿಸಿ, Wi‑Fi ಆಯ್ಕೆಯಲ್ಲಿ ಪ್ರತಿಯೊಂದು SSID RSSI ತೋರಿಸಿ"</string>
-    <string name="wifi_allow_scan_with_traffic_summary" msgid="2575101424972686310">"ಇಂಟರ್‌ಫೇಸ್‌ನಲ್ಲಿ ಲಭ್ಯವಿರುವ ಡೇಟಾ ಟ್ರಾಫಿಕ್ ಆಧಾರದ ಮೇಲೆ Wi‑Fi ರೋಮ್ ಸ್ಕ್ಯಾನ್‌ಗಳನ್ನು ಅನುಮತಿಸಿ/ನಿರಾಕರಿಸಿ"</string>
+    <string name="wifi_connected_mac_randomization_summary" msgid="1743059848752201485">"ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಸಂಪರ್ಕಿಸುವಾಗ MAC ವಿಳಾಸವನ್ನು ಯಾದೃಚ್ಛಿಕಗೊಳಿಸಿ"</string>
     <string name="select_logd_size_title" msgid="7433137108348553508">"ಲಾಗರ್ ಬಫರ್ ಗಾತ್ರಗಳು"</string>
     <string name="select_logd_size_dialog_title" msgid="1206769310236476760">"ಪ್ರತಿ ಲಾಗ್ ಬಫರ್‌ಗೆ ಲಾಗರ್ ಗಾತ್ರಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="684806692440237967">"ಶಾಶ್ವತವಾಗಿರುವ ಸಂಗ್ರಹಣೆ ಲಾಗರ್ ಅನ್ನು ತೆರವುಗೊಳಿಸುವುದೇ?"</string>
@@ -403,4 +403,10 @@
     <string name="ims_reg_status_registered" msgid="933003316932739188">"ನೋಂದಾಯಿಸಲಾಗಿದೆ"</string>
     <string name="ims_reg_status_not_registered" msgid="6529783773485229486">"ನೋಂದಾಯಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="status_unavailable" msgid="7862009036663793314">"ಲಭ್ಯವಿಲ್ಲ"</string>
+    <plurals name="wifi_tether_connected_summary" formatted="false" msgid="3871603864314407780">
+      <item quantity="one">%1$d ಸಾಧನಗಳನ್ನು ಸಂಪರ್ಕಿಸಲಾಗಿದೆ</item>
+      <item quantity="other">%1$d ಸಾಧನಗಳನ್ನು ಸಂಪರ್ಕಿಸಲಾಗಿದೆ</item>
+    </plurals>
+    <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"ಹೆಚ್ಚು ಸಮಯ."</string>
+    <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"ಕಡಿಮೆ ಸಮಯ."</string>
 </resources>

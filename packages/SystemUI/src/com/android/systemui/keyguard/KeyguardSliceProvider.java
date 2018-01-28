@@ -118,7 +118,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
     public boolean onCreateSliceProvider() {
         mNextAlarmController = new NextAlarmControllerImpl(getContext());
         mNextAlarmController.addCallback(this);
-        mDatePattern = getContext().getString(R.string.system_ui_date_pattern);
+        mDatePattern = getContext().getString(R.string.system_ui_aod_date_pattern);
         registerClockUpdate(false /* everyMinute */);
         updateClock();
         return true;

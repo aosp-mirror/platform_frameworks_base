@@ -18,31 +18,34 @@ package android.media.update;
 
 import android.media.AudioAttributes;
 import android.media.MediaItem2;
-import android.media.MediaPlayerBase;
-import android.media.MediaSession2;
+import android.media.MediaPlayerInterface;
+import android.media.MediaPlayerInterface.PlaybackListener;
 import android.media.MediaSession2.Command;
 import android.media.MediaSession2.CommandButton;
 import android.media.MediaSession2.CommandGroup;
 import android.media.MediaSession2.ControllerInfo;
+import android.media.MediaSession2.PlaylistParams;
 import android.media.SessionToken2;
 import android.media.VolumeProvider;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 /**
  * @hide
  */
 public interface MediaSession2Provider extends TransportControlProvider {
+    void initialize();
+
     void close_impl();
-    void setPlayer_impl(MediaPlayerBase player);
-    void setPlayer_impl(MediaPlayerBase player, VolumeProvider volumeProvider);
-    MediaPlayerBase getPlayer_impl();
+    void setPlayer_impl(MediaPlayerInterface player);
+    void setPlayer_impl(MediaPlayerInterface player, VolumeProvider volumeProvider);
+    MediaPlayerInterface getPlayer_impl();
     SessionToken2 getToken_impl();
     List<ControllerInfo> getConnectedControllers_impl();
     void setCustomLayout_impl(ControllerInfo controller, List<CommandButton> layout);
-    void setAudioAttributes_impl(AudioAttributes attributes);
     void setAudioFocusRequest_impl(int focusGain);
 
     void setAllowedCommands_impl(ControllerInfo controller, CommandGroup commands);
@@ -50,11 +53,14 @@ public interface MediaSession2Provider extends TransportControlProvider {
     void sendCustomCommand_impl(ControllerInfo controller, Command command, Bundle args,
             ResultReceiver receiver);
     void sendCustomCommand_impl(Command command, Bundle args);
-    void setPlaylist_impl(List<MediaItem2> playlist, MediaSession2.PlaylistParam param);
+    void setPlaylist_impl(List<MediaItem2> playlist, PlaylistParams param);
+    List<MediaItem2> getPlaylist_impl();
+    void setPlaylistParams_impl(PlaylistParams params);
+    PlaylistParams getPlaylistParams_impl();
 
-    /**
-     * @hide
-     */
+    void addPlaybackListener_impl(Executor executor, PlaybackListener listener);
+    void removePlaybackListener_impl(PlaybackListener listener);
+
     interface ControllerInfoProvider {
         String getPackageName_impl();
         int getUid_impl();

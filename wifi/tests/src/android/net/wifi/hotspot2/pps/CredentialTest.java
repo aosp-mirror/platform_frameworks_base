@@ -22,7 +22,7 @@ import static org.junit.Assert.assertTrue;
 import android.net.wifi.EAPConstants;
 import android.net.wifi.FakeKeys;
 import android.os.Parcel;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.support.test.filters.SmallTest;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

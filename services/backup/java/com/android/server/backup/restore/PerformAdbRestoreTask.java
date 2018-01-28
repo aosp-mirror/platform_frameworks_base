@@ -18,18 +18,18 @@ package com.android.server.backup.restore;
 
 import static com.android.server.backup.BackupPasswordManager.PBKDF_CURRENT;
 import static com.android.server.backup.BackupPasswordManager.PBKDF_FALLBACK;
-import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_FILE_HEADER_MAGIC;
-import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_FILE_VERSION;
-import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_MANIFEST_FILENAME;
-import static com.android.server.backup.RefactoredBackupManagerService.BACKUP_METADATA_FILENAME;
-import static com.android.server.backup.RefactoredBackupManagerService.DEBUG;
-import static com.android.server.backup.RefactoredBackupManagerService.MORE_DEBUG;
-import static com.android.server.backup.RefactoredBackupManagerService.OP_TYPE_RESTORE_WAIT;
-import static com.android.server.backup.RefactoredBackupManagerService.SETTINGS_PACKAGE;
-import static com.android.server.backup.RefactoredBackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
-import static com.android.server.backup.RefactoredBackupManagerService.TAG;
-import static com.android.server.backup.RefactoredBackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL;
-import static com.android.server.backup.RefactoredBackupManagerService.TIMEOUT_RESTORE_INTERVAL;
+import static com.android.server.backup.BackupManagerService.BACKUP_FILE_HEADER_MAGIC;
+import static com.android.server.backup.BackupManagerService.BACKUP_FILE_VERSION;
+import static com.android.server.backup.BackupManagerService.BACKUP_MANIFEST_FILENAME;
+import static com.android.server.backup.BackupManagerService.BACKUP_METADATA_FILENAME;
+import static com.android.server.backup.BackupManagerService.DEBUG;
+import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.BackupManagerService.OP_TYPE_RESTORE_WAIT;
+import static com.android.server.backup.BackupManagerService.SETTINGS_PACKAGE;
+import static com.android.server.backup.BackupManagerService.SHARED_BACKUP_AGENT_PACKAGE;
+import static com.android.server.backup.BackupManagerService.TAG;
+import static com.android.server.backup.BackupManagerService.TIMEOUT_FULL_BACKUP_INTERVAL;
+import static com.android.server.backup.BackupManagerService.TIMEOUT_RESTORE_INTERVAL;
 import static com.android.server.backup.internal.BackupHandler.MSG_RESTORE_OPERATION_TIMEOUT;
 
 import android.app.ApplicationThreadConstants;
@@ -47,10 +47,10 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.backup.BackupManagerService;
 import com.android.server.backup.FileMetadata;
 import com.android.server.backup.KeyValueAdbRestoreEngine;
 import com.android.server.backup.PackageManagerBackupAgent;
-import com.android.server.backup.RefactoredBackupManagerService;
 import com.android.server.backup.fullbackup.FullBackupObbConnection;
 import com.android.server.backup.utils.BytesReadListener;
 import com.android.server.backup.utils.FullBackupRestoreObserverUtils;
@@ -82,7 +82,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class PerformAdbRestoreTask implements Runnable {
 
-    private final RefactoredBackupManagerService mBackupManagerService;
+    private final BackupManagerService mBackupManagerService;
     private final ParcelFileDescriptor mInputFile;
     private final String mCurrentPassword;
     private final String mDecryptPassword;
@@ -106,10 +106,10 @@ public class PerformAdbRestoreTask implements Runnable {
 
         private final IBackupAgent mAgent;
         private final int mToken;
-        private final RefactoredBackupManagerService mBackupManagerService;
+        private final BackupManagerService mBackupManagerService;
 
         RestoreFinishedRunnable(IBackupAgent agent, int token,
-                RefactoredBackupManagerService backupManagerService) {
+                BackupManagerService backupManagerService) {
             mAgent = agent;
             mToken = token;
             mBackupManagerService = backupManagerService;
@@ -139,7 +139,7 @@ public class PerformAdbRestoreTask implements Runnable {
     // Packages we've already wiped data on when restoring their first file
     private final HashSet<String> mClearedPackages = new HashSet<>();
 
-    public PerformAdbRestoreTask(RefactoredBackupManagerService backupManagerService,
+    public PerformAdbRestoreTask(BackupManagerService backupManagerService,
             ParcelFileDescriptor fd, String curPassword, String decryptPassword,
             IFullBackupRestoreObserver observer, AtomicBoolean latch) {
         this.mBackupManagerService = backupManagerService;

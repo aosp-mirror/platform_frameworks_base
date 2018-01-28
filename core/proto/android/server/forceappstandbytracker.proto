@@ -16,12 +16,18 @@
 
 syntax = "proto2";
 
+import "frameworks/base/core/proto/android/server/statlogger.proto";
+
 package com.android.server;
 
 option java_multiple_files = true;
 
-// Dump from ForceAppStandbyTracker.
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
+// Dump from com.android.server.ForceAppStandbyTracker.
 message ForceAppStandbyTrackerProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   // Whether all apps are forced standby or not.
   optional bool force_all_apps_standby = 1;
 
@@ -35,10 +41,11 @@ message ForceAppStandbyTrackerProto {
   repeated int32 temp_power_save_whitelist_app_ids = 4;
 
   message RunAnyInBackgroundRestrictedPackages {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     optional int32 uid = 1;
     optional string package_name = 2;
   }
-
   // Packages that are disallowed OP_RUN_ANY_IN_BACKGROUND.
   repeated RunAnyInBackgroundRestrictedPackages run_any_in_background_restricted_packages = 5;
 
@@ -48,6 +55,17 @@ message ForceAppStandbyTrackerProto {
   // Whether force app standby for small battery device setting is enabled
   optional bool force_all_apps_standby_for_small_battery = 7;
 
-  // Whether device is charging
-  optional bool is_charging = 8;
+  // Whether device is plugged in to the charger
+  optional bool is_plugged_in = 8;
+
+  // Performance stats.
+  optional StatLoggerProto stats = 9;
+
+  message ExemptedPackage {
+    optional int32 userId = 1;
+    optional string package_name = 2;
+  }
+
+  // Packages that are in the EXEMPT bucket.
+  repeated ExemptedPackage exempted_packages = 10;
 }

@@ -47,7 +47,6 @@ public class RemoteInputController {
     private final Delegate mDelegate;
 
     public RemoteInputController(Delegate delegate) {
-        addCallback(Dependency.get(StatusBarWindowManager.class));
         mDelegate = delegate;
     }
 

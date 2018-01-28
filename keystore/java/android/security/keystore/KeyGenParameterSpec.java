@@ -258,6 +258,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     private final boolean mRandomizedEncryptionRequired;
     private final boolean mUserAuthenticationRequired;
     private final int mUserAuthenticationValidityDurationSeconds;
+    private final boolean mTrustedUserPresenceRequred;
     private final byte[] mAttestationChallenge;
     private final boolean mUniqueIdIncluded;
     private final boolean mUserAuthenticationValidWhileOnBody;
@@ -287,6 +288,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
             boolean randomizedEncryptionRequired,
             boolean userAuthenticationRequired,
             int userAuthenticationValidityDurationSeconds,
+            boolean trustedUserPresenceRequired,
             byte[] attestationChallenge,
             boolean uniqueIdIncluded,
             boolean userAuthenticationValidWhileOnBody,
@@ -332,6 +334,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         mBlockModes = ArrayUtils.cloneIfNotEmpty(ArrayUtils.nullToEmpty(blockModes));
         mRandomizedEncryptionRequired = randomizedEncryptionRequired;
         mUserAuthenticationRequired = userAuthenticationRequired;
+        mTrustedUserPresenceRequred = trustedUserPresenceRequired;
         mUserAuthenticationValidityDurationSeconds = userAuthenticationValidityDurationSeconds;
         mAttestationChallenge = Utils.cloneIfNotNull(attestationChallenge);
         mUniqueIdIncluded = uniqueIdIncluded;
@@ -562,6 +565,14 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     }
 
     /**
+     * Returns {@code true} if the key is authorized to be used only if a test of user presence has
+     * been performed between the {@code Signature.initSign()} and {@code Signature.sign()} calls.
+     */
+    public boolean isTrustedUserPresenceRequired() {
+        return mTrustedUserPresenceRequred;
+    }
+
+    /**
      * Returns the attestation challenge value that will be placed in attestation certificate for
      * this key pair.
      *
@@ -658,6 +669,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         private boolean mRandomizedEncryptionRequired = true;
         private boolean mUserAuthenticationRequired;
         private int mUserAuthenticationValidityDurationSeconds = -1;
+        private boolean mTrustedUserPresenceRequired = false;
         private byte[] mAttestationChallenge = null;
         private boolean mUniqueIdIncluded = false;
         private boolean mUserAuthenticationValidWhileOnBody;
@@ -718,6 +730,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
             mUserAuthenticationRequired = sourceSpec.isUserAuthenticationRequired();
             mUserAuthenticationValidityDurationSeconds =
                 sourceSpec.getUserAuthenticationValidityDurationSeconds();
+            mTrustedUserPresenceRequired = sourceSpec.isTrustedUserPresenceRequired();
             mAttestationChallenge = sourceSpec.getAttestationChallenge();
             mUniqueIdIncluded = sourceSpec.isUniqueIdIncluded();
             mUserAuthenticationValidWhileOnBody = sourceSpec.isUserAuthenticationValidWhileOnBody();
@@ -1095,6 +1108,16 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         }
 
         /**
+         * Sets whether a test of user presence is required to be performed between the
+         * {@code Signature.initSign()} and {@code Signature.sign()} method calls.
+         */
+        @NonNull
+        public Builder setTrustedUserPresenceRequired(boolean required) {
+            mTrustedUserPresenceRequired = required;
+            return this;
+        }
+
+        /**
          * Sets whether an attestation certificate will be generated for this key pair, and what
          * challenge value will be placed in the certificate.  The attestation certificate chain
          * can be retrieved with with {@link java.security.KeyStore#getCertificateChain(String)}.
@@ -1221,6 +1244,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
                     mRandomizedEncryptionRequired,
                     mUserAuthenticationRequired,
                     mUserAuthenticationValidityDurationSeconds,
+                    mTrustedUserPresenceRequired,
                     mAttestationChallenge,
                     mUniqueIdIncluded,
                     mUserAuthenticationValidWhileOnBody,

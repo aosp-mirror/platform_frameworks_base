@@ -24,6 +24,7 @@ import android.accessibilityservice.IAccessibilityServiceConnection;
 import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -46,14 +47,10 @@ import android.view.accessibility.AccessibilityInteractionClient;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
-
-import com.android.internal.util.CollectionUtils;
-
 import libcore.io.IoUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
@@ -583,8 +580,6 @@ public final class UiAutomation {
         // Execute the command *without* the lock being held.
         command.run();
 
-        List<AccessibilityEvent> eventsReceived = Collections.emptyList();
-
         // Acquire the lock and wait for the event.
         try {
             // Wait for the event.
@@ -605,14 +600,14 @@ public final class UiAutomation {
                     if (filter.accept(event)) {
                         return event;
                     }
-                    eventsReceived = CollectionUtils.add(eventsReceived, event);
+                    event.recycle();
                 }
                 // Check if timed out and if not wait.
                 final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
                 final long remainingTimeMillis = timeoutMillis - elapsedTimeMillis;
                 if (remainingTimeMillis <= 0) {
                     throw new TimeoutException("Expected event not received within: "
-                            + timeoutMillis + " ms, among " + eventsReceived);
+                            + timeoutMillis + " ms.");
                 }
                 synchronized (mLock) {
                     if (mEventQueue.isEmpty()) {
@@ -625,10 +620,6 @@ public final class UiAutomation {
                 }
             }
         } finally {
-            for (int i = 0; i < CollectionUtils.size(eventsReceived); i++) {
-                AccessibilityEvent event = eventsReceived.get(i);
-                event.recycle();
-            }
             synchronized (mLock) {
                 mWaitingForEventDelivery = false;
                 mEventQueue.clear();

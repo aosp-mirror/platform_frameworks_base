@@ -18,6 +18,8 @@ package com.android.server.broadcastradio.hal2;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.radio.ITuner;
 import android.hardware.radio.RadioManager;
 import android.hardware.broadcastradio.V2_0.AmFmRegionConfig;
@@ -76,15 +78,17 @@ class RadioModule {
         Mutable<ITunerSession> hwSession = new Mutable<>();
         MutableInt halResult = new MutableInt(Result.UNKNOWN_ERROR);
 
-        mService.openSession(cb, (int result, ITunerSession session) -> {
-            hwSession.value = session;
-            halResult.value = result;
-        });
+        synchronized (mService) {
+            mService.openSession(cb, (result, session) -> {
+                hwSession.value = session;
+                halResult.value = result;
+            });
+        }
 
         Convert.throwOnError("openSession", halResult.value);
         Objects.requireNonNull(hwSession.value);
 
-        return new TunerSession(hwSession.value, cb);
+        return new TunerSession(this, hwSession.value, cb);
     }
 
     public android.hardware.radio.ICloseHandle addAnnouncementListener(@NonNull int[] enabledTypes,
@@ -103,10 +107,13 @@ class RadioModule {
                     map(a -> Convert.announcementFromHal(a)).collect(Collectors.toList()));
             }
         };
-        mService.registerAnnouncementListener(enabledList, hwListener, (result, closeHandle) -> {
-            halResult.value = result;
-            hwCloseHandle.value = closeHandle;
-        });
+
+        synchronized (mService) {
+            mService.registerAnnouncementListener(enabledList, hwListener, (result, closeHnd) -> {
+                halResult.value = result;
+                hwCloseHandle.value = closeHnd;
+            });
+        }
         Convert.throwOnError("addAnnouncementListener", halResult.value);
 
         return new android.hardware.radio.ICloseHandle.Stub() {
@@ -118,5 +125,22 @@ class RadioModule {
                 }
             }
         };
+    }
+
+    Bitmap getImage(int id) {
+        if (id == 0) throw new IllegalArgumentException("Image ID is missing");
+
+        byte[] rawImage;
+        synchronized (mService) {
+            List<Byte> rawList = Utils.maybeRethrow(() -> mService.getImage(id));
+            rawImage = new byte[rawList.size()];
+            for (int i = 0; i < rawList.size(); i++) {
+                rawImage[i] = rawList.get(i);
+            }
+        }
+
+        if (rawImage == null || rawImage.length == 0) return null;
+
+        return BitmapFactory.decodeByteArray(rawImage, 0, rawImage.length);
     }
 }

@@ -149,6 +149,9 @@ public class SystemConfig {
     final ArrayMap<String, ArraySet<String>> mVendorPrivAppPermissions = new ArrayMap<>();
     final ArrayMap<String, ArraySet<String>> mVendorPrivAppDenyPermissions = new ArrayMap<>();
 
+    final ArrayMap<String, ArraySet<String>> mProductPrivAppPermissions = new ArrayMap<>();
+    final ArrayMap<String, ArraySet<String>> mProductPrivAppDenyPermissions = new ArrayMap<>();
+
     final ArrayMap<String, ArrayMap<String, Boolean>> mOemPermissions = new ArrayMap<>();
 
     public static SystemConfig getInstance() {
@@ -240,6 +243,14 @@ public class SystemConfig {
         return mVendorPrivAppDenyPermissions.get(packageName);
     }
 
+    public ArraySet<String> getProductPrivAppPermissions(String packageName) {
+        return mProductPrivAppPermissions.get(packageName);
+    }
+
+    public ArraySet<String> getProductPrivAppDenyPermissions(String packageName) {
+        return mProductPrivAppDenyPermissions.get(packageName);
+    }
+
     public Map<String, Boolean> getOemPermissions(String packageName) {
         final Map<String, Boolean> oemPermissions = mOemPermissions.get(packageName);
         if (oemPermissions != null) {
@@ -278,6 +289,14 @@ public class SystemConfig {
                 Environment.getOemDirectory(), "etc", "sysconfig"), oemPermissionFlag);
         readPermissions(Environment.buildPath(
                 Environment.getOemDirectory(), "etc", "permissions"), oemPermissionFlag);
+
+        // Allow Product to customize system configs around libs, features, permissions and apps
+        int productPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_PERMISSIONS |
+                ALLOW_APP_CONFIGS | ALLOW_PRIVAPP_PERMISSIONS;
+        readPermissions(Environment.buildPath(
+                Environment.getProductDirectory(), "etc", "sysconfig"), productPermissionFlag);
+        readPermissions(Environment.buildPath(
+                Environment.getProductDirectory(), "etc", "permissions"), productPermissionFlag);
     }
 
     void readPermissions(File libraryDir, int permissionFlag) {
@@ -598,15 +617,20 @@ public class SystemConfig {
                     }
                     XmlUtils.skipCurrentTag(parser);
                 } else if ("privapp-permissions".equals(name) && allowPrivappPermissions) {
-                    // privapp permissions from system and vendor partitions are stored
+                    // privapp permissions from system, vendor and product partitions are stored
                     // separately. This is to prevent xml files in the vendor partition from
                     // granting permissions to priv apps in the system partition and vice
                     // versa.
                     boolean vendor = permFile.toPath().startsWith(
                             Environment.getVendorDirectory().toPath());
+                    boolean product = permFile.toPath().startsWith(
+                            Environment.getProductDirectory().toPath());
                     if (vendor) {
                         readPrivAppPermissions(parser, mVendorPrivAppPermissions,
                                 mVendorPrivAppDenyPermissions);
+                    } else if (product) {
+                        readPrivAppPermissions(parser, mProductPrivAppPermissions,
+                                mProductPrivAppDenyPermissions);
                     } else {
                         readPrivAppPermissions(parser, mPrivAppPermissions,
                                 mPrivAppDenyPermissions);

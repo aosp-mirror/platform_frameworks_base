@@ -16,12 +16,16 @@
 
 package android.os;
 
+import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.media.AudioAttributes;
 import android.util.Log;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Class that operates the vibrator on the device.
@@ -32,6 +36,40 @@ import android.util.Log;
 @SystemService(Context.VIBRATOR_SERVICE)
 public abstract class Vibrator {
     private static final String TAG = "Vibrator";
+
+    /**
+     * Vibration intensity: no vibrations.
+     * @hide
+     */
+    public static final int VIBRATION_INTENSITY_OFF = 0;
+
+    /**
+     * Vibration intensity: low.
+     * @hide
+     */
+    public static final int VIBRATION_INTENSITY_LOW = 1;
+
+    /**
+     * Vibration intensity: medium.
+     * @hide
+     */
+    public static final int VIBRATION_INTENSITY_MEDIUM = 2;
+
+    /**
+     * Vibration intensity: high.
+     * @hide
+     */
+    public static final int VIBRATION_INTENSITY_HIGH = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "VIBRATION_INTENSITY_" }, value = {
+        VIBRATION_INTENSITY_OFF,
+        VIBRATION_INTENSITY_LOW,
+        VIBRATION_INTENSITY_MEDIUM,
+        VIBRATION_INTENSITY_HIGH
+    })
+    public @interface VibrationIntensity{}
 
     private final String mPackageName;
 
@@ -47,6 +85,22 @@ public abstract class Vibrator {
      */
     protected Vibrator(Context context) {
         mPackageName = context.getOpPackageName();
+    }
+
+    /**
+     * Get the default vibration intensity for haptic feedback.
+     * @hide
+     */
+    public int getDefaultHapticFeedbackIntensity() {
+        return VIBRATION_INTENSITY_MEDIUM;
+    }
+
+    /**
+     * Get the default vibration intensity for notifications and ringtones.
+     * @hide
+     */
+    public int getDefaultNotificationVibrationIntensity() {
+        return VIBRATION_INTENSITY_HIGH;
     }
 
     /**

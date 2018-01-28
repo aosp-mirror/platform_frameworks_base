@@ -41,9 +41,11 @@ import android.os.Handler;
 import android.os.IBatteryPropertiesRegistrar;
 import android.os.Looper;
 import android.os.Message;
+import android.os.OsProtoEnums;
 import android.os.Parcel;
 import android.os.ParcelFormatException;
 import android.os.Parcelable;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -4252,11 +4254,11 @@ public class BatteryStatsImpl extends BatteryStats {
             getUidStatsLocked(uid).noteStartWakeLocked(pid, name, type, elapsedRealtime);
 
             if (wc != null) {
-                StatsLog.write(
-                        StatsLog.WAKELOCK_STATE_CHANGED, wc.getUids(), wc.getTags(), type, name, 1);
+                StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, wc.getUids(), wc.getTags(),
+                        getPowerManagerWakeLockLevel(type), name, 1);
             } else {
-                StatsLog.write_non_chained(StatsLog.WAKELOCK_STATE_CHANGED, uid, null, type, name,
-                        1);
+                StatsLog.write_non_chained(StatsLog.WAKELOCK_STATE_CHANGED, uid, null,
+                        getPowerManagerWakeLockLevel(type), name, 1);
             }
         }
     }
@@ -4295,12 +4297,42 @@ public class BatteryStatsImpl extends BatteryStats {
 
             getUidStatsLocked(uid).noteStopWakeLocked(pid, name, type, elapsedRealtime);
             if (wc != null) {
-                StatsLog.write(
-                        StatsLog.WAKELOCK_STATE_CHANGED, wc.getUids(), wc.getTags(), type, name, 0);
+                StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, wc.getUids(), wc.getTags(),
+                        getPowerManagerWakeLockLevel(type), name, 0);
             } else {
-                StatsLog.write_non_chained(StatsLog.WAKELOCK_STATE_CHANGED, uid, null, type, name,
-                        0);
+                StatsLog.write_non_chained(StatsLog.WAKELOCK_STATE_CHANGED, uid, null,
+                        getPowerManagerWakeLockLevel(type), name, 0);
             }
+        }
+    }
+
+    /**
+     * Converts BatteryStats wakelock types back into PowerManager wakelock levels.
+     * This is the inverse map of Notifier.getBatteryStatsWakeLockMonitorType().
+     * These are estimations, since batterystats loses some of the original data.
+     * TODO: Delete this. Instead, StatsLog.write should be called from PowerManager's Notifier.
+     */
+    private int getPowerManagerWakeLockLevel(int battertStatsWakelockType) {
+        switch (battertStatsWakelockType) {
+            // PowerManager.PARTIAL_WAKE_LOCK or PROXIMITY_SCREEN_OFF_WAKE_LOCK
+            case BatteryStats.WAKE_TYPE_PARTIAL:
+                return PowerManager.PARTIAL_WAKE_LOCK;
+
+            // PowerManager.SCREEN_DIM_WAKE_LOCK or SCREEN_BRIGHT_WAKE_LOCK
+            case BatteryStats.WAKE_TYPE_FULL:
+                return PowerManager.FULL_WAKE_LOCK;
+
+            case BatteryStats.WAKE_TYPE_DRAW:
+                return PowerManager.DRAW_WAKE_LOCK;
+
+            // It appears that nothing can ever make a Window and PowerManager lacks an equivalent.
+            case BatteryStats.WAKE_TYPE_WINDOW:
+                Slog.e(TAG, "Illegal window wakelock type observed in batterystats.");
+                return -1;
+
+            default:
+                Slog.e(TAG, "Illegal wakelock type in batterystats: " + battertStatsWakelockType);
+                return -1;
         }
     }
 
@@ -4587,8 +4619,35 @@ public class BatteryStatsImpl extends BatteryStats {
 
     int mGpsNesting;
 
-    public void noteStartGpsLocked(int uid) {
-        uid = mapUid(uid);
+    public void noteGpsChangedLocked(WorkSource oldWs, WorkSource newWs) {
+        for (int i = 0; i < newWs.size(); ++i) {
+            noteStartGpsLocked(newWs.get(i), null);
+        }
+
+        for (int i = 0; i < oldWs.size(); ++i) {
+            noteStopGpsLocked((oldWs.get(i)), null);
+        }
+
+        List<WorkChain>[] wcs = WorkSource.diffChains(oldWs, newWs);
+        if (wcs != null) {
+            if (wcs[0] != null) {
+                final List<WorkChain> newChains = wcs[0];
+                for (int i = 0; i < newChains.size(); ++i) {
+                    noteStartGpsLocked(-1, newChains.get(i));
+                }
+            }
+
+            if (wcs[1] != null) {
+                final List<WorkChain> goneChains = wcs[1];
+                for (int i = 0; i < goneChains.size(); ++i) {
+                    noteStopGpsLocked(-1, goneChains.get(i));
+                }
+            }
+        }
+    }
+
+    private void noteStartGpsLocked(int uid, WorkChain workChain) {
+        uid = getAttributionUid(uid, workChain);
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
         if (mGpsNesting == 0) {
@@ -4598,11 +4657,19 @@ public class BatteryStatsImpl extends BatteryStats {
             addHistoryRecordLocked(elapsedRealtime, uptime);
         }
         mGpsNesting++;
+
+        if (workChain == null) {
+            StatsLog.write_non_chained(StatsLog.GPS_SCAN_STATE_CHANGED, uid, null, 1);
+        } else {
+            StatsLog.write(StatsLog.GPS_SCAN_STATE_CHANGED,
+                    workChain.getUids(), workChain.getTags(), 1);
+        }
+
         getUidStatsLocked(uid).noteStartGps(elapsedRealtime);
     }
 
-    public void noteStopGpsLocked(int uid) {
-        uid = mapUid(uid);
+    private void noteStopGpsLocked(int uid, WorkChain workChain) {
+        uid = getAttributionUid(uid, workChain);
         final long elapsedRealtime = mClocks.elapsedRealtime();
         final long uptime = mClocks.uptimeMillis();
         mGpsNesting--;
@@ -4614,6 +4681,14 @@ public class BatteryStatsImpl extends BatteryStats {
             stopAllGpsSignalQualityTimersLocked(-1);
             mGpsSignalQualityBin = -1;
         }
+
+        if (workChain == null) {
+            StatsLog.write_non_chained(StatsLog.GPS_SCAN_STATE_CHANGED, uid, null, 0);
+        } else {
+            StatsLog.write(StatsLog.GPS_SCAN_STATE_CHANGED, workChain.getUids(),
+                    workChain.getTags(), 0);
+        }
+
         getUidStatsLocked(uid).noteStopGps(elapsedRealtime);
     }
 
@@ -9842,9 +9917,7 @@ public class BatteryStatsImpl extends BatteryStats {
         public void noteStartSensor(int sensor, long elapsedRealtimeMs) {
             DualTimer t = getSensorTimerLocked(sensor, /* create= */ true);
             t.startRunningLocked(elapsedRealtimeMs);
-            if (sensor == Sensor.GPS) {
-                StatsLog.write_non_chained(StatsLog.GPS_SCAN_STATE_CHANGED, getUid(), null, 1);
-            } else {
+            if (sensor != Sensor.GPS) {
                 StatsLog.write_non_chained(StatsLog.SENSOR_STATE_CHANGED, getUid(), null, sensor,
                         1);
             }
@@ -9855,14 +9928,9 @@ public class BatteryStatsImpl extends BatteryStats {
             DualTimer t = getSensorTimerLocked(sensor, false);
             if (t != null) {
                 t.stopRunningLocked(elapsedRealtimeMs);
-                if (!t.isRunningLocked()) { // only tell statsd if truly stopped
-                    if (sensor == Sensor.GPS) {
-                        StatsLog.write_non_chained(StatsLog.GPS_SCAN_STATE_CHANGED, getUid(), null,
-                                0);
-                    } else {
-                        StatsLog.write_non_chained(StatsLog.SENSOR_STATE_CHANGED, getUid(), null,
-                                sensor, 0);
-                    }
+                if (sensor != Sensor.GPS) {
+                    StatsLog.write_non_chained(StatsLog.SENSOR_STATE_CHANGED, getUid(), null,
+                             sensor, 0);
                 }
             }
         }
@@ -12179,7 +12247,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     // This should probably be exposed in the API, though it's not critical
-    public static final int BATTERY_PLUGGED_NONE = 0;
+    public static final int BATTERY_PLUGGED_NONE = OsProtoEnums.BATTERY_PLUGGED_NONE; // = 0
 
     public void setBatteryStateLocked(final int status, final int health, final int plugType,
             final int level, /* not final */ int temp, final int volt, final int chargeUAh,

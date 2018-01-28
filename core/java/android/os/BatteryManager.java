@@ -157,11 +157,11 @@ public class BatteryManager {
     // values of the "plugged" field in the ACTION_BATTERY_CHANGED intent.
     // These must be powers of 2.
     /** Power source is an AC charger. */
-    public static final int BATTERY_PLUGGED_AC = 1;
+    public static final int BATTERY_PLUGGED_AC = OsProtoEnums.BATTERY_PLUGGED_AC; // = 1
     /** Power source is a USB port. */
-    public static final int BATTERY_PLUGGED_USB = 2;
+    public static final int BATTERY_PLUGGED_USB = OsProtoEnums.BATTERY_PLUGGED_USB; // = 2
     /** Power source is wireless. */
-    public static final int BATTERY_PLUGGED_WIRELESS = 4;
+    public static final int BATTERY_PLUGGED_WIRELESS = OsProtoEnums.BATTERY_PLUGGED_WIRELESS; // = 4
 
     /** @hide */
     public static final int BATTERY_PLUGGED_ANY =

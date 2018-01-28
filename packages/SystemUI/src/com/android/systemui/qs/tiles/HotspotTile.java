@@ -113,11 +113,11 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
         if (state.slash == null) {
             state.slash = new SlashState();
         }
-        state.label = mContext.getString(R.string.quick_settings_hotspot_label);
-
-        checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_CONFIG_TETHERING);
 
         final int numConnectedDevices;
+        final boolean isTransient = mController.isHotspotTransient();
+
+        checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_CONFIG_TETHERING);
         if (arg instanceof CallbackInfo) {
             CallbackInfo info = (CallbackInfo) arg;
             state.value = info.enabled;
@@ -127,11 +127,11 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
             numConnectedDevices = mController.getNumConnectedDevices();
         }
 
-        state.secondaryLabel = getSecondaryLabel(state.value, numConnectedDevices);
-
         state.icon = mEnabledStatic;
+        state.label = mContext.getString(R.string.quick_settings_hotspot_label);
+        state.secondaryLabel = getSecondaryLabel(state.value, isTransient, numConnectedDevices);
         state.isAirplaneMode = mAirplaneMode.getValue() != 0;
-        state.isTransient = mController.isHotspotTransient();
+        state.isTransient = isTransient;
         state.slash.isSlashed = !state.value && !state.isTransient;
         if (state.isTransient) {
             state.icon = ResourceIcon.get(R.drawable.ic_hotspot_transient_animation);
@@ -143,10 +143,13 @@ public class HotspotTile extends QSTileImpl<AirplaneBooleanState> {
     }
 
     @Nullable
-    private String getSecondaryLabel(boolean enabled, int numConnectedDevices) {
-        if (numConnectedDevices > 0 && enabled) {
+    private String getSecondaryLabel(
+            boolean enabled, boolean isTransient, int numConnectedDevices) {
+        if (isTransient) {
+            return mContext.getString(R.string.quick_settings_hotspot_secondary_label_transient);
+        } else if (numConnectedDevices > 0 && enabled) {
             return mContext.getResources().getQuantityString(
-                    R.plurals.quick_settings_hotspot_num_devices,
+                    R.plurals.quick_settings_hotspot_secondary_label_num_devices,
                     numConnectedDevices,
                     numConnectedDevices);
         }

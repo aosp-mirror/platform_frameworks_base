@@ -20,35 +20,16 @@ package android.service.battery;
 option java_multiple_files = true;
 option java_outer_classname = "BatteryServiceProto";
 
-import "frameworks/base/core/proto/android/os/batterymanager.proto";
+import "frameworks/base/core/proto/android/os/enums.proto";
 import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 message BatteryServiceDumpProto {
     option (android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    enum BatteryStatus {
-        BATTERY_STATUS_INVALID = 0;
-        BATTERY_STATUS_UNKNOWN = 1;
-        BATTERY_STATUS_CHARGING = 2;
-        BATTERY_STATUS_DISCHARGING = 3;
-        BATTERY_STATUS_NOT_CHARGING = 4;
-        BATTERY_STATUS_FULL = 5;
-    }
-    enum BatteryHealth {
-        BATTERY_HEALTH_INVALID = 0;
-        BATTERY_HEALTH_UNKNOWN = 1;
-        BATTERY_HEALTH_GOOD = 2;
-        BATTERY_HEALTH_OVERHEAT = 3;
-        BATTERY_HEALTH_DEAD = 4;
-        BATTERY_HEALTH_OVER_VOLTAGE = 5;
-        BATTERY_HEALTH_UNSPECIFIED_FAILURE = 6;
-        BATTERY_HEALTH_COLD = 7;
-    }
-
     // If true: UPDATES STOPPED -- use 'reset' to restart
     optional bool are_updates_stopped = 1;
     // Plugged status of power sources
-    optional android.os.BatteryManagerProto.PlugType plugged = 2;
+    optional android.os.BatteryPluggedStateEnum plugged = 2;
     // Max current in microamperes. This may be 0 if the device's kernel drivers
     // don't support it.
     optional int32 max_charging_current = 3;
@@ -58,9 +39,9 @@ message BatteryServiceDumpProto {
     // Battery capacity in microampere-hours
     optional int32 charge_counter = 5;
     // Charging status
-    optional BatteryStatus status = 6;
+    optional android.os.BatteryStatusEnum status = 6;
     // Battery health
-    optional BatteryHealth health = 7;
+    optional android.os.BatteryHealthEnum health = 7;
     // True if the battery is present
     optional bool is_present = 8;
     // Charge level, from 0 through "scale" inclusive

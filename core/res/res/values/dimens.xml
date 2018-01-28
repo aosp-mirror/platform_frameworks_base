@@ -33,6 +33,10 @@
     <dimen name="toast_y_offset">24dp</dimen>
     <!-- Height of the status bar -->
     <dimen name="status_bar_height">24dp</dimen>
+    <!-- Height of area above QQS where battery/time go -->
+    <dimen name="quick_qs_offset_height">48dp</dimen>
+    <!-- Total height of QQS (quick_qs_offset_height + 128) -->
+    <dimen name="quick_qs_total_height">176dp</dimen>
     <!-- Height of the bottom navigation / system bar. -->
     <dimen name="navigation_bar_height">48dp</dimen>
     <!-- Height of the bottom navigation bar in portrait; often the same as @dimen/navigation_bar_height -->
@@ -635,4 +639,26 @@
     <!-- Size of thumbnail used in the cross profile apps animation -->
     <dimen name="cross_profile_apps_thumbnail_size">72dp</dimen>
 
+    <!-- Padding between the title and content in the harmful app dialog -->
+    <dimen name="harmful_app_padding_top">10dp</dimen>
+    <!-- Bottom padding for the "app name" section of the harmful app dialog -->
+    <dimen name="harmful_app_name_padding_bottom">20dp</dimen>
+    <!-- Left padding for the "app name" section of the harmful app dialog -->
+    <dimen name="harmful_app_name_padding_left">24dp</dimen>
+    <!-- Right padding for the "app name" section of the harmful app dialog -->
+    <dimen name="harmful_app_name_padding_right">24dp</dimen>
+    <!-- Top padding for the "app name" section of the harmful app dialog -->
+    <dimen name="harmful_app_name_padding_top">8dp</dimen>
+    <!-- Padding between the icon and app name in the harmful app dialog -->
+    <dimen name="harmful_app_icon_name_padding">20dp</dimen>
+    <!-- The size of the icon on the harmful app dialog -->
+    <dimen name="harmful_app_icon_size">44dp</dimen>
+    <!-- Left padding for the message section of the harmful app dialog -->
+    <dimen name="harmful_app_message_padding_left">24dp</dimen>
+    <!-- Right padding for the message section of the harmful app dialog -->
+    <dimen name="harmful_app_message_padding_right">24dp</dimen>
+    <!-- Bottom padding for the message section of the harmful app dialog -->
+    <dimen name="harmful_app_message_padding_bottom">24dp</dimen>
+    <!-- Line spacing modifier for the message field of the harmful app dialog -->
+    <item name="harmful_app_message_line_spacing_modifier" type="dimen">1.22</item>
 </resources>

@@ -18,12 +18,15 @@ syntax = "proto2";
 
 import "frameworks/base/core/proto/android/graphics/pixelformat.proto";
 import "frameworks/base/core/proto/android/view/display.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 package android.view;
 option java_multiple_files = true;
 
 /* represents WindowManager.LayoutParams */
 message WindowLayoutParamsProto {
+  option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
   optional int32 type = 1;
   optional int32 x = 2;
   optional int32 y = 3;

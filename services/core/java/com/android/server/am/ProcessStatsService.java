@@ -1048,7 +1048,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         }
     }
 
-    private void dumpAggregatedStats(ProtoOutputStream proto, int aggregateHours, long now) {
+    private void dumpAggregatedStats(ProtoOutputStream proto, long fieldId, int aggregateHours, long now) {
         ParcelFileDescriptor pfd = getStatsOverTime(aggregateHours*60*60*1000
                 - (ProcessStats.COMMIT_PERIOD/2));
         if (pfd == null) {
@@ -1060,30 +1060,24 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         if (stats.mReadError != null) {
             return;
         }
-        stats.toProto(proto, now);
+        stats.writeToProto(proto, fieldId, now);
     }
 
     private void dumpProto(FileDescriptor fd) {
         final ProtoOutputStream proto = new ProtoOutputStream(fd);
 
         // dump current procstats
-        long nowToken = proto.start(ProcessStatsServiceDumpProto.PROCSTATS_NOW);
         long now;
         synchronized (mAm) {
             now = SystemClock.uptimeMillis();
-            mProcessStats.toProto(proto, now);
+            mProcessStats.writeToProto(proto,ProcessStatsServiceDumpProto.PROCSTATS_NOW, now);
         }
-        proto.end(nowToken);
 
         // aggregated over last 3 hours procstats
-        long tokenOf3Hrs = proto.start(ProcessStatsServiceDumpProto.PROCSTATS_OVER_3HRS);
-        dumpAggregatedStats(proto, 3, now);
-        proto.end(tokenOf3Hrs);
+        dumpAggregatedStats(proto, ProcessStatsServiceDumpProto.PROCSTATS_OVER_3HRS, 3, now);
 
         // aggregated over last 24 hours procstats
-        long tokenOf24Hrs = proto.start(ProcessStatsServiceDumpProto.PROCSTATS_OVER_24HRS);
-        dumpAggregatedStats(proto, 24, now);
-        proto.end(tokenOf24Hrs);
+        dumpAggregatedStats(proto, ProcessStatsServiceDumpProto.PROCSTATS_OVER_24HRS, 24, now);
 
         proto.flush();
     }

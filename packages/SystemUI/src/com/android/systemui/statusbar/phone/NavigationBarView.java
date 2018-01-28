@@ -127,6 +127,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private RecentsComponent mRecentsComponent;
     private Divider mDivider;
     private SwipeUpOnboarding mSwipeUpOnboarding;
+    private NotificationPanelView mPanelView;
 
     private class NavTransitionListener implements TransitionListener {
         private boolean mBackTransitioning;
@@ -209,7 +210,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private final OverviewProxyListener mOverviewProxyListener = new OverviewProxyListener() {
         @Override
         public void onConnectionChanged(boolean isConnected) {
-            setSlippery(!isConnected);
+            updateSlippery();
             setDisabledFlags(mDisabledFlags, true);
             setUpSwipeUpOnboarding(isConnected);
         }
@@ -260,9 +261,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         return mBarTransitions.getLightTransitionsController();
     }
 
-    public void setComponents(RecentsComponent recentsComponent, Divider divider) {
+    public void setComponents(RecentsComponent recentsComponent, Divider divider,
+            NotificationPanelView panel) {
         mRecentsComponent = recentsComponent;
         mDivider = divider;
+        mPanelView = panel;
         if (mGestureHelper instanceof NavigationBarGestureHelper) {
             ((NavigationBarGestureHelper) mGestureHelper).setComponents(
                     recentsComponent, divider, this);
@@ -592,6 +595,14 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             WindowManager wm = (WindowManager)getContext().getSystemService(Context.WINDOW_SERVICE);
             wm.updateViewLayout((View) getParent(), lp);
         }
+    }
+
+    public void onPanelExpandedChange(boolean expanded) {
+        updateSlippery();
+    }
+
+    private void updateSlippery() {
+        setSlippery(mOverviewProxyService.getProxy() != null && mPanelView.isFullyExpanded());
     }
 
     private void setSlippery(boolean slippery) {

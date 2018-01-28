@@ -1,7 +1,10 @@
 package android.os;
 
 import android.annotation.Nullable;
+import android.content.Context;
 import android.os.WorkSourceProto;
+import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
@@ -107,6 +110,17 @@ public class WorkSource implements Parcelable {
         } else {
             mChains = null;
         }
+    }
+
+    /**
+     * Whether system services should create {@code WorkChains} (wherever possible) in the place
+     * of flat UID lists.
+     *
+     * @hide
+     */
+    public static boolean isChainedBatteryAttributionEnabled(Context context) {
+        return Settings.Global.getInt(context.getContentResolver(),
+                Global.CHAINED_BATTERY_ATTRIBUTION_ENABLED, 0) == 1;
     }
 
     /** @hide */
@@ -477,6 +491,29 @@ public class WorkSource implements Parcelable {
      */
     public ArrayList<WorkChain> getWorkChains() {
         return mChains;
+    }
+
+    /**
+     * DO NOT USE: Hacky API provided solely for {@code GnssLocationProvider}. See
+     * {@code setReturningDiffs} as well.
+     *
+     * @hide
+     */
+    public void transferWorkChains(WorkSource other) {
+        if (mChains != null) {
+            mChains.clear();
+        }
+
+        if (other.mChains == null || other.mChains.isEmpty()) {
+            return;
+        }
+
+        if (mChains == null) {
+            mChains = new ArrayList<>(4);
+        }
+
+        mChains.addAll(other.mChains);
+        other.mChains.clear();
     }
 
     private boolean removeUids(WorkSource other) {
@@ -864,6 +901,13 @@ public class WorkSource implements Parcelable {
          */
         public int getAttributionUid() {
             return mUids[0];
+        }
+
+        /**
+         * Return the tag associated with the attribution UID. See (@link #getAttributionUid}.
+         */
+        public String getAttributionTag() {
+            return mTags[0];
         }
 
         // TODO: The following three trivial getters are purely for testing and will be removed

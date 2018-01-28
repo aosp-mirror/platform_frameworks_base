@@ -436,7 +436,7 @@
           0 = Not available.
           1 = Available.
      -->
-    <integer translatable="false" name="config_wifi_wakeup_available">0</integer>
+    <integer translatable="false" name="config_wifi_wakeup_available">1</integer>
 
     <!-- Array of ConnectivityManager.TYPE_xxxx values allowable for tethering.
 
@@ -3246,6 +3246,10 @@
     <!-- Class name of the device specific implementation to replace the DevicePolicyManagerService
          or empty if the default should be used. -->
     <string translatable="false" name="config_deviceSpecificDevicePolicyManagerService"></string>
+
+    <!-- Class name of the device specific implementation to replace the AudioService
+         or empty if the default should be used. -->
+    <string translatable="false" name="config_deviceSpecificAudioService"></string>
 
     <!-- Component name of media projection permission dialog -->
     <string name="config_mediaProjectionPermissionDialogComponent" translateable="false">com.android.systemui/com.android.systemui.media.MediaProjectionPermissionActivity</string>

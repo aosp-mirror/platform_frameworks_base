@@ -123,11 +123,13 @@ TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks) {
     auto crashEvent10 = CreateAppCrashEvent(appUid, bucketStartTimeNs + 2 * bucketSizeNs - 2);
 
     auto screenTurnedOnEvent =
-        CreateScreenStateChangedEvent(ScreenStateChanged::STATE_ON, bucketStartTimeNs + 2);
+        CreateScreenStateChangedEvent(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
+                                      bucketStartTimeNs + 2);
     auto screenTurnedOffEvent =
-        CreateScreenStateChangedEvent(ScreenStateChanged::STATE_OFF, bucketStartTimeNs + 200);
+        CreateScreenStateChangedEvent(android::view::DisplayStateEnum::DISPLAY_STATE_OFF,
+                                      bucketStartTimeNs + 200);
     auto screenTurnedOnEvent2 =
-        CreateScreenStateChangedEvent(ScreenStateChanged::STATE_ON,
+        CreateScreenStateChangedEvent(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
                                       bucketStartTimeNs + 2 * bucketSizeNs - 100);
 
     auto syncOnEvent1 =

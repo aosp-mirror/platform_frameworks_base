@@ -16,6 +16,7 @@
 
 package android.view.textclassifier;
 
+import android.annotation.Nullable;
 import android.content.res.AssetFileDescriptor;
 
 /**
@@ -146,11 +147,24 @@ final class SmartSelection {
         final String mCollection;
         /** float range: 0 - 1 */
         final float mScore;
+        @Nullable final DatetimeParseResult mDatetime;
 
         ClassificationResult(String collection, float score) {
             mCollection = collection;
             mScore = score;
+            mDatetime = null;
         }
+
+        ClassificationResult(String collection, float score, DatetimeParseResult datetime) {
+            mCollection = collection;
+            mScore = score;
+            mDatetime = datetime;
+        }
+    }
+
+    /** Parsed date information for the classification result. */
+    static final class DatetimeParseResult {
+        long mMsSinceEpoch;
     }
 
     /** Represents a result of Annotate call. */

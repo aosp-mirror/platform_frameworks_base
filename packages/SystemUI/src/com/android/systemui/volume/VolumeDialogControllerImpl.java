@@ -26,6 +26,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.database.ContentObserver;
+import android.media.AudioDeviceCallback;
+import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.IVolumeController;
@@ -105,6 +107,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private boolean mShowA11yStream;
     private boolean mShowVolumeDialog;
     private boolean mShowSafetyWarning;
+    private DeviceCallback mDeviceCallback = new DeviceCallback();
+    private AudioDeviceInfo mConnectedDevice;
 
     private boolean mDestroyed;
     private VolumePolicy mVolumePolicy;
@@ -180,6 +184,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         } catch (SecurityException e) {
             Log.w(TAG, "No access to media sessions", e);
         }
+        mAudio.registerAudioDeviceCallback(mDeviceCallback, mWorker);
     }
 
     public void setVolumePolicy(VolumePolicy policy) {
@@ -205,6 +210,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         mMediaSessions.destroy();
         mObserver.destroy();
         mReceiver.destroy();
+        mAudio.unregisterAudioDeviceCallback(mDeviceCallback);
         mWorkerThread.quitSafely();
     }
 
@@ -664,6 +670,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 case USER_ACTIVITY: onUserActivityW(); break;
                 case SHOW_SAFETY_WARNING: onShowSafetyWarningW(msg.arg1); break;
                 case ACCESSIBILITY_MODE_CHANGED: onAccessibilityModeChanged((Boolean) msg.obj);
+
             }
         }
     }
@@ -799,6 +806,18 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                     @Override
                     public void run() {
                         entry.getKey().onAccessibilityModeChanged(show);
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void onConnectedDeviceChanged(String deviceName) {
+            for (final Map.Entry<Callbacks, Handler> entry : mCallbackMap.entrySet()) {
+                entry.getValue().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        entry.getKey().onConnectedDeviceChanged(deviceName);
                     }
                 });
             }
@@ -1001,6 +1020,34 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 if (D.BUG) Log.d(TAG, triggeringMethod + ": added stream " +  mNextStream
                         + " from token + "+ token.toString());
                 mNextStream++;
+            }
+        }
+    }
+
+    protected final class DeviceCallback extends AudioDeviceCallback {
+        public void onAudioDevicesAdded(AudioDeviceInfo[] addedDevices) {
+            for (AudioDeviceInfo info : addedDevices) {
+                if (info.isSink()
+                        && (info.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP
+                        || info.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_SCO)) {
+                    mConnectedDevice = info;
+                    mCallbacks.onConnectedDeviceChanged(info.getProductName().toString());
+                }
+            }
+        }
+
+        public void onAudioDevicesRemoved(AudioDeviceInfo[] removedDevices) {
+            if (mConnectedDevice == null) {
+                mCallbacks.onConnectedDeviceChanged(null);
+                return;
+            }
+            for (AudioDeviceInfo info : removedDevices) {
+                if (info.isSink() == mConnectedDevice.isSink()
+                        && Objects.equals(info.getProductName(), mConnectedDevice.getProductName())
+                        && info.getType() == mConnectedDevice.getType()) {
+                    mConnectedDevice = null;
+                    mCallbacks.onConnectedDeviceChanged(null);
+                }
             }
         }
     }

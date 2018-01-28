@@ -3175,6 +3175,43 @@ public final class Settings {
         private static final Validator VIBRATE_INPUT_DEVICES_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
+         * The intensity of notification vibrations, if configurable.
+         *
+         * Not all devices are capable of changing their vibration intensity; on these devices
+         * there will likely be no difference between the various vibration intensities except for
+         * intensity 0 (off) and the rest.
+         *
+         * <b>Values:</b><br/>
+         * 0 - Vibration is disabled<br/>
+         * 1 - Weak vibrations<br/>
+         * 2 - Medium vibrations<br/>
+         * 3 - Strong vibrations
+         * @hide
+         */
+        public static final String NOTIFICATION_VIBRATION_INTENSITY =
+                "notification_vibration_intensity";
+
+        /**
+         * The intensity of haptic feedback vibrations, if configurable.
+         *
+         * Not all devices are capable of changing their feedback intensity; on these devices
+         * there will likely be no difference between the various vibration intensities except for
+         * intensity 0 (off) and the rest.
+         *
+         * <b>Values:</b><br/>
+         * 0 - Vibration is disabled<br/>
+         * 1 - Weak vibrations<br/>
+         * 2 - Medium vibrations<br/>
+         * 3 - Strong vibrations
+         * @hide
+         */
+        public static final String HAPTIC_FEEDBACK_INTENSITY =
+                "haptic_feedback_intensity";
+
+        private static final Validator VIBRATION_INTENSITY_VALIDATOR =
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 3);
+
+        /**
          * Ringer volume. This is used internally, changing this value will not
          * change the volume. See AudioManager.
          *
@@ -3995,7 +4032,9 @@ public final class Settings {
             LOCK_TO_APP_ENABLED,
             NOTIFICATION_SOUND,
             ACCELEROMETER_ROTATION,
-            SHOW_BATTERY_PERCENT
+            SHOW_BATTERY_PERCENT,
+            NOTIFICATION_VIBRATION_INTENSITY,
+            HAPTIC_FEEDBACK_INTENSITY,
         };
 
         /**
@@ -4136,6 +4175,8 @@ public final class Settings {
             VALIDATORS.put(MODE_RINGER_STREAMS_AFFECTED, MODE_RINGER_STREAMS_AFFECTED_VALIDATOR);
             VALIDATORS.put(MUTE_STREAMS_AFFECTED, MUTE_STREAMS_AFFECTED_VALIDATOR);
             VALIDATORS.put(VIBRATE_ON, VIBRATE_ON_VALIDATOR);
+            VALIDATORS.put(NOTIFICATION_VIBRATION_INTENSITY, VIBRATION_INTENSITY_VALIDATOR);
+            VALIDATORS.put(HAPTIC_FEEDBACK_INTENSITY, VIBRATION_INTENSITY_VALIDATOR);
             VALIDATORS.put(RINGTONE, RINGTONE_VALIDATOR);
             VALIDATORS.put(NOTIFICATION_SOUND, NOTIFICATION_SOUND_VALIDATOR);
             VALIDATORS.put(ALARM_ALERT, ALARM_ALERT_VALIDATOR);
@@ -5508,6 +5549,27 @@ public final class Settings {
          */
         @Deprecated
         public static final String LOCATION_MODE = "location_mode";
+
+        /**
+         * The App or module that changes the location mode.
+         * @hide
+         */
+        public static final String LOCATION_CHANGER = "location_changer";
+        /**
+         * The location changer is unknown or unable to detect.
+         * @hide
+         */
+        public static final int LOCATION_CHANGER_UNKNOWN = 0;
+        /**
+         * Location settings in system settings.
+         * @hide
+         */
+        public static final int LOCATION_CHANGER_SYSTEM_SETTINGS = 1;
+        /**
+         * The location icon in drop down notification drawer.
+         * @hide
+         */
+        public static final int LOCATION_CHANGER_QUICK_SETTINGS = 2;
 
         /**
          * Location access disabled.
@@ -7881,6 +7943,7 @@ public final class Settings {
             CLONE_TO_MANAGED_PROFILE.add(DEFAULT_INPUT_METHOD);
             CLONE_TO_MANAGED_PROFILE.add(ENABLED_ACCESSIBILITY_SERVICES);
             CLONE_TO_MANAGED_PROFILE.add(ENABLED_INPUT_METHODS);
+            CLONE_TO_MANAGED_PROFILE.add(LOCATION_CHANGER);
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_MODE);
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_PROVIDERS_ALLOWED);
             CLONE_TO_MANAGED_PROFILE.add(SELECTED_INPUT_METHOD_SUBTYPE);
@@ -10440,6 +10503,15 @@ public final class Settings {
                 = "forced_app_standby_for_small_battery_enabled";
 
         /**
+         * Whether or not to enable Time Only Mode for watch type devices.
+         * Type: int (0 for false, 1 for true)
+         * Default: 0
+         * @hide
+         */
+        public static final String TIME_ONLY_MODE_ENABLED
+                = "time_only_mode_enabled";
+
+        /**
          * Whether or not Network Watchlist feature is enabled.
          * Type: int (0 for false, 1 for true)
          * Default: 0
@@ -11248,6 +11320,16 @@ public final class Settings {
          */
         public static final String OVERRIDE_SETTINGS_PROVIDER_RESTORE_ANY_VERSION =
                 "override_settings_provider_restore_any_version";
+        /**
+         * Flag to toggle whether system services report attribution chains when they attribute
+         * battery use via a {@code WorkSource}.
+         *
+         * Type: int (0 to disable, 1 to enable)
+         *
+         * @hide
+         */
+        public static final String CHAINED_BATTERY_ATTRIBUTION_ENABLED =
+                "chained_battery_attribution_enabled";
 
         /**
          * Settings to backup. This is here so that it's in the same place as the settings

@@ -18,11 +18,11 @@ package android.service.notification;
 
 import android.annotation.IntDef;
 import android.annotation.SystemApi;
-import android.app.AutomaticZenRule;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.proto.ProtoOutputStream;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -159,6 +159,22 @@ public final class Condition implements Parcelable {
             .append(",state=").append(stateToString(state))
             .append(",flags=").append(flags)
             .append(']').toString();
+    }
+
+    /** @hide */
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+
+        // id is guarantreed not to be null.
+        proto.write(ConditionProto.ID, id.toString());
+        proto.write(ConditionProto.SUMMARY, summary);
+        proto.write(ConditionProto.LINE_1, line1);
+        proto.write(ConditionProto.LINE_2, line2);
+        proto.write(ConditionProto.ICON, icon);
+        proto.write(ConditionProto.STATE, state);
+        proto.write(ConditionProto.FLAGS, flags);
+
+        proto.end(token);
     }
 
     @SystemApi

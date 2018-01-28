@@ -143,6 +143,26 @@ public abstract class BackupAgent extends ContextWrapper {
     /** @hide */
     public static final int TYPE_SYMLINK = 3;
 
+    /**
+     * Flag for {@link BackupDataOutput#getTransportFlags()} and
+     * {@link FullBackupDataOutput#getTransportFlags()} only.
+     *
+     * <p>The transport has client-side encryption enabled. i.e., the user's backup has been
+     * encrypted with a key known only to the device, and not to the remote storage solution. Even
+     * if an attacker had root access to the remote storage provider they should not be able to
+     * decrypt the user's backup data.
+     */
+    public static final int FLAG_CLIENT_SIDE_ENCRYPTION_ENABLED = 1;
+
+    /**
+     * Flag for {@link BackupDataOutput#getTransportFlags()} and
+     * {@link FullBackupDataOutput#getTransportFlags()} only.
+     *
+     * <p>The transport is for a device-to-device transfer. There is no third party or intermediate
+     * storage. The user's backup data is sent directly to another device over e.g., USB or WiFi.
+     */
+    public static final int FLAG_DEVICE_TO_DEVICE_TRANSFER = 2;
+
     Handler mHandler = null;
 
     Handler getHandler() {
@@ -920,12 +940,14 @@ public abstract class BackupAgent extends ContextWrapper {
         public void doBackup(ParcelFileDescriptor oldState,
                 ParcelFileDescriptor data,
                 ParcelFileDescriptor newState,
-                long quotaBytes, int token, IBackupManager callbackBinder) throws RemoteException {
+                long quotaBytes, int token, IBackupManager callbackBinder, int transportFlags)
+                throws RemoteException {
             // Ensure that we're running with the app's normal permission level
             long ident = Binder.clearCallingIdentity();
 
             if (DEBUG) Log.v(TAG, "doBackup() invoked");
-            BackupDataOutput output = new BackupDataOutput(data.getFileDescriptor(), quotaBytes);
+            BackupDataOutput output = new BackupDataOutput(
+                    data.getFileDescriptor(), quotaBytes, transportFlags);
 
             try {
                 BackupAgent.this.onBackup(oldState, output, newState);
@@ -999,7 +1021,7 @@ public abstract class BackupAgent extends ContextWrapper {
 
         @Override
         public void doFullBackup(ParcelFileDescriptor data,
-                long quotaBytes, int token, IBackupManager callbackBinder) {
+                long quotaBytes, int token, IBackupManager callbackBinder, int transportFlags) {
             // Ensure that we're running with the app's normal permission level
             long ident = Binder.clearCallingIdentity();
 
@@ -1010,7 +1032,8 @@ public abstract class BackupAgent extends ContextWrapper {
             waitForSharedPrefs();
 
             try {
-                BackupAgent.this.onFullBackup(new FullBackupDataOutput(data, quotaBytes));
+                BackupAgent.this.onFullBackup(new FullBackupDataOutput(
+                        data, quotaBytes, transportFlags));
             } catch (IOException ex) {
                 Log.d(TAG, "onFullBackup (" + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw new RuntimeException(ex);
@@ -1044,10 +1067,12 @@ public abstract class BackupAgent extends ContextWrapper {
             }
         }
 
-        public void doMeasureFullBackup(long quotaBytes, int token, IBackupManager callbackBinder) {
+        public void doMeasureFullBackup(long quotaBytes, int token, IBackupManager callbackBinder,
+                int transportFlags) {
             // Ensure that we're running with the app's normal permission level
             final long ident = Binder.clearCallingIdentity();
-            FullBackupDataOutput measureOutput = new FullBackupDataOutput(quotaBytes);
+            FullBackupDataOutput measureOutput =
+                    new FullBackupDataOutput(quotaBytes, transportFlags);
 
             waitForSharedPrefs();
             try {

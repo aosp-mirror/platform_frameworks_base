@@ -54,6 +54,12 @@ public final class StatsManager extends android.util.StatsManager { // TODO: Rem
             "android.app.extra.STATS_DIMENSIONS_VALUE";
 
     /**
+     * Broadcast Action: Statsd has started.
+     * Configurations and PendingIntents can now be sent to it.
+     */
+    public static final String ACTION_STATSD_STARTED = "android.app.action.STATSD_STARTED";
+
+    /**
      * Constructor for StatsManagerClient.
      *
      * @hide

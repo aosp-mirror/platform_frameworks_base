@@ -12,7 +12,6 @@ cc_library_shared {
         "android_media_MediaDrm.cpp",
         "android_media_MediaExtractor.cpp",
         "android_media_MediaHTTPConnection.cpp",
-        "android_media_MediaMetricsJNI.cpp",
         "android_media_MediaMetadataRetriever.cpp",
         "android_media_MediaMuxer.cpp",
         "android_media_MediaPlayer.cpp",
@@ -93,7 +92,6 @@ cc_library_shared {
         "android_media_MediaCrypto.cpp",
         "android_media_Media2DataSource.cpp",
         "android_media_MediaDrm.cpp",
-        "android_media_MediaMetricsJNI.cpp",
         "android_media_MediaPlayer2.cpp",
         "android_media_SyncParams.cpp",
     ],
@@ -110,6 +108,9 @@ cc_library_shared {
         "libhidlbase",  // VNDK???
         "libmediandk",  // NDK
         "libpowermanager",  // for JWakeLock. to be removed
+
+        "libutils",  // Have to use shared lib to make libandroid_runtime behave correctly.
+                     // Otherwise, AndroidRuntime::getJNIEnv() will return NULL.
     ],
 
     header_libs: ["libhardware_headers"],
@@ -143,7 +144,6 @@ cc_library_shared {
         "libstagefright_rtsp",
         "libstagefright_timedtext",
         "libunwindstack",
-        "libutils",
         "libutilscallstack",
         "libvndksupport",
         "libz",

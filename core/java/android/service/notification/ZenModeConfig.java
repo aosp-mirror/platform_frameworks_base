@@ -33,6 +33,7 @@ import android.text.format.DateFormat;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
 
@@ -1260,6 +1261,30 @@ public class ZenModeConfig implements Parcelable {
                     .append(",creationTime=").append(creationTime)
                     .append(",enabler=").append(enabler)
                     .append(']').toString();
+        }
+
+        /** @hide */
+        public void writeToProto(ProtoOutputStream proto, long fieldId) {
+            final long token = proto.start(fieldId);
+
+            proto.write(ZenRuleProto.ID, id);
+            proto.write(ZenRuleProto.NAME, name);
+            proto.write(ZenRuleProto.CREATION_TIME_MS, creationTime);
+            proto.write(ZenRuleProto.ENABLED, enabled);
+            proto.write(ZenRuleProto.ENABLER, enabler);
+            proto.write(ZenRuleProto.IS_SNOOZING, snoozing);
+            proto.write(ZenRuleProto.ZEN_MODE, zenMode);
+            if (conditionId != null) {
+                proto.write(ZenRuleProto.CONDITION_ID, conditionId.toString());
+            }
+            if (condition != null) {
+                condition.writeToProto(proto, ZenRuleProto.CONDITION);
+            }
+            if (component != null) {
+                component.writeToProto(proto, ZenRuleProto.COMPONENT);
+            }
+
+            proto.end(token);
         }
 
         private static void appendDiff(Diff d, String item, ZenRule from, ZenRule to) {

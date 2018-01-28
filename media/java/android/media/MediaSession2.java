@@ -20,11 +20,11 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.Activity;
+import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaPlayerBase.PlaybackListener;
+import android.media.MediaPlayerInterface.PlaybackListener;
 import android.media.session.MediaSession;
 import android.media.session.MediaSession.Callback;
 import android.media.session.PlaybackState;
@@ -67,7 +67,8 @@ import java.util.concurrent.Executor;
  * session.
  * <p>
  * When a session receive transport control commands, the session sends the commands directly to
- * the the underlying media player set by {@link Builder} or {@link #setPlayer(MediaPlayerBase)}.
+ * the the underlying media player set by {@link Builder} or
+ * {@link #setPlayer(MediaPlayerInterface)}.
  * <p>
  * When an app is finished performing playback it must call {@link #close()} to clean up the session
  * and notify any controllers.
@@ -77,17 +78,12 @@ import java.util.concurrent.Executor;
  * @see MediaSessionService2
  * @hide
  */
-// TODO(jaewan): Unhide
-// TODO(jaewan): Revisit comments. Currently it's borrowed from the MediaSession.
-// TODO(jaewan): Should we support thread safe? It may cause tricky issue such as b/63797089
-// TODO(jaewan): Should we make APIs for MediaSessionService2 public? It's helpful for
-//               developers that doesn't want to override from Browser, but user may not use this
-//               correctly.
 public class MediaSession2 implements AutoCloseable {
     private final MediaSession2Provider mProvider;
 
     // Note: Do not define IntDef because subclass can add more command code on top of these.
     // TODO(jaewan): Shouldn't we pull out?
+    // TODO(jaewan): Should we also protect getPlaybackState()?
     public static final int COMMAND_CODE_CUSTOM = 0;
     public static final int COMMAND_CODE_PLAYBACK_START = 1;
     public static final int COMMAND_CODE_PLAYBACK_PAUSE = 2;
@@ -204,7 +200,8 @@ public class MediaSession2 implements AutoCloseable {
         @Override
         public int hashCode() {
             final int prime = 31;
-            return ((mCustomCommand != null) ? mCustomCommand.hashCode() : 0) * prime + mCommandCode;
+            return ((mCustomCommand != null)
+                    ? mCustomCommand.hashCode() : 0) * prime + mCommandCode;
         }
     }
 
@@ -235,6 +232,11 @@ public class MediaSession2 implements AutoCloseable {
             mCommands.add(new Command(COMMAND_CODE_PLAYBACK_STOP));
             mCommands.add(new Command(COMMAND_CODE_PLAYBACK_SKIP_NEXT_ITEM));
             mCommands.add(new Command(COMMAND_CODE_PLAYBACK_SKIP_PREV_ITEM));
+            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_PREPARE));
+            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_FAST_FORWARD));
+            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_REWIND));
+            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_SEEK_TO));
+            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_SET_CURRENT_PLAYLIST_ITEM));
         }
 
         public void removeCommand(Command command) {
@@ -349,7 +351,8 @@ public class MediaSession2 implements AutoCloseable {
         /**
          * Called when a controller set rating on the currently playing contents.
          *
-         * @param
+         * @param controller controller information
+         * @param rating new rating from the controller
          */
         public void onSetRating(@NonNull ControllerInfo controller, @NonNull Rating2 rating) { }
 
@@ -429,7 +432,7 @@ public class MediaSession2 implements AutoCloseable {
         /**
          * Override to handle requests to play a specific media item represented by a URI.
          */
-        public void prepareFromUri(@NonNull ControllerInfo controller,
+        public void onPrepareFromUri(@NonNull ControllerInfo controller,
                 @NonNull Uri uri, @Nullable Bundle extras) { }
 
         /**
@@ -462,7 +465,7 @@ public class MediaSession2 implements AutoCloseable {
     static abstract class BuilderBase
             <T extends MediaSession2.BuilderBase<T, C>, C extends SessionCallback> {
         final Context mContext;
-        final MediaPlayerBase mPlayer;
+        final MediaPlayerInterface mPlayer;
         String mId;
         Executor mCallbackExecutor;
         C mCallback;
@@ -479,7 +482,7 @@ public class MediaSession2 implements AutoCloseable {
          *      {@link MediaSession2} or {@link MediaController2}.
          */
         // TODO(jaewan): Also need executor
-        public BuilderBase(@NonNull Context context, @NonNull MediaPlayerBase player) {
+        public BuilderBase(@NonNull Context context, @NonNull MediaPlayerInterface player) {
             if (context == null) {
                 throw new IllegalArgumentException("context shouldn't be null");
             }
@@ -527,7 +530,7 @@ public class MediaSession2 implements AutoCloseable {
         /**
          * Set an intent for launching UI for this Session. This can be used as a
          * quick link to an ongoing media screen. The intent should be for an
-         * activity that may be started using {@link Activity#startActivity(Intent)}.
+         * activity that may be started using {@link Context#startActivity(Intent)}.
          *
          * @param pi The intent to launch to show UI for this session.
          */
@@ -555,7 +558,7 @@ public class MediaSession2 implements AutoCloseable {
         }
 
         /**
-         * Set {@link SessionCallback}.
+         * Set callback for the session.
          *
          * @param executor callback executor
          * @param callback session callback.
@@ -581,7 +584,7 @@ public class MediaSession2 implements AutoCloseable {
          * @throws IllegalStateException if the session with the same id is already exists for the
          *      package.
          */
-        public abstract MediaSession2 build() throws IllegalStateException;
+        public abstract MediaSession2 build();
     }
 
     /**
@@ -594,17 +597,20 @@ public class MediaSession2 implements AutoCloseable {
     // TODO(jaewan): Add setRatingType()
     // TODO(jaewan): Add setSessionActivity()
     public static final class Builder extends BuilderBase<Builder, SessionCallback> {
-        public Builder(Context context, @NonNull MediaPlayerBase player) {
+        public Builder(Context context, @NonNull MediaPlayerInterface player) {
             super(context, player);
         }
 
         @Override
-        public MediaSession2 build() throws IllegalStateException {
+        public MediaSession2 build() {
+            if (mCallbackExecutor == null) {
+                mCallbackExecutor = mContext.getMainExecutor();
+            }
             if (mCallback == null) {
                 mCallback = new SessionCallback();
             }
-            return new MediaSession2(mContext, mPlayer, mId, mCallbackExecutor, mCallback,
-                    mVolumeProvider, mRatingType, mSessionActivity);
+            return new MediaSession2(mContext, mPlayer, mId, mVolumeProvider, mRatingType,
+                    mSessionActivity, mCallbackExecutor, mCallback);
         }
     }
 
@@ -624,7 +630,7 @@ public class MediaSession2 implements AutoCloseable {
                 IMediaSession2Callback callback) {
             mProvider = ApiLoader.getProvider(context)
                     .createMediaSession2ControllerInfoProvider(
-                            this, context, uid, pid, packageName, callback);
+                            context, this, uid, pid, packageName, callback);
         }
 
         /**
@@ -652,11 +658,7 @@ public class MediaSession2 implements AutoCloseable {
             return mProvider.isTrusted_impl();
         }
 
-        /**
-         * @hide
-         * @return
-         */
-        // TODO(jaewan): SystemApi
+        @SystemApi
         public ControllerInfoProvider getProvider() {
             return mProvider;
         }
@@ -854,8 +856,7 @@ public class MediaSession2 implements AutoCloseable {
     /**
      * Parameter for the playlist.
      */
-    // TODO(jaewan): add fromBundle()/toBundle()
-    public static class PlaylistParam {
+    public static class PlaylistParams {
         /**
          * @hide
          */
@@ -910,12 +911,22 @@ public class MediaSession2 implements AutoCloseable {
          */
         public static final int SHUFFLE_MODE_GROUP = 2;
 
+        /**
+         * Keys used for converting a PlaylistParams object to a bundle object and vice versa.
+         */
+        private static final String KEY_REPEAT_MODE =
+                "android.media.session2.playlistparams2.repeat_mode";
+        private static final String KEY_SHUFFLE_MODE =
+                "android.media.session2.playlistparams2.shuffle_mode";
+        private static final String KEY_MEDIA_METADATA2_BUNDLE =
+                "android.media.session2.playlistparams2.metadata2_bundle";
+
         private @RepeatMode int mRepeatMode;
         private @ShuffleMode int mShuffleMode;
 
         private MediaMetadata2 mPlaylistMetadata;
 
-        public PlaylistParam(@RepeatMode int repeatMode, @ShuffleMode int shuffleMode,
+        public PlaylistParams(@RepeatMode int repeatMode, @ShuffleMode int shuffleMode,
                 @Nullable MediaMetadata2 playlistMetadata) {
             mRepeatMode = repeatMode;
             mShuffleMode = shuffleMode;
@@ -933,6 +944,47 @@ public class MediaSession2 implements AutoCloseable {
         public MediaMetadata2 getPlaylistMetadata() {
             return mPlaylistMetadata;
         }
+
+        /**
+         * Returns this object as a bundle to share between processes.
+         *
+         * @hide
+         */
+        public Bundle toBundle() {
+            Bundle bundle = new Bundle();
+            bundle.putInt(KEY_REPEAT_MODE, mRepeatMode);
+            bundle.putInt(KEY_SHUFFLE_MODE, mShuffleMode);
+            if (mPlaylistMetadata != null) {
+                bundle.putBundle(KEY_MEDIA_METADATA2_BUNDLE, mPlaylistMetadata.getBundle());
+            }
+            return bundle;
+        }
+
+        /**
+         * Creates an instance from a bundle which is previously created by {@link #toBundle()}.
+         *
+         * @param bundle A bundle created by {@link #toBundle()}.
+         * @return A new {@link PlaylistParams} instance. Returns {@code null} if the given
+         *         {@param bundle} is null, or if the {@param bundle} has no playlist parameters.
+         * @hide
+         */
+        public static PlaylistParams fromBundle(Bundle bundle) {
+            if (bundle == null) {
+                return null;
+            }
+            if (!bundle.containsKey(KEY_REPEAT_MODE) || !bundle.containsKey(KEY_SHUFFLE_MODE)) {
+                return null;
+            }
+
+            Bundle metadataBundle = bundle.getBundle(KEY_MEDIA_METADATA2_BUNDLE);
+            MediaMetadata2 metadata =
+                    metadataBundle == null ? null : new MediaMetadata2(metadataBundle);
+
+            return new PlaylistParams(
+                    bundle.getInt(KEY_REPEAT_MODE),
+                    bundle.getInt(KEY_SHUFFLE_MODE),
+                    metadata);
+        }
     }
 
     /**
@@ -949,33 +1001,31 @@ public class MediaSession2 implements AutoCloseable {
      *       framework had to add heuristics to figure out if an app is
      * @hide
      */
-    MediaSession2(Context context, MediaPlayerBase player, String id, Executor callbackExecutor,
-            SessionCallback callback, VolumeProvider volumeProvider, int ratingType,
-            PendingIntent sessionActivity) {
+    MediaSession2(Context context, MediaPlayerInterface player, String id,
+            VolumeProvider volumeProvider, int ratingType, PendingIntent sessionActivity,
+            Executor callbackExecutor, SessionCallback callback) {
         super();
-        mProvider = createProvider(context, player, id, callbackExecutor, callback,
-                volumeProvider, ratingType, sessionActivity);
+        mProvider = createProvider(context, player, id, volumeProvider, ratingType, sessionActivity,
+                callbackExecutor, callback);
+        mProvider.initialize();
     }
 
-    MediaSession2Provider createProvider(Context context, MediaPlayerBase player, String id,
-            Executor callbackExecutor, SessionCallback callback, VolumeProvider volumeProvider,
-            int ratingType, PendingIntent sessionActivity) {
+    MediaSession2Provider createProvider(Context context, MediaPlayerInterface player, String id,
+            VolumeProvider volumeProvider, int ratingType, PendingIntent sessionActivity,
+            Executor callbackExecutor, SessionCallback callback) {
         return ApiLoader.getProvider(context)
-                .createMediaSession2(this, context, player, id, callbackExecutor,
-                        callback, volumeProvider, ratingType, sessionActivity);
+                .createMediaSession2(context, this, player, id, volumeProvider, ratingType,
+                        sessionActivity, callbackExecutor, callback);
     }
 
-    /**
-     * @hide
-     */
-    // TODO(jaewan): SystemApi
+    @SystemApi
     public MediaSession2Provider getProvider() {
         return mProvider;
     }
 
     /**
-     * Set the underlying {@link MediaPlayerBase} for this session to dispatch incoming event to.
-     * Events from the {@link MediaController2} will be sent directly to the underlying
+     * Set the underlying {@link MediaPlayerInterface} for this session to dispatch incoming event
+     * to. Events from the {@link MediaController2} will be sent directly to the underlying
      * player on the {@link Handler} where the session is created on.
      * <p>
      * If the new player is successfully set, {@link PlaybackListener}
@@ -984,24 +1034,23 @@ public class MediaSession2 implements AutoCloseable {
      * You can also specify a volume provider. If so, playback in the player is considered as
      * remote playback.
      *
-     * @param player a {@link MediaPlayerBase} that handles actual media playback in your app.
+     * @param player a {@link MediaPlayerInterface} that handles actual media playback in your app.
      * @throws IllegalArgumentException if the player is {@code null}.
      */
-    public void setPlayer(@NonNull MediaPlayerBase player) {
+    public void setPlayer(@NonNull MediaPlayerInterface player) {
         mProvider.setPlayer_impl(player);
     }
 
     /**
-     * Set the underlying {@link MediaPlayerBase} with the volume provider for remote playback.
+     * Set the underlying {@link MediaPlayerInterface} with the volume provider for remote playback.
      *
-     * @param player a {@link MediaPlayerBase} that handles actual media playback in your app.
+     * @param player a {@link MediaPlayerInterface} that handles actual media playback in your app.
      * @param volumeProvider a volume provider
-     * @see #setPlayer(MediaPlayerBase)
+     * @see #setPlayer(MediaPlayerInterface)
      * @see Builder#setVolumeProvider(VolumeProvider)
-     * @throws IllegalArgumentException if a parameter is {@code null}.
      */
-    public void setPlayer(@NonNull MediaPlayerBase player, @NonNull VolumeProvider volumeProvider)
-            throws IllegalArgumentException {
+    public void setPlayer(@NonNull MediaPlayerInterface player,
+            @NonNull VolumeProvider volumeProvider) {
         mProvider.setPlayer_impl(player, volumeProvider);
     }
 
@@ -1013,7 +1062,8 @@ public class MediaSession2 implements AutoCloseable {
     /**
      * @return player
      */
-    public @Nullable MediaPlayerBase getPlayer() {
+    public @Nullable
+    MediaPlayerInterface getPlayer() {
         return mProvider.getPlayer_impl();
     }
 
@@ -1027,15 +1077,6 @@ public class MediaSession2 implements AutoCloseable {
 
     public @NonNull List<ControllerInfo> getConnectedControllers() {
         return mProvider.getConnectedControllers_impl();
-    }
-
-    /**
-     * Sets the {@link AudioAttributes} to be used during the playback of the video.
-     *
-     * @param attributes non-null <code>AudioAttributes</code>.
-     */
-    public void setAudioAttributes(@NonNull AudioAttributes attributes) {
-        mProvider.setAudioAttributes_impl(attributes);
     }
 
     /**
@@ -1217,7 +1258,64 @@ public class MediaSession2 implements AutoCloseable {
         // To match with KEYCODE_MEDIA_SKIP_BACKWARD
     }
 
-    public void setPlaylist(@NonNull List<MediaItem2> playlist, @NonNull PlaylistParam param) {
+    public void setPlaylist(@NonNull List<MediaItem2> playlist, @NonNull PlaylistParams param) {
         mProvider.setPlaylist_impl(playlist, param);
+    }
+
+    public List<MediaItem2> getPlaylist() {
+        return mProvider.getPlaylist_impl();
+    }
+
+    /**
+     * Sets the {@link PlaylistParams} for the current play list. Repeat/shuffle mode and metadata
+     * for the list can be set by calling this method.
+     *
+     * @param params A {@link PlaylistParams} object to set.
+     * @throws IllegalArgumentException if given {@param param} is null.
+     */
+    public void setPlaylistParams(PlaylistParams params) {
+        mProvider.setPlaylistParams_impl(params);
+    }
+
+    /**
+     * Returns the {@link PlaylistParams} for the current play list.
+     * Returns {@code null} if not set.
+     */
+    public PlaylistParams getPlaylistParams() {
+        return mProvider.getPlaylistParams_impl();
+    }
+
+    /*
+     * Add a {@link PlaybackListener} to listen changes in the underlying
+     * {@link MediaPlayerInterface}. Listener will be called immediately to tell the current value.
+     * <p>
+     * Added listeners will be also called when the underlying player is changed.
+     *
+     * @param executor the call listener
+     * @param listener the listener that will be run
+     * @throws IllegalArgumentException when either the listener or handler is {@code null}.
+     */
+    public void addPlaybackListener(@NonNull @CallbackExecutor Executor executor,
+            @NonNull PlaybackListener listener) {
+        mProvider.addPlaybackListener_impl(executor, listener);
+    }
+
+    /**
+     * Remove previously added {@link PlaybackListener}.
+     *
+     * @param listener the listener to be removed
+     * @throws IllegalArgumentException if the listener is {@code null}.
+     */
+    public void removePlaybackListener(@NonNull PlaybackListener listener) {
+        mProvider.removePlaybackListener_impl(listener);
+    }
+
+    /**
+     * Return the {@link PlaybackState2} from the player.
+     *
+     * @return playback state
+     */
+    public PlaybackState2 getPlaybackState() {
+        return mProvider.getPlaybackState_impl();
     }
 }

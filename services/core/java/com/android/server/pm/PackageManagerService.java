@@ -193,6 +193,7 @@ import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VerifierInfo;
 import android.content.pm.VersionedPackage;
+import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
 import android.content.res.Resources;
@@ -337,6 +338,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.StandardCharsets;
+import java.security.DigestException;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -439,6 +441,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final int NFC_UID = Process.NFC_UID;
     private static final int BLUETOOTH_UID = Process.BLUETOOTH_UID;
     private static final int SHELL_UID = Process.SHELL_UID;
+    private static final int SE_UID = Process.SE_UID;
 
     // Suffix used during package installation when copying/moving
     // package apks to install directory.
@@ -464,6 +467,7 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int SCAN_AS_PRIVILEGED = 1<<18;
     static final int SCAN_AS_OEM = 1<<19;
     static final int SCAN_AS_VENDOR = 1<<20;
+    static final int SCAN_AS_PRODUCT = 1<<21;
 
     @IntDef(flag = true, prefix = { "SCAN_" }, value = {
             SCAN_NO_DEX,
@@ -567,6 +571,8 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final String PACKAGE_SCHEME = "package";
 
     private static final String VENDOR_OVERLAY_DIR = "/vendor/overlay";
+
+    private static final String PRODUCT_OVERLAY_DIR = "/product/overlay";
 
     private static final String PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB = "pm.dexopt.priv-apps-oob";
 
@@ -2403,6 +2409,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
         mSettings.addSharedUserLPw("android.uid.shell", SHELL_UID,
                 ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
+        mSettings.addSharedUserLPw("android.uid.se", SE_UID,
+                ApplicationInfo.FLAG_SYSTEM, ApplicationInfo.PRIVATE_FLAG_PRIVILEGED);
 
         String separateProcesses = SystemProperties.get("debug.separate_processes");
         if (separateProcesses != null && separateProcesses.length() > 0) {
@@ -2550,7 +2558,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 scanFlags = scanFlags | SCAN_FIRST_BOOT_OR_UPGRADE;
             }
 
-            // Collect vendor overlay packages. (Do this before scanning any apps.)
+            // Collect vendor/product overlay packages. (Do this before scanning any apps.)
             // For security and version matching reason, only consider
             // overlay packages if they reside in the right directory.
             scanDirTracedLI(new File(VENDOR_OVERLAY_DIR),
@@ -2559,6 +2567,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     scanFlags
                     | SCAN_AS_SYSTEM
                     | SCAN_AS_VENDOR,
+                    0);
+            scanDirTracedLI(new File(PRODUCT_OVERLAY_DIR),
+                    mDefParseFlags
+                    | PackageParser.PARSE_IS_SYSTEM_DIR,
+                    scanFlags
+                    | SCAN_AS_SYSTEM
+                    | SCAN_AS_PRODUCT,
                     0);
 
             mParallelPackageParserCallback.findStaticOverlayPackages();
@@ -2593,8 +2608,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     0);
 
             // Collected privileged vendor packages.
-                File privilegedVendorAppDir = new File(Environment.getVendorDirectory(),
-                        "priv-app");
+            File privilegedVendorAppDir = new File(Environment.getVendorDirectory(), "priv-app");
             try {
                 privilegedVendorAppDir = privilegedVendorAppDir.getCanonicalFile();
             } catch (IOException e) {
@@ -2632,6 +2646,37 @@ public class PackageManagerService extends IPackageManager.Stub
                     scanFlags
                     | SCAN_AS_SYSTEM
                     | SCAN_AS_OEM,
+                    0);
+
+            // Collected privileged product packages.
+            File privilegedProductAppDir = new File(Environment.getProductDirectory(), "priv-app");
+            try {
+                privilegedProductAppDir = privilegedProductAppDir.getCanonicalFile();
+            } catch (IOException e) {
+                // failed to look up canonical path, continue with original one
+            }
+            scanDirTracedLI(privilegedProductAppDir,
+                    mDefParseFlags
+                    | PackageParser.PARSE_IS_SYSTEM_DIR,
+                    scanFlags
+                    | SCAN_AS_SYSTEM
+                    | SCAN_AS_PRODUCT
+                    | SCAN_AS_PRIVILEGED,
+                    0);
+
+            // Collect ordinary product packages.
+            File productAppDir = new File(Environment.getProductDirectory(), "app");
+            try {
+                productAppDir = productAppDir.getCanonicalFile();
+            } catch (IOException e) {
+                // failed to look up canonical path, continue with original one
+            }
+            scanDirTracedLI(productAppDir,
+                    mDefParseFlags
+                    | PackageParser.PARSE_IS_SYSTEM_DIR,
+                    scanFlags
+                    | SCAN_AS_SYSTEM
+                    | SCAN_AS_PRODUCT,
                     0);
 
             // Prune any system packages that no longer exist.
@@ -2840,6 +2885,23 @@ Slog.e("TODD",
                                     scanFlags
                                     | SCAN_AS_SYSTEM
                                     | SCAN_AS_OEM;
+                        } else if (FileUtils.contains(privilegedProductAppDir, scanFile)) {
+                            reparseFlags =
+                                    mDefParseFlags |
+                                    PackageParser.PARSE_IS_SYSTEM_DIR;
+                            rescanFlags =
+                                    scanFlags
+                                    | SCAN_AS_SYSTEM
+                                    | SCAN_AS_PRODUCT
+                                    | SCAN_AS_PRIVILEGED;
+                        } else if (FileUtils.contains(productAppDir, scanFile)) {
+                            reparseFlags =
+                                    mDefParseFlags |
+                                    PackageParser.PARSE_IS_SYSTEM_DIR;
+                            rescanFlags =
+                                    scanFlags
+                                    | SCAN_AS_SYSTEM
+                                    | SCAN_AS_PRODUCT;
                         } else {
                             Slog.e(TAG, "Ignoring unexpected fallback path " + scanFile);
                             continue;
@@ -8291,11 +8353,13 @@ Slog.e("TODD",
     }
 
     private void collectCertificatesLI(PackageSetting ps, PackageParser.Package pkg,
-            final @ParseFlags int parseFlags, boolean forceCollect) throws PackageManagerException {
+            boolean forceCollect) throws PackageManagerException {
         // When upgrading from pre-N MR1, verify the package time stamp using the package
         // directory and not the APK file.
         final long lastModifiedTime = mIsPreNMR1Upgrade
                 ? new File(pkg.codePath).lastModified() : getLastModifiedTime(pkg);
+        // Note that currently skipVerify skips verification on both base and splits for simplicity.
+        final boolean skipVerify = forceCollect && canSkipFullPackageVerification(pkg);
         if (ps != null && !forceCollect
                 && ps.codePathString.equals(pkg.codePath)
                 && ps.timeStamp == lastModifiedTime
@@ -8321,7 +8385,7 @@ Slog.e("TODD",
 
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
-            PackageParser.collectCertificates(pkg, parseFlags);
+            PackageParser.collectCertificates(pkg, skipVerify);
         } catch (PackageParserException e) {
             throw PackageManagerException.from(e);
         } finally {
@@ -8413,6 +8477,48 @@ Slog.e("TODD",
         }
 
         return scannedPkg;
+    }
+
+    /**
+     * Returns if full apk verification can be skipped for the whole package, including the splits.
+     */
+    private boolean canSkipFullPackageVerification(PackageParser.Package pkg) {
+        if (!canSkipFullApkVerification(pkg.baseCodePath)) {
+            return false;
+        }
+        // TODO: Allow base and splits to be verified individually.
+        if (!ArrayUtils.isEmpty(pkg.splitCodePaths)) {
+            for (int i = 0; i < pkg.splitCodePaths.length; i++) {
+                if (!canSkipFullApkVerification(pkg.splitCodePaths[i])) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Returns if full apk verification can be skipped, depending on current FSVerity setup and
+     * whether the apk contains signed root hash.  Note that the signer's certificate still needs to
+     * match one in a trusted source, and should be done separately.
+     */
+    private boolean canSkipFullApkVerification(String apkPath) {
+        byte[] rootHashObserved = null;
+        try {
+            rootHashObserved = VerityUtils.generateFsverityRootHash(apkPath);
+            if (rootHashObserved == null) {
+                return false;  // APK does not contain Merkle tree root hash.
+            }
+            synchronized (mInstallLock) {
+                // Returns whether the observed root hash matches what kernel has.
+                mInstaller.assertFsverityRootHashMatches(apkPath, rootHashObserved);
+                return true;
+            }
+        } catch (InstallerException | IOException | DigestException |
+                NoSuchAlgorithmException e) {
+            Slog.w(TAG, "Error in fsverity check. Fallback to full apk verification.", e);
+        }
+        return false;
     }
 
     // Temporary to catch potential issues with refactoring
@@ -8626,10 +8732,11 @@ Slog.e("TODD",
         }
 
         // Verify certificates against what was last scanned. If it is an updated priv app, we will
-        // force the verification. Full apk verification will happen unless apk verity is set up for
-        // the file. In that case, only small part of the apk is verified upfront.
-        collectCertificatesLI(pkgSetting, pkg, parseFlags,
-                PackageManagerServiceUtils.isApkVerificationForced(disabledPkgSetting));
+        // force re-collecting certificate. Full apk verification will happen unless apk verity is
+        // set up for the file. In that case, only small part of the apk is verified upfront.
+        final boolean forceCollect = PackageManagerServiceUtils.isApkVerificationForced(
+                disabledPkgSetting);
+        collectCertificatesLI(pkgSetting, pkg, forceCollect);
 
         boolean shouldHideSystemApp = false;
         // A new application appeared on /system, but, we already have a copy of
@@ -8870,7 +8977,8 @@ Slog.e("TODD",
                         // PackageDexOptimizer to prevent this happening on first boot. The issue
                         // is that we don't have a good way to say "do this only once".
                         if (!mInstaller.copySystemProfile(profileFile.getAbsolutePath(),
-                                pkg.applicationInfo.uid, pkg.packageName)) {
+                                pkg.applicationInfo.uid, pkg.packageName,
+                                ArtManager.getProfileName(null))) {
                             Log.e(TAG, "Installer failed to copy system profile!");
                         } else {
                             // Disabled as this causes speed-profile compilation during first boot
@@ -8905,7 +9013,8 @@ Slog.e("TODD",
                                 // issue is that we don't have a good way to say "do this only
                                 // once".
                                 if (!mInstaller.copySystemProfile(profileFile.getAbsolutePath(),
-                                        pkg.applicationInfo.uid, pkg.packageName)) {
+                                        pkg.applicationInfo.uid, pkg.packageName,
+                                        ArtManager.getProfileName(null))) {
                                     Log.e(TAG, "Failed to copy system profile for stub package!");
                                 } else {
                                     useProfileForDexopt = true;
@@ -9330,14 +9439,7 @@ Slog.e("TODD",
 
         synchronized (mInstallLock) {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dump profiles");
-            final int sharedGid = UserHandle.getSharedAppGid(pkg.applicationInfo.uid);
-            try {
-                List<String> allCodePaths = pkg.getAllCodePathsExcludingResourceOnly();
-                String codePaths = TextUtils.join(";", allCodePaths);
-                mInstaller.dumpProfiles(sharedGid, packageName, codePaths);
-            } catch (InstallerException e) {
-                Slog.w(TAG, "Failed to dump profiles", e);
-            }
+            mArtManagerService.dumpProfiles(pkg);
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
     }
@@ -9413,6 +9515,8 @@ Slog.e("TODD",
         for (int i = 0; i < childCount; i++) {
             clearAppDataLeafLIF(pkg.childPackages.get(i), userId, flags);
         }
+
+        clearAppProfilesLIF(pkg, UserHandle.USER_ALL);
     }
 
     private void clearAppDataLeafLIF(PackageParser.Package pkg, int userId, int flags) {
@@ -9485,18 +9589,10 @@ Slog.e("TODD",
             Slog.wtf(TAG, "Package was null!", new Throwable());
             return;
         }
-        clearAppProfilesLeafLIF(pkg);
+        mArtManagerService.clearAppProfiles(pkg);
         final int childCount = (pkg.childPackages != null) ? pkg.childPackages.size() : 0;
         for (int i = 0; i < childCount; i++) {
-            clearAppProfilesLeafLIF(pkg.childPackages.get(i));
-        }
-    }
-
-    private void clearAppProfilesLeafLIF(PackageParser.Package pkg) {
-        try {
-            mInstaller.clearAppProfiles(pkg.packageName);
-        } catch (InstallerException e) {
-            Slog.w(TAG, String.valueOf(e));
+            mArtManagerService.clearAppProfiles(pkg.childPackages.get(i));
         }
     }
 
@@ -9826,6 +9922,7 @@ Slog.e("TODD",
      * <li>{@link #SCAN_AS_PRIVILEGED}</li>
      * <li>{@link #SCAN_AS_OEM}</li>
      * <li>{@link #SCAN_AS_VENDOR}</li>
+     * <li>{@link #SCAN_AS_PRODUCT}</li>
      * <li>{@link #SCAN_AS_INSTANT_APP}</li>
      * <li>{@link #SCAN_AS_VIRTUAL_PRELOAD}</li>
      * </ul>
@@ -9847,6 +9944,10 @@ Slog.e("TODD",
             if ((disabledPkgSetting.pkgPrivateFlags
                     & ApplicationInfo.PRIVATE_FLAG_VENDOR) != 0) {
                 scanFlags |= SCAN_AS_VENDOR;
+            }
+            if ((disabledPkgSetting.pkgPrivateFlags
+                    & ApplicationInfo.PRIVATE_FLAG_PRODUCT) != 0) {
+                scanFlags |= SCAN_AS_PRODUCT;
             }
         }
         if (pkgSetting != null) {
@@ -10624,6 +10725,10 @@ Slog.e("TODD",
 
         if ((scanFlags & SCAN_AS_VENDOR) != 0) {
             pkg.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_VENDOR;
+        }
+
+        if ((scanFlags & SCAN_AS_PRODUCT) != 0) {
+            pkg.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_PRODUCT;
         }
 
         if (!isSystemApp(pkg)) {
@@ -11672,6 +11777,8 @@ Slog.e("TODD",
             codeRoot = Environment.getOemDirectory();
         } else if (FileUtils.contains(Environment.getVendorDirectory(), codePath)) {
             codeRoot = Environment.getVendorDirectory();
+        } else if (FileUtils.contains(Environment.getProductDirectory(), codePath)) {
+            codeRoot = Environment.getProductDirectory();
         } else {
             // Unrecognized code path; take its top real segment as the apk root:
             // e.g. /something/app/blah.apk => /something
@@ -16074,7 +16181,7 @@ Slog.e("TODD",
 
         boolean sysPkg = (isSystemApp(oldPackage));
         if (sysPkg) {
-            // Set the system/privileged/oem/vendor flags as needed
+            // Set the system/privileged/oem/vendor/product flags as needed
             final boolean privileged =
                     (oldPackage.applicationInfo.privateFlags
                             & ApplicationInfo.PRIVATE_FLAG_PRIVILEGED) != 0;
@@ -16084,12 +16191,16 @@ Slog.e("TODD",
             final boolean vendor =
                     (oldPackage.applicationInfo.privateFlags
                             & ApplicationInfo.PRIVATE_FLAG_VENDOR) != 0;
+            final boolean product =
+                    (oldPackage.applicationInfo.privateFlags
+                            & ApplicationInfo.PRIVATE_FLAG_PRODUCT) != 0;
             final @ParseFlags int systemParseFlags = parseFlags;
             final @ScanFlags int systemScanFlags = scanFlags
                     | SCAN_AS_SYSTEM
                     | (privileged ? SCAN_AS_PRIVILEGED : 0)
                     | (oem ? SCAN_AS_OEM : 0)
-                    | (vendor ? SCAN_AS_VENDOR : 0);
+                    | (vendor ? SCAN_AS_VENDOR : 0)
+                    | (product ? SCAN_AS_PRODUCT : 0);
 
             replaceSystemPackageLIF(oldPackage, pkg, systemParseFlags, systemScanFlags,
                     user, allUsers, installerPackageName, res, installReason);
@@ -16156,7 +16267,6 @@ Slog.e("TODD",
 
             clearAppDataLIF(pkg, UserHandle.USER_ALL, StorageManager.FLAG_STORAGE_DE
                     | StorageManager.FLAG_STORAGE_CE | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
-            clearAppProfilesLIF(deletedPackage, UserHandle.USER_ALL);
 
             try {
                 final PackageParser.Package newPackage = scanPackageTracedLI(pkg, parseFlags,
@@ -16295,7 +16405,6 @@ Slog.e("TODD",
         // Successfully disabled the old package. Now proceed with re-installation
         clearAppDataLIF(pkg, UserHandle.USER_ALL, StorageManager.FLAG_STORAGE_DE
                 | StorageManager.FLAG_STORAGE_CE | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
-        clearAppProfilesLIF(deletedPackage, UserHandle.USER_ALL);
 
         res.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
         pkg.setApplicationInfoFlags(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP,
@@ -16755,7 +16864,7 @@ Slog.e("TODD",
             if (args.signingDetails != PackageParser.SigningDetails.UNKNOWN) {
                 pkg.setSigningDetails(args.signingDetails);
             } else {
-                PackageParser.collectCertificates(pkg, parseFlags);
+                PackageParser.collectCertificates(pkg, false /* skipVerify */);
             }
         } catch (PackageParserException e) {
             res.setError("Failed collect during installPackageLI", e);
@@ -17337,6 +17446,10 @@ Slog.e("TODD",
 
     private static boolean isVendorApp(PackageParser.Package pkg) {
         return (pkg.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_VENDOR) != 0;
+    }
+
+    private static boolean isProductApp(PackageParser.Package pkg) {
+        return (pkg.applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_PRODUCT) != 0;
     }
 
     private static boolean hasDomainURLs(PackageParser.Package pkg) {
@@ -18078,8 +18191,10 @@ Slog.e("TODD",
         try {
             final File privilegedAppDir = new File(Environment.getRootDirectory(), "priv-app");
             final File privilegedVendorAppDir = new File(Environment.getVendorDirectory(), "priv-app");
+            final File privilegedProductAppDir = new File(Environment.getProductDirectory(), "priv-app");
             return path.startsWith(privilegedAppDir.getCanonicalPath())
-                    || path.startsWith(privilegedVendorAppDir.getCanonicalPath());
+                    || path.startsWith(privilegedVendorAppDir.getCanonicalPath())
+                    || path.startsWith(privilegedProductAppDir.getCanonicalPath());
         } catch (IOException e) {
             Slog.e(TAG, "Unable to access code path " + path);
         }
@@ -18098,6 +18213,15 @@ Slog.e("TODD",
     static boolean locationIsVendor(String path) {
         try {
             return path.startsWith(Environment.getVendorDirectory().getCanonicalPath());
+        } catch (IOException e) {
+            Slog.e(TAG, "Unable to access code path " + path);
+        }
+        return false;
+    }
+
+    static boolean locationIsProduct(String path) {
+        try {
+            return path.startsWith(Environment.getProductDirectory().getCanonicalPath());
         } catch (IOException e) {
             Slog.e(TAG, "Unable to access code path " + path);
         }
@@ -18227,6 +18351,9 @@ Slog.e("TODD",
         }
         if (locationIsVendor(codePathString)) {
             scanFlags |= SCAN_AS_VENDOR;
+        }
+        if (locationIsProduct(codePathString)) {
+            scanFlags |= SCAN_AS_PRODUCT;
         }
 
         final File codePath = new File(codePathString);
@@ -20368,7 +20495,6 @@ Slog.v(TAG, ":: stepped forward, applying functor at tag " + parser.getName());
                     }
                     clearAppDataLIF(pkg, UserHandle.USER_ALL, FLAG_STORAGE_DE
                             | FLAG_STORAGE_CE | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
-                    clearAppProfilesLIF(pkg, UserHandle.USER_ALL);
                     mDexManager.notifyPackageUpdated(pkg.packageName,
                             pkg.baseCodePath, pkg.splitCodePaths);
                 }

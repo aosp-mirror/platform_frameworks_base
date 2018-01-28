@@ -20,10 +20,14 @@ option java_multiple_files = true;
 
 package android.app;
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 /**
- * An android.app.NotificationMananger.Policy object.
+ * An android.app.NotificationManager.Policy object.
  */
 message PolicyProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     enum Category {
         CATEGORY_UNKNOWN = 0;
         // Reminder notifications are prioritized.
@@ -36,6 +40,11 @@ message PolicyProto {
         CALLS = 4;
         // Calls from repeat callers are prioritized.
         REPEAT_CALLERS = 5;
+        // Alarms are prioritized.
+        ALARMS = 6;
+        // Media, system, game (catch-all for non-never suppressible sounds) are
+        // prioritized.
+        MEDIA_SYSTEM_OTHER = 7;
     }
     repeated Category priority_categories = 1;
 

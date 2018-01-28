@@ -361,6 +361,7 @@ package android.app {
     method public byte[] getMetadata();
     method public boolean removeConfiguration(long);
     method public boolean setBroadcastSubscriber(long, long, android.app.PendingIntent);
+    field public static final java.lang.String ACTION_STATSD_STARTED = "android.app.action.STATSD_STARTED";
     field public static final java.lang.String EXTRA_STATS_CONFIG_KEY = "android.app.extra.STATS_CONFIG_KEY";
     field public static final java.lang.String EXTRA_STATS_CONFIG_UID = "android.app.extra.STATS_CONFIG_UID";
     field public static final java.lang.String EXTRA_STATS_DIMENSIONS_VALUE = "android.app.extra.STATS_DIMENSIONS_VALUE";
@@ -450,7 +451,7 @@ package android.app.backup {
     method public java.lang.String[] listAllTransports();
     method public int requestBackup(java.lang.String[], android.app.backup.BackupObserver);
     method public int requestBackup(java.lang.String[], android.app.backup.BackupObserver, android.app.backup.BackupManagerMonitor, int);
-    method public int requestRestore(android.app.backup.RestoreObserver, android.app.backup.BackupManagerMonitor);
+    method public deprecated int requestRestore(android.app.backup.RestoreObserver, android.app.backup.BackupManagerMonitor);
     method public deprecated java.lang.String selectBackupTransport(java.lang.String);
     method public void selectBackupTransport(android.content.ComponentName, android.app.backup.SelectBackupTransportCallback);
     method public void setAutoRestore(boolean);
@@ -527,6 +528,7 @@ package android.app.backup {
     field public static final int LOG_EVENT_ID_SIGNATURE_MISMATCH = 29; // 0x1d
     field public static final int LOG_EVENT_ID_SYSTEM_APP_NO_AGENT = 38; // 0x26
     field public static final int LOG_EVENT_ID_TRANSPORT_IS_NULL = 50; // 0x32
+    field public static final int LOG_EVENT_ID_TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED = 51; // 0x33
     field public static final int LOG_EVENT_ID_UNKNOWN_VERSION = 44; // 0x2c
     field public static final int LOG_EVENT_ID_VERSIONS_MATCH = 35; // 0x23
     field public static final int LOG_EVENT_ID_VERSION_OF_BACKUP_OLDER = 36; // 0x24
@@ -568,6 +570,7 @@ package android.app.backup {
     method public long getCurrentRestoreSet();
     method public int getNextFullRestoreDataChunk(android.os.ParcelFileDescriptor);
     method public int getRestoreData(android.os.ParcelFileDescriptor);
+    method public int getTransportFlags();
     method public int initializeDevice();
     method public boolean isAppEligibleForBackup(android.content.pm.PackageInfo, boolean);
     method public java.lang.String name();
@@ -583,9 +586,12 @@ package android.app.backup {
     method public java.lang.String transportDirName();
     field public static final int AGENT_ERROR = -1003; // 0xfffffc15
     field public static final int AGENT_UNKNOWN = -1004; // 0xfffffc14
+    field public static final int FLAG_INCREMENTAL = 2; // 0x2
+    field public static final int FLAG_NON_INCREMENTAL = 4; // 0x4
     field public static final int FLAG_USER_INITIATED = 1; // 0x1
     field public static final int NO_MORE_DATA = -1; // 0xffffffff
     field public static final int TRANSPORT_ERROR = -1000; // 0xfffffc18
+    field public static final int TRANSPORT_NON_INCREMENTAL_BACKUP_REQUIRED = -1006; // 0xfffffc12
     field public static final int TRANSPORT_NOT_INITIALIZED = -1001; // 0xfffffc17
     field public static final int TRANSPORT_OK = 0; // 0x0
     field public static final int TRANSPORT_PACKAGE_REJECTED = -1002; // 0xfffffc16
@@ -775,6 +781,7 @@ package android.content {
     field public static final java.lang.String NETWORK_SCORE_SERVICE = "network_score";
     field public static final java.lang.String OEM_LOCK_SERVICE = "oem_lock";
     field public static final java.lang.String PERSISTENT_DATA_BLOCK_SERVICE = "persistent_data_block";
+    field public static final java.lang.String SECURE_ELEMENT_SERVICE = "secure_element";
     field public static final java.lang.String STATS_MANAGER = "stats";
     field public static final java.lang.String SYSTEM_UPDATE_SERVICE = "system_update";
     field public static final java.lang.String VR_SERVICE = "vrmanager";
@@ -1038,8 +1045,10 @@ package android.content.pm {
 package android.content.pm.dex {
 
   public class ArtManager {
-    method public boolean isRuntimeProfilingEnabled();
-    method public void snapshotRuntimeProfile(java.lang.String, java.lang.String, android.content.pm.dex.ArtManager.SnapshotRuntimeProfileCallback, android.os.Handler);
+    method public boolean isRuntimeProfilingEnabled(int);
+    method public void snapshotRuntimeProfile(int, java.lang.String, java.lang.String, java.util.concurrent.Executor, android.content.pm.dex.ArtManager.SnapshotRuntimeProfileCallback);
+    field public static final int PROFILE_APPS = 0; // 0x0
+    field public static final int PROFILE_BOOT_IMAGE = 1; // 0x1
     field public static final int SNAPSHOT_FAILED_CODE_PATH_NOT_FOUND = 1; // 0x1
     field public static final int SNAPSHOT_FAILED_INTERNAL_ERROR = 2; // 0x2
     field public static final int SNAPSHOT_FAILED_PACKAGE_NOT_FOUND = 0; // 0x0
@@ -2069,21 +2078,21 @@ package android.hardware.radio {
     method public abstract int cancel();
     method public abstract void cancelAnnouncement();
     method public abstract void close();
-    method public abstract int getConfiguration(android.hardware.radio.RadioManager.BandConfig[]);
+    method public abstract deprecated int getConfiguration(android.hardware.radio.RadioManager.BandConfig[]);
     method public android.hardware.radio.ProgramList getDynamicProgramList(android.hardware.radio.ProgramList.Filter);
     method public abstract boolean getMute();
     method public java.util.Map<java.lang.String, java.lang.String> getParameters(java.util.List<java.lang.String>);
-    method public abstract int getProgramInformation(android.hardware.radio.RadioManager.ProgramInfo[]);
+    method public abstract deprecated int getProgramInformation(android.hardware.radio.RadioManager.ProgramInfo[]);
     method public abstract deprecated java.util.List<android.hardware.radio.RadioManager.ProgramInfo> getProgramList(java.util.Map<java.lang.String, java.lang.String>);
     method public abstract boolean hasControl();
     method public abstract deprecated boolean isAnalogForced();
-    method public abstract boolean isAntennaConnected();
+    method public abstract deprecated boolean isAntennaConnected();
     method public boolean isConfigFlagSet(int);
     method public boolean isConfigFlagSupported(int);
     method public abstract int scan(int, boolean);
     method public abstract deprecated void setAnalogForced(boolean);
     method public void setConfigFlag(int, boolean);
-    method public abstract int setConfiguration(android.hardware.radio.RadioManager.BandConfig);
+    method public abstract deprecated int setConfiguration(android.hardware.radio.RadioManager.BandConfig);
     method public abstract int setMute(boolean);
     method public java.util.Map<java.lang.String, java.lang.String> setParameters(java.util.Map<java.lang.String, java.lang.String>);
     method public abstract boolean startBackgroundScan();
@@ -2092,13 +2101,13 @@ package android.hardware.radio {
     method public abstract void tune(android.hardware.radio.ProgramSelector);
     field public static final int DIRECTION_DOWN = 1; // 0x1
     field public static final int DIRECTION_UP = 0; // 0x0
-    field public static final int ERROR_BACKGROUND_SCAN_FAILED = 6; // 0x6
-    field public static final int ERROR_BACKGROUND_SCAN_UNAVAILABLE = 5; // 0x5
-    field public static final int ERROR_CANCELLED = 2; // 0x2
-    field public static final int ERROR_CONFIG = 4; // 0x4
-    field public static final int ERROR_HARDWARE_FAILURE = 0; // 0x0
-    field public static final int ERROR_SCAN_TIMEOUT = 3; // 0x3
-    field public static final int ERROR_SERVER_DIED = 1; // 0x1
+    field public static final deprecated int ERROR_BACKGROUND_SCAN_FAILED = 6; // 0x6
+    field public static final deprecated int ERROR_BACKGROUND_SCAN_UNAVAILABLE = 5; // 0x5
+    field public static final deprecated int ERROR_CANCELLED = 2; // 0x2
+    field public static final deprecated int ERROR_CONFIG = 4; // 0x4
+    field public static final deprecated int ERROR_HARDWARE_FAILURE = 0; // 0x0
+    field public static final deprecated int ERROR_SCAN_TIMEOUT = 3; // 0x3
+    field public static final deprecated int ERROR_SERVER_DIED = 1; // 0x1
   }
 
   public static abstract class RadioTuner.Callback {
@@ -2106,15 +2115,16 @@ package android.hardware.radio {
     method public void onAntennaState(boolean);
     method public void onBackgroundScanAvailabilityChange(boolean);
     method public void onBackgroundScanComplete();
-    method public void onConfigurationChanged(android.hardware.radio.RadioManager.BandConfig);
+    method public deprecated void onConfigurationChanged(android.hardware.radio.RadioManager.BandConfig);
     method public void onControlChanged(boolean);
     method public void onEmergencyAnnouncement(boolean);
-    method public void onError(int);
+    method public deprecated void onError(int);
     method public deprecated void onMetadataChanged(android.hardware.radio.RadioMetadata);
     method public void onParametersUpdated(java.util.Map<java.lang.String, java.lang.String>);
     method public void onProgramInfoChanged(android.hardware.radio.RadioManager.ProgramInfo);
     method public void onProgramListChanged();
     method public void onTrafficAnnouncement(boolean);
+    method public void onTuneFailed(int, android.hardware.radio.ProgramSelector);
   }
 
 }
@@ -2921,9 +2931,23 @@ package android.net {
     method public java.lang.String getInterfaceName();
   }
 
+  public final class IpSecTransform implements java.lang.AutoCloseable {
+    method public void startNattKeepalive(android.net.IpSecTransform.NattKeepaliveCallback, int, android.os.Handler) throws java.io.IOException;
+    method public void stopNattKeepalive();
+  }
+
   public static class IpSecTransform.Builder {
     method public android.net.IpSecTransform buildTunnelModeTransform(java.net.InetAddress, android.net.IpSecManager.SecurityParameterIndex) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException, android.net.IpSecManager.SpiUnavailableException;
-    method public android.net.IpSecTransform.Builder setNattKeepalive(int);
+  }
+
+  public static class IpSecTransform.NattKeepaliveCallback {
+    ctor public IpSecTransform.NattKeepaliveCallback();
+    method public void onError(int);
+    method public void onStarted();
+    method public void onStopped();
+    field public static final int ERROR_HARDWARE_ERROR = 3; // 0x3
+    field public static final int ERROR_HARDWARE_UNSUPPORTED = 2; // 0x2
+    field public static final int ERROR_INVALID_NETWORK = 1; // 0x1
   }
 
   public class NetworkKey implements android.os.Parcelable {
@@ -3500,12 +3524,17 @@ package android.os {
   public class HidlSupport {
     method public static boolean deepEquals(java.lang.Object, java.lang.Object);
     method public static int deepHashCode(java.lang.Object);
+    method public static int getPidIfSharable();
     method public static boolean interfacesEqual(android.os.IHwInterface, java.lang.Object);
   }
 
   public abstract class HwBinder implements android.os.IHwBinder {
     method public static final void configureRpcThreadpool(long, boolean);
+    method public static void enableInstrumentation();
+    method public static final android.os.IHwBinder getService(java.lang.String, java.lang.String) throws java.util.NoSuchElementException, android.os.RemoteException;
+    method public static final android.os.IHwBinder getService(java.lang.String, java.lang.String, boolean) throws java.util.NoSuchElementException, android.os.RemoteException;
     method public static final void joinRpcThreadpool();
+    method public final void transact(int, android.os.HwParcel, android.os.HwParcel, int) throws android.os.RemoteException;
   }
 
   public class HwBlob {
@@ -3605,6 +3634,8 @@ package android.os {
 
   public abstract interface IHwBinder {
     method public abstract boolean linkToDeath(android.os.IHwBinder.DeathRecipient, long);
+    method public abstract android.os.IHwInterface queryLocalInterface(java.lang.String);
+    method public abstract void transact(int, android.os.HwParcel, android.os.HwParcel, int) throws android.os.RemoteException;
     method public abstract boolean unlinkToDeath(android.os.IHwBinder.DeathRecipient);
   }
 
@@ -4716,7 +4747,9 @@ package android.telephony {
     method public int describeContents();
     method public int getAccessNetworkTechnology();
     method public int[] getAvailableServices();
+    method public android.telephony.CellIdentity getCellIdentity();
     method public int getDomain();
+    method public int getReasonForDenial();
     method public int getRegState();
     method public int getTransportType();
     method public boolean isEmergencyEnabled();
@@ -4770,6 +4803,24 @@ package android.telephony {
   public final class SmsManager {
     method public void sendMultipartTextMessageWithoutPersisting(java.lang.String, java.lang.String, java.util.List<java.lang.String>, java.util.List<android.app.PendingIntent>, java.util.List<android.app.PendingIntent>);
     method public void sendTextMessageWithoutPersisting(java.lang.String, java.lang.String, java.lang.String, android.app.PendingIntent, android.app.PendingIntent);
+    field public static final int RESULT_CANCELLED = 23; // 0x17
+    field public static final int RESULT_ENCODING_ERROR = 18; // 0x12
+    field public static final int RESULT_ERROR_FDN_CHECK_FAILURE = 6; // 0x6
+    field public static final int RESULT_ERROR_NONE = 0; // 0x0
+    field public static final int RESULT_INTERNAL_ERROR = 21; // 0x15
+    field public static final int RESULT_INVALID_ARGUMENTS = 11; // 0xb
+    field public static final int RESULT_INVALID_SMSC_ADDRESS = 19; // 0x13
+    field public static final int RESULT_INVALID_SMS_FORMAT = 14; // 0xe
+    field public static final int RESULT_INVALID_STATE = 12; // 0xc
+    field public static final int RESULT_MODEM_ERROR = 16; // 0x10
+    field public static final int RESULT_NETWORK_ERROR = 17; // 0x11
+    field public static final int RESULT_NETWORK_REJECT = 10; // 0xa
+    field public static final int RESULT_NO_MEMORY = 13; // 0xd
+    field public static final int RESULT_NO_RESOURCES = 22; // 0x16
+    field public static final int RESULT_OPERATION_NOT_ALLOWED = 20; // 0x14
+    field public static final int RESULT_RADIO_NOT_AVAILABLE = 9; // 0x9
+    field public static final int RESULT_REQUEST_NOT_SUPPORTED = 24; // 0x18
+    field public static final int RESULT_SYSTEM_ERROR = 15; // 0xf
   }
 
   public class SubscriptionManager {
@@ -5030,6 +5081,30 @@ package android.telephony.ims {
 
 }
 
+package android.telephony.ims.internal.stub {
+
+  public class SmsImplBase {
+    ctor public SmsImplBase();
+    method public void acknowledgeSms(int, int, int);
+    method public void acknowledgeSmsReport(int, int, int);
+    method public java.lang.String getSmsFormat();
+    method public void onReady();
+    method public final void onSendSmsResult(int, int, int, int) throws java.lang.RuntimeException;
+    method public final void onSmsReceived(int, java.lang.String, byte[]) throws java.lang.RuntimeException;
+    method public final void onSmsStatusReportReceived(int, int, java.lang.String, byte[]) throws java.lang.RuntimeException;
+    method public void sendSms(int, int, java.lang.String, java.lang.String, boolean, byte[]);
+    field public static final int DELIVER_STATUS_ERROR = 2; // 0x2
+    field public static final int DELIVER_STATUS_OK = 1; // 0x1
+    field public static final int SEND_STATUS_ERROR = 2; // 0x2
+    field public static final int SEND_STATUS_ERROR_FALLBACK = 4; // 0x4
+    field public static final int SEND_STATUS_ERROR_RETRY = 3; // 0x3
+    field public static final int SEND_STATUS_OK = 1; // 0x1
+    field public static final int STATUS_REPORT_STATUS_ERROR = 2; // 0x2
+    field public static final int STATUS_REPORT_STATUS_OK = 1; // 0x1
+  }
+
+}
+
 package android.telephony.mbms {
 
   public final class DownloadRequest implements android.os.Parcelable {
@@ -5134,10 +5209,6 @@ package android.util {
 }
 
 package android.view {
-
-  public abstract class Window {
-    method public void setDisableWallpaperTouchEvents(boolean);
-  }
 
   public abstract interface WindowManager implements android.view.ViewManager {
     method public abstract android.graphics.Region getCurrentImeTouchRegion();
@@ -5564,7 +5635,7 @@ package android.webkit {
     field public final java.lang.String description;
     field public final boolean isFallback;
     field public final java.lang.String packageName;
-    field public final java.lang.String[] signatures;
+    field public final android.content.pm.Signature[] signatures;
   }
 
   public final class WebViewUpdateService {
