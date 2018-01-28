@@ -72,8 +72,7 @@ static void nAddStyleRun(JNIEnv* /* unused */, jclass /* unused */, jlong builde
     Paint* paint = toPaint(paintPtr);
     const Typeface* typeface = Typeface::resolveDefault(paint->getAndroidTypeface());
     minikin::MinikinPaint minikinPaint = MinikinUtils::prepareMinikinPaint(paint, typeface);
-    toBuilder(builderPtr)->addStyleRun(start, end, std::move(minikinPaint),
-                                       typeface->fFontCollection, isRtl);
+    toBuilder(builderPtr)->addStyleRun(start, end, std::move(minikinPaint), isRtl);
 }
 
 // Regular JNI
