@@ -88,6 +88,7 @@
     <string name="accessibility_home" msgid="8217216074895377641">"Utama"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
     <string name="accessibility_accessibility_button" msgid="7601252764577607915">"Aksesibilitas"</string>
+    <string name="accessibility_rotate_button" msgid="7402949513740253006">"Putar layar"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"Ringkasan"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Telusuri"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Kamera"</string>
@@ -102,6 +103,12 @@
     <string name="camera_label" msgid="7261107956054836961">"buka kamera"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Pilih tata letak tugas baru"</string>
     <string name="cancel" msgid="6442560571259935130">"Batal"</string>
+    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
+    <skip />
+    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
+    <skip />
+    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
+    <skip />
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Tombol perbesar/perkecil kompatibilitas."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Perbesar dari layar kecil ke besar."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth tersambung."</string>
@@ -178,7 +185,8 @@
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Pendering senyap."</string>
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />
-    <string name="accessibility_work_mode" msgid="2478631941714607225">"Mode kerja"</string>
+    <!-- no translation found for accessibility_work_mode (702887484664647430) -->
+    <skip />
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Menyingkirkan <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> disingkirkan."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Semua aplikasi terbaru telah ditutup."</string>
@@ -275,6 +283,10 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> Perangkat)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth Mati"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Perangkat yang disandingkan tak tersedia"</string>
+    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="7106697106764717416">"Baterai <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Audio"</string>
+    <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Headset"</string>
+    <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Masukan"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Kecerahan"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Rotasi otomatis"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Putar layar otomatis"</string>
@@ -315,6 +327,9 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Menyambung..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Menambatkan"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
+    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
+    <skip />
+    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Notifikasi"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Lampu senter"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Data seluler"</string>
@@ -324,8 +339,13 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> digunakan"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Batas <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Peringatan <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Mode kerja"</string>
+    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"Profil kerja"</string>
+    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"Notifikasi &amp; aplikasi dinonaktifkan"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Cahaya Malam"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Aktif saat matahari terbenam"</string>
+    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Sampai matahari terbit"</string>
+    <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Aktif pada <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"Sampai <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC dinonaktifkan"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC diaktifkan"</string>
@@ -337,7 +357,8 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"Tidak dapat memulai <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> dinonaktifkan dalam mode aman."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Hapus semua"</string>
-    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Seret ke sini untuk menggunakan layar terpisah"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Tarik ke sini untuk menggunakan layar terpisah"</string>
+    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Geser ke atas untuk beralih aplikasi"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Pisahkan Horizontal"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Pisahkan Vertikal"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Pisahkan Khusus"</string>
@@ -562,6 +583,8 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Dengan kontrol notifikasi daya, Anda dapt menyetel level kepentingan notifikasi aplikasi dari 0 sampai 5. \n\n"<b>"Level 5"</b>" \n- Muncul di atas daftar notifikasi \n- Izinkan interupsi layar penuh \n- Selalu intip pesan \n\n"<b>"Level 4"</b>" \n- Jangan interupsi layar penuh \n- Selalu intip pesan \n\n"<b>"Level 3"</b>" \n- Jangan interupsi layar penuh \n- Tak pernah intip pesan \n\n"<b>"Level 2"</b>" \n- Jangan interupsi layar penuh \n- Tak pernah intip pesan \n- Tanpa suara dan getaran \n\n"<b>"Level 1"</b>" \n- Jangan interupsi layar penuh \n- Tak pernah intip pesan \n- Tanpa suara atau getaran \n- Sembunyikan dari layar kunci dan bilah status \n- Muncul di bawah daftar notifikasi \n\n"<b>"Level 0"</b>" \n- Blokir semua notifikasi dari aplikasi"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Notifikasi"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Anda tidak akan melihat notifikasi ini lagi"</string>
+    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
+    <skip />
     <string name="inline_keep_showing" msgid="8945102997083836858">"Terus tampilkan notifikasi ini?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Hentikan notifikasi"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Terus tampilkan"</string>
@@ -656,7 +679,8 @@
     <item msgid="1545641631806817203">"Papan klip"</item>
     <item msgid="5742013440802239414">"Kode tombol"</item>
     <item msgid="8802889973626281575">"Pengalih keyboard"</item>
-    <item msgid="8175437057325747277">"Tidak ada"</item>
+    <item msgid="7095517796293767867">"Saran rotasi"</item>
+    <item msgid="8494159969042135235">"Tak Ada"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"Biasa"</item>
@@ -674,8 +698,8 @@
     <string name="right_keycode" msgid="708447961000848163">"Kode tombol kanan"</string>
     <string name="left_icon" msgid="3096287125959387541">"Ikon kiri"</string>
     <string name="right_icon" msgid="3952104823293824311">"Ikon kanan"</string>
-    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Seret untuk menambahkan ubin"</string>
-    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Seret ke sini untuk menghapus"</string>
+    <string name="drag_to_add_tiles" msgid="7058945779098711293">"Tarik untuk menambahkan ubin"</string>
+    <string name="drag_to_remove_tiles" msgid="3361212377437088062">"Tarik ke sini untuk menghapus"</string>
     <string name="qs_edit" msgid="2232596095725105230">"Edit"</string>
     <string name="tuner_time" msgid="6572217313285536011">"Waktu"</string>
   <string-array name="clock_options">
@@ -729,7 +753,7 @@
     <string name="pip_phone_minimize" msgid="1079119422589131792">"Minimalkan"</string>
     <string name="pip_phone_close" msgid="8416647892889710330">"Tutup"</string>
     <string name="pip_phone_settings" msgid="8080777499521528521">"Setelan"</string>
-    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Seret ke bawah untuk menutup"</string>
+    <string name="pip_phone_dismiss_hint" msgid="6351678169095923899">"Tarik ke bawah untuk menutup"</string>
     <string name="pip_menu_title" msgid="4707292089961887657">"Menu"</string>
     <string name="pip_notification_title" msgid="3204024940158161322">"<xliff:g id="NAME">%s</xliff:g> adalah picture-in-picture"</string>
     <string name="pip_notification_message" msgid="5619512781514343311">"Jika Anda tidak ingin <xliff:g id="NAME">%s</xliff:g> menggunakan fitur ini, tap untuk membuka setelan dan menonaktifkannya."</string>
@@ -780,4 +804,10 @@
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Tap untuk melihat detail penggunaan baterai dan data"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Nonaktifkan data seluler?"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Karena sebuah aplikasi menghalangi permintaan izin, Setelan tidak dapat memverifikasi respons Anda."</string>
+    <string name="slice_permission_title" msgid="7465009437851044444">"Izinkan <xliff:g id="APP_0">%1$s</xliff:g> menampilkan potongan <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
+    <string name="slice_permission_text_1" msgid="3514586565609596523">"- Dapat membaca informasi dari <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="slice_permission_text_2" msgid="3146758297471143723">"- Dapat mengambil tindakan di dalam <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="slice_permission_checkbox" msgid="7986504458640562900">"Izinkan <xliff:g id="APP">%1$s</xliff:g> menampilkan potongan dari aplikasi apa pun"</string>
+    <string name="slice_permission_allow" msgid="2340244901366722709">"Izinkan"</string>
+    <string name="slice_permission_deny" msgid="7683681514008048807">"Tolak"</string>
 </resources>

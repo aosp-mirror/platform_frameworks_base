@@ -88,6 +88,7 @@
     <string name="accessibility_home" msgid="8217216074895377641">"होम"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"मेन्यू"</string>
     <string name="accessibility_accessibility_button" msgid="7601252764577607915">"सुलभता"</string>
+    <string name="accessibility_rotate_button" msgid="7402949513740253006">"स्क्रीन घुमाएं"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"खास जानकारी"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"सर्च करें"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"कैमरा"</string>
@@ -102,6 +103,12 @@
     <string name="camera_label" msgid="7261107956054836961">"कैमरा खोलें"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"नया कार्य लेआउट चुनें"</string>
     <string name="cancel" msgid="6442560571259935130">"रद्द करें"</string>
+    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
+    <skip />
+    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
+    <skip />
+    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
+    <skip />
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"संगतता ज़ूम बटन."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"छोटी से बड़ी स्‍क्रीन पर ज़ूम करें."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"ब्लूटूथ कनेक्ट किया गया."</string>
@@ -178,7 +185,8 @@
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"रिंगर मौन."</string>
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />
-    <string name="accessibility_work_mode" msgid="2478631941714607225">"कार्य मोड"</string>
+    <!-- no translation found for accessibility_work_mode (702887484664647430) -->
+    <skip />
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"<xliff:g id="APP">%s</xliff:g> को ख़ारिज करें."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> खा़रिज कर दिया गया."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"हाल ही के सभी ऐप्लिकेशन ख़ारिज कर दिए गए."</string>
@@ -275,6 +283,10 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"ब्लूटूथ (<xliff:g id="NUMBER">%d</xliff:g> डिवाइस)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"ब्लूटूथ बंद"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"कोई भी युग्मित डिवाइस उपलब्ध नहीं"</string>
+    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="7106697106764717416">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> बैटरी"</string>
+    <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"ऑडियो"</string>
+    <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"हेडसेट"</string>
+    <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"इनपुट"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"स्क्रीन की रोशनी"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"स्वत: घुमाएं"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"स्क्रीन स्वत: घुमाएं"</string>
@@ -315,6 +327,9 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"कनेक्ट हो रहा है..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"टेदरिंग"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"हॉटस्पॉट"</string>
+    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
+    <skip />
+    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"सूचनाएं"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"फ़्लैशलाइट"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"मोबाइल डेटा"</string>
@@ -324,8 +339,15 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> उपयोग किया गया"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> सीमा"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> चेतावनी"</string>
-    <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"कार्य मोड"</string>
+    <!-- no translation found for quick_settings_work_mode_on_label (3421274215098764735) -->
+    <skip />
+    <!-- no translation found for quick_settings_work_mode_off_label (8856918707867192186) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"नाइट लाइट"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"शाम को चालू की जाएगी"</string>
+    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"सुबह तक चालू रहेगी"</string>
+    <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> पर चालू की जाएगी"</string>
+    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"<xliff:g id="TIME">%s</xliff:g> तक"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC बंद है"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC चालू है"</string>
@@ -338,6 +360,8 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> को सुरक्षित-मोड में बंद किया गया."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Clear all"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"स्क्रीन के दो हिस्से में बंट जाने, स्पिल्ट स्क्रीन, का इस्तेमाल करने के लिए यहां खींचें और छोडें"</string>
+    <!-- no translation found for recents_swipe_up_onboarding (3824607135920170001) -->
+    <skip />
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"क्षैतिज रूप से विभाजित करें"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"लम्बवत रूप से विभाजित करें"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"अपने मुताबिक बांटें"</string>
@@ -562,6 +586,8 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"पावर सूचना नियंत्रण के ज़रिये, आप किसी ऐप की सूचना को उसकी अहमियत के हिसाब से 0 से 5 के लेवल पर सेट कर सकते हैं.\n\n"<b>"लेवल 5"</b>" \n- सूचना सूची में सबसे ऊपर दिखाएं \n- पूरे स्क्रीन को ढंकने की अनुमति दें \n- लगातार देखते रहें \n\n"<b>" लेवल 4"</b>" \n- पूरे स्क्रीन को ढंकें \n- लगातार देखते रहें \n\n"<b>"लेवल 3"</b>" \n- पूरे स्क्रीन को ढंकने से रोकें \n-कभी भी न देखें \n\n"<b>"लेवल 2"</b>" \n- पूरे स्क्रीन को ढंकने से रोकें \n- कभी भी देखें \n- कभी भी आवाज़ या कंपन (वाइब्रेशन) न करें \n\n"<b>"लेवल 1"</b>" \n- पूरे स्क्रीन को ढंकने से रोकें \n- कभी भी न देखें \n- कभी भी आवाज़ या कंपन (वाइब्रेशन) न करें \n- लॉक स्क्रीन और स्टेटस बार से छिपाएं \n- सूचना सूची के नीचे दिखाएं \n\n"<b>"लेवल 0"</b>" \n- ऐप्लिकेशन की सभी सूचनाएं रोक दें"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"सूचना"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"अब आपको ये सूचनाएं दिखाई नहीं देंगी"</string>
+    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
+    <skip />
     <string name="inline_keep_showing" msgid="8945102997083836858">"ये सूचनाएं दिखाना जारी रखें?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"सूचनाएं दिखाना बंद करें"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"दिखाना जारी रखें"</string>
@@ -656,7 +682,8 @@
     <item msgid="1545641631806817203">"क्लिपबोर्ड"</item>
     <item msgid="5742013440802239414">"कुंजी कोड"</item>
     <item msgid="8802889973626281575">"कीबोर्ड स्विचर"</item>
-    <item msgid="8175437057325747277">"कोई नहीं"</item>
+    <item msgid="7095517796293767867">"घुमाने के सुझाव"</item>
+    <item msgid="8494159969042135235">"कोई नहीं"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"सामान्य"</item>
@@ -780,4 +807,10 @@
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"बैटरी और डेटा खर्च की जानकारी के लिए छूएं"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"मोबाइल डेटा बंद करना चाहते हैं?"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"ऐप की वजह से मंज़ूरी के अनुरोध को समझने में दिक्कत हो रही है, इसलिए सेटिंग से आपके जवाब की पुष्टि नहीं हो पा रही है."</string>
+    <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_0">%1$s</xliff:g> को <xliff:g id="APP_2">%2$s</xliff:g> से हिस्से (स्लाइस) दिखाने की मंज़ूरी दें?"</string>
+    <string name="slice_permission_text_1" msgid="3514586565609596523">"- यह <xliff:g id="APP">%1$s</xliff:g> से सूचना पढ़ सकता है"</string>
+    <string name="slice_permission_text_2" msgid="3146758297471143723">"- यह <xliff:g id="APP">%1$s</xliff:g> में कार्रवाई कर सकता है"</string>
+    <string name="slice_permission_checkbox" msgid="7986504458640562900">"<xliff:g id="APP">%1$s</xliff:g> को किसी भी ऐप्लिकेशन से हिस्से (स्लाइस) दिखाने की मंज़ूरी दें."</string>
+    <string name="slice_permission_allow" msgid="2340244901366722709">"मंज़ूरी दें"</string>
+    <string name="slice_permission_deny" msgid="7683681514008048807">"नामंज़ूर करें"</string>
 </resources>
