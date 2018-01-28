@@ -181,6 +181,7 @@
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Teie organisatsioon haldab seda seadet ja võib jälgida võrguliiklust. Puudutage üksikasjade vaatamiseks."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Seade kustutatakse"</string>
     <string name="factory_reset_message" msgid="7972496262232832457">"Administraatori rakendust ei saa kasutada. Teie seade kustutatakse.\n\nKüsimuste korral pöörduge organisatsiooni administraatori poole."</string>
+    <string name="printing_disabled_by" msgid="8936832919072486965">"Rakendus <xliff:g id="OWNER_APP">%s</xliff:g> on printimise keelanud."</string>
     <string name="me" msgid="6545696007631404292">"Mina"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Tahvelarvuti valikud"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"Teleri valikud"</string>
@@ -217,6 +218,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"Hädaabi"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Veaaruanne"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Seansi lõpp"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Ekraanipilt"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Veaaruande võtmine"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Nii kogutakse teavet teie seadme praeguse oleku kohta, et saata see meilisõnumina. Enne kui saate veaaruande ära saata, võtab selle loomine natuke aega; varuge kannatust."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Interakt. aruanne"</string>
@@ -262,8 +264,10 @@
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Turvarežiim"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-süsteem"</string>
-    <string name="user_owner_label" msgid="1119010402169916617">"Lülita isiklikule profiilile"</string>
-    <string name="managed_profile_label" msgid="5289992269827577857">"Lülita tööprofiilile"</string>
+    <!-- no translation found for user_owner_label (8836124313744349203) -->
+    <skip />
+    <!-- no translation found for managed_profile_label (8947929265267690522) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktid"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"juurdepääs kontaktidele"</string>
     <string name="permgrouprequest_contacts" msgid="1601591667800538208">"Lubage rakendusele &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; juurdepääs kontaktidele"</string>
@@ -415,6 +419,10 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Annab rakendusele juurdepääsu seadme telefonifunktsioonidele. See luba võimaldab rakendusel määrata telefoninumbri ja seadme ID-d ning kontrollida, kas kõne on aktiivne ja kaugnumber on kõne kaudu telefoniga ühendatud."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"kõnede marsruutimine süsteemi kaudu"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Võimaldab rakendusel kõnesid süsteemi kaudu marsruutida, et helistamiskogemust täiustada."</string>
+    <!-- no translation found for permlab_acceptHandover (2661534649736022409) -->
+    <skip />
+    <!-- no translation found for permdesc_acceptHandovers (4570660484220539698) -->
+    <skip />
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"lugeda telefoninumbreid"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Rakendusel lubatakse juurde pääseda seadme telefoninumbritele."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"tahvelarvuti uinumise vältimine"</string>
@@ -484,10 +492,13 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Sõrm liikus liiga aeglaselt. Proovige uuesti."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Ei tuvastatud"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Sõrmejälje riistvara pole saadaval."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Sõrmejälge ei saa salvestada. Eemaldage olemasolev sõrmejälg."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Sõrmejälje riistvara taimeri ajalõpp. Proovige uuesti."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Sõrmejälje toiming tühistati."</string>
+    <!-- no translation found for fingerprint_error_user_canceled (7999639584615291494) -->
+    <skip />
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Liiga palju katseid. Proovige hiljem uuesti."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Liiga palju katseid. Sõrmejäljeandur on keelatud."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Proovige uuesti."</string>
@@ -989,6 +1000,12 @@
     <string name="browse" msgid="1245903488306147205">"Ava"</string>
     <string name="sms" msgid="4560537514610063430">"Saada sõnum"</string>
     <string name="add_contact" msgid="7867066569670597203">"Lisa"</string>
+    <!-- no translation found for view_calendar (979609872939597838) -->
+    <skip />
+    <!-- no translation found for add_calendar_event (1953664627192056206) -->
+    <skip />
+    <!-- no translation found for view_flight (7691640491425680214) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Talletusruum saab täis"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Mõned süsteemifunktsioonid ei pruugi töötada"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Süsteemis pole piisavalt talletusruumi. Veenduge, et seadmes oleks 250 MB vaba ruumi, ja käivitage seade uuesti."</string>
@@ -1114,6 +1131,8 @@
       <item quantity="one">Avatud WiFi-võrk on saadaval</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Looge ühendus avatud WiFi-võrguga"</string>
+    <!-- no translation found for wifi_available_carrier_network_title (4527932626916527897) -->
+    <skip />
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Ühenduse loomine avatud WiFi-võrguga"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Ühendatud WiFi-võrguga"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"WiFi-võrguga ei õnnestunud ühendust luua"</string>
@@ -1123,6 +1142,8 @@
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"WiFi lülitub sisse automaatselt"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Kui olete kvaliteetse salvestatud võrgu läheduses"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Ära lülita tagasi sisse"</string>
+    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"WiFi lülitati automaatselt sisse"</string>
+    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Teie lähedal on salvestatud võrk: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Logi sisse WiFi-võrku"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Võrku sisselogimine"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1409,6 +1430,8 @@
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> üle määratud piirmäära."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Taustandmed on piiratud"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Puudut. piirangu eemaldamiseks."</string>
+    <string name="data_usage_rapid_title" msgid="4579994056245665351">"Suur andmekasutus"</string>
+    <string name="data_usage_rapid_body" msgid="4899922842674185567">"Teie andmekasutus on viimastel päevadel tavapärasest suurem. Puudutage kasutuse ja seadete vaatamiseks."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Turvasertifikaat"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"See sertifikaat on kehtiv."</string>
     <string name="issued_to" msgid="454239480274921032">"Väljastatud subjektile:"</string>
@@ -1685,7 +1708,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Kuni <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Kuni <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (järgmine äratus)"</string>
-    <string name="zen_mode_forever" msgid="1916263162129197274">"Kuni lülitate välja valiku Mitte segada"</string>
+    <string name="zen_mode_forever" msgid="931849471004038757">"Kuni välja lülitate"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Kuni lülitate välja valiku Mitte segada"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Ahendamine"</string>
@@ -1734,9 +1757,15 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Kõik keeled"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Kõik piirkonnad"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Otsing"</string>
-    <string name="work_mode_off_title" msgid="2615362773958585967">"Kas lülitada töörežiim sisse?"</string>
-    <string name="work_mode_off_message" msgid="2961559609199223594">"See lülitab sisse teie tööprofiili, sh rakendused, taustal sünkroonimise ja seotud funktsioonid"</string>
+    <!-- no translation found for work_mode_off_title (1118691887588435530) -->
+    <skip />
+    <!-- no translation found for work_mode_off_message (5130856710614337649) -->
+    <skip />
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Lülita sisse"</string>
+    <!-- no translation found for deprecated_target_sdk_message (1449696506742572767) -->
+    <skip />
+    <!-- no translation found for deprecated_target_sdk_app_store (5032340500368495077) -->
+    <skip />
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Teile on uusi sõnumeid"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Avage vaatamiseks SMS-rakendus"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Funktsioon võib olla piiratud"</string>
@@ -1807,6 +1836,13 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Otseteed ei õnnestunud taastada, kuna rakendus ei toeta varundamist ega taastamist"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Otseteed ei õnnestunud taastada, kuna rakenduse allkiri ei ühti"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Otseteed ei õnnestunud taastada"</string>
-    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"Otsetee on keelatud"</string>
+    <!-- no translation found for harmful_app_warning_uninstall (4837672735619532931) -->
     <skip />
+    <!-- no translation found for harmful_app_warning_open_anyway (596432803680914321) -->
+    <skip />
+    <!-- no translation found for harmful_app_warning_title (8982527462829423432) -->
+    <skip />
+    <string name="slices_permission_request" msgid="8484943441501672932">"Rakendus <xliff:g id="APP_0">%1$s</xliff:g> soovib näidata rakenduse <xliff:g id="APP_2">%2$s</xliff:g> lõike"</string>
+    <string name="screenshot_edit" msgid="7867478911006447565">"Muutmine"</string>
 </resources>
