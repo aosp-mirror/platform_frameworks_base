@@ -181,6 +181,7 @@
     <string name="network_logging_notification_text" msgid="7930089249949354026">"మీ సంస్థ ఈ పరికరాన్ని నిర్వహిస్తుంది మరియు నెట్‌వర్క్ ట్రాఫిక్‌ని పర్యవేక్షించవచ్చు. వివరాల కోసం నొక్కండి."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"మీ పరికరంలోని డేటా తొలగించబడుతుంది"</string>
     <string name="factory_reset_message" msgid="7972496262232832457">"నిర్వాహక యాప్‌ ఉపయోగించడం సాధ్యపడదు. మీ డివైజ్‌లోని డేటా ఇప్పుడు తొలగించబడుతుంది.\n\nమీకు సందేహాలుంటే, మీ సంస్థ యొక్క నిర్వాహకులను సంప్రదించండి."</string>
+    <string name="printing_disabled_by" msgid="8936832919072486965">"ముద్రణ <xliff:g id="OWNER_APP">%s</xliff:g> ద్వారా నిలిపివేయబడింది."</string>
     <string name="me" msgid="6545696007631404292">"నేను"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"టాబ్లెట్ ఎంపికలు"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"టీవీ ఎంపికలు"</string>
@@ -217,8 +218,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"అత్యవసరం"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"బగ్ నివేదిక"</string>
     <string name="global_action_logout" msgid="935179188218826050">"సెషన్‌ను ముగించు"</string>
-    <!-- no translation found for global_action_screenshot (8329831278085426283) -->
-    <skip />
+    <string name="global_action_screenshot" msgid="8329831278085426283">"స్క్రీన్‌షాట్"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"బగ్ నివేదికను సిద్ధం చేయి"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ఇది ఇ-మెయిల్ సందేశం రూపంలో పంపడానికి మీ ప్రస్తుత పరికర స్థితి గురించి సమాచారాన్ని సేకరిస్తుంది. బగ్ నివేదికను ప్రారంభించడం మొదలుకొని పంపడానికి సిద్ధం చేసే వరకు ఇందుకు కొంత సమయం పడుతుంది; దయచేసి ఓపిక పట్టండి."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ప్రభావశీల నివేదిక"</string>
@@ -264,8 +264,10 @@
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"సురక్షిత మోడ్"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android సిస్టమ్"</string>
-    <string name="user_owner_label" msgid="1119010402169916617">"వ్యక్తిగతానికి మార్చు"</string>
-    <string name="managed_profile_label" msgid="5289992269827577857">"కార్యాలయానికి మార్చు"</string>
+    <!-- no translation found for user_owner_label (8836124313744349203) -->
+    <skip />
+    <!-- no translation found for managed_profile_label (8947929265267690522) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"పరిచయాలు"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"మీ పరిచయాలను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouprequest_contacts" msgid="1601591667800538208">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని ఉపయోగించి, మీ పరిచయాలను యాక్సెస్ చేయండి"</string>
@@ -417,6 +419,10 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"పరికరం యొక్క ఫోన్ ఫీచర్‌లను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది. ఈ అనుమతి ఫోన్ నంబర్ మరియు పరికరం IDలను, కాల్ సక్రియంగా ఉందా లేదా అనే విషయాన్ని మరియు కాల్ ద్వారా కనెక్ట్ చేయబడిన రిమోట్ నంబర్‌ను కనుగొనడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"కాల్‌లను సిస్టమ్ ద్వారా వెళ్లేలా చేయి"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"కాలింగ్ అనుభవాన్ని మెరుగుపరచడం కోసం తన కాల్‌లను సిస్టమ్ ద్వారా వెళ్లేలా చేయడానికి అనువర్తనాన్ని అనుమతిస్తుంది."</string>
+    <!-- no translation found for permlab_acceptHandover (2661534649736022409) -->
+    <skip />
+    <!-- no translation found for permdesc_acceptHandovers (4570660484220539698) -->
+    <skip />
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ఫోన్ నంబర్‌లను చదువు"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"పరికరం యొక్క ఫోన్ నంబర్‌లను యాక్సెస్ చేయడానికి యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"టాబ్లెట్‌ను నిద్రావస్థకు వెళ్లనీయకుండా నిరోధించడం"</string>
@@ -486,10 +492,13 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"వేలిని చాలా నెమ్మదిగా కదిలించారు. దయచేసి మళ్లీ ప్రయత్నించండి."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"గుర్తించలేదు"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"వేలిముద్ర హార్డ్‌వేర్ అందుబాటులో లేదు."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"వేలిముద్రను నిల్వ చేయడం సాధ్యపడదు. దయచేసి ఇప్పటికే ఉన్న వేలిముద్రను తీసివేయండి."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"వేలిముద్ర గడువు సమయం చేరుకుంది. మళ్లీ ప్రయత్నించండి."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"వేలిముద్ర కార్యకలాపం రద్దయింది."</string>
+    <!-- no translation found for fingerprint_error_user_canceled (7999639584615291494) -->
+    <skip />
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"చాలా ఎక్కువ ప్రయత్నాలు చేసారు. తర్వాత మళ్లీ ప్రయత్నించండి."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"అనేకసార్లు ప్రయత్నించారు. వేలిముద్ర సెన్సార్ నిలిపివేయబడింది."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"మళ్లీ ప్రయత్నించండి."</string>
@@ -991,6 +1000,12 @@
     <string name="browse" msgid="1245903488306147205">"తెరవండి"</string>
     <string name="sms" msgid="4560537514610063430">"సందేశం"</string>
     <string name="add_contact" msgid="7867066569670597203">"జోడించండి"</string>
+    <!-- no translation found for view_calendar (979609872939597838) -->
+    <skip />
+    <!-- no translation found for add_calendar_event (1953664627192056206) -->
+    <skip />
+    <!-- no translation found for view_flight (7691640491425680214) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"నిల్వ ఖాళీ అయిపోతోంది"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"కొన్ని సిస్టమ్ కార్యాచరణలు పని చేయకపోవచ్చు"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"సిస్టమ్ కోసం తగినంత నిల్వ లేదు. మీకు 250MB ఖాళీ స్థలం ఉందని నిర్ధారించుకుని, పునఃప్రారంభించండి."</string>
@@ -1116,6 +1131,8 @@
       <item quantity="one">ఓపెన్ Wi-Fi నెట్‌వర్క్ అందుబాటులో ఉంది</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"బహిరంగ Wi‑Fi నెట్‌వర్క్‌కు కనెక్ట్ చేయండి"</string>
+    <!-- no translation found for wifi_available_carrier_network_title (4527932626916527897) -->
+    <skip />
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"బహిరంగ Wi‑Fi నెట్‌వర్క్‌కు కనెక్ట్ చేస్తోంది"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi‑Fi నెట్‌వర్క్‌కు కనెక్ట్ చేయబడింది"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi‑Fi నెట్‌వర్క్‌కు కనెక్ట్ చేయడం సాధ్యపడలేదు"</string>
@@ -1125,10 +1142,8 @@
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi స్వయంచాలకంగా ఆన్ అవుతుంది"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"మీరు అధిక నాణ్యత గల సేవ్ చేసిన నెట్‌వర్క్‌కు సమీపంగా ఉన్నప్పుడు"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"తిరిగి ఆన్ చేయవద్దు"</string>
-    <!-- no translation found for wifi_wakeup_enabled_title (6534603733173085309) -->
-    <skip />
-    <!-- no translation found for wifi_wakeup_enabled_content (189330154407990583) -->
-    <skip />
+    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi‑Fi స్వయంచాలకంగా ఆన్ చేయబడింది"</string>
+    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"మీరు సేవ్ చేసిన నెట్‌వర్క్‌కి సమీపంలో ఉన్నారు: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi నెట్‌వర్క్‌కి సైన్ ఇన్ చేయండి"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"నెట్‌వర్క్‌కి సైన్ ఇన్ చేయండి"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1416,6 +1431,8 @@
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"పేర్కొన్న పరిమితి కంటే <xliff:g id="SIZE">%s</xliff:g> మించిపోయింది."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"నేపథ్య డేటా పరిమితం చేయబడింది"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"నియంత్రణ తీసివేయడానికి నొక్కండి."</string>
+    <string name="data_usage_rapid_title" msgid="4579994056245665351">"ఎక్కువ డేటా వినియోగం"</string>
+    <string name="data_usage_rapid_body" msgid="4899922842674185567">"గత కొన్ని రోజులుగా మీ డేటా వినియోగం సాధారణం కంటే ఎక్కువగా ఉంటోంది. వినియోగం మరియు సెట్టింగ్‌లను చూడడానికి నొక్కండి."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"భద్రతా సర్టిఫికెట్"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"ఈ సర్టిఫికెట్ చెల్లుబాటు అవుతుంది."</string>
     <string name="issued_to" msgid="454239480274921032">"దీనికి జారీ చేయబడింది:"</string>
@@ -1692,7 +1709,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> వరకు"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (తర్వాత అలారం) వరకు"</string>
-    <string name="zen_mode_forever" msgid="1916263162129197274">"మీరు అంతరాయం కలిగించవద్దు ఎంపిక ఆఫ్ చేసే వరకు"</string>
+    <string name="zen_mode_forever" msgid="931849471004038757">"మీరు ఆఫ్‌చేసే వరకు"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"మీరు అంతరాయం కలిగించవద్దు ఎంపిక ఆఫ్ చేసే వరకు"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"కుదించండి"</string>
@@ -1741,9 +1758,15 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"అన్ని భాషలు"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"అన్ని ప్రాంతాలు"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"వెతుకు"</string>
-    <string name="work_mode_off_title" msgid="2615362773958585967">"కార్యాలయ మోడ్‌ని ఆన్ చేయాలా?"</string>
-    <string name="work_mode_off_message" msgid="2961559609199223594">"ఇది అనువర్తనాలు, నేపథ్య సమకాలీకరణ మరియు సంబంధిత లక్షణాలతో సహా మీ కార్యాలయ ప్రొఫైల్‌ను ఆన్ చేస్తుంది"</string>
+    <!-- no translation found for work_mode_off_title (1118691887588435530) -->
+    <skip />
+    <!-- no translation found for work_mode_off_message (5130856710614337649) -->
+    <skip />
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ఆన్ చేయి"</string>
+    <!-- no translation found for deprecated_target_sdk_message (1449696506742572767) -->
+    <skip />
+    <!-- no translation found for deprecated_target_sdk_app_store (5032340500368495077) -->
+    <skip />
     <string name="new_sms_notification_title" msgid="8442817549127555977">"మీకు కొత్త సందేశాలు ఉన్నాయి"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"వీక్షించడానికి SMS అనువర్తనాన్ని తెరవండి"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"కొంత పనితనం పరిమితం కావచ్చు"</string>
@@ -1815,10 +1838,12 @@
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"యాప్ సంతకం సరిపోలని కారణంగా సత్వరమార్గాన్ని పునరుద్ధరించడం సాధ్యపడలేదు"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"సత్వరమార్గాన్ని పునరుద్ధరించడం సాధ్యపడలేదు"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"షార్ట్‌కట్ నిలిపివేయబడింది"</string>
-    <!-- no translation found for harmful_app_warning_uninstall (3846265696369136266) -->
+    <!-- no translation found for harmful_app_warning_uninstall (4837672735619532931) -->
     <skip />
-    <!-- no translation found for harmful_app_warning_launch_anyway (5784428382367400530) -->
+    <!-- no translation found for harmful_app_warning_open_anyway (596432803680914321) -->
     <skip />
-    <!-- no translation found for harmful_app_warning_title (2229996292333310435) -->
+    <!-- no translation found for harmful_app_warning_title (8982527462829423432) -->
     <skip />
+    <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> <xliff:g id="APP_2">%2$s</xliff:g> స్లైస్‌లను చూపించాలనుకుంటోంది"</string>
+    <string name="screenshot_edit" msgid="7867478911006447565">"సవరించు"</string>
 </resources>

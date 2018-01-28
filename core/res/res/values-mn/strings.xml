@@ -181,6 +181,7 @@
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Таны байгууллага энэ төхөөрөмжийг удирдаж, сүлжээний ачааллыг хянадаг. Дэлгэрэнгүй мэдээлэл авах бол товшино уу."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Таны төхөөрөмж устах болно."</string>
     <string name="factory_reset_message" msgid="7972496262232832457">"Админы аппыг ашиглах боломжгүй. Таны төхөөрөмжийг одоо устгана.\n\nХэрэв танд асуулт байгаа бол админтайгаа холбогдоно уу."</string>
+    <string name="printing_disabled_by" msgid="8936832919072486965">"<xliff:g id="OWNER_APP">%s</xliff:g> хэвлэх үйлдлийг идэвхгүй болгосон."</string>
     <string name="me" msgid="6545696007631404292">"Би"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Таблетын сонголтууд"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"Телевиз сонголтууд"</string>
@@ -217,6 +218,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"Яаралтай тусламж"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Алдаа мэдээлэх"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Гаргах харилцан үйлдэл"</string>
+    <string name="global_action_screenshot" msgid="8329831278085426283">"Дэлгэцийн зураг дарах"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Согог репорт авах"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Энэ таны төхөөрөмжийн одоогийн статусын талаарх мэдээллийг цуглуулах ба имэйл мессеж болгон илгээнэ. Алдааны мэдэгдлээс эхэлж илгээхэд бэлэн болоход хэсэг хугацаа зарцуулагдана тэвчээртэй байна уу."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"Интерактив тайлан"</string>
@@ -262,8 +264,10 @@
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Аюулгүй горим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Андройд систем"</string>
-    <string name="user_owner_label" msgid="1119010402169916617">"\"Хувийн\" руу шилжих"</string>
-    <string name="managed_profile_label" msgid="5289992269827577857">"\"Ажлын\" руу шилжих"</string>
+    <!-- no translation found for user_owner_label (8836124313744349203) -->
+    <skip />
+    <!-- no translation found for managed_profile_label (8947929265267690522) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Харилцагчдын хаяг"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"харилцагч руугаа хандах"</string>
     <string name="permgrouprequest_contacts" msgid="1601591667800538208">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-д таны харилцагчдад хандахыг зөвшөөрнө үү"</string>
@@ -415,6 +419,10 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Апп нь төхөөрөмжийн утасны функцд хандах боломжтой. Энэ зөвшөөрөл нь апп-д утасны дугаар болон төхөөрөмжийн ID-г, дуудлага идэвхтэй эсэх, холын дугаар дуудлагаар холбогдсон байгаа эсэхийг тогтоох боломжийг олгоно,"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"системээр дамжуулах дуудлага"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Дуудлагыг сайжруулахын тулд дуудлагаа системээр дамжуулах зөвшөөрлийг апп-д олгодог."</string>
+    <!-- no translation found for permlab_acceptHandover (2661534649736022409) -->
+    <skip />
+    <!-- no translation found for permdesc_acceptHandovers (4570660484220539698) -->
+    <skip />
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"утасны дугаарыг унших"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Төхөөрөмжийн утасны дугаарт хандах зөвшөөрлийг апп-д олгоно."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"таблетыг унтуулахгүй байлгах"</string>
@@ -484,10 +492,13 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Хуруу хэт удаан хөдөлгөсөн байна. Дахин оролдоно уу."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Танигдахгүй байна"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Хурууны хээний тоног төхөөрөмж бэлэн бус байна."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Хурууны хээг хадгалах боломжгүй байна. Одоо байгаа хурууны хээг арилгана уу."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Хурууны хээ оруулах хугацаа өнгөрсөн байна. Дахин оруулна уу."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Хурууны хээний бүртгэл амжилтгүй боллоо."</string>
+    <!-- no translation found for fingerprint_error_user_canceled (7999639584615291494) -->
+    <skip />
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Хэтэрхий олон оролдлоо.  Түр хүлээгээд дахин оролдоно уу."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Хэт олон удаа оролдсон тул хурууны хээ мэдрэгчийг идэвхгүй болголоо."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Дахин оролдно уу."</string>
@@ -989,6 +1000,12 @@
     <string name="browse" msgid="1245903488306147205">"Нээх"</string>
     <string name="sms" msgid="4560537514610063430">"Зурвас"</string>
     <string name="add_contact" msgid="7867066569670597203">"Нэмэх"</string>
+    <!-- no translation found for view_calendar (979609872939597838) -->
+    <skip />
+    <!-- no translation found for add_calendar_event (1953664627192056206) -->
+    <skip />
+    <!-- no translation found for view_flight (7691640491425680214) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Сангийн хэмжээ дутагдаж байна"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Зарим систем функц ажиллахгүй байна"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Системд хангалттай сан байхгүй байна. 250MБ чөлөөтэй зай байгаа эсэхийг шалгаад дахин эхлүүлнэ үү."</string>
@@ -1114,6 +1131,8 @@
       <item quantity="one">Нээлттэй Wi-Fi сүлжээ ашиглах боломжтой</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Нээлттэй Wi‑Fi сүлжээнд холбогдох"</string>
+    <!-- no translation found for wifi_available_carrier_network_title (4527932626916527897) -->
+    <skip />
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Нээлттэй Wi‑Fi сүлжээнд холбогдож байна"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi‑Fi сүлжээнд холбогдлоо"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi‑Fi сүлжээнд холбогдож чадсангүй"</string>
@@ -1123,6 +1142,8 @@
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"Wi‑Fi автоматаар асна"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"Таныг хадгалсан, өндөр чанартай сүлжээний ойролцоо байх үед"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"Буцааж асаахгүй"</string>
+    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"Wi‑Fi-г автоматаар асаасан"</string>
+    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"Та дараах хадгалсан сүлжээтэй ойрхон байна: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"Wi-Fi сүлжээнд нэвтэрнэ үү"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"Сүлжээнд нэвтэрнэ үү"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1409,6 +1430,8 @@
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> заасан хязгаарыг давав."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Арын дата хязгаарлагдсан"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Хязгаарлалтыг устгах бол товш."</string>
+    <string name="data_usage_rapid_title" msgid="4579994056245665351">"Их хэмжээний дата ашиглалт"</string>
+    <string name="data_usage_rapid_body" msgid="4899922842674185567">"Таны сүүлийн хэдэн өдрийн дата ашиглалт хэвийн хэмжээнээс их байна. Ашиглалт, тохиргоог харах бол товшино уу."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Аюулгүй сертификат"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Сертификат хүчинтэй."</string>
     <string name="issued_to" msgid="454239480274921032">"Гаргуулсан:"</string>
@@ -1683,7 +1706,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> хүртэл"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> хүртэл (дараагийн сэрүүлэг)"</string>
-    <string name="zen_mode_forever" msgid="1916263162129197274">"\"Бүү саад бол\" горимыг унтраах хүртэл"</string>
+    <string name="zen_mode_forever" msgid="931849471004038757">"Та унтраах хүртэл"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"\"Бүү саад бол\"-ыг унтраах хүртэл"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Хумих"</string>
@@ -1732,9 +1755,15 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Бүх хэл"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Бүх бүс нутаг"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Хайх"</string>
-    <string name="work_mode_off_title" msgid="2615362773958585967">"Ажлын горимыг асаах уу?"</string>
-    <string name="work_mode_off_message" msgid="2961559609199223594">"Энэ нь апп, цаана синк хийх болон холбоотой онцлог зэрэг таны ажлын профайлыг асаана"</string>
+    <!-- no translation found for work_mode_off_title (1118691887588435530) -->
+    <skip />
+    <!-- no translation found for work_mode_off_message (5130856710614337649) -->
+    <skip />
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Асаах"</string>
+    <!-- no translation found for deprecated_target_sdk_message (1449696506742572767) -->
+    <skip />
+    <!-- no translation found for deprecated_target_sdk_app_store (5032340500368495077) -->
+    <skip />
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Танд шинэ зурвасууд байна"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Үзэхийн тулд SMS аппыг нээх"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Зарим үйлдэл хязгаарлалттай байж болно"</string>
@@ -1805,6 +1834,13 @@
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Апп нөөцлөлт, сэргээлтийг дэмждэггүй тул товчлолыг сэргээж чадсангүй"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Аппын гарын үсэг таарахгүй байгаа тул товчлолыг сэргээж чадсангүй"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Товчлолыг сэргээж чадсангүй"</string>
-    <!-- no translation found for shortcut_disabled_reason_unknown (5276016910284687075) -->
+    <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"Товчлолыг идэвхгүй болгосон"</string>
+    <!-- no translation found for harmful_app_warning_uninstall (4837672735619532931) -->
     <skip />
+    <!-- no translation found for harmful_app_warning_open_anyway (596432803680914321) -->
+    <skip />
+    <!-- no translation found for harmful_app_warning_title (8982527462829423432) -->
+    <skip />
+    <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> <xliff:g id="APP_2">%2$s</xliff:g>-н хэсгүүдийг (slices) харуулах хүсэлтэй байна"</string>
+    <string name="screenshot_edit" msgid="7867478911006447565">"Засах"</string>
 </resources>
