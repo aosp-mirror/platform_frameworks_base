@@ -373,6 +373,9 @@ message WifiLog {
 
   // Wps connection metrics
   optional WpsMetrics wps_metrics = 91;
+
+  // Wifi power statistics
+  optional WifiPowerStats wifi_power_stats = 92;
 }
 
 // Information that gets logged for every WiFi connection.
@@ -1133,4 +1136,23 @@ message WpsMetrics {
 
   // Total number of wps cancellation
   optional int32 num_wps_cancellation = 8;
+}
+
+// Power stats for Wifi
+message WifiPowerStats {
+
+  // Duration of log (ms)
+  optional int64 logging_duration_ms = 1;
+
+  // Energy consumed by wifi (mAh)
+  optional double energy_consumed_mah = 2;
+
+  // Amount of time wifi is in idle (ms)
+  optional int64 idle_time_ms = 3;
+
+  // Amount of time wifi is in rx (ms)
+  optional int64 rx_time_ms = 4;
+
+  // Amount of time wifi is in tx (ms)
+  optional int64 tx_time_ms = 5;
 }
