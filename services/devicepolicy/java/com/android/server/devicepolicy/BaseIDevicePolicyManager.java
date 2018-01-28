@@ -175,4 +175,7 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     public boolean isOverrideApnEnabled(ComponentName admin) {
         return false;
     }
+
+    public void clearSystemUpdatePolicyFreezePeriodRecord() {
+    }
 }
