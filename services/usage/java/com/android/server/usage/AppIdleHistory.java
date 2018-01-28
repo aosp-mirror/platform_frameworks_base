@@ -228,7 +228,9 @@ public class AppIdleHistory {
             }
             if (timeout > elapsedRealtime) {
                 // Convert to elapsed timebase
-                appUsageHistory.bucketTimeoutTime = mElapsedDuration + (timeout - mElapsedSnapshot);
+                appUsageHistory.bucketTimeoutTime =
+                        Math.max(appUsageHistory.bucketTimeoutTime,
+                                mElapsedDuration + (timeout - mElapsedSnapshot));
             }
         }
         appUsageHistory.bucketingReason = REASON_USAGE;
