@@ -234,10 +234,6 @@
     <item msgid="7688197031296835369">"ရှိရင်းစွဲထက်ပိုသော ဧရိယာများကိုပြရန်"</item>
     <item msgid="2290859360633824369">"အရောင်ရောနှောသောဧရိယာများပြရန်"</item>
   </string-array>
-  <string-array name="debug_hw_renderer_entries">
-    <item msgid="2578620445459945681">"OpenGL (မူရင်း)"</item>
-    <item msgid="2839130076198120436">"OpenGL (Skia)"</item>
-  </string-array>
   <string-array name="app_process_limit_entries">
     <item msgid="3401625457385943795">"သတ်မှတ်စံနှုန်း"</item>
     <item msgid="4071574792028999443">"နောက်ခံပြုလုပ်နေသောလုပ်ငန်းစဉ်မရှိ"</item>
