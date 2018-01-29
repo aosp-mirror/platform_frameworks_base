@@ -1974,6 +1974,7 @@ public final class ViewRootImpl implements ViewParent,
                 final boolean outsetsChanged = !mPendingOutsets.equals(mAttachInfo.mOutsets);
                 final boolean surfaceSizeChanged = (relayoutResult
                         & WindowManagerGlobal.RELAYOUT_RES_SURFACE_RESIZED) != 0;
+                surfaceChanged |= surfaceSizeChanged;
                 final boolean alwaysConsumeNavBarChanged =
                         mPendingAlwaysConsumeNavBar != mAttachInfo.mAlwaysConsumeNavBar;
                 if (contentInsetsChanged) {
