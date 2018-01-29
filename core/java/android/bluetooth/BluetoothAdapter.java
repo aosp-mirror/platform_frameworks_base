@@ -415,7 +415,7 @@ public final class BluetoothAdapter {
      * Intent used to broadcast the change in connection state of the local
      * Bluetooth adapter to a profile of the remote device. When the adapter is
      * not connected to any profiles of any remote devices and it attempts a
-     * connection to a profile this intent will sent. Once connected, this intent
+     * connection to a profile this intent will be sent. Once connected, this intent
      * will not be sent for any more connection attempts to any profiles of any
      * remote device. When the adapter disconnects from the last profile its
      * connected to of any remote device, this intent will be sent.
