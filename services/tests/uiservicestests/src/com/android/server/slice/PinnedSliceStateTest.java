@@ -198,6 +198,7 @@ public class PinnedSliceStateTest extends UiServiceTestCase {
         when(binder.isBinderAlive()).thenReturn(false);
         arg.getValue().binderDied();
 
+        verify(mSliceService).unlisten(eq(TEST_URI));
         verify(mSliceService).removePinnedSlice(eq(TEST_URI));
         assertFalse(mPinnedSliceManager.isPinned());
     }
