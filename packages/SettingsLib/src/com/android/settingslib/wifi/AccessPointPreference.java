@@ -41,7 +41,7 @@ import com.android.settingslib.TwoTargetPreference;
 import com.android.settingslib.Utils;
 import com.android.settingslib.wifi.AccessPoint.Speed;
 
-public class AccessPointPreference extends TwoTargetPreference {
+public class AccessPointPreference extends Preference {
 
     private static final int[] STATE_SECURED = {
             R.attr.state_encrypted
@@ -128,6 +128,7 @@ public class AccessPointPreference extends TwoTargetPreference {
                           int iconResId, boolean forSavedNetworks, StateListDrawable frictionSld,
                           int level, IconInjector iconInjector) {
         super(context);
+        setWidgetLayoutResource(R.layout.access_point_friction_widget);
         mBadgeCache = cache;
         mAccessPoint = accessPoint;
         mForSavedNetworks = forSavedNetworks;
@@ -166,20 +167,6 @@ public class AccessPointPreference extends TwoTargetPreference {
 
         ImageView frictionImageView = (ImageView) view.findViewById(R.id.friction_icon);
         bindFrictionImage(frictionImageView);
-        setDividerVisibility(view, View.GONE);
-    }
-
-    protected void setDividerVisibility(final PreferenceViewHolder view,
-            @View.Visibility int visibility) {
-        final View divider = view.findViewById(R.id.two_target_divider);
-        if (divider != null) {
-            divider.setVisibility(visibility);
-        }
-    }
-
-    @Override
-    protected int getSecondTargetResId() {
-        return R.layout.access_point_friction_widget;
     }
 
     protected void updateIcon(int level, Context context) {
