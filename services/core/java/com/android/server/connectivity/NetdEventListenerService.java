@@ -219,11 +219,7 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
 
         for (INetdEventCallback callback : mNetdEventCallbackList) {
             if (callback != null) {
-                // TODO(rickywai): Remove this checking to collect ip in watchlist.
-                if (callback ==
-                        mNetdEventCallbackList[INetdEventCallback.CALLBACK_CALLER_DEVICE_POLICY]) {
-                    callback.onConnectEvent(ipAddr, port, timestamp, uid);
-                }
+                callback.onConnectEvent(ipAddr, port, timestamp, uid);
             }
         }
     }
