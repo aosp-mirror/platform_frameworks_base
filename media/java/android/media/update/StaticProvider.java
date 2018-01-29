@@ -77,8 +77,7 @@ public interface StaticProvider {
             VolumeProvider volumeProvider, int ratingType, PendingIntent sessionActivity,
             Executor executor, MediaLibrarySessionCallback callback);
     SessionToken2Provider createSessionToken2(Context context, SessionToken2 instance,
-            int uid, int type, String packageName, String serviceName, String id,
-            IInterface sessionBinderInterface);
+            String packageName, String serviceName, int uid);
     SessionToken2 SessionToken2_fromBundle(Context context, Bundle bundle);
 
     SessionPlayer2Provider createSessionPlayer2(Context context, SessionPlayer2 instance);

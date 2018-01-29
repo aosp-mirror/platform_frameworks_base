@@ -18,14 +18,12 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.session.MediaSessionManager;
 import android.media.update.ApiLoader;
 import android.media.update.SessionToken2Provider;
 import android.os.Bundle;
-import android.os.IInterface;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -52,38 +50,45 @@ public final class SessionToken2 {
 
     private final SessionToken2Provider mProvider;
 
+    // From the return value of android.os.Process.getUidForName(String) when error
+    private static final int UID_UNKNOWN = -1;
+
     /**
      * Constructor for the token. You can only create token for session service or library service
      * to use by {@link MediaController2} or {@link MediaBrowser2}.
      *
      * @param context context
-     * @param type type
      * @param packageName package name
      * @param serviceName name of service. Can be {@code null} if it's not an service.
      */
-    public SessionToken2(@NonNull Context context, @TokenType int type, @NonNull String packageName,
+    public SessionToken2(@NonNull Context context, @NonNull String packageName,
             @NonNull String serviceName) {
-        this(context, -1, type, packageName, serviceName, null, null);
+        this(context, packageName, serviceName, UID_UNKNOWN);
+    }
+
+    /**
+     * Constructor for the token. You can only create token for session service or library service
+     * to use by {@link MediaController2} or {@link MediaBrowser2}.
+     *
+     * @param context context
+     * @param packageName package name
+     * @param serviceName name of service. Can be {@code null} if it's not an service.
+     * @param uid uid of the app.
+     * @hide
+     */
+    public SessionToken2(@NonNull Context context, @NonNull String packageName,
+            @NonNull String serviceName, int uid) {
+        mProvider = ApiLoader.getProvider(context).createSessionToken2(
+                context, this, packageName, serviceName, uid);
     }
 
     /**
      * Constructor for the token.
-     *
-     * @param context context
-     * @param uid uid
-     * @param type type
-     * @param packageName package name
-     * @param serviceName name of service. Can be {@code null} if it's not an service.
-     * @param id id. Can be {@code null} if serviceName is specified.
-     * @param sessionBinderInterface sessionBinder. Required for the session.
+     * @hide
      */
     @SystemApi
-    public SessionToken2(@NonNull Context context, int uid, @TokenType int type,
-            @NonNull String packageName, @Nullable String serviceName, @Nullable String id,
-            @Nullable IInterface sessionBinderInterface) {
-        mProvider = ApiLoader.getProvider(context)
-                .createSessionToken2(context, this, uid, type, packageName,
-                        serviceName, id, sessionBinderInterface);
+    public SessionToken2(@NonNull SessionToken2Provider provider) {
+        mProvider = provider;
     }
 
     @Override

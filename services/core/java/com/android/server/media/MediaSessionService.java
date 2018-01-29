@@ -469,31 +469,21 @@ public class MediaSessionService extends SystemService implements Monitor {
                 ServiceInfo serviceInfo = services.get(i).serviceInfo;
                 int uid;
                 try {
+                    // TODO(jaewan): Do this per user.
                     uid = manager.getPackageUid(serviceInfo.packageName,
                             PackageManager.GET_META_DATA);
                 } catch (NameNotFoundException e) {
                     continue;
                 }
-                String id = (serviceInfo.metaData != null) ? serviceInfo.metaData.getString(
-                        MediaSessionService2.SERVICE_META_DATA) : null;
-                // Do basic sanity check
-                // TODO(jaewan): also santity check if it's protected with the system|privileged
-                //               permission
-                boolean conflict = (getSessionRecordLocked(uid, serviceInfo.name, id) != null);
-                if (conflict) {
-                    Log.w(TAG, serviceInfo.packageName + " contains multiple"
-                            + " MediaSessionService2s declared in the manifest with"
-                            + " the same ID=" + id + ". Ignoring "
-                            + serviceInfo.packageName + "/" + serviceInfo.name);
-                } else {
-                    int type = (libraryServices.contains(services.get(i)))
-                            ? SessionToken2.TYPE_LIBRARY_SERVICE
-                            : SessionToken2.TYPE_SESSION_SERVICE;
-                    SessionToken2 token = new SessionToken2(getContext(), uid, type,
-                            serviceInfo.packageName, serviceInfo.name, id, null);
+
+                try {
+                    SessionToken2 token = new SessionToken2(getContext(),
+                            serviceInfo.packageName, serviceInfo.name, uid);
                     MediaSession2Record record = new MediaSession2Record(getContext(),
                             token, mSessionDestroyedListener);
                     mSessions.add(record);
+                } catch (IllegalArgumentException e) {
+                    Log.d(TAG, "Invalid session service", e);
                 }
             }
         }
