@@ -48,6 +48,7 @@ public:
 
     int64_t predictAnomalyTimestampNs(const DurationAnomalyTracker& anomalyTracker,
                                       const uint64_t currentTimestamp) const override;
+    void dumpStates(FILE* out, bool verbose) const override;
 
 private:
     std::map<HashableDimensionKey, DurationInfo> mInfos;

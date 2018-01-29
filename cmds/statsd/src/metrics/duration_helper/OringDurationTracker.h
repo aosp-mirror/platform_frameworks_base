@@ -48,6 +48,7 @@ public:
 
     int64_t predictAnomalyTimestampNs(const DurationAnomalyTracker& anomalyTracker,
                                       const uint64_t currentTimestamp) const override;
+    void dumpStates(FILE* out, bool verbose) const override;
 
 private:
     // We don't need to keep track of individual durations. The information that's needed is:
