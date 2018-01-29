@@ -88,6 +88,10 @@ class RemoteAnimationController {
      * Called when the transition is ready to be started, and all leashes have been set up.
      */
     void goodToGo() {
+        if (mPendingAnimations.isEmpty()) {
+            onAnimationFinished();
+            return;
+        }
         mHandler.postDelayed(mTimeoutRunnable, TIMEOUT_MS);
         try {
             mRemoteAnimationAdapter.getRunner().onAnimationStart(createAnimations(),
