@@ -24,7 +24,6 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.support.test.InstrumentationRegistry;
@@ -270,8 +269,8 @@ public class IntentForwarderActivityTest {
         }
 
         @Override
-        public void startActivityAsCaller(Intent intent, @Nullable Bundle options,
-                IBinder permissionToken, boolean ignoreTargetSecurity, int userId) {
+        public void startActivityAsCaller(Intent intent, @Nullable Bundle options, boolean
+                ignoreTargetSecurity, int userId) {
             mStartActivityIntent = intent;
             mUserIdActivityLaunchedIn = userId;
         }
