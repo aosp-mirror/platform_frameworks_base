@@ -39,7 +39,6 @@ import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioSystem;
 import android.media.IAudioService;
-import android.media.IMediaSession2;
 import android.media.IRemoteVolumeController;
 import android.media.ISessionTokensListener;
 import android.media.MediaLibraryService2;
