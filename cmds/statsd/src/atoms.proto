@@ -1214,8 +1214,14 @@ message AppStartMemoryStateCaptured {
     // # of major page-faults
     optional int64 pgmajfault = 5;
 
-    // RSS+CACHE(+SWAP)
-    optional int64 usage_in_bytes = 6;
+    // RSS
+    optional int64 rss_in_bytes = 6;
+
+    // CACHE
+    optional int64 cache_in_bytes = 7;
+
+    // SWAP
+    optional int64 swap_in_bytes = 8;
 }
 
 /*
@@ -1237,8 +1243,14 @@ message ProcessMemoryState {
     // # of major page-faults
     optional int64 pgmajfault = 5;
 
-    // RSS+CACHE(+SWAP)
-    optional int64 usage_in_bytes = 6;
+    // RSS
+    optional int64 rss_in_bytes = 6;
+
+    // CACHE
+    optional int64 cache_in_bytes = 7;
+
+    // SWAP
+    optional int64 swap_in_bytes = 8;
 }
 
 /*
@@ -1277,8 +1289,14 @@ message LmkKillOccurred {
     // # of major page-faults
     optional int64 pgmajfault = 5;
 
-    // RSS+CACHE(+SWAP)
-    optional int64 usage_in_bytes = 6;
+    // RSS
+    optional int64 rss_in_bytes = 6;
+
+    // CACHE
+    optional int64 cache_in_bytes = 7;
+
+    // SWAP
+    optional int64 swap_in_bytes = 8;
 }
 
 /*
