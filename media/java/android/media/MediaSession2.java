@@ -34,6 +34,7 @@ import android.media.update.MediaSession2Provider.ControllerInfoProvider;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IInterface;
 import android.os.Parcelable;
 import android.os.ResultReceiver;
 import android.text.TextUtils;
@@ -630,7 +631,7 @@ public class MediaSession2 implements AutoCloseable {
         // TODO(jaewan): SystemApi
         // TODO(jaewan): Also accept componentName to check notificaiton listener.
         public ControllerInfo(Context context, int uid, int pid, String packageName,
-                IMediaSession2Callback callback) {
+                IInterface callback) {
             mProvider = ApiLoader.getProvider(context)
                     .createMediaSession2ControllerInfoProvider(
                             context, this, uid, pid, packageName, callback);

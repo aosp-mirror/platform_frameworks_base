@@ -20,6 +20,9 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.content.Context;
+import android.media.update.ApiLoader;
+import android.media.update.MediaItem2Provider;
 import android.os.Bundle;
 import android.text.TextUtils;
 
@@ -36,10 +39,6 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 public class MediaItem2 {
-    private final int mFlags;
-    private MediaMetadata2 mMetadata;
-    private DataSourceDesc mDataSourceDesc;
-
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag=true, value = { FLAG_BROWSABLE, FLAG_PLAYABLE })
@@ -58,17 +57,29 @@ public class MediaItem2 {
      */
     public static final int FLAG_PLAYABLE = 1 << 1;
 
+    private final MediaItem2Provider mProvider;
+
     /**
      * Create a new media item.
      *
+     * @param mediaId id of this item. It must be unique whithin this app
      * @param metadata metadata with the media id.
      * @param flags The flags for this item.
      */
-    public MediaItem2(@Nullable MediaMetadata2 metadata,
-            @Nullable DataSourceDesc data, @Flags int flags) {
-        mFlags = flags;
-        mDataSourceDesc = data;
-        setMetadata(metadata);
+    public MediaItem2(@NonNull Context context, @NonNull String mediaId,
+            @NonNull DataSourceDesc dsd, @Nullable MediaMetadata2 metadata,
+            @Flags int flags) {
+        mProvider = ApiLoader.getProvider(context).createMediaItem2Provider(
+                context, this, mediaId, dsd, metadata, flags);
+    }
+
+    /**
+     * Create a new media item
+     * @hide
+     */
+    @SystemApi
+    public MediaItem2(MediaItem2Provider provider) {
+        mProvider = provider;
     }
 
     /**
@@ -78,22 +89,22 @@ public class MediaItem2 {
      */
     public Bundle toBundle() {
         // TODO(jaewan): Fill here when we rebase.
-        return new Bundle();
+        return mProvider.toBundle_impl();
+    }
+
+    public static MediaItem2 fromBundle(Context context, Bundle bundle) {
+        return ApiLoader.getProvider(context).fromBundle_MediaItem2(context, bundle);
     }
 
     public String toString() {
-        final StringBuilder sb = new StringBuilder("MediaItem2{");
-        sb.append("mFlags=").append(mFlags);
-        sb.append(", mMetadata=").append(mMetadata);
-        sb.append('}');
-        return sb.toString();
+        return mProvider.toString_impl();
     }
 
     /**
      * Gets the flags of the item.
      */
     public @Flags int getFlags() {
-        return mFlags;
+        return mProvider.getFlags_impl();
     }
 
     /**
@@ -101,7 +112,7 @@ public class MediaItem2 {
      * @see #FLAG_BROWSABLE
      */
     public boolean isBrowsable() {
-        return (mFlags & FLAG_BROWSABLE) != 0;
+        return mProvider.isBrowsable_impl();
     }
 
     /**
@@ -109,29 +120,24 @@ public class MediaItem2 {
      * @see #FLAG_PLAYABLE
      */
     public boolean isPlayable() {
-        return (mFlags & FLAG_PLAYABLE) != 0;
+        return mProvider.isPlayable_impl();
     }
 
     /**
-     * Set a metadata. Metadata shouldn't be null and should have non-empty media id.
+     * Set a metadata. Metadata shouldn't be {@code null} and its id should be match
+     * with this instance's id.
      *
-     * @param metadata
+     * @param metadata metadata to update
      */
     public void setMetadata(@NonNull MediaMetadata2 metadata) {
-        if (metadata == null) {
-            throw new IllegalArgumentException("metadata cannot be null");
-        }
-        if (TextUtils.isEmpty(metadata.getMediaId())) {
-            throw new IllegalArgumentException("metadata must have a non-empty media id");
-        }
-        mMetadata = metadata;
+        mProvider.setMetadata_impl(metadata);
     }
 
     /**
      * Returns the metadata of the media.
      */
     public @NonNull MediaMetadata2 getMetadata() {
-        return mMetadata;
+        return mProvider.getMetadata_impl();
     }
 
     /**
@@ -139,10 +145,17 @@ public class MediaItem2 {
      * @see MediaMetadata2#METADATA_KEY_MEDIA_ID
      */
     public @Nullable String getMediaId() {
-        return mMetadata.getMediaId();
+        return mProvider.getMediaId_impl();
     }
 
+    /**
+     * Return the {@link DataSourceDesc}
+     * <p>
+     * Can be {@code null} if the MediaItem2 came from another process and anonymized
+     *
+     * @return data source descriptor
+     */
     public @Nullable DataSourceDesc getDataSourceDesc() {
-        return mDataSourceDesc;
+        return mProvider.getDataSourceDesc_impl();
     }
 }

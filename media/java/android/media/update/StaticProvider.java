@@ -19,13 +19,16 @@ package android.media.update;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.media.DataSourceDesc;
 import android.media.MediaBrowser2;
 import android.media.MediaBrowser2.BrowserCallback;
 import android.media.MediaController2;
 import android.media.MediaController2.ControllerCallback;
+import android.media.MediaItem2;
 import android.media.MediaLibraryService2;
 import android.media.MediaLibraryService2.MediaLibrarySession;
 import android.media.MediaLibraryService2.MediaLibrarySessionCallback;
+import android.media.MediaMetadata2;
 import android.media.MediaPlayerInterface;
 import android.media.MediaSession2;
 import android.media.MediaSession2.SessionCallback;
@@ -74,9 +77,12 @@ public interface StaticProvider {
             VolumeProvider volumeProvider, int ratingType, PendingIntent sessionActivity,
             Executor executor, MediaLibrarySessionCallback callback);
     SessionToken2Provider createSessionToken2(Context context, SessionToken2 instance,
-            int uid, int type, String packageName, String serviceName, String id,
-            IInterface sessionBinderInterface);
+            String packageName, String serviceName, int uid);
     SessionToken2 SessionToken2_fromBundle(Context context, Bundle bundle);
 
     SessionPlayer2Provider createSessionPlayer2(Context context, SessionPlayer2 instance);
+
+    MediaItem2Provider createMediaItem2Provider(Context context, MediaItem2 mediaItem2,
+            String mediaId, DataSourceDesc dsd, MediaMetadata2 metadata, int flags);
+    MediaItem2 fromBundle_MediaItem2(Context context, Bundle bundle);
 }
