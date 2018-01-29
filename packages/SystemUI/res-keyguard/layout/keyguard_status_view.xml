@@ -31,6 +31,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/widget_vertical_padding"
         android:orientation="vertical">
         <RelativeLayout
             android:id="@+id/keyguard_clock_container"
@@ -63,7 +64,6 @@
             <include layout="@layout/keyguard_status_area"
                 android:id="@+id/keyguard_status_area"
                 android:layout_marginTop="20dp"
-                android:layout_marginBottom="@dimen/widget_vertical_padding"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/clock_separator" />
