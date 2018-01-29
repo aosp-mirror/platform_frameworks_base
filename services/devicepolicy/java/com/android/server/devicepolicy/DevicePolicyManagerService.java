@@ -744,7 +744,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 if (deviceOwner != null) {
                     Bundle extras = new Bundle();
                     extras.putParcelable(Intent.EXTRA_USER, UserHandle.of(userHandle));
-                    sendAdminCommandLocked(deviceOwner, action, extras, null);
+                    sendAdminCommandLocked(deviceOwner, action, extras, /* result */ null,
+                            /* inForeground */ true);
                 }
             }
         }
