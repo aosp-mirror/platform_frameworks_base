@@ -134,7 +134,7 @@ public class PendingTransactionActions {
                 Bundle.dumpStats(pw, mPersistentState);
 
                 if (ex instanceof TransactionTooLargeException
-                        && mActivity.loadedApk.getTargetSdkVersion() < Build.VERSION_CODES.N) {
+                        && mActivity.packageInfo.getTargetSdkVersion() < Build.VERSION_CODES.N) {
                     Log.e(TAG, "App sent too much data in instance state, so it was ignored", ex);
                     return;
                 }
