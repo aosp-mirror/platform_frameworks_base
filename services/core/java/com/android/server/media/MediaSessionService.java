@@ -1425,6 +1425,16 @@ public class MediaSessionService extends SystemService implements Monitor {
                     mUserRecords.valueAt(i).dumpLocked(pw, "");
                 }
                 mAudioPlayerStateMonitor.dump(getContext(), pw, "");
+
+                // TODO(jaewan): Remove this debug command before ship.
+                if (args != null && args.length > 0 && "--purge".equals(args[0])) {
+                    mSessions.clear();
+                }
+                pw.println();
+                pw.println("Session2: size=" + mSessions.size());
+                for (int i = 0; i < mSessions.size(); i++) {
+                    pw.println("  " + mSessions.get(i));
+                }
             }
         }
 

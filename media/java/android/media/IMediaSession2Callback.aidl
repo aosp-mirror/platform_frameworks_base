@@ -17,6 +17,7 @@
 package android.media;
 
 import android.os.Bundle;
+import android.os.ResultReceiver;
 import android.media.session.PlaybackState;
 import android.media.IMediaSession2;
 
@@ -47,6 +48,8 @@ oneway interface IMediaSession2Callback {
     void onConnectionChanged(IMediaSession2 sessionBinder, in Bundle commandGroup);
 
     void onCustomLayoutChanged(in List<Bundle> commandButtonlist);
+
+    void sendCustomCommand(in Bundle command, in Bundle args, in ResultReceiver receiver);
 
     //////////////////////////////////////////////////////////////////////////////////////////////
     // Browser sepcific

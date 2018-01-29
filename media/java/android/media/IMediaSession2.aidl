@@ -18,6 +18,7 @@ package android.media;
 
 import android.media.IMediaSession2Callback;
 import android.os.Bundle;
+import android.os.ResultReceiver;
 
 /**
  * Interface to MediaSession2. Framework MUST only call oneway APIs.
@@ -42,6 +43,8 @@ oneway interface IMediaSession2 {
     void sendCommand(IMediaSession2Callback caller, in Bundle command, in Bundle args);
     void sendTransportControlCommand(IMediaSession2Callback caller,
             int commandCode, in Bundle args);
+    void sendCustomCommand(IMediaSession2Callback caller, in Bundle command, in Bundle args,
+            in ResultReceiver receiver);
 
     //////////////////////////////////////////////////////////////////////////////////////////////
     // Get library service specific
