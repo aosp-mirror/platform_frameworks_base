@@ -27,6 +27,7 @@ import android.widget.VideoView2;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * Interface for connecting the public API to an updatable implementation.
@@ -48,7 +49,6 @@ public interface VideoView2Provider extends ViewProvider {
     MediaControlView2 getMediaControlView2_impl();
     void showSubtitle_impl();
     void hideSubtitle_impl();
-    void setFullScreen_impl(boolean fullScreen);
     // TODO: remove setSpeed_impl once MediaController2 is ready.
     void setSpeed_impl(float speed);
     void setAudioFocusRequest_impl(int focusGain);
@@ -62,11 +62,13 @@ public interface VideoView2Provider extends ViewProvider {
     void setViewType_impl(int viewType);
     int getViewType_impl();
     void setCustomActions_impl(List<PlaybackState.CustomAction> actionList,
-            VideoView2.OnCustomActionListener listener);
-    void setOnPreparedListener_impl(VideoView2.OnPreparedListener l);
-    void setOnCompletionListener_impl(VideoView2.OnCompletionListener l);
-    void setOnErrorListener_impl(VideoView2.OnErrorListener l);
-    void setOnInfoListener_impl(VideoView2.OnInfoListener l);
-    void setOnViewTypeChangedListener_impl(VideoView2.OnViewTypeChangedListener l);
-    void setFullScreenChangedListener_impl(VideoView2.OnFullScreenChangedListener l);
+            Executor executor, VideoView2.OnCustomActionListener listener);
+    void setOnPreparedListener_impl(Executor executor, VideoView2.OnPreparedListener l);
+    void setOnCompletionListener_impl(Executor executor, VideoView2.OnCompletionListener l);
+    void setOnErrorListener_impl(Executor executor, VideoView2.OnErrorListener l);
+    void setOnInfoListener_impl(Executor executor, VideoView2.OnInfoListener l);
+    void setOnViewTypeChangedListener_impl(
+            Executor executor, VideoView2.OnViewTypeChangedListener l);
+    void setFullScreenRequestListener_impl(
+            Executor executor, VideoView2.OnFullScreenRequestListener l);
 }
