@@ -1,12 +1,15 @@
 package android.os;
 
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.WorkSourceProto;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -464,6 +467,7 @@ public class WorkSource implements Parcelable {
      *
      * @hide
      */
+    @SystemApi
     public WorkChain createWorkChain() {
         if (mChains == null) {
             mChains = new ArrayList<>(4);
@@ -854,7 +858,8 @@ public class WorkSource implements Parcelable {
      *
      * @hide
      */
-    public static class WorkChain implements Parcelable {
+    @SystemApi
+    public static final class WorkChain implements Parcelable {
         private int mSize;
         private int[] mUids;
         private String[] mTags;
@@ -866,7 +871,8 @@ public class WorkSource implements Parcelable {
             mTags = new String[4];
         }
 
-        // @VisibleForTesting
+        /** @hide */
+        @VisibleForTesting
         public WorkChain(WorkChain other) {
             mSize = other.mSize;
             mUids = other.mUids.clone();
@@ -913,16 +919,22 @@ public class WorkSource implements Parcelable {
         // TODO: The following three trivial getters are purely for testing and will be removed
         // once we have higher level logic in place, e.g for serializing this WorkChain to a proto,
         // diffing it etc.
-        //
-        // @VisibleForTesting
+
+
+        /** @hide */
+        @VisibleForTesting
         public int[] getUids() {
             return mUids;
         }
-        // @VisibleForTesting
+
+        /** @hide */
+        @VisibleForTesting
         public String[] getTags() {
             return mTags;
         }
-        // @VisibleForTesting
+
+        /** @hide */
+        @VisibleForTesting
         public int getSize() {
             return mSize;
         }
