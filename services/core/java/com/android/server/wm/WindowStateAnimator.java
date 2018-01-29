@@ -135,8 +135,6 @@ class WindowStateAnimator {
     float mAlpha = 0;
     float mLastAlpha = 0;
 
-    boolean mHasClipRect;
-    Rect mClipRect = new Rect();
     Rect mTmpClipRect = new Rect();
     Rect mTmpFinalClipRect = new Rect();
     Rect mLastClipRect = new Rect();
@@ -456,8 +454,6 @@ class WindowStateAnimator {
 
         // We may abort, so initialize to defaults.
         mLastSystemDecorRect.set(0, 0, 0, 0);
-        mHasClipRect = false;
-        mClipRect.set(0, 0, 0, 0);
         mLastClipRect.set(0, 0, 0, 0);
 
         // Set up surface control with initial size.
@@ -649,14 +645,12 @@ class WindowStateAnimator {
     }
 
     void computeShownFrameLocked() {
-
         final int displayId = mWin.getDisplayId();
         final ScreenRotationAnimation screenRotationAnimation =
                 mAnimator.getScreenRotationAnimationLocked(displayId);
         final boolean screenAnimation =
                 screenRotationAnimation != null && screenRotationAnimation.isAnimating();
 
-        mHasClipRect = false;
         if (screenAnimation) {
             // cache often used attributes locally
             final Rect frame = mWin.mFrame;
@@ -796,9 +790,9 @@ class WindowStateAnimator {
 
         // We use the clip rect as provided by the tranformation for non-fullscreen windows to
         // avoid premature clipping with the system decor rect.
-        clipRect.set((mHasClipRect && !fullscreen) ? mClipRect : mSystemDecorRect);
+        clipRect.set(mSystemDecorRect);
         if (DEBUG_WINDOW_CROP) Slog.d(TAG, "win=" + w + " Initial clip rect: " + clipRect
-                + " mHasClipRect=" + mHasClipRect + " fullscreen=" + fullscreen);
+                + " fullscreen=" + fullscreen);
 
         if (isFreeformResizing && !w.isChildWindow()) {
             // For freeform resizing non child windows, we are using the big surface positioned
@@ -808,12 +802,6 @@ class WindowStateAnimator {
 
         w.expandForSurfaceInsets(clipRect);
 
-        if (mHasClipRect && fullscreen) {
-            // We intersect the clip rect specified by the transformation with the expanded system
-            // decor rect to prevent artifacts from drawing during animation if the transformation
-            // clip rect extends outside the system decor rect.
-            clipRect.intersect(mClipRect);
-        }
         // The clip rect was generated assuming (0,0) as the window origin,
         // so we need to translate to match the actual surface coordinates.
         clipRect.offset(w.mAttrs.surfaceInsets.left, w.mAttrs.surfaceInsets.top);
@@ -1379,7 +1367,6 @@ class WindowStateAnimator {
             pw.print(prefix); pw.print(" mLastHidden="); pw.println(mLastHidden);
             pw.print(prefix); pw.print("mSystemDecorRect="); mSystemDecorRect.printShortString(pw);
             pw.print(" last="); mLastSystemDecorRect.printShortString(pw);
-            pw.print(" mHasClipRect="); pw.print(mHasClipRect);
             pw.print(" mLastClipRect="); mLastClipRect.printShortString(pw);
 
             if (!mLastFinalClipRect.isEmpty()) {
