@@ -7118,7 +7118,7 @@ public class Activity extends ContextThemeWrapper
         boolean isAppDebuggable =
                 (mApplication.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
 
-        // This property is set for all builds except final release
+        // This property is set for all non-user builds except final release
         boolean isDlwarningEnabled = SystemProperties.getInt("ro.bionic.ld.warning", 0) == 1;
 
         if (isAppDebuggable || isDlwarningEnabled) {
@@ -7141,8 +7141,8 @@ public class Activity extends ContextThemeWrapper
             }
         }
 
-        // We might disable this for final builds.
-        boolean isApiWarningEnabled = true;
+        // This property is set for all non-user builds except final release
+        boolean isApiWarningEnabled = SystemProperties.getInt("ro.art.hiddenapi.warning", 0) == 1;
 
         if (isAppDebuggable || isApiWarningEnabled) {
             if (VMRuntime.getRuntime().hasUsedHiddenApi()) {
