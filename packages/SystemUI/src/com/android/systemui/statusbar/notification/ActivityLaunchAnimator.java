@@ -77,11 +77,11 @@ public class ActivityLaunchAnimator {
         mStatusBar = statusBar;
     }
 
-    public ActivityOptions getLaunchAnimation(
-            ExpandableNotificationRow sourceNofitication) {
-        AnimationRunner animationRunner = new AnimationRunner(sourceNofitication);
-        return ActivityOptions.makeRemoteAnimation(
-                new RemoteAnimationAdapter(animationRunner, 1000 /* Duration */, 0 /* delay */));
+    public RemoteAnimationAdapter getLaunchAnimation(
+            ExpandableNotificationRow sourceNotification) {
+        AnimationRunner animationRunner = new AnimationRunner(sourceNotification);
+        return new RemoteAnimationAdapter(animationRunner, ANIMATION_DURATION,
+                0 /* statusBarTransitionDelay */);
     }
 
     public boolean isAnimationPending() {

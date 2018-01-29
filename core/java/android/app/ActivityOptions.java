@@ -1106,6 +1106,11 @@ public class ActivityOptions {
     }
 
     /** @hide */
+    public void setRemoteAnimationAdapter(RemoteAnimationAdapter remoteAnimationAdapter) {
+        mRemoteAnimationAdapter = remoteAnimationAdapter;
+    }
+
+    /** @hide */
     public static ActivityOptions fromBundle(Bundle bOptions) {
         return bOptions != null ? new ActivityOptions(bOptions) : null;
     }
