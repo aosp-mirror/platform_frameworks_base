@@ -20,7 +20,9 @@
         android:color="@color/notification_ripple_untinted_color">
     <item>
         <shape android:shape="rectangle">
-            <corners android:radius="@dimen/smart_reply_button_corner_radius"/>
+            <!-- Use non-zero corner radius to work around b/73285195. The actual corner radius is
+                 set dynamically at runtime in SmartReplyView. -->
+            <corners android:radius="1dp"/>
             <solid android:color="@color/smart_reply_button_background"/>
         </shape>
     </item>

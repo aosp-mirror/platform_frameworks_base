@@ -130,5 +130,11 @@
     <attr name="darkIconTheme" format="reference" />
     <attr name="wallpaperTextColor" format="reference|color" />
     <attr name="wallpaperTextColorSecondary" format="reference|color" />
+
+    <declare-styleable name="SmartReplyView">
+        <attr name="spacing" format="dimension" />
+        <attr name="singleLineButtonPaddingHorizontal" format="dimension" />
+        <attr name="doubleLineButtonPaddingHorizontal" format="dimension" />
+    </declare-styleable>
 </resources>
 

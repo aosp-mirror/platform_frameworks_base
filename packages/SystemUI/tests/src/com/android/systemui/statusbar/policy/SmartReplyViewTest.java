@@ -14,16 +14,27 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.view.View.MeasureSpec;
+
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
+import static junit.framework.Assert.assertTrue;
+import static junit.framework.Assert.fail;
 
 import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
 
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
@@ -34,13 +45,20 @@ import org.junit.runner.RunWith;
 @TestableLooper.RunWithLooper
 @SmallTest
 public class SmartReplyViewTest extends SysuiTestCase {
-
     private static final String TEST_RESULT_KEY = "test_result_key";
     private static final String TEST_ACTION = "com.android.ACTION";
+
     private static final String[] TEST_CHOICES = new String[]{"Hello", "What's up?", "I'm here"};
+
+    private static final int WIDTH_SPEC = MeasureSpec.makeMeasureSpec(500, MeasureSpec.EXACTLY);
+    private static final int HEIGHT_SPEC = MeasureSpec.makeMeasureSpec(400, MeasureSpec.AT_MOST);
 
     private BlockingQueueIntentReceiver mReceiver;
     private SmartReplyView mView;
+
+    private int mSingleLinePaddingHorizontal;
+    private int mDoubleLinePaddingHorizontal;
+    private int mSpacing;
 
     @Before
     public void setUp() {
@@ -48,16 +66,19 @@ public class SmartReplyViewTest extends SysuiTestCase {
         mContext.registerReceiver(mReceiver, new IntentFilter(TEST_ACTION));
 
         mView = SmartReplyView.inflate(mContext, null);
+
+
+        final Resources res = mContext.getResources();
+        mSingleLinePaddingHorizontal = res.getDimensionPixelSize(
+                R.dimen.smart_reply_button_padding_horizontal_single_line);
+        mDoubleLinePaddingHorizontal = res.getDimensionPixelSize(
+                R.dimen.smart_reply_button_padding_horizontal_double_line);
+        mSpacing = res.getDimensionPixelSize(R.dimen.smart_reply_button_spacing);
     }
 
     @Test
     public void testSendSmartReply_intentContainsResultsAndSource() throws InterruptedException {
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
-                new Intent(TEST_ACTION), 0);
-        RemoteInput input = new RemoteInput.Builder(TEST_RESULT_KEY).setChoices(
-                TEST_CHOICES).build();
-
-        mView.setRepliesFromRemoteInput(input, pendingIntent);
+        setRepliesFromRemoteInput(TEST_CHOICES);
 
         mView.getChildAt(2).performClick();
 
@@ -65,5 +86,260 @@ public class SmartReplyViewTest extends SysuiTestCase {
         assertEquals(TEST_CHOICES[2],
                 RemoteInput.getResultsFromIntent(resultIntent).get(TEST_RESULT_KEY));
         assertEquals(RemoteInput.SOURCE_CHOICE, RemoteInput.getResultsSource(resultIntent));
+    }
+
+    @Test
+    public void testMeasure_empty() {
+        mView.measure(WIDTH_SPEC, HEIGHT_SPEC);
+        assertEquals(500, mView.getMeasuredWidthAndState());
+        assertEquals(0, mView.getMeasuredHeightAndState());
+    }
+
+    @Test
+    public void testLayout_empty() {
+        mView.measure(WIDTH_SPEC, HEIGHT_SPEC);
+        mView.layout(0, 0, 500, 0);
+    }
+
+
+    // Instead of manually calculating the expected measurement/layout results, we build the
+    // expectations as ordinary linear layouts and then check that the relevant parameters in the
+    // corresponding SmartReplyView and LinearView are equal.
+
+    @Test
+    public void testMeasure_shortChoices() {
+        final CharSequence[] choices = new CharSequence[]{"Hi", "Hello", "Bye"};
+
+        // All choices should be displayed as SINGLE-line smart reply buttons.
+        ViewGroup expectedView = buildExpectedView(choices, 1);
+        expectedView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+
+        setRepliesFromRemoteInput(choices);
+        mView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+
+        assertEqualMeasures(expectedView, mView);
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(0), mView.getChildAt(0));
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(1), mView.getChildAt(1));
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(2), mView.getChildAt(2));
+    }
+
+    @Test
+    public void testLayout_shortChoices() {
+        final CharSequence[] choices = new CharSequence[]{"Hi", "Hello", "Bye"};
+
+        // All choices should be displayed as SINGLE-line smart reply buttons.
+        ViewGroup expectedView = buildExpectedView(choices, 1);
+        expectedView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+        expectedView.layout(10, 10, 10 + expectedView.getMeasuredWidth(),
+                10 + expectedView.getMeasuredHeight());
+
+        setRepliesFromRemoteInput(choices);
+        mView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+        mView.layout(10, 10, 10 + mView.getMeasuredWidth(), 10 + mView.getMeasuredHeight());
+
+        assertEqualLayouts(expectedView, mView);
+        assertEqualLayouts(expectedView.getChildAt(0), mView.getChildAt(0));
+        assertEqualLayouts(expectedView.getChildAt(1), mView.getChildAt(1));
+        assertEqualLayouts(expectedView.getChildAt(2), mView.getChildAt(2));
+    }
+
+    @Test
+    public void testMeasure_choiceWithTwoLines() {
+        final CharSequence[] choices = new CharSequence[]{"Hi", "Hello\neveryone", "Bye"};
+
+        // All choices should be displayed as DOUBLE-line smart reply buttons.
+        ViewGroup expectedView = buildExpectedView(choices, 2);
+        expectedView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+
+        setRepliesFromRemoteInput(choices);
+        mView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+
+        assertEqualMeasures(expectedView, mView);
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(0), mView.getChildAt(0));
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(1), mView.getChildAt(1));
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(2), mView.getChildAt(2));
+    }
+
+    @Test
+    public void testLayout_choiceWithTwoLines() {
+        final CharSequence[] choices = new CharSequence[]{"Hi", "Hello\neveryone", "Bye"};
+
+        // All choices should be displayed as DOUBLE-line smart reply buttons.
+        ViewGroup expectedView = buildExpectedView(choices, 2);
+        expectedView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+        expectedView.layout(10, 10, 10 + expectedView.getMeasuredWidth(),
+                10 + expectedView.getMeasuredHeight());
+
+        setRepliesFromRemoteInput(choices);
+        mView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+        mView.layout(10, 10, 10 + mView.getMeasuredWidth(), 10 + mView.getMeasuredHeight());
+
+        assertEqualLayouts(expectedView, mView);
+        assertEqualLayouts(expectedView.getChildAt(0), mView.getChildAt(0));
+        assertEqualLayouts(expectedView.getChildAt(1), mView.getChildAt(1));
+        assertEqualLayouts(expectedView.getChildAt(2), mView.getChildAt(2));
+    }
+
+    @Test
+    public void testMeasure_choiceWithThreeLines() {
+        final CharSequence[] choices = new CharSequence[]{"Hi", "Hello\nevery\nbody", "Bye"};
+
+        // The choice with three lines should NOT be displayed. All other choices should be
+        // displayed as SINGLE-line smart reply buttons.
+        ViewGroup expectedView = buildExpectedView(new CharSequence[]{"Hi", "Bye"}, 1);
+        expectedView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+
+        setRepliesFromRemoteInput(choices);
+        mView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+
+        assertEqualMeasures(expectedView, mView);
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(0), mView.getChildAt(0));
+        assertReplyButtonHidden(mView.getChildAt(1));
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(1), mView.getChildAt(2));
+    }
+
+    @Test
+    public void testLayout_choiceWithThreeLines() {
+        final CharSequence[] choices = new CharSequence[]{"Hi", "Hello\nevery\nbody", "Bye"};
+
+        // The choice with three lines should NOT be displayed. All other choices should be
+        // displayed as SINGLE-line smart reply buttons.
+        ViewGroup expectedView = buildExpectedView(new CharSequence[]{"Hi", "Bye"}, 1);
+        expectedView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+        expectedView.layout(10, 10, 10 + expectedView.getMeasuredWidth(),
+                10 + expectedView.getMeasuredHeight());
+
+        setRepliesFromRemoteInput(choices);
+        mView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+        mView.layout(10, 10, 10 + mView.getMeasuredWidth(), 10 + mView.getMeasuredHeight());
+
+        assertEqualLayouts(expectedView, mView);
+        assertEqualLayouts(expectedView.getChildAt(0), mView.getChildAt(0));
+        // We don't care about mView.getChildAt(1)'s layout because it's hidden (see
+        // testMeasure_choiceWithThreeLines).
+        assertEqualLayouts(expectedView.getChildAt(1), mView.getChildAt(2));
+    }
+
+    @Test
+    public void testMeasure_squeezeLongest() {
+        final CharSequence[] choices = new CharSequence[]{"Short", "Short", "Looooooong replyyyyy"};
+
+        // All choices should be displayed as DOUBLE-line smart reply buttons.
+        ViewGroup expectedView = buildExpectedView(
+                new CharSequence[]{"Short", "Short", "Looooooong \nreplyyyyy"}, 2);
+        expectedView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+
+        setRepliesFromRemoteInput(choices);
+        mView.measure(
+                MeasureSpec.makeMeasureSpec(expectedView.getMeasuredWidth(), MeasureSpec.AT_MOST),
+                MeasureSpec.UNSPECIFIED);
+
+        assertEqualMeasures(expectedView, mView);
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(0), mView.getChildAt(0));
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(1), mView.getChildAt(1));
+        assertReplyButtonShownWithEqualMeasures(expectedView.getChildAt(2), mView.getChildAt(2));
+    }
+
+    @Test
+    public void testLayout_squeezeLongest() {
+        final CharSequence[] choices = new CharSequence[]{"Short", "Short", "Looooooong replyyyyy"};
+
+        // All choices should be displayed as DOUBLE-line smart reply buttons.
+        ViewGroup expectedView = buildExpectedView(
+                new CharSequence[]{"Short", "Short", "Looooooong \nreplyyyyy"}, 2);
+        expectedView.measure(MeasureSpec.UNSPECIFIED, MeasureSpec.UNSPECIFIED);
+        expectedView.layout(10, 10, 10 + expectedView.getMeasuredWidth(),
+                10 + expectedView.getMeasuredHeight());
+
+        setRepliesFromRemoteInput(choices);
+        mView.measure(
+                MeasureSpec.makeMeasureSpec(expectedView.getMeasuredWidth(), MeasureSpec.AT_MOST),
+                MeasureSpec.UNSPECIFIED);
+        mView.layout(10, 10, 10 + mView.getMeasuredWidth(), 10 + mView.getMeasuredHeight());
+
+        assertEqualLayouts(expectedView, mView);
+        assertEqualLayouts(expectedView.getChildAt(0), mView.getChildAt(0));
+        assertEqualLayouts(expectedView.getChildAt(1), mView.getChildAt(1));
+        assertEqualLayouts(expectedView.getChildAt(2), mView.getChildAt(2));
+    }
+
+    private void setRepliesFromRemoteInput(CharSequence[] choices) {
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
+                new Intent(TEST_ACTION), 0);
+        RemoteInput input = new RemoteInput.Builder(TEST_RESULT_KEY).setChoices(choices).build();
+        mView.setRepliesFromRemoteInput(input, pendingIntent);
+    }
+
+    /** Builds a {@link ViewGroup} whose measures and layout mirror a {@link SmartReplyView}. */
+    private ViewGroup buildExpectedView(CharSequence[] choices, int lineCount) {
+        LinearLayout layout = new LinearLayout(mContext);
+        layout.setOrientation(LinearLayout.HORIZONTAL);
+
+        // Baseline alignment causes expected heights to be off by one or two pixels on some
+        // devices.
+        layout.setBaselineAligned(false);
+
+        final boolean isRtl = mView.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
+        final int paddingHorizontal;
+        switch (lineCount) {
+            case 1:
+                paddingHorizontal = mSingleLinePaddingHorizontal;
+                break;
+            case 2:
+                paddingHorizontal = mDoubleLinePaddingHorizontal;
+                break;
+            default:
+                fail("Invalid line count " + lineCount);
+                return null;
+        }
+
+        Button previous = null;
+        for (CharSequence choice : choices) {
+            Button current = SmartReplyView.inflateReplyButton(mContext, mView, choice, null, null);
+            current.setPadding(paddingHorizontal, current.getPaddingTop(), paddingHorizontal,
+                    current.getPaddingBottom());
+            if (previous != null) {
+                ViewGroup.MarginLayoutParams lp =
+                        (ViewGroup.MarginLayoutParams) previous.getLayoutParams();
+                if (isRtl) {
+                    lp.leftMargin = mSpacing;
+                } else {
+                    lp.rightMargin = mSpacing;
+                }
+            }
+            layout.addView(current);
+            previous = current;
+        }
+
+        return layout;
+    }
+
+    private static void assertEqualMeasures(View expected, View actual) {
+        assertEquals(expected.getMeasuredWidth(), actual.getMeasuredWidth());
+        assertEquals(expected.getMeasuredHeight(), actual.getMeasuredHeight());
+    }
+
+    private static void assertReplyButtonShownWithEqualMeasures(View expected, View actual) {
+        assertReplyButtonShown(actual);
+        assertEqualMeasures(expected, actual);
+        assertEquals(expected.getPaddingLeft(), actual.getPaddingLeft());
+        assertEquals(expected.getPaddingTop(), actual.getPaddingTop());
+        assertEquals(expected.getPaddingRight(), actual.getPaddingRight());
+        assertEquals(expected.getPaddingBottom(), actual.getPaddingBottom());
+    }
+
+    private static void assertReplyButtonShown(View view) {
+        assertTrue(((SmartReplyView.LayoutParams) view.getLayoutParams()).isShown());
+    }
+
+    private static void assertReplyButtonHidden(View view) {
+        assertFalse(((SmartReplyView.LayoutParams) view.getLayoutParams()).isShown());
+    }
+
+    private static void assertEqualLayouts(View expected, View actual) {
+        assertEquals(expected.getLeft(), actual.getLeft());
+        assertEquals(expected.getTop(), actual.getTop());
+        assertEquals(expected.getRight(), actual.getRight());
+        assertEquals(expected.getBottom(), actual.getBottom());
     }
 }

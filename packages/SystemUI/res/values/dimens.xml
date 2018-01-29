@@ -891,10 +891,13 @@
     <dimen name="home_padding">16dp</dimen>
 
     <!-- Smart reply button -->
-    <dimen name="smart_reply_button_corner_radius">24dip</dimen>
     <dimen name="smart_reply_button_spacing">8dp</dimen>
-    <dimen name="smart_reply_button_padding_vertical">4dp</dimen>
+    <dimen name="smart_reply_button_padding_vertical">10dp</dimen>
+    <dimen name="smart_reply_button_padding_horizontal_single_line">12dp</dimen>
+    <dimen name="smart_reply_button_padding_horizontal_double_line">16dp</dimen>
+    <dimen name="smart_reply_button_min_height">40dp</dimen>
     <dimen name="smart_reply_button_font_size">14sp</dimen>
+    <dimen name="smart_reply_button_line_spacing_extra">6sp</dimen> <!-- Total line height 20sp. -->
 
     <dimen name="fingerprint_dialog_icon_size">44dp</dimen>
     <dimen name="fingerprint_dialog_fp_icon_size">60dp</dimen>
