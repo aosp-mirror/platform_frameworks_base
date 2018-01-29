@@ -4576,6 +4576,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             outPoint.offset(-parentBounds.left, -parentBounds.top);
         }
 
+        TaskStack stack = getStack();
+
+        // If we have stack outsets, that means the top-left
+        // will be outset, and we need to inset ourselves
+        // to account for it. If we actually have shadows we will
+        // then un-inset ourselves by the surfaceInsets.
+        if (stack != null) {
+            final int outset = stack.getStackOutset();
+            outPoint.offset(outset, outset);
+        }
+
         // Expand for surface insets. See WindowState.expandForSurfaceInsets.
         outPoint.offset(-mAttrs.surfaceInsets.left, -mAttrs.surfaceInsets.top);
     }

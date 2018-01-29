@@ -86,6 +86,7 @@ import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.PopupWindow;
 
+import static android.app.WindowConfiguration.PINNED_WINDOWING_MODE_ELEVATION_IN_DIP;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -2216,7 +2217,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             elevation = dipToPx(elevation);
             mElevationAdjustedForStack = true;
         } else if (windowingMode == WINDOWING_MODE_PINNED) {
-            elevation = dipToPx(DECOR_SHADOW_UNFOCUSED_HEIGHT_IN_DIP);
+            elevation = dipToPx(PINNED_WINDOWING_MODE_ELEVATION_IN_DIP);
             mElevationAdjustedForStack = true;
         } else {
             mElevationAdjustedForStack = false;
