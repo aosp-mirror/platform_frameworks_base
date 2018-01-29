@@ -1216,10 +1216,10 @@ public class Instrumentation {
                     + " disabling AppComponentFactory", new Throwable());
             return AppComponentFactory.DEFAULT;
         }
-        LoadedApk loadedApk = mThread.peekLoadedApk(pkg, true);
+        LoadedApk apk = mThread.peekPackageInfo(pkg, true);
         // This is in the case of starting up "android".
-        if (loadedApk == null) loadedApk = mThread.getSystemContext().mLoadedApk;
-        return loadedApk.getAppFactory();
+        if (apk == null) apk = mThread.getSystemContext().mPackageInfo;
+        return apk.getAppFactory();
     }
 
     private void prePerformCreate(Activity activity) {

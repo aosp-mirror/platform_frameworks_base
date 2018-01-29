@@ -111,7 +111,7 @@ public abstract class ClientTransactionHandler {
             PendingTransactionActions pendingActions);
 
     /** Get package info. */
-    public abstract LoadedApk getLoadedApkNoCheck(ApplicationInfo ai,
+    public abstract LoadedApk getPackageInfoNoCheck(ApplicationInfo ai,
             CompatibilityInfo compatInfo);
 
     /** Deliver app configuration change notification. */
