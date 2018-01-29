@@ -42,9 +42,9 @@ public interface SessionPlayer2Provider {
     PlaybackState2 getPlaybackState_impl();
     void setAudioAttributes_impl(AudioAttributes attributes);
     AudioAttributes getAudioAttributes_impl();
-    void setPlaylist_impl(List<MediaItem2> list, PlaylistParams param);
     void addPlaylistItem_impl(int index, MediaItem2 item);
     void removePlaylistItem_impl(MediaItem2 item);
+    void setPlaylist_impl(List<MediaItem2> playlist);
     List<MediaItem2> getPlaylist_impl();
     void setCurrentPlaylistItem_impl(int index);
     void setPlaylistParams_impl(PlaylistParams params);
