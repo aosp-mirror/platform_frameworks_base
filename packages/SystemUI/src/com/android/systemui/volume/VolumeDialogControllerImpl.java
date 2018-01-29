@@ -43,6 +43,7 @@ import android.os.RemoteException;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.service.notification.Condition;
+import android.service.notification.ZenModeConfig;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.accessibility.AccessibilityManager;
@@ -109,6 +110,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private boolean mShowSafetyWarning;
     private DeviceCallback mDeviceCallback = new DeviceCallback();
     private AudioDeviceInfo mConnectedDevice;
+    private final NotificationManager mNotificationManager;
 
     private boolean mDestroyed;
     private VolumePolicy mVolumePolicy;
@@ -120,6 +122,8 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
     public VolumeDialogControllerImpl(Context context) {
         mContext = context.getApplicationContext();
+        mNotificationManager = (NotificationManager) mContext.getSystemService(
+                Context.NOTIFICATION_SERVICE);
         Events.writeEvent(mContext, Events.EVENT_COLLECTION_STARTED);
         mWorkerThread = new HandlerThread(VolumeDialogControllerImpl.class.getSimpleName());
         mWorkerThread.start();
@@ -425,6 +429,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         }
         updateRingerModeExternalW(mAudio.getRingerMode());
         updateZenModeW();
+        updateZenConfig();
         updateEffectsSuppressorW(mNoMan.getEffectsSuppressor());
         mCallbacks.onStateChanged(mState);
     }
@@ -507,6 +512,26 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
         if (mState.zenMode == zen) return false;
         mState.zenMode = zen;
         Events.writeEvent(mContext, Events.EVENT_ZEN_MODE_CHANGED, zen);
+        return true;
+    }
+
+    private boolean updateZenConfig() {
+        final NotificationManager.Policy policy = mNotificationManager.getNotificationPolicy();
+        boolean disallowAlarms = (policy.priorityCategories & NotificationManager.Policy
+                .PRIORITY_CATEGORY_ALARMS) == 0;
+        boolean disallowMedia = (policy.priorityCategories & NotificationManager.Policy
+                .PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER) == 0;
+        boolean disallowRinger = ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(policy);
+        if (mState.disallowAlarms == disallowAlarms && mState.disallowMedia == disallowMedia
+                && mState.disallowRinger == disallowRinger) {
+            return false;
+        }
+        mState.disallowAlarms = disallowAlarms;
+        mState.disallowMedia = disallowMedia;
+        mState.disallowRinger = disallowRinger;
+        Events.writeEvent(mContext, Events.EVENT_ZEN_CONFIG_CHANGED, "disallowAlarms=" +
+                disallowAlarms + " disallowMedia=" + disallowMedia + " disallowRinger=" +
+                disallowRinger);
         return true;
     }
 
@@ -850,6 +875,10 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
             if (ZEN_MODE_URI.equals(uri)) {
                 changed = updateZenModeW();
             }
+            if (ZEN_MODE_CONFIG_URI.equals(uri)) {
+                changed |= updateZenConfig();
+            }
+
             if (changed) {
                 mCallbacks.onStateChanged(mState);
             }

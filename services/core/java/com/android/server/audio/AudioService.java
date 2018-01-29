@@ -16,11 +16,6 @@
 
 package com.android.server.audio;
 
-import com.android.server.audio.AudioServiceEvents.ForceUseEvent;
-import com.android.server.audio.AudioServiceEvents.PhoneStateEvent;
-import com.android.server.audio.AudioServiceEvents.VolumeEvent;
-import com.android.server.audio.AudioServiceEvents.WiredDevConnectEvent;
-
 import static android.Manifest.permission.REMOTE_AUDIO_PLAYBACK;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
@@ -64,14 +59,14 @@ import android.media.AudioAttributes;
 import android.media.AudioDevicePort;
 import android.media.AudioFocusInfo;
 import android.media.AudioFocusRequest;
-import android.media.AudioSystem;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
-import android.media.AudioPort;
 import android.media.AudioPlaybackConfiguration;
+import android.media.AudioPort;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
+import android.media.AudioSystem;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioRoutesObserver;
 import android.media.IAudioService;
@@ -80,12 +75,12 @@ import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
 import android.media.IVolumeController;
 import android.media.MediaPlayer;
-import android.media.SoundPool;
-import android.media.VolumePolicy;
-import android.media.audiofx.AudioEffect;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
 import android.media.PlayerBase;
+import android.media.SoundPool;
+import android.media.VolumePolicy;
+import android.media.audiofx.AudioEffect;
 import android.media.audiopolicy.AudioMix;
 import android.media.audiopolicy.AudioPolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
@@ -110,6 +105,7 @@ import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.provider.Settings.System;
+import android.service.notification.ZenModeConfig;
 import android.telecom.TelecomManager;
 import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
@@ -129,6 +125,10 @@ import com.android.internal.util.XmlUtils;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.audio.AudioServiceEvents.ForceUseEvent;
+import com.android.server.audio.AudioServiceEvents.PhoneStateEvent;
+import com.android.server.audio.AudioServiceEvents.VolumeEvent;
+import com.android.server.audio.AudioServiceEvents.WiredDevConnectEvent;
 import com.android.server.pm.UserManagerService;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -1853,10 +1853,12 @@ public class AudioService extends IAudioService.Stub
         sendVolumeUpdate(streamType, oldIndex, index, flags);
     }
 
-    // No ringer affected streams can be changed in total silence mode except those that
-    // will cause the device to exit total silence mode.
+    // No ringer affected streams can be changed in total silence mode or priority-only
+    // (with alarms/media toggled off) except those that will cause the device to exit
+    // the mode.
     private boolean volumeAdjustmentAllowedByDnd(int streamTypeAlias, int flags) {
-        if (mNm.getZenMode() == Settings.Global.ZEN_MODE_NO_INTERRUPTIONS
+        if ((mNm.getZenMode() == Settings.Global.ZEN_MODE_NO_INTERRUPTIONS
+                || mNm.getZenMode() == Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS)
                 && isStreamMutedByRingerMode(streamTypeAlias)) {
             if (!(((flags & AudioManager.FLAG_ALLOW_RINGER_MODES) != 0) ||
                     (streamTypeAlias == getUiSoundsStreamType()))) {
@@ -2381,11 +2383,30 @@ public class AudioService extends IAudioService.Stub
         // Unmute stream if previously muted by ringer mode and ringer mode
         // is RINGER_MODE_NORMAL or stream is not affected by ringer mode.
         int numStreamTypes = AudioSystem.getNumStreamTypes();
+
+        if (mNm == null) {
+            mNm = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        }
+
+        // in priority only dnd, alarms and media streams can be muted when ringer is not muted
+        boolean isZenPriorityMode = mNm.getZenMode() ==
+                Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        NotificationManager.Policy zenPolicy = mNm.getNotificationPolicy();
+        boolean muteAlarms = isZenPriorityMode && ((zenPolicy.priorityCategories
+                & NotificationManager.Policy.PRIORITY_CATEGORY_ALARMS) == 0);
+        boolean muteMedia = isZenPriorityMode && ((zenPolicy.priorityCategories
+                & NotificationManager.Policy.PRIORITY_CATEGORY_MEDIA_SYSTEM_OTHER) == 0);
+
         final boolean ringerModeMute = mRingerMode == AudioManager.RINGER_MODE_VIBRATE
                 || mRingerMode == AudioManager.RINGER_MODE_SILENT;
+
         for (int streamType = numStreamTypes - 1; streamType >= 0; streamType--) {
             final boolean isMuted = isStreamMutedByRingerMode(streamType);
-            final boolean shouldMute = ringerModeMute && isStreamAffectedByRingerMode(streamType);
+
+            final boolean shouldZenMute = (isAlarm(streamType) && muteAlarms)
+                    || (isMedia(streamType) && muteMedia);
+            final boolean shouldMute = (shouldZenMute || ringerModeMute)
+                    && isStreamAffectedByRingerMode(streamType);
             if (isMuted == shouldMute) continue;
             if (!shouldMute) {
                 // unmute
@@ -2419,6 +2440,19 @@ public class AudioService extends IAudioService.Stub
                 mRingerModeMutedStreams |= (1 << streamType);
             }
         }
+    }
+
+    private boolean isAlarm(int streamType) {
+        return streamType == AudioSystem.STREAM_ALARM;
+    }
+
+    private boolean isNotificationOrRinger(int streamType) {
+        return streamType == AudioSystem.STREAM_NOTIFICATION
+                || streamType == AudioSystem.STREAM_RING;
+    }
+
+    private boolean isMedia(int streamType) {
+        return streamType == AudioSystem.STREAM_SYSTEM || streamType == AudioSystem.STREAM_MUSIC;
     }
 
     private void setRingerModeInt(int ringerMode, boolean persist) {

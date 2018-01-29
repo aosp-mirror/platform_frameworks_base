@@ -129,7 +129,6 @@ public class ZenModeHelper {
         mFiltering = new ZenModeFiltering(mContext);
         mConditions = new ZenModeConditions(this, conditionProviders);
         mServiceConfig = conditionProviders.getConfig();
-
     }
 
     public Looper getLooper() {
@@ -822,7 +821,7 @@ public class ZenModeHelper {
     @VisibleForTesting
     protected void applyRestrictions() {
         final boolean zenPriorityOnly = mZenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        final boolean zenSilence  = mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
+        final boolean zenSilence = mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS;
         final boolean zenAlarmsOnly = mZenMode == Global.ZEN_MODE_ALARMS;
 
         // notification restrictions
@@ -838,7 +837,7 @@ public class ZenModeHelper {
         final boolean muteMediaAndSystemSounds = zenPriorityOnly && !mConfig.allowMediaSystemOther;
         // total silence restrictions
         final boolean muteEverything = zenSilence
-                || (zenPriorityOnly && areAllBehaviorSoundsMuted());
+                || (zenPriorityOnly && ZenModeConfig.areAllZenBehaviorSoundsMuted(mConfig));
 
         for (int usage : AudioAttributes.SDK_USAGES) {
             final int suppressionBehavior = AudioAttributes.SUPPRESSIBLE_USAGES.get(usage);
@@ -871,12 +870,6 @@ public class ZenModeHelper {
                 exceptionPackages);
     }
 
-    private boolean areAllBehaviorSoundsMuted() {
-        return !mConfig.allowAlarms  && !mConfig.allowMediaSystemOther && !mConfig.allowReminders
-                && !mConfig.allowCalls && !mConfig.allowMessages && !mConfig.allowEvents
-                && !mConfig.allowRepeatCallers;
-    }
-
     private void applyZenToRingerMode() {
         if (mAudioManager == null) return;
         // force the ringer mode into compliance
@@ -891,6 +884,18 @@ public class ZenModeHelper {
                 }
                 break;
             case Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS:
+                if (ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(mConfig)) {
+                    if (ringerModeInternal != AudioManager.RINGER_MODE_SILENT) {
+                        setPreviousRingerModeSetting(ringerModeInternal);
+                        newRingerModeInternal = AudioManager.RINGER_MODE_SILENT;
+                    }
+                } else {
+                    if (ringerModeInternal == AudioManager.RINGER_MODE_SILENT) {
+                        newRingerModeInternal = getPreviousRingerModeSetting();
+                        setPreviousRingerModeSetting(null);
+                    }
+                }
+                break;
             case Global.ZEN_MODE_OFF:
                 if (ringerModeInternal == AudioManager.RINGER_MODE_SILENT) {
                     newRingerModeInternal = getPreviousRingerModeSetting();
@@ -999,8 +1004,7 @@ public class ZenModeHelper {
             switch (ringerModeNew) {
                 case AudioManager.RINGER_MODE_SILENT:
                     if (isChange && policy.doNotDisturbWhenSilent) {
-                        if (mZenMode != Global.ZEN_MODE_NO_INTERRUPTIONS
-                                && mZenMode != Global.ZEN_MODE_ALARMS) {
+                        if (mZenMode == Global.ZEN_MODE_OFF) {
                             newZen = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
                         }
                         setPreviousRingerModeSetting(ringerModeOld);
@@ -1010,7 +1014,10 @@ public class ZenModeHelper {
                 case AudioManager.RINGER_MODE_NORMAL:
                     if (isChange && ringerModeOld == AudioManager.RINGER_MODE_SILENT
                             && (mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS
-                                    || mZenMode == Global.ZEN_MODE_ALARMS)) {
+                            || mZenMode == Global.ZEN_MODE_ALARMS
+                            || (mZenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
+                            && ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(
+                                    mConfig)))) {
                         newZen = Global.ZEN_MODE_OFF;
                     } else if (mZenMode != Global.ZEN_MODE_OFF) {
                         ringerModeExternalOut = AudioManager.RINGER_MODE_SILENT;
@@ -1078,10 +1085,24 @@ public class ZenModeHelper {
                        (1 << AudioSystem.STREAM_NOTIFICATION) |
                        (1 << AudioSystem.STREAM_SYSTEM);
 
-            // alarm and music streams are only affected by ringer mode when in total silence
             if (mZenMode == Global.ZEN_MODE_NO_INTERRUPTIONS) {
+                // alarm and music streams affected by ringer mode when in total silence
                 streams |= (1 << AudioSystem.STREAM_ALARM) |
                            (1 << AudioSystem.STREAM_MUSIC);
+            } else if (mZenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
+                // alarm and music streams affected by ringer mode when in priority only with
+                // media and alarms not allowed to bypass dnd
+                if (!mConfig.allowMediaSystemOther) {
+                    streams |= (1 << AudioSystem.STREAM_MUSIC);
+                } else {
+                    streams &= ~(1 << AudioSystem.STREAM_MUSIC);
+                }
+
+                if (!mConfig.allowAlarms) {
+                    streams |= (1 << AudioSystem.STREAM_ALARM);
+                } else {
+                    streams &= ~(1 << AudioSystem.STREAM_ALARM);
+                }
             } else {
                 streams &= ~((1 << AudioSystem.STREAM_ALARM) |
                              (1 << AudioSystem.STREAM_MUSIC));
