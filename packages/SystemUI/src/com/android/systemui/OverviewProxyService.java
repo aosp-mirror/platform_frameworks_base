@@ -37,6 +37,7 @@ import com.android.systemui.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.GraphicBufferCompat;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
@@ -67,6 +68,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private int mConnectionBackoffAttempts;
 
     private ISystemUiProxy mSysUiProxy = new ISystemUiProxy.Stub() {
+
         public GraphicBufferCompat screenshot(Rect sourceCrop, int width, int height, int minLayer,
                 int maxLayer, boolean useIdentityTransform, int rotation) {
             long token = Binder.clearCallingIdentity();
@@ -78,10 +80,27 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
         }
 
+        public void startScreenPinning(int taskId) {
+            long token = Binder.clearCallingIdentity();
+            try {
+                mHandler.post(() -> {
+                    StatusBar statusBar = ((SystemUIApplication) mContext).getComponent(
+                            StatusBar.class);
+                    if (statusBar != null) {
+                        statusBar.showScreenPinningRequest(taskId, false /* allowCancel */);
+                    }
+                });
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
         public void onRecentsAnimationStarted() {
             long token = Binder.clearCallingIdentity();
             try {
-                notifyRecentsAnimationStarted();
+                mHandler.post(() -> {
+                    notifyRecentsAnimationStarted();
+                });
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

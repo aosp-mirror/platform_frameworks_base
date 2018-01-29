@@ -73,7 +73,6 @@ public class SwipeUpOnboarding {
     private final RippleDrawable mLightRipple;
 
     private boolean mTaskListenerRegistered;
-    private ComponentName mLauncherComponent;
     private boolean mLayoutAttachedToWindow;
     private boolean mBackgroundIsLight;
 
@@ -92,15 +91,7 @@ public class SwipeUpOnboarding {
                     Prefs.putInt(mContext, Prefs.Key.NUM_APPS_LAUNCHED, numAppsLaunched);
                 }
             } else {
-                String runningPackage = info.topActivity.getPackageName();
-                // TODO: use callback from the overview proxy service to handle this case
-                if (runningPackage.equals(mLauncherComponent.getPackageName())
-                        && activityType == ACTIVITY_TYPE_RECENTS) {
-                    Prefs.putBoolean(mContext, Prefs.Key.HAS_SWIPED_UP_FOR_RECENTS, true);
-                    onDisconnectedFromLauncher();
-                } else {
-                    hide(false);
-                }
+                hide(false);
             }
         }
     };
@@ -127,8 +118,8 @@ public class SwipeUpOnboarding {
         final Resources res = context.getResources();
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mLayout = LayoutInflater.from(mContext).inflate(R.layout.recents_swipe_up_onboarding, null);
-        mTextView = (TextView) mLayout.findViewById(R.id.onboarding_text);
-        mDismissView = (ImageView) mLayout.findViewById(R.id.dismiss);
+        mTextView = mLayout.findViewById(R.id.onboarding_text);
+        mDismissView = mLayout.findViewById(R.id.dismiss);
         mDarkBackgroundColor = res.getColor(android.R.color.background_dark);
         mLightBackgroundColor = res.getColor(android.R.color.background_light);
         mDarkContentColor = res.getColor(R.color.primary_text_default_material_light);
@@ -149,18 +140,21 @@ public class SwipeUpOnboarding {
         }
     }
 
-    public void onConnectedToLauncher(ComponentName launcherComponent) {
-        // TODO: re-enable this once we have the proper callback for when a swipe up was performed.
-        final boolean disableOnboarding = true;
-        if (disableOnboarding) {
-            return;
-        }
-        mLauncherComponent = launcherComponent;
+    public void onConnectedToLauncher() {
         boolean alreadyLearnedSwipeUpForRecents = Prefs.getBoolean(mContext,
                 Prefs.Key.HAS_SWIPED_UP_FOR_RECENTS, false);
         if (!mTaskListenerRegistered && !alreadyLearnedSwipeUpForRecents) {
             ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskListener);
             mTaskListenerRegistered = true;
+        }
+    }
+
+    public void onRecentsAnimationStarted() {
+        boolean alreadyLearnedSwipeUpForRecents = Prefs.getBoolean(mContext,
+                Prefs.Key.HAS_SWIPED_UP_FOR_RECENTS, false);
+        if (!alreadyLearnedSwipeUpForRecents) {
+            Prefs.putBoolean(mContext, Prefs.Key.HAS_SWIPED_UP_FOR_RECENTS, true);
+            onDisconnectedFromLauncher();
         }
     }
 
