@@ -16,6 +16,7 @@
 
 package android.telephony;
 
+import android.annotation.Nullable;
 import android.os.Binder;
 import android.os.Parcel;
 import android.content.res.Resources;
@@ -534,8 +535,16 @@ public class SmsMessage {
 
     /**
      * Returns the originating address (sender) of this SMS message in String
-     * form or null if unavailable
+     * form or null if unavailable.
+     *
+     * <p>If the address is a GSM-formatted address, it will be in a format specified by 3GPP
+     * 23.040 Sec 9.1.2.5. If it is a CDMA address, it will be a format specified by 3GPP2
+     * C.S005-D Table 2.7.1.3.2.4-2. The choice of format is carrier-specific, so callers of the
+     * should be careful to avoid assumptions about the returned content.
+     *
+     * @return a String representation of the address; null if unavailable.
      */
+    @Nullable
     public String getOriginatingAddress() {
         return mWrappedSmsMessage.getOriginatingAddress();
     }
