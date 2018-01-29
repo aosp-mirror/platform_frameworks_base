@@ -599,9 +599,13 @@ public class MediaController2 implements AutoCloseable {
         return mProvider.getPlaylist_impl();
     }
 
-    public @Nullable
-    PlaylistParams getPlaylistParam() {
-        return mProvider.getPlaylistParam_impl();
+    /**
+     * Returns the {@link PlaylistParams} for the current play list.
+     * Can return {@code null} if the controller doesn't have enough permission, or if the session
+     * has not set the parameters.
+     */
+    public @Nullable PlaylistParams getPlaylistParams() {
+        return mProvider.getPlaylistParams_impl();
     }
 
     /**

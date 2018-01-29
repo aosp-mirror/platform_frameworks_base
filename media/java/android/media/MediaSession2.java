@@ -108,6 +108,8 @@ public class MediaSession2 implements AutoCloseable {
     public static final int COMMAND_CODE_PREPARE_FROM_URI = 18;
     public static final int COMMAND_CODE_PREPARE_FROM_SEARCH = 19;
 
+    public static final int COMMAND_CODE_PLAYBACK_SET_PLAYLIST_PARAMS = 20;
+
     /**
      * Define a command that a {@link MediaController2} can send to a {@link MediaSession2}.
      * <p>
@@ -237,6 +239,7 @@ public class MediaSession2 implements AutoCloseable {
             mCommands.add(new Command(COMMAND_CODE_PLAYBACK_REWIND));
             mCommands.add(new Command(COMMAND_CODE_PLAYBACK_SEEK_TO));
             mCommands.add(new Command(COMMAND_CODE_PLAYBACK_SET_CURRENT_PLAYLIST_ITEM));
+            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_SET_PLAYLIST_PARAMS));
         }
 
         public void removeCommand(Command command) {

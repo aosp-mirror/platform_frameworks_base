@@ -41,7 +41,7 @@ oneway interface IMediaSession2 {
     //////////////////////////////////////////////////////////////////////////////////////////////
     void sendCommand(IMediaSession2Callback caller, in Bundle command, in Bundle args);
     void sendTransportControlCommand(IMediaSession2Callback caller,
-            int commandCode, long arg);
+            int commandCode, in Bundle args);
 
     //////////////////////////////////////////////////////////////////////////////////////////////
     // Get library service specific
