@@ -493,7 +493,7 @@ public class Notification implements Parcelable
      * </ul>
      * <p>
      * Since hardware varies, you are not guaranteed that any of the values
-     * you pass are honored exactly.  Use the system defaults (TODO) if possible
+     * you pass are honored exactly.  Use the system defaults if possible
      * because they will be set to values that work on any given hardware.
      * <p>
      * The alpha channel must be set for forward compatibility.
