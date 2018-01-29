@@ -896,6 +896,26 @@ public final class ViewRootImpl implements ViewParent,
         return mWindowAttributes.getTitle();
     }
 
+    /**
+     * @return the width of the root view. Note that this will return {@code -1} until the first
+     *         layout traversal, when the width is set.
+     *
+     * @hide
+     */
+    public int getWidth() {
+        return mWidth;
+    }
+
+    /**
+     * @return the height of the root view. Note that this will return {@code -1} until the first
+     *         layout traversal, when the height is set.
+     *
+     * @hide
+     */
+    public int getHeight() {
+        return mHeight;
+    }
+
     void destroyHardwareResources() {
         if (mAttachInfo.mThreadedRenderer != null) {
             mAttachInfo.mThreadedRenderer.destroyHardwareResources(mView);
