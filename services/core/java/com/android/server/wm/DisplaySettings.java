@@ -64,7 +64,7 @@ public class DisplaySettings {
     public DisplaySettings() {
         File dataDir = Environment.getDataDirectory();
         File systemDir = new File(dataDir, "system");
-        mFile = new AtomicFile(new File(systemDir, "display_settings.xml"));
+        mFile = new AtomicFile(new File(systemDir, "display_settings.xml"), "wm-displays");
     }
 
     public void getOverscanLocked(String name, String uniqueId, Rect outRect) {

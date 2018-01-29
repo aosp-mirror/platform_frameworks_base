@@ -81,7 +81,7 @@ class AppWarnings {
         mUiContext = uiContext;
         mAmsHandler = new ConfigHandler(amsHandler.getLooper());
         mUiHandler = new UiHandler(uiHandler.getLooper());
-        mConfigFile = new AtomicFile(new File(systemDir, CONFIG_FILE_NAME));
+        mConfigFile = new AtomicFile(new File(systemDir, CONFIG_FILE_NAME), "warnings-config");
 
         readConfigFromFileAmsThread();
     }

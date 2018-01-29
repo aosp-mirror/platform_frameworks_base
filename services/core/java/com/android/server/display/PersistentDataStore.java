@@ -771,7 +771,8 @@ final class PersistentDataStore {
         private final AtomicFile mAtomicFile;
 
         public Injector() {
-            mAtomicFile = new AtomicFile(new File("/data/system/display-manager-state.xml"));
+            mAtomicFile = new AtomicFile(new File("/data/system/display-manager-state.xml"),
+                    "display-state");
         }
 
         public InputStream openRead() throws FileNotFoundException {

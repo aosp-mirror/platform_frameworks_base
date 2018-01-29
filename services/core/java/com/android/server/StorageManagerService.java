@@ -1386,7 +1386,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         mSettingsFile = new AtomicFile(
-                new File(Environment.getDataSystemDirectory(), "storage.xml"));
+                new File(Environment.getDataSystemDirectory(), "storage.xml"), "storage-settings");
 
         synchronized (mLock) {
             readSettingsLocked();

@@ -29,6 +29,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.os.Process;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.format.DateUtils;
 import android.util.ArraySet;
@@ -133,7 +134,7 @@ public final class JobStore {
         File systemDir = new File(dataDir, "system");
         File jobDir = new File(systemDir, "job");
         jobDir.mkdirs();
-        mJobsFile = new AtomicFile(new File(jobDir, "jobs.xml"));
+        mJobsFile = new AtomicFile(new File(jobDir, "jobs.xml"), "jobs");
 
         mJobSet = new JobSet();
 
@@ -361,6 +362,7 @@ public final class JobStore {
             int numSystemJobs = 0;
             int numSyncJobs = 0;
             try {
+                final long startTime = SystemClock.uptimeMillis();
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 XmlSerializer out = new FastXmlSerializer();
                 out.setOutput(baos, StandardCharsets.UTF_8.name());
@@ -393,7 +395,7 @@ public final class JobStore {
                 out.endDocument();
 
                 // Write out to disk in one fell swoop.
-                FileOutputStream fos = mJobsFile.startWrite();
+                FileOutputStream fos = mJobsFile.startWrite(startTime);
                 fos.write(baos.toByteArray());
                 mJobsFile.finishWrite(fos);
                 mDirtyOperations = 0;

@@ -481,9 +481,9 @@ public class SyncStorageEngine {
 
         maybeDeleteLegacyPendingInfoLocked(syncDir);
 
-        mAccountInfoFile = new AtomicFile(new File(syncDir, "accounts.xml"));
-        mStatusFile = new AtomicFile(new File(syncDir, "status.bin"));
-        mStatisticsFile = new AtomicFile(new File(syncDir, "stats.bin"));
+        mAccountInfoFile = new AtomicFile(new File(syncDir, "accounts.xml"), "sync-accounts");
+        mStatusFile = new AtomicFile(new File(syncDir, "status.bin"), "sync-status");
+        mStatisticsFile = new AtomicFile(new File(syncDir, "stats.bin"), "sync-stats");
 
         readAccountInfoLocked();
         readStatusLocked();

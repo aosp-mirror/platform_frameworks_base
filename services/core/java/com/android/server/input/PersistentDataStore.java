@@ -82,7 +82,8 @@ final class PersistentDataStore {
     private boolean mDirty;
 
     public PersistentDataStore() {
-        mAtomicFile = new AtomicFile(new File("/data/system/input-manager-state.xml"));
+        mAtomicFile = new AtomicFile(new File("/data/system/input-manager-state.xml"),
+                "input-state");
     }
 
     public void saveIfNeeded() {

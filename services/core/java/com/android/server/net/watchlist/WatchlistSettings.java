@@ -77,7 +77,7 @@ class WatchlistSettings {
 
     @VisibleForTesting
     protected WatchlistSettings(File xmlFile) {
-        mXmlFile = new AtomicFile(xmlFile);
+        mXmlFile = new AtomicFile(xmlFile, "net-watchlist");
         reloadSettings();
         if (mPrivacySecretKey == null) {
             // Generate a new secret key and save settings

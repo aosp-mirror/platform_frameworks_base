@@ -17,25 +17,18 @@
 package com.android.internal.app.procstats;
 
 import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.service.pm.PackageProto;
 import android.service.procstats.ProcessStatsProto;
-import android.text.format.DateFormat;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
 
-import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.app.procstats.ProcessStats.PackageState;
 import com.android.internal.app.procstats.ProcessStats.ProcessStateHolder;
 import com.android.internal.app.procstats.ProcessStats.TotalMemoryUseCollection;
@@ -43,6 +36,9 @@ import static com.android.internal.app.procstats.ProcessStats.PSS_SAMPLE_COUNT;
 import static com.android.internal.app.procstats.ProcessStats.PSS_MINIMUM;
 import static com.android.internal.app.procstats.ProcessStats.PSS_AVERAGE;
 import static com.android.internal.app.procstats.ProcessStats.PSS_MAXIMUM;
+import static com.android.internal.app.procstats.ProcessStats.PSS_RSS_MINIMUM;
+import static com.android.internal.app.procstats.ProcessStats.PSS_RSS_AVERAGE;
+import static com.android.internal.app.procstats.ProcessStats.PSS_RSS_MAXIMUM;
 import static com.android.internal.app.procstats.ProcessStats.PSS_USS_MINIMUM;
 import static com.android.internal.app.procstats.ProcessStats.PSS_USS_AVERAGE;
 import static com.android.internal.app.procstats.ProcessStats.PSS_USS_MAXIMUM;
@@ -64,20 +60,10 @@ import static com.android.internal.app.procstats.ProcessStats.STATE_CACHED_ACTIV
 import static com.android.internal.app.procstats.ProcessStats.STATE_CACHED_EMPTY;
 import static com.android.internal.app.procstats.ProcessStats.STATE_COUNT;
 
-import dalvik.system.VMRuntime;
-import libcore.util.EmptyArray;
-
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public final class ProcessState {
     private static final String TAG = "ProcessStats";
@@ -469,13 +455,21 @@ public final class ProcessState {
         }
     }
 
-    public void addPss(long pss, long uss, boolean always, int type, long duration,
+    public void addPss(long pss, long uss, long rss, boolean always, int type, long duration,
             ArrayMap<String, ProcessStateHolder> pkgList) {
         ensureNotDead();
         switch (type) {
-            case ProcessStats.ADD_PSS_INTERNAL:
-                mStats.mInternalPssCount++;
-                mStats.mInternalPssTime += duration;
+            case ProcessStats.ADD_PSS_INTERNAL_SINGLE:
+                mStats.mInternalSinglePssCount++;
+                mStats.mInternalSinglePssTime += duration;
+                break;
+            case ProcessStats.ADD_PSS_INTERNAL_ALL_MEM:
+                mStats.mInternalAllMemPssCount++;
+                mStats.mInternalAllMemPssTime += duration;
+                break;
+            case ProcessStats.ADD_PSS_INTERNAL_ALL_POLL:
+                mStats.mInternalAllPollPssCount++;
+                mStats.mInternalAllPollPssTime += duration;
                 break;
             case ProcessStats.ADD_PSS_EXTERNAL:
                 mStats.mExternalPssCount++;
@@ -496,7 +490,8 @@ public final class ProcessState {
         mLastPssTime = SystemClock.uptimeMillis();
         if (mCurState != STATE_NOTHING) {
             // First update the common process.
-            mCommonProcess.mPssTable.mergeStats(mCurState, 1, pss, pss, pss, uss, uss, uss);
+            mCommonProcess.mPssTable.mergeStats(mCurState, 1, pss, pss, pss, uss, uss, uss,
+                    rss, rss, rss);
 
             // If the common process is not multi-package, there is nothing else to do.
             if (!mCommonProcess.mMultiPackage) {
@@ -506,7 +501,7 @@ public final class ProcessState {
             if (pkgList != null) {
                 for (int ip=pkgList.size()-1; ip>=0; ip--) {
                     pullFixedProc(pkgList, ip).mPssTable.mergeStats(mCurState, 1,
-                            pss, pss, pss, uss, uss, uss);
+                            pss, pss, pss, uss, uss, uss, rss, rss, rss);
                 }
             }
         }
@@ -658,6 +653,18 @@ public final class ProcessState {
         return mPssTable.getValueForId((byte)state, PSS_USS_MAXIMUM);
     }
 
+    public long getPssRssMinimum(int state) {
+        return mPssTable.getValueForId((byte)state, PSS_RSS_MINIMUM);
+    }
+
+    public long getPssRssAverage(int state) {
+        return mPssTable.getValueForId((byte)state, PSS_RSS_AVERAGE);
+    }
+
+    public long getPssRssMaximum(int state) {
+        return mPssTable.getValueForId((byte)state, PSS_RSS_MAXIMUM);
+    }
+
     /**
      * Sums up the PSS data and adds it to 'data'.
      * 
@@ -793,6 +800,8 @@ public final class ProcessState {
                 new int[] {STATE_SERVICE_RESTARTING}, now, totalTime, true);
         dumpProcessSummaryDetails(pw, prefix, "      Receiver: ", screenStates, memStates,
                 new int[] {STATE_RECEIVER}, now, totalTime, true);
+        dumpProcessSummaryDetails(pw, prefix, "         Heavy: ", screenStates, memStates,
+                new int[] {STATE_HOME}, now, totalTime, true);
         dumpProcessSummaryDetails(pw, prefix, "        (Home): ", screenStates, memStates,
                 new int[] {STATE_HOME}, now, totalTime, true);
         dumpProcessSummaryDetails(pw, prefix, "    (Last Act): ", screenStates, memStates,
@@ -897,6 +906,12 @@ public final class ProcessState {
                         DebugUtils.printSizeValue(pw, getPssUssAverage(bucket) * 1024);
                         pw.print(" ");
                         DebugUtils.printSizeValue(pw, getPssUssMaximum(bucket) * 1024);
+                        pw.print(" / ");
+                        DebugUtils.printSizeValue(pw, getPssRssMinimum(bucket) * 1024);
+                        pw.print(" ");
+                        DebugUtils.printSizeValue(pw, getPssRssAverage(bucket) * 1024);
+                        pw.print(" ");
+                        DebugUtils.printSizeValue(pw, getPssRssMaximum(bucket) * 1024);
                         pw.println();
                     }
                 }
@@ -969,7 +984,8 @@ public final class ProcessState {
     public void computeProcessData(ProcessStats.ProcessDataCollection data, long now) {
         data.totalTime = 0;
         data.numPss = data.minPss = data.avgPss = data.maxPss =
-                data.minUss = data.avgUss = data.maxUss = 0;
+                data.minUss = data.avgUss = data.maxUss =
+                data.minRss = data.avgRss = data.maxRss = 0;
         for (int is=0; is<data.screenStates.length; is++) {
             for (int im=0; im<data.memStates.length; im++) {
                 for (int ip=0; ip<data.procStates.length; ip++) {
@@ -984,6 +1000,9 @@ public final class ProcessState {
                         long minUss = getPssUssMinimum(bucket);
                         long avgUss = getPssUssAverage(bucket);
                         long maxUss = getPssUssMaximum(bucket);
+                        long minRss = getPssRssMinimum(bucket);
+                        long avgRss = getPssRssAverage(bucket);
+                        long maxRss = getPssRssMaximum(bucket);
                         if (data.numPss == 0) {
                             data.minPss = minPss;
                             data.avgPss = avgPss;
@@ -991,6 +1010,9 @@ public final class ProcessState {
                             data.minUss = minUss;
                             data.avgUss = avgUss;
                             data.maxUss = maxUss;
+                            data.minRss = minRss;
+                            data.avgRss = avgRss;
+                            data.maxRss = maxRss;
                         } else {
                             if (minPss < data.minPss) {
                                 data.minPss = minPss;
@@ -1007,6 +1029,14 @@ public final class ProcessState {
                                     + (avgUss*(double)samples)) / (data.numPss+samples) );
                             if (maxUss > data.maxUss) {
                                 data.maxUss = maxUss;
+                            }
+                            if (minRss < data.minRss) {
+                                data.minRss = minRss;
+                            }
+                            data.avgRss = (long)( ((data.avgRss*(double)data.numPss)
+                                    + (avgRss*(double)samples)) / (data.numPss+samples) );
+                            if (maxRss > data.maxRss) {
+                                data.maxRss = maxRss;
                             }
                         }
                         data.numPss += samples;
@@ -1176,6 +1206,12 @@ public final class ProcessState {
             pw.print(mPssTable.getValue(key, PSS_USS_AVERAGE));
             pw.print(':');
             pw.print(mPssTable.getValue(key, PSS_USS_MAXIMUM));
+            pw.print(':');
+            pw.print(mPssTable.getValue(key, PSS_RSS_MINIMUM));
+            pw.print(':');
+            pw.print(mPssTable.getValue(key, PSS_RSS_AVERAGE));
+            pw.print(':');
+            pw.print(mPssTable.getValue(key, PSS_RSS_MAXIMUM));
         }
     }
 
@@ -1249,6 +1285,10 @@ public final class ProcessState {
                     mPssTable.getValue(key, PSS_USS_MINIMUM),
                     mPssTable.getValue(key, PSS_USS_AVERAGE),
                     mPssTable.getValue(key, PSS_USS_MAXIMUM));
+            ProtoUtils.toAggStatsProto(proto, ProcessStatsProto.State.RSS,
+                    mPssTable.getValue(key, PSS_RSS_MINIMUM),
+                    mPssTable.getValue(key, PSS_RSS_AVERAGE),
+                    mPssTable.getValue(key, PSS_RSS_MAXIMUM));
 
             proto.end(stateToken);
         }

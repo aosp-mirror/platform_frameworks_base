@@ -85,7 +85,7 @@ public class BootReceiver extends BroadcastReceiver {
 
     private static final String LOG_FILES_FILE = "log-files.xml";
     private static final AtomicFile sFile = new AtomicFile(new File(
-            Environment.getDataSystemDirectory(), LOG_FILES_FILE));
+            Environment.getDataSystemDirectory(), LOG_FILES_FILE), "log-files");
     private static final String LAST_HEADER_FILE = "last-header.txt";
     private static final File lastHeaderFile = new File(
             Environment.getDataSystemDirectory(), LAST_HEADER_FILE);

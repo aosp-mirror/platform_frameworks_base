@@ -81,7 +81,7 @@ final class PackageStatusStorage {
     private final AtomicFile mPackageStatusFile;
 
     PackageStatusStorage(File storageDir) {
-        mPackageStatusFile = new AtomicFile(new File(storageDir, "package-status.xml"));
+        mPackageStatusFile = new AtomicFile(new File(storageDir, "package-status.xml"), "timezone-status");
     }
 
     /**
