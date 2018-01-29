@@ -21,6 +21,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.IActivityManager;
 import android.app.ProgressDialog;
+import android.app.admin.SecurityLog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -388,6 +389,10 @@ public final class ShutdownThread extends Thread {
                 Log.w(TAG, "No permission to acquire wake lock", e);
                 sInstance.mScreenWakeLock = null;
             }
+        }
+
+        if (SecurityLog.isLoggingEnabled()) {
+            SecurityLog.writeEvent(SecurityLog.TAG_OS_SHUTDOWN);
         }
 
         // start the thread that initiates shutdown

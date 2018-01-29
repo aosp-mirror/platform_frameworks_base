@@ -71,6 +71,10 @@ class SecurityLogMonitor implements Runnable {
      */
     private static final int BUFFER_ENTRIES_MAXIMUM_LEVEL = BUFFER_ENTRIES_NOTIFICATION_LEVEL * 10;
     /**
+     * Critical log buffer level, 90% of capacity.
+     */
+    private static final int BUFFER_ENTRIES_CRITICAL_LEVEL = BUFFER_ENTRIES_MAXIMUM_LEVEL * 9 / 10;
+    /**
      * How often should Device Owner be notified under normal circumstances.
      */
     private static final long RATE_LIMIT_INTERVAL_MILLISECONDS = TimeUnit.HOURS.toMillis(2);
@@ -97,6 +101,10 @@ class SecurityLogMonitor implements Runnable {
     @GuardedBy("mLock")
     private boolean mAllowedToRetrieve = false;
 
+    // Whether we have already logged the fact that log buffer reached 90%, to avoid dupes.
+    @GuardedBy("mLock")
+    private boolean mCriticalLevelLogged = false;
+
     /**
      * Last events fetched from log to check for overlap between batches. We can leave it empty if
      * we are sure there will be no overlap anymore, e.g. when we get empty batch.
@@ -116,10 +124,12 @@ class SecurityLogMonitor implements Runnable {
 
     void start() {
         Slog.i(TAG, "Starting security logging.");
+        SecurityLog.writeEvent(SecurityLog.TAG_LOGGING_STARTED);
         mLock.lock();
         try {
             if (mMonitorThread == null) {
                 mPendingLogs = new ArrayList<>();
+                mCriticalLevelLogged = false;
                 mId = 0;
                 mAllowedToRetrieve = false;
                 mNextAllowedRetrievalTimeMillis = -1;
@@ -135,6 +145,7 @@ class SecurityLogMonitor implements Runnable {
 
     void stop() {
         Slog.i(TAG, "Stopping security logging.");
+        SecurityLog.writeEvent(SecurityLog.TAG_LOGGING_STOPPED);
         mLock.lock();
         try {
             if (mMonitorThread != null) {
@@ -205,6 +216,7 @@ class SecurityLogMonitor implements Runnable {
         mLock.lock();
         mAllowedToRetrieve = false;
         mPendingLogs = new ArrayList<>();
+        mCriticalLevelLogged = false;
         mLock.unlock();
         Slog.i(TAG, "Discarded all logs.");
     }
@@ -222,6 +234,7 @@ class SecurityLogMonitor implements Runnable {
                         + RATE_LIMIT_INTERVAL_MILLISECONDS;
                 List<SecurityEvent> result = mPendingLogs;
                 mPendingLogs = new ArrayList<>();
+                mCriticalLevelLogged = false;
                 return result;
             } else {
                 return null;
@@ -344,16 +357,33 @@ class SecurityLogMonitor implements Runnable {
         // Save the rest of the new batch.
         mPendingLogs.addAll(idLogs);
 
+        checkCriticalLevel();
+
         if (mPendingLogs.size() > BUFFER_ENTRIES_MAXIMUM_LEVEL) {
             // Truncate buffer down to half of BUFFER_ENTRIES_MAXIMUM_LEVEL.
             mPendingLogs = new ArrayList<>(mPendingLogs.subList(
                     mPendingLogs.size() - (BUFFER_ENTRIES_MAXIMUM_LEVEL / 2),
                     mPendingLogs.size()));
+            mCriticalLevelLogged = false;
             Slog.i(TAG, "Pending logs buffer full. Discarding old logs.");
         }
         if (DEBUG) Slog.d(TAG, mPendingLogs.size() + " pending events in the buffer after merging,"
                 + " with ids " + mPendingLogs.get(0).getId()
                 + " to " + mPendingLogs.get(mPendingLogs.size() - 1).getId());
+    }
+
+    @GuardedBy("mLock")
+    private void checkCriticalLevel() {
+        if (!SecurityLog.isLoggingEnabled()) {
+            return;
+        }
+
+        if (mPendingLogs.size() >= BUFFER_ENTRIES_CRITICAL_LEVEL) {
+            if (!mCriticalLevelLogged) {
+                mCriticalLevelLogged = true;
+                SecurityLog.writeEvent(SecurityLog.TAG_LOG_BUFFER_SIZE_CRITICAL);
+            }
+        }
     }
 
     @GuardedBy("mLock")
