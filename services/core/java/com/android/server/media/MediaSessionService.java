@@ -41,6 +41,7 @@ import android.media.AudioSystem;
 import android.media.IAudioService;
 import android.media.IMediaSession2;
 import android.media.IRemoteVolumeController;
+import android.media.ISessionTokensListener;
 import android.media.MediaLibraryService2;
 import android.media.MediaSessionService2;
 import android.media.SessionToken2;
@@ -1480,7 +1481,6 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         // TODO(jaewan): Protect this API with permission
-        // TODO(jaewan): Add listeners for change in operations..
         @Override
         public List<Bundle> getSessionTokens(boolean activeSessionOnly,
                 boolean sessionServiceOnly) throws RemoteException {
@@ -1502,6 +1502,17 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
             }
             return tokens;
+        }
+
+        @Override
+        public void addSessionTokensListener(ISessionTokensListener listener, int userId,
+                String packageName) {
+            // TODO(jaewan): Implement.
+        }
+
+        @Override
+        public void removeSessionTokensListener(ISessionTokensListener listener) {
+            // TODO(jaewan): Implement
         }
 
         private int verifySessionsRequest(ComponentName componentName, int userId, final int pid,

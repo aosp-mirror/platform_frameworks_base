@@ -117,6 +117,16 @@ public class SessionPlayer2 implements MediaPlayerInterface {
     }
 
     @Override
+    public void addPlaylistItem(int index, MediaItem2 item) {
+        mProvider.addPlaylistItem_impl(index, item);
+    }
+
+    @Override
+    public void removePlaylistItem(MediaItem2 item) {
+        mProvider.removePlaylistItem_impl(item);
+    }
+
+    @Override
     public PlaylistParams getPlaylistParams() {
         return mProvider.getPlaylistParams_impl();
     }
