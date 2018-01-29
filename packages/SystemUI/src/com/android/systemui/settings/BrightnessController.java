@@ -81,7 +81,7 @@ public class BrightnessController implements ToggleSlider.Listener {
     private volatile boolean mIsVrModeEnabled;
     private boolean mListening;
     private boolean mExternalChange;
-    private boolean mControlInitialized;
+    private boolean mControlValueInitialized;
 
     private ValueAnimator mSliderAnimator;
 
@@ -337,6 +337,7 @@ public class BrightnessController implements ToggleSlider.Listener {
 
         mBackgroundHandler.post(mStopListeningRunnable);
         mListening = false;
+        mControlValueInitialized = false;
     }
 
     @Override
@@ -428,10 +429,10 @@ public class BrightnessController implements ToggleSlider.Listener {
     }
 
     private void animateSliderTo(int target) {
-        if (!mControlInitialized) {
+        if (!mControlValueInitialized) {
             // Don't animate the first value since it's default state isn't meaningful to users.
             mControl.setValue(target);
-            mControlInitialized = true;
+            mControlValueInitialized = true;
         }
         if (mSliderAnimator != null && mSliderAnimator.isStarted()) {
             mSliderAnimator.cancel();
