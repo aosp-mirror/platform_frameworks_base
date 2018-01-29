@@ -53,7 +53,7 @@ public interface MediaSession2Provider extends TransportControlProvider {
     void sendCustomCommand_impl(ControllerInfo controller, Command command, Bundle args,
             ResultReceiver receiver);
     void sendCustomCommand_impl(Command command, Bundle args);
-    void setPlaylist_impl(List<MediaItem2> playlist, PlaylistParams param);
+    void setPlaylist_impl(List<MediaItem2> playlist);
     List<MediaItem2> getPlaylist_impl();
     void setPlaylistParams_impl(PlaylistParams params);
     PlaylistParams getPlaylistParams_impl();

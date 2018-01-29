@@ -1262,10 +1262,19 @@ public class MediaSession2 implements AutoCloseable {
         // To match with KEYCODE_MEDIA_SKIP_BACKWARD
     }
 
-    public void setPlaylist(@NonNull List<MediaItem2> playlist, @NonNull PlaylistParams param) {
-        mProvider.setPlaylist_impl(playlist, param);
+    /**
+     * Sets a list of {@link MediaItem2} as the current play list.
+     *
+     * @param playlist A list of {@link MediaItem2} objects to set as a play list.
+     * @throws IllegalArgumentException if given {@param playlist} is null.
+     */
+    public void setPlaylist(@NonNull List<MediaItem2> playlist) {
+        mProvider.setPlaylist_impl(playlist);
     }
 
+    /**
+     * Returns the playlist which is lastly set.
+     */
     public List<MediaItem2> getPlaylist() {
         return mProvider.getPlaylist_impl();
     }

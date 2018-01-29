@@ -126,11 +126,9 @@ public class MediaController2 implements AutoCloseable {
         /**
          * Called when the playlist is changed.
          *
-         * @param list
-         * @param param
+         * @param playlist A new playlist set by the session.
          */
-        public void onPlaylistChanged(
-                @NonNull List<MediaItem2> list, @NonNull PlaylistParams param) { }
+        public void onPlaylistChanged(@NonNull List<MediaItem2> playlist) { }
 
         /**
          * Called when the playback state is changed, or connection success.

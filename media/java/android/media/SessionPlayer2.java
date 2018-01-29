@@ -97,8 +97,8 @@ public class SessionPlayer2 implements MediaPlayerInterface {
     }
 
     @Override
-    public void setPlaylist(List<MediaItem2> list, PlaylistParams param) {
-        mProvider.setPlaylist_impl(list, param);
+    public void setPlaylist(List<MediaItem2> playlist) {
+        mProvider.setPlaylist_impl(playlist);
     }
 
     @Override
