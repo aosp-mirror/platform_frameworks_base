@@ -2656,6 +2656,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mStatusBarView != null) {
             dumpBarTransitions(pw, "mStatusBarView", mStatusBarView.getBarTransitions());
         }
+        pw.println("  StatusBarWindowView: ");
+        if (mStatusBarWindow != null) {
+            mStatusBarWindow.dump(fd, pw, args);
+        }
 
         pw.println("  mMediaManager: ");
         if (mMediaManager != null) {
