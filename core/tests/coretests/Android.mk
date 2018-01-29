@@ -52,10 +52,7 @@ LOCAL_JAVA_LIBRARIES := \
     org.apache.http.legacy \
     android.test.base \
     android.test.mock \
-
-ifeq ($(REMOVE_OAHL_FROM_BCP),true)
-LOCAL_JAVA_LIBRARIES += framework-oahl-backward-compatibility
-endif
+    framework-oahl-backward-compatibility \
 
 LOCAL_PACKAGE_NAME := FrameworksCoreTests
 LOCAL_COMPATIBILITY_SUITE := device-tests

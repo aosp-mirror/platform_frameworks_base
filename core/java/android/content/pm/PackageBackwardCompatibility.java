@@ -16,14 +16,18 @@
 
 package android.content.pm;
 
+import static android.content.pm.SharedLibraryNames.ANDROID_TEST_MOCK;
+import static android.content.pm.SharedLibraryNames.ANDROID_TEST_RUNNER;
+import static android.content.pm.SharedLibraryNames.ORG_APACHE_HTTP_LEGACY;
+
 import android.content.pm.PackageParser.Package;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Modifies {@link Package} in order to maintain backwards compatibility.
@@ -35,54 +39,77 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
 
     private static final String TAG = PackageBackwardCompatibility.class.getSimpleName();
 
-    private static final String ANDROID_TEST_MOCK = "android.test.mock";
-
-    private static final String ANDROID_TEST_RUNNER = "android.test.runner";
-
     private static final PackageBackwardCompatibility INSTANCE;
 
     static {
-        String className = "android.content.pm.OrgApacheHttpLegacyUpdater";
-        Class<? extends PackageSharedLibraryUpdater> clazz;
-        try {
-            clazz = (PackageBackwardCompatibility.class.getClassLoader()
-                    .loadClass(className)
-                    .asSubclass(PackageSharedLibraryUpdater.class));
-        } catch (ClassNotFoundException e) {
-            Log.i(TAG, "Could not find " + className + ", ignoring");
-            clazz = null;
-        }
-
-        boolean hasOrgApacheHttpLegacy = false;
         final List<PackageSharedLibraryUpdater> packageUpdaters = new ArrayList<>();
-        if (clazz == null) {
-            // Add an updater that will remove any references to org.apache.http.library from the
-            // package so that it does not try and load the library when it is on the
-            // bootclasspath.
-            packageUpdaters.add(new RemoveUnnecessaryOrgApacheHttpLegacyLibrary());
-        } else {
-            try {
-                packageUpdaters.add(clazz.getConstructor().newInstance());
-                hasOrgApacheHttpLegacy = true;
-            } catch (ReflectiveOperationException e) {
-                throw new IllegalStateException("Could not create instance of " + className, e);
-            }
-        }
+
+        // Attempt to load and add the optional updater that will only be available when
+        // REMOVE_OAHL_FROM_BCP=true. If that could not be found then add the default updater that
+        // will remove any references to org.apache.http.library from the package so that it does
+        // not try and load the library when it is on the bootclasspath.
+        boolean bootClassPathContainsOAHL = !addOptionalUpdater(packageUpdaters,
+                "android.content.pm.OrgApacheHttpLegacyUpdater",
+                RemoveUnnecessaryOrgApacheHttpLegacyLibrary::new);
 
         packageUpdaters.add(new AndroidTestRunnerSplitUpdater());
 
         PackageSharedLibraryUpdater[] updaterArray = packageUpdaters
                 .toArray(new PackageSharedLibraryUpdater[0]);
-        INSTANCE = new PackageBackwardCompatibility(hasOrgApacheHttpLegacy, updaterArray);
+        INSTANCE = new PackageBackwardCompatibility(
+                bootClassPathContainsOAHL, updaterArray);
     }
 
-    private final boolean mRemovedOAHLFromBCP;
+    /**
+     * Add an optional {@link PackageSharedLibraryUpdater} instance to the list, if it could not be
+     * found then add a default instance instead.
+     *
+     * @param packageUpdaters the list to update.
+     * @param className the name of the optional class.
+     * @param defaultUpdater the supplier of the default instance.
+     * @return true if the optional updater was added false otherwise.
+     */
+    private static boolean addOptionalUpdater(List<PackageSharedLibraryUpdater> packageUpdaters,
+            String className, Supplier<PackageSharedLibraryUpdater> defaultUpdater) {
+        Class<? extends PackageSharedLibraryUpdater> clazz;
+        try {
+            clazz = (PackageBackwardCompatibility.class.getClassLoader()
+                    .loadClass(className)
+                    .asSubclass(PackageSharedLibraryUpdater.class));
+            Log.i(TAG, "Loaded " + className);
+        } catch (ClassNotFoundException e) {
+            Log.i(TAG, "Could not find " + className + ", ignoring");
+            clazz = null;
+        }
+
+        boolean usedOptional = false;
+        PackageSharedLibraryUpdater updater;
+        if (clazz == null) {
+            updater = defaultUpdater.get();
+        } else {
+            try {
+                updater = clazz.getConstructor().newInstance();
+                usedOptional = true;
+            } catch (ReflectiveOperationException e) {
+                throw new IllegalStateException("Could not create instance of " + className, e);
+            }
+        }
+        packageUpdaters.add(updater);
+        return usedOptional;
+    }
+
+    @VisibleForTesting
+    public static PackageSharedLibraryUpdater getInstance() {
+        return INSTANCE;
+    }
+
+    private final boolean mBootClassPathContainsOAHL;
 
     private final PackageSharedLibraryUpdater[] mPackageUpdaters;
 
-    public PackageBackwardCompatibility(boolean removedOAHLFromBCP,
+    public PackageBackwardCompatibility(boolean bootClassPathContainsOAHL,
             PackageSharedLibraryUpdater[] packageUpdaters) {
-        this.mRemovedOAHLFromBCP = removedOAHLFromBCP;
+        this.mBootClassPathContainsOAHL = bootClassPathContainsOAHL;
         this.mPackageUpdaters = packageUpdaters;
     }
 
@@ -99,17 +126,17 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
 
     @Override
     public void updatePackage(Package pkg) {
-
         for (PackageSharedLibraryUpdater packageUpdater : mPackageUpdaters) {
             packageUpdater.updatePackage(pkg);
         }
     }
 
     /**
-     * True if the org.apache.http.legacy has been removed the bootclasspath, false otherwise.
+     * True if the org.apache.http.legacy is on the bootclasspath, false otherwise.
      */
-    public static boolean removeOAHLFromBCP() {
-        return INSTANCE.mRemovedOAHLFromBCP;
+    @VisibleForTesting
+    public static boolean bootClassPathContainsOAHL() {
+        return INSTANCE.mBootClassPathContainsOAHL;
     }
 
     /**
@@ -126,24 +153,9 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
 
         @Override
         public void updatePackage(Package pkg) {
-            ArrayList<String> usesLibraries = pkg.usesLibraries;
-            ArrayList<String> usesOptionalLibraries = pkg.usesOptionalLibraries;
-
             // android.test.runner has a dependency on android.test.mock so if android.test.runner
             // is present but android.test.mock is not then add android.test.mock.
-            boolean androidTestMockPresent = isLibraryPresent(
-                    usesLibraries, usesOptionalLibraries, ANDROID_TEST_MOCK);
-            if (ArrayUtils.contains(usesLibraries, ANDROID_TEST_RUNNER)
-                    && !androidTestMockPresent) {
-                usesLibraries.add(ANDROID_TEST_MOCK);
-            }
-            if (ArrayUtils.contains(usesOptionalLibraries, ANDROID_TEST_RUNNER)
-                    && !androidTestMockPresent) {
-                usesOptionalLibraries.add(ANDROID_TEST_MOCK);
-            }
-
-            pkg.usesLibraries = usesLibraries;
-            pkg.usesOptionalLibraries = usesOptionalLibraries;
+            prefixImplicitDependency(pkg, ANDROID_TEST_RUNNER, ANDROID_TEST_MOCK);
         }
     }
 
@@ -155,13 +167,10 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
     public static class RemoveUnnecessaryOrgApacheHttpLegacyLibrary
             extends PackageSharedLibraryUpdater {
 
-        private static final String APACHE_HTTP_LEGACY = "org.apache.http.legacy";
-
         @Override
         public void updatePackage(Package pkg) {
-            pkg.usesLibraries = ArrayUtils.remove(pkg.usesLibraries, APACHE_HTTP_LEGACY);
-            pkg.usesOptionalLibraries =
-                    ArrayUtils.remove(pkg.usesOptionalLibraries, APACHE_HTTP_LEGACY);
+            removeLibrary(pkg, ORG_APACHE_HTTP_LEGACY);
         }
+
     }
 }
