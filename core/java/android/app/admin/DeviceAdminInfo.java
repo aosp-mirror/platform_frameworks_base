@@ -75,6 +75,10 @@ public final class DeviceAdminInfo implements Parcelable {
      *
      * <p>To control this policy, the device admin must have a "limit-password"
      * tag in the "uses-policies" section of its meta-data.
+     *
+     * <p>This policy is deprecated for use by a device admin.  In future releases, it will
+     * only be possible for a device owner or profile owner to enforce constraints on user
+     * passwords.
      */
     public static final int USES_POLICY_LIMIT_PASSWORD = 0;
 
@@ -136,6 +140,9 @@ public final class DeviceAdminInfo implements Parcelable {
      *
      * <p>To control this policy, the device admin must have an "expire-password"
      * tag in the "uses-policies" section of its meta-data.
+     *
+     * <p>This policy is deprecated for use by a device admin.  In future releases, it will
+     * only be possible for a device owner or profile owner to enforce password expiry.
      */
     public static final int USES_POLICY_EXPIRE_PASSWORD = 6;
 
@@ -152,6 +159,9 @@ public final class DeviceAdminInfo implements Parcelable {
      *
      * <p>To control this policy, the device admin must have a "disable-camera"
      * tag in the "uses-policies" section of its meta-data.
+     *
+     * <p>This policy is deprecated for use by a device admin.  In future releases, it will
+     * only be possible for a device owner or profile owner to disable use of the camera.
      */
     public static final int USES_POLICY_DISABLE_CAMERA = 8;
 
@@ -160,6 +170,10 @@ public final class DeviceAdminInfo implements Parcelable {
      *
      * <p>To control this policy, the device admin must have a "disable-keyguard-features"
      * tag in the "uses-policies" section of its meta-data.
+     *
+     * <p>This policy is deprecated for use by a device admin.  In future releases, it will
+     * only be possible for a device owner or profile owner to disable use of keyguard
+     * features.
      */
     public static final int USES_POLICY_DISABLE_KEYGUARD_FEATURES = 9;
 
