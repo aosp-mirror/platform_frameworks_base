@@ -28,6 +28,8 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +40,7 @@ import java.util.List;
  * follow the following format:
  * ...
  * <service android:name=".xxxNetworkService"
- *     android:permission="android.permission.BIND_NETWORK_SERVICE" >
+ *     android:permission="android.permission.BIND_TELEPHONY_NETWORK_SERVICE" >
  *     <intent-filter>
  *         <action android:name="android.telephony.NetworkService" />
  *     </intent-filter>
@@ -68,7 +70,11 @@ public abstract class NetworkService extends Service {
 
     private final SparseArray<NetworkServiceProvider> mServiceMap = new SparseArray<>();
 
-    private final INetworkServiceWrapper mBinder = new INetworkServiceWrapper();
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public final INetworkServiceWrapper mBinder = new INetworkServiceWrapper();
 
     /**
      * The abstract class of the actual network service implementation. The network service provider
