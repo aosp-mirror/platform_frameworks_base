@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -41,11 +42,16 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 /**
  * Test class for {@link WindowContainer}.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.wm.WindowContainerTests
+ *  atest FrameworksServicesTests:com.android.server.wm.WindowContainerTests
  */
 @SmallTest
 @Presubmit
@@ -642,6 +648,37 @@ public class WindowContainerTests extends WindowTestsBase {
         root.removeChild(child1);
 
         assertEquals(1, child2.getPrefixOrderIndex());
+    }
+
+    /**
+     * Ensure children of a {@link WindowContainer} do not have
+     * {@link WindowContainer#onParentResize()} called when {@link WindowContainer#onParentResize()}
+     * is invoked with overridden bounds.
+     */
+    @Test
+    public void testOnParentResizePropagation() throws Exception {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainer root = builder.build();
+
+        final TestWindowContainer child = root.addChildWindow();
+        child.setBounds(new Rect(1,1,2,2));
+
+        final TestWindowContainer grandChild = mock(TestWindowContainer.class);
+
+        child.addChildWindow(grandChild);
+        root.onResize();
+
+        // Make sure the child does not propagate resize through onParentResize when bounds are set.
+        verify(grandChild, never()).onParentResize();
+
+        child.removeChild(grandChild);
+
+        child.setBounds(null);
+        child.addChildWindow(grandChild);
+        root.onResize();
+
+        // Make sure the child propagates resize through onParentResize when no bounds set.
+        verify(grandChild, times(1)).onParentResize();
     }
 
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */
