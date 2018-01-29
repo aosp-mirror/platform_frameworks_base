@@ -11410,6 +11410,27 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    @Override
+    public boolean isMeteredDataDisabledForUser(ComponentName who,
+            String packageName, int userId) {
+        Preconditions.checkNotNull(who);
+
+        if (!mHasFeature) {
+            return false;
+        }
+        if (!isCallerWithSystemUid()) {
+            throw new SecurityException(
+                    "Only the system can query restricted pkgs for a specific user");
+        }
+        synchronized (this) {
+            final ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userId);
+            if (admin != null && admin.meteredDisabledPackages != null) {
+                return admin.meteredDisabledPackages.contains(packageName);
+            }
+        }
+        return false;
+    }
+
     private void pushMeteredDisabledPackagesLocked(int userId) {
         mInjector.getNetworkPolicyManagerInternal().setMeteredRestrictedPackages(
                 getMeteredDisabledPackagesLocked(userId), userId);

@@ -363,6 +363,26 @@ public class RestrictedLockUtils {
     }
 
     /**
+     * Check if {@param packageName} is restricted by the profile or device owner from using
+     * metered data.
+     *
+     * @return EnforcedAdmin object containing the enforced admin component and admin user details,
+     * or {@code null} if the {@param packageName} is not restricted.
+     */
+    public static EnforcedAdmin checkIfMeteredDataRestricted(Context context,
+            String packageName, int userId) {
+        final EnforcedAdmin enforcedAdmin = getProfileOrDeviceOwner(context, userId);
+        if (enforcedAdmin == null) {
+            return null;
+        }
+
+        final DevicePolicyManager dpm = (DevicePolicyManager) context.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        return dpm.isMeteredDataDisabledForUser(enforcedAdmin.component, packageName, userId)
+                ? enforcedAdmin : null;
+    }
+
+    /**
      * Checks if {@link android.app.admin.DevicePolicyManager#setAutoTimeRequired} is enforced
      * on the device.
      *
