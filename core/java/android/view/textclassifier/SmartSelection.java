@@ -108,9 +108,9 @@ final class SmartSelection {
     }
 
     /**
-     * Returns the language of the model.
+     * Returns a comma separated list of locales supported by the model as BCP 47 tags.
      */
-    public static String getLanguage(int fd) {
+    public static String getLanguages(int fd) {
         return nativeGetLanguage(fd);
     }
 
