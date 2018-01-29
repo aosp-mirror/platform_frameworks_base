@@ -24,6 +24,7 @@
 #include "core_jni_helpers.h"
 #include <nativehelper/ScopedStringChars.h>
 #include <nativehelper/ScopedUtfChars.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
 
 #include "SkBlurDrawLooper.h"
 #include "SkColorFilter.h"
@@ -515,11 +516,10 @@ namespace PaintGlue {
             jint start, jint end, jint contextStart, jint contextEnd, jboolean isRtl, jint offset) {
         const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         const Typeface* typeface = paint->getAndroidTypeface();
-        jchar* textArray = (jchar*) env->GetPrimitiveArrayCritical(text, nullptr);
-        jfloat result = doRunAdvance(paint, typeface, textArray + contextStart,
+        ScopedCharArrayRO textArray(env, text);
+        jfloat result = doRunAdvance(paint, typeface, textArray.get() + contextStart,
                 start - contextStart, end - start, contextEnd - contextStart, isRtl,
                 offset - contextStart);
-        env->ReleasePrimitiveArrayCritical(text, textArray, JNI_ABORT);
         return result;
     }
 
@@ -537,11 +537,10 @@ namespace PaintGlue {
             jboolean isRtl, jfloat advance) {
         const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         const Typeface* typeface = paint->getAndroidTypeface();
-        jchar* textArray = (jchar*) env->GetPrimitiveArrayCritical(text, nullptr);
-        jint result = doOffsetForAdvance(paint, typeface, textArray + contextStart,
+        ScopedCharArrayRO textArray(env, text);
+        jint result = doOffsetForAdvance(paint, typeface, textArray.get() + contextStart,
                 start - contextStart, end - start, contextEnd - contextStart, isRtl, advance);
         result += contextStart;
-        env->ReleasePrimitiveArrayCritical(text, textArray, JNI_ABORT);
         return result;
     }
 
