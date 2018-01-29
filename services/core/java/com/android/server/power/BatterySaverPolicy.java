@@ -33,6 +33,7 @@ import android.util.Slog;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.power.batterysaver.BatterySavingStats;
 import com.android.server.power.batterysaver.CpuFrequencies;
 
 import java.io.PrintWriter;
@@ -498,6 +499,8 @@ public class BatterySaverPolicy extends ContentObserver {
             pw.print("  Noninteractive File values:\n");
             dumpMap(pw, "    ", mFilesForNoninteractive);
             pw.println();
+            pw.println();
+            BatterySavingStats.getInstance().dump(pw, "  ");
         }
     }
 
