@@ -16,16 +16,27 @@
 
 package android.app.admin;
 
+import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
+import static org.xmlpull.v1.XmlPullParser.END_TAG;
+import static org.xmlpull.v1.XmlPullParser.TEXT;
+
 import android.annotation.IntDef;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
+import android.util.Pair;
 
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A class that represents a local system update policy set by the device owner.
@@ -34,6 +45,7 @@ import java.lang.annotation.RetentionPolicy;
  * @see DevicePolicyManager#getSystemUpdatePolicy
  */
 public class SystemUpdatePolicy implements Parcelable {
+    private static final String TAG = "SystemUpdatePolicy";
 
     /** @hide */
     @IntDef(prefix = { "TYPE_" }, value = {
@@ -94,10 +106,145 @@ public class SystemUpdatePolicy implements Parcelable {
     private static final String KEY_POLICY_TYPE = "policy_type";
     private static final String KEY_INSTALL_WINDOW_START = "install_window_start";
     private static final String KEY_INSTALL_WINDOW_END = "install_window_end";
+    private static final String KEY_FREEZE_TAG = "freeze";
+    private static final String KEY_FREEZE_START = "start";
+    private static final String KEY_FREEZE_END = "end";
+
     /**
      * The upper boundary of the daily maintenance window: 24 * 60 minutes.
      */
     private static final int WINDOW_BOUNDARY = 24 * 60;
+
+    /**
+     * The maximum length of a single freeze period: 90  days.
+     */
+    static final int FREEZE_PERIOD_MAX_LENGTH = 90;
+
+    /**
+     * The minimum allowed time between two adjacent freeze period (from the end of the first
+     * freeze period to the start of the second freeze period, both exclusive): 60 days.
+     */
+    static final int FREEZE_PERIOD_MIN_SEPARATION = 60;
+
+
+    /**
+     * An exception class that represents various validation errors thrown from
+     * {@link SystemUpdatePolicy#setFreezePeriods} and
+     * {@link DevicePolicyManager#setSystemUpdatePolicy}
+     */
+    public static final class ValidationFailedException extends IllegalArgumentException
+            implements Parcelable {
+
+        /** @hide */
+        @IntDef(prefix = { "ERROR_" }, value = {
+                ERROR_NONE,
+                ERROR_DUPLICATE_OR_OVERLAP,
+                ERROR_NEW_FREEZE_PERIOD_TOO_LONG,
+                ERROR_NEW_FREEZE_PERIOD_TOO_CLOSE,
+                ERROR_COMBINED_FREEZE_PERIOD_TOO_LONG,
+                ERROR_COMBINED_FREEZE_PERIOD_TOO_CLOSE,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        @interface ValidationFailureType {}
+
+        /** @hide */
+        public static final int ERROR_NONE = 0;
+
+        /**
+         * The freeze periods contains duplicates, periods that overlap with each
+         * other or periods whose start and end joins.
+         */
+        public static final int ERROR_DUPLICATE_OR_OVERLAP = 1;
+
+        /**
+         * There exists at least one freeze period whose length exceeds 90 days.
+         */
+        public static final int ERROR_NEW_FREEZE_PERIOD_TOO_LONG = 2;
+
+        /**
+         * There exists some freeze period which starts within 60 days of the preceding period's
+         * end time.
+         */
+        public static final int ERROR_NEW_FREEZE_PERIOD_TOO_CLOSE = 3;
+
+        /**
+         * The device has been in a freeze period and when combining with the new freeze period
+         * to be set, it will result in the total freeze period being longer than 90 days.
+         */
+        public static final int ERROR_COMBINED_FREEZE_PERIOD_TOO_LONG = 4;
+
+        /**
+         * The device has been in a freeze period and some new freeze period to be set is less
+         * than 60 days from the end of the last freeze period the device went through.
+         */
+        public static final int ERROR_COMBINED_FREEZE_PERIOD_TOO_CLOSE = 5;
+
+        @ValidationFailureType
+        private final int mErrorCode;
+
+        private ValidationFailedException(int errorCode, String message) {
+            super(message);
+            mErrorCode = errorCode;
+        }
+
+        /**
+         * Returns the type of validation error associated with this exception.
+         */
+        public @ValidationFailureType int getErrorCode() {
+            return mErrorCode;
+        }
+
+        /** @hide */
+        public static ValidationFailedException duplicateOrOverlapPeriods() {
+            return new ValidationFailedException(ERROR_DUPLICATE_OR_OVERLAP,
+                    "Found duplicate or overlapping periods");
+        }
+
+        /** @hide */
+        public static ValidationFailedException freezePeriodTooLong(String message) {
+            return new ValidationFailedException(ERROR_NEW_FREEZE_PERIOD_TOO_LONG, message);
+        }
+
+        /** @hide */
+        public static ValidationFailedException freezePeriodTooClose(String message) {
+            return new ValidationFailedException(ERROR_NEW_FREEZE_PERIOD_TOO_CLOSE, message);
+        }
+
+        /** @hide */
+        public static ValidationFailedException combinedPeriodTooLong(String message) {
+            return new ValidationFailedException(ERROR_COMBINED_FREEZE_PERIOD_TOO_LONG, message);
+        }
+
+        /** @hide */
+        public static ValidationFailedException combinedPeriodTooClose(String message) {
+            return new ValidationFailedException(ERROR_COMBINED_FREEZE_PERIOD_TOO_CLOSE, message);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mErrorCode);
+            dest.writeString(getMessage());
+        }
+
+        public static final Parcelable.Creator<ValidationFailedException> CREATOR =
+                new Parcelable.Creator<ValidationFailedException>() {
+            @Override
+            public ValidationFailedException createFromParcel(Parcel source) {
+                return new ValidationFailedException(source.readInt(), source.readString());
+            }
+
+            @Override
+            public ValidationFailedException[] newArray(int size) {
+                return new ValidationFailedException[size];
+            }
+
+        };
+    }
 
     @SystemUpdatePolicyType
     private int mPolicyType;
@@ -105,9 +252,11 @@ public class SystemUpdatePolicy implements Parcelable {
     private int mMaintenanceWindowStart;
     private int mMaintenanceWindowEnd;
 
+    private final ArrayList<FreezeInterval> mFreezePeriods;
 
     private SystemUpdatePolicy() {
         mPolicyType = TYPE_UNKNOWN;
+        mFreezePeriods = new ArrayList<>();
     }
 
     /**
@@ -206,24 +355,129 @@ public class SystemUpdatePolicy implements Parcelable {
     }
 
     /**
-     * Return if this object represents a valid policy.
+     * Return if this object represents a valid policy with:
+     * 1. Correct type
+     * 2. Valid maintenance window if applicable
+     * 3. Valid freeze periods
      * @hide
      */
     public boolean isValid() {
-        if (mPolicyType == TYPE_INSTALL_AUTOMATIC || mPolicyType == TYPE_POSTPONE) {
+        try {
+            validateType();
+            validateFreezePeriods();
             return true;
-        } else if (mPolicyType == TYPE_INSTALL_WINDOWED) {
-            return mMaintenanceWindowStart >= 0 && mMaintenanceWindowStart < WINDOW_BOUNDARY
-                    && mMaintenanceWindowEnd >= 0 && mMaintenanceWindowEnd < WINDOW_BOUNDARY;
-        } else {
+        } catch (IllegalArgumentException e) {
             return false;
         }
     }
 
+    /**
+     * Validate the type and maintenance window (if applicable) of this policy object,
+     * throws {@link IllegalArgumentException} if it's invalid.
+     * @hide
+     */
+    public void validateType() {
+        if (mPolicyType == TYPE_INSTALL_AUTOMATIC || mPolicyType == TYPE_POSTPONE) {
+            return;
+        } else if (mPolicyType == TYPE_INSTALL_WINDOWED) {
+            if (!(mMaintenanceWindowStart >= 0 && mMaintenanceWindowStart < WINDOW_BOUNDARY
+                    && mMaintenanceWindowEnd >= 0 && mMaintenanceWindowEnd < WINDOW_BOUNDARY)) {
+                throw new IllegalArgumentException("Invalid maintenance window");
+            }
+        } else {
+            throw new IllegalArgumentException("Invalid system update policy type.");
+        }
+    }
+
+    /**
+     * Configure a list of freeze periods on top of the current policy. When the device's clock is
+     * within any of the freeze periods, all incoming system updates including security patches will
+     * be blocked and cannot be installed. When the device is outside the freeze periods, the normal
+     * policy behavior will apply.
+     * <p>
+     * Each freeze period is defined by a starting and finishing date (both inclusive). Since the
+     * freeze period repeats annually, both of these dates are simply represented by integers
+     * counting the number of days since year start, similar to {@link LocalDate#getDayOfYear()}. We
+     * do not consider leap year when handling freeze period so the valid range of the integer is
+     * always [1,365] (see last section for more details on leap year). If the finishing date is
+     * smaller than the starting date, the freeze period is considered to be spanning across
+     * year-end.
+     * <p>
+     * Each individual freeze period is allowed to be at most 90 days long, and adjacent freeze
+     * periods need to be at least 60 days apart. Also, the list of freeze periods should not
+     * contain duplicates or overlap with each other. If any of these conditions is not met, a
+     * {@link ValidationFailedException} will be thrown.
+     * <p>
+     * Handling of leap year: we do not consider leap year when handling freeze period, in
+     * particular,
+     * <ul>
+     * <li>When a freeze period is defined by the day of year, February 29th does not count as one
+     * day, so day 59 is February 28th while day 60 is March 1st.</li>
+     * <li>When applying freeze period behavior to the device, a system clock of February 29th is
+     * treated as if it were February 28th</li>
+     * <li>When calculating the number of days of a freeze period or separation between two freeze
+     * periods, February 29th is also ignored and not counted as one day.</li>
+     * </ul>
+     *
+     * @param freezePeriods the list of freeze periods
+     * @throws ValidationFailedException if the supplied freeze periods do not meet the
+     *         requirement set above
+     * @return this instance
+     */
+    public SystemUpdatePolicy setFreezePeriods(List<Pair<Integer, Integer>> freezePeriods) {
+        List<FreezeInterval> newPeriods = freezePeriods.stream().map(
+                p -> new FreezeInterval(p.first, p.second)).collect(Collectors.toList());
+        FreezeInterval.validatePeriods(newPeriods);
+        mFreezePeriods.clear();
+        mFreezePeriods.addAll(newPeriods);
+        return this;
+    }
+
+    /**
+     * Returns the list of freeze periods previously set on this system update policy object.
+     *
+     * @return the list of freeze periods, or an empty list if none was set.
+     */
+    public List<Pair<Integer, Integer>> getFreezePeriods() {
+        List<Pair<Integer, Integer>> result = new ArrayList<>(mFreezePeriods.size());
+        for (FreezeInterval interval : mFreezePeriods) {
+            result.add(new Pair<>(interval.mStartDay, interval.mEndDay));
+        }
+        return result;
+    }
+
+    /**
+     * Returns the real calendar dates of the current freeze period, or null if the device
+     * is not in a freeze period at the moment.
+     * @hide
+     */
+    public Pair<LocalDate, LocalDate> getCurrentFreezePeriod(LocalDate now) {
+        for (FreezeInterval interval : mFreezePeriods) {
+            if (interval.contains(now)) {
+                return interval.toCurrentOrFutureRealDates(now);
+            }
+        }
+        return null;
+    }
+
+    /** @hide */
+    public void validateFreezePeriods() {
+        FreezeInterval.validatePeriods(mFreezePeriods);
+    }
+
+    /** @hide */
+    public void validateAgainstPreviousFreezePeriod(LocalDate prevPeriodStart,
+            LocalDate prevPeriodEnd, LocalDate now) {
+        FreezeInterval.validateAgainstPreviousFreezePeriod(mFreezePeriods, prevPeriodStart,
+                prevPeriodEnd, now);
+    }
+
     @Override
     public String toString() {
-        return String.format("SystemUpdatePolicy (type: %d, windowStart: %d, windowEnd: %d)",
-                mPolicyType, mMaintenanceWindowStart, mMaintenanceWindowEnd);
+        return String.format("SystemUpdatePolicy (type: %d, windowStart: %d, windowEnd: %d, "
+                + "freezes: [%s])",
+                mPolicyType, mMaintenanceWindowStart, mMaintenanceWindowEnd,
+                mFreezePeriods.stream().map(n -> n.toString()).collect(Collectors.joining(",")));
     }
 
     @Override
@@ -236,6 +490,13 @@ public class SystemUpdatePolicy implements Parcelable {
         dest.writeInt(mPolicyType);
         dest.writeInt(mMaintenanceWindowStart);
         dest.writeInt(mMaintenanceWindowEnd);
+        int freezeCount = mFreezePeriods.size();
+        dest.writeInt(freezeCount);
+        for (int i = 0; i < freezeCount; i++) {
+            FreezeInterval interval = mFreezePeriods.get(i);
+            dest.writeInt(interval.mStartDay);
+            dest.writeInt(interval.mEndDay);
+        }
     }
 
     public static final Parcelable.Creator<SystemUpdatePolicy> CREATOR =
@@ -247,6 +508,12 @@ public class SystemUpdatePolicy implements Parcelable {
                     policy.mPolicyType = source.readInt();
                     policy.mMaintenanceWindowStart = source.readInt();
                     policy.mMaintenanceWindowEnd = source.readInt();
+                    int freezeCount = source.readInt();
+                    policy.mFreezePeriods.ensureCapacity(freezeCount);
+                    for (int i = 0; i < freezeCount; i++) {
+                        policy.mFreezePeriods.add(
+                                new FreezeInterval(source.readInt(), source.readInt()));
+                    }
                     return policy;
                 }
 
@@ -256,8 +523,10 @@ public class SystemUpdatePolicy implements Parcelable {
                 }
     };
 
-
     /**
+     * Restore a previously saved SystemUpdatePolicy from XML. No need to validate
+     * the reconstructed policy since the XML is supposed to be created by the
+     * system server from a validated policy object previously.
      * @hide
      */
     public static SystemUpdatePolicy restoreFromXml(XmlPullParser parser) {
@@ -275,10 +544,26 @@ public class SystemUpdatePolicy implements Parcelable {
                 if (value != null) {
                     policy.mMaintenanceWindowEnd = Integer.parseInt(value);
                 }
+
+                int outerDepth = parser.getDepth();
+                int type;
+                while ((type = parser.next()) != END_DOCUMENT
+                        && (type != END_TAG || parser.getDepth() > outerDepth)) {
+                    if (type == END_TAG || type == TEXT) {
+                        continue;
+                    }
+                    if (!parser.getName().equals(KEY_FREEZE_TAG)) {
+                        continue;
+                    }
+                    policy.mFreezePeriods.add(new FreezeInterval(
+                            Integer.parseInt(parser.getAttributeValue(null, KEY_FREEZE_START)),
+                            Integer.parseInt(parser.getAttributeValue(null, KEY_FREEZE_END))));
+                }
                 return policy;
             }
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException | XmlPullParserException | IOException e) {
             // Fail through
+            Log.w(TAG, "Load xml failed", e);
         }
         return null;
     }
@@ -290,6 +575,13 @@ public class SystemUpdatePolicy implements Parcelable {
         out.attribute(null, KEY_POLICY_TYPE, Integer.toString(mPolicyType));
         out.attribute(null, KEY_INSTALL_WINDOW_START, Integer.toString(mMaintenanceWindowStart));
         out.attribute(null, KEY_INSTALL_WINDOW_END, Integer.toString(mMaintenanceWindowEnd));
+        for (int i = 0; i < mFreezePeriods.size(); i++) {
+            FreezeInterval interval = mFreezePeriods.get(i);
+            out.startTag(null, KEY_FREEZE_TAG);
+            out.attribute(null, KEY_FREEZE_START, Integer.toString(interval.mStartDay));
+            out.attribute(null, KEY_FREEZE_END, Integer.toString(interval.mEndDay));
+            out.endTag(null, KEY_FREEZE_TAG);
+        }
     }
 }
 

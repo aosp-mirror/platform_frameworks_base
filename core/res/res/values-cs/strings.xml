@@ -185,6 +185,7 @@
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Toto zařízení je spravováno vaší organizací, která může sledovat síťový provoz. Podrobnosti zobrazíte klepnutím."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Zařízení bude vymazáno"</string>
     <string name="factory_reset_message" msgid="7972496262232832457">"Aplikaci pro správu nelze použít. Zařízení nyní bude vymazáno.\n\nV případě dotazů vám pomůže administrátor organizace."</string>
+    <string name="printing_disabled_by" msgid="8936832919072486965">"Aplikace <xliff:g id="OWNER_APP">%s</xliff:g> tisk zakazuje."</string>
     <string name="me" msgid="6545696007631404292">"Já"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Možnosti tabletu"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"Možnosti televize"</string>
@@ -269,8 +270,10 @@
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Nouzový režim"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Systém Android"</string>
-    <string name="user_owner_label" msgid="1119010402169916617">"Přepnout na osobní profil"</string>
-    <string name="managed_profile_label" msgid="5289992269827577857">"Přepnout na pracovní profil"</string>
+    <!-- no translation found for user_owner_label (8836124313744349203) -->
+    <skip />
+    <!-- no translation found for managed_profile_label (8947929265267690522) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontakty"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"přístup ke kontaktům"</string>
     <string name="permgrouprequest_contacts" msgid="1601591667800538208">"Povolte aplikaci &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; přístup ke kontaktům"</string>
@@ -422,6 +425,10 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Umožňuje aplikaci získat přístup k telefonním funkcím zařízení. Toto oprávnění umožňuje aplikaci zjistit telefonní číslo telefonu, identifikační čísla zařízení, zda zrovna probíhá hovor, a vzdálené číslo, ke kterému je hovor připojen."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"směrování volání prostřednictvím systému"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Umožňuje aplikaci směrovat volání prostřednictvím systému za účelem vylepšení funkcí volání."</string>
+    <!-- no translation found for permlab_acceptHandover (2661534649736022409) -->
+    <skip />
+    <!-- no translation found for permdesc_acceptHandovers (4570660484220539698) -->
+    <skip />
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"přístup k telefonním číslům"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Umožňuje aplikaci přístup k telefonním číslům v zařízení."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"bránění přechodu tabletu do režimu spánku"</string>
@@ -491,10 +498,13 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Pohyb prstem byl příliš pomalý. Zkuste to znovu."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Nerozpoznáno"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Není k dispozici hardware ke snímání otisků prstů."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Otisk prstu nelze uložit. Odstraňte existující otisk prstu."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Časový limit sejmutí otisku prstu vypršel. Zkuste to znovu."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Operace otisku prstu byla zrušena."</string>
+    <!-- no translation found for fingerprint_error_user_canceled (7999639584615291494) -->
+    <skip />
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Příliš mnoho pokusů. Zkuste to později."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Příliš mnoho pokusů. Snímač otisků prstů byl deaktivován."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Zkuste to znovu."</string>
@@ -1030,6 +1040,12 @@
     <string name="browse" msgid="1245903488306147205">"Otevřít"</string>
     <string name="sms" msgid="4560537514610063430">"Zpráva"</string>
     <string name="add_contact" msgid="7867066569670597203">"Přidat"</string>
+    <!-- no translation found for view_calendar (979609872939597838) -->
+    <skip />
+    <!-- no translation found for add_calendar_event (1953664627192056206) -->
+    <skip />
+    <!-- no translation found for view_flight (7691640491425680214) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"V úložišti je málo místa"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Některé systémové funkce nemusí fungovat"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Pro systém není dostatek místa v úložišti. Uvolněte alespoň 250 MB místa a restartujte zařízení."</string>
@@ -1159,6 +1175,8 @@
       <item quantity="one">K dispozici je veřejná síť Wi-Fi</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Připojení k otevřené síti Wi-Fi"</string>
+    <!-- no translation found for wifi_available_carrier_network_title (4527932626916527897) -->
+    <skip />
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Připojování k otevřené síti Wi-Fi"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Připojeno k síti Wi-Fi"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Připojení k síti Wi-Fi se nezdařilo"</string>
@@ -1458,6 +1476,8 @@
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> nad stanoveným limitem."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Data na pozadí jsou omezena"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Klepnutím odstraníte omezení."</string>
+    <string name="data_usage_rapid_title" msgid="4579994056245665351">"Velké využití dat"</string>
+    <string name="data_usage_rapid_body" msgid="4899922842674185567">"Za posledních několik dní máte větší využití dat než obvykle. Klepnutím zobrazíte využití a nastavení."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certifikát zabezpečení"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Tento certifikát je platný."</string>
     <string name="issued_to" msgid="454239480274921032">"Vydáno pro:"</string>
@@ -1754,7 +1774,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (příští budík)"</string>
-    <string name="zen_mode_forever" msgid="1916263162129197274">"Dokud nevypnete režim Nerušit"</string>
+    <string name="zen_mode_forever" msgid="931849471004038757">"Dokud tuto funkci nevypnete"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Dokud nevypnete režim Nerušit"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Sbalit"</string>
@@ -1805,9 +1825,15 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Všechny jazyky"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Všechny oblasti"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Vyhledávání"</string>
-    <string name="work_mode_off_title" msgid="2615362773958585967">"Zapnout pracovní režim?"</string>
-    <string name="work_mode_off_message" msgid="2961559609199223594">"Zapne se pracovní profil, včetně aplikací, synchronizace na pozadí a souvisejících funkcí"</string>
+    <!-- no translation found for work_mode_off_title (1118691887588435530) -->
+    <skip />
+    <!-- no translation found for work_mode_off_message (5130856710614337649) -->
+    <skip />
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Zapnout"</string>
+    <!-- no translation found for deprecated_target_sdk_message (1449696506742572767) -->
+    <skip />
+    <!-- no translation found for deprecated_target_sdk_app_store (5032340500368495077) -->
+    <skip />
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Máte nové zprávy"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Zobrazíte je v aplikaci pro SMS"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Funkce mohou být omezeny"</string>
@@ -1881,7 +1907,12 @@
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Zkratku nelze obnovit, protože se neshoduje podpis aplikace"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Zkratku nelze obnovit"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"Zkratka nefunguje"</string>
-    <string name="harmful_app_warning_uninstall" msgid="3846265696369136266">"Odinstalovat"</string>
-    <string name="harmful_app_warning_launch_anyway" msgid="5784428382367400530">"Přesto spustit"</string>
-    <string name="harmful_app_warning_title" msgid="2229996292333310435">"Odinstalovat škodlivou aplikaci?"</string>
+    <!-- no translation found for harmful_app_warning_uninstall (4837672735619532931) -->
+    <skip />
+    <!-- no translation found for harmful_app_warning_open_anyway (596432803680914321) -->
+    <skip />
+    <!-- no translation found for harmful_app_warning_title (8982527462829423432) -->
+    <skip />
+    <string name="slices_permission_request" msgid="8484943441501672932">"Aplikace <xliff:g id="APP_0">%1$s</xliff:g> chce zobrazovat ukázky z aplikace <xliff:g id="APP_2">%2$s</xliff:g>"</string>
+    <string name="screenshot_edit" msgid="7867478911006447565">"Upravit"</string>
 </resources>

@@ -181,6 +181,7 @@
     <string name="network_logging_notification_text" msgid="7930089249949354026">"آپ کی تنظیم اس آلے کا نظم کرتی ہے اور وہ نیٹ ورک ٹریفک کی نگرانی کر سکتی ہے۔ تفاصیل کیلئے تھپتھپائیں۔"</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"آپ کا آلہ صاف کر دیا جائے گا"</string>
     <string name="factory_reset_message" msgid="7972496262232832457">"منتظم کی ایپ استعمال نہیں کی جا سکتی۔ آپ کا آلہ اب مٹا دیا جائے گا۔\n\nاگر آپ کے پاس سوالات ہیں، تو اپنی تنظیم کے منتظم سے رابطہ کریں۔"</string>
+    <string name="printing_disabled_by" msgid="8936832919072486965">"<xliff:g id="OWNER_APP">%s</xliff:g> نے پرنٹنگ کو غیر فعال کر دیا ہے۔"</string>
     <string name="me" msgid="6545696007631404292">"میں"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ٹیبلیٹ کے اختیارات"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"‏TV کے اختیارات"</string>
@@ -217,8 +218,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"ایمرجنسی"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"بگ کی اطلاع"</string>
     <string name="global_action_logout" msgid="935179188218826050">"سیشن ختم کریں"</string>
-    <!-- no translation found for global_action_screenshot (8329831278085426283) -->
-    <skip />
+    <string name="global_action_screenshot" msgid="8329831278085426283">"اسکرین شاٹ"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"بگ کی اطلاع لیں"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ایک ای میل پیغام کے بطور بھیجنے کیلئے، یہ آپ کے موجودہ آلہ کی حالت کے بارے میں معلومات جمع کرے گا۔ بگ کی اطلاع شروع کرنے سے لے کر بھیجنے کیلئے تیار ہونے تک اس میں تھوڑا وقت لگے گا؛ براہ کرم تحمل سے کام لیں۔"</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"متعامل رپورٹ"</string>
@@ -264,8 +264,10 @@
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>، <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"حفاظتی وضع"</string>
     <string name="android_system_label" msgid="6577375335728551336">"‏Android سسٹم"</string>
-    <string name="user_owner_label" msgid="1119010402169916617">"ذاتی پر سوئچ کریں"</string>
-    <string name="managed_profile_label" msgid="5289992269827577857">"کام پر سوئچ کریں"</string>
+    <!-- no translation found for user_owner_label (8836124313744349203) -->
+    <skip />
+    <!-- no translation found for managed_profile_label (8947929265267690522) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"رابطے"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"اپنے رابطوں تک رسائی حاصل کریں"</string>
     <string name="permgrouprequest_contacts" msgid="1601591667800538208">"‏&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; کو اپنے رابطوں تک رسائی کی اجازت دیں"</string>
@@ -417,6 +419,10 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"‏ایپ کو آلے کی فون والی خصوصیات تک رسائی حاصل کرنے کی اجازت دیتا ہے۔ یہ اجازت ایپ کو فون نمبر اور آلے کے IDs کا تعین کرنے، آیا کوئی کال فعال ہے، اور کال کے ذریعہ مربوط ریموٹ نمبر کا تعین کرنے دیتی ہے۔"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"سسٹم کے ذریعہ کالز روٹ کریں"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"کالںگ کا تجربہ بہتر بنانے کے لیے سسٹم کے ذریعہ ایپ کو کالز روٹ کرنے کی اجازت دیتا ہے۔"</string>
+    <!-- no translation found for permlab_acceptHandover (2661534649736022409) -->
+    <skip />
+    <!-- no translation found for permdesc_acceptHandovers (4570660484220539698) -->
+    <skip />
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"فون نمبرز پڑھیں"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"ایپ کو آلہ کے فون نمبرز تک رسائی کرنے دیتا ہے۔"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ٹیبلیٹ کو سلیپ وضع میں جانے سے روکیں"</string>
@@ -486,10 +492,13 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"انگلی کو بہت آہستہ ہٹایا گیا۔ براہ کرم دوبارہ کوشش کریں۔"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"تسلیم شدہ نہیں ہے"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"فنگر پرنٹ ہارڈ ویئر دستیاب نہیں ہے۔"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"فنگر پرنٹ اسٹور نہیں کیا جا سکتا ہے۔ براہ کرم ایک موجودہ فنگر پرنٹ ہٹائیں۔"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"فنگر پرنٹ کی میعاد ختم ہوگئی۔ دوبارہ کوشش کریں۔"</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"فنگر پرنٹ کی کارروائی منسوخ ہوگئی۔"</string>
+    <!-- no translation found for fingerprint_error_user_canceled (7999639584615291494) -->
+    <skip />
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"کافی زیادہ کوششیں کی گئیں۔ بعد میں دوبارہ کوشش کریں۔"</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"کافی زیادہ کوششیں۔ فنگر پرنٹ سینسر غیر فعال ہو گیا۔"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"دوبارہ کوشش کریں۔"</string>
@@ -991,6 +1000,12 @@
     <string name="browse" msgid="1245903488306147205">"کھولیں"</string>
     <string name="sms" msgid="4560537514610063430">"پیغام"</string>
     <string name="add_contact" msgid="7867066569670597203">"شامل کریں"</string>
+    <!-- no translation found for view_calendar (979609872939597838) -->
+    <skip />
+    <!-- no translation found for add_calendar_event (1953664627192056206) -->
+    <skip />
+    <!-- no translation found for view_flight (7691640491425680214) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"اسٹوریج کی جگہ ختم ہو رہی ہے"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ممکن ہے سسٹم کے کچھ فنکشنز کام نہ کریں"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"‏سسٹم کیلئے کافی اسٹوریج نہیں ہے۔ اس بات کو یقینی بنائیں کہ آپ کے پاس 250MB خالی جگہ ہے اور دوبارہ شروع کریں۔"</string>
@@ -1116,6 +1131,8 @@
       <item quantity="one">‏عوامی Wi-Fi نیٹ ورک دستیاب ہے</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"‏عوامی Wi‑Fi نیٹ ورک سے منسلک ہوں"</string>
+    <!-- no translation found for wifi_available_carrier_network_title (4527932626916527897) -->
+    <skip />
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"‏عوامی Wi‑Fi نیٹ ورک سے منسلک ہو رہا ہے"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"‏عوامی Wi‑Fi نیٹ ورک سے منسلک ہو گيا"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"‏Wi‑Fi نیٹ ورک سے منسلک نہیں ہو سکا"</string>
@@ -1125,10 +1142,8 @@
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"‏Wi‑Fi از خود آن ہو جائے گا"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"جب آپ اعلی معیار کے محفوظ کردہ نیٹ ورک کے قریب ہوں"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"دوبارہ آن نہ کریں"</string>
-    <!-- no translation found for wifi_wakeup_enabled_title (6534603733173085309) -->
-    <skip />
-    <!-- no translation found for wifi_wakeup_enabled_content (189330154407990583) -->
-    <skip />
+    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"‏Wi-Fi خود کار طور پر آن ہو گیا"</string>
+    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"آپ ایک محفوظ نیٹ ورک کے قریب ہیں: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"‏Wi-Fi نیٹ ورک میں سائن ان کریں"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"نیٹ ورک میں سائن ان کریں"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1416,6 +1431,8 @@
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> متعینہ حد سے زیادہ ہے۔"</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"پس منظر ڈیٹا محدود ہے"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"حد بندی ہٹانے کیلئے تھپتھپائیں۔"</string>
+    <string name="data_usage_rapid_title" msgid="4579994056245665351">"ڈیٹا کا زیادہ استعمال"</string>
+    <string name="data_usage_rapid_body" msgid="4899922842674185567">"پچھلے چند دنوں میں آپ کے ڈیٹا کا استعمال معمول سے زیادہ ہو گیا ہے۔ استعمال اور ترتیبات دیکھنے کیلئے تھپتھپائیں۔"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"سیکیورٹی سرٹیفیکیٹ"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"یہ سرٹیفکیٹ درست ہے۔"</string>
     <string name="issued_to" msgid="454239480274921032">"جاری کردہ بنام:"</string>
@@ -1692,7 +1709,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> تک"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> تک (اگلا الارم)"</string>
-    <string name="zen_mode_forever" msgid="1916263162129197274">"جب تک آپ \'ڈسڑب نہ کریں\' کو آف نہیں کر دیتے"</string>
+    <string name="zen_mode_forever" msgid="931849471004038757">"یہاں تک کہ آپ آف کر دیں"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"جب تک آپ ڈسڑب نہ کریں کو آف نہیں کر دیتے"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"سکیڑیں"</string>
@@ -1741,9 +1758,15 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"سبھی زبانیں"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"تمام علاقے"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"تلاش"</string>
-    <string name="work_mode_off_title" msgid="2615362773958585967">"دفتری وضع آن کریں؟"</string>
-    <string name="work_mode_off_message" msgid="2961559609199223594">"اس سے آپ کا دفتری پروفائل آن ہو جائے گا، بشمول ایپس، پس منظر کی مطابقت پذیری اور متعلقہ خصوصیات"</string>
+    <!-- no translation found for work_mode_off_title (1118691887588435530) -->
+    <skip />
+    <!-- no translation found for work_mode_off_message (5130856710614337649) -->
+    <skip />
     <string name="work_mode_turn_on" msgid="2062544985670564875">"آن کریں"</string>
+    <!-- no translation found for deprecated_target_sdk_message (1449696506742572767) -->
+    <skip />
+    <!-- no translation found for deprecated_target_sdk_app_store (5032340500368495077) -->
+    <skip />
     <string name="new_sms_notification_title" msgid="8442817549127555977">"آپ کے پاس نئے پیغامات ہیں"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"‏دیکھنے کیلئے SMS ایپ کھولیں"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"کچھ فعالیت محدود ہو سکتی ہے"</string>
@@ -1815,10 +1838,12 @@
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"ایپ دستخط غیر مماثل ہونے کی وجہ سے شارٹ کٹ کو بحال نہیں کیا جا سکا"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"شارٹ کٹ کو بحال نہیں کیا جا سکا"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"شارٹ کٹ غیر فعال ہے"</string>
-    <!-- no translation found for harmful_app_warning_uninstall (3846265696369136266) -->
+    <!-- no translation found for harmful_app_warning_uninstall (4837672735619532931) -->
     <skip />
-    <!-- no translation found for harmful_app_warning_launch_anyway (5784428382367400530) -->
+    <!-- no translation found for harmful_app_warning_open_anyway (596432803680914321) -->
     <skip />
-    <!-- no translation found for harmful_app_warning_title (2229996292333310435) -->
+    <!-- no translation found for harmful_app_warning_title (8982527462829423432) -->
     <skip />
+    <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> <xliff:g id="APP_2">%2$s</xliff:g> کے سلائسز دکھانا چاہتی ہے"</string>
+    <string name="screenshot_edit" msgid="7867478911006447565">"ترمیم کریں"</string>
 </resources>

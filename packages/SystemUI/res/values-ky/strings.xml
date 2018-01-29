@@ -67,7 +67,7 @@
     <string name="usb_debugging_message" msgid="2220143855912376496">"Компүтердин RSA ачкычынын контролдук суммасы:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Бул компүтерден дайыма уруксат берилсин"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB мүчүлүштүктөрүн оңдоого уруксат жок"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Учурда бул түзмөккө каттоо эсеби менен кирген колдонуучу USB мүчүлүштүктөрүн оңдоо функциясын күйгүзө албай жатат. Бул функцияны колдонуу үчүн негизги колдонуучунун каттоо эсебине которулуңуз."</string>
+    <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"Учурда бул аккаунтта USB аркылуу мүчүлүштүктөрдү оңдоо функциясын иштетүүгө болбойт. Негизги колдонуучунун аккаунтуна кириңиз."</string>
     <string name="compat_mode_on" msgid="6623839244840638213">"Экрнд тлтр ү. чен өлч өзг"</string>
     <string name="compat_mode_off" msgid="4434467572461327898">"Экранды толтуруу ү-н чоюу"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Скриншот"</string>
@@ -88,6 +88,7 @@
     <string name="accessibility_home" msgid="8217216074895377641">"Үйгө"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Меню"</string>
     <string name="accessibility_accessibility_button" msgid="7601252764577607915">"Атайын мүмкүнчүлүктөр"</string>
+    <string name="accessibility_rotate_button" msgid="7402949513740253006">"Экранды буруу"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"Көз жүгүртүү"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Издөө"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Камера"</string>
@@ -102,6 +103,12 @@
     <string name="camera_label" msgid="7261107956054836961">"камераны ачуу"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Жаңы тапшырманын планын тандаңыз"</string>
     <string name="cancel" msgid="6442560571259935130">"Жокко чыгаруу"</string>
+    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
+    <skip />
+    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
+    <skip />
+    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
+    <skip />
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Масштабды сыйыштыруу баскычы."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Кичинекейди чоң экранга масштабдоо."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth байланышта"</string>
@@ -178,7 +185,8 @@
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Үнсүз шыңгыроо."</string>
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />
-    <string name="accessibility_work_mode" msgid="2478631941714607225">"Иштөө режими"</string>
+    <!-- no translation found for accessibility_work_mode (702887484664647430) -->
+    <skip />
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"<xliff:g id="APP">%s</xliff:g> этибарга албоо."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> жок болду."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Акыркы колдонмолордун баары көз жаздымда калтырылды."</string>
@@ -275,6 +283,10 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> түзмөк)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth өчүк"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Жупташкан түзмөктөр жок"</string>
+    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="7106697106764717416">"Батареянын деңгээли <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Аудио"</string>
+    <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Гарнитура"</string>
+    <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Киргизүү"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Жарыктыгы"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Автоматтык бурулуу"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Экрандын авто-айлануусу"</string>
@@ -315,6 +327,9 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Туташууда…"</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Тетеринг"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Туташуу чекити"</string>
+    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
+    <skip />
+    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Эскертмелер"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Кол чырак"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Мобилдик Интернет"</string>
@@ -324,8 +339,13 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> колдонулду"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> чектөө"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> эскертүү"</string>
-    <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Иштөө режими"</string>
+    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"Жумуш профили"</string>
+    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"Эскертмелер менен колдонмолор өчүрүлгөн"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Түнкү жарык"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Күн батканда күйөт"</string>
+    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Күн чыкканга чейин"</string>
+    <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Саат <xliff:g id="TIME">%s</xliff:g> күйөт"</string>
+    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"<xliff:g id="TIME">%s</xliff:g> чейин"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC өчүрүлгөн"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC иштетилген"</string>
@@ -338,6 +358,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> коопсуз режиминде өчүрүлдү."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Баарын тазалоо"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Экранды бөлүү үчүн бул жерге сүйрөңүз"</string>
+    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Колдонмолорду которуштуруу үчүн өйдө сүрүңүз"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Туурасынан бөлүү"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Тигинен бөлүү"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Ыңгайлаштырылган бөлүү"</string>
@@ -562,6 +583,8 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Бул функциянын жардамы менен ар бир колдонмо үчүн эскертменин маанилүүлүк деңгээлин 0дон 5ке чейин койсоңуз болот. \n\n"<b>"5-деңгээл"</b>" \n- Эскертмелер тизмесинин башында көрсөтүлсүн \n- Эскертмелер толук экранда көрсөтүлсүн \n- Калкып чыгуучу эскертмелерге уруксат берилсин \n\n"<b>"4-деңгээл"</b>" \n- Эскертмелер толук экранда көрсөтүлбөсүн \n- Калкып чыгуучу эскертмелерге уруксат берилсин \n\n"<b>"3-деңгээл"</b>" \n- Эскертмелер толук экранда көрсөтүлбөсүн \n- Калкып чыгуучу эскертмелерге тыюу салынсын \n\n"<b>"2-деңгээл"</b>" \n- Эскертмелер толук экранда көрсөтүлбөсүн \n- Калкып чыгуучу эскертмелерге тыюу салынсын \n- Эч качан добуш чыгып же дирилдебесин \n\n"<b>"1-деңгээл"</b>" \n- Эскертмелер толук экранда көрсөтүлбөсүн \n- Калкып чыгуучу эскертмелерге тыюу салынсын \n- Эч качан добуш чыгып же дирилдебесин \n- Кулпуланган экрандан жана абал тилкесинен жашырылсын \n- Эскертмелер тизмесинин аягында көрсөтүлсүн \n\n"<b>"0-деңгээл"</b>" \n- Колдонмодон алынган бардык эскертмелер бөгөттөлсүн"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Эскертмелер"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Мындан ары бул эскертмелер сизге көрсөтүлбөйт"</string>
+    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
+    <skip />
     <string name="inline_keep_showing" msgid="8945102997083836858">"Бул эскертмелер көрсөтүлө берсинби?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Эскертмелерди токтотуу"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Көрсөтүлө берсин"</string>
@@ -656,7 +679,8 @@
     <item msgid="1545641631806817203">"Алмашуу буфери"</item>
     <item msgid="5742013440802239414">"Баскыч коду"</item>
     <item msgid="8802889973626281575">"Баскычтоп которуштургуч"</item>
-    <item msgid="8175437057325747277">"Эч бири"</item>
+    <item msgid="7095517796293767867">"Буруу сунушу"</item>
+    <item msgid="8494159969042135235">"Эч бири"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"Кадимки"</item>
@@ -718,7 +742,7 @@
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Ыкчам жөндөөлөрдү ачуу."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Ыкчам жөндөөлөрдү жабуу."</string>
     <string name="accessibility_quick_settings_alarm_set" msgid="1863000242431528676">"Ойготкуч коюлду."</string>
-    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> каттоо эсеби аркылуу кирди"</string>
+    <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> аккаунту менен кирди"</string>
     <string name="accessibility_quick_settings_no_internet" msgid="31890692343084075">"Интернет жок."</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Чоо-жайын ачуу."</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> жөндөөлөрүн ачуу."</string>
@@ -780,4 +804,10 @@
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Батареянын кубаты жана трафиктин көлөмү жөнүндө билүү үчүн таптап коюңуз"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Мобилдик Интернетти өчүрөсүзбү?"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Уруксат берүү сурамыңыз көрүнбөй калгандыктан, Жөндөөлөр жообуңузду ырастай албай жатат."</string>
+    <string name="slice_permission_title" msgid="7465009437851044444">"<xliff:g id="APP_0">%1$s</xliff:g> колдонмосуна <xliff:g id="APP_2">%2$s</xliff:g> үлгүлөрүн көрсөтүүгө уруксат берилсинби?"</string>
+    <string name="slice_permission_text_1" msgid="3514586565609596523">"- <xliff:g id="APP">%1$s</xliff:g> колдонмосунун маалыматын окуйт"</string>
+    <string name="slice_permission_text_2" msgid="3146758297471143723">"- <xliff:g id="APP">%1$s</xliff:g> колдонмосунда аракеттерди аткарат"</string>
+    <string name="slice_permission_checkbox" msgid="7986504458640562900">"<xliff:g id="APP">%1$s</xliff:g> бардык колдонмолордун үлгүлөрүн көрсөтүүгө уруксат берүү"</string>
+    <string name="slice_permission_allow" msgid="2340244901366722709">"Уруксат берүү"</string>
+    <string name="slice_permission_deny" msgid="7683681514008048807">"Жок"</string>
 </resources>

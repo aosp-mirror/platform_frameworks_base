@@ -45,6 +45,7 @@ public final class Dpm extends BaseCommand {
     private static final String COMMAND_SET_DEVICE_OWNER = "set-device-owner";
     private static final String COMMAND_SET_PROFILE_OWNER = "set-profile-owner";
     private static final String COMMAND_REMOVE_ACTIVE_ADMIN = "remove-active-admin";
+    private static final String COMMAND_CLEAR_FREEZE_PERIOD_RECORD = "clear-freeze-period-record";
 
     private IDevicePolicyManager mDevicePolicyManager;
     private int mUserId = UserHandle.USER_SYSTEM;
@@ -75,7 +76,11 @@ public final class Dpm extends BaseCommand {
                 "\n" +
                 "dpm remove-active-admin: Disables an active admin, the admin must have declared" +
                 " android:testOnly in the application in its manifest. This will also remove" +
-                " device and profile owners\n");
+                " device and profile owners\n" +
+                "\n" +
+                "dpm " + COMMAND_CLEAR_FREEZE_PERIOD_RECORD + ": clears framework-maintained " +
+                "record of past freeze periods that the device went through. For use during " +
+                "feature development to prevent triggering restriction on setting freeze periods");
     }
 
     @Override
@@ -100,6 +105,9 @@ public final class Dpm extends BaseCommand {
                 break;
             case COMMAND_REMOVE_ACTIVE_ADMIN:
                 runRemoveActiveAdmin();
+                break;
+            case COMMAND_CLEAR_FREEZE_PERIOD_RECORD:
+                runClearFreezePeriodRecord();
                 break;
             default:
                 throw new IllegalArgumentException ("unknown command '" + command + "'");
@@ -188,6 +196,11 @@ public final class Dpm extends BaseCommand {
 
         System.out.println("Success: Active admin and profile owner set to "
                 + mComponent.toShortString() + " for user " + mUserId);
+    }
+
+    private void runClearFreezePeriodRecord() throws RemoteException {
+        mDevicePolicyManager.clearSystemUpdatePolicyFreezePeriodRecord();
+        System.out.println("Success");
     }
 
     private ComponentName parseComponentName(String component) {

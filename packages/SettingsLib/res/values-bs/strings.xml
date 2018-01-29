@@ -275,7 +275,6 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"Prikaži dodatne informacije za ažuriranja za hardver"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Trepći hardverske slojeve zeleno kada se ažuriraju"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"Otkl. greške GPU preklap."</string>
-    <string name="debug_hw_renderer" msgid="7568529019431785816">"Postavite GPU renderer"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"Onemog. HW preklapanja"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"Uvijek koristi GPU za kompoziciju ekrana"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"Simuliraj prostor boje"</string>
@@ -410,4 +409,10 @@
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"Više vremena."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"Manje vremena."</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"Uključi"</string>
+    <string name="cancel" msgid="6859253417269739139">"Otkaži"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"Uključi način rada Ne ometaj"</string>
+    <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"Nikada"</string>
+    <string name="zen_interruption_level_priority" msgid="2078370238113347720">"Samo prioriteti"</string>
+    <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
 </resources>

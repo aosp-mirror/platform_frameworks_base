@@ -33,7 +33,7 @@
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"進行中"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"通知"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"電池電力不足"</string>
-    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"電池電力不足，請開啟節約耗電量模式"</string>
+    <string name="battery_low_title_hybrid" msgid="6268991275887381595">"電池電量偏低，請開啟節約耗電量模式"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"僅剩 <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="6838677459286775617">"電力剩餘 <xliff:g id="PERCENTAGE">%s</xliff:g>，根據你的使用情形，剩餘時間大約還有 <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="9025795469949145586">"電力剩餘 <xliff:g id="PERCENTAGE">%s</xliff:g>，剩餘時間大約還有 <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -88,6 +88,7 @@
     <string name="accessibility_home" msgid="8217216074895377641">"主螢幕"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"選單"</string>
     <string name="accessibility_accessibility_button" msgid="7601252764577607915">"協助工具"</string>
+    <string name="accessibility_rotate_button" msgid="7402949513740253006">"旋轉螢幕"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"總覽"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"搜尋"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"相機"</string>
@@ -102,6 +103,12 @@
     <string name="camera_label" msgid="7261107956054836961">"開啟攝影機"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"選取新工作版面配置"</string>
     <string name="cancel" msgid="6442560571259935130">"取消"</string>
+    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
+    <skip />
+    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
+    <skip />
+    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
+    <skip />
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"相容性縮放按鈕。"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"將較小螢幕的畫面放大在較大螢幕上顯示。"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"藍牙連線已建立。"</string>
@@ -178,7 +185,8 @@
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"鈴聲靜音。"</string>
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />
-    <string name="accessibility_work_mode" msgid="2478631941714607225">"工作模式"</string>
+    <!-- no translation found for accessibility_work_mode (702887484664647430) -->
+    <skip />
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"關閉「<xliff:g id="APP">%s</xliff:g>」。"</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"「<xliff:g id="APP">%s</xliff:g>」已關閉。"</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"最近使用的應用程式已全部關閉。"</string>
@@ -275,6 +283,10 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"藍牙 (<xliff:g id="NUMBER">%d</xliff:g> 個裝置)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"關閉藍牙"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"找不到配對的裝置"</string>
+    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="7106697106764717416">"電量：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"音訊"</string>
+    <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"耳機"</string>
+    <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"輸入"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"亮度"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"自動旋轉"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"自動旋轉螢幕"</string>
@@ -315,6 +327,9 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"連線中..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"網路共用"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"無線基地台"</string>
+    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
+    <skip />
+    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"通知"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"手電筒"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"行動數據"</string>
@@ -324,8 +339,15 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"已使用 <xliff:g id="DATA_USED">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"上限為 <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> 警告"</string>
-    <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"工作模式"</string>
+    <!-- no translation found for quick_settings_work_mode_on_label (3421274215098764735) -->
+    <skip />
+    <!-- no translation found for quick_settings_work_mode_off_label (8856918707867192186) -->
+    <skip />
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"夜燈"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"於日落時開啟"</string>
+    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"於日出時關閉"</string>
+    <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"開啟時間：<xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"關閉時間：<xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC 已停用"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC 已啟用"</string>
@@ -338,6 +360,8 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"「<xliff:g id="APP">%s</xliff:g>」在安全模式中為停用狀態。"</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"全部清除"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"拖曳到這裡即可使用分割畫面"</string>
+    <!-- no translation found for recents_swipe_up_onboarding (3824607135920170001) -->
+    <skip />
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"水平分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"垂直分割"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"自訂分割"</string>
@@ -562,8 +586,10 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"只要使用電源通知控制項，你就能為應用程式通知設定從 0 到 5 的重要性等級。\n\n"<b>"等級 5"</b>" \n- 顯示在通知清單頂端 \n- 允許全螢幕通知 \n- 一律允許短暫顯示通知 \n\n"<b>"等級 4"</b>" \n- 禁止全螢幕通知 \n- 一律允許短暫顯示通知 \n\n"<b>"等級 3"</b>" \n- 禁止全螢幕通知 \n- 一律不允許短暫顯示通知 \n\n"<b>"等級 2"</b>" \n- 禁止全螢幕通知 \n- 一律不允許短暫顯示通知 \n- 一律不發出音效或震動 \n\n"<b>"等級 1"</b>" \n- 禁止全螢幕通知 \n- 一律不允許短暫顯示通知 \n- 一律不發出音效或震動 \n- 在鎖定畫面和狀態列中隱藏 \n- 顯示在通知清單底端 \n\n"<b>"等級 0"</b>" \n- 封鎖應用程式的所有通知"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"通知"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"你不會再看到這些通知"</string>
+    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
+    <skip />
     <string name="inline_keep_showing" msgid="8945102997083836858">"要繼續顯示這些通知嗎？"</string>
-    <string name="inline_stop_button" msgid="4172980096860941033">"停止通知"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"停止顯示通知"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"繼續顯示"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"要繼續顯示這個應用程式的通知嗎？"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"無法關閉這些通知"</string>
@@ -656,7 +682,8 @@
     <item msgid="1545641631806817203">"剪貼簿"</item>
     <item msgid="5742013440802239414">"按鍵碼"</item>
     <item msgid="8802889973626281575">"鍵盤切換工具"</item>
-    <item msgid="8175437057325747277">"無"</item>
+    <item msgid="7095517796293767867">"旋轉建議"</item>
+    <item msgid="8494159969042135235">"無"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"一般"</item>
@@ -780,4 +807,10 @@
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"輕觸即可查看電池和數據用量詳情"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"要關閉行動數據嗎？"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"由於某個應用程式覆蓋了權限要求畫面，因此「設定」應用程式無法驗證你的回應。"</string>
+    <string name="slice_permission_title" msgid="7465009437851044444">"要允許「<xliff:g id="APP_0">%1$s</xliff:g>」顯示「<xliff:g id="APP_2">%2$s</xliff:g>」的區塊嗎？"</string>
+    <string name="slice_permission_text_1" msgid="3514586565609596523">"- 它可以讀取「<xliff:g id="APP">%1$s</xliff:g>」的資訊"</string>
+    <string name="slice_permission_text_2" msgid="3146758297471143723">"- 它可以在「<xliff:g id="APP">%1$s</xliff:g>」內執行操作"</string>
+    <string name="slice_permission_checkbox" msgid="7986504458640562900">"允許「<xliff:g id="APP">%1$s</xliff:g>」顯示任何應用程式的區塊"</string>
+    <string name="slice_permission_allow" msgid="2340244901366722709">"允許"</string>
+    <string name="slice_permission_deny" msgid="7683681514008048807">"拒絕"</string>
 </resources>

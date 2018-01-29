@@ -185,6 +185,7 @@
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Адміністратор вашої організації контролює цей пристрій і відстежує мережевий трафік. Торкніться, щоб дізнатися більше."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"З вашого пристрою буде стерто всі дані"</string>
     <string name="factory_reset_message" msgid="7972496262232832457">"Не можна використовувати цей додаток адміністратора. На пристрої буде відновлено заводські налаштування.\n\nЯкщо у вас є запитання, зв’яжіться з адміністратором організації."</string>
+    <string name="printing_disabled_by" msgid="8936832919072486965">"Додаток <xliff:g id="OWNER_APP">%s</xliff:g> вимкнув друк."</string>
     <string name="me" msgid="6545696007631404292">"Я"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Парам. пристрою"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"Параметри ТБ"</string>
@@ -269,8 +270,10 @@
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Безпечний режим"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Система Android"</string>
-    <string name="user_owner_label" msgid="1119010402169916617">"Перейти в особистий профіль"</string>
-    <string name="managed_profile_label" msgid="5289992269827577857">"Перейти в робочий профіль"</string>
+    <!-- no translation found for user_owner_label (8836124313744349203) -->
+    <skip />
+    <!-- no translation found for managed_profile_label (8947929265267690522) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Контакти"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"отримувати доступ до контактів"</string>
     <string name="permgrouprequest_contacts" msgid="1601591667800538208">"Надати додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ до контактів"</string>
@@ -422,6 +425,10 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Дозволяє програмі отримувати доступ до телефонних функцій пристрою. Такий дозвіл дає програмі змогу визначати номер телефону й ідентифікатори пристрою, активність виклику, а також віддалений номер, на який здійснюється виклик."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"маршрутизувати виклики через систему"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Дозволяє додатку маршрутизувати виклики через систему, щоб було зручніше телефонувати."</string>
+    <!-- no translation found for permlab_acceptHandover (2661534649736022409) -->
+    <skip />
+    <!-- no translation found for permdesc_acceptHandovers (4570660484220539698) -->
+    <skip />
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"переглядати номери телефону"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Надає додаткам доступ до номерів телефону на пристрої."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"не доп.перехід пристр.в реж.сну"</string>
@@ -491,10 +498,13 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Ви провели пальцем надто повільно. Повторіть спробу."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Не розпізнано"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Апаратне забезпечення для сканування відбитка недоступне."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Не вдалося зберегти відбиток. Видаліть наявний відбиток."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Час очікування відбитка минув. Повторіть спробу."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Дію з відбитком скасовано."</string>
+    <!-- no translation found for fingerprint_error_user_canceled (7999639584615291494) -->
+    <skip />
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Забагато спроб. Спробуйте пізніше."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Забагато спроб. Сканер відбитків пальців вимкнено."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Повторіть спробу."</string>
@@ -1030,6 +1040,12 @@
     <string name="browse" msgid="1245903488306147205">"Відкрити"</string>
     <string name="sms" msgid="4560537514610063430">"Повідомлення"</string>
     <string name="add_contact" msgid="7867066569670597203">"Додати"</string>
+    <!-- no translation found for view_calendar (979609872939597838) -->
+    <skip />
+    <!-- no translation found for add_calendar_event (1953664627192056206) -->
+    <skip />
+    <!-- no translation found for view_flight (7691640491425680214) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Закінчується пам’ять"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Деякі системні функції можуть не працювати"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Недостатньо місця для системи. Переконайтесь, що на пристрої є 250 МБ вільного місця, і повторіть спробу."</string>
@@ -1159,6 +1175,8 @@
       <item quantity="other">Відкриті мережі Wi-Fi доступні</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Під’єднайтеся до відкритої мережі Wi-Fi"</string>
+    <!-- no translation found for wifi_available_carrier_network_title (4527932626916527897) -->
+    <skip />
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Під’єднання до відкритої мережі Wi-Fi"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Під’єднано до мережі Wi-Fi"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Не вдалося під’єднатися до мережі Wi-Fi"</string>
@@ -1458,6 +1476,8 @@
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> – понад указаний ліміт."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Викор-ня фонових даних обмежено"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Скасувати обмеження."</string>
+    <string name="data_usage_rapid_title" msgid="4579994056245665351">"Надмірне використання трафіку"</string>
+    <string name="data_usage_rapid_body" msgid="4899922842674185567">"За останні кілька днів ви використовуєте більше трафіку, ніж зазвичай. Торкніться, щоб переглянути дані й налаштування."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Сертифікат безпеки"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Цей сертифікат дійсний."</string>
     <string name="issued_to" msgid="454239480274921032">"Кому видано:"</string>
@@ -1754,7 +1774,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"До <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (наступний будильник)"</string>
-    <string name="zen_mode_forever" msgid="1916263162129197274">"Доки ввімкнено режим \"Не турбувати\""</string>
+    <string name="zen_mode_forever" msgid="931849471004038757">"Доки ви не вимкнете"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Доки ввімкнено режим \"Не турбувати\""</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Згорнути"</string>
@@ -1805,9 +1825,15 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Усі мови"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Усі регіони"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Пошук"</string>
-    <string name="work_mode_off_title" msgid="2615362773958585967">"Увімкнути робочий режим?"</string>
-    <string name="work_mode_off_message" msgid="2961559609199223594">"Буде ввімкнено робочий профіль, зокрема додатки, фонову синхронізацію та пов’язані функції"</string>
+    <!-- no translation found for work_mode_off_title (1118691887588435530) -->
+    <skip />
+    <!-- no translation found for work_mode_off_message (5130856710614337649) -->
+    <skip />
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Увімкнути"</string>
+    <!-- no translation found for deprecated_target_sdk_message (1449696506742572767) -->
+    <skip />
+    <!-- no translation found for deprecated_target_sdk_app_store (5032340500368495077) -->
+    <skip />
     <string name="new_sms_notification_title" msgid="8442817549127555977">"У вас є нові повідомлення"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Щоб переглянути, відкрийте додаток для SMS"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Деякі функції можуть не працювати"</string>
@@ -1881,7 +1907,12 @@
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Не вдалося відновити ярлик, оскільки підписи додатків не збігаються"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Не вдалося відновити ярлик"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"Ярлик вимкнено"</string>
-    <string name="harmful_app_warning_uninstall" msgid="3846265696369136266">"Видалити"</string>
-    <string name="harmful_app_warning_launch_anyway" msgid="5784428382367400530">"Усе одно запустити"</string>
-    <string name="harmful_app_warning_title" msgid="2229996292333310435">"Видалити шкідливий додаток?"</string>
+    <!-- no translation found for harmful_app_warning_uninstall (4837672735619532931) -->
+    <skip />
+    <!-- no translation found for harmful_app_warning_open_anyway (596432803680914321) -->
+    <skip />
+    <!-- no translation found for harmful_app_warning_title (8982527462829423432) -->
+    <skip />
+    <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> хоче показати фрагменти додатка <xliff:g id="APP_2">%2$s</xliff:g>"</string>
+    <string name="screenshot_edit" msgid="7867478911006447565">"Редагувати"</string>
 </resources>

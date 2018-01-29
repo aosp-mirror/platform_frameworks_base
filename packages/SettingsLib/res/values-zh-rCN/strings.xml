@@ -275,7 +275,6 @@
     <string name="show_hw_layers_updates" msgid="5645728765605699821">"显示硬件层更新"</string>
     <string name="show_hw_layers_updates_summary" msgid="5296917233236661465">"Flash 硬件层在进行更新时会显示为绿色"</string>
     <string name="debug_hw_overdraw" msgid="2968692419951565417">"调试 GPU 过度绘制"</string>
-    <string name="debug_hw_renderer" msgid="7568529019431785816">"设置 GPU 渲染程序"</string>
     <string name="disable_overlays" msgid="2074488440505934665">"停用 HW 叠加层"</string>
     <string name="disable_overlays_summary" msgid="3578941133710758592">"始终使用 GPU 进行屏幕合成"</string>
     <string name="simulate_color_space" msgid="6745847141353345872">"模拟颜色空间"</string>
@@ -409,4 +408,10 @@
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="1636187409258564291">"增加时间。"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6590887204171164991">"减少时间。"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="8287824809739581837">"开启"</string>
+    <string name="cancel" msgid="6859253417269739139">"取消"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2297134204747331078">"开启“勿扰”模式"</string>
+    <string name="zen_mode_settings_summary_off" msgid="6119891445378113334">"永不"</string>
+    <string name="zen_interruption_level_priority" msgid="2078370238113347720">"仅限优先事项"</string>
+    <string name="zen_mode_and_condition" msgid="4927230238450354412">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>。<xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
 </resources>

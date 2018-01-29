@@ -35,6 +35,7 @@ import static android.net.wifi.WifiManager.WIFI_AP_STATE_FAILED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
@@ -950,4 +951,86 @@ public class WifiManagerTest {
         doThrow(new SecurityException()).when(mWifiService).setCountryCode(anyString());
         mWifiManager.setCountryCode(TEST_COUNTRY_CODE);
     }
+
+    /**
+     * Test that calls to get the current WPS config token return null and do not have any
+     * interactions with WifiServiceImpl.
+     */
+    @Test
+    public void testGetCurrentNetworkWpsNfcConfigurationTokenReturnsNull() {
+        assertNull(mWifiManager.getCurrentNetworkWpsNfcConfigurationToken());
+        verifyNoMoreInteractions(mWifiService);
+    }
+
+
+    class WpsCallbackTester extends WifiManager.WpsCallback {
+        public boolean mStarted = false;
+        public boolean mSucceeded = false;
+        public boolean mFailed = false;
+        public int mFailureCode = -1;
+
+        @Override
+        public void onStarted(String pin) {
+            mStarted = true;
+        }
+
+        @Override
+        public void onSucceeded() {
+            mSucceeded = true;
+        }
+
+        @Override
+        public void onFailed(int reason) {
+            mFailed = true;
+            mFailureCode = reason;
+        }
+
+    }
+
+    /**
+     * Verify that a call to start WPS immediately returns a failure.
+     */
+    @Test
+    public void testStartWpsImmediatelyFailsWithCallback() {
+        WpsCallbackTester wpsCallback = new WpsCallbackTester();
+        mWifiManager.startWps(null, wpsCallback);
+        assertTrue(wpsCallback.mFailed);
+        assertEquals(WifiManager.ERROR, wpsCallback.mFailureCode);
+        assertFalse(wpsCallback.mStarted);
+        assertFalse(wpsCallback.mSucceeded);
+        verifyNoMoreInteractions(mWifiService);
+    }
+
+    /**
+     * Verify that a call to start WPS does not go to WifiServiceImpl if we do not have a callback.
+     */
+    @Test
+    public void testStartWpsDoesNotCallWifiServiceImpl() {
+        mWifiManager.startWps(null, null);
+        verifyNoMoreInteractions(mWifiService);
+    }
+
+   /**
+i     * Verify that a call to cancel WPS immediately returns a failure.
+     */
+    @Test
+    public void testCancelWpsImmediatelyFailsWithCallback() {
+        WpsCallbackTester wpsCallback = new WpsCallbackTester();
+        mWifiManager.cancelWps(wpsCallback);
+        assertTrue(wpsCallback.mFailed);
+        assertEquals(WifiManager.ERROR, wpsCallback.mFailureCode);
+        assertFalse(wpsCallback.mStarted);
+        assertFalse(wpsCallback.mSucceeded);
+        verifyNoMoreInteractions(mWifiService);
+    }
+
+    /**
+     * Verify that a call to cancel WPS does not go to WifiServiceImpl if we do not have a callback.
+     */
+    @Test
+    public void testCancelWpsDoesNotCallWifiServiceImpl() {
+        mWifiManager.cancelWps(null);
+        verifyNoMoreInteractions(mWifiService);
+    }
+
 }

@@ -88,6 +88,7 @@
     <string name="accessibility_home" msgid="8217216074895377641">"Home"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
     <string name="accessibility_accessibility_button" msgid="7601252764577607915">"Accessibilità"</string>
+    <string name="accessibility_rotate_button" msgid="7402949513740253006">"Ruota lo schermo"</string>
     <string name="accessibility_recent" msgid="5208608566793607626">"Panoramica"</string>
     <string name="accessibility_search_light" msgid="1103867596330271848">"Cerca"</string>
     <string name="accessibility_camera_button" msgid="8064671582820358152">"Fotocamera"</string>
@@ -102,6 +103,12 @@
     <string name="camera_label" msgid="7261107956054836961">"apri fotocamera"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Seleziona un nuovo layout per le attività"</string>
     <string name="cancel" msgid="6442560571259935130">"Annulla"</string>
+    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
+    <skip />
+    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
+    <skip />
+    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
+    <skip />
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Pulsante zoom compatibilità."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom inferiore per schermo più grande."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth collegato."</string>
@@ -180,7 +187,8 @@
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Suoneria silenziosa."</string>
     <!-- no translation found for accessibility_casting (6887382141726543668) -->
     <skip />
-    <string name="accessibility_work_mode" msgid="2478631941714607225">"Modalità Lavoro"</string>
+    <!-- no translation found for accessibility_work_mode (702887484664647430) -->
+    <skip />
     <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Elimina <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> eliminata."</string>
     <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Tutte le applicazioni recenti sono state rimosse."</string>
@@ -277,6 +285,10 @@
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> dispositivi)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="8159652146149219937">"Bluetooth spento"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="4910015762433302860">"Nessun dispositivo accoppiato disponibile"</string>
+    <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="7106697106764717416">"Batteria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
+    <string name="quick_settings_bluetooth_secondary_label_audio" msgid="5673845963301132071">"Audio"</string>
+    <string name="quick_settings_bluetooth_secondary_label_headset" msgid="1880572731276240588">"Auricolare"</string>
+    <string name="quick_settings_bluetooth_secondary_label_input" msgid="2173322305072945905">"Ingresso"</string>
     <string name="quick_settings_brightness_label" msgid="6968372297018755815">"Luminosità"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="7305323031808150099">"Rotazione automatica"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4231661040698488779">"Rotazione automatica dello schermo"</string>
@@ -317,6 +329,9 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Connessione..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Tethering"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
+    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
+    <skip />
+    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Notifiche"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Torcia"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Dati mobili"</string>
@@ -326,8 +341,13 @@
     <string name="quick_settings_cellular_detail_data_used" msgid="1476810587475761478">"<xliff:g id="DATA_USED">%s</xliff:g> utilizzati"</string>
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"Limite di <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"Avviso <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
-    <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Modalità Lavoro"</string>
+    <string name="quick_settings_work_mode_on_label" msgid="3421274215098764735">"Profilo di lavoro"</string>
+    <string name="quick_settings_work_mode_off_label" msgid="8856918707867192186">"Le app e le notifiche sono disattivate"</string>
     <string name="quick_settings_night_display_label" msgid="3577098011487644395">"Luminosità notturna"</string>
+    <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"Attivata al tramonto"</string>
+    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"Fino all\'alba"</string>
+    <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"Attivata alle ore <xliff:g id="TIME">%s</xliff:g>"</string>
+    <string name="quick_settings_night_secondary_label_until" msgid="8664820079774824618">"Fino alle ore <xliff:g id="TIME">%s</xliff:g>"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC non attiva"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC attiva"</string>
@@ -340,6 +360,7 @@
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"L\'app <xliff:g id="APP">%s</xliff:g> è stata disattivata in modalità provvisoria."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Cancella tutto"</string>
     <string name="recents_drag_hint_message" msgid="2649739267073203985">"Trascina qui per utilizzare la modalità Schermo diviso"</string>
+    <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Scorri verso l\'alto per passare ad altre app"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Divisione in orizzontale"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Divisione in verticale"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Divisione personalizzata"</string>
@@ -564,6 +585,8 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"I controlli di gestione delle notifiche ti consentono di impostare un livello di importanza compreso tra 0 e 5 per le notifiche di un\'app. \n\n"<b>"Livello 5"</b>" \n- Mostra in cima all\'elenco di notifiche \n- Consenti l\'interruzione a schermo intero \n- Visualizza sempre \n\n"<b>"Livello 4"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Visualizza sempre \n\n"<b>"Livello 3"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n\n"<b>"Livello 2"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n- Non emettere mai suoni e vibrazioni \n\n"<b>"Livello 1"</b>" \n- Impedisci l\'interruzione a schermo intero \n- Non visualizzare mai \n- Non emettere mai suoni e vibrazioni \n- Nascondi da schermata di blocco e barra di stato \n- Mostra in fondo all\'elenco di notifiche \n\n"<b>"Livello 0"</b>" \n- Blocca tutte le notifiche dell\'app"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Notifiche"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Non vedrai più queste notifiche"</string>
+    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
+    <skip />
     <string name="inline_keep_showing" msgid="8945102997083836858">"Continuare a ricevere queste notifiche?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Interrompi la ricezione di notifiche"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Continua a mostrare"</string>
@@ -658,7 +681,8 @@
     <item msgid="1545641631806817203">"Appunti"</item>
     <item msgid="5742013440802239414">"Keycode"</item>
     <item msgid="8802889973626281575">"Selettore tastiera"</item>
-    <item msgid="8175437057325747277">"Nessuno"</item>
+    <item msgid="7095517796293767867">"Suggerimento per la rotazione"</item>
+    <item msgid="8494159969042135235">"Nessuno"</item>
   </string-array>
   <string-array name="nav_bar_layouts">
     <item msgid="8077901629964902399">"Normale"</item>
@@ -782,4 +806,10 @@
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Tocca per conoscere i dettagli sull\'utilizzo dei dati e della batteria"</string>
     <string name="data_usage_disable_mobile" msgid="5116269981510015864">"Disattivare i dati mobili?"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Un\'app sta oscurando una richiesta di autorizzazione, pertanto Impostazioni non può verificare la tua risposta."</string>
+    <string name="slice_permission_title" msgid="7465009437851044444">"Vuoi consentire all\'app <xliff:g id="APP_0">%1$s</xliff:g> di mostrare porzioni dell\'app <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
+    <string name="slice_permission_text_1" msgid="3514586565609596523">"- Può leggere informazioni dell\'app <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="slice_permission_text_2" msgid="3146758297471143723">"- Può compiere azioni nell\'app <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="slice_permission_checkbox" msgid="7986504458640562900">"Consenti all\'app <xliff:g id="APP">%1$s</xliff:g> di mostrare porzioni di qualsiasi app"</string>
+    <string name="slice_permission_allow" msgid="2340244901366722709">"Consenti"</string>
+    <string name="slice_permission_deny" msgid="7683681514008048807">"Nega"</string>
 </resources>

@@ -181,6 +181,7 @@
     <string name="network_logging_notification_text" msgid="7930089249949354026">"Tashkilotingiz bu qurilmani boshqaradi va tarmoq trafigini nazorat qilishi mumkin. Tafsilotlar uchun bosing."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"Qurilmangizdagi ma’lumotlar o‘chirib tashlanadi"</string>
     <string name="factory_reset_message" msgid="7972496262232832457">"Administrator ilovasini ishlatib bo‘lmaydi. Qurilmada barcha ma’lumotlar o‘chirib tashlanadi.\n\nSavollaringiz bo‘lsa, administrator bilan bog‘laning."</string>
+    <string name="printing_disabled_by" msgid="8936832919072486965">"Chop etish funksiyasi <xliff:g id="OWNER_APP">%s</xliff:g> tomonidan faolsizlantirilgan."</string>
     <string name="me" msgid="6545696007631404292">"Men"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Planshet sozlamalari"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"TV tanlamalari"</string>
@@ -263,8 +264,10 @@
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Xavfsiz usul"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android tizimi"</string>
-    <string name="user_owner_label" msgid="1119010402169916617">"Shaxsiy profilga o‘tish"</string>
-    <string name="managed_profile_label" msgid="5289992269827577857">"Ishchi profilga o‘tish"</string>
+    <!-- no translation found for user_owner_label (8836124313744349203) -->
+    <skip />
+    <!-- no translation found for managed_profile_label (8947929265267690522) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Kontaktlar"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"kontaktlarga kirish"</string>
     <string name="permgrouprequest_contacts" msgid="1601591667800538208">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uchun kontaktlaringizga ruxsat berish"</string>
@@ -416,6 +419,10 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Ilovaga qurilmangizdagi telefon xususiyatlariga kirishga ruxsat beradi. Bu ruxsat ilovaga telefon raqami va qurilma nomlari, qo‘ng‘iroq faol yoki faolsizligi va masofadagi raqam qo‘ng‘rioq orqali bog‘langanligini aniqlashga imkon beradi."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"chaqiruvlarni tizim orqali yo‘naltirish"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Ilova aloqa sifatini yaxshilash maqsadida chaqiruvlarni tizim orqali yo‘naltirishi mumkin."</string>
+    <!-- no translation found for permlab_acceptHandover (2661534649736022409) -->
+    <skip />
+    <!-- no translation found for permdesc_acceptHandovers (4570660484220539698) -->
+    <skip />
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"telefon raqamlarini o‘qish"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Ilovaga qurilmaning telefon raqamlaridan foydalanishiga ruxsat beradi."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"planshetni uyquga ketishiga yo‘l qo‘ymaslik"</string>
@@ -485,10 +492,13 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Barmoq juda sekin harakatlandi. Qayta urinib ko‘ring."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Aniqlanmadi"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Barmoq izi skaneri ish holatida emas."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Barmoq izini saqlab bo‘lmadi. Mavjud barmoq izlaridan birini o‘chirib tashlang."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Barmoq izini aniqlash vaqti tugab qoldi. Qayta urinib ko‘ring."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Barmoq izi tekshiruvi bekor qilindi."</string>
+    <!-- no translation found for fingerprint_error_user_canceled (7999639584615291494) -->
+    <skip />
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Urinishlar soni ko‘payib ketdi. Keyinroq qayta urinib ko‘ring."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Urinishlar soni ko‘payib ketdi. Barmoq izi skaneri bloklandi."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Qayta urinib ko‘ring."</string>
@@ -990,6 +1000,12 @@
     <string name="browse" msgid="1245903488306147205">"Ochish"</string>
     <string name="sms" msgid="4560537514610063430">"Xabar"</string>
     <string name="add_contact" msgid="7867066569670597203">"Qo‘shish"</string>
+    <!-- no translation found for view_calendar (979609872939597838) -->
+    <skip />
+    <!-- no translation found for add_calendar_event (1953664627192056206) -->
+    <skip />
+    <!-- no translation found for view_flight (7691640491425680214) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Xotirada bo‘sh joy tugamoqda"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Ba‘zi tizim funksiyalari ishlamasligi mumkin"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Tizim uchun xotirada joy yetarli emas. Avval 250 megabayt joy bo‘shatib, keyin qurilmani o‘chirib yoqing."</string>
@@ -1115,6 +1131,8 @@
       <item quantity="one">Ochiq Wi-Fi tarmog‘i aniqlandi</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Ochiq Wi‑Fi tarmoqqa ulaning"</string>
+    <!-- no translation found for wifi_available_carrier_network_title (4527932626916527897) -->
+    <skip />
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Ochiq Wi‑Fi tarmoqqa ulanilmoqda"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi‑Fi tarmoqqa ulanildi"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi-Fi tarmoqqa ulanib bo‘lmadi"</string>
@@ -1413,6 +1431,8 @@
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"Chegaradan <xliff:g id="SIZE">%s</xliff:g> oshib ketdi."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"Fon rejimi cheklangan"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"Cheklovni olib tashlash uchun bosing."</string>
+    <string name="data_usage_rapid_title" msgid="4579994056245665351">"Ko‘p trafik sarflandi"</string>
+    <string name="data_usage_rapid_body" msgid="4899922842674185567">"Oxirgi bir necha kunda odatdagidan ko‘proq trafik sarflandi. Trafik sarfi va sozlamalarni ko‘rish uchun bosing."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Xavfsizlik sertifikati"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Ushbu sertifikat - to‘g‘ri."</string>
     <string name="issued_to" msgid="454239480274921032">"Tegishli:"</string>
@@ -1689,7 +1709,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> gacha"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> gacha (keyingi signal)"</string>
-    <string name="zen_mode_forever" msgid="1916263162129197274">"“Bezovta qilinmasin” rejimi o‘chirilmaguncha"</string>
+    <string name="zen_mode_forever" msgid="931849471004038757">"O‘chirib qo‘ymagunimcha"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"“Bezovta qilinmasin” rejimi o‘chirilmaguncha"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Yig‘ish"</string>
@@ -1738,9 +1758,15 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Barcha tillar"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Barcha hududlar"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Qidiruv"</string>
-    <string name="work_mode_off_title" msgid="2615362773958585967">"Ishchi rejim yoqilsinmi?"</string>
-    <string name="work_mode_off_message" msgid="2961559609199223594">"Bunda ishchi profilingiz, jumladan, ilovalar, fonda sinxronlash va aloqador funksiyalar yoqiladi"</string>
+    <!-- no translation found for work_mode_off_title (1118691887588435530) -->
+    <skip />
+    <!-- no translation found for work_mode_off_message (5130856710614337649) -->
+    <skip />
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Yoqish"</string>
+    <!-- no translation found for deprecated_target_sdk_message (1449696506742572767) -->
+    <skip />
+    <!-- no translation found for deprecated_target_sdk_app_store (5032340500368495077) -->
+    <skip />
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Sizga yangi SMS keldi"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Ko‘rish uchun SMS ilovasini oching"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Ba’zi funksiyalar cheklanishi m-n"</string>
@@ -1812,7 +1838,12 @@
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Ilova imzosi mos kelmagani uchun yorliq tiklanmadi"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Yorliq tiklanmadi"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"Yorliq faolsizlantirildi"</string>
-    <string name="harmful_app_warning_uninstall" msgid="3846265696369136266">"O‘chirib tashlash"</string>
-    <string name="harmful_app_warning_launch_anyway" msgid="5784428382367400530">"Baribir ishga tushirilsin"</string>
-    <string name="harmful_app_warning_title" msgid="2229996292333310435">"Zararli ilova o‘chirilsinmi?"</string>
+    <!-- no translation found for harmful_app_warning_uninstall (4837672735619532931) -->
+    <skip />
+    <!-- no translation found for harmful_app_warning_open_anyway (596432803680914321) -->
+    <skip />
+    <!-- no translation found for harmful_app_warning_title (8982527462829423432) -->
+    <skip />
+    <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> ilovasi <xliff:g id="APP_2">%2$s</xliff:g> ilovasidan fragmentlar ko‘rsatish uchun ruxsat so‘ramoqda"</string>
+    <string name="screenshot_edit" msgid="7867478911006447565">"Tahrirlash"</string>
 </resources>

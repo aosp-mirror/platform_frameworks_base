@@ -181,6 +181,7 @@
     <string name="network_logging_notification_text" msgid="7930089249949354026">"ನಿಮ್ಮ ಸಂಸ್ಥೆಯು ಈ ಸಾಧನವನ್ನು ನಿರ್ವಹಿಸುತ್ತದೆ ಮತ್ತು ಅದು ನೆಟ್‌ವರ್ಕ್ ಟ್ರಾಫಿಕ್ ಮೇಲೆ ಗಮನವಿರಿಸಬಹುದು. ವಿವರಗಳಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="factory_reset_warning" msgid="5423253125642394387">"ನಿಮ್ಮ ಸಾಧನವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ"</string>
     <string name="factory_reset_message" msgid="7972496262232832457">"ನಿರ್ವಹಣೆ ಅಪ್ಲಿಕೇಶನ್ ಬಳಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ನಿಮ್ಮ ಸಾಧನವನ್ನು ಇದೀಗ ಅಳಿಸಲಾಗುತ್ತದೆ.\n\nನಿಮ್ಮಲ್ಲಿ ಪ್ರಶ್ನೆಗಳಿದ್ದರೆ, ನಿಮ್ಮ ಸಂಸ್ಥೆಯ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
+    <string name="printing_disabled_by" msgid="8936832919072486965">"<xliff:g id="OWNER_APP">%s</xliff:g> ಮೂಲಕ ಪ್ರಿಂಟಿಂಗ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ."</string>
     <string name="me" msgid="6545696007631404292">"ನಾನು"</string>
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"ಟ್ಯಾಬ್ಲೆಟ್ ಆಯ್ಕೆಗಳು"</string>
     <string name="power_dialog" product="tv" msgid="6153888706430556356">"ಟಿವಿ ಆಯ್ಕೆಗಳು"</string>
@@ -217,8 +218,7 @@
     <string name="global_action_emergency" msgid="7112311161137421166">"ತುರ್ತು"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"ದೋಷದ ವರದಿ"</string>
     <string name="global_action_logout" msgid="935179188218826050">"ಸೆಷನ್ ಅಂತ್ಯಗೊಳಿಸಿ"</string>
-    <!-- no translation found for global_action_screenshot (8329831278085426283) -->
-    <skip />
+    <string name="global_action_screenshot" msgid="8329831278085426283">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"ದೋಷ ವರದಿ ರಚಿಸಿ"</string>
     <string name="bugreport_message" msgid="398447048750350456">"ನಿಮ್ಮ ಸಾಧನದ ಪ್ರಸ್ತುತ ಸ್ಥಿತಿಯ ಕುರಿತು ಮಾಹಿತಿಯನ್ನು ಸಂಗ್ರಹಿಸಿಕೊಳ್ಳುವುದರ ಜೊತೆ ಇ-ಮೇಲ್ ರೂಪದಲ್ಲಿ ನಿಮಗೆ ರವಾನಿಸುತ್ತದೆ. ಇದು ದೋಷ ವರದಿಯನ್ನು ಪ್ರಾರಂಭಿಸಿದ ಸಮಯದಿಂದ ಅದನ್ನು ಕಳುಹಿಸುವವರೆಗೆ ಸ್ವಲ್ಪ ಸಮಯವನ್ನು ತೆಗೆದುಕೊಳ್ಳುತ್ತದೆ; ದಯವಿಟ್ಟು ತಾಳ್ಮೆಯಿಂದಿರಿ."</string>
     <string name="bugreport_option_interactive_title" msgid="8635056131768862479">"ಪರಸ್ಪರ ಸಂವಹನ ವರದಿ"</string>
@@ -264,8 +264,10 @@
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"ಸುರಕ್ಷಿತ ಮೋಡ್"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android ಸಿಸ್ಟಂ"</string>
-    <string name="user_owner_label" msgid="1119010402169916617">"ವೈಯಕ್ತಿಕಗೆ ಬದಲಿಸಿ"</string>
-    <string name="managed_profile_label" msgid="5289992269827577857">"ಕೆಲಸಕ್ಕೆ ಬದಲಿಸು"</string>
+    <!-- no translation found for user_owner_label (8836124313744349203) -->
+    <skip />
+    <!-- no translation found for managed_profile_label (8947929265267690522) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"ಸಂಪರ್ಕಗಳು"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"ನಿಮ್ಮ ಸಂಪರ್ಕಗಳನ್ನು ಪ್ರವೇಶಿಸಲು"</string>
     <string name="permgrouprequest_contacts" msgid="1601591667800538208">"ನಿಮ್ಮ ಸಂಪರ್ಕಗಳನ್ನು ಪ್ರವೇಶಿಸಲು &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಅನುಮತಿಸಿ"</string>
@@ -417,6 +419,10 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ಸಾಧನದ ಫೋನ್ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಪ್ರವೇಶಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ. ಈ ಅನುಮತಿಯು ಫೋನ್ ಸಂಖ್ಯೆ ಮತ್ತು ಸಾಧನದ ID ಗಳನ್ನು ನಿರ್ಧರಿಸಲು, ಕರೆಯು ಸಕ್ರಿಯವಾಗಿದೆಯೇ ಮತ್ತು ಕರೆಯ ಮೂಲಕ ರಿಮೋಟ್ ಸಂಖ್ಯೆಯು ಸಂಪರ್ಕಗೊಂಡಿವೆಯೇ ಎಂಬುದನ್ನೂ ನಿರ್ಧರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಕಲ್ಪಿಸುತ್ತದೆ."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"ಕರೆಗಳನ್ನು ಸಿಸ್ಟಂ ಮೂಲಕ ರವಾನಿಸಿ"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"ಕರೆಯ ಅನುಭವವನ್ನು ಸುಧಾರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ನ ಕರೆಗಳನ್ನು ಸಿಸ್ಟಂ ಮೂಲಕ ರವಾನಿಸಲು ಅನುಮತಿಸುತ್ತದೆ."</string>
+    <!-- no translation found for permlab_acceptHandover (2661534649736022409) -->
+    <skip />
+    <!-- no translation found for permdesc_acceptHandovers (4570660484220539698) -->
+    <skip />
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ಫೋನ್‌ ಸಂಖ್ಯೆಗಳನ್ನು ಓದಿ"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"ಸಾಧನದ ಫೋನ್ ಸಂಖ್ಯೆಗಳಿಗೆ ಪ್ರವೇಶ ಪಡೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿ ನೀಡುತ್ತದೆ."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ಟ್ಯಾಬ್ಲೆಟ್ ನಿದ್ರಾವಸ್ಥೆಯನ್ನು ತಡೆಯಿರಿ"</string>
@@ -486,10 +492,13 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"ಬೆರಳನ್ನು ತುಂಬಾ ನಿಧಾನವಾಗಿ ಸರಿಸಲಾಗಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
+    <string name="fingerprint_not_recognized" msgid="2690661881608146617">"ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ಬೆರಳಚ್ಚು ಹಾರ್ಡ್‌ವೇರ್‌ ಲಭ್ಯವಿಲ್ಲ."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ಬೆರಳಚ್ಚು ಸಂಗ್ರಹಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಬೆರಳಚ್ಚು ತೆಗೆದುಹಾಕಿ."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ಬೆರಳಚ್ಚು ಅವಧಿ ಮೀರಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ಬೆರಳಚ್ಚು ಕಾರ್ಯಾಚರಣೆಯನ್ನು ರದ್ದುಮಾಡಲಾಗಿದೆ."</string>
+    <!-- no translation found for fingerprint_error_user_canceled (7999639584615291494) -->
+    <skip />
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"ಹಲವಾರು ಪ್ರಯತ್ನಗಳು. ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"ಹಲವು ಬಾರಿ ಪ್ರಯತ್ನಿಸಿದ್ದೀರಿ. ಫಿಂಗರ್‌ ಫ್ರಿಂಟ್‌ ಸೆನ್ಸಾರ್ ನಿಷ್ಕ್ರಿಯಗೊಂಡಿದೆ."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
@@ -991,6 +1000,12 @@
     <string name="browse" msgid="1245903488306147205">"ತೆರೆ"</string>
     <string name="sms" msgid="4560537514610063430">"ಸಂದೇಶ"</string>
     <string name="add_contact" msgid="7867066569670597203">"ಸೇರಿಸಿ"</string>
+    <!-- no translation found for view_calendar (979609872939597838) -->
+    <skip />
+    <!-- no translation found for add_calendar_event (1953664627192056206) -->
+    <skip />
+    <!-- no translation found for view_flight (7691640491425680214) -->
+    <skip />
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"ಸಂಗ್ರಹಣೆ ಸ್ಥಳವು ತುಂಬಿದೆ"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ಕೆಲವು ಸಿಸ್ಟಂ ಕಾರ್ಯವಿಧಾನಗಳು ಕಾರ್ಯನಿರ್ವಹಿಸದೇ ಇರಬಹುದು"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ಸಿಸ್ಟಂನಲ್ಲಿ ಸಾಕಷ್ಟು ಸಂಗ್ರಹಣೆಯಿಲ್ಲ. ನೀವು 250MB ನಷ್ಟು ಖಾಲಿ ಸ್ಥಳವನ್ನು ಹೊಂದಿರುವಿರಾ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಿ ಹಾಗೂ ಮರುಪ್ರಾರಂಭಿಸಿ."</string>
@@ -1116,6 +1131,8 @@
       <item quantity="other">ಮುಕ್ತ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗಳು ಲಭ್ಯವಿವೆ</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"ಮುಕ್ತ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಿಸಿ"</string>
+    <!-- no translation found for wifi_available_carrier_network_title (4527932626916527897) -->
+    <skip />
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"ಮುಕ್ತ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಪಡಿಸಲಾಗುತ್ತಿದೆ"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ"</string>
@@ -1125,10 +1142,8 @@
     <string name="wifi_wakeup_onboarding_title" msgid="228772560195634292">"ವೈ‑ಫೈ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆನ್ ಆಗುತ್ತದೆ"</string>
     <string name="wifi_wakeup_onboarding_subtext" msgid="3989697580301186973">"ನೀವು ಉಳಿಸಿದ ಅಧಿಕ ಗುಣಮಟ್ಟದ ನೆಟ್‌ವರ್ಕ್‌ ಸಮೀಪದಲ್ಲಿದ್ದಾಗ"</string>
     <string name="wifi_wakeup_onboarding_action_disable" msgid="838648204200836028">"ಮತ್ತೆ ಆನ್ ಮಾಡಲು ಹಿಂತಿರುಗಬೇಡಿ"</string>
-    <!-- no translation found for wifi_wakeup_enabled_title (6534603733173085309) -->
-    <skip />
-    <!-- no translation found for wifi_wakeup_enabled_content (189330154407990583) -->
-    <skip />
+    <string name="wifi_wakeup_enabled_title" msgid="6534603733173085309">"ವೈ-ಫೈ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಆನ್ ಆಗಿದೆ"</string>
+    <string name="wifi_wakeup_enabled_content" msgid="189330154407990583">"ನೀವು ಉಳಿಸಿದ ನೆಟ್‌ವರ್ಕ್‌ನ ಸಮೀಪವಿರುವಿರಿ: <xliff:g id="NETWORK_SSID">%1$s</xliff:g>"</string>
     <string name="wifi_available_sign_in" msgid="9157196203958866662">"ವೈ-ಫೈ ನೆಟ್‍ವರ್ಕ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
     <string name="network_available_sign_in" msgid="1848877297365446605">"ನೆಟ್‌ವರ್ಕ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ"</string>
     <!-- no translation found for network_available_sign_in_detailed (8000081941447976118) -->
@@ -1416,6 +1431,8 @@
     <string name="data_usage_limit_snoozed_body" msgid="7035490278298441767">"<xliff:g id="SIZE">%s</xliff:g> ನಿರ್ದಿಷ್ಟಪಡಿಸಿದ ಮಿತಿ ಮೀರಿದೆ."</string>
     <string name="data_usage_restricted_title" msgid="5965157361036321914">"ಹಿನ್ನೆಲೆ ಡೇಟಾವನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
     <string name="data_usage_restricted_body" msgid="469866376337242726">"ನಿರ್ಬಂಧವನ್ನು ತೆಗೆದುಹಾಕಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
+    <string name="data_usage_rapid_title" msgid="4579994056245665351">"ಹೆಚ್ಚು ಡೇಟಾ ಬಳಕೆ"</string>
+    <string name="data_usage_rapid_body" msgid="4899922842674185567">"ಕಳೆದ ಕೆಲವು ದಿನಗಳಿಂದ ನಿಮ್ಮ ಡೇಟಾ ಬಳಕೆಯು ಸಾಮಾನ್ಯಕ್ಕಿಂತ ಹೆಚ್ಚಾಗಿದೆ. ಬಳಕೆ ಮತ್ತು ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ವೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"ಭದ್ರತಾ ಪ್ರಮಾಣಪತ್ರ"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"ಈ ಪ್ರಮಾಣಪತ್ರವು ಮಾನ್ಯವಾಗಿದೆ."</string>
     <string name="issued_to" msgid="454239480274921032">"ಇವರಿಗೆ ನೀಡಲಾಗಿದೆ:"</string>
@@ -1692,7 +1709,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ವರೆಗೆ"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> ವರೆಗೆ (ಮುಂದಿನ ಅಲಾರಮ್)"</string>
-    <string name="zen_mode_forever" msgid="1916263162129197274">"ನೀವು ಆಫ್ ಮಾಡುವವರೆಗೂ ಅಡಚಣೆ ಮಾಡಬೇಡಿ"</string>
+    <string name="zen_mode_forever" msgid="931849471004038757">"ನೀವು ಆಫ್ ಮಾಡುವವರೆಗೆ"</string>
     <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"ನೀವು ಆಫ್ ಮಾಡುವವರೆಗೂ ಅಡಚಣೆ ಮಾಡಬೇಡಿ"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"ಸಂಕುಚಿಸು"</string>
@@ -1741,9 +1758,15 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"ಎಲ್ಲಾ ಭಾಷೆಗಳು"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"ಎಲ್ಲಾ ಪ್ರದೇಶಗಳು"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"ಹುಡುಕಿ"</string>
-    <string name="work_mode_off_title" msgid="2615362773958585967">"ಉದ್ಯೋಗ ಮೋಡ್ ಆನ್ ಮಾಡುವುದೇ?"</string>
-    <string name="work_mode_off_message" msgid="2961559609199223594">"ಇದು ನಿಮ್ಮ ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ ಜೊತೆಗೆ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು, ಹಿನ್ನೆಲೆ ಸಿಂಕ್ ಮತ್ತು ಸಂಬಂಧಿತ ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಆನ್ ಮಾಡುತ್ತದೆ"</string>
+    <!-- no translation found for work_mode_off_title (1118691887588435530) -->
+    <skip />
+    <!-- no translation found for work_mode_off_message (5130856710614337649) -->
+    <skip />
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ಆನ್‌ ಮಾಡಿ"</string>
+    <!-- no translation found for deprecated_target_sdk_message (1449696506742572767) -->
+    <skip />
+    <!-- no translation found for deprecated_target_sdk_app_store (5032340500368495077) -->
+    <skip />
     <string name="new_sms_notification_title" msgid="8442817549127555977">"ನೀವು ಹೊಸ ಸಂದೇಶಗಳನ್ನು ಹೊಂದಿರುವಿರಿ"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"ವೀಕ್ಷಿಸಲು SMS ಅಪ್ಲಿಕೇಶನ್ ತೆರೆಯಿರಿ"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"ಕೆಲವು ಕಾರ್ಯನಿರ್ವಹಣೆಗಳು ಸೀಮಿತವಾಗಿರಬಹುದು"</string>
@@ -1815,10 +1838,12 @@
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"ಅಪ್ಲಿಕೇಶನ್‌ ಸಹಿ ಹೊಂದಿಕೆಯಾಗದ ಕಾರಣದಿಂದ ಶಾರ್ಟ್‌ಕಟ್‌ ಅನ್ನು ಪುನಃಸ್ಥಾಪಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"ಶಾರ್ಟ್‌ಕಟ್‌ ಅನ್ನು ಪುನಃ ಸ್ಥಾಪನೆ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"ಶಾರ್ಟ್‌ಕಟ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
-    <!-- no translation found for harmful_app_warning_uninstall (3846265696369136266) -->
+    <!-- no translation found for harmful_app_warning_uninstall (4837672735619532931) -->
     <skip />
-    <!-- no translation found for harmful_app_warning_launch_anyway (5784428382367400530) -->
+    <!-- no translation found for harmful_app_warning_open_anyway (596432803680914321) -->
     <skip />
-    <!-- no translation found for harmful_app_warning_title (2229996292333310435) -->
+    <!-- no translation found for harmful_app_warning_title (8982527462829423432) -->
     <skip />
+    <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_2">%2$s</xliff:g> ಸ್ಲೈಸ್‌ಗಳನ್ನು <xliff:g id="APP_0">%1$s</xliff:g> ತೋರಿಸಲು ಬಯಸಿದೆ"</string>
+    <string name="screenshot_edit" msgid="7867478911006447565">"ಎಡಿಟ್"</string>
 </resources>

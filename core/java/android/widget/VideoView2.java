@@ -24,6 +24,7 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayerInterface;
 import android.media.session.MediaController;
+import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.media.update.ApiLoader;
 import android.media.update.VideoView2Provider;
@@ -38,10 +39,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
-// TODO: Use @link tag to refer MediaPlayer2 in docs once MediaPlayer2.java is submitted. Same to
-// MediaSession2.
-// TODO: change the reference from MediaPlayer to MediaPlayer2.
+// TODO: Replace MediaSession wtih MediaSession2 once MediaSession2 is submitted.
 /**
  * Displays a video file.  VideoView2 class is a View class which is wrapping MediaPlayer2 so that
  * developers can easily implement a video rendering application.
@@ -203,13 +203,6 @@ public class VideoView2 extends FrameLayout {
     }
 
     /**
-     * Sets full screen mode.
-     */
-    public void setFullScreen(boolean fullScreen) {
-        mProvider.setFullScreen_impl(fullScreen);
-    }
-
-    /**
      * Sets playback speed.
      *
      * It is expressed as a multiplicative factor, where normal speed is 1.0f. If it is less than
@@ -257,13 +250,31 @@ public class VideoView2 extends FrameLayout {
      *
      * @param routeCategories        the list of media control categories in
      *                               {@link android.support.v7.media.MediaControlIntent}
-     * @param player                 the player to handle the selected route. If null, a default
-     *                               route player will be used.
+     * @param player                 the player to handle playback of the selected route.
+     *                               If null, a default route player will be used.
      * @throws IllegalStateException if MediaControlView2 is not set.
+     * @hide
      */
     public void setRouteAttributes(@NonNull List<String> routeCategories,
             @Nullable MediaPlayerInterface player) {
         mProvider.setRouteAttributes_impl(routeCategories, player);
+    }
+
+    /**
+     * Sets a remote player for handling playback of the selected route from MediaControlView2.
+     * If this is not called, MediaCotrolView2 will not show the route button.
+     *
+     * @param routeCategories        the list of media control categories in
+     *                               {@link android.support.v7.media.MediaControlIntent}
+     * @param sessionPlayer          the player to handle playback of the selected route.
+     *                               If null, a default route player will be used.
+     * @throws IllegalStateException if MediaControlView2 is not set.
+     * @hide
+     */
+    // TODO: Use MediaPlayerBase once MediaSession2 APIs are ready.
+    public void setRouteAttributes(@NonNull List<String> routeCategories,
+            @Nullable MediaSession.Callback sessionPlayer) {
+        mProvider.setRouteAttributes_impl(routeCategories, sessionPlayer);
     }
 
     /**
@@ -327,30 +338,33 @@ public class VideoView2 extends FrameLayout {
      * @param actionList A list of {@link PlaybackState.CustomAction}. The return value of
      *                   {@link PlaybackState.CustomAction#getIcon()} will be used to draw buttons
      *                   in {@link MediaControlView2}.
+     * @param executor executor to run callbacks on.
      * @param listener A listener to be called when a custom button is clicked.
      */
     public void setCustomActions(List<PlaybackState.CustomAction> actionList,
-            OnCustomActionListener listener) {
-        mProvider.setCustomActions_impl(actionList, listener);
+            Executor executor, OnCustomActionListener listener) {
+        mProvider.setCustomActions_impl(actionList, executor, listener);
     }
 
     /**
      * Registers a callback to be invoked when the media file is loaded and ready to go.
      *
+     * @param executor executor to run callbacks on.
      * @param l the callback that will be run.
      */
-    public void setOnPreparedListener(OnPreparedListener l) {
-        mProvider.setOnPreparedListener_impl(l);
+    public void setOnPreparedListener(Executor executor, OnPreparedListener l) {
+        mProvider.setOnPreparedListener_impl(executor, l);
     }
 
     /**
      * Registers a callback to be invoked when the end of a media file has been reached during
      * playback.
      *
+     * @param executor executor to run callbacks on.
      * @param l the callback that will be run.
      */
-    public void setOnCompletionListener(OnCompletionListener l) {
-        mProvider.setOnCompletionListener_impl(l);
+    public void setOnCompletionListener(Executor executor, OnCompletionListener l) {
+        mProvider.setOnCompletionListener_impl(executor, l);
     }
 
     /**
@@ -358,36 +372,41 @@ public class VideoView2 extends FrameLayout {
      * listener is specified, or if the listener returned false, VideoView2 will inform the user of
      * any errors.
      *
+     * @param executor executor to run callbacks on.
      * @param l The callback that will be run
      */
-    public void setOnErrorListener(OnErrorListener l) {
-        mProvider.setOnErrorListener_impl(l);
+    public void setOnErrorListener(Executor executor, OnErrorListener l) {
+        mProvider.setOnErrorListener_impl(executor, l);
     }
 
     /**
      * Registers a callback to be invoked when an informational event occurs during playback or
      * setup.
      *
+     * @param executor executor to run callbacks on.
      * @param l The callback that will be run
      */
-    public void setOnInfoListener(OnInfoListener l) {
-        mProvider.setOnInfoListener_impl(l);
+    public void setOnInfoListener(Executor executor, OnInfoListener l) {
+        mProvider.setOnInfoListener_impl(executor, l);
     }
 
     /**
      * Registers a callback to be invoked when a view type change is done.
      * {@see #setViewType(int)}
+     * @param executor executor to run callbacks on.
      * @param l The callback that will be run
      */
-    public void setOnViewTypeChangedListener(OnViewTypeChangedListener l) {
-        mProvider.setOnViewTypeChangedListener_impl(l);
+    public void setOnViewTypeChangedListener(Executor executor, OnViewTypeChangedListener l) {
+        mProvider.setOnViewTypeChangedListener_impl(executor, l);
     }
 
     /**
      * Registers a callback to be invoked when the fullscreen mode should be changed.
+     * @param executor executor to run callbacks on.
+     * @param l The callback that will be run
      */
-    public void setFullScreenChangedListener(OnFullScreenChangedListener l) {
-        mProvider.setFullScreenChangedListener_impl(l);
+    public void setFullScreenRequestListener(Executor executor, OnFullScreenRequestListener l) {
+        mProvider.setFullScreenRequestListener_impl(executor, l);
     }
 
     /**
@@ -461,19 +480,19 @@ public class VideoView2 extends FrameLayout {
 
     /**
      * Interface definition of a callback to be invoked to inform the fullscreen mode is changed.
+     * Application should handle the fullscreen mode accordingly.
      */
-    public interface OnFullScreenChangedListener {
+    public interface OnFullScreenRequestListener {
         /**
          * Called to indicate a fullscreen mode change.
          */
-        void onFullScreenChanged(View view, boolean fullScreen);
+        void onFullScreenRequest(View view, boolean fullScreen);
     }
 
     /**
      * Interface definition of a callback to be invoked to inform that a custom action is performed.
-     *
-     * TODO: When MediaSession2 is ready, modify the method to match the signature.
      */
+    // TODO: When MediaSession2 is ready, modify the method to match the signature.
     public interface OnCustomActionListener {
         /**
          * Called to indicate that a custom action is performed.
