@@ -287,7 +287,8 @@ public final class SELinuxMMAC {
      *
      * @param pkg object representing the package to be labeled.
      */
-    public static void assignSeInfoValue(PackageParser.Package pkg) {
+    public static void assignSeInfoValue(PackageParser.Package pkg, boolean isPrivileged,
+            int targetSdkVersion) {
         synchronized (sPolicies) {
             if (!sPolicyRead) {
                 if (DEBUG_POLICY) {
@@ -307,10 +308,11 @@ public final class SELinuxMMAC {
         if (pkg.applicationInfo.targetSandboxVersion == 2)
             pkg.applicationInfo.seInfo += SANDBOX_V2_STR;
 
-        if (pkg.applicationInfo.isPrivilegedApp())
+        if (isPrivileged) {
             pkg.applicationInfo.seInfo += PRIVILEGED_APP_STR;
+        }
 
-        pkg.applicationInfo.seInfo += TARGETSDKVERSION_STR + pkg.applicationInfo.targetSdkVersion;
+        pkg.applicationInfo.seInfo += TARGETSDKVERSION_STR + targetSdkVersion;
 
         if (DEBUG_POLICY_INSTALL) {
             Slog.i(TAG, "package (" + pkg.packageName + ") labeled with " +
