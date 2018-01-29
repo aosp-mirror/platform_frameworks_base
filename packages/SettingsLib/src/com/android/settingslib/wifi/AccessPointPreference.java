@@ -77,19 +77,6 @@ public class AccessPointPreference extends TwoTargetPreference {
     private int mDefaultIconResId;
     private int mWifiSpeed = Speed.NONE;
 
-    public static String generatePreferenceKey(AccessPoint accessPoint) {
-        StringBuilder builder = new StringBuilder();
-
-        if (TextUtils.isEmpty(accessPoint.getSsidStr())) {
-            builder.append(accessPoint.getBssid());
-        } else {
-            builder.append(accessPoint.getSsidStr());
-        }
-
-        builder.append(',').append(accessPoint.getSecurity());
-        return builder.toString();
-    }
-
     @Nullable
     private static StateListDrawable getFrictionStateListDrawable(Context context) {
         TypedArray frictionSld;

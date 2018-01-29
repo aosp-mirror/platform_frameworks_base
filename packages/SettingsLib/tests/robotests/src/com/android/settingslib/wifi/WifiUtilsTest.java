@@ -29,6 +29,7 @@ import android.net.WifiKey;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiNetworkScoreCache;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
 
@@ -72,7 +73,8 @@ public class WifiUtilsTest {
 
         Bundle bundle = new Bundle();
         ArrayList<ScanResult> scanResults = buildScanResultCache();
-        bundle.putParcelableArrayList(AccessPoint.KEY_SCANRESULTCACHE, scanResults);
+        bundle.putParcelableArray(AccessPoint.KEY_SCANRESULTS,
+                                  scanResults.toArray(new Parcelable[scanResults.size()]));
         AccessPoint ap = new AccessPoint(mContext, bundle);
 
         when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))

@@ -109,7 +109,7 @@ public class WifiUtils {
 
         // TODO: sort list by RSSI or age
         long nowMs = SystemClock.elapsedRealtime();
-        for (ScanResult result : accessPoint.getScanResults().values()) {
+        for (ScanResult result : accessPoint.getScanResults()) {
             if (result.frequency >= AccessPoint.LOWER_FREQ_5GHZ
                     && result.frequency <= AccessPoint.HIGHER_FREQ_5GHZ) {
                 // Strictly speaking: [4915, 5825]

@@ -61,34 +61,6 @@ public class AccessPointPreferenceTest {
     }
 
     @Test
-    public void generatePreferenceKey_returnsSsidPlusSecurity() {
-        String ssid = "ssid";
-        String bssid = "00:00:00:00:00:00";
-        int security = AccessPoint.SECURITY_WEP;
-        String expectedKey = ssid + ',' + security;
-
-        TestAccessPointBuilder builder = new TestAccessPointBuilder(mContext);
-        builder.setBssid(bssid).setSsid(ssid).setSecurity(security);
-
-        assertThat(AccessPointPreference.generatePreferenceKey(builder.build()))
-                .isEqualTo(expectedKey);
-    }
-
-    @Test
-    public void generatePreferenceKey_emptySsidReturnsBssidPlusSecurity() {
-        String ssid = "";
-        String bssid = "00:00:00:00:00:00";
-        int security = AccessPoint.SECURITY_WEP;
-        String expectedKey = bssid + ',' + security;
-
-        TestAccessPointBuilder builder = new TestAccessPointBuilder(mContext);
-        builder.setBssid(bssid).setSsid(ssid).setSecurity(security);
-
-        assertThat(AccessPointPreference.generatePreferenceKey(builder.build()))
-                .isEqualTo(expectedKey);
-    }
-
-    @Test
     public void refresh_openNetwork_updateContentDescription() {
         final String ssid = "ssid";
         final String summary = "connected";
