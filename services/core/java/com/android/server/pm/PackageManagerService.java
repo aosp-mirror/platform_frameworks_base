@@ -8353,13 +8353,11 @@ Slog.e("TODD",
     }
 
     private void collectCertificatesLI(PackageSetting ps, PackageParser.Package pkg,
-            boolean forceCollect) throws PackageManagerException {
+            boolean forceCollect, boolean skipVerify) throws PackageManagerException {
         // When upgrading from pre-N MR1, verify the package time stamp using the package
         // directory and not the APK file.
         final long lastModifiedTime = mIsPreNMR1Upgrade
                 ? new File(pkg.codePath).lastModified() : getLastModifiedTime(pkg);
-        // Note that currently skipVerify skips verification on both base and splits for simplicity.
-        final boolean skipVerify = forceCollect && canSkipFullPackageVerification(pkg);
         if (ps != null && !forceCollect
                 && ps.codePathString.equals(pkg.codePath)
                 && ps.timeStamp == lastModifiedTime
@@ -8732,11 +8730,15 @@ Slog.e("TODD",
         }
 
         // Verify certificates against what was last scanned. If it is an updated priv app, we will
-        // force re-collecting certificate. Full apk verification will happen unless apk verity is
-        // set up for the file. In that case, only small part of the apk is verified upfront.
+        // force re-collecting certificate.
         final boolean forceCollect = PackageManagerServiceUtils.isApkVerificationForced(
                 disabledPkgSetting);
-        collectCertificatesLI(pkgSetting, pkg, forceCollect);
+        // Full APK verification can be skipped during certificate collection, only if the file is
+        // in verified partition, or can be verified on access (when apk verity is enabled). In both
+        // cases, only data in Signing Block is verified instead of the whole file.
+        final boolean skipVerify = ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) != 0) ||
+                (forceCollect && canSkipFullPackageVerification(pkg));
+        collectCertificatesLI(pkgSetting, pkg, forceCollect, skipVerify);
 
         boolean shouldHideSystemApp = false;
         // A new application appeared on /system, but, we already have a copy of
