@@ -400,6 +400,18 @@ public class AudioManager {
     public static final int ADJUST_TOGGLE_MUTE = 101;
 
     /** @hide */
+    @IntDef(flag = false, prefix = "ADJUST", value = {
+            ADJUST_RAISE,
+            ADJUST_LOWER,
+            ADJUST_SAME,
+            ADJUST_MUTE,
+            ADJUST_UNMUTE,
+            ADJUST_TOGGLE_MUTE }
+            )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface VolumeAdjustement {}
+
+    /** @hide */
     public static final String adjustToString(int adj) {
         switch (adj) {
             case ADJUST_RAISE: return "ADJUST_RAISE";
@@ -2989,7 +3001,7 @@ public class AudioManager {
         final IAudioService service = getService();
         try {
             String regId = service.registerAudioPolicy(policy.getConfig(), policy.cb(),
-                    policy.hasFocusListener(), policy.isFocusPolicy());
+                    policy.hasFocusListener(), policy.isFocusPolicy(), policy.isVolumeController());
             if (regId == null) {
                 return ERROR;
             } else {

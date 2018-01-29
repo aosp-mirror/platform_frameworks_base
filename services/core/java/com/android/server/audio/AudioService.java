@@ -1329,8 +1329,20 @@ public class AudioService extends IAudioService.Stub
     /** @see AudioManager#adjustVolume(int, int) */
     public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
             String callingPackage, String caller) {
-        adjustSuggestedStreamVolume(direction, suggestedStreamType, flags, callingPackage,
-                caller, Binder.getCallingUid());
+        final IAudioPolicyCallback extVolCtlr;
+        synchronized (mExtVolumeControllerLock) {
+            extVolCtlr = mExtVolumeController;
+        }
+        if (extVolCtlr != null) {
+            try {
+                mExtVolumeController.notifyVolumeAdjust(direction);
+            } catch(RemoteException e) {
+                // nothing we can do about this. Do not log error, too much potential for spam
+            }
+        } else {
+            adjustSuggestedStreamVolume(direction, suggestedStreamType, flags, callingPackage,
+                    caller, Binder.getCallingUid());
+        }
     }
 
     private void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
@@ -6964,7 +6976,7 @@ public class AudioService extends IAudioService.Stub
     // Audio policy management
     //==========================================================================================
     public String registerAudioPolicy(AudioPolicyConfig policyConfig, IAudioPolicyCallback pcb,
-            boolean hasFocusListener, boolean isFocusPolicy) {
+            boolean hasFocusListener, boolean isFocusPolicy, boolean isVolumeController) {
         AudioSystem.setDynamicPolicyCallback(mDynPolicyCallback);
 
         if (DEBUG_AP) Log.d(TAG, "registerAudioPolicy for " + pcb.asBinder()
@@ -6987,7 +6999,7 @@ public class AudioService extends IAudioService.Stub
                     return null;
                 }
                 AudioPolicyProxy app = new AudioPolicyProxy(policyConfig, pcb, hasFocusListener,
-                        isFocusPolicy);
+                        isFocusPolicy, isVolumeController);
                 pcb.asBinder().linkToDeath(app, 0/*flags*/);
                 regId = app.getRegistrationId();
                 mAudioPolicies.put(pcb.asBinder(), app);
@@ -7051,6 +7063,23 @@ public class AudioService extends IAudioService.Stub
                     duckingBehavior == AudioPolicy.FOCUS_POLICY_DUCKING_IN_POLICY);
         }
         return AudioManager.SUCCESS;
+    }
+
+    private final Object mExtVolumeControllerLock = new Object();
+    private IAudioPolicyCallback mExtVolumeController;
+    private void setExtVolumeController(IAudioPolicyCallback apc) {
+        if (!mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_handleVolumeKeysInWindowManager)) {
+            Log.e(TAG, "Cannot set external volume controller: device not set for volume keys" +
+                    " handled in PhoneWindowManager");
+            return;
+        }
+        synchronized (mExtVolumeControllerLock) {
+            if (mExtVolumeController != null && !mExtVolumeController.asBinder().pingBinder()) {
+                Log.e(TAG, "Cannot set external volume controller: existing controller");
+            }
+            mExtVolumeController = apc;
+        }
     }
 
     private void dumpAudioPolicies(PrintWriter pw) {
@@ -7185,8 +7214,9 @@ public class AudioService extends IAudioService.Stub
      */
     public class AudioPolicyProxy extends AudioPolicyConfig implements IBinder.DeathRecipient {
         private static final String TAG = "AudioPolicyProxy";
-        IAudioPolicyCallback mPolicyCallback;
-        boolean mHasFocusListener;
+        final IAudioPolicyCallback mPolicyCallback;
+        final boolean mHasFocusListener;
+        final boolean mIsVolumeController;
         /**
          * Audio focus ducking behavior for an audio policy.
          * This variable reflects the value that was successfully set in
@@ -7198,11 +7228,12 @@ public class AudioService extends IAudioService.Stub
         boolean mIsFocusPolicy = false;
 
         AudioPolicyProxy(AudioPolicyConfig config, IAudioPolicyCallback token,
-                boolean hasFocusListener, boolean isFocusPolicy) {
+                boolean hasFocusListener, boolean isFocusPolicy, boolean isVolumeController) {
             super(config);
             setRegistration(new String(config.hashCode() + ":ap:" + mAudioPolicyCounter++));
             mPolicyCallback = token;
             mHasFocusListener = hasFocusListener;
+            mIsVolumeController = isVolumeController;
             if (mHasFocusListener) {
                 mMediaFocusControl.addFocusFollower(mPolicyCallback);
                 // can only ever be true if there is a focus listener
@@ -7210,6 +7241,9 @@ public class AudioService extends IAudioService.Stub
                     mIsFocusPolicy = true;
                     mMediaFocusControl.setFocusPolicy(mPolicyCallback);
                 }
+            }
+            if (mIsVolumeController) {
+                setExtVolumeController(mPolicyCallback);
             }
             connectMixes();
         }
@@ -7219,6 +7253,11 @@ public class AudioService extends IAudioService.Stub
                 Log.i(TAG, "audio policy " + mPolicyCallback + " died");
                 release();
                 mAudioPolicies.remove(mPolicyCallback.asBinder());
+            }
+            if (mIsVolumeController) {
+                synchronized (mExtVolumeControllerLock) {
+                    mExtVolumeController = null;
+                }
             }
         }
 

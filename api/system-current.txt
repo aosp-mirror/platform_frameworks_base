@@ -2603,12 +2603,17 @@ package android.media.audiopolicy {
     method public void onStatusChange();
   }
 
+  public static abstract class AudioPolicy.AudioPolicyVolumeCallback {
+    method public void onVolumeAdjustment(int);
+  }
+
   public static class AudioPolicy.Builder {
     ctor public AudioPolicy.Builder(android.content.Context);
     method public android.media.audiopolicy.AudioPolicy.Builder addMix(android.media.audiopolicy.AudioMix) throws java.lang.IllegalArgumentException;
     method public android.media.audiopolicy.AudioPolicy build();
     method public void setAudioPolicyFocusListener(android.media.audiopolicy.AudioPolicy.AudioPolicyFocusListener);
     method public void setAudioPolicyStatusListener(android.media.audiopolicy.AudioPolicy.AudioPolicyStatusListener);
+    method public android.media.audiopolicy.AudioPolicy.Builder setAudioPolicyVolumeCallback(android.media.audiopolicy.AudioPolicy.AudioPolicyVolumeCallback);
     method public android.media.audiopolicy.AudioPolicy.Builder setIsAudioFocusPolicy(boolean);
     method public android.media.audiopolicy.AudioPolicy.Builder setLooper(android.os.Looper) throws java.lang.IllegalArgumentException;
   }
