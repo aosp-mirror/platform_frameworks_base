@@ -333,6 +333,20 @@ public class MeasuredText implements Spanned {
         return getMeasuredParagraph(paraIndex).getWidth(start - paraStart, end - paraStart);
     }
 
+    /**
+     * Returns the size of native MeasuredText memory usage
+     *
+     * Note that this may not be aculate. Must be used only for testing purposes.
+     * @hide
+     */
+    public int getMemoryUsage() {
+        int r = 0;
+        for (int i = 0; i < getParagraphCount(); ++i) {
+            r += getMeasuredParagraph(i).getMemoryUsage();
+        }
+        return r;
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Spanned overrides
     //
