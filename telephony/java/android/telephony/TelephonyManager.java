@@ -4768,28 +4768,6 @@ public class TelephonyManager {
         }
     }
 
-    /**
-     * Returns the response of ISIM Authetification through RIL.
-     * Returns null if the Authentification hasn't been successed or isn't present iphonesubinfo.
-     * @return the response of ISIM Authetification, or null if not available
-     * @hide
-     * @deprecated
-     * @see getIccAuthentication with appType=PhoneConstants.APPTYPE_ISIM
-     */
-    public String getIsimChallengeResponse(String nonce){
-        try {
-            IPhoneSubInfo info = getSubscriberInfo();
-            if (info == null)
-                return null;
-            return info.getIsimChallengeResponse(nonce);
-        } catch (RemoteException ex) {
-            return null;
-        } catch (NullPointerException ex) {
-            // This could happen before phone restarts due to crashing
-            return null;
-        }
-    }
-
     // ICC SIM Application Types
     /** UICC application type is SIM */
     public static final int APPTYPE_SIM = PhoneConstants.APPTYPE_SIM;
