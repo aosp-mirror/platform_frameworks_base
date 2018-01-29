@@ -96,22 +96,13 @@ import java.util.UUID;
  *         {@link #close()} is called, it is in the <em>End</em> state. Between these
  *         two states is the life cycle of the MediaPlayer2 object.
  *         <ul>
- *         <li>There is a subtle but important difference between a newly constructed
- *         MediaPlayer2 object and the MediaPlayer2 object after {@link #reset()}
- *         is called. It is a programming error to invoke methods such
+ *         <li> It is a programming error to invoke methods such
  *         as {@link #getCurrentPosition()},
  *         {@link #getDuration()}, {@link #getVideoHeight()},
  *         {@link #getVideoWidth()}, {@link #setAudioAttributes(AudioAttributes)},
  *         {@link #setVolume(float, float)}, {@link #pause()}, {@link #play()},
  *         {@link #seekTo(long, int)} or
- *         {@link #prepareAsync()} in the <em>Idle</em> state for both cases. If any of these
- *         methods is called right after a MediaPlayer2 object is constructed,
- *         the user supplied callback method OnErrorListener.onError() won't be
- *         called by the internal player engine and the object state remains
- *         unchanged; but if these methods are called right after {@link #reset()},
- *         the user supplied callback method OnErrorListener.onError() will be
- *         invoked by the internal player engine and the object will be
- *         transfered to the <em>Error</em> state. </li>
+ *         {@link #prepareAsync()} in the <em>Idle</em> state.
  *         <li>It is also recommended that once
  *         a MediaPlayer2 object is no longer being used, call {@link #close()} immediately
  *         so that resources used by the internal player engine associated with the
