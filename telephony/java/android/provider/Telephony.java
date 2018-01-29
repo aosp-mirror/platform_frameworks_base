@@ -33,6 +33,7 @@ import android.telephony.Rlog;
 import android.telephony.ServiceState;
 import android.telephony.SmsMessage;
 import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Patterns;
 
@@ -3345,73 +3346,118 @@ public final class Telephony {
     }
 
     /**
-     * Contains carrier identification information.
-     * @hide
+     * Contains carrier identification information for the current subscriptions.
+     * @see SubscriptionManager#getActiveSubscriptionIdList()
      */
     public static final class CarrierIdentification implements BaseColumns {
         /**
-         * Numeric operator ID (as String). {@code MCC + MNC}
-         * <P>Type: TEXT </P>
+         * Not instantiable.
+         * @hide
          */
-        public static final String MCCMNC = "mccmnc";
+        private CarrierIdentification() {}
 
         /**
-         * Group id level 1 (as String).
-         * <P>Type: TEXT </P>
+         * The {@code content://} style URI for this provider.
          */
-        public static final String GID1 = "gid1";
+        public static final Uri CONTENT_URI = Uri.parse("content://carrier_identification");
 
         /**
-         * Group id level 2 (as String).
-         * <P>Type: TEXT </P>
+         * The authority string for the CarrierIdentification Provider
+         * @hide
          */
-        public static final String GID2 = "gid2";
+        public static final String AUTHORITY = "carrier_identification";
+
 
         /**
-         * Public Land Mobile Network name.
-         * <P>Type: TEXT </P>
+         * Generates a content {@link Uri} used to receive updates on carrier identity change
+         * on the given subscriptionId
+         * <p>
+         * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
+         * carrier identity {@link TelephonyManager#getAndroidCarrierIdForSubscription()}
+         * while your app is running. You can also use a {@link JobService} to ensure your app
+         * is notified of changes to the {@link Uri} even when it is not running.
+         * Note, however, that using a {@link JobService} does not guarantee timely delivery of
+         * updates to the {@link Uri}.
+         *
+         * @param subscriptionId the subscriptionId to receive updates on
+         * @return the Uri used to observe carrier identity changes
          */
-        public static final String PLMN = "plmn";
+        public static Uri getUriForSubscriptionId(int subscriptionId) {
+            return CONTENT_URI.buildUpon().appendEncodedPath(
+                    String.valueOf(subscriptionId)).build();
+        }
 
         /**
-         * Prefix xpattern of IMSI (International Mobile Subscriber Identity).
-         * <P>Type: TEXT </P>
-         */
-        public static final String IMSI_PREFIX_XPATTERN = "imsi_prefix_xpattern";
-
-        /**
-         * Service Provider Name.
-         * <P>Type: TEXT </P>
-         */
-        public static final String SPN = "spn";
-
-        /**
-         * Prefer APN name.
-         * <P>Type: TEXT </P>
-         */
-        public static final String APN = "apn";
-
-        /**
-         * Prefix of Integrated Circuit Card Identifier.
-         * <P>Type: TEXT </P>
-         */
-        public static final String ICCID_PREFIX = "iccid_prefix";
-
-        /**
-         * User facing carrier name.
+         * A user facing carrier name.
+         * @see TelephonyManager#getAndroidCarrierNameForSubscription()
          * <P>Type: TEXT </P>
          */
         public static final String NAME = "carrier_name";
 
         /**
          * A unique carrier id
+         * @see TelephonyManager#getAndroidCarrierIdForSubscription()
          * <P>Type: INTEGER </P>
          */
         public static final String CID = "carrier_id";
 
         /**
-         * The {@code content://} URI for this table.
+         * Contains mappings between matching rules with carrier id for all carriers.
+         * @hide
          */
-        public static final Uri CONTENT_URI = Uri.parse("content://carrier_identification");
+        public static final class All implements BaseColumns {
+            /**
+             * Numeric operator ID (as String). {@code MCC + MNC}
+             * <P>Type: TEXT </P>
+             */
+            public static final String MCCMNC = "mccmnc";
+
+            /**
+             * Group id level 1 (as String).
+             * <P>Type: TEXT </P>
+             */
+            public static final String GID1 = "gid1";
+
+            /**
+             * Group id level 2 (as String).
+             * <P>Type: TEXT </P>
+             */
+            public static final String GID2 = "gid2";
+
+            /**
+             * Public Land Mobile Network name.
+             * <P>Type: TEXT </P>
+             */
+            public static final String PLMN = "plmn";
+
+            /**
+             * Prefix xpattern of IMSI (International Mobile Subscriber Identity).
+             * <P>Type: TEXT </P>
+             */
+            public static final String IMSI_PREFIX_XPATTERN = "imsi_prefix_xpattern";
+
+            /**
+             * Service Provider Name.
+             * <P>Type: TEXT </P>
+             */
+            public static final String SPN = "spn";
+
+            /**
+             * Prefer APN name.
+             * <P>Type: TEXT </P>
+             */
+            public static final String APN = "apn";
+
+            /**
+             * Prefix of Integrated Circuit Card Identifier.
+             * <P>Type: TEXT </P>
+             */
+            public static final String ICCID_PREFIX = "iccid_prefix";
+
+            /**
+             * The {@code content://} URI for this table.
+             */
+            public static final Uri CONTENT_URI = Uri.parse("content://carrier_identification/all");
+        }
     }
 }
