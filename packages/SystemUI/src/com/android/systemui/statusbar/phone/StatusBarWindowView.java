@@ -62,6 +62,9 @@ import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 
 public class StatusBarWindowView extends FrameLayout {
     public static final String TAG = "StatusBarWindowView";
@@ -396,6 +399,13 @@ public class StatusBarWindowView extends FrameLayout {
 
     public void setExpandAnimationPending(boolean pending) {
         mExpandAnimationPending = pending;
+    }
+
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.print("  mExpandAnimationPending="); pw.println(mExpandAnimationPending);
+        pw.print("  mExpandAnimationRunning="); pw.println(mExpandAnimationRunning);
+        pw.print("  mTouchCancelled="); pw.println(mTouchCancelled);
+        pw.print("  mTouchActive="); pw.println(mTouchActive);
     }
 
     public class LayoutParams extends FrameLayout.LayoutParams {
