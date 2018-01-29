@@ -56,10 +56,15 @@ public class ActivityLaunchAnimator {
     public static final long ANIMATION_DELAY_ICON_FADE_IN = ANIMATION_DURATION -
             CollapsedStatusBarFragment.FADE_IN_DURATION - CollapsedStatusBarFragment.FADE_IN_DELAY
             - 16;
+    private static final long LAUNCH_TIMEOUT = 500;
     private final NotificationPanelView mNotificationPanel;
     private final NotificationListContainer mNotificationContainer;
     private final StatusBarWindowView mStatusBarWindow;
-    private final StatusBar mStatusBar;
+    private StatusBar mStatusBar;
+    private final Runnable mTimeoutRunnable = () -> {
+        setAnimationPending(false);
+        mStatusBar.collapsePanel(true /* animate */);
+    };
     private boolean mAnimationPending;
 
     public ActivityLaunchAnimator(StatusBarWindowView statusBarWindow,
@@ -92,6 +97,11 @@ public class ActivityLaunchAnimator {
     private void setAnimationPending(boolean pending) {
         mAnimationPending = pending;
         mStatusBarWindow.setExpandAnimationPending(pending);
+        if (pending) {
+            mStatusBarWindow.postDelayed(mTimeoutRunnable, LAUNCH_TIMEOUT);
+        } else {
+            mStatusBarWindow.removeCallbacks(mTimeoutRunnable);
+        }
     }
 
     class AnimationRunner extends IRemoteAnimationRunner.Stub {
