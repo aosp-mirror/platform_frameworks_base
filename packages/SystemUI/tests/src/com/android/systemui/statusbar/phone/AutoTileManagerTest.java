@@ -18,45 +18,48 @@ package com.android.systemui.statusbar.phone;
 
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+import android.app.AlarmManager.AlarmClockInfo;
+import android.os.Handler;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
-
 import com.android.internal.app.ColorDisplayController;
 import com.android.systemui.Dependency;
-import com.android.systemui.Prefs;
-import com.android.systemui.Prefs.Key;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.qs.AutoAddTracker;
 import com.android.systemui.qs.QSTileHost;
-
-import org.junit.After;
+import com.android.systemui.statusbar.policy.NextAlarmController;
+import com.android.systemui.statusbar.policy.NextAlarmController.NextAlarmChangeCallback;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
 public class AutoTileManagerTest extends SysuiTestCase {
 
-    private QSTileHost mQsTileHost;
+    @Mock private QSTileHost mQsTileHost;
+    @Mock private AutoAddTracker mAutoAddTracker;
+    @Captor private ArgumentCaptor<NextAlarmChangeCallback> mAlarmCallback;
+
     private AutoTileManager mAutoTileManager;
 
     @Before
     public void setUp() throws Exception {
-        mDependency.injectTestDependency(Dependency.BG_LOOPER,
-                TestableLooper.get(this).getLooper());
-        Prefs.putBoolean(mContext, Key.QS_NIGHTDISPLAY_ADDED, false);
-        mQsTileHost = Mockito.mock(QSTileHost.class);
-        mAutoTileManager = new AutoTileManager(mContext, mQsTileHost);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        mAutoTileManager = null;
+        MockitoAnnotations.initMocks(this);
+        mDependency.injectMockDependency(NextAlarmController.class);
+        mAutoTileManager = new AutoTileManager(mContext, mAutoAddTracker,
+            mQsTileHost, new Handler(TestableLooper.get(this).getLooper()));
+        verify(Dependency.get(NextAlarmController.class))
+            .addCallback(mAlarmCallback.capture());
     }
 
     @Test
@@ -105,5 +108,31 @@ public class AutoTileManagerTest extends SysuiTestCase {
         mAutoTileManager.mColorDisplayCallback.onAutoModeChanged(
                 ColorDisplayController.AUTO_MODE_DISABLED);
         verify(mQsTileHost, never()).addTile("night");
+    }
+
+    @Test
+    public void alarmTileAdded_whenAlarmSet() {
+        mAlarmCallback.getValue().onNextAlarmChanged(new AlarmClockInfo(0, null));
+
+        verify(mQsTileHost).addTile("alarm");
+        verify(mAutoAddTracker).setTileAdded("alarm");
+    }
+
+    @Test
+    public void alarmTileNotAdded_whenAlarmNotSet() {
+        mAlarmCallback.getValue().onNextAlarmChanged(null);
+
+        verify(mQsTileHost, never()).addTile("alarm");
+        verify(mAutoAddTracker, never()).setTileAdded("alarm");
+    }
+
+    @Test
+    public void alarmTileNotAdded_whenAlreadyAdded() {
+        when(mAutoAddTracker.isAdded("alarm")).thenReturn(true);
+
+        mAlarmCallback.getValue().onNextAlarmChanged(new AlarmClockInfo(0, null));
+
+        verify(mQsTileHost, never()).addTile("alarm");
+        verify(mAutoAddTracker, never()).setTileAdded("alarm");
     }
 }
