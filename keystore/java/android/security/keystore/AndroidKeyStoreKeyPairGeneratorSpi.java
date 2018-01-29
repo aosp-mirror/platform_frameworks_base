@@ -344,12 +344,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                 // Check that user authentication related parameters are acceptable. This method
                 // will throw an IllegalStateException if there are issues (e.g., secure lock screen
                 // not set up).
-                KeymasterUtils.addUserAuthArgs(new KeymasterArguments(),
-                        mSpec.isUserAuthenticationRequired(),
-                        mSpec.getUserAuthenticationValidityDurationSeconds(),
-                        mSpec.isUserAuthenticationValidWhileOnBody(),
-                        mSpec.isInvalidatedByBiometricEnrollment(),
-                        GateKeeper.INVALID_SECURE_USER_ID /* boundToSpecificSecureUserId */);
+                KeymasterUtils.addUserAuthArgs(new KeymasterArguments(), mSpec);
             } catch (IllegalArgumentException | IllegalStateException e) {
                 throw new InvalidAlgorithmParameterException(e);
             }
@@ -540,12 +535,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         args.addEnums(KeymasterDefs.KM_TAG_PADDING, mKeymasterSignaturePaddings);
         args.addEnums(KeymasterDefs.KM_TAG_DIGEST, mKeymasterDigests);
 
-        KeymasterUtils.addUserAuthArgs(args,
-                mSpec.isUserAuthenticationRequired(),
-                mSpec.getUserAuthenticationValidityDurationSeconds(),
-                mSpec.isUserAuthenticationValidWhileOnBody(),
-                mSpec.isInvalidatedByBiometricEnrollment(),
-                GateKeeper.INVALID_SECURE_USER_ID /* boundToSpecificSecureUserId */);
+        KeymasterUtils.addUserAuthArgs(args, mSpec);
         args.addDateIfNotNull(KeymasterDefs.KM_TAG_ACTIVE_DATETIME, mSpec.getKeyValidityStart());
         args.addDateIfNotNull(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
                 mSpec.getKeyValidityForOriginationEnd());
