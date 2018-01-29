@@ -372,15 +372,19 @@ public final class PinnerService extends SystemService {
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+            long totalSize = 0;
             pw.println("Pinned Files:");
             synchronized(this) {
                 for (int i = 0; i < mPinnedFiles.size(); i++) {
                     pw.println(mPinnedFiles.get(i).mFilename);
+                    totalSize += mPinnedFiles.get(i).mLength;
                 }
                 for (int i = 0; i < mPinnedCameraFiles.size(); i++) {
                     pw.println(mPinnedCameraFiles.get(i).mFilename);
+                    totalSize += mPinnedCameraFiles.get(i).mLength;
                 }
             }
+            pw.println("Total size: " + totalSize);
         }
     }
 
