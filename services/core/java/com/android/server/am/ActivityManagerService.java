@@ -6446,7 +6446,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (!keepState) {
                         synchronized (this) {
                             // Remove all permissions granted from/to this package
-                            removeUriPermissionsForPackageLocked(packageName, resolvedUserId, true);
+                            removeUriPermissionsForPackageLocked(packageName, resolvedUserId, true,
+                                    false);
                         }
 
                         // Reset notification state
@@ -7101,7 +7102,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         // Remove transient permissions granted from/to this package/user
-        removeUriPermissionsForPackageLocked(packageName, userId, false);
+        removeUriPermissionsForPackageLocked(packageName, userId, false, false);
 
         if (doit) {
             for (i = mBroadcastQueues.length - 1; i >= 0; i--) {
@@ -9824,9 +9825,11 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param userHandle User to match, or {@link UserHandle#USER_ALL} to apply
      *            to all users.
      * @param persistable If persistable grants should be removed.
+     * @param targetOnly When {@code true}, only remove permissions where the app is the target,
+     * not source.
      */
     private void removeUriPermissionsForPackageLocked(
-            String packageName, int userHandle, boolean persistable) {
+            String packageName, int userHandle, boolean persistable, boolean targetOnly) {
         if (userHandle == UserHandle.USER_ALL && packageName == null) {
             throw new IllegalArgumentException("Must narrow by either package or user");
         }
@@ -9845,7 +9848,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     final UriPermission perm = it.next();
 
                     // Only inspect grants matching package
-                    if (packageName == null || perm.sourcePkg.equals(packageName)
+                    if (packageName == null || (!targetOnly && perm.sourcePkg.equals(packageName))
                             || perm.targetPkg.equals(packageName)) {
                         // Hacky solution as part of fixing a security bug; ignore
                         // grants associated with DownloadManager so we don't have
@@ -10099,8 +10102,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             boolean persistChanged = false;
             GrantUri grantUri = new GrantUri(userId, uri, false);
 
-            UriPermission exactPerm = findUriPermissionLocked(callingUid,
-                    new GrantUri(userId, uri, false));
+            UriPermission exactPerm = findUriPermissionLocked(callingUid, grantUri);
             UriPermission prefixPerm = findUriPermissionLocked(callingUid,
                     new GrantUri(userId, uri, true));
 
@@ -10283,7 +10285,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void clearGrantedUriPermissions(String packageName, int userId) {
         enforceCallingPermission(android.Manifest.permission.CLEAR_APP_GRANTED_URI_PERMISSIONS,
                 "clearGrantedUriPermissions");
-        removeUriPermissionsForPackageLocked(packageName, userId, true);
+        synchronized(this) {
+            removeUriPermissionsForPackageLocked(packageName, userId, true, true);
+        }
     }
 
     @Override
@@ -20876,7 +20880,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                                                 intent.getIntExtra(Intent.EXTRA_UID, -1), ssp);
 
                                         // Remove all permissions granted from/to this package
-                                        removeUriPermissionsForPackageLocked(ssp, userId, true);
+                                        removeUriPermissionsForPackageLocked(ssp, userId, true,
+                                                false);
 
                                         mRecentTasks.removeTasksByPackageName(ssp, userId);
 
