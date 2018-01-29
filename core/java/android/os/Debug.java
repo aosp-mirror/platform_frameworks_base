@@ -56,10 +56,10 @@ import java.util.Map;
  * <p><strong>Logging Trace Files</strong></p>
  * <p>Debug can create log files that give details about an application, such as
  * a call stack and start/stop times for any running methods. See <a
-href="{@docRoot}guide/developing/tools/traceview.html">Traceview: A Graphical Log Viewer</a> for
- * information about reading trace files. To start logging trace files, call one
- * of the startMethodTracing() methods. To stop tracing, call
- * {@link #stopMethodTracing()}.
+ * href="{@docRoot}studio/profile/traceview.html">Inspect Trace Logs with
+ * Traceview</a> for information about reading trace files. To start logging
+ * trace files, call one of the startMethodTracing() methods. To stop tracing,
+ * call {@link #stopMethodTracing()}.
  */
 public final class Debug
 {
@@ -1001,8 +1001,8 @@ public final class Debug
      * under your package-specific directory on primary shared/external storage,
      * as returned by {@link Context#getExternalFilesDir(String)}.
      * <p>
-     * See <a href="{@docRoot}guide/developing/tools/traceview.html">Traceview:
-     * A Graphical Log Viewer</a> for information about reading trace files.
+     * See <a href="{@docRoot}studio/profile/traceview.html">Inspect Trace Logs
+     * with Traceview</a> for information about reading trace files.
      * <p class="note">
      * When method tracing is enabled, the VM will run more slowly than usual,
      * so the timings from the trace files should only be considered in relative
@@ -1025,8 +1025,8 @@ public final class Debug
      * your package-specific directory on primary shared/external storage, as
      * returned by {@link Context#getExternalFilesDir(String)}.
      * <p>
-     * See <a href="{@docRoot}guide/developing/tools/traceview.html">Traceview:
-     * A Graphical Log Viewer</a> for information about reading trace files.
+     * See <a href="{@docRoot}studio/profile/traceview.html">Inspect Trace Logs
+     * with Traceview</a> for information about reading trace files.
      * <p class="note">
      * When method tracing is enabled, the VM will run more slowly than usual,
      * so the timings from the trace files should only be considered in relative
@@ -1055,8 +1055,8 @@ public final class Debug
      * your package-specific directory on primary shared/external storage, as
      * returned by {@link Context#getExternalFilesDir(String)}.
      * <p>
-     * See <a href="{@docRoot}guide/developing/tools/traceview.html">Traceview:
-     * A Graphical Log Viewer</a> for information about reading trace files.
+     * See <a href="{@docRoot}studio/profile/traceview.html">Inspect Trace Logs
+     * with Traceview</a> for information about reading trace files.
      * <p class="note">
      * When method tracing is enabled, the VM will run more slowly than usual,
      * so the timings from the trace files should only be considered in relative
@@ -1087,8 +1087,8 @@ public final class Debug
      * your package-specific directory on primary shared/external storage, as
      * returned by {@link Context#getExternalFilesDir(String)}.
      * <p>
-     * See <a href="{@docRoot}guide/developing/tools/traceview.html">Traceview:
-     * A Graphical Log Viewer</a> for information about reading trace files.
+     * See <a href="{@docRoot}studio/profile/traceview.html">Inspect Trace Logs
+     * with Traceview</a> for information about reading trace files.
      * <p class="note">
      * When method tracing is enabled, the VM will run more slowly than usual,
      * so the timings from the trace files should only be considered in relative
@@ -1121,8 +1121,8 @@ public final class Debug
      * your package-specific directory on primary shared/external storage, as
      * returned by {@link Context#getExternalFilesDir(String)}.
      * <p>
-     * See <a href="{@docRoot}guide/developing/tools/traceview.html">Traceview:
-     * A Graphical Log Viewer</a> for information about reading trace files.
+     * See <a href="{@docRoot}studio/profile/traceview.html">Inspect Trace Logs
+     * with Traceview</a> for information about reading trace files.
      *
      * @param tracePath Path to the trace log file to create. If {@code null},
      *            this will default to "dmtrace.trace". If the file already
