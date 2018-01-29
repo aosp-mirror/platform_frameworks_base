@@ -296,6 +296,7 @@ class PackageSignatures {
                 PackageManagerService.reportSettingsProblem(Log.WARN,
                         "Unknown element under <sigs>: "
                                 + parser.getName());
+                XmlUtils.skipCurrentTag(parser);
             }
         }
         return pos;
