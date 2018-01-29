@@ -9991,8 +9991,7 @@ Slog.e("TODD",
                 // priv-apps.
                 synchronized (mPackages) {
                     PackageSetting platformPkgSetting = mSettings.mPackages.get("android");
-                    if (!pkg.packageName.equals("android")
-                            && (compareSignatures(platformPkgSetting.signatures.mSigningDetails.signatures,
+                    if ((compareSignatures(platformPkgSetting.signatures.mSigningDetails.signatures,
                                 pkg.mSigningDetails.signatures) != PackageManager.SIGNATURE_MATCH)) {
                         scanFlags |= SCAN_AS_PRIVILEGED;
                     }
@@ -10459,7 +10458,20 @@ Slog.e("TODD",
             pkg.applicationInfo.flags |= ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
         }
 
-        SELinuxMMAC.assignSeInfoValue(pkg);
+        // SELinux sandboxes become more restrictive as targetSdkVersion increases.
+        // To ensure that apps with sharedUserId are placed in the same selinux domain
+        // without breaking any assumptions about access, put them into the least
+        // restrictive targetSdkVersion=25 domain.
+        // TODO(b/72290969): Base this on the actual targetSdkVersion(s) of the apps within the
+        // sharedUserSetting, instead of defaulting to the least restrictive domain.
+        final int targetSdk = (sharedUserSetting != null) ? 25
+                : pkg.applicationInfo.targetSdkVersion;
+        // TODO(b/71593002): isPrivileged for sharedUser and appInfo should never be out of sync.
+        // They currently can be if the sharedUser apps are signed with the platform key.
+        final boolean isPrivileged = (sharedUserSetting != null) ?
+            sharedUserSetting.isPrivileged() | pkg.isPrivileged() : pkg.isPrivileged();
+
+        SELinuxMMAC.assignSeInfoValue(pkg, isPrivileged, targetSdk);
 
         pkg.mExtras = pkgSetting;
         pkg.applicationInfo.processName = fixProcessName(
