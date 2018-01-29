@@ -34,6 +34,7 @@ cc_library_shared {
         "libutils",
         "libbinder",
         "libmedia",
+        "libmediaextractor",
         "libmedia_omx",
         "libmediametrics",
         "libmediadrm",
