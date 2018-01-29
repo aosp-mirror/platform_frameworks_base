@@ -19,7 +19,6 @@ package com.android.server.devicepolicy;
 import static android.Manifest.permission.BIND_DEVICE_ADMIN;
 import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
-import static android.app.ActivityManager.USER_OP_SUCCESS;
 import static android.app.admin.DeviceAdminReceiver.EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_USER;
 import static android.app.admin.DevicePolicyManager.CODE_ACCOUNTS_NOT_EMPTY;
@@ -67,9 +66,6 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent
         .PROVISIONING_ENTRY_POINT_ADB;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker
         .STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
-
-import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.PROVISIONING_ENTRY_POINT_ADB;
-import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
 
 import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_DEVICE_OWNER;
 import static com.android.server.devicepolicy.TransferOwnershipMetadataManager.ADMIN_TYPE_PROFILE_OWNER;
@@ -249,7 +245,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -9030,7 +9025,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean startUserInBackground(ComponentName who, UserHandle userHandle) {
+    public int startUserInBackground(ComponentName who, UserHandle userHandle) {
         Preconditions.checkNotNull(who, "ComponentName is null");
         Preconditions.checkNotNull(userHandle, "UserHandle is null");
 
@@ -9041,27 +9036,31 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int userId = userHandle.getIdentifier();
         if (isManagedProfile(userId)) {
             Log.w(LOG_TAG, "Managed profile cannot be started in background");
-            return false;
+            return DevicePolicyManager.USER_OPERATION_ERROR_MANAGED_PROFILE;
         }
 
         final long id = mInjector.binderClearCallingIdentity();
         try {
             if (!mInjector.getActivityManagerInternal().canStartMoreUsers()) {
                 Log.w(LOG_TAG, "Cannot start more users in background");
-                return false;
+                return DevicePolicyManager.USER_OPERATION_ERROR_MAX_RUNNING_USERS;
             }
 
-            return mInjector.getIActivityManager().startUserInBackground(userId);
+            if (mInjector.getIActivityManager().startUserInBackground(userId)) {
+                return DevicePolicyManager.USER_OPERATION_SUCCESS;
+            } else {
+                return DevicePolicyManager.USER_OPERATION_ERROR_UNKNOWN;
+            }
         } catch (RemoteException e) {
             // Same process, should not happen.
-            return false;
+            return DevicePolicyManager.USER_OPERATION_ERROR_UNKNOWN;
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
         }
     }
 
     @Override
-    public boolean stopUser(ComponentName who, UserHandle userHandle) {
+    public int stopUser(ComponentName who, UserHandle userHandle) {
         Preconditions.checkNotNull(who, "ComponentName is null");
         Preconditions.checkNotNull(userHandle, "UserHandle is null");
 
@@ -9072,23 +9071,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int userId = userHandle.getIdentifier();
         if (isManagedProfile(userId)) {
             Log.w(LOG_TAG, "Managed profile cannot be stopped");
-            return false;
+            return DevicePolicyManager.USER_OPERATION_ERROR_MANAGED_PROFILE;
         }
 
-        final long id = mInjector.binderClearCallingIdentity();
-        try {
-            return mInjector.getIActivityManager().stopUser(userId, true /*force*/, null)
-                    == USER_OP_SUCCESS;
-        } catch (RemoteException e) {
-            // Same process, should not happen.
-            return false;
-        } finally {
-            mInjector.binderRestoreCallingIdentity(id);
-        }
+        return stopUserUnchecked(userId);
     }
 
     @Override
-    public boolean logoutUser(ComponentName who) {
+    public int logoutUser(ComponentName who) {
         Preconditions.checkNotNull(who, "ComponentName is null");
 
         final int callingUserId = mInjector.userHandleGetCallingUserId();
@@ -9102,20 +9092,40 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         if (isManagedProfile(callingUserId)) {
             Log.w(LOG_TAG, "Managed profile cannot be logout");
-            return false;
+            return DevicePolicyManager.USER_OPERATION_ERROR_MANAGED_PROFILE;
         }
 
         final long id = mInjector.binderClearCallingIdentity();
         try {
             if (!mInjector.getIActivityManager().switchUser(UserHandle.USER_SYSTEM)) {
                 Log.w(LOG_TAG, "Failed to switch to primary user");
-                return false;
+                // This should never happen as target user is UserHandle.USER_SYSTEM
+                return DevicePolicyManager.USER_OPERATION_ERROR_UNKNOWN;
             }
-            return mInjector.getIActivityManager().stopUser(callingUserId, true /*force*/, null)
-                    == USER_OP_SUCCESS;
         } catch (RemoteException e) {
             // Same process, should not happen.
-            return false;
+            return DevicePolicyManager.USER_OPERATION_ERROR_UNKNOWN;
+        } finally {
+            mInjector.binderRestoreCallingIdentity(id);
+        }
+
+        return stopUserUnchecked(callingUserId);
+    }
+
+    private int stopUserUnchecked(int userId) {
+        final long id = mInjector.binderClearCallingIdentity();
+        try {
+            switch (mInjector.getIActivityManager().stopUser(userId, true /*force*/, null)) {
+                case ActivityManager.USER_OP_SUCCESS:
+                    return DevicePolicyManager.USER_OPERATION_SUCCESS;
+                case ActivityManager.USER_OP_IS_CURRENT:
+                    return DevicePolicyManager.USER_OPERATION_ERROR_CURRENT_USER;
+                default:
+                    return DevicePolicyManager.USER_OPERATION_ERROR_UNKNOWN;
+            }
+        } catch (RemoteException e) {
+            // Same process, should not happen.
+            return DevicePolicyManager.USER_OPERATION_ERROR_UNKNOWN;
         } finally {
             mInjector.binderRestoreCallingIdentity(id);
         }
