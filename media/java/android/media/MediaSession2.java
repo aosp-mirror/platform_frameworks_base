@@ -30,6 +30,7 @@ import android.media.session.MediaSession.Callback;
 import android.media.session.PlaybackState;
 import android.media.update.ApiLoader;
 import android.media.update.MediaSession2Provider;
+import android.media.update.MediaSession2Provider.CommandProvider;
 import android.media.update.MediaSession2Provider.ControllerInfoProvider;
 import android.net.Uri;
 import android.os.Bundle;
@@ -120,43 +121,31 @@ public class MediaSession2 implements AutoCloseable {
      */
     // TODO(jaewan): Move this into the updatable.
     public static final class Command {
-        private static final String KEY_COMMAND_CODE
-                = "android.media.media_session2.command.command_code";
-        private static final String KEY_COMMAND_CUSTOM_COMMAND
-                = "android.media.media_session2.command.custom_command";
-        private static final String KEY_COMMAND_EXTRA
-                = "android.media.media_session2.command.extra";
+        private final CommandProvider mProvider;
 
-        private final int mCommandCode;
-        // Nonnull if it's custom command
-        private final String mCustomCommand;
-        private final Bundle mExtra;
-
-        public Command(int commandCode) {
-            mCommandCode = commandCode;
-            mCustomCommand = null;
-            mExtra = null;
+        public Command(@NonNull Context context, int commandCode) {
+            mProvider = ApiLoader.getProvider(context)
+                    .createMediaSession2Command(this, commandCode, null, null);
         }
 
-        public Command(@NonNull String action, @Nullable Bundle extra) {
+        public Command(@NonNull Context context, @NonNull String action, @Nullable Bundle extra) {
             if (action == null) {
                 throw new IllegalArgumentException("action shouldn't be null");
             }
-            mCommandCode = COMMAND_CODE_CUSTOM;
-            mCustomCommand = action;
-            mExtra = extra;
+            mProvider = ApiLoader.getProvider(context)
+                    .createMediaSession2Command(this, COMMAND_CODE_CUSTOM, action, extra);
         }
 
         public int getCommandCode() {
-            return mCommandCode;
+            return mProvider.getCommandCode_impl();
         }
 
         public @Nullable String getCustomCommand() {
-            return mCustomCommand;
+            return mProvider.getCustomCommand_impl();
         }
 
         public @Nullable Bundle getExtra() {
-            return mExtra;
+            return mProvider.getExtra_impl();
         }
 
         /**
@@ -164,28 +153,15 @@ public class MediaSession2 implements AutoCloseable {
          * @hide
          */
         public Bundle toBundle() {
-            Bundle bundle = new Bundle();
-            bundle.putInt(KEY_COMMAND_CODE, mCommandCode);
-            bundle.putString(KEY_COMMAND_CUSTOM_COMMAND, mCustomCommand);
-            bundle.putBundle(KEY_COMMAND_EXTRA, mExtra);
-            return bundle;
+            return mProvider.toBundle_impl();
         }
 
         /**
          * @return a new Command instance from the Bundle
          * @hide
          */
-        public static Command fromBundle(Bundle command) {
-            int code = command.getInt(KEY_COMMAND_CODE);
-            if (code != COMMAND_CODE_CUSTOM) {
-                return new Command(code);
-            } else {
-                String customCommand = command.getString(KEY_COMMAND_CUSTOM_COMMAND);
-                if (customCommand == null) {
-                    return null;
-                }
-                return new Command(customCommand, command.getBundle(KEY_COMMAND_EXTRA));
-            }
+        public static Command fromBundle(@NonNull Context context, Bundle command) {
+            return ApiLoader.getProvider(context).fromBundle_MediaSession2Command(context, command);
         }
 
         @Override
@@ -193,18 +169,12 @@ public class MediaSession2 implements AutoCloseable {
             if (!(obj instanceof Command)) {
                 return false;
             }
-            Command other = (Command) obj;
-            // TODO(jaewan): Should we also compare contents in bundle?
-            //               It may not be possible if the bundle contains private class.
-            return mCommandCode == other.mCommandCode
-                    && TextUtils.equals(mCustomCommand, other.mCustomCommand);
+            return mProvider.equals_impl(((Command) obj).mProvider);
         }
 
         @Override
         public int hashCode() {
-            final int prime = 31;
-            return ((mCustomCommand != null)
-                    ? mCustomCommand.hashCode() : 0) * prime + mCommandCode;
+            return mProvider.hashCode_impl();
         }
     }
 
@@ -216,11 +186,14 @@ public class MediaSession2 implements AutoCloseable {
         private static final String KEY_COMMANDS =
                 "android.media.mediasession2.commandgroup.commands";
         private ArraySet<Command> mCommands = new ArraySet<>();
+        private final Context mContext;
 
-        public CommandGroup() {
+        public CommandGroup(Context context) {
+            mContext = context;
         }
 
-        public CommandGroup(CommandGroup others) {
+        public CommandGroup(Context context, CommandGroup others) {
+            this(context);
             mCommands.addAll(others.mCommands);
         }
 
@@ -230,17 +203,16 @@ public class MediaSession2 implements AutoCloseable {
 
         public void addAllPredefinedCommands() {
             // TODO(jaewan): Is there any better way than this?
-            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_START));
-            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_PAUSE));
-            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_STOP));
-            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_SKIP_NEXT_ITEM));
-            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_SKIP_PREV_ITEM));
-            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_PREPARE));
-            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_FAST_FORWARD));
-            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_REWIND));
-            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_SEEK_TO));
-            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_SET_CURRENT_PLAYLIST_ITEM));
-            mCommands.add(new Command(COMMAND_CODE_PLAYBACK_SET_PLAYLIST_PARAMS));
+            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_START));
+            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_PAUSE));
+            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_STOP));
+            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_SKIP_NEXT_ITEM));
+            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_SKIP_PREV_ITEM));
+            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_PREPARE));
+            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_FAST_FORWARD));
+            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_REWIND));
+            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_SEEK_TO));
+            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_SET_CURRENT_PLAYLIST_ITEM));
         }
 
         public void removeCommand(Command command) {
@@ -281,7 +253,7 @@ public class MediaSession2 implements AutoCloseable {
          * @return new instance of CommandGroup from the bundle
          * @hide
          */
-        public static @Nullable CommandGroup fromBundle(Bundle commands) {
+        public static @Nullable CommandGroup fromBundle(Context context, Bundle commands) {
             if (commands == null) {
                 return null;
             }
@@ -289,14 +261,14 @@ public class MediaSession2 implements AutoCloseable {
             if (list == null) {
                 return null;
             }
-            CommandGroup commandGroup = new CommandGroup();
+            CommandGroup commandGroup = new CommandGroup(context);
             for (int i = 0; i < list.size(); i++) {
                 Parcelable parcelable = list.get(i);
                 if (!(parcelable instanceof Bundle)) {
                     continue;
                 }
                 Bundle commandBundle = (Bundle) parcelable;
-                Command command = Command.fromBundle(commandBundle);
+                Command command = Command.fromBundle(context, commandBundle);
                 if (command != null) {
                     commandGroup.addCommand(command);
                 }
@@ -313,6 +285,12 @@ public class MediaSession2 implements AutoCloseable {
      */
     // TODO(jaewan): Can we move this inside of the updatable for default implementation.
     public static class SessionCallback {
+        private final Context mContext;
+
+        public SessionCallback(Context context) {
+            mContext = context;
+        }
+
         /**
          * Called when a controller is created for this session. Return allowed commands for
          * controller. By default it allows all connection requests and commands.
@@ -325,7 +303,7 @@ public class MediaSession2 implements AutoCloseable {
          */
         // TODO(jaewan): Change return type. Once we do, null is for reject.
         public @Nullable CommandGroup onConnect(@NonNull ControllerInfo controller) {
-            CommandGroup commands = new CommandGroup();
+            CommandGroup commands = new CommandGroup(mContext);
             commands.addAllPredefinedCommands();
             return commands;
         }
@@ -611,7 +589,7 @@ public class MediaSession2 implements AutoCloseable {
                 mCallbackExecutor = mContext.getMainExecutor();
             }
             if (mCallback == null) {
-                mCallback = new SessionCallback();
+                mCallback = new SessionCallback(mContext);
             }
             return new MediaSession2(mContext, mPlayer, mId, mVolumeProvider, mRatingType,
                     mSessionActivity, mCallbackExecutor, mCallback);
@@ -621,7 +599,6 @@ public class MediaSession2 implements AutoCloseable {
     /**
      * Information of a controller.
      */
-    // TODO(jaewan): Move implementation to the updatable.
     public static final class ControllerInfo {
         private final ControllerInfoProvider mProvider;
 
@@ -788,9 +765,9 @@ public class MediaSession2 implements AutoCloseable {
          * @hide
          */
         // TODO(jaewan): @SystemApi
-        public static @Nullable CommandButton fromBundle(Bundle bundle) {
+        public static @Nullable CommandButton fromBundle(Context context, Bundle bundle) {
             Builder builder = new Builder();
-            builder.setCommand(Command.fromBundle(bundle.getBundle(KEY_COMMAND)));
+            builder.setCommand(Command.fromBundle(context, bundle.getBundle(KEY_COMMAND)));
             builder.setIconResId(bundle.getInt(KEY_ICON_RES_ID, 0));
             builder.setDisplayName(bundle.getString(KEY_DISPLAY_NAME));
             builder.setExtra(bundle.getBundle(KEY_EXTRA));

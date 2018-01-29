@@ -37,6 +37,7 @@ import android.media.SessionPlayer2;
 import android.media.SessionToken2;
 import android.media.VolumeProvider;
 import android.media.update.MediaLibraryService2Provider.MediaLibrarySessionProvider;
+import android.media.update.MediaSession2Provider.CommandProvider;
 import android.media.update.MediaSession2Provider.ControllerInfoProvider;
 import android.os.Bundle;
 import android.os.IInterface;
@@ -66,16 +67,24 @@ public interface StaticProvider {
     ControllerInfoProvider createMediaSession2ControllerInfoProvider(Context context,
             MediaSession2.ControllerInfo instance, int uid, int pid,
             String packageName, IInterface callback);
+    CommandProvider createMediaSession2Command(MediaSession2.Command instance,
+            int commandCode, String action, Bundle extra);
+    MediaSession2.Command fromBundle_MediaSession2Command(Context context, Bundle bundle);
+
     MediaController2Provider createMediaController2(Context context, MediaController2 instance,
             SessionToken2 token, Executor executor, ControllerCallback callback);
+
     MediaBrowser2Provider createMediaBrowser2(Context context, MediaBrowser2 instance,
             SessionToken2 token, Executor executor, BrowserCallback callback);
+
     MediaSessionService2Provider createMediaSessionService2(MediaSessionService2 instance);
     MediaSessionService2Provider createMediaLibraryService2(MediaLibraryService2 instance);
+
     MediaLibrarySessionProvider createMediaLibraryService2MediaLibrarySession(Context context,
             MediaLibrarySession instance, MediaPlayerInterface player, String id,
             VolumeProvider volumeProvider, int ratingType, PendingIntent sessionActivity,
             Executor executor, MediaLibrarySessionCallback callback);
+
     SessionToken2Provider createSessionToken2(Context context, SessionToken2 instance,
             String packageName, String serviceName, int uid);
     SessionToken2 SessionToken2_fromBundle(Context context, Bundle bundle);
