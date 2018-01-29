@@ -3532,31 +3532,6 @@ public class WifiManager {
     }
 
     /**
-     * Set wifi Aggressive Handover. Called from developer settings.
-     * @hide
-     */
-    public void enableAggressiveHandover(int enabled) {
-        try {
-            mService.enableAggressiveHandover(enabled);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Get the WiFi Handover aggressiveness.This is used by settings
-     * to decide what to show within the picker.
-     * @hide
-     */
-    public int getAggressiveHandover() {
-        try {
-            return mService.getAggressiveHandover();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Removes all saved wifi networks.
      *
      * @hide
