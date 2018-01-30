@@ -490,9 +490,9 @@ public class AudioPolicy {
         public AudioPolicyVolumeCallback() {}
         /**
          * Called when volume key-related changes are triggered, on the key down event.
-         * @param adjustement the type of volume adjustment for the key.
+         * @param adjustment the type of volume adjustment for the key.
          */
-        public void onVolumeAdjustment(@AudioManager.VolumeAdjustement int adjustement) {}
+        public void onVolumeAdjustment(@AudioManager.VolumeAdjustment int adjustment) {}
     }
 
     private void onPolicyStatusChange() {
@@ -625,6 +625,7 @@ public class AudioPolicy {
                     } else { // should never be null, but don't crash
                         Log.e(TAG, "Invalid null volume event");
                     }
+                    break;
                 default:
                     Log.e(TAG, "Unknown event " + msg.what);
             }

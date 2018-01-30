@@ -409,7 +409,7 @@ public class AudioManager {
             ADJUST_TOGGLE_MUTE }
             )
     @Retention(RetentionPolicy.SOURCE)
-    public @interface VolumeAdjustement {}
+    public @interface VolumeAdjustment {}
 
     /** @hide */
     public static final String adjustToString(int adj) {
