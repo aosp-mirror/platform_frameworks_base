@@ -30,20 +30,18 @@ import android.media.session.MediaSession.Callback;
 import android.media.session.PlaybackState;
 import android.media.update.ApiLoader;
 import android.media.update.MediaSession2Provider;
+import android.media.update.MediaSession2Provider.CommandGroupProvider;
 import android.media.update.MediaSession2Provider.CommandProvider;
 import android.media.update.MediaSession2Provider.ControllerInfoProvider;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IInterface;
-import android.os.Parcelable;
 import android.os.ResultReceiver;
 import android.text.TextUtils;
-import android.util.ArraySet;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -156,14 +154,6 @@ public class MediaSession2 implements AutoCloseable {
             return mProvider.toBundle_impl();
         }
 
-        /**
-         * @return a new Command instance from the Bundle
-         * @hide
-         */
-        public static Command fromBundle(@NonNull Context context, Bundle command) {
-            return ApiLoader.getProvider(context).fromBundle_MediaSession2Command(context, command);
-        }
-
         @Override
         public boolean equals(Object obj) {
             if (!(obj instanceof Command)) {
@@ -176,63 +166,55 @@ public class MediaSession2 implements AutoCloseable {
         public int hashCode() {
             return mProvider.hashCode_impl();
         }
+
+        /**
+         * @return a new Command instance from the Bundle
+         * @hide
+         */
+        public static Command fromBundle(@NonNull Context context, Bundle command) {
+            return ApiLoader.getProvider(context).fromBundle_MediaSession2Command(context, command);
+        }
     }
 
     /**
      * Represent set of {@link Command}.
      */
-    // TODO(jaewan): Move this to updatable
     public static class CommandGroup {
-        private static final String KEY_COMMANDS =
-                "android.media.mediasession2.commandgroup.commands";
-        private ArraySet<Command> mCommands = new ArraySet<>();
-        private final Context mContext;
+        private final CommandGroupProvider mProvider;
 
         public CommandGroup(Context context) {
-            mContext = context;
+            mProvider = ApiLoader.getProvider(context)
+                    .createMediaSession2CommandGroup(context, this, null);
         }
 
         public CommandGroup(Context context, CommandGroup others) {
-            this(context);
-            mCommands.addAll(others.mCommands);
+            mProvider = ApiLoader.getProvider(context)
+                    .createMediaSession2CommandGroup(context, this, others);
         }
 
         public void addCommand(Command command) {
-            mCommands.add(command);
+            mProvider.addCommand_impl(command);
         }
 
         public void addAllPredefinedCommands() {
-            // TODO(jaewan): Is there any better way than this?
-            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_START));
-            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_PAUSE));
-            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_STOP));
-            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_SKIP_NEXT_ITEM));
-            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_SKIP_PREV_ITEM));
-            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_PREPARE));
-            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_FAST_FORWARD));
-            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_REWIND));
-            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_SEEK_TO));
-            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_SET_CURRENT_PLAYLIST_ITEM));
+            mProvider.addAllPredefinedCommands_impl();
         }
 
         public void removeCommand(Command command) {
-            mCommands.remove(command);
+            mProvider.removeCommand_impl(command);
         }
 
         public boolean hasCommand(Command command) {
-            return mCommands.contains(command);
+            return mProvider.hasCommand_impl(command);
         }
 
         public boolean hasCommand(int code) {
-            if (code == COMMAND_CODE_CUSTOM) {
-                throw new IllegalArgumentException("Use hasCommand(Command) for custom command");
-            }
-            for (int i = 0; i < mCommands.size(); i++) {
-                if (mCommands.valueAt(i).getCommandCode() == code) {
-                    return true;
-                }
-            }
-            return false;
+            return mProvider.hasCommand_impl(code);
+        }
+
+        @SystemApi
+        public CommandGroupProvider getProvider() {
+            return mProvider;
         }
 
         /**
@@ -240,13 +222,7 @@ public class MediaSession2 implements AutoCloseable {
          * @hide
          */
         public Bundle toBundle() {
-            ArrayList<Bundle> list = new ArrayList<>();
-            for (int i = 0; i < mCommands.size(); i++) {
-                list.add(mCommands.valueAt(i).toBundle());
-            }
-            Bundle bundle = new Bundle();
-            bundle.putParcelableArrayList(KEY_COMMANDS, list);
-            return bundle;
+            return mProvider.toBundle_impl();
         }
 
         /**
@@ -254,26 +230,8 @@ public class MediaSession2 implements AutoCloseable {
          * @hide
          */
         public static @Nullable CommandGroup fromBundle(Context context, Bundle commands) {
-            if (commands == null) {
-                return null;
-            }
-            List<Parcelable> list = commands.getParcelableArrayList(KEY_COMMANDS);
-            if (list == null) {
-                return null;
-            }
-            CommandGroup commandGroup = new CommandGroup(context);
-            for (int i = 0; i < list.size(); i++) {
-                Parcelable parcelable = list.get(i);
-                if (!(parcelable instanceof Bundle)) {
-                    continue;
-                }
-                Bundle commandBundle = (Bundle) parcelable;
-                Command command = Command.fromBundle(context, commandBundle);
-                if (command != null) {
-                    commandGroup.addCommand(command);
-                }
-            }
-            return commandGroup;
+            return ApiLoader.getProvider(context)
+                    .fromBundle_MediaSession2CommandGroup(context, commands);
         }
     }
 

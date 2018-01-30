@@ -37,6 +37,7 @@ import android.media.SessionPlayer2;
 import android.media.SessionToken2;
 import android.media.VolumeProvider;
 import android.media.update.MediaLibraryService2Provider.MediaLibrarySessionProvider;
+import android.media.update.MediaSession2Provider.CommandGroupProvider;
 import android.media.update.MediaSession2Provider.CommandProvider;
 import android.media.update.MediaSession2Provider.ControllerInfoProvider;
 import android.os.Bundle;
@@ -64,12 +65,16 @@ public interface StaticProvider {
     MediaSession2Provider createMediaSession2(Context context, MediaSession2 instance,
             MediaPlayerInterface player, String id, VolumeProvider volumeProvider, int ratingType,
             PendingIntent sessionActivity, Executor executor, SessionCallback callback);
-    ControllerInfoProvider createMediaSession2ControllerInfoProvider(Context context,
-            MediaSession2.ControllerInfo instance, int uid, int pid,
-            String packageName, IInterface callback);
     CommandProvider createMediaSession2Command(MediaSession2.Command instance,
             int commandCode, String action, Bundle extra);
     MediaSession2.Command fromBundle_MediaSession2Command(Context context, Bundle bundle);
+    CommandGroupProvider createMediaSession2CommandGroup(Context context,
+            MediaSession2.CommandGroup instance, MediaSession2.CommandGroup others);
+    MediaSession2.CommandGroup fromBundle_MediaSession2CommandGroup(Context context, Bundle bundle);
+    ControllerInfoProvider createMediaSession2ControllerInfoProvider(Context context,
+            MediaSession2.ControllerInfo instance, int uid, int pid,
+            String packageName, IInterface callback);
+
 
     MediaController2Provider createMediaController2(Context context, MediaController2 instance,
             SessionToken2 token, Executor executor, ControllerCallback callback);
