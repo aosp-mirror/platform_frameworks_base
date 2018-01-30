@@ -166,7 +166,8 @@ interface IAudioService {
     boolean isHdmiSystemAudioSupported();
 
     String registerAudioPolicy(in AudioPolicyConfig policyConfig,
-            in IAudioPolicyCallback pcb, boolean hasFocusListener, boolean isFocusPolicy);
+            in IAudioPolicyCallback pcb, boolean hasFocusListener, boolean isFocusPolicy,
+            boolean isVolumeController);
 
     oneway void unregisterAudioPolicyAsync(in IAudioPolicyCallback pcb);
 

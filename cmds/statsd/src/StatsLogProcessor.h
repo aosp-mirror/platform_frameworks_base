@@ -61,6 +61,8 @@ public:
         return mUidMap;
     }
 
+    void dumpStates(FILE* out, bool verbose);
+
 private:
     mutable mutex mMetricsMutex;
 

@@ -119,18 +119,10 @@ public class BatteryMeterView extends LinearLayout implements
         addView(mBatteryIconView, mlp);
 
         updateShowPercent();
-
-        Context dualToneDarkTheme = new ContextThemeWrapper(context,
-                Utils.getThemeAttr(context, R.attr.darkIconTheme));
-        Context dualToneLightTheme = new ContextThemeWrapper(context,
-                Utils.getThemeAttr(context, R.attr.lightIconTheme));
-        mDarkModeBackgroundColor = Utils.getColorAttr(dualToneDarkTheme, R.attr.backgroundColor);
-        mDarkModeFillColor = Utils.getColorAttr(dualToneDarkTheme, R.attr.fillColor);
-        mLightModeBackgroundColor = Utils.getColorAttr(dualToneLightTheme, R.attr.backgroundColor);
-        mLightModeFillColor = Utils.getColorAttr(dualToneLightTheme, R.attr.fillColor);
-
+        setColorsFromContext(context);
         // Init to not dark at all.
         onDarkChanged(new Rect(), 0, DarkIconDispatcher.DEFAULT_ICON_TINT);
+
         mUserTracker = new CurrentUserTracker(mContext) {
             @Override
             public void onUserSwitched(int newUserId) {
@@ -146,6 +138,21 @@ public class BatteryMeterView extends LinearLayout implements
     public void setForceShowPercent(boolean show) {
         mForceShowPercent = show;
         updateShowPercent();
+    }
+
+    public void setColorsFromContext(Context context) {
+        if (context == null) {
+            return;
+        }
+
+        Context dualToneDarkTheme = new ContextThemeWrapper(context,
+                Utils.getThemeAttr(context, R.attr.darkIconTheme));
+        Context dualToneLightTheme = new ContextThemeWrapper(context,
+                Utils.getThemeAttr(context, R.attr.lightIconTheme));
+        mDarkModeBackgroundColor = Utils.getColorAttr(dualToneDarkTheme, R.attr.backgroundColor);
+        mDarkModeFillColor = Utils.getColorAttr(dualToneDarkTheme, R.attr.fillColor);
+        mLightModeBackgroundColor = Utils.getColorAttr(dualToneLightTheme, R.attr.backgroundColor);
+        mLightModeFillColor = Utils.getColorAttr(dualToneLightTheme, R.attr.fillColor);
     }
 
     @Override

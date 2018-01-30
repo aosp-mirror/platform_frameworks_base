@@ -36,6 +36,7 @@ import android.app.ActivityManagerInternal.ScreenObserver;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.KeyguardManager;
+import android.app.admin.SecurityLog;
 import android.app.usage.StorageStatsManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -50,7 +51,6 @@ import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.ObbInfo;
 import android.database.ContentObserver;
-import android.net.TrafficStats;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.DropBoxManager;
@@ -150,7 +150,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -1275,6 +1274,29 @@ class StorageManagerService extends IStorageManager.Stub
             mObbActionHandler.sendMessage(mObbActionHandler.obtainMessage(
                     OBB_FLUSH_MOUNT_STATE, vol.path));
         }
+        maybeLogMediaMount(vol, newState);
+    }
+
+    private void maybeLogMediaMount(VolumeInfo vol, int newState) {
+        if (!SecurityLog.isLoggingEnabled()) {
+            return;
+        }
+
+        final DiskInfo disk = vol.getDisk();
+        if (disk == null || (disk.flags & (DiskInfo.FLAG_SD | DiskInfo.FLAG_USB)) == 0) {
+            return;
+        }
+
+        // Sometimes there is a newline character.
+        final String label = disk.label != null ? disk.label.trim() : "";
+
+        if (newState == VolumeInfo.STATE_MOUNTED
+                || newState == VolumeInfo.STATE_MOUNTED_READ_ONLY) {
+            SecurityLog.writeEvent(SecurityLog.TAG_MEDIA_MOUNT, vol.path, label);
+        } else if (newState == VolumeInfo.STATE_UNMOUNTED
+                || newState == VolumeInfo.STATE_BAD_REMOVAL) {
+            SecurityLog.writeEvent(SecurityLog.TAG_MEDIA_UNMOUNT, vol.path, label);
+        }
     }
 
     private void onMoveStatusLocked(int status) {
@@ -1386,7 +1408,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         mSettingsFile = new AtomicFile(
-                new File(Environment.getDataSystemDirectory(), "storage.xml"));
+                new File(Environment.getDataSystemDirectory(), "storage.xml"), "storage-settings");
 
         synchronized (mLock) {
             readSettingsLocked();

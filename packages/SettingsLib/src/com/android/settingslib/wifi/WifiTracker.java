@@ -39,11 +39,13 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.annotation.GuardedBy;
 import android.support.annotation.NonNull;
 import android.support.annotation.VisibleForTesting;
 import android.text.format.DateUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -77,6 +79,9 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
      * {@link AccessPoint#mScoredNetworkCache} to be used for speed label generation.
      */
     private static final long DEFAULT_MAX_CACHED_SCORE_AGE_MILLIS = 20 * DateUtils.MINUTE_IN_MILLIS;
+
+    /** Maximum age of scan results to hold onto while actively scanning. **/
+    private static final long MAX_SCAN_RESULT_AGE_MILLIS = 25000;
 
     private static final String TAG = "WifiTracker";
     private static final boolean DBG() {
@@ -142,6 +147,8 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
             = new AccessPointListenerAdapter();
 
     private final HashMap<String, Integer> mSeenBssids = new HashMap<>();
+
+    // TODO(sghuman): Change this to be keyed on AccessPoint.getKey
     private final HashMap<String, ScanResult> mScanResultCache = new HashMap<>();
     private Integer mScanId = 0;
 
@@ -455,32 +462,40 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     }
 
     private Collection<ScanResult> updateScanResultCache(final List<ScanResult> newResults) {
-        mScanId++;
+        // TODO(sghuman): Delete this and replace it with the Map of Ap Keys to ScanResults
         for (ScanResult newResult : newResults) {
             if (newResult.SSID == null || newResult.SSID.isEmpty()) {
                 continue;
             }
             mScanResultCache.put(newResult.BSSID, newResult);
-            mSeenBssids.put(newResult.BSSID, mScanId);
         }
 
-        if (mScanId > NUM_SCANS_TO_CONFIRM_AP_LOSS) {
-            if (DBG()) Log.d(TAG, "------ Dumping SSIDs that were expired on this scan ------");
-            Integer threshold = mScanId - NUM_SCANS_TO_CONFIRM_AP_LOSS;
-            for (Iterator<Map.Entry<String, Integer>> it = mSeenBssids.entrySet().iterator();
-                    it.hasNext(); /* nothing */) {
-                Map.Entry<String, Integer> e = it.next();
-                if (e.getValue() < threshold) {
-                    ScanResult result = mScanResultCache.get(e.getKey());
-                    if (DBG()) Log.d(TAG, "Removing " + e.getKey() + ":(" + result.SSID + ")");
-                    mScanResultCache.remove(e.getKey());
-                    it.remove();
-                }
-            }
-            if (DBG()) Log.d(TAG, "---- Done Dumping SSIDs that were expired on this scan ----");
+        // Don't evict old results if no new scan results
+        if (!mStaleScanResults) {
+            evictOldScans();
         }
+
+        // TODO(sghuman): Update a Map<ApKey, List<ScanResults>> variable to be reused later after
+        // double threads have been removed.
 
         return mScanResultCache.values();
+    }
+
+    /**
+     * Remove old scan results from the cache.
+     *
+     * <p>Should only ever be invoked from {@link #updateScanResultCache(List)} when
+     * {@link #mStaleScanResults} is false.
+     */
+    private void evictOldScans() {
+        long nowMs = SystemClock.elapsedRealtime();
+        for (Iterator<ScanResult> iter = mScanResultCache.values().iterator(); iter.hasNext(); ) {
+            ScanResult result = iter.next();
+            // result timestamp is in microseconds
+            if (nowMs - result.timestamp / 1000 > MAX_SCAN_RESULT_AGE_MILLIS) {
+                iter.remove();
+            }
+        }
     }
 
     private WifiConfiguration getWifiConfigurationForNetworkId(
@@ -541,10 +556,12 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
 
     /* Lookup table to more quickly update AccessPoints by only considering objects with the
      * correct SSID.  Maps SSID -> List of AccessPoints with the given SSID.  */
-        Multimap<String, AccessPoint> apMap = new Multimap<String, AccessPoint>();
+        Multimap<String, AccessPoint> existingApMap = new Multimap<String, AccessPoint>();
 
         final Collection<ScanResult> results = updateScanResultCache(newScanResults);
 
+        // TODO(sghuman): This entire block only exists to populate the WifiConfiguration for
+        // APs, remove and refactor
         if (configs != null) {
             for (WifiConfiguration config : configs) {
                 if (config.selfAdded && config.numAssociation == 0) {
@@ -568,7 +585,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                         accessPoint.setUnreachable();
                     }
                     accessPoints.add(accessPoint);
-                    apMap.put(accessPoint.getSsidStr(), accessPoint);
+                    existingApMap.put(accessPoint.getSsidStr(), accessPoint);
                 } else {
                     // If we aren't using saved networks, drop them into the cache so that
                     // we have access to their saved info.
@@ -579,6 +596,9 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
 
         final List<NetworkKey> scoresToRequest = new ArrayList<>();
         if (results != null) {
+            // TODO(sghuman): Move this loop to updateScanResultCache and make instance variable
+            // after double handlers are removed.
+            ArrayMap<String, List<ScanResult>> scanResultsByApKey = new ArrayMap<>();
             for (ScanResult result : results) {
                 // Ignore hidden and ad-hoc networks.
                 if (result.SSID == null || result.SSID.length() == 0 ||
@@ -591,27 +611,45 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                     scoresToRequest.add(key);
                 }
 
-                boolean found = false;
-                for (AccessPoint accessPoint : apMap.getAll(result.SSID)) {
-                    // We want to evict old scan results if are current results are not stale
-                    if (accessPoint.update(result, !mStaleScanResults)) {
-                        found = true;
-                        break;
-                    }
+                String apKey = AccessPoint.getKey(result);
+                List<ScanResult> resultList;
+                if (scanResultsByApKey.containsKey(apKey)) {
+                    resultList = scanResultsByApKey.get(apKey);
+                } else {
+                    resultList = new ArrayList<>();
+                    scanResultsByApKey.put(apKey, resultList);
                 }
-                if (!found && mIncludeScans) {
-                    AccessPoint accessPoint = getCachedOrCreate(result, cachedAccessPoints);
+
+                resultList.add(result);
+            }
+
+            for (Map.Entry<String, List<ScanResult>> entry : scanResultsByApKey.entrySet()) {
+                // List can not be empty as it is dynamically constructed on each iteration
+                ScanResult firstResult = entry.getValue().get(0);
+                boolean found = false;
+                for (AccessPoint accessPoint : existingApMap.getAll(firstResult.SSID)) {
+                    accessPoint.setScanResults(entry.getValue());
+                    found = true;
+                    break;
+                }
+
+                // Only create a new AP / add to the list if it wasn't already in the saved configs
+                if (!found) {
+                    AccessPoint accessPoint =
+                            getCachedOrCreate(entry.getValue(), cachedAccessPoints);
                     if (mLastInfo != null && mLastNetworkInfo != null) {
                         accessPoint.update(connectionConfig, mLastInfo, mLastNetworkInfo);
                     }
 
-                    if (result.isPasspointNetwork()) {
+                    // TODO(sghuman): Move isPasspointNetwork logic into AccessPoint.java
+                    if (firstResult.isPasspointNetwork()) {
                         // Retrieve a WifiConfiguration for a Passpoint provider that matches
                         // the given ScanResult.  This is used for showing that a given AP
                         // (ScanResult) is available via a Passpoint provider (provider friendly
                         // name).
                         try {
-                            WifiConfiguration config = mWifiManager.getMatchingWifiConfig(result);
+                            WifiConfiguration config =
+                                    mWifiManager.getMatchingWifiConfig(firstResult);
                             if (config != null) {
                                 accessPoint.update(config);
                             }
@@ -621,7 +659,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                     }
 
                     accessPoints.add(accessPoint);
-                    apMap.put(accessPoint.getSsidStr(), accessPoint);
                 }
             }
         }
@@ -662,17 +699,18 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     }
 
     @VisibleForTesting
-    AccessPoint getCachedOrCreate(ScanResult result, List<AccessPoint> cache) {
+    AccessPoint getCachedOrCreate(
+            List<ScanResult> scanResults,
+            List<AccessPoint> cache) {
         final int N = cache.size();
         for (int i = 0; i < N; i++) {
-            if (cache.get(i).matches(result)) {
+            if (cache.get(i).getKey().equals(AccessPoint.getKey(scanResults.get(0)))) {
                 AccessPoint ret = cache.remove(i);
-                // evict old scan results only if we have fresh results
-                ret.update(result, !mStaleScanResults);
+                ret.setScanResults(scanResults);
                 return ret;
             }
         }
-        final AccessPoint accessPoint = new AccessPoint(mContext, result);
+        final AccessPoint accessPoint = new AccessPoint(mContext, scanResults);
         accessPoint.setListener(mAccessPointListenerAdapter);
         return accessPoint;
     }

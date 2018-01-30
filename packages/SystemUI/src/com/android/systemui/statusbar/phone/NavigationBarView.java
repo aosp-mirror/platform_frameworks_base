@@ -218,6 +218,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         @Override
         public void onRecentsAnimationStarted() {
             mRecentsAnimationStarted = true;
+            if (mSwipeUpOnboarding != null) {
+                mSwipeUpOnboarding.onRecentsAnimationStarted();
+            }
         }
     };
 
@@ -887,7 +890,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     private void setUpSwipeUpOnboarding(boolean connectedToOverviewProxy) {
         if (connectedToOverviewProxy) {
-            mSwipeUpOnboarding.onConnectedToLauncher(mOverviewProxyService.getLauncherComponent());
+            mSwipeUpOnboarding.onConnectedToLauncher();
         } else {
             mSwipeUpOnboarding.onDisconnectedFromLauncher();
         }

@@ -175,8 +175,13 @@ status_t StatsService::dump(int fd, const Vector<String16>& args) {
         return NO_MEMORY;  // the fd is already open
     }
 
+    bool verbose = false;
+    if (args.size() > 0 && !args[0].compare(String16("-v"))) {
+        verbose = true;
+    }
+
     // TODO: Proto format for incident reports
-    dump_impl(out);
+    dump_impl(out, verbose);
 
     fclose(out);
     return NO_ERROR;
@@ -185,9 +190,9 @@ status_t StatsService::dump(int fd, const Vector<String16>& args) {
 /**
  * Write debugging data about statsd in text format.
  */
-void StatsService::dump_impl(FILE* out) {
-    mConfigManager->Dump(out);
+void StatsService::dump_impl(FILE* out, bool verbose) {
     StatsdStats::getInstance().dumpStats(out);
+    mProcessor->dumpStates(out, verbose);
 }
 
 /**

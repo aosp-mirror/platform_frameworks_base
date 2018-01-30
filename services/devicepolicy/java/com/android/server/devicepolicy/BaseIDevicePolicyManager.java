@@ -178,4 +178,10 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
 
     public void clearSystemUpdatePolicyFreezePeriodRecord() {
     }
+
+    @Override
+    public boolean isMeteredDataDisabledForUser(ComponentName admin,
+            String packageName, int userId) {
+        return false;
+    }
 }

@@ -89,6 +89,8 @@ public class AudioPolicy {
 
     private AudioPolicyFocusListener mFocusListener;
 
+    private final AudioPolicyVolumeCallback mVolCb;
+
     private Context mContext;
 
     private AudioPolicyConfig mConfig;
@@ -99,12 +101,15 @@ public class AudioPolicy {
     public boolean hasFocusListener() { return mFocusListener != null; }
     /** @hide */
     public boolean isFocusPolicy() { return mIsFocusPolicy; }
+    /** @hide */
+    public boolean isVolumeController() { return mVolCb != null; }
 
     /**
      * The parameter is guaranteed non-null through the Builder
      */
     private AudioPolicy(AudioPolicyConfig config, Context context, Looper looper,
-            AudioPolicyFocusListener fl, AudioPolicyStatusListener sl, boolean isFocusPolicy) {
+            AudioPolicyFocusListener fl, AudioPolicyStatusListener sl, boolean isFocusPolicy,
+            AudioPolicyVolumeCallback vc) {
         mConfig = config;
         mStatus = POLICY_STATUS_UNREGISTERED;
         mContext = context;
@@ -120,6 +125,7 @@ public class AudioPolicy {
         mFocusListener = fl;
         mStatusListener = sl;
         mIsFocusPolicy = isFocusPolicy;
+        mVolCb = vc;
     }
 
     /**
@@ -134,6 +140,7 @@ public class AudioPolicy {
         private AudioPolicyFocusListener mFocusListener;
         private AudioPolicyStatusListener mStatusListener;
         private boolean mIsFocusPolicy = false;
+        private AudioPolicyVolumeCallback mVolCb;
 
         /**
          * Constructs a new Builder with no audio mixes.
@@ -208,6 +215,22 @@ public class AudioPolicy {
             mStatusListener = l;
         }
 
+        @SystemApi
+        /**
+         * Sets the callback to receive all volume key-related events.
+         * The callback will only be called if the device is configured to handle volume events
+         * in the PhoneWindowManager (see config_handleVolumeKeysInWindowManager)
+         * @param vc
+         * @return the same Builder instance.
+         */
+        public Builder setAudioPolicyVolumeCallback(@NonNull AudioPolicyVolumeCallback vc) {
+            if (vc == null) {
+                throw new IllegalArgumentException("Invalid null volume callback");
+            }
+            mVolCb = vc;
+            return this;
+        }
+
         /**
          * Combines all of the attributes that have been set on this {@code Builder} and returns a
          * new {@link AudioPolicy} object.
@@ -229,7 +252,7 @@ public class AudioPolicy {
                         + "an AudioPolicyFocusListener");
             }
             return new AudioPolicy(new AudioPolicyConfig(mMixes), mContext, mLooper,
-                    mFocusListener, mStatusListener, mIsFocusPolicy);
+                    mFocusListener, mStatusListener, mIsFocusPolicy, mVolCb);
         }
     }
 
@@ -455,6 +478,23 @@ public class AudioPolicy {
         public void onAudioFocusAbandon(AudioFocusInfo afi) {}
     }
 
+    @SystemApi
+    /**
+     * Callback class to receive volume change-related events.
+     * See {@link #Builder.setAudioPolicyVolumeCallback(AudioPolicyCallback)} to configure the
+     * {@link AudioPolicy} to receive those events.
+     *
+     */
+    public static abstract class AudioPolicyVolumeCallback {
+        /** @hide */
+        public AudioPolicyVolumeCallback() {}
+        /**
+         * Called when volume key-related changes are triggered, on the key down event.
+         * @param adjustment the type of volume adjustment for the key.
+         */
+        public void onVolumeAdjustment(@AudioManager.VolumeAdjustment int adjustment) {}
+    }
+
     private void onPolicyStatusChange() {
         AudioPolicyStatusListener l;
         synchronized (mLock) {
@@ -517,6 +557,13 @@ public class AudioPolicy {
                 }
             }
         }
+
+        public void notifyVolumeAdjust(int adjustment) {
+            sendMsg(MSG_VOL_ADJUST, null /* ignored */, adjustment);
+            if (DEBUG) {
+                Log.v(TAG, "notifyVolumeAdjust: " + adjustment);
+            }
+        }
     };
 
     //==================================================
@@ -528,6 +575,7 @@ public class AudioPolicy {
     private final static int MSG_MIX_STATE_UPDATE = 3;
     private final static int MSG_FOCUS_REQUEST = 4;
     private final static int MSG_FOCUS_ABANDON = 5;
+    private final static int MSG_VOL_ADJUST = 6;
 
     private class EventHandler extends Handler {
         public EventHandler(AudioPolicy ap, Looper looper) {
@@ -569,6 +617,13 @@ public class AudioPolicy {
                         mFocusListener.onAudioFocusAbandon((AudioFocusInfo) msg.obj);
                     } else { // should never be null, but don't crash
                         Log.e(TAG, "Invalid null focus listener for focus abandon event");
+                    }
+                    break;
+                case MSG_VOL_ADJUST:
+                    if (mVolCb != null) {
+                        mVolCb.onVolumeAdjustment(msg.arg1);
+                    } else { // should never be null, but don't crash
+                        Log.e(TAG, "Invalid null volume event");
                     }
                     break;
                 default:

@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.INTENT_SENDER_ACTIVITY;
+import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
@@ -41,6 +42,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -119,11 +121,12 @@ class ActivityStartInterceptor {
     }
 
     private IntentSender createIntentSenderForOriginalIntent(int callingUid, int flags) {
+        Bundle activityOptions = deferCrossProfileAppsAnimationIfNecessary();
         final IIntentSender target = mService.getIntentSenderLocked(
                 INTENT_SENDER_ACTIVITY, mCallingPackage, callingUid, mUserId, null /*token*/,
                 null /*resultCode*/, 0 /*requestCode*/,
                 new Intent[] { mIntent }, new String[] { mResolvedType },
-                flags, null /*bOptions*/);
+                flags, activityOptions);
         return new IntentSender(target);
     }
 
@@ -164,11 +167,27 @@ class ActivityStartInterceptor {
         return interceptWorkProfileChallengeIfNeeded();
     }
 
+    /**
+     * If the activity option is the {@link ActivityOptions#ANIM_OPEN_CROSS_PROFILE_APPS} one,
+     * defer the animation until the original intent is started.
+     *
+     * @return the activity option used to start the original intent.
+     */
+    private Bundle deferCrossProfileAppsAnimationIfNecessary() {
+        if (mActivityOptions != null
+                && mActivityOptions.getAnimationType() == ANIM_OPEN_CROSS_PROFILE_APPS) {
+            mActivityOptions = null;
+            return ActivityOptions.makeOpenCrossProfileAppsAnimation().toBundle();
+        }
+        return null;
+    }
+
     private boolean interceptQuietProfileIfNeeded() {
         // Do not intercept if the user has not turned off the profile
         if (!mUserManager.isQuietModeEnabled(UserHandle.of(mUserId))) {
             return false;
         }
+
         IntentSender target = createIntentSenderForOriginalIntent(mCallingUid,
                 FLAG_CANCEL_CURRENT | FLAG_ONE_SHOT);
 
@@ -210,8 +229,7 @@ class ActivityStartInterceptor {
     }
 
     private boolean interceptWorkProfileChallengeIfNeeded() {
-        final Intent interceptingIntent = interceptWithConfirmCredentialsIfNeeded(mIntent,
-                mResolvedType, mAInfo, mCallingPackage, mUserId);
+        final Intent interceptingIntent = interceptWithConfirmCredentialsIfNeeded(mAInfo, mUserId);
         if (interceptingIntent == null) {
             return false;
         }
@@ -248,8 +266,7 @@ class ActivityStartInterceptor {
      *
      * @return The intercepting intent if needed.
      */
-    private Intent interceptWithConfirmCredentialsIfNeeded(Intent intent, String resolvedType,
-            ActivityInfo aInfo, String callingPackage, int userId) {
+    private Intent interceptWithConfirmCredentialsIfNeeded(ActivityInfo aInfo, int userId) {
         if (!mUserController.shouldConfirmCredentials(userId)) {
             return null;
         }
@@ -296,5 +313,4 @@ class ActivityStartInterceptor {
         mAInfo = mSupervisor.resolveActivity(mIntent, mRInfo, mStartFlags, null /*profilerInfo*/);
         return true;
     }
-
 }

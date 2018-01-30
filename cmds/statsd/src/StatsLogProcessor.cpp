@@ -196,6 +196,14 @@ size_t StatsLogProcessor::GetMetricsSize(const ConfigKey& key) const {
     return it->second->byteSize();
 }
 
+void StatsLogProcessor::dumpStates(FILE* out, bool verbose) {
+    std::lock_guard<std::mutex> lock(mMetricsMutex);
+    fprintf(out, "MetricsManager count: %lu\n", (unsigned long)mMetricsManagers.size());
+    for (auto metricsManager : mMetricsManagers) {
+        metricsManager.second->dumpStates(out, verbose);
+    }
+}
+
 void StatsLogProcessor::onDumpReport(const ConfigKey& key, const uint64_t& dumpTimeStampNs,
                                      ConfigMetricsReportList* report) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);

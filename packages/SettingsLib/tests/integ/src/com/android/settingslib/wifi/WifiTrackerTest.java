@@ -29,6 +29,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -57,9 +58,9 @@ import android.os.HandlerThread;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.support.test.filters.FlakyTest;
 
 import org.junit.After;
 import org.junit.Before;
@@ -76,7 +77,9 @@ import org.mockito.stubbing.Answer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -399,7 +402,8 @@ public class WifiTrackerTest {
         WifiTracker tracker = new WifiTracker(
                 InstrumentationRegistry.getTargetContext(), null, true, true);
 
-        AccessPoint result = tracker.getCachedOrCreate(scanResult, new ArrayList<AccessPoint>());
+        AccessPoint result = tracker.getCachedOrCreate(
+                Collections.singletonList(scanResult), new ArrayList<AccessPoint>());
         assertTrue(result.mAccessPointListener != null);
     }
 

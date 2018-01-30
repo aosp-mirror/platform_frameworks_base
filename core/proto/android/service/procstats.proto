@@ -169,6 +169,9 @@ message ProcessStatsProto {
 
         // USS is memory shared between processes, divided evenly for accounting
         optional android.util.AggStats uss = 7;
+
+        // RSS is memory resident for this process
+        optional android.util.AggStats rss = 8;
     }
     repeated State states = 5;
 }

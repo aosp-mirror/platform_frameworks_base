@@ -70,55 +70,61 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
 
     void startRecentsActivity(Intent intent, IRecentsAnimationRunner recentsAnimationRunner,
             ComponentName recentsComponent, int recentsUid) {
+        mWindowManager.deferSurfaceLayout();
+        try {
+            // Cancel the previous recents animation if necessary
+            mWindowManager.cancelRecentsAnimation();
 
-        // Cancel the previous recents animation if necessary
-        mWindowManager.cancelRecentsAnimation();
+            final boolean hasExistingHomeActivity = mStackSupervisor.getHomeActivity() != null;
+            if (!hasExistingHomeActivity) {
+                // No home activity
+                final ActivityOptions opts = ActivityOptions.makeBasic();
+                opts.setLaunchActivityType(ACTIVITY_TYPE_HOME);
+                opts.setAvoidMoveToFront();
+                intent.addFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_NO_ANIMATION);
 
-        final boolean hasExistingHomeActivity = mStackSupervisor.getHomeActivity() != null;
-        if (!hasExistingHomeActivity) {
-            // No home activity
-            final ActivityOptions opts = ActivityOptions.makeBasic();
-            opts.setLaunchActivityType(ACTIVITY_TYPE_HOME);
-            opts.setAvoidMoveToFront();
-            intent.addFlags(FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_NO_ANIMATION);
+                mActivityStartController
+                        .obtainStarter(intent, "startRecentsActivity_noHomeActivity")
+                        .setCallingUid(recentsUid)
+                        .setCallingPackage(recentsComponent.getPackageName())
+                        .setActivityOptions(SafeActivityOptions.fromBundle(opts.toBundle()))
+                        .setMayWait(mUserController.getCurrentUserId())
+                        .execute();
+                mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
 
-            mActivityStartController.obtainStarter(intent, "startRecentsActivity_noHomeActivity")
-                    .setCallingUid(recentsUid)
-                    .setCallingPackage(recentsComponent.getPackageName())
-                    .setActivityOptions(SafeActivityOptions.fromBundle(opts.toBundle()))
-                    .setMayWait(mUserController.getCurrentUserId())
-                    .execute();
-            mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
+                // TODO: Maybe wait for app to draw in this particular case?
+            }
 
-            // TODO: Maybe wait for app to draw in this particular case?
+            final ActivityRecord homeActivity = mStackSupervisor.getHomeActivity();
+            final ActivityDisplay display = homeActivity.getDisplay();
+
+            // Save the initial position of the home activity stack to be restored to after the
+            // animation completes
+            mRestoreHomeBehindStack = hasExistingHomeActivity
+                    ? display.getStackAboveHome()
+                    : null;
+
+            // Move the home activity into place for the animation
+            display.moveHomeStackBehindBottomMostVisibleStack();
+
+            // Mark the home activity as launch-behind to bump its visibility for the
+            // duration of the gesture that is driven by the recents component
+            homeActivity.mLaunchTaskBehind = true;
+
+            // Fetch all the surface controls and pass them to the client to get the animation
+            // started
+            mWindowManager.initializeRecentsAnimation(recentsAnimationRunner, this,
+                    display.mDisplayId);
+
+            // If we updated the launch-behind state, update the visibility of the activities after
+            // we fetch the visible tasks to be controlled by the animation
+            mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, PRESERVE_WINDOWS);
+
+            // Post a timeout for the animation
+            mHandler.postDelayed(mCancelAnimationRunnable, RECENTS_ANIMATION_TIMEOUT);
+        } finally {
+            mWindowManager.continueSurfaceLayout();
         }
-
-        final ActivityRecord homeActivity = mStackSupervisor.getHomeActivity();
-        final ActivityDisplay display = homeActivity.getDisplay();
-
-        // Save the initial position of the home activity stack to be restored to after the
-        // animation completes
-        mRestoreHomeBehindStack = hasExistingHomeActivity
-                ? display.getStackAboveHome()
-                : null;
-
-        // Move the home activity into place for the animation
-        display.moveHomeStackBehindBottomMostVisibleStack();
-
-        // Mark the home activity as launch-behind to bump its visibility for the
-        // duration of the gesture that is driven by the recents component
-        homeActivity.mLaunchTaskBehind = true;
-
-        // Fetch all the surface controls and pass them to the client to get the animation
-        // started
-        mWindowManager.initializeRecentsAnimation(recentsAnimationRunner, this, display.mDisplayId);
-
-        // If we updated the launch-behind state, update the visibility of the activities after we
-        // fetch the visible tasks to be controlled by the animation
-        mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, PRESERVE_WINDOWS);
-
-        // Post a timeout for the animation
-        mHandler.postDelayed(mCancelAnimationRunnable, RECENTS_ANIMATION_TIMEOUT);
     }
 
     @Override
@@ -128,31 +134,40 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
             if (mWindowManager.getRecentsAnimationController() == null) return;
 
             mWindowManager.inSurfaceTransaction(() -> {
-                mWindowManager.cleanupRecentsAnimation();
+                mWindowManager.deferSurfaceLayout();
+                try {
+                    mWindowManager.cleanupRecentsAnimation();
 
-                // Move the home stack to the front
-                final ActivityRecord homeActivity = mStackSupervisor.getHomeActivity();
-                if (homeActivity == null) {
-                    return;
+                    // Move the home stack to the front
+                    final ActivityRecord homeActivity = mStackSupervisor.getHomeActivity();
+                    if (homeActivity == null) {
+                        return;
+                    }
+
+                    // Restore the launched-behind state
+                    homeActivity.mLaunchTaskBehind = false;
+
+                    if (moveHomeToTop) {
+                        // Bring the home stack to the front
+                        final ActivityStack homeStack = homeActivity.getStack();
+                        homeStack.mNoAnimActivities.add(homeActivity);
+                        homeStack.moveToFront("RecentsAnimation.onAnimationFinished()");
+                    } else {
+                        // Restore the home stack to its previous position
+                        final ActivityDisplay display = homeActivity.getDisplay();
+                        display.moveHomeStackBehindStack(mRestoreHomeBehindStack);
+                    }
+
+                    mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
+                    mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, false);
+                    mStackSupervisor.resumeFocusedStackTopActivityLocked();
+
+                    // No reason to wait for the pausing activity in this case, as the hiding of
+                    // surfaces needs to be done immediately.
+                    mWindowManager.executeAppTransition();
+                } finally {
+                    mWindowManager.continueSurfaceLayout();
                 }
-
-                // Restore the launched-behind state
-                homeActivity.mLaunchTaskBehind = false;
-
-                if (moveHomeToTop) {
-                    // Bring the home stack to the front
-                    final ActivityStack homeStack = homeActivity.getStack();
-                    homeStack.mNoAnimActivities.add(homeActivity);
-                    homeStack.moveToFront("RecentsAnimation.onAnimationFinished()");
-                } else {
-                    // Restore the home stack to its previous position
-                    final ActivityDisplay display = homeActivity.getDisplay();
-                    display.moveHomeStackBehindStack(mRestoreHomeBehindStack);
-                }
-
-                mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
-                mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, false);
-                mStackSupervisor.resumeFocusedStackTopActivityLocked();
             });
         }
     }

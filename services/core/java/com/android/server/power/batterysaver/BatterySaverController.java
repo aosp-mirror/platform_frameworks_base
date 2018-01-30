@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.power.V1_0.PowerHint;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -50,6 +51,9 @@ import com.android.server.LocalServices;
 import com.android.server.power.BatterySaverPolicy;
 import com.android.server.power.BatterySaverPolicy.BatterySaverPolicyListener;
 import com.android.server.power.PowerManagerService;
+import com.android.server.power.batterysaver.BatterySavingStats.BatterySaverState;
+import com.android.server.power.batterysaver.BatterySavingStats.DozeState;
+import com.android.server.power.batterysaver.BatterySavingStats.InteractiveState;
 
 import java.util.ArrayList;
 
@@ -70,6 +74,8 @@ public class BatterySaverController implements BatterySaverPolicyListener {
 
     private final BatterySaverPolicy mBatterySaverPolicy;
 
+    private final BatterySavingStats mBatterySavingStats;
+
     private static final String WARNING_LINK_URL = "http://goto.google.com/extreme-battery-saver";
 
     @GuardedBy("mLock")
@@ -77,6 +83,9 @@ public class BatterySaverController implements BatterySaverPolicyListener {
 
     @GuardedBy("mLock")
     private boolean mEnabled;
+
+    @GuardedBy("mLock")
+    private boolean mIsPluggedIn;
 
     /**
      * Previously enabled or not; only for the event logging. Only use it from
@@ -104,14 +113,27 @@ public class BatterySaverController implements BatterySaverPolicyListener {
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (DEBUG) {
+                Slog.d(TAG, "onReceive: " + intent);
+            }
             switch (intent.getAction()) {
                 case Intent.ACTION_SCREEN_ON:
                 case Intent.ACTION_SCREEN_OFF:
                     if (!isEnabled()) {
+                        updateBatterySavingStats();
                         return; // No need to send it if not enabled.
                     }
                     // Don't send the broadcast, because we never did so in this case.
                     mHandler.postStateChanged(/*sendBroadcast=*/ false);
+                    break;
+                case Intent.ACTION_BATTERY_CHANGED:
+                    synchronized (mLock) {
+                        mIsPluggedIn = (intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0);
+                    }
+                    // Fall-through.
+                case PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED:
+                case PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED:
+                    updateBatterySavingStats();
                     break;
             }
         }
@@ -126,6 +148,7 @@ public class BatterySaverController implements BatterySaverPolicyListener {
         mBatterySaverPolicy = policy;
         mBatterySaverPolicy.addListener(this);
         mFileUpdater = new FileUpdater(context);
+        mBatterySavingStats = BatterySavingStats.getInstance();
 
         // Initialize plugins.
         final ArrayList<Plugin> plugins = new ArrayList<>();
@@ -149,6 +172,9 @@ public class BatterySaverController implements BatterySaverPolicyListener {
     public void systemReady() {
         final IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        filter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
+        filter.addAction(PowerManager.ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED);
         mContext.registerReceiver(mReceiver, filter);
 
         mFileUpdater.systemReady(LocalServices.getService(ActivityManagerInternal.class)
@@ -280,7 +306,6 @@ public class BatterySaverController implements BatterySaverPolicyListener {
             enabled = mEnabled;
             mIsInteractive = isInteractive;
 
-
             if (enabled) {
                 fileValues = mBatterySaverPolicy.getFileValues(isInteractive);
             } else {
@@ -292,6 +317,8 @@ public class BatterySaverController implements BatterySaverPolicyListener {
         if (pmi != null) {
             pmi.powerHint(PowerHint.LOW_POWER, enabled ? 1 : 0);
         }
+
+        updateBatterySavingStats();
 
         if (ArrayUtils.isEmpty(fileValues)) {
             mFileUpdater.restoreDefault();
@@ -331,7 +358,6 @@ public class BatterySaverController implements BatterySaverPolicyListener {
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                     Manifest.permission.DEVICE_POWER);
-
 
             for (LowPowerModeListener listener : listeners) {
                 final PowerSaveState result =
@@ -386,6 +412,30 @@ public class BatterySaverController implements BatterySaverPolicyListener {
         if (nm != null) {
             nm.cancelAsUser(title.toString(), SystemMessage.NOTE_BATTERY_SAVER_WARNING,
                     foregroundUser);
+        }
+    }
+
+    private void updateBatterySavingStats() {
+        final PowerManager pm = getPowerManager();
+        if (pm == null) {
+            Slog.wtf(TAG, "PowerManager not initialized");
+            return;
+        }
+        final boolean isInteractive = pm.isInteractive();
+        final int dozeMode =
+                pm.isDeviceIdleMode() ? DozeState.DEEP
+                        : pm.isLightDeviceIdleMode() ? DozeState.LIGHT
+                        : DozeState.NOT_DOZING;
+
+        synchronized (mLock) {
+            if (mIsPluggedIn) {
+                mBatterySavingStats.startCharging();
+                return;
+            }
+            mBatterySavingStats.transitionState(
+                    mEnabled ? BatterySaverState.ON : BatterySaverState.OFF,
+                    isInteractive ? InteractiveState.INTERACTIVE : InteractiveState.NON_INTERACTIVE,
+                    dozeMode);
         }
     }
 }

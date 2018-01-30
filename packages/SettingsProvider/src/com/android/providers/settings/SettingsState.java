@@ -166,6 +166,9 @@ final class SettingsState {
     @GuardedBy("mLock")
     private final File mStatePersistFile;
 
+    @GuardedBy("mLock")
+    private final String mStatePersistTag;
+
     private final Setting mNullSetting = new Setting(null, null, false, null, null) {
         @Override
         public boolean isNull() {
@@ -250,6 +253,7 @@ final class SettingsState {
         mContext = context;
         mLock = lock;
         mStatePersistFile = file;
+        mStatePersistTag = "settings-" + getTypeFromKey(key) + "-" + getUserIdFromKey(key);
         mKey = key;
         mHandler = new MyHandler(looper);
         if (maxBytesPerAppPackage == MAX_BYTES_PER_APP_PACKAGE_LIMITED) {
@@ -634,7 +638,7 @@ final class SettingsState {
                 Slog.i(LOG_TAG, "[PERSIST START]");
             }
 
-            AtomicFile destination = new AtomicFile(mStatePersistFile);
+            AtomicFile destination = new AtomicFile(mStatePersistFile, mStatePersistTag);
             FileOutputStream out = null;
             try {
                 out = destination.startWrite();

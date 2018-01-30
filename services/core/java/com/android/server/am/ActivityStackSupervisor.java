@@ -1245,10 +1245,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         synchronized (mService) {
             try {
                 Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "resolveIntent");
+                int modifiedFlags = flags
+                        | PackageManager.MATCH_DEFAULT_ONLY | ActivityManagerService.STOCK_PM_FLAGS;
+                if (intent.isBrowsableWebIntent()
+                            || (intent.getFlags() & Intent.FLAG_ACTIVITY_MATCH_EXTERNAL) != 0) {
+                    modifiedFlags |= PackageManager.MATCH_INSTANT;
+                }
                 return mService.getPackageManagerInternalLocked().resolveIntent(
-                        intent, resolvedType, PackageManager.MATCH_INSTANT
-                                | PackageManager.MATCH_DEFAULT_ONLY | flags
-                                | ActivityManagerService.STOCK_PM_FLAGS, userId, true);
+                        intent, resolvedType, modifiedFlags, userId, true);
 
             } finally {
                 Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);

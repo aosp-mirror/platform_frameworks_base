@@ -310,8 +310,10 @@ package android.app {
     ctor public InstantAppResolverService();
     method public final void attachBaseContext(android.content.Context);
     method public final android.os.IBinder onBind(android.content.Intent);
-    method public void onGetInstantAppIntentFilter(int[], java.lang.String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
-    method public void onGetInstantAppResolveInfo(int[], java.lang.String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method public deprecated void onGetInstantAppIntentFilter(int[], java.lang.String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method public void onGetInstantAppIntentFilter(android.content.Intent, int[], java.lang.String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method public deprecated void onGetInstantAppResolveInfo(int[], java.lang.String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
+    method public void onGetInstantAppResolveInfo(android.content.Intent, int[], java.lang.String, android.app.InstantAppResolverService.InstantAppResolutionCallback);
   }
 
   public static final class InstantAppResolverService.InstantAppResolutionCallback {
@@ -820,12 +822,14 @@ package android.content {
     field public static final java.lang.String ACTION_VOICE_ASSIST = "android.intent.action.VOICE_ASSIST";
     field public static final java.lang.String CATEGORY_LEANBACK_SETTINGS = "android.intent.category.LEANBACK_SETTINGS";
     field public static final java.lang.String EXTRA_FORCE_FACTORY_RESET = "android.intent.extra.FORCE_FACTORY_RESET";
+    field public static final java.lang.String EXTRA_INSTANT_APP_BUNDLES = "android.intent.extra.INSTANT_APP_BUNDLES";
     field public static final java.lang.String EXTRA_ORIGINATING_UID = "android.intent.extra.ORIGINATING_UID";
     field public static final java.lang.String EXTRA_PACKAGES = "android.intent.extra.PACKAGES";
     field public static final java.lang.String EXTRA_PERMISSION_NAME = "android.intent.extra.PERMISSION_NAME";
     field public static final java.lang.String EXTRA_REASON = "android.intent.extra.REASON";
     field public static final java.lang.String EXTRA_REMOTE_CALLBACK = "android.intent.extra.REMOTE_CALLBACK";
     field public static final java.lang.String EXTRA_RESULT_NEEDED = "android.intent.extra.RESULT_NEEDED";
+    field public static final java.lang.String EXTRA_UNKNOWN_INSTANT_APP = "android.intent.extra.UNKNOWN_INSTANT_APP";
   }
 
   public class IntentFilter implements android.os.Parcelable {
@@ -868,6 +872,7 @@ package android.content.pm {
     ctor public InstantAppResolveInfo(android.content.pm.InstantAppResolveInfo.InstantAppDigest, java.lang.String, java.util.List<android.content.pm.InstantAppIntentFilter>, int);
     ctor public InstantAppResolveInfo(android.content.pm.InstantAppResolveInfo.InstantAppDigest, java.lang.String, java.util.List<android.content.pm.InstantAppIntentFilter>, long, android.os.Bundle);
     ctor public InstantAppResolveInfo(java.lang.String, java.lang.String, java.util.List<android.content.pm.InstantAppIntentFilter>);
+    ctor public InstantAppResolveInfo(android.os.Bundle);
     method public int describeContents();
     method public byte[] getDigestBytes();
     method public int getDigestPrefix();
@@ -876,6 +881,7 @@ package android.content.pm {
     method public long getLongVersionCode();
     method public java.lang.String getPackageName();
     method public deprecated int getVersionCode();
+    method public boolean shouldLetInstallerDecide();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.content.pm.InstantAppResolveInfo> CREATOR;
   }
@@ -887,6 +893,7 @@ package android.content.pm {
     method public int[] getDigestPrefix();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.content.pm.InstantAppResolveInfo.InstantAppDigest> CREATOR;
+    field public static final android.content.pm.InstantAppResolveInfo.InstantAppDigest UNDEFINED;
   }
 
   public final class IntentFilterVerificationInfo implements android.os.Parcelable {
@@ -2596,12 +2603,17 @@ package android.media.audiopolicy {
     method public void onStatusChange();
   }
 
+  public static abstract class AudioPolicy.AudioPolicyVolumeCallback {
+    method public void onVolumeAdjustment(int);
+  }
+
   public static class AudioPolicy.Builder {
     ctor public AudioPolicy.Builder(android.content.Context);
     method public android.media.audiopolicy.AudioPolicy.Builder addMix(android.media.audiopolicy.AudioMix) throws java.lang.IllegalArgumentException;
     method public android.media.audiopolicy.AudioPolicy build();
     method public void setAudioPolicyFocusListener(android.media.audiopolicy.AudioPolicy.AudioPolicyFocusListener);
     method public void setAudioPolicyStatusListener(android.media.audiopolicy.AudioPolicy.AudioPolicyStatusListener);
+    method public android.media.audiopolicy.AudioPolicy.Builder setAudioPolicyVolumeCallback(android.media.audiopolicy.AudioPolicy.AudioPolicyVolumeCallback);
     method public android.media.audiopolicy.AudioPolicy.Builder setIsAudioFocusPolicy(boolean);
     method public android.media.audiopolicy.AudioPolicy.Builder setLooper(android.os.Looper) throws java.lang.IllegalArgumentException;
   }
@@ -3832,6 +3844,20 @@ package android.os {
   }
 
   public static abstract class UserManager.UserRestrictionSource implements java.lang.annotation.Annotation {
+  }
+
+  public class WorkSource implements android.os.Parcelable {
+    method public android.os.WorkSource.WorkChain createWorkChain();
+  }
+
+  public static final class WorkSource.WorkChain implements android.os.Parcelable {
+    ctor public WorkSource.WorkChain();
+    method public android.os.WorkSource.WorkChain addNode(int, java.lang.String);
+    method public int describeContents();
+    method public java.lang.String getAttributionTag();
+    method public int getAttributionUid();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.os.WorkSource.WorkChain> CREATOR;
   }
 
 }

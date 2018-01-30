@@ -182,7 +182,6 @@ class PackageSignatures {
                                     Signature sig = readSignatures.get(idx);
                                     if (sig != null) {
                                         signatures[pos] = readSignatures.get(idx);
-                                        pos++;
                                     } else {
                                         PackageManagerService.reportSettingsProblem(Log.WARN,
                                                 "Error in package manager settings: <cert> "
@@ -202,7 +201,6 @@ class PackageSignatures {
                                 Signature sig = new Signature(key);
                                 readSignatures.set(idx, sig);
                                 signatures[pos] = sig;
-                                pos++;
                             }
                         } catch (NumberFormatException e) {
                             PackageManagerService.reportSettingsProblem(Log.WARN,
@@ -245,6 +243,8 @@ class PackageSignatures {
                                     + "many <cert> tags, expected " + count
                                     + " at " + parser.getPositionDescription());
                 }
+                pos++;
+                XmlUtils.skipCurrentTag(parser);
             } else if (tagName.equals("pastSigs")) {
                 if (flags == null) {
                     // we haven't encountered pastSigs yet, go ahead
@@ -296,8 +296,8 @@ class PackageSignatures {
                 PackageManagerService.reportSettingsProblem(Log.WARN,
                         "Unknown element under <sigs>: "
                                 + parser.getName());
+                XmlUtils.skipCurrentTag(parser);
             }
-            XmlUtils.skipCurrentTag(parser);
         }
         return pos;
     }

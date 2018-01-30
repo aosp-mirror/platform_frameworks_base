@@ -18,7 +18,6 @@ package android.widget;
 
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.UiThread;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -30,9 +29,11 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.PixelCopy;
 import android.view.Surface;
+import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewParent;
+import android.view.ViewRootImpl;
 
 import com.android.internal.util.Preconditions;
 
@@ -124,7 +125,8 @@ public final class Magnifier {
 
         configureCoordinates(xPosInView, yPosInView);
 
-        // Clamp startX value to avoid distorting the rendering of the magnifier content.
+        // Clamp the startX value to avoid magnifying content which does not belong to the magnified
+        // view. This will not take into account overlapping views.
         // For this, we compute:
         // - zeroScrollXInSurface: this is the start x of mView, where this is not masked by a
         //                         potential scrolling container. For example, if mView is a
@@ -221,33 +223,48 @@ public final class Magnifier {
     }
 
     private void performPixelCopy(final int startXInSurface, final int startYInSurface) {
-        final Surface surface = getValidViewSurface();
-        if (surface != null) {
-            mPixelCopyRequestRect.set(startXInSurface, startYInSurface,
-                    startXInSurface + mBitmap.getWidth(), startYInSurface + mBitmap.getHeight());
-
-            PixelCopy.request(surface, mPixelCopyRequestRect, mBitmap,
-                    result -> {
-                        getImageView().invalidate();
-                        mPrevStartCoordsInSurface.x = startXInSurface;
-                        mPrevStartCoordsInSurface.y = startYInSurface;
-                    },
-                    mPixelCopyHandler);
-        }
-    }
-
-    @Nullable
-    private Surface getValidViewSurface() {
+        // Get the view surface where the content will be copied from.
         final Surface surface;
+        final int surfaceWidth;
+        final int surfaceHeight;
         if (mView instanceof SurfaceView) {
-            surface = ((SurfaceView) mView).getHolder().getSurface();
+            final SurfaceHolder surfaceHolder = ((SurfaceView) mView).getHolder();
+            surface = surfaceHolder.getSurface();
+            surfaceWidth = surfaceHolder.getSurfaceFrame().right;
+            surfaceHeight = surfaceHolder.getSurfaceFrame().bottom;
         } else if (mView.getViewRootImpl() != null) {
-            surface = mView.getViewRootImpl().mSurface;
+            final ViewRootImpl viewRootImpl = mView.getViewRootImpl();
+            surface = viewRootImpl.mSurface;
+            surfaceWidth = viewRootImpl.getWidth();
+            surfaceHeight = viewRootImpl.getHeight();
         } else {
             surface = null;
+            surfaceWidth = NONEXISTENT_PREVIOUS_CONFIG_VALUE;
+            surfaceHeight = NONEXISTENT_PREVIOUS_CONFIG_VALUE;
         }
 
-        return (surface != null && surface.isValid()) ? surface : null;
+        if (surface == null || !surface.isValid()) {
+            return;
+        }
+
+        // Clamp copy coordinates inside the surface to avoid displaying distorted content.
+        final int clampedStartXInSurface = Math.max(0,
+                Math.min(startXInSurface, surfaceWidth - mWindowWidth));
+        final int clampedStartYInSurface = Math.max(0,
+                Math.min(startYInSurface, surfaceHeight - mWindowHeight));
+
+        // Perform the pixel copy.
+        mPixelCopyRequestRect.set(clampedStartXInSurface,
+                clampedStartYInSurface,
+                clampedStartXInSurface + mBitmap.getWidth(),
+                clampedStartYInSurface + mBitmap.getHeight());
+        PixelCopy.request(surface, mPixelCopyRequestRect, mBitmap,
+                result -> {
+                    getImageView().invalidate();
+                    mPrevStartCoordsInSurface.x = startXInSurface;
+                    mPrevStartCoordsInSurface.y = startYInSurface;
+                },
+                mPixelCopyHandler);
     }
 
     private ImageView getImageView() {

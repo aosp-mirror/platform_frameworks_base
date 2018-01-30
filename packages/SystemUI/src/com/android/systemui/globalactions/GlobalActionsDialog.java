@@ -587,9 +587,9 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             // switching user
             mHandler.postDelayed(() -> {
                 try {
+                    int currentUserId = getCurrentUser().id;
                     ActivityManager.getService().switchUser(UserHandle.USER_SYSTEM);
-                    ActivityManager.getService().stopUser(getCurrentUser().id, true /*force*/,
-                            null);
+                    ActivityManager.getService().stopUser(currentUserId, true /*force*/, null);
                 } catch (RemoteException re) {
                     Log.e(TAG, "Couldn't logout user " + re);
                 }

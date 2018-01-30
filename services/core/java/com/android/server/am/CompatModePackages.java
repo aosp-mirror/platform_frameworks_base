@@ -82,7 +82,7 @@ public final class CompatModePackages {
 
     public CompatModePackages(ActivityManagerService service, File systemDir, Handler handler) {
         mService = service;
-        mFile = new AtomicFile(new File(systemDir, "packages-compat.xml"));
+        mFile = new AtomicFile(new File(systemDir, "packages-compat.xml"), "compat-mode");
         mHandler = new CompatHandler(handler.getLooper());
 
         FileInputStream fis = null;

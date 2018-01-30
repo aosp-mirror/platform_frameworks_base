@@ -1631,7 +1631,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     String mTrackAllocationApp = null;
     String mNativeDebuggingApp = null;
 
-    final long[] mTmpLong = new long[2];
+    final long[] mTmpLong = new long[3];
 
     private final ArraySet<BroadcastQueue> mTmpBroadcastQueue = new ArraySet();
 
@@ -2574,22 +2574,24 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
 
                 int num = 0;
-                long[] tmp = new long[2];
+                long[] tmp = new long[3];
                 do {
                     ProcessRecord proc;
                     int procState;
+                    int statType;
                     int pid;
                     long lastPssTime;
                     synchronized (ActivityManagerService.this) {
                         if (mPendingPssProcesses.size() <= 0) {
                             if (mTestPssMode || DEBUG_PSS) Slog.d(TAG_PSS,
-                                    "Collected PSS of " + num + " processes in "
+                                    "Collected pss of " + num + " processes in "
                                     + (SystemClock.uptimeMillis() - start) + "ms");
                             mPendingPssProcesses.clear();
                             return;
                         }
                         proc = mPendingPssProcesses.remove(0);
                         procState = proc.pssProcState;
+                        statType = proc.pssStatType;
                         lastPssTime = proc.lastPssTime;
                         if (proc.thread != null && procState == proc.setProcState
                                 && (lastPssTime+ProcessList.PSS_SAFE_TIME_FROM_STATE_CHANGE)
@@ -2608,8 +2610,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                             if (pss != 0 && proc.thread != null && proc.setProcState == procState
                                     && proc.pid == pid && proc.lastPssTime == lastPssTime) {
                                 num++;
-                                recordPssSampleLocked(proc, procState, pss, tmp[0], tmp[1],
-                                        endTime-startTime, SystemClock.uptimeMillis());
+                                ProcessList.commitNextPssTime(proc.procStateMemTracker);
+                                recordPssSampleLocked(proc, procState, pss, tmp[0], tmp[1], tmp[2],
+                                        statType, endTime-startTime, SystemClock.uptimeMillis());
+                            } else {
+                                ProcessList.abortNextPssTime(proc.procStateMemTracker);
+                                if (DEBUG_PSS) Slog.d(TAG_PSS, "Skipped pss collection of " + pid +
+                                        ": " + (proc.thread == null ? "NO_THREAD " : "") +
+                                        (proc.pid != pid ? "PID_CHANGED " : "") +
+                                        " initState=" + procState + " curState=" +
+                                        proc.setProcState + " " +
+                                        (proc.lastPssTime != lastPssTime ? "TIME_CHANGED" : ""));
                             }
                         }
                     }
@@ -2906,7 +2917,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 });
 
-        mGrantFile = new AtomicFile(new File(systemDir, "urigrants.xml"));
+        mGrantFile = new AtomicFile(new File(systemDir, "urigrants.xml"), "uri-grants");
 
         mUserController = new UserController(this);
 
@@ -6326,7 +6337,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (!keepState) {
                         synchronized (this) {
                             // Remove all permissions granted from/to this package
-                            removeUriPermissionsForPackageLocked(packageName, resolvedUserId, true);
+                            removeUriPermissionsForPackageLocked(packageName, resolvedUserId, true,
+                                    false);
                         }
 
                         // Reset notification state
@@ -6654,7 +6666,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (proc.thread != null && proc.setAdj == oomAdj) {
                         // Record this for posterity if the process has been stable.
                         proc.baseProcessTracker.addPss(infos[i].getTotalPss(),
-                                infos[i].getTotalUss(), false,
+                                infos[i].getTotalUss(), infos[i].getTotalRss(), false,
                                 ProcessStats.ADD_PSS_EXTERNAL_SLOW, endTime-startTime,
                                 proc.pkgList);
                     }
@@ -6677,7 +6689,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     oomAdj = proc != null ? proc.setAdj : 0;
                 }
             }
-            long[] tmpUss = new long[1];
+            long[] tmpUss = new long[3];
             long startTime = SystemClock.currentThreadTimeMillis();
             pss[i] = Debug.getPss(pids[i], tmpUss, null);
             long endTime = SystemClock.currentThreadTimeMillis();
@@ -6685,7 +6697,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 synchronized (this) {
                     if (proc.thread != null && proc.setAdj == oomAdj) {
                         // Record this for posterity if the process has been stable.
-                        proc.baseProcessTracker.addPss(pss[i], tmpUss[0], false,
+                        proc.baseProcessTracker.addPss(pss[i], tmpUss[0], tmpUss[2], false,
                                 ProcessStats.ADD_PSS_EXTERNAL, endTime-startTime, proc.pkgList);
                     }
                 }
@@ -6981,7 +6993,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         // Remove transient permissions granted from/to this package/user
-        removeUriPermissionsForPackageLocked(packageName, userId, false);
+        removeUriPermissionsForPackageLocked(packageName, userId, false, false);
 
         if (doit) {
             for (i = mBroadcastQueues.length - 1; i >= 0; i--) {
@@ -9704,9 +9716,11 @@ public class ActivityManagerService extends IActivityManager.Stub
      * @param userHandle User to match, or {@link UserHandle#USER_ALL} to apply
      *            to all users.
      * @param persistable If persistable grants should be removed.
+     * @param targetOnly When {@code true}, only remove permissions where the app is the target,
+     * not source.
      */
     private void removeUriPermissionsForPackageLocked(
-            String packageName, int userHandle, boolean persistable) {
+            String packageName, int userHandle, boolean persistable, boolean targetOnly) {
         if (userHandle == UserHandle.USER_ALL && packageName == null) {
             throw new IllegalArgumentException("Must narrow by either package or user");
         }
@@ -9725,7 +9739,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     final UriPermission perm = it.next();
 
                     // Only inspect grants matching package
-                    if (packageName == null || perm.sourcePkg.equals(packageName)
+                    if (packageName == null || (!targetOnly && perm.sourcePkg.equals(packageName))
                             || perm.targetPkg.equals(packageName)) {
                         // Hacky solution as part of fixing a security bug; ignore
                         // grants associated with DownloadManager so we don't have
@@ -9844,6 +9858,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     private void writeGrantedUriPermissions() {
         if (DEBUG_URI_PERMISSION) Slog.v(TAG_URI_PERMISSION, "writeGrantedUriPermissions()");
 
+        final long startTime = SystemClock.uptimeMillis();
+
         // Snapshot permissions so we can persist without lock
         ArrayList<UriPermission.Snapshot> persist = Lists.newArrayList();
         synchronized (this) {
@@ -9860,7 +9876,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         FileOutputStream fos = null;
         try {
-            fos = mGrantFile.startWrite();
+            fos = mGrantFile.startWrite(startTime);
 
             XmlSerializer out = new FastXmlSerializer();
             out.setOutput(fos, StandardCharsets.UTF_8.name());
@@ -9977,8 +9993,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             boolean persistChanged = false;
             GrantUri grantUri = new GrantUri(userId, uri, false);
 
-            UriPermission exactPerm = findUriPermissionLocked(callingUid,
-                    new GrantUri(userId, uri, false));
+            UriPermission exactPerm = findUriPermissionLocked(callingUid, grantUri);
             UriPermission prefixPerm = findUriPermissionLocked(callingUid,
                     new GrantUri(userId, uri, true));
 
@@ -10161,7 +10176,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void clearGrantedUriPermissions(String packageName, int userId) {
         enforceCallingPermission(android.Manifest.permission.CLEAR_APP_GRANTED_URI_PERMISSIONS,
                 "clearGrantedUriPermissions");
-        removeUriPermissionsForPackageLocked(packageName, userId, true);
+        synchronized(this) {
+            removeUriPermissionsForPackageLocked(packageName, userId, true, true);
+        }
     }
 
     @Override
@@ -14414,7 +14431,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         && proc.setProcState >= ActivityManager.PROCESS_STATE_PERSISTENT) {
                     proc.notCachedSinceIdle = true;
                     proc.initialIdlePss = 0;
-                    proc.nextPssTime = ProcessList.computeNextPssTime(proc.setProcState, true,
+                    proc.nextPssTime = ProcessList.computeNextPssTime(proc.setProcState, null,
                             mTestPssMode, isSleepingLocked(), now);
                 }
             }
@@ -14727,6 +14744,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             mUserController.sendUserSwitchBroadcasts(-1, currentUserId);
 
             BinderInternal.nSetBinderProxyCountEnabled(true);
+            //STOPSHIP: Temporary BinderProxy Threshold for b/71353150
+            BinderInternal.nSetBinderProxyCountWatermarks(1500, 1200);
             BinderInternal.setBinderProxyCountCallback(
                     new BinderInternal.BinderProxyLimitListener() {
                         @Override
@@ -18344,12 +18363,13 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 final long myTotalPss = mi.getTotalPss();
                 final long myTotalUss = mi.getTotalUss();
+                final long myTotalRss = mi.getTotalRss();
                 final long myTotalSwapPss = mi.getTotalSwappedOutPss();
 
                 synchronized (this) {
                     if (r.thread != null && oomAdj == r.getSetAdjWithServices()) {
                         // Record this for posterity if the process has been stable.
-                        r.baseProcessTracker.addPss(myTotalPss, myTotalUss, true,
+                        r.baseProcessTracker.addPss(myTotalPss, myTotalUss, myTotalRss, true,
                                 reportType, endTime-startTime, r.pkgList);
                     }
                 }
@@ -18840,12 +18860,13 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             final long myTotalPss = mi.getTotalPss();
             final long myTotalUss = mi.getTotalUss();
+            final long myTotalRss = mi.getTotalRss();
             final long myTotalSwapPss = mi.getTotalSwappedOutPss();
 
             synchronized (this) {
                 if (r.thread != null && oomAdj == r.getSetAdjWithServices()) {
                     // Record this for posterity if the process has been stable.
-                    r.baseProcessTracker.addPss(myTotalPss, myTotalUss, true,
+                    r.baseProcessTracker.addPss(myTotalPss, myTotalUss, myTotalRss, true,
                             reportType, endTime-startTime, r.pkgList);
                 }
             }
@@ -20752,7 +20773,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                                                 intent.getIntExtra(Intent.EXTRA_UID, -1), ssp);
 
                                         // Remove all permissions granted from/to this package
-                                        removeUriPermissionsForPackageLocked(ssp, userId, true);
+                                        removeUriPermissionsForPackageLocked(ssp, userId, true,
+                                                false);
 
                                         mRecentTasks.removeTasksByPackageName(ssp, userId);
 
@@ -23121,14 +23143,13 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Record new PSS sample for a process.
      */
     void recordPssSampleLocked(ProcessRecord proc, int procState, long pss, long uss, long swapPss,
-            long pssDuration, long now) {
+            long rss, int statType, long pssDuration, long now) {
         EventLogTags.writeAmPss(proc.pid, proc.uid, proc.processName, pss * 1024, uss * 1024,
-                swapPss * 1024);
+                swapPss * 1024, rss * 1024, statType, procState, pssDuration);
         proc.lastPssTime = now;
-        proc.baseProcessTracker.addPss(pss, uss, true, ProcessStats.ADD_PSS_INTERNAL,
-                pssDuration, proc.pkgList);
+        proc.baseProcessTracker.addPss(pss, uss, rss, true, statType, pssDuration, proc.pkgList);
         if (DEBUG_PSS) Slog.d(TAG_PSS,
-                "PSS of " + proc.toShortString() + ": " + pss + " lastPss=" + proc.lastPss
+                "pss of " + proc.toShortString() + ": " + pss + " lastPss=" + proc.lastPss
                 + " state=" + ProcessList.makeProcStateString(procState));
         if (proc.initialIdlePss == 0) {
             proc.initialIdlePss = pss;
@@ -23227,8 +23248,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (mPendingPssProcesses.size() == 0) {
             mBgHandler.sendEmptyMessage(COLLECT_PSS_BG_MSG);
         }
-        if (DEBUG_PSS) Slog.d(TAG_PSS, "Requesting PSS of: " + proc);
+        if (DEBUG_PSS) Slog.d(TAG_PSS, "Requesting pss of: " + proc);
         proc.pssProcState = procState;
+        proc.pssStatType = ProcessStats.ADD_PSS_INTERNAL_SINGLE;
         mPendingPssProcesses.add(proc);
     }
 
@@ -23243,7 +23265,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return;
             }
         }
-        if (DEBUG_PSS) Slog.d(TAG_PSS, "Requesting PSS of all procs!  memLowered=" + memLowered);
+        if (DEBUG_PSS) Slog.d(TAG_PSS, "Requesting pss of all procs!  memLowered=" + memLowered);
         mLastFullPssTime = now;
         mFullPssPending = true;
         mPendingPssProcesses.ensureCapacity(mLruProcesses.size());
@@ -23256,8 +23278,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             if (memLowered || now > (app.lastStateTime+ProcessList.PSS_ALL_INTERVAL)) {
                 app.pssProcState = app.setProcState;
-                app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState, true,
-                        mTestPssMode, isSleepingLocked(), now);
+                app.pssStatType = always ? ProcessStats.ADD_PSS_INTERNAL_ALL_POLL
+                        : ProcessStats.ADD_PSS_INTERNAL_ALL_MEM;
+                app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState,
+                        app.procStateMemTracker, mTestPssMode, isSleepingLocked(), now);
                 mPendingPssProcesses.add(app);
             }
         }
@@ -23624,16 +23648,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                 long startTime = SystemClock.currentThreadTimeMillis();
                 long pss = Debug.getPss(app.pid, mTmpLong, null);
                 long endTime = SystemClock.currentThreadTimeMillis();
-                recordPssSampleLocked(app, app.curProcState, pss, endTime-startTime,
-                        mTmpLong[0], mTmpLong[1], now);
+                recordPssSampleLocked(app, app.curProcState, pss, mTmpLong[0], mTmpLong[1],
+                        mTmpLong[2], ProcessStats.ADD_PSS_INTERNAL_SINGLE, endTime-startTime, now);
                 mPendingPssProcesses.remove(app);
                 Slog.i(TAG, "Recorded pss for " + app + " state " + app.setProcState
                         + " to " + app.curProcState + ": "
                         + (SystemClock.uptimeMillis()-start) + "ms");
             }
             app.lastStateTime = now;
-            app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState, true,
-                    mTestPssMode, isSleepingLocked(), now);
+            app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState,
+                    app.procStateMemTracker, mTestPssMode, isSleepingLocked(), now);
             if (DEBUG_PSS) Slog.d(TAG_PSS, "Process state change from "
                     + ProcessList.makeProcStateString(app.setProcState) + " to "
                     + ProcessList.makeProcStateString(app.curProcState) + " next pss in "
@@ -23643,10 +23667,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     && now > (app.lastStateTime+ProcessList.minTimeFromStateChange(
                     mTestPssMode)))) {
                 requestPssLocked(app, app.setProcState);
-                app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState, false,
-                        mTestPssMode, isSleepingLocked(), now);
+                app.nextPssTime = ProcessList.computeNextPssTime(app.curProcState,
+                        app.procStateMemTracker, mTestPssMode, isSleepingLocked(), now);
             } else if (false && DEBUG_PSS) Slog.d(TAG_PSS,
-                    "Not requesting PSS of " + app + ": next=" + (app.nextPssTime-now));
+                    "Not requesting pss of " + app + ": next=" + (app.nextPssTime-now));
         }
         if (app.setProcState != app.curProcState) {
             if (DEBUG_SWITCH || DEBUG_OOM_ADJ || mCurOomAdjUid == app.uid) {

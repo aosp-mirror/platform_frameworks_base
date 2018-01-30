@@ -126,11 +126,9 @@ public class MediaController2 implements AutoCloseable {
         /**
          * Called when the playlist is changed.
          *
-         * @param list
-         * @param param
+         * @param playlist A new playlist set by the session.
          */
-        public void onPlaylistChanged(
-                @NonNull List<MediaItem2> list, @NonNull PlaylistParams param) { }
+        public void onPlaylistChanged(@NonNull List<MediaItem2> playlist) { }
 
         /**
          * Called when the playback state is changed, or connection success.
@@ -599,9 +597,13 @@ public class MediaController2 implements AutoCloseable {
         return mProvider.getPlaylist_impl();
     }
 
-    public @Nullable
-    PlaylistParams getPlaylistParam() {
-        return mProvider.getPlaylistParam_impl();
+    /**
+     * Returns the {@link PlaylistParams} for the current play list.
+     * Can return {@code null} if the controller doesn't have enough permission, or if the session
+     * has not set the parameters.
+     */
+    public @Nullable PlaylistParams getPlaylistParams() {
+        return mProvider.getPlaylistParams_impl();
     }
 
     /**

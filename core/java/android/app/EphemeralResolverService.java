@@ -17,20 +17,10 @@
 package android.app;
 
 import android.annotation.SystemApi;
-import android.app.Service;
-import android.app.InstantAppResolverService.InstantAppResolutionCallback;
-import android.content.Context;
-import android.content.Intent;
 import android.content.pm.EphemeralResolveInfo;
 import android.content.pm.InstantAppResolveInfo;
 import android.os.Build;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.IRemoteCallback;
 import android.os.Looper;
-import android.os.Message;
-import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -85,7 +75,6 @@ public abstract class EphemeralResolverService extends InstantAppResolverService
         return super.getLooper();
     }
 
-    @Override
     void _onGetInstantAppResolveInfo(int[] digestPrefix, String token,
             InstantAppResolutionCallback callback) {
         if (DEBUG_EPHEMERAL) {
@@ -101,7 +90,6 @@ public abstract class EphemeralResolverService extends InstantAppResolverService
         callback.onInstantAppResolveInfo(resultList);
     }
 
-    @Override
     void _onGetInstantAppIntentFilter(int[] digestPrefix, String token,
             String hostName, InstantAppResolutionCallback callback) {
         if (DEBUG_EPHEMERAL) {

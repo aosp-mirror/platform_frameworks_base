@@ -462,8 +462,8 @@ class Task extends WindowContainer<AppWindowToken> {
                 } else {
                     mStack.getBounds(mTmpRect);
                     mTmpRect.intersect(getBounds());
+                    out.set(mTmpRect);
                 }
-                out.set(mTmpRect);
             } else {
                 out.set(getBounds());
             }
@@ -640,6 +640,7 @@ class Task extends WindowContainer<AppWindowToken> {
         mPreserveNonFloatingState = false;
     }
 
+    @Override
     Dimmer getDimmer() {
         return mDimmer;
     }

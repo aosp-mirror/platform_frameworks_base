@@ -30,7 +30,7 @@ include $(BUILD_STATIC_JAVA_LIBRARY)
 
 include $(CLEAR_VARS)
 
-LOCAL_PACKAGE_NAME := SystemUISharedLib
+LOCAL_PACKAGE_NAME := SysUISharedLib
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_JAVA_LIBRARIES := SystemUISharedLib

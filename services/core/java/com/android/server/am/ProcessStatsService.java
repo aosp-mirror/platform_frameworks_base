@@ -220,8 +220,9 @@ public final class ProcessStatsService extends IProcessStats.Stub {
     }
 
     public void writeStateLocked(boolean sync, final boolean commit) {
+        final long totalTime;
         synchronized (mPendingWriteLock) {
-            long now = SystemClock.uptimeMillis();
+            final long now = SystemClock.uptimeMillis();
             if (mPendingWrite == null || !mPendingWriteCommitted) {
                 mPendingWrite = Parcel.obtain();
                 mProcessStats.mTimePeriodEndRealtime = SystemClock.elapsedRealtime();
@@ -238,19 +239,19 @@ public final class ProcessStatsService extends IProcessStats.Stub {
                 updateFile();
             }
             mLastWriteTime = SystemClock.uptimeMillis();
-            if (DEBUG) Slog.d(TAG, "Prepared write state in "
-                    + (SystemClock.uptimeMillis()-now) + "ms");
+            totalTime = SystemClock.uptimeMillis() - now;
+            if (DEBUG) Slog.d(TAG, "Prepared write state in " + now + "ms");
             if (!sync) {
                 BackgroundThread.getHandler().post(new Runnable() {
                     @Override public void run() {
-                        performWriteState();
+                        performWriteState(totalTime);
                     }
                 });
                 return;
             }
         }
 
-        performWriteState();
+        performWriteState(totalTime);
     }
 
     private void updateFile() {
@@ -259,7 +260,7 @@ public final class ProcessStatsService extends IProcessStats.Stub {
         mLastWriteTime = SystemClock.uptimeMillis();
     }
 
-    void performWriteState() {
+    void performWriteState(long initialTime) {
         if (DEBUG) Slog.d(TAG, "Performing write to " + mFile.getBaseFile());
         Parcel data;
         AtomicFile file;
@@ -275,12 +276,15 @@ public final class ProcessStatsService extends IProcessStats.Stub {
             mWriteLock.lock();
         }
 
+        final long startTime = SystemClock.uptimeMillis();
         FileOutputStream stream = null;
         try {
             stream = file.startWrite();
             stream.write(data.marshall());
             stream.flush();
             file.finishWrite(stream);
+            com.android.internal.logging.EventLogTags.writeCommitSysConfigFile(
+                    "procstats", SystemClock.uptimeMillis() - startTime + initialTime);
             if (DEBUG) Slog.d(TAG, "Write completed successfully!");
         } catch (IOException e) {
             Slog.w(TAG, "Error writing process statistics", e);

@@ -37,11 +37,8 @@ import android.view.View;
 public interface MediaControlView2Provider extends ViewProvider {
     void setController_impl(MediaController controller);
     void show_impl();
-    void show_impl(int timeout);
+    void show_impl(long timeout);
     boolean isShowing_impl();
     void hide_impl();
-    void showSubtitle_impl();
-    void hideSubtitle_impl();
-    void setPrevNextListeners_impl(View.OnClickListener next, View.OnClickListener prev);
-    void setButtonVisibility_impl(int button, boolean visible);
+    void setButtonVisibility_impl(int button, int visibility);
 }

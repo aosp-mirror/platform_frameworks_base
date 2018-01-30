@@ -889,7 +889,7 @@ public final class PrintSpoolerService extends Service {
 
         private PersistenceManager() {
             mStatePersistFile = new AtomicFile(new File(getFilesDir(),
-                    PERSIST_FILE_NAME));
+                    PERSIST_FILE_NAME), "print-spooler");
         }
 
         public void writeStateLocked() {

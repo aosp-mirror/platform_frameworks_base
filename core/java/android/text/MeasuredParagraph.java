@@ -672,6 +672,13 @@ public class MeasuredParagraph {
         return width;
     }
 
+    /**
+     * This only works if the MeasuredParagraph is computed with buildForStaticLayout.
+     */
+    @IntRange(from = 0) int getMemoryUsage() {
+        return nGetMemoryUsage(mNativePtr);
+    }
+
     private static native /* Non Zero */ long nInitBuilder();
 
     /**
@@ -718,4 +725,7 @@ public class MeasuredParagraph {
 
     @CriticalNative
     private static native /* Non Zero */ long nGetReleaseFunc();
+
+    @CriticalNative
+    private static native int nGetMemoryUsage(/* Non Zero */ long nativePtr);
 }

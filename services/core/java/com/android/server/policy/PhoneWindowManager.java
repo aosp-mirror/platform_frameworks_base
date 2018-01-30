@@ -1025,7 +1025,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             public void run() {
                 // send interaction hint to improve redraw performance
                 mPowerManagerInternal.powerHint(PowerHint.INTERACTION, 0);
-                if (isRotationChoiceEnabled()) {
+                if (isRotationChoicePossible(mCurrentAppOrientation)) {
                     final boolean isValid = isValidRotationChoice(mCurrentAppOrientation,
                             mRotation);
                     sendProposedRotationChangeToStatusBarInternal(mRotation, isValid);
@@ -7144,7 +7144,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mOrientationListener.setCurrentRotation(rotation);
     }
 
-    public boolean isRotationChoiceEnabled() {
+    public boolean isRotationChoicePossible(int orientation) {
         // Rotation choice is only shown when the user is in locked mode.
         if (mUserRotationMode != WindowManagerPolicy.USER_ROTATION_LOCKED) return false;
 
@@ -7184,50 +7184,45 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return false;
         }
 
-        // Rotation isn't forced, enable choice
-        return true;
+        // Ensure that some rotation choice is possible for the given orientation
+        switch (orientation) {
+            case ActivityInfo.SCREEN_ORIENTATION_FULL_USER:
+            case ActivityInfo.SCREEN_ORIENTATION_USER:
+            case ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED:
+            case ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE:
+            case ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT:
+                // NOSENSOR description is ambiguous, in reality WM ignores user choice
+                return true;
+        }
+
+        // Rotation is forced, should be controlled by system
+        return false;
     }
 
     public boolean isValidRotationChoice(int orientation, final int preferredRotation) {
-        // Determine if the given app orientation can be chosen and, if so, if it is compatible
-        // with the provided rotation choice
-
+        // Determine if the given app orientation is compatible with the provided rotation choice
         switch (orientation) {
-            case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
-            case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
-            case ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT:
-            case ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
-            case ActivityInfo.SCREEN_ORIENTATION_LOCKED:
-                return false; // Forced into a particular rotation, no user choice
-
-            case ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE:
-            case ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT:
-            case ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR:
-            case ActivityInfo.SCREEN_ORIENTATION_SENSOR:
-                return false; // Sensor overrides user choice
-
-            case ActivityInfo.SCREEN_ORIENTATION_NOSENSOR:
-                // TODO Can sensor be used to indirectly determine the orientation?
-                return false;
-
-            case ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE:
-                // If the user has locked sensor-based rotation, this behaves the same as landscape
-                return false; // User has locked the rotation, will behave as LANDSCAPE
-            case ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT:
-                // If the user has locked sensor-based rotation, this behaves the same as portrait
-                return false; // User has locked the rotation, will behave as PORTRAIT
-            case ActivityInfo.SCREEN_ORIENTATION_USER:
-                // Works with any rotation except upside down
-                return (preferredRotation >= 0) && (preferredRotation != mUpsideDownRotation);
             case ActivityInfo.SCREEN_ORIENTATION_FULL_USER:
                 // Works with any of the 4 rotations
                 return preferredRotation >= 0;
 
-            default:
-                // TODO: how to handle SCREEN_ORIENTATION_BEHIND, UNSET?
-                // For UNSPECIFIED use preferred orientation matching SCREEN_ORIENTATION_USER
+            case ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT:
+                // It's possible for the user pref to be set at 180 because of FULL_USER. This would
+                // make switching to USER_PORTRAIT appear at 180. Provide choice to back to portrait
+                // but never to go to 180.
+                return preferredRotation == mPortraitRotation;
+
+            case ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE:
+                // Works landscape or seascape
+                return isLandscapeOrSeascape(preferredRotation);
+
+            case ActivityInfo.SCREEN_ORIENTATION_USER:
+            case ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED:
+                // Works with any rotation except upside down
                 return (preferredRotation >= 0) && (preferredRotation != mUpsideDownRotation);
         }
+
+        return false;
     }
 
     private boolean isLandscapeOrSeascape(int rotation) {

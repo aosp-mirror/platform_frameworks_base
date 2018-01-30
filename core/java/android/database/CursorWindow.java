@@ -28,6 +28,7 @@ import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.SparseIntArray;
 
+import dalvik.annotation.optimization.FastNative;
 import dalvik.system.CloseGuard;
 
 /**
@@ -62,28 +63,43 @@ public class CursorWindow extends SQLiteClosable implements Parcelable {
     private static native void nativeDispose(long windowPtr);
     private static native void nativeWriteToParcel(long windowPtr, Parcel parcel);
 
-    private static native void nativeClear(long windowPtr);
-
-    private static native int nativeGetNumRows(long windowPtr);
-    private static native boolean nativeSetNumColumns(long windowPtr, int columnNum);
-    private static native boolean nativeAllocRow(long windowPtr);
-    private static native void nativeFreeLastRow(long windowPtr);
-
-    private static native int nativeGetType(long windowPtr, int row, int column);
+    private static native String nativeGetName(long windowPtr);
     private static native byte[] nativeGetBlob(long windowPtr, int row, int column);
     private static native String nativeGetString(long windowPtr, int row, int column);
-    private static native long nativeGetLong(long windowPtr, int row, int column);
-    private static native double nativeGetDouble(long windowPtr, int row, int column);
     private static native void nativeCopyStringToBuffer(long windowPtr, int row, int column,
             CharArrayBuffer buffer);
-
     private static native boolean nativePutBlob(long windowPtr, byte[] value, int row, int column);
-    private static native boolean nativePutString(long windowPtr, String value, int row, int column);
+    private static native boolean nativePutString(long windowPtr, String value,
+            int row, int column);
+
+    // Below native methods don't do unconstrained work, so are FastNative for performance
+
+    @FastNative
+    private static native void nativeClear(long windowPtr);
+
+    @FastNative
+    private static native int nativeGetNumRows(long windowPtr);
+    @FastNative
+    private static native boolean nativeSetNumColumns(long windowPtr, int columnNum);
+    @FastNative
+    private static native boolean nativeAllocRow(long windowPtr);
+    @FastNative
+    private static native void nativeFreeLastRow(long windowPtr);
+
+    @FastNative
+    private static native int nativeGetType(long windowPtr, int row, int column);
+    @FastNative
+    private static native long nativeGetLong(long windowPtr, int row, int column);
+    @FastNative
+    private static native double nativeGetDouble(long windowPtr, int row, int column);
+
+    @FastNative
     private static native boolean nativePutLong(long windowPtr, long value, int row, int column);
+    @FastNative
     private static native boolean nativePutDouble(long windowPtr, double value, int row, int column);
+    @FastNative
     private static native boolean nativePutNull(long windowPtr, int row, int column);
 
-    private static native String nativeGetName(long windowPtr);
 
     /**
      * Creates a new empty cursor window and gives it a name.

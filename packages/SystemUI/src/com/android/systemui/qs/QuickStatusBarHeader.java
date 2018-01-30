@@ -97,7 +97,6 @@ public class QuickStatusBarHeader extends RelativeLayout
         mIconManager.setTint(fillColor);
 
         BatteryMeterView battery = findViewById(R.id.battery);
-        battery.setFillColor(Color.WHITE);
         battery.setForceShowPercent(true);
 
         mActivityStarter = Dependency.get(ActivityStarter.class);
@@ -216,6 +215,11 @@ public class QuickStatusBarHeader extends RelativeLayout
         //host.setHeaderView(mExpandIndicator);
         mHeaderQsPanel.setQSPanelAndHeader(mQsPanel, this);
         mHeaderQsPanel.setHost(host, null /* No customization in header */);
+
+        // Use SystemUI context to get battery meter colors, and let it use the default tint (white)
+        BatteryMeterView battery = findViewById(R.id.battery);
+        battery.setColorsFromContext(mHost.getContext());
+        battery.onDarkChanged(new Rect(), 0, DarkIconDispatcher.DEFAULT_ICON_TINT);
     }
 
     public void setCallback(Callback qsPanelCallback) {

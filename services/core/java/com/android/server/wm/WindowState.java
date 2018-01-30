@@ -2138,18 +2138,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mInputWindowHandle.inputChannel = null;
     }
 
-    private Dimmer getDimmer() {
-        Task task = getTask();
-        if (task != null) {
-            return task.getDimmer();
-        }
-        TaskStack taskStack = getStack();
-        if (taskStack != null) {
-            return taskStack.getDimmer();
-        }
-        return null;
-    }
-
     /** Returns true if the replacement window was removed. */
     boolean removeReplacedWindowIfNeeded(WindowState replacement) {
         if (mWillReplaceWindow && mReplacementWindow == replacement && replacement.hasDrawnLw()) {
@@ -4516,11 +4504,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private void applyDims(Dimmer dimmer) {
         if (!mAnimatingExit && mAppDied) {
             mIsDimming = true;
-            getDimmer().dimAbove(getPendingTransaction(), this, DEFAULT_DIM_AMOUNT_DEAD_WINDOW);
+            dimmer.dimAbove(getPendingTransaction(), this, DEFAULT_DIM_AMOUNT_DEAD_WINDOW);
         } else if ((mAttrs.flags & FLAG_DIM_BEHIND) != 0
-                && !mAnimatingExit && isVisible()) {
+                && !mAnimatingExit && isVisible() && !mWinAnimator.mLastHidden) {
             mIsDimming = true;
-            getDimmer().dimBelow(getPendingTransaction(), this, mAttrs.dimAmount);
+            dimmer.dimBelow(getPendingTransaction(), this, mAttrs.dimAmount);
         }
     }
 
@@ -4531,7 +4519,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (dimmer != null) {
             applyDims(dimmer);
         }
-
         updateSurfacePosition(mPendingTransaction);
 
         mWinAnimator.prepareSurfaceLocked(true);

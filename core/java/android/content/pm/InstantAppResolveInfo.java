@@ -19,6 +19,7 @@ package android.content.pm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -26,17 +27,43 @@ import android.os.Parcelable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
 /**
- * Information about an instant application.
+ * Describes an externally resolvable instant application. There are three states that this class
+ * can represent: <p/>
+ * <ul>
+ *     <li>
+ *         The first, usable only for non http/s intents, implies that the resolver cannot
+ *         immediately resolve this intent and would prefer that resolution be deferred to the
+ *         instant app installer. Represent this state with {@link #InstantAppResolveInfo(Bundle)}.
+ *         If the {@link android.content.Intent} has the scheme set to http/s and a set of digest
+ *         prefixes were passed into one of the resolve methods in
+ *         {@link android.app.InstantAppResolverService}, this state cannot be used.
+ *     </li>
+ *     <li>
+ *         The second represents a partial match and is constructed with any of the other
+ *         constructors. By setting one or more of the {@link Nullable}arguments to null, you
+ *         communicate to the resolver in response to
+ *         {@link android.app.InstantAppResolverService#onGetInstantAppResolveInfo(Intent, int[],
+ *                String, InstantAppResolverService.InstantAppResolutionCallback)}
+ *         that you need a 2nd round of resolution to complete the request.
+ *     </li>
+ *     <li>
+ *         The third represents a complete match and is constructed with all @Nullable parameters
+ *         populated.
+ *     </li>
+ * </ul>
  * @hide
  */
 @SystemApi
 public final class InstantAppResolveInfo implements Parcelable {
     /** Algorithm that will be used to generate the domain digest */
     private static final String SHA_ALGORITHM = "SHA-256";
+
+    private static final byte[] EMPTY_DIGEST = new byte[0];
 
     private final InstantAppDigest mDigest;
     private final String mPackageName;
@@ -46,15 +73,30 @@ public final class InstantAppResolveInfo implements Parcelable {
     private final long mVersionCode;
     /** Data about the app that should be passed along to the Instant App installer on resolve */
     private final Bundle mExtras;
+    /**
+     * A flag that indicates that the resolver is aware that an app may match, but would prefer
+     * that the installer get the sanitized intent to decide. This should not be used for
+     * resolutions that include a host and will be ignored in such cases.
+     */
+    private final boolean mShouldLetInstallerDecide;
 
+    /** Constructor for intent-based InstantApp resolution results. */
     public InstantAppResolveInfo(@NonNull InstantAppDigest digest, @Nullable String packageName,
             @Nullable List<InstantAppIntentFilter> filters, int versionCode) {
         this(digest, packageName, filters, (long) versionCode, null /* extras */);
     }
 
+    /** Constructor for intent-based InstantApp resolution results with extras. */
     public InstantAppResolveInfo(@NonNull InstantAppDigest digest, @Nullable String packageName,
             @Nullable List<InstantAppIntentFilter> filters, long versionCode,
             @Nullable Bundle extras) {
+        this(digest, packageName, filters, versionCode, extras, false);
+    }
+
+    /** Constructor for intent-based InstantApp resolution results with extras. */
+    private InstantAppResolveInfo(@NonNull InstantAppDigest digest, @Nullable String packageName,
+            @Nullable List<InstantAppIntentFilter> filters, long versionCode,
+            @Nullable Bundle extras, boolean shouldLetInstallerDecide) {
         // validate arguments
         if ((packageName == null && (filters != null && filters.size() != 0))
                 || (packageName != null && (filters == null || filters.size() == 0))) {
@@ -62,7 +104,7 @@ public final class InstantAppResolveInfo implements Parcelable {
         }
         mDigest = digest;
         if (filters != null) {
-            mFilters = new ArrayList<InstantAppIntentFilter>(filters.size());
+            mFilters = new ArrayList<>(filters.size());
             mFilters.addAll(filters);
         } else {
             mFilters = null;
@@ -70,25 +112,48 @@ public final class InstantAppResolveInfo implements Parcelable {
         mPackageName = packageName;
         mVersionCode = versionCode;
         mExtras = extras;
+        mShouldLetInstallerDecide = shouldLetInstallerDecide;
     }
 
+    /** Constructor for intent-based InstantApp resolution results by hostname. */
     public InstantAppResolveInfo(@NonNull String hostName, @Nullable String packageName,
             @Nullable List<InstantAppIntentFilter> filters) {
         this(new InstantAppDigest(hostName), packageName, filters, -1 /*versionCode*/,
                 null /* extras */);
     }
 
+    /**
+     * Constructor that creates a "let the installer decide" response with optional included
+     * extras.
+     */
+    public InstantAppResolveInfo(@Nullable Bundle extras) {
+        this(InstantAppDigest.UNDEFINED, null, null, -1, extras, true);
+    }
+
     InstantAppResolveInfo(Parcel in) {
-        mDigest = in.readParcelable(null /*loader*/);
-        mPackageName = in.readString();
-        mFilters = new ArrayList<InstantAppIntentFilter>();
-        in.readList(mFilters, null /*loader*/);
-        mVersionCode = in.readLong();
+        mShouldLetInstallerDecide = in.readBoolean();
         mExtras = in.readBundle();
+        if (mShouldLetInstallerDecide) {
+            mDigest = InstantAppDigest.UNDEFINED;
+            mPackageName = null;
+            mFilters = Collections.emptyList();
+            mVersionCode = -1;
+        } else {
+            mDigest = in.readParcelable(null /*loader*/);
+            mPackageName = in.readString();
+            mFilters = new ArrayList<>();
+            in.readList(mFilters, null /*loader*/);
+            mVersionCode = in.readLong();
+        }
+    }
+
+    /** Returns true if the installer should be notified that it should query for packages. */
+    public boolean shouldLetInstallerDecide() {
+        return mShouldLetInstallerDecide;
     }
 
     public byte[] getDigestBytes() {
-        return mDigest.getDigestBytes()[0];
+        return mDigest.mDigestBytes.length > 0 ? mDigest.getDigestBytes()[0] : EMPTY_DIGEST;
     }
 
     public int getDigestPrefix() {
@@ -127,11 +192,15 @@ public final class InstantAppResolveInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
+        out.writeBoolean(mShouldLetInstallerDecide);
+        out.writeBundle(mExtras);
+        if (mShouldLetInstallerDecide) {
+            return;
+        }
         out.writeParcelable(mDigest, flags);
         out.writeString(mPackageName);
         out.writeList(mFilters);
         out.writeLong(mVersionCode);
-        out.writeBundle(mExtras);
     }
 
     public static final Parcelable.Creator<InstantAppResolveInfo> CREATOR
@@ -159,7 +228,9 @@ public final class InstantAppResolveInfo implements Parcelable {
     @SystemApi
     public static final class InstantAppDigest implements Parcelable {
         private static final int DIGEST_MASK = 0xfffff000;
-        private static final int DIGEST_PREFIX_COUNT = 5;
+
+        public static final InstantAppDigest UNDEFINED =
+                new InstantAppDigest(new byte[][]{}, new int[]{});
         /** Full digest of the domain hashes */
         private final byte[][] mDigestBytes;
         /** The first 4 bytes of the domain hashes */
@@ -184,6 +255,11 @@ public final class InstantAppResolveInfo implements Parcelable {
                                 | (mDigestBytes[i][3] & 0xFF) << 0)
                         & DIGEST_MASK;
             }
+        }
+
+        private InstantAppDigest(byte[][] digestBytes, int[] prefix) {
+            this.mDigestPrefix = prefix;
+            this.mDigestBytes = digestBytes;
         }
 
         private static byte[][] generateDigest(String hostName, int maxDigests) {

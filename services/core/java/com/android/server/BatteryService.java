@@ -835,6 +835,9 @@ public final class BatteryService extends SystemService {
                         case "level":
                             mHealthInfo.batteryLevel = Integer.parseInt(value);
                             break;
+                        case "counter":
+                            mHealthInfo.batteryChargeCounter = Integer.parseInt(value);
+                            break;
                         case "temp":
                             mHealthInfo.batteryTemperature = Integer.parseInt(value);
                             break;
@@ -1160,6 +1163,20 @@ public final class BatteryService extends SystemService {
         public int getBatteryLevel() {
             synchronized (mLock) {
                 return mHealthInfo.batteryLevel;
+            }
+        }
+
+        @Override
+        public int getBatteryChargeCounter() {
+            synchronized (mLock) {
+                return mHealthInfo.batteryChargeCounter;
+            }
+        }
+
+        @Override
+        public int getBatteryFullCharge() {
+            synchronized (mLock) {
+                return mHealthInfo.batteryFullCharge;
             }
         }
 

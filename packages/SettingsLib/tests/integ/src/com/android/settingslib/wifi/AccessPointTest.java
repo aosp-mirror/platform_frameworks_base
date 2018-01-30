@@ -40,6 +40,7 @@ import android.net.wifi.WifiSsid;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.net.wifi.hotspot2.pps.HomeSp;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.os.SystemClock;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
@@ -277,7 +278,8 @@ public class AccessPointTest {
         scanResult.BSSID = "bssid";
         scanResult.timestamp = SystemClock.elapsedRealtime() * 1000;
         scanResult.capabilities = "";
-        assertThat(ap.update(scanResult, true /* evict old scan results */)).isTrue();
+
+        ap.setScanResults(Collections.singletonList(scanResult));
 
         assertThat(ap.getRssi()).isEqualTo(expectedRssi);
     }
@@ -477,7 +479,7 @@ public class AccessPointTest {
         result.carrierApEapType = WifiEnterpriseConfig.Eap.SIM;
         result.carrierName = carrierName;
 
-        AccessPoint ap = new AccessPoint(mContext, result);
+        AccessPoint ap = new AccessPoint(mContext, Collections.singletonList(result));
         assertThat(ap.getSummary()).isEqualTo(String.format(mContext.getString(
                 R.string.available_via_carrier), carrierName));
         assertThat(ap.isCarrierAp()).isEqualTo(true);
@@ -513,7 +515,7 @@ public class AccessPointTest {
     }
 
     @Test
-    public void testUpdateScanResultWithCarrierInfo() {
+    public void testSetScanResultWithCarrierInfo() {
         String ssid = "ssid";
         AccessPoint ap = new TestAccessPointBuilder(mContext).setSsid(ssid).build();
         assertThat(ap.isCarrierAp()).isEqualTo(false);
@@ -529,8 +531,9 @@ public class AccessPointTest {
         scanResult.isCarrierAp = true;
         scanResult.carrierApEapType = carrierApEapType;
         scanResult.carrierName = carrierName;
-        assertThat(ap.update(scanResult, true /* evictOldScanresults */)).isTrue();
 
+
+        ap.setScanResults(Collections.singletonList(scanResult));
         assertThat(ap.isCarrierAp()).isEqualTo(true);
         assertThat(ap.getCarrierApEapType()).isEqualTo(carrierApEapType);
         assertThat(ap.getCarrierName()).isEqualTo(carrierName);
@@ -552,7 +555,9 @@ public class AccessPointTest {
 
     private AccessPoint createAccessPointWithScanResultCache() {
         Bundle bundle = new Bundle();
-        bundle.putParcelableArrayList(AccessPoint.KEY_SCANRESULTCACHE, SCAN_RESULTS);
+        bundle.putParcelableArray(
+                AccessPoint.KEY_SCANRESULTS,
+                SCAN_RESULTS.toArray(new Parcelable[SCAN_RESULTS.size()]));
         return new AccessPoint(mContext, bundle);
     }
 
@@ -903,7 +908,7 @@ public class AccessPointTest {
                         .setActive(true)
                         .setNetworkId(networkId)
                         .setSsid(TEST_SSID)
-                        .setScanResultCache(scanResults)
+                        .setScanResults(scanResults)
                         .setWifiInfo(info)
                         .build();
 
@@ -990,7 +995,7 @@ public class AccessPointTest {
                 .setActive(true)
                 .setScoredNetworkCache(
                         new ArrayList(Arrays.asList(recentScore)))
-                .setScanResultCache(SCAN_RESULTS)
+                .setScanResults(SCAN_RESULTS)
                 .build();
 
         when(mockWifiNetworkScoreCache.getScoredNetwork(any(ScanResult.class)))
@@ -1018,7 +1023,7 @@ public class AccessPointTest {
                 .setActive(true)
                 .setScoredNetworkCache(
                         new ArrayList(Arrays.asList(recentScore)))
-                .setScanResultCache(SCAN_RESULTS)
+                .setScanResults(SCAN_RESULTS)
                 .build();
 
         int newSpeed = Speed.MODERATE;

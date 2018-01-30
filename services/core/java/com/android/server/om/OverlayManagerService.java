@@ -228,7 +228,7 @@ public final class OverlayManagerService extends SystemService {
             @NonNull final Installer installer) {
         super(context);
         mSettingsFile =
-            new AtomicFile(new File(Environment.getDataSystemDirectory(), "overlays.xml"));
+            new AtomicFile(new File(Environment.getDataSystemDirectory(), "overlays.xml"), "overlays");
         mPackageManager = new PackageManagerHelper();
         mUserManager = UserManagerService.getInstance();
         IdmapManager im = new IdmapManager(installer);

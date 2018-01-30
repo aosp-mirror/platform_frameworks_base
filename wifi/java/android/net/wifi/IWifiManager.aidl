@@ -158,9 +158,6 @@ interface IWifiManager
 
     int getVerboseLoggingLevel();
 
-    void enableAggressiveHandover(int enabled);
-    int getAggressiveHandover();
-
     void enableWifiConnectivityManager(boolean enabled);
 
     void disableEphemeralNetwork(String SSID, String packageName);

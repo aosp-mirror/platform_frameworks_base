@@ -618,9 +618,9 @@ public class KeyStore {
      * @return {@code KeyStore.NO_ERROR} on success, otherwise an error value corresponding to
      * a {@code KeymasterDefs.KM_ERROR_} value or {@code KeyStore} ResponseCode.
      */
-    public int addAuthToken(byte[] authToken) {
+    public int addAuthToken(byte[] authToken, int userId) {
         try {
-            return mBinder.addAuthToken(authToken);
+            return mBinder.addAuthToken(authToken, userId);
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return SYSTEM_ERROR;

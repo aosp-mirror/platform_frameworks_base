@@ -16,19 +16,13 @@
 
 package com.android.server.media;
 
-import android.annotation.CallSuper;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
-import android.media.IMediaSession2;
 import android.media.MediaController2;
 import android.media.MediaSession2;
 import android.media.SessionToken2;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Records a {@link MediaSession2} and holds {@link MediaController2}.

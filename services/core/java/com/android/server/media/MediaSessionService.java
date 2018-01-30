@@ -39,8 +39,8 @@ import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioSystem;
 import android.media.IAudioService;
-import android.media.IMediaSession2;
 import android.media.IRemoteVolumeController;
+import android.media.ISessionTokensListener;
 import android.media.MediaLibraryService2;
 import android.media.MediaSessionService2;
 import android.media.SessionToken2;
@@ -469,31 +469,21 @@ public class MediaSessionService extends SystemService implements Monitor {
                 ServiceInfo serviceInfo = services.get(i).serviceInfo;
                 int uid;
                 try {
+                    // TODO(jaewan): Do this per user.
                     uid = manager.getPackageUid(serviceInfo.packageName,
                             PackageManager.GET_META_DATA);
                 } catch (NameNotFoundException e) {
                     continue;
                 }
-                String id = (serviceInfo.metaData != null) ? serviceInfo.metaData.getString(
-                        MediaSessionService2.SERVICE_META_DATA) : null;
-                // Do basic sanity check
-                // TODO(jaewan): also santity check if it's protected with the system|privileged
-                //               permission
-                boolean conflict = (getSessionRecordLocked(uid, serviceInfo.name, id) != null);
-                if (conflict) {
-                    Log.w(TAG, serviceInfo.packageName + " contains multiple"
-                            + " MediaSessionService2s declared in the manifest with"
-                            + " the same ID=" + id + ". Ignoring "
-                            + serviceInfo.packageName + "/" + serviceInfo.name);
-                } else {
-                    int type = (libraryServices.contains(services.get(i)))
-                            ? SessionToken2.TYPE_LIBRARY_SERVICE
-                            : SessionToken2.TYPE_SESSION_SERVICE;
-                    SessionToken2 token = new SessionToken2(getContext(), uid, type,
-                            serviceInfo.packageName, serviceInfo.name, id, null);
+
+                try {
+                    SessionToken2 token = new SessionToken2(getContext(),
+                            serviceInfo.packageName, serviceInfo.name, uid);
                     MediaSession2Record record = new MediaSession2Record(getContext(),
                             token, mSessionDestroyedListener);
                     mSessions.add(record);
+                } catch (IllegalArgumentException e) {
+                    Log.d(TAG, "Invalid session service", e);
                 }
             }
         }
@@ -1424,6 +1414,16 @@ public class MediaSessionService extends SystemService implements Monitor {
                     mUserRecords.valueAt(i).dumpLocked(pw, "");
                 }
                 mAudioPlayerStateMonitor.dump(getContext(), pw, "");
+
+                // TODO(jaewan): Remove this debug command before ship.
+                if (args != null && args.length > 0 && "--purge".equals(args[0])) {
+                    mSessions.clear();
+                }
+                pw.println();
+                pw.println("Session2: size=" + mSessions.size());
+                for (int i = 0; i < mSessions.size(); i++) {
+                    pw.println("  " + mSessions.get(i));
+                }
             }
         }
 
@@ -1480,7 +1480,6 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         // TODO(jaewan): Protect this API with permission
-        // TODO(jaewan): Add listeners for change in operations..
         @Override
         public List<Bundle> getSessionTokens(boolean activeSessionOnly,
                 boolean sessionServiceOnly) throws RemoteException {
@@ -1502,6 +1501,17 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
             }
             return tokens;
+        }
+
+        @Override
+        public void addSessionTokensListener(ISessionTokensListener listener, int userId,
+                String packageName) {
+            // TODO(jaewan): Implement.
+        }
+
+        @Override
+        public void removeSessionTokensListener(ISessionTokensListener listener) {
+            // TODO(jaewan): Implement
         }
 
         private int verifySessionsRequest(ComponentName componentName, int userId, final int pid,

@@ -291,6 +291,11 @@ int64_t MaxDurationTracker::predictAnomalyTimestampNs(const DurationAnomalyTrack
     return currentTimestamp;
 }
 
+void MaxDurationTracker::dumpStates(FILE* out, bool verbose) const {
+    fprintf(out, "\t\t sub-durations %lu\n", (unsigned long)mInfos.size());
+    fprintf(out, "\t\t current duration %lld\n", (long long)mDuration);
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

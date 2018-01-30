@@ -265,7 +265,6 @@ public class RecentsAnimationController {
         mPendingAnimations.clear();
 
         mService.mInputMonitor.updateInputWindowsLw(true /*force*/);
-        mService.scheduleAnimationLocked();
         mService.destroyInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
     }
 

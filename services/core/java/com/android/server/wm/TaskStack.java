@@ -1722,6 +1722,7 @@ public class TaskStack extends WindowContainer<Task> implements
                 || activityType == ACTIVITY_TYPE_ASSISTANT;
     }
 
+    @Override
     Dimmer getDimmer() {
         return mDimmer;
     }

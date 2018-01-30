@@ -166,6 +166,7 @@ public class PinnedSliceState {
     ContentProviderClient getClient() {
         ContentProviderClient client =
                 mService.getContext().getContentResolver().acquireContentProviderClient(mUri);
+        if (client == null) return null;
         client.setDetectNotResponding(SLICE_TIMEOUT);
         return client;
     }
@@ -181,6 +182,7 @@ public class PinnedSliceState {
             }
             if (!isPinned()) {
                 // All the listeners died, remove from pinned state.
+                mService.unlisten(mUri);
                 mService.removePinnedSlice(mUri);
             }
         }
@@ -210,6 +212,7 @@ public class PinnedSliceState {
             }
             if (!isPinned()) {
                 // All the listeners died, remove from pinned state.
+                mService.unlisten(mUri);
                 mService.removePinnedSlice(mUri);
             }
         }
@@ -217,6 +220,7 @@ public class PinnedSliceState {
 
     private Slice doBind(String overridePkg) {
         try (ContentProviderClient client = getClient()) {
+            if (client == null) return null;
             Bundle extras = new Bundle();
             extras.putParcelable(SliceProvider.EXTRA_BIND_URI, mUri);
             extras.putParcelableArrayList(SliceProvider.EXTRA_SUPPORTED_SPECS,
@@ -237,6 +241,7 @@ public class PinnedSliceState {
 
     private void handleSendPinned() {
         try (ContentProviderClient client = getClient()) {
+            if (client == null) return;
             Bundle b = new Bundle();
             b.putParcelable(SliceProvider.EXTRA_BIND_URI, mUri);
             try {
@@ -249,6 +254,7 @@ public class PinnedSliceState {
 
     private void handleSendUnpinned() {
         try (ContentProviderClient client = getClient()) {
+            if (client == null) return;
             Bundle b = new Bundle();
             b.putParcelable(SliceProvider.EXTRA_BIND_URI, mUri);
             try {

@@ -16,6 +16,9 @@
 
 package com.android.internal.app.procstats;
 
+import static com.android.internal.app.procstats.ProcessStats.PSS_RSS_AVERAGE;
+import static com.android.internal.app.procstats.ProcessStats.PSS_RSS_MAXIMUM;
+import static com.android.internal.app.procstats.ProcessStats.PSS_RSS_MINIMUM;
 import static com.android.internal.app.procstats.ProcessStats.PSS_SAMPLE_COUNT;
 import static com.android.internal.app.procstats.ProcessStats.PSS_MINIMUM;
 import static com.android.internal.app.procstats.ProcessStats.PSS_AVERAGE;
@@ -51,7 +54,10 @@ public class PssTable extends SparseMappingTable.Table {
                     that.getValue(key, PSS_MAXIMUM),
                     that.getValue(key, PSS_USS_MINIMUM),
                     that.getValue(key, PSS_USS_AVERAGE),
-                    that.getValue(key, PSS_USS_MAXIMUM));
+                    that.getValue(key, PSS_USS_MAXIMUM),
+                    that.getValue(key, PSS_RSS_MINIMUM),
+                    that.getValue(key, PSS_RSS_AVERAGE),
+                    that.getValue(key, PSS_RSS_MAXIMUM));
         }
     }
 
@@ -60,7 +66,7 @@ public class PssTable extends SparseMappingTable.Table {
      * one and the new one, the average will now incorporate the new average, etc.
      */
     public void mergeStats(int state, int inCount, long minPss, long avgPss, long maxPss,
-            long minUss, long avgUss, long maxUss) {
+            long minUss, long avgUss, long maxUss, long minRss, long avgRss, long maxRss) {
         final int key = getOrAddKey((byte)state, PSS_COUNT);
         final long count = getValue(key, PSS_SAMPLE_COUNT);
         if (count == 0) {
@@ -71,6 +77,9 @@ public class PssTable extends SparseMappingTable.Table {
             setValue(key, PSS_USS_MINIMUM, minUss);
             setValue(key, PSS_USS_AVERAGE, avgUss);
             setValue(key, PSS_USS_MAXIMUM, maxUss);
+            setValue(key, PSS_RSS_MINIMUM, minRss);
+            setValue(key, PSS_RSS_AVERAGE, avgRss);
+            setValue(key, PSS_RSS_MAXIMUM, maxRss);
         } else {
             setValue(key, PSS_SAMPLE_COUNT, count + inCount);
 
@@ -102,6 +111,20 @@ public class PssTable extends SparseMappingTable.Table {
             val = getValue(key, PSS_USS_MAXIMUM);
             if (val < maxUss) {
                 setValue(key, PSS_USS_MAXIMUM, maxUss);
+            }
+
+            val = getValue(key, PSS_RSS_MINIMUM);
+            if (val > minUss) {
+                setValue(key, PSS_RSS_MINIMUM, minUss);
+            }
+
+            val = getValue(key, PSS_RSS_AVERAGE);
+            setValue(key, PSS_RSS_AVERAGE,
+                    (long)(((val*(double)count)+(avgUss*(double)inCount)) / (count+inCount)));
+
+            val = getValue(key, PSS_RSS_MAXIMUM);
+            if (val < maxUss) {
+                setValue(key, PSS_RSS_MAXIMUM, maxUss);
             }
         }
     }
