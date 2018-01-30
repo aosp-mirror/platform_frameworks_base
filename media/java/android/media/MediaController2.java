@@ -104,7 +104,7 @@ public class MediaController2 implements AutoCloseable {
          *
          * @param info new playback info
          */
-        public void onAudioInfoChanged(PlaybackInfo info) { }
+        public void onPlaybackInfoChanged(PlaybackInfo info) { }
 
         /**
          * Called when the allowed commands are changed by session.
