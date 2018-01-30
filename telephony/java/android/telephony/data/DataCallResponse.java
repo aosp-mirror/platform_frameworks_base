@@ -27,6 +27,7 @@ import android.os.Parcelable;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Description of the response of a setup data call connection request.
@@ -220,17 +221,8 @@ public final class DataCallResponse implements Parcelable {
 
     @Override
     public int hashCode() {
-        return mStatus * 31
-                + mSuggestedRetryTime * 37
-                + mCid * 41
-                + mActive * 43
-                + mType.hashCode() * 47
-                + mIfname.hashCode() * 53
-                + mAddresses.hashCode() * 59
-                + mDnses.hashCode() * 61
-                + mGateways.hashCode() * 67
-                + mPcscfs.hashCode() * 71
-                + mMtu * 73;
+        return Objects.hash(mStatus, mSuggestedRetryTime, mCid, mActive, mType, mIfname, mAddresses,
+                mDnses, mGateways, mPcscfs, mMtu);
     }
 
     @Override
