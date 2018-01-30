@@ -56,4 +56,6 @@ oneway interface IInCallService {
     void onRttInitiationFailure(String callId, int reason);
 
     void onHandoverFailed(String callId, int error);
+
+    void onHandoverComplete(String callId);
 }

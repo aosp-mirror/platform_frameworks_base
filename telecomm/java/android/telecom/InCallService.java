@@ -81,6 +81,7 @@ public abstract class InCallService extends Service {
     private static final int MSG_ON_RTT_UPGRADE_REQUEST = 10;
     private static final int MSG_ON_RTT_INITIATION_FAILURE = 11;
     private static final int MSG_ON_HANDOVER_FAILED = 12;
+    private static final int MSG_ON_HANDOVER_COMPLETE = 13;
 
     /** Default Handler used to consolidate binder method calls onto a single thread. */
     private final Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -155,6 +156,11 @@ public abstract class InCallService extends Service {
                     String callId = (String) msg.obj;
                     int error = msg.arg1;
                     mPhone.internalOnHandoverFailed(callId, error);
+                    break;
+                }
+                case MSG_ON_HANDOVER_COMPLETE: {
+                    String callId = (String) msg.obj;
+                    mPhone.internalOnHandoverComplete(callId);
                     break;
                 }
                 default:
@@ -236,6 +242,11 @@ public abstract class InCallService extends Service {
         @Override
         public void onHandoverFailed(String callId, int error) {
             mHandler.obtainMessage(MSG_ON_HANDOVER_FAILED, error, 0, callId).sendToTarget();
+        }
+
+        @Override
+        public void onHandoverComplete(String callId) {
+            mHandler.obtainMessage(MSG_ON_HANDOVER_COMPLETE, callId).sendToTarget();
         }
     }
 
