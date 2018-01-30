@@ -83,6 +83,10 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
 
     private boolean mRingOrCallActive = false;
 
+    private final Object mExtFocusChangeLock = new Object();
+    @GuardedBy("mExtFocusChangeLock")
+    private long mExtFocusChangeCounter;
+
     protected MediaFocusControl(Context cntxt, PlayerFocusEnforcer pfe) {
         mContext = cntxt;
         mAppOps = (AppOpsManager)mContext.getSystemService(Context.APP_OPS_SERVICE);
@@ -521,7 +525,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
      * @param requestResult
      * @return true if the external audio focus policy (if any) is handling the focus request
      */
-    boolean notifyExtFocusPolicyFocusRequest_syncAf(AudioFocusInfo afi, int requestResult,
+    boolean notifyExtFocusPolicyFocusRequest_syncAf(AudioFocusInfo afi,
             IAudioFocusDispatcher fd, IBinder cb) {
         if (mFocusPolicy == null) {
             return false;
@@ -529,6 +533,9 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         if (DEBUG) {
             Log.v(TAG, "notifyExtFocusPolicyFocusRequest client="+afi.getClientId()
             + " dispatcher=" + fd);
+        }
+        synchronized (mExtFocusChangeLock) {
+            afi.setGen(mExtFocusChangeCounter++);
         }
         final FocusRequester existingFr = mFocusOwnersForFocusPolicy.get(afi.getClientId());
         if (existingFr != null) {
@@ -538,8 +545,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
                 mFocusOwnersForFocusPolicy.put(afi.getClientId(),
                         new FocusRequester(afi, fd, cb, hdlr, this));
             }
-        } else if (requestResult == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
-                 || requestResult == AudioManager.AUDIOFOCUS_REQUEST_DELAYED) {
+        } else {
             // new focus (future) focus owner to keep track of
             final AudioFocusDeathHandler hdlr = new AudioFocusDeathHandler(cb);
             mFocusOwnersForFocusPolicy.put(afi.getClientId(),
@@ -547,12 +553,25 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
         }
         try {
             //oneway
-            mFocusPolicy.notifyAudioFocusRequest(afi, requestResult);
+            mFocusPolicy.notifyAudioFocusRequest(afi, AudioManager.AUDIOFOCUS_REQUEST_GRANTED);
+            return true;
         } catch (RemoteException e) {
             Log.e(TAG, "Can't call notifyAudioFocusRequest() on IAudioPolicyCallback "
                     + mFocusPolicy.asBinder(), e);
         }
-        return true;
+        return false;
+    }
+
+    void setFocusRequestResultFromExtPolicy(AudioFocusInfo afi, int requestResult) {
+        synchronized (mExtFocusChangeLock) {
+            if (afi.getGen() > mExtFocusChangeCounter) {
+                return;
+            }
+        }
+        final FocusRequester fr = mFocusOwnersForFocusPolicy.get(afi.getClientId());
+        if (fr != null) {
+            fr.dispatchFocusResultFromExtPolicy(requestResult);
+        }
     }
 
     /**
@@ -590,7 +609,12 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
                 if (DEBUG) { Log.v(TAG, "> failed: no focus policy" ); }
                 return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
             }
-            final FocusRequester fr = mFocusOwnersForFocusPolicy.get(afi.getClientId());
+            final FocusRequester fr;
+            if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
+                fr = mFocusOwnersForFocusPolicy.remove(afi.getClientId());
+            } else {
+                fr = mFocusOwnersForFocusPolicy.get(afi.getClientId());
+            }
             if (fr == null) {
                 if (DEBUG) { Log.v(TAG, "> failed: no such focus requester known" ); }
                 return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
@@ -710,9 +734,7 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
             boolean focusGrantDelayed = false;
             if (!canReassignAudioFocus()) {
                 if ((flags & AudioManager.AUDIOFOCUS_FLAG_DELAY_OK) == 0) {
-                    final int result = AudioManager.AUDIOFOCUS_REQUEST_FAILED;
-                    notifyExtFocusPolicyFocusRequest_syncAf(afiForExtPolicy, result, fd, cb);
-                    return result;
+                    return AudioManager.AUDIOFOCUS_REQUEST_FAILED;
                 } else {
                     // request has AUDIOFOCUS_FLAG_DELAY_OK: focus can't be
                     // granted right now, so the requester will be inserted in the focus stack
@@ -721,12 +743,11 @@ public class MediaFocusControl implements PlayerFocusEnforcer {
                 }
             }
 
-            // external focus policy: delay request for focus gain?
-            final int resultWithExtPolicy = AudioManager.AUDIOFOCUS_REQUEST_DELAYED;
+            // external focus policy?
             if (notifyExtFocusPolicyFocusRequest_syncAf(
-                    afiForExtPolicy, resultWithExtPolicy, fd, cb)) {
+                    afiForExtPolicy, fd, cb)) {
                 // stop handling focus request here as it is handled by external audio focus policy
-                return resultWithExtPolicy;
+                return AudioManager.AUDIOFOCUS_REQUEST_WAITING_FOR_EXT_POLICY;
             }
 
             // handle the potential premature death of the new holder of the focus
