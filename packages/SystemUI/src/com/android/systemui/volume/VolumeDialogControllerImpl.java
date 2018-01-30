@@ -76,7 +76,7 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private static final int DYNAMIC_STREAM_START_INDEX = 100;
     private static final int VIBRATE_HINT_DURATION = 50;
 
-    private static final ArrayMap<Integer, Integer> STREAMS = new ArrayMap<>();
+    static final ArrayMap<Integer, Integer> STREAMS = new ArrayMap<>();
     static {
         STREAMS.put(AudioSystem.STREAM_ALARM, R.string.stream_alarm);
         STREAMS.put(AudioSystem.STREAM_BLUETOOTH_SCO, R.string.stream_bluetooth_sco);
