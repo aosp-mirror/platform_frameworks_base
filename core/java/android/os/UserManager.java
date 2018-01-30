@@ -2731,6 +2731,25 @@ public class UserManager {
     }
 
     /**
+     * Checks whether changing a setting to a value is prohibited by the corresponding user
+     * restriction.
+     *
+     * <p>See also {@link com.android.server.pm.UserRestrictionsUtils#applyUserRestriction(
+     * Context, int, String, boolean)}, which should be in sync with this method.
+     *
+     * @return true if the change is prohibited, false if the change is allowed.
+     *
+     * @hide
+     */
+    public boolean isSettingRestrictedForUser(String setting, int userId, String value) {
+        try {
+            return mService.isSettingRestrictedForUser(setting, userId, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * @hide
      * User that enforces a restriction.
      *

@@ -31,6 +31,7 @@ import android.app.IActivityManager;
 import android.app.IStopUserCallback;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
+import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -71,6 +72,7 @@ import android.os.UserManager.EnforcingUser;
 import android.os.UserManagerInternal;
 import android.os.UserManagerInternal.UserRestrictionsListener;
 import android.os.storage.StorageManager;
+import android.provider.Settings;
 import android.security.GateKeeper;
 import android.service.gatekeeper.IGateKeeperService;
 import android.util.AtomicFile;
@@ -4036,6 +4038,160 @@ public class UserManagerService extends IUserManager.Stub {
         if (packageUid != callingUid) {
             throw new SecurityException("Specified package " + callingPackage
                     + " does not match the calling uid " + callingUid);
+        }
+    }
+
+    @Override
+    public boolean isSettingRestrictedForUser(String setting, int userId, String value) {
+        final int callingUid = Binder.getCallingUid();
+        if (setting == null) {
+            return false;
+        }
+        String restriction;
+        boolean checkAllUser = false;
+        switch (setting) {
+            case android.provider.Settings.Secure.LOCATION_MODE:
+                if (hasUserRestriction(UserManager.DISALLOW_CONFIG_LOCATION, userId)
+                        && callingUid != Process.SYSTEM_UID) {
+                    return true;
+                } else if (String.valueOf(Settings.Secure.LOCATION_MODE_OFF).equals(value)) {
+                    // Note LOCATION_MODE will be converted into LOCATION_PROVIDERS_ALLOWED
+                    // in android.provider.Settings.Secure.putStringForUser(), so we shouldn't come
+                    // here normally, but we still protect it here from a direct provider write.
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_SHARE_LOCATION;
+                break;
+
+            case android.provider.Settings.Secure.LOCATION_PROVIDERS_ALLOWED:
+                if (hasUserRestriction(UserManager.DISALLOW_CONFIG_LOCATION, userId)
+                        && callingUid != Process.SYSTEM_UID) {
+                    return true;
+                } else if (value != null && value.startsWith("-")) {
+                    // See SettingsProvider.updateLocationProvidersAllowedLocked.  "-" is to disable
+                    // a provider, which should be allowed even if the user restriction is set.
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_SHARE_LOCATION;
+                break;
+
+            case android.provider.Settings.Secure.INSTALL_NON_MARKET_APPS:
+                if ("0".equals(value)) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES;
+                break;
+
+            case android.provider.Settings.Global.ADB_ENABLED:
+                if ("0".equals(value)) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_DEBUGGING_FEATURES;
+                break;
+
+            case android.provider.Settings.Global.PACKAGE_VERIFIER_ENABLE:
+            case android.provider.Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB:
+                if ("1".equals(value)) {
+                    return false;
+                }
+                restriction = UserManager.ENSURE_VERIFY_APPS;
+                break;
+
+            case android.provider.Settings.Global.PREFERRED_NETWORK_MODE:
+                restriction = UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS;
+                break;
+
+            case android.provider.Settings.Secure.ALWAYS_ON_VPN_APP:
+            case android.provider.Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN:
+                // Whitelist system uid (ConnectivityService) and root uid to change always-on vpn
+                final int appId = UserHandle.getAppId(callingUid);
+                if (appId == Process.SYSTEM_UID || appId == Process.ROOT_UID) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_CONFIG_VPN;
+                break;
+
+            case android.provider.Settings.Global.SAFE_BOOT_DISALLOWED:
+                if ("1".equals(value)) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_SAFE_BOOT;
+                break;
+
+            case android.provider.Settings.Global.AIRPLANE_MODE_ON:
+                if ("0".equals(value)) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_AIRPLANE_MODE;
+                break;
+
+            case android.provider.Settings.Secure.DOZE_ENABLED:
+            case android.provider.Settings.Secure.DOZE_ALWAYS_ON:
+            case android.provider.Settings.Secure.DOZE_PULSE_ON_PICK_UP:
+            case android.provider.Settings.Secure.DOZE_PULSE_ON_LONG_PRESS:
+            case android.provider.Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP:
+                if ("0".equals(value)) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_AMBIENT_DISPLAY;
+                break;
+
+            case android.provider.Settings.Global.LOCATION_GLOBAL_KILL_SWITCH:
+                if ("0".equals(value)) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_CONFIG_LOCATION;
+                checkAllUser = true;
+                break;
+
+            case android.provider.Settings.System.SCREEN_BRIGHTNESS:
+            case android.provider.Settings.System.SCREEN_BRIGHTNESS_MODE:
+                if (callingUid == Process.SYSTEM_UID) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_CONFIG_BRIGHTNESS;
+                break;
+
+            case android.provider.Settings.Global.AUTO_TIME:
+                DevicePolicyManager dpm = mContext.getSystemService(DevicePolicyManager.class);
+                if (dpm != null && dpm.getAutoTimeRequired()
+                        && "0".equals(value)) {
+                    return true;
+                } else if (callingUid == Process.SYSTEM_UID) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_CONFIG_DATE_TIME;
+                break;
+
+            case android.provider.Settings.Global.AUTO_TIME_ZONE:
+                if (callingUid == Process.SYSTEM_UID) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_CONFIG_DATE_TIME;
+                break;
+
+            case android.provider.Settings.System.SCREEN_OFF_TIMEOUT:
+                if (callingUid == Process.SYSTEM_UID) {
+                    return false;
+                }
+                restriction = UserManager.DISALLOW_CONFIG_SCREEN_TIMEOUT;
+                break;
+
+            default:
+                if (setting.startsWith(Settings.Global.DATA_ROAMING)) {
+                    if ("0".equals(value)) {
+                        return false;
+                    }
+                    restriction = UserManager.DISALLOW_DATA_ROAMING;
+                    break;
+                }
+                return false;
+        }
+
+        if (checkAllUser) {
+            return hasUserRestrictionOnAnyUser(restriction);
+        } else {
+            return hasUserRestriction(restriction, userId);
         }
     }
 }
