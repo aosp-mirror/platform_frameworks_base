@@ -33,8 +33,7 @@ const DimensionsValue* getSingleLeafValue(const DimensionsValue* value);
 DimensionsValue getSingleLeafValue(const DimensionsValue& value);
 
 // Appends the leaf node to the parent tree.
-void appendLeafNodeToParent(const Field& field, const DimensionsValue& value,
-                            DimensionsValue* parentValue);
+void appendLeafNodeToTree(const Field& field, const DimensionsValue& value, DimensionsValue* tree);
 
 // Constructs the DimensionsValue protos from the FieldMatcher. Each DimensionsValue proto
 // represents a tree. When the input proto has repeated fields and the input "dimensions" wants
@@ -45,13 +44,16 @@ void findDimensionsValues(
        std::vector<DimensionsValue>* rootDimensionsValues);
 
 // Utils to build FieldMatcher proto for simple one-depth atoms.
-FieldMatcher buildSimpleAtomFieldMatcher(const int tagId, const int atomFieldNum);
-FieldMatcher buildSimpleAtomFieldMatcher(const int tagId);
+void buildSimpleAtomFieldMatcher(const int tagId, const int atomFieldNum, FieldMatcher* matcher);
+void buildSimpleAtomFieldMatcher(const int tagId, FieldMatcher* matcher);
 
 // Utils to build FieldMatcher proto for attribution nodes.
-FieldMatcher buildAttributionUidFieldMatcher(const int tagId, const Position position);
-FieldMatcher buildAttributionTagFieldMatcher(const int tagId, const Position position);
-FieldMatcher buildAttributionFieldMatcher(const int tagId, const Position position);
+void buildAttributionUidFieldMatcher(const int tagId, const Position position,
+                                     FieldMatcher* matcher);
+void buildAttributionTagFieldMatcher(const int tagId, const Position position,
+                                     FieldMatcher* matcher);
+void buildAttributionFieldMatcher(const int tagId, const Position position,
+                                  FieldMatcher* matcher);
 
 // Utils to print pretty string for DimensionsValue proto.
 std::string DimensionsValueToString(const DimensionsValue& value);

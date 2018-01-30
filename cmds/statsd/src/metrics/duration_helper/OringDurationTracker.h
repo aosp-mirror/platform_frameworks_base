@@ -56,10 +56,10 @@ private:
     // 2) which keys are paused (started but condition was false)
     // 3) whenever a key stops, we remove it from the started set. And if the set becomes empty,
     //    it means everything has stopped, we then record the end time.
-    std::map<HashableDimensionKey, int> mStarted;
-    std::map<HashableDimensionKey, int> mPaused;
+    std::unordered_map<HashableDimensionKey, int> mStarted;
+    std::unordered_map<HashableDimensionKey, int> mPaused;
     int64_t mLastStartTime;
-    std::map<HashableDimensionKey, ConditionKey> mConditionKeyMap;
+    std::unordered_map<HashableDimensionKey, ConditionKey> mConditionKeyMap;
 
     // return true if we should not allow newKey to be tracked because we are above the threshold
     bool hitGuardRail(const HashableDimensionKey& newKey);

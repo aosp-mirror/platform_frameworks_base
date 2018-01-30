@@ -116,28 +116,30 @@ void OrBooleanVector(const std::vector<bool>& ref, vector<bool> * ored) {
     }
 }
 
-void getFieldsFromFieldMatcher(const FieldMatcher& matcher, const Field& parentField,
-                       std::vector<Field> *allFields) {
-    Field newParent = parentField;
-    Field* leaf = getSingleLeaf(&newParent);
-    leaf->set_field(matcher.field());
+void getFieldsFromFieldMatcher(const FieldMatcher& matcher, Field* rootField, Field* leafField,
+                               std::vector<Field> *allFields) {
     if (matcher.child_size() == 0) {
-        allFields->push_back(newParent);
+        allFields->push_back(*rootField);
         return;
     }
     for (int i = 0; i < matcher.child_size(); ++i) {
-        leaf->add_child();
-        getFieldsFromFieldMatcher(matcher.child(i), newParent, allFields);
+        Field* newLeafField = leafField->add_child();
+        newLeafField->set_field(matcher.child(i).field());
+        getFieldsFromFieldMatcher(matcher.child(i), rootField, newLeafField, allFields);
     }
 }
 
 void getFieldsFromFieldMatcher(const FieldMatcher& matcher, std::vector<Field> *allFields) {
-    Field parentField;
-    getFieldsFromFieldMatcher(matcher, parentField, allFields);
+    if (!matcher.has_field()) {
+        return;
+    }
+    Field rootField;
+    rootField.set_field(matcher.field());
+    getFieldsFromFieldMatcher(matcher, &rootField, &rootField, allFields);
 }
 
 void flattenValueLeaves(const DimensionsValue& value,
-                        std::vector<DimensionsValue> *allLaves) {
+                        std::vector<const DimensionsValue*> *allLaves) {
     switch (value.value_case()) {
         case DimensionsValue::ValueCase::kValueStr:
         case DimensionsValue::ValueCase::kValueInt:
@@ -145,7 +147,7 @@ void flattenValueLeaves(const DimensionsValue& value,
         case DimensionsValue::ValueCase::kValueBool:
         case DimensionsValue::ValueCase::kValueFloat:
         case DimensionsValue::ValueCase::VALUE_NOT_SET:
-            allLaves->push_back(value);
+            allLaves->push_back(&value);
             break;
         case DimensionsValue::ValueCase::kValueTuple:
             for (int i = 0; i < value.value_tuple().dimensions_value_size(); ++i) {
@@ -155,45 +157,44 @@ void flattenValueLeaves(const DimensionsValue& value,
     }
 }
 
-std::vector<HashableDimensionKey> getDimensionKeysForCondition(
-    const LogEvent& event, const MetricConditionLink& link) {
+void getDimensionKeysForCondition(
+    const LogEvent& event, const MetricConditionLink& link,
+    std::vector<HashableDimensionKey> *hashableDimensionKeys) {
     std::vector<Field> whatFields;
     getFieldsFromFieldMatcher(link.fields_in_what(), &whatFields);
     std::vector<Field> conditionFields;
     getFieldsFromFieldMatcher(link.fields_in_condition(), &conditionFields);
 
-    std::vector<HashableDimensionKey> hashableDimensionKeys;
-
     // TODO(yanglu): here we could simplify the logic to get the leaf value node in what and
     // directly construct the full condition value tree.
-    std::vector<DimensionsValue> whatValues = getDimensionKeys(event, link.fields_in_what());
+    std::vector<DimensionsValue> whatValues;
+    getDimensionKeys(event, link.fields_in_what(), &whatValues);
 
     for (size_t i = 0; i < whatValues.size(); ++i) {
-        std::vector<DimensionsValue> whatLeaves;
+        std::vector<const DimensionsValue*> whatLeaves;
         flattenValueLeaves(whatValues[i], &whatLeaves);
         if (whatLeaves.size() != whatFields.size() ||
             whatLeaves.size() != conditionFields.size()) {
             ALOGE("Dimensions between what and condition not equal.");
-            return hashableDimensionKeys;
+            return;
         }
         FieldValueMap conditionValueMap;
         for (size_t j = 0; j < whatLeaves.size(); ++j) {
-            if (!setFieldInLeafValueProto(conditionFields[j], &whatLeaves[j])) {
+            DimensionsValue* conditionValue = &conditionValueMap[conditionFields[j]];
+            *conditionValue = *whatLeaves[i];
+            if (!setFieldInLeafValueProto(conditionFields[j], conditionValue)) {
                 ALOGE("Not able to reset the field for condition leaf value.");
-                return hashableDimensionKeys;
+                return;
             }
-            conditionValueMap.insert(std::make_pair(conditionFields[j], whatLeaves[j]));
         }
-        std::vector<DimensionsValue> conditionValues;
-        findDimensionsValues(conditionValueMap, link.fields_in_condition(), &conditionValues);
-        if (conditionValues.size() != 1) {
+        std::vector<DimensionsValue> conditionValueTrees;
+        findDimensionsValues(conditionValueMap, link.fields_in_condition(), &conditionValueTrees);
+        if (conditionValueTrees.size() != 1) {
             ALOGE("Not able to find unambiguous field value in condition atom.");
             continue;
         }
-        hashableDimensionKeys.push_back(HashableDimensionKey(conditionValues[0]));
+        hashableDimensionKeys->push_back(HashableDimensionKey(conditionValueTrees[0]));
     }
-
-    return hashableDimensionKeys;
 }
 
 }  // namespace statsd

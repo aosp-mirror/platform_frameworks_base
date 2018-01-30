@@ -32,8 +32,7 @@ void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const Lo
     ConditionKey conditionKey;
     if (mConditionSliced) {
         for (const auto& link : mConditionLinks) {
-            conditionKey.insert(std::make_pair(link.condition(),
-                                               getDimensionKeysForCondition(event, link)));
+            getDimensionKeysForCondition(event, link, &conditionKey[link.condition()]);
         }
         if (mWizard->query(mConditionTrackerIndex, conditionKey) != ConditionState::kTrue) {
             condition = false;
@@ -44,8 +43,9 @@ void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const Lo
         condition = mCondition;
     }
 
-    if (mDimensions.child_size() > 0) {
-        vector<DimensionsValue> dimensionValues = getDimensionKeys(event, mDimensions);
+    if (mDimensions.has_field() && mDimensions.child_size() > 0) {
+        vector<DimensionsValue> dimensionValues;
+        getDimensionKeys(event, mDimensions, &dimensionValues);
         for (const DimensionsValue& dimensionValue : dimensionValues) {
             onMatchedLogEventInternalLocked(
                 matcherIndex, HashableDimensionKey(dimensionValue), conditionKey, condition, event);
