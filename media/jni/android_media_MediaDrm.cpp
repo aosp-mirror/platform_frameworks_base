@@ -20,7 +20,7 @@
 
 #include "android_media_MediaDrm.h"
 #include "android_media_MediaMetricsJNI.h"
-
+#include "android_os_Parcel.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "android_runtime/Log.h"
 #include "android_os_Parcel.h"
@@ -29,11 +29,15 @@
 
 #include <binder/IServiceManager.h>
 #include <binder/Parcel.h>
+#include <binder/PersistableBundle.h>
 #include <cutils/properties.h>
 #include <media/IDrm.h>
 #include <media/IMediaDrmService.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/MediaErrors.h>
+
+using ::android::os::PersistableBundle;
+
 
 namespace android {
 
@@ -56,6 +60,10 @@ namespace android {
 #define GET_STATIC_METHOD_ID(var, clazz, fieldName, fieldDescriptor) \
     var = env->GetStaticMethodID(clazz, fieldName, fieldDescriptor); \
     LOG_FATAL_IF(! (var), "Unable to find static method " fieldName);
+
+#define GET_STATIC_OBJECT_FIELD(var, clazz, fieldName) \
+    var = env->GetStaticObjectField(clazz, fieldName); \
+    LOG_FATAL_IF(! (var), "Unable to find static object field " fieldName);
 
 
 struct RequestFields {
@@ -169,9 +177,57 @@ struct fields_t {
     jclass hashmapClassId;
     jclass arraylistClassId;
     jclass stringClassId;
+    jobject bundleCreator;
+    jmethodID createFromParcelId;
+    jclass parcelCreatorClassId;
 };
 
 static fields_t gFields;
+
+namespace {
+
+// Helper function to convert a native PersistableBundle to a Java
+// PersistableBundle.
+jobject nativeToJavaPersistableBundle(JNIEnv *env, jobject thiz,
+                                      PersistableBundle* nativeBundle) {
+    if (env == NULL || thiz == NULL || nativeBundle == NULL) {
+        ALOGE("Unexpected NULL parmeter");
+        return NULL;
+    }
+
+    // Create a Java parcel with the native parcel data.
+    // Then create a new PersistableBundle with that parcel as a parameter.
+    jobject jParcel = android::createJavaParcelObject(env);
+    if (jParcel == NULL) {
+      ALOGE("Failed to create a Java Parcel.");
+      return NULL;
+    }
+
+    android::Parcel* nativeParcel = android::parcelForJavaObject(env, jParcel);
+    if (nativeParcel == NULL) {
+      ALOGE("Failed to get the native Parcel.");
+      return NULL;
+    }
+
+    android::status_t result = nativeBundle->writeToParcel(nativeParcel);
+    nativeParcel->setDataPosition(0);
+    if (result != android::OK) {
+      ALOGE("Failed to write nativeBundle to Parcel: %d.", result);
+      return NULL;
+    }
+
+    jobject newBundle = env->CallObjectMethod(gFields.bundleCreator,
+                                              gFields.createFromParcelId,
+                                              jParcel);
+    if (newBundle == NULL) {
+        ALOGE("Failed to create a new PersistableBundle "
+              "from the createFromParcel call.");
+    }
+
+    return newBundle;
+}
+
+}  // namespace anonymous
 
 // ----------------------------------------------------------------------------
 // ref-counted object for callbacks
@@ -707,6 +763,19 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     GET_FIELD_ID(gFields.certificate.wrappedPrivateKey, clazz, "mWrappedKey", "[B");
     GET_FIELD_ID(gFields.certificate.certificateData, clazz, "mCertificateData", "[B");
     gFields.certificateClassId = static_cast<jclass>(env->NewGlobalRef(clazz));
+
+    // Metrics-related fields and classes.
+    FIND_CLASS(clazz, "android/os/PersistableBundle");
+    jfieldID bundleCreatorId;
+    GET_STATIC_FIELD_ID(bundleCreatorId, clazz, "CREATOR",
+                        "Landroid/os/Parcelable$Creator;");
+    jobject bundleCreator;
+    GET_STATIC_OBJECT_FIELD(bundleCreator, clazz, bundleCreatorId);
+    gFields.bundleCreator = static_cast<jobject>(env->NewGlobalRef(bundleCreator));
+    FIND_CLASS(clazz, "android/os/Parcelable$Creator");
+    GET_METHOD_ID(gFields.createFromParcelId, clazz, "createFromParcel",
+                  "(Landroid/os/Parcel;)Ljava/lang/Object;");
+    gFields.parcelCreatorClassId = static_cast<jclass>(env->NewGlobalRef(clazz));
 
     FIND_CLASS(clazz, "java/util/ArrayList");
     GET_METHOD_ID(gFields.arraylist.init, clazz, "<init>", "()V");
@@ -1666,19 +1735,14 @@ android_media_MediaDrm_native_getMetrics(JNIEnv *env, jobject thiz)
     }
 
     // Retrieve current metrics snapshot from drm.
-    MediaAnalyticsItem item ;
-    status_t err = drm->getMetrics(&item);
+    PersistableBundle metrics;
+    status_t err = drm->getMetrics(&metrics);
     if (err != OK) {
         ALOGE("getMetrics failed: %d", (int)err);
         return (jobject) NULL;
     }
 
-    jobject mybundle = MediaMetricsJNI::writeMetricsToBundle(env, &item, NULL);
-    if (mybundle == NULL) {
-        ALOGE("getMetrics metric conversion failed");
-    }
-
-    return mybundle;
+    return nativeToJavaPersistableBundle(env, thiz, &metrics);
 }
 
 static jbyteArray android_media_MediaDrm_signRSANative(
