@@ -230,6 +230,13 @@ public final class Phone {
         }
     }
 
+    final void internalOnHandoverComplete(String callId) {
+        Call call = mCallByTelecomCallId.get(callId);
+        if (call != null) {
+            call.internalOnHandoverComplete();
+        }
+    }
+
     /**
      * Called to destroy the phone and cleanup any lingering calls.
      */
