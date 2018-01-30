@@ -26,7 +26,6 @@ import android.media.update.MediaControlView2Provider;
 import android.media.update.ViewProvider;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.view.View;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -41,10 +40,10 @@ import java.lang.annotation.RetentionPolicy;
  * adds it to the view.
  * 2) Initialize MediaControlView2 programmatically and add it to a ViewGroup instance.
  *
- * In the first option, VideoView2 automatically connects MediaControlView2 to MediaController2,
+ * In the first option, VideoView2 automatically connects MediaControlView2 to MediaController,
  * which is necessary to communicate with MediaSession2. In the second option, however, the
- * developer needs to manually retrieve a MediaController2 instance and set it to MediaControlView2
- * by calling setController(MediaController2 controller).
+ * developer needs to manually retrieve a MediaController instance and set it to MediaControlView2
+ * by calling setController(MediaController controller).
  *
  * TODO PUBLIC API
  * @hide
@@ -67,17 +66,66 @@ public class MediaControlView2 extends FrameLayout {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Button {}
 
+    /**
+     * MediaControlView2 button value for playing and pausing media.
+     */
     public static final int BUTTON_PLAY_PAUSE = 1;
+    /**
+     * MediaControlView2 button value for jumping 30 seconds forward.
+     */
     public static final int BUTTON_FFWD = 2;
+    /**
+     * MediaControlView2 button value for jumping 10 seconds backward.
+     */
     public static final int BUTTON_REW = 3;
+    /**
+     * MediaControlView2 button value for jumping to next media.
+     */
     public static final int BUTTON_NEXT = 4;
+    /**
+     * MediaControlView2 button value for jumping to previous media.
+     */
     public static final int BUTTON_PREV = 5;
+    /**
+     * MediaControlView2 button value for showing/hiding subtitle track.
+     */
     public static final int BUTTON_SUBTITLE = 6;
+    /**
+     * MediaControlView2 button value for toggling full screen.
+     */
     public static final int BUTTON_FULL_SCREEN = 7;
+    /**
+     * MediaControlView2 button value for showing/hiding overflow buttons.
+     */
     public static final int BUTTON_OVERFLOW = 8;
+    /**
+     * MediaControlView2 button value for muting audio.
+     */
     public static final int BUTTON_MUTE = 9;
+    /**
+     * MediaControlView2 button value for adjusting aspect ratio of view.
+     */
     public static final int BUTTON_ASPECT_RATIO = 10;
+    /**
+     * MediaControlView2 button value for showing/hiding settings page.
+     */
     public static final int BUTTON_SETTINGS = 11;
+
+    /**
+     * String for receiving command to show subtitle from MediaSession. Can be checked by
+     * implementing {@link android.media.session.MediaSession.Callback#onCommand}
+     */
+    public static final String COMMAND_SHOW_SUBTITLE = "showSubtitle";
+    /**
+     * String for receiving command to hide subtitle from MediaSession. Can be checked by
+     * implementing {@link android.media.session.MediaSession.Callback#onCommand}
+     */
+    public static final String COMMAND_HIDE_SUBTITLE = "hideSubtitle";
+    /**
+     * String for receiving command to set fullscreen from MediaSession. Can be checked by
+     * implementing {@link android.media.session.MediaSession.Callback#onCommand}
+     */
+    public static final String COMMAND_SET_FULLSCREEN = "setFullscreen";
 
     private final MediaControlView2Provider mProvider;
 
@@ -90,12 +138,12 @@ public class MediaControlView2 extends FrameLayout {
     }
 
     public MediaControlView2(@NonNull Context context, @Nullable AttributeSet attrs,
-                            int defStyleAttr) {
+            int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
     }
 
     public MediaControlView2(@NonNull Context context, @Nullable AttributeSet attrs,
-                            int defStyleAttr, int defStyleRes) {
+            int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
 
         mProvider = ApiLoader.getProvider(context)
@@ -110,7 +158,7 @@ public class MediaControlView2 extends FrameLayout {
     }
 
     /**
-     * Sets MediaController2 instance to control corresponding MediaSession2.
+     * Sets MediaController instance to control corresponding MediaSession.
      */
     public void setController(MediaController controller) {
         mProvider.setController_impl(controller);
@@ -128,7 +176,7 @@ public class MediaControlView2 extends FrameLayout {
      * Shows the control view on screen. It will disappear automatically after {@code timeout}
      * milliseconds of inactivity.
      */
-    public void show(int timeout) {
+    public void show(long timeout) {
         mProvider.show_impl(timeout);
     }
 
@@ -147,41 +195,26 @@ public class MediaControlView2 extends FrameLayout {
     }
 
     /**
-     * If the media selected has a subtitle track, calling this method will display the subtitle at
-     * the bottom of the view. If a media has multiple subtitle tracks, this method will select the
-     * first one of them.
-     */
-    public void showSubtitle() {
-        mProvider.showSubtitle_impl();
-    }
-
-    /**
-     * Hides the currently displayed subtitle.
-     */
-    public void hideSubtitle() {
-        mProvider.hideSubtitle_impl();
-    }
-
-    /**
-     * Set listeners for previous and next buttons to customize the behavior of clicking them.
-     * The UI for these buttons are provided as default and will be automatically displayed when
-     * this method is called.
+     * Changes the visibility state of an individual button. Default value is View.Visible.
      *
-     * @param next Listener for clicking next button
-     * @param prev Listener for clicking previous button
+     * @param button the {@code Button} assigned to individual buttons
+     * <ul>
+     * <li>{@link #BUTTON_PLAY_PAUSE}
+     * <li>{@link #BUTTON_FFWD}
+     * <li>{@link #BUTTON_REW}
+     * <li>{@link #BUTTON_NEXT}
+     * <li>{@link #BUTTON_PREV}
+     * <li>{@link #BUTTON_SUBTITLE}
+     * <li>{@link #BUTTON_FULL_SCREEN}
+     * <li>{@link #BUTTON_MUTE}
+     * <li>{@link #BUTTON_OVERFLOW}
+     * <li>{@link #BUTTON_ASPECT_RATIO}
+     * <li>{@link #BUTTON_SETTINGS}
+     * </ul>
+     * @param visibility One of {@link #VISIBLE}, {@link #INVISIBLE}, or {@link #GONE}.
      */
-    public void setPrevNextListeners(View.OnClickListener next, View.OnClickListener prev) {
-        mProvider.setPrevNextListeners_impl(next, prev);
-    }
-
-    /**
-     * Hides the specified button from view.
-     *
-     * @param button the constant integer assigned to individual buttons
-     * @param visible whether the button should be visible or not
-     */
-    public void setButtonVisibility(int button, boolean visible) {
-        mProvider.setButtonVisibility_impl(button, visible);
+    public void setButtonVisibility(@Button int button, @Visibility int visibility) {
+        mProvider.setButtonVisibility_impl(button, visibility);
     }
 
     @Override
