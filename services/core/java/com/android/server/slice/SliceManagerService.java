@@ -39,6 +39,7 @@ import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -47,7 +48,10 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.AtomicFile;
 import android.util.Log;
+import android.util.Slog;
+import android.util.Xml.Encoding;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -57,6 +61,16 @@ import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+import org.xmlpull.v1.XmlSerializer;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -77,6 +91,8 @@ public class SliceManagerService extends ISliceManager.Stub {
     private final ArraySet<SliceGrant> mUserGrants = new ArraySet<>();
     private final Handler mHandler;
     private final ContentObserver mObserver;
+    private final AtomicFile mSliceAccessFile;
+    private final SliceFullAccessList mAccessList;
 
     public SliceManagerService(Context context) {
         this(context, createHandler().getLooper());
@@ -101,6 +117,21 @@ public class SliceManagerService extends ISliceManager.Stub {
                 }
             }
         };
+        final File systemDir = new File(Environment.getDataDirectory(), "system");
+        mSliceAccessFile = new AtomicFile(new File(systemDir, "slice_access.xml"));
+        mAccessList = new SliceFullAccessList(mContext);
+
+        synchronized (mSliceAccessFile) {
+            if (!mSliceAccessFile.exists()) return;
+            try {
+                InputStream input = mSliceAccessFile.openRead();
+                XmlPullParser parser = XmlPullParserFactory.newInstance().newPullParser();
+                parser.setInput(input, Encoding.UTF_8.name());
+                mAccessList.readXml(parser);
+            } catch (IOException | XmlPullParserException e) {
+                Slog.d(TAG, "Can't read slice access file", e);
+            }
+        }
     }
 
     ///  ----- Lifecycle stuff -----
@@ -175,11 +206,11 @@ public class SliceManagerService extends ISliceManager.Stub {
                 == PERMISSION_GRANTED) {
             return SliceManager.PERMISSION_GRANTED;
         }
-        if (hasFullSliceAccess(pkg, uid)) {
+        if (hasFullSliceAccess(pkg, UserHandle.getUserId(uid))) {
             return SliceManager.PERMISSION_GRANTED;
         }
         synchronized (mLock) {
-            if (mUserGrants.contains(new SliceGrant(uri, pkg))) {
+            if (mUserGrants.contains(new SliceGrant(uri, pkg, UserHandle.getUserId(uid)))) {
                 return SliceManager.PERMISSION_USER_GRANTED;
             }
         }
@@ -192,17 +223,19 @@ public class SliceManagerService extends ISliceManager.Stub {
         getContext().enforceCallingOrSelfPermission(permission.MANAGE_SLICE_PERMISSIONS,
                 "Slice granting requires MANAGE_SLICE_PERMISSIONS");
         if (allSlices) {
-            // TODO: Manage full access grants.
+            mAccessList.grantFullAccess(pkg, Binder.getCallingUserHandle().getIdentifier());
+            mHandler.post(mSaveAccessList);
         } else {
             synchronized (mLock) {
-                mUserGrants.add(new SliceGrant(uri, pkg));
+                mUserGrants.add(new SliceGrant(uri, pkg,
+                        Binder.getCallingUserHandle().getIdentifier()));
             }
-            long ident = Binder.clearCallingIdentity();
-            try {
-                mContext.getContentResolver().notifyChange(uri, null);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
+        }
+        long ident = Binder.clearCallingIdentity();
+        try {
+            mContext.getContentResolver().notifyChange(uri, null);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
         }
         synchronized (mLock) {
             for (PinnedSliceState p : mPinnedSlicesByUri.values()) {
@@ -260,7 +293,7 @@ public class SliceManagerService extends ISliceManager.Stub {
     protected int checkAccess(String pkg, Uri uri, int uid, int pid) {
         int user = UserHandle.getUserId(uid);
         // Check for default launcher/assistant.
-        if (!hasFullSliceAccess(pkg, uid)) {
+        if (!hasFullSliceAccess(pkg, user)) {
             // Also allow things with uri access.
             if (getContext().checkUriPermission(uri, pid, uid,
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != PERMISSION_GRANTED) {
@@ -411,8 +444,7 @@ public class SliceManagerService extends ISliceManager.Stub {
     }
 
     private boolean isGrantedFullAccess(String pkg, int userId) {
-        // TODO: This will be user granted access, if we allow this through a prompt.
-        return false;
+        return mAccessList.hasFullAccess(pkg, userId);
     }
 
     private static ServiceThread createHandler() {
@@ -421,6 +453,32 @@ public class SliceManagerService extends ISliceManager.Stub {
         handlerThread.start();
         return handlerThread;
     }
+
+    private final Runnable mSaveAccessList = new Runnable() {
+        @Override
+        public void run() {
+            synchronized (mSliceAccessFile) {
+                final FileOutputStream stream;
+                try {
+                    stream = mSliceAccessFile.startWrite();
+                } catch (IOException e) {
+                    Slog.w(TAG, "Failed to save access file", e);
+                    return;
+                }
+
+                try {
+                    XmlSerializer out = XmlPullParserFactory.newInstance().newSerializer();
+                    out.setOutput(stream, Encoding.UTF_8.name());
+                    mAccessList.writeXml(out);
+                    out.flush();
+                    mSliceAccessFile.finishWrite(stream);
+                } catch (IOException | XmlPullParserException e) {
+                    Slog.w(TAG, "Failed to save access file, restoring backup", e);
+                    mSliceAccessFile.failWrite(stream);
+                }
+            }
+        }
+    };
 
     public static class Lifecycle extends SystemService {
         private SliceManagerService mService;
@@ -456,10 +514,12 @@ public class SliceManagerService extends ISliceManager.Stub {
     private class SliceGrant {
         private final Uri mUri;
         private final String mPkg;
+        private final int mUserId;
 
-        public SliceGrant(Uri uri, String pkg) {
+        public SliceGrant(Uri uri, String pkg, int userId) {
             mUri = uri;
             mPkg = pkg;
+            mUserId = userId;
         }
 
         @Override
@@ -471,7 +531,8 @@ public class SliceManagerService extends ISliceManager.Stub {
         public boolean equals(Object obj) {
             if (!(obj instanceof SliceGrant)) return false;
             SliceGrant other = (SliceGrant) obj;
-            return Objects.equals(other.mUri, mUri) && Objects.equals(other.mPkg, mPkg);
+            return Objects.equals(other.mUri, mUri) && Objects.equals(other.mPkg, mPkg)
+                    && (other.mUserId == mUserId);
         }
     }
 }
