@@ -24,9 +24,9 @@ import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.ImageDecoder;
 import android.graphics.Insets;
 import android.graphics.NinePatch;
 import android.graphics.Outline;
@@ -211,7 +211,8 @@ public class NinePatchDrawable extends Drawable {
             restoreAlpha = -1;
         }
 
-        final boolean needsDensityScaling = canvas.getDensity() == 0;
+        final boolean needsDensityScaling = canvas.getDensity() == 0
+                && Bitmap.DENSITY_NONE != state.mNinePatch.getDensity();
         if (needsDensityScaling) {
             restoreToCount = restoreToCount >= 0 ? restoreToCount : canvas.save();
 
@@ -421,10 +422,6 @@ public class NinePatchDrawable extends Drawable {
 
         final int srcResId = a.getResourceId(R.styleable.NinePatchDrawable_src, 0);
         if (srcResId != 0) {
-            final BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inDither = !state.mDither;
-            options.inScreenDensity = r.getDisplayMetrics().noncompatDensityDpi;
-
             final Rect padding = new Rect();
             final Rect opticalInsets = new Rect();
             Bitmap bitmap = null;
@@ -433,7 +430,17 @@ public class NinePatchDrawable extends Drawable {
                 final TypedValue value = new TypedValue();
                 final InputStream is = r.openRawResource(srcResId, value);
 
-                bitmap = BitmapFactory.decodeResourceStream(r, value, is, padding, options);
+                int density = Bitmap.DENSITY_NONE;
+                if (value.density == TypedValue.DENSITY_DEFAULT) {
+                    density = DisplayMetrics.DENSITY_DEFAULT;
+                } else if (value.density != TypedValue.DENSITY_NONE) {
+                    density = value.density;
+                }
+                ImageDecoder.Source source = ImageDecoder.createSource(r, is, density);
+                bitmap = ImageDecoder.decodeBitmap(source, (decoder, info, src) -> {
+                    decoder.setOutPaddingRect(padding);
+                    decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
+                });
 
                 is.close();
             } catch (IOException e) {
