@@ -30,9 +30,11 @@ import android.media.session.MediaSession.Callback;
 import android.media.session.PlaybackState;
 import android.media.update.ApiLoader;
 import android.media.update.MediaSession2Provider;
+import android.media.update.MediaSession2Provider.BuilderBaseProvider;
 import android.media.update.MediaSession2Provider.CommandGroupProvider;
 import android.media.update.MediaSession2Provider.CommandProvider;
 import android.media.update.MediaSession2Provider.ControllerInfoProvider;
+import android.media.update.ProviderCreator;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -403,36 +405,11 @@ public class MediaSession2 implements AutoCloseable {
      * @hide
      */
     static abstract class BuilderBase
-            <T extends MediaSession2.BuilderBase<T, C>, C extends SessionCallback> {
-        final Context mContext;
-        final MediaPlayerInterface mPlayer;
-        String mId;
-        Executor mCallbackExecutor;
-        C mCallback;
-        VolumeProvider mVolumeProvider;
-        int mRatingType;
-        PendingIntent mSessionActivity;
+            <T extends MediaSession2, U extends BuilderBase<T, U, C>, C extends SessionCallback> {
+        private final BuilderBaseProvider<T, C> mProvider;
 
-        /**
-         * Constructor.
-         *
-         * @param context a context
-         * @param player a player to handle incoming command from any controller.
-         * @throws IllegalArgumentException if any parameter is null, or the player is a
-         *      {@link MediaSession2} or {@link MediaController2}.
-         */
-        // TODO(jaewan): Also need executor
-        public BuilderBase(@NonNull Context context, @NonNull MediaPlayerInterface player) {
-            if (context == null) {
-                throw new IllegalArgumentException("context shouldn't be null");
-            }
-            if (player == null) {
-                throw new IllegalArgumentException("player shouldn't be null");
-            }
-            mContext = context;
-            mPlayer = player;
-            // Ensure non-null
-            mId = "";
+        BuilderBase(ProviderCreator<BuilderBase<T, U, C>, BuilderBaseProvider<T, C>> creator) {
+            mProvider = creator.createProvider(this);
         }
 
         /**
@@ -444,9 +421,9 @@ public class MediaSession2 implements AutoCloseable {
          *
          * @param volumeProvider The provider that will handle volume changes. Can be {@code null}
          */
-        public T setVolumeProvider(@Nullable VolumeProvider volumeProvider) {
-            mVolumeProvider = volumeProvider;
-            return (T) this;
+        public U setVolumeProvider(@Nullable VolumeProvider volumeProvider) {
+            mProvider.setVolumeProvider_impl(volumeProvider);
+            return (U) this;
         }
 
         /**
@@ -462,9 +439,9 @@ public class MediaSession2 implements AutoCloseable {
          * <li>{@link Rating2#RATING_THUMB_UP_DOWN}</li>
          * </ul>
          */
-        public T setRatingType(@Rating2.Style int type) {
-            mRatingType = type;
-            return (T) this;
+        public U setRatingType(@Rating2.Style int type) {
+            mProvider.setRatingType_impl(type);
+            return (U) this;
         }
 
         /**
@@ -474,9 +451,9 @@ public class MediaSession2 implements AutoCloseable {
          *
          * @param pi The intent to launch to show UI for this session.
          */
-        public T setSessionActivity(@Nullable PendingIntent pi) {
-            mSessionActivity = pi;
-            return (T) this;
+        public U setSessionActivity(@Nullable PendingIntent pi) {
+            mProvider.setSessionActivity_impl(pi);
+            return (U) this;
         }
 
         /**
@@ -489,12 +466,9 @@ public class MediaSession2 implements AutoCloseable {
          * @throws IllegalArgumentException if id is {@code null}
          * @return
          */
-        public T setId(@NonNull String id) {
-            if (id == null) {
-                throw new IllegalArgumentException("id shouldn't be null");
-            }
-            mId = id;
-            return (T) this;
+        public U setId(@NonNull String id) {
+            mProvider.setId_impl(id);
+            return (U) this;
         }
 
         /**
@@ -504,17 +478,10 @@ public class MediaSession2 implements AutoCloseable {
          * @param callback session callback.
          * @return
          */
-        public T setSessionCallback(@NonNull @CallbackExecutor Executor executor,
+        public U setSessionCallback(@NonNull @CallbackExecutor Executor executor,
                 @NonNull C callback) {
-            if (executor == null) {
-                throw new IllegalArgumentException("executor shouldn't be null");
-            }
-            if (callback == null) {
-                throw new IllegalArgumentException("callback shouldn't be null");
-            }
-            mCallbackExecutor = executor;
-            mCallback = callback;
-            return (T) this;
+            mProvider.setSessionCallback_impl(executor, callback);
+            return (U) this;
         }
 
         /**
@@ -524,7 +491,9 @@ public class MediaSession2 implements AutoCloseable {
          * @throws IllegalStateException if the session with the same id is already exists for the
          *      package.
          */
-        public abstract MediaSession2 build();
+        public T build() {
+            return mProvider.build_impl();
+        }
     }
 
     /**
@@ -533,24 +502,12 @@ public class MediaSession2 implements AutoCloseable {
      * Any incoming event from the {@link MediaController2} will be handled on the thread
      * that created session with the {@link Builder#build()}.
      */
-    // TODO(jaewan): Move this to updatable
     // TODO(jaewan): Add setRatingType()
     // TODO(jaewan): Add setSessionActivity()
-    public static final class Builder extends BuilderBase<Builder, SessionCallback> {
+    public static final class Builder extends BuilderBase<MediaSession2, Builder, SessionCallback> {
         public Builder(Context context, @NonNull MediaPlayerInterface player) {
-            super(context, player);
-        }
-
-        @Override
-        public MediaSession2 build() {
-            if (mCallbackExecutor == null) {
-                mCallbackExecutor = mContext.getMainExecutor();
-            }
-            if (mCallback == null) {
-                mCallback = new SessionCallback(mContext);
-            }
-            return new MediaSession2(mContext, mPlayer, mId, mVolumeProvider, mRatingType,
-                    mSessionActivity, mCallbackExecutor, mCallback);
+            super((instance) -> ApiLoader.getProvider(context).createMediaSession2Builder(
+                    context, (Builder) instance, player));
         }
     }
 
@@ -932,21 +889,10 @@ public class MediaSession2 implements AutoCloseable {
      *       framework had to add heuristics to figure out if an app is
      * @hide
      */
-    MediaSession2(Context context, MediaPlayerInterface player, String id,
-            VolumeProvider volumeProvider, int ratingType, PendingIntent sessionActivity,
-            Executor callbackExecutor, SessionCallback callback) {
+    @SystemApi
+    public MediaSession2(MediaSession2Provider provider) {
         super();
-        mProvider = createProvider(context, player, id, volumeProvider, ratingType, sessionActivity,
-                callbackExecutor, callback);
-        mProvider.initialize();
-    }
-
-    MediaSession2Provider createProvider(Context context, MediaPlayerInterface player, String id,
-            VolumeProvider volumeProvider, int ratingType, PendingIntent sessionActivity,
-            Executor callbackExecutor, SessionCallback callback) {
-        return ApiLoader.getProvider(context)
-                .createMediaSession2(context, this, player, id, volumeProvider, ratingType,
-                        sessionActivity, callbackExecutor, callback);
+        mProvider = provider;
     }
 
     @SystemApi
