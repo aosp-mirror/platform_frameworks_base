@@ -17,15 +17,16 @@
 package android.telephony.ims.stub;
 
 import android.annotation.IntDef;
+import android.annotation.SystemApi;
 import android.net.Uri;
-import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.telephony.ims.aidl.IImsRegistration;
+import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.util.Log;
 
-import com.android.ims.ImsReasonInfo;
-import com.android.ims.internal.IImsRegistration;
-import com.android.ims.internal.IImsRegistrationCallback;
+import android.telephony.ims.ImsReasonInfo;
+
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
@@ -36,11 +37,14 @@ import java.lang.annotation.RetentionPolicy;
  * registration for this ImsService has changed status.
  * @hide
  */
-
+@SystemApi
 public class ImsRegistrationImplBase {
 
     private static final String LOG_TAG = "ImsRegistrationImplBase";
 
+    /**
+     * @hide
+     */
     // Defines the underlying radio technology type that we have registered for IMS over.
     @IntDef(flag = true,
             value = {
@@ -155,6 +159,9 @@ public class ImsRegistrationImplBase {
     // Locked on mLock, create unspecified disconnect cause.
     private ImsReasonInfo mLastDisconnectCause = new ImsReasonInfo();
 
+    /**
+     * @hide
+     */
     public final IImsRegistration getBinder() {
         return mBinder;
     }
@@ -171,8 +178,8 @@ public class ImsRegistrationImplBase {
     /**
      * Notify the framework that the device is connected to the IMS network.
      *
-     * @param imsRadioTech the radio access technology. Valid values are defined in
-     * {@link ImsRegistrationTech}.
+     * @param imsRadioTech the radio access technology. Valid values are defined as
+     * {@link #REGISTRATION_TECH_LTE} and {@link #REGISTRATION_TECH_IWLAN}.
      */
     public final void onRegistered(@ImsRegistrationTech int imsRadioTech) {
         updateToState(imsRadioTech, REGISTRATION_STATE_REGISTERED);
@@ -189,8 +196,8 @@ public class ImsRegistrationImplBase {
     /**
      * Notify the framework that the device is trying to connect the IMS network.
      *
-     * @param imsRadioTech the radio access technology. Valid values are defined in
-     * {@link ImsRegistrationTech}.
+     * @param imsRadioTech the radio access technology. Valid values are defined as
+     * {@link #REGISTRATION_TECH_LTE} and {@link #REGISTRATION_TECH_IWLAN}.
      */
     public final void onRegistering(@ImsRegistrationTech int imsRadioTech) {
         updateToState(imsRadioTech, REGISTRATION_STATE_REGISTERING);
@@ -221,6 +228,13 @@ public class ImsRegistrationImplBase {
         });
     }
 
+    /**
+     * Notify the framework that the handover from the current radio technology to the technology
+     * defined in {@code imsRadioTech} has failed.
+     * @param imsRadioTech The technology that has failed to be changed. Valid values are
+     * {@link #REGISTRATION_TECH_LTE} and {@link #REGISTRATION_TECH_IWLAN}.
+     * @param info The {@link ImsReasonInfo} for the failure to change technology.
+     */
     public final void onTechnologyChangeFailed(@ImsRegistrationTech int imsRadioTech,
             ImsReasonInfo info) {
         mCallbacks.broadcast((c) -> {
@@ -233,6 +247,11 @@ public class ImsRegistrationImplBase {
         });
     }
 
+    /**
+     * The this device's subscriber associated {@link Uri}s have changed, which are used to filter
+     * out this device's {@link Uri}s during conference calling.
+     * @param uris
+     */
     public final void onSubscriberAssociatedUriChanged(Uri[] uris) {
         mCallbacks.broadcast((c) -> {
             try {
@@ -264,6 +283,11 @@ public class ImsRegistrationImplBase {
         }
     }
 
+    /**
+     * @return the current registration connection type. Valid values are
+     * {@link #REGISTRATION_TECH_LTE} and {@link #REGISTRATION_TECH_IWLAN}
+     * @hide
+     */
     @VisibleForTesting
     public final @ImsRegistrationTech int getConnectionType() {
         synchronized (mLock) {
