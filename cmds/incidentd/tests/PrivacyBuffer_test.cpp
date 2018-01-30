@@ -73,7 +73,7 @@ public:
     }
 
     void assertStrip(uint8_t dest, string expected, Privacy* policy) {
-        PrivacySpec spec(dest);
+        PrivacySpec spec = PrivacySpec::new_spec(dest);
         EncodedBuffer::iterator bufData = buffer.data();
         PrivacyBuffer privacyBuf(policy, bufData);
         ASSERT_EQ(privacyBuf.strip(spec), NO_ERROR);
@@ -224,7 +224,8 @@ TEST_F(PrivacyBufferTest, ClearAndStrip) {
     Privacy* list[] = { create_privacy(1, OTHER_TYPE, DEST_LOCAL), NULL };
     EncodedBuffer::iterator bufData = buffer.data();
     PrivacyBuffer privacyBuf(create_message_privacy(300, list), bufData);
-    PrivacySpec spec1(DEST_EXPLICIT), spec2(DEST_LOCAL);
+    PrivacySpec spec1 = PrivacySpec::new_spec(DEST_EXPLICIT);
+    PrivacySpec spec2 = PrivacySpec::new_spec(DEST_LOCAL);
 
     ASSERT_EQ(privacyBuf.strip(spec1), NO_ERROR);
     assertBuffer(privacyBuf, STRING_FIELD_0);

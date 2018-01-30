@@ -64,7 +64,8 @@ ReportRequest::ok()
 ReportRequestSet::ReportRequestSet()
     :mRequests(),
      mSections(),
-     mMainFd(-1)
+     mMainFd(-1),
+     mMainDest(-1)
 {
 }
 
@@ -84,6 +85,12 @@ void
 ReportRequestSet::setMainFd(int fd)
 {
     mMainFd = fd;
+}
+
+void
+ReportRequestSet::setMainDest(int dest)
+{
+    mMainDest = dest;
 }
 
 bool
@@ -125,12 +132,14 @@ Reporter::runReport()
     status_t err = NO_ERROR;
     bool needMainFd = false;
     int mainFd = -1;
+    int mainDest = -1;
     HeaderSection headers;
 
     // See if we need the main file
     for (ReportRequestSet::iterator it=batch.begin(); it!=batch.end(); it++) {
         if ((*it)->fd < 0 && mainFd < 0) {
             needMainFd = true;
+            mainDest = (*it)->args.dest();
             break;
         }
     }
@@ -154,6 +163,7 @@ Reporter::runReport()
 
         // Add to the set
         batch.setMainFd(mainFd);
+        batch.setMainDest(mainDest);
     }
 
     // Tell everyone that we're starting.
