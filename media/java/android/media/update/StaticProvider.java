@@ -34,6 +34,7 @@ import android.media.MediaSession2;
 import android.media.MediaSession2.PlaylistParams;
 import android.media.MediaSession2.SessionCallback;
 import android.media.MediaSessionService2;
+import android.media.Rating2;
 import android.media.SessionPlayer2;
 import android.media.SessionToken2;
 import android.media.VolumeProvider;
@@ -109,4 +110,11 @@ public interface StaticProvider {
             Context context, MediaMetadata2.Builder builder);
     MediaMetadata2Provider.BuilderProvider createMediaMetadata2Builder(
             Context context, MediaMetadata2.Builder builder, MediaMetadata2 source);
+
+    Rating2 newUnratedRating_Rating2(Context context, int ratingStyle);
+    Rating2 fromBundle_Rating2(Context context, Bundle bundle);
+    Rating2 newHeartRating_Rating2(Context context, boolean hasHeart);
+    Rating2 newThumbRating_Rating2(Context context, boolean thumbIsUp);
+    Rating2 newStarRating_Rating2(Context context, int starRatingStyle, float starRating);
+    Rating2 newPercentageRating_Rating2(Context context, float percent);
 }
