@@ -20,6 +20,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Rlog;
 
+import java.util.Objects;
+
 /**
  * GSM signal strength related information.
  */
@@ -185,8 +187,7 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
 
     @Override
     public int hashCode() {
-        int primeNum = 31;
-        return (mSignalStrength * primeNum) + (mBitErrorRate * primeNum);
+        return Objects.hash(mSignalStrength, mBitErrorRate, mTimingAdvance);
     }
 
     @Override

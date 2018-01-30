@@ -20,6 +20,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Rlog;
 
+import java.util.Objects;
+
 /**
  * Wcdma signal strength related information.
  */
@@ -156,8 +158,7 @@ public final class CellSignalStrengthWcdma extends CellSignalStrength implements
 
     @Override
     public int hashCode() {
-        int primeNum = 31;
-        return (mSignalStrength * primeNum) + (mBitErrorRate * primeNum);
+        return Objects.hash(mSignalStrength, mBitErrorRate);
     }
 
     @Override
