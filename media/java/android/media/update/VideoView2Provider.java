@@ -47,8 +47,7 @@ public interface VideoView2Provider extends ViewProvider {
     void setMediaControlView2_impl(MediaControlView2 mediaControlView);
     MediaController getMediaController_impl();
     MediaControlView2 getMediaControlView2_impl();
-    void showSubtitle_impl();
-    void hideSubtitle_impl();
+    void showSubtitle_impl(boolean show);
     // TODO: remove setSpeed_impl once MediaController2 is ready.
     void setSpeed_impl(float speed);
     void setAudioFocusRequest_impl(int focusGain);

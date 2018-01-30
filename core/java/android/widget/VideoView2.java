@@ -112,14 +112,14 @@ public class VideoView2 extends FrameLayout {
     public @interface ViewType {}
 
     /**
-     * Indicates video is rendering on SurfaceView
+     * Indicates video is rendering on SurfaceView.
      *
      * @see #setViewType
      */
     public static final int VIEW_TYPE_SURFACEVIEW = 1;
 
     /**
-     * Indicates video is rendering on TextureView
+     * Indicates video is rendering on TextureView.
      *
      * @see #setViewType
      */
@@ -188,18 +188,12 @@ public class VideoView2 extends FrameLayout {
     }
 
     /**
-     * Starts rendering closed caption or subtitles if there is any. The first subtitle track will
-     * be chosen by default if there multiple subtitle tracks exist.
+     * Shows or hides closed caption or subtitles if there is any.
+     * The first subtitle track will be chosen by default if there multiple subtitle tracks exist.
+     * @param show shows closed caption or subtitles if this value is true, or hides.
      */
-    public void showSubtitle() {
-        mProvider.showSubtitle_impl();
-    }
-
-    /**
-     * Stops showing closed captions or subtitles.
-     */
-    public void hideSubtitle() {
-        mProvider.hideSubtitle_impl();
+    public void showSubtitle(boolean show) {
+        mProvider.showSubtitle_impl(show);
     }
 
     /**
