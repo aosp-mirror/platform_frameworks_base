@@ -35,3 +35,4 @@ option java_package android.app.admin
 210028 security_user_restriction_removed        (package|3),(admin_user|1),(restriction|3)
 210029 security_cert_authority_installed        (success|1),(subject|3)
 210030 security_cert_authority_removed          (success|1),(subject|3)
+210031 security_crypto_self_test_completed      (success|1)
