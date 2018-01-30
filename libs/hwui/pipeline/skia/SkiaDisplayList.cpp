@@ -98,8 +98,6 @@ bool SkiaDisplayList::prepareListAndChildren(
             isDirty = true;
         }
         if (animatedImage->isRunning()) {
-            static_cast<SkiaPipeline*>(info.canvasContext.getRenderPipeline())
-                    ->scheduleDeferredUpdate(animatedImage);
             info.out.hasAnimations = true;
         }
     }

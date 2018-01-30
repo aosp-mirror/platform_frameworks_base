@@ -55,12 +55,6 @@ public:
 
     std::vector<VectorDrawableRoot*>* getVectorDrawables() { return &mVectorDrawables; }
 
-    void scheduleDeferredUpdate(AnimatedImageDrawable* imageDrawable) {
-        mAnimatedImageDrawables.push_back(imageDrawable);
-    }
-
-    std::vector<AnimatedImageDrawable*>* getAnimatingImages() { return &mAnimatedImageDrawables; }
-
     static void destroyLayer(RenderNode* node);
 
     static void prepareToDraw(const renderthread::RenderThread& thread, Bitmap* bitmap);
@@ -143,11 +137,6 @@ private:
      *  populated by prepareTree with dirty VDs
      */
     std::vector<VectorDrawableRoot*> mVectorDrawables;
-
-    /**
-     * populated by prepareTree with images with active animations
-     */
-    std::vector<AnimatedImageDrawable*> mAnimatedImageDrawables;
 
     // Block of properties used only for debugging to record a SkPicture and save it in a file.
     /**

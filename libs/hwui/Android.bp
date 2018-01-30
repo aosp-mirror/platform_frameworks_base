@@ -138,6 +138,7 @@ cc_defaults {
 
     srcs: [
         "hwui/AnimatedImageDrawable.cpp",
+        "hwui/AnimatedImageThread.cpp",
         "hwui/Bitmap.cpp",
         "font/CacheTexture.cpp",
         "font/Font.cpp",
