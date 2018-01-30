@@ -236,6 +236,10 @@ public class QSTileBaseView extends com.android.systemui.plugins.qs.QSTileView {
         return mIcon;
     }
 
+    public View getIconWithBackground() {
+        return mIconFrame;
+    }
+
     @Override
     public boolean performClick() {
         mClicked = true;
