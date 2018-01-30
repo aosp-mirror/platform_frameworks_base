@@ -58,6 +58,7 @@ const int FIELD_ID_BUCKET_INFO = 3;
 const int FIELD_ID_START_BUCKET_NANOS = 1;
 const int FIELD_ID_END_BUCKET_NANOS = 2;
 const int FIELD_ID_ATOM = 3;
+const int FIELD_ID_TIMESTAMP = 4;
 
 GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& metric,
                                          const int conditionIndex,
@@ -67,7 +68,7 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
     : MetricProducer(metric.id(), key, startTimeNs, conditionIndex, wizard),
       mStatsPullerManager(statsPullerManager),
       mPullTagId(pullTagId) {
-    mCurrentSlicedBucket = std::make_shared<DimToGaugeFieldsMap>();
+    mCurrentSlicedBucket = std::make_shared<DimToGaugeAtomsMap>();
     mCurrentSlicedBucketForAnomaly = std::make_shared<DimToValMap>();
     int64_t bucketSizeMills = 0;
     if (metric.has_bucket()) {
@@ -77,6 +78,7 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
     }
     mBucketSizeNs = bucketSizeMills * 1000000;
 
+    mSamplingType = metric.sampling_type();
     mFieldFilter = metric.gauge_fields_filter();
 
     // TODO: use UidMap if uid->pkg_name is required
@@ -89,7 +91,7 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
     }
 
     // Kicks off the puller immediately.
-    if (mPullTagId != -1) {
+    if (mPullTagId != -1 && mSamplingType == GaugeMetric::RANDOM_ONE_SAMPLE) {
         mStatsPullerManager->RegisterReceiver(mPullTagId, this, bucketSizeMills);
     }
 
@@ -154,12 +156,23 @@ void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                                (long long)bucket.mBucketStartNs);
             protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_END_BUCKET_NANOS,
                                (long long)bucket.mBucketEndNs);
-            long long atomToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_ATOM);
-            writeFieldValueTreeToStream(*bucket.mGaugeFields, protoOutput);
-            protoOutput->end(atomToken);
+
+            if (!bucket.mGaugeAtoms.empty()) {
+                long long atomsToken =
+                    protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_ATOM);
+                for (const auto& atom : bucket.mGaugeAtoms) {
+                    writeFieldValueTreeToStream(*atom.mFields, protoOutput);
+                }
+                protoOutput->end(atomsToken);
+
+                for (const auto& atom : bucket.mGaugeAtoms) {
+                    protoOutput->write(FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED | FIELD_ID_TIMESTAMP,
+                                       (long long)atom.mTimestamps);
+                }
+            }
             protoOutput->end(bucketInfoToken);
-            VLOG("\t bucket [%lld - %lld] includes %d gauge fields.", (long long)bucket.mBucketStartNs,
-                 (long long)bucket.mBucketEndNs, (int)bucket.mGaugeFields->size());
+            VLOG("\t bucket [%lld - %lld] includes %d atoms.", (long long)bucket.mBucketStartNs,
+                 (long long)bucket.mBucketEndNs, (int)bucket.mGaugeAtoms.size());
         }
         protoOutput->end(wrapperToken);
     }
@@ -181,14 +194,26 @@ void GaugeMetricProducer::onConditionChangedLocked(const bool conditionMet,
     if (mPullTagId == -1) {
         return;
     }
-    // No need to pull again. Either scheduled pull or condition on true happened
-    if (!mCondition) {
+
+    bool triggerPuller = false;
+    switch(mSamplingType) {
+        // When the metric wants to do random sampling and there is already one gauge atom for the
+        // current bucket, do not do it again.
+        case GaugeMetric::RANDOM_ONE_SAMPLE: {
+            triggerPuller = mCondition && mCurrentSlicedBucket->empty();
+            break;
+        }
+        case GaugeMetric::ALL_CONDITION_CHANGES: {
+            triggerPuller = true;
+            break;
+        }
+        default:
+            break;
+    }
+    if (!triggerPuller) {
         return;
     }
-    // Already have gauge metric for the current bucket, do not do it again.
-    if (mCurrentSlicedBucket->size() > 0) {
-        return;
-    }
+
     vector<std::shared_ptr<LogEvent>> allData;
     if (!mStatsPullerManager->Pull(mPullTagId, &allData)) {
         ALOGE("Stats puller failed for tag: %d", mPullTagId);
@@ -257,20 +282,24 @@ void GaugeMetricProducer::onMatchedLogEventInternalLocked(
     }
     flushIfNeededLocked(eventTimeNs);
 
-    // For gauge metric, we just simply use the first gauge in the given bucket.
-    if (mCurrentSlicedBucket->find(eventKey) != mCurrentSlicedBucket->end()) {
+    // When gauge metric wants to randomly sample the output atom, we just simply use the first
+    // gauge in the given bucket.
+    if (mCurrentSlicedBucket->find(eventKey) != mCurrentSlicedBucket->end() &&
+        mSamplingType == GaugeMetric::RANDOM_ONE_SAMPLE) {
         return;
     }
-    std::shared_ptr<FieldValueMap> gaugeFields = getGaugeFields(event);
     if (hitGuardRailLocked(eventKey)) {
         return;
     }
-    (*mCurrentSlicedBucket)[eventKey] = gaugeFields;
+    GaugeAtom gaugeAtom;
+    gaugeAtom.mFields = getGaugeFields(event);
+    gaugeAtom.mTimestamps = eventTimeNs;
+    (*mCurrentSlicedBucket)[eventKey].push_back(gaugeAtom);
     // Anomaly detection on gauge metric only works when there is one numeric
     // field specified.
     if (mAnomalyTrackers.size() > 0) {
-        if (gaugeFields->size() == 1) {
-            const DimensionsValue& dimensionsValue = gaugeFields->begin()->second;
+        if (gaugeAtom.mFields->size() == 1) {
+            const DimensionsValue& dimensionsValue = gaugeAtom.mFields->begin()->second;
             long gaugeVal = 0;
             if (dimensionsValue.has_value_int()) {
                 gaugeVal = (long)dimensionsValue.value_int();
@@ -289,7 +318,10 @@ void GaugeMetricProducer::updateCurrentSlicedBucketForAnomaly() {
     mCurrentSlicedBucketForAnomaly->clear();
     status_t err = NO_ERROR;
     for (const auto& slice : *mCurrentSlicedBucket) {
-        const DimensionsValue& dimensionsValue = slice.second->begin()->second;
+        if (slice.second.empty() || slice.second.front().mFields->empty()) {
+            continue;
+        }
+        const DimensionsValue& dimensionsValue = slice.second.front().mFields->begin()->second;
         long gaugeVal = 0;
         if (dimensionsValue.has_value_int()) {
             gaugeVal = (long)dimensionsValue.value_int();
@@ -318,7 +350,7 @@ void GaugeMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
     info.mBucketNum = mCurrentBucketNum;
 
     for (const auto& slice : *mCurrentSlicedBucket) {
-        info.mGaugeFields = slice.second;
+        info.mGaugeAtoms = slice.second;
         auto& bucketList = mPastBuckets[slice.first];
         bucketList.push_back(info);
         VLOG("gauge metric %lld, dump key value: %s",
@@ -334,7 +366,7 @@ void GaugeMetricProducer::flushIfNeededLocked(const uint64_t& eventTimeNs) {
     }
 
     mCurrentSlicedBucketForAnomaly = std::make_shared<DimToValMap>();
-    mCurrentSlicedBucket = std::make_shared<DimToGaugeFieldsMap>();
+    mCurrentSlicedBucket = std::make_shared<DimToGaugeAtomsMap>();
 
     // Adjusts the bucket start time
     int64_t numBucketsForward = (eventTimeNs - mCurrentBucketStartTimeNs) / mBucketSizeNs;

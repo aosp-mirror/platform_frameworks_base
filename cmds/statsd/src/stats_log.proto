@@ -100,7 +100,9 @@ message GaugeBucketInfo {
 
   optional int64 end_bucket_nanos = 2;
 
-  optional Atom atom = 3;
+  repeated Atom atom = 3;
+
+  repeated int64 timestamp_nanos = 4;
 }
 
 message GaugeMetricData {
