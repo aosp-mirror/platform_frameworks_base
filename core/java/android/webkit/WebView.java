@@ -2106,6 +2106,18 @@ public class WebView extends AbsoluteLayout
      * the default directory, and other processes must call this API to define
      * a unique suffix.
      * <p>
+     * This means that different processes in the same application cannot directly
+     * share WebView-related data, since the data directories must be distinct.
+     * Applications that use this API may have to explicitly pass data between
+     * processes. For example, login cookies may have to be copied from one
+     * process's cookie jar to the other using {@link CookieManager} if both
+     * processes' WebViews are intended to be logged in.
+     * <p>
+     * Most applications should simply ensure that all components of the app
+     * that rely on WebView are in the same process, to avoid needing multiple
+     * data directories. The {@link #disableWebView} method can be used to ensure
+     * that the other processes do not use WebView by accident in this case.
+     * <p>
      * This API must be called before any instances of WebView are created in
      * this process and before any other methods in the android.webkit package
      * are called by this process.
@@ -2126,10 +2138,14 @@ public class WebView extends AbsoluteLayout
      * methods in the android.webkit package are used.
      * <p>
      * Applications with multiple processes may wish to call this in processes
-     * which are not intended to use WebView to prevent potential data directory
-     * conflicts (see {@link #setDataDirectorySuffix}) and to avoid accidentally
-     * incurring the memory usage of initializing WebView in long-lived
-     * processes which have no need for it.
+     * that are not intended to use WebView to avoid accidentally incurring
+     * the memory usage of initializing WebView in long-lived processes that
+     * have no need for it, and to prevent potential data directory conflicts
+     * (see {@link #setDataDirectorySuffix}).
+     * <p>
+     * For example, an audio player application with one process for its
+     * activities and another process for its playback service may wish to call
+     * this method in the playback service's {@link android.app.Service#onCreate}.
      *
      * @throws IllegalStateException if WebView has already been initialized
      *                               in the current process.
