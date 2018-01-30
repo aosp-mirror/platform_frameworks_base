@@ -319,7 +319,8 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
     /**
      *  Start the animation.
      *
-     *  <p>Does nothing if the animation is already running.
+     *  <p>Does nothing if the animation is already running. If the animation is stopped,
+     *  this will reset it.</p>
      *
      *  <p>If the animation starts, this will call
      *  {@link Animatable2.AnimationCallback#onAnimationStart}.</p>
