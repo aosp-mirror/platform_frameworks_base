@@ -37,6 +37,7 @@ LOCAL_JNI_SHARED_LIBRARIES := \
     libc++ \
     libcrypto \
     libcutils \
+    libdexfile \
     libframeworksnettestsjni \
     libhidl-gen-utils \
     libhidlbase \
