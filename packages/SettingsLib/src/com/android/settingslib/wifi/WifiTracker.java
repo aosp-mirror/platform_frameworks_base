@@ -132,8 +132,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     */
     private final Object mLock = new Object();
 
-    private final HashMap<String, Integer> mSeenBssids = new HashMap<>();
-
     // TODO(sghuman): Change this to be keyed on AccessPoint.getKey
     private final HashMap<String, ScanResult> mScanResultCache = new HashMap<>();
 
@@ -447,13 +445,11 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     }
 
     private void handleResume() {
-        // TODO(sghuman): Investigate removing this and replacing it with a cache eviction call
-        // instead.
-        mScanResultCache.clear();
-        mSeenBssids.clear();
+        evictOldScans();
     }
 
-    private Collection<ScanResult> updateScanResultCache(final List<ScanResult> newResults) {
+    private ArrayMap<String, List<ScanResult>> updateScanResultCache(
+            final List<ScanResult> newResults) {
         // TODO(sghuman): Delete this and replace it with the Map of Ap Keys to ScanResults
         for (ScanResult newResult : newResults) {
             if (newResult.SSID == null || newResult.SSID.isEmpty()) {
@@ -467,10 +463,27 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
             evictOldScans();
         }
 
-        // TODO(sghuman): Update a Map<ApKey, List<ScanResults>> variable to be reused later after
-        // double threads have been removed.
+        ArrayMap<String, List<ScanResult>> scanResultsByApKey = new ArrayMap<>();
+        for (ScanResult result : mScanResultCache.values()) {
+            // Ignore hidden and ad-hoc networks.
+            if (result.SSID == null || result.SSID.length() == 0 ||
+                    result.capabilities.contains("[IBSS]")) {
+                continue;
+            }
 
-        return mScanResultCache.values();
+            String apKey = AccessPoint.getKey(result);
+            List<ScanResult> resultList;
+            if (scanResultsByApKey.containsKey(apKey)) {
+                resultList = scanResultsByApKey.get(apKey);
+            } else {
+                resultList = new ArrayList<>();
+                scanResultsByApKey.put(apKey, resultList);
+            }
+
+            resultList.add(result);
+        }
+
+        return scanResultsByApKey;
     }
 
     /**
@@ -535,77 +548,49 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         // modifying lists exposed to operations on the MainThread (getAccessPoints, stopTracking,
         // startTracking, etc).
 
-        WifiConfiguration connectionConfig = null;
-        if (mLastInfo != null) {
-            connectionConfig = getWifiConfigurationForNetworkId(
-                    mLastInfo.getNetworkId(), configs);
-        }
-
-        // Swap the current access points into a cached list.
-        List<AccessPoint> cachedAccessPoints = new ArrayList<>(mInternalAccessPoints);
-        ArrayList<AccessPoint> accessPoints = new ArrayList<>();
-
-        // Clear out the configs so we don't think something is saved when it isn't.
-        for (AccessPoint accessPoint : cachedAccessPoints) {
-            accessPoint.clearConfig();
-        }
-
-        final Collection<ScanResult> results = updateScanResultCache(newScanResults);
-
+        // Map configs and scan results necessary to make AccessPoints
         final Map<String, WifiConfiguration> configsByKey = new ArrayMap(configs.size());
         if (configs != null) {
             for (WifiConfiguration config : configs) {
                 configsByKey.put(AccessPoint.getKey(config), config);
             }
         }
+        ArrayMap<String, List<ScanResult>> scanResultsByApKey =
+                updateScanResultCache(newScanResults);
+
+        WifiConfiguration connectionConfig = null;
+        if (mLastInfo != null) {
+            // TODO(sghuman): This call is unneccessary, as we already have all the configs.
+            // Refactor to match config network id when updating configs below, and then update
+            // networkinfo and wifi info only on match
+            connectionConfig = getWifiConfigurationForNetworkId(
+                    mLastInfo.getNetworkId(), configs);
+        }
+
+        // Swap the current access points into a cached list for maintaining AP listeners
+        List<AccessPoint> cachedAccessPoints = new ArrayList<>(mInternalAccessPoints);
+        ArrayList<AccessPoint> accessPoints = new ArrayList<>();
 
         final List<NetworkKey> scoresToRequest = new ArrayList<>();
-        if (results != null) {
-            // TODO(sghuman): Move this loop to updateScanResultCache and make instance variable
-            // after double handlers are removed.
-            ArrayMap<String, List<ScanResult>> scanResultsByApKey = new ArrayMap<>();
-            for (ScanResult result : results) {
-                // Ignore hidden and ad-hoc networks.
-                if (result.SSID == null || result.SSID.length() == 0 ||
-                        result.capabilities.contains("[IBSS]")) {
-                    continue;
-                }
 
+        for (Map.Entry<String, List<ScanResult>> entry : scanResultsByApKey.entrySet()) {
+            for (ScanResult result : entry.getValue()) {
                 NetworkKey key = NetworkKey.createFromScanResult(result);
                 if (key != null && !mRequestedScores.contains(key)) {
                     scoresToRequest.add(key);
                 }
-
-                String apKey = AccessPoint.getKey(result);
-                List<ScanResult> resultList;
-                if (scanResultsByApKey.containsKey(apKey)) {
-                    resultList = scanResultsByApKey.get(apKey);
-                } else {
-                    resultList = new ArrayList<>();
-                    scanResultsByApKey.put(apKey, resultList);
-                }
-
-                resultList.add(result);
             }
 
-            for (Map.Entry<String, List<ScanResult>> entry : scanResultsByApKey.entrySet()) {
-                // List can not be empty as it is dynamically constructed on each iteration
-                ScanResult firstResult = entry.getValue().get(0);
-
-                AccessPoint accessPoint =
-                        getCachedOrCreate(entry.getValue(), cachedAccessPoints);
-                if (mLastInfo != null && mLastNetworkInfo != null) {
-                    accessPoint.update(connectionConfig, mLastInfo, mLastNetworkInfo);
-                }
-
-                // Update the matching config if there is one, to populate saved network info
-                WifiConfiguration config = configsByKey.get(entry.getKey());
-                if (config != null) {
-                    accessPoint.update(config);
-                }
-
-                accessPoints.add(accessPoint);
+            AccessPoint accessPoint =
+                    getCachedOrCreate(entry.getValue(), cachedAccessPoints);
+            if (mLastInfo != null && mLastNetworkInfo != null) {
+                accessPoint.update(connectionConfig, mLastInfo, mLastNetworkInfo);
             }
+
+            // Update the matching config if there is one, to populate saved network info
+            accessPoint.update(configsByKey.get(entry.getKey()));
+
+            accessPoints.add(accessPoint);
         }
 
         requestScoresForNetworkKeys(scoresToRequest);
@@ -616,7 +601,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         // Pre-sort accessPoints to speed preference insertion
         Collections.sort(accessPoints);
 
-        // Log accesspoints that were deleted
+        // Log accesspoints that are being removed
         if (DBG()) {
             Log.d(TAG, "------ Dumping SSIDs that were not seen on this scan ------");
             for (AccessPoint prevAccessPoint : mInternalAccessPoints) {
