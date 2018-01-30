@@ -62,6 +62,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Maintains the master list of jobs that the job scheduler is tracking. These jobs are compared by
@@ -85,7 +86,7 @@ public final class JobStore {
     private static final int MAX_OPS_BEFORE_WRITE = 1;
 
     final Object mLock;
-    final JobSet mJobSet; // per-caller-uid tracking
+    final JobSet mJobSet; // per-caller-uid and per-source-uid tracking
     final Context mContext;
 
     // Bookkeeping around incorrect boot-time system clock
@@ -1000,10 +1001,11 @@ public final class JobStore {
     }
 
     static final class JobSet {
-        // Key is the getUid() originator of the jobs in each sheaf
-        private SparseArray<ArraySet<JobStatus>> mJobs;
-        // Same data but with the key as getSourceUid() of the jobs in each sheaf
-        private SparseArray<ArraySet<JobStatus>> mJobsPerSourceUid;
+        @VisibleForTesting // Key is the getUid() originator of the jobs in each sheaf
+        final SparseArray<ArraySet<JobStatus>> mJobs;
+
+        @VisibleForTesting // Same data but with the key as getSourceUid() of the jobs in each sheaf
+        final SparseArray<ArraySet<JobStatus>> mJobsPerSourceUid;
 
         public JobSet() {
             mJobs = new SparseArray<ArraySet<JobStatus>>();
@@ -1046,7 +1048,13 @@ public final class JobStore {
                 jobsForSourceUid = new ArraySet<>();
                 mJobsPerSourceUid.put(sourceUid, jobsForSourceUid);
             }
-            return jobs.add(job) && jobsForSourceUid.add(job);
+            final boolean added = jobs.add(job);
+            final boolean addedInSource = jobsForSourceUid.add(job);
+            if (added != addedInSource) {
+                Slog.wtf(TAG, "mJobs and mJobsPerSourceUid mismatch; caller= " + added
+                        + " source= " + addedInSource);
+            }
+            return added || addedInSource;
         }
 
         public boolean remove(JobStatus job) {
@@ -1075,25 +1083,38 @@ public final class JobStore {
 
         /**
          * Removes the jobs of all users not specified by the whitelist of user ids.
-         * The jobs scheduled by non existent users will not be removed if they were
+         * This will remove jobs scheduled *by* non-existent users as well as jobs scheduled *for*
+         * non-existent users
          */
-        public void removeJobsOfNonUsers(int[] whitelist) {
-            for (int jobSetIndex = mJobsPerSourceUid.size() - 1; jobSetIndex >= 0; jobSetIndex--) {
-                final int jobUserId = UserHandle.getUserId(mJobsPerSourceUid.keyAt(jobSetIndex));
-                if (!ArrayUtils.contains(whitelist, jobUserId)) {
-                    mJobsPerSourceUid.removeAt(jobSetIndex);
-                }
-            }
+        public void removeJobsOfNonUsers(final int[] whitelist) {
+            final Predicate<JobStatus> noSourceUser =
+                    job -> !ArrayUtils.contains(whitelist, job.getSourceUserId());
+            final Predicate<JobStatus> noCallingUser =
+                    job -> !ArrayUtils.contains(whitelist, job.getUserId());
+            removeAll(noSourceUser.or(noCallingUser));
+        }
+
+        private void removeAll(Predicate<JobStatus> predicate) {
             for (int jobSetIndex = mJobs.size() - 1; jobSetIndex >= 0; jobSetIndex--) {
-                final ArraySet<JobStatus> jobsForUid = mJobs.valueAt(jobSetIndex);
-                for (int jobIndex = jobsForUid.size() - 1; jobIndex >= 0; jobIndex--) {
-                    final int jobUserId = jobsForUid.valueAt(jobIndex).getUserId();
-                    if (!ArrayUtils.contains(whitelist, jobUserId)) {
-                        jobsForUid.removeAt(jobIndex);
+                final ArraySet<JobStatus> jobs = mJobs.valueAt(jobSetIndex);
+                for (int jobIndex = jobs.size() - 1; jobIndex >= 0; jobIndex--) {
+                    if (predicate.test(jobs.valueAt(jobIndex))) {
+                        jobs.removeAt(jobIndex);
                     }
                 }
-                if (jobsForUid.size() == 0) {
+                if (jobs.size() == 0) {
                     mJobs.removeAt(jobSetIndex);
+                }
+            }
+            for (int jobSetIndex = mJobsPerSourceUid.size() - 1; jobSetIndex >= 0; jobSetIndex--) {
+                final ArraySet<JobStatus> jobs = mJobsPerSourceUid.valueAt(jobSetIndex);
+                for (int jobIndex = jobs.size() - 1; jobIndex >= 0; jobIndex--) {
+                    if (predicate.test(jobs.valueAt(jobIndex))) {
+                        jobs.removeAt(jobIndex);
+                    }
+                }
+                if (jobs.size() == 0) {
+                    mJobsPerSourceUid.removeAt(jobSetIndex);
                 }
             }
         }
