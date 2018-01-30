@@ -29,7 +29,6 @@ import android.widget.RemoteViews;
 
 import com.android.internal.util.Preconditions;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
@@ -99,7 +98,7 @@ public final class Dataset implements Parcelable {
     private final ArrayList<AutofillId> mFieldIds;
     private final ArrayList<AutofillValue> mFieldValues;
     private final ArrayList<RemoteViews> mFieldPresentations;
-    private final ArrayList<Pattern> mFieldFilters;
+    private final ArrayList<DatasetFieldFilter> mFieldFilters;
     private final RemoteViews mPresentation;
     private final IntentSender mAuthentication;
     @Nullable String mId;
@@ -132,7 +131,7 @@ public final class Dataset implements Parcelable {
 
     /** @hide */
     @Nullable
-    public Pattern getFilter(int index) {
+    public DatasetFieldFilter getFilter(int index) {
         return mFieldFilters.get(index);
     }
 
@@ -189,7 +188,7 @@ public final class Dataset implements Parcelable {
         private ArrayList<AutofillId> mFieldIds;
         private ArrayList<AutofillValue> mFieldValues;
         private ArrayList<RemoteViews> mFieldPresentations;
-        private ArrayList<Pattern> mFieldFilters;
+        private ArrayList<DatasetFieldFilter> mFieldFilters;
         private RemoteViews mPresentation;
         private IntentSender mAuthentication;
         private boolean mDestroyed;
@@ -363,19 +362,21 @@ public final class Dataset implements Parcelable {
          * @param value the value to be autofilled. Pass {@code null} if you do not have the value
          *        but the target view is a logical part of the dataset. For example, if
          *        the dataset needs authentication and you have no access to the value.
-         * @param filter regex used to determine if the dataset should be shown in the autofill UI.
+         * @param filter regex used to determine if the dataset should be shown in the autofill UI;
+         *        when {@code null}, it disables filtering on that dataset (this is the recommended
+         *        approach when {@code value} is not {@code null} and field contains sensitive data
+         *        such as passwords).
          *
          * @return this builder.
          * @throws IllegalStateException if the builder was constructed without a
          *         {@link RemoteViews presentation}.
          */
         public @NonNull Builder setValue(@NonNull AutofillId id, @Nullable AutofillValue value,
-                @NonNull Pattern filter) {
+                @Nullable Pattern filter) {
             throwIfDestroyed();
-            Preconditions.checkNotNull(filter, "filter cannot be null");
             Preconditions.checkState(mPresentation != null,
                     "Dataset presentation not set on constructor");
-            setLifeTheUniverseAndEverything(id, value, null, filter);
+            setLifeTheUniverseAndEverything(id, value, null, new DatasetFieldFilter(filter));
             return this;
         }
 
@@ -398,23 +399,26 @@ public final class Dataset implements Parcelable {
          * @param value the value to be autofilled. Pass {@code null} if you do not have the value
          *        but the target view is a logical part of the dataset. For example, if
          *        the dataset needs authentication and you have no access to the value.
+         * @param filter regex used to determine if the dataset should be shown in the autofill UI;
+         *        when {@code null}, it disables filtering on that dataset (this is the recommended
+         *        approach when {@code value} is not {@code null} and field contains sensitive data
+         *        such as passwords).
          * @param presentation the presentation used to visualize this field.
-         * @param filter regex used to determine if the dataset should be shown in the autofill UI.
          *
          * @return this builder.
          */
         public @NonNull Builder setValue(@NonNull AutofillId id, @Nullable AutofillValue value,
-                @NonNull Pattern filter, @NonNull RemoteViews presentation) {
+                @Nullable Pattern filter, @NonNull RemoteViews presentation) {
             throwIfDestroyed();
-            Preconditions.checkNotNull(filter, "filter cannot be null");
             Preconditions.checkNotNull(presentation, "presentation cannot be null");
-            setLifeTheUniverseAndEverything(id, value, presentation, filter);
+            setLifeTheUniverseAndEverything(id, value, presentation,
+                    new DatasetFieldFilter(filter));
             return this;
         }
 
         private void setLifeTheUniverseAndEverything(@NonNull AutofillId id,
                 @Nullable AutofillValue value, @Nullable RemoteViews presentation,
-                @Nullable Pattern filter) {
+                @Nullable DatasetFieldFilter filter) {
             Preconditions.checkNotNull(id, "id cannot be null");
             if (mFieldIds != null) {
                 final int existingIdx = mFieldIds.indexOf(id);
@@ -477,8 +481,8 @@ public final class Dataset implements Parcelable {
         parcel.writeParcelable(mPresentation, flags);
         parcel.writeTypedList(mFieldIds, flags);
         parcel.writeTypedList(mFieldValues, flags);
-        parcel.writeParcelableList(mFieldPresentations, flags);
-        parcel.writeSerializable(mFieldFilters);
+        parcel.writeTypedList(mFieldPresentations, flags);
+        parcel.writeTypedList(mFieldFilters, flags);
         parcel.writeParcelable(mAuthentication, flags);
         parcel.writeString(mId);
     }
@@ -493,22 +497,19 @@ public final class Dataset implements Parcelable {
             final Builder builder = (presentation == null)
                     ? new Builder()
                     : new Builder(presentation);
-            final ArrayList<AutofillId> ids = parcel.createTypedArrayList(AutofillId.CREATOR);
+            final ArrayList<AutofillId> ids =
+                    parcel.createTypedArrayList(AutofillId.CREATOR);
             final ArrayList<AutofillValue> values =
                     parcel.createTypedArrayList(AutofillValue.CREATOR);
-            final ArrayList<RemoteViews> presentations = new ArrayList<>();
-            parcel.readParcelableList(presentations, null);
-            @SuppressWarnings("unchecked")
-            final ArrayList<Serializable> filters =
-                    (ArrayList<Serializable>) parcel.readSerializable();
-            final int idCount = (ids != null) ? ids.size() : 0;
-            final int valueCount = (values != null) ? values.size() : 0;
-            for (int i = 0; i < idCount; i++) {
+            final ArrayList<RemoteViews> presentations =
+                    parcel.createTypedArrayList(RemoteViews.CREATOR);
+            final ArrayList<DatasetFieldFilter> filters =
+                    parcel.createTypedArrayList(DatasetFieldFilter.CREATOR);
+            for (int i = 0; i < ids.size(); i++) {
                 final AutofillId id = ids.get(i);
-                final AutofillValue value = (valueCount > i) ? values.get(i) : null;
-                final RemoteViews fieldPresentation = presentations.isEmpty() ? null
-                        : presentations.get(i);
-                final Pattern filter = (Pattern) filters.get(i);
+                final AutofillValue value = values.get(i);
+                final RemoteViews fieldPresentation = presentations.get(i);
+                final DatasetFieldFilter filter = filters.get(i);
                 builder.setLifeTheUniverseAndEverything(id, value, fieldPresentation, filter);
             }
             builder.setAuthentication(parcel.readParcelable(null));
@@ -521,4 +522,55 @@ public final class Dataset implements Parcelable {
             return new Dataset[size];
         }
     };
+
+    /**
+     * Helper class used to indicate when the service explicitly set a {@link Pattern} filter for a
+     * dataset field&dash; we cannot use a {@link Pattern} directly because then we wouldn't be
+     * able to differentiate whether the service explicitly passed a {@code null} filter to disable
+     * filter, or when it called the methods that does not take a filter {@link Pattern}.
+     *
+     * @hide
+     */
+    public static final class DatasetFieldFilter implements Parcelable {
+
+        @Nullable
+        public final Pattern pattern;
+
+        private DatasetFieldFilter(@Nullable Pattern pattern) {
+            this.pattern = pattern;
+        }
+
+        @Override
+        public String toString() {
+            if (!sDebug) return super.toString();
+
+            // Cannot log pattern because it could contain PII
+            return pattern == null ? "null" : pattern.pattern().length() + "_chars";
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel parcel, int flags) {
+            parcel.writeSerializable(pattern);
+        }
+
+        @SuppressWarnings("hiding")
+        public static final Creator<DatasetFieldFilter> CREATOR =
+                new Creator<DatasetFieldFilter>() {
+
+            @Override
+            public DatasetFieldFilter createFromParcel(Parcel parcel) {
+                return new DatasetFieldFilter((Pattern) parcel.readSerializable());
+            }
+
+            @Override
+            public DatasetFieldFilter[] newArray(int size) {
+                return new DatasetFieldFilter[size];
+            }
+        };
+    }
 }
