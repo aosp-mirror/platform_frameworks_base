@@ -293,6 +293,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             sharingIntent.setType("image/png");
             sharingIntent.putExtra(Intent.EXTRA_STREAM, uri);
             sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+            sharingIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
             // Create a share action for the notification. Note, we proxy the call to
             // ScreenshotActionReceiver because RemoteViews currently forces an activity options
@@ -310,7 +311,9 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
 
             Intent editIntent = new Intent(Intent.ACTION_EDIT);
             editIntent.setType("image/png");
-            editIntent.putExtra(Intent.EXTRA_STREAM, uri);
+            editIntent.setData(uri);
+            editIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            editIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
             // Create a edit action for the notification the same way.
             PendingIntent editAction = PendingIntent.getBroadcast(context, 1,
@@ -902,6 +905,7 @@ class GlobalScreenshot {
             Intent chooserIntent = Intent.createChooser(sharingIntent, null,
                     chooseAction.getIntentSender())
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+
             ActivityOptions opts = ActivityOptions.makeBasic();
             opts.setDisallowEnterPictureInPictureWhileLaunching(true);
             context.startActivityAsUser(chooserIntent, opts.toBundle(), UserHandle.CURRENT);
