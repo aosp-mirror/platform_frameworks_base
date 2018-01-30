@@ -48,7 +48,8 @@ import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
 import com.android.server.backup.transport.TransportNotRegisteredException;
 import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderClasses;
+import com.android.server.testing.SystemLoaderPackages;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -74,11 +75,7 @@ import org.robolectric.shadows.ShadowSystemClock;
     sdk = 26,
     shadows = {ShadowAppBackupUtils.class, ShadowBackupPolicyEnforcer.class}
 )
-@SystemLoaderClasses({
-    BackupManagerService.class,
-    TransportManager.class,
-    PackageManagerBackupAgent.class
-})
+@SystemLoaderPackages({"com.android.server.backup"})
 @Presubmit
 public class BackupManagerServiceTest {
     private static final String TAG = "BMSTest";
