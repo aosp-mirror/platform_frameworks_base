@@ -2685,6 +2685,32 @@ public class ConnectivityManager {
          * satisfying the request changes.
          *
          * @param network The {@link Network} of the satisfying network.
+         * @param networkCapabilities The {@link NetworkCapabilities} of the satisfying network.
+         * @param linkProperties The {@link LinkProperties} of the satisfying network.
+         * @hide
+         */
+        public void onAvailable(Network network, NetworkCapabilities networkCapabilities,
+                LinkProperties linkProperties) {
+            // Internally only this method is called when a new network is available, and
+            // it calls the callback in the same way and order that older versions used
+            // to call so as not to change the behavior.
+            onAvailable(network);
+            if (!networkCapabilities.hasCapability(
+                    NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED)) {
+                onNetworkSuspended(network);
+            }
+            onCapabilitiesChanged(network, networkCapabilities);
+            onLinkPropertiesChanged(network, linkProperties);
+        }
+
+        /**
+         * Called when the framework connects and has declared a new network ready for use.
+         * This callback may be called more than once if the {@link Network} that is
+         * satisfying the request changes. This will always immediately be followed by a
+         * call to {@link #onCapabilitiesChanged(Network, NetworkCapabilities)} then by a
+         * call to {@link #onLinkPropertiesChanged(Network, LinkProperties)}.
+         *
+         * @param network The {@link Network} of the satisfying network.
          */
         public void onAvailable(Network network) {}
 
@@ -2727,7 +2753,8 @@ public class ConnectivityManager {
          * changes capabilities but still satisfies the stated need.
          *
          * @param network The {@link Network} whose capabilities have changed.
-         * @param networkCapabilities The new {@link android.net.NetworkCapabilities} for this network.
+         * @param networkCapabilities The new {@link android.net.NetworkCapabilities} for this
+         *                            network.
          */
         public void onCapabilitiesChanged(Network network,
                 NetworkCapabilities networkCapabilities) {}
@@ -2743,7 +2770,7 @@ public class ConnectivityManager {
 
         /**
          * Called when the network the framework connected to for this request
-         * goes into {@link NetworkInfo.DetailedState.SUSPENDED}.
+         * goes into {@link NetworkInfo.State#SUSPENDED}.
          * This generally means that while the TCP connections are still live,
          * temporarily network data fails to transfer.  Specifically this is used
          * on cellular networks to mask temporary outages when driving through
@@ -2754,9 +2781,8 @@ public class ConnectivityManager {
 
         /**
          * Called when the network the framework connected to for this request
-         * returns from a {@link NetworkInfo.DetailedState.SUSPENDED} state.
-         * This should always be preceeded by a matching {@code onNetworkSuspended}
-         * call.
+         * returns from a {@link NetworkInfo.State#SUSPENDED} state. This should always be
+         * preceded by a matching {@link NetworkCallback#onNetworkSuspended} call.
          * @hide
          */
         public void onNetworkResumed(Network network) {}
@@ -2865,7 +2891,9 @@ public class ConnectivityManager {
                     break;
                 }
                 case CALLBACK_AVAILABLE: {
-                    callback.onAvailable(network);
+                    NetworkCapabilities cap = getObject(message, NetworkCapabilities.class);
+                    LinkProperties lp = getObject(message, LinkProperties.class);
+                    callback.onAvailable(network, cap, lp);
                     break;
                 }
                 case CALLBACK_LOSING: {

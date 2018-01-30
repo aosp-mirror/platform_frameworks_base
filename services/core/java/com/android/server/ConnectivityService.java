@@ -30,6 +30,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
@@ -4503,10 +4504,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
         lp.ensureDirectlyConnectedRoutes();
         // TODO: Instead of passing mDefaultRequest, provide an API to determine whether a Network
         // satisfies mDefaultRequest.
+        final NetworkCapabilities nc = new NetworkCapabilities(networkCapabilities);
         final NetworkAgentInfo nai = new NetworkAgentInfo(messenger, new AsyncChannel(),
-                new Network(reserveNetId()), new NetworkInfo(networkInfo), lp,
-                new NetworkCapabilities(networkCapabilities), currentScore,
+                new Network(reserveNetId()), new NetworkInfo(networkInfo), lp, nc, currentScore,
                 mContext, mTrackerHandler, new NetworkMisc(networkMisc), mDefaultRequest, this);
+        // Make sure the network capabilities reflect what the agent info says.
+        nai.networkCapabilities = mixInCapabilities(nai, nc);
         synchronized (this) {
             nai.networkMonitor.systemReady = mSystemReady;
         }
@@ -4735,6 +4738,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         } else {
             newNc.addCapability(NET_CAPABILITY_FOREGROUND);
         }
+        if (nai.isSuspended()) {
+            newNc.removeCapability(NET_CAPABILITY_NOT_SUSPENDED);
+        } else {
+            newNc.addCapability(NET_CAPABILITY_NOT_SUSPENDED);
+        }
 
         return newNc;
     }
@@ -4928,6 +4936,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             putParcelable(bundle, networkAgent.network);
         }
         switch (notificationType) {
+            case ConnectivityManager.CALLBACK_AVAILABLE: {
+                putParcelable(bundle, new NetworkCapabilities(networkAgent.networkCapabilities));
+                putParcelable(bundle, new LinkProperties(networkAgent.linkProperties));
+                break;
+            }
             case ConnectivityManager.CALLBACK_LOSING: {
                 msg.arg1 = arg1;
                 break;
@@ -5468,6 +5481,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (networkAgent.getCurrentScore() != oldScore) {
                 rematchAllNetworksAndRequests(networkAgent, oldScore);
             }
+            updateCapabilities(networkAgent.getCurrentScore(), networkAgent,
+                    networkAgent.networkCapabilities);
+            // TODO (b/73132094) : remove this call once the few users of onSuspended and
+            // onResumed have been removed.
             notifyNetworkCallbacks(networkAgent, (state == NetworkInfo.State.SUSPENDED ?
                     ConnectivityManager.CALLBACK_SUSPENDED :
                     ConnectivityManager.CALLBACK_RESUMED));
@@ -5504,14 +5521,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         callCallbackForRequest(nri, nai, ConnectivityManager.CALLBACK_AVAILABLE, 0);
-        // Whether a network is currently suspended is also an important
-        // element of state to be transferred (it would not otherwise be
-        // delivered by any currently available mechanism).
-        if (nai.networkInfo.getState() == NetworkInfo.State.SUSPENDED) {
-            callCallbackForRequest(nri, nai, ConnectivityManager.CALLBACK_SUSPENDED, 0);
-        }
-        callCallbackForRequest(nri, nai, ConnectivityManager.CALLBACK_CAP_CHANGED, 0);
-        callCallbackForRequest(nri, nai, ConnectivityManager.CALLBACK_IP_CHANGED, 0);
     }
 
     private void sendLegacyNetworkBroadcast(NetworkAgentInfo nai, DetailedState state, int type) {

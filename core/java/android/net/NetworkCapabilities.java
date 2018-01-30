@@ -116,6 +116,7 @@ public final class NetworkCapabilities implements Parcelable {
             NET_CAPABILITY_NOT_ROAMING,
             NET_CAPABILITY_FOREGROUND,
             NET_CAPABILITY_NOT_CONGESTED,
+            NET_CAPABILITY_NOT_SUSPENDED,
     })
     public @interface NetCapability { }
 
@@ -239,7 +240,6 @@ public final class NetworkCapabilities implements Parcelable {
     /**
      * Indicates that this network is available for use by apps, and not a network that is being
      * kept up in the background to facilitate fast network switching.
-     * @hide
      */
     public static final int NET_CAPABILITY_FOREGROUND = 19;
 
@@ -252,8 +252,20 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public static final int NET_CAPABILITY_NOT_CONGESTED = 20;
 
+    /**
+     * Indicates that this network is not currently suspended.
+     * <p>
+     * When a network is suspended, the network's IP addresses and any connections
+     * established on the network remain valid, but the network is temporarily unable
+     * to transfer data. This can happen, for example, if a cellular network experiences
+     * a temporary loss of signal, such as when driving through a tunnel, etc.
+     * A network with this capability is not suspended, so is expected to be able to
+     * transfer data.
+     */
+    public static final int NET_CAPABILITY_NOT_SUSPENDED = 21;
+
     private static final int MIN_NET_CAPABILITY = NET_CAPABILITY_MMS;
-    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_NOT_CONGESTED;
+    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_NOT_SUSPENDED;
 
     /**
      * Network capabilities that are expected to be mutable, i.e., can change while a particular
@@ -262,12 +274,13 @@ public final class NetworkCapabilities implements Parcelable {
     private static final long MUTABLE_CAPABILITIES =
             // TRUSTED can change when user explicitly connects to an untrusted network in Settings.
             // http://b/18206275
-            (1 << NET_CAPABILITY_TRUSTED) |
-            (1 << NET_CAPABILITY_VALIDATED) |
-            (1 << NET_CAPABILITY_CAPTIVE_PORTAL) |
-            (1 << NET_CAPABILITY_NOT_ROAMING) |
-            (1 << NET_CAPABILITY_FOREGROUND) |
-            (1 << NET_CAPABILITY_NOT_CONGESTED);
+            (1 << NET_CAPABILITY_TRUSTED)
+            | (1 << NET_CAPABILITY_VALIDATED)
+            | (1 << NET_CAPABILITY_CAPTIVE_PORTAL)
+            | (1 << NET_CAPABILITY_NOT_ROAMING)
+            | (1 << NET_CAPABILITY_FOREGROUND)
+            | (1 << NET_CAPABILITY_NOT_CONGESTED)
+            | (1 << NET_CAPABILITY_NOT_SUSPENDED);
 
     /**
      * Network capabilities that are not allowed in NetworkRequests. This exists because the
@@ -1276,6 +1289,7 @@ public final class NetworkCapabilities implements Parcelable {
             case NET_CAPABILITY_NOT_ROAMING:    return "NOT_ROAMING";
             case NET_CAPABILITY_FOREGROUND:     return "FOREGROUND";
             case NET_CAPABILITY_NOT_CONGESTED:  return "NOT_CONGESTED";
+            case NET_CAPABILITY_NOT_SUSPENDED:  return "NOT_SUSPENDED";
             default:                            return Integer.toString(capability);
         }
     }
