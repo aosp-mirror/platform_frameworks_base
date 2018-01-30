@@ -37,6 +37,7 @@ import static java.lang.Thread.sleep;
 import android.content.Intent;
 import android.metrics.LogMaker;
 import android.support.test.filters.SmallTest;
+import android.support.test.InstrumentationRegistry;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
@@ -73,6 +74,7 @@ public class QSTileImplTest extends SysuiTestCase {
         mMetricsLogger = mDependency.injectMockDependency(MetricsLogger.class);
         mHost = mock(QSTileHost.class);
         when(mHost.indexOf(spec)).thenReturn(POSITION);
+        when(mHost.getContext()).thenReturn(mContext.getBaseContext());
 
         mTile = spy(new TileImpl(mHost));
         mTile.mHandler = mTile.new H(mTestableLooper.getLooper());
