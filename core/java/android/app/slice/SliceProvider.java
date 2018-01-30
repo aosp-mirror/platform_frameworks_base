@@ -147,6 +147,14 @@ public abstract class SliceProvider extends ContentProvider {
      * @hide
      */
     public static final String EXTRA_OVERRIDE_PKG = "override_pkg";
+    /**
+     * @hide
+     */
+    public static final String EXTRA_OVERRIDE_UID = "override_uid";
+    /**
+     * @hide
+     */
+    public static final String EXTRA_OVERRIDE_PID = "override_pid";
 
     private static final boolean DEBUG = false;
 
@@ -302,13 +310,20 @@ public abstract class SliceProvider extends ContentProvider {
             List<SliceSpec> supportedSpecs = extras.getParcelableArrayList(EXTRA_SUPPORTED_SPECS);
 
             String callingPackage = getCallingPackage();
+            int callingUid = Binder.getCallingUid();
+            int callingPid = Binder.getCallingPid();
             if (extras.containsKey(EXTRA_OVERRIDE_PKG)) {
                 if (Binder.getCallingUid() != Process.SYSTEM_UID) {
                     throw new SecurityException("Only the system can override calling pkg");
                 }
+                // This is safe because we would grant SYSTEM_UID access to all slices
+                // and want to allow it to bind slices as if it were a less privileged app
+                // to check their permission levels.
                 callingPackage = extras.getString(EXTRA_OVERRIDE_PKG);
+                callingUid = extras.getInt(EXTRA_OVERRIDE_UID);
+                callingPid = extras.getInt(EXTRA_OVERRIDE_PID);
             }
-            Slice s = handleBindSlice(uri, supportedSpecs, callingPackage);
+            Slice s = handleBindSlice(uri, supportedSpecs, callingPackage, callingUid, callingPid);
             Bundle b = new Bundle();
             b.putParcelable(EXTRA_SLICE, s);
             return b;
@@ -319,7 +334,8 @@ public abstract class SliceProvider extends ContentProvider {
             List<SliceSpec> supportedSpecs = extras.getParcelableArrayList(EXTRA_SUPPORTED_SPECS);
             Bundle b = new Bundle();
             if (uri != null) {
-                Slice s = handleBindSlice(uri, supportedSpecs, getCallingPackage());
+                Slice s = handleBindSlice(uri, supportedSpecs, getCallingPackage(),
+                        Binder.getCallingUid(), Binder.getCallingPid());
                 b.putParcelable(EXTRA_SLICE, s);
             } else {
                 b.putParcelable(EXTRA_SLICE, null);
@@ -401,15 +417,15 @@ public abstract class SliceProvider extends ContentProvider {
     }
 
     private Slice handleBindSlice(Uri sliceUri, List<SliceSpec> supportedSpecs,
-            String callingPkg) {
+            String callingPkg, int callingUid, int callingPid) {
         // This can be removed once Slice#bindSlice is removed and everyone is using
         // SliceManager#bindSlice.
         String pkg = callingPkg != null ? callingPkg
-                : getContext().getPackageManager().getNameForUid(Binder.getCallingUid());
-        if (!UserHandle.isSameApp(Binder.getCallingUid(), Process.myUid())) {
+                : getContext().getPackageManager().getNameForUid(callingUid);
+        if (!UserHandle.isSameApp(callingUid, Process.myUid())) {
             try {
                 mSliceManager.enforceSlicePermission(sliceUri, pkg,
-                        Binder.getCallingPid(), Binder.getCallingUid());
+                        callingPid, callingUid);
             } catch (SecurityException e) {
                 return createPermissionSlice(getContext(), sliceUri, pkg);
             }
