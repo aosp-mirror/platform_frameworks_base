@@ -111,7 +111,6 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.IDeviceIdleController;
 import android.os.IInterface;
 import android.os.Looper;
 import android.os.Message;
@@ -287,7 +286,6 @@ public class NotificationManagerService extends SystemService {
     private AlarmManager mAlarmManager;
     private ICompanionDeviceManager mCompanionManager;
     private AccessibilityManager mAccessibilityManager;
-    private IDeviceIdleController mDeviceIdleController;
 
     final IBinder mForegroundToken = new Binder();
     private WorkerHandler mHandler;
@@ -661,7 +659,6 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void onNotificationClick(int callingUid, int callingPid, String key) {
-            exitIdle();
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r == null) {
@@ -686,7 +683,6 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void onNotificationActionClick(int callingUid, int callingPid, String key,
                 int actionIndex) {
-            exitIdle();
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r == null) {
@@ -816,7 +812,6 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void onNotificationDirectReplied(String key) {
-            exitIdle();
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
@@ -1285,8 +1280,6 @@ public class NotificationManagerService extends SystemService {
         mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
         mCompanionManager = companionManager;
         mActivityManager = activityManager;
-        mDeviceIdleController = IDeviceIdleController.Stub.asInterface(
-                ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
 
         mHandler = new WorkerHandler(looper);
         mRankingThread.start();
@@ -1538,15 +1531,6 @@ public class NotificationManagerService extends SystemService {
         mEffectsSuppressors = suppressors;
         mZenModeHelper.setSuppressedEffects(updatedSuppressedEffects);
         sendRegisteredOnlyBroadcast(NotificationManager.ACTION_EFFECTS_SUPPRESSOR_CHANGED);
-    }
-
-    private void exitIdle() {
-        try {
-            if (mDeviceIdleController != null) {
-                mDeviceIdleController.exitIdle("notification interaction");
-            }
-        } catch (RemoteException e) {
-        }
     }
 
     private void updateNotificationChannelInt(String pkg, int uid, NotificationChannel channel,

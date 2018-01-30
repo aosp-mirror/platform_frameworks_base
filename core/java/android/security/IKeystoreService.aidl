@@ -71,7 +71,7 @@ interface IKeystoreService {
         in byte[] entropy);
     int abort(IBinder handle);
     boolean isOperationAuthorized(IBinder token);
-    int addAuthToken(in byte[] authToken, in int androidId);
+    int addAuthToken(in byte[] authToken);
     int onUserAdded(int userId, int parentId);
     int onUserRemoved(int userId);
     int attestKey(String alias, in KeymasterArguments params, out KeymasterCertificateChain chain);

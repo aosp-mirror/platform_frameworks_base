@@ -212,7 +212,7 @@ import javax.crypto.Mac;
  * ...
  * }</pre>
  */
-public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
+public final class KeyProtection implements ProtectionParameter {
     private final Date mKeyValidityStart;
     private final Date mKeyValidityForOriginationEnd;
     private final Date mKeyValidityForConsumptionEnd;
@@ -228,8 +228,6 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
     private final boolean mInvalidatedByBiometricEnrollment;
     private final long mBoundToSecureUserId;
     private final boolean mCriticalToDeviceEncryption;
-    private final boolean mTrustedUserPresenceRequired;
-    private final boolean mUnlockedDeviceRequired;
 
     private KeyProtection(
             Date keyValidityStart,
@@ -243,12 +241,10 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
             boolean randomizedEncryptionRequired,
             boolean userAuthenticationRequired,
             int userAuthenticationValidityDurationSeconds,
-            boolean trustedUserPresenceRequired,
             boolean userAuthenticationValidWhileOnBody,
             boolean invalidatedByBiometricEnrollment,
             long boundToSecureUserId,
-            boolean criticalToDeviceEncryption,
-            boolean unlockedDeviceRequired) {
+            boolean criticalToDeviceEncryption) {
         mKeyValidityStart = Utils.cloneIfNotNull(keyValidityStart);
         mKeyValidityForOriginationEnd = Utils.cloneIfNotNull(keyValidityForOriginationEnd);
         mKeyValidityForConsumptionEnd = Utils.cloneIfNotNull(keyValidityForConsumptionEnd);
@@ -266,8 +262,6 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
         mInvalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
         mBoundToSecureUserId = boundToSecureUserId;
         mCriticalToDeviceEncryption = criticalToDeviceEncryption;
-        mTrustedUserPresenceRequired = trustedUserPresenceRequired;
-        mUnlockedDeviceRequired = unlockedDeviceRequired;
     }
 
     /**
@@ -420,14 +414,6 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
     }
 
     /**
-     * Returns {@code true} if the key is authorized to be used only if a test of user presence has
-     * been performed between the {@code Signature.initSign()} and {@code Signature.sign()} calls.
-     */
-    public boolean isTrustedUserPresenceRequired() {
-        return mTrustedUserPresenceRequired;
-    }
-
-    /**
      * Returns {@code true} if the key will be de-authorized when the device is removed from the
      * user's body.  This option has no effect on keys that don't have an authentication validity
      * duration, and has no effect if the device lacks an on-body sensor.
@@ -485,15 +471,6 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
     }
 
     /**
-     * Returns {@code true} if the key cannot be used unless the device screen is unlocked.
-     *
-     * @see Builder#SetRequireDeviceUnlocked(boolean)
-     */
-    public boolean isUnlockedDeviceRequired() {
-        return mUnlockedDeviceRequired;
-    }
-
-    /**
      * Builder of {@link KeyProtection} instances.
      */
     public final static class Builder {
@@ -511,9 +488,6 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
         private int mUserAuthenticationValidityDurationSeconds = -1;
         private boolean mUserAuthenticationValidWhileOnBody;
         private boolean mInvalidatedByBiometricEnrollment = true;
-        private boolean mTrustedUserPresenceRequired = false;
-        private boolean mUnlockedDeviceRequired = false;
-
         private long mBoundToSecureUserId = GateKeeper.INVALID_SECURE_USER_ID;
         private boolean mCriticalToDeviceEncryption = false;
 
@@ -790,16 +764,6 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
         }
 
         /**
-         * Sets whether a test of user presence is required to be performed between the
-         * {@code Signature.initSign()} and {@code Signature.sign()} method calls.
-         */
-        @NonNull
-        public Builder setTrustedUserPresenceRequired(boolean required) {
-            mTrustedUserPresenceRequired = required;
-            return this;
-        }
-
-        /**
          * Sets whether the key will remain authorized only until the device is removed from the
          * user's body up to the limit of the authentication validity period (see
          * {@link #setUserAuthenticationValidityDurationSeconds} and
@@ -881,18 +845,6 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
         }
 
         /**
-         * Sets whether the keystore requires the screen to be unlocked before allowing decryption
-         * using this key. If this is set to {@code true}, any attempt to decrypt using this key
-         * while the screen is locked will fail. A locked device requires a PIN, password,
-         * fingerprint, or other trusted factor to access.
-         */
-        @NonNull
-        public Builder setUnlockedDeviceRequired(boolean unlockedDeviceRequired) {
-            mUnlockedDeviceRequired = unlockedDeviceRequired;
-            return this;
-        }
-
-        /**
          * Builds an instance of {@link KeyProtection}.
          *
          * @throws IllegalArgumentException if a required field is missing
@@ -911,12 +863,10 @@ public final class KeyProtection implements ProtectionParameter, UserAuthArgs {
                     mRandomizedEncryptionRequired,
                     mUserAuthenticationRequired,
                     mUserAuthenticationValidityDurationSeconds,
-                    mTrustedUserPresenceRequired,
                     mUserAuthenticationValidWhileOnBody,
                     mInvalidatedByBiometricEnrollment,
                     mBoundToSecureUserId,
-                    mCriticalToDeviceEncryption,
-                    mUnlockedDeviceRequired);
+                    mCriticalToDeviceEncryption);
         }
     }
 }
