@@ -1,13 +1,5 @@
 package android.app {
 
-  public abstract deprecated class EphemeralResolverService extends android.app.InstantAppResolverService {
-    ctor public EphemeralResolverService();
-    method public android.os.Looper getLooper();
-    method public abstract deprecated java.util.List<android.content.pm.EphemeralResolveInfo> onEphemeralResolveInfoList(int[], int);
-    method public android.content.pm.EphemeralResolveInfo onGetEphemeralIntentFilter(java.lang.String);
-    method public java.util.List<android.content.pm.EphemeralResolveInfo> onGetEphemeralResolveInfo(int[]);
-  }
-
   public class Notification implements android.os.Parcelable {
     method public static java.lang.Class<? extends android.app.Notification.Style> getNotificationStyleClass(java.lang.String);
   }
@@ -31,10 +23,7 @@ package android.content {
 
   public class Intent implements java.lang.Cloneable android.os.Parcelable {
     field public static final deprecated java.lang.String ACTION_DEVICE_INITIALIZATION_WIZARD = "android.intent.action.DEVICE_INITIALIZATION_WIZARD";
-    field public static final deprecated java.lang.String ACTION_EPHEMERAL_RESOLVER_SETTINGS = "android.intent.action.EPHEMERAL_RESOLVER_SETTINGS";
-    field public static final deprecated java.lang.String ACTION_INSTALL_EPHEMERAL_PACKAGE = "android.intent.action.INSTALL_EPHEMERAL_PACKAGE";
     field public static final deprecated java.lang.String ACTION_MASTER_CLEAR = "android.intent.action.MASTER_CLEAR";
-    field public static final deprecated java.lang.String ACTION_RESOLVE_EPHEMERAL_PACKAGE = "android.intent.action.RESOLVE_EPHEMERAL_PACKAGE";
     field public static final deprecated java.lang.String ACTION_SERVICE_STATE = "android.intent.action.SERVICE_STATE";
     field public static final deprecated java.lang.String EXTRA_CDMA_DEFAULT_ROAMING_INDICATOR = "cdmaDefaultRoamingIndicator";
     field public static final deprecated java.lang.String EXTRA_CDMA_ROAMING_INDICATOR = "cdmaRoamingIndicator";
@@ -58,45 +47,6 @@ package android.content {
     field public static final deprecated java.lang.String EXTRA_VOICE_RADIO_TECH = "radioTechnology";
     field public static final deprecated java.lang.String EXTRA_VOICE_REG_STATE = "voiceRegState";
     field public static final deprecated java.lang.String EXTRA_VOICE_ROAMING_TYPE = "voiceRoamingType";
-  }
-
-}
-
-package android.content.pm {
-
-  public final deprecated class EphemeralIntentFilter implements android.os.Parcelable {
-    ctor public EphemeralIntentFilter(java.lang.String, java.util.List<android.content.IntentFilter>);
-    method public int describeContents();
-    method public java.util.List<android.content.IntentFilter> getFilters();
-    method public java.lang.String getSplitName();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.content.pm.EphemeralIntentFilter> CREATOR;
-  }
-
-  public final deprecated class EphemeralResolveInfo implements android.os.Parcelable {
-    ctor public deprecated EphemeralResolveInfo(android.net.Uri, java.lang.String, java.util.List<android.content.IntentFilter>);
-    ctor public deprecated EphemeralResolveInfo(android.content.pm.EphemeralResolveInfo.EphemeralDigest, java.lang.String, java.util.List<android.content.pm.EphemeralIntentFilter>);
-    ctor public EphemeralResolveInfo(android.content.pm.EphemeralResolveInfo.EphemeralDigest, java.lang.String, java.util.List<android.content.pm.EphemeralIntentFilter>, int);
-    ctor public EphemeralResolveInfo(java.lang.String, java.lang.String, java.util.List<android.content.pm.EphemeralIntentFilter>);
-    method public int describeContents();
-    method public byte[] getDigestBytes();
-    method public int getDigestPrefix();
-    method public deprecated java.util.List<android.content.IntentFilter> getFilters();
-    method public java.util.List<android.content.pm.EphemeralIntentFilter> getIntentFilters();
-    method public java.lang.String getPackageName();
-    method public int getVersionCode();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.content.pm.EphemeralResolveInfo> CREATOR;
-    field public static final java.lang.String SHA_ALGORITHM = "SHA-256";
-  }
-
-  public static final class EphemeralResolveInfo.EphemeralDigest implements android.os.Parcelable {
-    ctor public EphemeralResolveInfo.EphemeralDigest(java.lang.String);
-    method public int describeContents();
-    method public byte[][] getDigestBytes();
-    method public int[] getDigestPrefix();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.content.pm.EphemeralResolveInfo.EphemeralDigest> CREATOR;
   }
 
 }
