@@ -182,8 +182,6 @@ public final class Magnifier {
     /**
      * Forces the magnifier to update its content. It uses the previous coordinates passed to
      * {@link #show(float, float)}. This only happens if the magnifier is currently showing.
-     *
-     * @hide
      */
     public void update() {
         if (mWindow.isShowing()) {
