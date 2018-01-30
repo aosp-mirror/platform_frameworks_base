@@ -38,7 +38,7 @@ public class AndroidTestRunnerSplitUpdaterTest extends PackageSharedLibraryUpdat
         PackageBuilder before = builder().optionalLibraries(ANDROID_TEST_RUNNER);
 
         PackageBuilder after = builder()
-                .optionalLibraries(ANDROID_TEST_RUNNER, ANDROID_TEST_MOCK);
+                .optionalLibraries(ANDROID_TEST_MOCK, ANDROID_TEST_RUNNER);
 
         checkBackwardsCompatibility(before, after);
     }
