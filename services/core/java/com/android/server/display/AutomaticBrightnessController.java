@@ -269,6 +269,14 @@ class AutomaticBrightnessController {
         }
     }
 
+    public boolean hasUserDataPoints() {
+        return mBrightnessMapper.hasUserDataPoints();
+    }
+
+    public boolean isDefaultConfig() {
+        return mBrightnessMapper.isDefaultConfig();
+    }
+
     private boolean setDisplayPolicy(int policy) {
         if (mDisplayPolicy == policy) {
             return false;
