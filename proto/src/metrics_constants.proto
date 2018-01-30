@@ -5168,6 +5168,11 @@ message MetricsEvent {
     // OS: P
     ROTATION_SUGGESTION_SHOWN = 1288;
 
+    // An autofill service was bound using an unofficial(but still supported) permission.
+    // Package: Package of the autofill service
+    // OS: P
+    AUTOFILL_INVALID_PERMISSION = 1289;
+
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
     // END OF AOSP CONSTANTS
