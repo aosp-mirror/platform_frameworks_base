@@ -71,10 +71,9 @@ public interface StaticProvider {
     CommandGroupProvider createMediaSession2CommandGroup(Context context,
             MediaSession2.CommandGroup instance, MediaSession2.CommandGroup others);
     MediaSession2.CommandGroup fromBundle_MediaSession2CommandGroup(Context context, Bundle bundle);
-    ControllerInfoProvider createMediaSession2ControllerInfoProvider(Context context,
+    ControllerInfoProvider createMediaSession2ControllerInfo(Context context,
             MediaSession2.ControllerInfo instance, int uid, int pid,
             String packageName, IInterface callback);
-
 
     MediaController2Provider createMediaController2(Context context, MediaController2 instance,
             SessionToken2 token, Executor executor, ControllerCallback callback);
@@ -96,7 +95,13 @@ public interface StaticProvider {
 
     SessionPlayer2Provider createSessionPlayer2(Context context, SessionPlayer2 instance);
 
-    MediaItem2Provider createMediaItem2Provider(Context context, MediaItem2 mediaItem2,
+    MediaItem2Provider createMediaItem2(Context context, MediaItem2 mediaItem2,
             String mediaId, DataSourceDesc dsd, MediaMetadata2 metadata, int flags);
     MediaItem2 fromBundle_MediaItem2(Context context, Bundle bundle);
+
+    MediaMetadata2 fromBundle_MediaMetadata2(Context context, Bundle bundle);
+    MediaMetadata2Provider.BuilderProvider createMediaMetadata2Builder(
+            Context context, MediaMetadata2.Builder builder);
+    MediaMetadata2Provider.BuilderProvider createMediaMetadata2Builder(
+            Context context, MediaMetadata2.Builder builder, MediaMetadata2 source);
 }

@@ -568,7 +568,7 @@ public class MediaSession2 implements AutoCloseable {
         public ControllerInfo(Context context, int uid, int pid, String packageName,
                 IInterface callback) {
             mProvider = ApiLoader.getProvider(context)
-                    .createMediaSession2ControllerInfoProvider(
+                    .createMediaSession2ControllerInfo(
                             context, this, uid, pid, packageName, callback);
         }
 
@@ -894,7 +894,7 @@ public class MediaSession2 implements AutoCloseable {
             bundle.putInt(KEY_REPEAT_MODE, mRepeatMode);
             bundle.putInt(KEY_SHUFFLE_MODE, mShuffleMode);
             if (mPlaylistMetadata != null) {
-                bundle.putBundle(KEY_MEDIA_METADATA2_BUNDLE, mPlaylistMetadata.getBundle());
+                bundle.putBundle(KEY_MEDIA_METADATA2_BUNDLE, mPlaylistMetadata.toBundle());
             }
             return bundle;
         }
@@ -916,8 +916,12 @@ public class MediaSession2 implements AutoCloseable {
             }
 
             Bundle metadataBundle = bundle.getBundle(KEY_MEDIA_METADATA2_BUNDLE);
-            MediaMetadata2 metadata =
-                    metadataBundle == null ? null : new MediaMetadata2(metadataBundle);
+            MediaMetadata2 metadata = null;
+            // TODO(jaewan): Uncomment here when the PlaylistParam becomes updatable.
+            /*
+            MediaMetadata2 metadata = metadataBundle == null
+                    ? null : MediaMetadata2.fromBundle(mContext, metadataBundle);
+            */
 
             return new PlaylistParams(
                     bundle.getInt(KEY_REPEAT_MODE),

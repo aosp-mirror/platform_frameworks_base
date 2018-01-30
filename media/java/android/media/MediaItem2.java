@@ -24,7 +24,6 @@ import android.content.Context;
 import android.media.update.ApiLoader;
 import android.media.update.MediaItem2Provider;
 import android.os.Bundle;
-import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -69,7 +68,7 @@ public class MediaItem2 {
     public MediaItem2(@NonNull Context context, @NonNull String mediaId,
             @NonNull DataSourceDesc dsd, @Nullable MediaMetadata2 metadata,
             @Flags int flags) {
-        mProvider = ApiLoader.getProvider(context).createMediaItem2Provider(
+        mProvider = ApiLoader.getProvider(context).createMediaItem2(
                 context, this, mediaId, dsd, metadata, flags);
     }
 
