@@ -18,10 +18,10 @@ package com.android.server.connectivity;
 
 import com.android.internal.util.HexDump;
 import com.android.internal.util.IndentingPrintWriter;
-import com.android.server.connectivity.KeepalivePacketData;
 import com.android.server.connectivity.NetworkAgentInfo;
 import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.PacketKeepalive;
+import android.net.KeepalivePacketData;
 import android.net.LinkAddress;
 import android.net.NetworkAgent;
 import android.net.NetworkUtils;
@@ -129,7 +129,7 @@ public class KeepaliveTracker {
                     .append("->")
                     .append(IpUtils.addressAndPortToString(mPacket.dstAddress, mPacket.dstPort))
                     .append(" interval=" + mInterval)
-                    .append(" data=" + HexDump.toHexString(mPacket.data))
+                    .append(" packetData=" + HexDump.toHexString(mPacket.getPacket()))
                     .append(" uid=").append(mUid).append(" pid=").append(mPid)
                     .append(" ]")
                     .toString();
@@ -172,7 +172,7 @@ public class KeepaliveTracker {
         }
 
         private int checkInterval() {
-            return mInterval >= 20 ? SUCCESS : ERROR_INVALID_INTERVAL;
+            return mInterval >= 10 ? SUCCESS : ERROR_INVALID_INTERVAL;
         }
 
         private int isValid() {
