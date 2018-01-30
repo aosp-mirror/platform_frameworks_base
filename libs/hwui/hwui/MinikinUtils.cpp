@@ -31,7 +31,7 @@ minikin::MinikinPaint MinikinUtils::prepareMinikinPaint(const Paint* paint,
                                                         const Typeface* typeface) {
     const Typeface* resolvedFace = Typeface::resolveDefault(typeface);
 
-    minikin::MinikinPaint minikinPaint;
+    minikin::MinikinPaint minikinPaint(resolvedFace->fFontCollection);
     /* Prepare minikin Paint */
     minikinPaint.size =
             paint->isLinearText() ? paint->getTextSize() : static_cast<int>(paint->getTextSize());
@@ -53,21 +53,20 @@ minikin::Layout MinikinUtils::doLayout(const Paint* paint, minikin::Bidi bidiFla
                                        size_t count, size_t bufSize, minikin::MeasuredText* mt,
                                        int mtOffset) {
     minikin::MinikinPaint minikinPaint = prepareMinikinPaint(paint, typeface);
-    const auto& fc = Typeface::resolveDefault(typeface)->fFontCollection;
     minikin::Layout layout;
 
     if (mt == nullptr) {
-        layout.doLayout(buf, start, count, bufSize, bidiFlags, minikinPaint, fc);
+        layout.doLayout(buf, start, count, bufSize, bidiFlags, minikinPaint);
         return layout;
     }
 
     if (mt->buildLayout(minikin::U16StringPiece(buf, bufSize),
                         minikin::Range(start, start + count),
-                        minikinPaint, fc, bidiFlags, mtOffset, &layout)) {
+                        minikinPaint, bidiFlags, mtOffset, &layout)) {
         return layout;
     }
 
-    layout.doLayout(buf, start, count, bufSize, bidiFlags, minikinPaint, fc);
+    layout.doLayout(buf, start, count, bufSize, bidiFlags, minikinPaint);
     return layout;
 }
 
@@ -75,10 +74,8 @@ float MinikinUtils::measureText(const Paint* paint, minikin::Bidi bidiFlags,
                                 const Typeface* typeface, const uint16_t* buf, size_t start,
                                 size_t count, size_t bufSize, float* advances) {
     minikin::MinikinPaint minikinPaint = prepareMinikinPaint(paint, typeface);
-    const Typeface* resolvedTypeface = Typeface::resolveDefault(typeface);
     return minikin::Layout::measureText(buf, start, count, bufSize, bidiFlags, minikinPaint,
-                                        resolvedTypeface->fFontCollection, advances,
-                                        nullptr /* extent */);
+                                        advances, nullptr /* extent */);
 }
 
 bool MinikinUtils::hasVariationSelector(const Typeface* typeface, uint32_t codepoint, uint32_t vs) {
