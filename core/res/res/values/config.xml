@@ -3266,4 +3266,6 @@
     <string name="config_defaultAssistantAccessPackage" translatable="false">android.ext.services</string>
 
     <bool name="config_supportBluetoothPersistedState">true</bool>
+
+    <bool name="config_keepRestrictedProfilesInBackground">true</bool>
 </resources>
