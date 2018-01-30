@@ -383,38 +383,6 @@ public class WifiTrackerTest {
     }
 
     @Test
-    public void testAccessPointListenerSetWhenLookingUpUsingScanResults() {
-        ScanResult scanResult = new ScanResult();
-        scanResult.level = 123;
-        scanResult.BSSID = "bssid-" + 111;
-        scanResult.timestamp = SystemClock.elapsedRealtime() * 1000;
-        scanResult.capabilities = "";
-
-        WifiTracker tracker = new WifiTracker(
-                InstrumentationRegistry.getTargetContext(), null, true, true);
-
-        AccessPoint result = tracker.getCachedOrCreate(
-                Collections.singletonList(scanResult), new ArrayList<AccessPoint>());
-        assertTrue(result.mAccessPointListener != null);
-    }
-
-    @Test
-    public void testAccessPointListenerSetWhenLookingUpUsingWifiConfiguration() {
-        WifiConfiguration configuration = new WifiConfiguration();
-        configuration.SSID = "test123";
-        configuration.BSSID="bssid";
-        configuration.networkId = 123;
-        configuration.allowedKeyManagement = new BitSet();
-        configuration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-
-        WifiTracker tracker = new WifiTracker(
-                InstrumentationRegistry.getTargetContext(), null, true, true);
-
-        AccessPoint result = tracker.getCachedOrCreate(configuration, new ArrayList<AccessPoint>());
-        assertTrue(result.mAccessPointListener != null);
-    }
-
-    @Test
     public void startAndStopTrackingShouldRegisterAndUnregisterScoreCache()
             throws InterruptedException {
         WifiTracker tracker = createMockedWifiTracker();
