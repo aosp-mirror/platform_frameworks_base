@@ -83,6 +83,8 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
 
     private Runnable mRunnable;
 
+    private ColorFilter mColorFilter;
+
     /**
      *  Pass this to {@link #setLoopCount} to loop infinitely.
      *
@@ -276,9 +278,18 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
             throw new IllegalStateException("called setColorFilter on empty AnimatedImageDrawable");
         }
 
-        long nativeFilter = colorFilter == null ? 0 : colorFilter.getNativeInstance();
-        nSetColorFilter(mState.mNativePtr, nativeFilter);
-        invalidateSelf();
+        if (colorFilter != mColorFilter) {
+            mColorFilter = colorFilter;
+            long nativeFilter = colorFilter == null ? 0 : colorFilter.getNativeInstance();
+            nSetColorFilter(mState.mNativePtr, nativeFilter);
+            invalidateSelf();
+        }
+    }
+
+    @Override
+    @Nullable
+    public ColorFilter getColorFilter() {
+        return mColorFilter;
     }
 
     @Override
