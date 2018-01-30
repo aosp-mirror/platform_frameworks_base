@@ -68,6 +68,7 @@ interface IInputMethodManager {
     void showInputMethodPickerFromClient(in IInputMethodClient client,
             int auxiliarySubtypeMode);
     void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client, String topId);
+    boolean isInputMethodPickerShownForTest();
     void setInputMethod(in IBinder token, String id);
     void setInputMethodAndSubtype(in IBinder token, String id, in InputMethodSubtype subtype);
     void hideMySoftInput(in IBinder token, int flags);

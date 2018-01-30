@@ -59,6 +59,7 @@ import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -468,7 +469,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     int mCurFocusedWindowSoftInputMode;
 
     /**
-     * The client by which {@link #mCurFocusedWindow} was reported.  Used only for debugging.
+     * The client by which {@link #mCurFocusedWindow} was reported.
      */
     ClientState mCurFocusedWindowClient;
 
@@ -2989,8 +2990,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final int uid = Binder.getCallingUid();
         if (UserHandle.getAppId(uid) == Process.SYSTEM_UID) {
             return true;
-        } else if (mCurClient != null && client != null
-                && mCurClient.client.asBinder() == client.asBinder()) {
+        } else if (mCurFocusedWindowClient != null && client != null
+                && mCurFocusedWindowClient.client.asBinder() == client.asBinder()) {
             return true;
         } else if (mCurIntent != null && InputMethodUtils.checkIfPackageBelongsToUid(
                 mAppOpsManager,
@@ -3023,6 +3024,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             // picker.
             mHandler.sendMessage(mCaller.obtainMessageI(
                     MSG_SHOW_IM_SUBTYPE_PICKER, auxiliarySubtypeMode));
+        }
+    }
+
+    public boolean isInputMethodPickerShownForTest() {
+        synchronized(mMethodMap) {
+            if (mSwitchingDialog == null) {
+                return false;
+            }
+            return mSwitchingDialog.isShowing();
         }
     }
 
