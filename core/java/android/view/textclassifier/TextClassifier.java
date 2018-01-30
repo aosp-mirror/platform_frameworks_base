@@ -276,9 +276,11 @@ public interface TextClassifier {
      * @param text the text to generate annotations for
      * @param options configuration for link generation
      *
-     * @throws IllegalArgumentException if text is null
+     * @throws IllegalArgumentException if text is null or the text is too long for the
+     *      TextClassifier implementation.
      *
      * @see #generateLinks(CharSequence)
+     * @see #getMaxGenerateLinksTextLength()
      */
     @WorkerThread
     default TextLinks generateLinks(
@@ -299,13 +301,25 @@ public interface TextClassifier {
      *
      * @param text the text to generate annotations for
      *
-     * @throws IllegalArgumentException if text is null
+     * @throws IllegalArgumentException if text is null or the text is too long for the
+     *      TextClassifier implementation.
      *
      * @see #generateLinks(CharSequence, TextLinks.Options)
+     * @see #getMaxGenerateLinksTextLength()
      */
     @WorkerThread
     default TextLinks generateLinks(@NonNull CharSequence text) {
         return generateLinks(text, null);
+    }
+
+    /**
+     * Returns the maximal length of text that can be processed by generateLinks.
+     *
+     * @see #generateLinks(CharSequence)
+     * @see #generateLinks(CharSequence, TextLinks.Options)
+     */
+    default int getMaxGenerateLinksTextLength() {
+        return Integer.MAX_VALUE;
     }
 
     /**
@@ -459,6 +473,15 @@ public interface TextClassifier {
         public static void validate(@NonNull CharSequence text, boolean allowInMainThread) {
             Preconditions.checkArgument(text != null);
             checkMainThread(allowInMainThread);
+        }
+
+        /**
+         * @throws IllegalArgumentException if text is null; the text is too long or options is null
+         */
+        public static void validate(@NonNull CharSequence text, int maxLength,
+                boolean allowInMainThread) {
+            validate(text, allowInMainThread);
+            Preconditions.checkArgumentInRange(text.length(), 0, maxLength, "text.length()");
         }
 
         private static void checkMainThread(boolean allowInMainThread) {

@@ -121,6 +121,15 @@ final class SystemTextClassifier implements TextClassifier {
         return mFallback.generateLinks(text, options);
     }
 
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public int getMaxGenerateLinksTextLength() {
+        // TODO: retrieve this from the bound service.
+        return mFallback.getMaxGenerateLinksTextLength();
+    }
+
     private static final class TextSelectionCallback extends ITextSelectionCallback.Stub {
 
         final ResponseReceiver<TextSelection> mReceiver = new ResponseReceiver<>();

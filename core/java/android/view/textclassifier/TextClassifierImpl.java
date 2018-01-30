@@ -127,7 +127,9 @@ public final class TextClassifierImpl implements TextClassifier {
             @Nullable TextSelection.Options options) {
         Utils.validate(text, selectionStartIndex, selectionEndIndex, false /* allowInMainThread */);
         try {
-            if (text.length() > 0) {
+            final int rangeLength = selectionEndIndex - selectionStartIndex;
+            if (text.length() > 0
+                    && rangeLength <= getSettings().getSuggestSelectionMaxRangeLength()) {
                 final LocaleList locales = (options == null) ? null : options.getDefaultLocales();
                 final boolean darkLaunchAllowed = options != null && options.isDarkLaunchAllowed();
                 final SmartSelection smartSelection = getSmartSelection(locales);
@@ -182,7 +184,8 @@ public final class TextClassifierImpl implements TextClassifier {
             @Nullable TextClassification.Options options) {
         Utils.validate(text, startIndex, endIndex, false /* allowInMainThread */);
         try {
-            if (text.length() > 0) {
+            final int rangeLength = endIndex - startIndex;
+            if (text.length() > 0 && rangeLength <= getSettings().getClassifyTextMaxRangeLength()) {
                 final String string = text.toString();
                 final LocaleList locales = (options == null) ? null : options.getDefaultLocales();
                 final Calendar refTime = (options == null) ? null : options.getReferenceTime();
@@ -206,7 +209,7 @@ public final class TextClassifierImpl implements TextClassifier {
     @Override
     public TextLinks generateLinks(
             @NonNull CharSequence text, @Nullable TextLinks.Options options) {
-        Utils.validate(text, false /* allowInMainThread */);
+        Utils.validate(text, getMaxGenerateLinksTextLength(), false /* allowInMainThread */);
         final String textString = text.toString();
         final TextLinks.Builder builder = new TextLinks.Builder(textString);
 
@@ -238,6 +241,12 @@ public final class TextClassifierImpl implements TextClassifier {
             Log.e(LOG_TAG, "Error getting links info.", t);
         }
         return mFallback.generateLinks(text, options);
+    }
+
+    /** @inheritDoc */
+    @Override
+    public int getMaxGenerateLinksTextLength() {
+        return getSettings().getGenerateLinksMaxTextLength();
     }
 
     @Override
