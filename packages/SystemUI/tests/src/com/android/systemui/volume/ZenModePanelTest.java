@@ -30,15 +30,18 @@ import android.service.notification.ZenModeConfig;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.test.FlakyTest;
 import android.view.LayoutInflater;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+@Ignore
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ZenModePanelTest extends SysuiTestCase {
