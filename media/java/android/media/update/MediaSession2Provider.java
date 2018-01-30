@@ -36,6 +36,7 @@ import java.util.concurrent.Executor;
 /**
  * @hide
  */
+// TODO: @SystemApi
 public interface MediaSession2Provider extends TransportControlProvider {
     void initialize();
 
@@ -67,5 +68,15 @@ public interface MediaSession2Provider extends TransportControlProvider {
         boolean isTrusted_impl();
         int hashCode_impl();
         boolean equals_impl(ControllerInfoProvider obj);
+    }
+
+    interface CommandProvider {
+        int getCommandCode_impl();
+        String getCustomCommand_impl();
+        Bundle getExtra_impl();
+        Bundle toBundle_impl();
+
+        boolean equals_impl(Object ob);
+        int hashCode_impl();
     }
 }

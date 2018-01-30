@@ -110,6 +110,11 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
     }
 
     public static class MediaLibrarySessionCallback extends MediaSession2.SessionCallback {
+
+        public MediaLibrarySessionCallback(Context context) {
+            super(context);
+        }
+
         /**
          * Called to get the root information for browsing by a particular client.
          * <p>
