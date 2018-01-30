@@ -84,6 +84,16 @@ class WindowTestsBase {
     WindowState mChildAppWindowBelow;
     HashSet<WindowState> mCommonWindows;
 
+    private final SurfaceAnimationRunner mSurfaceAnimationRunner;
+
+    public WindowTestsBase() {
+        this(new SurfaceAnimationRunner());
+    }
+
+    public WindowTestsBase(SurfaceAnimationRunner surfaceAnimationRunner) {
+        mSurfaceAnimationRunner = surfaceAnimationRunner;
+    }
+
     @Before
     public void setUp() throws Exception {
         if (!sOneTimeSetupDone) {
@@ -98,7 +108,7 @@ class WindowTestsBase {
         final Context context = InstrumentationRegistry.getTargetContext();
         AttributeCache.init(context);
 
-        sWm = TestWindowManagerPolicy.getWindowManagerService(context);
+        sWm = TestWindowManagerPolicy.getWindowManagerService(context, mSurfaceAnimationRunner);
         beforeCreateDisplay();
 
         context.getDisplay().getDisplayInfo(mDisplayInfo);
