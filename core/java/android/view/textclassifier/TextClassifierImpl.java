@@ -72,7 +72,7 @@ final class TextClassifierImpl implements TextClassifier {
     private static final String MODEL_DIR = "/etc/textclassifier/";
     private static final String MODEL_FILE_REGEX = "textclassifier\\.smartselection\\.(.*)\\.model";
     private static final String UPDATED_MODEL_FILE_PATH =
-            "/data/misc/textclassifier/textclassifier.smartselection.model";
+            "/data/misc/textclassifier/textclassifier.model";
     private static final List<String> ENTITY_TYPES_ALL =
             Collections.unmodifiableList(Arrays.asList(
                     TextClassifier.TYPE_ADDRESS,
