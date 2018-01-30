@@ -356,6 +356,8 @@ public class WifiTrackerTest {
 
     private void waitForHandlersToProcessCurrentlyEnqueuedMessages(WifiTracker tracker)
             throws InterruptedException {
+        // TODO(sghuman): This should no longer be necessary in a single work handler model
+
         CountDownLatch workerLatch = new CountDownLatch(1);
         tracker.mWorkHandler.post(() -> {
             workerLatch.countDown();
@@ -495,7 +497,6 @@ public class WifiTrackerTest {
         waitForHandlersToProcessCurrentlyEnqueuedMessages(tracker);
     }
 
-    @FlakyTest
     @Test
     public void scoreCacheUpdateScoresShouldChangeSortOrder() throws InterruptedException {
         WifiTracker tracker =  createTrackerWithImmediateBroadcastsAndInjectInitialScanResults();
@@ -595,9 +596,9 @@ public class WifiTrackerTest {
     public void scoresShouldBeRequestedForNewScanResultOnly()  throws InterruptedException {
         // Scores can be requested together or serially depending on how the scan results are
         // processed.
-        mRequestScoresLatch = new CountDownLatch(2);
+        mRequestScoresLatch = new CountDownLatch(1);
         WifiTracker tracker = createTrackerWithImmediateBroadcastsAndInjectInitialScanResults();
-        mRequestScoresLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS);
+        assertTrue(mRequestScoresLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
         mRequestedKeys.clear();
 
         String ssid = "ssid3";
@@ -815,7 +816,7 @@ public class WifiTrackerTest {
         mAccessPointsChangedLatch = new CountDownLatch(1);
         tracker.mReceiver.onReceive(mContext, new Intent(WifiManager.WIFI_STATE_CHANGED_ACTION));
 
-        mAccessPointsChangedLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS);
+        assertTrue(mAccessPointsChangedLatch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
         waitForHandlersToProcessCurrentlyEnqueuedMessages(tracker);
 
         assertThat(tracker.getAccessPoints()).isEmpty();

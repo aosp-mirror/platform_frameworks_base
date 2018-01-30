@@ -49,7 +49,6 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
-import android.util.SparseIntArray;
 import android.widget.Toast;
 
 import com.android.settingslib.R;
@@ -222,6 +221,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
 
         mNetworkScoreManager = networkScoreManager;
 
+        // TODO(sghuman): Remove this and create less hacky solution for testing
         final HandlerThread workThread = new HandlerThread(TAG
                 + "{" + Integer.toHexString(System.identityHashCode(this)) + "}",
                 Process.THREAD_PRIORITY_BACKGROUND);
@@ -234,6 +234,8 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
      * @param workThread substitute Handler thread, for testing purposes only
      */
     @VisibleForTesting
+    // TODO(sghuman): Remove this method, this needs to happen in a factory method and be passed in
+    // during construction
     void setWorkThread(HandlerThread workThread) {
         mWorkThread = workThread;
         mWorkHandler = new WorkHandler(workThread.getLooper());
@@ -673,7 +675,8 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     }
 
     private void updateNetworkInfo(NetworkInfo networkInfo) {
-        /* sticky broadcasts can call this when wifi is disabled */
+
+        /* Sticky broadcasts can call this when wifi is disabled */
         if (!mWifiManager.isWifiEnabled()) {
             clearAccessPointsAndConditionallyUpdate();
             return;
@@ -683,6 +686,10 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
             mLastNetworkInfo = networkInfo;
             if (DBG()) {
                 Log.d(TAG, "mLastNetworkInfo set: " + mLastNetworkInfo);
+            }
+
+            if(networkInfo.isConnected() != mConnected.getAndSet(networkInfo.isConnected())) {
+                mListener.onConnectedChanged();
             }
         }
 
@@ -760,22 +767,21 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         }
     }
 
-    private void updateWifiState(int state) {
-        mWorkHandler.obtainMessage(WorkHandler.MSG_UPDATE_WIFI_STATE, state, 0).sendToTarget();
-        if (!mWifiManager.isWifiEnabled()) {
-            clearAccessPointsAndConditionallyUpdate();
-        }
-    }
-
     @VisibleForTesting
     final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            // No work should be performed in this Receiver, instead all operations should be passed
+            // off to the WorkHandler to avoid concurrent modification exceptions.
+
             String action = intent.getAction();
 
             if (WifiManager.WIFI_STATE_CHANGED_ACTION.equals(action)) {
-                updateWifiState(intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
-                        WifiManager.WIFI_STATE_UNKNOWN));
+                mWorkHandler.obtainMessage(
+                        WorkHandler.MSG_UPDATE_WIFI_STATE,
+                        intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
+                            WifiManager.WIFI_STATE_UNKNOWN),
+                        0).sendToTarget();
             } else if (WifiManager.SCAN_RESULTS_AVAILABLE_ACTION.equals(action)) {
                 mWorkHandler
                         .obtainMessage(
@@ -788,12 +794,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                 mWorkHandler.sendEmptyMessage(WorkHandler.MSG_UPDATE_ACCESS_POINTS);
             } else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
                 NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
-
-                if(mConnected.get() != info.isConnected()) {
-                    mConnected.set(info.isConnected());
-                    mListener.onConnectedChanged();
-                }
-
                 mWorkHandler.obtainMessage(WorkHandler.MSG_UPDATE_NETWORK_INFO, info)
                         .sendToTarget();
                 mWorkHandler.sendEmptyMessage(WorkHandler.MSG_UPDATE_ACCESS_POINTS);
@@ -832,6 +832,8 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
 
         @Override
         public void handleMessage(Message msg) {
+            // TODO(sghuman): Clean up synchronization to only be used when modifying collections
+            // exposed to the MainThread (through onStart, onStop, forceUpdate).
             synchronized (mLock) {
                 processMessage(msg);
             }
@@ -861,6 +863,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                             mScanner.resume();
                         }
                     } else {
+                        clearAccessPointsAndConditionallyUpdate();
                         mLastInfo = null;
                         mLastNetworkInfo = null;
                         if (mScanner != null) {
