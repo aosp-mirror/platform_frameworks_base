@@ -24,14 +24,19 @@ package com.android.server;
 option java_multiple_files = true;
 
 // Dump from com.android.server.ForceAppStandbyTracker.
+//
+// Next ID: 12
 message ForceAppStandbyTrackerProto {
   option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
   // Whether all apps are forced standby or not.
   optional bool force_all_apps_standby = 1;
 
+  // UIDs currently active.
+  repeated int32 active_uids = 2;
+
   // UIDs currently in the foreground.
-  repeated int32 foreground_uids = 2;
+  repeated int32 foreground_uids = 11;
 
   // App ids that are in power-save whitelist.
   repeated int32 power_save_whitelist_app_ids = 3;
