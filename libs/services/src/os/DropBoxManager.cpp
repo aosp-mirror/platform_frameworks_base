@@ -185,6 +185,11 @@ DropBoxManager::addFile(const String16& tag, const string& filename, int flags)
 Status
 DropBoxManager::addFile(const String16& tag, int fd, int flags)
 {
+    if (fd == -1) {
+        string message("invalid fd (-1) passed to to addFile");
+        ALOGW("DropboxManager: %s", message.c_str());
+        return Status::fromExceptionCode(Status::EX_ILLEGAL_STATE, message.c_str());
+    }
     Entry entry(tag, flags, fd);
     return add(entry);
 }
@@ -201,4 +206,3 @@ DropBoxManager::add(const Entry& entry)
 }
 
 }} // namespace android::os
-
