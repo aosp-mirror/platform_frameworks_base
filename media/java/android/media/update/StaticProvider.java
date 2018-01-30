@@ -31,6 +31,7 @@ import android.media.MediaLibraryService2.MediaLibrarySessionCallback;
 import android.media.MediaMetadata2;
 import android.media.MediaPlayerInterface;
 import android.media.MediaSession2;
+import android.media.MediaSession2.PlaylistParams;
 import android.media.MediaSession2.SessionCallback;
 import android.media.MediaSessionService2;
 import android.media.SessionPlayer2;
@@ -40,6 +41,7 @@ import android.media.update.MediaLibraryService2Provider.MediaLibrarySessionProv
 import android.media.update.MediaSession2Provider.CommandGroupProvider;
 import android.media.update.MediaSession2Provider.CommandProvider;
 import android.media.update.MediaSession2Provider.ControllerInfoProvider;
+import android.media.update.MediaSession2Provider.PlaylistParamsProvider;
 import android.os.Bundle;
 import android.os.IInterface;
 import android.util.AttributeSet;
@@ -74,7 +76,10 @@ public interface StaticProvider {
     ControllerInfoProvider createMediaSession2ControllerInfo(Context context,
             MediaSession2.ControllerInfo instance, int uid, int pid,
             String packageName, IInterface callback);
-
+    PlaylistParamsProvider createMediaSession2PlaylistParams(Context context,
+            PlaylistParams playlistParams, int repeatMode, int shuffleMode,
+            MediaMetadata2 playlistMetadata);
+    PlaylistParams fromBundle_PlaylistParams(Context context, Bundle bundle);
     MediaController2Provider createMediaController2(Context context, MediaController2 instance,
             SessionToken2 token, Executor executor, ControllerCallback callback);
 
