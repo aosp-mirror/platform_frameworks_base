@@ -20,6 +20,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Rlog;
 
+import java.util.Objects;
+
 /**
  * Signal strength related information.
  */
@@ -293,9 +295,7 @@ public final class CellSignalStrengthCdma extends CellSignalStrength implements 
 
     @Override
     public int hashCode() {
-        int primeNum = 31;
-        return ((mCdmaDbm * primeNum) + (mCdmaEcio * primeNum)
-                + (mEvdoDbm * primeNum) + (mEvdoEcio * primeNum) + (mEvdoSnr * primeNum));
+        return Objects.hash(mCdmaDbm, mCdmaEcio, mEvdoDbm, mEvdoEcio, mEvdoSnr);
     }
 
     @Override

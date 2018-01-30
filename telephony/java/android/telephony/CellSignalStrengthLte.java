@@ -20,6 +20,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Rlog;
 
+import java.util.Objects;
+
 /**
  * LTE signal strength related information.
  */
@@ -231,10 +233,7 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
 
     @Override
     public int hashCode() {
-        int primeNum = 31;
-        return (mSignalStrength * primeNum) + (mRsrp * primeNum)
-                + (mRsrq * primeNum) + (mRssnr * primeNum) + (mCqi * primeNum)
-                + (mTimingAdvance * primeNum);
+        return Objects.hash(mSignalStrength, mRsrp, mRsrq, mRssnr, mCqi, mTimingAdvance);
     }
 
     @Override
