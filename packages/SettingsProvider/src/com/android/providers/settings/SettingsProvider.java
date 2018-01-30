@@ -16,6 +16,10 @@
 
 package com.android.providers.settings;
 
+import static android.os.Process.ROOT_UID;
+import static android.os.Process.SHELL_UID;
+import static android.os.Process.SYSTEM_UID;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -60,9 +64,9 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.UserManagerInternal;
 import android.provider.Settings;
-import android.provider.SettingsValidators;
 import android.provider.Settings.Global;
 import android.provider.Settings.Secure;
+import android.provider.SettingsValidators;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -96,12 +100,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-
-import static android.os.Process.ROOT_UID;
-import static android.os.Process.SHELL_UID;
-import static android.os.Process.SYSTEM_UID;
 
 
 /**
@@ -272,6 +273,8 @@ public class SettingsProvider extends ContentProvider {
     // We have to call in the user manager with no lock held,
     private volatile UserManager mUserManager;
 
+    private UserManagerInternal mUserManagerInternal;
+
     // We have to call in the package manager with no lock held,
     private volatile IPackageManager mPackageManager;
 
@@ -306,6 +309,7 @@ public class SettingsProvider extends ContentProvider {
 
         synchronized (mLock) {
             mUserManager = UserManager.get(getContext());
+            mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
             mPackageManager = AppGlobals.getPackageManager();
             mHandlerThread = new HandlerThread(LOG_TAG,
                     Process.THREAD_PRIORITY_BACKGROUND);
@@ -1017,8 +1021,8 @@ public class SettingsProvider extends ContentProvider {
 
         // If this is a setting that is currently restricted for this user, do not allow
         // unrestricting changes.
-        if (name != null && isGlobalOrSecureSettingRestrictedForUser(name, callingUserId, value,
-                Binder.getCallingUid())) {
+        if (name != null && mUserManagerInternal.isSettingRestrictedForUser(
+                name, callingUserId, value, Binder.getCallingUid())) {
             return false;
         }
 
@@ -1325,8 +1329,8 @@ public class SettingsProvider extends ContentProvider {
 
         // If this is a setting that is currently restricted for this user, do not allow
         // unrestricting changes.
-        if (name != null && isGlobalOrSecureSettingRestrictedForUser(name, callingUserId, value,
-                Binder.getCallingUid())) {
+        if (name != null && mUserManagerInternal.isSettingRestrictedForUser(
+                name, callingUserId, value, Binder.getCallingUid())) {
             return false;
         }
 
@@ -1466,6 +1470,11 @@ public class SettingsProvider extends ContentProvider {
         // Resolve the userId on whose behalf the call is made.
         final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(runAsUserId);
 
+        if (name != null && mUserManagerInternal.isSettingRestrictedForUser(
+                name, callingUserId, value, Binder.getCallingUid())) {
+            return false;
+        }
+
         // Enforce what the calling package can mutate the system settings.
         enforceRestrictedSystemSettingsMutationForCallingPackage(operation, name, callingUserId);
 
@@ -1577,106 +1586,6 @@ public class SettingsProvider extends ContentProvider {
             return true;
         }
         return false;
-    }
-
-    /**
-     * Checks whether changing a setting to a value is prohibited by the corresponding user
-     * restriction.
-     *
-     * <p>See also {@link com.android.server.pm.UserRestrictionsUtils#applyUserRestriction(
-     * Context, int, String, boolean)}, which should be in sync with this method.
-     *
-     * @return true if the change is prohibited, false if the change is allowed.
-     */
-    private boolean isGlobalOrSecureSettingRestrictedForUser(String setting, int userId,
-            String value, int callingUid) {
-        String restriction;
-        boolean checkAllUser = false;
-        switch (setting) {
-            case Settings.Secure.LOCATION_MODE:
-                // Note LOCATION_MODE will be converted into LOCATION_PROVIDERS_ALLOWED
-                // in android.provider.Settings.Secure.putStringForUser(), so we shouldn't come
-                // here normally, but we still protect it here from a direct provider write.
-                if (String.valueOf(Settings.Secure.LOCATION_MODE_OFF).equals(value)) return false;
-                restriction = UserManager.DISALLOW_SHARE_LOCATION;
-                break;
-
-            case Settings.Secure.LOCATION_PROVIDERS_ALLOWED:
-                // See SettingsProvider.updateLocationProvidersAllowedLocked.  "-" is to disable
-                // a provider, which should be allowed even if the user restriction is set.
-                if (value != null && value.startsWith("-")) return false;
-                restriction = UserManager.DISALLOW_SHARE_LOCATION;
-                break;
-
-            case Settings.Secure.INSTALL_NON_MARKET_APPS:
-                if ("0".equals(value)) return false;
-                restriction = UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES;
-                break;
-
-            case Settings.Global.ADB_ENABLED:
-                if ("0".equals(value)) return false;
-                restriction = UserManager.DISALLOW_DEBUGGING_FEATURES;
-                break;
-
-            case Settings.Global.PACKAGE_VERIFIER_ENABLE:
-            case Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB:
-                if ("1".equals(value)) return false;
-                restriction = UserManager.ENSURE_VERIFY_APPS;
-                break;
-
-            case Settings.Global.PREFERRED_NETWORK_MODE:
-                restriction = UserManager.DISALLOW_CONFIG_MOBILE_NETWORKS;
-                break;
-
-            case Settings.Secure.ALWAYS_ON_VPN_APP:
-            case Settings.Secure.ALWAYS_ON_VPN_LOCKDOWN:
-                // Whitelist system uid (ConnectivityService) and root uid to change always-on vpn
-                final int appId = UserHandle.getAppId(callingUid);
-                if (appId == Process.SYSTEM_UID || appId == Process.ROOT_UID) {
-                    return false;
-                }
-                restriction = UserManager.DISALLOW_CONFIG_VPN;
-                break;
-
-            case Settings.Global.SAFE_BOOT_DISALLOWED:
-                if ("1".equals(value)) return false;
-                restriction = UserManager.DISALLOW_SAFE_BOOT;
-                break;
-
-            case Settings.Global.AIRPLANE_MODE_ON:
-                if ("0".equals(value)) return false;
-                restriction = UserManager.DISALLOW_AIRPLANE_MODE;
-                break;
-
-            case Settings.Secure.DOZE_ENABLED:
-            case Settings.Secure.DOZE_ALWAYS_ON:
-            case Settings.Secure.DOZE_PULSE_ON_PICK_UP:
-            case Settings.Secure.DOZE_PULSE_ON_LONG_PRESS:
-            case Settings.Secure.DOZE_PULSE_ON_DOUBLE_TAP:
-                if ("0".equals(value)) return false;
-                restriction = UserManager.DISALLOW_AMBIENT_DISPLAY;
-                break;
-
-            case Global.LOCATION_GLOBAL_KILL_SWITCH:
-                if ("0".equals(value)) return false;
-                restriction = UserManager.DISALLOW_CONFIG_LOCATION;
-                checkAllUser = true;
-                break;
-
-            default:
-                if (setting != null && setting.startsWith(Settings.Global.DATA_ROAMING)) {
-                    if ("0".equals(value)) return false;
-                    restriction = UserManager.DISALLOW_DATA_ROAMING;
-                    break;
-                }
-                return false;
-        }
-
-        if (checkAllUser) {
-            return mUserManager.hasUserRestrictionOnAnyUser(restriction);
-        } else {
-            return mUserManager.hasUserRestriction(restriction, UserHandle.of(userId));
-        }
     }
 
     private int resolveOwningUserIdForSecureSettingLocked(int userId, String setting) {
@@ -1878,8 +1787,9 @@ public class SettingsProvider extends ContentProvider {
      * But helper functions in android.providers.Settings can enable or disable
      * a single provider by using a "+" or "-" prefix before the provider name.
      *
-     * <p>See also {@link #isGlobalOrSecureSettingRestrictedForUser()}.  If DISALLOW_SHARE_LOCATION
-     * is set, the said method will only allow values with the "-" prefix.
+     * <p>See also {@link com.android.server.pm.UserRestrictionsUtils#isSettingRestrictedForUser()}.
+     * If DISALLOW_SHARE_LOCATION is set, the said method will only allow values with
+     * the "-" prefix.
      *
      * @returns whether the enabled location providers changed.
      */

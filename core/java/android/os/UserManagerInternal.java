@@ -16,6 +16,7 @@
 package android.os;
 
 import android.annotation.Nullable;
+import android.content.Context;
 import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
 
@@ -206,4 +207,18 @@ public abstract class UserManagerInternal {
      * itself.
      */
     public abstract int getProfileParentId(int userId);
+
+    /**
+     * Checks whether changing a setting to a value is prohibited by the corresponding user
+     * restriction.
+     *
+     * <p>See also {@link com.android.server.pm.UserRestrictionsUtils#applyUserRestriction(
+     * Context, int, String, boolean)}, which should be in sync with this method.
+     *
+     * @return {@code true} if the change is prohibited, {@code false} if the change is allowed.
+     *
+     * @hide
+     */
+    public abstract boolean isSettingRestrictedForUser(String setting, int userId, String value,
+            int callingUid);
 }
