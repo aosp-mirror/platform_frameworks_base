@@ -19,8 +19,14 @@ package com.android.server.power;
 
 option java_multiple_files = true;
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 message WirelessChargerDetectorProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     message VectorProto {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
         optional float x = 1;
         optional float y = 2;
         optional float z = 3;

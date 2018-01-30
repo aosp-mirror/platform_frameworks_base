@@ -17,12 +17,11 @@
 syntax = "proto2";
 
 import "frameworks/base/core/proto/android/server/statlogger.proto";
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 package com.android.server;
 
 option java_multiple_files = true;
-
-import "frameworks/base/libs/incident/proto/android/privacy.proto";
 
 // Dump from com.android.server.ForceAppStandbyTracker.
 message ForceAppStandbyTrackerProto {
@@ -62,6 +61,8 @@ message ForceAppStandbyTrackerProto {
   optional StatLoggerProto stats = 9;
 
   message ExemptedPackage {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     optional int32 userId = 1;
     optional string package_name = 2;
   }
