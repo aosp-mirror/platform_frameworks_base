@@ -84,6 +84,7 @@ import android.os.UserHandle;
 import android.util.EventLog;
 import android.util.PrintWriterPrinter;
 import android.util.Slog;
+import android.util.StatsLog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -1094,6 +1095,8 @@ public final class ActiveServices {
                     active.mNumActive++;
                 }
                 r.isForeground = true;
+                StatsLog.write(StatsLog.FOREGROUND_SERVICE_STATE_CHANGED, r.userId, r.shortName,
+                        StatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER);
             }
             r.postNotification();
             if (r.app != null) {
@@ -1109,6 +1112,8 @@ public final class ActiveServices {
                     decActiveForegroundAppLocked(smap, r);
                 }
                 r.isForeground = false;
+                StatsLog.write(StatsLog.FOREGROUND_SERVICE_STATE_CHANGED, r.userId, r.shortName,
+                        StatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT);
                 if (r.app != null) {
                     mAm.updateLruProcessLocked(r.app, false, null);
                     updateServiceForegroundLocked(r.app, true);
@@ -2533,7 +2538,10 @@ public final class ActiveServices {
         cancelForegroundNotificationLocked(r);
         if (r.isForeground) {
             decActiveForegroundAppLocked(smap, r);
+            StatsLog.write(StatsLog.FOREGROUND_SERVICE_STATE_CHANGED, r.userId, r.shortName,
+                    StatsLog.FOREGROUND_SERVICE_STATE_CHANGED__STATE__EXIT);
         }
+
         r.isForeground = false;
         r.foregroundId = 0;
         r.foregroundNoti = null;

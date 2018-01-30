@@ -97,6 +97,7 @@ message Atom {
         BootSequenceReported boot_sequence_reported = 57;
         DaveyOccurred davey_occurred = 58;
         OverlayStateChanged overlay_state_changed = 59;
+        ForegroundServiceStateChanged foreground_service_state_changed = 60;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
@@ -998,6 +999,25 @@ message OverlayStateChanged {
     optional State state = 4;
 }
 
+/*
+ * Logs foreground service starts and stops.
+ * Note that this is not when a service starts or stops, but when it is
+ * considered foreground.
+ * Logged from
+ *     //frameworks/base/services/core/java/com/android/server/am/ActiveServices.java
+ */
+message ForegroundServiceStateChanged {
+    optional int32 uid = 1;
+    // package_name + "/" + class_name
+    optional string short_name = 2;
+
+    enum State {
+        ENTER = 1;
+        EXIT = 2;
+    }
+    optional State state = 3;
+}
+
 /**
  * Pulls bytes transferred via wifi (Sum of foreground and background usage).
  *
@@ -1463,3 +1483,4 @@ message RemainingBatteryCapacity {
 message FullBatteryCapacity {
     optional int32 capacity_uAh = 1;
 }
+
