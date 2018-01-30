@@ -16,7 +16,6 @@
 
 package android.media.update;
 
-import android.media.AudioAttributes;
 import android.media.MediaItem2;
 import android.media.MediaPlayerInterface;
 import android.media.MediaPlayerInterface.PlaybackListener;
@@ -62,14 +61,6 @@ public interface MediaSession2Provider extends TransportControlProvider {
     void addPlaybackListener_impl(Executor executor, PlaybackListener listener);
     void removePlaybackListener_impl(PlaybackListener listener);
 
-    interface ControllerInfoProvider {
-        String getPackageName_impl();
-        int getUid_impl();
-        boolean isTrusted_impl();
-        int hashCode_impl();
-        boolean equals_impl(ControllerInfoProvider obj);
-    }
-
     interface CommandProvider {
         int getCommandCode_impl();
         String getCustomCommand_impl();
@@ -78,5 +69,22 @@ public interface MediaSession2Provider extends TransportControlProvider {
 
         boolean equals_impl(Object ob);
         int hashCode_impl();
+    }
+
+    interface CommandGroupProvider {
+        void addCommand_impl(Command command);
+        void addAllPredefinedCommands_impl();
+        void removeCommand_impl(Command command);
+        boolean hasCommand_impl(Command command);
+        boolean hasCommand_impl(int code);
+        Bundle toBundle_impl();
+    }
+
+    interface ControllerInfoProvider {
+        String getPackageName_impl();
+        int getUid_impl();
+        boolean isTrusted_impl();
+        int hashCode_impl();
+        boolean equals_impl(ControllerInfoProvider obj);
     }
 }
