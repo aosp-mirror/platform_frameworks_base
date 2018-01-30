@@ -150,7 +150,8 @@ public class DefaultNetworkMetrics {
             fillLinkInfo(ev, newNai);
             ev.initialScore = newNai.getCurrentScore();
             if (newNai.lastValidated) {
-                logDefaultNetworkValidity(timeMs, true);
+                mIsCurrentlyValid = true;
+                mLastValidationTimeMs = timeMs;
             }
         } else {
             mIsCurrentlyValid = false;
