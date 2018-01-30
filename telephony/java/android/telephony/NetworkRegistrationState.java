@@ -298,9 +298,9 @@ public class NetworkRegistrationState implements Parcelable {
                 && mEmergencyOnly == other.mEmergencyOnly
                 && (mAvailableServices == other.mAvailableServices
                     || Arrays.equals(mAvailableServices, other.mAvailableServices))
-                && mCellIdentity == other.mCellIdentity
-                && mVoiceSpecificStates == other.mVoiceSpecificStates
-                && mDataSpecificStates == other.mDataSpecificStates;
+                && equals(mCellIdentity, other.mCellIdentity)
+                && equals(mVoiceSpecificStates, other.mVoiceSpecificStates)
+                && equals(mDataSpecificStates, other.mDataSpecificStates);
     }
 
     @Override
@@ -329,4 +329,14 @@ public class NetworkRegistrationState implements Parcelable {
             return new NetworkRegistrationState[size];
         }
     };
+
+    private static boolean equals(Object o1, Object o2) {
+        if (o1 == o2) {
+            return true;
+        } else if (o1 == null) {
+            return false;
+        } else {
+            return o1.equals(o2);
+        }
+    }
 }

@@ -94,47 +94,6 @@ public class ServiceState implements Parcelable {
      */
     public static final int DUPLEX_MODE_TDD = 2;
 
-    /**
-     * RIL level registration state values from ril.h
-     * ((const char **)response)[0] is registration state 0-6,
-     *              0 - Not registered, MT is not currently searching
-     *                  a new operator to register
-     *              1 - Registered, home network
-     *              2 - Not registered, but MT is currently searching
-     *                  a new operator to register
-     *              3 - Registration denied
-     *              4 - Unknown
-     *              5 - Registered, roaming
-     *             10 - Same as 0, but indicates that emergency calls
-     *                  are enabled.
-     *             12 - Same as 2, but indicates that emergency calls
-     *                  are enabled.
-     *             13 - Same as 3, but indicates that emergency calls
-     *                  are enabled.
-     *             14 - Same as 4, but indicates that emergency calls
-     *                  are enabled.
-     * @hide
-     */
-    public static final int RIL_REG_STATE_NOT_REG = 0;
-    /** @hide */
-    public static final int RIL_REG_STATE_HOME = 1;
-    /** @hide */
-    public static final int RIL_REG_STATE_SEARCHING = 2;
-    /** @hide */
-    public static final int RIL_REG_STATE_DENIED = 3;
-    /** @hide */
-    public static final int RIL_REG_STATE_UNKNOWN = 4;
-    /** @hide */
-    public static final int RIL_REG_STATE_ROAMING = 5;
-    /** @hide */
-    public static final int RIL_REG_STATE_NOT_REG_EMERGENCY_CALL_ENABLED = 10;
-    /** @hide */
-    public static final int RIL_REG_STATE_SEARCHING_EMERGENCY_CALL_ENABLED = 12;
-    /** @hide */
-    public static final int RIL_REG_STATE_DENIED_EMERGENCY_CALL_ENABLED = 13;
-    /** @hide */
-    public static final int RIL_REG_STATE_UNKNOWN_EMERGENCY_CALL_ENABLED = 14;
-
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = { "RIL_RADIO_TECHNOLOGY_" },
@@ -232,22 +191,6 @@ public class ServiceState implements Parcelable {
                     | (1 << (RIL_RADIO_TECHNOLOGY_EVDO_A - 1))
                     | (1 << (RIL_RADIO_TECHNOLOGY_EVDO_B - 1))
                     | (1 << (RIL_RADIO_TECHNOLOGY_EHRPD - 1));
-
-    /**
-     * Available registration states for GSM, UMTS and CDMA.
-     */
-    /** @hide */
-    public static final int REGISTRATION_STATE_NOT_REGISTERED_AND_NOT_SEARCHING = 0;
-    /** @hide */
-    public static final int REGISTRATION_STATE_HOME_NETWORK = 1;
-    /** @hide */
-    public static final int REGISTRATION_STATE_NOT_REGISTERED_AND_SEARCHING = 2;
-    /** @hide */
-    public static final int REGISTRATION_STATE_REGISTRATION_DENIED = 3;
-    /** @hide */
-    public static final int REGISTRATION_STATE_UNKNOWN = 4;
-    /** @hide */
-    public static final int REGISTRATION_STATE_ROAMING = 5;
 
     private int mVoiceRegState = STATE_OUT_OF_SERVICE;
     private int mDataRegState = STATE_OUT_OF_SERVICE;
@@ -1371,6 +1314,51 @@ public class ServiceState implements Parcelable {
                 return AccessNetworkType.UNKNOWN;
         }
     }
+
+    /** @hide */
+    public static int networkTypeToRilRadioTechnology(int networkType) {
+        switch(networkType) {
+            case TelephonyManager.NETWORK_TYPE_GPRS:
+                return ServiceState.RIL_RADIO_TECHNOLOGY_GPRS;
+            case TelephonyManager.NETWORK_TYPE_EDGE:
+                return ServiceState.RIL_RADIO_TECHNOLOGY_EDGE;
+            case TelephonyManager.NETWORK_TYPE_UMTS:
+                return ServiceState.RIL_RADIO_TECHNOLOGY_UMTS;
+            case TelephonyManager.NETWORK_TYPE_HSDPA:
+                return ServiceState.RIL_RADIO_TECHNOLOGY_HSDPA;
+            case TelephonyManager.NETWORK_TYPE_HSUPA:
+                return ServiceState.RIL_RADIO_TECHNOLOGY_HSUPA;
+            case TelephonyManager.NETWORK_TYPE_HSPA:
+                return ServiceState.RIL_RADIO_TECHNOLOGY_HSPA;
+            case TelephonyManager.NETWORK_TYPE_CDMA:
+                return ServiceState.RIL_RADIO_TECHNOLOGY_IS95A;
+            case TelephonyManager.NETWORK_TYPE_1xRTT:
+                return ServiceState.RIL_RADIO_TECHNOLOGY_1xRTT;
+            case TelephonyManager.NETWORK_TYPE_EVDO_0:
+                return ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_0;
+            case TelephonyManager.NETWORK_TYPE_EVDO_A:
+                return ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_A;
+            case TelephonyManager.NETWORK_TYPE_EVDO_B:
+                return ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_B;
+            case TelephonyManager.NETWORK_TYPE_EHRPD:
+                return ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD;
+            case TelephonyManager.NETWORK_TYPE_LTE:
+                return ServiceState.RIL_RADIO_TECHNOLOGY_LTE;
+            case TelephonyManager.NETWORK_TYPE_HSPAP:
+                return ServiceState.RIL_RADIO_TECHNOLOGY_HSPAP;
+            case TelephonyManager.NETWORK_TYPE_GSM:
+                return ServiceState.RIL_RADIO_TECHNOLOGY_GSM;
+            case TelephonyManager.NETWORK_TYPE_TD_SCDMA:
+                return ServiceState.RIL_RADIO_TECHNOLOGY_TD_SCDMA;
+            case TelephonyManager.NETWORK_TYPE_IWLAN:
+                return ServiceState.RIL_RADIO_TECHNOLOGY_IWLAN;
+            case TelephonyManager.NETWORK_TYPE_LTE_CA:
+                return ServiceState.RIL_RADIO_TECHNOLOGY_LTE_CA;
+            default:
+                return ServiceState.RIL_RADIO_TECHNOLOGY_UNKNOWN;
+        }
+    }
+
 
     /** @hide */
     public int getDataNetworkType() {
