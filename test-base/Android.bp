@@ -64,27 +64,22 @@ java_library_static {
     jarjar_rules: "jarjar-rules.txt",
 }
 
-// Build the legacy-android-test library
-// =====================================
-// This contains the android.test classes that were in Android API level 25,
-// including those from android.test.runner.
-// Also contains the com.android.internal.util.Predicate[s] classes.
+// Build the android.test.base-minus-junit library
+// ===============================================
+// This contains the android.test classes from android.test.base plus
+// the com.android.internal.util.Predicate[s] classes. This is only
+// intended for inclusion in the android.test.legacy static library and
+// must not be used elsewhere.
 java_library_static {
-    name: "legacy-android-test",
+    name: "android.test.base-minus-junit",
 
     srcs: [
         "src/android/**/*.java",
         "src/com/**/*.java",
     ],
 
-    static_libs: [
-        "android.test.runner-minus-junit",
-        "android.test.mock",
-    ],
-
-    no_framework_libs: true,
+    sdk_version: "current",
     libs: [
-        "framework",
         "junit",
     ],
 }
