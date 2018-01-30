@@ -22,9 +22,7 @@ include $(CLEAR_VARS)
 LOCAL_MODULE:= com.android.location.provider
 LOCAL_MODULE_TAGS := optional
 
-LOCAL_SRC_FILES := \
-            $(call all-subdir-java-files) \
-            $(call all-aidl-files-under, java)
+LOCAL_SRC_FILES := $(call all-subdir-java-files)
 
 include $(BUILD_JAVA_LIBRARY)
 
