@@ -12788,7 +12788,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             long ident = Binder.clearCallingIdentity();
             try {
                 mKeyguardController.setKeyguardShown(showing, secondaryDisplayShowing);
-                mLocalDeviceIdleController.keyguardShowing(showing);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
