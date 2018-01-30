@@ -568,7 +568,7 @@ public class MediaSession2 implements AutoCloseable {
         public ControllerInfo(Context context, int uid, int pid, String packageName,
                 IInterface callback) {
             mProvider = ApiLoader.getProvider(context)
-                    .createMediaSession2ControllerInfoProvider(
+                    .createMediaSession2ControllerInfo(
                             context, this, uid, pid, packageName, callback);
         }
 
@@ -795,7 +795,7 @@ public class MediaSession2 implements AutoCloseable {
     /**
      * Parameter for the playlist.
      */
-    public static class PlaylistParams {
+    public final static class PlaylistParams {
         /**
          * @hide
          */
@@ -850,79 +850,71 @@ public class MediaSession2 implements AutoCloseable {
          */
         public static final int SHUFFLE_MODE_GROUP = 2;
 
+
+        private final MediaSession2Provider.PlaylistParamsProvider mProvider;
+
         /**
-         * Keys used for converting a PlaylistParams object to a bundle object and vice versa.
+         * Instantiate {@link PlaylistParams}
+         *
+         * @param context context
+         * @param repeatMode repeat mode
+         * @param shuffleMode shuffle mode
+         * @param playlistMetadata metadata for the list
          */
-        private static final String KEY_REPEAT_MODE =
-                "android.media.session2.playlistparams2.repeat_mode";
-        private static final String KEY_SHUFFLE_MODE =
-                "android.media.session2.playlistparams2.shuffle_mode";
-        private static final String KEY_MEDIA_METADATA2_BUNDLE =
-                "android.media.session2.playlistparams2.metadata2_bundle";
-
-        private @RepeatMode int mRepeatMode;
-        private @ShuffleMode int mShuffleMode;
-
-        private MediaMetadata2 mPlaylistMetadata;
-
-        public PlaylistParams(@RepeatMode int repeatMode, @ShuffleMode int shuffleMode,
-                @Nullable MediaMetadata2 playlistMetadata) {
-            mRepeatMode = repeatMode;
-            mShuffleMode = shuffleMode;
-            mPlaylistMetadata = playlistMetadata;
+        public PlaylistParams(@NonNull Context context, @RepeatMode int repeatMode,
+                @ShuffleMode int shuffleMode, @Nullable MediaMetadata2 playlistMetadata) {
+            mProvider = ApiLoader.getProvider(context).createMediaSession2PlaylistParams(
+                    context, this, repeatMode, shuffleMode, playlistMetadata);
         }
 
+        /**
+         * Create a new bundle for this object.
+         *
+         * @return
+         */
+        public @NonNull Bundle toBundle() {
+            return mProvider.toBundle_impl();
+        }
+
+        /**
+         * Create a new playlist params from the bundle that was previously returned by
+         * {@link #toBundle}.
+         *
+         * @param context context
+         * @return a new playlist params. Can be {@code null} for error.
+         */
+        public static @Nullable PlaylistParams fromBundle(
+                @NonNull Context context, @Nullable Bundle bundle) {
+            return ApiLoader.getProvider(context).fromBundle_PlaylistParams(context, bundle);
+        }
+
+        /**
+         * Get repeat mode
+         *
+         * @return repeat mode
+         * @see #REPEAT_MODE_NONE, #REPEAT_MODE_ONE, #REPEAT_MODE_ALL, #REPEAT_MODE_GROUP
+         */
         public @RepeatMode int getRepeatMode() {
-            return mRepeatMode;
+            return mProvider.getRepeatMode_impl();
         }
 
+        /**
+         * Get shuffle mode
+         *
+         * @return shuffle mode
+         * @see #SHUFFLE_MODE_NONE, #SHUFFLE_MODE_ALL, #SHUFFLE_MODE_GROUP
+         */
         public @ShuffleMode int getShuffleMode() {
-            return mShuffleMode;
-        }
-
-        public MediaMetadata2 getPlaylistMetadata() {
-            return mPlaylistMetadata;
+            return mProvider.getShuffleMode_impl();
         }
 
         /**
-         * Returns this object as a bundle to share between processes.
+         * Get metadata for the playlist
          *
-         * @hide
+         * @return metadata. Can be {@code null}
          */
-        public Bundle toBundle() {
-            Bundle bundle = new Bundle();
-            bundle.putInt(KEY_REPEAT_MODE, mRepeatMode);
-            bundle.putInt(KEY_SHUFFLE_MODE, mShuffleMode);
-            if (mPlaylistMetadata != null) {
-                bundle.putBundle(KEY_MEDIA_METADATA2_BUNDLE, mPlaylistMetadata.getBundle());
-            }
-            return bundle;
-        }
-
-        /**
-         * Creates an instance from a bundle which is previously created by {@link #toBundle()}.
-         *
-         * @param bundle A bundle created by {@link #toBundle()}.
-         * @return A new {@link PlaylistParams} instance. Returns {@code null} if the given
-         *         {@param bundle} is null, or if the {@param bundle} has no playlist parameters.
-         * @hide
-         */
-        public static PlaylistParams fromBundle(Bundle bundle) {
-            if (bundle == null) {
-                return null;
-            }
-            if (!bundle.containsKey(KEY_REPEAT_MODE) || !bundle.containsKey(KEY_SHUFFLE_MODE)) {
-                return null;
-            }
-
-            Bundle metadataBundle = bundle.getBundle(KEY_MEDIA_METADATA2_BUNDLE);
-            MediaMetadata2 metadata =
-                    metadataBundle == null ? null : new MediaMetadata2(metadataBundle);
-
-            return new PlaylistParams(
-                    bundle.getInt(KEY_REPEAT_MODE),
-                    bundle.getInt(KEY_SHUFFLE_MODE),
-                    metadata);
+        public @Nullable MediaMetadata2 getPlaylistMetadata() {
+            return mProvider.getPlaylistMetadata_impl();
         }
     }
 

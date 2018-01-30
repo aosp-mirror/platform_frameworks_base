@@ -17,6 +17,7 @@
 package android.media.update;
 
 import android.media.MediaItem2;
+import android.media.MediaMetadata2;
 import android.media.MediaPlayerInterface;
 import android.media.MediaPlayerInterface.PlaybackListener;
 import android.media.MediaSession2.Command;
@@ -86,5 +87,12 @@ public interface MediaSession2Provider extends TransportControlProvider {
         boolean isTrusted_impl();
         int hashCode_impl();
         boolean equals_impl(ControllerInfoProvider obj);
+    }
+
+    interface PlaylistParamsProvider {
+        int getRepeatMode_impl();
+        int getShuffleMode_impl();
+        MediaMetadata2 getPlaylistMetadata_impl();
+        Bundle toBundle_impl();
     }
 }

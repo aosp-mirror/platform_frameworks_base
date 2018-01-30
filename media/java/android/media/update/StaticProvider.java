@@ -31,8 +31,10 @@ import android.media.MediaLibraryService2.MediaLibrarySessionCallback;
 import android.media.MediaMetadata2;
 import android.media.MediaPlayerInterface;
 import android.media.MediaSession2;
+import android.media.MediaSession2.PlaylistParams;
 import android.media.MediaSession2.SessionCallback;
 import android.media.MediaSessionService2;
+import android.media.Rating2;
 import android.media.SessionPlayer2;
 import android.media.SessionToken2;
 import android.media.VolumeProvider;
@@ -40,6 +42,7 @@ import android.media.update.MediaLibraryService2Provider.MediaLibrarySessionProv
 import android.media.update.MediaSession2Provider.CommandGroupProvider;
 import android.media.update.MediaSession2Provider.CommandProvider;
 import android.media.update.MediaSession2Provider.ControllerInfoProvider;
+import android.media.update.MediaSession2Provider.PlaylistParamsProvider;
 import android.os.Bundle;
 import android.os.IInterface;
 import android.util.AttributeSet;
@@ -71,11 +74,13 @@ public interface StaticProvider {
     CommandGroupProvider createMediaSession2CommandGroup(Context context,
             MediaSession2.CommandGroup instance, MediaSession2.CommandGroup others);
     MediaSession2.CommandGroup fromBundle_MediaSession2CommandGroup(Context context, Bundle bundle);
-    ControllerInfoProvider createMediaSession2ControllerInfoProvider(Context context,
+    ControllerInfoProvider createMediaSession2ControllerInfo(Context context,
             MediaSession2.ControllerInfo instance, int uid, int pid,
             String packageName, IInterface callback);
-
-
+    PlaylistParamsProvider createMediaSession2PlaylistParams(Context context,
+            PlaylistParams playlistParams, int repeatMode, int shuffleMode,
+            MediaMetadata2 playlistMetadata);
+    PlaylistParams fromBundle_PlaylistParams(Context context, Bundle bundle);
     MediaController2Provider createMediaController2(Context context, MediaController2 instance,
             SessionToken2 token, Executor executor, ControllerCallback callback);
 
@@ -96,7 +101,20 @@ public interface StaticProvider {
 
     SessionPlayer2Provider createSessionPlayer2(Context context, SessionPlayer2 instance);
 
-    MediaItem2Provider createMediaItem2Provider(Context context, MediaItem2 mediaItem2,
+    MediaItem2Provider createMediaItem2(Context context, MediaItem2 mediaItem2,
             String mediaId, DataSourceDesc dsd, MediaMetadata2 metadata, int flags);
     MediaItem2 fromBundle_MediaItem2(Context context, Bundle bundle);
+
+    MediaMetadata2 fromBundle_MediaMetadata2(Context context, Bundle bundle);
+    MediaMetadata2Provider.BuilderProvider createMediaMetadata2Builder(
+            Context context, MediaMetadata2.Builder builder);
+    MediaMetadata2Provider.BuilderProvider createMediaMetadata2Builder(
+            Context context, MediaMetadata2.Builder builder, MediaMetadata2 source);
+
+    Rating2 newUnratedRating_Rating2(Context context, int ratingStyle);
+    Rating2 fromBundle_Rating2(Context context, Bundle bundle);
+    Rating2 newHeartRating_Rating2(Context context, boolean hasHeart);
+    Rating2 newThumbRating_Rating2(Context context, boolean thumbIsUp);
+    Rating2 newStarRating_Rating2(Context context, int starRatingStyle, float starRating);
+    Rating2 newPercentageRating_Rating2(Context context, float percent);
 }
