@@ -942,43 +942,78 @@ public final class MediaDrm implements AutoCloseable {
             throws DeniedByServerException;
 
     /**
-     * A means of enforcing limits on the number of concurrent streams per subscriber
-     * across devices is provided via SecureStop. This is achieved by securely
-     * monitoring the lifetime of sessions.
+     * Secure stops are a way to enforce limits on the number of concurrent
+     * streams per subscriber across devices. They provide secure monitoring of
+     * the lifetime of content decryption keys in MediaDrm sessions.
      * <p>
-     * Information from the server related to the current playback session is written
-     * to persistent storage on the device when each MediaCrypto object is created.
+     * A secure stop is written to secure persistent memory when keys are loaded
+     * into a MediaDrm session. The secure stop state indicates that the keys
+     * are available for use. When playback completes and the keys are removed
+     * or the session is destroyed, the secure stop state is updated to indicate
+     * that keys are no longer usable.
      * <p>
-     * In the normal case, playback will be completed, the session destroyed and the
-     * Secure Stops will be queried. The app queries secure stops and forwards the
-     * secure stop message to the server which verifies the signature and notifies the
-     * server side database that the session destruction has been confirmed. The persisted
-     * record on the client is only removed after positive confirmation that the server
-     * received the message using releaseSecureStops().
+     * After playback, the app can query the secure stop and send it in a
+     * message to the license server confirming that the keys are no longer
+     * active. The license server returns a secure stop release response
+     * message to the app which then deletes the secure stop from persistent
+     * memory using {@link #releaseSecureStops}.
+     * @return a list of all secure stops from secure persistent memory
      */
     @NonNull
     public native List<byte[]> getSecureStops();
 
     /**
-     * Access secure stop by secure stop ID.
+     * Return a list of all secure stop IDs currently in persistent memory.
      *
-     * @param ssid - The secure stop ID provided by the license server.
+     * @return a list of secure stop IDs
+     */
+    @NonNull
+    public native List<byte[]> getSecureStopIds();
+
+    /**
+     * Access a specific secure stop given its secure stop ID.
+     *
+     * @param ssid the ID of the secure stop to return
+     * @return the secure stop identified by ssid
      */
     @NonNull
     public native byte[] getSecureStop(@NonNull byte[] ssid);
 
     /**
-     * Process the SecureStop server response message ssRelease.  After authenticating
-     * the message, remove the SecureStops identified in the response.
+     * Process the secure stop server response message ssRelease.  After
+     * authenticating the message, remove the secure stops identified in the
+     * response.
      *
      * @param ssRelease the server response indicating which secure stops to release
      */
     public native void releaseSecureStops(@NonNull byte[] ssRelease);
 
     /**
-     * Remove all secure stops without requiring interaction with the server.
+     * Remove a specific secure stop without requiring a secure stop release message
+     * from the license server.
+     * @param ssid the ID of the secure stop to remove
      */
-    public native void releaseAllSecureStops();
+    public native void removeSecureStop(@NonNull byte[] ssid);
+
+    /**
+     * Remove all secure stops without requiring a secure stop release message from
+     * the license server.
+     *
+     * This method was added in API 28. In API versions 18 through 27,
+     * {@link #releaseAllSecureStops} should be called instead. There is no need to
+     * do anything for API versions prior to 18.
+     */
+    public native void removeAllSecureStops();
+
+    /**
+     * Remove all secure stops without requiring a secure stop release message from
+     * the license server.
+     *
+     * @deprecated Remove all secure stops using {@link #removeAllSecureStops} instead.
+     */
+    public void releaseAllSecureStops() {
+        removeAllSecureStops();;
+    }
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({HDCP_LEVEL_UNKNOWN, HDCP_NONE, HDCP_V1, HDCP_V2,
