@@ -21,7 +21,7 @@ import android.annotation.SystemApi;
 @SystemApi
 public interface IHwInterface {
     /**
-     * Returns the binder object that corresponds to an interface.
+     * @return the binder object that corresponds to this interface.
      */
     @SystemApi
     public IHwBinder asBinder();
