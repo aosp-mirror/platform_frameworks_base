@@ -695,7 +695,7 @@ class TaskRecord extends ConfigurationContainer implements TaskWindowContainerLi
                         wasPaused, reason);
             }
             if (!animate) {
-                toStack.mNoAnimActivities.add(topActivity);
+                mService.mStackSupervisor.mNoAnimActivities.add(topActivity);
             }
 
             // We might trigger a configuration change. Save the current task bounds for freezing.

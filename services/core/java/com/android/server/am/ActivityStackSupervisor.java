@@ -357,6 +357,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * application */
     final ArrayList<ActivityRecord> mPipModeChangedActivities = new ArrayList<>();
 
+    /**
+     * Animations that for the current transition have requested not to
+     * be considered for the transition animation.
+     */
+    final ArrayList<ActivityRecord> mNoAnimActivities = new ArrayList<>();
+
     /** The target stack bounds for the picture-in-picture mode changed that we need to report to
      * the application */
     Rect mPipModeChangedTargetStackBounds;
