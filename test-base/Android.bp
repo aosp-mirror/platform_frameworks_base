@@ -83,28 +83,3 @@ java_library_static {
         "junit",
     ],
 }
-
-// Build the legacy-android-test library
-// =====================================
-// This contains the android.test classes that were in Android API level 25,
-// including those from android.test.runner.
-// Also contains the com.android.internal.util.Predicate[s] classes.
-java_library_static {
-    name: "legacy-android-test",
-
-    srcs: [
-        "src/android/**/*.java",
-        "src/com/**/*.java",
-    ],
-
-    static_libs: [
-        "android.test.runner-minus-junit",
-        "android.test.mock",
-    ],
-
-    no_framework_libs: true,
-    libs: [
-        "framework",
-        "junit",
-    ],
-}
