@@ -36,7 +36,6 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.media.AudioSystem;
@@ -58,7 +57,6 @@ import android.view.View;
 import android.view.View.AccessibilityDelegate;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
@@ -105,6 +103,7 @@ public class VolumeDialogImpl implements VolumeDialog {
     private CustomDialog mDialog;
     private ViewGroup mDialogView;
     private ViewGroup mDialogRowsView;
+    private ViewGroup mFooter;
     private ImageButton mRingerIcon;
     private TextView mRingerStatus;
     private final List<VolumeRow> mRows = new ArrayList<>();
@@ -202,8 +201,9 @@ public class VolumeDialogImpl implements VolumeDialog {
         hardwareLayout.setOutsideTouchListener(view -> dismiss(DISMISS_REASON_TOUCH_OUTSIDE));
 
         mDialogRowsView = mDialog.findViewById(R.id.volume_dialog_rows);
-        mRingerIcon = mDialog.findViewById(R.id.ringer_icon);
-        mRingerStatus = mDialog.findViewById(R.id.ringer_status);
+        mFooter = mDialog.findViewById(R.id.footer);
+        mRingerIcon = mFooter.findViewById(R.id.ringer_icon);
+        mRingerStatus = mFooter.findViewById(R.id.ringer_status);
 
         if (mRows.isEmpty()) {
             addRow(AudioManager.STREAM_MUSIC,
@@ -340,36 +340,8 @@ public class VolumeDialogImpl implements VolumeDialog {
 
         row.outputChooser = row.view.findViewById(R.id.output_chooser);
         row.outputChooser.setOnClickListener(mClickOutputChooser);
-        row.outputChooser.findViewById(R.id.output_chooser_button)
-                .setOnClickListener(mClickOutputChooser);
         row.connectedDevice = row.view.findViewById(R.id.volume_row_connected_device);
 
-        // forward events above the slider into the slider
-        row.view.findViewById(R.id.volume_row_slider_frame)
-                .setOnTouchListener(new OnTouchListener() {
-            private final Rect mSliderHitRect = new Rect();
-            private boolean mDragging;
-
-            @SuppressLint("ClickableViewAccessibility")
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                row.slider.getHitRect(mSliderHitRect);
-                if (!mDragging && event.getActionMasked() == MotionEvent.ACTION_DOWN
-                        && event.getY() < mSliderHitRect.top) {
-                    mDragging = true;
-                }
-                if (mDragging) {
-                    event.offsetLocation(-mSliderHitRect.left, -mSliderHitRect.top);
-                    row.slider.dispatchTouchEvent(event);
-                    if (event.getActionMasked() == MotionEvent.ACTION_UP
-                            || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
-                        mDragging = false;
-                    }
-                    return true;
-                }
-                return false;
-            }
-        });
         row.icon = row.view.findViewById(R.id.volume_row_icon);
         row.icon.setImageResource(iconRes);
         if (row.stream != AudioSystem.STREAM_ACCESSIBILITY) {
@@ -412,6 +384,8 @@ public class VolumeDialogImpl implements VolumeDialog {
             if (ss == null) {
                 return;
             }
+            // normal -> vibrate -> silent -> normal (skip vibrate if device doesn't have
+            // a vibrator.
             final boolean hasVibrator = mController.hasVibrator();
             if (mState.ringerModeInternal == AudioManager.RINGER_MODE_NORMAL) {
                 if (hasVibrator) {
@@ -419,7 +393,12 @@ public class VolumeDialogImpl implements VolumeDialog {
                 } else {
                     final boolean wasZero = ss.level == 0;
                     mController.setStreamVolume(AudioManager.STREAM_RING, wasZero ? 1 : 0);
+                    mController.setRingerMode(AudioManager.RINGER_MODE_SILENT, false);
                 }
+            } else if (mState.ringerModeInternal == AudioManager.RINGER_MODE_VIBRATE) {
+                final boolean wasZero = ss.level == 0;
+                mController.setStreamVolume(AudioManager.STREAM_RING, wasZero ? 1 : 0);
+                mController.setRingerMode(AudioManager.RINGER_MODE_SILENT, false);
             } else {
                 mController.setRingerMode(AudioManager.RINGER_MODE_NORMAL, false);
                 if (ss.level == 0) {
@@ -908,7 +887,6 @@ public class VolumeDialogImpl implements VolumeDialog {
     private final OnClickListener mClickOutputChooser = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            // TODO: log
             dismissH(DISMISS_REASON_OUTPUT_CHOOSER);
             showOutputChooserH();
         }
