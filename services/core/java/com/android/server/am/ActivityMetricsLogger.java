@@ -32,6 +32,8 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_T
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_METRICS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.MemoryStatUtil.MemoryStat;
+import static com.android.server.am.MemoryStatUtil.readMemoryStatFromMemcg;
 
 import android.content.Context;
 import android.metrics.LogMaker;
@@ -67,6 +69,7 @@ class ActivityMetricsLogger {
     private static final long INVALID_START_TIME = -1;
 
     private static final int MSG_CHECK_VISIBILITY = 0;
+    private static final int MSG_LOG_APP_START_MEMORY_STATE_CAPTURE = 1;
 
     // Preallocated strings we are sending to tron, so we don't have to allocate a new one every
     // time we log.
@@ -101,6 +104,9 @@ class ActivityMetricsLogger {
                 case MSG_CHECK_VISIBILITY:
                     final SomeArgs args = (SomeArgs) msg.obj;
                     checkVisibility((TaskRecord) args.arg1, (ActivityRecord) args.arg2);
+                    break;
+                case MSG_LOG_APP_START_MEMORY_STATE_CAPTURE:
+                    logAppStartMemoryStateCapture((StackTransitionInfo) msg.obj);
                     break;
             }
         }
@@ -187,10 +193,7 @@ class ActivityMetricsLogger {
      * @param launchedActivity the activity that is being launched
      */
     void notifyActivityLaunched(int resultCode, ActivityRecord launchedActivity) {
-        final ProcessRecord processRecord = launchedActivity != null
-                ? mSupervisor.mService.mProcessNames.get(launchedActivity.processName,
-                        launchedActivity.appInfo.uid)
-                : null;
+        final ProcessRecord processRecord = findProcessForActivity(launchedActivity);
         final boolean processRunning = processRecord != null;
 
         // We consider this a "process switch" if the process of the activity that gets launched
@@ -492,6 +495,7 @@ class ActivityMetricsLogger {
                     info.bindApplicationDelayMs,
                     info.windowsDrawnDelayMs,
                     launchToken);
+            mHandler.obtainMessage(MSG_LOG_APP_START_MEMORY_STATE_CAPTURE, info).sendToTarget();
         }
     }
 
@@ -547,5 +551,39 @@ class ActivityMetricsLogger {
             return TYPE_TRANSITION_COLD_LAUNCH;
         }
         return -1;
+    }
+
+    private void logAppStartMemoryStateCapture(StackTransitionInfo info) {
+        final ProcessRecord processRecord = findProcessForActivity(info.launchedActivity);
+        if (processRecord == null) {
+            if (DEBUG_METRICS) Slog.i(TAG, "logAppStartMemoryStateCapture processRecord null");
+            return;
+        }
+
+        final int pid = processRecord.pid;
+        final int uid = info.launchedActivity.appInfo.uid;
+        final MemoryStat memoryStat = readMemoryStatFromMemcg(uid, pid);
+        if (memoryStat == null) {
+            if (DEBUG_METRICS) Slog.i(TAG, "logAppStartMemoryStateCapture memoryStat null");
+            return;
+        }
+
+        StatsLog.write(
+                StatsLog.APP_START_MEMORY_STATE_CAPTURED,
+                uid,
+                info.launchedActivity.processName,
+                info.launchedActivity.info.name,
+                memoryStat.pgfault,
+                memoryStat.pgmajfault,
+                memoryStat.rssInBytes,
+                memoryStat.cacheInBytes,
+                memoryStat.swapInBytes);
+    }
+
+    private ProcessRecord findProcessForActivity(ActivityRecord launchedActivity) {
+        return launchedActivity != null
+                ? mSupervisor.mService.mProcessNames.get(launchedActivity.processName,
+                        launchedActivity.appInfo.uid)
+                : null;
     }
 }
