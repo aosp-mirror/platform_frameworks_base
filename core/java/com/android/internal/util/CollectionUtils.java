@@ -138,14 +138,14 @@ public class CollectionUtils {
     public static @NonNull <I, O> List<O> mapNotNull(@Nullable List<I> cur,
             Function<? super I, ? extends O> f) {
         if (isEmpty(cur)) return Collections.emptyList();
-        final ArrayList<O> result = new ArrayList<>();
+        List<O> result = null;
         for (int i = 0; i < cur.size(); i++) {
             O transformed = f.apply(cur.get(i));
             if (transformed != null) {
-                result.add(transformed);
+                result = add(result, transformed);
             }
         }
-        return result;
+        return emptyIfNull(result);
     }
 
     /**
