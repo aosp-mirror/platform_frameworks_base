@@ -120,9 +120,6 @@ public final class PowerManagerService extends SystemService
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_SPEW = DEBUG && true;
 
-    // if DEBUG_WIRELESS=true, plays wireless charging animation w/ sound on every plug + unplug
-    private static final boolean DEBUG_WIRELESS = false;
-
     // Message: Sent when a user activity timeout occurs to update the power state.
     private static final int MSG_USER_ACTIVITY_TIMEOUT = 1;
     // Message: Sent when the device enters or exits a dreaming or dozing state.
@@ -1743,14 +1740,15 @@ public final class PowerManagerService extends SystemService
                 userActivityNoUpdateLocked(
                         now, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
 
-                // Tell the notifier whether wireless charging has started so that
-                // it can provide feedback to the user.
-                if (dockedOnWirelessCharger || DEBUG_WIRELESS) {
-                    mNotifier.onWirelessChargingStarted(mBatteryLevel);
-                } else if (mIsPowered && !wasPowered
-                        && (mPlugType == BatteryManager.BATTERY_PLUGGED_AC
-                        || mPlugType == BatteryManager.BATTERY_PLUGGED_USB)) {
-                    mNotifier.onWiredChargingStarted();
+                // only play charging sounds if boot is completed so charging sounds don't play
+                // with potential notification sounds
+                if (mBootCompleted) {
+                    if (mIsPowered && !BatteryManager.isPlugWired(oldPlugType)
+                            && BatteryManager.isPlugWired(mPlugType)) {
+                        mNotifier.onWiredChargingStarted();
+                    } else if (dockedOnWirelessCharger) {
+                        mNotifier.onWirelessChargingStarted(mBatteryLevel);
+                    }
                 }
             }
 

@@ -19,7 +19,6 @@ package com.android.systemui.charging;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.Looper;
@@ -36,12 +35,17 @@ import android.view.WindowManager;
  */
 public class WirelessChargingAnimation {
 
-    public static final long DURATION = 1400;
+    public static final long DURATION = 1133;
     private static final String TAG = "WirelessChargingView";
     private static final boolean LOCAL_LOGV = false;
 
     private final WirelessChargingView mCurrentWirelessChargingView;
     private static WirelessChargingView mPreviousWirelessChargingView;
+
+    public interface Callback {
+        void onAnimationStarting();
+        void onAnimationEnded();
+    }
 
     /**
      * Constructs an empty WirelessChargingAnimation object.  If looper is null,
@@ -51,9 +55,9 @@ public class WirelessChargingAnimation {
      * @hide
      */
     public WirelessChargingAnimation(@NonNull Context context, @Nullable Looper looper, int
-            batteryLevel) {
+            batteryLevel, Callback callback) {
         mCurrentWirelessChargingView = new WirelessChargingView(context, looper,
-                batteryLevel);
+                batteryLevel, callback);
     }
 
     /**
@@ -61,8 +65,8 @@ public class WirelessChargingAnimation {
      * @hide
      */
     public static WirelessChargingAnimation makeWirelessChargingAnimation(@NonNull Context context,
-            @Nullable Looper looper, int batteryLevel) {
-        return new WirelessChargingAnimation(context, looper, batteryLevel);
+            @Nullable Looper looper, int batteryLevel, Callback callback) {
+        return new WirelessChargingAnimation(context, looper, batteryLevel, callback);
     }
 
     /**
@@ -95,8 +99,11 @@ public class WirelessChargingAnimation {
         private View mView;
         private View mNextView;
         private WindowManager mWM;
+        private Callback mCallback;
 
-        public WirelessChargingView(Context context, @Nullable Looper looper, int batteryLevel) {
+        public WirelessChargingView(Context context, @Nullable Looper looper, int batteryLevel,
+                Callback callback) {
+            mCallback = callback;
             mNextView = new WirelessChargingLayout(context, batteryLevel);
             mGravity = Gravity.CENTER_HORIZONTAL | Gravity.CENTER;
 
@@ -149,6 +156,8 @@ public class WirelessChargingAnimation {
         }
 
         public void hide(long duration) {
+            mHandler.removeMessages(HIDE);
+
             if (LOCAL_LOGV) Log.v(TAG, "HIDE: " + this);
             mHandler.sendMessageDelayed(Message.obtain(mHandler, HIDE), duration);
         }
@@ -169,18 +178,6 @@ public class WirelessChargingAnimation {
                     context = mView.getContext();
                 }
                 mWM = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-                // We can resolve the Gravity here by using the Locale for getting
-                // the layout direction
-                final Configuration config = mView.getContext().getResources().getConfiguration();
-                final int gravity = Gravity.getAbsoluteGravity(mGravity,
-                        config.getLayoutDirection());
-                mParams.gravity = gravity;
-                if ((gravity & Gravity.HORIZONTAL_GRAVITY_MASK) == Gravity.FILL_HORIZONTAL) {
-                    mParams.horizontalWeight = 1.0f;
-                }
-                if ((gravity & Gravity.VERTICAL_GRAVITY_MASK) == Gravity.FILL_VERTICAL) {
-                    mParams.verticalWeight = 1.0f;
-                }
                 mParams.packageName = packageName;
                 mParams.hideTimeoutMilliseconds = DURATION;
 
@@ -191,6 +188,9 @@ public class WirelessChargingAnimation {
                 if (LOCAL_LOGV) Log.v(TAG, "ADD! " + mView + " in " + this);
 
                 try {
+                    if (mCallback != null) {
+                        mCallback.onAnimationStarting();
+                    }
                     mWM.addView(mView, mParams);
                 } catch (WindowManager.BadTokenException e) {
                     Slog.d(TAG, "Unable to add wireless charging view. " + e);
@@ -203,6 +203,9 @@ public class WirelessChargingAnimation {
             if (mView != null) {
                 if (mView.getParent() != null) {
                     if (LOCAL_LOGV) Log.v(TAG, "REMOVE! " + mView + " in " + this);
+                    if (mCallback != null) {
+                        mCallback.onAnimationEnded();
+                    }
                     mWM.removeViewImmediate(mView);
                 }
 
