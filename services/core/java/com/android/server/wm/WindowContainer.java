@@ -1142,7 +1142,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         scheduleAnimation();
     }
 
-    private void reassignLayer(Transaction t) {
+    void reassignLayer(Transaction t) {
         final WindowContainer parent = getParent();
         if (parent != null) {
             parent.assignChildLayers(t);
