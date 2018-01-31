@@ -97,6 +97,11 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
     private static final boolean DEBUG = false;
 
     /**
+     * The name of the xml file in which screen unlocked functions are stored.
+     */
+    private static final String USB_PREFS_XML = "UsbDeviceManagerPrefs.xml";
+
+    /**
      * The SharedPreference setting per user that stores the screen unlocked functions between
      * sessions.
      */
@@ -223,14 +228,12 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
         int userHandle = ActivityManager.getCurrentUser();
         boolean secure = mContext.getSystemService(KeyguardManager.class)
                 .isDeviceSecure(userHandle);
-        boolean unlocking = mContext.getSystemService(UserManager.class)
-                .isUserUnlockingOrUnlocked(userHandle);
         if (DEBUG) {
             Slog.v(TAG, "onKeyguardStateChanged: isShowing:" + isShowing + " secure:" + secure
-                    + " unlocking:" + unlocking + " user:" + userHandle);
+                    + " user:" + userHandle);
         }
-        // We are unlocked when the keyguard is down or non-secure, and user storage is unlocked.
-        mHandler.sendMessage(MSG_UPDATE_SCREEN_LOCK, (isShowing && secure) || !unlocking);
+        // We are unlocked when the keyguard is down or non-secure.
+        mHandler.sendMessage(MSG_UPDATE_SCREEN_LOCK, (isShowing && secure));
     }
 
     @Override
@@ -494,7 +497,6 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
             mContentResolver = context.getContentResolver();
 
             mCurrentUser = ActivityManager.getCurrentUser();
-            mScreenUnlockedFunctions = UsbManager.FUNCTION_NONE;
             mScreenLocked = true;
 
             /*
@@ -503,6 +505,16 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
              */
             mAdbEnabled = (UsbManager.usbFunctionsFromString(getSystemProperty(
                     USB_PERSISTENT_CONFIG_PROPERTY, "")) & UsbManager.FUNCTION_ADB) != 0;
+
+            mSettings = getPinnedSharedPrefs(mContext);
+            if (mSettings == null) {
+                Slog.e(TAG, "Couldn't load shared preferences");
+            } else {
+                mScreenUnlockedFunctions = UsbManager.usbFunctionsFromString(
+                        mSettings.getString(
+                                String.format(Locale.ENGLISH, UNLOCKED_CONFIG_PREF, mCurrentUser),
+                                ""));
+            }
 
             // We do not show the USB notification if the primary volume supports mass storage.
             // The legacy mass storage UI will be used instead.
@@ -658,11 +670,10 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
         }
 
         protected SharedPreferences getPinnedSharedPrefs(Context context) {
-            final File prefsFile = new File(new File(
-                    Environment.getDataUserCePackageDirectory(StorageManager.UUID_PRIVATE_INTERNAL,
-                            context.getUserId(), context.getPackageName()), "shared_prefs"),
-                    UsbDeviceManager.class.getSimpleName() + ".xml");
-            return context.getSharedPreferences(prefsFile, Context.MODE_PRIVATE);
+            final File prefsFile = new File(
+                    Environment.getDataSystemDeDirectory(UserHandle.USER_SYSTEM), USB_PREFS_XML);
+            return context.createDeviceProtectedStorageContext()
+                    .getSharedPreferences(prefsFile, Context.MODE_PRIVATE);
         }
 
         private boolean isUsbStateChanged(Intent intent) {
@@ -908,11 +919,13 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
                     break;
                 case MSG_SET_SCREEN_UNLOCKED_FUNCTIONS:
                     mScreenUnlockedFunctions = (Long) msg.obj;
-                    SharedPreferences.Editor editor = mSettings.edit();
-                    editor.putString(String.format(Locale.ENGLISH, UNLOCKED_CONFIG_PREF,
-                            mCurrentUser),
-                            UsbManager.usbFunctionsToString(mScreenUnlockedFunctions));
-                    editor.commit();
+                    if (mSettings != null) {
+                        SharedPreferences.Editor editor = mSettings.edit();
+                        editor.putString(String.format(Locale.ENGLISH, UNLOCKED_CONFIG_PREF,
+                                mCurrentUser),
+                                UsbManager.usbFunctionsToString(mScreenUnlockedFunctions));
+                        editor.commit();
+                    }
                     if (!mScreenLocked && mScreenUnlockedFunctions != UsbManager.FUNCTION_NONE) {
                         // If the screen is unlocked, also set current functions.
                         setScreenUnlockedFunctions();
@@ -923,14 +936,6 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
                         break;
                     }
                     mScreenLocked = msg.arg1 == 1;
-                    if (mSettings == null && !mScreenLocked) {
-                        // Shared preferences aren't accessible until the user has been unlocked.
-                        mSettings = getPinnedSharedPrefs(mContext);
-                        mScreenUnlockedFunctions = UsbManager.usbFunctionsFromString(
-                                mSettings.getString(
-                                String.format(Locale.ENGLISH, UNLOCKED_CONFIG_PREF, mCurrentUser),
-                                ""));
-                    }
                     if (!mBootCompleted) {
                         break;
                     }
@@ -984,12 +989,11 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
                         }
                         mCurrentUser = msg.arg1;
                         mScreenLocked = true;
+                        mScreenUnlockedFunctions = UsbManager.FUNCTION_NONE;
                         if (mSettings != null) {
                             mScreenUnlockedFunctions = UsbManager.usbFunctionsFromString(
-                                    mSettings.getString(
-                                            String.format(Locale.ENGLISH, UNLOCKED_CONFIG_PREF,
-                                            mCurrentUser),
-                                    ""));
+                                    mSettings.getString(String.format(Locale.ENGLISH,
+                                            UNLOCKED_CONFIG_PREF, mCurrentUser), ""));
                         }
                         setEnabledFunctions(UsbManager.FUNCTION_NONE, false);
                     }
