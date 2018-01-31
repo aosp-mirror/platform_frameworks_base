@@ -424,7 +424,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public static final boolean DEBUG_DEXOPT = false;
 
     private static final boolean DEBUG_ABI_SELECTION = false;
-    private static final boolean DEBUG_INSTANT = Build.IS_DEBUGGABLE;
+    private static final boolean DEBUG_EPHEMERAL = Build.IS_DEBUGGABLE;
     private static final boolean DEBUG_TRIAGED_MISSING = false;
     private static final boolean DEBUG_APP_DATA = false;
 
@@ -981,7 +981,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private int mIntentFilterVerificationToken = 0;
 
     /** The service connection to the ephemeral resolver */
-    final InstantAppResolverConnection mInstantAppResolverConnection;
+    final EphemeralResolverConnection mInstantAppResolverConnection;
     /** Component used to show resolver settings for Instant Apps */
     final ComponentName mInstantAppResolverSettingsComponent;
 
@@ -3149,10 +3149,10 @@ Slog.e("TODD",
             final Pair<ComponentName, String> instantAppResolverComponent =
                     getInstantAppResolverLPr();
             if (instantAppResolverComponent != null) {
-                if (DEBUG_INSTANT) {
+                if (DEBUG_EPHEMERAL) {
                     Slog.d(TAG, "Set ephemeral resolver: " + instantAppResolverComponent);
                 }
-                mInstantAppResolverConnection = new InstantAppResolverConnection(
+                mInstantAppResolverConnection = new EphemeralResolverConnection(
                         mContext, instantAppResolverComponent.first,
                         instantAppResolverComponent.second);
                 mInstantAppResolverSettingsComponent =
@@ -3532,7 +3532,7 @@ Slog.e("TODD",
         final String[] packageArray =
                 mContext.getResources().getStringArray(R.array.config_ephemeralResolverPackage);
         if (packageArray.length == 0 && !Build.IS_DEBUGGABLE) {
-            if (DEBUG_INSTANT) {
+            if (DEBUG_EPHEMERAL) {
                 Slog.d(TAG, "Ephemeral resolver NOT found; empty package list");
             }
             return null;
@@ -3547,9 +3547,19 @@ Slog.e("TODD",
         final Intent resolverIntent = new Intent(actionName);
         List<ResolveInfo> resolvers = queryIntentServicesInternal(resolverIntent, null,
                 resolveFlags, UserHandle.USER_SYSTEM, callingUid, false /*includeInstantApps*/);
+        // temporarily look for the old action
+        if (resolvers.size() == 0) {
+            if (DEBUG_EPHEMERAL) {
+                Slog.d(TAG, "Ephemeral resolver not found with new action; try old one");
+            }
+            actionName = Intent.ACTION_RESOLVE_EPHEMERAL_PACKAGE;
+            resolverIntent.setAction(actionName);
+            resolvers = queryIntentServicesInternal(resolverIntent, null,
+                    resolveFlags, UserHandle.USER_SYSTEM, callingUid, false /*includeInstantApps*/);
+        }
         final int N = resolvers.size();
         if (N == 0) {
-            if (DEBUG_INSTANT) {
+            if (DEBUG_EPHEMERAL) {
                 Slog.d(TAG, "Ephemeral resolver NOT found; no matching intent filters");
             }
             return null;
@@ -3565,53 +3575,44 @@ Slog.e("TODD",
 
             final String packageName = info.serviceInfo.packageName;
             if (!possiblePackages.contains(packageName) && !Build.IS_DEBUGGABLE) {
-                if (DEBUG_INSTANT) {
+                if (DEBUG_EPHEMERAL) {
                     Slog.d(TAG, "Ephemeral resolver not in allowed package list;"
                             + " pkg: " + packageName + ", info:" + info);
                 }
                 continue;
             }
 
-            if (DEBUG_INSTANT) {
+            if (DEBUG_EPHEMERAL) {
                 Slog.v(TAG, "Ephemeral resolver found;"
                         + " pkg: " + packageName + ", info:" + info);
             }
             return new Pair<>(new ComponentName(packageName, info.serviceInfo.name), actionName);
         }
-        if (DEBUG_INSTANT) {
+        if (DEBUG_EPHEMERAL) {
             Slog.v(TAG, "Ephemeral resolver NOT found");
         }
         return null;
     }
 
     private @Nullable ActivityInfo getInstantAppInstallerLPr() {
-        String[] orderedActions = Build.IS_ENG
-                ? new String[]{
-                        Intent.ACTION_INSTALL_INSTANT_APP_PACKAGE + "_TEST",
-                        Intent.ACTION_INSTALL_INSTANT_APP_PACKAGE}
-                : new String[]{
-                        Intent.ACTION_INSTALL_INSTANT_APP_PACKAGE};
+        final Intent intent = new Intent(Intent.ACTION_INSTALL_INSTANT_APP_PACKAGE);
+        intent.addCategory(Intent.CATEGORY_DEFAULT);
+        intent.setDataAndType(Uri.fromFile(new File("foo.apk")), PACKAGE_MIME_TYPE);
 
         final int resolveFlags =
                 MATCH_DIRECT_BOOT_AWARE
-                        | MATCH_DIRECT_BOOT_UNAWARE
-                        | Intent.FLAG_IGNORE_EPHEMERAL
-                        | (!Build.IS_ENG ? MATCH_SYSTEM_ONLY : 0);
-        final Intent intent = new Intent();
-        intent.addCategory(Intent.CATEGORY_DEFAULT);
-        intent.setDataAndType(Uri.fromFile(new File("foo.apk")), PACKAGE_MIME_TYPE);
-        List<ResolveInfo> matches = null;
-        for (String action : orderedActions) {
-            intent.setAction(action);
+                | MATCH_DIRECT_BOOT_UNAWARE
+                | (!Build.IS_DEBUGGABLE ? MATCH_SYSTEM_ONLY : 0);
+        List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, PACKAGE_MIME_TYPE,
+                resolveFlags, UserHandle.USER_SYSTEM);
+        // temporarily look for the old action
+        if (matches.isEmpty()) {
+            if (DEBUG_EPHEMERAL) {
+                Slog.d(TAG, "Ephemeral installer not found with new action; try old one");
+            }
+            intent.setAction(Intent.ACTION_INSTALL_EPHEMERAL_PACKAGE);
             matches = queryIntentActivitiesInternal(intent, PACKAGE_MIME_TYPE,
                     resolveFlags, UserHandle.USER_SYSTEM);
-            if (matches.isEmpty()) {
-                if (DEBUG_INSTANT) {
-                    Slog.d(TAG, "Instant App installer not found with " + action);
-                }
-            } else {
-                break;
-            }
         }
         Iterator<ResolveInfo> iter = matches.iterator();
         while (iter.hasNext()) {
@@ -3619,8 +3620,7 @@ Slog.e("TODD",
             final PackageSetting ps = mSettings.mPackages.get(rInfo.activityInfo.packageName);
             if (ps != null) {
                 final PermissionsState permissionsState = ps.getPermissionsState();
-                if (permissionsState.hasPermission(Manifest.permission.INSTALL_PACKAGES, 0)
-                        || Build.IS_ENG) {
+                if (permissionsState.hasPermission(Manifest.permission.INSTALL_PACKAGES, 0)) {
                     continue;
                 }
             }
@@ -3644,6 +3644,15 @@ Slog.e("TODD",
         final int resolveFlags = MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
         List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, null, resolveFlags,
                 UserHandle.USER_SYSTEM);
+        // temporarily look for the old action
+        if (matches.isEmpty()) {
+            if (DEBUG_EPHEMERAL) {
+                Slog.d(TAG, "Ephemeral resolver settings not found with new action; try old one");
+            }
+            intent.setAction(Intent.ACTION_EPHEMERAL_RESOLVER_SETTINGS);
+            matches = queryIntentActivitiesInternal(intent, null, resolveFlags,
+                    UserHandle.USER_SYSTEM);
+        }
         if (matches.isEmpty()) {
             return null;
         }
@@ -4770,7 +4779,10 @@ Slog.e("TODD",
             flags |= PackageManager.MATCH_INSTANT;
         } else {
             final boolean wantMatchInstant = (flags & PackageManager.MATCH_INSTANT) != 0;
-            final boolean allowMatchInstant = wantInstantApps
+            final boolean allowMatchInstant =
+                    (wantInstantApps
+                            && Intent.ACTION_VIEW.equals(intent.getAction())
+                            && hasWebURI(intent))
                     || (wantMatchInstant && canViewInstantApps(callingUid, userId));
             flags &= ~(PackageManager.MATCH_VISIBLE_TO_INSTANT_APP_ONLY
                     | PackageManager.MATCH_EXPLICITLY_VISIBLE_ONLY);
@@ -5960,14 +5972,8 @@ Slog.e("TODD",
         if (!skipPackageCheck && intent.getPackage() != null) {
             return false;
         }
-        if (!intent.isBrowsableWebIntent()) {
-            // for non web intents, we should not resolve externally if an app already exists to
-            // handle it or if the caller didn't explicitly request it.
-            if ((resolvedActivities != null && resolvedActivities.size() != 0)
-                    || (intent.getFlags() & Intent.FLAG_ACTIVITY_MATCH_EXTERNAL) == 0) {
-                return false;
-            }
-        } else if (intent.getData() == null) {
+        final boolean isWebUri = hasWebURI(intent);
+        if (!isWebUri || intent.getData().getHost() == null) {
             return false;
         }
         // Deny ephemeral apps if the user chose _ALWAYS or _ALWAYS_ASK for intent resolution.
@@ -5986,7 +5992,7 @@ Slog.e("TODD",
                         final int status = (int) (packedStatus >> 32);
                         if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS
                             || status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK) {
-                            if (DEBUG_INSTANT) {
+                            if (DEBUG_EPHEMERAL) {
                                 Slog.v(TAG, "DENY instant app;"
                                     + " pkg: " + packageName + ", status: " + status);
                             }
@@ -5994,7 +6000,7 @@ Slog.e("TODD",
                         }
                     }
                     if (ps.getInstantApp(userId)) {
-                        if (DEBUG_INSTANT) {
+                        if (DEBUG_EPHEMERAL) {
                             Slog.v(TAG, "DENY instant app installed;"
                                     + " pkg: " + packageName);
                         }
@@ -6365,7 +6371,7 @@ Slog.e("TODD",
                 if (matches.get(i).getTargetUserId() == targetUserId) return true;
             }
         }
-        if (intent.hasWebURI()) {
+        if (hasWebURI(intent)) {
             // cross-profile app linking works only towards the parent.
             final int callingUid = Binder.getCallingUid();
             final UserInfo parent = getProfileParent(sourceUserId);
@@ -6540,7 +6546,7 @@ Slog.e("TODD",
                         sortResult = true;
                     }
                 }
-                if (intent.hasWebURI()) {
+                if (hasWebURI(intent)) {
                     CrossProfileDomainInfo xpDomainInfo = null;
                     final UserInfo parent = getProfileParent(userId);
                     if (parent != null) {
@@ -6626,11 +6632,12 @@ Slog.e("TODD",
                 if (ps.getInstantApp(userId)) {
                     final long packedStatus = getDomainVerificationStatusLPr(ps, userId);
                     final int status = (int)(packedStatus >> 32);
+                    final int linkGeneration = (int)(packedStatus & 0xFFFFFFFF);
                     if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER) {
                         // there's a local instant application installed, but, the user has
                         // chosen to never use it; skip resolution and don't acknowledge
                         // an instant application is even available
-                        if (DEBUG_INSTANT) {
+                        if (DEBUG_EPHEMERAL) {
                             Slog.v(TAG, "Instant app marked to never run; pkg: " + packageName);
                         }
                         blockResolution = true;
@@ -6638,7 +6645,7 @@ Slog.e("TODD",
                     } else {
                         // we have a locally installed instant application; skip resolution
                         // but acknowledge there's an instant application available
-                        if (DEBUG_INSTANT) {
+                        if (DEBUG_EPHEMERAL) {
                             Slog.v(TAG, "Found installed instant app; pkg: " + packageName);
                         }
                         localInstantApp = info;
@@ -6657,8 +6664,9 @@ Slog.e("TODD",
                         null /*responseObj*/, intent /*origIntent*/, resolvedType,
                         null /*callingPackage*/, userId, null /*verificationBundle*/,
                         resolveForStart);
-                auxiliaryResponse = InstantAppResolver.doInstantAppResolutionPhaseOne(
-                        mInstantAppResolverConnection, requestObject);
+                auxiliaryResponse =
+                        InstantAppResolver.doInstantAppResolutionPhaseOne(
+                                mContext, mInstantAppResolverConnection, requestObject);
                 Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
             } else {
                 // we have an instant application locally, but, we can't admit that since
@@ -6667,40 +6675,35 @@ Slog.e("TODD",
                 // instant application available externally. when it comes time to start
                 // the instant application, we'll do the right thing.
                 final ApplicationInfo ai = localInstantApp.activityInfo.applicationInfo;
-                auxiliaryResponse = new AuxiliaryResolveInfo(null /* failureActivity */,
-                                        ai.packageName, ai.versionCode, null /* splitName */);
+                auxiliaryResponse = new AuxiliaryResolveInfo(
+                        ai.packageName, null /*splitName*/, null /*failureActivity*/,
+                        ai.versionCode, null /*failureIntent*/);
             }
         }
-        if (intent.isBrowsableWebIntent() && auxiliaryResponse == null) {
-            return result;
+        if (auxiliaryResponse != null) {
+            if (DEBUG_EPHEMERAL) {
+                Slog.v(TAG, "Adding ephemeral installer to the ResolveInfo list");
+            }
+            final ResolveInfo ephemeralInstaller = new ResolveInfo(mInstantAppInstallerInfo);
+            final PackageSetting ps =
+                    mSettings.mPackages.get(mInstantAppInstallerActivity.packageName);
+            if (ps != null) {
+                ephemeralInstaller.activityInfo = PackageParser.generateActivityInfo(
+                        mInstantAppInstallerActivity, 0, ps.readUserState(userId), userId);
+                ephemeralInstaller.activityInfo.launchToken = auxiliaryResponse.token;
+                ephemeralInstaller.auxiliaryInfo = auxiliaryResponse;
+                // make sure this resolver is the default
+                ephemeralInstaller.isDefault = true;
+                ephemeralInstaller.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
+                        | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
+                // add a non-generic filter
+                ephemeralInstaller.filter = new IntentFilter(intent.getAction());
+                ephemeralInstaller.filter.addDataPath(
+                        intent.getData().getPath(), PatternMatcher.PATTERN_LITERAL);
+                ephemeralInstaller.isInstantAppAvailable = true;
+                result.add(ephemeralInstaller);
+            }
         }
-        final PackageSetting ps = mSettings.mPackages.get(mInstantAppInstallerActivity.packageName);
-        if (ps == null) {
-            return result;
-        }
-        final ResolveInfo ephemeralInstaller = new ResolveInfo(mInstantAppInstallerInfo);
-        ephemeralInstaller.activityInfo = PackageParser.generateActivityInfo(
-                mInstantAppInstallerActivity, 0, ps.readUserState(userId), userId);
-        ephemeralInstaller.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
-                | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
-        // add a non-generic filter
-        ephemeralInstaller.filter = new IntentFilter();
-        if (intent.getAction() != null) {
-            ephemeralInstaller.filter.addAction(intent.getAction());
-        }
-        if (intent.getData() != null && intent.getData().getPath() != null) {
-            ephemeralInstaller.filter.addDataPath(
-                    intent.getData().getPath(), PatternMatcher.PATTERN_LITERAL);
-        }
-        ephemeralInstaller.isInstantAppAvailable = true;
-        // make sure this resolver is the default
-        ephemeralInstaller.isDefault = true;
-        ephemeralInstaller.auxiliaryInfo = auxiliaryResponse;
-        if (DEBUG_INSTANT) {
-            Slog.v(TAG, "Adding ephemeral installer to the ResolveInfo list");
-        }
-
-        result.add(ephemeralInstaller);
         return result;
     }
 
@@ -6815,11 +6818,10 @@ Slog.e("TODD",
             final ResolveInfo info = resolveInfos.get(i);
             // allow activities that are defined in the provided package
             if (allowDynamicSplits
-                    && info.activityInfo != null
                     && info.activityInfo.splitName != null
                     && !ArrayUtils.contains(info.activityInfo.applicationInfo.splitNames,
                             info.activityInfo.splitName)) {
-                if (mInstantAppInstallerActivity == null) {
+                if (mInstantAppInstallerInfo == null) {
                     if (DEBUG_INSTALL) {
                         Slog.v(TAG, "No installer - not adding it to the ResolveInfo list");
                     }
@@ -6831,15 +6833,14 @@ Slog.e("TODD",
                 if (DEBUG_INSTALL) {
                     Slog.v(TAG, "Adding installer to the ResolveInfo list");
                 }
-                final ResolveInfo installerInfo = new ResolveInfo(
-                        mInstantAppInstallerInfo);
+                final ResolveInfo installerInfo = new ResolveInfo(mInstantAppInstallerInfo);
                 final ComponentName installFailureActivity = findInstallFailureActivity(
                         info.activityInfo.packageName,  filterCallingUid, userId);
                 installerInfo.auxiliaryInfo = new AuxiliaryResolveInfo(
+                        info.activityInfo.packageName, info.activityInfo.splitName,
                         installFailureActivity,
-                        info.activityInfo.packageName,
                         info.activityInfo.applicationInfo.versionCode,
-                        info.activityInfo.splitName);
+                        null /*failureIntent*/);
                 installerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
                         | IntentFilter.MATCH_ADJUSTMENT_NORMAL;
                 // add a non-generic filter
@@ -6856,7 +6857,6 @@ Slog.e("TODD",
                 installerInfo.priority = info.priority;
                 installerInfo.preferredOrder = info.preferredOrder;
                 installerInfo.isDefault = info.isDefault;
-                installerInfo.isInstantAppAvailable = true;
                 resolveInfos.set(i, installerInfo);
                 continue;
             }
@@ -6912,6 +6912,17 @@ Slog.e("TODD",
      */
     private boolean hasNonNegativePriority(List<ResolveInfo> resolveInfos) {
         return resolveInfos.size() > 0 && resolveInfos.get(0).priority >= 0;
+    }
+
+    private static boolean hasWebURI(Intent intent) {
+        if (intent.getData() == null) {
+            return false;
+        }
+        final String scheme = intent.getScheme();
+        if (TextUtils.isEmpty(scheme)) {
+            return false;
+        }
+        return scheme.equals(IntentFilter.SCHEME_HTTP) || scheme.equals(IntentFilter.SCHEME_HTTPS);
     }
 
     private List<ResolveInfo> filterCandidatesWithDomainPreferredActivitiesLPr(Intent intent,
@@ -7583,16 +7594,14 @@ Slog.e("TODD",
                                 info.serviceInfo.splitName)) {
                     // requested service is defined in a split that hasn't been installed yet.
                     // add the installer to the resolve list
-                    if (DEBUG_INSTANT) {
+                    if (DEBUG_EPHEMERAL) {
                         Slog.v(TAG, "Adding ephemeral installer to the ResolveInfo list");
                     }
-                    final ResolveInfo installerInfo = new ResolveInfo(
-                            mInstantAppInstallerInfo);
+                    final ResolveInfo installerInfo = new ResolveInfo(mInstantAppInstallerInfo);
                     installerInfo.auxiliaryInfo = new AuxiliaryResolveInfo(
-                            null /* installFailureActivity */,
-                            info.serviceInfo.packageName,
-                            info.serviceInfo.applicationInfo.versionCode,
-                            info.serviceInfo.splitName);
+                            info.serviceInfo.packageName, info.serviceInfo.splitName,
+                            null /*failureActivity*/, info.serviceInfo.applicationInfo.versionCode,
+                            null /*failureIntent*/);
                     // make sure this resolver is the default
                     installerInfo.isDefault = true;
                     installerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
@@ -7705,16 +7714,14 @@ Slog.e("TODD",
                                 info.providerInfo.splitName)) {
                     // requested provider is defined in a split that hasn't been installed yet.
                     // add the installer to the resolve list
-                    if (DEBUG_INSTANT) {
+                    if (DEBUG_EPHEMERAL) {
                         Slog.v(TAG, "Adding ephemeral installer to the ResolveInfo list");
                     }
-                    final ResolveInfo installerInfo = new ResolveInfo(
-                            mInstantAppInstallerInfo);
+                    final ResolveInfo installerInfo = new ResolveInfo(mInstantAppInstallerInfo);
                     installerInfo.auxiliaryInfo = new AuxiliaryResolveInfo(
-                            null /*failureActivity*/,
-                            info.providerInfo.packageName,
-                            info.providerInfo.applicationInfo.versionCode,
-                            info.providerInfo.splitName);
+                            info.providerInfo.packageName, info.providerInfo.splitName,
+                            null /*failureActivity*/, info.providerInfo.applicationInfo.versionCode,
+                            null /*failureIntent*/);
                     // make sure this resolver is the default
                     installerInfo.isDefault = true;
                     installerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
@@ -11738,14 +11745,14 @@ Slog.e("TODD",
 
     private void setUpInstantAppInstallerActivityLP(ActivityInfo installerActivity) {
         if (installerActivity == null) {
-            if (DEBUG_INSTANT) {
+            if (DEBUG_EPHEMERAL) {
                 Slog.d(TAG, "Clear ephemeral installer activity");
             }
             mInstantAppInstallerActivity = null;
             return;
         }
 
-        if (DEBUG_INSTANT) {
+        if (DEBUG_EPHEMERAL) {
             Slog.d(TAG, "Set ephemeral installer activity: "
                     + installerActivity.getComponentName());
         }
@@ -11756,7 +11763,7 @@ Slog.e("TODD",
         mInstantAppInstallerActivity.exported = true;
         mInstantAppInstallerActivity.enabled = true;
         mInstantAppInstallerInfo.activityInfo = mInstantAppInstallerActivity;
-        mInstantAppInstallerInfo.priority = 1;
+        mInstantAppInstallerInfo.priority = 0;
         mInstantAppInstallerInfo.preferredOrder = 1;
         mInstantAppInstallerInfo.isDefault = true;
         mInstantAppInstallerInfo.match = IntentFilter.MATCH_CATEGORY_SCHEME_SPECIFIC_PART
@@ -13205,9 +13212,8 @@ Slog.e("TODD",
         private int mFlags;
     }
 
-    static final class InstantAppIntentResolver
-            extends IntentResolver<AuxiliaryResolveInfo.AuxiliaryFilter,
-            AuxiliaryResolveInfo.AuxiliaryFilter> {
+    static final class EphemeralIntentResolver
+            extends IntentResolver<AuxiliaryResolveInfo, AuxiliaryResolveInfo> {
         /**
          * The result that has the highest defined order. Ordering applies on a
          * per-package basis. Mapping is from package name to Pair of order and
@@ -13222,19 +13228,18 @@ Slog.e("TODD",
         final ArrayMap<String, Pair<Integer, InstantAppResolveInfo>> mOrderResult = new ArrayMap<>();
 
         @Override
-        protected AuxiliaryResolveInfo.AuxiliaryFilter[] newArray(int size) {
-            return new AuxiliaryResolveInfo.AuxiliaryFilter[size];
+        protected AuxiliaryResolveInfo[] newArray(int size) {
+            return new AuxiliaryResolveInfo[size];
         }
 
         @Override
-        protected boolean isPackageForFilter(String packageName,
-                AuxiliaryResolveInfo.AuxiliaryFilter responseObj) {
+        protected boolean isPackageForFilter(String packageName, AuxiliaryResolveInfo responseObj) {
             return true;
         }
 
         @Override
-        protected AuxiliaryResolveInfo.AuxiliaryFilter newResult(
-                AuxiliaryResolveInfo.AuxiliaryFilter responseObj, int match, int userId) {
+        protected AuxiliaryResolveInfo newResult(AuxiliaryResolveInfo responseObj, int match,
+                int userId) {
             if (!sUserManager.exists(userId)) {
                 return null;
             }
@@ -13255,7 +13260,7 @@ Slog.e("TODD",
         }
 
         @Override
-        protected void filterResults(List<AuxiliaryResolveInfo.AuxiliaryFilter> results) {
+        protected void filterResults(List<AuxiliaryResolveInfo> results) {
             // only do work if ordering is enabled [most of the time it won't be]
             if (mOrderResult.size() == 0) {
                 return;
@@ -13575,7 +13580,7 @@ Slog.e("TODD",
             IPackageInstallObserver2 observer, PackageInstaller.SessionParams sessionParams,
             String installerPackageName, int installerUid, UserHandle user,
             PackageParser.SigningDetails signingDetails) {
-        if (DEBUG_INSTANT) {
+        if (DEBUG_EPHEMERAL) {
             if ((sessionParams.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
                 Slog.d(TAG, "Ephemeral install of " + packageName);
             }
@@ -15059,7 +15064,7 @@ Slog.e("TODD",
                 pkgLite = mContainerService.getMinimalPackageInfo(origin.resolvedPath, installFlags,
                         packageAbiOverride);
 
-                if (DEBUG_INSTANT && ephemeral) {
+                if (DEBUG_EPHEMERAL && ephemeral) {
                     Slog.v(TAG, "pkgLite for install: " + pkgLite);
                 }
 
@@ -15126,7 +15131,7 @@ Slog.e("TODD",
                             installFlags |= PackageManager.INSTALL_EXTERNAL;
                             installFlags &= ~PackageManager.INSTALL_INTERNAL;
                         } else if (loc == PackageHelper.RECOMMEND_INSTALL_EPHEMERAL) {
-                            if (DEBUG_INSTANT) {
+                            if (DEBUG_EPHEMERAL) {
                                 Slog.v(TAG, "...setting INSTALL_EPHEMERAL install flag");
                             }
                             installFlags |= PackageManager.INSTALL_INSTANT_APP;
