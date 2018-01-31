@@ -62,8 +62,8 @@ public final class UsbAlsaManager {
     // this is needed to map USB devices to ALSA Audio Devices, especially to remove an
     // ALSA device when we are notified that its associated USB device has been removed.
 
-    private final HashMap<UsbDevice,UsbAudioDevice>
-        mAudioDevices = new HashMap<UsbDevice,UsbAudioDevice>();
+    private final HashMap<UsbDevice, UsbAlsaDevice>
+            mAudioDevices = new HashMap<UsbDevice, UsbAlsaDevice>();
 
     private boolean mIsInputHeadset; // as reported by UsbDescriptorParser
     private boolean mIsOutputHeadset; // as reported by UsbDescriptorParser
@@ -74,7 +74,7 @@ public final class UsbAlsaManager {
     private final HashMap<String,AlsaDevice>
         mAlsaDevices = new HashMap<String,AlsaDevice>();
 
-    private UsbAudioDevice mAccessoryAudioDevice = null;
+    private UsbAlsaDevice mAccessoryAudioDevice = null;
 
     // UsbMidiDevice for USB peripheral mode (gadget) device
     private UsbMidiDevice mPeripheralMidiDevice = null;
@@ -155,7 +155,7 @@ public final class UsbAlsaManager {
     // Notifies AudioService when a device is added or removed
     // audioDevice - the AudioDevice that was added or removed
     // enabled - if true, we're connecting a device (it's arrived), else disconnecting
-    private void notifyDeviceState(UsbAudioDevice audioDevice, boolean enabled) {
+    private void notifyDeviceState(UsbAlsaDevice audioDevice, boolean enabled) {
         if (DEBUG) {
             Slog.d(TAG, "notifyDeviceState " + enabled + " " + audioDevice);
         }
@@ -307,7 +307,7 @@ public final class UsbAlsaManager {
     /*
      * Select the default device of the specified card.
      */
-    /* package */ UsbAudioDevice selectAudioCard(int card) {
+    /* package */ UsbAlsaDevice selectAudioCard(int card) {
         if (DEBUG) {
             Slog.d(TAG, "selectAudioCard() card:" + card
                     + " isCardUsb(): " + mCardsParser.isCardUsb(card));
@@ -332,9 +332,9 @@ public final class UsbAlsaManager {
 
         int deviceClass =
             (mCardsParser.isCardUsb(card)
-                ? UsbAudioDevice.kAudioDeviceClass_External
-                : UsbAudioDevice.kAudioDeviceClass_Internal) |
-            UsbAudioDevice.kAudioDeviceMeta_Alsa;
+                ? UsbAlsaDevice.AUDIO_DEVICE_CLASS_EXTERNAL
+                : UsbAlsaDevice.AUDIO_DEVICE_CLASS_INTERNAL)
+                | UsbAlsaDevice.AUDIO_DEVICE_META_ALSA;
 
         // Playback device file needed/present?
         if (hasPlayback && (waitForAlsaDevice(card, device, AlsaDevice.TYPE_PLAYBACK) == null)) {
@@ -346,8 +346,8 @@ public final class UsbAlsaManager {
             return null;
         }
 
-        UsbAudioDevice audioDevice =
-                new UsbAudioDevice(card, device, hasPlayback, hasCapture, deviceClass);
+        UsbAlsaDevice audioDevice =
+                new UsbAlsaDevice(card, device, hasPlayback, hasCapture, deviceClass);
         AlsaCardsParser.AlsaCardRecord cardRecord = mCardsParser.getCardRecordFor(card);
         audioDevice.setDeviceNameAndDescription(cardRecord.mCardName, cardRecord.mCardDescription);
 
@@ -356,7 +356,7 @@ public final class UsbAlsaManager {
         return audioDevice;
     }
 
-    /* package */ UsbAudioDevice selectDefaultDevice() {
+    /* package */ UsbAlsaDevice selectDefaultDevice() {
         if (DEBUG) {
             Slog.d(TAG, "UsbAudioManager.selectDefaultDevice()");
         }
@@ -402,7 +402,7 @@ public final class UsbAlsaManager {
                         + mCardsParser.isCardUsb(addedCard));
         }
         if (mCardsParser.isCardUsb(addedCard)) {
-            UsbAudioDevice audioDevice = selectAudioCard(addedCard);
+            UsbAlsaDevice audioDevice = selectAudioCard(addedCard);
             if (audioDevice != null) {
                 mAudioDevices.put(usbDevice, audioDevice);
                 Slog.i(TAG, "USB Audio Device Added: " + audioDevice);
@@ -461,7 +461,7 @@ public final class UsbAlsaManager {
                   " " + usbDevice.getProductName());
         }
 
-        UsbAudioDevice audioDevice = mAudioDevices.remove(usbDevice);
+        UsbAlsaDevice audioDevice = mAudioDevices.remove(usbDevice);
         Slog.i(TAG, "USB Audio Device Removed: " + audioDevice);
         if (audioDevice != null) {
             if (audioDevice.mHasPlayback || audioDevice.mHasCapture) {
@@ -482,8 +482,8 @@ public final class UsbAlsaManager {
             Slog.d(TAG, "setAccessoryAudioState " + enabled + " " + card + " " + device);
         }
         if (enabled) {
-            mAccessoryAudioDevice = new UsbAudioDevice(card, device, true, false,
-                    UsbAudioDevice.kAudioDeviceClass_External);
+            mAccessoryAudioDevice = new UsbAlsaDevice(card, device, true, false,
+                    UsbAlsaDevice.AUDIO_DEVICE_CLASS_EXTERNAL);
             notifyDeviceState(mAccessoryAudioDevice, true /*enabled*/);
         } else if (mAccessoryAudioDevice != null) {
             notifyDeviceState(mAccessoryAudioDevice, false /*enabled*/);
@@ -519,9 +519,9 @@ public final class UsbAlsaManager {
     //
 /*
     //import java.util.ArrayList;
-    public ArrayList<UsbAudioDevice> getConnectedDevices() {
-        ArrayList<UsbAudioDevice> devices = new ArrayList<UsbAudioDevice>(mAudioDevices.size());
-        for (HashMap.Entry<UsbDevice,UsbAudioDevice> entry : mAudioDevices.entrySet()) {
+    public ArrayList<UsbAlsaDevice> getConnectedDevices() {
+        ArrayList<UsbAlsaDevice> devices = new ArrayList<UsbAlsaDevice>(mAudioDevices.size());
+        for (HashMap.Entry<UsbDevice,UsbAlsaDevice> entry : mAudioDevices.entrySet()) {
             devices.add(entry.getValue());
         }
         return devices;
@@ -549,10 +549,10 @@ public final class UsbAlsaManager {
 /*
     public void logDevicesList(String title) {
       if (DEBUG) {
-          for (HashMap.Entry<UsbDevice,UsbAudioDevice> entry : mAudioDevices.entrySet()) {
+          for (HashMap.Entry<UsbDevice,UsbAlsaDevice> entry : mAudioDevices.entrySet()) {
               Slog.i(TAG, "UsbDevice-------------------");
               Slog.i(TAG, "" + (entry != null ? entry.getKey() : "[none]"));
-              Slog.i(TAG, "UsbAudioDevice--------------");
+              Slog.i(TAG, "UsbAlsaDevice--------------");
               Slog.i(TAG, "" + entry.getValue());
           }
       }
@@ -564,7 +564,7 @@ public final class UsbAlsaManager {
     public void logDevices(String title) {
       if (DEBUG) {
           Slog.i(TAG, title);
-          for (HashMap.Entry<UsbDevice,UsbAudioDevice> entry : mAudioDevices.entrySet()) {
+          for (HashMap.Entry<UsbDevice,UsbAlsaDevice> entry : mAudioDevices.entrySet()) {
               Slog.i(TAG, entry.getValue().toShortString());
           }
       }

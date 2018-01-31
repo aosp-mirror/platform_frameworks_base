@@ -10,14 +10,17 @@
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions an
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  */
 
 package com.android.server.usb;
 
-public final class UsbAudioDevice {
-    private static final String TAG = "UsbAudioDevice";
+/**
+ * Represents an instance of an Alsa-supported USB peripheral.
+ */
+public final class UsbAlsaDevice {
+    private static final String TAG = "UsbAlsaDevice";
     protected static final boolean DEBUG = false;
 
     public final int mCard;
@@ -26,20 +29,20 @@ public final class UsbAudioDevice {
     public final boolean mHasCapture;
 
     // Device "class" flags
-    public static final int kAudioDeviceClassMask = 0x00FFFFFF;
-    public static final int kAudioDeviceClass_Undefined = 0x00000000;
-    public static final int kAudioDeviceClass_Internal = 0x00000001;
-    public static final int kAudioDeviceClass_External = 0x00000002;
+    static final int AUDIO_DEVICE_CLASS_MASK = 0x00FFFFFF;
+    static final int AUDIO_DEVICE_CLASS_UNDEFINED = 0x00000000;
+    static final int AUDIO_DEVICE_CLASS_INTERNAL = 0x00000001;
+    static final int AUDIO_DEVICE_CLASS_EXTERNAL = 0x00000002;
     // Device meta-data flags
-    public static final int kAudioDeviceMetaMask = 0xFF000000;
-    public static final int kAudioDeviceMeta_Alsa = 0x80000000;
+    static final int AUDIO_DEVICE_META_MASK = 0xFF000000;
+    static final int AUDIO_DEVICE_META_ALSA = 0x80000000;
     // This member is a combination of the above bit-flags
     public final int mDeviceClass;
 
     private String mDeviceName = "";
     private String mDeviceDescription = "";
 
-    public UsbAudioDevice(int card, int device,
+    public UsbAlsaDevice(int card, int device,
             boolean hasPlayback, boolean hasCapture, int deviceClass) {
         mCard = card;
         mDevice = device;
@@ -48,9 +51,13 @@ public final class UsbAudioDevice {
         mDeviceClass = deviceClass;
     }
 
+    /**
+     * @Override
+     * @return a String representation of the object.
+     */
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("UsbAudioDevice: [card: " + mCard);
+        sb.append("UsbAlsaDevice: [card: " + mCard);
         sb.append(", device: " + mDevice);
         sb.append(", name: " + mDeviceName);
         sb.append(", hasPlayback: " + mHasPlayback);
