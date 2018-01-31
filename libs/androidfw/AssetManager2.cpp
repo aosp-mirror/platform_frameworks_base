@@ -74,7 +74,9 @@ void AssetManager2::BuildDynamicRefTable() {
       if (idx == 0xff) {
         package_ids_[package_id] = idx = static_cast<uint8_t>(package_groups_.size());
         package_groups_.push_back({});
-        package_groups_.back().dynamic_ref_table.mAssignedPackageId = package_id;
+        DynamicRefTable& ref_table = package_groups_.back().dynamic_ref_table;
+        ref_table.mAssignedPackageId = package_id;
+        ref_table.mAppAsLib = package->IsDynamic() && package->GetPackageId() == 0x7f;
       }
       PackageGroup* package_group = &package_groups_[idx];
 
@@ -105,7 +107,15 @@ void AssetManager2::BuildDynamicRefTable() {
 void AssetManager2::DumpToLog() const {
   base::ScopedLogSeverity _log(base::INFO);
 
+  LOG(INFO) << base::StringPrintf("AssetManager2(this=%p)", this);
+
   std::string list;
+  for (const auto& apk_assets : apk_assets_) {
+    base::StringAppendF(&list, "%s,", apk_assets->GetPath().c_str());
+  }
+  LOG(INFO) << "ApkAssets: " << list;
+
+  list = "";
   for (size_t i = 0; i < package_ids_.size(); i++) {
     if (package_ids_[i] != 0xff) {
       base::StringAppendF(&list, "%02x -> %d, ", (int) i, package_ids_[i]);
@@ -116,9 +126,12 @@ void AssetManager2::DumpToLog() const {
   for (const auto& package_group: package_groups_) {
       list = "";
       for (const auto& package : package_group.packages_) {
-        base::StringAppendF(&list, "%s(%02x), ", package->GetPackageName().c_str(), package->GetPackageId());
+        base::StringAppendF(&list, "%s(%02x%s), ", package->GetPackageName().c_str(),
+                            package->GetPackageId(), (package->IsDynamic() ? " dynamic" : ""));
       }
-      LOG(INFO) << base::StringPrintf("PG (%02x): ", package_group.dynamic_ref_table.mAssignedPackageId) << list;
+      LOG(INFO) << base::StringPrintf("PG (%02x): ",
+                                      package_group.dynamic_ref_table.mAssignedPackageId)
+                << list;
   }
 }
 
