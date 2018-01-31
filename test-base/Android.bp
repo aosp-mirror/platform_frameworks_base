@@ -68,8 +68,8 @@ java_library_static {
 // ===============================================
 // This contains the android.test classes from android.test.base plus
 // the com.android.internal.util.Predicate[s] classes. This is only
-// intended for inclusion in the android.test.legacy static library and
-// must not be used elsewhere.
+// intended for inclusion in the android.test.legacy and
+// legacy-android-test static libraries and must not be used elsewhere.
 java_library_static {
     name: "android.test.base-minus-junit",
 
