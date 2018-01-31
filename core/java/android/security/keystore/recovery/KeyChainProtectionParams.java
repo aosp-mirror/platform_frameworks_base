@@ -235,17 +235,7 @@ public final class KeyChainProtectionParams implements Parcelable {
     }
 
     /**
-     * Removes secret from memory than object is no longer used.
-     * Since finalizer call is not reliable, please use @link {#clearSecret} directly.
-     */
-    @Override
-    protected void finalize() throws Throwable {
-        clearSecret();
-        super.finalize();
-    }
-
-    /**
-     * Fills mSecret with zeroes.
+     * Fills secret with zeroes.
      */
     public void clearSecret() {
         Arrays.fill(mSecret, (byte) 0);

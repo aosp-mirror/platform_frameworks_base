@@ -1099,6 +1099,30 @@ public final class AutofillManager {
     }
 
     /**
+     * Gets the id of the {@link UserData} used for
+     * <a href="AutofillService.html#FieldClassification">field classification</a>.
+     *
+     * <p>This method is useful when the service must check the status of the {@link UserData} in
+     * the device without fetching the whole object.
+     *
+     * <p><b>Note:</b> This method should only be called by an app providing an autofill service,
+     * and it's ignored if the caller currently doesn't have an enabled autofill service for
+     * the user.
+     *
+     * @return id of the {@link UserData} previously set by {@link #setUserData(UserData)}
+     * or {@code null} if it was reset or if the caller currently does not have an enabled autofill
+     * service for the user.
+     */
+    @Nullable public String getUserDataId() {
+        try {
+            return mService.getUserDataId();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return null;
+        }
+    }
+
+    /**
      * Gets the user data used for
      * <a href="AutofillService.html#FieldClassification">field classification</a>.
      *
@@ -1119,7 +1143,7 @@ public final class AutofillManager {
     }
 
     /**
-     * Sets the user data used for
+     * Sets the {@link UserData} used for
      * <a href="AutofillService.html#FieldClassification">field classification</a>
      *
      * <p><b>Note:</b> This method should only be called by an app providing an autofill service,

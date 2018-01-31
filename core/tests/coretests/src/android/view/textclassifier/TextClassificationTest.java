@@ -86,15 +86,11 @@ public class TextClassificationTest {
                 .setSignature(signature)
                 .build();
 
-        // Parcel and unparcel using ParcelableWrapper.
-        final TextClassification.ParcelableWrapper parcelableReference = new TextClassification
-                .ParcelableWrapper(reference);
+        // Parcel and unparcel
         final Parcel parcel = Parcel.obtain();
-        parcelableReference.writeToParcel(parcel, parcelableReference.describeContents());
+        reference.writeToParcel(parcel, reference.describeContents());
         parcel.setDataPosition(0);
-        final TextClassification result =
-                TextClassification.ParcelableWrapper.CREATOR.createFromParcel(
-                        parcel).getTextClassification();
+        final TextClassification result = TextClassification.CREATOR.createFromParcel(parcel);
 
         assertEquals(text, result.getText());
         assertEquals(signature, result.getSignature());

@@ -147,6 +147,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private boolean mHasTelephony;
     private boolean mHasVibrator;
     private boolean mHasLogoutButton;
+    private boolean mHasLockdownButton;
     private final boolean mShowSilentToggle;
     private final EmergencyAffordanceManager mEmergencyAffordanceManager;
     private final ScreenshotHelper mScreenshotHelper;
@@ -311,6 +312,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         ArraySet<String> addedKeys = new ArraySet<String>();
         mHasLogoutButton = false;
+        mHasLockdownButton = false;
         for (int i = 0; i < defaultActions.length; i++) {
             String actionKey = defaultActions[i];
             if (addedKeys.contains(actionKey)) {
@@ -341,6 +343,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                             Settings.Secure.LOCKDOWN_IN_POWER_MENU, 0) != 0
                         && shouldDisplayLockdown()) {
                     mItems.add(getLockdownAction());
+                    mHasLockdownButton = true;
                 }
             } else if (GLOBAL_ACTION_KEY_VOICEASSIST.equals(actionKey)) {
                 mItems.add(getVoiceAssistAction());
@@ -871,10 +874,9 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         public View getView(int position, View convertView, ViewGroup parent) {
             Action action = getItem(position);
             View view = action.create(mContext, convertView, parent, LayoutInflater.from(mContext));
-            // When there is no logout button, only power off and restart should be in white
-            // background, thus setting division view at third item; with logout button being the
-            // third item, set the division view at fourth item instead.
-            if (position == (mHasLogoutButton ? 3 : 2)) {
+            // Power off, restart, logout (if present) and lockdown (if present) should be in white
+            // background. Set the division based on which buttons are currently being displayed.
+            if (position == 2 + (mHasLogoutButton ? 1 : 0) + (mHasLockdownButton ? 1 : 0)) {
                 HardwareUiLayout.get(parent).setDivisionView(view);
             }
             return view;

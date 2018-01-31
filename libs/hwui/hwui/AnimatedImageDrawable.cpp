@@ -15,21 +15,21 @@
  */
 
 #include "AnimatedImageDrawable.h"
+#include "AnimatedImageThread.h"
 
-#include "thread/Task.h"
-#include "thread/TaskManager.h"
-#include "thread/TaskProcessor.h"
 #include "utils/TraceUtils.h"
 
 #include <SkPicture.h>
 #include <SkRefCnt.h>
-#include <SkTime.h>
 #include <SkTLazy.h>
+#include <SkTime.h>
 
 namespace android {
 
 AnimatedImageDrawable::AnimatedImageDrawable(sk_sp<SkAnimatedImage> animatedImage)
-    : mSkAnimatedImage(std::move(animatedImage)) { }
+        : mSkAnimatedImage(std::move(animatedImage)) {
+    mTimeToShowNextSnapshot = mSkAnimatedImage->currentFrameDuration();
+}
 
 void AnimatedImageDrawable::syncProperties() {
     mAlpha = mStagingAlpha;
@@ -37,88 +37,81 @@ void AnimatedImageDrawable::syncProperties() {
 }
 
 bool AnimatedImageDrawable::start() {
-    SkAutoExclusive lock(mLock);
-    if (mSkAnimatedImage->isRunning()) {
+    if (mRunning) {
         return false;
     }
 
-    if (!mSnapshot) {
-        mSnapshot.reset(mSkAnimatedImage->newPictureSnapshot());
-    }
+    // This will trigger a reset.
+    mFinished = true;
 
-    // While stopped, update() does not decode, but it does advance the time.
-    // This prevents us from skipping ahead when we resume.
-    const double currentTime = SkTime::GetMSecs();
-    mSkAnimatedImage->update(currentTime);
-    mSkAnimatedImage->start();
-    return mSkAnimatedImage->isRunning();
+    mRunning = true;
+    return true;
 }
 
 void AnimatedImageDrawable::stop() {
-    SkAutoExclusive lock(mLock);
-    mSkAnimatedImage->stop();
+    mRunning = false;
 }
 
 bool AnimatedImageDrawable::isRunning() {
-    return mSkAnimatedImage->isRunning();
+    return mRunning;
 }
 
-// This is really a Task<void> but that doesn't really work when Future<>
-// expects to be able to get/set a value
-class AnimatedImageDrawable::AnimatedImageTask : public uirenderer::Task<bool> {
-public:
-    AnimatedImageTask(AnimatedImageDrawable* animatedImageDrawable)
-            : mAnimatedImageDrawable(sk_ref_sp(animatedImageDrawable)) {}
-
-    sk_sp<AnimatedImageDrawable> mAnimatedImageDrawable;
-    bool mIsCompleted = false;
-};
-
-class AnimatedImageDrawable::AnimatedImageTaskProcessor : public uirenderer::TaskProcessor<bool> {
-public:
-    explicit AnimatedImageTaskProcessor(uirenderer::TaskManager* taskManager)
-            : uirenderer::TaskProcessor<bool>(taskManager) {}
-    ~AnimatedImageTaskProcessor() {}
-
-    virtual void onProcess(const sp<uirenderer::Task<bool>>& task) override {
-        ATRACE_NAME("Updating AnimatedImageDrawables");
-        AnimatedImageTask* t = static_cast<AnimatedImageTask*>(task.get());
-        t->mAnimatedImageDrawable->update();
-        t->mIsCompleted = true;
-        task->setResult(true);
-    };
-};
-
-void AnimatedImageDrawable::scheduleUpdate(uirenderer::TaskManager* taskManager) {
-    if (!mSkAnimatedImage->isRunning()
-            || (mDecodeTask.get() != nullptr && !mDecodeTask->mIsCompleted)) {
-        return;
-    }
-
-    if (!mDecodeTaskProcessor.get()) {
-        mDecodeTaskProcessor = new AnimatedImageTaskProcessor(taskManager);
-    }
-
-    // TODO get one frame ahead and only schedule updates when you need to replenish
-    mDecodeTask = new AnimatedImageTask(this);
-    mDecodeTaskProcessor->add(mDecodeTask);
+bool AnimatedImageDrawable::nextSnapshotReady() const {
+    return mNextSnapshot.valid() &&
+           mNextSnapshot.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
 }
 
-void AnimatedImageDrawable::update() {
-    SkAutoExclusive lock(mLock);
-
-    if (!mSkAnimatedImage->isRunning()) {
-        return;
-    }
-
+// Only called on the RenderThread while UI thread is locked.
+bool AnimatedImageDrawable::isDirty() {
     const double currentTime = SkTime::GetMSecs();
-    if (currentTime >= mNextFrameTime) {
-        mNextFrameTime = mSkAnimatedImage->update(currentTime);
-        mSnapshot.reset(mSkAnimatedImage->newPictureSnapshot());
-        mIsDirty = true;
+    const double lastWallTime = mLastWallTime;
+
+    mLastWallTime = currentTime;
+    if (!mRunning) {
+        mDidDraw = false;
+        return false;
     }
+
+    std::unique_lock lock{mSwapLock};
+    if (mDidDraw) {
+        mCurrentTime += currentTime - lastWallTime;
+        mDidDraw = false;
+    }
+
+    if (!mNextSnapshot.valid()) {
+        // Need to trigger onDraw in order to start decoding the next frame.
+        return true;
+    }
+
+    return nextSnapshotReady() && mCurrentTime >= mTimeToShowNextSnapshot;
 }
 
+// Only called on the AnimatedImageThread.
+AnimatedImageDrawable::Snapshot AnimatedImageDrawable::decodeNextFrame() {
+    Snapshot snap;
+    {
+        std::unique_lock lock{mImageLock};
+        snap.mDuration = mSkAnimatedImage->decodeNextFrame();
+        snap.mPic.reset(mSkAnimatedImage->newPictureSnapshot());
+    }
+
+    return snap;
+}
+
+// Only called on the AnimatedImageThread.
+AnimatedImageDrawable::Snapshot AnimatedImageDrawable::reset() {
+    Snapshot snap;
+    {
+        std::unique_lock lock{mImageLock};
+        mSkAnimatedImage->reset();
+        snap.mPic.reset(mSkAnimatedImage->newPictureSnapshot());
+        snap.mDuration = mSkAnimatedImage->currentFrameDuration();
+    }
+
+    return snap;
+}
+
+// Only called on the RenderThread.
 void AnimatedImageDrawable::onDraw(SkCanvas* canvas) {
     SkTLazy<SkPaint> lazyPaint;
     if (mAlpha != SK_AlphaOPAQUE || mColorFilter.get()) {
@@ -128,25 +121,71 @@ void AnimatedImageDrawable::onDraw(SkCanvas* canvas) {
         lazyPaint.get()->setFilterQuality(kLow_SkFilterQuality);
     }
 
-    SkAutoExclusive lock(mLock);
-    if (mSnapshot) {
-        canvas->drawPicture(mSnapshot, nullptr, lazyPaint.getMaybeNull());
-    } else {
-        // TODO: we could potentially keep the cached surface around if there is a paint and we know
-        // the drawable is attached to the view system
+    mDidDraw = true;
+
+    bool drewDirectly = false;
+    if (!mSnapshot.mPic) {
+        // The image is not animating, and never was. Draw directly from
+        // mSkAnimatedImage.
         SkAutoCanvasRestore acr(canvas, false);
         if (lazyPaint.isValid()) {
             canvas->saveLayer(mSkAnimatedImage->getBounds(), lazyPaint.get());
         }
+
+        std::unique_lock lock{mImageLock};
         mSkAnimatedImage->draw(canvas);
+        drewDirectly = true;
     }
 
-    mIsDirty = false;
+    if (mRunning && mFinished) {
+        auto& thread = uirenderer::AnimatedImageThread::getInstance();
+        mNextSnapshot = thread.reset(sk_ref_sp(this));
+        mFinished = false;
+    }
+
+    bool finalFrame = false;
+    if (mRunning && nextSnapshotReady()) {
+        std::unique_lock lock{mSwapLock};
+        if (mCurrentTime >= mTimeToShowNextSnapshot) {
+            mSnapshot = mNextSnapshot.get();
+            const double timeToShowCurrentSnap = mTimeToShowNextSnapshot;
+            if (mSnapshot.mDuration == SkAnimatedImage::kFinished) {
+                finalFrame = true;
+                mRunning = false;
+                mFinished = true;
+            } else {
+                mTimeToShowNextSnapshot += mSnapshot.mDuration;
+                if (mCurrentTime >= mTimeToShowNextSnapshot) {
+                    // This would mean showing the current frame very briefly. It's
+                    // possible that not being displayed for a time resulted in
+                    // mCurrentTime being far ahead. Prevent showing many frames
+                    // rapidly by going back to the beginning of this frame time.
+                    mCurrentTime = timeToShowCurrentSnap;
+                }
+            }
+        }
+    }
+
+    if (mRunning && !mNextSnapshot.valid()) {
+        auto& thread = uirenderer::AnimatedImageThread::getInstance();
+        mNextSnapshot = thread.decodeNextFrame(sk_ref_sp(this));
+    }
+
+    if (!drewDirectly) {
+        // No other thread will modify mCurrentSnap so this should be safe to
+        // use without locking.
+        canvas->drawPicture(mSnapshot.mPic, nullptr, lazyPaint.getMaybeNull());
+    }
+
+    if (finalFrame) {
+        if (mEndListener) {
+            mEndListener->onAnimationEnd();
+            mEndListener = nullptr;
+        }
+    }
 }
 
 double AnimatedImageDrawable::drawStaging(SkCanvas* canvas) {
-    // update the drawable with the current time
-    double nextUpdate = mSkAnimatedImage->update(SkTime::GetMSecs());
     SkAutoCanvasRestore acr(canvas, false);
     if (mStagingAlpha != SK_AlphaOPAQUE || mStagingColorFilter.get()) {
         SkPaint paint;
@@ -154,8 +193,59 @@ double AnimatedImageDrawable::drawStaging(SkCanvas* canvas) {
         paint.setColorFilter(mStagingColorFilter);
         canvas->saveLayer(mSkAnimatedImage->getBounds(), &paint);
     }
-    canvas->drawDrawable(mSkAnimatedImage.get());
-    return nextUpdate;
+
+    if (mFinished && !mRunning) {
+        // Continue drawing the last frame, and return 0 to indicate no need to
+        // redraw.
+        std::unique_lock lock{mImageLock};
+        canvas->drawDrawable(mSkAnimatedImage.get());
+        return 0.0;
+    }
+
+    bool update = false;
+    {
+        const double currentTime = SkTime::GetMSecs();
+        std::unique_lock lock{mSwapLock};
+        // mLastWallTime starts off at 0. If it is still 0, just update it to
+        // the current time and avoid updating
+        if (mLastWallTime == 0.0) {
+            mCurrentTime = currentTime;
+        } else if (mRunning) {
+            if (mFinished) {
+                mCurrentTime = currentTime;
+                {
+                    std::unique_lock lock{mImageLock};
+                    mSkAnimatedImage->reset();
+                }
+                mTimeToShowNextSnapshot = currentTime + mSkAnimatedImage->currentFrameDuration();
+            } else {
+                mCurrentTime += currentTime - mLastWallTime;
+                update = mCurrentTime >= mTimeToShowNextSnapshot;
+            }
+        }
+        mLastWallTime = currentTime;
+    }
+
+    double duration = 0.0;
+    {
+        std::unique_lock lock{mImageLock};
+        if (update) {
+            duration = mSkAnimatedImage->decodeNextFrame();
+        }
+
+        canvas->drawDrawable(mSkAnimatedImage.get());
+    }
+
+    std::unique_lock lock{mSwapLock};
+    if (update) {
+        if (duration == SkAnimatedImage::kFinished) {
+            mRunning = false;
+            mFinished = true;
+        } else {
+            mTimeToShowNextSnapshot += duration;
+        }
+    }
+    return mTimeToShowNextSnapshot;
 }
 
-};  // namespace android
+}  // namespace android

@@ -16,7 +16,7 @@
 
 package com.android.ims.internal;
 
-import com.android.ims.ImsExternalCallState;
+import android.telephony.ims.ImsExternalCallState;
 
 /**
  * A listener type for receiving notifications about DEP through IMS

@@ -1695,7 +1695,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
         resumeKeyDispatchingLocked();
         final ActivityStack stack = getStack();
-        stack.mNoAnimActivities.clear();
+        mStackSupervisor.mNoAnimActivities.clear();
 
         // Mark the point when the activity is resuming
         // TODO: To be more accurate, the mark should be before the onCreate,

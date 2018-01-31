@@ -111,6 +111,7 @@ import com.android.server.stats.StatsCompanionService;
 import com.android.server.statusbar.StatusBarManagerService;
 import com.android.server.storage.DeviceStorageMonitorService;
 import com.android.server.telecom.TelecomLoaderService;
+import com.android.server.textclassifier.TextClassificationManagerService;
 import com.android.server.trust.TrustManagerService;
 import com.android.server.tv.TvInputManagerService;
 import com.android.server.tv.TvRemoteService;
@@ -733,6 +734,8 @@ public final class SystemServer {
                 false);
         boolean disableTextServices = SystemProperties.getBoolean("config.disable_textservices",
                 false);
+        boolean disableSystemTextClassifier = SystemProperties.getBoolean(
+                "config.disable_systemtextclassifier", false);
         boolean disableConsumerIr = SystemProperties.getBoolean("config.disable_consumerir", false);
         boolean disableVrManager = SystemProperties.getBoolean("config.disable_vrmanager", false);
         boolean disableCameraService = SystemProperties.getBoolean("config.disable_cameraservice",
@@ -1063,6 +1066,12 @@ public final class SystemServer {
             if (!disableTextServices) {
                 traceBeginAndSlog("StartTextServicesManager");
                 mSystemServiceManager.startService(TextServicesManagerService.Lifecycle.class);
+                traceEnd();
+            }
+
+            if (!disableSystemTextClassifier) {
+                traceBeginAndSlog("StartTextClassificationManagerService");
+                mSystemServiceManager.startService(TextClassificationManagerService.Lifecycle.class);
                 traceEnd();
             }
 

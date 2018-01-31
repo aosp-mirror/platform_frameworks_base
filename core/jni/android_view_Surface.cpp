@@ -524,15 +524,15 @@ static jint nativeAttachAndQueueBuffer(JNIEnv *env, jclass clazz, jlong nativeOb
 static jint nativeSetSharedBufferModeEnabled(JNIEnv* env, jclass clazz, jlong nativeObject,
         jboolean enabled) {
     Surface* surface = reinterpret_cast<Surface*>(nativeObject);
-    return ((ANativeWindow*) nativeObject)->perform(surface,
-            NATIVE_WINDOW_SET_SHARED_BUFFER_MODE, enabled);
+    ANativeWindow* anw = static_cast<ANativeWindow*>(surface);
+    return anw->perform(surface, NATIVE_WINDOW_SET_SHARED_BUFFER_MODE, int(enabled));
 }
 
 static jint nativeSetAutoRefreshEnabled(JNIEnv* env, jclass clazz, jlong nativeObject,
         jboolean enabled) {
     Surface* surface = reinterpret_cast<Surface*>(nativeObject);
-    return ((ANativeWindow*) nativeObject)->perform(surface,
-            NATIVE_WINDOW_SET_AUTO_REFRESH, enabled);
+    ANativeWindow* anw = static_cast<ANativeWindow*>(surface);
+    return anw->perform(surface, NATIVE_WINDOW_SET_AUTO_REFRESH, int(enabled));
 }
 
 namespace uirenderer {

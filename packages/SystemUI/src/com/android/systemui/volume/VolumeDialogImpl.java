@@ -63,7 +63,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
@@ -79,6 +78,7 @@ import com.android.systemui.plugins.VolumeDialog;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.plugins.VolumeDialogController.State;
 import com.android.systemui.plugins.VolumeDialogController.StreamState;
+import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -111,7 +111,7 @@ public class VolumeDialogImpl implements VolumeDialog {
     private ConfigurableTexts mConfigurableTexts;
     private final SparseBooleanArray mDynamic = new SparseBooleanArray();
     private final KeyguardManager mKeyguard;
-    private final AccessibilityManager mAccessibilityMgr;
+    private final AccessibilityManagerWrapper mAccessibilityMgr;
     private final Object mSafetyWarningLock = new Object();
     private final Object mOutputChooserLock = new Object();
     private final Accessibility mAccessibility = new Accessibility();
@@ -134,8 +134,7 @@ public class VolumeDialogImpl implements VolumeDialog {
         mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
         mController = Dependency.get(VolumeDialogController.class);
         mKeyguard = (KeyguardManager) mContext.getSystemService(Context.KEYGUARD_SERVICE);
-        mAccessibilityMgr =
-                (AccessibilityManager) mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        mAccessibilityMgr = Dependency.get(AccessibilityManagerWrapper.class);
         mActiveSliderTint = ColorStateList.valueOf(Utils.getColorAccent(mContext));
         mInactiveSliderTint = loadColorStateList(R.color.volume_slider_inactive);
     }
@@ -231,6 +230,10 @@ public class VolumeDialogImpl implements VolumeDialog {
         initRingerH();
     }
 
+    protected ViewGroup getDialogView() {
+        return mDialogView;
+    }
+
     private ColorStateList loadColorStateList(int colorResId) {
         return ColorStateList.valueOf(mContext.getColor(colorResId));
     }
@@ -258,6 +261,7 @@ public class VolumeDialogImpl implements VolumeDialog {
 
     private void addRow(int stream, int iconRes, int iconMuteRes, boolean important,
             boolean defaultStream, boolean dynamic) {
+        if (D.BUG) Slog.d(TAG, "Adding row for stream " + stream);
         VolumeRow row = new VolumeRow();
         initRow(row, stream, iconRes, iconMuteRes, important, defaultStream);
         int rowSize;
@@ -621,7 +625,7 @@ public class VolumeDialogImpl implements VolumeDialog {
         }
     }
 
-    private void onStateChangedH(State state) {
+    protected void onStateChangedH(State state) {
         mState = state;
         mDynamic.clear();
         // add any new dynamic rows
@@ -894,7 +898,7 @@ public class VolumeDialogImpl implements VolumeDialog {
             return ss.remoteLabel;
         }
         try {
-            return mContext.getString(ss.name);
+            return mContext.getResources().getString(ss.name);
         } catch (Resources.NotFoundException e) {
             Slog.e(TAG, "Can't find translation for stream " + ss);
             return "";

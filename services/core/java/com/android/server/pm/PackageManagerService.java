@@ -424,7 +424,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public static final boolean DEBUG_DEXOPT = false;
 
     private static final boolean DEBUG_ABI_SELECTION = false;
-    private static final boolean DEBUG_EPHEMERAL = Build.IS_DEBUGGABLE;
+    private static final boolean DEBUG_INSTANT = Build.IS_DEBUGGABLE;
     private static final boolean DEBUG_TRIAGED_MISSING = false;
     private static final boolean DEBUG_APP_DATA = false;
 
@@ -981,7 +981,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private int mIntentFilterVerificationToken = 0;
 
     /** The service connection to the ephemeral resolver */
-    final EphemeralResolverConnection mInstantAppResolverConnection;
+    final InstantAppResolverConnection mInstantAppResolverConnection;
     /** Component used to show resolver settings for Instant Apps */
     final ComponentName mInstantAppResolverSettingsComponent;
 
@@ -3149,10 +3149,10 @@ Slog.e("TODD",
             final Pair<ComponentName, String> instantAppResolverComponent =
                     getInstantAppResolverLPr();
             if (instantAppResolverComponent != null) {
-                if (DEBUG_EPHEMERAL) {
+                if (DEBUG_INSTANT) {
                     Slog.d(TAG, "Set ephemeral resolver: " + instantAppResolverComponent);
                 }
-                mInstantAppResolverConnection = new EphemeralResolverConnection(
+                mInstantAppResolverConnection = new InstantAppResolverConnection(
                         mContext, instantAppResolverComponent.first,
                         instantAppResolverComponent.second);
                 mInstantAppResolverSettingsComponent =
@@ -3532,7 +3532,7 @@ Slog.e("TODD",
         final String[] packageArray =
                 mContext.getResources().getStringArray(R.array.config_ephemeralResolverPackage);
         if (packageArray.length == 0 && !Build.IS_DEBUGGABLE) {
-            if (DEBUG_EPHEMERAL) {
+            if (DEBUG_INSTANT) {
                 Slog.d(TAG, "Ephemeral resolver NOT found; empty package list");
             }
             return null;
@@ -3547,19 +3547,9 @@ Slog.e("TODD",
         final Intent resolverIntent = new Intent(actionName);
         List<ResolveInfo> resolvers = queryIntentServicesInternal(resolverIntent, null,
                 resolveFlags, UserHandle.USER_SYSTEM, callingUid, false /*includeInstantApps*/);
-        // temporarily look for the old action
-        if (resolvers.size() == 0) {
-            if (DEBUG_EPHEMERAL) {
-                Slog.d(TAG, "Ephemeral resolver not found with new action; try old one");
-            }
-            actionName = Intent.ACTION_RESOLVE_EPHEMERAL_PACKAGE;
-            resolverIntent.setAction(actionName);
-            resolvers = queryIntentServicesInternal(resolverIntent, null,
-                    resolveFlags, UserHandle.USER_SYSTEM, callingUid, false /*includeInstantApps*/);
-        }
         final int N = resolvers.size();
         if (N == 0) {
-            if (DEBUG_EPHEMERAL) {
+            if (DEBUG_INSTANT) {
                 Slog.d(TAG, "Ephemeral resolver NOT found; no matching intent filters");
             }
             return null;
@@ -3575,20 +3565,20 @@ Slog.e("TODD",
 
             final String packageName = info.serviceInfo.packageName;
             if (!possiblePackages.contains(packageName) && !Build.IS_DEBUGGABLE) {
-                if (DEBUG_EPHEMERAL) {
+                if (DEBUG_INSTANT) {
                     Slog.d(TAG, "Ephemeral resolver not in allowed package list;"
                             + " pkg: " + packageName + ", info:" + info);
                 }
                 continue;
             }
 
-            if (DEBUG_EPHEMERAL) {
+            if (DEBUG_INSTANT) {
                 Slog.v(TAG, "Ephemeral resolver found;"
                         + " pkg: " + packageName + ", info:" + info);
             }
             return new Pair<>(new ComponentName(packageName, info.serviceInfo.name), actionName);
         }
-        if (DEBUG_EPHEMERAL) {
+        if (DEBUG_INSTANT) {
             Slog.v(TAG, "Ephemeral resolver NOT found");
         }
         return null;
@@ -3598,11 +3588,9 @@ Slog.e("TODD",
         String[] orderedActions = Build.IS_ENG
                 ? new String[]{
                         Intent.ACTION_INSTALL_INSTANT_APP_PACKAGE + "_TEST",
-                        Intent.ACTION_INSTALL_INSTANT_APP_PACKAGE,
-                        Intent.ACTION_INSTALL_EPHEMERAL_PACKAGE}
+                        Intent.ACTION_INSTALL_INSTANT_APP_PACKAGE}
                 : new String[]{
-                        Intent.ACTION_INSTALL_INSTANT_APP_PACKAGE,
-                        Intent.ACTION_INSTALL_EPHEMERAL_PACKAGE};
+                        Intent.ACTION_INSTALL_INSTANT_APP_PACKAGE};
 
         final int resolveFlags =
                 MATCH_DIRECT_BOOT_AWARE
@@ -3618,7 +3606,7 @@ Slog.e("TODD",
             matches = queryIntentActivitiesInternal(intent, PACKAGE_MIME_TYPE,
                     resolveFlags, UserHandle.USER_SYSTEM);
             if (matches.isEmpty()) {
-                if (DEBUG_EPHEMERAL) {
+                if (DEBUG_INSTANT) {
                     Slog.d(TAG, "Instant App installer not found with " + action);
                 }
             } else {
@@ -3656,15 +3644,6 @@ Slog.e("TODD",
         final int resolveFlags = MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE;
         List<ResolveInfo> matches = queryIntentActivitiesInternal(intent, null, resolveFlags,
                 UserHandle.USER_SYSTEM);
-        // temporarily look for the old action
-        if (matches.isEmpty()) {
-            if (DEBUG_EPHEMERAL) {
-                Slog.d(TAG, "Ephemeral resolver settings not found with new action; try old one");
-            }
-            intent.setAction(Intent.ACTION_EPHEMERAL_RESOLVER_SETTINGS);
-            matches = queryIntentActivitiesInternal(intent, null, resolveFlags,
-                    UserHandle.USER_SYSTEM);
-        }
         if (matches.isEmpty()) {
             return null;
         }
@@ -6007,7 +5986,7 @@ Slog.e("TODD",
                         final int status = (int) (packedStatus >> 32);
                         if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS
                             || status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK) {
-                            if (DEBUG_EPHEMERAL) {
+                            if (DEBUG_INSTANT) {
                                 Slog.v(TAG, "DENY instant app;"
                                     + " pkg: " + packageName + ", status: " + status);
                             }
@@ -6015,7 +5994,7 @@ Slog.e("TODD",
                         }
                     }
                     if (ps.getInstantApp(userId)) {
-                        if (DEBUG_EPHEMERAL) {
+                        if (DEBUG_INSTANT) {
                             Slog.v(TAG, "DENY instant app installed;"
                                     + " pkg: " + packageName);
                         }
@@ -6651,7 +6630,7 @@ Slog.e("TODD",
                         // there's a local instant application installed, but, the user has
                         // chosen to never use it; skip resolution and don't acknowledge
                         // an instant application is even available
-                        if (DEBUG_EPHEMERAL) {
+                        if (DEBUG_INSTANT) {
                             Slog.v(TAG, "Instant app marked to never run; pkg: " + packageName);
                         }
                         blockResolution = true;
@@ -6659,7 +6638,7 @@ Slog.e("TODD",
                     } else {
                         // we have a locally installed instant application; skip resolution
                         // but acknowledge there's an instant application available
-                        if (DEBUG_EPHEMERAL) {
+                        if (DEBUG_INSTANT) {
                             Slog.v(TAG, "Found installed instant app; pkg: " + packageName);
                         }
                         localInstantApp = info;
@@ -6717,7 +6696,7 @@ Slog.e("TODD",
         // make sure this resolver is the default
         ephemeralInstaller.isDefault = true;
         ephemeralInstaller.auxiliaryInfo = auxiliaryResponse;
-        if (DEBUG_EPHEMERAL) {
+        if (DEBUG_INSTANT) {
             Slog.v(TAG, "Adding ephemeral installer to the ResolveInfo list");
         }
 
@@ -7604,7 +7583,7 @@ Slog.e("TODD",
                                 info.serviceInfo.splitName)) {
                     // requested service is defined in a split that hasn't been installed yet.
                     // add the installer to the resolve list
-                    if (DEBUG_EPHEMERAL) {
+                    if (DEBUG_INSTANT) {
                         Slog.v(TAG, "Adding ephemeral installer to the ResolveInfo list");
                     }
                     final ResolveInfo installerInfo = new ResolveInfo(
@@ -7726,7 +7705,7 @@ Slog.e("TODD",
                                 info.providerInfo.splitName)) {
                     // requested provider is defined in a split that hasn't been installed yet.
                     // add the installer to the resolve list
-                    if (DEBUG_EPHEMERAL) {
+                    if (DEBUG_INSTANT) {
                         Slog.v(TAG, "Adding ephemeral installer to the ResolveInfo list");
                     }
                     final ResolveInfo installerInfo = new ResolveInfo(
@@ -8367,13 +8346,11 @@ Slog.e("TODD",
     }
 
     private void collectCertificatesLI(PackageSetting ps, PackageParser.Package pkg,
-            boolean forceCollect) throws PackageManagerException {
+            boolean forceCollect, boolean skipVerify) throws PackageManagerException {
         // When upgrading from pre-N MR1, verify the package time stamp using the package
         // directory and not the APK file.
         final long lastModifiedTime = mIsPreNMR1Upgrade
                 ? new File(pkg.codePath).lastModified() : getLastModifiedTime(pkg);
-        // Note that currently skipVerify skips verification on both base and splits for simplicity.
-        final boolean skipVerify = forceCollect && canSkipFullPackageVerification(pkg);
         if (ps != null && !forceCollect
                 && ps.codePathString.equals(pkg.codePath)
                 && ps.timeStamp == lastModifiedTime
@@ -8746,11 +8723,15 @@ Slog.e("TODD",
         }
 
         // Verify certificates against what was last scanned. If it is an updated priv app, we will
-        // force re-collecting certificate. Full apk verification will happen unless apk verity is
-        // set up for the file. In that case, only small part of the apk is verified upfront.
+        // force re-collecting certificate.
         final boolean forceCollect = PackageManagerServiceUtils.isApkVerificationForced(
                 disabledPkgSetting);
-        collectCertificatesLI(pkgSetting, pkg, forceCollect);
+        // Full APK verification can be skipped during certificate collection, only if the file is
+        // in verified partition, or can be verified on access (when apk verity is enabled). In both
+        // cases, only data in Signing Block is verified instead of the whole file.
+        final boolean skipVerify = ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) != 0) ||
+                (forceCollect && canSkipFullPackageVerification(pkg));
+        collectCertificatesLI(pkgSetting, pkg, forceCollect, skipVerify);
 
         boolean shouldHideSystemApp = false;
         // A new application appeared on /system, but, we already have a copy of
@@ -11757,14 +11738,14 @@ Slog.e("TODD",
 
     private void setUpInstantAppInstallerActivityLP(ActivityInfo installerActivity) {
         if (installerActivity == null) {
-            if (DEBUG_EPHEMERAL) {
+            if (DEBUG_INSTANT) {
                 Slog.d(TAG, "Clear ephemeral installer activity");
             }
             mInstantAppInstallerActivity = null;
             return;
         }
 
-        if (DEBUG_EPHEMERAL) {
+        if (DEBUG_INSTANT) {
             Slog.d(TAG, "Set ephemeral installer activity: "
                     + installerActivity.getComponentName());
         }
@@ -13224,7 +13205,7 @@ Slog.e("TODD",
         private int mFlags;
     }
 
-    static final class EphemeralIntentResolver
+    static final class InstantAppIntentResolver
             extends IntentResolver<AuxiliaryResolveInfo.AuxiliaryFilter,
             AuxiliaryResolveInfo.AuxiliaryFilter> {
         /**
@@ -13594,7 +13575,7 @@ Slog.e("TODD",
             IPackageInstallObserver2 observer, PackageInstaller.SessionParams sessionParams,
             String installerPackageName, int installerUid, UserHandle user,
             PackageParser.SigningDetails signingDetails) {
-        if (DEBUG_EPHEMERAL) {
+        if (DEBUG_INSTANT) {
             if ((sessionParams.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0) {
                 Slog.d(TAG, "Ephemeral install of " + packageName);
             }
@@ -15078,7 +15059,7 @@ Slog.e("TODD",
                 pkgLite = mContainerService.getMinimalPackageInfo(origin.resolvedPath, installFlags,
                         packageAbiOverride);
 
-                if (DEBUG_EPHEMERAL && ephemeral) {
+                if (DEBUG_INSTANT && ephemeral) {
                     Slog.v(TAG, "pkgLite for install: " + pkgLite);
                 }
 
@@ -15145,7 +15126,7 @@ Slog.e("TODD",
                             installFlags |= PackageManager.INSTALL_EXTERNAL;
                             installFlags &= ~PackageManager.INSTALL_INTERNAL;
                         } else if (loc == PackageHelper.RECOMMEND_INSTALL_EPHEMERAL) {
-                            if (DEBUG_EPHEMERAL) {
+                            if (DEBUG_INSTANT) {
                                 Slog.v(TAG, "...setting INSTALL_EPHEMERAL install flag");
                             }
                             installFlags |= PackageManager.INSTALL_INSTANT_APP;

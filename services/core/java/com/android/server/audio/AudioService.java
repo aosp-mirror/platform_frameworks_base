@@ -2292,7 +2292,9 @@ public class AudioService extends IAudioService.Stub
         // only mute for the current user
         if (getCurrentUserId() == userId) {
             final boolean currentMute = AudioSystem.isMicrophoneMuted();
+            final long identity = Binder.clearCallingIdentity();
             AudioSystem.muteMicrophone(on);
+            Binder.restoreCallingIdentity(identity);
             if (on != currentMute) {
                 mContext.sendBroadcast(new Intent(AudioManager.ACTION_MICROPHONE_MUTE_CHANGED)
                         .setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY));
@@ -2666,7 +2668,9 @@ public class AudioService extends IAudioService.Stub
             }
 
             if (actualMode != mMode) {
+                final long identity = Binder.clearCallingIdentity();
                 status = AudioSystem.setPhoneState(actualMode);
+                Binder.restoreCallingIdentity(identity);
                 if (status == AudioSystem.AUDIO_STATUS_OK) {
                     if (DEBUG_MODE) { Log.v(TAG, " mode successfully set to " + actualMode); }
                     mMode = actualMode;
@@ -7275,11 +7279,15 @@ public class AudioService extends IAudioService.Stub
             if (mHasFocusListener) {
                 mMediaFocusControl.removeFocusFollower(mPolicyCallback);
             }
+            final long identity = Binder.clearCallingIdentity();
             AudioSystem.registerPolicyMixes(mMixes, false);
+            Binder.restoreCallingIdentity(identity);
         }
 
         void connectMixes() {
+            final long identity = Binder.clearCallingIdentity();
             AudioSystem.registerPolicyMixes(mMixes, true);
+            Binder.restoreCallingIdentity(identity);
         }
     };
 

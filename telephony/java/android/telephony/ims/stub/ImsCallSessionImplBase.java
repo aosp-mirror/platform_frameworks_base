@@ -16,105 +16,259 @@
 
 package android.telephony.ims.stub;
 
+import android.annotation.SystemApi;
 import android.os.Message;
 import android.os.RemoteException;
+import android.telephony.ims.ImsCallSessionListener;
+import android.telephony.ims.aidl.IImsCallSessionListener;
 
-import com.android.ims.ImsCallProfile;
-import com.android.ims.ImsStreamMediaProfile;
-import com.android.ims.internal.ImsCallSession;
+import android.telephony.ims.ImsCallProfile;
+import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.ImsStreamMediaProfile;
+import android.telephony.ims.ImsCallSession;
 import com.android.ims.internal.IImsCallSession;
-import com.android.ims.internal.IImsCallSessionListener;
 import com.android.ims.internal.IImsVideoCallProvider;
+import android.telephony.ims.ImsVideoCallProvider;
+
+import dalvik.system.CloseGuard;
 
 /**
- * Base implementation of IImsCallSession, which implements stub versions of the methods in the
- * IImsCallSession AIDL. Override the methods that your implementation of ImsCallSession supports.
+ * Base implementation of IImsCallSession, which implements stub versions of the methods available.
  *
- * DO NOT remove or change the existing APIs, only add new ones to this Base implementation or you
- * will break other implementations of ImsCallSession maintained by other ImsServices.
+ * Override the methods that your implementation of ImsCallSession supports.
  *
  * @hide
  */
-
-public class ImsCallSessionImplBase extends IImsCallSession.Stub {
+@SystemApi
+// DO NOT remove or change the existing APIs, only add new ones to this Base implementation or you
+// will break other implementations of ImsCallSession maintained by other ImsServices.
+public class ImsCallSessionImplBase implements AutoCloseable {
+    /**
+     * Notify USSD Mode.
+     */
+    public static final int USSD_MODE_NOTIFY = 0;
+    /**
+     * Request USSD Mode
+     */
+    public static final int USSD_MODE_REQUEST = 1;
 
     /**
-     * Closes the object. This object is not usable after being closed.
+     * Defines IMS call session state.
      */
-    @Override
-    public void close() throws RemoteException {
+    public static class State {
+        public static final int IDLE = 0;
+        public static final int INITIATED = 1;
+        public static final int NEGOTIATING = 2;
+        public static final int ESTABLISHING = 3;
+        public static final int ESTABLISHED = 4;
 
+        public static final int RENEGOTIATING = 5;
+        public static final int REESTABLISHING = 6;
+
+        public static final int TERMINATING = 7;
+        public static final int TERMINATED = 8;
+
+        public static final int INVALID = (-1);
+
+        /**
+         * Converts the state to string.
+         */
+        public static String toString(int state) {
+            switch (state) {
+                case IDLE:
+                    return "IDLE";
+                case INITIATED:
+                    return "INITIATED";
+                case NEGOTIATING:
+                    return "NEGOTIATING";
+                case ESTABLISHING:
+                    return "ESTABLISHING";
+                case ESTABLISHED:
+                    return "ESTABLISHED";
+                case RENEGOTIATING:
+                    return "RENEGOTIATING";
+                case REESTABLISHING:
+                    return "REESTABLISHING";
+                case TERMINATING:
+                    return "TERMINATING";
+                case TERMINATED:
+                    return "TERMINATED";
+                default:
+                    return "UNKNOWN";
+            }
+        }
+
+        /**
+         * @hide
+         */
+        private State() {
+        }
     }
 
-    /**
-     * Gets the call ID of the session.
-     *
-     * @return the call ID
-     */
-    @Override
-    public String getCallId() throws RemoteException {
-        return null;
-    }
+    // Non-final for injection by tests
+    private IImsCallSession mServiceImpl = new IImsCallSession.Stub() {
+        @Override
+        public void close() {
+            ImsCallSessionImplBase.this.close();
+        }
+
+        @Override
+        public String getCallId() {
+            return ImsCallSessionImplBase.this.getCallId();
+        }
+
+        @Override
+        public ImsCallProfile getCallProfile() {
+            return ImsCallSessionImplBase.this.getCallProfile();
+        }
+
+        @Override
+        public ImsCallProfile getLocalCallProfile() {
+            return ImsCallSessionImplBase.this.getLocalCallProfile();
+        }
+
+        @Override
+        public ImsCallProfile getRemoteCallProfile() {
+            return ImsCallSessionImplBase.this.getRemoteCallProfile();
+        }
+
+        @Override
+        public String getProperty(String name) {
+            return ImsCallSessionImplBase.this.getProperty(name);
+        }
+
+        @Override
+        public int getState() {
+            return ImsCallSessionImplBase.this.getState();
+        }
+
+        @Override
+        public boolean isInCall() {
+            return ImsCallSessionImplBase.this.isInCall();
+        }
+
+        @Override
+        public void setListener(IImsCallSessionListener listener) {
+            ImsCallSessionImplBase.this.setListener(new ImsCallSessionListener(listener));
+        }
+
+        @Override
+        public void setMute(boolean muted) {
+            ImsCallSessionImplBase.this.setMute(muted);
+        }
+
+        @Override
+        public void start(String callee, ImsCallProfile profile) {
+            ImsCallSessionImplBase.this.start(callee, profile);
+        }
+
+        @Override
+        public void startConference(String[] participants, ImsCallProfile profile) throws
+                RemoteException {
+            ImsCallSessionImplBase.this.startConference(participants, profile);
+        }
+
+        @Override
+        public void accept(int callType, ImsStreamMediaProfile profile) {
+            ImsCallSessionImplBase.this.accept(callType, profile);
+        }
+
+        @Override
+        public void reject(int reason) {
+            ImsCallSessionImplBase.this.reject(reason);
+        }
+
+        @Override
+        public void terminate(int reason) {
+            ImsCallSessionImplBase.this.terminate(reason);
+        }
+
+        @Override
+        public void hold(ImsStreamMediaProfile profile) {
+            ImsCallSessionImplBase.this.hold(profile);
+        }
+
+        @Override
+        public void resume(ImsStreamMediaProfile profile) {
+            ImsCallSessionImplBase.this.resume(profile);
+        }
+
+        @Override
+        public void merge() {
+            ImsCallSessionImplBase.this.merge();
+        }
+
+        @Override
+        public void update(int callType, ImsStreamMediaProfile profile) {
+            ImsCallSessionImplBase.this.update(callType, profile);
+        }
+
+        @Override
+        public void extendToConference(String[] participants) {
+            ImsCallSessionImplBase.this.extendToConference(participants);
+        }
+
+        @Override
+        public void inviteParticipants(String[] participants) {
+            ImsCallSessionImplBase.this.inviteParticipants(participants);
+        }
+
+        @Override
+        public void removeParticipants(String[] participants) {
+            ImsCallSessionImplBase.this.removeParticipants(participants);
+        }
+
+        @Override
+        public void sendDtmf(char c, Message result) {
+            ImsCallSessionImplBase.this.sendDtmf(c, result);
+        }
+
+        @Override
+        public void startDtmf(char c) {
+            ImsCallSessionImplBase.this.startDtmf(c);
+        }
+
+        @Override
+        public void stopDtmf() {
+            ImsCallSessionImplBase.this.stopDtmf();
+        }
+
+        @Override
+        public void sendUssd(String ussdMessage) {
+            ImsCallSessionImplBase.this.sendUssd(ussdMessage);
+        }
+
+        @Override
+        public IImsVideoCallProvider getVideoCallProvider() {
+            return ImsCallSessionImplBase.this.getVideoCallProvider();
+        }
+
+        @Override
+        public boolean isMultiparty() {
+            return ImsCallSessionImplBase.this.isMultiparty();
+        }
+
+        @Override
+        public void sendRttModifyRequest(ImsCallProfile toProfile) {
+            ImsCallSessionImplBase.this.sendRttModifyRequest(toProfile);
+        }
+
+        @Override
+        public void sendRttModifyResponse(boolean status) {
+            ImsCallSessionImplBase.this.sendRttModifyResponse(status);
+        }
+
+        @Override
+        public void sendRttMessage(String rttMessage) {
+            ImsCallSessionImplBase.this.sendRttMessage(rttMessage);
+        }
+    };
 
     /**
-     * Gets the call profile that this session is associated with
-     *
-     * @return the {@link ImsCallProfile} that this session is associated with
+     * @hide
      */
-    @Override
-    public ImsCallProfile getCallProfile() throws RemoteException {
-        return null;
-    }
-
-    /**
-     * Gets the local call profile that this session is associated with
-     *
-     * @return the local {@link ImsCallProfile} that this session is associated with
-     */
-    @Override
-    public ImsCallProfile getLocalCallProfile() throws RemoteException {
-        return null;
-    }
-
-    /**
-     * Gets the remote call profile that this session is associated with
-     *
-     * @return the remote {@link ImsCallProfile} that this session is associated with
-     */
-    @Override
-    public ImsCallProfile getRemoteCallProfile() throws RemoteException {
-        return null;
-    }
-
-    /**
-     * Gets the value associated with the specified property of this session.
-     *
-     * @return the string value associated with the specified property
-     */
-    @Override
-    public String getProperty(String name) throws RemoteException {
-        return null;
-    }
-
-    /**
-     * Gets the session state.
-     * The value returned must be one of the states in {@link ImsCallSession.State}.
-     *
-     * @return the session state
-     */
-    @Override
-    public int getState() throws RemoteException {
-        return ImsCallSession.State.INVALID;
-    }
-
-    /**
-     * Checks if the session is in call.
-     *
-     * @return true if the session is in call, false otherwise
-     */
-    @Override
-    public boolean isInCall() throws RemoteException {
-        return false;
+    public final void setListener(IImsCallSessionListener listener) throws RemoteException {
+        setListener(new ImsCallSessionListener(listener));
     }
 
     /**
@@ -122,25 +276,87 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * can only hold one listener at a time. Subsequent calls to this method
      * override the previous listener.
      *
-     * @param listener to listen to the session events of this object
+     * @param listener {@link ImsCallSessionListener} used to notify the framework of updates
+     * to the ImsCallSession
+     */
+    public void setListener(ImsCallSessionListener listener) {
+    }
+
+    /**
+     * Closes the object. This {@link ImsCallSessionImplBase} is not usable after being closed.
      */
     @Override
-    public void setListener(IImsCallSessionListener listener) throws RemoteException {
+    public void close() {
+
+    }
+
+    /**
+     * @return A String containing the unique call ID of this {@link ImsCallSessionImplBase}.
+     */
+    public String getCallId() {
+        return null;
+    }
+
+    /**
+     * @return The {@link ImsCallProfile} that this {@link ImsCallSessionImplBase} is associated
+     * with.
+     */
+    public ImsCallProfile getCallProfile() {
+        return null;
+    }
+
+    /**
+     * @return The local {@link ImsCallProfile} that this {@link ImsCallSessionImplBase} is
+     * associated with.
+     */
+    public ImsCallProfile getLocalCallProfile() {
+        return null;
+    }
+
+    /**
+     * @return The remote {@link ImsCallProfile} that this {@link ImsCallSessionImplBase} is
+     * associated with.
+     */
+    public ImsCallProfile getRemoteCallProfile() {
+        return null;
+    }
+
+    /**
+     * @param name The String extra key.
+     * @return The string extra value associated with the specified property.
+     */
+    public String getProperty(String name) {
+        return null;
+    }
+
+    /**
+     * @return The {@link ImsCallSessionImplBase} state, defined in
+     * {@link ImsCallSessionImplBase.State}.
+     */
+    public int getState() {
+        return ImsCallSessionImplBase.State.INVALID;
+    }
+
+    /**
+     * @return true if the {@link ImsCallSessionImplBase} is in a call, false otherwise.
+     */
+    public boolean isInCall() {
+        return false;
     }
 
     /**
      * Mutes or unmutes the mic for the active call.
      *
-     * @param muted true if the call is muted, false otherwise
+     * @param muted true if the call should be muted, false otherwise.
      */
-    @Override
-    public void setMute(boolean muted) throws RemoteException {
+    public void setMute(boolean muted) {
     }
 
     /**
-     * Initiates an IMS call with the specified target and call profile.
-     * The session listener set in {@link #setListener} is called back upon defined session events.
-     * The method is only valid to call when the session state is in
+     * Initiates an IMS call with the specified number and call profile.
+     * The session listener set in {@link #setListener(ImsCallSessionListener)} is called back upon
+     * defined session events.
+     * Only valid to call when the session state is in
      * {@link ImsCallSession.State#IDLE}.
      *
      * @param callee dialed string to make the call to
@@ -149,13 +365,13 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @see {@link ImsCallSession.Listener#callSessionStarted},
      * {@link ImsCallSession.Listener#callSessionStartFailed}
      */
-    @Override
-    public void start(String callee, ImsCallProfile profile) throws RemoteException {
+    public void start(String callee, ImsCallProfile profile) {
     }
 
     /**
      * Initiates an IMS call with the specified participants and call profile.
-     * The session listener set in {@link #setListener} is called back upon defined session events.
+     * The session listener set in {@link #setListener(ImsCallSessionListener)} is called back upon
+     * defined session events.
      * The method is only valid to call when the session state is in
      * {@link ImsCallSession.State#IDLE}.
      *
@@ -165,9 +381,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @see {@link ImsCallSession.Listener#callSessionStarted},
      * {@link ImsCallSession.Listener#callSessionStartFailed}
      */
-    @Override
-    public void startConference(String[] participants, ImsCallProfile profile)
-            throws RemoteException {
+    public void startConference(String[] participants, ImsCallProfile profile) {
     }
 
     /**
@@ -177,31 +391,26 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @param profile stream media profile {@link ImsStreamMediaProfile} to be answered
      * @see {@link ImsCallSession.Listener#callSessionStarted}
      */
-    @Override
-    public void accept(int callType, ImsStreamMediaProfile profile) throws RemoteException {
+    public void accept(int callType, ImsStreamMediaProfile profile) {
     }
 
     /**
      * Rejects an incoming call or session update.
      *
-     * @param reason reason code to reject an incoming call, defined in
-     *         com.android.ims.ImsReasonInfo
+     * @param reason reason code to reject an incoming call, defined in {@link ImsReasonInfo}.
      * {@link ImsCallSession.Listener#callSessionStartFailed}
      */
-    @Override
-    public void reject(int reason) throws RemoteException {
+    public void reject(int reason) {
     }
 
     /**
      * Terminates a call.
      *
-     * @param reason reason code to terminate a call, defined in
-     *         com.android.ims.ImsReasonInfo
+     * @param reason reason code to terminate a call, defined in {@link ImsReasonInfo}.
      *
      * @see {@link ImsCallSession.Listener#callSessionTerminated}
      */
-    @Override
-    public void terminate(int reason) throws RemoteException {
+    public void terminate(int reason) {
     }
 
     /**
@@ -212,8 +421,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @see {@link ImsCallSession.Listener#callSessionHeld},
      * {@link ImsCallSession.Listener#callSessionHoldFailed}
      */
-    @Override
-    public void hold(ImsStreamMediaProfile profile) throws RemoteException {
+    public void hold(ImsStreamMediaProfile profile) {
     }
 
     /**
@@ -224,12 +432,11 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @see {@link ImsCallSession.Listener#callSessionResumed},
      * {@link ImsCallSession.Listener#callSessionResumeFailed}
      */
-    @Override
-    public void resume(ImsStreamMediaProfile profile) throws RemoteException {
+    public void resume(ImsStreamMediaProfile profile) {
     }
 
     /**
-     * Merges the active & hold call. When the merge starts,
+     * Merges the active and held call. When the merge starts,
      * {@link ImsCallSession.Listener#callSessionMergeStarted} is called.
      * {@link ImsCallSession.Listener#callSessionMergeComplete} is called if the merge is
      * successful, and {@link ImsCallSession.Listener#callSessionMergeFailed} is called if the merge
@@ -239,8 +446,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * {@link ImsCallSession.Listener#callSessionMergeComplete},
      *      {@link ImsCallSession.Listener#callSessionMergeFailed}
      */
-    @Override
-    public void merge() throws RemoteException {
+    public void merge() {
     }
 
     /**
@@ -251,8 +457,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @see {@link ImsCallSession.Listener#callSessionUpdated},
      * {@link ImsCallSession.Listener#callSessionUpdateFailed}
      */
-    @Override
-    public void update(int callType, ImsStreamMediaProfile profile) throws RemoteException {
+    public void update(int callType, ImsStreamMediaProfile profile) {
     }
 
     /**
@@ -263,8 +468,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @see {@link ImsCallSession.Listener#callSessionConferenceExtended},
      * {@link ImsCallSession.Listener#callSessionConferenceExtendFailed}
      */
-    @Override
-    public void extendToConference(String[] participants) throws RemoteException {
+    public void extendToConference(String[] participants) {
     }
 
     /**
@@ -274,8 +478,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @see {@link ImsCallSession.Listener#callSessionInviteParticipantsRequestDelivered},
      *      {@link ImsCallSession.Listener#callSessionInviteParticipantsRequestFailed}
      */
-    @Override
-    public void inviteParticipants(String[] participants) throws RemoteException {
+    public void inviteParticipants(String[] participants) {
     }
 
     /**
@@ -285,8 +488,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * @see {@link ImsCallSession.Listener#callSessionRemoveParticipantsRequestDelivered},
      *      {@link ImsCallSession.Listener#callSessionRemoveParticipantsRequestFailed}
      */
-    @Override
-    public void removeParticipants(String[] participants) throws RemoteException {
+    public void removeParticipants(String[] participants) {
     }
 
     /**
@@ -296,8 +498,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      *
      * @param c the DTMF to send. '0' ~ '9', 'A' ~ 'D', '*', '#' are valid inputs.
      */
-    @Override
-    public void sendDtmf(char c, Message result) throws RemoteException {
+    public void sendDtmf(char c, Message result) {
     }
 
     /**
@@ -307,15 +508,13 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      *
      * @param c the DTMF to send. '0' ~ '9', 'A' ~ 'D', '*', '#' are valid inputs.
      */
-    @Override
-    public void startDtmf(char c) throws RemoteException {
+    public void startDtmf(char c) {
     }
 
     /**
      * Stop a DTMF code.
      */
-    @Override
-    public void stopDtmf() throws RemoteException {
+    public void stopDtmf() {
     }
 
     /**
@@ -323,17 +522,23 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      *
      * @param ussdMessage USSD message to send
      */
-    @Override
-    public void sendUssd(String ussdMessage) throws RemoteException {
+    public void sendUssd(String ussdMessage) {
     }
 
     /**
-     * Returns a binder for the video call provider implementation contained within the IMS service
-     * process. This binder is used by the VideoCallProvider subclass in Telephony which
-     * intermediates between the propriety implementation and Telecomm/InCall.
+     * See {@link #getImsVideoCallProvider()}, used directly in older ImsService implementations.
+     * @hide
      */
-    @Override
-    public IImsVideoCallProvider getVideoCallProvider() throws RemoteException {
+    public IImsVideoCallProvider getVideoCallProvider() {
+        ImsVideoCallProvider provider = getImsVideoCallProvider();
+        return provider != null ? provider.getInterface() : null;
+    }
+
+    /**
+     * @return The {@link ImsVideoCallProvider} implementation contained within the IMS service
+     * process.
+     */
+    public ImsVideoCallProvider getImsVideoCallProvider() {
         return null;
     }
 
@@ -341,8 +546,7 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * Determines if the current session is multiparty.
      * @return {@code True} if the session is multiparty.
      */
-    @Override
-    public boolean isMultiparty() throws RemoteException {
+    public boolean isMultiparty() {
         return false;
     }
 
@@ -350,16 +554,13 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * Device issues RTT modify request
      * @param toProfile The profile with requested changes made
      */
-    @Override
     public void sendRttModifyRequest(ImsCallProfile toProfile) {
     }
 
     /**
      * Device responds to Remote RTT modify request
-     * @param status true  Accepted the request
-     *                false  Declined the request
+     * @param status true if the the request was accepted or false of the request is defined.
      */
-    @Override
     public void sendRttModifyResponse(boolean status) {
     }
 
@@ -367,7 +568,16 @@ public class ImsCallSessionImplBase extends IImsCallSession.Stub {
      * Device sends RTT message
      * @param rttMessage RTT message to be sent
      */
-    @Override
     public void sendRttMessage(String rttMessage) {
+    }
+
+    /** @hide */
+    public IImsCallSession getServiceImpl() {
+        return mServiceImpl;
+    }
+
+    /** @hide */
+    public void setServiceImpl(IImsCallSession serviceImpl) {
+        mServiceImpl = serviceImpl;
     }
 }

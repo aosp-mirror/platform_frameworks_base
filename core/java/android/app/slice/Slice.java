@@ -164,8 +164,14 @@ public final class Slice implements Parcelable {
     public static final String EXTRA_TOGGLE_STATE = "android.app.slice.extra.TOGGLE_STATE";
     /**
      * Key to retrieve an extra added to an intent when the value of a slider is changed.
+     * @deprecated remove once support lib is update to use EXTRA_RANGE_VALUE instead
      */
+    @Deprecated
     public static final String EXTRA_SLIDER_VALUE = "android.app.slice.extra.SLIDER_VALUE";
+    /**
+     * Key to retrieve an extra added to an intent when the value of an input range is changed.
+     */
+    public static final String EXTRA_RANGE_VALUE = "android.app.slice.extra.RANGE_VALUE";
     /**
      * Subtype to indicate that this is a message as part of a communication
      * sequence in this slice.
@@ -181,14 +187,20 @@ public final class Slice implements Parcelable {
     public static final String SUBTYPE_COLOR = "color";
     /**
      * Subtype to tag an item as representing a slider.
+     * @deprecated remove once support lib is update to use SUBTYPE_RANGE instead
      */
+    @Deprecated
     public static final String SUBTYPE_SLIDER = "slider";
     /**
-     * Subtype to tag an item as representing the max int value for a {@link #SUBTYPE_SLIDER}.
+     * Subtype to tag an item as representing a range.
+     */
+    public static final String SUBTYPE_RANGE = "range";
+    /**
+     * Subtype to tag an item as representing the max int value for a {@link #SUBTYPE_RANGE}.
      */
     public static final String SUBTYPE_MAX = "max";
     /**
-     * Subtype to tag an item as representing the current int value for a {@link #SUBTYPE_SLIDER}.
+     * Subtype to tag an item as representing the current int value for a {@link #SUBTYPE_RANGE}.
      */
     public static final String SUBTYPE_VALUE = "value";
     /**

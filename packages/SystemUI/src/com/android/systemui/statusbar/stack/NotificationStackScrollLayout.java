@@ -92,10 +92,11 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
+import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.ScrimController;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 
 import android.support.v4.graphics.ColorUtils;
@@ -288,7 +289,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private HashSet<View> mClearOverlayViewsWhenFinished = new HashSet<>();
     private HashSet<Pair<ExpandableNotificationRow, Boolean>> mHeadsUpChangeAnimations
             = new HashSet<>();
-    private HeadsUpManager mHeadsUpManager;
+    private HeadsUpManagerPhone mHeadsUpManager;
     private boolean mTrackingHeadsUp;
     private ScrimController mScrimController;
     private boolean mForceNoOverlappingRendering;
@@ -358,14 +359,14 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     };
     private PorterDuffXfermode mSrcMode = new PorterDuffXfermode(PorterDuff.Mode.SRC);
-    private Collection<HeadsUpManager.HeadsUpEntry> mPulsing;
+    private boolean mPulsing;
     private boolean mDrawBackgroundAsSrc;
     private boolean mFadingOut;
     private boolean mParentNotFullyVisible;
     private boolean mGroupExpandedForMeasure;
     private boolean mScrollable;
     private View mForcedScroll;
-    private float mDarkAmount = 1.0f;
+    private float mDarkAmount = 0f;
     private static final Property<NotificationStackScrollLayout, Float> DARK_AMOUNT =
             new FloatProperty<NotificationStackScrollLayout>("darkAmount") {
                 @Override
@@ -523,9 +524,9 @@ public class NotificationStackScrollLayout extends ViewGroup
             setClipBounds(null);
         } else {
             float animProgress = Interpolators.FAST_OUT_SLOW_IN
-                    .getInterpolation(mDarkAmount);
+                    .getInterpolation(1f - mDarkAmount);
             float sidePaddingsProgress = Interpolators.FAST_OUT_SLOW_IN
-                    .getInterpolation(mDarkAmount * 2);
+                    .getInterpolation((1f - mDarkAmount) * 2);
             mTmpRect.set((int) MathUtils.lerp(darkLeft, lockScreenLeft, sidePaddingsProgress),
                     (int) MathUtils.lerp(darkTop, lockScreenTop, animProgress),
                     (int) MathUtils.lerp(darkRight, lockScreenRight, sidePaddingsProgress),
@@ -548,7 +549,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         } else {
             float alpha =
                     BACKGROUND_ALPHA_DIMMED + (1 - BACKGROUND_ALPHA_DIMMED) * (1.0f - mDimAmount);
-            alpha *= mDarkAmount;
+            alpha *= 1f - mDarkAmount;
             // We need to manually blend in the background color
             int scrimColor = mScrimController.getBackgroundColor();
             color = ColorUtils.blendARGB(scrimColor, mBgColor, alpha);
@@ -689,7 +690,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateAlgorithmHeightAndPadding() {
-        if (mPulsing != null) {
+        if (mPulsing) {
             mTopPadding = mClockBottom;
         } else {
             mTopPadding = mAmbientState.isDark() ? mDarkTopPadding : mRegularTopPadding;
@@ -919,6 +920,27 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     /**
+     * @return the height of the top heads up notification when pinned. This is different from the
+     *         intrinsic height, which also includes whether the notification is system expanded and
+     *         is mainly used when dragging down from a heads up notification.
+     */
+    private int getTopHeadsUpPinnedHeight() {
+        NotificationData.Entry topEntry = mHeadsUpManager.getTopEntry();
+        if (topEntry == null) {
+            return 0;
+        }
+        ExpandableNotificationRow row = topEntry.row;
+        if (row.isChildInGroup()) {
+            final ExpandableNotificationRow groupSummary
+                    = mGroupManager.getGroupSummary(row.getStatusBarNotification());
+            if (groupSummary != null) {
+                row = groupSummary;
+            }
+        }
+        return row.getPinnedHeadsUpHeight();
+    }
+
+    /**
      * @return the position from where the appear transition ends when expanding.
      *         Measured in absolute height.
      */
@@ -929,7 +951,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             int minNotificationsForShelf = 1;
             if (mTrackingHeadsUp
                     || (mHeadsUpManager.hasPinnedHeadsUp() && !mAmbientState.isDark())) {
-                appearPosition = mHeadsUpManager.getTopHeadsUpPinnedHeight();
+                appearPosition = getTopHeadsUpPinnedHeight();
                 minNotificationsForShelf = 2;
             } else {
                 appearPosition = 0;
@@ -1197,9 +1219,9 @@ public class NotificationStackScrollLayout extends ViewGroup
                 if (slidingChild instanceof ExpandableNotificationRow) {
                     ExpandableNotificationRow row = (ExpandableNotificationRow) slidingChild;
                     if (!mIsExpanded && row.isHeadsUp() && row.isPinned()
-                            && mHeadsUpManager.getTopEntry().entry.row != row
+                            && mHeadsUpManager.getTopEntry().row != row
                             && mGroupManager.getGroupSummary(
-                                mHeadsUpManager.getTopEntry().entry.row.getStatusBarNotification())
+                                mHeadsUpManager.getTopEntry().row.getStatusBarNotification())
                                 != row) {
                         continue;
                     }
@@ -2119,7 +2141,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public boolean hasPulsingNotifications() {
-        return mPulsing != null;
+        return mPulsing;
     }
 
     private void updateScrollability() {
@@ -2304,8 +2326,9 @@ public class NotificationStackScrollLayout extends ViewGroup
             return;
         }
 
+        final boolean awake = mDarkAmount != 0 || mAmbientState.isDark();
         mScrimController.setExcludedBackgroundArea(
-                mFadingOut || mParentNotFullyVisible || mDarkAmount != 1 || mIsClipped ? null
+                mFadingOut || mParentNotFullyVisible || awake || mIsClipped ? null
                         : mCurrentBounds);
         invalidate();
     }
@@ -2751,7 +2774,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private boolean isClickedHeadsUp(View child) {
-        return HeadsUpManager.isClickedHeadsUpNotification(child);
+        return HeadsUpUtil.isClickedHeadsUpNotification(child);
     }
 
     /**
@@ -3858,17 +3881,12 @@ public class NotificationStackScrollLayout extends ViewGroup
             mDarkNeedsAnimation = true;
             mDarkAnimationOriginIndex = findDarkAnimationOriginIndex(touchWakeUpScreenLocation);
             mNeedsAnimation =  true;
-            setDarkAmount(0.0f);
-        } else if (!dark) {
-            setDarkAmount(1.0f);
-        }
-        requestChildrenUpdate();
-        if (dark) {
-            mScrimController.setExcludedBackgroundArea(null);
         } else {
+            setDarkAmount(dark ? 1f : 0f);
             updateBackground();
         }
-
+        requestChildrenUpdate();
+        applyCurrentBackgroundBounds();
         updateWillNotDraw();
         updateContentHeight();
         notifyHeightChangeListener(mShelf);
@@ -3894,7 +3912,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void startBackgroundFadeIn() {
-        ObjectAnimator fadeAnimator = ObjectAnimator.ofFloat(this, DARK_AMOUNT, 0f, 1f);
+        ObjectAnimator fadeAnimator = ObjectAnimator.ofFloat(this, DARK_AMOUNT, mDarkAmount, 0f);
         fadeAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP);
         fadeAnimator.setInterpolator(Interpolators.ALPHA_IN);
         fadeAnimator.start();
@@ -4256,7 +4274,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mAnimationFinishedRunnables.add(runnable);
     }
 
-    public void setHeadsUpManager(HeadsUpManager headsUpManager) {
+    public void setHeadsUpManager(HeadsUpManagerPhone headsUpManager) {
         mHeadsUpManager = headsUpManager;
         mAmbientState.setHeadsUpManager(headsUpManager);
     }
@@ -4324,8 +4342,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         return mIsExpanded;
     }
 
-    public void setPulsing(Collection<HeadsUpManager.HeadsUpEntry> pulsing, int clockBottom) {
-        if (mPulsing == null && pulsing == null) {
+    public void setPulsing(boolean pulsing, int clockBottom) {
+        if (!mPulsing && !pulsing) {
             return;
         }
         mPulsing = pulsing;
@@ -4463,7 +4481,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         pw.println(String.format("[%s: pulsing=%s qsCustomizerShowing=%s visibility=%s"
                         + " alpha:%f scrollY:%d]",
                 this.getClass().getSimpleName(),
-                mPulsing != null ?"T":"f",
+                mPulsing ? "T":"f",
                 mAmbientState.isQsCustomizerShowing() ? "T":"f",
                 getVisibility() == View.VISIBLE ? "visible"
                         : getVisibility() == View.GONE ? "gone"

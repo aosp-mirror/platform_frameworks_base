@@ -68,7 +68,7 @@ import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationUtils;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
@@ -1571,7 +1571,7 @@ public class NotificationPanelView extends PanelView implements
     private void updatePanelExpanded() {
         boolean isExpanded = !isFullyCollapsed();
         if (mPanelExpanded != isExpanded) {
-            mHeadsUpManager.setIsExpanded(isExpanded);
+            mHeadsUpManager.setIsPanelExpanded(isExpanded);
             mStatusBar.setPanelExpanded(isExpanded);
             mPanelExpanded = isExpanded;
         }
@@ -2338,7 +2338,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     @Override
-    public void setHeadsUpManager(HeadsUpManager headsUpManager) {
+    public void setHeadsUpManager(HeadsUpManagerPhone headsUpManager) {
         super.setHeadsUpManager(headsUpManager);
         mHeadsUpTouchHelper = new HeadsUpTouchHelper(headsUpManager, mNotificationStackScroller,
                 this);
@@ -2630,8 +2630,8 @@ public class NotificationPanelView extends PanelView implements
         }
     }
 
-    public void setPulsing(Collection<HeadsUpManager.HeadsUpEntry> pulsing) {
-        mKeyguardStatusView.setPulsing(pulsing != null);
+    public void setPulsing(boolean pulsing) {
+        mKeyguardStatusView.setPulsing(pulsing);
         positionClockAndNotifications();
         mNotificationStackScroller.setPulsing(pulsing, mKeyguardStatusView.getLocationOnScreen()[1]
                 + mKeyguardStatusView.getClockBottom());

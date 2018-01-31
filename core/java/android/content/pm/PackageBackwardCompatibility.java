@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import static android.content.pm.SharedLibraryNames.ANDROID_TEST_BASE;
 import static android.content.pm.SharedLibraryNames.ANDROID_TEST_MOCK;
 import static android.content.pm.SharedLibraryNames.ANDROID_TEST_RUNNER;
 import static android.content.pm.SharedLibraryNames.ORG_APACHE_HTTP_LEGACY;
@@ -52,12 +53,22 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
                 "android.content.pm.OrgApacheHttpLegacyUpdater",
                 RemoveUnnecessaryOrgApacheHttpLegacyLibrary::new);
 
+        // Add this before adding AndroidTestBaseUpdater so that android.test.base comes before
+        // android.test.mock.
         packageUpdaters.add(new AndroidTestRunnerSplitUpdater());
+
+        // Attempt to load and add the optional updater that will only be available when
+        // REMOVE_ATB_FROM_BCP=true. If that could not be found then add the default updater that
+        // will remove any references to org.apache.http.library from the package so that it does
+        // not try and load the library when it is on the bootclasspath.
+        boolean bootClassPathContainsATB = !addOptionalUpdater(packageUpdaters,
+                "android.content.pm.AndroidTestBaseUpdater",
+                RemoveUnnecessaryAndroidTestBaseLibrary::new);
 
         PackageSharedLibraryUpdater[] updaterArray = packageUpdaters
                 .toArray(new PackageSharedLibraryUpdater[0]);
         INSTANCE = new PackageBackwardCompatibility(
-                bootClassPathContainsOAHL, updaterArray);
+                bootClassPathContainsOAHL, bootClassPathContainsATB, updaterArray);
     }
 
     /**
@@ -105,11 +116,14 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
 
     private final boolean mBootClassPathContainsOAHL;
 
+    private final boolean mBootClassPathContainsATB;
+
     private final PackageSharedLibraryUpdater[] mPackageUpdaters;
 
     public PackageBackwardCompatibility(boolean bootClassPathContainsOAHL,
-            PackageSharedLibraryUpdater[] packageUpdaters) {
+            boolean bootClassPathContainsATB, PackageSharedLibraryUpdater[] packageUpdaters) {
         this.mBootClassPathContainsOAHL = bootClassPathContainsOAHL;
+        this.mBootClassPathContainsATB = bootClassPathContainsATB;
         this.mPackageUpdaters = packageUpdaters;
     }
 
@@ -137,6 +151,14 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
     @VisibleForTesting
     public static boolean bootClassPathContainsOAHL() {
         return INSTANCE.mBootClassPathContainsOAHL;
+    }
+
+    /**
+     * True if the android.test.base is on the bootclasspath, false otherwise.
+     */
+    @VisibleForTesting
+    public static boolean bootClassPathContainsATB() {
+        return INSTANCE.mBootClassPathContainsATB;
     }
 
     /**
@@ -172,5 +194,19 @@ public class PackageBackwardCompatibility extends PackageSharedLibraryUpdater {
             removeLibrary(pkg, ORG_APACHE_HTTP_LEGACY);
         }
 
+    }
+
+    /**
+     * Remove any usages of android.test.base from the shared library as the library is on the
+     * bootclasspath.
+     */
+    @VisibleForTesting
+    public static class RemoveUnnecessaryAndroidTestBaseLibrary
+            extends PackageSharedLibraryUpdater {
+
+        @Override
+        public void updatePackage(Package pkg) {
+            removeLibrary(pkg, ANDROID_TEST_BASE);
+        }
     }
 }

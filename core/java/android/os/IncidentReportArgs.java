@@ -32,6 +32,9 @@ import java.util.ArrayList;
 @TestApi
 public final class IncidentReportArgs implements Parcelable {
 
+    private static final int DEST_EXPLICIT = 100;
+    private static final int DEST_AUTO = 200;
+
     private final IntArray mSections = new IntArray();
     private final ArrayList<byte[]> mHeaders = new ArrayList<byte[]>();
     private boolean mAll;
@@ -41,6 +44,7 @@ public final class IncidentReportArgs implements Parcelable {
      * Construct an incident report args with no fields.
      */
     public IncidentReportArgs() {
+        mDest = DEST_AUTO;
     }
 
     /**
@@ -143,7 +147,14 @@ public final class IncidentReportArgs implements Parcelable {
      * @hide
      */
     public void setPrivacyPolicy(int dest) {
-        mDest = dest;
+        switch (dest) {
+            case DEST_EXPLICIT:
+            case DEST_AUTO:
+                mDest = dest;
+                break;
+            default:
+                mDest = DEST_AUTO;
+        }
     }
 
     /**

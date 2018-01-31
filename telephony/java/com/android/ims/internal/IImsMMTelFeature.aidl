@@ -18,14 +18,12 @@ package com.android.ims.internal;
 
 import android.app.PendingIntent;
 
-import com.android.ims.ImsCallProfile;
+import android.telephony.ims.ImsCallProfile;
 import com.android.ims.internal.IImsCallSession;
-import com.android.ims.internal.IImsCallSessionListener;
 import com.android.ims.internal.IImsConfig;
 import com.android.ims.internal.IImsEcbm;
 import com.android.ims.internal.IImsMultiEndpoint;
 import com.android.ims.internal.IImsRegistrationListener;
-import com.android.ims.internal.IImsSmsListener;
 import com.android.ims.internal.IImsUt;
 
 import android.os.Message;
@@ -44,8 +42,7 @@ interface IImsMMTelFeature {
     void addRegistrationListener(in IImsRegistrationListener listener);
     void removeRegistrationListener(in IImsRegistrationListener listener);
     ImsCallProfile createCallProfile(int sessionId, int callSessionType, int callType);
-    IImsCallSession createCallSession(int sessionId, in ImsCallProfile profile,
-            IImsCallSessionListener listener);
+    IImsCallSession createCallSession(int sessionId, in ImsCallProfile profile);
     IImsCallSession getPendingCallSession(int sessionId, String callId);
     IImsUt getUtInterface();
     IImsConfig getConfigInterface();
@@ -54,12 +51,4 @@ interface IImsMMTelFeature {
     IImsEcbm getEcbmInterface();
     void setUiTTYMode(int uiTtyMode, in Message onComplete);
     IImsMultiEndpoint getMultiEndpointInterface();
-    // SMS APIs
-    void setSmsListener(IImsSmsListener l);
-    oneway void sendSms(in int token, int messageRef, String format, String smsc, boolean retry,
-            in byte[] pdu);
-    oneway void acknowledgeSms(int token, int messageRef, int result);
-    oneway void acknowledgeSmsReport(int token, int messageRef, int result);
-    String getSmsFormat();
-    oneway void onSmsReady();
 }

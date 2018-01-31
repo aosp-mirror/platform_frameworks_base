@@ -617,6 +617,23 @@ public final class AutofillManagerService extends SystemService {
         }
 
         @Override
+        public String getUserDataId() throws RemoteException {
+            final int userId = UserHandle.getCallingUserId();
+
+            synchronized (mLock) {
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
+                if (service != null) {
+                    final UserData userData = service.getUserData(getCallingUid());
+                    return userData == null ? null : userData.getId();
+                } else if (sVerbose) {
+                    Slog.v(TAG, "getUserDataId(): no service for " + userId);
+                }
+            }
+
+            return null;
+        }
+
+        @Override
         public void setUserData(UserData userData) throws RemoteException {
             final int userId = UserHandle.getCallingUserId();
 

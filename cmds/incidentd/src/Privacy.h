@@ -65,8 +65,6 @@ public:
     const uint8_t dest;
 
     PrivacySpec() : dest(DEST_DEFAULT_VALUE) {}
-    PrivacySpec(uint8_t dest) : dest(dest) {}
-
     bool operator<(const PrivacySpec& other) const;
 
     // check permission of a policy, if returns true, don't strip the data.
@@ -74,9 +72,12 @@ public:
 
     // if returns true, no data need to be stripped.
     bool RequireAll() const;
-};
 
-PrivacySpec new_spec_from_args(int dest);
-PrivacySpec get_default_dropbox_spec();
+    // Constructs spec using static methods below.
+    static PrivacySpec new_spec(int dest);
+    static PrivacySpec get_default_dropbox_spec();
+private:
+    PrivacySpec(uint8_t dest) : dest(dest) {}
+};
 
 #endif // PRIVACY_H

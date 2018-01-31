@@ -19,17 +19,25 @@ package android.util;
 
 option java_multiple_files = true;
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 // Proto representation of event.logtags.
 // Usually sit in /system/etc/event-log-tags.
 message EventLogTagMapProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     repeated EventLogTag event_log_tags = 1;
 }
 
 message EventLogTag {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
     optional uint32 tag_number = 1; // keyed by tag number.
     optional string tag_name = 2;
 
     message ValueDescriptor {
+        option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
         optional string name = 1;
 
         enum DataType {

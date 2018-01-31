@@ -10520,6 +10520,18 @@ public final class Settings {
         public static final String NETWORK_WATCHLIST_ENABLED = "network_watchlist_enabled";
 
         /**
+         * Flag to keep background restricted profiles running after exiting. If disabled,
+         * the restricted profile can be put into stopped state as soon as the user leaves it.
+         * Type: int (0 for false, 1 for true)
+         *
+         * Overridden by the system based on device information. If null, the value specified
+         * by {@code config_keepRestrictedProfilesInBackground} is used.
+         *
+         * @hide
+         */
+        public static final String KEEP_PROFILE_IN_BACKGROUND = "keep_profile_in_background";
+
+        /**
          * Get the key that retrieves a bluetooth headset's priority.
          * @hide
          */

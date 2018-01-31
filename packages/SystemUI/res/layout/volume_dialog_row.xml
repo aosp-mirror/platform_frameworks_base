@@ -61,6 +61,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:background="?android:selectableItemBackgroundBorderless"
+                android:contentDescription="@string/accessibility_output_chooser"
                 style="@style/VolumeButtons"
                 android:layout_centerVertical="true"
                 android:src="@drawable/ic_swap"

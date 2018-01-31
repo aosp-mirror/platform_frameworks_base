@@ -150,7 +150,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks {
                     if (moveHomeToTop) {
                         // Bring the home stack to the front
                         final ActivityStack homeStack = homeActivity.getStack();
-                        homeStack.mNoAnimActivities.add(homeActivity);
+                        mStackSupervisor.mNoAnimActivities.add(homeActivity);
                         homeStack.moveToFront("RecentsAnimation.onAnimationFinished()");
                     } else {
                         // Restore the home stack to its previous position

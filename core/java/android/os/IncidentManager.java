@@ -33,9 +33,11 @@ import android.util.Slog;
 @TestApi
 @SystemService(Context.INCIDENT_SERVICE)
 public class IncidentManager {
-    private static final String TAG = "incident";
+    private static final String TAG = "IncidentManager";
 
     private final Context mContext;
+
+    private IIncidentManager mService;
 
     /**
      * @hide
@@ -96,19 +98,45 @@ public class IncidentManager {
         reportIncidentInternal(args);
     }
 
-    private void reportIncidentInternal(IncidentReportArgs args) {
-        final IIncidentManager service = IIncidentManager.Stub.asInterface(
-                ServiceManager.getService(Context.INCIDENT_SERVICE));
-        if (service == null) {
-            Slog.e(TAG, "reportIncident can't find incident binder service");
-            return;
+    private class IncidentdDeathRecipient implements IBinder.DeathRecipient {
+        @Override
+        public void binderDied() {
+            synchronized (this) {
+                mService = null;
+            }
         }
+    }
 
+    private void reportIncidentInternal(IncidentReportArgs args) {
         try {
+            final IIncidentManager service = getIIncidentManagerLocked();
+            if (service == null) {
+                Slog.e(TAG, "reportIncident can't find incident binder service");
+                return;
+            }
             service.reportIncident(args);
         } catch (RemoteException ex) {
             Slog.e(TAG, "reportIncident failed", ex);
         }
     }
+
+    private IIncidentManager getIIncidentManagerLocked() throws RemoteException {
+        if (mService != null) {
+            return mService;
+        }
+
+        synchronized (this) {
+            if (mService != null) {
+                return mService;
+            }
+            mService = IIncidentManager.Stub.asInterface(
+                ServiceManager.getService(Context.INCIDENT_SERVICE));
+            if (mService != null) {
+                mService.asBinder().linkToDeath(new IncidentdDeathRecipient(), 0);
+            }
+            return mService;
+        }
+    }
+
 }
 

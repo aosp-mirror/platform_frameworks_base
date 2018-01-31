@@ -74,7 +74,8 @@ static jobject native_create(JNIEnv* env, std::unique_ptr<SkStream> stream) {
 
     // FIXME: Avoid parsing the whole image?
     const bool animated = codec->getFrameCount() > 1;
-    decoder->mCodec = SkAndroidCodec::MakeFromCodec(std::move(codec));
+    decoder->mCodec = SkAndroidCodec::MakeFromCodec(std::move(codec),
+            SkAndroidCodec::ExifOrientationBehavior::kRespect);
     if (!decoder->mCodec.get()) {
         doThrowIOE(env, "Could not create AndroidCodec");
         return nullptr;

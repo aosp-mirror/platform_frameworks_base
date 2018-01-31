@@ -87,6 +87,9 @@ public abstract class HwBinder implements IHwBinder {
      * Configures how many threads the process-wide hwbinder threadpool
      * has to process incoming requests.
      *
+     * @param maxThreads total number of threads to create (includes this thread if
+     *     callerWillJoin is true)
+     * @param callerWillJoin whether joinRpcThreadpool will be called in advance
      * @hide
      */
     @SystemApi
@@ -125,6 +128,12 @@ public abstract class HwBinder implements IHwBinder {
 
     /**
      * Enable instrumentation if available.
+     *
+     * On a non-user build, this method:
+     * - tries to enable atracing (if enabled)
+     * - tries to enable coverage dumps (if running in VTS)
+     * - tries to enable record and replay (if running in VTS)
+     *
      * @hide
      */
     @SystemApi

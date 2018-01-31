@@ -6609,15 +6609,81 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Indicates user operation is successful.
+     *
+     * @see #startUserInBackground(ComponentName, UserHandle)
+     * @see #stopUser(ComponentName, UserHandle)
+     * @see #logoutUser(ComponentName)
+     */
+    public static final int USER_OPERATION_SUCCESS = 0;
+
+    /**
+     * Indicates user operation failed for unknown reason.
+     *
+     * @see #startUserInBackground(ComponentName, UserHandle)
+     * @see #stopUser(ComponentName, UserHandle)
+     * @see #logoutUser(ComponentName)
+     */
+    public static final int USER_OPERATION_ERROR_UNKNOWN = 1;
+
+    /**
+     * Indicates user operation failed because target user is a managed profile.
+     *
+     * @see #startUserInBackground(ComponentName, UserHandle)
+     * @see #stopUser(ComponentName, UserHandle)
+     * @see #logoutUser(ComponentName)
+     */
+    public static final int USER_OPERATION_ERROR_MANAGED_PROFILE = 2;
+
+    /**
+     * Indicates user operation failed because maximum running user limit has reached.
+     *
+     * @see #startUserInBackground(ComponentName, UserHandle)
+     */
+    public static final int USER_OPERATION_ERROR_MAX_RUNNING_USERS = 3;
+
+    /**
+     * Indicates user operation failed because the target user is in foreground.
+     *
+     * @see #stopUser(ComponentName, UserHandle)
+     * @see #logoutUser(ComponentName)
+     */
+    public static final int USER_OPERATION_ERROR_CURRENT_USER = 4;
+
+    /**
+     * Result returned from
+     * <ul>
+     * <li>{@link #startUserInBackground(ComponentName, UserHandle)}</li>
+     * <li>{@link #stopUser(ComponentName, UserHandle)}</li>
+     * <li>{@link #logoutUser(ComponentName)}</li>
+     * </ul>
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "USER_OPERATION_" }, value = {
+            USER_OPERATION_SUCCESS,
+            USER_OPERATION_ERROR_UNKNOWN,
+            USER_OPERATION_ERROR_MANAGED_PROFILE,
+            USER_OPERATION_ERROR_MAX_RUNNING_USERS,
+            USER_OPERATION_ERROR_CURRENT_USER
+    })
+    public @interface UserOperationResult {}
+
+    /**
      * Called by a device owner to start the specified secondary user in background.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param userHandle the user to be stopped.
-     * @return {@code true} if the user can be started, {@code false} otherwise.
+     * @param userHandle the user to be started in background.
+     * @return one of the following result codes:
+     * {@link #USER_OPERATION_ERROR_UNKNOWN},
+     * {@link #USER_OPERATION_SUCCESS},
+     * {@link #USER_OPERATION_ERROR_MANAGED_PROFILE},
+     * {@link #USER_OPERATION_ERROR_MAX_RUNNING_USERS},
      * @throws SecurityException if {@code admin} is not a device owner.
      * @see #getSecondaryUsers(ComponentName)
      */
-    public boolean startUserInBackground(
+    public @UserOperationResult int startUserInBackground(
             @NonNull ComponentName admin, @NonNull UserHandle userHandle) {
         throwIfParentInstance("startUserInBackground");
         try {
@@ -6632,11 +6698,16 @@ public class DevicePolicyManager {
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param userHandle the user to be stopped.
-     * @return {@code true} if the user can be stopped, {@code false} otherwise.
+     * @return one of the following result codes:
+     * {@link #USER_OPERATION_ERROR_UNKNOWN},
+     * {@link #USER_OPERATION_SUCCESS},
+     * {@link #USER_OPERATION_ERROR_MANAGED_PROFILE},
+     * {@link #USER_OPERATION_ERROR_CURRENT_USER}
      * @throws SecurityException if {@code admin} is not a device owner.
      * @see #getSecondaryUsers(ComponentName)
      */
-    public boolean stopUser(@NonNull ComponentName admin, @NonNull UserHandle userHandle) {
+    public @UserOperationResult int stopUser(
+            @NonNull ComponentName admin, @NonNull UserHandle userHandle) {
         throwIfParentInstance("stopUser");
         try {
             return mService.stopUser(admin, userHandle);
@@ -6650,11 +6721,15 @@ public class DevicePolicyManager {
      * calling user and switch back to primary.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @return {@code true} if the exit was successful, {@code false} otherwise.
+     * @return one of the following result codes:
+     * {@link #USER_OPERATION_ERROR_UNKNOWN},
+     * {@link #USER_OPERATION_SUCCESS},
+     * {@link #USER_OPERATION_ERROR_MANAGED_PROFILE},
+     * {@link #USER_OPERATION_ERROR_CURRENT_USER}
      * @throws SecurityException if {@code admin} is not a profile owner affiliated with the device.
      * @see #getSecondaryUsers(ComponentName)
      */
-    public boolean logoutUser(@NonNull ComponentName admin) {
+    public @UserOperationResult int logoutUser(@NonNull ComponentName admin) {
         throwIfParentInstance("logoutUser");
         try {
             return mService.logoutUser(admin);

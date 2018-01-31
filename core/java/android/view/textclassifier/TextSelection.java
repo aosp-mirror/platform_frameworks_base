@@ -34,7 +34,7 @@ import java.util.Map;
 /**
  * Information about where text selection should be.
  */
-public final class TextSelection {
+public final class TextSelection implements Parcelable {
 
     private final int mStartIndex;
     private final int mEndIndex;
@@ -110,22 +110,6 @@ public final class TextSelection {
                 Locale.US,
                 "TextSelection {startIndex=%d, endIndex=%d, entities=%s, signature=%s}",
                 mStartIndex, mEndIndex, mEntityConfidence, mSignature);
-    }
-
-    /** Helper for parceling via #ParcelableWrapper. */
-    private void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(mStartIndex);
-        dest.writeInt(mEndIndex);
-        mEntityConfidence.writeToParcel(dest, flags);
-        dest.writeString(mSignature);
-    }
-
-    /** Helper for unparceling via #ParcelableWrapper. */
-    private TextSelection(Parcel in) {
-        mStartIndex = in.readInt();
-        mEndIndex = in.readInt();
-        mEntityConfidence = EntityConfidence.CREATOR.createFromParcel(in);
-        mSignature = in.readString();
     }
 
     /**
@@ -272,46 +256,36 @@ public final class TextSelection {
         }
     }
 
-    /**
-     * Parcelable wrapper for TextSelection objects.
-     * @hide
-     */
-    public static final class ParcelableWrapper implements Parcelable {
+    @Override
+    public int describeContents() {
+        return 0;
+    }
 
-        @NonNull private TextSelection mTextSelection;
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(mStartIndex);
+        dest.writeInt(mEndIndex);
+        mEntityConfidence.writeToParcel(dest, flags);
+        dest.writeString(mSignature);
+    }
 
-        public ParcelableWrapper(@NonNull TextSelection textSelection) {
-            Preconditions.checkNotNull(textSelection);
-            mTextSelection = textSelection;
-        }
+    public static final Parcelable.Creator<TextSelection> CREATOR =
+            new Parcelable.Creator<TextSelection>() {
+                @Override
+                public TextSelection createFromParcel(Parcel in) {
+                    return new TextSelection(in);
+                }
 
-        @NonNull
-        public TextSelection getTextSelection() {
-            return mTextSelection;
-        }
+                @Override
+                public TextSelection[] newArray(int size) {
+                    return new TextSelection[size];
+                }
+            };
 
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            mTextSelection.writeToParcel(dest, flags);
-        }
-
-        public static final Parcelable.Creator<ParcelableWrapper> CREATOR =
-                new Parcelable.Creator<ParcelableWrapper>() {
-                    @Override
-                    public ParcelableWrapper createFromParcel(Parcel in) {
-                        return new ParcelableWrapper(new TextSelection(in));
-                    }
-
-                    @Override
-                    public ParcelableWrapper[] newArray(int size) {
-                        return new ParcelableWrapper[size];
-                    }
-                };
-
+    private TextSelection(Parcel in) {
+        mStartIndex = in.readInt();
+        mEndIndex = in.readInt();
+        mEntityConfidence = EntityConfidence.CREATOR.createFromParcel(in);
+        mSignature = in.readString();
     }
 }

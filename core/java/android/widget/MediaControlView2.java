@@ -22,13 +22,13 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.media.session.MediaController;
 import android.media.update.ApiLoader;
+import android.media.update.FrameLayoutHelper;
 import android.media.update.MediaControlView2Provider;
-import android.media.update.ViewProvider;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+
 /**
  * A View that contains the controls for MediaPlayer2.
  * It provides a wide range of UI including buttons such as "Play/Pause", "Rewind", "Fast Forward",
@@ -45,10 +45,23 @@ import java.lang.annotation.RetentionPolicy;
  * developer needs to manually retrieve a MediaController instance and set it to MediaControlView2
  * by calling setController(MediaController controller).
  *
+ * <p>
+ * There is no separate method that handles the show/hide behavior for MediaControlView2. Instead,
+ * one can directly change the visibility of this view by calling View.setVisibility(int). The
+ * values supported are View.VISIBLE and View.GONE.
+ * In addition, the following customizations are supported:
+ * 1. Modify default timeout value of 2 seconds by calling setTimeout(long).
+ * 2. Set focus to the play/pause button by calling requestPlayButtonFocus().
+ *
+ * <p>
+ * It is also possible to add custom buttons with custom icons and actions inside MediaControlView2.
+ * Those buttons will be shown when the overflow button is clicked.
+ * See {@link VideoView2#setCustomActions} for more details on how to add.
+ *
  * TODO PUBLIC API
  * @hide
  */
-public class MediaControlView2 extends FrameLayout {
+public class MediaControlView2 extends FrameLayoutHelper<MediaControlView2Provider> {
     /** @hide */
     @IntDef({
             BUTTON_PLAY_PAUSE,
@@ -127,8 +140,6 @@ public class MediaControlView2 extends FrameLayout {
      */
     public static final String COMMAND_SET_FULLSCREEN = "setFullscreen";
 
-    private final MediaControlView2Provider mProvider;
-
     public MediaControlView2(@NonNull Context context) {
         this(context, null);
     }
@@ -144,17 +155,10 @@ public class MediaControlView2 extends FrameLayout {
 
     public MediaControlView2(@NonNull Context context, @Nullable AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-
-        mProvider = ApiLoader.getProvider(context)
-                .createMediaControlView2(this, new SuperProvider());
-    }
-
-    /**
-     * @hide
-     */
-    public MediaControlView2Provider getProvider() {
-        return mProvider;
+        super((instance, superProvider) ->
+                ApiLoader.getProvider(context).createMediaControlView2(
+                        (MediaControlView2) instance, superProvider),
+                context, attrs, defStyleAttr, defStyleRes);
     }
 
     /**
@@ -165,33 +169,10 @@ public class MediaControlView2 extends FrameLayout {
     }
 
     /**
-     * Shows the control view on screen. It will disappear automatically after 3 seconds of
-     * inactivity.
-     */
-    public void show() {
-        mProvider.show_impl();
-    }
-
-    /**
-     * Shows the control view on screen. It will disappear automatically after {@code timeout}
-     * milliseconds of inactivity.
-     */
-    public void show(long timeout) {
-        mProvider.show_impl(timeout);
-    }
-
-    /**
      * Returns whether the control view is currently shown or hidden.
      */
     public boolean isShowing() {
         return mProvider.isShowing_impl();
-    }
-
-    /**
-     * Hide the control view from the screen.
-     */
-    public void hide() {
-        mProvider.hide_impl();
     }
 
     /**
@@ -217,75 +198,34 @@ public class MediaControlView2 extends FrameLayout {
         mProvider.setButtonVisibility_impl(button, visibility);
     }
 
-    @Override
-    protected void onAttachedToWindow() {
-        mProvider.onAttachedToWindow_impl();
+    /**
+     *  Requests focus for the play/pause button.
+     */
+    public void requestPlayButtonFocus() {
+        mProvider.requestPlayButtonFocus_impl();
+    }
+
+    /**
+     * Sets a new timeout value (in milliseconds) for showing MediaControlView2. The default value
+     * is set as 2 seconds.
+     * @param timeout the
+     */
+    public void setTimeout(long timeout) {
+        mProvider.setTimeout_impl(timeout);
+    }
+
+    /**
+     * Retrieves current timeout value (in milliseconds) for showing MediaControlView2. The default
+     * value is set as 2 seconds.
+     */
+    public long getTimeout() {
+        return mProvider.getTimeout_impl();
     }
 
     @Override
-    protected void onDetachedFromWindow() {
-        mProvider.onDetachedFromWindow_impl();
-    }
+    // TODO Move this method to ViewProvider
+    public void onVisibilityAggregated(boolean isVisible) {
 
-    @Override
-    public CharSequence getAccessibilityClassName() {
-        return mProvider.getAccessibilityClassName_impl();
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        return mProvider.onTouchEvent_impl(ev);
-    }
-
-    @Override
-    public boolean onTrackballEvent(MotionEvent ev) {
-        return mProvider.onTrackballEvent_impl(ev);
-    }
-
-    @Override
-    public void onFinishInflate() {
-        mProvider.onFinishInflate_impl();
-    }
-
-    @Override
-    public void setEnabled(boolean enabled) {
-        mProvider.setEnabled_impl(enabled);
-    }
-
-    private class SuperProvider implements ViewProvider {
-        @Override
-        public void onAttachedToWindow_impl() {
-            MediaControlView2.super.onAttachedToWindow();
-        }
-
-        @Override
-        public void onDetachedFromWindow_impl() {
-            MediaControlView2.super.onDetachedFromWindow();
-        }
-
-        @Override
-        public CharSequence getAccessibilityClassName_impl() {
-            return MediaControlView2.super.getAccessibilityClassName();
-        }
-
-        @Override
-        public boolean onTouchEvent_impl(MotionEvent ev) {
-            return MediaControlView2.super.onTouchEvent(ev);
-        }
-
-        @Override
-        public boolean onTrackballEvent_impl(MotionEvent ev) {
-            return MediaControlView2.super.onTrackballEvent(ev);
-        }
-
-        @Override
-        public void onFinishInflate_impl() {
-            MediaControlView2.super.onFinishInflate();
-        }
-
-        @Override
-        public void setEnabled_impl(boolean enabled) {
-            MediaControlView2.super.setEnabled(enabled);
-        }
+        mProvider.onVisibilityAggregated_impl(isVisible);
     }
 }

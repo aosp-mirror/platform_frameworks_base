@@ -222,6 +222,12 @@ message GaugeMetric {
   optional TimeUnit bucket = 6;
 
   repeated MetricConditionLink links = 7;
+
+  enum SamplingType {
+    RANDOM_ONE_SAMPLE = 1;
+    ALL_CONDITION_CHANGES = 2;
+  }
+  optional SamplingType sampling_type = 9 [default = RANDOM_ONE_SAMPLE] ;
 }
 
 message ValueMetric {

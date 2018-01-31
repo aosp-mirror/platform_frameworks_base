@@ -42,13 +42,11 @@ enum MatchingState {
 bool combinationMatch(const std::vector<int>& children, const LogicalOperation& operation,
                       const std::vector<MatchingState>& matcherResults);
 
-bool matchFieldSimple(const UidMap& uidMap, const FieldValueMap& dimensionsMap,
-                      const FieldValueMatcher& matcher, const Field& field);
-
 bool matchesSimple(const UidMap& uidMap,
     const SimpleAtomMatcher& simpleMatcher, const LogEvent& wrapper);
 
-std::vector<DimensionsValue> getDimensionKeys(const LogEvent& event, const FieldMatcher& matcher);
+void getDimensionKeys(const LogEvent& event, const FieldMatcher& matcher,
+                      std::vector<DimensionsValue> *dimensionKeys);
 
 }  // namespace statsd
 }  // namespace os

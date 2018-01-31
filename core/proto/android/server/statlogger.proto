@@ -20,8 +20,12 @@ package com.android.server;
 
 option java_multiple_files = true;
 
+import "frameworks/base/libs/incident/proto/android/privacy.proto";
+
 // Dump from StatLogger.
 message StatLoggerProto {
+  option (.android.msg_privacy).dest = DEST_EXPLICIT;
+
   message Event {
     optional int32 eventId = 1;
     optional string label = 2;

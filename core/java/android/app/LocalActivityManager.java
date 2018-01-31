@@ -224,8 +224,8 @@ public class LocalActivityManager {
     
     private void performPause(LocalActivityRecord r, boolean finishing) {
         final boolean needState = r.instanceState == null;
-        final Bundle instanceState = mActivityThread.performPauseActivity(
-                r, finishing, needState, "performPause", null /* pendingActions */);
+        final Bundle instanceState = mActivityThread.performPauseActivity(r, finishing,
+                "performPause", null /* pendingActions */);
         if (needState) {
             r.instanceState = instanceState;
         }

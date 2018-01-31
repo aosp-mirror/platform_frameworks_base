@@ -14,10 +14,10 @@ LOCAL_SHARED_ANDROID_LIBRARIES := \
     android-support-v7-preference \
     android-support-v7-appcompat \
     android-support-v14-preference \
-    apptoolkit-lifecycle-runtime
+    android-arch-lifecycle-runtime
 
 LOCAL_SHARED_JAVA_LIBRARIES := \
-    apptoolkit-lifecycle-common
+    android-arch-lifecycle-common
 
 LOCAL_RESOURCE_DIR := $(LOCAL_PATH)/res
 

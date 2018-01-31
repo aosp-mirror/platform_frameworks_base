@@ -25,15 +25,19 @@ import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.metrics.LogMaker;
 import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
 
 import com.android.internal.R;
+import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+
 
 import java.io.IOException;
 
@@ -91,10 +95,20 @@ public final class AutofillServiceInfo {
     private static TypedArray getMetaDataArray(PackageManager pm, ServiceInfo si) {
         // Check for permissions.
         if (!Manifest.permission.BIND_AUTOFILL_SERVICE.equals(si.permission)) {
-            Log.w(TAG, "AutofillService from '" + si.packageName + "' does not require permission "
-                    + Manifest.permission.BIND_AUTOFILL_SERVICE);
-            throw new SecurityException("Service does not require permission "
-                    + Manifest.permission.BIND_AUTOFILL_SERVICE);
+            if (Manifest.permission.BIND_AUTOFILL.equals(si.permission)) {
+                // Let it go for now...
+                Log.w(TAG, "AutofillService from '" + si.packageName + "' uses unsupported "
+                        + "permission " + Manifest.permission.BIND_AUTOFILL + ". It works for "
+                        + "now, but might not be supported on future releases");
+                new MetricsLogger().write(new LogMaker(MetricsEvent.AUTOFILL_INVALID_PERMISSION)
+                        .setPackageName(si.packageName));
+            } else {
+                Log.w(TAG, "AutofillService from '" + si.packageName
+                        + "' does not require permission "
+                        + Manifest.permission.BIND_AUTOFILL_SERVICE);
+                throw new SecurityException("Service does not require permission "
+                        + Manifest.permission.BIND_AUTOFILL_SERVICE);
+            }
         }
 
         // Get the AutoFill metadata, if declared.

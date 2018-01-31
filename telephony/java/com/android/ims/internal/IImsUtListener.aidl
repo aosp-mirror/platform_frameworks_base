@@ -18,11 +18,11 @@ package com.android.ims.internal;
 
 import android.os.Bundle;
 
-import com.android.ims.ImsCallForwardInfo;
-import com.android.ims.ImsSsData;
-import com.android.ims.ImsSsInfo;
+import android.telephony.ims.ImsCallForwardInfo;
+import android.telephony.ims.ImsSsInfo;
 import com.android.ims.internal.IImsUt;
-import com.android.ims.ImsReasonInfo;
+import android.telephony.ims.ImsReasonInfo;
+import android.telephony.ims.ImsSsData;
 
 /**
  * {@hide}

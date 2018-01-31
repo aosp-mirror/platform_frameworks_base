@@ -227,9 +227,9 @@ interface IDevicePolicyManager {
     UserHandle createAndManageUser(in ComponentName who, in String name, in ComponentName profileOwner, in PersistableBundle adminExtras, in int flags);
     boolean removeUser(in ComponentName who, in UserHandle userHandle);
     boolean switchUser(in ComponentName who, in UserHandle userHandle);
-    boolean startUserInBackground(in ComponentName who, in UserHandle userHandle);
-    boolean stopUser(in ComponentName who, in UserHandle userHandle);
-    boolean logoutUser(in ComponentName who);
+    int startUserInBackground(in ComponentName who, in UserHandle userHandle);
+    int stopUser(in ComponentName who, in UserHandle userHandle);
+    int logoutUser(in ComponentName who);
     List<UserHandle> getSecondaryUsers(in ComponentName who);
 
     void enableSystemApp(in ComponentName admin, in String callerPackage, in String packageName);

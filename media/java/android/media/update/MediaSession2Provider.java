@@ -16,15 +16,18 @@
 
 package android.media.update;
 
-import android.media.AudioAttributes;
+import android.app.PendingIntent;
 import android.media.MediaItem2;
+import android.media.MediaMetadata2;
 import android.media.MediaPlayerInterface;
 import android.media.MediaPlayerInterface.PlaybackListener;
+import android.media.MediaSession2;
 import android.media.MediaSession2.Command;
 import android.media.MediaSession2.CommandButton;
 import android.media.MediaSession2.CommandGroup;
 import android.media.MediaSession2.ControllerInfo;
 import android.media.MediaSession2.PlaylistParams;
+import android.media.MediaSession2.SessionCallback;
 import android.media.SessionToken2;
 import android.media.VolumeProvider;
 import android.os.Bundle;
@@ -38,8 +41,6 @@ import java.util.concurrent.Executor;
  */
 // TODO: @SystemApi
 public interface MediaSession2Provider extends TransportControlProvider {
-    void initialize();
-
     void close_impl();
     void setPlayer_impl(MediaPlayerInterface player);
     void setPlayer_impl(MediaPlayerInterface player, VolumeProvider volumeProvider);
@@ -62,14 +63,6 @@ public interface MediaSession2Provider extends TransportControlProvider {
     void addPlaybackListener_impl(Executor executor, PlaybackListener listener);
     void removePlaybackListener_impl(PlaybackListener listener);
 
-    interface ControllerInfoProvider {
-        String getPackageName_impl();
-        int getUid_impl();
-        boolean isTrusted_impl();
-        int hashCode_impl();
-        boolean equals_impl(ControllerInfoProvider obj);
-    }
-
     interface CommandProvider {
         int getCommandCode_impl();
         String getCustomCommand_impl();
@@ -78,5 +71,38 @@ public interface MediaSession2Provider extends TransportControlProvider {
 
         boolean equals_impl(Object ob);
         int hashCode_impl();
+    }
+
+    interface CommandGroupProvider {
+        void addCommand_impl(Command command);
+        void addAllPredefinedCommands_impl();
+        void removeCommand_impl(Command command);
+        boolean hasCommand_impl(Command command);
+        boolean hasCommand_impl(int code);
+        Bundle toBundle_impl();
+    }
+
+    interface ControllerInfoProvider {
+        String getPackageName_impl();
+        int getUid_impl();
+        boolean isTrusted_impl();
+        int hashCode_impl();
+        boolean equals_impl(ControllerInfoProvider obj);
+    }
+
+    interface PlaylistParamsProvider {
+        int getRepeatMode_impl();
+        int getShuffleMode_impl();
+        MediaMetadata2 getPlaylistMetadata_impl();
+        Bundle toBundle_impl();
+    }
+
+    interface BuilderBaseProvider<T extends MediaSession2, C extends SessionCallback> {
+        void setVolumeProvider_impl(VolumeProvider volumeProvider);
+        void setRatingType_impl(int type);
+        void setSessionActivity_impl(PendingIntent pi);
+        void setId_impl(String id);
+        void setSessionCallback_impl(Executor executor, C callback);
+        T build_impl();
     }
 }

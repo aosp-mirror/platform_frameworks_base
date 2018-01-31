@@ -16,16 +16,16 @@
 
 #include "GraphicsJNI.h"
 #include "ImageDecoder.h"
-#include "core_jni_helpers.h"
 #include "Utils.h"
+#include "core_jni_helpers.h"
 
-#include <hwui/AnimatedImageDrawable.h>
-#include <hwui/Canvas.h>
 #include <SkAndroidCodec.h>
 #include <SkAnimatedImage.h>
 #include <SkColorFilter.h>
 #include <SkPicture.h>
 #include <SkPictureRecorder.h>
+#include <hwui/AnimatedImageDrawable.h>
+#include <hwui/Canvas.h>
 
 using namespace android;
 
@@ -85,6 +85,9 @@ static jlong AnimatedImageDrawable_nGetNativeFinalizer(JNIEnv* /*env*/, jobject 
     return static_cast<jlong>(reinterpret_cast<uintptr_t>(&AnimatedImageDrawable_destruct));
 }
 
+// Java's FINISHED relies on this being -1
+static_assert(SkAnimatedImage::kFinished == -1);
+
 static jlong AnimatedImageDrawable_nDraw(JNIEnv* env, jobject /*clazz*/, jlong nativePtr,
                                          jlong canvasPtr) {
     auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
@@ -114,9 +117,6 @@ static jboolean AnimatedImageDrawable_nIsRunning(JNIEnv* env, jobject /*clazz*/,
     auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
     return drawable->isRunning();
 }
-
-// Java's NOT_RUNNING relies on this being -2.0.
-static_assert(SkAnimatedImage::kNotRunning == -2.0);
 
 static jboolean AnimatedImageDrawable_nStart(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
     auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
@@ -172,6 +172,11 @@ static long AnimatedImageDrawable_nNativeByteSize(JNIEnv* env, jobject /*clazz*/
     return sizeof(drawable);
 }
 
+static void AnimatedImageDrawable_nMarkInvisible(JNIEnv* env, jobject /*clazz*/, jlong nativePtr) {
+    auto* drawable = reinterpret_cast<AnimatedImageDrawable*>(nativePtr);
+    drawable->markInvisible();
+}
+
 static const JNINativeMethod gAnimatedImageDrawableMethods[] = {
     { "nCreate",             "(JLandroid/graphics/ImageDecoder;IILandroid/graphics/Rect;)J", (void*) AnimatedImageDrawable_nCreate },
     { "nGetNativeFinalizer", "()J",                                                          (void*) AnimatedImageDrawable_nGetNativeFinalizer },
@@ -185,6 +190,7 @@ static const JNINativeMethod gAnimatedImageDrawableMethods[] = {
     { "nSetLoopCount",       "(JI)V",                                                        (void*) AnimatedImageDrawable_nSetLoopCount },
     { "nSetOnAnimationEndListener", "(JLandroid/graphics/drawable/AnimatedImageDrawable;)V", (void*) AnimatedImageDrawable_nSetOnAnimationEndListener },
     { "nNativeByteSize",     "(J)J",                                                         (void*) AnimatedImageDrawable_nNativeByteSize },
+    { "nMarkInvisible",      "(J)V",                                                         (void*) AnimatedImageDrawable_nMarkInvisible },
 };
 
 int register_android_graphics_drawable_AnimatedImageDrawable(JNIEnv* env) {

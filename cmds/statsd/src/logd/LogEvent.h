@@ -92,7 +92,6 @@ public:
      * Get a DimensionsValue proto objects from Field.
      */
     bool GetSimpleAtomDimensionsValueProto(size_t field, DimensionsValue* dimensionsValue) const;
-    DimensionsValue  GetSimpleAtomDimensionsValueProto(size_t atomField)  const;
 
     /**
      * Write test data to the LogEvent. This can only be used when the LogEvent is constructed

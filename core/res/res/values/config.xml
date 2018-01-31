@@ -2477,9 +2477,9 @@
         <item>restart</item>
         <item>screenshot</item>
         <item>logout</item>
+        <item>lockdown</item>
         <item>bugreport</item>
         <item>users</item>
-        <item>lockdown</item>
     </string-array>
 
     <!-- Number of milliseconds to hold a wake lock to ensure that drawing is fully
@@ -3123,6 +3123,15 @@
     -->
     <string name="config_defaultAutofillService" translatable="false"></string>
 
+    <!-- The component name, flattened to a string, for the default system textclassifier service.
+         This service must be trusted, as it can be activated without explicit consent of the user.
+         (e.g. com.android.textclassifier/.TextClassifierServiceImpl).
+         If no textclassifier service with the specified name exists on the device (or if this is
+         set to empty string), a default textclassifier will be loaded in the calling app's process.
+         See android.view.textclassifier.TextClassificationManager.
+    -->
+    <string name="config_defaultTextClassifierService" translatable="false"></string>
+
     <!-- Whether the device uses the default focus highlight when focus state isn't specified. -->
     <bool name="config_useDefaultFocusHighlight">true</bool>
 
@@ -3266,4 +3275,6 @@
     <string name="config_defaultAssistantAccessPackage" translatable="false">android.ext.services</string>
 
     <bool name="config_supportBluetoothPersistedState">true</bool>
+
+    <bool name="config_keepRestrictedProfilesInBackground">true</bool>
 </resources>

@@ -64,7 +64,7 @@ LOCAL_AAPT_FLAGS += --auto-add-overlay --extra-packages com.android.settingslib
 LOCAL_STATIC_JAVA_LIBRARIES += \
     android-support-annotations \
     android-support-v4 \
-    apptoolkit-lifecycle-runtime \
-    apptoolkit-lifecycle-common \
+    android-arch-lifecycle-runtime \
+    android-arch-lifecycle-common \
     SettingsLib
 endif

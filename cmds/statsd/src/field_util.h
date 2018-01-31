@@ -20,7 +20,8 @@
 #include "frameworks/base/cmds/statsd/src/statsd_internal.pb.h"
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
 
-#include <unordered_map>
+#include <map>
+#include <set>
 
 namespace android {
 namespace os {
@@ -54,14 +55,8 @@ Field* getSingleLeaf(Field* field);
 void appendLeaf(Field *parent, int node_field_num);
 void appendLeaf(Field *parent, int node_field_num, int position);
 
-// Given the field sorting logic, this function is to increase the "field" at the leaf node.
-void getNextField(Field* field);
-
 // Increase the position index for the node. If the "position_index" is not set, set it as 0.
 void increasePosition(Field *field);
-
-// Finds the leaf node and set the index there.
-void setPositionForLeaf(Field *field, int index);
 
 // Returns true if the matcher has specified at least one leaf node.
 bool hasLeafNode(const FieldMatcher& matcher);
@@ -72,15 +67,13 @@ bool hasLeafNode(const FieldMatcher& matcher);
 int getPositionByReferenceField(const Field& reference, const Field& field_with_index);
 
 // Utils to build the Field proto for simple atom fields.
-Field buildAtomField(const int tagId, const Field &atomField);
-Field buildSimpleAtomField(const int tagId, const int atomFieldNum);
-Field buildSimpleAtomField(const int tagId);
+void buildSimpleAtomField(const int tagId, const int atomFieldNum, Field* field);
+void buildSimpleAtomField(const int tagId, Field* field);
 
 // Find out all the fields specified by the matcher.
 void findFields(
-       const FieldValueMap& fieldValueMap,
-       const FieldMatcher& matcher,
-       std::vector<Field>* rootFields);
+       const FieldValueMap& fieldValueMap, const FieldMatcher& matcher,
+       std::set<Field, FieldCmp>* rootFields);
 
 // Filter out the fields not in the field matcher.
 void filterFields(const FieldMatcher& matcher, FieldValueMap* fieldValueMap);

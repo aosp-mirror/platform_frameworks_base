@@ -2206,12 +2206,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
                     Slog.i(TAG, "Moving uid " + uid + " to bucketIndex " + bucketIndex);
                 }
                 synchronized (mLock) {
-                    // TODO: update to be more efficient once we can slice by source UID
-                    mJobs.forEachJob((JobStatus job) -> {
-                        if (job.getSourceUid() == uid) {
-                            job.setStandbyBucket(bucketIndex);
-                        }
-                    });
+                    mJobs.forEachJobForSourceUid(uid, job -> job.setStandbyBucket(bucketIndex));
                     onControllerStateChanged();
                 }
             });

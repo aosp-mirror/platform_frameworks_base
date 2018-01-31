@@ -431,7 +431,7 @@ public class DateFormat {
             int c = s.charAt(i);
 
             if (c == QUOTE) {
-                count = appendQuotedText(s, i, len);
+                count = appendQuotedText(s, i);
                 len = s.length();
                 continue;
             }
@@ -574,36 +574,48 @@ public class DateFormat {
                             : String.format(Locale.getDefault(), "%d", year);
     }
 
-    private static int appendQuotedText(SpannableStringBuilder s, int i, int len) {
-        if (i + 1 < len && s.charAt(i + 1) == QUOTE) {
-            s.delete(i, i + 1);
+
+    /**
+     * Strips quotation marks from the {@code formatString} and appends the result back to the
+     * {@code formatString}.
+     *
+     * @param formatString the format string, as described in
+     *                     {@link android.text.format.DateFormat}, to be modified
+     * @param index        index of the first quote
+     * @return the length of the quoted text that was appended.
+     * @hide
+     */
+    public static int appendQuotedText(SpannableStringBuilder formatString, int index) {
+        int length = formatString.length();
+        if (index + 1 < length && formatString.charAt(index + 1) == QUOTE) {
+            formatString.delete(index, index + 1);
             return 1;
         }
 
         int count = 0;
 
         // delete leading quote
-        s.delete(i, i + 1);
-        len--;
+        formatString.delete(index, index + 1);
+        length--;
 
-        while (i < len) {
-            char c = s.charAt(i);
+        while (index < length) {
+            char c = formatString.charAt(index);
 
             if (c == QUOTE) {
                 //  QUOTEQUOTE -> QUOTE
-                if (i + 1 < len && s.charAt(i + 1) == QUOTE) {
+                if (index + 1 < length && formatString.charAt(index + 1) == QUOTE) {
 
-                    s.delete(i, i + 1);
-                    len--;
+                    formatString.delete(index, index + 1);
+                    length--;
                     count++;
-                    i++;
+                    index++;
                 } else {
                     //  Closing QUOTE ends quoted text copying
-                    s.delete(i, i + 1);
+                    formatString.delete(index, index + 1);
                     break;
                 }
             } else {
-                i++;
+                index++;
                 count++;
             }
         }

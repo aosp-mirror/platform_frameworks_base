@@ -30,20 +30,20 @@ import android.media.session.MediaSession.Callback;
 import android.media.session.PlaybackState;
 import android.media.update.ApiLoader;
 import android.media.update.MediaSession2Provider;
+import android.media.update.MediaSession2Provider.BuilderBaseProvider;
+import android.media.update.MediaSession2Provider.CommandGroupProvider;
 import android.media.update.MediaSession2Provider.CommandProvider;
 import android.media.update.MediaSession2Provider.ControllerInfoProvider;
+import android.media.update.ProviderCreator;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IInterface;
-import android.os.Parcelable;
 import android.os.ResultReceiver;
 import android.text.TextUtils;
-import android.util.ArraySet;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -156,14 +156,6 @@ public class MediaSession2 implements AutoCloseable {
             return mProvider.toBundle_impl();
         }
 
-        /**
-         * @return a new Command instance from the Bundle
-         * @hide
-         */
-        public static Command fromBundle(@NonNull Context context, Bundle command) {
-            return ApiLoader.getProvider(context).fromBundle_MediaSession2Command(context, command);
-        }
-
         @Override
         public boolean equals(Object obj) {
             if (!(obj instanceof Command)) {
@@ -176,63 +168,55 @@ public class MediaSession2 implements AutoCloseable {
         public int hashCode() {
             return mProvider.hashCode_impl();
         }
+
+        /**
+         * @return a new Command instance from the Bundle
+         * @hide
+         */
+        public static Command fromBundle(@NonNull Context context, Bundle command) {
+            return ApiLoader.getProvider(context).fromBundle_MediaSession2Command(context, command);
+        }
     }
 
     /**
      * Represent set of {@link Command}.
      */
-    // TODO(jaewan): Move this to updatable
     public static class CommandGroup {
-        private static final String KEY_COMMANDS =
-                "android.media.mediasession2.commandgroup.commands";
-        private ArraySet<Command> mCommands = new ArraySet<>();
-        private final Context mContext;
+        private final CommandGroupProvider mProvider;
 
         public CommandGroup(Context context) {
-            mContext = context;
+            mProvider = ApiLoader.getProvider(context)
+                    .createMediaSession2CommandGroup(context, this, null);
         }
 
         public CommandGroup(Context context, CommandGroup others) {
-            this(context);
-            mCommands.addAll(others.mCommands);
+            mProvider = ApiLoader.getProvider(context)
+                    .createMediaSession2CommandGroup(context, this, others);
         }
 
         public void addCommand(Command command) {
-            mCommands.add(command);
+            mProvider.addCommand_impl(command);
         }
 
         public void addAllPredefinedCommands() {
-            // TODO(jaewan): Is there any better way than this?
-            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_START));
-            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_PAUSE));
-            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_STOP));
-            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_SKIP_NEXT_ITEM));
-            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_SKIP_PREV_ITEM));
-            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_PREPARE));
-            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_FAST_FORWARD));
-            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_REWIND));
-            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_SEEK_TO));
-            mCommands.add(new Command(mContext, COMMAND_CODE_PLAYBACK_SET_CURRENT_PLAYLIST_ITEM));
+            mProvider.addAllPredefinedCommands_impl();
         }
 
         public void removeCommand(Command command) {
-            mCommands.remove(command);
+            mProvider.removeCommand_impl(command);
         }
 
         public boolean hasCommand(Command command) {
-            return mCommands.contains(command);
+            return mProvider.hasCommand_impl(command);
         }
 
         public boolean hasCommand(int code) {
-            if (code == COMMAND_CODE_CUSTOM) {
-                throw new IllegalArgumentException("Use hasCommand(Command) for custom command");
-            }
-            for (int i = 0; i < mCommands.size(); i++) {
-                if (mCommands.valueAt(i).getCommandCode() == code) {
-                    return true;
-                }
-            }
-            return false;
+            return mProvider.hasCommand_impl(code);
+        }
+
+        @SystemApi
+        public CommandGroupProvider getProvider() {
+            return mProvider;
         }
 
         /**
@@ -240,13 +224,7 @@ public class MediaSession2 implements AutoCloseable {
          * @hide
          */
         public Bundle toBundle() {
-            ArrayList<Bundle> list = new ArrayList<>();
-            for (int i = 0; i < mCommands.size(); i++) {
-                list.add(mCommands.valueAt(i).toBundle());
-            }
-            Bundle bundle = new Bundle();
-            bundle.putParcelableArrayList(KEY_COMMANDS, list);
-            return bundle;
+            return mProvider.toBundle_impl();
         }
 
         /**
@@ -254,26 +232,8 @@ public class MediaSession2 implements AutoCloseable {
          * @hide
          */
         public static @Nullable CommandGroup fromBundle(Context context, Bundle commands) {
-            if (commands == null) {
-                return null;
-            }
-            List<Parcelable> list = commands.getParcelableArrayList(KEY_COMMANDS);
-            if (list == null) {
-                return null;
-            }
-            CommandGroup commandGroup = new CommandGroup(context);
-            for (int i = 0; i < list.size(); i++) {
-                Parcelable parcelable = list.get(i);
-                if (!(parcelable instanceof Bundle)) {
-                    continue;
-                }
-                Bundle commandBundle = (Bundle) parcelable;
-                Command command = Command.fromBundle(context, commandBundle);
-                if (command != null) {
-                    commandGroup.addCommand(command);
-                }
-            }
-            return commandGroup;
+            return ApiLoader.getProvider(context)
+                    .fromBundle_MediaSession2CommandGroup(context, commands);
         }
     }
 
@@ -445,36 +405,11 @@ public class MediaSession2 implements AutoCloseable {
      * @hide
      */
     static abstract class BuilderBase
-            <T extends MediaSession2.BuilderBase<T, C>, C extends SessionCallback> {
-        final Context mContext;
-        final MediaPlayerInterface mPlayer;
-        String mId;
-        Executor mCallbackExecutor;
-        C mCallback;
-        VolumeProvider mVolumeProvider;
-        int mRatingType;
-        PendingIntent mSessionActivity;
+            <T extends MediaSession2, U extends BuilderBase<T, U, C>, C extends SessionCallback> {
+        private final BuilderBaseProvider<T, C> mProvider;
 
-        /**
-         * Constructor.
-         *
-         * @param context a context
-         * @param player a player to handle incoming command from any controller.
-         * @throws IllegalArgumentException if any parameter is null, or the player is a
-         *      {@link MediaSession2} or {@link MediaController2}.
-         */
-        // TODO(jaewan): Also need executor
-        public BuilderBase(@NonNull Context context, @NonNull MediaPlayerInterface player) {
-            if (context == null) {
-                throw new IllegalArgumentException("context shouldn't be null");
-            }
-            if (player == null) {
-                throw new IllegalArgumentException("player shouldn't be null");
-            }
-            mContext = context;
-            mPlayer = player;
-            // Ensure non-null
-            mId = "";
+        BuilderBase(ProviderCreator<BuilderBase<T, U, C>, BuilderBaseProvider<T, C>> creator) {
+            mProvider = creator.createProvider(this);
         }
 
         /**
@@ -486,9 +421,9 @@ public class MediaSession2 implements AutoCloseable {
          *
          * @param volumeProvider The provider that will handle volume changes. Can be {@code null}
          */
-        public T setVolumeProvider(@Nullable VolumeProvider volumeProvider) {
-            mVolumeProvider = volumeProvider;
-            return (T) this;
+        public U setVolumeProvider(@Nullable VolumeProvider volumeProvider) {
+            mProvider.setVolumeProvider_impl(volumeProvider);
+            return (U) this;
         }
 
         /**
@@ -504,9 +439,9 @@ public class MediaSession2 implements AutoCloseable {
          * <li>{@link Rating2#RATING_THUMB_UP_DOWN}</li>
          * </ul>
          */
-        public T setRatingType(@Rating2.Style int type) {
-            mRatingType = type;
-            return (T) this;
+        public U setRatingType(@Rating2.Style int type) {
+            mProvider.setRatingType_impl(type);
+            return (U) this;
         }
 
         /**
@@ -516,9 +451,9 @@ public class MediaSession2 implements AutoCloseable {
          *
          * @param pi The intent to launch to show UI for this session.
          */
-        public T setSessionActivity(@Nullable PendingIntent pi) {
-            mSessionActivity = pi;
-            return (T) this;
+        public U setSessionActivity(@Nullable PendingIntent pi) {
+            mProvider.setSessionActivity_impl(pi);
+            return (U) this;
         }
 
         /**
@@ -531,12 +466,9 @@ public class MediaSession2 implements AutoCloseable {
          * @throws IllegalArgumentException if id is {@code null}
          * @return
          */
-        public T setId(@NonNull String id) {
-            if (id == null) {
-                throw new IllegalArgumentException("id shouldn't be null");
-            }
-            mId = id;
-            return (T) this;
+        public U setId(@NonNull String id) {
+            mProvider.setId_impl(id);
+            return (U) this;
         }
 
         /**
@@ -546,17 +478,10 @@ public class MediaSession2 implements AutoCloseable {
          * @param callback session callback.
          * @return
          */
-        public T setSessionCallback(@NonNull @CallbackExecutor Executor executor,
+        public U setSessionCallback(@NonNull @CallbackExecutor Executor executor,
                 @NonNull C callback) {
-            if (executor == null) {
-                throw new IllegalArgumentException("executor shouldn't be null");
-            }
-            if (callback == null) {
-                throw new IllegalArgumentException("callback shouldn't be null");
-            }
-            mCallbackExecutor = executor;
-            mCallback = callback;
-            return (T) this;
+            mProvider.setSessionCallback_impl(executor, callback);
+            return (U) this;
         }
 
         /**
@@ -566,7 +491,9 @@ public class MediaSession2 implements AutoCloseable {
          * @throws IllegalStateException if the session with the same id is already exists for the
          *      package.
          */
-        public abstract MediaSession2 build();
+        public T build() {
+            return mProvider.build_impl();
+        }
     }
 
     /**
@@ -575,24 +502,12 @@ public class MediaSession2 implements AutoCloseable {
      * Any incoming event from the {@link MediaController2} will be handled on the thread
      * that created session with the {@link Builder#build()}.
      */
-    // TODO(jaewan): Move this to updatable
     // TODO(jaewan): Add setRatingType()
     // TODO(jaewan): Add setSessionActivity()
-    public static final class Builder extends BuilderBase<Builder, SessionCallback> {
+    public static final class Builder extends BuilderBase<MediaSession2, Builder, SessionCallback> {
         public Builder(Context context, @NonNull MediaPlayerInterface player) {
-            super(context, player);
-        }
-
-        @Override
-        public MediaSession2 build() {
-            if (mCallbackExecutor == null) {
-                mCallbackExecutor = mContext.getMainExecutor();
-            }
-            if (mCallback == null) {
-                mCallback = new SessionCallback(mContext);
-            }
-            return new MediaSession2(mContext, mPlayer, mId, mVolumeProvider, mRatingType,
-                    mSessionActivity, mCallbackExecutor, mCallback);
+            super((instance) -> ApiLoader.getProvider(context).createMediaSession2Builder(
+                    context, (Builder) instance, player));
         }
     }
 
@@ -610,7 +525,7 @@ public class MediaSession2 implements AutoCloseable {
         public ControllerInfo(Context context, int uid, int pid, String packageName,
                 IInterface callback) {
             mProvider = ApiLoader.getProvider(context)
-                    .createMediaSession2ControllerInfoProvider(
+                    .createMediaSession2ControllerInfo(
                             context, this, uid, pid, packageName, callback);
         }
 
@@ -837,7 +752,7 @@ public class MediaSession2 implements AutoCloseable {
     /**
      * Parameter for the playlist.
      */
-    public static class PlaylistParams {
+    public final static class PlaylistParams {
         /**
          * @hide
          */
@@ -892,79 +807,71 @@ public class MediaSession2 implements AutoCloseable {
          */
         public static final int SHUFFLE_MODE_GROUP = 2;
 
+
+        private final MediaSession2Provider.PlaylistParamsProvider mProvider;
+
         /**
-         * Keys used for converting a PlaylistParams object to a bundle object and vice versa.
+         * Instantiate {@link PlaylistParams}
+         *
+         * @param context context
+         * @param repeatMode repeat mode
+         * @param shuffleMode shuffle mode
+         * @param playlistMetadata metadata for the list
          */
-        private static final String KEY_REPEAT_MODE =
-                "android.media.session2.playlistparams2.repeat_mode";
-        private static final String KEY_SHUFFLE_MODE =
-                "android.media.session2.playlistparams2.shuffle_mode";
-        private static final String KEY_MEDIA_METADATA2_BUNDLE =
-                "android.media.session2.playlistparams2.metadata2_bundle";
-
-        private @RepeatMode int mRepeatMode;
-        private @ShuffleMode int mShuffleMode;
-
-        private MediaMetadata2 mPlaylistMetadata;
-
-        public PlaylistParams(@RepeatMode int repeatMode, @ShuffleMode int shuffleMode,
-                @Nullable MediaMetadata2 playlistMetadata) {
-            mRepeatMode = repeatMode;
-            mShuffleMode = shuffleMode;
-            mPlaylistMetadata = playlistMetadata;
+        public PlaylistParams(@NonNull Context context, @RepeatMode int repeatMode,
+                @ShuffleMode int shuffleMode, @Nullable MediaMetadata2 playlistMetadata) {
+            mProvider = ApiLoader.getProvider(context).createMediaSession2PlaylistParams(
+                    context, this, repeatMode, shuffleMode, playlistMetadata);
         }
 
+        /**
+         * Create a new bundle for this object.
+         *
+         * @return
+         */
+        public @NonNull Bundle toBundle() {
+            return mProvider.toBundle_impl();
+        }
+
+        /**
+         * Create a new playlist params from the bundle that was previously returned by
+         * {@link #toBundle}.
+         *
+         * @param context context
+         * @return a new playlist params. Can be {@code null} for error.
+         */
+        public static @Nullable PlaylistParams fromBundle(
+                @NonNull Context context, @Nullable Bundle bundle) {
+            return ApiLoader.getProvider(context).fromBundle_PlaylistParams(context, bundle);
+        }
+
+        /**
+         * Get repeat mode
+         *
+         * @return repeat mode
+         * @see #REPEAT_MODE_NONE, #REPEAT_MODE_ONE, #REPEAT_MODE_ALL, #REPEAT_MODE_GROUP
+         */
         public @RepeatMode int getRepeatMode() {
-            return mRepeatMode;
+            return mProvider.getRepeatMode_impl();
         }
 
+        /**
+         * Get shuffle mode
+         *
+         * @return shuffle mode
+         * @see #SHUFFLE_MODE_NONE, #SHUFFLE_MODE_ALL, #SHUFFLE_MODE_GROUP
+         */
         public @ShuffleMode int getShuffleMode() {
-            return mShuffleMode;
-        }
-
-        public MediaMetadata2 getPlaylistMetadata() {
-            return mPlaylistMetadata;
+            return mProvider.getShuffleMode_impl();
         }
 
         /**
-         * Returns this object as a bundle to share between processes.
+         * Get metadata for the playlist
          *
-         * @hide
+         * @return metadata. Can be {@code null}
          */
-        public Bundle toBundle() {
-            Bundle bundle = new Bundle();
-            bundle.putInt(KEY_REPEAT_MODE, mRepeatMode);
-            bundle.putInt(KEY_SHUFFLE_MODE, mShuffleMode);
-            if (mPlaylistMetadata != null) {
-                bundle.putBundle(KEY_MEDIA_METADATA2_BUNDLE, mPlaylistMetadata.getBundle());
-            }
-            return bundle;
-        }
-
-        /**
-         * Creates an instance from a bundle which is previously created by {@link #toBundle()}.
-         *
-         * @param bundle A bundle created by {@link #toBundle()}.
-         * @return A new {@link PlaylistParams} instance. Returns {@code null} if the given
-         *         {@param bundle} is null, or if the {@param bundle} has no playlist parameters.
-         * @hide
-         */
-        public static PlaylistParams fromBundle(Bundle bundle) {
-            if (bundle == null) {
-                return null;
-            }
-            if (!bundle.containsKey(KEY_REPEAT_MODE) || !bundle.containsKey(KEY_SHUFFLE_MODE)) {
-                return null;
-            }
-
-            Bundle metadataBundle = bundle.getBundle(KEY_MEDIA_METADATA2_BUNDLE);
-            MediaMetadata2 metadata =
-                    metadataBundle == null ? null : new MediaMetadata2(metadataBundle);
-
-            return new PlaylistParams(
-                    bundle.getInt(KEY_REPEAT_MODE),
-                    bundle.getInt(KEY_SHUFFLE_MODE),
-                    metadata);
+        public @Nullable MediaMetadata2 getPlaylistMetadata() {
+            return mProvider.getPlaylistMetadata_impl();
         }
     }
 
@@ -982,21 +889,10 @@ public class MediaSession2 implements AutoCloseable {
      *       framework had to add heuristics to figure out if an app is
      * @hide
      */
-    MediaSession2(Context context, MediaPlayerInterface player, String id,
-            VolumeProvider volumeProvider, int ratingType, PendingIntent sessionActivity,
-            Executor callbackExecutor, SessionCallback callback) {
+    @SystemApi
+    public MediaSession2(MediaSession2Provider provider) {
         super();
-        mProvider = createProvider(context, player, id, volumeProvider, ratingType, sessionActivity,
-                callbackExecutor, callback);
-        mProvider.initialize();
-    }
-
-    MediaSession2Provider createProvider(Context context, MediaPlayerInterface player, String id,
-            VolumeProvider volumeProvider, int ratingType, PendingIntent sessionActivity,
-            Executor callbackExecutor, SessionCallback callback) {
-        return ApiLoader.getProvider(context)
-                .createMediaSession2(context, this, player, id, volumeProvider, ratingType,
-                        sessionActivity, callbackExecutor, callback);
+        mProvider = provider;
     }
 
     @SystemApi

@@ -53,6 +53,7 @@ public:
 
     void add(const sp<ReportRequest>& request);
     void setMainFd(int fd);
+    void setMainDest(int dest);
 
     typedef vector<sp<ReportRequest>>::iterator iterator;
 
@@ -61,10 +62,12 @@ public:
 
     int mainFd() { return mMainFd; }
     bool containsSection(int id);
+    int mainDest() { return mMainDest; }
 private:
     vector<sp<ReportRequest>> mRequests;
     IncidentReportArgs mSections;
     int mMainFd;
+    int mMainDest;
 };
 
 // ================================================================================

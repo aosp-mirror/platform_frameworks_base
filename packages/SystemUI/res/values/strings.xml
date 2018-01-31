@@ -1272,6 +1272,9 @@
     <!-- Content description for accessibility (not shown on the screen): volume dialog collapse button. [CHAR LIMIT=NONE] -->
     <string name="accessibility_volume_collapse">Collapse</string>
 
+    <!-- content description for audio output chooser [CHAR LIMIT=NONE]-->
+    <string name="accessibility_output_chooser">Switch output device</string>
+
     <!-- Screen pinning dialog title. -->
     <string name="screen_pinning_title">Screen is pinned</string>
     <!-- Screen pinning dialog description. -->

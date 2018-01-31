@@ -202,14 +202,6 @@ interface IPhoneSubInfo {
     String[] getIsimPcscf(int subId);
 
     /**
-     * TODO: Deprecate and remove this interface. Superceded by getIccsimChallengeResponse.
-     * Returns the response of ISIM Authetification through RIL.
-     * @return the response of ISIM Authetification, or null if
-     *     the Authentification hasn't been successed or isn't present iphonesubinfo.
-     */
-    String getIsimChallengeResponse(String nonce);
-
-    /**
      * Returns the response of the SIM application on the UICC to authentication
      * challenge/response algorithm. The data string and challenge response are
      * Base64 encoded Strings.

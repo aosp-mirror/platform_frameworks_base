@@ -93,6 +93,8 @@ message Atom {
         WifiMulticastLockStateChanged wifi_multicast_lock_state_changed = 53;
         LmkStateChanged lmk_state_changed = 54;
         AppStartMemoryStateCaptured app_start_memory_state_captured = 55;
+        ShutdownSequenceReported shutdown_sequence_reported = 56;
+        BootSequenceReported boot_sequence_reported = 57;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
@@ -666,6 +668,56 @@ message WifiMulticastLockStateChanged {
         ON = 1;
     }
     optional State state = 2;
+}
+
+/**
+ * Logs shutdown reason and duration on next boot.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/server/BootReceiver.java
+ */
+message ShutdownSequenceReported {
+    // True if shutdown is for a reboot. Default: false if we do not know.
+    optional bool reboot = 1;
+
+    // Reason for shutdown. Eg: userrequested. Default: "<EMPTY>".
+    optional string reason = 2;
+
+    // Beginning of shutdown time in ms using wall clock time since unix epoch.
+    // Default: 0 if no start time received.
+    optional int64 start_time_ms = 3;
+
+    // Duration of shutdown in ms. Default: 0 if no duration received.
+    optional int64 duration_ms = 4;
+}
+
+
+/**
+ * Logs boot reason and duration.
+ *
+ * Logged from:
+ *   system/core/bootstat/bootstat.cpp
+ */
+message BootSequenceReported {
+    // Reason for bootloader boot. Eg. reboot. See bootstat.cpp for larger list
+    // Default: "<EMPTY>" if not available.
+    optional string bootloader_reason = 1;
+
+    // Reason for system boot. Eg. bootloader, reboot,userrequested
+    // Default: "<EMPTY>" if not available.
+    optional string system_reason = 2;
+
+    // End of boot time in ms from unix epoch using system wall clock.
+    optional int64 end_time_ms = 3;
+
+    // Total boot duration in ms.
+    optional int64 total_duration_ms = 4;
+
+    // Bootloader duration in ms.
+    optional int64 bootloader_duration_ms = 5;
+
+    // Time since last boot in ms. Default: 0 if not available.
+    optional int64 time_since_last_boot = 6;
 }
 
 /**

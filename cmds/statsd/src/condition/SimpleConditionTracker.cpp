@@ -289,7 +289,8 @@ void SimpleConditionTracker::evaluateCondition(const LogEvent& event,
     }
 
     // outputKey is the output values. e.g, uid:1234
-    const std::vector<DimensionsValue> outputValues = getDimensionKeys(event, mOutputDimensions);
+    std::vector<DimensionsValue> outputValues;
+    getDimensionKeys(event, mOutputDimensions, &outputValues);
     if (outputValues.size() == 0) {
         // The original implementation would generate an empty string dimension hash when condition
         // is not sliced.

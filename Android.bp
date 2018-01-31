@@ -319,6 +319,10 @@ java_library {
         "core/java/android/service/chooser/IChooserTargetResult.aidl",
         "core/java/android/service/resolver/IResolverRankerService.aidl",
         "core/java/android/service/resolver/IResolverRankerResult.aidl",
+        "core/java/android/service/textclassifier/ITextClassificationCallback.aidl",
+        "core/java/android/service/textclassifier/ITextClassifierService.aidl",
+        "core/java/android/service/textclassifier/ITextLinksCallback.aidl",
+        "core/java/android/service/textclassifier/ITextSelectionCallback.aidl",
         "core/java/android/view/accessibility/IAccessibilityInteractionConnection.aidl",
         "core/java/android/view/accessibility/IAccessibilityInteractionConnectionCallback.aidl",
         "core/java/android/view/accessibility/IAccessibilityManager.aidl",
@@ -483,16 +487,19 @@ java_library {
         "telecomm/java/com/android/internal/telecom/RemoteServiceCallback.aidl",
         "telephony/java/android/telephony/data/IDataService.aidl",
         "telephony/java/android/telephony/data/IDataServiceCallback.aidl",
-        "telephony/java/android/telephony/ims/internal/aidl/IImsCallSessionListener.aidl",
-        "telephony/java/android/telephony/ims/internal/aidl/IImsCapabilityCallback.aidl",
-        "telephony/java/android/telephony/ims/internal/aidl/IImsConfig.aidl",
-        "telephony/java/android/telephony/ims/internal/aidl/IImsConfigCallback.aidl",
-        "telephony/java/android/telephony/ims/internal/aidl/IImsMmTelFeature.aidl",
-        "telephony/java/android/telephony/ims/internal/aidl/IImsMmTelListener.aidl",
-        "telephony/java/android/telephony/ims/internal/aidl/IImsRcsFeature.aidl",
-        "telephony/java/android/telephony/ims/internal/aidl/IImsServiceController.aidl",
-        "telephony/java/android/telephony/ims/internal/aidl/IImsServiceControllerListener.aidl",
-	"telephony/java/android/telephony/mbms/IMbmsDownloadSessionCallback.aidl",
+        "telephony/java/android/telephony/ims/aidl/IImsCallSessionListener.aidl",
+        "telephony/java/android/telephony/ims/aidl/IImsCapabilityCallback.aidl",
+        "telephony/java/android/telephony/ims/aidl/IImsConfig.aidl",
+        "telephony/java/android/telephony/ims/aidl/IImsConfigCallback.aidl",
+        "telephony/java/android/telephony/ims/aidl/IImsMmTelFeature.aidl",
+        "telephony/java/android/telephony/ims/aidl/IImsMmTelListener.aidl",
+        "telephony/java/android/telephony/ims/aidl/IImsRegistration.aidl",
+        "telephony/java/android/telephony/ims/aidl/IImsRegistrationCallback.aidl",
+        "telephony/java/android/telephony/ims/aidl/IImsRcsFeature.aidl",
+        "telephony/java/android/telephony/ims/aidl/IImsServiceController.aidl",
+        "telephony/java/android/telephony/ims/aidl/IImsServiceControllerListener.aidl",
+	    "telephony/java/android/telephony/ims/aidl/IImsSmsListener.aidl",
+        "telephony/java/android/telephony/mbms/IMbmsDownloadSessionCallback.aidl",
         "telephony/java/android/telephony/mbms/IMbmsStreamingSessionCallback.aidl",
         "telephony/java/android/telephony/mbms/IDownloadStateCallback.aidl",
         "telephony/java/android/telephony/mbms/IStreamingServiceCallback.aidl",
@@ -510,13 +517,10 @@ java_library {
         "telephony/java/com/android/ims/internal/IImsFeatureStatusCallback.aidl",
         "telephony/java/com/android/ims/internal/IImsMMTelFeature.aidl",
         "telephony/java/com/android/ims/internal/IImsMultiEndpoint.aidl",
-        "telephony/java/com/android/ims/internal/IImsRegistration.aidl",
-        "telephony/java/com/android/ims/internal/IImsRegistrationCallback.aidl",
         "telephony/java/com/android/ims/internal/IImsRcsFeature.aidl",
         "telephony/java/com/android/ims/internal/IImsService.aidl",
         "telephony/java/com/android/ims/internal/IImsServiceController.aidl",
         "telephony/java/com/android/ims/internal/IImsServiceFeatureCallback.aidl",
-	"telephony/java/com/android/ims/internal/IImsSmsListener.aidl",
         "telephony/java/com/android/ims/internal/IImsStreamMediaSession.aidl",
         "telephony/java/com/android/ims/internal/IImsUt.aidl",
         "telephony/java/com/android/ims/internal/IImsUtListener.aidl",
@@ -643,8 +647,10 @@ java_library {
         ],
     },
 
-    // See comment on framework-oahl-backward-compatibility module below
     exclude_srcs: [
+        // See comment on framework-atb-backward-compatibility module below
+        "core/java/android/content/pm/AndroidTestBaseUpdater.java",
+        // See comment on framework-oahl-backward-compatibility module below
         "core/java/android/content/pm/OrgApacheHttpLegacyUpdater.java",
     ],
 
@@ -694,6 +700,18 @@ java_library {
     name: "framework-oahl-backward-compatibility",
     srcs: [
         "core/java/android/content/pm/OrgApacheHttpLegacyUpdater.java",
+    ],
+}
+
+// A temporary build target that is conditionally included on the bootclasspath if
+// android.test.base library has been removed and which provides support for
+// maintaining backwards compatibility for APKs that target pre-P and depend on
+// android.test.base classes. This is used iff REMOVE_ATB_FROM_BCP=true is
+// specified on the build command line.
+java_library {
+    name: "framework-atb-backward-compatibility",
+    srcs: [
+        "core/java/android/content/pm/AndroidTestBaseUpdater.java",
     ],
 }
 

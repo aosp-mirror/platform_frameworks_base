@@ -36,9 +36,10 @@ import android.view.View;
 // TODO @SystemApi
 public interface MediaControlView2Provider extends ViewProvider {
     void setController_impl(MediaController controller);
-    void show_impl();
-    void show_impl(long timeout);
     boolean isShowing_impl();
-    void hide_impl();
     void setButtonVisibility_impl(int button, int visibility);
+    void requestPlayButtonFocus_impl();
+    void onVisibilityAggregated_impl(boolean isVisible);
+    void setTimeout_impl(long timeout);
+    long getTimeout_impl();
 }

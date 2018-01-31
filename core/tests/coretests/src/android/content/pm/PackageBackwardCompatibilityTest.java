@@ -17,10 +17,12 @@
 package android.content.pm;
 
 import static android.content.pm.PackageBuilder.builder;
+import static android.content.pm.SharedLibraryNames.ANDROID_TEST_BASE;
 import static android.content.pm.SharedLibraryNames.ANDROID_TEST_MOCK;
 import static android.content.pm.SharedLibraryNames.ANDROID_TEST_RUNNER;
 import static android.content.pm.SharedLibraryNames.ORG_APACHE_HTTP_LEGACY;
 
+import android.content.pm.PackageBackwardCompatibility.RemoveUnnecessaryAndroidTestBaseLibrary;
 import android.os.Build;
 import android.support.test.filters.SmallTest;
 
@@ -56,8 +58,19 @@ public class PackageBackwardCompatibilityTest extends PackageSharedLibraryUpdate
     }
 
     /**
+     * Detect when the android.test.base is not on the bootclasspath.
+     *
+     * <p>This test will be ignored when org.apache.http.legacy is not on the bootclasspath and
+     * succeed otherwise. This allows a developer to ensure that the tests are being
+     */
+    @Test
+    public void detectWhenATBisOnBCP() {
+        Assume.assumeTrue(PackageBackwardCompatibility.bootClassPathContainsATB());
+    }
+
+    /**
      * Ensures that the {@link PackageBackwardCompatibility} uses {@link OrgApacheHttpLegacyUpdater}
-     * when necessary.
+     * and {@link AndroidTestBaseUpdater} when necessary.
      *
      * <p>More comprehensive tests for that class can be found in
      * {@link OrgApacheHttpLegacyUpdaterTest}.
@@ -68,6 +81,9 @@ public class PackageBackwardCompatibilityTest extends PackageSharedLibraryUpdate
                 .targetSdkVersion(Build.VERSION_CODES.O);
 
         List<String> expected = new ArrayList<>();
+        if (!PackageBackwardCompatibility.bootClassPathContainsATB()) {
+            expected.add(ANDROID_TEST_BASE);
+        }
         if (!PackageBackwardCompatibility.bootClassPathContainsOAHL()) {
             expected.add(ORG_APACHE_HTTP_LEGACY);
         }
@@ -104,6 +120,30 @@ public class PackageBackwardCompatibilityTest extends PackageSharedLibraryUpdate
     }
 
     /**
+     * Ensures that the {@link PackageBackwardCompatibility} uses
+     * {@link RemoveUnnecessaryAndroidTestBaseLibrary}
+     * when necessary.
+     *
+     * <p>More comprehensive tests for that class can be found in
+     * {@link RemoveUnnecessaryAndroidTestBaseLibraryTest}.
+     */
+    @Test
+    public void android_test_base_in_usesLibraries() {
+        Assume.assumeTrue("Test requires that "
+                        + ANDROID_TEST_BASE + " is on the bootclasspath",
+                PackageBackwardCompatibility.bootClassPathContainsATB());
+
+        PackageBuilder before = builder()
+                .requiredLibraries(ANDROID_TEST_BASE);
+
+        // android.test.base should be removed from the libraries because it is provided
+        // on the bootclasspath and providing both increases start up cost unnecessarily.
+        PackageBuilder after = builder();
+
+        checkBackwardsCompatibility(before, after);
+    }
+
+    /**
      * Ensures that the {@link PackageBackwardCompatibility} uses a
      * {@link PackageBackwardCompatibility.AndroidTestRunnerSplitUpdater}.
      *
@@ -114,8 +154,15 @@ public class PackageBackwardCompatibilityTest extends PackageSharedLibraryUpdate
     public void android_test_runner_in_usesLibraries() {
         PackageBuilder before = builder().requiredLibraries(ANDROID_TEST_RUNNER);
 
+        List<String> expected = new ArrayList<>();
+        if (!PackageBackwardCompatibility.bootClassPathContainsATB()) {
+            expected.add(ANDROID_TEST_BASE);
+        }
+        expected.add(ANDROID_TEST_MOCK);
+        expected.add(ANDROID_TEST_RUNNER);
+
         PackageBuilder after = builder()
-                .requiredLibraries(ANDROID_TEST_RUNNER, ANDROID_TEST_MOCK);
+                .requiredLibraries(expected);
 
         checkBackwardsCompatibility(before, after);
     }

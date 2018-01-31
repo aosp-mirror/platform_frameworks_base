@@ -6338,7 +6338,7 @@ public class Activity extends ContextThemeWrapper
 
         mHandler.getLooper().dump(new PrintWriterPrinter(writer), prefix);
 
-        final AutofillManager afm = mAutofillManager;
+        final AutofillManager afm = getAutofillManager();
         if (afm != null) {
             afm.dump(prefix, writer);
         } else {

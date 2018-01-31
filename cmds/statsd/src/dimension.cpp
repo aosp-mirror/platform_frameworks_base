@@ -38,7 +38,7 @@ DimensionsValue getSingleLeafValue(const DimensionsValue& value) {
     return *leafValue;
 }
 
-void appendLeafNodeToParent(const Field& field,
+void appendLeafNodeToTree(const Field& field,
                             const DimensionsValue& value,
                             DimensionsValue* parentValue) {
     if (field.child_size() <= 0) {
@@ -58,24 +58,24 @@ void appendLeafNodeToParent(const Field& field,
         parentValue->mutable_value_tuple()->add_dimensions_value();
         idx = parentValue->mutable_value_tuple()->dimensions_value_size() - 1;
     }
-    appendLeafNodeToParent(
+    appendLeafNodeToTree(
         field.child(0), value,
         parentValue->mutable_value_tuple()->mutable_dimensions_value(idx));
 }
 
-void addNodeToRootDimensionsValues(const Field& field,
-                                   const DimensionsValue& node,
-                                   std::vector<DimensionsValue>* rootValues) {
-    if (rootValues == nullptr) {
+void appendLeafNodeToTrees(const Field& field,
+                           const DimensionsValue& node,
+                           std::vector<DimensionsValue>* rootTrees) {
+    if (rootTrees == nullptr) {
         return;
     }
-    if (rootValues->empty()) {
-        DimensionsValue rootValue;
-        appendLeafNodeToParent(field, node, &rootValue);
-        rootValues->push_back(rootValue);
+    if (rootTrees->empty()) {
+        DimensionsValue tree;
+        appendLeafNodeToTree(field, node, &tree);
+        rootTrees->push_back(tree);
     } else {
-        for (size_t i = 0; i < rootValues->size(); ++i) {
-            appendLeafNodeToParent(field, node, &rootValues->at(i));
+        for (size_t i = 0; i < rootTrees->size(); ++i) {
+            appendLeafNodeToTree(field, node, &rootTrees->at(i));
         }
     }
 }
@@ -85,22 +85,25 @@ namespace {
 void findDimensionsValues(
        const FieldValueMap& fieldValueMap,
        const FieldMatcher& matcher,
-       const Field& field,
+       Field* rootField,
+       Field* leafField,
        std::vector<DimensionsValue>* rootDimensionsValues);
 
 void findNonRepeatedDimensionsValues(
        const FieldValueMap& fieldValueMap,
        const FieldMatcher& matcher,
-       const Field& field,
+       Field* rootField,
+       Field* leafField,
        std::vector<DimensionsValue>* rootValues) {
     if (matcher.child_size() > 0) {
+        Field* newLeafField = leafField->add_child();
         for (const auto& childMatcher : matcher.child()) {
-          Field childField = field;
-          appendLeaf(&childField, childMatcher.field());
-          findDimensionsValues(fieldValueMap, childMatcher, childField, rootValues);
+          newLeafField->set_field(childMatcher.field());
+          findDimensionsValues(fieldValueMap, childMatcher, rootField, newLeafField, rootValues);
         }
+        leafField->clear_child();
     } else {
-        auto ret = fieldValueMap.equal_range(field);
+        auto ret = fieldValueMap.equal_range(*rootField);
         int found = 0;
         for (auto it = ret.first; it != ret.second; ++it) {
             found++;
@@ -113,40 +116,43 @@ void findNonRepeatedDimensionsValues(
             ALOGE("Found multiple values for optional field.");
             return;
         }
-        addNodeToRootDimensionsValues(field, ret.first->second, rootValues);
+        appendLeafNodeToTrees(*rootField, ret.first->second, rootValues);
     }
 }
 
 void findRepeatedDimensionsValues(const FieldValueMap& fieldValueMap,
                                   const FieldMatcher& matcher,
-                                  const Field& field,
+                                  Field* rootField,
+                                  Field* leafField,
                                   std::vector<DimensionsValue>* rootValues) {
     if (matcher.position() == Position::FIRST) {
-        Field first_field = field;
-        setPositionForLeaf(&first_field, 0);
-        findNonRepeatedDimensionsValues(fieldValueMap, matcher, first_field, rootValues);
+        leafField->set_position_index(0);
+        findNonRepeatedDimensionsValues(fieldValueMap, matcher, rootField, leafField, rootValues);
+        leafField->clear_position_index();
     } else {
-        auto itLower = fieldValueMap.lower_bound(field);
+        auto itLower = fieldValueMap.lower_bound(*rootField);
         if (itLower == fieldValueMap.end()) {
             return;
         }
-        Field next_field = field;
-        getNextField(&next_field);
-        auto itUpper = fieldValueMap.lower_bound(next_field);
+        const int leafFieldNum = leafField->field();
+        leafField->set_field(leafFieldNum + 1);
+        auto itUpper = fieldValueMap.lower_bound(*rootField);
+        // Resets the field number.
+        leafField->set_field(leafFieldNum);
 
         switch (matcher.position()) {
              case Position::LAST:
                  {
                      itUpper--;
                      if (itUpper != fieldValueMap.end()) {
-                         Field last_field = field;
-                         int last_index = getPositionByReferenceField(field, itUpper->first);
+                         int last_index = getPositionByReferenceField(*rootField, itUpper->first);
                          if (last_index < 0) {
                             return;
                          }
-                         setPositionForLeaf(&last_field, last_index);
+                         leafField->set_position_index(last_index);
                          findNonRepeatedDimensionsValues(
-                            fieldValueMap, matcher, last_field, rootValues);
+                            fieldValueMap, matcher, rootField, leafField, rootValues);
+                         leafField->clear_position_index();
                      }
                  }
                  break;
@@ -154,20 +160,20 @@ void findRepeatedDimensionsValues(const FieldValueMap& fieldValueMap,
                  {
                     std::set<int> indexes;
                     for (auto it = itLower; it != itUpper; ++it) {
-                        int index = getPositionByReferenceField(field, it->first);
+                        int index = getPositionByReferenceField(*rootField, it->first);
                         if (index >= 0) {
                             indexes.insert(index);
                         }
                     }
                     if (!indexes.empty()) {
-                        Field any_field = field;
                         std::vector<DimensionsValue> allValues;
                         for (const int index : indexes) {
-                             setPositionForLeaf(&any_field, index);
+                             leafField->set_position_index(index);
                              std::vector<DimensionsValue> newValues = *rootValues;
                              findNonRepeatedDimensionsValues(
-                                fieldValueMap, matcher, any_field, &newValues);
+                                fieldValueMap, matcher, rootField, leafField, &newValues);
                              allValues.insert(allValues.end(), newValues.begin(), newValues.end());
+                             leafField->clear_position_index();
                         }
                         rootValues->clear();
                         rootValues->insert(rootValues->end(), allValues.begin(), allValues.end());
@@ -183,12 +189,15 @@ void findRepeatedDimensionsValues(const FieldValueMap& fieldValueMap,
 void findDimensionsValues(
        const FieldValueMap& fieldValueMap,
        const FieldMatcher& matcher,
-       const Field& field,
+       Field* rootField,
+       Field* leafField,
        std::vector<DimensionsValue>* rootDimensionsValues) {
     if (!matcher.has_position()) {
-        findNonRepeatedDimensionsValues(fieldValueMap, matcher, field, rootDimensionsValues);
+        findNonRepeatedDimensionsValues(fieldValueMap, matcher, rootField, leafField,
+                                        rootDimensionsValues);
     } else {
-        findRepeatedDimensionsValues(fieldValueMap, matcher, field, rootDimensionsValues);
+        findRepeatedDimensionsValues(fieldValueMap, matcher, rootField, leafField,
+                                     rootDimensionsValues);
     }
 }
 
@@ -198,56 +207,49 @@ void findDimensionsValues(
        const FieldValueMap& fieldValueMap,
        const FieldMatcher& matcher,
        std::vector<DimensionsValue>* rootDimensionsValues) {
-    findDimensionsValues(fieldValueMap, matcher,
-                    buildSimpleAtomField(matcher.field()), rootDimensionsValues);
+    Field rootField;
+    buildSimpleAtomField(matcher.field(), &rootField);
+    findDimensionsValues(fieldValueMap, matcher, &rootField, &rootField, rootDimensionsValues);
 }
 
-FieldMatcher buildSimpleAtomFieldMatcher(const int tagId) {
-    FieldMatcher matcher;
-    matcher.set_field(tagId);
-    return matcher;
+void buildSimpleAtomFieldMatcher(const int tagId, FieldMatcher* matcher) {
+    matcher->set_field(tagId);
 }
 
-FieldMatcher buildSimpleAtomFieldMatcher(const int tagId, const int atomFieldNum) {
-    FieldMatcher matcher;
-    matcher.set_field(tagId);
-    matcher.add_child()->set_field(atomFieldNum);
-    return matcher;
+void buildSimpleAtomFieldMatcher(const int tagId, const int fieldNum, FieldMatcher* matcher) {
+    matcher->set_field(tagId);
+    matcher->add_child()->set_field(fieldNum);
 }
 
 constexpr int ATTRIBUTION_FIELD_NUM_IN_ATOM_PROTO = 1;
 constexpr int UID_FIELD_NUM_IN_ATTRIBUTION_NODE_PROTO = 1;
 constexpr int TAG_FIELD_NUM_IN_ATTRIBUTION_NODE_PROTO = 2;
 
-FieldMatcher buildAttributionUidFieldMatcher(const int tagId, const Position position) {
-    FieldMatcher matcher;
-    matcher.set_field(tagId);
-    auto child = matcher.add_child();
+void buildAttributionUidFieldMatcher(const int tagId, const Position position,
+                                     FieldMatcher* matcher) {
+    matcher->set_field(tagId);
+    auto child = matcher->add_child();
     child->set_field(ATTRIBUTION_FIELD_NUM_IN_ATOM_PROTO);
     child->set_position(position);
     child->add_child()->set_field(UID_FIELD_NUM_IN_ATTRIBUTION_NODE_PROTO);
-    return matcher;
 }
 
-FieldMatcher buildAttributionTagFieldMatcher(const int tagId, const Position position) {
-    FieldMatcher matcher;
-    matcher.set_field(tagId);
-    FieldMatcher* child = matcher.add_child();
+void buildAttributionTagFieldMatcher(const int tagId, const Position position,
+                                     FieldMatcher* matcher) {
+    matcher->set_field(tagId);
+    FieldMatcher* child = matcher->add_child();
     child->set_field(ATTRIBUTION_FIELD_NUM_IN_ATOM_PROTO);
     child->set_position(position);
     child->add_child()->set_field(TAG_FIELD_NUM_IN_ATTRIBUTION_NODE_PROTO);
-    return matcher;
 }
 
-FieldMatcher buildAttributionFieldMatcher(const int tagId, const Position position) {
-    FieldMatcher matcher;
-    matcher.set_field(tagId);
-    FieldMatcher* child = matcher.add_child();
+void buildAttributionFieldMatcher(const int tagId, const Position position, FieldMatcher* matcher) {
+    matcher->set_field(tagId);
+    FieldMatcher* child = matcher->add_child();
     child->set_field(ATTRIBUTION_FIELD_NUM_IN_ATOM_PROTO);
     child->set_position(position);
     child->add_child()->set_field(UID_FIELD_NUM_IN_ATTRIBUTION_NODE_PROTO);
     child->add_child()->set_field(TAG_FIELD_NUM_IN_ATTRIBUTION_NODE_PROTO);
-    return matcher;
 }
 
 void DimensionsValueToString(const DimensionsValue& value, std::string *flattened) {
@@ -280,28 +282,6 @@ void DimensionsValueToString(const DimensionsValue& value, std::string *flattene
             }
             break;
         case DimensionsValue::ValueCase::VALUE_NOT_SET:
-            break;
-    }
-}
-
-void getDimensionsValueLeafNodes(
-    const DimensionsValue& value, std::vector<DimensionsValue> *leafNodes) {
-    switch (value.value_case()) {
-        case DimensionsValue::ValueCase::kValueStr:
-        case DimensionsValue::ValueCase::kValueInt:
-        case DimensionsValue::ValueCase::kValueLong:
-        case DimensionsValue::ValueCase::kValueBool:
-        case DimensionsValue::ValueCase::kValueFloat:
-            leafNodes->push_back(value);
-            break;
-        case DimensionsValue::ValueCase::kValueTuple:
-            for (int i = 0; i < value.value_tuple().dimensions_value_size(); ++i) {
-                getDimensionsValueLeafNodes(value.value_tuple().dimensions_value(i), leafNodes);
-            }
-            break;
-        case DimensionsValue::ValueCase::VALUE_NOT_SET:
-            break;
-        default:
             break;
     }
 }
