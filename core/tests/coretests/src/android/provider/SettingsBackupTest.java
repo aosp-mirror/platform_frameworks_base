@@ -17,11 +17,9 @@
 package android.provider;
 
 import static com.google.android.collect.Sets.newHashSet;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
-
 import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
@@ -440,7 +438,7 @@ public class SettingsBackupTest {
                     Settings.Global.WIFI_WATCHDOG_ON,
                     Settings.Global.WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON,
                     Settings.Global.WINDOW_ANIMATION_SCALE,
-                    Settings.Global.WIRELESS_CHARGING_STARTED_SOUND,
+                    Settings.Global.CHARGING_STARTED_SOUND,
                     Settings.Global.WTF_IS_FATAL,
                     Settings.Global.ZEN_MODE,
                     Settings.Global.ZEN_MODE_CONFIG_ETAG,

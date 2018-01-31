@@ -1747,6 +1747,10 @@ public final class PowerManagerService extends SystemService
                 // it can provide feedback to the user.
                 if (dockedOnWirelessCharger || DEBUG_WIRELESS) {
                     mNotifier.onWirelessChargingStarted(mBatteryLevel);
+                } else if (mIsPowered && !wasPowered
+                        && (mPlugType == BatteryManager.BATTERY_PLUGGED_AC
+                        || mPlugType == BatteryManager.BATTERY_PLUGGED_USB)) {
+                    mNotifier.onWiredChargingStarted();
                 }
             }
 
