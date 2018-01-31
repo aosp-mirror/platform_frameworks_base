@@ -23,8 +23,8 @@ import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.session.MediaController;
 import android.media.update.ApiLoader;
-import android.media.update.FrameLayoutHelper;
 import android.media.update.MediaControlView2Provider;
+import android.media.update.ViewGroupHelper;
 import android.util.AttributeSet;
 
 import java.lang.annotation.Retention;
@@ -62,7 +62,7 @@ import java.lang.annotation.RetentionPolicy;
  * TODO PUBLIC API
  * @hide
  */
-public class MediaControlView2 extends FrameLayoutHelper<MediaControlView2Provider> {
+public class MediaControlView2 extends ViewGroupHelper<MediaControlView2Provider> {
     /** @hide */
     @IntDef({
             BUTTON_PLAY_PAUSE,
@@ -156,10 +156,12 @@ public class MediaControlView2 extends FrameLayoutHelper<MediaControlView2Provid
 
     public MediaControlView2(@NonNull Context context, @Nullable AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
-        super((instance, superProvider) ->
+        super((instance, superProvider, privateProvider) ->
                 ApiLoader.getProvider(context).createMediaControlView2(
-                        (MediaControlView2) instance, superProvider),
+                        (MediaControlView2) instance, superProvider, privateProvider,
+                        attrs, defStyleAttr, defStyleRes),
                 context, attrs, defStyleAttr, defStyleRes);
+        mProvider.initialize(attrs, defStyleAttr, defStyleRes);
     }
 
     /**
@@ -229,12 +231,5 @@ public class MediaControlView2 extends FrameLayoutHelper<MediaControlView2Provid
      */
     public long getTimeout() {
         return mProvider.getTimeout_impl();
-    }
-
-    @Override
-    // TODO Move this method to ViewProvider
-    public void onVisibilityAggregated(boolean isVisible) {
-
-        mProvider.onVisibilityAggregated_impl(isVisible);
     }
 }

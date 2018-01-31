@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,10 @@
 package android.media.update;
 
 import android.annotation.SystemApi;
+import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 
 /**
  * Interface for connecting the public API to an updatable implementation.
@@ -33,8 +36,8 @@ import android.view.MotionEvent;
  * @hide
  */
 // TODO @SystemApi
-public interface ViewProvider {
-    // TODO Add more (all?) methods from View
+public interface ViewGroupProvider {
+    // View methods
     void onAttachedToWindow_impl();
     void onDetachedFromWindow_impl();
     CharSequence getAccessibilityClassName_impl();
@@ -42,4 +45,22 @@ public interface ViewProvider {
     boolean onTrackballEvent_impl(MotionEvent ev);
     void onFinishInflate_impl();
     void setEnabled_impl(boolean enabled);
+    void onVisibilityAggregated_impl(boolean isVisible);
+    void onLayout_impl(boolean changed, int left, int top, int right, int bottom);
+    void onMeasure_impl(int widthMeasureSpec, int heightMeasureSpec);
+    int getSuggestedMinimumWidth_impl();
+    int getSuggestedMinimumHeight_impl();
+    void setMeasuredDimension_impl(int measuredWidth, int measuredHeight);
+
+    // ViewGroup methods
+    boolean checkLayoutParams_impl(LayoutParams p);
+    LayoutParams generateDefaultLayoutParams_impl();
+    LayoutParams generateLayoutParams_impl(AttributeSet attrs);
+    LayoutParams generateLayoutParams_impl(LayoutParams lp);
+    boolean shouldDelayChildPressedState_impl();
+    void measureChildWithMargins_impl(View child, int parentWidthMeasureSpec, int widthUsed,
+        int parentHeightMeasureSpec, int heightUsed);
+
+    // ViewManager methods
+    // ViewParent methods
 }

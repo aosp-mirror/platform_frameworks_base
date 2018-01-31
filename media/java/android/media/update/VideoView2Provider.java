@@ -22,6 +22,7 @@ import android.media.session.MediaController;
 import android.media.session.PlaybackState;
 import android.media.session.MediaSession;
 import android.net.Uri;
+import android.util.AttributeSet;
 import android.widget.MediaControlView2;
 import android.widget.VideoView2;
 
@@ -43,7 +44,9 @@ import java.util.concurrent.Executor;
  * @hide
  */
 // TODO @SystemApi
-public interface VideoView2Provider extends ViewProvider {
+public interface VideoView2Provider extends ViewGroupProvider {
+    void initialize(AttributeSet attrs, int defStyleAttr, int defStyleRes);
+
     void setMediaControlView2_impl(MediaControlView2 mediaControlView);
     MediaController getMediaController_impl();
     MediaControlView2 getMediaControlView2_impl();
