@@ -214,6 +214,9 @@ public class MediaSession2 implements AutoCloseable {
             return mProvider.hasCommand_impl(code);
         }
 
+        /**
+         * @hide
+         */
         @SystemApi
         public CommandGroupProvider getProvider() {
             return mProvider;
@@ -554,6 +557,9 @@ public class MediaSession2 implements AutoCloseable {
             return mProvider.isTrusted_impl();
         }
 
+        /**
+         * @hide
+         */
         @SystemApi
         public ControllerInfoProvider getProvider() {
             return mProvider;
@@ -895,6 +901,9 @@ public class MediaSession2 implements AutoCloseable {
         mProvider = provider;
     }
 
+    /**
+     * @hide
+     */
     @SystemApi
     public MediaSession2Provider getProvider() {
         return mProvider;
