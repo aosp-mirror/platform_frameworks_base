@@ -11447,16 +11447,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private Set<String> getMeteredDisabledPackagesLocked(int userId) {
-        final DevicePolicyData policy = getUserData(userId);
+        final ComponentName who = getOwnerComponent(userId);
         final Set<String> restrictedPkgs = new ArraySet<>();
-        for (int i = policy.mAdminList.size() - 1; i >= 0; --i) {
-            final ActiveAdmin admin = policy.mAdminList.get(i);
-            if (!isActiveAdminWithPolicyForUserLocked(admin,
-                    DeviceAdminInfo.USES_POLICY_PROFILE_OWNER, userId)) {
-                // Not a profile or device owner, ignore
-                continue;
-            }
-            if (admin.meteredDisabledPackages != null) {
+        if (who != null) {
+            final ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userId);
+            if (admin != null && admin.meteredDisabledPackages != null) {
                 restrictedPkgs.addAll(admin.meteredDisabledPackages);
             }
         }
