@@ -51,7 +51,7 @@ import com.android.server.backup.transport.TransportClient;
 import com.android.server.backup.transport.TransportClientManager;
 import com.android.server.backup.transport.TransportNotRegisteredException;
 import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderClasses;
+import com.android.server.testing.SystemLoaderPackages;
 import com.android.server.testing.shadows.FrameworkShadowContextImpl;
 import com.android.server.testing.shadows.FrameworkShadowPackageManager;
 import java.util.ArrayList;
@@ -75,7 +75,7 @@ import org.robolectric.shadows.ShadowPackageManager;
     sdk = 26,
     shadows = {FrameworkShadowPackageManager.class, FrameworkShadowContextImpl.class}
 )
-@SystemLoaderClasses({TransportManager.class})
+@SystemLoaderPackages({"com.android.server.backup"})
 @Presubmit
 public class TransportManagerTest {
     private static final String PACKAGE_A = "some.package.a";

@@ -49,7 +49,7 @@ import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
 import com.android.server.backup.transport.TransportClient;
 import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderClasses;
+import com.android.server.testing.SystemLoaderPackages;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -67,11 +67,7 @@ import java.util.stream.Stream;
 
 @RunWith(FrameworkRobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 26)
-@SystemLoaderClasses({
-    BackupManagerService.class,
-    PerformInitializeTaskTest.class,
-    TransportManager.class
-})
+@SystemLoaderPackages({"com.android.server.backup"})
 @Presubmit
 public class PerformInitializeTaskTest {
     @Mock private BackupManagerService mBackupManagerService;

@@ -46,6 +46,7 @@ import com.android.server.EventLogTags;
 import com.android.server.backup.TransportManager;
 import com.android.server.testing.FrameworkRobolectricTestRunner;
 import com.android.server.testing.SystemLoaderClasses;
+import com.android.server.testing.SystemLoaderPackages;
 import com.android.server.testing.shadows.ShadowCloseGuard;
 import com.android.server.testing.shadows.ShadowEventLog;
 import com.android.server.testing.shadows.ShadowSlog;
@@ -66,7 +67,7 @@ import org.robolectric.shadows.ShadowLooper;
     sdk = 26,
     shadows = {ShadowEventLog.class, ShadowCloseGuard.class, ShadowSlog.class}
 )
-@SystemLoaderClasses({TransportManager.class, TransportClient.class})
+@SystemLoaderPackages({"com.android.server.backup"})
 @Presubmit
 public class TransportClientTest {
     private static final String PACKAGE_NAME = "some.package.name";
