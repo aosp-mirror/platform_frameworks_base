@@ -724,7 +724,6 @@ public final class SystemServer {
         MmsServiceBroker mmsService = null;
         HardwarePropertiesManagerService hardwarePropertiesService = null;
 
-        boolean disableRtt = SystemProperties.getBoolean("config.disable_rtt", false);
         boolean disableSystemTextClassifier = SystemProperties.getBoolean(
                 "config.disable_systemtextclassifier", false);
         boolean disableCameraService = SystemProperties.getBoolean("config.disable_cameraservice",
@@ -1105,18 +1104,12 @@ public final class SystemServer {
                 traceEnd();
             }
 
-            if (!disableRtt) {
-                traceBeginAndSlog("StartWifiRtt");
-                mSystemServiceManager.startService("com.android.server.wifi.RttService");
+            if (context.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_WIFI_RTT)) {
+                traceBeginAndSlog("StartRttService");
+                mSystemServiceManager.startService(
+                    "com.android.server.wifi.rtt.RttService");
                 traceEnd();
-
-                if (context.getPackageManager().hasSystemFeature(
-                    PackageManager.FEATURE_WIFI_RTT)) {
-                    traceBeginAndSlog("StartRttService");
-                    mSystemServiceManager.startService(
-                        "com.android.server.wifi.rtt.RttService");
-                    traceEnd();
-                }
             }
 
             if (context.getPackageManager().hasSystemFeature(
