@@ -384,4 +384,8 @@ class KeyguardController {
         proto.write(KEYGUARD_OCCLUDED, mOccluded);
         proto.end(token);
     }
+
+    public void notifyAppTransitionDone() {
+        setKeyguardGoingAway(false);
+    }
 }
