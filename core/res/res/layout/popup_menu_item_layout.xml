@@ -28,18 +28,18 @@
         android:layout_marginBottom="4dip"
         android:background="@drawable/list_divider_material" />
 
-    <!-- Icon will be inserted here. -->
-
-    <!-- The title and summary have some gap between them,
-    and this 'group' should be centered vertically. -->
     <LinearLayout
         android:id="@+id/content"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="?attr/dropdownListPreferredItemHeight"
         android:paddingEnd="16dip"
         android:duplicateParentState="true" >
 
-        <LinearLayout
+        <!-- Icon will be inserted here. -->
+
+        <!-- The title and summary have some gap between them,
+        and this 'group' should be centered vertically. -->
+        <RelativeLayout
             android:layout_width="0dip"
             android:layout_weight="1"
             android:layout_height="wrap_content"
@@ -71,7 +71,7 @@
                 android:duplicateParentState="true"
                 android:textAlignment="viewStart" />
 
-        </LinearLayout>
+        </RelativeLayout>
 
         <ImageView
             android:id="@+id/submenuarrow"
@@ -81,8 +81,9 @@
             android:layout_marginStart="8dp"
             android:scaleType="center"
             android:visibility="gone" />
-    </LinearLayout>
 
-    <!-- Checkbox, and/or radio button will be inserted here. -->
+        <!-- Checkbox, and/or radio button will be inserted here. -->
+
+    </LinearLayout>
 
 </com.android.internal.view.menu.ListMenuItemView>
