@@ -40,11 +40,14 @@ import android.content.pm.InstantAppIntentFilter;
 import android.content.pm.InstantAppResolveInfo;
 import android.content.pm.InstantAppResolveInfo.InstantAppDigest;
 import android.metrics.LogMaker;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
@@ -53,8 +56,12 @@ import com.android.server.pm.EphemeralResolverConnection.PhaseTwoCallback;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /** @hide */
@@ -79,6 +86,7 @@ public abstract class InstantAppResolver {
     public @interface ResolutionStatus {}
 
     private static MetricsLogger sMetricsLogger;
+
     private static MetricsLogger getLogger() {
         if (sMetricsLogger == null) {
             sMetricsLogger = new MetricsLogger();
@@ -86,26 +94,49 @@ public abstract class InstantAppResolver {
         return sMetricsLogger;
     }
 
-    public static AuxiliaryResolveInfo doInstantAppResolutionPhaseOne(Context context,
+    /**
+     * Returns an intent with potential PII removed from the original intent. Fields removed
+     * include extras and the host + path of the data, if defined.
+     */
+    public static Intent sanitizeIntent(Intent origIntent) {
+        final Intent sanitizedIntent;
+        sanitizedIntent = new Intent(origIntent.getAction());
+        Set<String> categories = origIntent.getCategories();
+        if (categories != null) {
+            for (String category : categories) {
+                sanitizedIntent.addCategory(category);
+            }
+        }
+        Uri sanitizedUri = origIntent.getData() == null
+                ? null
+                : Uri.fromParts(origIntent.getScheme(), "", "");
+        sanitizedIntent.setDataAndType(sanitizedUri, origIntent.getType());
+        sanitizedIntent.addFlags(origIntent.getFlags());
+        sanitizedIntent.setPackage(origIntent.getPackage());
+        return sanitizedIntent;
+    }
+
+    public static AuxiliaryResolveInfo doInstantAppResolutionPhaseOne(
             EphemeralResolverConnection connection, InstantAppRequest requestObj) {
         final long startTime = System.currentTimeMillis();
         final String token = UUID.randomUUID().toString();
         if (DEBUG_EPHEMERAL) {
             Log.d(TAG, "[" + token + "] Phase1; resolving");
         }
-        final Intent intent = requestObj.origIntent;
-        final InstantAppDigest digest =
-                new InstantAppDigest(intent.getData().getHost(), 5 /*maxDigests*/);
+        final Intent origIntent = requestObj.origIntent;
+        final Intent sanitizedIntent = sanitizeIntent(origIntent);
+
+        final InstantAppDigest digest = getInstantAppDigest(origIntent);
         final int[] shaPrefix = digest.getDigestPrefix();
         AuxiliaryResolveInfo resolveInfo = null;
         @ResolutionStatus int resolutionStatus = RESOLUTION_SUCCESS;
         try {
             final List<InstantAppResolveInfo> instantAppResolveInfoList =
-                    connection.getInstantAppResolveInfoList(shaPrefix, token);
+                    connection.getInstantAppResolveInfoList(sanitizedIntent, shaPrefix, token);
             if (instantAppResolveInfoList != null && instantAppResolveInfoList.size() > 0) {
                 resolveInfo = InstantAppResolver.filterInstantAppIntent(
-                        instantAppResolveInfoList, intent, requestObj.resolvedType,
-                        requestObj.userId, intent.getPackage(), digest, token);
+                        instantAppResolveInfoList, origIntent, requestObj.resolvedType,
+                        requestObj.userId, origIntent.getPackage(), digest, token);
             }
         } catch (ConnectionException e) {
             if (e.failure == ConnectionException.FAILURE_BIND) {
@@ -135,6 +166,12 @@ public abstract class InstantAppResolver {
         return resolveInfo;
     }
 
+    private static InstantAppDigest getInstantAppDigest(Intent origIntent) {
+        return origIntent.getData() != null && !TextUtils.isEmpty(origIntent.getData().getHost())
+                ? new InstantAppDigest(origIntent.getData().getHost(), 5 /*maxDigests*/)
+                : InstantAppDigest.UNDEFINED;
+    }
+
     public static void doInstantAppResolutionPhaseTwo(Context context,
             EphemeralResolverConnection connection, InstantAppRequest requestObj,
             ActivityInfo instantAppInstaller, Handler callbackHandler) {
@@ -143,73 +180,53 @@ public abstract class InstantAppResolver {
         if (DEBUG_EPHEMERAL) {
             Log.d(TAG, "[" + token + "] Phase2; resolving");
         }
-        final Intent intent = requestObj.origIntent;
-        final String hostName = intent.getData().getHost();
-        final InstantAppDigest digest = new InstantAppDigest(hostName, 5 /*maxDigests*/);
+        final Intent origIntent = requestObj.origIntent;
+        final Intent sanitizedIntent = sanitizeIntent(origIntent);
+        final InstantAppDigest digest = getInstantAppDigest(origIntent);
         final int[] shaPrefix = digest.getDigestPrefix();
 
         final PhaseTwoCallback callback = new PhaseTwoCallback() {
             @Override
             void onPhaseTwoResolved(List<InstantAppResolveInfo> instantAppResolveInfoList,
                     long startTime) {
-                final String packageName;
-                final String splitName;
-                final long versionCode;
                 final Intent failureIntent;
-                final Bundle extras;
                 if (instantAppResolveInfoList != null && instantAppResolveInfoList.size() > 0) {
                     final AuxiliaryResolveInfo instantAppIntentInfo =
                             InstantAppResolver.filterInstantAppIntent(
-                                    instantAppResolveInfoList, intent, null /*resolvedType*/,
-                                    0 /*userId*/, intent.getPackage(), digest, token);
-                    if (instantAppIntentInfo != null
-                            && instantAppIntentInfo.resolveInfo != null) {
-                        packageName = instantAppIntentInfo.resolveInfo.getPackageName();
-                        splitName = instantAppIntentInfo.splitName;
-                        versionCode = instantAppIntentInfo.resolveInfo.getVersionCode();
+                                    instantAppResolveInfoList, origIntent, null /*resolvedType*/,
+                                    0 /*userId*/, origIntent.getPackage(), digest, token);
+                    if (instantAppIntentInfo != null) {
                         failureIntent = instantAppIntentInfo.failureIntent;
-                        extras = instantAppIntentInfo.resolveInfo.getExtras();
                     } else {
-                        packageName = null;
-                        splitName = null;
-                        versionCode = -1;
                         failureIntent = null;
-                        extras = null;
                     }
                 } else {
-                    packageName = null;
-                    splitName = null;
-                    versionCode = -1;
                     failureIntent = null;
-                    extras = null;
                 }
                 final Intent installerIntent = buildEphemeralInstallerIntent(
-                        Intent.ACTION_RESOLVE_INSTANT_APP_PACKAGE,
                         requestObj.origIntent,
+                        sanitizedIntent,
                         failureIntent,
                         requestObj.callingPackage,
                         requestObj.verificationBundle,
                         requestObj.resolvedType,
                         requestObj.userId,
-                        packageName,
-                        splitName,
                         requestObj.responseObj.installFailureActivity,
-                        versionCode,
                         token,
-                        extras,
-                        false /*needsPhaseTwo*/);
+                        false /*needsPhaseTwo*/,
+                        requestObj.responseObj.filters);
                 installerIntent.setComponent(new ComponentName(
                         instantAppInstaller.packageName, instantAppInstaller.name));
 
                 logMetrics(ACTION_INSTANT_APP_RESOLUTION_PHASE_TWO, startTime, token,
-                        packageName != null ? RESOLUTION_SUCCESS : RESOLUTION_FAILURE);
+                        requestObj.responseObj.filters != null ? RESOLUTION_SUCCESS : RESOLUTION_FAILURE);
 
                 context.startActivity(installerIntent);
             }
         };
         try {
-            connection.getInstantAppIntentFilterList(
-                    shaPrefix, token, hostName, callback, callbackHandler, startTime);
+            connection.getInstantAppIntentFilterList(sanitizedIntent, shaPrefix, token, callback,
+                    callbackHandler, startTime);
         } catch (ConnectionException e) {
             @ResolutionStatus int resolutionStatus = RESOLUTION_FAILURE;
             if (e.failure == ConnectionException.FAILURE_BIND) {
@@ -231,23 +248,20 @@ public abstract class InstantAppResolver {
      * Builds and returns an intent to launch the instant installer.
      */
     public static Intent buildEphemeralInstallerIntent(
-            @NonNull String action,
             @NonNull Intent origIntent,
-            @NonNull Intent failureIntent,
+            @NonNull Intent sanitizedIntent,
+            @Nullable Intent failureIntent,
             @NonNull String callingPackage,
             @Nullable Bundle verificationBundle,
             @NonNull String resolvedType,
             int userId,
-            @NonNull String instantAppPackageName,
-            @Nullable String instantAppSplitName,
             @Nullable ComponentName installFailureActivity,
-            long versionCode,
             @Nullable String token,
-            @Nullable Bundle extras,
-            boolean needsPhaseTwo) {
+            boolean needsPhaseTwo,
+            List<AuxiliaryResolveInfo.AuxiliaryFilter> filters) {
         // Construct the intent that launches the instant installer
         int flags = origIntent.getFlags();
-        final Intent intent = new Intent(action);
+        final Intent intent = new Intent();
         intent.setFlags(flags
                 | Intent.FLAG_ACTIVITY_NEW_TASK
                 | Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -260,20 +274,23 @@ public abstract class InstantAppResolver {
             intent.putExtra(Intent.EXTRA_EPHEMERAL_HOSTNAME, origIntent.getData().getHost());
         }
         intent.putExtra(Intent.EXTRA_INSTANT_APP_ACTION, origIntent.getAction());
-        if (extras != null) {
-            intent.putExtra(Intent.EXTRA_INSTANT_APP_EXTRAS, extras);
-        }
+        intent.putExtra(Intent.EXTRA_INTENT, sanitizedIntent);
 
-        // We have all of the data we need; just start the installer without a second phase
-        if (!needsPhaseTwo) {
-            // Intent that is launched if the package couldn't be installed for any reason.
+        if (needsPhaseTwo) {
+            intent.setAction(Intent.ACTION_RESOLVE_INSTANT_APP_PACKAGE);
+        } else {
+            // We have all of the data we need; just start the installer without a second phase
             if (failureIntent != null || installFailureActivity != null) {
+                // Intent that is launched if the package couldn't be installed for any reason.
                 try {
                     final Intent onFailureIntent;
                     if (installFailureActivity != null) {
                         onFailureIntent = new Intent();
                         onFailureIntent.setComponent(installFailureActivity);
-                        onFailureIntent.putExtra(Intent.EXTRA_SPLIT_NAME, instantAppSplitName);
+                        if (filters != null && filters.size() == 1) {
+                            onFailureIntent.putExtra(Intent.EXTRA_SPLIT_NAME,
+                                    filters.get(0).splitName);
+                        }
                         onFailureIntent.putExtra(Intent.EXTRA_INTENT, origIntent);
                     } else {
                         onFailureIntent = failureIntent;
@@ -309,17 +326,35 @@ public abstract class InstantAppResolver {
                 intent.putExtra(Intent.EXTRA_EPHEMERAL_SUCCESS,
                         new IntentSender(successIntentTarget));
             } catch (RemoteException ignore) { /* ignore; same process */ }
-
-            intent.putExtra(Intent.EXTRA_PACKAGE_NAME, instantAppPackageName);
-            intent.putExtra(Intent.EXTRA_SPLIT_NAME, instantAppSplitName);
-            intent.putExtra(Intent.EXTRA_VERSION_CODE, (int) (versionCode & 0x7fffffff));
-            intent.putExtra(Intent.EXTRA_LONG_VERSION_CODE, versionCode);
-            intent.putExtra(Intent.EXTRA_CALLING_PACKAGE, callingPackage);
             if (verificationBundle != null) {
                 intent.putExtra(Intent.EXTRA_VERIFICATION_BUNDLE, verificationBundle);
             }
-        }
+            intent.putExtra(Intent.EXTRA_CALLING_PACKAGE, callingPackage);
 
+            if (filters != null) {
+                Bundle resolvableFilters[] = new Bundle[filters.size()];
+                for (int i = 0, max = filters.size(); i < max; i++) {
+                    Bundle resolvableFilter = new Bundle();
+                    AuxiliaryResolveInfo.AuxiliaryFilter filter = filters.get(i);
+                    resolvableFilter.putBoolean(Intent.EXTRA_UNKNOWN_INSTANT_APP,
+                            filter.resolveInfo != null
+                                    && filter.resolveInfo.shouldLetInstallerDecide());
+                    resolvableFilter.putString(Intent.EXTRA_PACKAGE_NAME, filter.packageName);
+                    resolvableFilter.putString(Intent.EXTRA_SPLIT_NAME, filter.splitName);
+                    resolvableFilter.putLong(Intent.EXTRA_LONG_VERSION_CODE, filter.versionCode);
+                    resolvableFilter.putBundle(Intent.EXTRA_INSTANT_APP_EXTRAS, filter.extras);
+                    resolvableFilters[i] = resolvableFilter;
+                    if (i == 0) {
+                        // for backwards compat, always set the first result on the intent and add
+                        // the int version code
+                        intent.putExtras(resolvableFilter);
+                        intent.putExtra(Intent.EXTRA_VERSION_CODE, (int) filter.versionCode);
+                    }
+                }
+                intent.putExtra(Intent.EXTRA_INSTANT_APP_BUNDLES, resolvableFilters);
+            }
+            intent.setAction(Intent.ACTION_INSTALL_INSTANT_APP_PACKAGE);
+        }
         return intent;
     }
 
@@ -330,66 +365,131 @@ public abstract class InstantAppResolver {
         final int[] shaPrefix = digest.getDigestPrefix();
         final byte[][] digestBytes = digest.getDigestBytes();
         final Intent failureIntent = new Intent(origIntent);
+        boolean requiresSecondPhase = false;
         failureIntent.setFlags(failureIntent.getFlags() | Intent.FLAG_IGNORE_EPHEMERAL);
         failureIntent.setLaunchToken(token);
-        // Go in reverse order so we match the narrowest scope first.
-        for (int i = shaPrefix.length - 1; i >= 0 ; --i) {
-            for (InstantAppResolveInfo instantAppInfo : instantAppResolveInfoList) {
-                if (!Arrays.equals(digestBytes[i], instantAppInfo.getDigestBytes())) {
+        ArrayList<AuxiliaryResolveInfo.AuxiliaryFilter> filters = null;
+        boolean isWebIntent = origIntent.isBrowsableWebIntent();
+        for (InstantAppResolveInfo instantAppResolveInfo : instantAppResolveInfoList) {
+            if (shaPrefix.length > 0 && instantAppResolveInfo.shouldLetInstallerDecide()) {
+                Slog.e(TAG, "InstantAppResolveInfo with mShouldLetInstallerDecide=true when digest"
+                        + " provided; ignoring");
+                continue;
+            }
+            byte[] filterDigestBytes = instantAppResolveInfo.getDigestBytes();
+            // Only include matching digests if we have a prefix and we're either dealing with a
+            // web intent or the resolveInfo specifies digest details.
+            if (shaPrefix.length > 0 && (isWebIntent || filterDigestBytes.length > 0)) {
+                boolean matchFound = false;
+                // Go in reverse order so we match the narrowest scope first.
+                for (int i = shaPrefix.length - 1; i >= 0; --i) {
+                    if (Arrays.equals(digestBytes[i], filterDigestBytes)) {
+                        matchFound = true;
+                        break;
+                    }
+                }
+                if (!matchFound) {
                     continue;
                 }
-                if (packageName != null
-                        && !packageName.equals(instantAppInfo.getPackageName())) {
-                    continue;
+            }
+            // We matched a resolve info; resolve the filters to see if anything matches completely.
+            List<AuxiliaryResolveInfo.AuxiliaryFilter> matchFilters = computeResolveFilters(
+                    origIntent, resolvedType, userId, packageName, token, instantAppResolveInfo);
+            if (matchFilters != null) {
+                if (matchFilters.isEmpty()) {
+                    requiresSecondPhase = true;
                 }
-                final List<InstantAppIntentFilter> instantAppFilters =
-                        instantAppInfo.getIntentFilters();
-                // No filters; we need to start phase two
-                if (instantAppFilters == null || instantAppFilters.isEmpty()) {
-                    if (DEBUG_EPHEMERAL) {
-                        Log.d(TAG, "No app filters; go to phase 2");
-                    }
-                    return new AuxiliaryResolveInfo(instantAppInfo,
-                            new IntentFilter(Intent.ACTION_VIEW) /*intentFilter*/,
-                            null /*splitName*/, token, true /*needsPhase2*/,
-                            null /*failureIntent*/);
-                }
-                // We have a domain match; resolve the filters to see if anything matches.
-                final PackageManagerService.EphemeralIntentResolver instantAppResolver =
-                        new PackageManagerService.EphemeralIntentResolver();
-                for (int j = instantAppFilters.size() - 1; j >= 0; --j) {
-                    final InstantAppIntentFilter instantAppFilter = instantAppFilters.get(j);
-                    final List<IntentFilter> splitFilters = instantAppFilter.getFilters();
-                    if (splitFilters == null || splitFilters.isEmpty()) {
-                        continue;
-                    }
-                    for (int k = splitFilters.size() - 1; k >= 0; --k) {
-                        final AuxiliaryResolveInfo intentInfo =
-                                new AuxiliaryResolveInfo(instantAppInfo,
-                                        splitFilters.get(k), instantAppFilter.getSplitName(),
-                                        token, false /*needsPhase2*/, failureIntent);
-                        instantAppResolver.addFilter(intentInfo);
-                    }
-                }
-                List<AuxiliaryResolveInfo> matchedResolveInfoList = instantAppResolver.queryIntent(
-                        origIntent, resolvedType, false /*defaultOnly*/, userId);
-                if (!matchedResolveInfoList.isEmpty()) {
-                    if (DEBUG_EPHEMERAL) {
-                        final AuxiliaryResolveInfo info = matchedResolveInfoList.get(0);
-                        Log.d(TAG, "[" + token + "] Found match;"
-                                + " package: " + info.packageName
-                                + ", split: " + info.splitName
-                                + ", versionCode: " + info.versionCode);
-                    }
-                    return matchedResolveInfoList.get(0);
-                } else if (DEBUG_EPHEMERAL) {
-                    Log.d(TAG, "[" + token + "] No matches found"
-                            + " package: " + instantAppInfo.getPackageName()
-                            + ", versionCode: " + instantAppInfo.getVersionCode());
+                if (filters == null) {
+                    filters = new ArrayList<>(matchFilters);
+                } else {
+                    filters.addAll(matchFilters);
                 }
             }
         }
+        if (filters != null && !filters.isEmpty()) {
+            return new AuxiliaryResolveInfo(token, requiresSecondPhase, failureIntent, filters);
+        }
         // Hash or filter mis-match; no instant apps for this domain.
+        return null;
+    }
+
+    /**
+     * Returns one of three states: <p/>
+     * <ul>
+     *     <li>{@code null} if there are no matches will not be; resolution is unnecessary.</li>
+     *     <li>An empty list signifying that a 2nd phase of resolution is required.</li>
+     *     <li>A populated list meaning that matches were found and should be sent directly to the
+     *     installer</li>
+     * </ul>
+     *
+     */
+    private static List<AuxiliaryResolveInfo.AuxiliaryFilter> computeResolveFilters(
+            Intent origIntent, String resolvedType, int userId, String packageName, String token,
+            InstantAppResolveInfo instantAppInfo) {
+        if (instantAppInfo.shouldLetInstallerDecide()) {
+            return Collections.singletonList(
+                    new AuxiliaryResolveInfo.AuxiliaryFilter(
+                            instantAppInfo, null /* splitName */,
+                            instantAppInfo.getExtras()));
+        }
+        if (packageName != null
+                && !packageName.equals(instantAppInfo.getPackageName())) {
+            return null;
+        }
+        final List<InstantAppIntentFilter> instantAppFilters =
+                instantAppInfo.getIntentFilters();
+        if (instantAppFilters == null || instantAppFilters.isEmpty()) {
+            // No filters on web intent; no matches, 2nd phase unnecessary.
+            if (origIntent.isBrowsableWebIntent()) {
+                return null;
+            }
+            // No filters; we need to start phase two
+            if (DEBUG_EPHEMERAL) {
+                Log.d(TAG, "No app filters; go to phase 2");
+            }
+            return Collections.emptyList();
+        }
+        final PackageManagerService.EphemeralIntentResolver instantAppResolver =
+                new PackageManagerService.EphemeralIntentResolver();
+        for (int j = instantAppFilters.size() - 1; j >= 0; --j) {
+            final InstantAppIntentFilter instantAppFilter = instantAppFilters.get(j);
+            final List<IntentFilter> splitFilters = instantAppFilter.getFilters();
+            if (splitFilters == null || splitFilters.isEmpty()) {
+                continue;
+            }
+            for (int k = splitFilters.size() - 1; k >= 0; --k) {
+                IntentFilter filter = splitFilters.get(k);
+                Iterator<IntentFilter.AuthorityEntry> authorities =
+                        filter.authoritiesIterator();
+                // ignore http/s-only filters.
+                if ((authorities == null || !authorities.hasNext())
+                        && (filter.hasDataScheme("http") || filter.hasDataScheme("https"))
+                        && filter.hasAction(Intent.ACTION_VIEW)
+                        && filter.hasCategory(Intent.CATEGORY_BROWSABLE)) {
+                    continue;
+                }
+                instantAppResolver.addFilter(
+                        new AuxiliaryResolveInfo.AuxiliaryFilter(
+                                filter,
+                                instantAppInfo,
+                                instantAppFilter.getSplitName(),
+                                instantAppInfo.getExtras()
+                        ));
+            }
+        }
+        List<AuxiliaryResolveInfo.AuxiliaryFilter> matchedResolveInfoList =
+                instantAppResolver.queryIntent(
+                        origIntent, resolvedType, false /*defaultOnly*/, userId);
+        if (!matchedResolveInfoList.isEmpty()) {
+            if (DEBUG_EPHEMERAL) {
+                Log.d(TAG, "[" + token + "] Found match(es); " + matchedResolveInfoList);
+            }
+            return matchedResolveInfoList;
+        } else if (DEBUG_EPHEMERAL) {
+            Log.d(TAG, "[" + token + "] No matches found"
+                    + " package: " + instantAppInfo.getPackageName()
+                    + ", versionCode: " + instantAppInfo.getVersionCode());
+        }
         return null;
     }
 
