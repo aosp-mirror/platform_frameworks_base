@@ -26,6 +26,7 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.STATUS_BAR_SERVICE" />
     <uses-permission android:name="android.permission.ACCESS_VOICE_INTERACTION_SERVICE" />
+    <uses-permission android:name="android.permission.DEVICE_POWER" />
 
     <application>
         <uses-library android:name="android.test.runner" />
