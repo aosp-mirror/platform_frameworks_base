@@ -438,8 +438,8 @@ public class ApkSignatureSchemeV3Verifier {
         List<Integer> flagsList = new ArrayList<>();
 
         // Proof-of-rotation struct:
-        // is basically a singly linked list of nodes, called levels here, each of which have the
-        // following structure:
+        // A uint32 version code followed by basically a singly linked list of nodes, called levels
+        // here, each of which have the following structure:
         // * length-prefix for the entire level
         //     - length-prefixed signed data (if previous level exists)
         //         * length-prefixed X509 Certificate
@@ -450,9 +450,13 @@ public class ApkSignatureSchemeV3Verifier {
         //     - length-prefixed signature over the signed data in this level.  The signature here
         //         is verified using the certificate from the previous level.
         // The linking is provided by the certificate of each level signing the one of the next.
-        while (porBuf.hasRemaining()) {
-            levelCount++;
-            try {
+
+        try {
+
+            // get the version code, but don't do anything with it: creator knew about all our flags
+            porBuf.getInt();
+            while (porBuf.hasRemaining()) {
+                levelCount++;
                 ByteBuffer level = getLengthPrefixedSlice(porBuf);
                 ByteBuffer signedData = getLengthPrefixedSlice(level);
                 int flags = level.getInt();
@@ -491,17 +495,17 @@ public class ApkSignatureSchemeV3Verifier {
                 lastSigAlgorithm = sigAlgorithm;
                 certs.add(lastCert);
                 flagsList.add(flags);
-            } catch (IOException | BufferUnderflowException e) {
-                throw new IOException("Failed to parse Proof-of-rotation record", e);
-            } catch (NoSuchAlgorithmException | InvalidKeyException
-                    | InvalidAlgorithmParameterException | SignatureException e) {
-                throw new SecurityException(
-                        "Failed to verify signature over signed data for certificate #"
-                                + levelCount + " when verifying Proof-of-rotation record", e);
-            } catch (CertificateException e) {
-                throw new SecurityException("Failed to decode certificate #" + levelCount
-                        + " when verifying Proof-of-rotation record", e);
             }
+        } catch (IOException | BufferUnderflowException e) {
+            throw new IOException("Failed to parse Proof-of-rotation record", e);
+        } catch (NoSuchAlgorithmException | InvalidKeyException
+                | InvalidAlgorithmParameterException | SignatureException e) {
+            throw new SecurityException(
+                    "Failed to verify signature over signed data for certificate #"
+                            + levelCount + " when verifying Proof-of-rotation record", e);
+        } catch (CertificateException e) {
+            throw new SecurityException("Failed to decode certificate #" + levelCount
+                    + " when verifying Proof-of-rotation record", e);
         }
         return new VerifiedProofOfRotation(certs, flagsList);
     }
