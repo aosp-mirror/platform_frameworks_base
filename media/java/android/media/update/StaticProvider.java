@@ -17,7 +17,6 @@
 package android.media.update;
 
 import android.annotation.Nullable;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.media.DataSourceDesc;
 import android.media.MediaBrowser2;
@@ -38,8 +37,7 @@ import android.media.MediaSessionService2;
 import android.media.Rating2;
 import android.media.SessionPlayer2;
 import android.media.SessionToken2;
-import android.media.VolumeProvider;
-import android.media.update.MediaLibraryService2Provider.MediaLibrarySessionProvider;
+import android.media.VolumeProvider2;
 import android.media.update.MediaSession2Provider.BuilderBaseProvider;
 import android.media.update.MediaSession2Provider.CommandGroupProvider;
 import android.media.update.MediaSession2Provider.CommandProvider;
@@ -106,6 +104,9 @@ public interface StaticProvider {
     MediaItem2Provider createMediaItem2(Context context, MediaItem2 mediaItem2,
             String mediaId, DataSourceDesc dsd, MediaMetadata2 metadata, int flags);
     MediaItem2 fromBundle_MediaItem2(Context context, Bundle bundle);
+
+    VolumeProvider2Provider createVolumeProvider2(Context context, VolumeProvider2 instance,
+            int controlType, int maxVolume, int currentVolume);
 
     MediaMetadata2 fromBundle_MediaMetadata2(Context context, Bundle bundle);
     MediaMetadata2Provider.BuilderProvider createMediaMetadata2Builder(
