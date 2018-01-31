@@ -270,6 +270,9 @@ public class MediaController2 implements AutoCloseable {
         mProvider.close_impl();
     }
 
+    /**
+     * @hide
+     */
     @SystemApi
     public MediaController2Provider getProvider() {
         return mProvider;
