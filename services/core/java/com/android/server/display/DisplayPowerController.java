@@ -478,6 +478,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mScreenBrightnessForVr = getScreenBrightnessForVrSetting();
         mAutoBrightnessAdjustment = getAutoBrightnessAdjustmentSetting();
         mTemporaryScreenBrightness = -1;
+        mPendingScreenBrightnessSetting = -1;
         mTemporaryAutoBrightnessAdjustment = Float.NaN;
     }
 
@@ -1466,6 +1467,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mPendingScreenBrightnessSetting = -1;
             return false;
         }
+        mCurrentScreenBrightnessSetting = mPendingScreenBrightnessSetting;
         mLastUserSetScreenBrightness = mPendingScreenBrightnessSetting;
         mPendingScreenBrightnessSetting = -1;
         return true;
@@ -1474,7 +1476,8 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private void notifyBrightnessChanged(int brightness, boolean userInitiated,
             boolean hadUserDataPoint) {
         final float brightnessInNits = convertToNits(brightness);
-        if (brightnessInNits >= 0.0f && mAutomaticBrightnessController != null) {
+        if (mPowerRequest.useAutoBrightness && brightnessInNits >= 0.0f
+                && mAutomaticBrightnessController != null) {
             // We only want to track changes on devices that can actually map the display backlight
             // values into a physical brightness unit since the value provided by the API is in
             // nits and not using the arbitrary backlight units.
