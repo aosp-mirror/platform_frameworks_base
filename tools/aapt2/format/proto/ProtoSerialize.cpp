@@ -460,7 +460,7 @@ class ValueSerializer : public ConstValueVisitor {
         pb_prim->set_int_decimal_value(static_cast<int32_t>(val.data));
       } break;
       case android::Res_value::TYPE_INT_HEX: {
-        pb_prim->set_int_hexidecimal_value(val.data);
+        pb_prim->set_int_hexadecimal_value(val.data);
       } break;
       case android::Res_value::TYPE_INT_BOOLEAN: {
         pb_prim->set_boolean_value(static_cast<bool>(val.data));

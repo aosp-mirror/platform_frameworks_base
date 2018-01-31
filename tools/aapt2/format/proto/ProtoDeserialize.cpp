@@ -792,9 +792,9 @@ std::unique_ptr<Item> DeserializeItemFromPb(const pb::Item& pb_item,
           val.dataType = android::Res_value::TYPE_INT_DEC;
           val.data = static_cast<uint32_t>(pb_prim.int_decimal_value());
         } break;
-        case pb::Primitive::kIntHexidecimalValue: {
+        case pb::Primitive::kIntHexadecimalValue: {
           val.dataType = android::Res_value::TYPE_INT_HEX;
-          val.data = pb_prim.int_hexidecimal_value();
+          val.data = pb_prim.int_hexadecimal_value();
         } break;
         case pb::Primitive::kBooleanValue: {
           val.dataType = android::Res_value::TYPE_INT_BOOLEAN;
