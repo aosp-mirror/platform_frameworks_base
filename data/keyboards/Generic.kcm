@@ -472,7 +472,7 @@ key PLUS {
 ### Non-printing keys ###
 
 key ESCAPE {
-    base:                               fallback BACK
+    base:                               none
     alt, meta:                          fallback HOME
     ctrl:                               fallback MENU
 }
