@@ -21,7 +21,9 @@ import android.annotation.Nullable;
 import android.util.ExceptionUtils;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseIntArray;
 
+import com.android.internal.os.BinderInternal;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.util.FunctionalUtils.ThrowingSupplier;
@@ -934,6 +936,7 @@ final class BinderProxy implements IBinder {
                     final int totalUnclearedSize = unclearedSize();
                     if (totalUnclearedSize >= CRASH_AT_SIZE) {
                         dumpProxyInterfaceCounts();
+                        dumpPerUidProxyCounts();
                         Runtime.getRuntime().gc();
                         throw new AssertionError("Binder ProxyMap has too many entries: "
                                 + totalSize + " (total), " + totalUnclearedSize + " (uncleared), "
@@ -984,6 +987,20 @@ final class BinderProxy implements IBinder {
             for (int i = 0; i < printLength; i++) {
                 Log.v(Binder.TAG, " #" + (i + 1) + ": " + sorted[i].getKey() + " x"
                         + sorted[i].getValue());
+            }
+        }
+
+        /**
+         * Dump per uid binder proxy counts to the logcat.
+         */
+        private void dumpPerUidProxyCounts() {
+            SparseIntArray counts = BinderInternal.nGetBinderProxyPerUidCounts();
+            if (counts.size() == 0) return;
+            Log.d(Binder.TAG, "Per Uid Binder Proxy Counts:");
+            for (int i = 0; i < counts.size(); i++) {
+                final int uid = counts.keyAt(i);
+                final int binderCount = counts.valueAt(i);
+                Log.d(Binder.TAG, "UID : " + uid + "  count = " + binderCount);
             }
         }
 
