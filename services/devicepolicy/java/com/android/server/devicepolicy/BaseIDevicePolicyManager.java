@@ -177,4 +177,9 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
             String packageName, int userId) {
         return false;
     }
+
+    @Override
+    public long forceSecurityLogs() {
+        return 0;
+    }
 }
