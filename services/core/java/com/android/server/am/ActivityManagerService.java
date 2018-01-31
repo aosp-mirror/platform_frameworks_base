@@ -4331,7 +4331,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         final BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
         StatsLog.write(StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED,
             component.userId, component.realActivity.getPackageName(),
-            component.realActivity.getShortClassName(), resumed ? 1 : 0);
+            component.realActivity.getShortClassName(), resumed ?
+                        StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__ACTIVITY__MOVE_TO_FOREGROUND :
+                        StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__ACTIVITY__MOVE_TO_BACKGROUND);
         if (resumed) {
             if (mUsageStatsService != null) {
                 mUsageStatsService.reportEvent(component.realActivity, component.userId,
@@ -12844,7 +12846,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         // TODO: Where should the corresponding '1' (start) write go?
-        StatsLog.write(StatsLog.DEVICE_ON_STATUS_CHANGED, 0);
+        StatsLog.write(StatsLog.DEVICE_ON_STATUS_CHANGED,
+                StatsLog.DEVICE_ON_STATUS_CHANGED__STATE__OFF);
 
         boolean timedout = false;
 

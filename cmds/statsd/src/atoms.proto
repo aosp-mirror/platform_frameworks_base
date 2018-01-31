@@ -757,8 +757,8 @@ message SettingChanged {
     // The tag used with the is_default for resetting sets of settings. This is generally null.
     optional string tag = 5;
 
-    // 1 indicates that this setting with tag should be resettable.
-    optional int32 is_default = 6;
+    // True if this setting with tag should be resettable.
+    optional bool is_default = 6;
 
     // The user ID associated. Defined in android/os/UserHandle.java
     optional int32 user = 7;
@@ -1105,9 +1105,12 @@ message IsolatedUidChanged {
 
     optional int32 isolated_uid = 2;
 
-    // 1 denotes we're creating an isolated uid and 0 denotes removal. We expect an isolated uid to
-    // be removed before if it's used for another parent uid.
-    optional int32 is_create = 3;
+    // We expect an isolated uid to be removed before if it's used for another parent uid.
+    enum Event {
+        REMOVED = 0;
+        CREATED = 1;
+    }
+    optional Event event = 3;
 }
 
 /**
