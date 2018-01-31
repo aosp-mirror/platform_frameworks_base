@@ -17,6 +17,9 @@
 package com.android.test.hwui;
 
 import android.app.Activity;
+import android.graphics.Color;
+import android.graphics.PixelFormat;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,7 +39,9 @@ public class ColoredShadowsActivity extends Activity {
     private void setShadowColors(ViewGroup row, int rowIndex) {
         for (int i = 0; i < row.getChildCount(); i++) {
             View view = row.getChildAt(i);
-            view.setShadowColor(shadowColorFor(view));
+            //view.setBackground(new MyHackyBackground());
+            view.setOutlineSpotShadowColor(shadowColorFor(view));
+            view.setOutlineAmbientShadowColor(shadowColorFor(view));
             view.setElevation(6.0f * (rowIndex + 1));
         }
     }
@@ -44,12 +49,27 @@ public class ColoredShadowsActivity extends Activity {
     private int shadowColorFor(View view) {
         switch (view.getId()) {
             case R.id.grey: return 0xFF3C4043;
-            case R.id.blue: return 0xFF185ABC;
-            case R.id.red: return 0xFFB31412;
-            case R.id.yellow: return 0xFFEA8600;
-            case R.id.green: return 0xFF137333;
+            case R.id.blue: return Color.BLUE;
+            case R.id.red: return 0xFFEA4335;
+            case R.id.yellow: return 0xFFFBBC04;
+            case R.id.green: return 0xFF34A853;
             default: return 0xFF000000;
         }
     }
 
+    private static class MyHackyBackground extends ColorDrawable {
+        MyHackyBackground() {
+            super(0);
+        }
+
+        @Override
+        public int getOpacity() {
+            return PixelFormat.TRANSLUCENT;
+        }
+
+        @Override
+        public int getAlpha() {
+            return 254;
+        }
+    }
 }

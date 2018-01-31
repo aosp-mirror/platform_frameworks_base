@@ -725,6 +725,8 @@ import java.util.function.Predicate;
  * @attr ref android.R.styleable#View_nextFocusRight
  * @attr ref android.R.styleable#View_nextFocusUp
  * @attr ref android.R.styleable#View_onClick
+ * @attr ref android.R.styleable#View_outlineSpotShadowColor
+ * @attr ref android.R.styleable#View_outlineAmbientShadowColor
  * @attr ref android.R.styleable#View_padding
  * @attr ref android.R.styleable#View_paddingHorizontal
  * @attr ref android.R.styleable#View_paddingVertical
@@ -5445,6 +5447,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     if (a.peekValue(attr) != null) {
                         setAccessibilityPaneTitle(a.getString(attr));
                     }
+                    break;
+                case R.styleable.View_outlineSpotShadowColor:
+                    setOutlineSpotShadowColor(a.getColor(attr, Color.BLACK));
+                    break;
+                case R.styleable.View_outlineAmbientShadowColor:
+                    setOutlineAmbientShadowColor(a.getColor(attr, Color.BLACK));
                     break;
             }
         }
@@ -15481,12 +15489,59 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * @hide
+     * Sets the color of the spot shadow that is drawn when the view has a positive Z or
+     * elevation value.
+     * <p>
+     * By default the shadow color is black. Generally, this color will be opaque so the intensity
+     * of the shadow is consistent between different views with different colors.
+     * <p>
+     * The opacity of the final spot shadow is a function of the shadow caster height, the
+     * alpha channel of the outlineSpotShadowColor (typically opaque), and the
+     * {@link android.R.attr#spotShadowAlpha} theme attribute.
+     *
+     * @attr ref android.R.styleable#View_outlineSpotShadowColor
+     * @param color The color this View will cast for its elevation spot shadow.
      */
-    public void setShadowColor(@ColorInt int color) {
-        if (mRenderNode.setShadowColor(color)) {
+    public void setOutlineSpotShadowColor(@ColorInt int color) {
+        if (mRenderNode.setSpotShadowColor(color)) {
             invalidateViewProperty(true, true);
         }
+    }
+
+    /**
+     * @return The shadow color set by {@link #setOutlineSpotShadowColor(int)}, or black if nothing
+     * was set
+     */
+    public @ColorInt int getOutlineSpotShadowColor() {
+        return mRenderNode.getSpotShadowColor();
+    }
+
+    /**
+     * Sets the color of the ambient shadow that is drawn when the view has a positive Z or
+     * elevation value.
+     * <p>
+     * By default the shadow color is black. Generally, this color will be opaque so the intensity
+     * of the shadow is consistent between different views with different colors.
+     * <p>
+     * The opacity of the final ambient shadow is a function of the shadow caster height, the
+     * alpha channel of the outlineAmbientShadowColor (typically opaque), and the
+     * {@link android.R.attr#ambientShadowAlpha} theme attribute.
+     *
+     * @attr ref android.R.styleable#View_outlineAmbientShadowColor
+     * @param color The color this View will cast for its elevation shadow.
+     */
+    public void setOutlineAmbientShadowColor(@ColorInt int color) {
+        if (mRenderNode.setAmbientShadowColor(color)) {
+            invalidateViewProperty(true, true);
+        }
+    }
+
+    /**
+     * @return The shadow color set by {@link #setOutlineAmbientShadowColor(int)}, or black if
+     * nothing was set
+     */
+    public @ColorInt int getOutlineAmbientShadowColor() {
+        return mRenderNode.getAmbientShadowColor();
     }
 
 
@@ -26992,6 +27047,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         stream.addProperty("drawing:willNotCacheDrawing", willNotCacheDrawing());
         stream.addProperty("drawing:drawingCacheEnabled", isDrawingCacheEnabled());
         stream.addProperty("drawing:overlappingRendering", hasOverlappingRendering());
+        stream.addProperty("drawing:outlineAmbientShadowColor", getOutlineAmbientShadowColor());
+        stream.addProperty("drawing:outlineSpotShadowColor", getOutlineSpotShadowColor());
 
         // focus
         stream.addProperty("focus:hasFocus", hasFocus());
