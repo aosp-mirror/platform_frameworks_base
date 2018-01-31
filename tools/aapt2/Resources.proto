@@ -318,7 +318,7 @@ message Primitive {
     float dimension_value = 4;
     float fraction_value = 5;
     int32 int_decimal_value = 6;
-    uint32 int_hexidecimal_value = 7;
+    uint32 int_hexadecimal_value = 7;
     bool boolean_value = 8;
     uint32 color_argb8_value = 9;
     uint32 color_rgb8_value = 10;
