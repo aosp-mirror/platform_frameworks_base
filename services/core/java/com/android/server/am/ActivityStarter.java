@@ -879,11 +879,11 @@ class ActivityStarter {
         }
 
         // We're waiting for an activity launch to finish, but that activity simply
-        // brought another activity to front. Let startActivityMayWait() know about
-        // this, so it waits for the new activity to become visible instead.
-        if (result == START_TASK_TO_FRONT && !mSupervisor.mWaitingActivityLaunched.isEmpty()) {
-            mSupervisor.reportTaskToFrontNoLaunch(mStartActivity);
-        }
+        // brought another activity to front. We must also handle the case where the task is already
+        // in the front as a result of the trampoline activity being in the same task (it will be
+        // considered focused as the trampoline will be finished). Let startActivityMayWait() know
+        // about this, so it waits for the new activity to become visible instead.
+        mSupervisor.reportWaitingActivityLaunchedIfNeeded(r, result);
 
         ActivityStack startedActivityStack = null;
         final ActivityStack currentStack = r.getStack();
@@ -1076,39 +1076,51 @@ class ActivityStarter {
 
             if (outResult != null) {
                 outResult.result = res;
-                if (res == ActivityManager.START_SUCCESS) {
-                    mSupervisor.mWaitingActivityLaunched.add(outResult);
-                    do {
-                        try {
-                            mService.wait();
-                        } catch (InterruptedException e) {
-                        }
-                    } while (outResult.result != START_TASK_TO_FRONT
-                            && !outResult.timeout && outResult.who == null);
-                    if (outResult.result == START_TASK_TO_FRONT) {
-                        res = START_TASK_TO_FRONT;
-                    }
-                }
-                if (res == START_TASK_TO_FRONT) {
-                    final ActivityRecord r = outRecord[0];
 
-                    // ActivityRecord may represent a different activity, but it should not be in
-                    // the resumed state.
-                    if (r.nowVisible && r.state == RESUMED) {
-                        outResult.timeout = false;
-                        outResult.who = r.realActivity;
-                        outResult.totalTime = 0;
-                        outResult.thisTime = 0;
-                    } else {
-                        outResult.thisTime = SystemClock.uptimeMillis();
-                        mSupervisor.waitActivityVisible(r.realActivity, outResult);
-                        // Note: the timeout variable is not currently not ever set.
+                final ActivityRecord r = outRecord[0];
+
+                switch(res) {
+                    case START_SUCCESS: {
+                        mSupervisor.mWaitingActivityLaunched.add(outResult);
                         do {
                             try {
                                 mService.wait();
                             } catch (InterruptedException e) {
                             }
-                        } while (!outResult.timeout && outResult.who == null);
+                        } while (outResult.result != START_TASK_TO_FRONT
+                                && !outResult.timeout && outResult.who == null);
+                        if (outResult.result == START_TASK_TO_FRONT) {
+                            res = START_TASK_TO_FRONT;
+                        }
+                        break;
+                    }
+                    case START_DELIVERED_TO_TOP: {
+                        outResult.timeout = false;
+                        outResult.who = r.realActivity;
+                        outResult.totalTime = 0;
+                        outResult.thisTime = 0;
+                        break;
+                    }
+                    case START_TASK_TO_FRONT: {
+                        // ActivityRecord may represent a different activity, but it should not be
+                        // in the resumed state.
+                        if (r.nowVisible && r.state == RESUMED) {
+                            outResult.timeout = false;
+                            outResult.who = r.realActivity;
+                            outResult.totalTime = 0;
+                            outResult.thisTime = 0;
+                        } else {
+                            outResult.thisTime = SystemClock.uptimeMillis();
+                            mSupervisor.waitActivityVisible(r.realActivity, outResult);
+                            // Note: the timeout variable is not currently not ever set.
+                            do {
+                                try {
+                                    mService.wait();
+                                } catch (InterruptedException e) {
+                                }
+                            } while (!outResult.timeout && outResult.who == null);
+                        }
+                        break;
                     }
                 }
             }
