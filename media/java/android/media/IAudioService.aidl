@@ -16,9 +16,7 @@
 
 package android.media;
 
-import android.app.PendingIntent;
 import android.bluetooth.BluetoothDevice;
-import android.content.ComponentName;
 import android.media.AudioAttributes;
 import android.media.AudioFocusInfo;
 import android.media.AudioPlaybackConfiguration;
@@ -31,24 +29,32 @@ import android.media.IRecordingConfigDispatcher;
 import android.media.IRingtonePlayer;
 import android.media.IVolumeController;
 import android.media.PlayerBase;
-import android.media.Rating;
 import android.media.VolumePolicy;
 import android.media.audiopolicy.AudioPolicyConfig;
 import android.media.audiopolicy.IAudioPolicyCallback;
-import android.net.Uri;
-import android.view.KeyEvent;
 
 /**
  * {@hide}
  */
 interface IAudioService {
+    // C++ and Java methods below.
 
-    // WARNING: When methods are inserted or deleted, the transaction IDs in
+    // WARNING: When methods are inserted or deleted in this section, the transaction IDs in
     // frameworks/native/include/audiomanager/IAudioManager.h must be updated to match the order
     // in this file.
     //
     // When a method's argument list is changed, BpAudioManager's corresponding serialization code
     // (if any) in frameworks/native/services/audiomanager/IAudioManager.cpp must be updated.
+
+    int trackPlayer(in PlayerBase.PlayerIdCard pic);
+
+    oneway void playerAttributes(in int piid, in AudioAttributes attr);
+
+    oneway void playerEvent(in int piid, in int event);
+
+    oneway void releasePlayer(in int piid);
+
+    // Java-only methods below.
 
     oneway void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
             String callingPackage, String caller);
@@ -187,14 +193,6 @@ interface IAudioService {
 
     List<AudioPlaybackConfiguration> getActivePlaybackConfigurations();
 
-    int trackPlayer(in PlayerBase.PlayerIdCard pic);
-
-    oneway void playerAttributes(in int piid, in AudioAttributes attr);
-
-    oneway void playerEvent(in int piid, in int event);
-
-    oneway void releasePlayer(in int piid);
-
     void disableRingtoneSync(in int userId);
 
     int getFocusRampTimeMs(in int focusGain, in AudioAttributes attr);
@@ -210,5 +208,6 @@ interface IAudioService {
     oneway void setFocusRequestResultFromExtPolicy(in AudioFocusInfo afi, int requestResult,
             in IAudioPolicyCallback pcb);
 
-    // WARNING: read warning at top of file, it is recommended to add new methods at the end
+    // WARNING: read warning at top of file, new methods that need to be used by native
+    // code via IAudioManager.h need to be added to the top section.
 }
