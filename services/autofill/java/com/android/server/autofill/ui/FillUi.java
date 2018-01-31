@@ -27,6 +27,7 @@ import android.content.IntentSender;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.service.autofill.Dataset;
+import android.service.autofill.Dataset.DatasetFieldFilter;
 import android.service.autofill.FillResponse;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -58,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 final class FillUi {
     private static final String TAG = "FillUi";
@@ -185,7 +187,7 @@ final class FillUi {
             final ArrayList<ViewItem> items = new ArrayList<>(totalItems);
             if (header != null) {
                 if (sVerbose) Slog.v(TAG, "adding header");
-                items.add(new ViewItem(null, null, null, header));
+                items.add(new ViewItem(null, null, false, null, header));
             }
             for (int i = 0; i < datasetCount; i++) {
                 final Dataset dataset = response.getDatasets().get(i);
@@ -205,21 +207,32 @@ final class FillUi {
                         Slog.e(TAG, "Error inflating remote views", e);
                         continue;
                     }
-                    final Pattern filter = dataset.getFilter(index);
+                    final DatasetFieldFilter filter = dataset.getFilter(index);
+                    Pattern filterPattern = null;
                     String valueText = null;
+                    boolean filterable = true;
                     if (filter == null) {
                         final AutofillValue value = dataset.getFieldValues().get(index);
                         if (value != null && value.isText()) {
                             valueText = value.getTextValue().toString().toLowerCase();
                         }
+                    } else {
+                        filterPattern = filter.pattern;
+                        if (filterPattern == null) {
+                            if (sVerbose) {
+                                Slog.v(TAG, "Explicitly disabling filter at id " + focusedViewId
+                                        + " for dataset #" + index);
+                            }
+                            filterable = false;
+                        }
                     }
 
-                    items.add(new ViewItem(dataset, filter, valueText, view));
+                    items.add(new ViewItem(dataset, filterPattern, filterable, valueText, view));
                 }
             }
             if (footer != null) {
                 if (sVerbose) Slog.v(TAG, "adding footer");
-                items.add(new ViewItem(null, null, null, footer));
+                items.add(new ViewItem(null, null, false, null, footer));
             }
 
             mAdapter = new ItemsAdapter(items);
@@ -354,7 +367,7 @@ final class FillUi {
                 MeasureSpec.AT_MOST);
         final int itemCount = mAdapter.getCount();
         for (int i = 0; i < itemCount; i++) {
-            View view = mAdapter.getItem(i).view;
+            final View view = mAdapter.getItem(i).view;
             view.measure(widthMeasureSpec, heightMeasureSpec);
             final int clampedMeasuredWidth = Math.min(view.getMeasuredWidth(), maxSize.x);
             final int newContentWidth = Math.max(mContentWidth, clampedMeasuredWidth);
@@ -400,13 +413,62 @@ final class FillUi {
         public final @Nullable Dataset dataset;
         public final @NonNull View view;
         public final @Nullable Pattern filter;
+        public final boolean filterable;
 
-        ViewItem(@Nullable Dataset dataset, @Nullable Pattern filter, @Nullable String value,
-                @NonNull View view) {
+        /**
+         * Default constructor.
+         *
+         * @param dataset dataset associated with the item or {@code null} if it's a header or
+         * footer (TODO(b/69796626): make @NonNull if header/footer is refactored out of the list)
+         * @param filter optional filter set by the service to determine how the item should be
+         * filtered
+         * @param filterable optional flag set by the service to indicate this item should not be
+         * filtered (typically used when the dataset has value but it's sensitive, like a password)
+         * @param value dataset value
+         * @param view dataset presentation.
+         */
+        ViewItem(@Nullable Dataset dataset, @Nullable Pattern filter, boolean filterable,
+                @Nullable String value, @NonNull View view) {
             this.dataset = dataset;
             this.value = value;
             this.view = view;
             this.filter = filter;
+            this.filterable = filterable;
+        }
+
+        /**
+         * Returns whether this item matches the value input by the user so it can be included
+         * in the filtered datasets.
+         */
+        public boolean matches(CharSequence filterText) {
+            if (TextUtils.isEmpty(filterText)) {
+                // Always show item when the user input is empty
+                return true;
+            }
+            if (!filterable) {
+                // Service explicitly disabled filtering using a null Pattern.
+                return false;
+            }
+            final String constraintLowerCase = filterText.toString().toLowerCase();
+            if (filter != null) {
+                // Uses pattern provided by service
+                return filter.matcher(constraintLowerCase).matches();
+            } else {
+                // Compares it with dataset value with dataset
+                return (value == null)
+                        ? (dataset.getAuthentication() == null)
+                        : value.toLowerCase().startsWith(constraintLowerCase);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "ViewItem: [dataset=" + (dataset == null ? "null" : dataset.getId())
+                    + ", value=" + (value == null ? "null" : value.length() + "_chars")
+                    + ", filterable=" + filterable
+                    + ", filter=" + (filter == null ? "null" : filter.pattern().length() + "_chars")
+                    + ", view=" + view.getAutofillId()
+                    + "]";
         }
     }
 
@@ -509,7 +571,7 @@ final class FillUi {
     public void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mCallback: "); pw.println(mCallback != null);
         pw.print(prefix); pw.print("mListView: "); pw.println(mListView);
-        pw.print(prefix); pw.print("mAdapter: "); pw.println(mAdapter != null);
+        pw.print(prefix); pw.print("mAdapter: "); pw.println(mAdapter);
         pw.print(prefix); pw.print("mFilterText: ");
         Helper.printlnRedactedText(pw, mFilterText);
         pw.print(prefix); pw.print("mContentWidth: "); pw.println(mContentWidth);
@@ -556,33 +618,14 @@ final class FillUi {
         public Filter getFilter() {
             return new Filter() {
                 @Override
-                protected FilterResults performFiltering(CharSequence constraint) {
+                protected FilterResults performFiltering(CharSequence filterText) {
                     // No locking needed as mAllItems is final an immutable
+                    final List<ViewItem> filtered = mAllItems.stream()
+                            .filter((item) -> item.matches(filterText))
+                            .collect(Collectors.toList());
                     final FilterResults results = new FilterResults();
-                    if (TextUtils.isEmpty(constraint)) {
-                        results.values = mAllItems;
-                        results.count = mAllItems.size();
-                        return results;
-                    }
-                    final List<ViewItem> filteredItems = new ArrayList<>();
-                    final String constraintLowerCase = constraint.toString().toLowerCase();
-                    final int itemCount = mAllItems.size();
-                    for (int i = 0; i < itemCount; i++) {
-                        final ViewItem item = mAllItems.get(i);
-                        final boolean matches;
-                        if (item.filter != null) {
-                            matches = item.filter.matcher(constraintLowerCase).matches();
-                        } else {
-                            matches = (item.value == null)
-                                    ? (item.dataset.getAuthentication() == null)
-                                    : item.value.toLowerCase().startsWith(constraintLowerCase);
-                        }
-                        if (matches) {
-                            filteredItems.add(item);
-                        }
-                    }
-                    results.values = filteredItems;
-                    results.count = filteredItems.size();
+                    results.values = filtered;
+                    results.count = filtered.size();
                     return results;
                 }
 
@@ -623,6 +666,11 @@ final class FillUi {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             return getItem(position).view;
+        }
+
+        @Override
+        public String toString() {
+            return "ItemsAdapter: [all=" + mAllItems + ", filtered=" + mFilteredItems + "]";
         }
     }
 
