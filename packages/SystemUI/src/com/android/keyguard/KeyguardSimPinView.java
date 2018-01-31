@@ -131,7 +131,7 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
         }
 
         if (isEsimLocked) {
-            msg = msg + " " + rez.getString(R.string.kg_sim_lock_instructions_esim);
+            msg = rez.getString(R.string.kg_sim_lock_esim_instructions, msg);
         }
 
         mSecurityMessageDisplay.setMessage(msg);
@@ -186,6 +186,10 @@ public class KeyguardSimPinView extends KeyguardPinBasedInputView {
         } else {
             msgId = isDefault ? R.string.kg_sim_pin_instructions : R.string.kg_password_pin_failed;
             displayMessage = getContext().getString(msgId);
+        }
+        if (KeyguardEsimArea.isEsimLocked(mContext, mSubId)) {
+            displayMessage = getResources()
+                    .getString(R.string.kg_sim_lock_esim_instructions, displayMessage);
         }
         if (DEBUG) Log.d(LOG_TAG, "getPinPasswordErrorMessage:"
                 + " attemptsRemaining=" + attemptsRemaining + " displayMessage=" + displayMessage);
