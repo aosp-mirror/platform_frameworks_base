@@ -1554,6 +1554,16 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_INSTALL_FAILURE = "android.intent.action.INSTALL_FAILURE";
 
     /**
+     * @hide
+     * @removed
+     * @deprecated Do not use. This will go away.
+     *     Replace with {@link #ACTION_INSTALL_INSTANT_APP_PACKAGE}.
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_INSTALL_EPHEMERAL_PACKAGE
+            = "android.intent.action.INSTALL_EPHEMERAL_PACKAGE";
+    /**
      * Activity Action: Launch instant application installer.
      * <p class="note">
      * This is a protected intent that can only be sent by the system.
@@ -1566,6 +1576,16 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_INSTALL_INSTANT_APP_PACKAGE
             = "android.intent.action.INSTALL_INSTANT_APP_PACKAGE";
 
+    /**
+     * @hide
+     * @removed
+     * @deprecated Do not use. This will go away.
+     *     Replace with {@link #ACTION_RESOLVE_INSTANT_APP_PACKAGE}.
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.SERVICE_ACTION)
+    public static final String ACTION_RESOLVE_EPHEMERAL_PACKAGE
+            = "android.intent.action.RESOLVE_EPHEMERAL_PACKAGE";
     /**
      * Service Action: Resolve instant application.
      * <p>
@@ -1580,6 +1600,16 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_RESOLVE_INSTANT_APP_PACKAGE
             = "android.intent.action.RESOLVE_INSTANT_APP_PACKAGE";
 
+    /**
+     * @hide
+     * @removed
+     * @deprecated Do not use. This will go away.
+     *     Replace with {@link #ACTION_INSTANT_APP_RESOLVER_SETTINGS}.
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_EPHEMERAL_RESOLVER_SETTINGS
+            = "android.intent.action.EPHEMERAL_RESOLVER_SETTINGS";
     /**
      * Activity Action: Launch instant app settings.
      *
