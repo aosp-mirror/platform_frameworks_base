@@ -43,6 +43,7 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -57,6 +58,7 @@ import android.view.IRecentsAnimationController;
 import android.view.IRecentsAnimationRunner;
 
 import android.view.RemoteAnimationTarget;
+import android.view.WindowManagerGlobal;
 import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.recents.model.Task.TaskKey;
 import com.android.systemui.shared.recents.model.ThumbnailData;
@@ -271,11 +273,20 @@ public class ActivityManagerWrapper {
                 runner = new IRecentsAnimationRunner.Stub() {
                     public void onAnimationStart(IRecentsAnimationController controller,
                             RemoteAnimationTarget[] apps) {
+                        final Rect stableInsets = new Rect();
+                        WindowManagerWrapper.getInstance().getStableInsets(stableInsets);
+                        onAnimationStart_New(controller, apps, stableInsets, null);
+                    }
+
+                    public void onAnimationStart_New(IRecentsAnimationController controller,
+                            RemoteAnimationTarget[] apps, Rect homeContentInsets,
+                            Rect minimizedHomeBounds) {
                         final RecentsAnimationControllerCompat controllerCompat =
                                 new RecentsAnimationControllerCompat(controller);
                         final RemoteAnimationTargetCompat[] appsCompat =
                                 RemoteAnimationTargetCompat.wrap(apps);
-                        animationHandler.onAnimationStart(controllerCompat, appsCompat);
+                        animationHandler.onAnimationStart(controllerCompat, appsCompat,
+                                homeContentInsets, minimizedHomeBounds);
                     }
 
                     public void onAnimationCanceled() {

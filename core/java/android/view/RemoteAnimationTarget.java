@@ -79,6 +79,11 @@ public class RemoteAnimationTarget implements Parcelable {
     public final Rect clipRect;
 
     /**
+     * The insets of the main app window.
+     */
+    public final Rect contentInsets;
+
+    /**
      * The index of the element in the tree in prefix order. This should be used for z-layering
      * to preserve original z-layer order in the hierarchy tree assuming no "boosting" needs to
      * happen.
@@ -105,13 +110,14 @@ public class RemoteAnimationTarget implements Parcelable {
     public final WindowConfiguration windowConfiguration;
 
     public RemoteAnimationTarget(int taskId, int mode, SurfaceControl leash, boolean isTranslucent,
-            Rect clipRect, int prefixOrderIndex, Point position, Rect sourceContainerBounds,
-            WindowConfiguration windowConfig) {
+            Rect clipRect, Rect contentInsets, int prefixOrderIndex, Point position,
+            Rect sourceContainerBounds, WindowConfiguration windowConfig) {
         this.mode = mode;
         this.taskId = taskId;
         this.leash = leash;
         this.isTranslucent = isTranslucent;
         this.clipRect = new Rect(clipRect);
+        this.contentInsets = new Rect(contentInsets);
         this.prefixOrderIndex = prefixOrderIndex;
         this.position = new Point(position);
         this.sourceContainerBounds = new Rect(sourceContainerBounds);
@@ -124,6 +130,7 @@ public class RemoteAnimationTarget implements Parcelable {
         leash = in.readParcelable(null);
         isTranslucent = in.readBoolean();
         clipRect = in.readParcelable(null);
+        contentInsets = in.readParcelable(null);
         prefixOrderIndex = in.readInt();
         position = in.readParcelable(null);
         sourceContainerBounds = in.readParcelable(null);
@@ -142,6 +149,7 @@ public class RemoteAnimationTarget implements Parcelable {
         dest.writeParcelable(leash, 0 /* flags */);
         dest.writeBoolean(isTranslucent);
         dest.writeParcelable(clipRect, 0 /* flags */);
+        dest.writeParcelable(contentInsets, 0 /* flags */);
         dest.writeInt(prefixOrderIndex);
         dest.writeParcelable(position, 0 /* flags */);
         dest.writeParcelable(sourceContainerBounds, 0 /* flags */);

@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.graphics.Rect;
 import android.view.RemoteAnimationTarget;
 import android.view.IRecentsAnimationController;
 
@@ -28,15 +29,26 @@ import android.view.IRecentsAnimationController;
 oneway interface IRecentsAnimationRunner {
 
     /**
-     * Called when the system is ready for the handler to start animating all the visible tasks.
+     * Deprecated, to be removed once Launcher updates
      */
     void onAnimationStart(in IRecentsAnimationController controller,
-            in RemoteAnimationTarget[] apps);
+            in RemoteAnimationTarget[] apps) = 0;
 
     /**
      * Called when the system needs to cancel the current animation. This can be due to the
      * wallpaper not drawing in time, or the handler not finishing the animation within a predefined
      * amount of time.
      */
-    void onAnimationCanceled();
+    void onAnimationCanceled() = 1;
+
+    /**
+     * Called when the system is ready for the handler to start animating all the visible tasks.
+     *
+     * @param homeContentInsets The current home app content insets
+     * @param minimizedHomeBounds Specifies the bounds of the minimized home app, will be
+     *                            {@code null} if the device is not currently in split screen
+     */
+    void onAnimationStart_New(in IRecentsAnimationController controller,
+            in RemoteAnimationTarget[] apps, in Rect homeContentInsets,
+            in Rect minimizedHomeBounds) = 2;
 }
