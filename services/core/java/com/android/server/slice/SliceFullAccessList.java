@@ -63,6 +63,15 @@ public class SliceFullAccessList {
         pkgs.add(pkg);
     }
 
+    public void removeGrant(String pkg, int userId) {
+        ArraySet<String> pkgs = mFullAccessPkgs.get(userId, null);
+        if (pkgs == null) {
+            pkgs = new ArraySet<>();
+            mFullAccessPkgs.put(userId, pkgs);
+        }
+        pkgs.remove(pkg);
+    }
+
     public void writeXml(XmlSerializer out) throws IOException {
         out.startTag(null, TAG_LIST);
         out.attribute(null, ATT_VERSION, String.valueOf(DB_VERSION));

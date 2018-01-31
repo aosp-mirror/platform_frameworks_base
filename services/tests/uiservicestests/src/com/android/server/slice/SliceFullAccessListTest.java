@@ -67,6 +67,15 @@ public class SliceFullAccessListTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testRemoveAccess() {
+        mAccessList.grantFullAccess("pkg", 0);
+        assertTrue(mAccessList.hasFullAccess("pkg", 0));
+
+        mAccessList.removeGrant("pkg", 0);
+        assertFalse(mAccessList.hasFullAccess("pkg", 0));
+    }
+
+    @Test
     public void testSerialization() throws XmlPullParserException, IOException {
         mAccessList.grantFullAccess("pkg", 0);
         mAccessList.grantFullAccess("pkg1", 0);
