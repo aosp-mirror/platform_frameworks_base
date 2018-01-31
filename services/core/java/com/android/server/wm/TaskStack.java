@@ -736,13 +736,9 @@ public class TaskStack extends WindowContainer<Task> implements
     }
 
     private void updateSurfaceBounds() {
-        updateSurfaceBounds(getPendingTransaction());
+        updateSurfaceSize(getPendingTransaction());
+        updateSurfacePosition();
         scheduleAnimation();
-    }
-
-    void updateSurfaceBounds(SurfaceControl.Transaction transaction) {
-        updateSurfaceSize(transaction);
-        updateSurfacePosition(transaction);
     }
 
     private void updateSurfaceSize(SurfaceControl.Transaction transaction) {

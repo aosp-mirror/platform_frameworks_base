@@ -4519,7 +4519,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (dimmer != null) {
             applyDims(dimmer);
         }
-        updateSurfacePosition(mPendingTransaction);
+        updateSurfacePosition();
 
         mWinAnimator.prepareSurfaceLocked(true);
         super.prepareSurfaces();
@@ -4541,7 +4541,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
-    void updateSurfacePosition(Transaction t) {
+    void updateSurfacePosition() {
+        updateSurfacePosition(getPendingTransaction());
+    }
+
+    private void updateSurfacePosition(Transaction t) {
         if (mSurfaceControl == null) {
             return;
         }

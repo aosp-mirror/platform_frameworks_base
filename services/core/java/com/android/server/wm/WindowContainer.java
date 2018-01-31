@@ -131,7 +131,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
         super.onConfigurationChanged(newParentConfig);
-        updateSurfacePosition(getPendingTransaction());
+        updateSurfacePosition();
         scheduleAnimation();
     }
 
@@ -1204,7 +1204,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
     }
 
-    void updateSurfacePosition(SurfaceControl.Transaction transaction) {
+    void updateSurfacePosition() {
         if (mSurfaceControl == null) {
             return;
         }
@@ -1214,12 +1214,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             return;
         }
 
-        transaction.setPosition(mSurfaceControl, mTmpPos.x, mTmpPos.y);
+        getPendingTransaction().setPosition(mSurfaceControl, mTmpPos.x, mTmpPos.y);
         mLastSurfacePosition.set(mTmpPos.x, mTmpPos.y);
-
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            mChildren.get(i).updateSurfacePosition(transaction);
-        }
     }
 
     void getRelativePosition(Point outPos) {
