@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -44,6 +46,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
+import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.LockIcon;
@@ -192,7 +195,7 @@ public class KeyguardIndicationController {
             if  (!mHandler.hasMessages(MSG_HIDE_TRANSIENT)) {
                 hideTransientIndication();
             }
-            updateIndication();
+            updateIndication(false);
         } else if (!visible) {
             // If we unlock and return to keyguard quickly, previous error should not be shown
             hideTransientIndication();
@@ -204,7 +207,7 @@ public class KeyguardIndicationController {
      */
     public void setRestingIndication(String restingIndication) {
         mRestingIndication = restingIndication;
-        updateIndication();
+        updateIndication(false);
     }
 
     /**
@@ -265,7 +268,8 @@ public class KeyguardIndicationController {
             mWakeLock.setAcquired(true);
             hideTransientIndicationDelayed(BaseKeyguardCallback.HIDE_DELAY_MS);
         }
-        updateIndication();
+
+        updateIndication(false);
     }
 
     /**
@@ -275,11 +279,11 @@ public class KeyguardIndicationController {
         if (mTransientIndication != null) {
             mTransientIndication = null;
             mHandler.removeMessages(MSG_HIDE_TRANSIENT);
-            updateIndication();
+            updateIndication(false);
         }
     }
 
-    protected final void updateIndication() {
+    protected final void updateIndication(boolean animate) {
         if (TextUtils.isEmpty(mTransientIndication)) {
             mWakeLock.setAcquired(false);
         }
@@ -295,7 +299,35 @@ public class KeyguardIndicationController {
                     mTextView.switchIndication(mTransientIndication);
                 } else if (mPowerPluggedIn) {
                     String indication = computePowerIndication();
-                    mTextView.switchIndication(indication);
+                    if (animate) {
+                        int yTranslation = mContext.getResources().getInteger(
+                                R.integer.wired_charging_aod_text_animation_distance);
+                        int animateUpDuration = mContext.getResources().getInteger(
+                                R.integer.wired_charging_aod_text_animation_duration_up);
+                        int animateDownDuration = mContext.getResources().getInteger(
+                                R.integer.wired_charging_aod_text_animation_duration_down);
+                        mTextView.animate()
+                                .translationYBy(yTranslation)
+                                .setInterpolator(Interpolators.LINEAR)
+                                .setDuration(animateUpDuration)
+                                .setListener(new AnimatorListenerAdapter() {
+                                    @Override
+                                    public void onAnimationStart(Animator animation) {
+                                        mTextView.switchIndication(indication);
+                                    }
+                                    @Override
+                                    public void onAnimationEnd(Animator animation) {
+                                        mTextView.animate()
+                                                .setDuration(animateDownDuration)
+                                                .setInterpolator(Interpolators.BOUNCE)
+                                                .translationYBy(-1 * yTranslation)
+                                                .setListener(null);
+                                    }
+                                });
+                    } else {
+                        mTextView.switchIndication(indication);
+                    }
+
                 } else {
                     String percentage = NumberFormat.getPercentInstance()
                             .format(mBatteryLevel / 100f);
@@ -390,7 +422,7 @@ public class KeyguardIndicationController {
         public void onReceive(Context context, Intent intent) {
             mHandler.post(() -> {
                 if (mVisible) {
-                    updateIndication();
+                    updateIndication(false);
                 }
             });
         }
@@ -412,7 +444,7 @@ public class KeyguardIndicationController {
             return;
         }
         mDozing = dozing;
-        updateIndication();
+        updateIndication(false);
         updateDisclosure();
     }
 
@@ -445,7 +477,7 @@ public class KeyguardIndicationController {
             mChargingWattage = status.maxChargingWattage;
             mChargingSpeed = status.getChargingSpeed(mSlowThreshold, mFastThreshold);
             mBatteryLevel = status.level;
-            updateIndication();
+            updateIndication(!wasPluggedIn && mPowerPluggedIn);
             if (mDozing) {
                 if (!wasPluggedIn && mPowerPluggedIn) {
                     showTransientIndication(computePowerIndication());
@@ -551,7 +583,7 @@ public class KeyguardIndicationController {
         @Override
         public void onUserUnlocked() {
             if (mVisible) {
-                updateIndication();
+                updateIndication(false);
             }
         }
     };
