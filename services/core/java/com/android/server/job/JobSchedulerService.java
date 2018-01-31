@@ -23,6 +23,7 @@ import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.AlarmManager;
 import android.app.AppGlobals;
 import android.app.IUidObserver;
 import android.app.job.IJobScheduler;
@@ -184,6 +185,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
     IBatteryStats mBatteryStats;
     DeviceIdleController.LocalService mLocalDeviceIdleController;
     AppStateTracker mAppStateTracker;
+    final UsageStatsManagerInternal mUsageStats;
 
     /**
      * Set to true once we are allowed to run third party apps.
@@ -225,7 +227,10 @@ public final class JobSchedulerService extends com.android.server.SystemService
      */
     final long[] mNextBucketHeartbeat = { 0, 0, 0, 0, Long.MAX_VALUE };
     long mHeartbeat = 0;
-    long mLastHeartbeatTime = 0;
+    long mLastHeartbeatTime = sElapsedRealtimeClock.millis();
+
+    static final String HEARTBEAT_TAG = "*job.heartbeat*";
+    final HeartbeatAlarmListener mHeartbeatAlarm = new HeartbeatAlarmListener();
 
     // -- Pre-allocated temporaries only for use in assignJobsToContextsLocked --
 
@@ -495,6 +500,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 STANDBY_BEATS[3] = mParser.getInt(KEY_STANDBY_RARE_BEATS,
                         DEFAULT_STANDBY_RARE_BEATS);
             }
+
+            // Reset the heartbeat alarm based on the new heartbeat duration
+            setNextHeartbeatAlarm();
         }
 
         void dump(PrintWriter pw) {
@@ -1090,9 +1098,9 @@ public final class JobSchedulerService extends com.android.server.SystemService
         mJobSchedulerStub = new JobSchedulerStub();
 
         // Set up the app standby bucketing tracker
-        UsageStatsManagerInternal usageStats = LocalServices.getService(UsageStatsManagerInternal.class);
-        mStandbyTracker = new StandbyTracker(usageStats);
-        usageStats.addAppIdleStateChangeListener(mStandbyTracker);
+        mStandbyTracker = new StandbyTracker();
+        mUsageStats = LocalServices.getService(UsageStatsManagerInternal.class);
+        mUsageStats.addAppIdleStateChangeListener(mStandbyTracker);
 
         // The job store needs to call back
         publishLocalService(JobSchedulerInternal.class, new LocalService());
@@ -1177,6 +1185,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
 
             mAppStateTracker = Preconditions.checkNotNull(
                     LocalServices.getService(AppStateTracker.class));
+            setNextHeartbeatAlarm();
 
             // Register br for package removals and user removals.
             final IntentFilter filter = new IntentFilter();
@@ -1418,6 +1427,23 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 periodicToReschedule.getLastFailedRunTime());
     }
 
+    long heartbeatWhenJobsLastRun(String packageName, final @UserIdInt int userId) {
+        final long heartbeat;
+        final long timeSinceLastJob = mUsageStats.getTimeSinceLastJobRun(packageName, userId);
+        synchronized (mLock) {
+            heartbeat = mHeartbeat - (timeSinceLastJob / mConstants.STANDBY_HEARTBEAT_TIME);
+        }
+        if (DEBUG_STANDBY) {
+            Slog.v(TAG, "Last job heartbeat " + heartbeat + " for " + packageName + "/" + userId
+                    + " delta=" + timeSinceLastJob);
+        }
+        return heartbeat;
+    }
+
+    long heartbeatWhenJobsLastRun(JobStatus job) {
+        return heartbeatWhenJobsLastRun(job.getSourcePackageName(), job.getSourceUserId());
+    }
+
     // JobCompletedListener implementations.
 
     /**
@@ -1560,9 +1586,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         noteJobsNonpending(mPendingJobs);
         mPendingJobs.clear();
         stopNonReadyActiveJobsLocked();
-        boolean updated = updateStandbyHeartbeatLocked();
         mJobs.forEachJob(mReadyQueueFunctor);
-        if (updated) updateNextStandbyHeartbeatsLocked();
         mReadyQueueFunctor.postProcess();
 
         if (DEBUG) {
@@ -1716,36 +1740,78 @@ public final class JobSchedulerService extends com.android.server.SystemService
         noteJobsNonpending(mPendingJobs);
         mPendingJobs.clear();
         stopNonReadyActiveJobsLocked();
-        boolean updated = updateStandbyHeartbeatLocked();
         mJobs.forEachJob(mMaybeQueueFunctor);
-        if (updated) updateNextStandbyHeartbeatsLocked();
         mMaybeQueueFunctor.postProcess();
     }
 
-    private boolean updateStandbyHeartbeatLocked() {
-        final long sinceLast = sElapsedRealtimeClock.millis() - mLastHeartbeatTime;
-        final long beatsElapsed = sinceLast / mConstants.STANDBY_HEARTBEAT_TIME;
-        if (beatsElapsed > 0) {
-            mHeartbeat += beatsElapsed;
-            mLastHeartbeatTime += beatsElapsed * mConstants.STANDBY_HEARTBEAT_TIME;
-            if (DEBUG_STANDBY) {
-                Slog.v(TAG, "Advancing standby heartbeat by " + beatsElapsed + " to " + mHeartbeat);
+    /**
+     * Heartbeat tracking.  The heartbeat alarm is intentionally non-wakeup.
+     */
+    class HeartbeatAlarmListener implements AlarmManager.OnAlarmListener {
+
+        @Override
+        public void onAlarm() {
+            synchronized (mLock) {
+                final long sinceLast = sElapsedRealtimeClock.millis() - mLastHeartbeatTime;
+                final long beatsElapsed = sinceLast / mConstants.STANDBY_HEARTBEAT_TIME;
+                if (beatsElapsed > 0) {
+                    mLastHeartbeatTime += beatsElapsed * mConstants.STANDBY_HEARTBEAT_TIME;
+                    advanceHeartbeatLocked(beatsElapsed);
+                }
             }
-            return true;
+            setNextHeartbeatAlarm();
         }
-        return false;
     }
 
-    private void updateNextStandbyHeartbeatsLocked() {
-        // don't update ACTIVE or NEVER bucket milestones
+    // Intentionally does not touch the alarm timing
+    void advanceHeartbeatLocked(long beatsElapsed) {
+        mHeartbeat += beatsElapsed;
+        if (DEBUG_STANDBY) {
+            Slog.v(TAG, "Advancing standby heartbeat by " + beatsElapsed
+                    + " to " + mHeartbeat);
+        }
+        // Don't update ACTIVE or NEVER bucket milestones.  Note that mHeartbeat
+        // will be equal to mNextBucketHeartbeat[bucket] for one beat, during which
+        // new jobs scheduled by apps in that bucket will be permitted to run
+        // immediately.
+        boolean didAdvanceBucket = false;
         for (int i = 1; i < mNextBucketHeartbeat.length - 1; i++) {
-            while (mHeartbeat >= mNextBucketHeartbeat[i]) {
+            // Did we reach or cross a bucket boundary?
+            if (mHeartbeat >= mNextBucketHeartbeat[i]) {
+                didAdvanceBucket = true;
+            }
+            while (mHeartbeat > mNextBucketHeartbeat[i]) {
                 mNextBucketHeartbeat[i] += mConstants.STANDBY_BEATS[i];
             }
             if (DEBUG_STANDBY) {
-                Slog.v(TAG, "   Bucket " + i + " next heartbeat " + mNextBucketHeartbeat[i]);
+                Slog.v(TAG, "   Bucket " + i + " next heartbeat "
+                        + mNextBucketHeartbeat[i]);
             }
         }
+
+        if (didAdvanceBucket) {
+            if (DEBUG_STANDBY) {
+                Slog.v(TAG, "Hit bucket boundary; reevaluating job runnability");
+            }
+            mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
+        }
+    }
+
+    void setNextHeartbeatAlarm() {
+        final long heartbeatLength;
+        synchronized (mLock) {
+            heartbeatLength = mConstants.STANDBY_HEARTBEAT_TIME;
+        }
+        final long now = sElapsedRealtimeClock.millis();
+        final long nextBeatOrdinal = (now + heartbeatLength) / heartbeatLength;
+        final long nextHeartbeat = nextBeatOrdinal * heartbeatLength;
+        if (DEBUG_STANDBY) {
+            Slog.i(TAG, "Setting heartbeat alarm for " + nextHeartbeat
+                    + " = " + TimeUtils.formatDuration(nextHeartbeat - now));
+        }
+        AlarmManager am = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+        am.setExact(AlarmManager.ELAPSED_REALTIME, nextHeartbeat,
+                HEARTBEAT_TAG, mHeartbeatAlarm, mHandler);
     }
 
     /**
@@ -1811,17 +1877,20 @@ public final class JobSchedulerService extends com.android.server.SystemService
         if (!mInParole && !job.getJob().isExemptedFromAppStandby()) {
             final int bucket = job.getStandbyBucket();
             if (mHeartbeat < mNextBucketHeartbeat[bucket]) {
-                // Only skip this job if it's still waiting for the end of its (initial) nominal
+                // Only skip this job if the app is still waiting for the end of its nominal
                 // bucket interval.  Once it's waited that long, we let it go ahead and clear.
                 // The final (NEVER) bucket is special; we never age those apps' jobs into
                 // runnability.
+                final long appLastRan = heartbeatWhenJobsLastRun(job);
                 if (bucket >= mConstants.STANDBY_BEATS.length
-                        || (mHeartbeat < job.getBaseHeartbeat() + mConstants.STANDBY_BEATS[bucket])) {
+                        || (mHeartbeat > appLastRan
+                                && mHeartbeat < appLastRan + mConstants.STANDBY_BEATS[bucket])) {
                     // TODO: log/trace that we're deferring the job due to bucketing if we hit this
                     if (job.getWhenStandbyDeferred() == 0) {
                         if (DEBUG_STANDBY) {
                             Slog.v(TAG, "Bucket deferral: " + mHeartbeat + " < "
-                                    + mNextBucketHeartbeat[job.getStandbyBucket()] + " for " + job);
+                                    + (appLastRan + mConstants.STANDBY_BEATS[bucket])
+                                    + " for " + job);
                         }
                         job.setWhenStandbyDeferred(sElapsedRealtimeClock.millis());
                     }
@@ -2078,18 +2147,19 @@ public final class JobSchedulerService extends com.android.server.SystemService
                 // ACTIVE => everything can be run right away
                 // NEVER => we won't run them anyway, so let them go in the future
                 // as soon as the app enters normal use
+                if (DEBUG_STANDBY) {
+                    Slog.v(TAG, "Base heartbeat forced ZERO for new job in "
+                            + packageName + "/" + userId);
+                }
                 return 0;
             }
 
-            final long timeSinceLastJob = mStandbyTracker.getTimeSinceLastJobRun(
-                    packageName, userId);
-            final long bucketLength = mConstants.STANDBY_BEATS[appStandbyBucket];
-            final long bucketsAgo = timeSinceLastJob / bucketLength;
-
-            // If we haven't run any jobs for more than the app's current bucket period, just
-            // consider anything new to be immediately runnable.  Otherwise, base it on the
-            // bucket at which we last ran jobs.
-            return (bucketsAgo > bucketLength) ? 0 : (getCurrentHeartbeat() - bucketsAgo);
+            final long baseHeartbeat = heartbeatWhenJobsLastRun(packageName, userId);
+            if (DEBUG_STANDBY) {
+                Slog.v(TAG, "Base heartbeat " + baseHeartbeat + " for new job in "
+                        + packageName + "/" + userId);
+            }
+            return baseHeartbeat;
         }
 
         /**
@@ -2166,15 +2236,6 @@ public final class JobSchedulerService extends com.android.server.SystemService
      * Tracking of app assignments to standby buckets
      */
     final class StandbyTracker extends AppIdleStateChangeListener {
-        final UsageStatsManagerInternal mUsageStats;
-
-        StandbyTracker(UsageStatsManagerInternal usageStats) {
-            mUsageStats = usageStats;
-        }
-
-        public long getTimeSinceLastJobRun(String packageName, final @UserIdInt int userId) {
-            return mUsageStats.getTimeSinceLastJobRun(packageName, userId);
-        }
 
         // AppIdleStateChangeListener interface for live updates
 
@@ -2256,6 +2317,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         else return 0;
     }
 
+    // Static to support external callers
     public static int standbyBucketForPackage(String packageName, int userId, long elapsedNow) {
         UsageStatsManagerInternal usageStats = LocalServices.getService(
                 UsageStatsManagerInternal.class);
@@ -2682,6 +2744,7 @@ public final class JobSchedulerService extends com.android.server.SystemService
         }
     }
 
+    // Shell command infrastructure
     int getJobState(PrintWriter pw, String pkgName, int userId, int jobId) {
         try {
             final int uid = AppGlobals.getPackageManager().getPackageUid(pkgName, 0,
@@ -2755,6 +2818,21 @@ public final class JobSchedulerService extends com.android.server.SystemService
             }
         } catch (RemoteException e) {
             // can't happen
+        }
+        return 0;
+    }
+
+    // Shell command infrastructure
+    int executeHeartbeatCommand(PrintWriter pw, int numBeats) {
+        if (numBeats < 1) {
+            pw.println(getCurrentHeartbeat());
+            return 0;
+        }
+
+        pw.print("Advancing standby heartbeat by ");
+        pw.println(numBeats);
+        synchronized (mLock) {
+            advanceHeartbeatLocked(numBeats);
         }
         return 0;
     }
