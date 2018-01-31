@@ -173,7 +173,10 @@ public final class CustomDescription implements Parcelable {
         }
 
         /**
-         * Updates the {@link RemoteViews presentation template} when a condition is satisfied.
+         * Updates the {@link RemoteViews presentation template} when a condition is satisfied by
+         * applying a series of remote view operations. This allows dynamic customization of the
+         * portion of the save UI that is controlled by the autofill service. Such dynamic
+         * customization is based on the content of target views.
          *
          * <p>The updates are applied in the sequence they are added, after the
          * {@link #addChild(int, Transformation) transformations} are applied to the children
