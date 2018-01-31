@@ -18,6 +18,7 @@ package com.android.settingslib.core.instrumentation;
 import static com.android.settingslib.core.instrumentation.Instrumentable.METRICS_CATEGORY_UNKNOWN;
 
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -30,6 +31,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
+import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.TestConfig;
@@ -39,6 +42,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.Robolectric;
+import org.robolectric.android.controller.ActivityController;
 import org.robolectric.annotation.Config;
 
 
@@ -108,6 +113,30 @@ public class VisibilityLoggerMixinTest {
 
         verify(mMetricsFeature, never())
                 .hidden(nullable(Context.class), anyInt());
+    }
+
+    @Test
+    public void activityShouldBecomeVisibleAndHide() {
+        ActivityController<TestActivity> ac = Robolectric.buildActivity(TestActivity.class);
+        TestActivity testActivity = ac.get();
+        MockitoAnnotations.initMocks(testActivity);
+        ac.create().start().resume();
+        verify(testActivity.mMetricsFeatureProvider, times(1)).visible(any(), anyInt(), anyInt());
+        ac.pause().stop().destroy();
+        verify(testActivity.mMetricsFeatureProvider, times(1)).hidden(any(), anyInt());
+    }
+
+    public static class TestActivity extends FragmentActivity {
+        @Mock
+        MetricsFeatureProvider mMetricsFeatureProvider;
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            VisibilityLoggerMixin mixin = new VisibilityLoggerMixin(
+                    TestInstrumentable.TEST_METRIC, mMetricsFeatureProvider);
+            getLifecycle().addObserver(mixin);
+            super.onCreate(savedInstanceState);
+        }
     }
 
     private final class TestInstrumentable implements Instrumentable {
