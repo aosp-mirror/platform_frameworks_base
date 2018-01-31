@@ -482,7 +482,11 @@ final class Policy {
         Signature[] certs = mCerts.toArray(new Signature[0]);
         if (pkg.mSigningDetails != SigningDetails.UNKNOWN
                 && !Signature.areExactMatch(certs, pkg.mSigningDetails.signatures)) {
-            return null;
+
+            // certs aren't exact match, but the package may have rotated from the known system cert
+            if (certs.length > 1 || !pkg.mSigningDetails.hasCertificate(certs[0])) {
+                return null;
+            }
         }
 
         // Check for inner package name matches given that the

@@ -1022,12 +1022,24 @@ Slog.e(TAG, "TODD: Packages: " + Arrays.toString(packages));
                 PackageManagerInternal.PACKAGE_SYSTEM, UserHandle.USER_SYSTEM);
         final PackageParser.Package systemPackage =
                 mPackageManagerInt.getPackage(systemPackageName);
-        boolean allowed = (PackageManagerServiceUtils.compareSignatures(
-                                bp.getSourceSignatures(), pkg.mSigningDetails.signatures)
-                        == PackageManager.SIGNATURE_MATCH)
-                || (PackageManagerServiceUtils.compareSignatures(
-                systemPackage.mSigningDetails.signatures, pkg.mSigningDetails.signatures)
-                        == PackageManager.SIGNATURE_MATCH);
+
+        // check if the package is allow to use this signature permission.  A package is allowed to
+        // use a signature permission if:
+        //     - it has the same set of signing certificates as the source package
+        //     - or its signing certificate was rotated from the source package's certificate
+        //     - or its signing certificate is a previous signing certificate of the defining
+        //       package, and the defining package still trusts the old certificate for permissions
+        //     - or it shares the above relationships with the system package
+        boolean allowed =
+                pkg.mSigningDetails.hasAncestorOrSelf(
+                        bp.getSourcePackageSetting().getSigningDetails())
+                || bp.getSourcePackageSetting().getSigningDetails().checkCapability(
+                        pkg.mSigningDetails,
+                        PackageParser.SigningDetails.CertCapabilities.PERMISSION)
+                || pkg.mSigningDetails.hasAncestorOrSelf(systemPackage.mSigningDetails)
+                || systemPackage.mSigningDetails.checkCapability(
+                        pkg.mSigningDetails,
+                        PackageParser.SigningDetails.CertCapabilities.PERMISSION);
         if (!allowed && (privilegedPermission || oemPermission)) {
             if (pkg.isSystem()) {
                 // For updated system applications, a privileged/oem permission

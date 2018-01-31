@@ -108,8 +108,6 @@ import static com.android.server.pm.PackageManagerServiceUtils.dumpCriticalInfo;
 import static com.android.server.pm.PackageManagerServiceUtils.getCompressedFiles;
 import static com.android.server.pm.PackageManagerServiceUtils.getLastModifiedTime;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
-import static com.android.server.pm.PackageManagerServiceUtils.signingDetailsHasCertificate;
-import static com.android.server.pm.PackageManagerServiceUtils.signingDetailsHasSha256Certificate;
 import static com.android.server.pm.PackageManagerServiceUtils.verifySignatures;
 import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_FAILURE;
 import static com.android.server.pm.permission.PermissionsState.PERMISSION_OPERATION_SUCCESS;
@@ -246,6 +244,7 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Base64;
+import android.util.ByteStringUtils;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.ExceptionUtils;
@@ -5537,9 +5536,9 @@ Slog.e("TODD",
             }
             switch (type) {
                 case CERT_INPUT_RAW_X509:
-                    return signingDetailsHasCertificate(certificate, p.mSigningDetails);
+                    return p.mSigningDetails.hasCertificate(certificate);
                 case CERT_INPUT_SHA256:
-                    return signingDetailsHasSha256Certificate(certificate, p.mSigningDetails);
+                    return p.mSigningDetails.hasSha256Certificate(certificate);
                 default:
                     return false;
             }
@@ -5578,9 +5577,9 @@ Slog.e("TODD",
             }
             switch (type) {
                 case CERT_INPUT_RAW_X509:
-                    return signingDetailsHasCertificate(certificate, signingDetails);
+                    return signingDetails.hasCertificate(certificate);
                 case CERT_INPUT_SHA256:
-                    return signingDetailsHasSha256Certificate(certificate, signingDetails);
+                    return signingDetails.hasSha256Certificate(certificate);
                 default:
                     return false;
             }
@@ -8745,10 +8744,9 @@ Slog.e("TODD",
         // the application installed on /data.
         if (scanSystemPartition && !isSystemPkgUpdated && pkgAlreadyExists
                 && !pkgSetting.isSystem()) {
-            // if the signatures don't match, wipe the installed application and its data
-            if (compareSignatures(pkgSetting.signatures.mSigningDetails.signatures,
-                    pkg.mSigningDetails.signatures)
-                            != PackageManager.SIGNATURE_MATCH) {
+
+            if (!pkg.mSigningDetails.checkCapability(pkgSetting.signatures.mSigningDetails,
+                    PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)) {
                 logCriticalInfo(Log.WARN,
                         "System package signature mismatch;"
                         + " name: " + pkgSetting.name);
@@ -9713,31 +9711,48 @@ Slog.e("TODD",
                     }
 
                     final String[] expectedCertDigests = requiredCertDigests[i];
-                    // For apps targeting O MR1 we require explicit enumeration of all certs.
-                    final String[] libCertDigests = (targetSdk > Build.VERSION_CODES.O)
-                            ? PackageUtils.computeSignaturesSha256Digests(
-                            libPkg.mSigningDetails.signatures)
-                            : PackageUtils.computeSignaturesSha256Digests(
-                                    new Signature[]{libPkg.mSigningDetails.signatures[0]});
 
-                    // Take a shortcut if sizes don't match. Note that if an app doesn't
-                    // target O we don't parse the "additional-certificate" tags similarly
-                    // how we only consider all certs only for apps targeting O (see above).
-                    // Therefore, the size check is safe to make.
-                    if (expectedCertDigests.length != libCertDigests.length) {
-                        throw new PackageManagerException(INSTALL_FAILED_MISSING_SHARED_LIBRARY,
-                                "Package " + packageName + " requires differently signed" +
-                                        " static shared library; failing!");
-                    }
 
-                    // Use a predictable order as signature order may vary
-                    Arrays.sort(libCertDigests);
-                    Arrays.sort(expectedCertDigests);
+                    if (expectedCertDigests.length > 1) {
 
-                    final int certCount = libCertDigests.length;
-                    for (int j = 0; j < certCount; j++) {
-                        if (!libCertDigests[j].equalsIgnoreCase(expectedCertDigests[j])) {
+                        // For apps targeting O MR1 we require explicit enumeration of all certs.
+                        final String[] libCertDigests = (targetSdk > Build.VERSION_CODES.O)
+                                ? PackageUtils.computeSignaturesSha256Digests(
+                                libPkg.mSigningDetails.signatures)
+                                : PackageUtils.computeSignaturesSha256Digests(
+                                        new Signature[]{libPkg.mSigningDetails.signatures[0]});
+
+                        // Take a shortcut if sizes don't match. Note that if an app doesn't
+                        // target O we don't parse the "additional-certificate" tags similarly
+                        // how we only consider all certs only for apps targeting O (see above).
+                        // Therefore, the size check is safe to make.
+                        if (expectedCertDigests.length != libCertDigests.length) {
                             throw new PackageManagerException(INSTALL_FAILED_MISSING_SHARED_LIBRARY,
+                                    "Package " + packageName + " requires differently signed" +
+                                            " static shared library; failing!");
+                        }
+
+                        // Use a predictable order as signature order may vary
+                        Arrays.sort(libCertDigests);
+                        Arrays.sort(expectedCertDigests);
+
+                        final int certCount = libCertDigests.length;
+                        for (int j = 0; j < certCount; j++) {
+                            if (!libCertDigests[j].equalsIgnoreCase(expectedCertDigests[j])) {
+                                throw new PackageManagerException(
+                                        INSTALL_FAILED_MISSING_SHARED_LIBRARY,
+                                        "Package " + packageName + " requires differently signed" +
+                                                " static shared library; failing!");
+                            }
+                        }
+                    } else {
+
+                        // lib signing cert could have rotated beyond the one expected, check to see
+                        // if the new one has been blessed by the old
+                        if (!libPkg.mSigningDetails.hasSha256Certificate(
+                                ByteStringUtils.fromHexToByteArray(expectedCertDigests[0]))) {
+                            throw new PackageManagerException(
+                                    INSTALL_FAILED_MISSING_SHARED_LIBRARY,
                                     "Package " + packageName + " requires differently signed" +
                                             " static shared library; failing!");
                         }
@@ -10157,6 +10172,15 @@ Slog.e("TODD",
                 // We just determined the app is signed correctly, so bring
                 // over the latest parsed certs.
                 pkgSetting.signatures.mSigningDetails = pkg.mSigningDetails;
+
+
+                // if this is is a sharedUser, check to see if the new package is signed by a newer
+                // signing certificate than the existing one, and if so, copy over the new details
+                if (signatureCheckPs.sharedUser != null
+                        && pkg.mSigningDetails.hasAncestor(
+                                signatureCheckPs.sharedUser.signatures.mSigningDetails)) {
+                    signatureCheckPs.sharedUser.signatures.mSigningDetails = pkg.mSigningDetails;
+                }
             } catch (PackageManagerException e) {
                 if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
                     throw e;
@@ -10183,6 +10207,13 @@ Slog.e("TODD",
                 String msg = "System package " + pkg.packageName
                         + " signature changed; retaining data.";
                 reportSettingsProblem(Log.WARN, msg);
+            } catch (IllegalArgumentException e) {
+
+                // should never happen: certs matched when checking, but not when comparing
+                // old to new for sharedUser
+                throw new PackageManagerException(INSTALL_PARSE_FAILED_INCONSISTENT_CERTIFICATES,
+                        "Signing certificates comparison made on incomparable signing details"
+                        + " but somehow passed verifySignatures!");
             }
         }
 
@@ -16047,10 +16078,10 @@ Slog.e("TODD",
                     return;
                 }
             } else {
+
                 // default to original signature matching
-                if (compareSignatures(oldPackage.mSigningDetails.signatures,
-                        pkg.mSigningDetails.signatures)
-                        != PackageManager.SIGNATURE_MATCH) {
+                if (!pkg.mSigningDetails.checkCapability(oldPackage.mSigningDetails,
+                        PackageParser.SigningDetails.CertCapabilities.INSTALLED_DATA)) {
                     res.setError(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
                             "New package has a different signature: " + pkgName);
                     return;
@@ -17044,9 +17075,25 @@ Slog.e("TODD",
                                     sourcePackageSetting, scanFlags))) {
                         sigsOk = ksms.checkUpgradeKeySetLocked(sourcePackageSetting, pkg);
                     } else {
-                        sigsOk = compareSignatures(
-                                sourcePackageSetting.signatures.mSigningDetails.signatures,
-                                pkg.mSigningDetails.signatures) == PackageManager.SIGNATURE_MATCH;
+
+                        // in the event of signing certificate rotation, we need to see if the
+                        // package's certificate has rotated from the current one, or if it is an
+                        // older certificate with which the current is ok with sharing permissions
+                        if (sourcePackageSetting.signatures.mSigningDetails.checkCapability(
+                                        pkg.mSigningDetails,
+                                        PackageParser.SigningDetails.CertCapabilities.PERMISSION)) {
+                            sigsOk = true;
+                        } else if (pkg.mSigningDetails.checkCapability(
+                                        sourcePackageSetting.signatures.mSigningDetails,
+                                        PackageParser.SigningDetails.CertCapabilities.PERMISSION)) {
+
+                            // the scanned package checks out, has signing certificate rotation
+                            // history, and is newer; bring it over
+                            sourcePackageSetting.signatures.mSigningDetails = pkg.mSigningDetails;
+                            sigsOk = true;
+                        } else {
+                            sigsOk = false;
+                        }
                     }
                     if (!sigsOk) {
                         // If the owning package is the system itself, we log but allow
