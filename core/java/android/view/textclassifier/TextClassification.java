@@ -97,7 +97,7 @@ import java.util.Map;
  *   });
  * }</pre>
  */
-public final class TextClassification {
+public final class TextClassification implements Parcelable {
 
     /**
      * @hide
@@ -308,42 +308,6 @@ public final class TextClassification {
                 mPrimaryLabel, mSecondaryLabels,
                 mPrimaryIntent, mSecondaryIntents,
                 mSignature);
-    }
-
-    /** Helper for parceling via #ParcelableWrapper. */
-    private void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(mText);
-        final Bitmap primaryIconBitmap = drawableToBitmap(mPrimaryIcon, MAX_PRIMARY_ICON_SIZE);
-        dest.writeInt(primaryIconBitmap != null ? 1 : 0);
-        if (primaryIconBitmap != null) {
-            primaryIconBitmap.writeToParcel(dest, flags);
-        }
-        dest.writeString(mPrimaryLabel);
-        dest.writeInt(mPrimaryIntent != null ? 1 : 0);
-        if (mPrimaryIntent != null) {
-            mPrimaryIntent.writeToParcel(dest, flags);
-        }
-        // mPrimaryOnClickListener is not parcelable.
-        dest.writeTypedList(drawablesToBitmaps(mSecondaryIcons, MAX_SECONDARY_ICON_SIZE));
-        dest.writeStringList(mSecondaryLabels);
-        dest.writeTypedList(mSecondaryIntents);
-        mEntityConfidence.writeToParcel(dest, flags);
-        dest.writeString(mSignature);
-    }
-
-    /** Helper for unparceling via #ParcelableWrapper. */
-    private TextClassification(Parcel in) {
-        mText = in.readString();
-        mPrimaryIcon = in.readInt() == 0
-                ? null : new BitmapDrawable(null, Bitmap.CREATOR.createFromParcel(in));
-        mPrimaryLabel = in.readString();
-        mPrimaryIntent = in.readInt() == 0 ? null : Intent.CREATOR.createFromParcel(in);
-        mPrimaryOnClickListener = null;  // not parcelable
-        mSecondaryIcons = bitmapsToDrawables(in.createTypedArrayList(Bitmap.CREATOR));
-        mSecondaryLabels = in.createStringArrayList();
-        mSecondaryIntents = in.createTypedArrayList(Intent.CREATOR);
-        mEntityConfidence = EntityConfidence.CREATOR.createFromParcel(in);
-        mSignature = in.readString();
     }
 
     /**
@@ -675,46 +639,56 @@ public final class TextClassification {
         }
     }
 
-    /**
-     * Parcelable wrapper for TextClassification objects.
-     * @hide
-     */
-    public static final class ParcelableWrapper implements Parcelable {
+    @Override
+    public int describeContents() {
+        return 0;
+    }
 
-        @NonNull private TextClassification mTextClassification;
-
-        public ParcelableWrapper(@NonNull TextClassification textClassification) {
-            Preconditions.checkNotNull(textClassification);
-            mTextClassification = textClassification;
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mText);
+        final Bitmap primaryIconBitmap = drawableToBitmap(mPrimaryIcon, MAX_PRIMARY_ICON_SIZE);
+        dest.writeInt(primaryIconBitmap != null ? 1 : 0);
+        if (primaryIconBitmap != null) {
+            primaryIconBitmap.writeToParcel(dest, flags);
         }
-
-        @NonNull
-        public TextClassification getTextClassification() {
-            return mTextClassification;
+        dest.writeString(mPrimaryLabel);
+        dest.writeInt(mPrimaryIntent != null ? 1 : 0);
+        if (mPrimaryIntent != null) {
+            mPrimaryIntent.writeToParcel(dest, flags);
         }
+        // mPrimaryOnClickListener is not parcelable.
+        dest.writeTypedList(drawablesToBitmaps(mSecondaryIcons, MAX_SECONDARY_ICON_SIZE));
+        dest.writeStringList(mSecondaryLabels);
+        dest.writeTypedList(mSecondaryIntents);
+        mEntityConfidence.writeToParcel(dest, flags);
+        dest.writeString(mSignature);
+    }
 
-        @Override
-        public int describeContents() {
-            return 0;
-        }
+    public static final Parcelable.Creator<TextClassification> CREATOR =
+            new Parcelable.Creator<TextClassification>() {
+                @Override
+                public TextClassification createFromParcel(Parcel in) {
+                    return new TextClassification(in);
+                }
 
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            mTextClassification.writeToParcel(dest, flags);
-        }
+                @Override
+                public TextClassification[] newArray(int size) {
+                    return new TextClassification[size];
+                }
+            };
 
-        public static final Parcelable.Creator<ParcelableWrapper> CREATOR =
-                new Parcelable.Creator<ParcelableWrapper>() {
-                    @Override
-                    public ParcelableWrapper createFromParcel(Parcel in) {
-                        return new ParcelableWrapper(new TextClassification(in));
-                    }
-
-                    @Override
-                    public ParcelableWrapper[] newArray(int size) {
-                        return new ParcelableWrapper[size];
-                    }
-                };
-
+    private TextClassification(Parcel in) {
+        mText = in.readString();
+        mPrimaryIcon = in.readInt() == 0
+                ? null : new BitmapDrawable(null, Bitmap.CREATOR.createFromParcel(in));
+        mPrimaryLabel = in.readString();
+        mPrimaryIntent = in.readInt() == 0 ? null : Intent.CREATOR.createFromParcel(in);
+        mPrimaryOnClickListener = null;  // not parcelable
+        mSecondaryIcons = bitmapsToDrawables(in.createTypedArrayList(Bitmap.CREATOR));
+        mSecondaryLabels = in.createStringArrayList();
+        mSecondaryIntents = in.createTypedArrayList(Intent.CREATOR);
+        mEntityConfidence = EntityConfidence.CREATOR.createFromParcel(in);
+        mSignature = in.readString();
     }
 }

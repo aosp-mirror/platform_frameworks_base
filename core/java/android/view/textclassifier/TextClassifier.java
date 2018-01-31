@@ -23,9 +23,11 @@ import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.annotation.WorkerThread;
 import android.os.LocaleList;
+import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
+import android.util.Slog;
 
 import com.android.internal.util.Preconditions;
 
@@ -39,8 +41,8 @@ import java.util.List;
 /**
  * Interface for providing text classification related features.
  *
- * <p>Unless otherwise stated, methods of this interface are blocking operations.
- * Avoid calling them on the UI thread.
+ * <p><strong>NOTE: </strong>Unless otherwise stated, methods of this interface are blocking
+ * operations. Call on a worker thread.
  */
 public interface TextClassifier {
 
@@ -107,6 +109,8 @@ public interface TextClassifier {
      * Returns suggested text selection start and end indices, recognized entity types, and their
      * associated confidence scores. The entity types are ordered from highest to lowest scoring.
      *
+     * <p><strong>NOTE: </strong>Call on a worker thread.
+     *
      * @param text text providing context for the selected text (which is specified
      *      by the sub sequence starting at selectionStartIndex and ending at selectionEndIndex)
      * @param selectionStartIndex start index of the selected part of text
@@ -125,7 +129,7 @@ public interface TextClassifier {
             @IntRange(from = 0) int selectionStartIndex,
             @IntRange(from = 0) int selectionEndIndex,
             @Nullable TextSelection.Options options) {
-        Utils.validateInput(text, selectionStartIndex, selectionEndIndex);
+        Utils.validate(text, selectionStartIndex, selectionEndIndex, false);
         return new TextSelection.Builder(selectionStartIndex, selectionEndIndex).build();
     }
 
@@ -136,6 +140,8 @@ public interface TextClassifier {
      * <p><b>NOTE:</b> Do not implement. The default implementation of this method calls
      * {@link #suggestSelection(CharSequence, int, int, TextSelection.Options)}. If that method
      * calls this method, a stack overflow error will happen.
+     *
+     * <p><strong>NOTE: </strong>Call on a worker thread.
      *
      * @param text text providing context for the selected text (which is specified
      *      by the sub sequence starting at selectionStartIndex and ending at selectionEndIndex)
@@ -161,6 +167,8 @@ public interface TextClassifier {
      * See {@link #suggestSelection(CharSequence, int, int)} or
      * {@link #suggestSelection(CharSequence, int, int, TextSelection.Options)}.
      *
+     * <p><strong>NOTE: </strong>Call on a worker thread.
+     *
      * <p><b>NOTE:</b> Do not implement. The default implementation of this method calls
      * {@link #suggestSelection(CharSequence, int, int, TextSelection.Options)}. If that method
      * calls this method, a stack overflow error will happen.
@@ -182,6 +190,8 @@ public interface TextClassifier {
      * Classifies the specified text and returns a {@link TextClassification} object that can be
      * used to generate a widget for handling the classified text.
      *
+     * <p><strong>NOTE: </strong>Call on a worker thread.
+     *
      * @param text text providing context for the text to classify (which is specified
      *      by the sub sequence starting at startIndex and ending at endIndex)
      * @param startIndex start index of the text to classify
@@ -200,13 +210,15 @@ public interface TextClassifier {
             @IntRange(from = 0) int startIndex,
             @IntRange(from = 0) int endIndex,
             @Nullable TextClassification.Options options) {
-        Utils.validateInput(text, startIndex, endIndex);
+        Utils.validate(text, startIndex, endIndex, false);
         return TextClassification.EMPTY;
     }
 
     /**
      * Classifies the specified text and returns a {@link TextClassification} object that can be
      * used to generate a widget for handling the classified text.
+     *
+     * <p><strong>NOTE: </strong>Call on a worker thread.
      *
      * <p><b>NOTE:</b> Do not implement. The default implementation of this method calls
      * {@link #classifyText(CharSequence, int, int, TextClassification.Options)}. If that method
@@ -235,6 +247,8 @@ public interface TextClassifier {
      * See {@link #classifyText(CharSequence, int, int, TextClassification.Options)} or
      * {@link #classifyText(CharSequence, int, int)}.
      *
+     * <p><strong>NOTE: </strong>Call on a worker thread.
+     *
      * <p><b>NOTE:</b> Do not implement. The default implementation of this method calls
      * {@link #classifyText(CharSequence, int, int, TextClassification.Options)}. If that method
      * calls this method, a stack overflow error will happen.
@@ -253,10 +267,10 @@ public interface TextClassifier {
     }
 
     /**
-     * Returns a {@link TextLinks} that may be applied to the text to annotate it with links
-     * information.
+     * Generates and returns a {@link TextLinks} that may be applied to the text to annotate it with
+     * links information.
      *
-     * If no options are supplied, default values will be used, determined by the TextClassifier.
+     * <p><strong>NOTE: </strong>Call on a worker thread.
      *
      * @param text the text to generate annotations for
      * @param options configuration for link generation
@@ -268,13 +282,15 @@ public interface TextClassifier {
     @WorkerThread
     default TextLinks generateLinks(
             @NonNull CharSequence text, @Nullable TextLinks.Options options) {
-        Utils.validateInput(text);
+        Utils.validate(text, false);
         return new TextLinks.Builder(text.toString()).build();
     }
 
     /**
-     * Returns a {@link TextLinks} that may be applied to the text to annotate it with links
-     * information.
+     * Generates and returns a {@link TextLinks} that may be applied to the text to annotate it with
+     * links information.
+     *
+     * <p><strong>NOTE: </strong>Call on a worker thread.
      *
      * <p><b>NOTE:</b> Do not implement. The default implementation of this method calls
      * {@link #generateLinks(CharSequence, TextLinks.Options)}. If that method calls this method,
@@ -296,6 +312,7 @@ public interface TextClassifier {
      *
      * @see #ENTITY_PRESET_ALL
      * @see #ENTITY_PRESET_NONE
+     * @see #ENTITY_PRESET_BASE
      */
     default Collection<String> getEntitiesForPreset(@EntityPreset int entityPreset) {
         return Collections.EMPTY_LIST;
@@ -424,19 +441,28 @@ public interface TextClassifier {
          *      endIndex is greater than text.length() or is not greater than startIndex;
          *      options is null
          */
-        static void validateInput(
-                @NonNull CharSequence text, int startIndex, int endIndex) {
+        public static void validate(
+                @NonNull CharSequence text, int startIndex, int endIndex,
+                boolean allowInMainThread) {
             Preconditions.checkArgument(text != null);
             Preconditions.checkArgument(startIndex >= 0);
             Preconditions.checkArgument(endIndex <= text.length());
             Preconditions.checkArgument(endIndex > startIndex);
+            checkMainThread(allowInMainThread);
         }
 
         /**
          * @throws IllegalArgumentException if text is null or options is null
          */
-        static void validateInput(@NonNull CharSequence text) {
+        public static void validate(@NonNull CharSequence text, boolean allowInMainThread) {
             Preconditions.checkArgument(text != null);
+            checkMainThread(allowInMainThread);
+        }
+
+        private static void checkMainThread(boolean allowInMainThread) {
+            if (!allowInMainThread && Looper.myLooper() == Looper.getMainLooper()) {
+                Slog.w(DEFAULT_LOG_TAG, "TextClassifier called on main thread");
+            }
         }
     }
 }
