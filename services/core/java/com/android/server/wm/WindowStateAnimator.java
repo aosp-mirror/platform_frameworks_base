@@ -99,7 +99,6 @@ class WindowStateAnimator {
     // Unchanging local convenience fields.
     final WindowManagerService mService;
     final WindowState mWin;
-    private final WindowStateAnimator mParentWinAnimator;
     final WindowAnimator mAnimator;
     final Session mSession;
     final WindowManagerPolicy mPolicy;
@@ -148,7 +147,6 @@ class WindowStateAnimator {
      * system decorations.
      */
     private final Rect mSystemDecorRect = new Rect();
-    private final Rect mLastSystemDecorRect = new Rect();
 
     float mDsDx=1, mDtDx=0, mDsDy=0, mDtDy=1;
     private float mLastDsDx=1, mLastDtDx=0, mLastDsDy=0, mLastDtDy=1;
@@ -222,7 +220,6 @@ class WindowStateAnimator {
         mContext = service.mContext;
 
         mWin = win;
-        mParentWinAnimator = !win.isChildWindow() ? null : win.getParentWindow().mWinAnimator;
         mSession = win.mSession;
         mAttrType = win.mAttrs.type;
         mIsWallpaper = win.mIsWallpaper;
@@ -453,7 +450,6 @@ class WindowStateAnimator {
         }
 
         // We may abort, so initialize to defaults.
-        mLastSystemDecorRect.set(0, 0, 0, 0);
         mLastClipRect.set(0, 0, 0, 0);
 
         // Set up surface control with initial size.
@@ -1366,7 +1362,6 @@ class WindowStateAnimator {
             pw.print(prefix); pw.print("mDrawState="); pw.print(drawStateToString());
             pw.print(prefix); pw.print(" mLastHidden="); pw.println(mLastHidden);
             pw.print(prefix); pw.print("mSystemDecorRect="); mSystemDecorRect.printShortString(pw);
-            pw.print(" last="); mLastSystemDecorRect.printShortString(pw);
             pw.print(" mLastClipRect="); mLastClipRect.printShortString(pw);
 
             if (!mLastFinalClipRect.isEmpty()) {
