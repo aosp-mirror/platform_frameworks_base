@@ -30,8 +30,8 @@ package android {
     field public static final java.lang.String BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE = "android.permission.BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE";
     field public static final java.lang.String BIND_SETTINGS_SUGGESTIONS_SERVICE = "android.permission.BIND_SETTINGS_SUGGESTIONS_SERVICE";
     field public static final java.lang.String BIND_TELEPHONY_DATA_SERVICE = "android.permission.BIND_TELEPHONY_DATA_SERVICE";
-    field public static final java.lang.String BIND_TEXTCLASSIFIER_SERVICE = "android.permission.BIND_TEXTCLASSIFIER_SERVICE";
     field public static final java.lang.String BIND_TELEPHONY_NETWORK_SERVICE = "android.permission.BIND_TELEPHONY_NETWORK_SERVICE";
+    field public static final java.lang.String BIND_TEXTCLASSIFIER_SERVICE = "android.permission.BIND_TEXTCLASSIFIER_SERVICE";
     field public static final java.lang.String BIND_TRUST_AGENT = "android.permission.BIND_TRUST_AGENT";
     field public static final java.lang.String BIND_TV_REMOTE_SERVICE = "android.permission.BIND_TV_REMOTE_SERVICE";
     field public static final java.lang.String BLUETOOTH_PRIVILEGED = "android.permission.BLUETOOTH_PRIVILEGED";
@@ -5035,22 +5035,19 @@ package android.telephony {
   }
 
   public class UiccSlotInfo implements android.os.Parcelable {
-    ctor public UiccSlotInfo(boolean, boolean, java.lang.String, int);
+    ctor public UiccSlotInfo(boolean, boolean, java.lang.String, int, int);
     method public int describeContents();
     method public java.lang.String getCardId();
     method public int getCardStateInfo();
     method public boolean getIsActive();
     method public boolean getIsEuicc();
+    method public int getLogicalSlotIdx();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final int CARD_STATE_INFO_ABSENT = 1; // 0x1
     field public static final int CARD_STATE_INFO_ERROR = 3; // 0x3
     field public static final int CARD_STATE_INFO_PRESENT = 2; // 0x2
     field public static final int CARD_STATE_INFO_RESTRICTED = 4; // 0x4
     field public static final android.os.Parcelable.Creator<android.telephony.UiccSlotInfo> CREATOR;
-    field public final java.lang.String cardId;
-    field public final int cardStateInfo;
-    field public final boolean isActive;
-    field public final boolean isEuicc;
   }
 
   public abstract class VisualVoicemailService extends android.app.Service {
