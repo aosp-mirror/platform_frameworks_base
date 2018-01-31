@@ -27,6 +27,7 @@ import android.media.MediaController2.ControllerCallback;
 import android.media.MediaItem2;
 import android.media.MediaLibraryService2;
 import android.media.MediaLibraryService2.MediaLibrarySession;
+import android.media.MediaLibraryService2.MediaLibrarySessionBuilder;
 import android.media.MediaLibraryService2.MediaLibrarySessionCallback;
 import android.media.MediaMetadata2;
 import android.media.MediaPlayerInterface;
@@ -39,6 +40,7 @@ import android.media.SessionPlayer2;
 import android.media.SessionToken2;
 import android.media.VolumeProvider;
 import android.media.update.MediaLibraryService2Provider.MediaLibrarySessionProvider;
+import android.media.update.MediaSession2Provider.BuilderBaseProvider;
 import android.media.update.MediaSession2Provider.CommandGroupProvider;
 import android.media.update.MediaSession2Provider.CommandProvider;
 import android.media.update.MediaSession2Provider.ControllerInfoProvider;
@@ -65,9 +67,6 @@ public interface StaticProvider {
             VideoView2 instance, ViewProvider superProvider,
             @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes);
 
-    MediaSession2Provider createMediaSession2(Context context, MediaSession2 instance,
-            MediaPlayerInterface player, String id, VolumeProvider volumeProvider, int ratingType,
-            PendingIntent sessionActivity, Executor executor, SessionCallback callback);
     CommandProvider createMediaSession2Command(MediaSession2.Command instance,
             int commandCode, String action, Bundle extra);
     MediaSession2.Command fromBundle_MediaSession2Command(Context context, Bundle bundle);
@@ -81,6 +80,9 @@ public interface StaticProvider {
             PlaylistParams playlistParams, int repeatMode, int shuffleMode,
             MediaMetadata2 playlistMetadata);
     PlaylistParams fromBundle_PlaylistParams(Context context, Bundle bundle);
+    BuilderBaseProvider<MediaSession2, SessionCallback> createMediaSession2Builder(
+            Context context, MediaSession2.Builder instance, MediaPlayerInterface player);
+
     MediaController2Provider createMediaController2(Context context, MediaController2 instance,
             SessionToken2 token, Executor executor, ControllerCallback callback);
 
@@ -88,12 +90,12 @@ public interface StaticProvider {
             SessionToken2 token, Executor executor, BrowserCallback callback);
 
     MediaSessionService2Provider createMediaSessionService2(MediaSessionService2 instance);
-    MediaSessionService2Provider createMediaLibraryService2(MediaLibraryService2 instance);
 
-    MediaLibrarySessionProvider createMediaLibraryService2MediaLibrarySession(Context context,
-            MediaLibrarySession instance, MediaPlayerInterface player, String id,
-            VolumeProvider volumeProvider, int ratingType, PendingIntent sessionActivity,
-            Executor executor, MediaLibrarySessionCallback callback);
+    MediaSessionService2Provider createMediaLibraryService2(MediaLibraryService2 instance);
+    BuilderBaseProvider<MediaLibrarySession, MediaLibrarySessionCallback>
+        createMediaLibraryService2Builder(
+            Context context, MediaLibrarySessionBuilder instance, MediaPlayerInterface player,
+            Executor callbackExecutor, MediaLibrarySessionCallback callback);
 
     SessionToken2Provider createSessionToken2(Context context, SessionToken2 instance,
             String packageName, String serviceName, int uid);

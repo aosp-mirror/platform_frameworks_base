@@ -16,15 +16,18 @@
 
 package android.media.update;
 
+import android.app.PendingIntent;
 import android.media.MediaItem2;
 import android.media.MediaMetadata2;
 import android.media.MediaPlayerInterface;
 import android.media.MediaPlayerInterface.PlaybackListener;
+import android.media.MediaSession2;
 import android.media.MediaSession2.Command;
 import android.media.MediaSession2.CommandButton;
 import android.media.MediaSession2.CommandGroup;
 import android.media.MediaSession2.ControllerInfo;
 import android.media.MediaSession2.PlaylistParams;
+import android.media.MediaSession2.SessionCallback;
 import android.media.SessionToken2;
 import android.media.VolumeProvider;
 import android.os.Bundle;
@@ -38,8 +41,6 @@ import java.util.concurrent.Executor;
  */
 // TODO: @SystemApi
 public interface MediaSession2Provider extends TransportControlProvider {
-    void initialize();
-
     void close_impl();
     void setPlayer_impl(MediaPlayerInterface player);
     void setPlayer_impl(MediaPlayerInterface player, VolumeProvider volumeProvider);
@@ -94,5 +95,14 @@ public interface MediaSession2Provider extends TransportControlProvider {
         int getShuffleMode_impl();
         MediaMetadata2 getPlaylistMetadata_impl();
         Bundle toBundle_impl();
+    }
+
+    interface BuilderBaseProvider<T extends MediaSession2, C extends SessionCallback> {
+        void setVolumeProvider_impl(VolumeProvider volumeProvider);
+        void setRatingType_impl(int type);
+        void setSessionActivity_impl(PendingIntent pi);
+        void setId_impl(String id);
+        void setSessionCallback_impl(Executor executor, C callback);
+        T build_impl();
     }
 }

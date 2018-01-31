@@ -19,6 +19,7 @@ package android.media;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.media.MediaSession2.BuilderBase;
@@ -63,26 +64,16 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
     /**
      * Session for the media library service.
      */
-    public class MediaLibrarySession extends MediaSession2 {
+    public static class MediaLibrarySession extends MediaSession2 {
         private final MediaLibrarySessionProvider mProvider;
 
-        MediaLibrarySession(Context context, MediaPlayerInterface player, String id,
-                VolumeProvider volumeProvider, int ratingType, PendingIntent sessionActivity,
-                Executor callbackExecutor, SessionCallback callback) {
-            super(context, player, id, volumeProvider, ratingType, sessionActivity,
-                    callbackExecutor, callback);
-            mProvider = (MediaLibrarySessionProvider) getProvider();
-        }
-
-        @Override
-        MediaSession2Provider createProvider(Context context, MediaPlayerInterface player,
-                String id, VolumeProvider volumeProvider, int ratingType,
-                PendingIntent sessionActivity, Executor callbackExecutor,
-                SessionCallback callback) {
-            return ApiLoader.getProvider(context)
-                    .createMediaLibraryService2MediaLibrarySession(context, this, player, id,
-                            volumeProvider, ratingType, sessionActivity,
-                            callbackExecutor, (MediaLibrarySessionCallback) callback);
+        /**
+         * @hide
+         */
+        @SystemApi
+        public MediaLibrarySession(MediaLibrarySessionProvider provider) {
+            super(provider);
+            mProvider = provider;
         }
 
         /**
@@ -208,31 +199,15 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
     /**
      * Builder for {@link MediaLibrarySession}.
      */
-    // TODO(jaewan): Move this to updatable.
-    public class MediaLibrarySessionBuilder
-            extends BuilderBase<MediaLibrarySessionBuilder, MediaLibrarySessionCallback> {
+    public class MediaLibrarySessionBuilder extends BuilderBase<MediaLibrarySession,
+            MediaLibrarySessionBuilder, MediaLibrarySessionCallback> {
         public MediaLibrarySessionBuilder(
                 @NonNull Context context, @NonNull MediaPlayerInterface player,
                 @NonNull @CallbackExecutor Executor callbackExecutor,
                 @NonNull MediaLibrarySessionCallback callback) {
-            super(context, player);
-            setSessionCallback(callbackExecutor, callback);
-        }
-
-        @Override
-        public MediaLibrarySessionBuilder setSessionCallback(
-                @NonNull @CallbackExecutor Executor callbackExecutor,
-                @NonNull MediaLibrarySessionCallback callback) {
-            if (callback == null) {
-                throw new IllegalArgumentException("MediaLibrarySessionCallback cannot be null");
-            }
-            return super.setSessionCallback(callbackExecutor, callback);
-        }
-
-        @Override
-        public MediaLibrarySession build() {
-            return new MediaLibrarySession(mContext, mPlayer, mId, mVolumeProvider, mRatingType,
-                    mSessionActivity, mCallbackExecutor, mCallback);
+            super((instance) -> ApiLoader.getProvider(context).createMediaLibraryService2Builder(
+                    context, (MediaLibrarySessionBuilder) instance, player, callbackExecutor,
+                    callback));
         }
     }
 
