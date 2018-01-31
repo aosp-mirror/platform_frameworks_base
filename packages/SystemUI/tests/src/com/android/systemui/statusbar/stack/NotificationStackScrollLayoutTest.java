@@ -61,4 +61,15 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         Assert.assertFalse(mStackScroller.isDimmed());
     }
 
+    @Test
+    public void testAntiBurnInOffset() {
+        final int burnInOffset = 30;
+        mStackScroller.setAntiBurnInOffsetX(burnInOffset);
+        mStackScroller.setDark(false /* dark */, false /* animated */, null /* touch */);
+        Assert.assertEquals(0 /* expected */, mStackScroller.getTranslationX(), 0.01 /* delta */);
+        mStackScroller.setDark(true /* dark */, false /* animated */, null /* touch */);
+        Assert.assertEquals(burnInOffset /* expected */, mStackScroller.getTranslationX(),
+                0.01 /* delta */);
+    }
+
 }

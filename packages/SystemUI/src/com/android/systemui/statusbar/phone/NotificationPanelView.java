@@ -47,6 +47,7 @@ import android.view.ViewTreeObserver;
 import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
+
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.keyguard.KeyguardStatusView;
@@ -67,14 +68,11 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
-import com.android.systemui.statusbar.notification.NotificationUtils;
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.stack.StackStateAnimator;
 
-import java.util.Collection;
 import java.util.List;
 
 public class NotificationPanelView extends PanelView implements
@@ -482,7 +480,7 @@ public class NotificationPanelView extends PanelView implements
             mTopPaddingAdjustment = mClockPositionResult.stackScrollerPaddingAdjustment;
         }
         mNotificationStackScroller.setIntrinsicPadding(stackScrollerPadding);
-        mNotificationStackScroller.setDarkShelfOffsetX(mClockPositionResult.clockX);
+        mNotificationStackScroller.setAntiBurnInOffsetX(mClockPositionResult.clockX);
         mKeyguardBottomArea.setBurnInXOffset(mClockPositionResult.clockX);
         requestScrollerTopPaddingUpdate(animate);
     }

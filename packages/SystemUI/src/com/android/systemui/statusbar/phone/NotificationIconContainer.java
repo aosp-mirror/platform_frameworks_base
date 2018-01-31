@@ -120,7 +120,6 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
     private boolean mDisallowNextAnimation;
     private boolean mAnimationsEnabled = true;
     private ArrayMap<String, ArrayList<StatusBarIcon>> mReplacingIcons;
-    private int mDarkOffsetX;
     // Keep track of the last visible icon so collapsed container can report on its location
     private IconState mLastVisibleIconState;
 
@@ -378,14 +377,6 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
                 iconState.xTranslation = getWidth() - iconState.xTranslation - view.getWidth();
             }
         }
-
-        if (mDark && mDarkOffsetX != 0) {
-            for (int i = 0; i < childCount; i++) {
-                View view = getChildAt(i);
-                IconState iconState = mIconStates.get(view);
-                iconState.xTranslation += mDarkOffsetX;
-            }
-        }
     }
 
     private float getLayoutEnd() {
@@ -532,10 +523,6 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             }
         }
         mAnimationsEnabled = enabled;
-    }
-
-    public void setDarkOffsetX(int offsetX) {
-        mDarkOffsetX = offsetX;
     }
 
     public void setReplacingIcons(ArrayMap<String, ArrayList<StatusBarIcon>> replacingIcons) {
