@@ -821,6 +821,8 @@ LOCAL_PROTOC_FLAGS := \
 LOCAL_SRC_FILES := \
     $(call all-proto-files-under, core/proto) \
     $(call all-proto-files-under, libs/incident/proto/android/os)
+# Protos have lots of MissingOverride and similar.
+LOCAL_ERROR_PRONE_FLAGS := -XepDisableAllChecks
 include $(BUILD_STATIC_JAVA_LIBRARY)
 
 # ==== hiddenapi lists =======================================
