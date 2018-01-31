@@ -44,6 +44,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
+import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
@@ -242,7 +243,9 @@ public class PowerUI extends SystemUI {
                 }
 
                 // Show the correct version of low battery warning if needed
-                maybeShowBatteryWarning(plugged, oldPlugged, oldBucket, bucket);
+                ThreadUtils.postOnBackgroundThread(() -> {
+                    maybeShowBatteryWarning(plugged, oldPlugged, oldBucket, bucket);
+                });
 
             } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 mScreenOffTime = SystemClock.elapsedRealtime();
