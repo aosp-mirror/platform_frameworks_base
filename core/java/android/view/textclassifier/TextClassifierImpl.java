@@ -232,6 +232,7 @@ public final class TextClassifierImpl implements TextClassifier {
                 }
                 builder.addLink(span.getStartIndex(), span.getEndIndex(), entityScores);
             }
+            return builder.build();
         } catch (Throwable t) {
             // Avoid throwing from this method. Log the error.
             Log.e(LOG_TAG, "Error getting links info.", t);

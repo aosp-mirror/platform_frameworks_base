@@ -23,13 +23,13 @@ import android.annotation.Nullable;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.widget.TextView;
 import android.text.Spannable;
 import android.text.style.ClickableSpan;
 import android.text.util.Linkify;
 import android.text.util.Linkify.LinkifyMask;
 import android.view.View;
 import android.view.textclassifier.TextClassifier.EntityType;
+import android.widget.TextView;
 
 import com.android.internal.util.Preconditions;
 
@@ -351,7 +351,7 @@ public final class TextLinks implements Parcelable {
          * @throws IllegalArgumentException if applyStrategy is not valid
          *
          * @see #APPLY_STRATEGY_IGNORE
-         * @see #APPLY_STRAGETY_REPLACE
+         * @see #APPLY_STRATEGY_REPLACE
          */
         public Options setApplyStrategy(@ApplyStrategy int applyStrategy) {
             checkValidApplyStrategy(applyStrategy);
@@ -391,8 +391,8 @@ public final class TextLinks implements Parcelable {
          * @return the strategy for resolving conflictswhen applying generated links to text that
          * already have links.
          *
-         * @see #APPLY_STATEGY_IGNORE
-         * @see #APPLY_STRAGETY_REPLACE
+         * @see #APPLY_STRATEGY_IGNORE
+         * @see #APPLY_STRATEGY_REPLACE
          */
         @ApplyStrategy
         public int getApplyStrategy() {
