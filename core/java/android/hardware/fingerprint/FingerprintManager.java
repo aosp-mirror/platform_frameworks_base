@@ -52,7 +52,12 @@ import javax.crypto.Mac;
 
 /**
  * A class that coordinates access to the fingerprint hardware.
+ * @deprecated See {@link FingerprintDialog} which shows a system-provided dialog upon starting
+ * authentication. In a world where devices may have in-display fingerprint sensors, it's much
+ * more realistic to have a system-provided authentication dialog since the in-display sensor
+ * location may vary by vendor/device.
  */
+@Deprecated
 @SystemService(Context.FINGERPRINT_SERVICE)
 public class FingerprintManager implements BiometricFingerprintConstants {
     private static final String TAG = "FingerprintManager";
@@ -361,7 +366,12 @@ public class FingerprintManager implements BiometricFingerprintConstants {
      *         by <a href="{@docRoot}training/articles/keystore.html">Android Keystore
      *         facility</a>.
      * @throws IllegalStateException if the crypto primitive is not initialized.
+     * @deprecated See {@link FingerprintDialog#authenticate(CancellationSignal, Executor,
+     * FingerprintDialog.AuthenticationCallback)} and {@link FingerprintDialog#authenticate(
+     * FingerprintDialog.CryptoObject, CancellationSignal, Executor,
+     * FingerprintDialog.AuthenticationCallback)}
      */
+    @Deprecated
     @RequiresPermission(USE_FINGERPRINT)
     public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
             int flags, @NonNull AuthenticationCallback callback, @Nullable Handler handler) {
@@ -721,7 +731,10 @@ public class FingerprintManager implements BiometricFingerprintConstants {
      * Determine if there is at least one fingerprint enrolled.
      *
      * @return true if at least one fingerprint is enrolled, false otherwise
+     * @deprecated See {@link FingerprintDialog} and
+     * {@link FingerprintDialog#FINGERPRINT_ERROR_NO_FINGERPRINTS}
      */
+    @Deprecated
     @RequiresPermission(USE_FINGERPRINT)
     public boolean hasEnrolledFingerprints() {
         if (mService != null) try {
@@ -752,7 +765,10 @@ public class FingerprintManager implements BiometricFingerprintConstants {
      * Determine if fingerprint hardware is present and functional.
      *
      * @return true if hardware is present and functional, false otherwise.
+     * @deprecated See {@link FingerprintDialog} and
+     * {@link FingerprintDialog#FINGERPRINT_ERROR_HW_UNAVAILABLE}
      */
+    @Deprecated
     @RequiresPermission(USE_FINGERPRINT)
     public boolean isHardwareDetected() {
         if (mService != null) {
