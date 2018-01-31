@@ -103,14 +103,11 @@ public class ResolverListController {
         List<ResolverActivity.ResolvedComponentInfo> resolvedComponents = null;
         for (int i = 0, N = intents.size(); i < N; i++) {
             final Intent intent = intents.get(i);
-            int flags = PackageManager.MATCH_DEFAULT_ONLY
-                    | (shouldGetResolvedFilter ? PackageManager.GET_RESOLVED_FILTER : 0)
-                    | (shouldGetActivityMetadata ? PackageManager.GET_META_DATA : 0);
-            if (intent.isBrowsableWebIntent()
-                        || (intent.getFlags() & Intent.FLAG_ACTIVITY_MATCH_EXTERNAL) != 0) {
-                flags |= PackageManager.MATCH_INSTANT;
-            }
-            final List<ResolveInfo> infos = mpm.queryIntentActivities(intent, flags);
+            final List<ResolveInfo> infos = mpm.queryIntentActivities(intent,
+                    PackageManager.MATCH_DEFAULT_ONLY
+                            | (shouldGetResolvedFilter ? PackageManager.GET_RESOLVED_FILTER : 0)
+                            | (shouldGetActivityMetadata ? PackageManager.GET_META_DATA : 0)
+                            | PackageManager.MATCH_INSTANT);
             // Remove any activities that are not exported.
             int totalSize = infos.size();
             for (int j = totalSize - 1; j >= 0 ; j--) {
