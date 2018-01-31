@@ -190,6 +190,8 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                     && !keymasterSecureUserIds.contains(getGateKeeperSecureUserId());
         }
 
+        boolean userConfirmationRequired = keyCharacteristics.hwEnforced.getBoolean(KeymasterDefs.KM_TAG_TRUSTED_CONFIRMATION_REQUIRED);
+
         return new KeyInfo(entryAlias,
                 insideSecureHardware,
                 origin,
@@ -207,7 +209,8 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                 userAuthenticationRequirementEnforcedBySecureHardware,
                 userAuthenticationValidWhileOnBody,
                 trustedUserPresenceRequred,
-                invalidatedByBiometricEnrollment);
+                invalidatedByBiometricEnrollment,
+                userConfirmationRequired);
     }
 
     private static BigInteger getGateKeeperSecureUserId() throws ProviderException {

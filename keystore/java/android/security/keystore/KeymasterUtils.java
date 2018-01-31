@@ -16,6 +16,7 @@
 
 package android.security.keystore;
 
+import android.util.Log;
 import android.hardware.fingerprint.FingerprintManager;
 import android.security.GateKeeper;
 import android.security.KeyStore;
@@ -93,6 +94,8 @@ public abstract class KeymasterUtils {
      *        overriding the default logic in this method where the key is bound to either the root
      *        SID of the current user, or the fingerprint SID if explicit fingerprint authorization
      *        is requested.
+     * @param userConfirmationRequired whether user confirmation is required to authorize the use
+     *        of the key.
      * @throws IllegalStateException if user authentication is required but the system is in a wrong
      *         state (e.g., secure lock screen not set up) for generating or importing keys that
      *         require user authentication.
@@ -102,7 +105,12 @@ public abstract class KeymasterUtils {
             int userAuthenticationValidityDurationSeconds,
             boolean userAuthenticationValidWhileOnBody,
             boolean invalidatedByBiometricEnrollment,
-            long boundToSpecificSecureUserId) {
+            long boundToSpecificSecureUserId,
+            boolean userConfirmationRequired) {
+        if (userConfirmationRequired) {
+            args.addBoolean(KeymasterDefs.KM_TAG_TRUSTED_CONFIRMATION_REQUIRED);
+        }
+
         if (!userAuthenticationRequired) {
             args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
             return;

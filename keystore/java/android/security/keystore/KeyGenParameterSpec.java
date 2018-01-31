@@ -264,6 +264,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     private final boolean mUserAuthenticationValidWhileOnBody;
     private final boolean mInvalidatedByBiometricEnrollment;
     private final boolean mIsStrongBoxBacked;
+    private final boolean mUserConfirmationRequired;
 
     /**
      * @hide should be built with Builder
@@ -293,7 +294,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
             boolean uniqueIdIncluded,
             boolean userAuthenticationValidWhileOnBody,
             boolean invalidatedByBiometricEnrollment,
-            boolean isStrongBoxBacked) {
+            boolean isStrongBoxBacked,
+            boolean userConfirmationRequired) {
         if (TextUtils.isEmpty(keyStoreAlias)) {
             throw new IllegalArgumentException("keyStoreAlias must not be empty");
         }
@@ -341,6 +343,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         mUserAuthenticationValidWhileOnBody = userAuthenticationValidWhileOnBody;
         mInvalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
         mIsStrongBoxBacked = isStrongBoxBacked;
+        mUserConfirmationRequired = userConfirmationRequired;
     }
 
     /**
@@ -547,6 +550,26 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
     }
 
     /**
+     * Returns {@code true} if the key is authorized to be used only for messages confirmed by the
+     * user.
+     *
+     * Confirmation is separate from user authentication (see
+     * {@link Builder#setUserAuthenticationRequired(boolean)}). Keys can be created that require
+     * confirmation but not user authentication, or user authentication but not confirmation, or
+     * both. Confirmation verifies that some user with physical possession of the device has
+     * approved a displayed message. User authentication verifies that the correct user is present
+     * and has authenticated.
+     *
+     * <p>This authorization applies only to secret key and private key operations. Public key
+     * operations are not restricted.
+     *
+     * @see Builder#setUserConfirmationRequired(boolean)
+     */
+    public boolean isUserConfirmationRequired() {
+        return mUserConfirmationRequired;
+    }
+
+    /**
      * Gets the duration of time (seconds) for which this key is authorized to be used after the
      * user is successfully authenticated. This has effect only if user authentication is required
      * (see {@link #isUserAuthenticationRequired()}).
@@ -675,6 +698,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         private boolean mUserAuthenticationValidWhileOnBody;
         private boolean mInvalidatedByBiometricEnrollment = true;
         private boolean mIsStrongBoxBacked = false;
+        private boolean mUserConfirmationRequired;
 
         /**
          * Creates a new instance of the {@code Builder}.
@@ -1063,6 +1087,29 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
         }
 
         /**
+         * Sets whether this key is authorized to be used only for messages confirmed by the
+         * user.
+         *
+         * Confirmation is separate from user authentication (see
+         * {@link #setUserAuthenticationRequired(boolean)}). Keys can be created that require
+         * confirmation but not user authentication, or user authentication but not confirmation,
+         * or both. Confirmation verifies that some user with physical possession of the device has
+         * approved a displayed message. User authentication verifies that the correct user is
+         * present and has authenticated.
+         *
+         * <p>This authorization applies only to secret key and private key operations. Public key
+         * operations are not restricted.
+         *
+         * @see {@link android.security.ConfirmationPrompter ConfirmationPrompter} class for
+         * more details about user confirmations.
+         */
+        @NonNull
+        public Builder setUserConfirmationRequired(boolean required) {
+            mUserConfirmationRequired = required;
+            return this;
+        }
+
+        /**
          * Sets the duration of time (seconds) for which this key is authorized to be used after the
          * user is successfully authenticated. This has effect if the key requires user
          * authentication for its use (see {@link #setUserAuthenticationRequired(boolean)}).
@@ -1249,7 +1296,8 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec {
                     mUniqueIdIncluded,
                     mUserAuthenticationValidWhileOnBody,
                     mInvalidatedByBiometricEnrollment,
-                    mIsStrongBoxBacked);
+                    mIsStrongBoxBacked,
+                    mUserConfirmationRequired);
         }
     }
 }
