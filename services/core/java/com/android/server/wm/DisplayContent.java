@@ -1542,11 +1542,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * Callback used to trigger bounds update after configuration change and get ids of stacks whose
      * bounds were updated.
      */
-    void updateStackBoundsAfterConfigChange(@NonNull List<Integer> changedStackList) {
+    void updateStackBoundsAfterConfigChange(@NonNull List<TaskStack> changedStackList) {
         for (int i = mTaskStackContainers.getChildCount() - 1; i >= 0; --i) {
             final TaskStack stack = mTaskStackContainers.getChildAt(i);
             if (stack.updateBoundsAfterConfigChange()) {
-                changedStackList.add(stack.mStackId);
+                changedStackList.add(stack);
             }
         }
 
