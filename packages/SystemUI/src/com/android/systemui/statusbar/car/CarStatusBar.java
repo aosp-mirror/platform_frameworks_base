@@ -379,7 +379,7 @@ public class CarStatusBar extends StatusBar implements
         // Because space is usually constrained in the auto use-case, there should not be a
         // pinned notification when the shade has been expanded. Ensure this by removing all heads-
         // up notifications.
-        mHeadsUpManager.removeAllHeadsUpEntries();
+        mHeadsUpManager.releaseAllImmediately();
         super.animateExpandNotificationsPanel();
     }
 
