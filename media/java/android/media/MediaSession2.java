@@ -81,34 +81,178 @@ import java.util.concurrent.Executor;
 public class MediaSession2 implements AutoCloseable {
     private final MediaSession2Provider mProvider;
 
-    // Note: Do not define IntDef because subclass can add more command code on top of these.
+    // TODO(jaewan): Should we define IntDef? Currently we don't have to allow subclass to add more.
     // TODO(jaewan): Shouldn't we pull out?
-    // TODO(jaewan): Should we also protect getPlaybackState()?
+    // TODO(jaewan): Should we also protect getters not related with metadata?
+    //               Getters are getRatingType(), getPlaybackState(), getSessionActivity(),
+    //               getPlaylistParams())
+    // Next ID: 23
+    /**
+     * Command code for the custom command which can be defined by string action in the
+     * {@link Command}.
+     */
     public static final int COMMAND_CODE_CUSTOM = 0;
-    public static final int COMMAND_CODE_PLAYBACK_START = 1;
+
+    /**
+     * Command code for {@link MediaController2#play()}.
+     * <p>
+     * Command would be sent directly to the player if the session doesn't reject the request
+     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     */
+    public static final int COMMAND_CODE_PLAYBACK_PLAY = 1;
+
+    /**
+     * Command code for {@link MediaController2#pause()}.
+     * <p>
+     * Command would be sent directly to the player if the session doesn't reject the request
+     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     */
     public static final int COMMAND_CODE_PLAYBACK_PAUSE = 2;
+
+    /**
+     * Command code for {@link MediaController2#stop()}.
+     * <p>
+     * Command would be sent directly to the player if the session doesn't reject the request
+     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     */
     public static final int COMMAND_CODE_PLAYBACK_STOP = 3;
+
+    /**
+     * Command code for {@link MediaController2#skipToNext()} ()}.
+     * <p>
+     * Command would be sent directly to the player if the session doesn't reject the request
+     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     */
     public static final int COMMAND_CODE_PLAYBACK_SKIP_NEXT_ITEM = 4;
+
+    /**
+     * Command code for {@link MediaController2#skipToPrevious()} ()}.
+     * <p>
+     * Command would be sent directly to the player if the session doesn't reject the request
+     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     */
     public static final int COMMAND_CODE_PLAYBACK_SKIP_PREV_ITEM = 5;
+
+    /**
+     * Command code for {@link MediaController2#prepare()}.
+     * <p>
+     * Command would be sent directly to the player if the session doesn't reject the request
+     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     */
     public static final int COMMAND_CODE_PLAYBACK_PREPARE = 6;
+
+    /**
+     * Command code for {@link MediaController2#fastForward()} ()}.
+     * <p>
+     * This is transport control command. Command would be sent directly to the player if the
+     * session doesn't reject the request through the
+     * {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     */
     public static final int COMMAND_CODE_PLAYBACK_FAST_FORWARD = 7;
+
+    /**
+     * Command code for {@link MediaController2#rewind()}.
+     * <p>
+     * Command would be sent directly to the player if the session doesn't reject the request
+     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     */
     public static final int COMMAND_CODE_PLAYBACK_REWIND = 8;
+
+    /**
+     * Command code for {@link MediaController2#seekTo(long)} ()}.
+     * <p>
+     * Command would be sent directly to the player if the session doesn't reject the request
+     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     */
     public static final int COMMAND_CODE_PLAYBACK_SEEK_TO = 9;
+    /**
+     * Command code for {@link MediaController2#setCurrentPlaylistItem(int)} ()}.
+     * <p>
+     * Command would be sent directly to the player if the session doesn't reject the request
+     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     */
     public static final int COMMAND_CODE_PLAYBACK_SET_CURRENT_PLAYLIST_ITEM = 10;
 
-    public static final int COMMAND_CODE_PLAYLIST_GET = 11;
+    /**
+     * Command code for {@link MediaController2#setPlaylistParams(PlaylistParams)} ()}.
+     * <p>
+     * Command would be sent directly to the player if the session doesn't reject the request
+     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     */
+    public static final int COMMAND_CODE_PLAYBACK_SET_PLAYLIST_PARAMS = 11;
+
+    /**
+     * Command code for {@link MediaController2#addPlaylistItem(int, MediaItem2)}.
+     * <p>
+     * Command would be sent directly to the player if the session doesn't reject the request
+     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     */
     public static final int COMMAND_CODE_PLAYLIST_ADD = 12;
+
+    /**
+     * Command code for {@link MediaController2#addPlaylistItem(int, MediaItem2)}.
+     * <p>
+     * Command would be sent directly to the player if the session doesn't reject the request
+     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     */
     public static final int COMMAND_CODE_PLAYLIST_REMOVE = 13;
 
-    public static final int COMMAND_CODE_PLAY_FROM_MEDIA_ID = 14;
-    public static final int COMMAND_CODE_PLAY_FROM_URI = 15;
-    public static final int COMMAND_CODE_PLAY_FROM_SEARCH = 16;
+    /**
+     * Command code for {@link MediaController2#getPlaylist()}.
+     * <p>
+     * Command would be sent directly to the player if the session doesn't reject the request
+     * through the {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     */
+    public static final int COMMAND_CODE_PLAYLIST_GET = 14;
 
-    public static final int COMMAND_CODE_PREPARE_FROM_MEDIA_ID = 17;
-    public static final int COMMAND_CODE_PREPARE_FROM_URI = 18;
-    public static final int COMMAND_CODE_PREPARE_FROM_SEARCH = 19;
+    /**
+     * Command code for both {@link MediaController2#setVolumeTo(int, int)} and
+     * {@link MediaController2#adjustVolume(int, int)}.
+     * <p>
+     * Command would adjust the volume or sent to the volume provider directly if the session
+     * doesn't reject the request through the
+     * {@link SessionCallback#onCommandRequest(ControllerInfo, Command)}.
+     */
+    public static final int COMMAND_CODE_SET_VOLUME = 15;
 
-    public static final int COMMAND_CODE_PLAYBACK_SET_PLAYLIST_PARAMS = 20;
+    /**
+     * Command code for {@link MediaController2#playFromMediaId(String, Bundle)}.
+     */
+    public static final int COMMAND_CODE_PLAY_FROM_MEDIA_ID = 16;
+
+    /**
+     * Command code for {@link MediaController2#playFromUri(String, Bundle)}.
+     */
+    public static final int COMMAND_CODE_PLAY_FROM_URI = 17;
+
+    /**
+     * Command code for {@link MediaController2#playFromSearch(String, Bundle)}.
+     */
+    public static final int COMMAND_CODE_PLAY_FROM_SEARCH = 18;
+
+    /**
+     * Command code for {@link MediaController2#prepareFromMediaId(String, Bundle)}.
+     */
+    public static final int COMMAND_CODE_PREPARE_FROM_MEDIA_ID = 19;
+
+    /**
+     * Command code for {@link MediaController2#prepareFromUri(Uri, Bundle)}.
+     */
+    public static final int COMMAND_CODE_PREPARE_FROM_URI = 20;
+
+    /**
+     * Command code for {@link MediaController2#prepareFromSearch(String, Bundle)}.
+     */
+    public static final int COMMAND_CODE_PREPARE_FROM_SEARCH = 21;
+
+    /**
+     * Command code for {@link MediaBrowser2} specific functions that allows navigation and search
+     * from the {@link MediaLibraryService2}. This would be ignored if a {@link MediaSession2},
+     * not {@link android.media.MediaLibraryService2.MediaLibrarySession}, specify this.
+     *
+     * @see MediaBrowser2
+     */
+    public static final int COMMAND_CODE_BROWSER = 22;
 
     /**
      * Define a command that a {@link MediaController2} can send to a {@link MediaSession2}.
@@ -274,22 +418,36 @@ public class MediaSession2 implements AutoCloseable {
         public void onDisconnected(@NonNull ControllerInfo controller) { }
 
         /**
-         * Called when a controller sent a command to the session, and the command will be sent to
-         * the player directly unless you reject the request by {@code false}.
+         * Called when a controller sent a command that will be sent directly to the player. Return
+         * {@code false} here to reject the request and stop sending command to the player.
          *
          * @param controller controller information.
          * @param command a command. This method will be called for every single command.
          * @return {@code true} if you want to accept incoming command. {@code false} otherwise.
+         * @see #COMMAND_CODE_PLAYBACK_PLAY
+         * @see #COMMAND_CODE_PLAYBACK_PAUSE
+         * @see #COMMAND_CODE_PLAYBACK_STOP
+         * @see #COMMAND_CODE_PLAYBACK_SKIP_NEXT_ITEM
+         * @see #COMMAND_CODE_PLAYBACK_SKIP_PREV_ITEM
+         * @see #COMMAND_CODE_PLAYBACK_PREPARE
+         * @see #COMMAND_CODE_PLAYBACK_FAST_FORWARD
+         * @see #COMMAND_CODE_PLAYBACK_REWIND
+         * @see #COMMAND_CODE_PLAYBACK_SEEK_TO
+         * @see #COMMAND_CODE_PLAYBACK_SET_CURRENT_PLAYLIST_ITEM
+         * @see #COMMAND_CODE_PLAYBACK_SET_PLAYLIST_PARAMS
+         * @see #COMMAND_CODE_PLAYLIST_ADD
+         * @see #COMMAND_CODE_PLAYLIST_REMOVE
+         * @see #COMMAND_CODE_PLAYLIST_GET
+         * @see #COMMAND_CODE_SET_VOLUME
          */
-        // TODO(jaewan): Add more documentations (or make it clear) which commands can be filtered
-        //               with this.
         public boolean onCommandRequest(@NonNull ControllerInfo controller,
                 @NonNull Command command) {
             return true;
         }
 
         /**
-         * Called when a controller set rating on the currently playing contents.
+         * Called when a controller set rating on the currently playing contents by
+         * {@link MediaController2#setRating(Rating2)}.
          *
          * @param controller controller information
          * @param rating new rating from the controller
@@ -297,7 +455,8 @@ public class MediaSession2 implements AutoCloseable {
         public void onSetRating(@NonNull ControllerInfo controller, @NonNull Rating2 rating) { }
 
         /**
-         * Called when a controller sent a custom command.
+         * Called when a controller sent a custom command through
+         * {@link MediaController2#sendCustomCommand(Command, Bundle, ResultReceiver)}.
          *
          * @param controller controller information
          * @param customCommand custom command.
@@ -309,7 +468,48 @@ public class MediaSession2 implements AutoCloseable {
                 @Nullable ResultReceiver cb) { }
 
         /**
-         * Override to handle requests to prepare for playing a specific mediaId.
+         * Called when a controller requested to play a specific mediaId through
+         * {@link MediaController2#playFromMediaId(String, Bundle)}.
+         *
+         * @param controller controller information
+         * @param mediaId media id
+         * @param extras optional extra bundle
+         * @see #COMMAND_CODE_PLAY_FROM_MEDIA_ID
+         */
+        public void onPlayFromMediaId(@NonNull ControllerInfo controller,
+                @NonNull String mediaId, @Nullable Bundle extras) { }
+
+        /**
+         * Called when a controller requested to begin playback from a search query through
+         * {@link MediaController2#playFromSearch(String, Bundle)}
+         * <p>
+         * An empty query indicates that the app may play any music. The implementation should
+         * attempt to make a smart choice about what to play.
+         *
+         * @param controller controller information
+         * @param query query string. Can be empty to indicate any suggested media
+         * @param extras optional extra bundle
+         * @see #COMMAND_CODE_PLAY_FROM_SEARCH
+         */
+        public void onPlayFromSearch(@NonNull ControllerInfo controller,
+                @NonNull String query, @Nullable Bundle extras) { }
+
+        /**
+         * Called when a controller requested to play a specific media item represented by a URI
+         * through {@link MediaController2#playFromUri(String, Bundle)}
+         *
+         * @param controller controller information
+         * @param uri uri
+         * @param extras optional extra bundle
+         * @see #COMMAND_CODE_PLAY_FROM_URI
+         */
+        public void onPlayFromUri(@NonNull ControllerInfo controller,
+                @NonNull String uri, @Nullable Bundle extras) { }
+
+        /**
+         * Called when a controller requested to prepare for playing a specific mediaId through
+         * {@link MediaController2#prepareFromMediaId(String, Bundle)}.
+         * <p>
          * During the preparation, a session should not hold audio focus in order to allow other
          * sessions play seamlessly. The state of playback should be updated to
          * {@link PlaybackState#STATE_PAUSED} after the preparation is done.
@@ -319,28 +519,41 @@ public class MediaSession2 implements AutoCloseable {
          * <p>
          * Override {@link #onPlayFromMediaId} to handle requests for starting
          * playback without preparation.
+         *
+         * @param controller controller information
+         * @param mediaId media id to prepare
+         * @param extras optional extra bundle
+         * @see #COMMAND_CODE_PREPARE_FROM_MEDIA_ID
          */
-        public void onPlayFromMediaId(@NonNull ControllerInfo controller,
+        public void onPrepareFromMediaId(@NonNull ControllerInfo controller,
                 @NonNull String mediaId, @Nullable Bundle extras) { }
 
         /**
-         * Override to handle requests to prepare playback from a search query. An empty query
-         * indicates that the app may prepare any music. The implementation should attempt to make a
-         * smart choice about what to play. During the preparation, a session should not hold audio
-         * focus in order to allow other sessions play seamlessly. The state of playback should be
-         * updated to {@link PlaybackState#STATE_PAUSED} after the preparation is done.
+         * Called when a controller requested to prepare playback from a search query through
+         * {@link MediaController2#prepareFromSearch(String, Bundle)}.
          * <p>
-         * The playback of the prepared content should start in the later calls of
-         * {@link MediaSession2#play()}.
+         * An empty query indicates that the app may prepare any music. The implementation should
+         * attempt to make a smart choice about what to play.
+         * <p>
+         * The state of playback should be updated to {@link PlaybackState#STATE_PAUSED} after the
+         * preparation is done. The playback of the prepared content should start in the later
+         * calls of {@link MediaSession2#play()}.
          * <p>
          * Override {@link #onPlayFromSearch} to handle requests for starting playback without
          * preparation.
+         *
+         * @param controller controller information
+         * @param query query string. Can be empty to indicate any suggested media
+         * @param extras optional extra bundle
+         * @see #COMMAND_CODE_PREPARE_FROM_SEARCH
          */
-        public void onPlayFromSearch(@NonNull ControllerInfo controller,
+        public void onPrepareFromSearch(@NonNull ControllerInfo controller,
                 @NonNull String query, @Nullable Bundle extras) { }
 
         /**
-         * Override to handle requests to prepare a specific media item represented by a URI.
+         * Called when a controller requested to prepare a specific media item represented by a URI
+         * through {@link MediaController2#prepareFromUri(Uri, Bundle)}.
+         * <p></p>
          * During the preparation, a session should not hold audio focus in order to allow
          * other sessions play seamlessly. The state of playback should be updated to
          * {@link PlaybackState#STATE_PAUSED} after the preparation is done.
@@ -350,51 +563,14 @@ public class MediaSession2 implements AutoCloseable {
          * <p>
          * Override {@link #onPlayFromUri} to handle requests for starting playback without
          * preparation.
-         */
-        public void onPlayFromUri(@NonNull ControllerInfo controller,
-                @NonNull String uri, @Nullable Bundle extras) { }
-
-        /**
-         * Override to handle requests to play a specific mediaId.
-         */
-        public void onPrepareFromMediaId(@NonNull ControllerInfo controller,
-                @NonNull String mediaId, @Nullable Bundle extras) { }
-
-        /**
-         * Override to handle requests to begin playback from a search query. An
-         * empty query indicates that the app may play any music. The
-         * implementation should attempt to make a smart choice about what to
-         * play.
-         */
-        public void onPrepareFromSearch(@NonNull ControllerInfo controller,
-                @NonNull String query, @Nullable Bundle extras) { }
-
-        /**
-         * Override to handle requests to play a specific media item represented by a URI.
+         *
+         * @param controller controller information
+         * @param uri uri
+         * @param extras optional extra bundle
+         * @see #COMMAND_CODE_PREPARE_FROM_URI
          */
         public void onPrepareFromUri(@NonNull ControllerInfo controller,
                 @NonNull Uri uri, @Nullable Bundle extras) { }
-
-        /**
-         * Called when a controller wants to add a {@link MediaItem2} at the specified position
-         * in the play queue.
-         * <p>
-         * The item from the media controller wouldn't have valid data source descriptor because
-         * it would have been anonymized when it's sent to the remote process.
-         *
-         * @param item The media item to be inserted.
-         * @param index The index at which the item is to be inserted.
-         */
-        public void onAddPlaylistItem(@NonNull ControllerInfo controller,
-                @NonNull MediaItem2 item, int index) { }
-
-        /**
-         * Called when a controller wants to remove the {@link MediaItem2}
-         *
-         * @param item
-         */
-        // Can we do this automatically?
-        public void onRemovePlaylistItem(@NonNull MediaItem2 item) { }
     };
 
     /**
