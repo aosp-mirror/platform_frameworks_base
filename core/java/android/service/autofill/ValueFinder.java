@@ -19,6 +19,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.view.autofill.AutofillId;
+import android.view.autofill.AutofillValue;
 
 /**
  * Helper object used to obtain the value of a field in the screen being autofilled.
@@ -29,7 +30,17 @@ import android.view.autofill.AutofillId;
 public interface ValueFinder {
 
     /**
+     * Gets the value of a field as String, or {@code null} when not found.
+     */
+    @Nullable
+    default String findByAutofillId(@NonNull AutofillId id) {
+        final AutofillValue value = findRawValueByAutofillId(id);
+        return (value == null || !value.isText()) ? null : value.getTextValue().toString();
+    }
+
+    /**
      * Gets the value of a field, or {@code null} when not found.
      */
-    @Nullable String findByAutofillId(@NonNull AutofillId id);
+    @Nullable
+    AutofillValue findRawValueByAutofillId(@NonNull AutofillId id);
 }
