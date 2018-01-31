@@ -1022,7 +1022,7 @@ public class WifiAwareManagerTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testNetworkSpecifierWithClientNullPmk() throws Exception {
-        executeNetworkSpecifierWithClient(true, null, null);
+        executeNetworkSpecifierWithClient(new PeerHandle(123412), true, null, null);
     }
 
     /**
@@ -1030,7 +1030,7 @@ public class WifiAwareManagerTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testNetworkSpecifierWithClientIncorrectLengthPmk() throws Exception {
-        executeNetworkSpecifierWithClient(true, "012".getBytes(), null);
+        executeNetworkSpecifierWithClient(new PeerHandle(123412), true, "012".getBytes(), null);
     }
 
     /**
@@ -1038,7 +1038,7 @@ public class WifiAwareManagerTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testNetworkSpecifierWithClientNullPassphrase() throws Exception {
-        executeNetworkSpecifierWithClient(false, null, null);
+        executeNetworkSpecifierWithClient(new PeerHandle(123412), false, null, null);
     }
 
     /**
@@ -1046,7 +1046,7 @@ public class WifiAwareManagerTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testNetworkSpecifierWithClientShortPassphrase() throws Exception {
-        executeNetworkSpecifierWithClient(false, null, "012");
+        executeNetworkSpecifierWithClient(new PeerHandle(123412), false, null, "012");
     }
 
     /**
@@ -1054,15 +1054,23 @@ public class WifiAwareManagerTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testNetworkSpecifierWithClientLongPassphrase() throws Exception {
-        executeNetworkSpecifierWithClient(false, null,
+        executeNetworkSpecifierWithClient(new PeerHandle(123412), false, null,
                 "0123456789012345678901234567890123456789012345678901234567890123456789");
     }
 
-    private void executeNetworkSpecifierWithClient(boolean doPmk, byte[] pmk, String passphrase)
-            throws Exception {
+    /**
+     * Validate that a null PeerHandle triggers an exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testNetworkSpecifierWithClientNullPeer() throws Exception {
+        executeNetworkSpecifierWithClient(null, false, null,
+                "0123456789012345678901234567890123456789012345678901234567890123456789");
+    }
+
+    private void executeNetworkSpecifierWithClient(PeerHandle peerHandle, boolean doPmk, byte[] pmk,
+            String passphrase) throws Exception {
         final int clientId = 4565;
         final int sessionId = 123;
-        final PeerHandle peerHandle = new PeerHandle(123412);
         final ConfigRequest configRequest = new ConfigRequest.Builder().build();
         final PublishConfig publishConfig = new PublishConfig.Builder().build();
 
@@ -1108,7 +1116,8 @@ public class WifiAwareManagerTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testNetworkSpecifierDirectNullPmk() throws Exception {
-        executeNetworkSpecifierDirect(true, null, null);
+        executeNetworkSpecifierDirect(HexEncoding.decode("000102030405".toCharArray(), false), true,
+                null, null);
     }
 
     /**
@@ -1116,7 +1125,8 @@ public class WifiAwareManagerTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testNetworkSpecifierDirectIncorrectLengthPmk() throws Exception {
-        executeNetworkSpecifierDirect(true, "012".getBytes(), null);
+        executeNetworkSpecifierDirect(HexEncoding.decode("000102030405".toCharArray(), false), true,
+                "012".getBytes(), null);
     }
 
     /**
@@ -1124,7 +1134,8 @@ public class WifiAwareManagerTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testNetworkSpecifierDirectNullPassphrase() throws Exception {
-        executeNetworkSpecifierDirect(false, null, null);
+        executeNetworkSpecifierDirect(HexEncoding.decode("000102030405".toCharArray(), false),
+                false, null, null);
     }
 
     /**
@@ -1132,7 +1143,8 @@ public class WifiAwareManagerTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testNetworkSpecifierDirectShortPassphrase() throws Exception {
-        executeNetworkSpecifierDirect(false, null, "012");
+        executeNetworkSpecifierDirect(HexEncoding.decode("000102030405".toCharArray(), false),
+                false, null, "012");
     }
 
     /**
@@ -1140,14 +1152,22 @@ public class WifiAwareManagerTest {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testNetworkSpecifierDirectLongPassphrase() throws Exception {
-        executeNetworkSpecifierDirect(false, null,
+        executeNetworkSpecifierDirect(HexEncoding.decode("000102030405".toCharArray(), false),
+                false, null,
                 "0123456789012345678901234567890123456789012345678901234567890123456789");
     }
 
-    private void executeNetworkSpecifierDirect(boolean doPmk, byte[] pmk, String passphrase)
-            throws Exception {
+    /**
+     * Validate that a null peer MAC triggers an exception.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testNetworkSpecifierDirectNullPeer() throws Exception {
+        executeNetworkSpecifierDirect(null, false, null, null);
+    }
+
+    private void executeNetworkSpecifierDirect(byte[] someMac, boolean doPmk, byte[] pmk,
+            String passphrase) throws Exception {
         final int clientId = 134;
-        final byte[] someMac = HexEncoding.decode("000102030405".toCharArray(), false);
         final int role = WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR;
         final ConfigRequest configRequest = new ConfigRequest.Builder().build();
 

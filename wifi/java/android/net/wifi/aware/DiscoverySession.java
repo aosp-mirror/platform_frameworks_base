@@ -22,6 +22,8 @@ import android.annotation.SystemApi;
 import android.net.NetworkSpecifier;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import dalvik.system.CloseGuard;
 
 import java.lang.ref.WeakReference;
@@ -142,6 +144,34 @@ public class DiscoverySession implements AutoCloseable {
     }
 
     /**
+     * Access the client ID of the Aware session.
+     *
+     * Note: internal visibility for testing.
+     *
+     * @return The internal client ID.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public int getClientId() {
+        return mClientId;
+    }
+
+    /**
+     * Access the discovery session ID of the Aware session.
+     *
+     * Note: internal visibility for testing.
+     *
+     * @return The internal discovery session ID.
+     *
+     * @hide
+     */
+    @VisibleForTesting
+    public int getSessionId() {
+        return mSessionId;
+    }
+
+    /**
      * Sends a message to the specified destination. Aware messages are transmitted in the context
      * of a discovery session - executed subsequent to a publish/subscribe
      * {@link DiscoverySessionCallback#onServiceDiscovered(PeerHandle,
@@ -246,8 +276,7 @@ public class DiscoverySession implements AutoCloseable {
      *                   or
      *                   {@link DiscoverySessionCallback#onMessageReceived(PeerHandle, byte[])}.
      *                   On a RESPONDER this value is used to gate the acceptance of a connection
-     *                   request from only that peer. A RESPONDER may specify a {@code null} -
-     *                   indicating that it will accept connection requests from any device.
+     *                   request from only that peer.
      *
      * @return A {@link NetworkSpecifier} to be used to construct
      * {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(NetworkSpecifier)} to pass to
@@ -255,7 +284,7 @@ public class DiscoverySession implements AutoCloseable {
      * android.net.ConnectivityManager.NetworkCallback)}
      * [or other varieties of that API].
      */
-    public NetworkSpecifier createNetworkSpecifierOpen(@Nullable PeerHandle peerHandle) {
+    public NetworkSpecifier createNetworkSpecifierOpen(@NonNull PeerHandle peerHandle) {
         if (mTerminated) {
             Log.w(TAG, "createNetworkSpecifierOpen: called on terminated session");
             return null;
@@ -295,8 +324,7 @@ public class DiscoverySession implements AutoCloseable {
      * byte[], java.util.List)} or
      * {@link DiscoverySessionCallback#onMessageReceived(PeerHandle,
      * byte[])}. On a RESPONDER this value is used to gate the acceptance of a connection request
-     *                   from only that peer. A RESPONDER may specify a {@code null} - indicating
-     *                   that it will accept connection requests from any device.
+     *                   from only that peer.
      * @param passphrase The passphrase to be used to encrypt the link. The PMK is generated from
      *                   the passphrase. Use the
      *                   {@link #createNetworkSpecifierOpen(PeerHandle)} API to
@@ -309,7 +337,7 @@ public class DiscoverySession implements AutoCloseable {
      * [or other varieties of that API].
      */
     public NetworkSpecifier createNetworkSpecifierPassphrase(
-            @Nullable PeerHandle peerHandle, @NonNull String passphrase) {
+            @NonNull PeerHandle peerHandle, @NonNull String passphrase) {
         if (!WifiAwareUtils.validatePassphrase(passphrase)) {
             throw new IllegalArgumentException("Passphrase must meet length requirements");
         }
@@ -354,8 +382,7 @@ public class DiscoverySession implements AutoCloseable {
      * byte[], java.util.List)} or
      * {@link DiscoverySessionCallback#onMessageReceived(PeerHandle,
      * byte[])}. On a RESPONDER this value is used to gate the acceptance of a connection request
-     *                   from only that peer. A RESPONDER may specify a null - indicating that
-     *                   it will accept connection requests from any device.
+     *                   from only that peer.
      * @param pmk A PMK (pairwise master key, see IEEE 802.11i) specifying the key to use for
      *            encrypting the data-path. Use the
      *            {@link #createNetworkSpecifierPassphrase(PeerHandle, String)} to specify a
@@ -371,7 +398,7 @@ public class DiscoverySession implements AutoCloseable {
      * @hide
      */
     @SystemApi
-    public NetworkSpecifier createNetworkSpecifierPmk(@Nullable PeerHandle peerHandle,
+    public NetworkSpecifier createNetworkSpecifierPmk(@NonNull PeerHandle peerHandle,
             @NonNull byte[] pmk) {
         if (!WifiAwareUtils.validatePmk(pmk)) {
             throw new IllegalArgumentException("PMK must 32 bytes");
