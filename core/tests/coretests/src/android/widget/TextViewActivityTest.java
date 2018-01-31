@@ -325,9 +325,9 @@ public class TextViewActivityTest {
         TextClassificationManager textClassificationManager =
                 mActivity.getSystemService(TextClassificationManager.class);
         TextClassifier textClassifier = textClassificationManager.getTextClassifier();
-        SpannableString content = new SpannableString("Call me at +19148277737");
+        Spannable content = new SpannableString("Call me at +19148277737");
         TextLinks links = textClassifier.generateLinks(content);
-        links.apply(content, null);
+        links.apply(content, TextLinks.APPLY_STRATEGY_REPLACE, null);
 
         mActivityRule.runOnUiThread(() -> {
             textView.setText(content);
