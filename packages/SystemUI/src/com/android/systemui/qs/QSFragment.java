@@ -69,7 +69,7 @@ public class QSFragment extends Fragment implements QS {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
             Bundle savedInstanceState) {
-        inflater =inflater.cloneInContext(new ContextThemeWrapper(getContext(), R.style.qs_theme));
+        inflater = inflater.cloneInContext(new ContextThemeWrapper(getContext(), R.style.qs_theme));
         return inflater.inflate(R.layout.qs_panel, container, false);
     }
 
