@@ -1600,7 +1600,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * @hide
      */
     public boolean isAllowedToUseHiddenApi() {
-        return isSystemApp();
+        return false;
     }
 
     /**
