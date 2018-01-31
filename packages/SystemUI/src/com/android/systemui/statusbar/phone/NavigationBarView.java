@@ -304,7 +304,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 }
             }
         }
-        return mRecentsAnimationStarted || mGestureHelper.onInterceptTouchEvent(event);
+        return mGestureHelper.onInterceptTouchEvent(event) || mRecentsAnimationStarted;
     }
 
     public void abortCurrentGesture() {
