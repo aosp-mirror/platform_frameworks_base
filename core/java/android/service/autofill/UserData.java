@@ -30,6 +30,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.provider.Settings;
 import android.service.autofill.FieldClassification.Match;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.Helper;
@@ -52,12 +53,14 @@ public final class UserData implements Parcelable {
     private static final int DEFAULT_MIN_VALUE_LENGTH = 5;
     private static final int DEFAULT_MAX_VALUE_LENGTH = 100;
 
+    private final String mId;
     private final String mAlgorithm;
     private final Bundle mAlgorithmArgs;
     private final String[] mRemoteIds;
     private final String[] mValues;
 
     private UserData(Builder builder) {
+        mId = builder.mId;
         mAlgorithm = builder.mAlgorithm;
         mAlgorithmArgs = builder.mAlgorithmArgs;
         mRemoteIds = new String[builder.mRemoteIds.size()];
@@ -73,6 +76,13 @@ public final class UserData implements Parcelable {
     @Nullable
     public String getFieldClassificationAlgorithm() {
         return mAlgorithm;
+    }
+
+    /**
+     * Gets the id.
+     */
+    public String getId() {
+        return mId;
     }
 
     /** @hide */
@@ -92,6 +102,7 @@ public final class UserData implements Parcelable {
 
     /** @hide */
     public void dump(String prefix, PrintWriter pw) {
+        pw.print(prefix); pw.print("id: "); pw.print(mId);
         pw.print(prefix); pw.print("Algorithm: "); pw.print(mAlgorithm);
         pw.print(" Args: "); pw.println(mAlgorithmArgs);
 
@@ -121,6 +132,7 @@ public final class UserData implements Parcelable {
      * A builder for {@link UserData} objects.
      */
     public static final class Builder {
+        private final String mId;
         private final ArrayList<String> mRemoteIds;
         private final ArrayList<String> mValues;
         private String mAlgorithm;
@@ -131,16 +143,28 @@ public final class UserData implements Parcelable {
          * Creates a new builder for the user data used for <a href="#FieldClassification">field
          * classification</a>.
          *
+         * <p>The user data must contain at least one pair of {@code remoteId} -> {@code value}, and
+         * more pairs can be added through the {@link #add(String, String)} method.
+         *
+         * @param id id used to identify the whole {@link UserData} object. This id is also returned
+         * by {@link AutofillManager#getUserDataId()}, which can be used to check if the
+         * {@link UserData} is up-to-date without fetching the whole object (through
+         * {@link AutofillManager#getUserData()}).
+         * @param remoteId unique string used to identify a user data value.
+         * @param value value of the user data.
+         *
          * @throws IllegalArgumentException if any of the following occurs:
          * <ol>
+         *   <li>{@code id} is empty
          *   <li>{@code remoteId} is empty
          *   <li>{@code value} is empty
          *   <li>the length of {@code value} is lower than {@link UserData#getMinValueLength()}
          *   <li>the length of {@code value} is higher than {@link UserData#getMaxValueLength()}
          * </ol>
          */
-        public Builder(@NonNull String remoteId, @NonNull String value) {
-            checkValidRemoteId(remoteId);
+        public Builder(@NonNull String id, @NonNull String remoteId, @NonNull String value) {
+            mId = checkNotEmpty("id", id);
+            checkNotEmpty("remoteId", remoteId);
             checkValidValue(value);
             final int capacity = getMaxUserDataSize();
             mRemoteIds = new ArrayList<>(capacity);
@@ -188,7 +212,7 @@ public final class UserData implements Parcelable {
          */
         public Builder add(@NonNull String remoteId, @NonNull String value) {
             throwIfDestroyed();
-            checkValidRemoteId(remoteId);
+            checkNotEmpty("remoteId", remoteId);
             checkValidValue(value);
 
             Preconditions.checkState(!mRemoteIds.contains(remoteId),
@@ -205,9 +229,10 @@ public final class UserData implements Parcelable {
             return this;
         }
 
-        private void checkValidRemoteId(@Nullable String remoteId) {
-            Preconditions.checkNotNull(remoteId);
-            Preconditions.checkArgument(!remoteId.isEmpty(), "remoteId cannot be empty");
+        private String checkNotEmpty(@NonNull String name, @Nullable String value) {
+            Preconditions.checkNotNull(value);
+            Preconditions.checkArgument(!TextUtils.isEmpty(value), "%s cannot be empty", name);
+            return value;
         }
 
         private void checkValidValue(@Nullable String value) {
@@ -246,7 +271,8 @@ public final class UserData implements Parcelable {
     public String toString() {
         if (!sDebug) return super.toString();
 
-        final StringBuilder builder = new StringBuilder("UserData: [algorithm=").append(mAlgorithm);
+        final StringBuilder builder = new StringBuilder("UserData: [id=").append(mId)
+                .append(", algorithm=").append(mAlgorithm);
         // Cannot disclose remote ids or values because they could contain PII
         builder.append(", remoteIds=");
         Helper.appendRedacted(builder, mRemoteIds);
@@ -266,6 +292,7 @@ public final class UserData implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeString(mId);
         parcel.writeStringArray(mRemoteIds);
         parcel.writeStringArray(mValues);
         parcel.writeString(mAlgorithm);
@@ -279,9 +306,10 @@ public final class UserData implements Parcelable {
             // Always go through the builder to ensure the data ingested by
             // the system obeys the contract of the builder to avoid attacks
             // using specially crafted parcels.
+            final String id = parcel.readString();
             final String[] remoteIds = parcel.readStringArray();
             final String[] values = parcel.readStringArray();
-            final Builder builder = new Builder(remoteIds[0], values[0])
+            final Builder builder = new Builder(id, remoteIds[0], values[0])
                     .setFieldClassificationAlgorithm(parcel.readString(), parcel.readBundle());
             for (int i = 1; i < remoteIds.length; i++) {
                 builder.add(remoteIds[i], values[i]);

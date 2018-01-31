@@ -56,6 +56,7 @@ interface IAutoFillManager {
     boolean isServiceEnabled(int userId, String packageName);
     void onPendingSaveUi(int operation, IBinder token);
     UserData getUserData();
+    String getUserDataId();
     void setUserData(in UserData userData);
     boolean isFieldClassificationEnabled();
     ComponentName getAutofillServiceComponentName();
