@@ -41,6 +41,9 @@ bool AnimatedImageDrawable::start() {
         return false;
     }
 
+    // This will trigger a reset.
+    mFinished = true;
+
     mRunning = true;
     return true;
 }
