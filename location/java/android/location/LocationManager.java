@@ -236,6 +236,62 @@ public class LocationManager {
      */
     public static final String GNSS_HARDWARE_MODEL_NAME_UNKNOWN = "Model Name Unknown";
 
+    /**
+     * Broadcast intent action for Settings app to inject a footer at the bottom of location
+     * settings.
+     *
+     * <p>This broadcast is used for two things:
+     * <ol>
+     *     <li>For receivers to inject a footer with provided text. This is for use only by apps
+     *         that are included in the system image. </li>
+     *     <li>For receivers to know their footer is injected under location settings.</li>
+     * </ol>
+     *
+     * <p>To inject a footer to location settings, you must declare a broadcast receiver of
+     * {@link LocationManager#SETTINGS_FOOTER_DISPLAYED_ACTION} in the manifest as so:
+     * <pre>
+     *     &lt;receiver android:name="com.example.android.footer.MyFooterInjector"&gt;
+     *         &lt;intent-filter&gt;
+     *             &lt;action android:name="com.android.settings.location.INJECT_FOOTER" /&gt;
+     *         &lt;/intent-filter&gt;
+     *         &lt;meta-data
+     *             android:name="com.android.settings.location.FOOTER_STRING"
+     *             android:resource="@string/my_injected_footer_string" /&gt;
+     *     &lt;/receiver&gt;
+     * </pre>
+     *
+     * <p>On entering location settings, Settings app will send a
+     * {@link #SETTINGS_FOOTER_DISPLAYED_ACTION} broadcast to receivers whose footer is successfully
+     * injected. On leaving location settings, the footer becomes not visible to users. Settings app
+     * will send a {@link #SETTINGS_FOOTER_REMOVED_ACTION} broadcast to those receivers.
+     *
+     * @hide
+     */
+    public static final String SETTINGS_FOOTER_DISPLAYED_ACTION =
+            "com.android.settings.location.DISPLAYED_FOOTER";
+
+    /**
+     * Broadcast intent action when location settings footer is not visible to users.
+     *
+     * <p>See {@link #SETTINGS_FOOTER_DISPLAYED_ACTION} for more detail on how to use.
+     *
+     * @hide
+     */
+    public static final String SETTINGS_FOOTER_REMOVED_ACTION =
+            "com.android.settings.location.REMOVED_FOOTER";
+
+    /**
+     * Metadata name for {@link LocationManager#SETTINGS_FOOTER_DISPLAYED_ACTION} broadcast
+     * receivers to specify a string resource id as location settings footer text. This is for use
+     * only by apps that are included in the system image.
+     *
+     * <p>See {@link #SETTINGS_FOOTER_DISPLAYED_ACTION} for more detail on how to use.
+     *
+     * @hide
+     */
+    public static final String METADATA_SETTINGS_FOOTER_STRING =
+            "com.android.settings.location.FOOTER_STRING";
+
     // Map from LocationListeners to their associated ListenerTransport objects
     private HashMap<LocationListener,ListenerTransport> mListeners =
         new HashMap<LocationListener,ListenerTransport>();
