@@ -114,6 +114,7 @@ public final class ShutdownThread extends Thread {
     private static String METRIC_PM = "shutdown_package_manager";
     private static String METRIC_RADIOS = "shutdown_radios";
     private static String METRIC_RADIO = "shutdown_radio";
+    private static String METRIC_SHUTDOWN_TIME_START = "begin_shutdown";
 
     private final Object mActionDoneSync = new Object();
     private boolean mActionDone;
@@ -415,6 +416,7 @@ public final class ShutdownThread extends Thread {
     public void run() {
         TimingsTraceLog shutdownTimingLog = newTimingsLog();
         shutdownTimingLog.traceBegin("SystemServerShutdown");
+        metricShutdownStart();
         metricStarted(METRIC_SYSTEM_SERVER);
 
         BroadcastReceiver br = new BroadcastReceiver() {
@@ -530,7 +532,7 @@ public final class ShutdownThread extends Thread {
 
         shutdownTimingLog.traceEnd(); // SystemServerShutdown
         metricEnded(METRIC_SYSTEM_SERVER);
-        saveMetrics(mReboot);
+        saveMetrics(mReboot, mReason);
         // Remaining work will be done by init, including vold shutdown
         rebootOrShutdown(mContext, mReboot, mReason);
     }
@@ -549,6 +551,12 @@ public final class ShutdownThread extends Thread {
         synchronized (TRON_METRICS) {
             TRON_METRICS
                     .put(metricKey, SystemClock.elapsedRealtime() + TRON_METRICS.get(metricKey));
+        }
+    }
+
+    private static void metricShutdownStart() {
+        synchronized (TRON_METRICS) {
+            TRON_METRICS.put(METRIC_SHUTDOWN_TIME_START, System.currentTimeMillis());
         }
     }
 
@@ -673,10 +681,11 @@ public final class ShutdownThread extends Thread {
         PowerManagerService.lowLevelShutdown(reason);
     }
 
-    private static void saveMetrics(boolean reboot) {
+    private static void saveMetrics(boolean reboot, String reason) {
         StringBuilder metricValue = new StringBuilder();
         metricValue.append("reboot:");
         metricValue.append(reboot ? "y" : "n");
+        metricValue.append(",").append("reason:").append(reason);
         final int metricsSize = TRON_METRICS.size();
         for (int i = 0; i < metricsSize; i++) {
             final String name = TRON_METRICS.keyAt(i);
