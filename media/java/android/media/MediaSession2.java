@@ -599,9 +599,9 @@ public class MediaSession2 implements AutoCloseable {
          * <p>
          * Set {@code null} to reset.
          *
-         * @param volumeProvider The provider that will handle volume changes. Can be {@code null}
+         * @param volumeProvider The provider that will handle volume changes. Can be {@code null}.
          */
-        public U setVolumeProvider(@Nullable VolumeProvider volumeProvider) {
+        public U setVolumeProvider(@Nullable VolumeProvider2 volumeProvider) {
             mProvider.setVolumeProvider_impl(volumeProvider);
             return (U) this;
         }
@@ -1035,8 +1035,8 @@ public class MediaSession2 implements AutoCloseable {
      * If the new player is successfully set, {@link PlaybackListener}
      * will be called to tell the current playback state of the new player.
      * <p>
-     * You can also specify a volume provider. If so, playback in the player is considered as
-     * remote playback.
+     * For the remote playback case which you want to handle volume by yourself, use
+     * {@link #setPlayer(MediaPlayerInterface, VolumeProvider2)}.
      *
      * @param player a {@link MediaPlayerInterface} that handles actual media playback in your app.
      * @throws IllegalArgumentException if the player is {@code null}.
@@ -1051,10 +1051,10 @@ public class MediaSession2 implements AutoCloseable {
      * @param player a {@link MediaPlayerInterface} that handles actual media playback in your app.
      * @param volumeProvider a volume provider
      * @see #setPlayer(MediaPlayerInterface)
-     * @see Builder#setVolumeProvider(VolumeProvider)
+     * @see Builder#setVolumeProvider(VolumeProvider2)
      */
     public void setPlayer(@NonNull MediaPlayerInterface player,
-            @NonNull VolumeProvider volumeProvider) {
+            @NonNull VolumeProvider2 volumeProvider) {
         mProvider.setPlayer_impl(player, volumeProvider);
     }
 
