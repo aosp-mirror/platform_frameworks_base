@@ -88,6 +88,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
@@ -387,7 +388,9 @@ public class UserManagerService extends IUserManager.Stub {
             }
             final IntentSender target = intent.getParcelableExtra(Intent.EXTRA_INTENT);
             final int userHandle = intent.getIntExtra(Intent.EXTRA_USER_ID, UserHandle.USER_NULL);
-            setQuietModeEnabled(userHandle, false, target);
+            // Call setQuietModeEnabled on bg thread to avoid ANR
+            BackgroundThread.getHandler()
+                    .post(() -> setQuietModeEnabled(userHandle, false, target));
         }
     };
 
