@@ -22,6 +22,7 @@ import android.util.SparseIntArray;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 import java.util.TreeSet;
 
 /**
@@ -174,6 +175,19 @@ public final class AudioDeviceInfo {
             default:
                 return false;
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AudioDeviceInfo that = (AudioDeviceInfo) o;
+        return Objects.equals(getPort(), that.getPort());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getPort());
     }
 
     private final AudioDevicePort mPort;
