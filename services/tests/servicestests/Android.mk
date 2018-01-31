@@ -27,7 +27,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     ShortcutManagerTestUtils \
     truth-prebuilt \
     testables \
-    testng
+    testng \
+    platformprotosnano
 
 LOCAL_AIDL_INCLUDES := $(LOCAL_PATH)/aidl
 

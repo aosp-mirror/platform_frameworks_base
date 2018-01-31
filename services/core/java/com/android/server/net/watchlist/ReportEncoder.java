@@ -19,38 +19,31 @@ package com.android.server.net.watchlist;
 
 import android.annotation.Nullable;
 import android.util.Log;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.HexDump;
+import com.android.service.NetworkWatchlistReportProto;
+import com.android.service.NetworkWatchlistAppResultProto;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Helper class to encode and generate serialized DP encoded watchlist report.
- *
- * <p>Serialized report data structure:
- * [4 bytes magic number][4_bytes_report_version_code][32_bytes_watchlist_hash]
- * [app_1_digest_byte_array][app_1_encoded_visited_cnc_byte]
- * [app_2_digest_byte_array][app_2_encoded_visited_cnc_byte]
- * ...
- *
- * Total size: 4 + 4 + 32 + (32+1)*N, where N = number of digests
+ * Helper class to encode and generate serialized DP encoded watchlist proto report.
  */
 class ReportEncoder {
 
     private static final String TAG = "ReportEncoder";
 
-    // Report header magic number
-    private static final byte[] MAGIC_NUMBER = {(byte) 0x8D, (byte) 0x37, (byte) 0x0A, (byte) 0xAC};
     // Report version number, as file format / parameters can be changed in later version, we need
     // to have versioning on watchlist report format
-    private static final byte[] REPORT_VERSION = {(byte) 0x00, (byte) 0x01};
+    private static final int REPORT_VERSION = 1;
 
     private static final int WATCHLIST_HASH_SIZE = 32;
-    private static final int APP_DIGEST_SIZE = 32;
 
     /**
      * Apply DP on watchlist results, and generate a serialized watchlist report ready to store
@@ -64,11 +57,10 @@ class ReportEncoder {
     }
 
     /**
-     * Convert DP encoded watchlist report into byte[] format.
-     * TODO: Serialize it using protobuf
+     * Convert DP encoded watchlist report into proto format.
      *
      * @param encodedReportMap DP encoded watchlist report.
-     * @return Watchlist report in byte[] format, which will be shared in Dropbox. Null if
+     * @return Watchlist report in proto format, which will be shared in Dropbox. Null if
      * watchlist report cannot be generated.
      */
     @Nullable
@@ -85,42 +77,25 @@ class ReportEncoder {
             Log.e(TAG, "Unexpected hash length");
             return null;
         }
-        final int reportMapSize = encodedReportMap.size();
-        final byte[] outputReport =
-                new byte[MAGIC_NUMBER.length + REPORT_VERSION.length + WATCHLIST_HASH_SIZE
-                        + reportMapSize * (APP_DIGEST_SIZE + /* Result */ 1)];
-        final List<String> sortedKeys = new ArrayList(encodedReportMap.keySet());
-        Collections.sort(sortedKeys);
-
-        int offset = 0;
-
-        // Set magic number to report
-        System.arraycopy(MAGIC_NUMBER, 0, outputReport, offset, MAGIC_NUMBER.length);
-        offset += MAGIC_NUMBER.length;
+        final ByteArrayOutputStream reportOutputStream = new ByteArrayOutputStream();
+        final ProtoOutputStream proto = new ProtoOutputStream(reportOutputStream);
 
         // Set report version to report
-        System.arraycopy(REPORT_VERSION, 0, outputReport, offset, REPORT_VERSION.length);
-        offset += REPORT_VERSION.length;
-
-        // Set watchlist hash to report
-        System.arraycopy(watchlistHash, 0, outputReport, offset, watchlistHash.length);
-        offset += watchlistHash.length;
+        proto.write(NetworkWatchlistReportProto.REPORT_VERSION, REPORT_VERSION);
+        proto.write(NetworkWatchlistReportProto.WATCHLIST_CONFIG_HASH,
+                HexDump.toHexString(watchlistHash));
 
         // Set app digest, encoded_isPha pair to report
-        for (int i = 0; i < reportMapSize; i++) {
-            String key = sortedKeys.get(i);
+        for (Map.Entry<String, Boolean> entry : encodedReportMap.entrySet()) {
+            String key = entry.getKey();
             byte[] digest = HexDump.hexStringToByteArray(key);
-            boolean isPha = encodedReportMap.get(key);
-            System.arraycopy(digest, 0, outputReport, offset, APP_DIGEST_SIZE);
-            offset += digest.length;
-            outputReport[offset] = (byte) (isPha ? 1 : 0);
-            offset += 1;
+            boolean encodedResult = entry.getValue();
+            long token = proto.start(NetworkWatchlistReportProto.APP_RESULT);
+            proto.write(NetworkWatchlistAppResultProto.APP_DIGEST, key);
+            proto.write(NetworkWatchlistAppResultProto.ENCODED_RESULT, encodedResult);
+            proto.end(token);
         }
-        if (outputReport.length != offset) {
-            Log.e(TAG, "Watchlist report size does not match! Offset: " + offset + ", report size: "
-                    + outputReport.length);
-
-        }
-        return outputReport;
+        proto.flush();
+        return reportOutputStream.toByteArray();
     }
 }
