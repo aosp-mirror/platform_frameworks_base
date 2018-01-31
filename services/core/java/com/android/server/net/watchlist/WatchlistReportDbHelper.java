@@ -141,20 +141,19 @@ class WatchlistReportDbHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Aggregate the records in database, and return a rappor encoded result.
+     * Aggregate all records before most recent local midnight in database, and return a
+     * rappor encoded result.
      */
     public AggregatedResult getAggregatedRecords() {
-        final long twoDaysBefore = getTwoDaysBeforeTimestamp();
-        final long yesterday = getYesterdayTimestamp();
-        final String selectStatement = WhiteListReportContract.TIMESTAMP + " >= ? AND " +
-                WhiteListReportContract.TIMESTAMP + " <= ?";
+        final long lastMidnightTime = getLastMidnightTime();
+        final String selectStatement = WhiteListReportContract.TIMESTAMP + " < ?";
 
         final SQLiteDatabase db = getReadableDatabase();
         Cursor c = null;
         try {
             c = db.query(true /* distinct */,
                     WhiteListReportContract.TABLE, DIGEST_DOMAIN_PROJECTION, selectStatement,
-                    new String[]{"" + twoDaysBefore, "" + yesterday}, null, null,
+                    new String[]{"" + lastMidnightTime}, null, null,
                     null, null);
             if (c == null) {
                 return null;
@@ -182,23 +181,19 @@ class WatchlistReportDbHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Remove all the records before yesterday.
+     * Remove all the records before most recent local midnight.
      *
      * @return True if success.
      */
     public boolean cleanup() {
         final SQLiteDatabase db = getWritableDatabase();
-        final long twoDaysBefore = getTwoDaysBeforeTimestamp();
-        final String clause = WhiteListReportContract.TIMESTAMP + "< " + twoDaysBefore;
+        final long midnightTime = getLastMidnightTime();
+        final String clause = WhiteListReportContract.TIMESTAMP + "< " + midnightTime;
         return db.delete(WhiteListReportContract.TABLE, clause, null) != 0;
     }
 
-    static long getTwoDaysBeforeTimestamp() {
-        return getMidnightTimestamp(2);
-    }
-
-    static long getYesterdayTimestamp() {
-        return getMidnightTimestamp(1);
+    static long getLastMidnightTime() {
+        return getMidnightTimestamp(0);
     }
 
     static long getMidnightTimestamp(int daysBefore) {
