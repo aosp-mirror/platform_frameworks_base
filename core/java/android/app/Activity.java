@@ -7067,7 +7067,10 @@ public class Activity extends ContextThemeWrapper
         boolean isApiWarningEnabled = SystemProperties.getInt("ro.art.hiddenapi.warning", 0) == 1;
 
         if (isAppDebuggable || isApiWarningEnabled) {
-            if (VMRuntime.getRuntime().hasUsedHiddenApi()) {
+            if (!mMainThread.mHiddenApiWarningShown && VMRuntime.getRuntime().hasUsedHiddenApi()) {
+                // Only show the warning once per process.
+                mMainThread.mHiddenApiWarningShown = true;
+
                 String appName = getApplicationInfo().loadLabel(getPackageManager())
                         .toString();
                 String warning = "Detected problems with API compatiblity\n"
