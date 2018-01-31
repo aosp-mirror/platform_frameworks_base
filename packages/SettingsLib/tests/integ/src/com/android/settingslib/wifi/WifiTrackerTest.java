@@ -26,10 +26,8 @@ import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -76,12 +74,11 @@ import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 // TODO(sghuman): Change these to robolectric tests b/35766684.
 
@@ -725,7 +722,7 @@ public class WifiTrackerTest {
     }
 
     @Test
-    public void stopTrackingShouldRemoveWifiListenerCallbacks() throws Exception {
+    public void stopTrackingShouldRemoveAllPendingWork() throws Exception {
         WifiTracker tracker = createMockedWifiTracker();
         startTracking(tracker);
 
@@ -743,13 +740,16 @@ public class WifiTrackerTest {
         });
 
         // Enqueue messages
-        tracker.mWorkHandler.sendEmptyMessage(WifiTracker.WorkHandler.MSG_UPDATE_ACCESS_POINTS);
+        final AtomicBoolean executed = new AtomicBoolean(false);
+        tracker.mWorkHandler.post(() -> executed.set(true));
 
         try {
             ready.await(); // Make sure we have entered the first message handler
         } catch (InterruptedException e) {}
         tracker.onStop();
 
+        // TODO(sghuman): Delete these in a following CL, no longer necessary (should be
+        // invoked 0 times)
         verify(mockWifiListener, atMost(1)).onAccessPointsChanged();
         verify(mockWifiListener, atMost(1)).onConnectedChanged();
         verify(mockWifiListener, atMost(1)).onWifiStateChanged(anyInt());
@@ -757,11 +757,11 @@ public class WifiTrackerTest {
         lock.countDown();
         assertTrue("Latch timed out", latch.await(LATCH_TIMEOUT, TimeUnit.MILLISECONDS));
 
-        assertThat(tracker.mWorkHandler.hasMessages(
-                WifiTracker.WorkHandler.MSG_UPDATE_ACCESS_POINTS)).isFalse();
+        assertThat(tracker.mWorkHandler.hasMessagesOrCallbacks()).isFalse();
+        // In case the method was already executing
         waitForHandlersToProcessCurrentlyEnqueuedMessages(tracker);
 
-        verifyNoMoreInteractions(mockWifiListener);
+        assertThat(executed.get()).isFalse();
     }
 
     @Test
