@@ -43,7 +43,6 @@ import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeoutException;
@@ -85,8 +84,8 @@ final class EphemeralResolverConnection implements DeathRecipient {
         mIntent = new Intent(action).setComponent(componentName);
     }
 
-    public final List<InstantAppResolveInfo> getInstantAppResolveInfoList(Intent sanitizedIntent,
-            int hashPrefix[], String token) throws ConnectionException {
+    public final List<InstantAppResolveInfo> getInstantAppResolveInfoList(int hashPrefix[],
+            String token) throws ConnectionException {
         throwIfCalledOnMainThread();
         IInstantAppResolver target = null;
         try {
@@ -99,7 +98,7 @@ final class EphemeralResolverConnection implements DeathRecipient {
             }
             try {
                 return mGetEphemeralResolveInfoCaller
-                        .getEphemeralResolveInfoList(target, sanitizedIntent, hashPrefix, token);
+                        .getEphemeralResolveInfoList(target, hashPrefix, token);
             } catch (TimeoutException e) {
                 throw new ConnectionException(ConnectionException.FAILURE_CALL);
             } catch (RemoteException ignore) {
@@ -112,22 +111,26 @@ final class EphemeralResolverConnection implements DeathRecipient {
         return null;
     }
 
-    public final void getInstantAppIntentFilterList(Intent sanitizedIntent, int hashPrefix[],
-            String token, PhaseTwoCallback callback, Handler callbackHandler, final long startTime)
-            throws ConnectionException {
+    public final void getInstantAppIntentFilterList(int hashPrefix[], String token,
+            String hostName, PhaseTwoCallback callback, Handler callbackHandler,
+            final long startTime) throws ConnectionException {
         final IRemoteCallback remoteCallback = new IRemoteCallback.Stub() {
             @Override
             public void sendResult(Bundle data) throws RemoteException {
                 final ArrayList<InstantAppResolveInfo> resolveList =
                         data.getParcelableArrayList(
                                 InstantAppResolverService.EXTRA_RESOLVE_INFO);
-                callbackHandler.post(() -> callback.onPhaseTwoResolved(resolveList, startTime));
+                callbackHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        callback.onPhaseTwoResolved(resolveList, startTime);
+                    }
+                });
             }
         };
         try {
             getRemoteInstanceLazy(token)
-                    .getInstantAppIntentFilterList(sanitizedIntent, hashPrefix, token,
-                            remoteCallback);
+                    .getInstantAppIntentFilterList(hashPrefix, token, hostName, remoteCallback);
         } catch (TimeoutException e) {
             throw new ConnectionException(ConnectionException.FAILURE_BIND);
         } catch (InterruptedException e) {
@@ -334,11 +337,10 @@ final class EphemeralResolverConnection implements DeathRecipient {
         }
 
         public List<InstantAppResolveInfo> getEphemeralResolveInfoList(
-                IInstantAppResolver target, Intent sanitizedIntent,  int hashPrefix[], String token)
+                IInstantAppResolver target, int hashPrefix[], String token)
                         throws RemoteException, TimeoutException {
             final int sequence = onBeforeRemoteCall();
-            target.getInstantAppResolveInfoList(sanitizedIntent, hashPrefix, token, sequence,
-                    mCallback);
+            target.getInstantAppResolveInfoList(hashPrefix, token, sequence, mCallback);
             return getResultTimed(sequence);
         }
     }

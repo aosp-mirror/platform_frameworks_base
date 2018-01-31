@@ -50,7 +50,6 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsProvider;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
-import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -4473,15 +4472,7 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_INSTANT_APP_ACTION = "android.intent.extra.INSTANT_APP_ACTION";
 
     /**
-     * An array of {@link Bundle}s containing details about resolved instant apps..
-     * @hide
-     */
-    @SystemApi
-    public static final String EXTRA_INSTANT_APP_BUNDLES =
-            "android.intent.extra.INSTANT_APP_BUNDLES";
-
-    /**
-     * A {@link Bundle} of metadata that describes the instant application that needs to be
+     * A {@link Bundle} of metadata that describes the instanta application that needs to be
      * installed. This data is populated from the response to
      * {@link android.content.pm.InstantAppResolveInfo#getExtras()} as provided by the registered
      * instant application resolver.
@@ -4489,16 +4480,6 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String EXTRA_INSTANT_APP_EXTRAS =
             "android.intent.extra.INSTANT_APP_EXTRAS";
-
-    /**
-     * A boolean value indicating that the instant app resolver was unable to state with certainty
-     * that it did or did not have an app for the sanitized {@link Intent} defined at
-     * {@link #EXTRA_INTENT}.
-     * @hide
-     */
-    @SystemApi
-    public static final String EXTRA_UNKNOWN_INSTANT_APP =
-            "android.intent.extra.UNKNOWN_INSTANT_APP";
 
     /**
      * The version code of the app to install components from.
@@ -5048,7 +5029,6 @@ public class Intent implements Parcelable, Cloneable {
             FLAG_GRANT_PREFIX_URI_PERMISSION,
             FLAG_DEBUG_TRIAGED_MISSING,
             FLAG_IGNORE_EPHEMERAL,
-            FLAG_ACTIVITY_MATCH_EXTERNAL,
             FLAG_ACTIVITY_NO_HISTORY,
             FLAG_ACTIVITY_SINGLE_TOP,
             FLAG_ACTIVITY_NEW_TASK,
@@ -5092,7 +5072,6 @@ public class Intent implements Parcelable, Cloneable {
             FLAG_INCLUDE_STOPPED_PACKAGES,
             FLAG_DEBUG_TRIAGED_MISSING,
             FLAG_IGNORE_EPHEMERAL,
-            FLAG_ACTIVITY_MATCH_EXTERNAL,
             FLAG_ACTIVITY_NO_HISTORY,
             FLAG_ACTIVITY_SINGLE_TOP,
             FLAG_ACTIVITY_NEW_TASK,
@@ -5495,14 +5474,6 @@ public class Intent implements Parcelable, Cloneable {
      * required if you want a new instance of an existing activity to be created.
      */
     public static final int FLAG_ACTIVITY_LAUNCH_ADJACENT = 0x00001000;
-
-
-    /**
-     * If set, resolution of this intent may take place via an instant app not
-     * yet on the device if there does not yet exist an app on device to
-     * resolve it.
-     */
-    public static final int FLAG_ACTIVITY_MATCH_EXTERNAL = 0x00000800;
 
     /**
      * If set, when sending a broadcast only registered receivers will be
@@ -10055,25 +10026,6 @@ public class Intent implements Parcelable, Cloneable {
                 mContentUserHint = UserHandle.USER_CURRENT;
             }
         }
-    }
-
-    /** @hide */
-    public boolean hasWebURI() {
-        if (getData() == null) {
-            return false;
-        }
-        final String scheme = getScheme();
-        if (TextUtils.isEmpty(scheme)) {
-            return false;
-        }
-        return scheme.equals(IntentFilter.SCHEME_HTTP) || scheme.equals(IntentFilter.SCHEME_HTTPS);
-    }
-
-    /** @hide */
-    public boolean isBrowsableWebIntent() {
-        return ACTION_VIEW.equals(mAction)
-                && hasCategory(CATEGORY_BROWSABLE)
-                && hasWebURI();
     }
 
     /**
