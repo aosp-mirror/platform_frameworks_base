@@ -34,6 +34,7 @@ import android.media.MediaSession2;
 import android.media.MediaSession2.PlaylistParams;
 import android.media.MediaSession2.SessionCallback;
 import android.media.MediaSessionService2;
+import android.media.PlaybackState2;
 import android.media.Rating2;
 import android.media.SessionPlayer2;
 import android.media.SessionToken2;
@@ -120,4 +121,9 @@ public interface StaticProvider {
     Rating2 newThumbRating_Rating2(Context context, boolean thumbIsUp);
     Rating2 newStarRating_Rating2(Context context, int starRatingStyle, float starRating);
     Rating2 newPercentageRating_Rating2(Context context, float percent);
+
+    PlaybackState2Provider createPlaybackState2(Context context, PlaybackState2 instance, int state,
+            long position, long updateTime, float speed, long bufferedPosition, long activeItemId,
+            CharSequence error);
+    PlaybackState2 fromBundle_PlaybackState2(Context context, Bundle bundle);
 }
