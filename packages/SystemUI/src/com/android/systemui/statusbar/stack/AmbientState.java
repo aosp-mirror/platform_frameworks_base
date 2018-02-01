@@ -64,7 +64,7 @@ public class AmbientState {
     private boolean mPanelTracking;
     private boolean mExpansionChanging;
     private boolean mPanelFullWidth;
-    private boolean mPulsing;
+    private Collection<HeadsUpManager.HeadsUpEntry> mPulsing;
     private boolean mUnlockHintRunning;
     private boolean mQsCustomizerShowing;
     private int mIntrinsicPadding;
@@ -315,18 +315,23 @@ public class AmbientState {
     }
 
     public boolean hasPulsingNotifications() {
-        return mPulsing;
+        return mPulsing != null;
     }
 
-    public void setPulsing(boolean hasPulsing) {
+    public void setPulsing(Collection<HeadsUpManager.HeadsUpEntry> hasPulsing) {
         mPulsing = hasPulsing;
     }
 
     public boolean isPulsing(NotificationData.Entry entry) {
-        if (!mPulsing || mHeadsUpManager == null) {
+        if (mPulsing == null) {
             return false;
         }
-        return mHeadsUpManager.getAllEntries().anyMatch(e -> (e == entry));
+        for (HeadsUpManager.HeadsUpEntry e : mPulsing) {
+            if (e.entry == entry) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean isPanelTracking() {

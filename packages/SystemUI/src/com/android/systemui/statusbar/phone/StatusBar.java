@@ -208,7 +208,6 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.UnlockMethodCache.OnUnlockMethodChangedListener;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback;
@@ -220,7 +219,6 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.statusbar.policy.ExtensionController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.statusbar.policy.HeadsUpUtil;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 import com.android.systemui.statusbar.policy.KeyguardMonitorImpl;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
@@ -811,14 +809,15 @@ public class StatusBar extends SystemUI implements DemoMode,
                 .commit();
         mIconController = Dependency.get(StatusBarIconController.class);
 
-        mHeadsUpManager = new HeadsUpManagerPhone(context, mStatusBarWindow, mGroupManager, this,
-                mVisualStabilityManager);
+        mHeadsUpManager = new HeadsUpManager(context, mStatusBarWindow, mGroupManager);
+        mHeadsUpManager.setBar(this);
         mHeadsUpManager.addListener(this);
         mHeadsUpManager.addListener(mNotificationPanel);
         mHeadsUpManager.addListener(mGroupManager);
         mHeadsUpManager.addListener(mVisualStabilityManager);
         mNotificationPanel.setHeadsUpManager(mHeadsUpManager);
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
+        mHeadsUpManager.setVisualStabilityManager(mVisualStabilityManager);
         putComponent(HeadsUpManager.class, mHeadsUpManager);
 
         mEntryManager.setUpWithPresenter(this, mStackScroller, this, mHeadsUpManager);
@@ -1349,8 +1348,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onPerformRemoveNotification(StatusBarNotification n) {
-        if (mStackScroller.hasPulsingNotifications() &&
-                    !mHeadsUpManager.hasHeadsUpNotifications()) {
+        if (mStackScroller.hasPulsingNotifications() && mHeadsUpManager.getAllEntries().isEmpty()) {
             // We were showing a pulse for a notification, but no notifications are pulsing anymore.
             // Finish the pulse.
             mDozeScrimController.pulseOutNow();
@@ -2099,8 +2097,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public void maybeEscalateHeadsUp() {
-        mHeadsUpManager.getAllEntries().forEach(entry -> {
-            final StatusBarNotification sbn = entry.notification;
+        Collection<HeadsUpManager.HeadsUpEntry> entries = mHeadsUpManager.getAllEntries();
+        for (HeadsUpManager.HeadsUpEntry entry : entries) {
+            final StatusBarNotification sbn = entry.entry.notification;
             final Notification notification = sbn.getNotification();
             if (notification.fullScreenIntent != null) {
                 if (DEBUG) {
@@ -2110,11 +2109,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                     EventLog.writeEvent(EventLogTags.SYSUI_HEADS_UP_ESCALATION,
                             sbn.getKey());
                     notification.fullScreenIntent.send();
-                    entry.notifyFullScreenIntentLaunched();
+                    entry.entry.notifyFullScreenIntentLaunched();
                 } catch (PendingIntent.CanceledException e) {
                 }
             }
-        });
+        }
         mHeadsUpManager.releaseAllImmediately();
     }
 
@@ -4659,22 +4658,24 @@ public class StatusBar extends SystemUI implements DemoMode,
                 @Override
                 public void onPulseStarted() {
                     callback.onPulseStarted();
-                    if (mHeadsUpManager.hasHeadsUpNotifications()) {
+                    Collection<HeadsUpManager.HeadsUpEntry> pulsingEntries =
+                            mHeadsUpManager.getAllEntries();
+                    if (!pulsingEntries.isEmpty()) {
                         // Only pulse the stack scroller if there's actually something to show.
                         // Otherwise just show the always-on screen.
-                        setPulsing(true);
+                        setPulsing(pulsingEntries);
                     }
                 }
 
                 @Override
                 public void onPulseFinished() {
                     callback.onPulseFinished();
-                    setPulsing(false);
+                    setPulsing(null);
                 }
 
-                private void setPulsing(boolean pulsing) {
+                private void setPulsing(Collection<HeadsUpManager.HeadsUpEntry> pulsing) {
                     mNotificationPanel.setPulsing(pulsing);
-                    mVisualStabilityManager.setPulsing(pulsing);
+                    mVisualStabilityManager.setPulsing(pulsing != null);
                     mIgnoreTouchWhilePulsing = false;
                 }
             }, reason);
@@ -4822,7 +4823,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
 
     // for heads up notifications
-    protected HeadsUpManagerPhone mHeadsUpManager;
+    protected HeadsUpManager mHeadsUpManager;
 
     private AboveShelfObserver mAboveShelfObserver;
 
@@ -4925,7 +4926,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 // Release the HUN notification to the shade.
 
                 if (isPresenterFullyCollapsed()) {
-                    HeadsUpUtil.setIsClickedHeadsUpNotification(row, true);
+                    HeadsUpManager.setIsClickedNotification(row, true);
                 }
                 //
                 // In most cases, when FLAG_AUTO_CANCEL is set, the notification will
