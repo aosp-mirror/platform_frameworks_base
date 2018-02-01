@@ -28,7 +28,7 @@ import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKe
  * Helper for creating the recoverable key database.
  */
 class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static final String DATABASE_NAME = "recoverablekeystore.db";
 
     private static final String SQL_CREATE_KEYS_ENTRY =
