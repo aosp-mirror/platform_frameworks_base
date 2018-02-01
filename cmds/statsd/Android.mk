@@ -41,6 +41,8 @@ statsd_common_src := \
     src/external/ResourceHealthManagerPuller.cpp \
     src/external/CpuTimePerUidPuller.cpp \
     src/external/CpuTimePerUidFreqPuller.cpp \
+    src/external/KernelUidCpuActiveTimeReader.cpp \
+    src/external/KernelUidCpuClusterTimeReader.cpp \
     src/external/StatsPullerManagerImpl.cpp \
     src/logd/LogEvent.cpp \
     src/logd/LogListener.cpp \

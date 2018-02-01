@@ -38,6 +38,8 @@ public:
 
     bool Pull(std::vector<std::shared_ptr<LogEvent>>* data);
 
+    void ClearCache();
+
 protected:
     // The atom tag id this puller pulls
     const int mTagId;

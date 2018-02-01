@@ -199,6 +199,12 @@ void StatsPullerManagerImpl::OnAlarmFired() {
     }
 }
 
+void StatsPullerManagerImpl::ClearPullerCache() {
+    for (auto puller : mPullers) {
+        puller.second->ClearCache();
+    }
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
