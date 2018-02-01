@@ -393,8 +393,9 @@ public class UserManager {
     public static final String DISALLOW_CONFIG_VPN = "no_config_vpn";
 
     /**
-     * Specifies if a user is disallowed from configuring location mode. Device owner and profile
-     * owners can set this restriction and it only applies on the managed user.
+     * Specifies if a user is disallowed from enabling or disabling location providers. As a
+     * result, user is disallowed from turning on or off location. Device owner and profile owners
+     * can set this restriction and it only applies on the managed user.
      *
      * <p>In a managed profile, location sharing is forced off when it's off on primary user, so
      * user can still turn off location sharing on managed profile when the restriction is set by
@@ -408,11 +409,12 @@ public class UserManager {
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
+     * @see android.location.LocationManager#isProviderEnabled(String)
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
      * @see #getUserRestrictions()
      */
-    public static final String DISALLOW_CONFIG_LOCATION_MODE = "no_config_location_mode";
+    public static final String DISALLOW_CONFIG_LOCATION = "no_config_location";
 
     /**
      * Specifies if date, time and timezone configuring is disallowed.
