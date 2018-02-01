@@ -59,6 +59,10 @@ public final class DexoptOptions {
     // When set, indicates that dexopt is invoked from the background service.
     public static final int DEXOPT_IDLE_BACKGROUND_JOB = 1 << 9;
 
+    // When set, indicates that dexopt is invoked from the install time flow and
+    // should get the dex metdata file if present.
+    public static final int DEXOPT_INSTALL_WITH_DEX_METADATA_FILE = 1 << 10;
+
     // The name of package to optimize.
     private final String mPackageName;
 
@@ -90,7 +94,8 @@ public final class DexoptOptions {
                 DEXOPT_ONLY_SHARED_DEX |
                 DEXOPT_DOWNGRADE |
                 DEXOPT_AS_SHARED_LIBRARY |
-                DEXOPT_IDLE_BACKGROUND_JOB;
+                DEXOPT_IDLE_BACKGROUND_JOB |
+                DEXOPT_INSTALL_WITH_DEX_METADATA_FILE;
         if ((flags & (~validityMask)) != 0) {
             throw new IllegalArgumentException("Invalid flags : " + Integer.toHexString(flags));
         }
@@ -139,6 +144,10 @@ public final class DexoptOptions {
 
     public boolean isDexoptIdleBackgroundJob() {
         return (mFlags & DEXOPT_IDLE_BACKGROUND_JOB) != 0;
+    }
+
+    public boolean isDexoptInstallWithDexMetadata() {
+        return (mFlags & DEXOPT_INSTALL_WITH_DEX_METADATA_FILE) != 0;
     }
 
     public String getSplitName() {

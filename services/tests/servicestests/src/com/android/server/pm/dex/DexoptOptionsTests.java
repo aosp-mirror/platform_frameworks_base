@@ -53,6 +53,7 @@ public class DexoptOptionsTests {
         assertFalse(opt.isDowngrade());
         assertFalse(opt.isForce());
         assertFalse(opt.isDexoptIdleBackgroundJob());
+        assertFalse(opt.isDexoptInstallWithDexMetadata());
     }
 
     @Test
@@ -65,7 +66,8 @@ public class DexoptOptionsTests {
                 DexoptOptions.DEXOPT_ONLY_SHARED_DEX |
                 DexoptOptions.DEXOPT_DOWNGRADE  |
                 DexoptOptions.DEXOPT_AS_SHARED_LIBRARY |
-                DexoptOptions.DEXOPT_IDLE_BACKGROUND_JOB;
+                DexoptOptions.DEXOPT_IDLE_BACKGROUND_JOB |
+                DexoptOptions.DEXOPT_INSTALL_WITH_DEX_METADATA_FILE;
 
         DexoptOptions opt = new DexoptOptions(mPackageName, mCompilerFilter, flags);
         assertEquals(mPackageName, opt.getPackageName());
@@ -79,6 +81,7 @@ public class DexoptOptionsTests {
         assertTrue(opt.isForce());
         assertTrue(opt.isDexoptAsSharedLibrary());
         assertTrue(opt.isDexoptIdleBackgroundJob());
+        assertTrue(opt.isDexoptInstallWithDexMetadata());
     }
 
     @Test
