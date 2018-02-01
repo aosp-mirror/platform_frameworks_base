@@ -35,6 +35,8 @@ import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.text.util.Linkify;
 import android.util.Patterns;
+import android.view.textclassifier.logging.DefaultLogger;
+import android.view.textclassifier.logging.Logger;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
@@ -43,6 +45,7 @@ import com.android.internal.util.Preconditions;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -70,7 +73,7 @@ public final class TextClassifierImpl implements TextClassifier {
 
     private static final String LOG_TAG = DEFAULT_LOG_TAG;
     private static final String MODEL_DIR = "/etc/textclassifier/";
-    private static final String MODEL_FILE_REGEX = "textclassifier\\.smartselection\\.(.*)\\.model";
+    private static final String MODEL_FILE_REGEX = "textclassifier\\.(.*)\\.model";
     private static final String UPDATED_MODEL_FILE_PATH =
             "/data/misc/textclassifier/textclassifier.model";
     private static final List<String> ENTITY_TYPES_ALL =
@@ -103,6 +106,12 @@ public final class TextClassifierImpl implements TextClassifier {
     private int mVersion;
     @GuardedBy("mLock") // Do not access outside this lock.
     private SmartSelection mSmartSelection;
+
+    private final Object mLoggerLock = new Object();
+    @GuardedBy("mLoggerLock") // Do not access outside this lock.
+    private WeakReference<Logger.Config> mLoggerConfig = new WeakReference<>(null);
+    @GuardedBy("mLoggerLock") // Do not access outside this lock.
+    private Logger mLogger;  // Should never be null if mLoggerConfig.get() is not null.
 
     private TextClassifierConstants mSettings;
 
@@ -221,9 +230,9 @@ public final class TextClassifierImpl implements TextClassifier {
                 for (int i = 0; i < results.length; i++) {
                     entityScores.put(results[i].mCollection, results[i].mScore);
                 }
-                builder.addLink(new TextLinks.TextLink(
-                        textString, span.getStartIndex(), span.getEndIndex(), entityScores));
+                builder.addLink(span.getStartIndex(), span.getEndIndex(), entityScores);
             }
+            return builder.build();
         } catch (Throwable t) {
             // Avoid throwing from this method. Log the error.
             Log.e(LOG_TAG, "Error getting links info.", t);
@@ -245,11 +254,15 @@ public final class TextClassifierImpl implements TextClassifier {
         }
     }
 
-    /** @hide */
     @Override
-    public void logEvent(String source, String event) {
-        if (LOG_TAG.equals(source)) {
-            mMetricsLogger.count(event, 1);
+    public Logger getLogger(@NonNull Logger.Config config) {
+        Preconditions.checkNotNull(config);
+        synchronized (mLoggerLock) {
+            if (mLoggerConfig.get() == null || !mLoggerConfig.get().equals(config)) {
+                mLoggerConfig = new WeakReference<>(config);
+                mLogger = new DefaultLogger(config);
+            }
+            return mLogger;
         }
     }
 
@@ -285,11 +298,7 @@ public final class TextClassifierImpl implements TextClassifier {
 
     private String getSignature(String text, int start, int end) {
         synchronized (mLock) {
-            final String versionInfo = (mLocale != null)
-                    ? String.format(Locale.US, "%s_v%d", mLocale.toLanguageTag(), mVersion)
-                    : "";
-            final int hash = Objects.hash(text, start, end, mContext.getPackageName());
-            return String.format(Locale.US, "%s|%s|%d", LOG_TAG, versionInfo, hash);
+            return DefaultLogger.createSignature(text, start, end, mContext, mVersion, mLocale);
         }
     }
 
@@ -328,7 +337,7 @@ public final class TextClassifierImpl implements TextClassifier {
                 return factoryFd;
             } else {
                 throw new FileNotFoundException(
-                        String.format("No model file found for %s", locale));
+                        String.format(Locale.US, "No model file found for %s", locale));
             }
         }
 
@@ -342,7 +351,7 @@ public final class TextClassifierImpl implements TextClassifier {
             } else {
                 closeAndLogError(updateFd);
                 throw new FileNotFoundException(
-                        String.format("No model file found for %s", locale));
+                        String.format(Locale.US, "No model file found for %s", locale));
             }
         }
 

@@ -59,7 +59,9 @@ import com.android.systemui.statusbar.phone.StatusBar;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -109,8 +111,10 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
     private boolean mShowVolumeDialog;
     private boolean mShowSafetyWarning;
     private DeviceCallback mDeviceCallback = new DeviceCallback();
-    private AudioDeviceInfo mConnectedDevice;
     private final NotificationManager mNotificationManager;
+    @GuardedBy("mLock")
+    private List<AudioDeviceInfo> mConnectedDevices = new ArrayList<>();
+    private Object mLock = new Object();
 
     private boolean mDestroyed;
     private VolumePolicy mVolumePolicy;
@@ -1055,26 +1059,25 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
     protected final class DeviceCallback extends AudioDeviceCallback {
         public void onAudioDevicesAdded(AudioDeviceInfo[] addedDevices) {
-            for (AudioDeviceInfo info : addedDevices) {
-                if (info.isSink()
-                        && (info.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP
-                        || info.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_SCO)) {
-                    mConnectedDevice = info;
-                    mCallbacks.onConnectedDeviceChanged(info.getProductName().toString());
+            synchronized (mLock) {
+                for (AudioDeviceInfo info : addedDevices) {
+                    if (info.isSink()
+                            && (info.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP
+                            || info.getType() == AudioDeviceInfo.TYPE_BLUETOOTH_SCO)) {
+                        mConnectedDevices.add(info);
+                        mCallbacks.onConnectedDeviceChanged(info.getProductName().toString());
+                    }
                 }
             }
         }
 
         public void onAudioDevicesRemoved(AudioDeviceInfo[] removedDevices) {
-            if (mConnectedDevice == null) {
-                mCallbacks.onConnectedDeviceChanged(null);
-                return;
-            }
-            for (AudioDeviceInfo info : removedDevices) {
-                if (info.isSink() == mConnectedDevice.isSink()
-                        && Objects.equals(info.getProductName(), mConnectedDevice.getProductName())
-                        && info.getType() == mConnectedDevice.getType()) {
-                    mConnectedDevice = null;
+            synchronized (mLock) {
+                for (AudioDeviceInfo info : removedDevices) {
+                    mConnectedDevices.remove(info);
+                }
+
+                if (mConnectedDevices.size() == 0) {
                     mCallbacks.onConnectedDeviceChanged(null);
                 }
             }

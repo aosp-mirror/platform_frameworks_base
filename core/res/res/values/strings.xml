@@ -3222,19 +3222,23 @@
     <string name="dlg_ok">OK</string>
 
     <!-- USB_PREFERENCES: Notification for when the user connected to the charger only.  This is the title -->
-    <string name="usb_charging_notification_title">USB charging this device</string>
+    <string name="usb_charging_notification_title">Charging this device via USB</string>
     <!-- USB_PREFERENCES: Notification for when the user connects the phone to supply power to attached device.  This is the title -->
-    <string name="usb_supplying_notification_title">USB supplying power to attached device</string>
+    <string name="usb_supplying_notification_title">Charging connected device via USB</string>
     <!-- USB_PREFERENCES: Notification for when the user connects the phone to a computer via USB in MTP mode.  This is the title -->
-    <string name="usb_mtp_notification_title">USB for file transfer</string>
+    <string name="usb_mtp_notification_title">USB file transfer turned on</string>
     <!-- USB_PREFERENCES: Notification for when the user connects the phone to a computer via USB in PTP mode.  This is the title -->
-    <string name="usb_ptp_notification_title">USB for photo transfer</string>
+    <string name="usb_ptp_notification_title">PTP via USB turned on</string>
+    <!-- USB_PREFERENCES: Notification for when the user connects the phone to a computer via USB in Tethering mode.  This is the title -->
+    <string name="usb_tether_notification_title">USB tethering turned on</string>
     <!-- USB_PREFERENCES: Notification for when the user connects the phone to a computer via USB in MIDI mode.  This is the title -->
-    <string name="usb_midi_notification_title">USB for MIDI</string>
+    <string name="usb_midi_notification_title">MIDI via USB turned on</string>
     <!-- USB_PREFERENCES: Notification for when a USB accessory is attached.  This is the title -->
-    <string name="usb_accessory_notification_title">Connected to a USB accessory</string>
+    <string name="usb_accessory_notification_title">USB accessory mode turned on</string>
     <!-- See USB_PREFERENCES. This is the message. -->
     <string name="usb_notification_message">Tap for more options.</string>
+    <!-- See USB_PREFERENCES. This is the message when a data mode is turned on (mtp, ptp, midi) and the device is supplying power.. -->
+    <string name="usb_power_notification_message">Charging connected device. Tap for more options.</string>
     <!-- USB_PREFERENCES: Notification for when a type-c USB audio accessory is attached but not supported.  This is the title -->
     <string name="usb_unsupported_audio_accessory_title">Analog audio accessory detected</string>
     <!-- Message of notification shown when a type-c USB audio accessory is attached but not supported. -->
@@ -4418,15 +4422,6 @@
     <string name="date_picker_day_of_week_typeface">sans-serif-medium</string>
     <!-- DO NOT TRANSLATE -->
     <string name="date_picker_day_typeface">sans-serif-medium</string>
-
-    <!-- Notify use that they are in Lock-to-app -->
-    <string name="lock_to_app_toast">To unpin this screen, touch &amp; hold Back and Overview
-        buttons</string>
-
-    <!-- Starting lock-to-app indication. -->
-    <string name="lock_to_app_start">Screen pinned</string>
-    <!-- Exting lock-to-app indication. -->
-    <string name="lock_to_app_exit">Screen unpinned</string>
 
     <!-- Lock-to-app unlock pin string -->
     <string name="lock_to_app_unlock_pin">Ask for PIN before unpinning</string>

@@ -576,7 +576,7 @@ public final class OutputConfiguration implements Parcelable {
      *
      * @see #enableSurfaceSharing
      */
-    public static int getMaxSharedSurfaceCount() {
+    public int getMaxSharedSurfaceCount() {
         return MAX_SURFACES_COUNT;
     }
 

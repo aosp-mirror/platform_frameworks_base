@@ -82,6 +82,7 @@ public class KeyInfo implements KeySpec {
     private final boolean mUserAuthenticationValidWhileOnBody;
     private final boolean mTrustedUserPresenceRequired;
     private final boolean mInvalidatedByBiometricEnrollment;
+    private final boolean mUserConfirmationRequired;
 
     /**
      * @hide
@@ -103,7 +104,8 @@ public class KeyInfo implements KeySpec {
             boolean userAuthenticationRequirementEnforcedBySecureHardware,
             boolean userAuthenticationValidWhileOnBody,
             boolean trustedUserPresenceRequired,
-            boolean invalidatedByBiometricEnrollment) {
+            boolean invalidatedByBiometricEnrollment,
+            boolean userConfirmationRequired) {
         mKeystoreAlias = keystoreKeyAlias;
         mInsideSecureHardware = insideSecureHardware;
         mOrigin = origin;
@@ -125,6 +127,7 @@ public class KeyInfo implements KeySpec {
         mUserAuthenticationValidWhileOnBody = userAuthenticationValidWhileOnBody;
         mTrustedUserPresenceRequired = trustedUserPresenceRequired;
         mInvalidatedByBiometricEnrollment = invalidatedByBiometricEnrollment;
+        mUserConfirmationRequired = userConfirmationRequired;
     }
 
     /**
@@ -257,6 +260,27 @@ public class KeyInfo implements KeySpec {
      */
     public boolean isUserAuthenticationRequired() {
         return mUserAuthenticationRequired;
+    }
+
+    /**
+     * Returns {@code true} if the key is authorized to be used only for messages confirmed by the
+     * user.
+     *
+     * Confirmation is separate from user authentication (see
+     * {@link #isUserAuthenticationRequired()}). Keys can be created that require confirmation but
+     * not user authentication, or user authentication but not confirmation, or both. Confirmation
+     * verifies that some user with physical possession of the device has approved a displayed
+     * message. User authentication verifies that the correct user is present and has
+     * authenticated.
+     *
+     * <p>This authorization applies only to secret key and private key operations. Public key
+     * operations are not restricted.
+     *
+     * @see KeyGenParameterSpec.Builder#setUserConfirmationRequired(boolean)
+     * @see KeyProtection.Builder#setUserConfirmationRequired(boolean)
+     */
+    public boolean isUserConfirmationRequired() {
+        return mUserConfirmationRequired;
     }
 
     /**

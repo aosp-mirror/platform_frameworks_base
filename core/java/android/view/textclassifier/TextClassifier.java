@@ -28,6 +28,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.view.textclassifier.logging.Logger;
 
 import com.android.internal.util.Preconditions;
 
@@ -319,14 +320,15 @@ public interface TextClassifier {
     }
 
     /**
-     * Logs a TextClassifier event.
+     * Returns a helper for logging TextClassifier related events.
      *
-     * @param source the text classifier used to generate this event
-     * @param event the text classifier related event
-     * @hide
+     * @param config logger configuration
      */
     @WorkerThread
-    default void logEvent(String source, String event) {}
+    default Logger getLogger(@NonNull Logger.Config config) {
+        Preconditions.checkNotNull(config);
+        return Logger.DISABLED;
+    }
 
     /**
      * Returns this TextClassifier's settings.

@@ -16,8 +16,7 @@
 
 package com.android.server.testing;
 
-import com.android.server.backup.PerformBackupTaskTest;
-import com.android.server.backup.internal.PerformBackupTask;
+import static java.util.Arrays.asList;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -33,10 +32,11 @@ import org.robolectric.util.Util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
@@ -51,9 +51,9 @@ import javax.annotation.Nonnull;
  * against the actual classes that are in the tree, not a past version of them. Ideally we would
  * have a locally built jar referenced by Robolectric, but until that happens one can use this
  * class.
- * This class reads the {@link SystemLoaderClasses} annotation on test classes and for each class
- * in that annotation value it will bypass the android jar and load it from the system class loader.
- * Allowing the test to test the actual class in the tree.
+ * This class reads the {@link SystemLoaderClasses} or {@link SystemLoaderPackages} annotations on
+ * test classes, for classes that match the annotations it will bypass the android jar and load it
+ * from the system class loader. Allowing the test to test the actual class in the tree.
  *
  * Implementation note: One could think about overriding
  * {@link RobolectricTestRunner#createClassLoaderConfig(FrameworkMethod)} method and putting the
@@ -72,11 +72,21 @@ public class FrameworkRobolectricTestRunner extends RobolectricTestRunner {
 
     public FrameworkRobolectricTestRunner(Class<?> testClass) throws InitializationError {
         super(testClass);
-        SystemLoaderClasses annotation = testClass.getAnnotation(SystemLoaderClasses.class);
-        Class<?>[] systemLoaderClasses =
-                (annotation != null) ? annotation.value() : new Class<?>[0];
-        Set<String> systemLoaderClassNames = classesToClassNames(systemLoaderClasses);
-        mSandboxFactory = new FrameworkSandboxFactory(systemLoaderClassNames);
+        Set<String> classPrefixes = getSystemLoaderClassPrefixes(testClass);
+        mSandboxFactory = new FrameworkSandboxFactory(classPrefixes);
+    }
+
+    private Set<String> getSystemLoaderClassPrefixes(Class<?> testClass) {
+        Set<String> classPrefixes = new HashSet<>();
+        SystemLoaderClasses byClass = testClass.getAnnotation(SystemLoaderClasses.class);
+        if (byClass != null) {
+            Stream.of(byClass.value()).map(Class::getName).forEach(classPrefixes::add);
+        }
+        SystemLoaderPackages byPackage = testClass.getAnnotation(SystemLoaderPackages.class);
+        if (byPackage != null) {
+            classPrefixes.addAll(asList(byPackage.value()));
+        }
+        return classPrefixes;
     }
 
     @Nonnull
@@ -92,15 +102,15 @@ public class FrameworkRobolectricTestRunner extends RobolectricTestRunner {
     }
 
     private static class FrameworkClassLoader extends SandboxClassLoader {
-        private final Set<String> mSystemLoaderClasses;
+        private final Set<String> mSystemLoaderClassPrefixes;
 
         private FrameworkClassLoader(
-                Set<String> systemLoaderClasses,
+                Set<String> systemLoaderClassPrefixes,
                 ClassLoader systemClassLoader,
                 InstrumentationConfiguration instrumentationConfig,
                 URL... urls) {
             super(systemClassLoader, instrumentationConfig, urls);
-            mSystemLoaderClasses = systemLoaderClasses;
+            mSystemLoaderClassPrefixes = systemLoaderClassPrefixes;
         }
 
         @Override
@@ -146,8 +156,8 @@ public class FrameworkRobolectricTestRunner extends RobolectricTestRunner {
          * loader, so we test if the classes in the annotation are prefixes of the class to load.
          */
         private boolean shouldLoadFromSystemLoader(String className) {
-            for (String classNamePrefix : mSystemLoaderClasses) {
-                if (className.startsWith(classNamePrefix)) {
+            for (String classPrefix : mSystemLoaderClassPrefixes) {
+                if (className.startsWith(classPrefix)) {
                     return true;
                 }
             }
@@ -156,10 +166,10 @@ public class FrameworkRobolectricTestRunner extends RobolectricTestRunner {
     }
 
     private static class FrameworkSandboxFactory extends SandboxFactory {
-        private final Set<String> mSystemLoaderClasses;
+        private final Set<String> mSystemLoaderClassPrefixes;
 
-        private FrameworkSandboxFactory(Set<String> systemLoaderClasses) {
-            mSystemLoaderClasses = systemLoaderClasses;
+        private FrameworkSandboxFactory(Set<String> systemLoaderClassPrefixes) {
+            mSystemLoaderClassPrefixes = systemLoaderClassPrefixes;
         }
 
         @Nonnull
@@ -167,18 +177,10 @@ public class FrameworkRobolectricTestRunner extends RobolectricTestRunner {
         public ClassLoader createClassLoader(
                 InstrumentationConfiguration instrumentationConfig, URL... urls) {
             return new FrameworkClassLoader(
-                    mSystemLoaderClasses,
+                    mSystemLoaderClassPrefixes,
                     ClassLoader.getSystemClassLoader(),
                     instrumentationConfig,
                     urls);
         }
-    }
-
-    private static Set<String> classesToClassNames(Class<?>[] classes) {
-        ImmutableSet.Builder<String> builder = ImmutableSet.builder();
-        for (Class<?> classObject : classes) {
-            builder.add(classObject.getName());
-        }
-        return builder.build();
     }
 }

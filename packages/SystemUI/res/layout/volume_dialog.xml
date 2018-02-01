@@ -59,6 +59,7 @@
             android:gravity="center"
             android:layout_gravity="end"
             android:translationZ="8dp"
+            android:clickable="true"
             android:orientation="vertical" >
 
             <TextView
@@ -76,7 +77,7 @@
                 android:id="@+id/ringer_icon"
                 style="@style/VolumeButtons"
                 android:background="?android:selectableItemBackgroundBorderless"
-                android:layout_width="@dimen/volume_button_size"
+                android:layout_width="@dimen/volume_dialog_panel_width"
                 android:layout_height="@dimen/volume_button_size"
                 android:tint="?android:attr/colorAccent"
                 android:soundEffectsEnabled="false" />

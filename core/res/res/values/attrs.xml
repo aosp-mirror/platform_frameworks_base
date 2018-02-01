@@ -3036,6 +3036,28 @@
         <!-- The title this view should present to accessibility as a pane title.
              See {@link android.view.View#setAccessibilityPaneTitle(CharSequence)} -->
         <attr name="accessibilityPaneTitle" format="string" />
+
+        <!-- Sets the color of the spot shadow that is drawn when the view has a positive Z or
+             elevation value.
+             <p>
+             By default the shadow color is black. Generally, this color will be opaque so the
+             intensity of the shadow is consistent between different views with different colors.
+             <p>
+             The opacity of the final spot shadow is a function of the shadow caster height, the
+             alpha channel of the outlineSpotShadowColor (typically opaque), and the
+             {@link android.R.attr#spotShadowAlpha} theme attribute. -->
+        <attr name="outlineSpotShadowColor" format="color" />
+
+        <!-- Sets the color of the ambient shadow that is drawn when the view has a positive Z
+             or elevation value.
+             <p>
+             By default the shadow color is black. Generally, this color will be opaque so the
+             intensity of the shadow is consistent between different views with different colors.
+             <p>
+             The opacity of the final ambient shadow is a function of the shadow caster height,
+             the alpha channel of the outlineAmbientShadowColor (typically opaque), and the
+             {@link android.R.attr#ambientShadowAlpha} theme attribute. -->
+        <attr name="outlineAmbientShadowColor" format="color" />
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->

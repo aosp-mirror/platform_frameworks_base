@@ -81,6 +81,12 @@ interface IStatusBarService
     void clickTile(in ComponentName tile);
     void handleSystemKey(in int key);
 
+    /**
+     * Methods to show toast messages for screen pinning
+     */
+    void showPinningEnterExitToast(boolean entering);
+    void showPinningEscapeToast();
+
     // Used to show the dialog when FingerprintService starts authentication
     void showFingerprintDialog(in Bundle bundle, IFingerprintDialogReceiver receiver);
     // Used to hide the dialog when a finger is authenticated

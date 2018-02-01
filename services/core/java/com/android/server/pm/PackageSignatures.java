@@ -291,6 +291,7 @@ class PackageSignatures {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "<pastSigs> encountered multiple times under the same <sigs> at "
                                     + parser.getPositionDescription());
+                    XmlUtils.skipCurrentTag(parser);
                 }
             } else {
                 PackageManagerService.reportSettingsProblem(Log.WARN,

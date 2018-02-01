@@ -141,32 +141,45 @@ static void SigChldHandler(int /*signal_number*/) {
   errno = saved_errno;
 }
 
-// Configures the SIGCHLD handler for the zygote process. This is configured
-// very late, because earlier in the runtime we may fork() and exec()
-// other processes, and we want to waitpid() for those rather than
+// Configures the SIGCHLD/SIGHUP handlers for the zygote process. This is
+// configured very late, because earlier in the runtime we may fork() and
+// exec() other processes, and we want to waitpid() for those rather than
 // have them be harvested immediately.
+//
+// Ignore SIGHUP because all processes forked by the zygote are in the same
+// process group as the zygote and we don't want to be notified if we become
+// an orphaned group and have one or more stopped processes. This is not a
+// theoretical concern :
+// - we can become an orphaned group if one of our direct descendants forks
+//   and is subsequently killed before its children.
+// - crash_dump routinely STOPs the process it's tracing.
+//
+// See issues b/71965619 and b/25567761 for further details.
 //
 // This ends up being called repeatedly before each fork(), but there's
 // no real harm in that.
-static void SetSigChldHandler() {
-  struct sigaction sa;
-  memset(&sa, 0, sizeof(sa));
-  sa.sa_handler = SigChldHandler;
+static void SetSignalHandlers() {
+  struct sigaction sig_chld = {};
+  sig_chld.sa_handler = SigChldHandler;
 
-  int err = sigaction(SIGCHLD, &sa, NULL);
-  if (err < 0) {
+  if (sigaction(SIGCHLD, &sig_chld, NULL) < 0) {
     ALOGW("Error setting SIGCHLD handler: %s", strerror(errno));
+  }
+
+  struct sigaction sig_hup = {};
+  sig_hup.sa_handler = SIG_IGN;
+  if (sigaction(SIGHUP, &sig_hup, NULL) < 0) {
+    ALOGW("Error setting SIGHUP handler: %s", strerror(errno));
   }
 }
 
 // Sets the SIGCHLD handler back to default behavior in zygote children.
-static void UnsetSigChldHandler() {
+static void UnsetChldSignalHandler() {
   struct sigaction sa;
   memset(&sa, 0, sizeof(sa));
   sa.sa_handler = SIG_DFL;
 
-  int err = sigaction(SIGCHLD, &sa, NULL);
-  if (err < 0) {
+  if (sigaction(SIGCHLD, &sa, NULL) < 0) {
     ALOGW("Error unsetting SIGCHLD handler: %s", strerror(errno));
   }
 }
@@ -505,7 +518,7 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
                                      bool is_system_server, jintArray fdsToClose,
                                      jintArray fdsToIgnore,
                                      jstring instructionSet, jstring dataDir) {
-  SetSigChldHandler();
+  SetSignalHandlers();
 
   sigset_t sigchld;
   sigemptyset(&sigchld);
@@ -682,7 +695,8 @@ static pid_t ForkAndSpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArra
     delete se_info;
     delete se_name;
 
-    UnsetSigChldHandler();
+    // Unset the SIGCHLD handler, but keep ignoring SIGHUP (rationale in SetSignalHandlers).
+    UnsetChldSignalHandler();
 
     env->CallStaticVoidMethod(gZygoteClass, gCallPostForkChildHooks, runtime_flags,
                               is_system_server, instructionSet);

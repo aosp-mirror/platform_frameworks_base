@@ -1166,9 +1166,9 @@ public final class DefaultPermissionGrantPolicy {
         final String systemPackageName = mServiceInternal.getKnownPackageName(
                 PackageManagerInternal.PACKAGE_SYSTEM, UserHandle.USER_SYSTEM);
         final PackageParser.Package systemPackage = getPackage(systemPackageName);
-        return compareSignatures(systemPackage.mSigningDetails.signatures,
-                pkg.mSigningDetails.signatures)
-                == PackageManager.SIGNATURE_MATCH;
+        return pkg.mSigningDetails.hasAncestorOrSelf(systemPackage.mSigningDetails)
+                || systemPackage.mSigningDetails.checkCapability(pkg.mSigningDetails,
+                        PackageParser.SigningDetails.CertCapabilities.PERMISSION);
     }
 
     private void grantDefaultPermissionExceptions(int userId) {

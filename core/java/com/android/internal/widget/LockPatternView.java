@@ -118,6 +118,7 @@ public class LockPatternView extends View {
     private float mInProgressY = -1;
 
     private long mAnimatingPeriodStart;
+    private long[] mLineFadeStart = new long[9];
 
     private DisplayMode mPatternDisplayMode = DisplayMode.Correct;
     private boolean mInputEnabled = true;
@@ -596,12 +597,14 @@ public class LockPatternView extends View {
     }
 
     /**
-     * Clear the pattern lookup table.
+     * Clear the pattern lookup table. Also reset the line fade start times for
+     * the next attempt.
      */
     private void clearPatternDrawLookup() {
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 mPatternDrawLookup[i][j] = false;
+                mLineFadeStart[i+j] = 0;
             }
         }
     }
@@ -1136,7 +1139,8 @@ public class LockPatternView extends View {
             boolean anyCircles = false;
             float lastX = 0f;
             float lastY = 0f;
-            for (int i = 0; i < count; i++) {
+            long elapsedRealtime = SystemClock.elapsedRealtime();
+           for (int i = 0; i < count; i++) {
                 Cell cell = pattern.get(i);
 
                 // only draw the part of the pattern stored in
@@ -1147,16 +1151,26 @@ public class LockPatternView extends View {
                 }
                 anyCircles = true;
 
+                if (mLineFadeStart[i] == 0) {
+                  mLineFadeStart[i] = SystemClock.elapsedRealtime();
+                }
+
                 float centerX = getCenterXForColumn(cell.column);
                 float centerY = getCenterYForRow(cell.row);
                 if (i != 0) {
+                   // Set this line segment to slowly fade over the next second.
+                   int lineFadeVal = (int) Math.min((elapsedRealtime -
+                           mLineFadeStart[i])/2f, 255f);
+
                     CellState state = mCellStates[cell.row][cell.column];
                     currentPath.rewind();
                     currentPath.moveTo(lastX, lastY);
                     if (state.lineEndX != Float.MIN_VALUE && state.lineEndY != Float.MIN_VALUE) {
                         currentPath.lineTo(state.lineEndX, state.lineEndY);
+                        mPathPaint.setAlpha((int) 255 - lineFadeVal );
                     } else {
                         currentPath.lineTo(centerX, centerY);
+                        mPathPaint.setAlpha((int) 255 - lineFadeVal );
                     }
                     canvas.drawPath(currentPath, mPathPaint);
                 }

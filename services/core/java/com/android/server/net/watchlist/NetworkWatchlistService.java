@@ -23,8 +23,10 @@ import android.net.INetdEventCallback;
 import android.net.metrics.IpConnectivityLog;
 import android.os.Binder;
 import android.os.Process;
+import android.os.ResultReceiver;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ShellCallback;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -80,6 +82,7 @@ public class NetworkWatchlistService extends INetworkWatchlistManager.Stub {
                     return;
                 }
                 try {
+                    mService.init();
                     mService.initIpConnectivityMetrics();
                     mService.startWatchlistLogging();
                 } catch (RemoteException e) {
@@ -127,6 +130,10 @@ public class NetworkWatchlistService extends INetworkWatchlistManager.Stub {
         mIpConnectivityMetrics = ipConnectivityMetrics;
     }
 
+    private void init() {
+        mConfig.removeTestModeConfig();
+    }
+
     private void initIpConnectivityMetrics() {
         mIpConnectivityMetrics = (IIpConnectivityMetrics) IIpConnectivityMetrics.Stub.asInterface(
                 ServiceManager.getService(IpConnectivityLog.SERVICE_NAME));
@@ -150,6 +157,22 @@ public class NetworkWatchlistService extends INetworkWatchlistManager.Stub {
             mNetworkWatchlistHandler.asyncNetworkEvent(null, new String[]{ipAddr}, uid);
         }
     };
+
+    private boolean isCallerShell() {
+        final int callingUid = Binder.getCallingUid();
+        return callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID;
+    }
+
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
+        if (!isCallerShell()) {
+            Slog.w(TAG, "Only shell is allowed to call network watchlist shell commands");
+            return;
+        }
+        (new NetworkWatchlistShellCommand(mContext)).exec(this, in, out, err, args, callback,
+                resultReceiver);
+    }
 
     @VisibleForTesting
     protected boolean startWatchlistLoggingImpl() throws RemoteException {

@@ -311,7 +311,7 @@ public class TetheringTest {
         // Emulate pressing the USB tethering button in Settings UI.
         mTethering.startTethering(TETHERING_USB, null, false);
         mLooper.dispatchAll();
-        verify(mUsbManager, times(1)).setCurrentFunction(UsbManager.USB_FUNCTION_RNDIS, false);
+        verify(mUsbManager, times(1)).setCurrentFunctions(UsbManager.FUNCTION_RNDIS);
 
         // Pretend we receive a USB connected broadcast. Here we also pretend
         // that the RNDIS function is somehow enabled, so that we see if we

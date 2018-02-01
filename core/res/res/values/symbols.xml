@@ -767,9 +767,6 @@
   <java-symbol type="string" name="kilobyteShort" />
   <java-symbol type="string" name="last_month" />
   <java-symbol type="string" name="launchBrowserDefault" />
-  <java-symbol type="string" name="lock_to_app_toast" />
-  <java-symbol type="string" name="lock_to_app_start" />
-  <java-symbol type="string" name="lock_to_app_exit" />
   <java-symbol type="string" name="lock_to_app_unlock_pin" />
   <java-symbol type="string" name="lock_to_app_unlock_pattern" />
   <java-symbol type="string" name="lock_to_app_unlock_password" />
@@ -2026,8 +2023,10 @@
   <java-symbol type="string" name="usb_mtp_notification_title" />
   <java-symbol type="string" name="usb_charging_notification_title" />
   <java-symbol type="string" name="usb_notification_message" />
+  <java-symbol type="string" name="usb_power_notification_message" />
   <java-symbol type="string" name="usb_ptp_notification_title" />
   <java-symbol type="string" name="usb_midi_notification_title" />
+  <java-symbol type="string" name="usb_tether_notification_title" />
   <java-symbol type="string" name="usb_supplying_notification_title" />
   <java-symbol type="string" name="usb_unsupported_audio_accessory_title" />
   <java-symbol type="string" name="usb_unsupported_audio_accessory_message" />

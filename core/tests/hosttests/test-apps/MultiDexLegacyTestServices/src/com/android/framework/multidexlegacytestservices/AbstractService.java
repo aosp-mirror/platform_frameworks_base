@@ -60,35 +60,40 @@ public abstract class AbstractService extends Service implements Runnable {
             // of the result file will be too big.
             RandomAccessFile raf = new RandomAccessFile(resultFile, "rw");
             raf.seek(raf.length());
-            Log.i(TAG, "Writing 0x42434445 at " + raf.length() + " in " + resultFile.getPath());
-            raf.writeInt(0x42434445);
+            if (raf.length() == 0) {
+                Log.i(TAG, "Writing 0x42434445 at " + raf.length() + " in " + resultFile.getPath());
+                raf.writeInt(0x42434445);
+            } else {
+                Log.w(TAG, "Service was restarted appending 0x42434445 twice at " + raf.length()
+                        + " in " + resultFile.getPath());
+                raf.writeInt(0x42434445);
+                raf.writeInt(0x42434445);
+            }
             raf.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        MultiDex.install(applicationContext);
-        Log.i(TAG, "Multi dex installation done.");
+            MultiDex.install(applicationContext);
+            Log.i(TAG, "Multi dex installation done.");
 
-        int value = getValue();
-        Log.i(TAG, "Saving the result (" + value + ") to " + resultFile.getPath());
-        try {
+            int value = getValue();
+            Log.i(TAG, "Saving the result (" + value + ") to " + resultFile.getPath());
             // Append the check value in result file, keeping the constant values already written.
-            RandomAccessFile raf = new RandomAccessFile(resultFile, "rw");
+            raf = new RandomAccessFile(resultFile, "rw");
             raf.seek(raf.length());
             Log.i(TAG, "Writing result at " + raf.length() + " in " + resultFile.getPath());
             raf.writeInt(value);
             raf.close();
         } catch (IOException e) {
-            e.printStackTrace();
-        }
-        try {
-            // Writing end of processing flags, the existence of the file is the criteria
-            RandomAccessFile raf = new RandomAccessFile(new File(applicationContext.getFilesDir(), getId() + ".complete"), "rw");
-            Log.i(TAG, "creating complete file " + resultFile.getPath());
-            raf.writeInt(0x32333435);
-            raf.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            throw new AssertionError(e);
+        } finally {
+            try {
+                // Writing end of processing flags, the existence of the file is the criteria
+                RandomAccessFile raf = new RandomAccessFile(
+                        new File(applicationContext.getFilesDir(), getId() + ".complete"), "rw");
+                Log.i(TAG, "creating complete file " + resultFile.getPath());
+                raf.writeInt(0x32333435);
+                raf.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -119,9 +124,10 @@ public abstract class AbstractService extends Service implements Runnable {
             intermediate = ReflectIntermediateClass.get(45, 80, 20 /* 5 seems enough on a nakasi,
                 using 20 to get some margin */);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new AssertionError(e);
         }
-        int value = new com.android.framework.multidexlegacytestservices.manymethods.Big001().get1() +
+        int value =
+                new com.android.framework.multidexlegacytestservices.manymethods.Big001().get1() +
                 new com.android.framework.multidexlegacytestservices.manymethods.Big002().get2() +
                 new com.android.framework.multidexlegacytestservices.manymethods.Big003().get3() +
                 new com.android.framework.multidexlegacytestservices.manymethods.Big004().get4() +

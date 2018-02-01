@@ -30,6 +30,7 @@ import android.media.MediaSession2.PlaylistParams;
 import android.media.session.MediaSessionManager;
 import android.media.update.ApiLoader;
 import android.media.update.MediaController2Provider;
+import android.media.update.PlaybackInfoProvider;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ResultReceiver;
@@ -160,21 +161,14 @@ public class MediaController2 implements AutoCloseable {
          */
         public static final int PLAYBACK_TYPE_LOCAL = 1;
 
-        private final int mVolumeType;
-        private final int mVolumeControl;
-        private final int mMaxVolume;
-        private final int mCurrentVolume;
-        private final AudioAttributes mAudioAttrs;
+        private final PlaybackInfoProvider mProvider;
 
         /**
          * @hide
          */
-        public PlaybackInfo(int type, AudioAttributes attrs, int control, int max, int current) {
-            mVolumeType = type;
-            mAudioAttrs = attrs;
-            mVolumeControl = control;
-            mMaxVolume = max;
-            mCurrentVolume = current;
+        @SystemApi
+        public PlaybackInfo(PlaybackInfoProvider provider) {
+            mProvider = provider;
         }
 
         /**
@@ -187,7 +181,7 @@ public class MediaController2 implements AutoCloseable {
          * @return The type of playback this session is using.
          */
         public int getPlaybackType() {
-            return mVolumeType;
+            return mProvider.getPlaybackType_impl();
         }
 
         /**
@@ -199,7 +193,7 @@ public class MediaController2 implements AutoCloseable {
          * @return The attributes for this session.
          */
         public AudioAttributes getAudioAttributes() {
-            return mAudioAttrs;
+            return mProvider.getAudioAttributes_impl();
         }
 
         /**
@@ -210,11 +204,10 @@ public class MediaController2 implements AutoCloseable {
          * <li>{@link VolumeProvider#VOLUME_CONTROL_FIXED}</li>
          * </ul>
          *
-         * @return The type of volume control that may be used with this
-         *         session.
+         * @return The type of volume control that may be used with this session.
          */
-        public int getVolumeControl() {
-            return mVolumeControl;
+        public int getControlType() {
+            return mProvider.getControlType_impl();
         }
 
         /**
@@ -223,7 +216,7 @@ public class MediaController2 implements AutoCloseable {
          * @return The maximum allowed volume where this session is playing.
          */
         public int getMaxVolume() {
-            return mMaxVolume;
+            return mProvider.getMaxVolume_impl();
         }
 
         /**
@@ -232,7 +225,7 @@ public class MediaController2 implements AutoCloseable {
          * @return The current volume where this session is playing.
          */
         public int getCurrentVolume() {
-            return mCurrentVolume;
+            return mProvider.getCurrentVolume_impl();
         }
     }
 
@@ -277,6 +270,9 @@ public class MediaController2 implements AutoCloseable {
         mProvider.close_impl();
     }
 
+    /**
+     * @hide
+     */
     @SystemApi
     public MediaController2Provider getProvider() {
         return mProvider;

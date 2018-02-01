@@ -96,5 +96,7 @@
 
     <!-- For StatusBarIconContainer to tag its icon views -->
     <item type="id" name="status_bar_view_state_tag" />
+
+    <item type="id" name="display_cutout" />
 </resources>
 

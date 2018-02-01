@@ -78,8 +78,10 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Base64;
+import android.util.ByteStringUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.PackageUtils;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -5683,7 +5685,10 @@ public class PackageParser {
         return true;
     }
 
-    /** A container for signing-related data of an application package. */
+    /**
+     *  A container for signing-related data of an application package.
+     * @hide
+     */
     public static final class SigningDetails implements Parcelable {
 
         @IntDef({SigningDetails.SignatureSchemeVersion.UNKNOWN,
@@ -5705,15 +5710,54 @@ public class PackageParser {
         public final ArraySet<PublicKey> publicKeys;
 
         /**
-         * Collection of {@code Signature} objects, each of which is formed from a former signing
-         * certificate of this APK before it was changed by signing certificate rotation.
+         * APK Signature Scheme v3 includes support for adding a proof-of-rotation record that
+         * contains two pieces of information:
+         *   1) the past signing certificates
+         *   2) the flags that APK wants to assign to each of the past signing certificates.
+         *
+         * This collection of {@code Signature} objects, each of which is formed from a former
+         * signing certificate of this APK before it was changed by signing certificate rotation,
+         * represents the first piece of information.  It is the APK saying to the rest of the
+         * world: "hey if you trust the old cert, you can trust me!"  This is useful, if for
+         * instance, the platform would like to determine whether or not to allow this APK to do
+         * something it would've allowed it to do under the old cert (like upgrade).
          */
         @Nullable
         public final Signature[] pastSigningCertificates;
 
+        /** special value used to see if cert is in package - not exposed to callers */
+        private static final int PAST_CERT_EXISTS = 0;
+
+        @IntDef(
+                flag = true,
+                value = {CertCapabilities.INSTALLED_DATA,
+                        CertCapabilities.SHARED_USER_ID,
+                        CertCapabilities.PERMISSION })
+        public @interface CertCapabilities {
+
+            /** accept data from already installed pkg with this cert */
+            int INSTALLED_DATA = 1;
+
+            /** accept sharedUserId with pkg with this cert */
+            int SHARED_USER_ID = 2;
+
+            /** grant SIGNATURE permissions to pkgs with this cert */
+            int PERMISSION = 4;
+        }
+
         /**
-         * Flags for the {@code pastSigningCertificates} collection, which indicate the capabilities
-         * the including APK wishes to grant to its past signing certificates.
+         * APK Signature Scheme v3 includes support for adding a proof-of-rotation record that
+         * contains two pieces of information:
+         *   1) the past signing certificates
+         *   2) the flags that APK wants to assign to each of the past signing certificates.
+         *
+         * These flags, which have a one-to-one relationship for the {@code pastSigningCertificates}
+         * collection, represent the second piece of information and are viewed as capabilities.
+         * They are an APK's way of telling the platform: "this is how I want to trust my old certs,
+         * please enforce that." This is useful for situation where this app itself is using its
+         * signing certificate as an authorization mechanism, like whether or not to allow another
+         * app to have its SIGNATURE permission.  An app could specify whether to allow other apps
+         * signed by its old cert 'X' to still get a signature permission it defines, for example.
          */
         @Nullable
         public final int[] pastSigningCertificatesFlags;
@@ -5782,6 +5826,244 @@ public class PackageParser {
         /** Returns true if the signing details have past signing certificates. */
         public boolean hasPastSigningCertificates() {
             return pastSigningCertificates != null && pastSigningCertificates.length > 0;
+        }
+
+        /**
+         * Determines if the provided {@code oldDetails} is an ancestor of or the same as this one.
+         * If the {@code oldDetails} signing certificate appears in our pastSigningCertificates,
+         * then that means it has authorized a signing certificate rotation, which eventually leads
+         * to our certificate, and thus can be trusted. If this method evaluates to true, this
+         * SigningDetails object should be trusted if the previous one is.
+         */
+        public boolean hasAncestorOrSelf(SigningDetails oldDetails) {
+            if (this == UNKNOWN || oldDetails == UNKNOWN) {
+                return false;
+            }
+            if (oldDetails.signatures.length > 1) {
+
+                // multiple-signer packages cannot rotate signing certs, so we just compare current
+                // signers for an exact match
+                return signaturesMatchExactly(oldDetails);
+            } else {
+
+                // we may have signing certificate rotation history, check to see if the oldDetails
+                // was one of our old signing certificates
+                return hasCertificate(oldDetails.signatures[0]);
+            }
+        }
+
+        /**
+         * Similar to {@code hasAncestorOrSelf}.  Returns true only if this {@code SigningDetails}
+         * is a descendant of {@code oldDetails}, not if they're the same.  This is used to
+         * determine if this object is newer than the provided one.
+         */
+        public boolean hasAncestor(SigningDetails oldDetails) {
+            if (this == UNKNOWN || oldDetails == UNKNOWN) {
+                return false;
+            }
+            if (this.hasPastSigningCertificates() && oldDetails.signatures.length == 1) {
+
+                // the last entry in pastSigningCertificates is the current signer, ignore it
+                for (int i = 0; i < pastSigningCertificates.length - 1; i++) {
+                    if (pastSigningCertificates[i].equals(oldDetails.signatures[i])) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /**
+         * Determines if the provided {@code oldDetails} is an ancestor of this one, and whether or
+         * not this one grants it the provided capability, represented by the {@code flags}
+         * parameter.  In the event of signing certificate rotation, a package may still interact
+         * with entities signed by its old signing certificate and not want to break previously
+         * functioning behavior.  The {@code flags} value determines which capabilities the app
+         * signed by the newer signing certificate would like to continue to give to its previous
+         * signing certificate(s).
+         */
+        public boolean checkCapability(SigningDetails oldDetails, @CertCapabilities int flags) {
+            if (this == UNKNOWN || oldDetails == UNKNOWN) {
+                return false;
+            }
+            if (oldDetails.signatures.length > 1) {
+
+                // multiple-signer packages cannot rotate signing certs, so we must have an exact
+                // match, which also means all capabilities are granted
+                return signaturesMatchExactly(oldDetails);
+            } else {
+
+                // we may have signing certificate rotation history, check to see if the oldDetails
+                // was one of our old signing certificates, and if we grant it the capability it's
+                // requesting
+                return hasCertificate(oldDetails.signatures[0], flags);
+            }
+        }
+
+        /**
+         * A special case of {@code checkCapability} which re-encodes both sets of signing
+         * certificates to counteract a previous re-encoding.
+         */
+        public boolean checkCapabilityRecover(SigningDetails oldDetails,
+                @CertCapabilities int flags) throws CertificateException {
+            if (oldDetails == UNKNOWN || this == UNKNOWN) {
+                return false;
+            }
+            if (hasPastSigningCertificates() && oldDetails.signatures.length == 1) {
+
+                // signing certificates may have rotated, check entire history for effective match
+                for (int i = 0; i < pastSigningCertificates.length; i++) {
+                    if (Signature.areEffectiveMatch(
+                            oldDetails.signatures[0],
+                            pastSigningCertificates[i])
+                            && pastSigningCertificatesFlags[i] == flags) {
+                        return true;
+                    }
+                }
+            } else {
+                return Signature.areEffectiveMatch(oldDetails.signatures, signatures);
+            }
+            return false;
+        }
+
+        /**
+         * Determine if {@code signature} is in this SigningDetails' signing certificate history,
+         * including the current signer.  Automatically returns false if this object has multiple
+         * signing certificates, since rotation is only supported for single-signers; this is
+         * enforced by {@code hasCertificateInternal}.
+         */
+        public boolean hasCertificate(Signature signature) {
+            return hasCertificateInternal(signature, PAST_CERT_EXISTS);
+        }
+
+        /**
+         * Determine if {@code signature} is in this SigningDetails' signing certificate history,
+         * including the current signer, and whether or not it has the given permission.
+         * Certificates which match our current signer automatically get all capabilities.
+         * Automatically returns false if this object has multiple signing certificates, since
+         * rotation is only supported for single-signers.
+         */
+        public boolean hasCertificate(Signature signature, @CertCapabilities int flags) {
+            return hasCertificateInternal(signature, flags);
+        }
+
+        /** Convenient wrapper for calling {@code hasCertificate} with certificate's raw bytes. */
+        public boolean hasCertificate(byte[] certificate) {
+            Signature signature = new Signature(certificate);
+            return hasCertificate(signature);
+        }
+
+        private boolean hasCertificateInternal(Signature signature, int flags) {
+            if (this == UNKNOWN) {
+                return false;
+            }
+
+            // only single-signed apps can have pastSigningCertificates
+            if (hasPastSigningCertificates()) {
+
+                // check all past certs, except for the current one, which automatically gets all
+                // capabilities, since it is the same as the current signature
+                for (int i = 0; i < pastSigningCertificates.length - 1; i++) {
+                    if (pastSigningCertificates[i].equals(signature)) {
+                        if (flags == PAST_CERT_EXISTS
+                                || (flags & pastSigningCertificatesFlags[i]) == flags) {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            // not in previous certs signing history, just check the current signer and make sure
+            // we are singly-signed
+            return signatures.length == 1 && signatures[0].equals(signature);
+        }
+
+        /**
+         * Determines if the provided {@code sha256String} is an ancestor of this one, and whether
+         * or not this one grants it the provided capability, represented by the {@code flags}
+         * parameter.  In the event of signing certificate rotation, a package may still interact
+         * with entities signed by its old signing certificate and not want to break previously
+         * functioning behavior.  The {@code flags} value determines which capabilities the app
+         * signed by the newer signing certificate would like to continue to give to its previous
+         * signing certificate(s).
+         *
+         * @param sha256String A hex-encoded representation of a sha256 digest.  In the case of an
+         *                     app with multiple signers, this represents the hex-encoded sha256
+         *                     digest of the combined hex-encoded sha256 digests of each individual
+         *                     signing certificate according to {@link
+         *                     PackageUtils#computeSignaturesSha256Digest(Signature[])}
+         */
+        public boolean checkCapability(String sha256String, @CertCapabilities int flags) {
+            if (this == UNKNOWN) {
+                return false;
+            }
+
+            // first see if the hash represents a single-signer in our signing history
+            byte[] sha256Bytes = ByteStringUtils.fromHexToByteArray(sha256String);
+            if (hasSha256Certificate(sha256Bytes, flags)) {
+                return true;
+            }
+
+            // Not in signing history, either represents multiple signatures or not a match.
+            // Multiple signers can't rotate, so no need to check flags, just see if the SHAs match.
+            // We already check the single-signer case above as part of hasSha256Certificate, so no
+            // need to verify we have multiple signers, just run the old check
+            // just consider current signing certs
+            final String[] mSignaturesSha256Digests =
+                    PackageUtils.computeSignaturesSha256Digests(signatures);
+            final String mSignaturesSha256Digest =
+                    PackageUtils.computeSignaturesSha256Digest(mSignaturesSha256Digests);
+            return mSignaturesSha256Digest.equals(sha256String);
+        }
+
+        /**
+         * Determine if the {@code sha256Certificate} is in this SigningDetails' signing certificate
+         * history, including the current signer.  Automatically returns false if this object has
+         * multiple signing certificates, since rotation is only supported for single-signers.
+         */
+        public boolean hasSha256Certificate(byte[] sha256Certificate) {
+            return hasSha256CertificateInternal(sha256Certificate, PAST_CERT_EXISTS);
+        }
+
+        /**
+         * Determine if the {@code sha256Certificate} certificate hash corresponds to a signing
+         * certificate in this SigningDetails' signing certificate history, including the current
+         * signer, and whether or not it has the given permission.  Certificates which match our
+         * current signer automatically get all capabilities. Automatically returns false if this
+         * object has multiple signing certificates, since rotation is only supported for
+         * single-signers.
+         */
+        public boolean hasSha256Certificate(byte[] sha256Certificate, @CertCapabilities int flags) {
+            return hasSha256CertificateInternal(sha256Certificate, flags);
+        }
+
+        private boolean hasSha256CertificateInternal(byte[] sha256Certificate, int flags) {
+            if (this == UNKNOWN) {
+                return false;
+            }
+            if (hasPastSigningCertificates()) {
+
+                // check all past certs, except for the last one, which automatically gets all
+                // capabilities, since it is the same as the current signature, and is checked below
+                for (int i = 0; i < pastSigningCertificates.length - 1; i++) {
+                    byte[] digest = PackageUtils.computeSha256DigestBytes(
+                            pastSigningCertificates[i].toByteArray());
+                    if (Arrays.equals(sha256Certificate, digest)) {
+                        if (flags == PAST_CERT_EXISTS
+                                || (flags & pastSigningCertificatesFlags[i]) == flags) {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            // not in previous certs signing history, just check the current signer
+            if (signatures.length == 1) {
+                byte[] digest =
+                        PackageUtils.computeSha256DigestBytes(signatures[0].toByteArray());
+                return Arrays.equals(sha256Certificate, digest);
+            }
+            return false;
         }
 
         /** Returns true if the signatures in this and other match exactly. */

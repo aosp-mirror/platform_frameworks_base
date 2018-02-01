@@ -309,6 +309,12 @@ public class VolumeUiLayout extends FrameLayout  {
         return super.getOutlineProvider();
     }
 
+    @Override
+    public void setPressed(boolean pressed)
+    {
+        // Ignore presses because it activates the seekbar thumb unnecessarily.
+    }
+
     public void setOutsideTouchListener(OnClickListener onClickListener) {
         mHasOutsideTouch = true;
         requestLayout();

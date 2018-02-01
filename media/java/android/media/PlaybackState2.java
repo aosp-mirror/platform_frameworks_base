@@ -17,6 +17,11 @@
 package android.media;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.content.Context;
+import android.media.update.ApiLoader;
+import android.media.update.PlaybackState2Provider;
 import android.os.Bundle;
 
 import java.lang.annotation.Retention;
@@ -29,14 +34,51 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 public final class PlaybackState2 {
-    private static final String TAG = "PlaybackState2";
-
+    // Similar to the PlaybackState2 with following changes
+    //    - Not implement Parcelable and added from/toBundle()
+    //    - Removed playback state that doesn't match with the MediaPlayer2
+    //      Full list should be finalized when the MediaPlayer2 has getter for the playback state.
+    //      Here's table for the MP2 state and PlaybackState2.State.
+    //         +----------------------------------------+----------------------------------------+
+    //         | MediaPlayer2 state                     | Matching PlaybackState2.State          |
+    //         | (Names are from MP2' Javadoc)          |                                        |
+    //         +----------------------------------------+----------------------------------------+
+    //         | Idle: Just finished creating MP2       | STATE_NONE                             |
+    //         |     or reset() is called               |                                        |
+    //         +----------------------------------------+----------------------------------------+
+    //         | Initialized: setDataSource/Playlist    | N/A (Session/Controller don't          |
+    //         |                                        |     differentiate with Prepared)       |
+    //         +----------------------------------------+----------------------------------------+
+    //         | Prepared: Prepared after initialized   | STATE_PAUSED                           |
+    //         +----------------------------------------+----------------------------------------+
+    //         | Started: Started playback              | STATE_PLAYING                          |
+    //         +----------------------------------------+----------------------------------------+
+    //         | Paused: Paused playback                | STATE_PAUSED                           |
+    //         +----------------------------------------+----------------------------------------+
+    //         | PlaybackCompleted: Playback is done    | STATE_PAUSED                           |
+    //         +----------------------------------------+----------------------------------------+
+    //         | Stopped: MP2.stop() is called.         | STATE_STOPPED                          |
+    //         |     prepare() is needed to play again  |                                        |
+    //         |     (Seemingly the same as initialized |                                        |
+    //         |     because cannot set data source     |                                        |
+    //         |     after this)                        |                                        |
+    //         +----------------------------------------+----------------------------------------+
+    //         | Error: an API is called in a state     | STATE_ERROR                            |
+    //         |     that the API isn't supported       |                                        |
+    //         +----------------------------------------+----------------------------------------+
+    //         | End: MP2.close() is called to release  | N/A (MediaSession will be gone)        |
+    //         |    MP2. Cannot be reused anymore       |                                        |
+    //         +----------------------------------------+----------------------------------------+
+    //         | Started, but                           | STATE_BUFFERING                        |
+    //         |    EventCallback.onBufferingUpdate()   |                                        |
+    //         +----------------------------------------+----------------------------------------+
+    //    - Removed actions and custom actions.
+    //    - Repeat mode / shuffle mode is now in the PlaylistParams
     // TODO(jaewan): Replace states from MediaPlayer2
     /**
      * @hide
      */
-    @IntDef({STATE_NONE, STATE_STOPPED, STATE_PREPARED, STATE_PAUSED, STATE_PLAYING,
-            STATE_FINISH, STATE_BUFFERING, STATE_ERROR})
+    @IntDef({STATE_NONE, STATE_STOPPED, STATE_PAUSED, STATE_PLAYING, STATE_BUFFERING, STATE_ERROR})
     @Retention(RetentionPolicy.SOURCE)
     public @interface State {}
 
@@ -52,88 +94,46 @@ public final class PlaybackState2 {
     public final static int STATE_STOPPED = 1;
 
     /**
-     * State indicating this item is currently prepared
-     */
-    public final static int STATE_PREPARED = 2;
-
-    /**
      * State indicating this item is currently paused.
      */
-    public final static int STATE_PAUSED = 3;
+    public final static int STATE_PAUSED = 2;
 
     /**
      * State indicating this item is currently playing.
      */
-    public final static int STATE_PLAYING = 4;
-
-    /**
-     * State indicating the playback reaches the end of the item.
-     */
-    public final static int STATE_FINISH = 5;
+    public final static int STATE_PLAYING = 3;
 
     /**
      * State indicating this item is currently buffering and will begin playing
      * when enough data has buffered.
      */
-    public final static int STATE_BUFFERING = 6;
+    public final static int STATE_BUFFERING = 4;
 
     /**
      * State indicating this item is currently in an error state. The error
      * message should also be set when entering this state.
      */
-    public final static int STATE_ERROR = 7;
+    public final static int STATE_ERROR = 5;
 
     /**
      * Use this value for the position to indicate the position is not known.
      */
     public final static long PLAYBACK_POSITION_UNKNOWN = -1;
 
-    /**
-     * Keys used for converting a PlaybackState2 to a bundle object and vice versa.
-     */
-    private static final String KEY_STATE = "android.media.playbackstate2.state";
-    private static final String KEY_POSITION = "android.media.playbackstate2.position";
-    private static final String KEY_BUFFERED_POSITION =
-            "android.media.playbackstate2.buffered_position";
-    private static final String KEY_SPEED = "android.media.playbackstate2.speed";
-    private static final String KEY_ERROR_MESSAGE = "android.media.playbackstate2.error_message";
-    private static final String KEY_UPDATE_TIME = "android.media.playbackstate2.update_time";
-    private static final String KEY_ACTIVE_ITEM_ID = "android.media.playbackstate2.active_item_id";
-
-    private final int mState;
-    private final long mPosition;
-    private final long mUpdateTime;
-    private final float mSpeed;
-    private final long mBufferedPosition;
-    private final long mActiveItemId;
-    private final CharSequence mErrorMessage;
+    private final PlaybackState2Provider mProvider;
 
     // TODO(jaewan): Better error handling?
     //               E.g. media item at #2 has issue, but continue playing #3
     //                    login error. fire intent xxx to login
-    public PlaybackState2(int state, long position, long updateTime, float speed,
-            long bufferedPosition, long activeItemId, CharSequence error) {
-        mState = state;
-        mPosition = position;
-        mSpeed = speed;
-        mUpdateTime = updateTime;
-        mBufferedPosition = bufferedPosition;
-        mActiveItemId = activeItemId;
-        mErrorMessage = error;
+    public PlaybackState2(@NonNull Context context, int state, long position, long updateTime,
+            float speed, long bufferedPosition, long activeItemId, CharSequence error) {
+        mProvider = ApiLoader.getProvider(context).createPlaybackState2(context, this, state,
+                position, updateTime, speed, bufferedPosition, activeItemId, error);
     }
 
     @Override
     public String toString() {
-        StringBuilder bob = new StringBuilder("PlaybackState {");
-        bob.append("state=").append(mState);
-        bob.append(", position=").append(mPosition);
-        bob.append(", buffered position=").append(mBufferedPosition);
-        bob.append(", speed=").append(mSpeed);
-        bob.append(", updated=").append(mUpdateTime);
-        bob.append(", active item id=").append(mActiveItemId);
-        bob.append(", error=").append(mErrorMessage);
-        bob.append("}");
-        return bob.toString();
+        return mProvider.toString_impl();
     }
 
     /**
@@ -141,22 +141,24 @@ public final class PlaybackState2 {
      * <ul>
      * <li> {@link PlaybackState2#STATE_NONE}</li>
      * <li> {@link PlaybackState2#STATE_STOPPED}</li>
-     * <li> {@link PlaybackState2#STATE_PLAYING}</li>
+     * <li> {@link PlaybackState2#STATE_PREPARED}</li>
      * <li> {@link PlaybackState2#STATE_PAUSED}</li>
+     * <li> {@link PlaybackState2#STATE_PLAYING}</li>
+     * <li> {@link PlaybackState2#STATE_FINISH}</li>
      * <li> {@link PlaybackState2#STATE_BUFFERING}</li>
      * <li> {@link PlaybackState2#STATE_ERROR}</li>
      * </ul>
      */
     @State
     public int getState() {
-        return mState;
+        return mProvider.getState_impl();
     }
 
     /**
      * Get the current playback position in ms.
      */
     public long getPosition() {
-        return mPosition;
+        return mProvider.getPosition_impl();
     }
 
     /**
@@ -165,7 +167,7 @@ public final class PlaybackState2 {
      * content.
      */
     public long getBufferedPosition() {
-        return mBufferedPosition;
+        return mProvider.getBufferedPosition_impl();
     }
 
     /**
@@ -176,7 +178,7 @@ public final class PlaybackState2 {
      * @return The current speed of playback.
      */
     public float getPlaybackSpeed() {
-        return mSpeed;
+        return mProvider.getPlaybackSpeed_impl();
     }
 
     /**
@@ -184,7 +186,7 @@ public final class PlaybackState2 {
      * {@link PlaybackState2#STATE_ERROR}.
      */
     public CharSequence getErrorMessage() {
-        return mErrorMessage;
+        return mProvider.getErrorMessage_impl();
     }
 
     /**
@@ -194,7 +196,7 @@ public final class PlaybackState2 {
      * @return The last time the position was updated.
      */
     public long getLastPositionUpdateTime() {
-        return mUpdateTime;
+        return mProvider.getLastPositionUpdateTime_impl();
     }
 
     /**
@@ -203,53 +205,26 @@ public final class PlaybackState2 {
      * @return The id of the currently active item in the queue
      */
     public long getCurrentPlaylistItemIndex() {
-        return mActiveItemId;
+        return mProvider.getCurrentPlaylistItemIndex_impl();
     }
 
     /**
      * Returns this object as a bundle to share between processes.
      */
-    public Bundle toBundle() {
-        Bundle bundle = new Bundle();
-        bundle.putInt(KEY_STATE, mState);
-        bundle.putLong(KEY_POSITION, mPosition);
-        bundle.putLong(KEY_UPDATE_TIME, mUpdateTime);
-        bundle.putFloat(KEY_SPEED, mSpeed);
-        bundle.putLong(KEY_BUFFERED_POSITION, mBufferedPosition);
-        bundle.putLong(KEY_ACTIVE_ITEM_ID, mActiveItemId);
-        bundle.putCharSequence(KEY_ERROR_MESSAGE, mErrorMessage);
-        return bundle;
+    public @NonNull Bundle toBundle() {
+        return mProvider.toBundle_impl();
     }
 
     /**
      * Creates an instance from a bundle which is previously created by {@link #toBundle()}.
      *
+     * @param context context
      * @param bundle A bundle created by {@link #toBundle()}.
      * @return A new {@link PlaybackState2} instance. Returns {@code null} if the given
      *         {@param bundle} is null, or if the {@param bundle} has no playback state parameters.
      */
-    public static PlaybackState2 fromBundle(Bundle bundle) {
-        if (bundle == null) {
-            return null;
-        }
-
-        if (!bundle.containsKey(KEY_STATE)
-                || !bundle.containsKey(KEY_POSITION)
-                || !bundle.containsKey(KEY_UPDATE_TIME)
-                || !bundle.containsKey(KEY_SPEED)
-                || !bundle.containsKey(KEY_BUFFERED_POSITION)
-                || !bundle.containsKey(KEY_ACTIVE_ITEM_ID)
-                || !bundle.containsKey(KEY_ERROR_MESSAGE)) {
-            return null;
-        }
-
-        return new PlaybackState2(
-                bundle.getInt(KEY_STATE),
-                bundle.getLong(KEY_POSITION),
-                bundle.getLong(KEY_UPDATE_TIME),
-                bundle.getFloat(KEY_SPEED),
-                bundle.getLong(KEY_BUFFERED_POSITION),
-                bundle.getLong(KEY_ACTIVE_ITEM_ID),
-                bundle.getCharSequence(KEY_ERROR_MESSAGE));
+    public @Nullable static PlaybackState2 fromBundle(@NonNull Context context,
+            @Nullable Bundle bundle) {
+        return ApiLoader.getProvider(context).fromBundle_PlaybackState2(context, bundle);
     }
 }

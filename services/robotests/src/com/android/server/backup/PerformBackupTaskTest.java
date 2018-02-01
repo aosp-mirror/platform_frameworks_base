@@ -69,6 +69,7 @@ import com.android.server.backup.testing.TransportTestUtils.TransportMock;
 import com.android.server.backup.transport.TransportClient;
 import com.android.server.testing.FrameworkRobolectricTestRunner;
 import com.android.server.testing.SystemLoaderClasses;
+import com.android.server.testing.SystemLoaderPackages;
 import com.android.server.testing.shadows.FrameworkShadowPackageManager;
 import com.android.server.testing.shadows.ShadowBackupDataInput;
 import com.android.server.testing.shadows.ShadowBackupDataOutput;
@@ -102,12 +103,10 @@ import java.util.stream.Stream;
         ShadowQueuedWork.class
     }
 )
+@SystemLoaderPackages({"com.android.server.backup"})
 @SystemLoaderClasses({
-    BackupManagerService.class,
-    PerformBackupTask.class,
     BackupDataOutput.class,
     FullBackupDataOutput.class,
-    TransportManager.class,
     BackupAgent.class,
     IBackupTransport.class,
     IBackupAgent.class,

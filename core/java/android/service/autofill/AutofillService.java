@@ -468,9 +468,8 @@ import com.android.internal.os.SomeArgs;
  * <p>Typically, field classification can be used to detect fields that can be autofilled with
  * user data that is not associated with a specific app&mdash;such as email and physical
  * address. Once the service identifies that a such field was manually filled by the user, the
- * service could use this signal to improve its heuristics, either locally (i.e., in the same
- * device) or globally (i.e., by crowdsourcing the results back to the service's server so it can
- * be used by other users).
+ * service could use this signal to improve its heuristics on subsequent requests (for example, by
+ * infering which resource ids are associated with known fields).
  *
  * <p>The field classification workflow involves 4 steps:
  *
@@ -481,8 +480,8 @@ import com.android.internal.os.SomeArgs;
  *   <li>Identify which fields should be analysed by calling
  *   {@link FillResponse.Builder#setFieldClassificationIds(AutofillId...)}.
  *   <li>Verify the results through {@link FillEventHistory.Event#getFieldsClassification()}.
- *   <li>Use the results to dynamically create {@link Dataset} or {@link SaveInfo} objects in future
- *   requests.
+ *   <li>Use the results to dynamically create {@link Dataset} or {@link SaveInfo} objects in
+ *   subsequent requests.
  * </ol>
  *
  * <p>The field classification is an expensive operation and should be used carefully, otherwise it

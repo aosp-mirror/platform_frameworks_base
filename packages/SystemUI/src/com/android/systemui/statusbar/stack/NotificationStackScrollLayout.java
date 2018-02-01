@@ -403,6 +403,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private final int mSeparatorThickness;
     private final Rect mTmpRect = new Rect();
     private int mClockBottom;
+    private int mAntiBurnInOffsetX;
 
     public NotificationStackScrollLayout(Context context) {
         this(context, null);
@@ -3889,7 +3890,12 @@ public class NotificationStackScrollLayout extends ViewGroup
         applyCurrentBackgroundBounds();
         updateWillNotDraw();
         updateContentHeight();
+        updateAntiBurnInTranslation();
         notifyHeightChangeListener(mShelf);
+    }
+
+    private void updateAntiBurnInTranslation() {
+        setTranslationX(mAmbientState.isDark() ? mAntiBurnInOffsetX : 0);
     }
 
     /**
@@ -4473,8 +4479,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         mHeadsUpGoingAwayAnimationsAllowed = headsUpGoingAwayAnimationsAllowed;
     }
 
-    public void setDarkShelfOffsetX(int shelfOffsetX) {
-        mShelf.setDarkOffsetX(shelfOffsetX);
+    public void setAntiBurnInOffsetX(int antiBurnInOffsetX) {
+        mAntiBurnInOffsetX = antiBurnInOffsetX;
+        updateAntiBurnInTranslation();
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {

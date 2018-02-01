@@ -21,17 +21,20 @@
 #include <utils/Log.h>
 
 #include <sstream>
+#include <vector>
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
 #include "core_jni_helpers.h"
 
 #include <media/AudioSystem.h>
 #include <media/AudioPolicy.h>
+#include <media/MicrophoneInfo.h>
 #include <nativehelper/ScopedLocalRef.h>
 #include <system/audio.h>
 #include <system/audio_policy.h>
 #include "android_media_AudioFormat.h"
 #include "android_media_AudioErrors.h"
+#include "android_media_MicrophoneInfo.h"
 
 // ----------------------------------------------------------------------------
 
@@ -142,7 +145,6 @@ static struct {
     jfieldID    mUsage;
     jfieldID    mSource;
 } gAudioAttributesFields;
-
 
 static const char* const kEventHandlerClassPathName =
         "android/media/AudioPortEventHandler";
@@ -1158,7 +1160,6 @@ exit:
     return jStatus;
 }
 
-
 static jint
 android_media_AudioSystem_listAudioPorts(JNIEnv *env, jobject clazz,
                                          jobject jPorts, jintArray jGeneration)
@@ -1789,6 +1790,45 @@ android_media_AudioSystem_isOffloadSupported(JNIEnv *env, jobject thiz,
     return AudioSystem::isOffloadSupported(format);
 }
 
+static jint
+android_media_AudioSystem_getMicrophones(JNIEnv *env, jobject thiz, jobject jMicrophonesInfo)
+{
+    ALOGV("getMicrophones");
+
+    if (jMicrophonesInfo == NULL) {
+        ALOGE("jMicrophonesInfo NULL MicrophoneInfo ArrayList");
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+    if (!env->IsInstanceOf(jMicrophonesInfo, gArrayListClass)) {
+        ALOGE("getMicrophones not an arraylist");
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+
+    jint jStatus;
+    std::vector<media::MicrophoneInfo> microphones;
+    status_t status = AudioSystem::getMicrophones(&microphones);
+    if (status != NO_ERROR) {
+        ALOGE_IF(status != NO_ERROR, "AudioSystem::getMicrophones error %d", status);
+        jStatus = nativeToJavaStatus(status);
+        return jStatus;
+    }
+    if (microphones.size() == 0) {
+        jStatus = (jint)AUDIO_JAVA_SUCCESS;
+        return jStatus;
+    }
+    for (size_t i = 0; i < microphones.size(); i++) {
+        jobject jMicrophoneInfo;
+        jStatus = convertMicrophoneInfoFromNative(env, &jMicrophoneInfo, &microphones[i]);
+        if (jStatus != AUDIO_JAVA_SUCCESS) {
+            return jStatus;
+        }
+        env->CallBooleanMethod(jMicrophonesInfo, gArrayListMethods.add, jMicrophoneInfo);
+        env->DeleteLocalRef(jMicrophoneInfo);
+    }
+
+    return jStatus;
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
@@ -1843,6 +1883,7 @@ static const JNINativeMethod gMethods[] = {
     {"systemReady", "()I", (void *)android_media_AudioSystem_systemReady},
     {"getStreamVolumeDB", "(III)F", (void *)android_media_AudioSystem_getStreamVolumeDB},
     {"native_is_offload_supported", "(IIII)Z", (void *)android_media_AudioSystem_isOffloadSupported},
+    {"getMicrophones", "(Ljava/util/ArrayList;)I", (void *)android_media_AudioSystem_getMicrophones},
 };
 
 

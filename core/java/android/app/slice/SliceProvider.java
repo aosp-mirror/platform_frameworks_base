@@ -114,6 +114,10 @@ public abstract class SliceProvider extends ContentProvider {
     /**
      * @hide
      */
+    public static final String METHOD_MAP_ONLY_INTENT = "map_only";
+    /**
+     * @hide
+     */
     public static final String METHOD_PIN = "pin";
     /**
      * @hide
@@ -340,6 +344,13 @@ public abstract class SliceProvider extends ContentProvider {
             } else {
                 b.putParcelable(EXTRA_SLICE, null);
             }
+            return b;
+        } else if (method.equals(METHOD_MAP_ONLY_INTENT)) {
+            Intent intent = extras.getParcelable(EXTRA_INTENT);
+            if (intent == null) return null;
+            Uri uri = onMapIntentToUri(intent);
+            Bundle b = new Bundle();
+            b.putParcelable(EXTRA_SLICE, uri);
             return b;
         } else if (method.equals(METHOD_PIN)) {
             Uri uri = getUriWithoutUserId(extras.getParcelable(EXTRA_BIND_URI));

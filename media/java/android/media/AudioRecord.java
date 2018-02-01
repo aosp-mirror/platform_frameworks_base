@@ -16,12 +16,15 @@
 
 package android.media;
 
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -35,6 +38,7 @@ import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -1601,6 +1605,32 @@ public class AudioRecord implements AudioRouting
         }
     }
 
+    //--------------------------------------------------------------------------
+    // Microphone information
+    //--------------------
+    /**
+     * Returns a lists of {@link MicrophoneInfo} representing the active microphones.
+     * By querying channel mapping for each active microphone, developer can know how
+     * the microphone is used by each channels or a capture stream.
+     * Note that the information about the active microphones may change during a recording.
+     * See {@link AudioManager#registerAudioDeviceCallback} to be notified of changes
+     * in the audio devices, querying the active microphones then will return the latest
+     * information.
+     *
+     * @return a lists of {@link MicrophoneInfo} representing the active microphones.
+     * @throws IOException if an error occurs
+     */
+    public List<MicrophoneInfo> getActiveMicrophones() throws IOException {
+        ArrayList<MicrophoneInfo> activeMicrophones = new ArrayList<>();
+        int status = native_get_active_microphones(activeMicrophones);
+        if (status != AudioManager.SUCCESS) {
+            Log.e(TAG, "getActiveMicrophones failed:" + status);
+            return new ArrayList<MicrophoneInfo>();
+        }
+        AudioManager.setPortIdForMicrophones(activeMicrophones);
+        return activeMicrophones;
+    }
+
     //---------------------------------------------------------
     // Interface definitions
     //--------------------
@@ -1745,6 +1775,9 @@ public class AudioRecord implements AudioRouting
 
     private native final int native_get_timestamp(@NonNull AudioTimestamp outTimestamp,
             @AudioTimestamp.Timebase int timebase);
+
+    private native final int native_get_active_microphones(
+            ArrayList<MicrophoneInfo> activeMicrophones);
 
     //---------------------------------------------------------
     // Utility methods

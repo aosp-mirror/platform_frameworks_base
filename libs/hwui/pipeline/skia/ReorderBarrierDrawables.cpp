@@ -111,6 +111,10 @@ void EndReorderBarrierDrawable::onDraw(SkCanvas* canvas) {
     }
 }
 
+static SkColor multiplyAlpha(SkColor color, float alpha) {
+    return SkColorSetA(color, alpha * SkColorGetA(color));
+}
+
 // copied from FrameBuilder::deferShadow
 void EndReorderBarrierDrawable::drawShadow(SkCanvas* canvas, RenderNodeDrawable* caster) {
     const RenderProperties& casterProperties = caster->getNodeProperties();
@@ -187,9 +191,11 @@ void EndReorderBarrierDrawable::drawShadow(SkCanvas* canvas, RenderNodeDrawable*
     } else {
         zParams = SkPoint3::Make(0, 0, casterProperties.getZ());
     }
+    SkColor ambientColor = multiplyAlpha(casterProperties.getAmbientShadowColor(), ambientAlpha);
+    SkColor spotColor = multiplyAlpha(casterProperties.getSpotShadowColor(), spotAlpha);
     SkShadowUtils::DrawShadow(
             canvas, *casterPath, zParams, skiaLightPos, SkiaPipeline::getLightRadius(),
-            ambientAlpha, spotAlpha, casterProperties.getShadowColor(),
+            ambientColor, spotColor,
             casterAlpha < 1.0f ? SkShadowFlags::kTransparentOccluder_ShadowFlag : 0);
 }
 

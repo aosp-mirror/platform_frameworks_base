@@ -84,6 +84,8 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     protected View mEdit;
     private TouchAnimator mAnimator;
 
+    private View mActionsContainer;
+
     public QSFooterImpl(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -106,6 +108,8 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
 
         mMultiUserSwitch = findViewById(R.id.multi_user_switch);
         mMultiUserAvatar = mMultiUserSwitch.findViewById(R.id.multi_user_avatar);
+
+        mActionsContainer = findViewById(R.id.qs_footer_actions_container);
 
         // RenderThread is doing more harm than good when touching the header (to expand quick
         // settings), so disable it for this view
@@ -158,10 +162,8 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
     @Nullable
     private TouchAnimator createSettingsAlphaAnimator() {
         return new TouchAnimator.Builder()
-                .addFloat(mEdit, "alpha", 0, 1)
-                .addFloat(mMultiUserSwitch, "alpha", 0, 1)
                 .addFloat(mCarrierText, "alpha", 0, 1)
-                .addFloat(mSettingsButton, "alpha", 0, 1)
+                .addFloat(mActionsContainer, "alpha", 0, 1)
                 .build();
     }
 
@@ -269,6 +271,11 @@ public class QSFooterImpl extends FrameLayout implements QSFooter,
 
     @Override
     public void onClick(View v) {
+        // Don't do anything until view are unhidden
+        if (!mExpanded) {
+            return;
+        }
+
         if (v == mSettingsButton) {
             if (!Dependency.get(DeviceProvisionedController.class).isCurrentUserSetup()) {
                 // If user isn't setup just unlock the device and dump them back at SUW.

@@ -16,6 +16,7 @@
 
 package com.android.server.net.watchlist;
 
+import android.os.FileUtils;
 import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
@@ -32,6 +33,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -50,6 +52,8 @@ class WatchlistConfig {
     // Watchlist config that pushed by ConfigUpdater.
     private static final String NETWORK_WATCHLIST_DB_PATH =
             "/data/misc/network_watchlist/network_watchlist.xml";
+    private static final String NETWORK_WATCHLIST_DB_FOR_TEST_PATH =
+            "/data/misc/network_watchlist/network_watchlist_for_test.xml";
 
     // Hash for null / unknown config, a 32 byte array filled with content 0x00
     private static final byte[] UNKNOWN_CONFIG_HASH = new byte[32];
@@ -80,7 +84,7 @@ class WatchlistConfig {
     private boolean mIsSecureConfig = true;
 
     private final static WatchlistConfig sInstance = new WatchlistConfig();
-    private final File mXmlFile;
+    private File mXmlFile;
 
     private volatile CrcShaDigests mDomainDigests;
     private volatile CrcShaDigests mIpDigests;
@@ -232,7 +236,38 @@ class WatchlistConfig {
         return UNKNOWN_CONFIG_HASH;
     }
 
+    /**
+     * This method will copy temporary test config and temporary override network watchlist config
+     * in memory. When device is rebooted, temporary test config will be removed, and system will
+     * use back the original watchlist config.
+     * Also, as temporary network watchlist config is not secure, we will mark it as insecure
+     * config and will be applied to testOnly applications only.
+     */
+    public void setTestMode(InputStream testConfigInputStream) throws IOException {
+        Log.i(TAG, "Setting watchlist testing config");
+        // Copy test config
+        FileUtils.copyToFileOrThrow(testConfigInputStream,
+                new File(NETWORK_WATCHLIST_DB_FOR_TEST_PATH));
+        // Mark config as insecure, so it will be applied to testOnly applications only
+        mIsSecureConfig = false;
+        // Reload watchlist config using test config file
+        mXmlFile = new File(NETWORK_WATCHLIST_DB_FOR_TEST_PATH);
+        reloadConfig();
+    }
+
+    public void removeTestModeConfig() {
+        try {
+            final File f = new File(NETWORK_WATCHLIST_DB_FOR_TEST_PATH);
+            if (f.exists()) {
+                f.delete();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Unable to delete test config");
+        }
+    }
+
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println("Watchlist config hash: " + HexDump.toHexString(getWatchlistConfigHash()));
         pw.println("Domain CRC32 digest list:");
         if (mDomainDigests != null) {
             mDomainDigests.crc32Digests.dump(fd, pw, args);

@@ -124,7 +124,7 @@
 
     <!-- Tiles native to System UI. Order should match "quick_settings_tiles_default" -->
     <string name="quick_settings_tiles_stock" translatable="false">
-        wifi,cell,battery,dnd,flashlight,rotation,bt,airplane,location,hotspot,inversion,saver,work,cast,night
+        wifi,cell,battery,dnd,flashlight,rotation,bt,airplane,location,hotspot,inversion,saver,work,cast,night,alarm
     </string>
 
     <!-- The tiles to display in QuickSettings -->
@@ -348,8 +348,7 @@
         <item>com.android.systemui.util.leak.GarbageMonitor$Service</item>
         <item>com.android.systemui.LatencyTester</item>
         <item>com.android.systemui.globalactions.GlobalActionsComponent</item>
-        <item>com.android.systemui.RoundedCorners</item>
-        <item>com.android.systemui.EmulatedDisplayCutout</item>
+        <item>com.android.systemui.ScreenDecorations</item>
         <item>com.android.systemui.fingerprint.FingerprintDialogImpl</item>
     </string-array>
 

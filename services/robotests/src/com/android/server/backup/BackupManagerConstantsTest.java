@@ -26,6 +26,7 @@ import android.provider.Settings;
 
 import com.android.server.testing.FrameworkRobolectricTestRunner;
 import com.android.server.testing.SystemLoaderClasses;
+import com.android.server.testing.SystemLoaderPackages;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +37,7 @@ import org.robolectric.annotation.Config;
 
 @RunWith(FrameworkRobolectricTestRunner.class)
 @Config(manifest = Config.NONE, sdk = 26)
-@SystemLoaderClasses({BackupManagerConstants.class})
+@SystemLoaderPackages({"com.android.server.backup"})
 @Presubmit
 public class BackupManagerConstantsTest {
     private static final String PACKAGE_NAME = "some.package.name";

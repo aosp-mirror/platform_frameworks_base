@@ -87,7 +87,6 @@ class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final HashSet<String> mValidTables = new HashSet<String>();
 
-    private static final String DATABASE_JOURNAL_SUFFIX = "-journal";
     private static final String DATABASE_BACKUP_SUFFIX = "-backup";
 
     private static final String TABLE_SYSTEM = "system";
@@ -148,12 +147,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
         }
         File databaseFile = mContext.getDatabasePath(getDatabaseName());
         if (databaseFile.exists()) {
-            databaseFile.delete();
-        }
-        File databaseJournalFile = mContext.getDatabasePath(getDatabaseName()
-                + DATABASE_JOURNAL_SUFFIX);
-        if (databaseJournalFile.exists()) {
-            databaseJournalFile.delete();
+            SQLiteDatabase.deleteDatabase(databaseFile);
         }
     }
 

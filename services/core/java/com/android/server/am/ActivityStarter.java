@@ -31,6 +31,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.content.Intent.ACTION_INSTALL_INSTANT_APP_PACKAGE;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP;
 import static android.content.Intent.FLAG_ACTIVITY_LAUNCH_ADJACENT;
@@ -789,7 +790,7 @@ class ActivityStarter {
         // Instead, launch the ephemeral installer. Once the installer is finished, it
         // starts either the intent we resolved here [on install error] or the ephemeral
         // app [on install success].
-        if (rInfo != null && rInfo.auxiliaryInfo != null) {
+        if (rInfo != null && rInfo.isInstantAppAvailable) {
             intent = createLaunchIntent(rInfo.auxiliaryInfo, ephemeralIntent,
                     callingPackage, verificationBundle, resolvedType, userId);
             resolvedType = null;
@@ -849,22 +850,27 @@ class ActivityStarter {
     /**
      * Creates a launch intent for the given auxiliary resolution data.
      */
-    private @NonNull Intent createLaunchIntent(@NonNull AuxiliaryResolveInfo auxiliaryResponse,
+    private @NonNull Intent createLaunchIntent(@Nullable AuxiliaryResolveInfo auxiliaryResponse,
             Intent originalIntent, String callingPackage, Bundle verificationBundle,
             String resolvedType, int userId) {
-        if (auxiliaryResponse.needsPhaseTwo) {
+        if (auxiliaryResponse != null && auxiliaryResponse.needsPhaseTwo) {
             // request phase two resolution
             mService.getPackageManagerInternalLocked().requestInstantAppResolutionPhaseTwo(
                     auxiliaryResponse, originalIntent, resolvedType, callingPackage,
                     verificationBundle, userId);
         }
         return InstantAppResolver.buildEphemeralInstallerIntent(
-                Intent.ACTION_INSTALL_INSTANT_APP_PACKAGE, originalIntent,
-                auxiliaryResponse.failureIntent, callingPackage, verificationBundle,
-                resolvedType, userId, auxiliaryResponse.packageName, auxiliaryResponse.splitName,
-                auxiliaryResponse.installFailureActivity, auxiliaryResponse.versionCode,
-                auxiliaryResponse.token, auxiliaryResponse.resolveInfo.getExtras(),
-                auxiliaryResponse.needsPhaseTwo);
+                originalIntent,
+                InstantAppResolver.sanitizeIntent(originalIntent),
+                auxiliaryResponse == null ? null : auxiliaryResponse.failureIntent,
+                callingPackage,
+                verificationBundle,
+                resolvedType,
+                userId,
+                auxiliaryResponse == null ? null : auxiliaryResponse.installFailureActivity,
+                auxiliaryResponse == null ? null : auxiliaryResponse.token,
+                auxiliaryResponse != null && auxiliaryResponse.needsPhaseTwo,
+                auxiliaryResponse == null ? null : auxiliaryResponse.filters);
     }
 
     void postStartActivityProcessing(ActivityRecord r, int result, ActivityStack targetStack) {
@@ -924,12 +930,12 @@ class ActivityStarter {
         // Don't modify the client's object!
         intent = new Intent(intent);
         if (componentSpecified
-                && intent.getData() != null
-                && Intent.ACTION_VIEW.equals(intent.getAction())
+                && !Intent.ACTION_INSTALL_INSTANT_APP_PACKAGE.equals(intent.getAction())
+                && !Intent.ACTION_RESOLVE_INSTANT_APP_PACKAGE.equals(intent.getAction())
                 && mService.getPackageManagerInternalLocked()
                         .isInstantAppInstallerComponent(intent.getComponent())) {
             // intercept intents targeted directly to the ephemeral installer the
-            // ephemeral installer should never be started with a raw URL; instead
+            // ephemeral installer should never be started with a raw Intent; instead
             // adjust the intent so it looks like a "normal" instant app launch
             intent.setComponent(null /*component*/);
             componentSpecified = false;
