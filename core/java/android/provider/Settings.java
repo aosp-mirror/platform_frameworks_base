@@ -10750,14 +10750,14 @@ public final class Settings {
         public static final String LOW_POWER_MODE = "low_power";
 
         /**
-         * Battery level [1-99] at which low power mode automatically turns on.
+         * Battery level [1-100] at which low power mode automatically turns on.
          * If 0, it will not automatically turn on.
          * @hide
          */
         public static final String LOW_POWER_MODE_TRIGGER_LEVEL = "low_power_trigger_level";
 
         private static final Validator LOW_POWER_MODE_TRIGGER_LEVEL_VALIDATOR =
-                new SettingsValidators.InclusiveIntegerRangeValidator(0, 99);
+                new SettingsValidators.InclusiveIntegerRangeValidator(0, 100);
 
          /**
          * If not 0, the activity manager will aggressively finish activities and
