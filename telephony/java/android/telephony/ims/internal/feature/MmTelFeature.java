@@ -21,14 +21,10 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.telecom.TelecomManager;
 import android.telephony.ims.internal.ImsCallSessionListener;
-import android.telephony.ims.internal.SmsImplBase;
-import android.telephony.ims.internal.SmsImplBase.DeliverStatusResult;
-import android.telephony.ims.internal.SmsImplBase.StatusReportResult;
 import android.telephony.ims.internal.aidl.IImsCallSessionListener;
 import android.telephony.ims.internal.aidl.IImsCapabilityCallback;
 import android.telephony.ims.internal.aidl.IImsMmTelFeature;
 import android.telephony.ims.internal.aidl.IImsMmTelListener;
-import android.telephony.ims.internal.aidl.IImsSmsListener;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.telephony.ims.stub.ImsEcbmImplBase;
 import android.telephony.ims.stub.ImsMultiEndpointImplBase;
@@ -65,11 +61,6 @@ public class MmTelFeature extends ImsFeature {
             synchronized (mLock) {
                 MmTelFeature.this.setListener(l);
             }
-        }
-
-        @Override
-        public void setSmsListener(IImsSmsListener l) throws RemoteException {
-            MmTelFeature.this.setSmsListener(l);
         }
 
         @Override
@@ -151,34 +142,6 @@ public class MmTelFeature extends ImsFeature {
         public void queryCapabilityConfiguration(int capability, int radioTech,
                 IImsCapabilityCallback c) {
             queryCapabilityConfigurationInternal(capability, radioTech, c);
-        }
-
-        @Override
-        public void sendSms(int messageRef, String format, String smsc, boolean retry, byte[] pdu) {
-            synchronized (mLock) {
-                MmTelFeature.this.sendSms(messageRef, format, smsc, retry, pdu);
-            }
-        }
-
-        @Override
-        public void acknowledgeSms(int messageRef, int result) {
-            synchronized (mLock) {
-                MmTelFeature.this.acknowledgeSms(messageRef, result);
-            }
-        }
-
-        @Override
-        public void acknowledgeSmsReport(int messageRef, int result) {
-            synchronized (mLock) {
-                MmTelFeature.this.acknowledgeSmsReport(messageRef, result);
-            }
-        }
-
-        @Override
-        public String getSmsFormat() {
-            synchronized (mLock) {
-                return MmTelFeature.this.getSmsFormat();
-            }
         }
     };
 
@@ -289,10 +252,6 @@ public class MmTelFeature extends ImsFeature {
         synchronized (mLock) {
             mListener = listener;
         }
-    }
-
-    private void setSmsListener(IImsSmsListener listener) {
-        getSmsImplementation().registerSmsListener(listener);
     }
 
     private void queryCapabilityConfigurationInternal(int capability, int radioTech,
@@ -454,32 +413,6 @@ public class MmTelFeature extends ImsFeature {
      */
     void setUiTtyMode(int mode, Message onCompleteMessage) {
         // Base Implementation - Should be overridden
-    }
-
-    private void sendSms(int messageRef, String format, String smsc, boolean isRetry, byte[] pdu) {
-        getSmsImplementation().sendSms(messageRef, format, smsc, isRetry, pdu);
-    }
-
-    private void acknowledgeSms(int messageRef, @DeliverStatusResult int result) {
-        getSmsImplementation().acknowledgeSms(messageRef, result);
-    }
-
-    private void acknowledgeSmsReport(int messageRef, @StatusReportResult int result) {
-        getSmsImplementation().acknowledgeSmsReport(messageRef, result);
-    }
-
-    private String getSmsFormat() {
-        return getSmsImplementation().getSmsFormat();
-    }
-
-    /**
-     * Must be overridden by IMS Provider to be able to support SMS over IMS. Otherwise a default
-     * non-functional implementation is returned.
-     *
-     * @return an instance of {@link SmsImplBase} which should be implemented by the IMS Provider.
-     */
-    protected SmsImplBase getSmsImplementation() {
-        return new SmsImplBase();
     }
 
     /**{@inheritDoc}*/
