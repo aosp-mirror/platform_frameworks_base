@@ -83,7 +83,7 @@ public final class ServiceManager {
      * @param service the service object
      */
     public static void addService(String name, IBinder service) {
-        addService(name, service, false, IServiceManager.DUMP_FLAG_PRIORITY_NORMAL);
+        addService(name, service, false, IServiceManager.DUMP_FLAG_PRIORITY_DEFAULT);
     }
 
     /**
@@ -96,7 +96,7 @@ public final class ServiceManager {
      * to access this service
      */
     public static void addService(String name, IBinder service, boolean allowIsolated) {
-        addService(name, service, allowIsolated, IServiceManager.DUMP_FLAG_PRIORITY_NORMAL);
+        addService(name, service, allowIsolated, IServiceManager.DUMP_FLAG_PRIORITY_DEFAULT);
     }
 
     /**
