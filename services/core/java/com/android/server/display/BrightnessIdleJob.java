@@ -70,7 +70,7 @@ public class BrightnessIdleJob extends JobService {
             Slog.d(BrightnessTracker.TAG, "Scheduled write of brightness events");
         }
         DisplayManagerInternal dmi = LocalServices.getService(DisplayManagerInternal.class);
-        dmi.persistBrightnessSliderEvents();
+        dmi.persistBrightnessTrackerState();
         return false;
     }
 

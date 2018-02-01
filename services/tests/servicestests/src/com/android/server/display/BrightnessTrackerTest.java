@@ -656,7 +656,7 @@ public class BrightnessTrackerTest {
         }
 
         @Override
-        public AtomicFile getFile() {
+        public AtomicFile getFile(String filename) {
             // Don't have the test write / read from anywhere.
             return null;
         }

@@ -38,6 +38,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.hardware.SensorManager;
+import android.hardware.display.AmbientBrightnessDayStats;
 import android.hardware.display.BrightnessChangeEvent;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.DisplayManagerGlobal;
@@ -359,6 +360,7 @@ public final class DisplayManagerService extends SystemService {
                         mPersistentDataStore.getBrightnessConfiguration(userSerial);
                 mDisplayPowerController.setBrightnessConfiguration(config);
             }
+            mDisplayPowerController.onSwitchUser(newUserId);
         }
     }
 
@@ -1835,6 +1837,23 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override // Binder call
+        public ParceledListSlice<AmbientBrightnessDayStats> getAmbientBrightnessStats() {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.ACCESS_AMBIENT_LIGHT_STATS,
+                    "Permission required to to access ambient light stats.");
+            final int callingUid = Binder.getCallingUid();
+            final int userId = UserHandle.getUserId(callingUid);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                synchronized (mSyncRoot) {
+                    return mDisplayPowerController.getAmbientBrightnessStats(userId);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override // Binder call
         public void setBrightnessConfigurationForUser(
                 BrightnessConfiguration c, @UserIdInt int userId, String packageName) {
             mContext.enforceCallingOrSelfPermission(
@@ -2039,9 +2058,9 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override
-        public void persistBrightnessSliderEvents() {
+        public void persistBrightnessTrackerState() {
             synchronized (mSyncRoot) {
-                mDisplayPowerController.persistBrightnessSliderEvents();
+                mDisplayPowerController.persistBrightnessTrackerState();
             }
         }
 

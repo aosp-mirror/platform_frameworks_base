@@ -525,6 +525,21 @@ public final class DisplayManagerGlobal {
         }
     }
 
+    /**
+     * Retrieves ambient brightness stats.
+     */
+    public List<AmbientBrightnessDayStats> getAmbientBrightnessStats() {
+        try {
+            ParceledListSlice<AmbientBrightnessDayStats> stats = mDm.getAmbientBrightnessStats();
+            if (stats == null) {
+                return Collections.emptyList();
+            }
+            return stats.getList();
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
     private final class DisplayManagerCallback extends IDisplayManagerCallback.Stub {
         @Override
         public void onDisplayEvent(int displayId, int event) {

@@ -34,6 +34,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.display.AmbientBrightnessDayStats;
 import android.hardware.display.BrightnessChangeEvent;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerCallbacks;
@@ -498,11 +499,20 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         return mBrightnessTracker.getEvents(userId, includePackage);
     }
 
+    public void onSwitchUser(@UserIdInt int newUserId) {
+        mBrightnessTracker.onSwitchUser(newUserId);
+    }
+
+    public ParceledListSlice<AmbientBrightnessDayStats> getAmbientBrightnessStats(
+            @UserIdInt int userId) {
+        return mBrightnessTracker.getAmbientBrightnessStats(userId);
+    }
+
     /**
-     * Persist the brightness slider events to disk.
+     * Persist the brightness slider events and ambient brightness stats to disk.
      */
-    public void persistBrightnessSliderEvents() {
-        mBrightnessTracker.persistEvents();
+    public void persistBrightnessTrackerState() {
+        mBrightnessTracker.persistBrightnessTrackerState();
     }
 
     /**

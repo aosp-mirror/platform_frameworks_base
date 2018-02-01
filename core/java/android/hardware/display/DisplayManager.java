@@ -631,6 +631,16 @@ public final class DisplayManager {
     }
 
     /**
+     * Fetch {@link AmbientBrightnessDayStats}s.
+     *
+     * @hide until we make it a system api
+     */
+    @RequiresPermission(Manifest.permission.ACCESS_AMBIENT_LIGHT_STATS)
+    public List<AmbientBrightnessDayStats> getAmbientBrightnessStats() {
+        return mGlobal.getAmbientBrightnessStats();
+    }
+
+    /**
      * Sets the global display brightness configuration.
      *
      * @hide
