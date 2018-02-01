@@ -56,7 +56,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
  * A note on locking:  We rely on the fact that calls onto mBar are oneway or
  * if they are local, that they just enqueue messages to not deadlock.
@@ -519,6 +518,26 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         if (mBar != null) {
             try {
                 mBar.handleSystemKey(key);
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    @Override
+    public void showPinningEnterExitToast(boolean entering) throws RemoteException {
+        if (mBar != null) {
+            try {
+                mBar.showPinningEnterExitToast(entering);
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    @Override
+    public void showPinningEscapeToast() throws RemoteException {
+        if (mBar != null) {
+            try {
+                mBar.showPinningEscapeToast();
             } catch (RemoteException ex) {
             }
         }
