@@ -38,6 +38,7 @@ statsd_common_src := \
     src/external/StatsPuller.cpp \
     src/external/StatsCompanionServicePuller.cpp \
     src/external/SubsystemSleepStatePuller.cpp \
+    src/external/ResourceHealthManagerPuller.cpp \
     src/external/CpuTimePerUidPuller.cpp \
     src/external/CpuTimePerUidFreqPuller.cpp \
     src/external/StatsPullerManagerImpl.cpp \
@@ -75,7 +76,8 @@ statsd_common_aidl_includes := \
     $(LOCAL_PATH)/../../core/java
 
 statsd_common_static_libraries := \
-    libplatformprotos
+    libhealthhalutils \
+    libplatformprotos \
 
 statsd_common_shared_libraries := \
     libbase \
@@ -93,6 +95,7 @@ statsd_common_shared_libraries := \
     libhidlbase \
     libhidltransport \
     libhwbinder \
+    android.hardware.health@2.0 \
     android.hardware.power@1.0 \
     android.hardware.power@1.1 \
     libmemunreachable
