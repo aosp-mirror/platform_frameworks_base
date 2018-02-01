@@ -96,13 +96,17 @@ class RemoteAnimationController {
         // Scale the timeout with the animator scale the controlling app is using.
         mHandler.postDelayed(mTimeoutRunnable,
                 (long) (TIMEOUT_MS * mService.getCurrentAnimatorScale()));
-        try {
-            mRemoteAnimationAdapter.getRunner().onAnimationStart(createAnimations(),
-                    mFinishedCallback);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Failed to start remote animation", e);
-            onAnimationFinished();
-        }
+
+        final RemoteAnimationTarget[] animations = createAnimations();
+        mService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
+            try {
+                mRemoteAnimationAdapter.getRunner().onAnimationStart(animations,
+                        mFinishedCallback);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to start remote animation", e);
+                onAnimationFinished();
+            }
+        });
     }
 
     private RemoteAnimationTarget[] createAnimations() {
