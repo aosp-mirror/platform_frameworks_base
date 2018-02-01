@@ -17,6 +17,7 @@
 package android.media.update;
 
 import android.annotation.SystemApi;
+import android.app.Notification;
 import android.content.Intent;
 import android.media.MediaSession2;
 import android.media.MediaSessionService2.MediaNotification;
@@ -33,4 +34,9 @@ public interface MediaSessionService2Provider {
     // Service
     void onCreate_impl();
     IBinder onBind_impl(Intent intent);
+
+    interface MediaNotificationProvider {
+        int getNotificationId_impl();
+        Notification getNotification_impl();
+    }
 }

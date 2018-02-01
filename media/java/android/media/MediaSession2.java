@@ -31,6 +31,7 @@ import android.media.session.PlaybackState;
 import android.media.update.ApiLoader;
 import android.media.update.MediaSession2Provider;
 import android.media.update.MediaSession2Provider.BuilderBaseProvider;
+import android.media.update.MediaSession2Provider.CommandButtonProvider;
 import android.media.update.MediaSession2Provider.CommandGroupProvider;
 import android.media.update.MediaSession2Provider.CommandProvider;
 import android.media.update.MediaSession2Provider.ControllerInfoProvider;
@@ -768,32 +769,15 @@ public class MediaSession2 implements AutoCloseable {
      * <p>
      * It's up to the controller's decision to respect or ignore this customization request.
      */
-    // TODO(jaewan): Move this to updatable.
     public static class CommandButton {
-        private static final String KEY_COMMAND
-                = "android.media.media_session2.command_button.command";
-        private static final String KEY_ICON_RES_ID
-                = "android.media.media_session2.command_button.icon_res_id";
-        private static final String KEY_DISPLAY_NAME
-                = "android.media.media_session2.command_button.display_name";
-        private static final String KEY_EXTRA
-                = "android.media.media_session2.command_button.extra";
-        private static final String KEY_ENABLED
-                = "android.media.media_session2.command_button.enabled";
+        private final CommandButtonProvider mProvider;
 
-        private Command mCommand;
-        private int mIconResId;
-        private String mDisplayName;
-        private Bundle mExtra;
-        private boolean mEnabled;
-
-        private CommandButton(@Nullable Command command, int iconResId,
-                @Nullable String displayName, Bundle extra, boolean enabled) {
-            mCommand = command;
-            mIconResId = iconResId;
-            mDisplayName = displayName;
-            mExtra = extra;
-            mEnabled = enabled;
+        /**
+         * @hide
+         */
+        @SystemApi
+        public CommandButton(CommandButtonProvider provider) {
+            mProvider = provider;
         }
 
         /**
@@ -803,7 +787,7 @@ public class MediaSession2 implements AutoCloseable {
          * @return command or {@code null}
          */
         public @Nullable Command getCommand() {
-            return mCommand;
+            return mProvider.getCommand_impl();
         }
 
         /**
@@ -813,7 +797,7 @@ public class MediaSession2 implements AutoCloseable {
          * @return resource id of the icon. Can be {@code 0}.
          */
         public int getIconResId() {
-            return mIconResId;
+            return mProvider.getIconResId_impl();
         }
 
         /**
@@ -823,7 +807,7 @@ public class MediaSession2 implements AutoCloseable {
          * @return custom display name. Can be {@code null} or empty.
          */
         public @Nullable String getDisplayName() {
-            return mDisplayName;
+            return mProvider.getDisplayName_impl();
         }
 
         /**
@@ -832,7 +816,7 @@ public class MediaSession2 implements AutoCloseable {
          * @return
          */
         public @Nullable Bundle getExtra() {
-            return mExtra;
+            return mProvider.getExtra_impl();
         }
 
         /**
@@ -841,92 +825,50 @@ public class MediaSession2 implements AutoCloseable {
          * @return {@code true} if enabled. {@code false} otherwise.
          */
         public boolean isEnabled() {
-            return mEnabled;
+            return mProvider.isEnabled_impl();
         }
 
         /**
          * @hide
          */
-        // TODO(jaewan): @SystemApi
-        public @NonNull Bundle toBundle() {
-            Bundle bundle = new Bundle();
-            bundle.putBundle(KEY_COMMAND, mCommand.toBundle());
-            bundle.putInt(KEY_ICON_RES_ID, mIconResId);
-            bundle.putString(KEY_DISPLAY_NAME, mDisplayName);
-            bundle.putBundle(KEY_EXTRA, mExtra);
-            bundle.putBoolean(KEY_ENABLED, mEnabled);
-            return bundle;
-        }
-
-        /**
-         * @hide
-         */
-        // TODO(jaewan): @SystemApi
-        public static @Nullable CommandButton fromBundle(Context context, Bundle bundle) {
-            Builder builder = new Builder();
-            builder.setCommand(Command.fromBundle(context, bundle.getBundle(KEY_COMMAND)));
-            builder.setIconResId(bundle.getInt(KEY_ICON_RES_ID, 0));
-            builder.setDisplayName(bundle.getString(KEY_DISPLAY_NAME));
-            builder.setExtra(bundle.getBundle(KEY_EXTRA));
-            builder.setEnabled(bundle.getBoolean(KEY_ENABLED));
-            try {
-                return builder.build();
-            } catch (IllegalStateException e) {
-                // Malformed or version mismatch. Return null for now.
-                return null;
-            }
+        @SystemApi
+        public CommandButtonProvider getProvider() {
+            return mProvider;
         }
 
         /**
          * Builder for {@link CommandButton}.
          */
         public static class Builder {
-            private Command mCommand;
-            private int mIconResId;
-            private String mDisplayName;
-            private Bundle mExtra;
-            private boolean mEnabled;
+            private final CommandButtonProvider.BuilderProvider mProvider;
 
-            public Builder() {
-                mEnabled = true;
+            public Builder(@NonNull Context context) {
+                mProvider = ApiLoader.getProvider(context)
+                        .createMediaSession2CommandButtonBuilder(context, this);
             }
 
             public Builder setCommand(Command command) {
-                mCommand = command;
-                return this;
+                return mProvider.setCommand_impl(command);
             }
 
             public Builder setIconResId(int resId) {
-                mIconResId = resId;
-                return this;
+                return mProvider.setIconResId_impl(resId);
             }
 
             public Builder setDisplayName(String displayName) {
-                mDisplayName = displayName;
-                return this;
+                return mProvider.setDisplayName_impl(displayName);
             }
 
             public Builder setEnabled(boolean enabled) {
-                mEnabled = enabled;
-                return this;
+                return mProvider.setEnabled_impl(enabled);
             }
 
             public Builder setExtra(Bundle extra) {
-                mExtra = extra;
-                return this;
+                return mProvider.setExtra_impl(extra);
             }
 
             public CommandButton build() {
-                if (mEnabled && mCommand == null) {
-                    throw new IllegalStateException("Enabled button needs Command"
-                            + " for controller to invoke the command");
-                }
-                if (mCommand != null && mCommand.getCommandCode() == COMMAND_CODE_CUSTOM
-                        && (mIconResId == 0 || TextUtils.isEmpty(mDisplayName))) {
-                    throw new IllegalStateException("Custom commands needs icon and"
-                            + " and name to display");
-                }
-                return new CommandButton(mCommand, mIconResId, mDisplayName, mExtra, mEnabled);
+                return mProvider.build_impl();
             }
         }
     }

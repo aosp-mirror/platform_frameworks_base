@@ -21,10 +21,12 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.media.MediaSession2.ControllerInfo;
 import android.media.update.ApiLoader;
 import android.media.update.MediaSessionService2Provider;
+import android.media.update.MediaSessionService2Provider.MediaNotificationProvider;
 import android.os.IBinder;
 
 /**
@@ -165,7 +167,6 @@ public abstract class MediaSessionService2 extends Service {
      * @param state playback state
      * @return a {@link MediaNotification}. If it's {@code null}, notification wouldn't be shown.
      */
-    // TODO(jaewan): Also add metadata
     public MediaNotification onUpdateNotification(PlaybackState2 state) {
         return mProvider.onUpdateNotification_impl(state);
     }
@@ -204,31 +205,31 @@ public abstract class MediaSessionService2 extends Service {
      * foreground service to keep playback running in the background. It's highly recommended to
      * show media style notification here.
      */
-    // TODO(jaewan): Should we also move this to updatable?
     public static class MediaNotification {
-        public final int id;
-        public final Notification notification;
-
-        private MediaNotification(int id, @NonNull Notification notification) {
-            this.id = id;
-            this.notification = notification;
-        }
+        private final MediaNotificationProvider mProvider;
 
         /**
-         * Create a {@link MediaNotification}.
+         * Default constructor
          *
+         * @param context context
          * @param notificationId notification id to be used for
          *      {@link android.app.NotificationManager#notify(int, Notification)}.
          * @param notification a notification to make session service foreground service. Media
          *      style notification is recommended here.
-         * @return
          */
-        public static MediaNotification create(int notificationId,
-                @NonNull Notification notification) {
-            if (notification == null) {
-                throw new IllegalArgumentException("Notification cannot be null");
-            }
-            return new MediaNotification(notificationId, notification);
+        public MediaNotification(@NonNull Context context,
+                int notificationId, @NonNull Notification notification) {
+            mProvider = ApiLoader.getProvider(context)
+                    .createMediaSessionService2MediaNotification(
+                            context, this, notificationId, notification);
+        }
+
+        public int getNotificationId() {
+            return mProvider.getNotificationId_impl();
+        }
+
+        public Notification getNotification() {
+            return mProvider.getNotification_impl();
         }
     }
 }

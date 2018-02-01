@@ -23,7 +23,7 @@ import android.os.Bundle;
  * @hide
  */
 public interface MediaBrowser2Provider extends MediaController2Provider {
-    void getBrowserRoot_impl(Bundle rootHints);
+    void getLibraryRoot_impl(Bundle rootHints);
 
     void subscribe_impl(String parentId, Bundle options);
     void unsubscribe_impl(String parentId, Bundle options);
