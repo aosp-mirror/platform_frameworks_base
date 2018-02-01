@@ -16,11 +16,14 @@
 
 package android.view;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import android.annotation.TestApi;
 import android.graphics.Matrix;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.util.Log;
 import android.util.SparseArray;
 
 import dalvik.annotation.optimization.CriticalNative;
@@ -172,6 +175,7 @@ import java.util.Objects;
  * </p>
  */
 public final class MotionEvent extends InputEvent implements Parcelable {
+    private static final String TAG = "MotionEvent";
     private static final long NS_PER_MS = 1000000;
     private static final String LABEL_PREFIX = "AXIS_";
 
@@ -1470,7 +1474,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     private MotionEvent mNext;
 
     private static native long nativeInitialize(long nativePtr,
-            int deviceId, int source, int action, int flags, int edgeFlags,
+            int deviceId, int source, int displayId, int action, int flags, int edgeFlags,
             int metaState, int buttonState,
             float xOffset, float yOffset, float xPrecision, float yPrecision,
             long downTimeNanos, long eventTimeNanos,
@@ -1514,7 +1518,11 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     @CriticalNative
     private static native int nativeGetSource(long nativePtr);
     @CriticalNative
-    private static native int nativeSetSource(long nativePtr, int source);
+    private static native void nativeSetSource(long nativePtr, int source);
+    @CriticalNative
+    private static native int nativeGetDisplayId(long nativePtr);
+    @CriticalNative
+    private static native void nativeSetDisplayId(long nativePtr, int displayId);
     @CriticalNative
     private static native int nativeGetAction(long nativePtr);
     @CriticalNative
@@ -1623,20 +1631,65 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @param edgeFlags A bitfield indicating which edges, if any, were touched by this
      * MotionEvent.
      * @param source The source of this event.
+     * @param displayId The display ID associated with this event.
      * @param flags The motion event flags.
+     * @hide
      */
     static public MotionEvent obtain(long downTime, long eventTime,
             int action, int pointerCount, PointerProperties[] pointerProperties,
             PointerCoords[] pointerCoords, int metaState, int buttonState,
             float xPrecision, float yPrecision, int deviceId,
-            int edgeFlags, int source, int flags) {
+            int edgeFlags, int source, int displayId, int flags) {
         MotionEvent ev = obtain();
         ev.mNativePtr = nativeInitialize(ev.mNativePtr,
-                deviceId, source, action, flags, edgeFlags, metaState, buttonState,
+                deviceId, source, displayId, action, flags, edgeFlags, metaState, buttonState,
                 0, 0, xPrecision, yPrecision,
                 downTime * NS_PER_MS, eventTime * NS_PER_MS,
                 pointerCount, pointerProperties, pointerCoords);
+        if (ev.mNativePtr == 0) {
+            Log.e(TAG, "Could not initialize MotionEvent");
+            ev.recycle();
+            return null;
+        }
         return ev;
+    }
+
+    /**
+     * Create a new MotionEvent, filling in all of the basic values that
+     * define the motion.
+     *
+     * @param downTime The time (in ms) when the user originally pressed down to start
+     * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
+     * @param eventTime The the time (in ms) when this specific event was generated.  This
+     * must be obtained from {@link SystemClock#uptimeMillis()}.
+     * @param action The kind of action being performed, such as {@link #ACTION_DOWN}.
+     * @param pointerCount The number of pointers that will be in this event.
+     * @param pointerProperties An array of <em>pointerCount</em> values providing
+     * a {@link PointerProperties} property object for each pointer, which must
+     * include the pointer identifier.
+     * @param pointerCoords An array of <em>pointerCount</em> values providing
+     * a {@link PointerCoords} coordinate object for each pointer.
+     * @param metaState The state of any meta / modifier keys that were in effect when
+     * the event was generated.
+     * @param buttonState The state of buttons that are pressed.
+     * @param xPrecision The precision of the X coordinate being reported.
+     * @param yPrecision The precision of the Y coordinate being reported.
+     * @param deviceId The id for the device that this event came from.  An id of
+     * zero indicates that the event didn't come from a physical device; other
+     * numbers are arbitrary and you shouldn't depend on the values.
+     * @param edgeFlags A bitfield indicating which edges, if any, were touched by this
+     * MotionEvent.
+     * @param source The source of this event.
+     * @param flags The motion event flags.
+     */
+    public static MotionEvent obtain(long downTime, long eventTime,
+            int action, int pointerCount, PointerProperties[] pointerProperties,
+            PointerCoords[] pointerCoords, int metaState, int buttonState,
+            float xPrecision, float yPrecision, int deviceId,
+            int edgeFlags, int source, int flags) {
+        return obtain(downTime, eventTime, action, pointerCount, pointerProperties, pointerCoords,
+                metaState, buttonState, xPrecision, yPrecision, deviceId, edgeFlags, source,
+                DEFAULT_DISPLAY, flags);
     }
 
     /**
@@ -1733,7 +1786,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             pc[0].size = size;
 
             ev.mNativePtr = nativeInitialize(ev.mNativePtr,
-                    deviceId, InputDevice.SOURCE_UNKNOWN, action, 0, edgeFlags, metaState, 0,
+                    deviceId, InputDevice.SOURCE_UNKNOWN, DEFAULT_DISPLAY,
+                    action, 0, edgeFlags, metaState, 0,
                     0, 0, xPrecision, yPrecision,
                     downTime * NS_PER_MS, eventTime * NS_PER_MS,
                     1, pp, pc);
@@ -1886,6 +1940,16 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     @Override
     public final void setSource(int source) {
         nativeSetSource(mNativePtr, source);
+    }
+
+    /** @hide */
+    public int getDisplayId() {
+        return nativeGetDisplayId(mNativePtr);
+    }
+
+    /** @hide */
+    public void setDisplayId(int displayId) {
+        nativeSetDisplayId(mNativePtr, displayId);
     }
 
     /**
@@ -3023,7 +3087,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     /**
      * Adds all of the movement samples of the specified event to this one if
      * it is compatible.  To be compatible, the event must have the same device id,
-     * source, action, flags, pointer count, pointer properties.
+     * source, display id, action, flags, pointer count, pointer properties.
      *
      * Only applies to {@link #ACTION_MOVE} or {@link #ACTION_HOVER_MOVE} events.
      *
@@ -3043,6 +3107,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
 
         if (nativeGetDeviceId(mNativePtr) != nativeGetDeviceId(event.mNativePtr)
                 || nativeGetSource(mNativePtr) != nativeGetSource(event.mNativePtr)
+                || nativeGetDisplayId(mNativePtr) != nativeGetDisplayId(event.mNativePtr)
                 || nativeGetFlags(mNativePtr) != nativeGetFlags(event.mNativePtr)) {
             return false;
         }
@@ -3128,6 +3193,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             }
             ev.mNativePtr = nativeInitialize(ev.mNativePtr,
                     nativeGetDeviceId(mNativePtr), nativeGetSource(mNativePtr),
+                    nativeGetDisplayId(mNativePtr),
                     nativeGetAction(mNativePtr), nativeGetFlags(mNativePtr),
                     nativeGetEdgeFlags(mNativePtr), nativeGetMetaState(mNativePtr),
                     nativeGetButtonState(mNativePtr),
@@ -3172,7 +3238,6 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                     >> ACTION_POINTER_INDEX_SHIFT;
             int newActionPointerIndex = -1;
             int newPointerCount = 0;
-            int newIdBits = 0;
             for (int i = 0; i < oldPointerCount; i++) {
                 nativeGetPointerProperties(mNativePtr, i, pp[newPointerCount]);
                 final int idBit = 1 << pp[newPointerCount].id;
@@ -3182,7 +3247,6 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                     }
                     map[newPointerCount] = i;
                     newPointerCount += 1;
-                    newIdBits |= idBit;
                 }
             }
 
@@ -3221,6 +3285,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                 if (h == 0) {
                     ev.mNativePtr = nativeInitialize(ev.mNativePtr,
                             nativeGetDeviceId(mNativePtr), nativeGetSource(mNativePtr),
+                            nativeGetDisplayId(mNativePtr),
                             newAction, nativeGetFlags(mNativePtr),
                             nativeGetEdgeFlags(mNativePtr), nativeGetMetaState(mNativePtr),
                             nativeGetButtonState(mNativePtr),
@@ -3266,6 +3331,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             msg.append(", downTime=").append(getDownTime());
             msg.append(", deviceId=").append(getDeviceId());
             msg.append(", source=0x").append(Integer.toHexString(getSource()));
+            msg.append(", displayId=").append(getDisplayId());
         }
         msg.append(" }");
         return msg.toString();

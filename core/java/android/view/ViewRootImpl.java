@@ -7098,7 +7098,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         @Override
-        public void onInputEvent(InputEvent event, int displayId) {
+        public void onInputEvent(InputEvent event) {
             enqueueInputEvent(event, this, 0, true);
         }
 

@@ -218,7 +218,7 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
         }
 
         @Override
-        public void onInputEvent(InputEvent event, int displayId) {
+        public void onInputEvent(InputEvent event) {
             if (mInputMethodSession == null) {
                 // The session has been finished.
                 finishInputEvent(event, false);

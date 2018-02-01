@@ -46,14 +46,10 @@ public class TaskTapPointerEventListener implements PointerEventListener {
     }
 
     @Override
-    public void onPointerEvent(MotionEvent motionEvent, int displayId) {
-        if (displayId == getDisplayId()) {
-            onPointerEvent(motionEvent);
-        }
-    }
-
-    @Override
     public void onPointerEvent(MotionEvent motionEvent) {
+        if (motionEvent.getDisplayId() != getDisplayId()) {
+            return;
+        }
         final int action = motionEvent.getAction();
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {

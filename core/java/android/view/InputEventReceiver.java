@@ -111,10 +111,9 @@ public abstract class InputEventReceiver {
      * to indicate whether the event was handled.  No new input events will be received
      * until {@link #finishInputEvent} is called.
      *
-     * @param displayId The display id on which input event triggered.
      * @param event The input event that was received.
      */
-    public void onInputEvent(InputEvent event, int displayId) {
+    public void onInputEvent(InputEvent event) {
         finishInputEvent(event, false);
     }
 
@@ -181,9 +180,9 @@ public abstract class InputEventReceiver {
 
     // Called from native code.
     @SuppressWarnings("unused")
-    private void dispatchInputEvent(int seq, InputEvent event, int displayId) {
+    private void dispatchInputEvent(int seq, InputEvent event) {
         mSeqMap.put(event.getSequenceNumber(), seq);
-        onInputEvent(event, displayId);
+        onInputEvent(event);
     }
 
     // Called from native code.

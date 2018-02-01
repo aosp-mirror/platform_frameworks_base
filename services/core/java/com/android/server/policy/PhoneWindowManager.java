@@ -4305,7 +4305,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         @Override
-        public void onInputEvent(InputEvent event, int displayId) {
+        public void onInputEvent(InputEvent event) {
             boolean handled = false;
             try {
                 if (event instanceof MotionEvent

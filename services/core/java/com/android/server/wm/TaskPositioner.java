@@ -126,7 +126,7 @@ class TaskPositioner {
         }
 
         @Override
-        public void onInputEvent(InputEvent event, int displayId) {
+        public void onInputEvent(InputEvent event) {
             if (!(event instanceof MotionEvent)
                     || (event.getSource() & InputDevice.SOURCE_CLASS_POINTER) == 0) {
                 return;

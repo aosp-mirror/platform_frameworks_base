@@ -1725,7 +1725,7 @@ Landroid/view/InputDevice;->addMotionRange(IIFFFFF)V
 Landroid/view/InputDevice;-><init>(IIILjava/lang/String;IILjava/lang/String;ZIILandroid/view/KeyCharacterMap;ZZZ)V
 Landroid/view/InputDevice;->isExternal()Z
 Landroid/view/InputEventReceiver;->dispatchBatchedInputEventPending()V
-Landroid/view/InputEventReceiver;->dispatchInputEvent(ILandroid/view/InputEvent;I)V
+Landroid/view/InputEventReceiver;->dispatchInputEvent(ILandroid/view/InputEvent;)V
 Landroid/view/InputEventSender;->dispatchInputEventFinished(IZ)V
 Landroid/view/inputmethod/InputMethodInfo;->mSubtypes:Landroid/view/inputmethod/InputMethodSubtypeArray;
 Landroid/view/inputmethod/InputMethodManager;->finishInputLocked()V

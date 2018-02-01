@@ -213,7 +213,7 @@ public class InputManagerService extends IInputManager.Stub
             InputWindowHandle inputWindowHandle, boolean monitor);
     private static native void nativeUnregisterInputChannel(long ptr, InputChannel inputChannel);
     private static native void nativeSetInputFilterEnabled(long ptr, boolean enable);
-    private static native int nativeInjectInputEvent(long ptr, InputEvent event, int displayId,
+    private static native int nativeInjectInputEvent(long ptr, InputEvent event,
             int injectorPid, int injectorUid, int syncMode, int timeoutMillis,
             int policyFlags);
     private static native void nativeToggleCapsLock(long ptr, int deviceId);
@@ -597,10 +597,10 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override // Binder call
     public boolean injectInputEvent(InputEvent event, int mode) {
-        return injectInputEventInternal(event, Display.DEFAULT_DISPLAY, mode);
+        return injectInputEventInternal(event, mode);
     }
 
-    private boolean injectInputEventInternal(InputEvent event, int displayId, int mode) {
+    private boolean injectInputEventInternal(InputEvent event, int mode) {
         if (event == null) {
             throw new IllegalArgumentException("event must not be null");
         }
@@ -615,7 +615,7 @@ public class InputManagerService extends IInputManager.Stub
         final long ident = Binder.clearCallingIdentity();
         final int result;
         try {
-            result = nativeInjectInputEvent(mPtr, event, displayId, pid, uid, mode,
+            result = nativeInjectInputEvent(mPtr, event, pid, uid, mode,
                     INJECTION_TIMEOUT_MILLIS, WindowManagerPolicy.FLAG_DISABLE_KEY_REPEAT);
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -2222,7 +2222,7 @@ public class InputManagerService extends IInputManager.Stub
 
             synchronized (mInputFilterLock) {
                 if (!mDisconnected) {
-                    nativeInjectInputEvent(mPtr, event, Display.DEFAULT_DISPLAY, 0, 0,
+                    nativeInjectInputEvent(mPtr, event, 0, 0,
                             InputManager.INJECT_INPUT_EVENT_MODE_ASYNC, 0,
                             policyFlags | WindowManagerPolicy.FLAG_FILTERED);
                 }
@@ -2370,8 +2370,8 @@ public class InputManagerService extends IInputManager.Stub
         }
 
         @Override
-        public boolean injectInputEvent(InputEvent event, int displayId, int mode) {
-            return injectInputEventInternal(event, displayId, mode);
+        public boolean injectInputEvent(InputEvent event, int mode) {
+            return injectInputEventInternal(event, mode);
         }
 
         @Override

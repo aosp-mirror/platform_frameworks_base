@@ -16,8 +16,6 @@
 
 package android.view;
 
-import static android.view.Display.DEFAULT_DISPLAY;
-
 /**
  * Constants for interfacing with WindowManagerService and WindowManagerPolicyInternal.
  * @hide
@@ -75,15 +73,6 @@ public interface WindowManagerPolicyConstants {
          * copy() must be made and the copy must be recycled.
          **/
         void onPointerEvent(MotionEvent motionEvent);
-
-        /**
-         * @see #onPointerEvent(MotionEvent)
-         **/
-        default void onPointerEvent(MotionEvent motionEvent, int displayId) {
-            if (displayId == DEFAULT_DISPLAY) {
-                onPointerEvent(motionEvent);
-            }
-        }
     }
 
     /** Screen turned off because of a device admin */

@@ -30,7 +30,14 @@ import java.util.List;
  * @hide Only for use within the system server.
  */
 public abstract class InputManagerInternal {
-    public abstract boolean injectInputEvent(InputEvent event, int displayId, int mode);
+    /**
+     * Inject an input event.
+     *
+     * @param event The InputEvent to inject
+     * @param mode Synchronous or asynchronous mode
+     * @return True if injection has succeeded
+     */
+    public abstract boolean injectInputEvent(InputEvent event, int mode);
 
     /**
      * Called by the display manager to set information about the displays as needed

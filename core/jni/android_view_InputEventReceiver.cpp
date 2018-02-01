@@ -236,9 +236,8 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
     for (;;) {
         uint32_t seq;
         InputEvent* inputEvent;
-        int32_t displayId;
         status_t status = mInputConsumer.consume(&mInputEventFactory,
-                consumeBatches, frameTime, &seq, &inputEvent, &displayId);
+                consumeBatches, frameTime, &seq, &inputEvent);
         if (status) {
             if (status == WOULD_BLOCK) {
                 if (!skipCallbacks && !mBatchedInputEventPending
@@ -315,8 +314,7 @@ status_t NativeInputEventReceiver::consumeEvents(JNIEnv* env,
                     ALOGD("channel '%s' ~ Dispatching input event.", getInputChannelName().c_str());
                 }
                 env->CallVoidMethod(receiverObj.get(),
-                        gInputEventReceiverClassInfo.dispatchInputEvent, seq, inputEventObj,
-                        displayId);
+                        gInputEventReceiverClassInfo.dispatchInputEvent, seq, inputEventObj);
                 if (env->ExceptionCheck()) {
                     ALOGE("Exception dispatching input event.");
                     skipCallbacks = true;
@@ -423,7 +421,7 @@ int register_android_view_InputEventReceiver(JNIEnv* env) {
 
     gInputEventReceiverClassInfo.dispatchInputEvent = GetMethodIDOrDie(env,
             gInputEventReceiverClassInfo.clazz,
-            "dispatchInputEvent", "(ILandroid/view/InputEvent;I)V");
+            "dispatchInputEvent", "(ILandroid/view/InputEvent;)V");
     gInputEventReceiverClassInfo.dispatchBatchedInputEventPending = GetMethodIDOrDie(env,
             gInputEventReceiverClassInfo.clazz, "dispatchBatchedInputEventPending", "()V");
 
