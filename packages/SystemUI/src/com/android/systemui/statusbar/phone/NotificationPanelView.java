@@ -498,7 +498,8 @@ public class NotificationPanelView extends PanelView implements
         float shelfSize = shelf.getVisibility() == GONE ? 0
                 : shelf.getIntrinsicHeight() + notificationPadding;
         float availableSpace = mNotificationStackScroller.getHeight() - minPadding - shelfSize
-                - Math.max(mIndicationBottomPadding, mAmbientIndicationBottomPadding);
+                - Math.max(mIndicationBottomPadding, mAmbientIndicationBottomPadding)
+                - mKeyguardStatusView.getLogoutButtonHeight();
         int count = 0;
         for (int i = 0; i < mNotificationStackScroller.getChildCount(); i++) {
             ExpandableView child = (ExpandableView) mNotificationStackScroller.getChildAt(i);

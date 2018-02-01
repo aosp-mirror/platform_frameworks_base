@@ -33,6 +33,23 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/widget_vertical_padding"
         android:orientation="vertical">
+        <TextView
+            android:id="@+id/logout"
+            android:layout_height="@dimen/logout_button_layout_height"
+            android:layout_width="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="@dimen/logout_button_margin_bottom"
+            android:gravity="center"
+            android:paddingLeft="@dimen/logout_button_padding_horizontal"
+            android:paddingRight="@dimen/logout_button_padding_horizontal"
+            android:background="@drawable/logout_button_background"
+            android:fontFamily="roboto-medium"
+            android:textAllCaps="true"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="13sp"
+            android:text="@*android:string/global_action_logout" />
+
         <RelativeLayout
             android:id="@+id/keyguard_clock_container"
             android:layout_width="match_parent"

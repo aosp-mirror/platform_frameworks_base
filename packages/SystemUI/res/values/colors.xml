@@ -166,4 +166,6 @@
     <color name="fingerprint_dialog_dim_color">#80000000</color> <!-- 50% black -->
     <color name="fingerprint_error_message_color">#ff5722</color>
 
+    <!-- Logout button -->
+    <color name="logout_button_bg_color">#ccffffff</color>
 </resources>
