@@ -30,6 +30,7 @@ import android.content.res.ObbInfo;
 import android.content.res.ObbScanner;
 import android.os.Binder;
 import android.os.Environment.UserEnvironment;
+import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
@@ -43,7 +44,6 @@ import com.android.internal.os.IParcelFileDescriptorFactory;
 import com.android.internal.util.ArrayUtils;
 
 import libcore.io.IoUtils;
-import libcore.io.Streams;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -260,7 +260,7 @@ public class DefaultContainerService extends IntentService {
             in = new FileInputStream(sourcePath);
             out = new ParcelFileDescriptor.AutoCloseOutputStream(
                     target.open(targetName, ParcelFileDescriptor.MODE_READ_WRITE));
-            Streams.copy(in, out);
+            FileUtils.copy(in, out);
         } finally {
             IoUtils.closeQuietly(out);
             IoUtils.closeQuietly(in);
