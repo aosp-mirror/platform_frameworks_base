@@ -92,7 +92,10 @@ class RemoteAnimationController {
             onAnimationFinished();
             return;
         }
-        mHandler.postDelayed(mTimeoutRunnable, TIMEOUT_MS);
+
+        // Scale the timeout with the animator scale the controlling app is using.
+        mHandler.postDelayed(mTimeoutRunnable,
+                (long) (TIMEOUT_MS * mService.getCurrentAnimatorScale()));
         try {
             mRemoteAnimationAdapter.getRunner().onAnimationStart(createAnimations(),
                     mFinishedCallback);
