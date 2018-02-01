@@ -31,9 +31,11 @@ import android.app.slice.ISliceListener;
 import android.app.slice.ISliceManager;
 import android.app.slice.SliceManager;
 import android.app.slice.SliceSpec;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
@@ -92,6 +94,7 @@ public class SliceManagerService extends ISliceManager.Stub {
     private final Handler mHandler;
     private final ContentObserver mObserver;
     private final AtomicFile mSliceAccessFile;
+    @GuardedBy("mAccessList")
     private final SliceFullAccessList mAccessList;
 
     public SliceManagerService(Context context) {
@@ -127,11 +130,19 @@ public class SliceManagerService extends ISliceManager.Stub {
                 InputStream input = mSliceAccessFile.openRead();
                 XmlPullParser parser = XmlPullParserFactory.newInstance().newPullParser();
                 parser.setInput(input, Encoding.UTF_8.name());
-                mAccessList.readXml(parser);
+                synchronized (mAccessList) {
+                    mAccessList.readXml(parser);
+                }
             } catch (IOException | XmlPullParserException e) {
                 Slog.d(TAG, "Can't read slice access file", e);
             }
         }
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addDataScheme("package");
+        mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, mHandler);
     }
 
     ///  ----- Lifecycle stuff -----
@@ -223,7 +234,9 @@ public class SliceManagerService extends ISliceManager.Stub {
         getContext().enforceCallingOrSelfPermission(permission.MANAGE_SLICE_PERMISSIONS,
                 "Slice granting requires MANAGE_SLICE_PERMISSIONS");
         if (allSlices) {
-            mAccessList.grantFullAccess(pkg, Binder.getCallingUserHandle().getIdentifier());
+            synchronized (mAccessList) {
+                mAccessList.grantFullAccess(pkg, Binder.getCallingUserHandle().getIdentifier());
+            }
             mHandler.post(mSaveAccessList);
         } else {
             synchronized (mLock) {
@@ -245,6 +258,13 @@ public class SliceManagerService extends ISliceManager.Stub {
     }
 
     ///  ----- internal code -----
+    private void removeFullAccess(String pkg, int userId) {
+        synchronized (mAccessList) {
+            mAccessList.removeGrant(pkg, userId);
+        }
+        mHandler.post(mSaveAccessList);
+    }
+
     protected void removePinnedSlice(Uri uri) {
         synchronized (mLock) {
             mPinnedSlicesByUri.remove(uri).destroy();
@@ -444,7 +464,9 @@ public class SliceManagerService extends ISliceManager.Stub {
     }
 
     private boolean isGrantedFullAccess(String pkg, int userId) {
-        return mAccessList.hasFullAccess(pkg, userId);
+        synchronized (mAccessList) {
+            return mAccessList.hasFullAccess(pkg, userId);
+        }
     }
 
     private static ServiceThread createHandler() {
@@ -469,13 +491,44 @@ public class SliceManagerService extends ISliceManager.Stub {
                 try {
                     XmlSerializer out = XmlPullParserFactory.newInstance().newSerializer();
                     out.setOutput(stream, Encoding.UTF_8.name());
-                    mAccessList.writeXml(out);
+                    synchronized (mAccessList) {
+                        mAccessList.writeXml(out);
+                    }
                     out.flush();
                     mSliceAccessFile.finishWrite(stream);
                 } catch (IOException | XmlPullParserException e) {
                     Slog.w(TAG, "Failed to save access file, restoring backup", e);
                     mSliceAccessFile.failWrite(stream);
                 }
+            }
+        }
+    };
+
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final int userId  = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+            if (userId == UserHandle.USER_NULL) {
+                Slog.w(TAG, "Intent broadcast does not contain user handle: " + intent);
+                return;
+            }
+            Uri data = intent.getData();
+            String pkg = data != null ? data.getSchemeSpecificPart() : null;
+            if (pkg == null) {
+                Slog.w(TAG, "Intent broadcast does not contain package name: " + intent);
+                return;
+            }
+            switch (intent.getAction()) {
+                case Intent.ACTION_PACKAGE_REMOVED:
+                    final boolean replacing =
+                            intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+                    if (!replacing) {
+                        removeFullAccess(pkg, userId);
+                    }
+                    break;
+                case Intent.ACTION_PACKAGE_DATA_CLEARED:
+                    removeFullAccess(pkg, userId);
+                    break;
             }
         }
     };
