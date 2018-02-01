@@ -133,11 +133,11 @@ public class VolumeUiLayout extends FrameLayout  {
         for (int i = 0; i < rowCount; i++) {
             View row = rows.getChildAt(i);
             if (to == ROTATION_SEASCAPE) {
-                rotateSeekBars(row, to, 180);
-            } else if (to == ROTATION_LANDSCAPE) {
                 rotateSeekBars(row, to, 0);
+            } else if (to == ROTATION_LANDSCAPE) {
+                rotateSeekBars(row, to, 180);
             } else {
-                rotateSeekBars(row, to, 270);
+                rotateSeekBars(row, to, 90);
             }
             rotate(row, from, to, true);
         }
@@ -307,12 +307,6 @@ public class VolumeUiLayout extends FrameLayout  {
     @Override
     public ViewOutlineProvider getOutlineProvider() {
         return super.getOutlineProvider();
-    }
-
-    @Override
-    public void setPressed(boolean pressed)
-    {
-        // Ignore presses because it activates the seekbar thumb unnecessarily.
     }
 
     public void setOutsideTouchListener(OnClickListener onClickListener) {
