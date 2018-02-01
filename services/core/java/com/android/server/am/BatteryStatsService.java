@@ -325,39 +325,38 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     void noteProcessStart(String name, int uid) {
         synchronized (mStats) {
             mStats.noteProcessStartLocked(name, uid);
-            // TODO: decide where this should be and use a constant instead of a literal.
-            StatsLog.write(StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED, uid, name, 1);
+            StatsLog.write(StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED, uid, name,
+                    StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED__EVENT__PROCESS_STARTED);
         }
     }
 
     void noteProcessCrash(String name, int uid) {
         synchronized (mStats) {
             mStats.noteProcessCrashLocked(name, uid);
-            // TODO: decide where this should be and use a constant instead of a literal.
-            StatsLog.write(StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED, uid, name, 2);
+            StatsLog.write(StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED, uid, name,
+                    StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED__EVENT__PROCESS_CRASHED);
         }
     }
 
     void noteProcessAnr(String name, int uid) {
         synchronized (mStats) {
             mStats.noteProcessAnrLocked(name, uid);
-            // TODO: decide where this should be and use a constant instead of a literal.
-            StatsLog.write(StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED, uid, name, 3);
+            StatsLog.write(StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED, uid, name,
+                    StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED__EVENT__PROCESS_ANRED);
         }
     }
 
     void noteProcessFinish(String name, int uid) {
         synchronized (mStats) {
             mStats.noteProcessFinishLocked(name, uid);
-            // TODO: decide where this should be and use a constant instead of a literal.
-            StatsLog.write(StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED, uid, name, 0);
+            StatsLog.write(StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED, uid, name,
+                    StatsLog.PROCESS_LIFE_CYCLE_STATE_CHANGED__EVENT__PROCESS_FINISHED);
         }
     }
 
     /** @param state Process state from ActivityManager.java. */
     void noteUidProcessState(int uid, int state) {
         synchronized (mStats) {
-            // TODO: remove this once we figure out properly where and how
             StatsLog.write(StatsLog.UID_PROCESS_STATE_CHANGED, uid,
                     ActivityManager.processStateAmToProto(state));
 
@@ -603,7 +602,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         enforceCallingPermission();
         if (DBG) Slog.d(TAG, "begin noteScreenState");
         synchronized (mStats) {
-            // TODO: remove this once we figure out properly where and how
             StatsLog.write(StatsLog.SCREEN_STATE_CHANGED, state);
 
             mStats.noteScreenStateLocked(state);

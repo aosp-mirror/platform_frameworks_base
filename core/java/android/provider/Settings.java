@@ -1903,7 +1903,7 @@ public final class Settings {
                 cp.call(cr.getPackageName(), mCallSetCommand, name, arg);
                 String newValue = getStringForUser(cr, name, userHandle);
                 StatsLog.write(StatsLog.SETTING_CHANGED, name, value, newValue, prevValue, tag,
-                        makeDefault ? 1 : 0, userHandle);
+                        makeDefault, userHandle);
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't set key " + name + " in " + mUri, e);
                 return false;
