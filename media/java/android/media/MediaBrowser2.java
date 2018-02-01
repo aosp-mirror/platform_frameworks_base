@@ -19,7 +19,6 @@ package android.media;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.update.ApiLoader;
 import android.media.update.MediaBrowser2Provider;
@@ -41,14 +40,14 @@ public class MediaBrowser2 extends MediaController2 {
      */
     public static class BrowserCallback extends MediaController2.ControllerCallback {
         /**
-         * Called with the result of {@link #getBrowserRoot(Bundle)}.
+         * Called with the result of {@link #getLibraryRoot(Bundle)}.
          * <p>
-         * {@code rootMediaId} and {@code rootExtra} can be {@code null} if the browser root isn't
+         * {@code rootMediaId} and {@code rootExtra} can be {@code null} if the library root isn't
          * available.
          *
          * @param rootHints rootHints that you previously requested.
-         * @param rootMediaId media id of the browser root. Can be {@code null}
-         * @param rootExtra extra of the browser root. Can be {@code null}
+         * @param rootMediaId media id of the library root. Can be {@code null}
+         * @param rootExtra extra of the library root. Can be {@code null}
          */
         public void onGetRootResult(Bundle rootHints, @Nullable String rootMediaId,
                 @Nullable Bundle rootExtra) { }
@@ -114,8 +113,15 @@ public class MediaBrowser2 extends MediaController2 {
                 .createMediaBrowser2(context, this, token, executor, (BrowserCallback) callback);
     }
 
-    public void getBrowserRoot(Bundle rootHints) {
-        mProvider.getBrowserRoot_impl(rootHints);
+    /**
+     * Get the library root. Result would be sent back asynchronously with the
+     * {@link BrowserCallback#onGetRootResult(Bundle, String, Bundle)}.
+     *
+     * @param rootHints hint for the root
+     * @see BrowserCallback#onGetRootResult(Bundle, String, Bundle)
+     */
+    public void getLibraryRoot(Bundle rootHints) {
+        mProvider.getLibraryRoot_impl(rootHints);
     }
 
     /**

@@ -26,6 +26,7 @@ import android.media.MediaController2;
 import android.media.MediaController2.ControllerCallback;
 import android.media.MediaItem2;
 import android.media.MediaLibraryService2;
+import android.media.MediaLibraryService2.LibraryRoot;
 import android.media.MediaLibraryService2.MediaLibrarySession;
 import android.media.MediaLibraryService2.MediaLibrarySessionBuilder;
 import android.media.MediaLibraryService2.MediaLibrarySessionCallback;
@@ -42,6 +43,7 @@ import android.media.Rating2;
 import android.media.SessionPlayer2;
 import android.media.SessionToken2;
 import android.media.VolumeProvider2;
+import android.media.update.MediaLibraryService2Provider.LibraryRootProvider;
 import android.media.update.MediaSession2Provider.BuilderBaseProvider;
 import android.media.update.MediaSession2Provider.CommandButtonProvider.BuilderProvider;
 import android.media.update.MediaSession2Provider.CommandGroupProvider;
@@ -103,6 +105,8 @@ public interface StaticProvider {
         createMediaLibraryService2Builder(
             Context context, MediaLibrarySessionBuilder instance, MediaPlayerInterface player,
             Executor callbackExecutor, MediaLibrarySessionCallback callback);
+    LibraryRootProvider createMediaLibraryService2LibraryRoot(Context context, LibraryRoot instance,
+            String rootId, Bundle extras);
 
     SessionToken2Provider createSessionToken2(Context context, SessionToken2 instance,
             String packageName, String serviceName, int uid);
