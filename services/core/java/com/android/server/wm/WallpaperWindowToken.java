@@ -74,10 +74,6 @@ class WallpaperWindowToken extends WindowToken {
         for (int wallpaperNdx = mChildren.size() - 1; wallpaperNdx >= 0; wallpaperNdx--) {
             final WindowState wallpaper = mChildren.get(wallpaperNdx);
             if (wallpaperController.updateWallpaperOffset(wallpaper, dw, dh, sync)) {
-                final WindowStateAnimator winAnimator = wallpaper.mWinAnimator;
-                winAnimator.computeShownFrameLocked();
-                // No need to lay out the windows - we can just set the wallpaper position directly.
-                winAnimator.setWallpaperOffset(wallpaper.mShownPosition);
                 // We only want to be synchronous with one wallpaper.
                 sync = false;
             }
