@@ -20,14 +20,15 @@
     android:background="@android:color/transparent"
     android:theme="@style/qs_theme"
     android:clipChildren="false" >
+    <!-- right-aligned to be physically near volume button -->
     <LinearLayout
         android:id="@+id/volume_dialog"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|end"
+        android:layout_gravity="center_vertical|right"
         android:minWidth="@dimen/volume_dialog_panel_width"
         android:background="@android:color/transparent"
-        android:layout_margin="12dp"
+        android:layout_margin="@dimen/volume_dialog_base_margin"
         android:translationZ="8dp"
         android:orientation="vertical"
         android:clipChildren="false" >
@@ -38,8 +39,8 @@
             android:layout_height="wrap_content"
             android:clipChildren="false"
             android:clipToPadding="false"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
             android:background="@drawable/rounded_bg_full"
             android:translationZ="8dp"
             android:orientation="horizontal" >
@@ -71,7 +72,7 @@
                 android:maxLines="1"
                 android:layout_centerVertical="true"
                 android:textColor="?android:attr/colorControlNormal"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+                android:textAppearance="@style/TextAppearance.Volume.Header" />
 
             <com.android.keyguard.AlphaOptimizedImageButton
                 android:id="@+id/ringer_icon"
@@ -89,7 +90,7 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textColor="?android:attr/colorControlNormal"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+                android:textAppearance="@style/TextAppearance.Volume.Header.Secondary" />
 
         </LinearLayout>
     </LinearLayout>

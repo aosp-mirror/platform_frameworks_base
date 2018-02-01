@@ -18,6 +18,7 @@ package com.android.systemui.volume;
 
 import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK;
 import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_GENERIC;
+import static android.media.AudioManager.STREAM_ACCESSIBILITY;
 
 import static com.android.systemui.volume.Events.DISMISS_REASON_OUTPUT_CHOOSER;
 import static com.android.systemui.volume.Events.DISMISS_REASON_SETTINGS_CLICKED;
@@ -47,6 +48,7 @@ import android.os.SystemClock;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.support.v7.media.MediaRouter;
+import android.text.InputFilter;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -219,7 +221,7 @@ public class VolumeDialogImpl implements VolumeDialog {
                         R.drawable.ic_volume_bt_sco, R.drawable.ic_volume_bt_sco, false, false);
                 addRow(AudioManager.STREAM_SYSTEM, R.drawable.ic_volume_system,
                         R.drawable.ic_volume_system_mute, false, false);
-                addRow(AudioManager.STREAM_ACCESSIBILITY, R.drawable.ic_volume_accessibility,
+                addRow(STREAM_ACCESSIBILITY, R.drawable.ic_volume_accessibility,
                         R.drawable.ic_volume_accessibility, true, false);
             }
         } else {
@@ -334,6 +336,9 @@ public class VolumeDialogImpl implements VolumeDialog {
         row.view.setTag(row);
         row.header = row.view.findViewById(R.id.volume_row_header);
         row.header.setId(20 * row.stream);
+        if (stream == STREAM_ACCESSIBILITY) {
+            row.header.setFilters(new InputFilter[] {new InputFilter.LengthFilter(13)});
+        }
         row.slider =  row.view.findViewById(R.id.volume_row_slider);
         row.slider.setOnSeekBarChangeListener(new VolumeSeekBarChangeListener(row));
         row.anim = null;
@@ -643,7 +648,7 @@ public class VolumeDialogImpl implements VolumeDialog {
         if (ss.level == row.requestedLevel) {
             row.requestedLevel = -1;
         }
-        final boolean isA11yStream = row.stream == AudioManager.STREAM_ACCESSIBILITY;
+        final boolean isA11yStream = row.stream == STREAM_ACCESSIBILITY;
         final boolean isRingStream = row.stream == AudioManager.STREAM_RING;
         final boolean isSystemStream = row.stream == AudioManager.STREAM_SYSTEM;
         final boolean isAlarmStream = row.stream == AudioManager.STREAM_ALARM;
@@ -949,7 +954,7 @@ public class VolumeDialogImpl implements VolumeDialog {
         public void onAccessibilityModeChanged(Boolean showA11yStream) {
             mShowA11yStream = showA11yStream == null ? false : showA11yStream;
             VolumeRow activeRow = getActiveRow();
-            if (!mShowA11yStream && AudioManager.STREAM_ACCESSIBILITY == activeRow.stream) {
+            if (!mShowA11yStream && STREAM_ACCESSIBILITY == activeRow.stream) {
                 dismissH(Events.DISMISS_STREAM_GONE);
             } else {
                 updateRowsH(activeRow);

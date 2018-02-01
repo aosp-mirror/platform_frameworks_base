@@ -14,26 +14,22 @@
 
 package com.android.systemui.volume;
 
-import static com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE;
 import static com.android.systemui.util.leak.RotationUtils.ROTATION_NONE;
-import static com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Slog;
-import android.view.Gravity;
+import android.view.DisplayCutout;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.SeekBar;
 
 import com.android.systemui.R;
 import com.android.systemui.util.leak.RotationUtils;
@@ -46,6 +42,9 @@ public class VolumeUiLayout extends FrameLayout  {
     private AnimatorSet mAnimation;
     private boolean mHasOutsideTouch;
     private int mRotation = ROTATION_NONE;
+    @Nullable
+    private DisplayCutout mDisplayCutout;
+
     public VolumeUiLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -60,6 +59,7 @@ public class VolumeUiLayout extends FrameLayout  {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         getViewTreeObserver().removeOnComputeInternalInsetsListener(mInsetsListener);
+        mDisplayCutout = null;
     }
 
     @Override
@@ -86,200 +86,64 @@ public class VolumeUiLayout extends FrameLayout  {
         updateRotation();
     }
 
+    private void setDisplayCutout() {
+        if (mDisplayCutout == null && getRootWindowInsets() != null) {
+            DisplayCutout cutout = getRootWindowInsets().getDisplayCutout();
+            if (cutout != null) {
+                mDisplayCutout = cutout;
+            }
+        }
+    }
+
     private void updateRotation() {
+        setDisplayCutout();
         int rotation = RotationUtils.getRotation(getContext());
         if (rotation != mRotation) {
-            rotate(mRotation, rotation);
+            updateSafeInsets(rotation);
             mRotation = rotation;
         }
     }
 
-    private void rotate(View view, int from, int to, boolean swapDimens) {
-        if (from != ROTATION_NONE && to != ROTATION_NONE) {
-            // Rather than handling this confusing case, just do 2 rotations.
-            rotate(view, from, ROTATION_NONE, swapDimens);
-            rotate(view, ROTATION_NONE, to, swapDimens);
-            return;
-        }
-        if (from == ROTATION_LANDSCAPE || to == ROTATION_SEASCAPE) {
-            rotateRight(view);
-        } else {
-            rotateLeft(view);
-        }
-        if (to != ROTATION_NONE) {
-            if (swapDimens && view instanceof LinearLayout) {
-                LinearLayout linearLayout = (LinearLayout) view;
-                linearLayout.setOrientation(LinearLayout.HORIZONTAL);
-                swapDimens(view);
-            }
-        } else {
-            if (swapDimens && view instanceof LinearLayout) {
-                LinearLayout linearLayout = (LinearLayout) view;
-                linearLayout.setOrientation(LinearLayout.VERTICAL);
-                swapDimens(view);
-            }
-        }
-    }
+    private void updateSafeInsets(int rotation) {
+        // Depending on our rotation, we may have to work around letterboxing from the right
+        // side from the navigation bar or a cutout.
 
-    private void rotate(int from, int to) {
-        View footer = mChild.findViewById(R.id.footer);
-        rotate(footer, from, to, false);
-        rotate(this, from, to, true);
-        rotate(mChild, from, to, true);
-        ViewGroup rows = mChild.findViewById(R.id.volume_dialog_rows);
-        rotate(rows, from, to, true);
-        swapOrientation((LinearLayout) rows);
-        int rowCount = rows.getChildCount();
-        for (int i = 0; i < rowCount; i++) {
-            View row = rows.getChildAt(i);
-            if (to == ROTATION_SEASCAPE) {
-                rotateSeekBars(row, to, 0);
-            } else if (to == ROTATION_LANDSCAPE) {
-                rotateSeekBars(row, to, 180);
-            } else {
-                rotateSeekBars(row, to, 90);
-            }
-            rotate(row, from, to, true);
-        }
-    }
+        MarginLayoutParams lp = (MarginLayoutParams) mChild.getLayoutParams();
 
-    private void swapOrientation(LinearLayout layout) {
-        if(layout.getOrientation() == LinearLayout.HORIZONTAL) {
-            layout.setOrientation(LinearLayout.VERTICAL);
-        } else {
-            layout.setOrientation(LinearLayout.HORIZONTAL);
-        }
-    }
-
-    private void swapDimens(View v) {
-        if (v == null) {
-            return;
-        }
-        ViewGroup.LayoutParams params = v.getLayoutParams();
-        int h = params.width;
-        params.width = params.height;
-        params.height = h;
-        v.setLayoutParams(params);
-    }
-
-    private void rotateSeekBars(View row, int to, int rotation) {
-        SeekBar seekbar = row.findViewById(R.id.volume_row_slider);
-        if (seekbar != null) {
-            seekbar.setRotation((float) rotation);
-        }
-
-        View parent = row.findViewById(R.id.volume_row_slider_frame);
-        swapDimens(parent);
-        ViewGroup.LayoutParams params = seekbar.getLayoutParams();
-        ViewGroup.LayoutParams parentParams = parent.getLayoutParams();
-        if (to != ROTATION_NONE) {
-            params.height = parentParams.height;
-            params.width = parentParams.width;
-        } else {
-            params.height = parentParams.width;
-            params.width = parentParams.height;
-        }
-        seekbar.setLayoutParams(params);
-    }
-
-    private int rotateGravityRight(int gravity) {
-        int retGravity = 0;
-        int layoutDirection = getLayoutDirection();
-        final int absoluteGravity = Gravity.getAbsoluteGravity(gravity, layoutDirection);
-        final int verticalGravity = gravity & Gravity.VERTICAL_GRAVITY_MASK;
-
-        switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
-            case Gravity.CENTER_HORIZONTAL:
-                retGravity |= Gravity.CENTER_VERTICAL;
+        int margin = (int) getResources().getDimension(R.dimen.volume_dialog_base_margin);
+        switch (rotation) {
+            /*
+             * Landscape: <-|. Have to deal with the nav bar
+             * Seascape:  |->. Have to deal with the cutout
+             */
+            case RotationUtils.ROTATION_LANDSCAPE:
+                margin += getNavBarHeight();
                 break;
-            case Gravity.RIGHT:
-                retGravity |= Gravity.BOTTOM;
+            case RotationUtils.ROTATION_SEASCAPE:
+                margin += getDisplayCutoutHeight();
                 break;
-            case Gravity.LEFT:
             default:
-                retGravity |= Gravity.TOP;
                 break;
         }
 
-        switch (verticalGravity) {
-            case Gravity.CENTER_VERTICAL:
-                retGravity |= Gravity.CENTER_HORIZONTAL;
-                break;
-            case Gravity.BOTTOM:
-                retGravity |= Gravity.LEFT;
-                break;
-            case Gravity.TOP:
-            default:
-                retGravity |= Gravity.RIGHT;
-                break;
-        }
-        return retGravity;
+        lp.rightMargin = margin;
+        mChild.setLayoutParams(lp);
     }
 
-    private int rotateGravityLeft(int gravity) {
-        if (gravity == -1) {
-            gravity = Gravity.TOP | Gravity.START;
-        }
-        int retGravity = 0;
-        int layoutDirection = getLayoutDirection();
-        final int absoluteGravity = Gravity.getAbsoluteGravity(gravity, layoutDirection);
-        final int verticalGravity = gravity & Gravity.VERTICAL_GRAVITY_MASK;
-
-        switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
-            case Gravity.CENTER_HORIZONTAL:
-                retGravity |= Gravity.CENTER_VERTICAL;
-                break;
-            case Gravity.RIGHT:
-                retGravity |= Gravity.TOP;
-                break;
-            case Gravity.LEFT:
-            default:
-                retGravity |= Gravity.BOTTOM;
-                break;
-        }
-
-        switch (verticalGravity) {
-            case Gravity.CENTER_VERTICAL:
-                retGravity |= Gravity.CENTER_HORIZONTAL;
-                break;
-            case Gravity.BOTTOM:
-                retGravity |= Gravity.RIGHT;
-                break;
-            case Gravity.TOP:
-            default:
-                retGravity |= Gravity.LEFT;
-                break;
-        }
-        return retGravity;
+    private int getNavBarHeight() {
+        return (int) getResources().getDimension(R.dimen.navigation_bar_size);
     }
 
-    private void rotateLeft(View v) {
-        if (v.getParent() instanceof FrameLayout) {
-            LayoutParams p = (LayoutParams) v.getLayoutParams();
-            p.gravity = rotateGravityLeft(p.gravity);
+    //TODO: Find a better way
+    private int getDisplayCutoutHeight() {
+        if (mDisplayCutout == null || mDisplayCutout.isEmpty()) {
+            return 0;
         }
 
-        v.setPadding(v.getPaddingTop(), v.getPaddingRight(), v.getPaddingBottom(),
-                v.getPaddingLeft());
-        MarginLayoutParams params = (MarginLayoutParams) v.getLayoutParams();
-        params.setMargins(params.topMargin, params.rightMargin, params.bottomMargin,
-                params.leftMargin);
-        v.setLayoutParams(params);
+        Rect r = mDisplayCutout.getBoundingRect();
+        return r.bottom - r.top;
     }
 
-    private void rotateRight(View v) {
-        if (v.getParent() instanceof FrameLayout) {
-            LayoutParams p = (LayoutParams) v.getLayoutParams();
-            p.gravity = rotateGravityRight(p.gravity);
-        }
-
-        v.setPadding(v.getPaddingBottom(), v.getPaddingLeft(), v.getPaddingTop(),
-                v.getPaddingRight());
-        MarginLayoutParams params = (MarginLayoutParams) v.getLayoutParams();
-        params.setMargins(params.bottomMargin, params.leftMargin, params.topMargin,
-                params.rightMargin);
-        v.setLayoutParams(params);
-    }
 
     private void animateChild(int oldHeight, int newHeight) {
         if (true) return;
