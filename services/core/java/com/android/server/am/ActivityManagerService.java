@@ -3005,6 +3005,16 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         Watchdog.getInstance().addMonitor(this);
         Watchdog.getInstance().addThread(mHandler);
+
+        // bind background thread to little cores
+        // this is expected to fail inside of framework tests because apps can't touch cpusets directly
+        try {
+            Process.setThreadGroupAndCpuset(BackgroundThread.get().getThreadId(),
+                    Process.THREAD_GROUP_BG_NONINTERACTIVE);
+        } catch (Exception e) {
+            Slog.w(TAG, "Setting background thread cpuset failed");
+        }
+
     }
 
     protected ActivityStackSupervisor createStackSupervisor() {
@@ -12648,6 +12658,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (!mBooted && !mBooting
                 && userId == UserHandle.USER_SYSTEM
                 && (info.flags & PERSISTENT_MASK) == PERSISTENT_MASK) {
+            // The system process is initialized to SCHED_GROUP_DEFAULT in init.rc.
+            r.curSchedGroup = ProcessList.SCHED_GROUP_DEFAULT;
+            r.setSchedGroup = ProcessList.SCHED_GROUP_DEFAULT;
             r.persistent = true;
             r.maxAdj = ProcessList.PERSISTENT_PROC_ADJ;
         }
