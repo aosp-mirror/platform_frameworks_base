@@ -44,11 +44,9 @@ namespace android {
 
 struct NativeFamilyBuilder {
     NativeFamilyBuilder(uint32_t langId, int variant)
-        : langId(langId), variant(static_cast<minikin::FontFamily::Variant>(variant)),
-          allowUnsupportedFont(false) {}
+        : langId(langId), variant(static_cast<minikin::FontFamily::Variant>(variant)) {}
     uint32_t langId;
     minikin::FontFamily::Variant variant;
-    bool allowUnsupportedFont;
     std::vector<minikin::Font> fonts;
     std::vector<minikin::FontVariation> axes;
 };
@@ -70,20 +68,15 @@ static jlong FontFamily_create(jlong builderPtr) {
     }
     std::unique_ptr<NativeFamilyBuilder> builder(
             reinterpret_cast<NativeFamilyBuilder*>(builderPtr));
+    if (builder->fonts.empty()) {
+        return 0;
+    }
     std::shared_ptr<minikin::FontFamily> family = std::make_shared<minikin::FontFamily>(
             builder->langId, builder->variant, std::move(builder->fonts));
-    if (family->getCoverage().length() == 0 && !builder->allowUnsupportedFont) {
+    if (family->getCoverage().length() == 0) {
         return 0;
     }
     return reinterpret_cast<jlong>(new FontFamilyWrapper(std::move(family)));
-}
-
-static void FontFamily_allowUnsupportedFont(jlong builderPtr) {
-    if (builderPtr == 0) {
-        return;
-    }
-    NativeFamilyBuilder* builder = reinterpret_cast<NativeFamilyBuilder*>(builderPtr);
-    builder->allowUnsupportedFont = true;
 }
 
 static void FontFamily_abort(jlong builderPtr) {
@@ -270,7 +263,6 @@ static void FontFamily_addAxisValue(jlong builderPtr, jint tag, jfloat value) {
 static const JNINativeMethod gFontFamilyMethods[] = {
     { "nInitBuilder",          "(Ljava/lang/String;I)J", (void*)FontFamily_initBuilder },
     { "nCreateFamily",         "(J)J", (void*)FontFamily_create },
-    { "nAllowUnsupportedFont", "(J)V", (void*)FontFamily_allowUnsupportedFont },
     { "nAbort",                "(J)V", (void*)FontFamily_abort },
     { "nUnrefFamily",          "(J)V", (void*)FontFamily_unref },
     { "nAddFont",              "(JLjava/nio/ByteBuffer;III)Z", (void*)FontFamily_addFont },

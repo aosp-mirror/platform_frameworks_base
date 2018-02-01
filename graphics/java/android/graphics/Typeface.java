@@ -818,12 +818,9 @@ public class Typeface {
             if (fontFamily.addFontFromAssetManager(mgr, path, 0, true /* isAsset */,
                     0 /* ttc index */, RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE,
                     null /* axes */)) {
-                // Due to backward compatibility, even if the font is not supported by our font
-                // stack, we need to place the empty font at the first place. The typeface with
-                // empty font behaves different from default typeface especially in fallback
-                // font selection.
-                fontFamily.allowUnsupportedFont();
-                fontFamily.freeze();
+                if (!fontFamily.freeze()) {
+                    return Typeface.DEFAULT;
+                }
                 final FontFamily[] families = { fontFamily };
                 typeface = createFromFamiliesWithDefault(families, DEFAULT_FAMILY,
                         RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE);
@@ -870,12 +867,9 @@ public class Typeface {
         final FontFamily fontFamily = new FontFamily();
         if (fontFamily.addFont(path, 0 /* ttcIndex */, null /* axes */,
                   RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE)) {
-            // Due to backward compatibility, even if the font is not supported by our font
-            // stack, we need to place the empty font at the first place. The typeface with
-            // empty font behaves different from default typeface especially in fallback font
-            // selection.
-            fontFamily.allowUnsupportedFont();
-            fontFamily.freeze();
+            if (!fontFamily.freeze()) {
+                return Typeface.DEFAULT;
+            }
             FontFamily[] families = { fontFamily };
             return createFromFamiliesWithDefault(families, DEFAULT_FAMILY,
                     RESOLVE_BY_FONT_TABLE, RESOLVE_BY_FONT_TABLE);
