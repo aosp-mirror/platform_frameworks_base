@@ -165,14 +165,14 @@ StatsPullerManagerImpl::StatsPullerManagerImpl()
 }
 
 bool StatsPullerManagerImpl::Pull(int tagId, vector<shared_ptr<LogEvent>>* data) {
-    if (DEBUG) ALOGD("Initiating pulling %d", tagId);
+    VLOG("Initiating pulling %d", tagId);
 
     if (kAllPullAtomInfo.find(tagId) != kAllPullAtomInfo.end()) {
-      bool ret = kAllPullAtomInfo.find(tagId)->second.puller->Pull(data);
-      ALOGD("pulled %d items", (int)data->size());
-      return ret;
+        bool ret = kAllPullAtomInfo.find(tagId)->second.puller->Pull(data);
+        VLOG("pulled %d items", (int)data->size());
+        return ret;
     } else {
-        ALOGD("Unknown tagId %d", tagId);
+        VLOG("Unknown tagId %d", tagId);
         return false;  // Return early since we don't know what to pull.
     }
 }

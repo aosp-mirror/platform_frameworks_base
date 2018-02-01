@@ -33,6 +33,7 @@ import android.util.Slog;
 public final class StatsManager {
     IStatsManager mService;
     private static final String TAG = "StatsManager";
+    private static final boolean DEBUG = false;
 
     /**
      * Long extra of uid that added the relevant stats config.
@@ -88,12 +89,12 @@ public final class StatsManager {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
-                    Slog.d(TAG, "Failed to find statsd when adding configuration");
+                    if (DEBUG) Slog.d(TAG, "Failed to find statsd when adding configuration");
                     return false;
                 }
                 return service.addConfiguration(configKey, config);
             } catch (RemoteException e) {
-                Slog.d(TAG, "Failed to connect to statsd when adding configuration");
+                if (DEBUG) Slog.d(TAG, "Failed to connect to statsd when adding configuration");
                 return false;
             }
         }
@@ -111,12 +112,12 @@ public final class StatsManager {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
-                    Slog.d(TAG, "Failed to find statsd when removing configuration");
+                    if (DEBUG) Slog.d(TAG, "Failed to find statsd when removing configuration");
                     return false;
                 }
                 return service.removeConfiguration(configKey);
             } catch (RemoteException e) {
-                Slog.d(TAG, "Failed to connect to statsd when removing configuration");
+                if (DEBUG) Slog.d(TAG, "Failed to connect to statsd when removing configuration");
                 return false;
             }
         }
@@ -225,12 +226,12 @@ public final class StatsManager {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
-                    Slog.d(TAG, "Failed to find statsd when getting data");
+                    if (DEBUG) Slog.d(TAG, "Failed to find statsd when getting data");
                     return null;
                 }
                 return service.getData(configKey);
             } catch (RemoteException e) {
-                Slog.d(TAG, "Failed to connecto statsd when getting data");
+                if (DEBUG) Slog.d(TAG, "Failed to connecto statsd when getting data");
                 return null;
             }
         }
@@ -249,12 +250,12 @@ public final class StatsManager {
             try {
                 IStatsManager service = getIStatsManagerLocked();
                 if (service == null) {
-                    Slog.d(TAG, "Failed to find statsd when getting metadata");
+                    if (DEBUG) Slog.d(TAG, "Failed to find statsd when getting metadata");
                     return null;
                 }
                 return service.getMetadata();
             } catch (RemoteException e) {
-                Slog.d(TAG, "Failed to connecto statsd when getting metadata");
+                if (DEBUG) Slog.d(TAG, "Failed to connecto statsd when getting metadata");
                 return null;
             }
         }
