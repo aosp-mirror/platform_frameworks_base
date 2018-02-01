@@ -32,7 +32,6 @@ import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.AboveShelfObserver;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.NotificationInflaterTest;
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
@@ -52,7 +51,7 @@ public class NotificationTestHelper {
     public NotificationTestHelper(Context context) {
         mContext = context;
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
-        mHeadsUpManager = new HeadsUpManagerPhone(mContext, null, mGroupManager, null, null);
+        mHeadsUpManager = new HeadsUpManager(mContext, null, mGroupManager);
     }
 
     public ExpandableNotificationRow createRow() throws Exception {
