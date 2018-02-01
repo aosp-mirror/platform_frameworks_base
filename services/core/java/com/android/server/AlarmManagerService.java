@@ -58,6 +58,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.KeyValueListParser;
 import android.util.Log;
 import android.util.Pair;
@@ -79,7 +80,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Random;
@@ -224,10 +224,12 @@ class AlarmManagerService extends SystemService {
 
     interface Stats {
         int REBATCH_ALL_ALARMS = 0;
+        int REORDER_ALARMS_FOR_STANDBY = 1;
     }
 
     private final StatLogger mStatLogger = new StatLogger(new String[] {
             "REBATCH_ALL_ALARMS",
+            "REORDER_ALARMS_FOR_STANDBY",
     });
 
     /**
@@ -522,6 +524,10 @@ class AlarmManagerService extends SystemService {
             return newStart;
         }
 
+        boolean remove(Alarm alarm) {
+            return remove(a -> (a == alarm));
+        }
+
         boolean remove(Predicate<Alarm> predicate) {
             boolean didRemove = false;
             long newStart = 0;  // recalculate endpoints as we go
@@ -741,6 +747,23 @@ class AlarmManagerService extends SystemService {
         return (index == 0);
     }
 
+    private void insertAndBatchAlarmLocked(Alarm alarm) {
+        final int whichBatch = ((alarm.flags & AlarmManager.FLAG_STANDALONE) != 0) ? -1
+                : attemptCoalesceLocked(alarm.whenElapsed, alarm.maxWhenElapsed);
+
+        if (whichBatch < 0) {
+            addBatchLocked(mAlarmBatches, new Batch(alarm));
+        } else {
+            final Batch batch = mAlarmBatches.get(whichBatch);
+            if (batch.add(alarm)) {
+                // The start time of this batch advanced, so batch ordering may
+                // have just been broken.  Move it to where it now belongs.
+                mAlarmBatches.remove(whichBatch);
+                addBatchLocked(mAlarmBatches, batch);
+            }
+        }
+    }
+
     // Return the index of the matching batch, or -1 if none found.
     int attemptCoalesceLocked(long whenElapsed, long maxWhen) {
         final int N = mAlarmBatches.size();
@@ -794,7 +817,7 @@ class AlarmManagerService extends SystemService {
     }
 
     void rebatchAllAlarmsLocked(boolean doValidate) {
-        long start = mStatLogger.getTime();
+        final long start = mStatLogger.getTime();
         final int oldCount =
                 getAlarmCount(mAlarmBatches) + ArrayUtils.size(mPendingWhileIdleAlarms);
         final boolean oldHasTick = haveBatchesTimeTickAlarm(mAlarmBatches)
@@ -835,6 +858,44 @@ class AlarmManagerService extends SystemService {
         rescheduleKernelAlarmsLocked();
         updateNextAlarmClockLocked();
         mStatLogger.logDurationStat(Stats.REBATCH_ALL_ALARMS, start);
+    }
+
+    /**
+     * Re-orders the alarm batches based on newly evaluated send times based on the current
+     * app-standby buckets
+     * @param targetPackages [Package, User] pairs for which alarms need to be re-evaluated,
+     *                       null indicates all
+     * @return True if there was any reordering done to the current list.
+     */
+    boolean reorderAlarmsBasedOnStandbyBuckets(ArraySet<Pair<String, Integer>> targetPackages) {
+        final long start = mStatLogger.getTime();
+        final ArrayList<Alarm> rescheduledAlarms = new ArrayList<>();
+
+        for (int batchIndex = mAlarmBatches.size() - 1; batchIndex >= 0; batchIndex--) {
+            final Batch batch = mAlarmBatches.get(batchIndex);
+            for (int alarmIndex = batch.size() - 1; alarmIndex >= 0; alarmIndex--) {
+                final Alarm alarm = batch.get(alarmIndex);
+                final Pair<String, Integer> packageUser =
+                        Pair.create(alarm.sourcePackage, UserHandle.getUserId(alarm.creatorUid));
+                if (targetPackages != null && !targetPackages.contains(packageUser)) {
+                    continue;
+                }
+                if (adjustDeliveryTimeBasedOnStandbyBucketLocked(alarm)) {
+                    batch.remove(alarm);
+                    rescheduledAlarms.add(alarm);
+                }
+            }
+            if (batch.size() == 0) {
+                mAlarmBatches.remove(batchIndex);
+            }
+        }
+        for (int i = 0; i < rescheduledAlarms.size(); i++) {
+            final Alarm a = rescheduledAlarms.get(i);
+            insertAndBatchAlarmLocked(a);
+        }
+
+        mStatLogger.logDurationStat(Stats.REORDER_ALARMS_FOR_STANDBY, start);
+        return rescheduledAlarms.size() > 0;
     }
 
     void reAddAlarmLocked(Alarm a, long nowElapsed, boolean doValidate) {
@@ -1442,18 +1503,32 @@ class AlarmManagerService extends SystemService {
         else return mConstants.APP_STANDBY_MIN_DELAYS[0];
     }
 
-    private void adjustDeliveryTimeBasedOnStandbyBucketLocked(Alarm alarm) {
+    /**
+     * Adjusts the alarm delivery time based on the current app standby bucket.
+     * @param alarm The alarm to adjust
+     * @return true if the alarm delivery time was updated.
+     * TODO: Reduce the number of calls to getAppStandbyBucket by batching the calls per
+     * {package, user} pairs
+     */
+    private boolean adjustDeliveryTimeBasedOnStandbyBucketLocked(Alarm alarm) {
         if (alarm.alarmClock != null || UserHandle.isCore(alarm.creatorUid)) {
-            return;
+            return false;
+        }
+        // TODO: short term fix for b/72816079, remove after a proper fix is in place
+        if ((alarm.flags & AlarmManager.FLAG_ALLOW_WHILE_IDLE) != 0) {
+            return false;
         }
         if (mAppStandbyParole) {
             if (alarm.whenElapsed > alarm.requestedWhenElapsed) {
-                // We did throttle this alarm earlier, restore original requirements
+                // We did defer this alarm earlier, restore original requirements
                 alarm.whenElapsed = alarm.requestedWhenElapsed;
                 alarm.maxWhenElapsed = alarm.requestedMaxWhenElapsed;
             }
-            return;
+            return true;
         }
+        final long oldWhenElapsed = alarm.whenElapsed;
+        final long oldMaxWhenElapsed = alarm.maxWhenElapsed;
+
         final String sourcePackage = alarm.sourcePackage;
         final int sourceUserId = UserHandle.getUserId(alarm.creatorUid);
         final int standbyBucket = mUsageStatsManagerInternal.getAppStandbyBucket(
@@ -1465,8 +1540,14 @@ class AlarmManagerService extends SystemService {
             final long minElapsed = lastElapsed + getMinDelayForBucketLocked(standbyBucket);
             if (alarm.requestedWhenElapsed < minElapsed) {
                 alarm.whenElapsed = alarm.maxWhenElapsed = minElapsed;
+            } else {
+                // app is now eligible to run alarms at the originally requested window.
+                // Restore original requirements in case they were changed earlier.
+                alarm.whenElapsed = alarm.requestedWhenElapsed;
+                alarm.maxWhenElapsed = alarm.requestedMaxWhenElapsed;
             }
         }
+        return (oldWhenElapsed != alarm.whenElapsed || oldMaxWhenElapsed != alarm.maxWhenElapsed);
     }
 
     private void setImplLocked(Alarm a, boolean rebatching, boolean doValidate) {
@@ -1521,21 +1602,7 @@ class AlarmManagerService extends SystemService {
             }
         }
         adjustDeliveryTimeBasedOnStandbyBucketLocked(a);
-
-        int whichBatch = ((a.flags&AlarmManager.FLAG_STANDALONE) != 0)
-                ? -1 : attemptCoalesceLocked(a.whenElapsed, a.maxWhenElapsed);
-        if (whichBatch < 0) {
-            Batch batch = new Batch(a);
-            addBatchLocked(mAlarmBatches, batch);
-        } else {
-            Batch batch = mAlarmBatches.get(whichBatch);
-            if (batch.add(a)) {
-                // The start time of this batch advanced, so batch ordering may
-                // have just been broken.  Move it to where it now belongs.
-                mAlarmBatches.remove(whichBatch);
-                addBatchLocked(mAlarmBatches, batch);
-            }
-        }
+        insertAndBatchAlarmLocked(a);
 
         if (a.alarmClock != null) {
             mNextAlarmClockMayChange = true;
@@ -3114,7 +3181,7 @@ class AlarmManagerService extends SystemService {
             final boolean isRtc = (type == RTC || type == RTC_WAKEUP);
             pw.print(prefix); pw.print("tag="); pw.println(statsTag);
             pw.print(prefix); pw.print("type="); pw.print(type);
-                    pw.print(" requestedWhenELapsed="); TimeUtils.formatDuration(
+                    pw.print(" requestedWhenElapsed="); TimeUtils.formatDuration(
                             requestedWhenElapsed, nowELAPSED, pw);
                     pw.print(" whenElapsed="); TimeUtils.formatDuration(whenElapsed,
                             nowELAPSED, pw);
@@ -3367,28 +3434,19 @@ class AlarmManagerService extends SystemService {
                                 }
                                 mPendingNonWakeupAlarms.clear();
                             }
-                            boolean needRebatch = false;
-                            final HashSet<String> triggerPackages = new HashSet<>();
-                            for (int i = triggerList.size() - 1; i >= 0; i--) {
-                                triggerPackages.add(triggerList.get(i).sourcePackage);
-                            }
-                            outer:
-                            for (int i = 0; i < mAlarmBatches.size(); i++) {
-                                final Batch batch = mAlarmBatches.get(i);
-                                for (int j = 0; j < batch.size(); j++) {
-                                    if (triggerPackages.contains(batch.get(j))) {
-                                        needRebatch = true;
-                                        break outer;
-                                    }
+                            final ArraySet<Pair<String, Integer>> triggerPackages =
+                                    new ArraySet<>();
+                            for (int i = 0; i < triggerList.size(); i++) {
+                                final Alarm a = triggerList.get(i);
+                                if (!UserHandle.isCore(a.creatorUid)) {
+                                    triggerPackages.add(Pair.create(
+                                            a.sourcePackage, UserHandle.getUserId(a.creatorUid)));
                                 }
                             }
-                            if (needRebatch) {
-                                rebatchAllAlarmsLocked(false);
-                            } else {
-                                rescheduleKernelAlarmsLocked();
-                                updateNextAlarmClockLocked();
-                            }
                             deliverAlarmsLocked(triggerList, nowELAPSED);
+                            reorderAlarmsBasedOnStandbyBuckets(triggerPackages);
+                            rescheduleKernelAlarmsLocked();
+                            updateNextAlarmClockLocked();
                         }
                     }
 
@@ -3494,13 +3552,21 @@ class AlarmManagerService extends SystemService {
                 case APP_STANDBY_PAROLE_CHANGED:
                     synchronized (mLock) {
                         mAppStandbyParole = (Boolean) msg.obj;
-                        rebatchAllAlarmsLocked(false);
+                        if (reorderAlarmsBasedOnStandbyBuckets(null)) {
+                            rescheduleKernelAlarmsLocked();
+                            updateNextAlarmClockLocked();
+                        }
                     }
                     break;
 
                 case APP_STANDBY_BUCKET_CHANGED:
                     synchronized (mLock) {
-                        rebatchAllAlarmsLocked(false);
+                        final ArraySet<Pair<String, Integer>> filterPackages = new ArraySet<>();
+                        filterPackages.add(Pair.create((String) msg.obj, msg.arg1));
+                        if (reorderAlarmsBasedOnStandbyBuckets(filterPackages)) {
+                            rescheduleKernelAlarmsLocked();
+                            updateNextAlarmClockLocked();
+                        }
                     }
                     break;
 
@@ -3730,7 +3796,8 @@ class AlarmManagerService extends SystemService {
                         bucket);
             }
             mHandler.removeMessages(AlarmHandler.APP_STANDBY_BUCKET_CHANGED);
-            mHandler.sendEmptyMessage(AlarmHandler.APP_STANDBY_BUCKET_CHANGED);
+            mHandler.obtainMessage(AlarmHandler.APP_STANDBY_BUCKET_CHANGED, userId, -1, packageName)
+                    .sendToTarget();
         }
 
         @Override
