@@ -22,13 +22,13 @@ import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.AccessNetworkConstants.AccessNetworkType;
 import android.text.TextUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.Arrays;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -1336,6 +1336,39 @@ public class ServiceState implements Parcelable {
             return TelephonyManager.NETWORK_TYPE_LTE_CA;
         default:
             return TelephonyManager.NETWORK_TYPE_UNKNOWN;
+        }
+    }
+
+    /** @hide */
+    public static int rilRadioTechnologyToAccessNetworkType(@RilRadioTechnology int rt) {
+        switch(rt) {
+            case RIL_RADIO_TECHNOLOGY_GPRS:
+            case RIL_RADIO_TECHNOLOGY_EDGE:
+            case RIL_RADIO_TECHNOLOGY_GSM:
+                return AccessNetworkType.GERAN;
+            case RIL_RADIO_TECHNOLOGY_UMTS:
+            case RIL_RADIO_TECHNOLOGY_HSDPA:
+            case RIL_RADIO_TECHNOLOGY_HSPAP:
+            case RIL_RADIO_TECHNOLOGY_HSUPA:
+            case RIL_RADIO_TECHNOLOGY_HSPA:
+            case RIL_RADIO_TECHNOLOGY_TD_SCDMA:
+                return AccessNetworkType.UTRAN;
+            case RIL_RADIO_TECHNOLOGY_IS95A:
+            case RIL_RADIO_TECHNOLOGY_IS95B:
+            case RIL_RADIO_TECHNOLOGY_1xRTT:
+            case RIL_RADIO_TECHNOLOGY_EVDO_0:
+            case RIL_RADIO_TECHNOLOGY_EVDO_A:
+            case RIL_RADIO_TECHNOLOGY_EVDO_B:
+            case RIL_RADIO_TECHNOLOGY_EHRPD:
+                return AccessNetworkType.CDMA2000;
+            case RIL_RADIO_TECHNOLOGY_LTE:
+            case RIL_RADIO_TECHNOLOGY_LTE_CA:
+                return AccessNetworkType.EUTRAN;
+            case RIL_RADIO_TECHNOLOGY_IWLAN:
+                return AccessNetworkType.IWLAN;
+            case RIL_RADIO_TECHNOLOGY_UNKNOWN:
+            default:
+                return AccessNetworkType.UNKNOWN;
         }
     }
 
