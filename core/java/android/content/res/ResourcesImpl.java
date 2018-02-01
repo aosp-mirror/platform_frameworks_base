@@ -27,9 +27,11 @@ import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
+import android.content.res.AssetManager.AssetInputStream;
 import android.content.res.Configuration.NativeConfig;
 import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
+import android.graphics.ImageDecoder;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -809,8 +811,13 @@ public class ResourcesImpl {
                 } else {
                     final InputStream is = mAssets.openNonAsset(
                             value.assetCookie, file, AssetManager.ACCESS_STREAMING);
-                    dr = Drawable.createFromResourceStream(wrapper, value, is, file, null);
-                    is.close();
+                    AssetInputStream ais = (AssetInputStream) is;
+                    // ImageDecoder will close the input stream.
+                    ImageDecoder.Source src = new ImageDecoder.AssetInputStreamSource(ais,
+                            wrapper, value);
+                    dr = ImageDecoder.decodeDrawable(src, (decoder, info, s) -> {
+                        decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
+                    });
                 }
             } finally {
                 stack.pop();
