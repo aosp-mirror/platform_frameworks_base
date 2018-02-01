@@ -1571,6 +1571,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                         if (view != null) {
                             try {
                                 Trace.traceBegin(Trace.TRACE_TAG_VIEW, "onDrawFrame");
+                                if (mFinishDrawingRunnable != null) {
+                                    finishDrawingRunnable = mFinishDrawingRunnable;
+                                    mFinishDrawingRunnable = null;
+                                }
                                 view.mRenderer.onDrawFrame(gl);
                                 if (finishDrawingRunnable != null) {
                                     finishDrawingRunnable.run();
