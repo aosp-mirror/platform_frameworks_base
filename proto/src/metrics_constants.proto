@@ -5172,11 +5172,6 @@ message MetricsEvent {
     // Package: Package of the autofill service
     // OS: P
     AUTOFILL_INVALID_PERMISSION = 1289;
-    
-    // OPEN: Settings->Connected Devices->USB->(click on details link)
-    // CATEGORY: SETTINGS
-    // OS: P
-    USB_DEVICE_DETAILS = 1290;
 
     // OPEN: QS Alarm tile shown
     // ACTION: QS Alarm tile tapped
@@ -5184,6 +5179,11 @@ message MetricsEvent {
     // CATEGORY: QUICK_SETTINGS
     // OS: P
     QS_ALARM = 1290;
+
+    // OPEN: Settings->Connected Devices->USB->(click on details link)
+    // CATEGORY: SETTINGS
+    // OS: P
+    USB_DEVICE_DETAILS = 1291;
 
     // ---- End P Constants, all P constants go above this line ----
     // Add new aosp constants above this line.
