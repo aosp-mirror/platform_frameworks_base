@@ -76,6 +76,16 @@ public class VolumeDialogControllerImplTest extends SysuiTestCase {
     }
 
     @Test
+    public void testVolumeChangeW_nullStatusBar() {
+        VolumeDialogControllerImpl.C callback = mock(VolumeDialogControllerImpl.C.class);
+        TestableVolumeDialogControllerImpl nullStatusBarTestableDialog =  new
+                TestableVolumeDialogControllerImpl(mContext, callback, null);
+        nullStatusBarTestableDialog.setEnableDialogs(true, true);
+        nullStatusBarTestableDialog.onVolumeChangedW(0, AudioManager.FLAG_SHOW_UI);
+        verify(callback, times(1)).onShowRequested(Events.SHOW_REASON_VOLUME_CHANGED);
+    }
+
+    @Test
     public void testOnRemoteVolumeChanged_newStream_noNullPointer() {
         MediaSession.Token token = new MediaSession.Token(null);
         mVolumeController.mMediaSessionsCallbacksW.onRemoteVolumeChanged(token, 0);
