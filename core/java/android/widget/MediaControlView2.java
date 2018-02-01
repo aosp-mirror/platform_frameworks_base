@@ -19,7 +19,6 @@ package android.widget;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.session.MediaController;
 import android.media.update.ApiLoader;
@@ -160,14 +159,6 @@ public class MediaControlView2 extends FrameLayoutHelper<MediaControlView2Provid
                 ApiLoader.getProvider(context).createMediaControlView2(
                         (MediaControlView2) instance, superProvider),
                 context, attrs, defStyleAttr, defStyleRes);
-    }
-
-    /**
-     * @hide
-     */
-    @SystemApi
-    public MediaControlView2Provider getProvider() {
-        return mProvider;
     }
 
     /**
