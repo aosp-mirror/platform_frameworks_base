@@ -17,6 +17,7 @@
 package android.media.update;
 
 import android.annotation.Nullable;
+import android.app.Notification;
 import android.content.Context;
 import android.media.DataSourceDesc;
 import android.media.MediaBrowser2;
@@ -34,6 +35,7 @@ import android.media.MediaSession2;
 import android.media.MediaSession2.PlaylistParams;
 import android.media.MediaSession2.SessionCallback;
 import android.media.MediaSessionService2;
+import android.media.MediaSessionService2.MediaNotification;
 import android.media.PlaybackState2;
 import android.media.Rating2;
 import android.media.SessionPlayer2;
@@ -44,6 +46,7 @@ import android.media.update.MediaSession2Provider.CommandGroupProvider;
 import android.media.update.MediaSession2Provider.CommandProvider;
 import android.media.update.MediaSession2Provider.ControllerInfoProvider;
 import android.media.update.MediaSession2Provider.PlaylistParamsProvider;
+import android.media.update.MediaSessionService2Provider.MediaNotificationProvider;
 import android.os.Bundle;
 import android.os.IInterface;
 import android.util.AttributeSet;
@@ -89,6 +92,8 @@ public interface StaticProvider {
             SessionToken2 token, Executor executor, BrowserCallback callback);
 
     MediaSessionService2Provider createMediaSessionService2(MediaSessionService2 instance);
+    MediaNotificationProvider createMediaSessionService2MediaNotification(Context context,
+            MediaNotification mediaNotification, int notificationId, Notification notification);
 
     MediaSessionService2Provider createMediaLibraryService2(MediaLibraryService2 instance);
     BuilderBaseProvider<MediaLibrarySession, MediaLibrarySessionCallback>
