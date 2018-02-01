@@ -98,29 +98,33 @@ public class SyncOperation {
     /** jobId of the JobScheduler job corresponding to this sync */
     public int jobId;
 
+    /** Whether this operation should be exempted from the app-standby throttling. */
+    public boolean isAppStandbyExempted;
+
     public SyncOperation(Account account, int userId, int owningUid, String owningPackage,
                          int reason, int source, String provider, Bundle extras,
-                         boolean allowParallelSyncs) {
+                         boolean allowParallelSyncs, boolean isAppStandbyExempted) {
         this(new SyncStorageEngine.EndPoint(account, provider, userId), owningUid, owningPackage,
-                reason, source, extras, allowParallelSyncs);
+                reason, source, extras, allowParallelSyncs, isAppStandbyExempted);
     }
 
     private SyncOperation(SyncStorageEngine.EndPoint info, int owningUid, String owningPackage,
-                          int reason, int source, Bundle extras, boolean allowParallelSyncs) {
+            int reason, int source, Bundle extras, boolean allowParallelSyncs,
+            boolean isAppStandbyExempted) {
         this(info, owningUid, owningPackage, reason, source, extras, allowParallelSyncs, false,
-                NO_JOB_ID, 0, 0);
+                NO_JOB_ID, 0, 0, isAppStandbyExempted);
     }
 
     public SyncOperation(SyncOperation op, long periodMillis, long flexMillis) {
         this(op.target, op.owningUid, op.owningPackage, op.reason, op.syncSource,
                 new Bundle(op.extras), op.allowParallelSyncs, op.isPeriodic, op.sourcePeriodicId,
-                periodMillis, flexMillis);
+                periodMillis, flexMillis, /*isAppStandbyExempted=*/ false);
     }
 
     public SyncOperation(SyncStorageEngine.EndPoint info, int owningUid, String owningPackage,
                          int reason, int source, Bundle extras, boolean allowParallelSyncs,
                          boolean isPeriodic, int sourcePeriodicId, long periodMillis,
-                         long flexMillis) {
+                         long flexMillis, boolean isAppStandbyExempted) {
         this.target = info;
         this.owningUid = owningUid;
         this.owningPackage = owningPackage;
@@ -134,6 +138,7 @@ public class SyncOperation {
         this.flexMillis = flexMillis;
         this.jobId = NO_JOB_ID;
         this.key = toKey();
+        this.isAppStandbyExempted = isAppStandbyExempted;
     }
 
     /* Get a one off sync operation instance from a periodic sync. */
@@ -143,7 +148,7 @@ public class SyncOperation {
         }
         SyncOperation op = new SyncOperation(target, owningUid, owningPackage, reason, syncSource,
                 new Bundle(extras), allowParallelSyncs, false, jobId /* sourcePeriodicId */,
-                periodMillis, flexMillis);
+                periodMillis, flexMillis, /*isAppStandbyExempted=*/ false);
         return op;
     }
 
@@ -161,6 +166,7 @@ public class SyncOperation {
         periodMillis = other.periodMillis;
         flexMillis = other.flexMillis;
         this.key = other.key;
+        isAppStandbyExempted = other.isAppStandbyExempted;
     }
 
     /**
@@ -229,6 +235,7 @@ public class SyncOperation {
         jobInfoExtras.putLong("flexMillis", flexMillis);
         jobInfoExtras.putLong("expectedRuntime", expectedRuntime);
         jobInfoExtras.putInt("retries", retries);
+        jobInfoExtras.putBoolean("isAppStandbyExempted", isAppStandbyExempted);
         return jobInfoExtras;
     }
 
@@ -249,6 +256,7 @@ public class SyncOperation {
         Bundle extras;
         boolean allowParallelSyncs, isPeriodic;
         long periodMillis, flexMillis;
+        boolean isAppStandbyExempted;
 
         if (!jobExtras.getBoolean("SyncManagerJob", false)) {
             return null;
@@ -267,6 +275,7 @@ public class SyncOperation {
         initiatedBy = jobExtras.getInt("sourcePeriodicId", NO_JOB_ID);
         periodMillis = jobExtras.getLong("periodMillis");
         flexMillis = jobExtras.getLong("flexMillis");
+        isAppStandbyExempted = jobExtras.getBoolean("isAppStandbyExempted", false);
         extras = new Bundle();
 
         PersistableBundle syncExtras = jobExtras.getPersistableBundle("syncExtras");
@@ -288,7 +297,8 @@ public class SyncOperation {
         SyncStorageEngine.EndPoint target =
                 new SyncStorageEngine.EndPoint(account, provider, userId);
         SyncOperation op = new SyncOperation(target, owningUid, owningPackage, reason, source,
-                extras, allowParallelSyncs, isPeriodic, initiatedBy, periodMillis, flexMillis);
+                extras, allowParallelSyncs, isPeriodic, initiatedBy, periodMillis, flexMillis,
+                isAppStandbyExempted);
         op.jobId = jobExtras.getInt("jobId");
         op.expectedRuntime = jobExtras.getLong("expectedRuntime");
         op.retries = jobExtras.getInt("retries");
@@ -374,6 +384,9 @@ public class SyncOperation {
         }
         if (extras.getBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, false)) {
             sb.append(" EXPEDITED");
+        }
+        if (isAppStandbyExempted) {
+            sb.append(" STANDBY-EXEMPTED");
         }
         sb.append(" Reason=");
         sb.append(reasonToString(pm, reason));

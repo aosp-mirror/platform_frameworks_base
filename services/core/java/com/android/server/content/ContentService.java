@@ -48,8 +48,8 @@ import android.os.Bundle;
 import android.os.FactoryTest;
 import android.os.IBinder;
 import android.os.Parcel;
+import android.os.Process;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -446,7 +446,7 @@ public final class ContentService extends IContentService.Stub {
                 SyncManager syncManager = getSyncManager();
                 if (syncManager != null) {
                     syncManager.scheduleLocalSync(null /* all accounts */, callingUserHandle, uid,
-                            uri.getAuthority());
+                            uri.getAuthority(), /*isAppStandbyExempted=*/ isUidInForeground(uid));
                 }
             }
 
@@ -502,6 +502,9 @@ public final class ContentService extends IContentService.Stub {
         int userId = UserHandle.getCallingUserId();
         int uId = Binder.getCallingUid();
 
+        validateExtras(uId, extras);
+        final boolean isForegroundSyncRequest = isForegroundSyncRequest(uId, extras);
+
         // This makes it so that future permission checks will be in the context of this
         // process rather than the caller's process. We will restore this before returning.
         long identityToken = clearCallingIdentity();
@@ -509,7 +512,8 @@ public final class ContentService extends IContentService.Stub {
             SyncManager syncManager = getSyncManager();
             if (syncManager != null) {
                 syncManager.scheduleSync(account, userId, uId, authority, extras,
-                        SyncStorageEngine.AuthorityInfo.UNDEFINED);
+                        SyncStorageEngine.AuthorityInfo.UNDEFINED,
+                        /*isAppStandbyExempted=*/ isForegroundSyncRequest);
             }
         } finally {
             restoreCallingIdentity(identityToken);
@@ -548,6 +552,12 @@ public final class ContentService extends IContentService.Stub {
     public void syncAsUser(SyncRequest request, int userId) {
         enforceCrossUserPermission(userId, "no permission to request sync as user: " + userId);
         int callerUid = Binder.getCallingUid();
+
+        final Bundle extras = request.getBundle();
+
+        validateExtras(callerUid, extras);
+        final boolean isForegroundSyncRequest = isForegroundSyncRequest(callerUid, extras);
+
         // This makes it so that future permission checks will be in the context of this
         // process rather than the caller's process. We will restore this before returning.
         long identityToken = clearCallingIdentity();
@@ -556,8 +566,6 @@ public final class ContentService extends IContentService.Stub {
             if (syncManager == null) {
                 return;
             }
-
-            Bundle extras = request.getBundle();
             long flextime = request.getSyncFlexTime();
             long runAtTime = request.getSyncRunTime();
             if (request.isPeriodic()) {
@@ -575,7 +583,8 @@ public final class ContentService extends IContentService.Stub {
             } else {
                 syncManager.scheduleSync(
                         request.getAccount(), userId, callerUid, request.getProvider(), extras,
-                        SyncStorageEngine.AuthorityInfo.UNDEFINED);
+                        SyncStorageEngine.AuthorityInfo.UNDEFINED,
+                        /*isAppStandbyExempted=*/ isForegroundSyncRequest);
             }
         } finally {
             restoreCallingIdentity(identityToken);
@@ -649,10 +658,13 @@ public final class ContentService extends IContentService.Stub {
                     "no permission to write the sync settings");
         }
 
+        Bundle extras = new Bundle(request.getBundle());
+        validateExtras(callingUid, extras);
+
         long identityToken = clearCallingIdentity();
         try {
             SyncStorageEngine.EndPoint info;
-            Bundle extras = new Bundle(request.getBundle());
+
             Account account = request.getAccount();
             String provider = request.getProvider();
             info = new SyncStorageEngine.EndPoint(account, provider, userId);
@@ -787,6 +799,8 @@ public final class ContentService extends IContentService.Stub {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
 
+        validateExtras(Binder.getCallingUid(), extras);
+
         int userId = UserHandle.getCallingUserId();
 
         pollFrequency = clampPeriod(pollFrequency);
@@ -814,6 +828,8 @@ public final class ContentService extends IContentService.Stub {
         }
         mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SYNC_SETTINGS,
                 "no permission to write the sync settings");
+
+        validateExtras(Binder.getCallingUid(), extras);
 
         final int callingUid = Binder.getCallingUid();
 
@@ -1237,6 +1253,56 @@ public final class ContentService extends IContentService.Stub {
             return SyncStorageEngine.AuthorityInfo.NOT_SYNCABLE;
         }
         return SyncStorageEngine.AuthorityInfo.UNDEFINED;
+    }
+
+    private void validateExtras(int callingUid, Bundle extras) {
+        if (extras.containsKey(ContentResolver.SYNC_VIRTUAL_EXTRAS_FORCE_FG_SYNC)
+                || extras.containsKey(ContentResolver.SYNC_VIRTUAL_EXTRAS_FORCE_FG_SYNC)
+                ) {
+            switch (callingUid) {
+                case Process.ROOT_UID:
+                case Process.SHELL_UID:
+                case Process.SYSTEM_UID:
+                    break; // Okay
+                default:
+                    throw new SecurityException("Invalid extras specified.");
+            }
+        }
+    }
+
+    private boolean isForegroundSyncRequest(int callingUid, Bundle extras) {
+        final boolean isForegroundRequest;
+        if (extras.getBoolean(ContentResolver.SYNC_VIRTUAL_EXTRAS_FORCE_FG_SYNC)) {
+            isForegroundRequest = true;
+        } else if (extras.getBoolean(ContentResolver.SYNC_VIRTUAL_EXTRAS_FORCE_BG_SYNC)) {
+            isForegroundRequest = false;
+        } else {
+            isForegroundRequest = isUidInForeground(callingUid);
+        }
+        extras.remove(ContentResolver.SYNC_VIRTUAL_EXTRAS_FORCE_FG_SYNC);
+        extras.remove(ContentResolver.SYNC_VIRTUAL_EXTRAS_FORCE_BG_SYNC);
+
+        return isForegroundRequest;
+    }
+
+    private boolean isUidInForeground(int uid) {
+        // If the caller is ADB, we assume it's a background request by default, because
+        // that's also the default of requests from the requestsync command.
+        // The requestsync command will always set either SYNC_VIRTUAL_EXTRAS_FORCE_FG_SYNC or
+        // SYNC_VIRTUAL_EXTRAS_FORCE_BG_SYNC (for non-periodic sync requests),
+        // so it shouldn't matter in practice.
+        switch (uid) {
+            case Process.SHELL_UID:
+            case Process.ROOT_UID:
+                return false;
+        }
+        final ActivityManagerInternal ami =
+                LocalServices.getService(ActivityManagerInternal.class);
+        if (ami != null) {
+            return ami.getUidProcessState(uid)
+                    <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+        }
+        return false;
     }
 
     /**

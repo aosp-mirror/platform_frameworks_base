@@ -340,7 +340,8 @@ public class SyncStorageEngine {
     interface OnSyncRequestListener {
 
         /** Called when a sync is needed on an account(s) due to some change in state. */
-        public void onSyncRequest(EndPoint info, int reason, Bundle extras);
+        public void onSyncRequest(EndPoint info, int reason, Bundle extras,
+                boolean exemptFromAppStandby);
     }
 
     interface PeriodicSyncAddedListener {
@@ -675,7 +676,8 @@ public class SyncStorageEngine {
 
         if (sync) {
             requestSync(account, userId, SyncOperation.REASON_SYNC_AUTO, providerName,
-                    new Bundle());
+                    new Bundle(),
+                    /* exemptFromAppStandby=*/ false);
         }
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
         queueBackup();
@@ -736,7 +738,8 @@ public class SyncStorageEngine {
             writeAccountInfoLocked();
         }
         if (syncable == AuthorityInfo.SYNCABLE) {
-            requestSync(aInfo, SyncOperation.REASON_IS_SYNCABLE, new Bundle());
+            requestSync(aInfo, SyncOperation.REASON_IS_SYNCABLE, new Bundle(),
+                    /*exemptFromAppStandby=*/ false); // Or the caller FG state?
         }
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
     }
@@ -908,7 +911,8 @@ public class SyncStorageEngine {
         }
         if (flag) {
             requestSync(null, userId, SyncOperation.REASON_MASTER_SYNC_AUTO, null,
-                    new Bundle());
+                    new Bundle(),
+                    /*exemptFromAppStandby=*/ false); // Or the caller FG state?
         }
         reportChange(ContentResolver.SYNC_OBSERVER_TYPE_SETTINGS);
         mContext.sendBroadcast(ContentResolver.ACTION_SYNC_CONN_STATUS_CHANGED);
@@ -2138,10 +2142,12 @@ public class SyncStorageEngine {
         }
     }
 
-    private void requestSync(AuthorityInfo authorityInfo, int reason, Bundle extras) {
+    private void requestSync(AuthorityInfo authorityInfo, int reason, Bundle extras,
+            boolean exemptFromAppStandby) {
         if (android.os.Process.myUid() == android.os.Process.SYSTEM_UID
                 && mSyncRequestListener != null) {
-            mSyncRequestListener.onSyncRequest(authorityInfo.target, reason, extras);
+            mSyncRequestListener.onSyncRequest(authorityInfo.target, reason, extras,
+                    exemptFromAppStandby);
         } else {
             SyncRequest.Builder req =
                     new SyncRequest.Builder()
@@ -2153,7 +2159,7 @@ public class SyncStorageEngine {
     }
 
     private void requestSync(Account account, int userId, int reason, String authority,
-                             Bundle extras) {
+            Bundle extras, boolean exemptFromAppStandby) {
         // If this is happening in the system process, then call the syncrequest listener
         // to make a request back to the SyncManager directly.
         // If this is probably a test instance, then call back through the ContentResolver
@@ -2162,8 +2168,7 @@ public class SyncStorageEngine {
                 && mSyncRequestListener != null) {
             mSyncRequestListener.onSyncRequest(
                     new EndPoint(account, authority, userId),
-                    reason,
-                    extras);
+                    reason, extras, exemptFromAppStandby);
         } else {
             ContentResolver.requestSync(account, authority, extras);
         }
