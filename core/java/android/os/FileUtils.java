@@ -89,7 +89,7 @@ public class FileUtils {
 
     private static final File[] EMPTY = new File[0];
 
-    private static final boolean ENABLE_COPY_OPTIMIZATIONS = false;
+    private static final boolean ENABLE_COPY_OPTIMIZATIONS = true;
 
     private static final long COPY_CHECKPOINT_BYTES = 524288;
 
