@@ -87,6 +87,7 @@ public class IpSecService extends IIpSecService.Stub {
     private static final String NETD_SERVICE_NAME = "netd";
     private static final int[] DIRECTIONS =
             new int[] {IpSecManager.DIRECTION_OUT, IpSecManager.DIRECTION_IN};
+    private static final String[] WILDCARD_ADDRESSES = new String[]{"0.0.0.0", "::"};
 
     private static final int NETD_FETCH_TIMEOUT_MS = 5000; // ms
     private static final int MAX_PORT_BIND_ATTEMPTS = 10;
@@ -413,12 +414,16 @@ public class IpSecService extends IIpSecService.Stub {
                     .append(mTransformQuotaTracker)
                     .append(", mSocketQuotaTracker=")
                     .append(mSocketQuotaTracker)
+                    .append(", mTunnelQuotaTracker=")
+                    .append(mTunnelQuotaTracker)
                     .append(", mSpiRecords=")
                     .append(mSpiRecords)
                     .append(", mTransformRecords=")
                     .append(mTransformRecords)
                     .append(", mEncapSocketRecords=")
                     .append(mEncapSocketRecords)
+                    .append(", mTunnelInterfaceRecords=")
+                    .append(mTunnelInterfaceRecords)
                     .append("}")
                     .toString();
         }
@@ -815,12 +820,14 @@ public class IpSecService extends IIpSecService.Stub {
             try {
                 mSrvConfig.getNetdInstance().removeVirtualTunnelInterface(mInterfaceName);
 
-                for (int direction : DIRECTIONS) {
-                    int mark = (direction == IpSecManager.DIRECTION_IN) ? mIkey : mOkey;
-                    mSrvConfig
-                            .getNetdInstance()
-                            .ipSecDeleteSecurityPolicy(
-                                    0, direction, mLocalAddress, mRemoteAddress, mark, 0xffffffff);
+                for(String wildcardAddr : WILDCARD_ADDRESSES) {
+                    for (int direction : DIRECTIONS) {
+                        int mark = (direction == IpSecManager.DIRECTION_IN) ? mIkey : mOkey;
+                        mSrvConfig
+                                .getNetdInstance()
+                                .ipSecDeleteSecurityPolicy(
+                                        0, direction, wildcardAddr, wildcardAddr, mark, 0xffffffff);
+                    }
                 }
             } catch (ServiceSpecificException e) {
                 // FIXME: get the error code and throw is at an IOException from Errno Exception
@@ -1261,19 +1268,21 @@ public class IpSecService extends IIpSecService.Stub {
                     .getNetdInstance()
                     .addVirtualTunnelInterface(intfName, localAddr, remoteAddr, ikey, okey);
 
-            for (int direction : DIRECTIONS) {
-                int mark = (direction == IpSecManager.DIRECTION_OUT) ? okey : ikey;
+            for(String wildcardAddr : WILDCARD_ADDRESSES) {
+                for (int direction : DIRECTIONS) {
+                    int mark = (direction == IpSecManager.DIRECTION_OUT) ? okey : ikey;
 
-                mSrvConfig
-                        .getNetdInstance()
-                        .ipSecAddSecurityPolicy(
+                    mSrvConfig
+                            .getNetdInstance()
+                            .ipSecAddSecurityPolicy(
                                 0, // Use 0 for reqId
                                 direction,
-                                "",
-                                "",
+                                wildcardAddr,
+                                wildcardAddr,
                                 0,
                                 mark,
                                 0xffffffff);
+                }
             }
 
             userRecord.mTunnelInterfaceRecords.put(
@@ -1646,16 +1655,18 @@ public class IpSecService extends IIpSecService.Stub {
                 c.setNetwork(tunnelInterfaceInfo.getUnderlyingNetwork());
 
                 // If outbound, also add SPI to the policy.
-                mSrvConfig
-                        .getNetdInstance()
-                        .ipSecUpdateSecurityPolicy(
-                                0, // Use 0 for reqId
-                                direction,
-                                "",
-                                "",
-                                transformInfo.getSpiRecord().getSpi(),
-                                mark,
-                                0xffffffff);
+                for(String wildcardAddr : WILDCARD_ADDRESSES) {
+                    mSrvConfig
+                            .getNetdInstance()
+                            .ipSecUpdateSecurityPolicy(
+                                    0, // Use 0 for reqId
+                                    direction,
+                                    wildcardAddr,
+                                    wildcardAddr,
+                                    transformInfo.getSpiRecord().getSpi(),
+                                    mark,
+                                    0xffffffff);
+                }
             }
 
             // Update SA with tunnel mark (ikey or okey based on direction)
