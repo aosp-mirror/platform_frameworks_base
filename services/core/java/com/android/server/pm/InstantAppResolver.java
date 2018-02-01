@@ -51,8 +51,8 @@ import android.util.Slog;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
-import com.android.server.pm.EphemeralResolverConnection.ConnectionException;
-import com.android.server.pm.EphemeralResolverConnection.PhaseTwoCallback;
+import com.android.server.pm.InstantAppResolverConnection.ConnectionException;
+import com.android.server.pm.InstantAppResolverConnection.PhaseTwoCallback;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -66,7 +66,7 @@ import java.util.UUID;
 
 /** @hide */
 public abstract class InstantAppResolver {
-    private static final boolean DEBUG_EPHEMERAL = Build.IS_DEBUGGABLE;
+    private static final boolean DEBUG_INSTANT = Build.IS_DEBUGGABLE;
     private static final String TAG = "PackageManager";
 
     private static final int RESOLUTION_SUCCESS = 0;
@@ -117,10 +117,10 @@ public abstract class InstantAppResolver {
     }
 
     public static AuxiliaryResolveInfo doInstantAppResolutionPhaseOne(
-            EphemeralResolverConnection connection, InstantAppRequest requestObj) {
+            InstantAppResolverConnection connection, InstantAppRequest requestObj) {
         final long startTime = System.currentTimeMillis();
         final String token = UUID.randomUUID().toString();
-        if (DEBUG_EPHEMERAL) {
+        if (DEBUG_INSTANT) {
             Log.d(TAG, "[" + token + "] Phase1; resolving");
         }
         final Intent origIntent = requestObj.origIntent;
@@ -152,7 +152,7 @@ public abstract class InstantAppResolver {
             logMetrics(ACTION_INSTANT_APP_RESOLUTION_PHASE_ONE, startTime, token,
                     resolutionStatus);
         }
-        if (DEBUG_EPHEMERAL && resolveInfo == null) {
+        if (DEBUG_INSTANT && resolveInfo == null) {
             if (resolutionStatus == RESOLUTION_BIND_TIMEOUT) {
                 Log.d(TAG, "[" + token + "] Phase1; bind timed out");
             } else if (resolutionStatus == RESOLUTION_CALL_TIMEOUT) {
@@ -173,11 +173,11 @@ public abstract class InstantAppResolver {
     }
 
     public static void doInstantAppResolutionPhaseTwo(Context context,
-            EphemeralResolverConnection connection, InstantAppRequest requestObj,
+            InstantAppResolverConnection connection, InstantAppRequest requestObj,
             ActivityInfo instantAppInstaller, Handler callbackHandler) {
         final long startTime = System.currentTimeMillis();
         final String token = requestObj.responseObj.token;
-        if (DEBUG_EPHEMERAL) {
+        if (DEBUG_INSTANT) {
             Log.d(TAG, "[" + token + "] Phase2; resolving");
         }
         final Intent origIntent = requestObj.origIntent;
@@ -234,7 +234,7 @@ public abstract class InstantAppResolver {
             }
             logMetrics(ACTION_INSTANT_APP_RESOLUTION_PHASE_TWO, startTime, token,
                     resolutionStatus);
-            if (DEBUG_EPHEMERAL) {
+            if (DEBUG_INSTANT) {
                 if (resolutionStatus == RESOLUTION_BIND_TIMEOUT) {
                     Log.d(TAG, "[" + token + "] Phase2; bind timed out");
                 } else {
@@ -268,10 +268,14 @@ public abstract class InstantAppResolver {
                 | Intent.FLAG_ACTIVITY_NO_HISTORY
                 | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
         if (token != null) {
+            // TODO(b/72700831): remove populating old extra
             intent.putExtra(Intent.EXTRA_EPHEMERAL_TOKEN, token);
+            intent.putExtra(Intent.EXTRA_INSTANT_APP_TOKEN, token);
         }
         if (origIntent.getData() != null) {
+            // TODO(b/72700831): remove populating old extra
             intent.putExtra(Intent.EXTRA_EPHEMERAL_HOSTNAME, origIntent.getData().getHost());
+            intent.putExtra(Intent.EXTRA_INSTANT_APP_HOSTNAME, origIntent.getData().getHost());
         }
         intent.putExtra(Intent.EXTRA_INSTANT_APP_ACTION, origIntent.getAction());
         intent.putExtra(Intent.EXTRA_INTENT, sanitizedIntent);
@@ -305,8 +309,10 @@ public abstract class InstantAppResolver {
                                             | PendingIntent.FLAG_ONE_SHOT
                                             | PendingIntent.FLAG_IMMUTABLE,
                                     null /*bOptions*/, userId);
-                    intent.putExtra(Intent.EXTRA_EPHEMERAL_FAILURE,
-                            new IntentSender(failureIntentTarget));
+                    IntentSender failureSender = new IntentSender(failureIntentTarget);
+                    // TODO(b/72700831): remove populating old extra
+                    intent.putExtra(Intent.EXTRA_EPHEMERAL_FAILURE, failureSender);
+                    intent.putExtra(Intent.EXTRA_INSTANT_APP_FAILURE, failureSender);
                 } catch (RemoteException ignore) { /* ignore; same process */ }
             }
 
@@ -323,8 +329,10 @@ public abstract class InstantAppResolver {
                                 PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_ONE_SHOT
                                         | PendingIntent.FLAG_IMMUTABLE,
                                 null /*bOptions*/, userId);
-                intent.putExtra(Intent.EXTRA_EPHEMERAL_SUCCESS,
-                        new IntentSender(successIntentTarget));
+                IntentSender successSender = new IntentSender(successIntentTarget);
+                // TODO(b/72700831): remove populating old extra
+                intent.putExtra(Intent.EXTRA_EPHEMERAL_SUCCESS, successSender);
+                intent.putExtra(Intent.EXTRA_INSTANT_APP_SUCCESS, successSender);
             } catch (RemoteException ignore) { /* ignore; same process */ }
             if (verificationBundle != null) {
                 intent.putExtra(Intent.EXTRA_VERIFICATION_BUNDLE, verificationBundle);
@@ -444,13 +452,13 @@ public abstract class InstantAppResolver {
                 return null;
             }
             // No filters; we need to start phase two
-            if (DEBUG_EPHEMERAL) {
+            if (DEBUG_INSTANT) {
                 Log.d(TAG, "No app filters; go to phase 2");
             }
             return Collections.emptyList();
         }
-        final PackageManagerService.EphemeralIntentResolver instantAppResolver =
-                new PackageManagerService.EphemeralIntentResolver();
+        final PackageManagerService.InstantAppIntentResolver instantAppResolver =
+                new PackageManagerService.InstantAppIntentResolver();
         for (int j = instantAppFilters.size() - 1; j >= 0; --j) {
             final InstantAppIntentFilter instantAppFilter = instantAppFilters.get(j);
             final List<IntentFilter> splitFilters = instantAppFilter.getFilters();
@@ -481,11 +489,11 @@ public abstract class InstantAppResolver {
                 instantAppResolver.queryIntent(
                         origIntent, resolvedType, false /*defaultOnly*/, userId);
         if (!matchedResolveInfoList.isEmpty()) {
-            if (DEBUG_EPHEMERAL) {
+            if (DEBUG_INSTANT) {
                 Log.d(TAG, "[" + token + "] Found match(es); " + matchedResolveInfoList);
             }
             return matchedResolveInfoList;
-        } else if (DEBUG_EPHEMERAL) {
+        } else if (DEBUG_INSTANT) {
             Log.d(TAG, "[" + token + "] No matches found"
                     + " package: " + instantAppInfo.getPackageName()
                     + ", versionCode: " + instantAppInfo.getVersionCode());

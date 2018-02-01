@@ -37,34 +37,29 @@ import android.util.Slog;
 import android.util.TimedRemoteCaller;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.os.TransferPipe;
 
-import java.io.FileDescriptor;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Represents a remote ephemeral resolver. It is responsible for binding to the remote
+ * Represents a remote instant app resolver. It is responsible for binding to the remote
  * service and handling all interactions in a timely manner.
  * @hide
  */
-final class EphemeralResolverConnection implements DeathRecipient {
+final class InstantAppResolverConnection implements DeathRecipient {
     private static final String TAG = "PackageManager";
     // This is running in a critical section and the timeout must be sufficiently low
     private static final long BIND_SERVICE_TIMEOUT_MS =
             Build.IS_ENG ? 500 : 300;
     private static final long CALL_SERVICE_TIMEOUT_MS =
             Build.IS_ENG ? 200 : 100;
-    private static final boolean DEBUG_EPHEMERAL = Build.IS_DEBUGGABLE;
+    private static final boolean DEBUG_INSTANT = Build.IS_DEBUGGABLE;
 
     private final Object mLock = new Object();
-    private final GetEphemeralResolveInfoCaller mGetEphemeralResolveInfoCaller =
-            new GetEphemeralResolveInfoCaller();
+    private final GetInstantAppResolveInfoCaller mGetInstantAppResolveInfoCaller =
+            new GetInstantAppResolveInfoCaller();
     private final ServiceConnection mServiceConnection = new MyServiceConnection();
     private final Context mContext;
     /** Intent used to bind to the service */
@@ -79,7 +74,7 @@ final class EphemeralResolverConnection implements DeathRecipient {
     @GuardedBy("mLock")
     private IInstantAppResolver mRemoteInstance;
 
-    public EphemeralResolverConnection(
+    public InstantAppResolverConnection(
             Context context, ComponentName componentName, String action) {
         mContext = context;
         mIntent = new Intent(action).setComponent(componentName);
@@ -98,8 +93,8 @@ final class EphemeralResolverConnection implements DeathRecipient {
                 throw new ConnectionException(ConnectionException.FAILURE_INTERRUPTED);
             }
             try {
-                return mGetEphemeralResolveInfoCaller
-                        .getEphemeralResolveInfoList(target, sanitizedIntent, hashPrefix, token);
+                return mGetInstantAppResolveInfoCaller
+                        .getInstantAppResolveInfoList(target, sanitizedIntent, hashPrefix, token);
             } catch (TimeoutException e) {
                 throw new ConnectionException(ConnectionException.FAILURE_CALL);
             } catch (RemoteException ignore) {
@@ -171,7 +166,7 @@ final class EphemeralResolverConnection implements DeathRecipient {
 
             if (mBindState == STATE_PENDING) {
                 // there is a pending bind, let's see if we can use it.
-                if (DEBUG_EPHEMERAL) {
+                if (DEBUG_INSTANT) {
                     Slog.i(TAG, "[" + token + "] Previous bind timed out; waiting for connection");
                 }
                 try {
@@ -188,7 +183,7 @@ final class EphemeralResolverConnection implements DeathRecipient {
             if (mBindState == STATE_BINDING) {
                 // someone was binding when we called bind(), or they raced ahead while we were
                 // waiting in the PENDING case; wait for their result instead. Last chance!
-                if (DEBUG_EPHEMERAL) {
+                if (DEBUG_INSTANT) {
                     Slog.i(TAG, "[" + token + "] Another thread is binding; waiting for connection");
                 }
                 waitForBindLocked(token);
@@ -206,12 +201,12 @@ final class EphemeralResolverConnection implements DeathRecipient {
         IInstantAppResolver instance = null;
         try {
             if (doUnbind) {
-                if (DEBUG_EPHEMERAL) {
+                if (DEBUG_INSTANT) {
                     Slog.i(TAG, "[" + token + "] Previous connection never established; rebinding");
                 }
                 mContext.unbindService(mServiceConnection);
             }
-            if (DEBUG_EPHEMERAL) {
+            if (DEBUG_INSTANT) {
                 Slog.v(TAG, "[" + token + "] Binding to instant app resolver");
             }
             final int flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE;
@@ -247,7 +242,7 @@ final class EphemeralResolverConnection implements DeathRecipient {
 
     @Override
     public void binderDied() {
-        if (DEBUG_EPHEMERAL) {
+        if (DEBUG_INSTANT) {
             Slog.d(TAG, "Binder to instant app resolver died");
         }
         synchronized (mLock) {
@@ -286,7 +281,7 @@ final class EphemeralResolverConnection implements DeathRecipient {
     private final class MyServiceConnection implements ServiceConnection {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            if (DEBUG_EPHEMERAL) {
+            if (DEBUG_INSTANT) {
                 Slog.d(TAG, "Connected to instant app resolver");
             }
             synchronized (mLock) {
@@ -295,7 +290,7 @@ final class EphemeralResolverConnection implements DeathRecipient {
                     mBindState = STATE_IDLE;
                 }
                 try {
-                    service.linkToDeath(EphemeralResolverConnection.this, 0 /*flags*/);
+                    service.linkToDeath(InstantAppResolverConnection.this, 0 /*flags*/);
                 } catch (RemoteException e) {
                     handleBinderDiedLocked();
                 }
@@ -305,7 +300,7 @@ final class EphemeralResolverConnection implements DeathRecipient {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            if (DEBUG_EPHEMERAL) {
+            if (DEBUG_INSTANT) {
                 Slog.d(TAG, "Disconnected from instant app resolver");
             }
             synchronized (mLock) {
@@ -314,11 +309,11 @@ final class EphemeralResolverConnection implements DeathRecipient {
         }
     }
 
-    private static final class GetEphemeralResolveInfoCaller
+    private static final class GetInstantAppResolveInfoCaller
             extends TimedRemoteCaller<List<InstantAppResolveInfo>> {
         private final IRemoteCallback mCallback;
 
-        public GetEphemeralResolveInfoCaller() {
+        public GetInstantAppResolveInfoCaller() {
             super(CALL_SERVICE_TIMEOUT_MS);
             mCallback = new IRemoteCallback.Stub() {
                     @Override
@@ -333,7 +328,7 @@ final class EphemeralResolverConnection implements DeathRecipient {
             };
         }
 
-        public List<InstantAppResolveInfo> getEphemeralResolveInfoList(
+        public List<InstantAppResolveInfo> getInstantAppResolveInfoList(
                 IInstantAppResolver target, Intent sanitizedIntent,  int hashPrefix[], String token)
                         throws RemoteException, TimeoutException {
             final int sequence = onBeforeRemoteCall();

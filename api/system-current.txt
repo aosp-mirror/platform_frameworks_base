@@ -822,8 +822,16 @@ package android.content {
     field public static final java.lang.String ACTION_USER_REMOVED = "android.intent.action.USER_REMOVED";
     field public static final java.lang.String ACTION_VOICE_ASSIST = "android.intent.action.VOICE_ASSIST";
     field public static final java.lang.String CATEGORY_LEANBACK_SETTINGS = "android.intent.category.LEANBACK_SETTINGS";
+    field public static final java.lang.String EXTRA_CALLING_PACKAGE = "android.intent.extra.CALLING_PACKAGE";
     field public static final java.lang.String EXTRA_FORCE_FACTORY_RESET = "android.intent.extra.FORCE_FACTORY_RESET";
+    field public static final java.lang.String EXTRA_INSTANT_APP_ACTION = "android.intent.extra.INSTANT_APP_ACTION";
     field public static final java.lang.String EXTRA_INSTANT_APP_BUNDLES = "android.intent.extra.INSTANT_APP_BUNDLES";
+    field public static final java.lang.String EXTRA_INSTANT_APP_EXTRAS = "android.intent.extra.INSTANT_APP_EXTRAS";
+    field public static final java.lang.String EXTRA_INSTANT_APP_FAILURE = "android.intent.extra.INSTANT_APP_FAILURE";
+    field public static final java.lang.String EXTRA_INSTANT_APP_HOSTNAME = "android.intent.extra.INSTANT_APP_HOSTNAME";
+    field public static final java.lang.String EXTRA_INSTANT_APP_SUCCESS = "android.intent.extra.INSTANT_APP_SUCCESS";
+    field public static final java.lang.String EXTRA_INSTANT_APP_TOKEN = "android.intent.extra.INSTANT_APP_TOKEN";
+    field public static final java.lang.String EXTRA_LONG_VERSION_CODE = "android.intent.extra.LONG_VERSION_CODE";
     field public static final java.lang.String EXTRA_ORIGINATING_UID = "android.intent.extra.ORIGINATING_UID";
     field public static final java.lang.String EXTRA_PACKAGES = "android.intent.extra.PACKAGES";
     field public static final java.lang.String EXTRA_PERMISSION_NAME = "android.intent.extra.PERMISSION_NAME";
@@ -831,6 +839,7 @@ package android.content {
     field public static final java.lang.String EXTRA_REMOTE_CALLBACK = "android.intent.extra.REMOTE_CALLBACK";
     field public static final java.lang.String EXTRA_RESULT_NEEDED = "android.intent.extra.RESULT_NEEDED";
     field public static final java.lang.String EXTRA_UNKNOWN_INSTANT_APP = "android.intent.extra.UNKNOWN_INSTANT_APP";
+    field public static final java.lang.String EXTRA_VERIFICATION_BUNDLE = "android.intent.extra.VERIFICATION_BUNDLE";
   }
 
   public class IntentFilter implements android.os.Parcelable {
@@ -843,7 +852,9 @@ package android.content {
 package android.content.pm {
 
   public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
+    method public boolean isInstantApp();
     field public java.lang.String credentialProtectedDataDir;
+    field public int targetSandboxVersion;
   }
 
   public final class InstantAppInfo implements android.os.Parcelable {

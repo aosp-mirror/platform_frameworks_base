@@ -1554,16 +1554,6 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_INSTALL_FAILURE = "android.intent.action.INSTALL_FAILURE";
 
     /**
-     * @hide
-     * @removed
-     * @deprecated Do not use. This will go away.
-     *     Replace with {@link #ACTION_INSTALL_INSTANT_APP_PACKAGE}.
-     */
-    @SystemApi
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_INSTALL_EPHEMERAL_PACKAGE
-            = "android.intent.action.INSTALL_EPHEMERAL_PACKAGE";
-    /**
      * Activity Action: Launch instant application installer.
      * <p class="note">
      * This is a protected intent that can only be sent by the system.
@@ -1576,16 +1566,6 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_INSTALL_INSTANT_APP_PACKAGE
             = "android.intent.action.INSTALL_INSTANT_APP_PACKAGE";
 
-    /**
-     * @hide
-     * @removed
-     * @deprecated Do not use. This will go away.
-     *     Replace with {@link #ACTION_RESOLVE_INSTANT_APP_PACKAGE}.
-     */
-    @SystemApi
-    @SdkConstant(SdkConstantType.SERVICE_ACTION)
-    public static final String ACTION_RESOLVE_EPHEMERAL_PACKAGE
-            = "android.intent.action.RESOLVE_EPHEMERAL_PACKAGE";
     /**
      * Service Action: Resolve instant application.
      * <p>
@@ -1600,16 +1580,6 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_RESOLVE_INSTANT_APP_PACKAGE
             = "android.intent.action.RESOLVE_INSTANT_APP_PACKAGE";
 
-    /**
-     * @hide
-     * @removed
-     * @deprecated Do not use. This will go away.
-     *     Replace with {@link #ACTION_INSTANT_APP_RESOLVER_SETTINGS}.
-     */
-    @SystemApi
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_EPHEMERAL_RESOLVER_SETTINGS
-            = "android.intent.action.EPHEMERAL_RESOLVER_SETTINGS";
     /**
      * Activity Action: Launch instant app settings.
      *
@@ -4444,32 +4414,77 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * A {@link IntentSender} to start after ephemeral installation success.
+     * @deprecated Use {@link #EXTRA_INSTANT_APP_SUCCESS).
+     * @removed
      * @hide
      */
+    @Deprecated
     public static final String EXTRA_EPHEMERAL_SUCCESS = "android.intent.extra.EPHEMERAL_SUCCESS";
 
     /**
-     * A {@link IntentSender} to start after ephemeral installation failure.
+     * A {@link IntentSender} to start after instant app installation success.
      * @hide
      */
+    @SystemApi
+    public static final String EXTRA_INSTANT_APP_SUCCESS =
+            "android.intent.extra.INSTANT_APP_SUCCESS";
+
+    /**
+     * A {@link IntentSender} to start after ephemeral installation failure.
+     * @deprecated Use {@link #EXTRA_INSTANT_APP_FAILURE).
+     * @removed
+     * @hide
+     */
+    @Deprecated
     public static final String EXTRA_EPHEMERAL_FAILURE = "android.intent.extra.EPHEMERAL_FAILURE";
 
     /**
-     * The host name that triggered an ephemeral resolution.
+     * A {@link IntentSender} to start after instant app installation failure.
      * @hide
      */
+    @SystemApi
+    public static final String EXTRA_INSTANT_APP_FAILURE =
+            "android.intent.extra.INSTANT_APP_FAILURE";
+
+    /**
+     * The host name that triggered an ephemeral resolution.
+     * @deprecated Use {@link #EXTRA_INSTANT_APP_HOSTNAME).
+     * @removed
+     * @hide
+     */
+    @Deprecated
     public static final String EXTRA_EPHEMERAL_HOSTNAME = "android.intent.extra.EPHEMERAL_HOSTNAME";
 
     /**
-     * An opaque token to track ephemeral resolution.
+     * The host name that triggered an instant app resolution.
      * @hide
      */
+    @SystemApi
+    public static final String EXTRA_INSTANT_APP_HOSTNAME =
+            "android.intent.extra.INSTANT_APP_HOSTNAME";
+
+    /**
+     * An opaque token to track ephemeral resolution.
+     * @deprecated Use {@link #EXTRA_INSTANT_APP_TOKEN).
+     * @removed
+     * @hide
+     */
+    @Deprecated
     public static final String EXTRA_EPHEMERAL_TOKEN = "android.intent.extra.EPHEMERAL_TOKEN";
+
+    /**
+     * An opaque token to track instant app resolution.
+     * @hide
+     */
+    @SystemApi
+    public static final String EXTRA_INSTANT_APP_TOKEN =
+            "android.intent.extra.INSTANT_APP_TOKEN";
 
     /**
      * The action that triggered an instant application resolution.
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_INSTANT_APP_ACTION = "android.intent.extra.INSTANT_APP_ACTION";
 
     /**
@@ -4487,6 +4502,7 @@ public class Intent implements Parcelable, Cloneable {
      * instant application resolver.
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_INSTANT_APP_EXTRAS =
             "android.intent.extra.INSTANT_APP_EXTRAS";
 
@@ -4512,12 +4528,14 @@ public class Intent implements Parcelable, Cloneable {
      * The version code of the app to install components from.
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_LONG_VERSION_CODE = "android.intent.extra.LONG_VERSION_CODE";
 
     /**
-     * The app that triggered the ephemeral installation.
+     * The app that triggered the instant app installation.
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_CALLING_PACKAGE
             = "android.intent.extra.CALLING_PACKAGE";
 
@@ -4526,6 +4544,7 @@ public class Intent implements Parcelable, Cloneable {
      * installer may use.
      * @hide
      */
+    @SystemApi
     public static final String EXTRA_VERIFICATION_BUNDLE
             = "android.intent.extra.VERIFICATION_BUNDLE";
 
