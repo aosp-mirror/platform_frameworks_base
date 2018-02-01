@@ -766,17 +766,16 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote)
 
     /*
      * Enable debugging only for apps forked from zygote.
-     * Set suspend=y to pause during VM init and use android ADB transport.
      */
     if (zygote) {
+      // Set the JDWP provider and required arguments. By default let the runtime choose how JDWP is
+      // implemented. When this is not set the runtime defaults to not allowing JDWP.
       addOption("-XjdwpOptions:suspend=n,server=y");
+      parseRuntimeOption("dalvik.vm.jdwp-provider",
+                         jdwpProviderBuf,
+                         "-XjdwpProvider:",
+                         "default");
     }
-
-    // Set the JDWP provider. By default let the runtime choose.
-    parseRuntimeOption("dalvik.vm.jdwp-provider",
-                       jdwpProviderBuf,
-                       "-XjdwpProvider:",
-                       "default");
 
     parseRuntimeOption("dalvik.vm.lockprof.threshold",
                        lockProfThresholdBuf,
