@@ -867,8 +867,9 @@ public class Resources {
      * @param theme The theme used to style the drawable attributes, may be {@code null}.
      * @return Drawable An object that can be used to draw this resource.
      * @throws NotFoundException Throws NotFoundException if the given ID does
-     *             not exist.
+     *             not exist, or cannot be decoded.
      */
+    @NonNull
     public Drawable getDrawableForDensity(@DrawableRes int id, int density, @Nullable Theme theme) {
         final TypedValue value = obtainTempTypedValue();
         try {
@@ -980,7 +981,7 @@ public class Resources {
      *         or multiple colors that can be selected based on a state.
      * @deprecated Use {@link #getColorStateList(int, Theme)} instead.
      */
-    @Nullable
+    @NonNull
     @Deprecated
     public ColorStateList getColorStateList(@ColorRes int id) throws NotFoundException {
         final ColorStateList csl = getColorStateList(id, null);
@@ -1011,7 +1012,7 @@ public class Resources {
      * @return A themed ColorStateList object containing either a single solid
      *         color or multiple colors that can be selected based on a state.
      */
-    @Nullable
+    @NonNull
     public ColorStateList getColorStateList(@ColorRes int id, @Nullable Theme theme)
             throws NotFoundException {
         final TypedValue value = obtainTempTypedValue();
@@ -1024,7 +1025,7 @@ public class Resources {
         }
     }
 
-    @Nullable
+    @NonNull
     ColorStateList loadColorStateList(@NonNull TypedValue value, int id, @Nullable Theme theme)
             throws NotFoundException {
         return mResourcesImpl.loadColorStateList(this, value, id, theme);
@@ -1033,7 +1034,7 @@ public class Resources {
     /**
      * @hide
      */
-    @Nullable
+    @NonNull
     public ComplexColor loadComplexColor(@NonNull TypedValue value, int id, @Nullable Theme theme) {
         return mResourcesImpl.loadComplexColor(this, value, id, theme);
     }
@@ -1139,6 +1140,7 @@ public class Resources {
      *         
      * @see #getXml
      */
+    @NonNull
     public XmlResourceParser getLayout(@LayoutRes int id) throws NotFoundException {
         return loadXmlResourceParser(id, "layout");
     }
@@ -1163,6 +1165,7 @@ public class Resources {
      *         
      * @see #getXml
      */
+    @NonNull
     public XmlResourceParser getAnimation(@AnimatorRes @AnimRes int id) throws NotFoundException {
         return loadXmlResourceParser(id, "anim");
     }
@@ -1188,6 +1191,7 @@ public class Resources {
      *         
      * @see android.util.AttributeSet
      */
+    @NonNull
     public XmlResourceParser getXml(@XmlRes int id) throws NotFoundException {
         return loadXmlResourceParser(id, "xml");
     }
@@ -1203,8 +1207,8 @@ public class Resources {
      * @return InputStream Access to the resource data.
      *
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
-     * 
      */
+    @NonNull
     public InputStream openRawResource(@RawRes int id) throws NotFoundException {
         final TypedValue value = obtainTempTypedValue();
         try {
@@ -1261,6 +1265,7 @@ public class Resources {
      *
      * @throws NotFoundException Throws NotFoundException if the given ID does not exist.
      */
+    @NonNull
     public InputStream openRawResource(@RawRes int id, TypedValue value)
             throws NotFoundException {
         return mResourcesImpl.openRawResource(id, value);
