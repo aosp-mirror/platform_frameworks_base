@@ -15,6 +15,7 @@
 
 #include "src/condition/ConditionWizard.h"
 #include "src/external/StatsPullerManager.h"
+#include "src/packages/UidMap.h"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -38,6 +39,11 @@ public:
     MOCK_METHOD3(RegisterReceiver, void(int tagId, wp<PullDataReceiver> receiver, long intervalMs));
     MOCK_METHOD2(UnRegisterReceiver, void(int tagId, wp<PullDataReceiver> receiver));
     MOCK_METHOD2(Pull, bool(const int pullCode, vector<std::shared_ptr<LogEvent>>* data));
+};
+
+class MockUidMap : public UidMap {
+ public:
+  MOCK_CONST_METHOD1(getHostUidOrSelf, int(int uid));
 };
 
 HashableDimensionKey getMockedDimensionKey(int tagId, int key, std::string value);

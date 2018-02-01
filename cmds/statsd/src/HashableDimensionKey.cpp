@@ -181,7 +181,9 @@ bool MetricDimensionKey::operator<(const MetricDimensionKey& that) const {
     return toString().compare(that.toString()) < 0;
 };
 
-
+bool compareDimensionsValue(const DimensionsValue& s1, const DimensionsValue& s2) {
+    return EqualsTo(s1, s2);
+}
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

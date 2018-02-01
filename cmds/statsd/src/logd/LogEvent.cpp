@@ -294,6 +294,28 @@ int64_t LogEvent::GetLong(size_t key, status_t* err) const {
     }
 }
 
+int LogEvent::GetInt(size_t key, status_t* err) const {
+  DimensionsValue value;
+  if (!GetSimpleAtomDimensionsValueProto(key, &value)) {
+    *err = BAD_INDEX;
+    return 0;
+  }
+  const DimensionsValue* leafValue = getSingleLeafValue(&value);
+  switch (leafValue->value_case()) {
+    case DimensionsValue::ValueCase::kValueInt:
+      return leafValue->value_int();
+    case DimensionsValue::ValueCase::kValueLong:
+    case DimensionsValue::ValueCase::kValueBool:
+    case DimensionsValue::ValueCase::kValueFloat:
+    case DimensionsValue::ValueCase::kValueTuple:
+    case DimensionsValue::ValueCase::kValueStr:
+    case DimensionsValue::ValueCase::VALUE_NOT_SET: {
+      *err = BAD_TYPE;
+      return 0;
+    }
+  }
+}
+
 const char* LogEvent::GetString(size_t key, status_t* err) const {
     DimensionsValue value;
     if (!GetSimpleAtomDimensionsValueProto(key, &value)) {

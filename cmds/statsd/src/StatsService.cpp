@@ -77,6 +77,7 @@ StatsService::StatsService(const sp<Looper>& handlerLooper)
     : mAnomalyMonitor(new AnomalyMonitor(MIN_DIFF_TO_UPDATE_REGISTERED_ALARM_SECS))
 {
     mUidMap = new UidMap();
+    StatsPuller::SetUidMap(mUidMap);
     mConfigManager = new ConfigManager();
     mProcessor = new StatsLogProcessor(mUidMap, mAnomalyMonitor, time(nullptr), [this](const ConfigKey& key) {
         sp<IStatsCompanionService> sc = getStatsCompanionService();
