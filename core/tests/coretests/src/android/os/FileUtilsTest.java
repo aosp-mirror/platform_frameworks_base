@@ -181,6 +181,27 @@ public class FileUtilsTest {
     }
 
     @Test
+    public void testCopy_ShortPipeToFile() throws Exception {
+        byte[] source = new byte[33_000_000];
+        new Random().nextBytes(source);
+
+        for (int size : DATA_SIZES) {
+            final File dest = new File(mTarget, "dest");
+
+            byte[] expected = Arrays.copyOf(source, size);
+            byte[] actual = new byte[size];
+
+            try (MemoryPipe in = MemoryPipe.createSource(source);
+                    FileOutputStream out = new FileOutputStream(dest)) {
+                FileUtils.copy(in.getFD(), out.getFD(), null, null, size);
+            }
+
+            actual = readFile(dest);
+            assertArrayEquals(expected, actual);
+        }
+    }
+
+    @Test
     public void testIsFilenameSafe() throws Exception {
         assertTrue(FileUtils.isFilenameSafe(new File("foobar")));
         assertTrue(FileUtils.isFilenameSafe(new File("a_b-c=d.e/0,1+23")));
