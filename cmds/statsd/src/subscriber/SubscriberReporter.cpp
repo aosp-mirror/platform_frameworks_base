@@ -56,7 +56,7 @@ void SubscriberReporter::removeConfig(const ConfigKey& configKey) {
 
 void SubscriberReporter::alertBroadcastSubscriber(const ConfigKey& configKey,
                                                   const Subscription& subscription,
-                                                  const HashableDimensionKey& dimKey) const {
+                                                  const MetricDimensionKey& dimKey) const {
     // Reminder about ids:
     //  subscription id - name of the Subscription (that ties the Alert to the broadcast)
     //  subscription rule_id - the name of the Alert (that triggers the broadcast)
@@ -92,7 +92,7 @@ void SubscriberReporter::alertBroadcastSubscriber(const ConfigKey& configKey,
 void SubscriberReporter::sendBroadcastLocked(const sp<IBinder>& intentSender,
                                              const ConfigKey& configKey,
                                              const Subscription& subscription,
-                                             const HashableDimensionKey& dimKey) const {
+                                             const MetricDimensionKey& dimKey) const {
     VLOG("SubscriberReporter::sendBroadcastLocked called.");
     if (mStatsCompanionService == nullptr) {
         ALOGW("Failed to send subscriber broadcast: could not access StatsCompanionService.");
@@ -107,8 +107,8 @@ void SubscriberReporter::sendBroadcastLocked(const sp<IBinder>& intentSender,
 }
 
 StatsDimensionsValue SubscriberReporter::protoToStatsDimensionsValue(
-        const HashableDimensionKey& dimKey) {
-    return protoToStatsDimensionsValue(dimKey.getDimensionsValue());
+        const MetricDimensionKey& dimKey) {
+    return protoToStatsDimensionsValue(dimKey.getDimensionKeyInWhat().getDimensionsValue());
 }
 
 StatsDimensionsValue SubscriberReporter::protoToStatsDimensionsValue(

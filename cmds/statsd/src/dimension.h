@@ -63,6 +63,9 @@ bool IsSubDimension(const DimensionsValue& dimension, const DimensionsValue& sub
 
 // Helper function to get long value from the DimensionsValue proto.
 long getLongFromDimenValue(const DimensionsValue& dimensionValue);
+
+bool getSubDimension(const DimensionsValue& dimension, const FieldMatcher& matcher,
+                    DimensionsValue* subDimension);
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

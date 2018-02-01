@@ -165,6 +165,7 @@ LOCAL_CFLAGS += \
 
 LOCAL_SRC_FILES := \
     $(statsd_common_src) \
+    tests/dimension_test.cpp \
     tests/AnomalyMonitor_test.cpp \
     tests/anomaly/AnomalyTracker_test.cpp \
     tests/ConfigManager_test.cpp \
@@ -190,7 +191,8 @@ LOCAL_SRC_FILES := \
     tests/e2e/WakelockDuration_e2e_test.cpp \
     tests/e2e/MetricConditionLink_e2e_test.cpp \
     tests/e2e/Attribution_e2e_test.cpp \
-    tests/e2e/GaugeMetric_e2e_test.cpp
+    tests/e2e/GaugeMetric_e2e_test.cpp \
+    tests/e2e/DimensionInCondition_e2e_test.cpp
 
 LOCAL_STATIC_LIBRARIES := \
     $(statsd_common_static_libraries) \

@@ -41,7 +41,14 @@ public:
     // the conditionParameters contains the parameters for it's children SimpleConditionTrackers.
     virtual ConditionState query(
             const int conditionIndex,
-            const ConditionKey& conditionParameters);
+            const ConditionKey& conditionParameters,
+            const FieldMatcher& dimensionFields,
+            std::unordered_set<HashableDimensionKey> *dimensionKeySet);
+
+    virtual ConditionState getMetConditionDimension(
+            const int index,
+            const FieldMatcher& dimensionFields,
+            std::unordered_set<HashableDimensionKey> *dimensionsKeySet) const;
 
 private:
     std::vector<sp<ConditionTracker>> mAllConditions;

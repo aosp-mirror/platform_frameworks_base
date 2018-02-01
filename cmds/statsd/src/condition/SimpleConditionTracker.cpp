@@ -104,6 +104,9 @@ bool SimpleConditionTracker::init(const vector<Predicate>& allConditionConfig,
                                   vector<bool>& stack) {
     // SimpleConditionTracker does not have dependency on other conditions, thus we just return
     // if the initialization was successful.
+    if (mOutputDimensions.has_field() || mOutputDimensions.child_size() > 0) {
+        setSliced(true);
+    }
     return mInitialized;
 }
 
@@ -234,11 +237,12 @@ void SimpleConditionTracker::handleConditionEvent(const HashableDimensionKey& ou
          conditionChangedCache[mIndex] == true);
 }
 
-void SimpleConditionTracker::evaluateCondition(const LogEvent& event,
-                                               const vector<MatchingState>& eventMatcherValues,
-                                               const vector<sp<ConditionTracker>>& mAllConditions,
-                                               vector<ConditionState>& conditionCache,
-                                               vector<bool>& conditionChangedCache) {
+void SimpleConditionTracker::evaluateCondition(
+        const LogEvent& event,
+        const vector<MatchingState>& eventMatcherValues,
+        const vector<sp<ConditionTracker>>& mAllConditions,
+        vector<ConditionState>& conditionCache,
+        vector<bool>& conditionChangedCache) {
     if (conditionCache[mIndex] != ConditionState::kNotEvaluated) {
         // it has been evaluated.
         VLOG("Yes, already evaluated, %lld %d",
@@ -271,7 +275,7 @@ void SimpleConditionTracker::evaluateCondition(const LogEvent& event,
         if (mSliced) {
             // if the condition result is sliced. metrics won't directly get value from the
             // cache, so just set any value other than kNotEvaluated.
-            conditionCache[mIndex] = ConditionState::kUnknown;
+            conditionCache[mIndex] = mInitialValue;
         } else {
             const auto& itr = mSlicedConditionState.find(DEFAULT_DIMENSION_KEY);
             if (itr == mSlicedConditionState.end()) {
@@ -310,10 +314,8 @@ void SimpleConditionTracker::evaluateCondition(const LogEvent& event,
             vector<ConditionState> dimensionalConditionCache(conditionCache.size(),
                                                              ConditionState::kNotEvaluated);
             vector<bool> dimensionalConditionChangedCache(conditionChangedCache.size(), false);
-
             handleConditionEvent(HashableDimensionKey(outputValue), matchedState == 1,
                 dimensionalConditionCache, dimensionalConditionChangedCache);
-
             OrConditionState(dimensionalConditionCache, &conditionCache);
             OrBooleanVector(dimensionalConditionChangedCache, &conditionChangedCache);
         }
@@ -323,47 +325,110 @@ void SimpleConditionTracker::evaluateCondition(const LogEvent& event,
 void SimpleConditionTracker::isConditionMet(
         const ConditionKey& conditionParameters,
         const vector<sp<ConditionTracker>>& allConditions,
-        vector<ConditionState>& conditionCache) const {
-    const auto pair = conditionParameters.find(mConditionId);
-
-    if (pair == conditionParameters.end() && mOutputDimensions.child_size() > 0) {
-        ALOGE("Predicate %lld output has dimension, but it's not specified in the query!",
-              (long long)mConditionId);
-        conditionCache[mIndex] = mInitialValue;
+        const FieldMatcher& dimensionFields,
+        vector<ConditionState>& conditionCache,
+        std::unordered_set<HashableDimensionKey> &dimensionsKeySet) const {
+    if (conditionCache[mIndex] != ConditionState::kNotEvaluated) {
+        // it has been evaluated.
+        VLOG("Yes, already evaluated, %lld %d",
+            (long long)mConditionId, conditionCache[mIndex]);
         return;
     }
-    std::vector<HashableDimensionKey> defaultKeys = {DEFAULT_DIMENSION_KEY};
+    const auto pair = conditionParameters.find(mConditionId);
+
+    if (pair == conditionParameters.end()) {
+        ConditionState conditionState = ConditionState::kNotEvaluated;
+        if (dimensionFields.has_field() && dimensionFields.child_size() > 0 &&
+            dimensionFields.field() == mOutputDimensions.field()) {
+            conditionState = conditionState | getMetConditionDimension(
+                allConditions, dimensionFields, dimensionsKeySet);
+        } else {
+            conditionState = conditionState | mInitialValue;
+            if (!mSliced) {
+                const auto& itr = mSlicedConditionState.find(DEFAULT_DIMENSION_KEY);
+                if (itr != mSlicedConditionState.end()) {
+                    ConditionState sliceState =
+                        itr->second > 0 ? ConditionState::kTrue : ConditionState::kFalse;
+                    conditionState = conditionState | sliceState;
+                }
+            }
+        }
+        conditionCache[mIndex] = conditionState;
+        return;
+    }
+    std::vector<HashableDimensionKey> defaultKeys = { DEFAULT_DIMENSION_KEY };
     const std::vector<HashableDimensionKey> &keys =
             (pair == conditionParameters.end()) ? defaultKeys : pair->second;
 
     ConditionState conditionState = ConditionState::kNotEvaluated;
-    for (const auto& key : keys) {
+    for (size_t i = 0; i < keys.size(); ++i) {
+        const HashableDimensionKey& key = keys[i];
         auto startedCountIt = mSlicedConditionState.find(key);
         if (startedCountIt != mSlicedConditionState.end()) {
-            conditionState = conditionState |
-                    (startedCountIt->second > 0 ? ConditionState::kTrue : ConditionState::kFalse);
+            ConditionState sliceState =
+                startedCountIt->second > 0 ? ConditionState::kTrue : ConditionState::kFalse;
+            conditionState = conditionState | sliceState;
+            if (sliceState == ConditionState::kTrue && dimensionFields.has_field()) {
+                HashableDimensionKey dimensionKey;
+                if (getSubDimension(startedCountIt->first.getDimensionsValue(), dimensionFields,
+                                    dimensionKey.getMutableDimensionsValue())) {
+                    dimensionsKeySet.insert(dimensionKey);
+                }
+            }
         } else {
             // For unseen key, check whether the require dimensions are subset of sliced condition
             // output.
-            bool seenDimension = false;
+            conditionState = conditionState | mInitialValue;
             for (const auto& slice : mSlicedConditionState) {
-                if (IsSubDimension(slice.first.getDimensionsValue(),
-                                   key.getDimensionsValue())) {
-                    seenDimension = true;
-                    conditionState = conditionState |
-                        (slice.second > 0 ? ConditionState::kTrue : ConditionState::kFalse);
+                ConditionState sliceState =
+                    slice.second > 0 ? ConditionState::kTrue : ConditionState::kFalse;
+                if (IsSubDimension(slice.first.getDimensionsValue(), key.getDimensionsValue())) {
+                    conditionState = conditionState | sliceState;
+                    if (sliceState == ConditionState::kTrue && dimensionFields.has_field()) {
+                        HashableDimensionKey dimensionKey;
+                        if (getSubDimension(slice.first.getDimensionsValue(),
+                                            dimensionFields, dimensionKey.getMutableDimensionsValue())) {
+                            dimensionsKeySet.insert(dimensionKey);
+                        }
+                    }
                 }
-                if (conditionState == ConditionState::kTrue) {
-                    break;
-                }
-            }
-            if (!seenDimension) {
-                conditionState = conditionState | mInitialValue;
             }
         }
     }
     conditionCache[mIndex] = conditionState;
     VLOG("Predicate %lld return %d", (long long)mConditionId, conditionCache[mIndex]);
+}
+
+ConditionState SimpleConditionTracker::getMetConditionDimension(
+        const std::vector<sp<ConditionTracker>>& allConditions,
+        const FieldMatcher& dimensionFields,
+        std::unordered_set<HashableDimensionKey> &dimensionsKeySet) const {
+    ConditionState conditionState = mInitialValue;
+    if (!dimensionFields.has_field() ||
+        !mOutputDimensions.has_field() ||
+        dimensionFields.field() != mOutputDimensions.field()) {
+        const auto& itr = mSlicedConditionState.find(DEFAULT_DIMENSION_KEY);
+        if (itr != mSlicedConditionState.end()) {
+            ConditionState sliceState =
+                itr->second > 0 ? ConditionState::kTrue : ConditionState::kFalse;
+            conditionState = conditionState | sliceState;
+        }
+        return conditionState;
+    }
+
+    for (const auto& slice : mSlicedConditionState) {
+        ConditionState sliceState =
+            slice.second > 0 ? ConditionState::kTrue : ConditionState::kFalse;
+        DimensionsValue dimensionsValue;
+        conditionState = conditionState | sliceState;
+        HashableDimensionKey dimensionKey;
+        if (sliceState == ConditionState::kTrue &&
+            getSubDimension(slice.first.getDimensionsValue(), dimensionFields,
+                            dimensionKey.getMutableDimensionsValue())) {
+            dimensionsKeySet.insert(dimensionKey);
+        }
+    }
+    return conditionState;
 }
 
 }  // namespace statsd

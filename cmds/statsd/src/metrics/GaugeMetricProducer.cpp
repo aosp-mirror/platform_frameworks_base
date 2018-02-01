@@ -82,13 +82,15 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
     mFieldFilter = metric.gauge_fields_filter();
 
     // TODO: use UidMap if uid->pkg_name is required
-    mDimensions = metric.dimensions_in_what();
+    mDimensionsInWhat = metric.dimensions_in_what();
+    mDimensionsInCondition = metric.dimensions_in_condition();
 
     if (metric.links().size() > 0) {
         mConditionLinks.insert(mConditionLinks.begin(), metric.links().begin(),
                                metric.links().end());
-        mConditionSliced = true;
     }
+    mConditionSliced = (metric.links().size() > 0)||
+        (mDimensionsInCondition.has_field() && mDimensionsInCondition.child_size() > 0);
 
     // Kicks off the puller immediately.
     if (mPullTagId != -1 && mSamplingType == GaugeMetric::RANDOM_ONE_SAMPLE) {
@@ -136,17 +138,26 @@ void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
     long long protoToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_GAUGE_METRICS);
 
     for (const auto& pair : mPastBuckets) {
-        const HashableDimensionKey& hashableKey = pair.first;
+        const MetricDimensionKey& dimensionKey = pair.first;
 
-        VLOG("  dimension key %s", hashableKey.c_str());
+        VLOG("  dimension key %s", dimensionKey.c_str());
         long long wrapperToken =
                 protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
 
         // First fill dimension.
         long long dimensionToken = protoOutput->start(
                 FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_WHAT);
-        writeDimensionsValueProtoToStream(hashableKey.getDimensionsValue(), protoOutput);
+        writeDimensionsValueProtoToStream(
+            dimensionKey.getDimensionKeyInWhat().getDimensionsValue(), protoOutput);
         protoOutput->end(dimensionToken);
+
+        if (dimensionKey.hasDimensionKeyInCondition()) {
+            long long dimensionInConditionToken = protoOutput->start(
+                    FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_CONDITION);
+            writeDimensionsValueProtoToStream(
+                dimensionKey.getDimensionKeyInCondition().getDimensionsValue(), protoOutput);
+            protoOutput->end(dimensionInConditionToken);
+        }
 
         // Then fill bucket_info (GaugeBucketInfo).
         for (const auto& bucket : pair.second) {
@@ -248,7 +259,7 @@ void GaugeMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
     }
 }
 
-bool GaugeMetricProducer::hitGuardRailLocked(const HashableDimensionKey& newKey) {
+bool GaugeMetricProducer::hitGuardRailLocked(const MetricDimensionKey& newKey) {
     if (mCurrentSlicedBucket->find(newKey) != mCurrentSlicedBucket->end()) {
         return false;
     }
@@ -268,7 +279,7 @@ bool GaugeMetricProducer::hitGuardRailLocked(const HashableDimensionKey& newKey)
 }
 
 void GaugeMetricProducer::onMatchedLogEventInternalLocked(
-        const size_t matcherIndex, const HashableDimensionKey& eventKey,
+        const size_t matcherIndex, const MetricDimensionKey& eventKey,
         const ConditionKey& conditionKey, bool condition,
         const LogEvent& event) {
     if (condition == false) {

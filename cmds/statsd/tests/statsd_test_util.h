@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include <gtest/gtest.h>
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "statslog.h"
 #include "src/logd/LogEvent.h"
@@ -25,6 +26,18 @@ namespace statsd {
 
 // Create AtomMatcher proto to simply match a specific atom type.
 AtomMatcher CreateSimpleAtomMatcher(const string& name, int atomId);
+
+// Create AtomMatcher proto for screen brightness state changed.
+AtomMatcher CreateScreenBrightnessChangedAtomMatcher();
+
+// Create AtomMatcher proto for starting battery save mode.
+AtomMatcher CreateBatterySaverModeStartAtomMatcher();
+
+// Create AtomMatcher proto for stopping battery save mode.
+AtomMatcher CreateBatterySaverModeStopAtomMatcher();
+
+// Create AtomMatcher proto for process state changed.
+AtomMatcher CreateUidProcessStateChangedAtomMatcher();
 
 // Create AtomMatcher proto for acquiring wakelock.
 AtomMatcher CreateAcquireWakelockAtomMatcher();
@@ -59,6 +72,9 @@ Predicate CreateScreenIsOnPredicate();
 // Create Predicate proto for screen is off.
 Predicate CreateScreenIsOffPredicate();
 
+// Create Predicate proto for battery saver mode.
+Predicate CreateBatterySaverModePredicate();
+
 // Create Predicate proto for holding wakelock.
 Predicate CreateHoldingWakelockPredicate();
 
@@ -86,6 +102,15 @@ FieldMatcher CreateAttributionUidDimensions(const int atomId,
 std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(
     const android::view::DisplayStateEnum state, uint64_t timestampNs);
 
+// Create log event for screen brightness state changed.
+std::unique_ptr<LogEvent> CreateScreenBrightnessChangedEvent(
+   int level, uint64_t timestampNs);
+
+// Create log event when battery saver starts.
+std::unique_ptr<LogEvent> CreateBatterySaverOnEvent(uint64_t timestampNs);
+// Create log event when battery saver stops.
+std::unique_ptr<LogEvent> CreateBatterySaverOffEvent(uint64_t timestampNs);
+
 // Create log event for app moving to background.
 std::unique_ptr<LogEvent> CreateMoveToBackgroundEvent(const int uid, uint64_t timestampNs);
 
@@ -94,11 +119,11 @@ std::unique_ptr<LogEvent> CreateMoveToForegroundEvent(const int uid, uint64_t ti
 
 // Create log event when the app sync starts.
 std::unique_ptr<LogEvent> CreateSyncStartEvent(
-    const int uid, const string& name, uint64_t timestampNs);
+    const std::vector<AttributionNode>& attributions, const string& name, uint64_t timestampNs);
 
 // Create log event when the app sync ends.
 std::unique_ptr<LogEvent> CreateSyncEndEvent(
-    const int uid, const string& name, uint64_t timestampNs);
+    const std::vector<AttributionNode>& attributions, const string& name, uint64_t timestampNs);
 
 // Create log event when the app sync ends.
 std::unique_ptr<LogEvent> CreateAppCrashEvent(
@@ -136,9 +161,12 @@ void ValidateAttributionUidAndTagDimension(
 
 template <typename T>
 void sortMetricDataByDimensionsValue(const T& metricData, T* sortedMetricData) {
-    std::map<HashableDimensionKey, int> dimensionIndexMap;
+    std::map<MetricDimensionKey, int> dimensionIndexMap;
     for (int i = 0; i < metricData.data_size(); ++i) {
-        dimensionIndexMap.insert(std::make_pair(metricData.data(i).dimensions_in_what(), i));
+        dimensionIndexMap.insert(std::make_pair(
+            MetricDimensionKey(HashableDimensionKey(metricData.data(i).dimensions_in_what()),
+            HashableDimensionKey(metricData.data(i).dimensions_in_condition())),
+            i));
     }
     for (const auto& itr : dimensionIndexMap) {
         *sortedMetricData->add_data() = metricData.data(itr.second);

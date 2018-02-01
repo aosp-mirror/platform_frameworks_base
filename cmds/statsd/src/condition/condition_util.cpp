@@ -118,6 +118,9 @@ void OrBooleanVector(const std::vector<bool>& ref, vector<bool> * ored) {
 
 void getFieldsFromFieldMatcher(const FieldMatcher& matcher, Field* rootField, Field* leafField,
                                std::vector<Field> *allFields) {
+    if (matcher.has_position()) {
+        leafField->set_position_index(0);
+    }
     if (matcher.child_size() == 0) {
         allFields->push_back(*rootField);
         return;

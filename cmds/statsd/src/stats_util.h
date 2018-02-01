@@ -28,13 +28,14 @@ namespace os {
 namespace statsd {
 
 const HashableDimensionKey DEFAULT_DIMENSION_KEY = HashableDimensionKey();
+const MetricDimensionKey DEFAULT_METRIC_DIMENSION_KEY = MetricDimensionKey();
 
 // Minimum bucket size in seconds
 const long kMinBucketSizeSec = 5 * 60;
 
 typedef std::map<int64_t, std::vector<HashableDimensionKey>> ConditionKey;
 
-typedef std::unordered_map<HashableDimensionKey, int64_t> DimToValMap;
+typedef std::unordered_map<MetricDimensionKey, int64_t> DimToValMap;
 
 }  // namespace statsd
 }  // namespace os

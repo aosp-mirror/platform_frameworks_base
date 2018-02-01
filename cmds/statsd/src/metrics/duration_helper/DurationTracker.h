@@ -60,8 +60,9 @@ struct DurationBucket {
 
 class DurationTracker {
 public:
-    DurationTracker(const ConfigKey& key, const int64_t& id, const HashableDimensionKey& eventKey,
-                    sp<ConditionWizard> wizard, int conditionIndex, bool nesting,
+    DurationTracker(const ConfigKey& key, const int64_t& id, const MetricDimensionKey& eventKey,
+                    sp<ConditionWizard> wizard, int conditionIndex,
+                    const FieldMatcher& dimensionInCondition, bool nesting,
                     uint64_t currentBucketStartNs, uint64_t bucketSizeNs, bool conditionSliced,
                     const std::vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
         : mConfigKey(key),
@@ -70,6 +71,7 @@ public:
           mWizard(wizard),
           mConditionTrackerIndex(conditionIndex),
           mBucketSizeNs(bucketSizeNs),
+          mDimensionInCondition(dimensionInCondition),
           mNested(nesting),
           mCurrentBucketStartTimeNs(currentBucketStartNs),
           mDuration(0),
@@ -78,6 +80,8 @@ public:
           mAnomalyTrackers(anomalyTrackers){};
 
     virtual ~DurationTracker(){};
+
+    virtual unique_ptr<DurationTracker> clone(const uint64_t eventTime) = 0;
 
     virtual void noteStart(const HashableDimensionKey& key, bool condition,
                            const uint64_t eventTime, const ConditionKey& conditionKey) = 0;
@@ -92,13 +96,17 @@ public:
     // events, so that the owner can safely remove the tracker.
     virtual bool flushIfNeeded(
             uint64_t timestampNs,
-            std::unordered_map<HashableDimensionKey, std::vector<DurationBucket>>* output) = 0;
+            std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>>* output) = 0;
 
     // Predict the anomaly timestamp given the current status.
     virtual int64_t predictAnomalyTimestampNs(const DurationAnomalyTracker& anomalyTracker,
                                               const uint64_t currentTimestamp) const = 0;
     // Dump internal states for debugging
     virtual void dumpStates(FILE* out, bool verbose) const = 0;
+
+    void setEventKey(const MetricDimensionKey& eventKey) {
+         mEventKey = eventKey;
+    }
 
 protected:
     // Starts the anomaly alarm.
@@ -150,13 +158,15 @@ protected:
 
     const int64_t mTrackerId;
 
-    HashableDimensionKey mEventKey;
+    MetricDimensionKey mEventKey;
 
     sp<ConditionWizard> mWizard;
 
     const int mConditionTrackerIndex;
 
     const int64_t mBucketSizeNs;
+
+    const FieldMatcher mDimensionInCondition;
 
     const bool mNested;
 

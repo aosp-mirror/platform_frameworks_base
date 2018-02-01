@@ -48,7 +48,14 @@ public:
 
     void isConditionMet(const ConditionKey& conditionParameters,
                         const std::vector<sp<ConditionTracker>>& allConditions,
-                        std::vector<ConditionState>& conditionCache) const override;
+                        const FieldMatcher& dimensionFields,
+                        std::vector<ConditionState>& conditionCache,
+                        std::unordered_set<HashableDimensionKey> &dimensionsKeySet) const override;
+
+    ConditionState getMetConditionDimension(
+            const std::vector<sp<ConditionTracker>>& allConditions,
+            const FieldMatcher& dimensionFields,
+            std::unordered_set<HashableDimensionKey> &dimensionsKeySet) const override;
 
 private:
     const ConfigKey mConfigKey;
@@ -73,7 +80,8 @@ private:
     void handleStopAll(std::vector<ConditionState>& conditionCache,
                        std::vector<bool>& changedCache);
 
-    void handleConditionEvent(const HashableDimensionKey& outputKey, bool matchStart,
+    void handleConditionEvent(const HashableDimensionKey& outputKey,
+                              bool matchStart,
                               std::vector<ConditionState>& conditionCache,
                               std::vector<bool>& changedCache);
 
