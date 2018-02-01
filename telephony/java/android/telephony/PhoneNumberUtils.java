@@ -22,6 +22,7 @@ import com.android.i18n.phonenumbers.PhoneNumberUtil.PhoneNumberFormat;
 import com.android.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.android.i18n.phonenumbers.ShortNumberInfo;
 
+import android.annotation.IntDef;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -42,6 +43,8 @@ import android.util.SparseIntArray;
 
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_OPERATOR_IDP_STRING;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,8 +52,31 @@ import java.util.regex.Pattern;
 /**
  * Various utilities for dealing with phone number strings.
  */
-public class PhoneNumberUtils
-{
+public class PhoneNumberUtils {
+    /** {@hide} */
+    @IntDef(prefix = "BCD_EXTENDED_TYPE_", value = {
+            BCD_EXTENDED_TYPE_EF_ADN,
+            BCD_EXTENDED_TYPE_CALLED_PARTY,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface BcdExtendType {}
+
+    /*
+     * The BCD extended type used to determine the extended char for the digit which is greater than
+     * 9.
+     *
+     * see TS 51.011 section 10.5.1 EF_ADN(Abbreviated dialling numbers)
+     */
+    public static final int BCD_EXTENDED_TYPE_EF_ADN = 1;
+
+    /*
+     * The BCD extended type used to determine the extended char for the digit which is greater than
+     * 9.
+     *
+     * see TS 24.008 section 10.5.4.7 Called party BCD number
+     */
+    public static final int BCD_EXTENDED_TYPE_CALLED_PARTY = 2;
+
     /*
      * Special characters
      *
@@ -76,22 +102,6 @@ public class PhoneNumberUtils
      */
     public static final int TOA_International = 0x91;
     public static final int TOA_Unknown = 0x81;
-
-    /*
-     * The BCD extended type used to determine the extended char for the digit which is greater than
-     * 9.
-     *
-     * see TS 51.011 section 10.5.1 EF_ADN(Abbreviated dialling numbers)
-     */
-    public static final int BCD_EXTENDED_TYPE_EF_ADN = 1;
-
-    /*
-     * The BCD extended type used to determine the extended char for the digit which is greater than
-     * 9.
-     *
-     * see TS 24.008 section 10.5.4.7 Called party BCD number
-     */
-    public static final int BCD_EXTENDED_TYPE_CALLED_PARTY = 2;
 
     static final String LOG_TAG = "PhoneNumberUtils";
     private static final boolean DBG = false;
@@ -844,7 +854,7 @@ public class PhoneNumberUtils
      *
      */
     public static String calledPartyBCDToString(
-            byte[] bytes, int offset, int length, int bcdExtType) {
+            byte[] bytes, int offset, int length, @BcdExtendType int bcdExtType) {
         boolean prependPlus = false;
         StringBuilder ret = new StringBuilder(1 + length * 2);
 
@@ -944,7 +954,8 @@ public class PhoneNumberUtils
     }
 
     private static void internalCalledPartyBCDFragmentToString(
-            StringBuilder sb, byte [] bytes, int offset, int length, int bcdExtType) {
+            StringBuilder sb, byte [] bytes, int offset, int length,
+            @BcdExtendType int bcdExtType) {
         for (int i = offset ; i < length + offset ; i++) {
             byte b;
             char c;
@@ -999,7 +1010,7 @@ public class PhoneNumberUtils
      * TOA byte. For example: SIM ADN extension fields
      */
     public static String calledPartyBCDFragmentToString(
-            byte[] bytes, int offset, int length, int bcdExtType) {
+            byte[] bytes, int offset, int length, @BcdExtendType int bcdExtType) {
         StringBuilder ret = new StringBuilder(length * 2);
         internalCalledPartyBCDFragmentToString(ret, bytes, offset, length, bcdExtType);
         return ret.toString();
@@ -1009,7 +1020,7 @@ public class PhoneNumberUtils
      * Returns the correspond character for given {@code b} based on {@code bcdExtType}, or 0 on
      * invalid code.
      */
-    private static char bcdToChar(byte b, int bcdExtType) {
+    private static char bcdToChar(byte b, @BcdExtendType int bcdExtType) {
         if (b < 0xa) {
             return (char) ('0' + b);
         }
@@ -1027,7 +1038,7 @@ public class PhoneNumberUtils
         return extended.charAt(b - 0xa);
     }
 
-    private static int charToBCD(char c, int bcdExtType) {
+    private static int charToBCD(char c, @BcdExtendType int bcdExtType) {
         if ('0' <= c && c <= '9') {
             return c - '0';
         }
@@ -1134,7 +1145,7 @@ public class PhoneNumberUtils
      *
      * @return BCD byte array
      */
-    public static byte[] numberToCalledPartyBCD(String number, int bcdExtType) {
+    public static byte[] numberToCalledPartyBCD(String number, @BcdExtendType int bcdExtType) {
         return numberToCalledPartyBCDHelper(number, false, bcdExtType);
     }
 
@@ -1143,7 +1154,7 @@ public class PhoneNumberUtils
      * the return array.
      */
     private static byte[] numberToCalledPartyBCDHelper(
-            String number, boolean includeLength, int bcdExtType) {
+            String number, boolean includeLength, @BcdExtendType int bcdExtType) {
         int numberLenReal = number.length();
         int numberLenEffective = numberLenReal;
         boolean hasPlus = number.indexOf('+') != -1;
