@@ -32,7 +32,7 @@ LOCAL_SRC_FILES := \
         src/Privacy.cpp \
         src/Reporter.cpp \
         src/Section.cpp \
-        src/io_util.cpp \
+        src/incidentd_util.cpp \
         src/main.cpp \
         src/report_directory.cpp
 
@@ -116,7 +116,7 @@ LOCAL_SRC_FILES := \
     src/Privacy.cpp \
     src/Reporter.cpp \
     src/Section.cpp \
-    src/io_util.cpp \
+    src/incidentd_util.cpp \
     src/report_directory.cpp \
     tests/section_list.cpp \
     tests/PrivacyBuffer_test.cpp \

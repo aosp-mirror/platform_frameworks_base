@@ -11,8 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-#define LOG_TAG "incidentd"
+#include "Log.h"
 
 #include "Section.h"
 
@@ -30,9 +29,9 @@ const int REVERSE_PARSER = 1;
 
 const int QUICK_TIMEOUT_MS = 100;
 
-const string VARINT_FIELD_1 = "\x08\x96\x01"; // 150
+const string VARINT_FIELD_1 = "\x08\x96\x01";  // 150
 const string STRING_FIELD_2 = "\x12\vwhatthefuck";
-const string FIX64_FIELD_3 = "\x19\xff\xff\xff\xff\xff\xff\xff\xff"; // -1
+const string FIX64_FIELD_3 = "\x19\xff\xff\xff\xff\xff\xff\xff\xff";  // -1
 
 using namespace android::base;
 using namespace android::binder;
@@ -44,11 +43,10 @@ using ::testing::internal::GetCapturedStdout;
 
 // NOTICE: this test requires /system/bin/incident_helper is installed.
 
-class SimpleListener : public IIncidentReportStatusListener
-{
+class SimpleListener : public IIncidentReportStatusListener {
 public:
-    SimpleListener() {};
-    virtual ~SimpleListener() {};
+    SimpleListener(){};
+    virtual ~SimpleListener(){};
 
     virtual Status onReportStarted() { return Status::ok(); };
     virtual Status onReportSectionStatus(int /*section*/, int /*status*/) { return Status::ok(); };
@@ -84,7 +82,9 @@ TEST(SectionTest, HeaderSection) {
     string content;
     CaptureStdout();
     ASSERT_EQ(NO_ERROR, hs.Execute(&requests));
-    EXPECT_THAT(GetCapturedStdout(), StrEq("\n\x5" "\x12\x3" "axe\n\x05\x12\x03pup"));
+    EXPECT_THAT(GetCapturedStdout(), StrEq("\n\x5"
+                                           "\x12\x3"
+                                           "axe\n\x05\x12\x03pup"));
 
     EXPECT_TRUE(ReadFileToString(output2.path, &content));
     EXPECT_THAT(content, StrEq("\n\x05\x12\x03pup"));
@@ -271,12 +271,12 @@ TEST(SectionTest, TestMultipleRequests) {
 
     string content, expect;
     expect = VARINT_FIELD_1 + STRING_FIELD_2 + FIX64_FIELD_3;
-    char c = (char) expect.size();
+    char c = (char)expect.size();
     EXPECT_TRUE(ReadFileToString(output1.path, &content));
     EXPECT_THAT(content, StrEq(string("\x02") + c + expect));
 
     expect = STRING_FIELD_2 + FIX64_FIELD_3;
-    c = (char) expect.size();
+    c = (char)expect.size();
     EXPECT_TRUE(ReadFileToString(output2.path, &content));
     EXPECT_THAT(content, StrEq(string("\x02") + c + expect));
 
@@ -315,7 +315,7 @@ TEST(SectionTest, TestMultipleRequestsBySpec) {
 
     string content, expect;
     expect = STRING_FIELD_2 + FIX64_FIELD_3;
-    char c = (char) expect.size();
+    char c = (char)expect.size();
 
     // output1 and output2 are the same
     EXPECT_TRUE(ReadFileToString(output1.path, &content));
@@ -324,7 +324,7 @@ TEST(SectionTest, TestMultipleRequestsBySpec) {
     EXPECT_THAT(content, StrEq(string("\x02") + c + expect));
 
     // output3 has only auto field
-    c = (char) STRING_FIELD_2.size();
+    c = (char)STRING_FIELD_2.size();
     EXPECT_TRUE(ReadFileToString(output3.path, &content));
     EXPECT_THAT(content, StrEq(string("\x02") + c + STRING_FIELD_2));
 }

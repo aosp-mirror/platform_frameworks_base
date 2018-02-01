@@ -21,10 +21,9 @@
 
 uint64_t encode_field_id(const Privacy* p) { return (uint64_t)p->type << 32 | p->field_id; }
 
-const Privacy* lookup(const Privacy* p, uint32_t fieldId)
-{
+const Privacy* lookup(const Privacy* p, uint32_t fieldId) {
     if (p->children == NULL) return NULL;
-    for (int i=0; p->children[i] != NULL; i++) { // NULL-terminated.
+    for (int i = 0; p->children[i] != NULL; i++) {  // NULL-terminated.
         if (p->children[i]->field_id == fieldId) return p->children[i];
         // Incident section gen tool guarantees field ids in ascending order.
         if (p->children[i]->field_id > fieldId) return NULL;
@@ -32,41 +31,31 @@ const Privacy* lookup(const Privacy* p, uint32_t fieldId)
     return NULL;
 }
 
-static bool allowDest(const uint8_t dest, const uint8_t policy)
-{
+static bool allowDest(const uint8_t dest, const uint8_t policy) {
     switch (policy) {
-    case android::os::DEST_LOCAL:
-        return dest == android::os::DEST_LOCAL;
-    case android::os::DEST_EXPLICIT:
-    case DEST_UNSET:
-        return dest == android::os::DEST_LOCAL ||
-            dest == android::os::DEST_EXPLICIT ||
-            dest == DEST_UNSET;
-    case android::os::DEST_AUTOMATIC:
-        return true;
-    default:
-        return false;
+        case android::os::DEST_LOCAL:
+            return dest == android::os::DEST_LOCAL;
+        case android::os::DEST_EXPLICIT:
+        case DEST_UNSET:
+            return dest == android::os::DEST_LOCAL || dest == android::os::DEST_EXPLICIT ||
+                   dest == DEST_UNSET;
+        case android::os::DEST_AUTOMATIC:
+            return true;
+        default:
+            return false;
     }
 }
 
-bool
-PrivacySpec::operator<(const PrivacySpec& other) const
-{
-  return dest < other.dest;
-}
+bool PrivacySpec::operator<(const PrivacySpec& other) const { return dest < other.dest; }
 
-bool
-PrivacySpec::CheckPremission(const Privacy* privacy, const uint8_t defaultDest) const
-{
+bool PrivacySpec::CheckPremission(const Privacy* privacy, const uint8_t defaultDest) const {
     uint8_t policy = privacy != NULL ? privacy->dest : defaultDest;
     return allowDest(dest, policy);
 }
 
-bool
-PrivacySpec::RequireAll() const { return dest == android::os::DEST_LOCAL; }
+bool PrivacySpec::RequireAll() const { return dest == android::os::DEST_LOCAL; }
 
-PrivacySpec PrivacySpec::new_spec(int dest)
-{
+PrivacySpec PrivacySpec::new_spec(int dest) {
     switch (dest) {
         case android::os::DEST_AUTOMATIC:
         case android::os::DEST_EXPLICIT:

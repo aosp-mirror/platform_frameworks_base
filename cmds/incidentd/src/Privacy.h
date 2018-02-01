@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#pragma once
 
 #ifndef PRIVACY_H
 #define PRIVACY_H
@@ -20,7 +21,7 @@
 #include <stdint.h>
 
 // This is the default value of DEST enum, sync with privacy.proto
-const uint8_t DEST_UNSET = 255; // DEST_UNSET is not exposed to libincident
+const uint8_t DEST_UNSET = 255;  // DEST_UNSET is not exposed to libincident
 const uint8_t DEST_DEFAULT_VALUE = DEST_UNSET;
 
 /*
@@ -68,15 +69,17 @@ public:
     bool operator<(const PrivacySpec& other) const;
 
     // check permission of a policy, if returns true, don't strip the data.
-    bool CheckPremission(const Privacy* privacy, const uint8_t defaultDest = DEST_DEFAULT_VALUE) const;
+    bool CheckPremission(const Privacy* privacy,
+                         const uint8_t defaultDest = DEST_DEFAULT_VALUE) const;
 
     // if returns true, no data need to be stripped.
     bool RequireAll() const;
 
     // Constructs spec using static methods below.
     static PrivacySpec new_spec(int dest);
+
 private:
     PrivacySpec(uint8_t dest) : dest(dest) {}
 };
 
-#endif // PRIVACY_H
+#endif  // PRIVACY_H

@@ -14,33 +14,21 @@
  * limitations under the License.
  */
 
+/*
+ * This file must be included at the top of the file. Other header files
+ * occasionally include log.h, and if LOG_TAG isn't set when that happens
+ * we'll get a preprocesser error when we try to define it here.
+ */
+
+#pragma once
+
 #define LOG_TAG "incidentd"
+#define DEBUG false
 
-#include "io_util.h"
+#include <log/log.h>
 
-#include <unistd.h>
-
-status_t write_all(int fd, uint8_t const* buf, size_t size)
-{
-    while (size > 0) {
-        ssize_t amt = TEMP_FAILURE_RETRY(::write(fd, buf, size));
-        if (amt < 0) {
-            return -errno;
-        }
-        size -= amt;
-        buf += amt;
-    }
-    return NO_ERROR;
-}
-
-Fpipe::Fpipe() {}
-
-Fpipe::~Fpipe() { close(); }
-
-bool Fpipe::close() { return !(::close(mFds[0]) || ::close(mFds[1])); }
-
-bool Fpipe::init() { return pipe(mFds) != -1; }
-
-int Fpipe::readFd() const { return mFds[0]; }
-
-int Fpipe::writeFd() const { return mFds[1]; }
+// Use the local value to turn on/off debug logs instead of using log.tag.properties.
+// The advantage is that in production compiler can remove the logging code if the local
+// DEBUG/VERBOSE is false.
+#define VLOG(...) \
+    if (DEBUG) ALOGD(__VA_ARGS__);

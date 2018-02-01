@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#pragma once
 
 #ifndef PRIVACY_BUFFER_H
 #define PRIVACY_BUFFER_H
@@ -31,14 +32,14 @@ using namespace android::util;
  * PrivacyBuffer holds the original protobuf data and strips PII-sensitive fields
  * based on the request and holds stripped data in its own buffer for output.
  */
-class PrivacyBuffer
-{
+class PrivacyBuffer {
 public:
     PrivacyBuffer(const Privacy* policy, EncodedBuffer::iterator& data);
     ~PrivacyBuffer();
 
     /**
-     * Strip based on the request and hold data in its own buffer. Return NO_ERROR if strip succeeds.
+     * Strip based on the request and hold data in its own buffer. Return NO_ERROR if strip
+     * succeeds.
      */
     status_t strip(const PrivacySpec& spec);
 
@@ -64,8 +65,8 @@ private:
     ProtoOutputStream mProto;
     size_t mSize;
 
-    status_t stripField(const Privacy* parentPolicy, const PrivacySpec& spec);
+    status_t stripField(const Privacy* parentPolicy, const PrivacySpec& spec, int depth);
     void writeFieldOrSkip(uint32_t fieldTag, bool skip);
 };
 
-#endif // PRIVACY_BUFFER_H
+#endif  // PRIVACY_BUFFER_H
