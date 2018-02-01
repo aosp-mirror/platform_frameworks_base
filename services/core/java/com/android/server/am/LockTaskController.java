@@ -38,7 +38,6 @@ import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
@@ -141,6 +140,14 @@ public class LockTaskController {
     LockPatternUtils mLockPatternUtils;
     @VisibleForTesting
     TelecomManager mTelecomManager;
+
+    /**
+     * Helper that is responsible for showing the right toast when a disallowed activity operation
+     * occurred. In pinned mode, we show instructions on how to break out of this mode, whilst in
+     * fully locked mode we only show that unlocking is blocked.
+     */
+    @VisibleForTesting
+    LockTaskNotify mLockTaskNotify;
 
     /**
      * The chain of tasks in LockTask mode, in the order of when they first entered LockTask mode.
@@ -468,7 +475,7 @@ public class LockTaskController {
                 getDevicePolicyManager().notifyLockTaskModeChanged(false, null, userId);
             }
             if (mLockTaskModeState == LOCK_TASK_MODE_PINNED) {
-                getStatusBarService().showPinningEnterExitToast(false /* entering */);
+                getLockTaskNotify().showPinningExitToast();
             }
         } catch (RemoteException ex) {
             throw new RuntimeException(ex);
@@ -483,11 +490,7 @@ public class LockTaskController {
      */
     void showLockTaskToast() {
         if (mLockTaskModeState == LOCK_TASK_MODE_PINNED) {
-            try {
-                getStatusBarService().showPinningEscapeToast();
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to send pinning escape toast", e);
-            }
+            mHandler.post(() -> getLockTaskNotify().showEscapeToast());
         }
     }
 
@@ -579,7 +582,7 @@ public class LockTaskController {
         // When lock task starts, we disable the status bars.
         try {
             if (lockTaskModeState == LOCK_TASK_MODE_PINNED) {
-                getStatusBarService().showPinningEnterExitToast(true /* entering */);
+                getLockTaskNotify().showPinningStartToast();
             }
             mLockTaskModeState = lockTaskModeState;
             setStatusBarState(lockTaskModeState, userId);
@@ -830,6 +833,15 @@ public class LockTaskController {
             return mContext.getSystemService(TelecomManager.class);
         }
         return mTelecomManager;
+    }
+
+    // Should only be called on the handler thread
+    @NonNull
+    private LockTaskNotify getLockTaskNotify() {
+        if (mLockTaskNotify == null) {
+            mLockTaskNotify = new LockTaskNotify(mContext);
+        }
+        return mLockTaskNotify;
     }
 
     public void dump(PrintWriter pw, String prefix) {

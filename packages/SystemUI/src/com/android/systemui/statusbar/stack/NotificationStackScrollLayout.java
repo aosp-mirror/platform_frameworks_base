@@ -92,11 +92,10 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.ScrimController;
-import com.android.systemui.statusbar.policy.HeadsUpUtil;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 
 import android.support.v4.graphics.ColorUtils;
@@ -289,7 +288,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private HashSet<View> mClearOverlayViewsWhenFinished = new HashSet<>();
     private HashSet<Pair<ExpandableNotificationRow, Boolean>> mHeadsUpChangeAnimations
             = new HashSet<>();
-    private HeadsUpManagerPhone mHeadsUpManager;
+    private HeadsUpManager mHeadsUpManager;
     private boolean mTrackingHeadsUp;
     private ScrimController mScrimController;
     private boolean mForceNoOverlappingRendering;
@@ -359,7 +358,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
     };
     private PorterDuffXfermode mSrcMode = new PorterDuffXfermode(PorterDuff.Mode.SRC);
-    private boolean mPulsing;
+    private Collection<HeadsUpManager.HeadsUpEntry> mPulsing;
     private boolean mDrawBackgroundAsSrc;
     private boolean mFadingOut;
     private boolean mParentNotFullyVisible;
@@ -691,7 +690,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private void updateAlgorithmHeightAndPadding() {
-        if (mPulsing) {
+        if (mPulsing != null) {
             mTopPadding = mClockBottom;
         } else {
             mTopPadding = mAmbientState.isDark() ? mDarkTopPadding : mRegularTopPadding;
@@ -921,27 +920,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     /**
-     * @return the height of the top heads up notification when pinned. This is different from the
-     *         intrinsic height, which also includes whether the notification is system expanded and
-     *         is mainly used when dragging down from a heads up notification.
-     */
-    private int getTopHeadsUpPinnedHeight() {
-        NotificationData.Entry topEntry = mHeadsUpManager.getTopEntry();
-        if (topEntry == null) {
-            return 0;
-        }
-        ExpandableNotificationRow row = topEntry.row;
-        if (row.isChildInGroup()) {
-            final ExpandableNotificationRow groupSummary
-                    = mGroupManager.getGroupSummary(row.getStatusBarNotification());
-            if (groupSummary != null) {
-                row = groupSummary;
-            }
-        }
-        return row.getPinnedHeadsUpHeight();
-    }
-
-    /**
      * @return the position from where the appear transition ends when expanding.
      *         Measured in absolute height.
      */
@@ -952,7 +930,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             int minNotificationsForShelf = 1;
             if (mTrackingHeadsUp
                     || (mHeadsUpManager.hasPinnedHeadsUp() && !mAmbientState.isDark())) {
-                appearPosition = getTopHeadsUpPinnedHeight();
+                appearPosition = mHeadsUpManager.getTopHeadsUpPinnedHeight();
                 minNotificationsForShelf = 2;
             } else {
                 appearPosition = 0;
@@ -1220,9 +1198,9 @@ public class NotificationStackScrollLayout extends ViewGroup
                 if (slidingChild instanceof ExpandableNotificationRow) {
                     ExpandableNotificationRow row = (ExpandableNotificationRow) slidingChild;
                     if (!mIsExpanded && row.isHeadsUp() && row.isPinned()
-                            && mHeadsUpManager.getTopEntry().row != row
+                            && mHeadsUpManager.getTopEntry().entry.row != row
                             && mGroupManager.getGroupSummary(
-                                mHeadsUpManager.getTopEntry().row.getStatusBarNotification())
+                                mHeadsUpManager.getTopEntry().entry.row.getStatusBarNotification())
                                 != row) {
                         continue;
                     }
@@ -2142,7 +2120,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @Override
     public boolean hasPulsingNotifications() {
-        return mPulsing;
+        return mPulsing != null;
     }
 
     private void updateScrollability() {
@@ -2775,7 +2753,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     private boolean isClickedHeadsUp(View child) {
-        return HeadsUpUtil.isClickedHeadsUpNotification(child);
+        return HeadsUpManager.isClickedHeadsUpNotification(child);
     }
 
     /**
@@ -4280,7 +4258,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         mAnimationFinishedRunnables.add(runnable);
     }
 
-    public void setHeadsUpManager(HeadsUpManagerPhone headsUpManager) {
+    public void setHeadsUpManager(HeadsUpManager headsUpManager) {
         mHeadsUpManager = headsUpManager;
         mAmbientState.setHeadsUpManager(headsUpManager);
     }
@@ -4348,8 +4326,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         return mIsExpanded;
     }
 
-    public void setPulsing(boolean pulsing, int clockBottom) {
-        if (!mPulsing && !pulsing) {
+    public void setPulsing(Collection<HeadsUpManager.HeadsUpEntry> pulsing, int clockBottom) {
+        if (mPulsing == null && pulsing == null) {
             return;
         }
         mPulsing = pulsing;
@@ -4488,7 +4466,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         pw.println(String.format("[%s: pulsing=%s qsCustomizerShowing=%s visibility=%s"
                         + " alpha:%f scrollY:%d]",
                 this.getClass().getSimpleName(),
-                mPulsing ? "T":"f",
+                mPulsing != null ?"T":"f",
                 mAmbientState.isQsCustomizerShowing() ? "T":"f",
                 getVisibility() == View.VISIBLE ? "visible"
                         : getVisibility() == View.GONE ? "gone"

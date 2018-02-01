@@ -207,6 +207,23 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         }
     }
 
+    private final OverviewProxyListener mOverviewProxyListener = new OverviewProxyListener() {
+        @Override
+        public void onConnectionChanged(boolean isConnected) {
+            updateSlippery();
+            setDisabledFlags(mDisabledFlags, true);
+            setUpSwipeUpOnboarding(isConnected);
+        }
+
+        @Override
+        public void onRecentsAnimationStarted() {
+            mRecentsAnimationStarted = true;
+            if (mSwipeUpOnboarding != null) {
+                mSwipeUpOnboarding.onRecentsAnimationStarted();
+            }
+        }
+    };
+
     public NavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -261,19 +278,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     public void setOnVerticalChangedListener(OnVerticalChangedListener onVerticalChangedListener) {
         mOnVerticalChangedListener = onVerticalChangedListener;
         notifyVerticalChangedListener(mVertical);
-    }
-
-    public void setRecentsAnimationStarted(boolean started) {
-        mRecentsAnimationStarted = started;
-        if (mSwipeUpOnboarding != null) {
-            mSwipeUpOnboarding.onRecentsAnimationStarted();
-        }
-    }
-
-    public void onConnectionChanged(boolean isConnected) {
-        updateSlippery();
-        setDisabledFlags(mDisabledFlags, true);
-        setUpSwipeUpOnboarding(isConnected);
     }
 
     @Override
@@ -347,10 +351,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     public SparseArray<ButtonDispatcher> getButtonDispatchers() {
         return mButtonDispatchers;
-    }
-
-    public boolean isRecentsButtonVisible() {
-        return getRecentsButton().getVisibility() == View.VISIBLE;
     }
 
     private void updateCarModeIcons(Context ctx) {
@@ -613,9 +613,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         final ViewGroup navbarView = ((ViewGroup) getParent());
         final WindowManager.LayoutParams lp = (WindowManager.LayoutParams) navbarView
                 .getLayoutParams();
-        if (lp == null) {
-            return;
-        }
         if (slippery && (lp.flags & WindowManager.LayoutParams.FLAG_SLIPPERY) == 0) {
             lp.flags |= WindowManager.LayoutParams.FLAG_SLIPPERY;
             changed = true;
@@ -677,12 +674,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (mSwipeUpOnboarding != null) {
             mSwipeUpOnboarding.setContentDarkIntensity(intensity);
         }
-    }
-
-    public void onOverviewProxyConnectionChanged(boolean isConnected) {
-        setSlippery(!isConnected);
-        setDisabledFlags(mDisabledFlags, true);
-        setUpSwipeUpOnboarding(isConnected);
     }
 
     @Override
@@ -882,6 +873,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         onPluginDisconnected(null); // Create default gesture helper
         Dependency.get(PluginManager.class).addPluginListener(this,
                 NavGesture.class, false /* Only one */);
+        mOverviewProxyService.addCallback(mOverviewProxyListener);
         setUpSwipeUpOnboarding(mOverviewProxyService.getProxy() != null);
     }
 
@@ -892,6 +884,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         if (mGestureHelper != null) {
             mGestureHelper.destroy();
         }
+        mOverviewProxyService.removeCallback(mOverviewProxyListener);
         setUpSwipeUpOnboarding(false);
     }
 
