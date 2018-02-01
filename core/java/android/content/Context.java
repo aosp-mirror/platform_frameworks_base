@@ -49,6 +49,7 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -4678,9 +4679,15 @@ public abstract class Context {
      *
      * @hide
      */
-    public abstract Context createPackageContextAsUser(
+    @SystemApi
+    public Context createPackageContextAsUser(
             String packageName, @CreatePackageOptions int flags, UserHandle user)
-            throws PackageManager.NameNotFoundException;
+            throws PackageManager.NameNotFoundException {
+        if (Build.IS_ENG) {
+            throw new IllegalStateException("createPackageContextAsUser not overridden!");
+        }
+        return this;
+    }
 
     /**
      * Creates a context given an {@link android.content.pm.ApplicationInfo}.

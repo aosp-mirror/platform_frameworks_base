@@ -773,6 +773,7 @@ package android.content {
   public abstract class Context {
     method public boolean bindServiceAsUser(android.content.Intent, android.content.ServiceConnection, int, android.os.UserHandle);
     method public abstract android.content.Context createCredentialProtectedStorageContext();
+    method public android.content.Context createPackageContextAsUser(java.lang.String, int, android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract java.io.File getPreloadsFileCache();
     method public abstract boolean isCredentialProtectedStorage();
     method public abstract void sendBroadcast(android.content.Intent, java.lang.String, android.os.Bundle);
