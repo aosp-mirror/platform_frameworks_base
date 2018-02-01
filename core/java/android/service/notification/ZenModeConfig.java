@@ -17,6 +17,7 @@
 package android.service.notification;
 
 import android.app.ActivityManager;
+import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
 import android.content.ComponentName;
@@ -1444,5 +1445,100 @@ public class ZenModeConfig implements Parcelable {
     public static boolean areAllZenBehaviorSoundsMuted(ZenModeConfig config) {
         return !config.allowAlarms  && !config.allowMediaSystemOther
                 && areAllPriorityOnlyNotificationZenSoundsMuted(config);
+    }
+
+    /**
+     * Returns a description of the current do not disturb settings from config.
+     * - If turned on manually and end time is known, returns end time.
+     * - If turned on by an automatic rule, returns the automatic rule name.
+     * - If on due to an app, returns the app name.
+     * - If there's a combination of rules/apps that trigger, then shows the one that will
+     *  last the longest if applicable.
+     * @return null if do not disturb is off.
+     */
+    public static String getDescription(Context context, boolean zenOn, ZenModeConfig config) {
+        if (!zenOn) {
+            return null;
+        }
+
+        String secondaryText = "";
+        long latestEndTime = -1;
+
+        // DND turned on by manual rule
+        if (config.manualRule != null) {
+            final Uri id = config.manualRule.conditionId;
+            if (config.manualRule.enabler != null) {
+                // app triggered manual rule
+                String appName = getOwnerCaption(context, config.manualRule.enabler);
+                if (!appName.isEmpty()) {
+                    secondaryText = appName;
+                }
+            } else {
+                if (id == null) {
+                    // Do not disturb manually triggered to remain on forever until turned off
+                    // No subtext
+                    return null;
+                } else {
+                    latestEndTime = tryParseCountdownConditionId(id);
+                    if (latestEndTime > 0) {
+                        final CharSequence formattedTime = getFormattedTime(context,
+                                latestEndTime, isToday(latestEndTime),
+                                context.getUserId());
+                        secondaryText = context.getString(R.string.zen_mode_until, formattedTime);
+                    }
+                }
+            }
+        }
+
+        // DND turned on by an automatic rule
+        for (ZenRule automaticRule : config.automaticRules.values()) {
+            if (automaticRule.isAutomaticActive()) {
+                if (isValidEventConditionId(automaticRule.conditionId)
+                        || isValidScheduleConditionId(automaticRule.conditionId)) {
+                    // set text if automatic rule end time is the latest active rule end time
+                    long endTime = parseAutomaticRuleEndTime(context, automaticRule.conditionId);
+                    if (endTime > latestEndTime) {
+                        latestEndTime = endTime;
+                        secondaryText = automaticRule.name;
+                    }
+                } else {
+                    // set text if 3rd party rule
+                    return automaticRule.name;
+                }
+            }
+        }
+
+        return !secondaryText.equals("") ? secondaryText : null;
+    }
+
+    private static long parseAutomaticRuleEndTime(Context context, Uri id) {
+        if (isValidEventConditionId(id)) {
+            // cannot look up end times for events
+            return Long.MAX_VALUE;
+        }
+
+        if (isValidScheduleConditionId(id)) {
+            ScheduleCalendar schedule = toScheduleCalendar(id);
+            long endTimeMs = schedule.getNextChangeTime(System.currentTimeMillis());
+
+            // check if automatic rule will end on next alarm
+            if (schedule.exitAtAlarm()) {
+                long nextAlarm = getNextAlarm(context);
+                schedule.maybeSetNextAlarm(System.currentTimeMillis(), nextAlarm);
+                if (schedule.shouldExitForAlarm(endTimeMs)) {
+                    return nextAlarm;
+                }
+            }
+
+            return endTimeMs;
+        }
+
+        return -1;
+    }
+
+    private static long getNextAlarm(Context context) {
+        final AlarmManager alarms = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        final AlarmManager.AlarmClockInfo info = alarms.getNextAlarmClock(context.getUserId());
+        return info != null ? info.getTriggerTime() : 0;
     }
 }
