@@ -802,6 +802,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 doDump(fd, pw, new String[]{"recents"}, asProto);
                 doDump(fd, pw, new String[]{"lastanr"}, asProto);
                 doDump(fd, pw, new String[]{"starter"}, asProto);
+                doDump(fd, pw, new String[]{"containers"}, asProto);
                 if (mAssociations.size() > 0) {
                     doDump(fd, pw, new String[]{"associations"}, asProto);
                 }
