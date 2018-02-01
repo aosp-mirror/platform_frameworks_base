@@ -1758,7 +1758,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * listeners and optionally animate it. Simply checking a change of position is not enough,
      * because being move due to dock divider is not a trigger for animation.
      */
-    void handleWindowMovedIfNeeded(Transaction t) {
+    void handleWindowMovedIfNeeded() {
         if (!hasMoved()) {
             return;
         }
@@ -1776,7 +1776,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 && !isDragResizing() && !adjustedForMinimizedDockOrIme
                 && getWindowConfiguration().hasMovementAnimations()
                 && !mWinAnimator.mLastHidden) {
-            startMoveAnimation(t, left, top);
+            startMoveAnimation(left, top);
         }
 
         //TODO (multidisplay): Accessibility supported only for the default display.
@@ -4360,7 +4360,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         commitPendingTransaction();
     }
 
-    private void startMoveAnimation(Transaction t, int left, int top) {
+    private void startMoveAnimation(int left, int top) {
         if (DEBUG_ANIM) Slog.v(TAG, "Setting move animation on " + this);
         final Point oldPosition = new Point();
         final Point newPosition = new Point();
@@ -4369,7 +4369,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final AnimationAdapter adapter = new LocalAnimationAdapter(
                 new MoveAnimationSpec(oldPosition.x, oldPosition.y, newPosition.x, newPosition.y),
                 mService.mSurfaceAnimationRunner);
-        startAnimation(t, adapter);
+        startAnimation(getPendingTransaction(), adapter);
     }
 
     private void startAnimation(Transaction t, AnimationAdapter adapter) {

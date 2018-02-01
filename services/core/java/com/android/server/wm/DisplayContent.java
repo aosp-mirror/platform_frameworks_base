@@ -662,7 +662,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mWallpaperController.updateWallpaperVisibility();
         }
 
-        w.handleWindowMovedIfNeeded(mPendingTransaction);
+        w.handleWindowMovedIfNeeded();
 
         final WindowStateAnimator winAnimator = w.mWinAnimator;
 
