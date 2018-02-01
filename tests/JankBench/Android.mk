@@ -19,7 +19,7 @@ LOCAL_RESOURCE_DIR := \
 
 
 LOCAL_STATIC_ANDROID_LIBRARIES := \
-    android-support-design \
+    $(ANDROID_SUPPORT_DESIGN_TARGETS) \
     android-support-v4 \
     android-support-v7-appcompat \
     android-support-v7-cardview \
