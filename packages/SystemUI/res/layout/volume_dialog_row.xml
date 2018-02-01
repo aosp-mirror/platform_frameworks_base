@@ -63,6 +63,7 @@
                 android:background="?android:selectableItemBackgroundBorderless"
                 android:contentDescription="@string/accessibility_output_chooser"
                 style="@style/VolumeButtons"
+                android:clickable="false"
                 android:layout_centerVertical="true"
                 android:src="@drawable/ic_swap"
                 android:soundEffectsEnabled="false" />
@@ -70,7 +71,7 @@
     </LinearLayout>
     <FrameLayout
         android:id="@+id/volume_row_slider_frame"
-        android:padding="10dp"
+        android:padding="0dp"
         android:layout_width="@dimen/volume_dialog_panel_width"
         android:layout_height="150dp">
         <SeekBar
@@ -80,8 +81,6 @@
             android:layout_width="150dp"
             android:layout_height="@dimen/volume_dialog_panel_width"
             android:layout_gravity="center"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
             android:rotation="270" />
     </FrameLayout>
 
@@ -91,6 +90,7 @@
         android:padding="10dp"
         android:layout_width="@dimen/volume_button_size"
         android:layout_height="@dimen/volume_button_size"
+        android:background="?android:selectableItemBackgroundBorderless"
         android:soundEffectsEnabled="false" />
 
 </LinearLayout>
