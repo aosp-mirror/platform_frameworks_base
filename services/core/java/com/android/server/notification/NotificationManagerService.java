@@ -5687,6 +5687,12 @@ public class NotificationManagerService extends SystemService {
             mListeners.unregisterService(removed.service, removed.userid);
         }
 
+        @Override
+        public void onUserUnlocked(int user) {
+            if (DEBUG) Slog.d(TAG, "onUserUnlocked u=" + user);
+            rebindServices(true);
+        }
+
         public void onNotificationEnqueued(final NotificationRecord r) {
             final StatusBarNotification sbn = r.sbn;
             TrimCache trimCache = new TrimCache(sbn);
