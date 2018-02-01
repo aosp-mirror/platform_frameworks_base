@@ -520,9 +520,13 @@ public class PackageDexOptimizer {
     private int getDexFlags(ApplicationInfo info, String compilerFilter, DexoptOptions options) {
         int flags = info.flags;
         boolean debuggable = (flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-        // Profile guide compiled oat files should not be public.
+        // Profile guide compiled oat files should not be public unles they are based
+        // on profiles from dex metadata archives.
+        // The flag isDexoptInstallWithDexMetadata applies only on installs when we know that
+        // the user does not have an existing profile.
         boolean isProfileGuidedFilter = isProfileGuidedCompilerFilter(compilerFilter);
-        boolean isPublic = !info.isForwardLocked() && !isProfileGuidedFilter;
+        boolean isPublic = !info.isForwardLocked() &&
+                (!isProfileGuidedFilter || options.isDexoptInstallWithDexMetadata());
         int profileFlag = isProfileGuidedFilter ? DEXOPT_PROFILE_GUIDED : 0;
         // System apps are invoked with a runtime flag which exempts them from
         // restrictions on hidden API usage. We dexopt with the same runtime flag
