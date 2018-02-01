@@ -1147,11 +1147,14 @@ package android.hardware.display {
     field public final float batteryLevel;
     field public final float brightness;
     field public final int colorTemperature;
+    field public final boolean isDefaultBrightnessConfig;
+    field public final boolean isUserSetBrightness;
     field public final float lastBrightness;
     field public final long[] luxTimestamps;
     field public final float[] luxValues;
     field public final boolean nightMode;
     field public final java.lang.String packageName;
+    field public final float powerBrightnessFactor;
     field public final long timeStamp;
   }
 

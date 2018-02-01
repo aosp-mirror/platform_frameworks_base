@@ -54,19 +54,30 @@ public final class BrightnessChangeEvent implements Parcelable {
     /** Most recent battery level when brightness was changed or Float.NaN */
     public final float batteryLevel;
 
+    /** Factor applied to brightness due to battery level, 0.0-1.0 */
+    public final float powerBrightnessFactor;
+
     /** Color filter active to provide night mode */
     public final boolean nightMode;
 
     /** If night mode color filter is active this will be the temperature in kelvin */
     public final int colorTemperature;
 
-    /** Brightness le vel before slider adjustment */
+    /** Brightness level before slider adjustment */
     public final float lastBrightness;
+
+    /** Whether brightness configuration is default version */
+    public final boolean isDefaultBrightnessConfig;
+
+    /** Whether brightness curve includes a user brightness point */
+    public final boolean isUserSetBrightness;
+
 
     /** @hide */
     private BrightnessChangeEvent(float brightness, long timeStamp, String packageName,
             int userId, float[] luxValues, long[] luxTimestamps, float batteryLevel,
-            boolean nightMode, int colorTemperature, float lastBrightness) {
+            float powerBrightnessFactor, boolean nightMode, int colorTemperature,
+            float lastBrightness, boolean isDefaultBrightnessConfig, boolean isUserSetBrightness) {
         this.brightness = brightness;
         this.timeStamp = timeStamp;
         this.packageName = packageName;
@@ -74,9 +85,12 @@ public final class BrightnessChangeEvent implements Parcelable {
         this.luxValues = luxValues;
         this.luxTimestamps = luxTimestamps;
         this.batteryLevel = batteryLevel;
+        this.powerBrightnessFactor = powerBrightnessFactor;
         this.nightMode = nightMode;
         this.colorTemperature = colorTemperature;
         this.lastBrightness = lastBrightness;
+        this.isDefaultBrightnessConfig = isDefaultBrightnessConfig;
+        this.isUserSetBrightness = isUserSetBrightness;
     }
 
     /** @hide */
@@ -88,9 +102,12 @@ public final class BrightnessChangeEvent implements Parcelable {
         this.luxValues = other.luxValues;
         this.luxTimestamps = other.luxTimestamps;
         this.batteryLevel = other.batteryLevel;
+        this.powerBrightnessFactor = other.powerBrightnessFactor;
         this.nightMode = other.nightMode;
         this.colorTemperature = other.colorTemperature;
         this.lastBrightness = other.lastBrightness;
+        this.isDefaultBrightnessConfig = other.isDefaultBrightnessConfig;
+        this.isUserSetBrightness = other.isUserSetBrightness;
     }
 
     private BrightnessChangeEvent(Parcel source) {
@@ -101,9 +118,12 @@ public final class BrightnessChangeEvent implements Parcelable {
         luxValues = source.createFloatArray();
         luxTimestamps = source.createLongArray();
         batteryLevel = source.readFloat();
+        powerBrightnessFactor = source.readFloat();
         nightMode = source.readBoolean();
         colorTemperature = source.readInt();
         lastBrightness = source.readFloat();
+        isDefaultBrightnessConfig = source.readBoolean();
+        isUserSetBrightness = source.readBoolean();
     }
 
     public static final Creator<BrightnessChangeEvent> CREATOR =
@@ -130,9 +150,12 @@ public final class BrightnessChangeEvent implements Parcelable {
         dest.writeFloatArray(luxValues);
         dest.writeLongArray(luxTimestamps);
         dest.writeFloat(batteryLevel);
+        dest.writeFloat(powerBrightnessFactor);
         dest.writeBoolean(nightMode);
         dest.writeInt(colorTemperature);
         dest.writeFloat(lastBrightness);
+        dest.writeBoolean(isDefaultBrightnessConfig);
+        dest.writeBoolean(isUserSetBrightness);
     }
 
     /** @hide */
@@ -144,9 +167,12 @@ public final class BrightnessChangeEvent implements Parcelable {
         private float[] mLuxValues;
         private long[] mLuxTimestamps;
         private float mBatteryLevel;
+        private float mPowerBrightnessFactor;
         private boolean mNightMode;
         private int mColorTemperature;
         private float mLastBrightness;
+        private boolean mIsDefaultBrightnessConfig;
+        private boolean mIsUserSetBrightness;
 
         /** {@see BrightnessChangeEvent#brightness} */
         public Builder setBrightness(float brightness) {
@@ -190,6 +216,12 @@ public final class BrightnessChangeEvent implements Parcelable {
             return this;
         }
 
+        /** {@see BrightnessChangeEvent#powerSaveBrightness} */
+        public Builder setPowerBrightnessFactor(float powerBrightnessFactor) {
+            mPowerBrightnessFactor = powerBrightnessFactor;
+            return this;
+        }
+
         /** {@see BrightnessChangeEvent#nightMode} */
         public Builder setNightMode(boolean nightMode) {
             mNightMode = nightMode;
@@ -208,11 +240,24 @@ public final class BrightnessChangeEvent implements Parcelable {
             return this;
         }
 
+        /** {@see BrightnessChangeEvent#isDefaultBrightnessConfig} */
+        public Builder setIsDefaultBrightnessConfig(boolean isDefaultBrightnessConfig) {
+            mIsDefaultBrightnessConfig = isDefaultBrightnessConfig;
+            return this;
+        }
+
+        /** {@see BrightnessChangeEvent#userBrightnessPoint} */
+        public Builder setUserBrightnessPoint(boolean isUserSetBrightness) {
+            mIsUserSetBrightness = isUserSetBrightness;
+            return this;
+        }
+
         /** Builds a BrightnessChangeEvent */
         public BrightnessChangeEvent build() {
             return new BrightnessChangeEvent(mBrightness, mTimeStamp,
                     mPackageName, mUserId, mLuxValues, mLuxTimestamps, mBatteryLevel,
-                    mNightMode, mColorTemperature, mLastBrightness);
+                    mPowerBrightnessFactor, mNightMode, mColorTemperature, mLastBrightness,
+                    mIsDefaultBrightnessConfig, mIsUserSetBrightness);
         }
     }
 }

@@ -99,6 +99,9 @@ public class BrightnessTracker {
     private static final String ATTR_NIGHT_MODE = "nightMode";
     private static final String ATTR_COLOR_TEMPERATURE = "colorTemperature";
     private static final String ATTR_LAST_NITS = "lastNits";
+    private static final String ATTR_DEFAULT_CONFIG = "defaultConfig";
+    private static final String ATTR_POWER_SAVE = "powerSaveFactor";
+    private static final String ATTR_USER_POINT = "userPoint";
 
     private static final int MSG_BACKGROUND_START = 0;
     private static final int MSG_BRIGHTNESS_CHANGED = 1;
@@ -235,17 +238,22 @@ public class BrightnessTracker {
     /**
      * Notify the BrightnessTracker that the user has changed the brightness of the display.
      */
-    public void notifyBrightnessChanged(float brightness, boolean userInitiated) {
+    public void notifyBrightnessChanged(float brightness, boolean userInitiated,
+            float powerBrightnessFactor, boolean isUserSetBrightness,
+            boolean isDefaultBrightnessConfig) {
         if (DEBUG) {
             Slog.d(TAG, String.format("notifyBrightnessChanged(brightness=%f, userInitiated=%b)",
                         brightness, userInitiated));
         }
         Message m = mBgHandler.obtainMessage(MSG_BRIGHTNESS_CHANGED,
-                userInitiated ? 1 : 0, 0 /*unused*/, (Float) brightness);
+                userInitiated ? 1 : 0, 0 /*unused*/, new BrightnessChangeValues(brightness,
+                        powerBrightnessFactor, isUserSetBrightness, isDefaultBrightnessConfig));
         m.sendToTarget();
     }
 
-    private void handleBrightnessChanged(float brightness, boolean userInitiated) {
+    private void handleBrightnessChanged(float brightness, boolean userInitiated,
+            float powerBrightnessFactor, boolean isUserSetBrightness,
+            boolean isDefaultBrightnessConfig) {
         BrightnessChangeEvent.Builder builder;
 
         synchronized (mDataCollectionLock) {
@@ -267,6 +275,9 @@ public class BrightnessTracker {
             builder = new BrightnessChangeEvent.Builder();
             builder.setBrightness(brightness);
             builder.setTimeStamp(mInjector.currentTimeMillis());
+            builder.setPowerBrightnessFactor(powerBrightnessFactor);
+            builder.setUserBrightnessPoint(isUserSetBrightness);
+            builder.setIsDefaultBrightnessConfig(isDefaultBrightnessConfig);
 
             final int readingCount = mLastSensorReadings.size();
             if (readingCount == 0) {
@@ -412,6 +423,12 @@ public class BrightnessTracker {
                         toWrite[i].colorTemperature));
                 out.attribute(null, ATTR_LAST_NITS,
                         Float.toString(toWrite[i].lastBrightness));
+                out.attribute(null, ATTR_DEFAULT_CONFIG,
+                        Boolean.toString(toWrite[i].isDefaultBrightnessConfig));
+                out.attribute(null, ATTR_POWER_SAVE,
+                        Float.toString(toWrite[i].powerBrightnessFactor));
+                out.attribute(null, ATTR_USER_POINT,
+                        Boolean.toString(toWrite[i].isUserSetBrightness));
                 StringBuilder luxValues = new StringBuilder();
                 StringBuilder luxTimestamps = new StringBuilder();
                 for (int j = 0; j < toWrite[i].luxValues.length; ++j) {
@@ -496,6 +513,21 @@ public class BrightnessTracker {
                     builder.setLuxValues(luxValues);
                     builder.setLuxTimestamps(luxTimestamps);
 
+                    String defaultConfig = parser.getAttributeValue(null, ATTR_DEFAULT_CONFIG);
+                    if (defaultConfig != null) {
+                        builder.setIsDefaultBrightnessConfig(Boolean.parseBoolean(defaultConfig));
+                    }
+                    String powerSave = parser.getAttributeValue(null, ATTR_POWER_SAVE);
+                    if (powerSave != null) {
+                        builder.setPowerBrightnessFactor(Float.parseFloat(powerSave));
+                    } else {
+                        builder.setPowerBrightnessFactor(1.0f);
+                    }
+                    String userPoint = parser.getAttributeValue(null, ATTR_USER_POINT);
+                    if (userPoint != null) {
+                        builder.setUserBrightnessPoint(Boolean.parseBoolean(userPoint));
+                    }
+
                     BrightnessChangeEvent event = builder.build();
                     if (DEBUG) {
                         Slog.i(TAG, "Read event " + event.brightness
@@ -535,7 +567,11 @@ public class BrightnessTracker {
             BrightnessChangeEvent[] events = mEvents.toArray();
             for (int i = 0; i < events.length; ++i) {
                 pw.print("    " + events[i].timeStamp + ", " + events[i].userId);
-                pw.print(", " + events[i].lastBrightness + "->" + events[i].brightness + ", {");
+                pw.print(", " + events[i].lastBrightness + "->" + events[i].brightness);
+                pw.print(", isUserSetBrightness=" + events[i].isUserSetBrightness);
+                pw.print(", powerBrightnessFactor=" + events[i].powerBrightnessFactor);
+                pw.print(", isDefaultBrightnessConfig=" + events[i].isDefaultBrightnessConfig);
+                pw.print(" {");
                 for (int j = 0; j < events[i].luxValues.length; ++j){
                     if (j != 0) {
                         pw.print(", ");
@@ -637,11 +673,28 @@ public class BrightnessTracker {
                     backgroundStart((float)msg.obj /*initial brightness*/);
                     break;
                 case MSG_BRIGHTNESS_CHANGED:
-                    float newBrightness = (float) msg.obj;
+                    BrightnessChangeValues values = (BrightnessChangeValues) msg.obj;
                     boolean userInitiatedChange = (msg.arg1 == 1);
-                    handleBrightnessChanged(newBrightness, userInitiatedChange);
+                    handleBrightnessChanged(values.brightness, userInitiatedChange,
+                            values.powerBrightnessFactor, values.isUserSetBrightness,
+                            values.isDefaultBrightnessConfig);
                     break;
             }
+        }
+    }
+
+    private static class BrightnessChangeValues {
+        final float brightness;
+        final float powerBrightnessFactor;
+        final boolean isUserSetBrightness;
+        final boolean isDefaultBrightnessConfig;
+
+        BrightnessChangeValues(float brightness, float powerBrightnessFactor,
+                boolean isUserSetBrightness, boolean isDefaultBrightnessConfig) {
+            this.brightness = brightness;
+            this.powerBrightnessFactor = powerBrightnessFactor;
+            this.isUserSetBrightness = isUserSetBrightness;
+            this.isDefaultBrightnessConfig = isDefaultBrightnessConfig;
         }
     }
 
