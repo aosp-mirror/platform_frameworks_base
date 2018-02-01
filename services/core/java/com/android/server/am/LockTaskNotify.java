@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone;
+package com.android.server.am;
 
 import android.content.Context;
 import android.os.SystemClock;
@@ -22,37 +22,36 @@ import android.util.Slog;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-import com.android.systemui.R;
-import com.android.systemui.SysUIToast;
+import com.android.internal.R;
 
 /**
  *  Helper to manage showing/hiding a image to notify them that they are entering or exiting screen
  *  pinning mode. All exposed methods should be called from a handler thread.
  */
-public class ScreenPinningNotify {
-    private static final String TAG = "ScreenPinningNotify";
+public class LockTaskNotify {
+    private static final String TAG = "LockTaskNotify";
     private static final long SHOW_TOAST_MINIMUM_INTERVAL = 1000;
 
     private final Context mContext;
     private Toast mLastToast;
     private long mLastShowToastTime;
 
-    public ScreenPinningNotify(Context context) {
+    public LockTaskNotify(Context context) {
         mContext = context;
     }
 
     /** Show "Screen pinned" toast. */
     void showPinningStartToast() {
-        makeAllUserToastAndShow(R.string.screen_pinning_start);
+        makeAllUserToastAndShow(R.string.lock_to_app_start);
     }
 
     /** Show "Screen unpinned" toast. */
     void showPinningExitToast() {
-        makeAllUserToastAndShow(R.string.screen_pinning_exit);
+        makeAllUserToastAndShow(R.string.lock_to_app_exit);
     }
 
     /** Show a toast that describes the gesture the user should use to escape pinned mode. */
-    void showEscapeToast(boolean isRecentsButtonVisible) {
+    void showEscapeToast() {
         long showToastTime = SystemClock.elapsedRealtime();
         if ((showToastTime - mLastShowToastTime) < SHOW_TOAST_MINIMUM_INTERVAL) {
             Slog.i(TAG, "Ignore toast since it is requested in very short interval.");
@@ -61,14 +60,14 @@ public class ScreenPinningNotify {
         if (mLastToast != null) {
             mLastToast.cancel();
         }
-        mLastToast = makeAllUserToastAndShow(isRecentsButtonVisible
-                ? R.string.screen_pinning_toast
-                : R.string.screen_pinning_toast_recents_invisible);
+        mLastToast = makeAllUserToastAndShow(R.string.lock_to_app_toast);
         mLastShowToastTime = showToastTime;
     }
 
     private Toast makeAllUserToastAndShow(int resId) {
-        Toast toast = SysUIToast.makeText(mContext, resId, Toast.LENGTH_LONG);
+        Toast toast = Toast.makeText(mContext, resId, Toast.LENGTH_LONG);
+        toast.getWindowParams().privateFlags |=
+                WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
         toast.show();
         return toast;
     }
