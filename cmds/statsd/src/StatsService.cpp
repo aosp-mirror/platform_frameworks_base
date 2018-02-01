@@ -551,6 +551,12 @@ status_t StatsService::cmd_dump_memory_info(FILE* out) {
     return NO_ERROR;
 }
 
+status_t StatsService::cmd_clear_puller_cache(FILE* out) {
+    mStatsPullerManager.ClearPullerCache();
+    fprintf(out, "Puller cached data removed!\n");
+    return NO_ERROR;
+}
+
 Status StatsService::informAllUidData(const vector<int32_t>& uid, const vector<int64_t>& version,
                                       const vector<String16>& app) {
     VLOG("StatsService::informAllUidData was called");

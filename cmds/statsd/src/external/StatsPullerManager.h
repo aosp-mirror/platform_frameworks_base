@@ -50,8 +50,12 @@ class StatsPullerManager {
         return mPullerManager.Pull(tagId, data);
     }
 
-    virtual void SetTimeBaseSec(const long timeBaseSec) {
+    void SetTimeBaseSec(const long timeBaseSec) {
         mPullerManager.SetTimeBaseSec(timeBaseSec);
+    }
+
+    void ClearPullerCache() {
+        mPullerManager.ClearPullerCache();
     }
 
  private:
