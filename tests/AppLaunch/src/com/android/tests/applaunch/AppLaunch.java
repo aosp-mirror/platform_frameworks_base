@@ -83,7 +83,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final String KEY_TRACE_DUMPINTERVAL = "tracedump_interval";
     private static final String WEARABLE_ACTION_GOOGLE =
             "com.google.android.wearable.action.GOOGLE";
-    private static final int INITIAL_LAUNCH_IDLE_TIMEOUT = 60000; //60s to allow app to idle
+    private static final int INITIAL_LAUNCH_IDLE_TIMEOUT = 5000; //5s to allow app to idle
     private static final int POST_LAUNCH_IDLE_TIMEOUT = 750; //750ms idle for non initial launches
     private static final int BETWEEN_LAUNCH_SLEEP_TIMEOUT = 5000; //5s between launching apps
     private static final String LAUNCH_SUB_DIRECTORY = "launch_logs";
