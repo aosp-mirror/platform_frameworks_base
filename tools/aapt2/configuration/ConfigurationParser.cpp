@@ -20,6 +20,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <string>
 #include <utility>
 
 #include "android-base/file.h"
@@ -93,6 +94,7 @@ class NoopDiagnostics : public IDiagnostics {
 };
 NoopDiagnostics noop_;
 
+/** Returns the value of the label attribute for a given element. */
 std::string GetLabel(const Element* element, IDiagnostics* diag) {
   std::string label;
   for (const auto& attr : element->attributes) {
@@ -106,6 +108,18 @@ std::string GetLabel(const Element* element, IDiagnostics* diag) {
     diag->Error(DiagMessage() << "No label found for element " << element->name);
   }
   return label;
+}
+
+/** Returns the value of the version-code-order attribute for a given element. */
+Maybe<int32_t> GetVersionCodeOrder(const Element* element, IDiagnostics* diag) {
+  const xml::Attribute* version = element->FindAttribute("", "version-code-order");
+  if (version == nullptr) {
+    std::string label = GetLabel(element, diag);
+    diag->Error(DiagMessage() << "No version-code-order found for element '" << element->name
+                              << "' with label '" << label << "'");
+    return {};
+  }
+  return std::stoi(version->value);
 }
 
 /** XML node visitor that removes all of the namespace URIs from the node and all children. */
@@ -437,26 +451,37 @@ Maybe<std::vector<OutputArtifact>> ConfigurationParser::Parse(
   // Convert from a parsed configuration to a list of artifacts for processing.
   const std::string& apk_name = file::GetFilename(apk_path).to_string();
   std::vector<OutputArtifact> output_artifacts;
-  bool has_errors = false;
 
   PostProcessingConfiguration& config = maybe_config.value();
-  config.SortArtifacts();
 
+  bool valid = true;
   int version = 1;
+
   for (const ConfiguredArtifact& artifact : config.artifacts) {
     Maybe<OutputArtifact> output_artifact = ToOutputArtifact(artifact, apk_name, config, diag_);
     if (!output_artifact) {
       // Defer return an error condition so that all errors are reported.
-      has_errors = true;
+      valid = false;
     } else {
       output_artifact.value().version = version++;
       output_artifacts.push_back(std::move(output_artifact.value()));
     }
   }
 
-  if (has_errors) {
+  if (!config.ValidateVersionCodeOrdering(diag_)) {
+    diag_->Error(DiagMessage() << "could not validate post processing configuration");
+    valid = false;
+  }
+
+  if (valid) {
+    // Sorting artifacts requires that all references are valid as it uses them to determine order.
+    config.SortArtifacts();
+  }
+
+  if (!valid) {
     return {};
   }
+
   return {output_artifacts};
 }
 
@@ -509,8 +534,15 @@ bool AbiGroupTagHandler(PostProcessingConfiguration* config, Element* root_eleme
     return false;
   }
 
-  auto& group = GetOrCreateGroup(label, &config->abi_groups);
   bool valid = true;
+  OrderedEntry<Abi>& entry = config->abi_groups[label];
+  Maybe<int32_t> order = GetVersionCodeOrder(root_element, diag);
+  if (!order) {
+    valid = false;
+  } else {
+    entry.order = order.value();
+  }
+  auto& group = entry.entry;
 
   // Special case for empty abi-group tag. Label will be used as the ABI.
   if (root_element->GetChildElements().empty()) {
@@ -519,7 +551,7 @@ bool AbiGroupTagHandler(PostProcessingConfiguration* config, Element* root_eleme
       return false;
     }
     group.push_back(abi->second);
-    return true;
+    return valid;
   }
 
   for (auto* child : root_element->GetChildElements()) {
@@ -553,8 +585,15 @@ bool ScreenDensityGroupTagHandler(PostProcessingConfiguration* config, Element* 
     return false;
   }
 
-  auto& group = GetOrCreateGroup(label, &config->screen_density_groups);
   bool valid = true;
+  OrderedEntry<ConfigDescription>& entry = config->screen_density_groups[label];
+  Maybe<int32_t> order = GetVersionCodeOrder(root_element, diag);
+  if (!order) {
+    valid = false;
+  } else {
+    entry.order = order.value();
+  }
+  auto& group = entry.entry;
 
   // Special case for empty screen-density-group tag. Label will be used as the screen density.
   if (root_element->GetChildElements().empty()) {
@@ -613,8 +652,15 @@ bool LocaleGroupTagHandler(PostProcessingConfiguration* config, Element* root_el
     return false;
   }
 
-  auto& group = GetOrCreateGroup(label, &config->locale_groups);
   bool valid = true;
+  OrderedEntry<ConfigDescription>& entry = config->locale_groups[label];
+  Maybe<int32_t> order = GetVersionCodeOrder(root_element, diag);
+  if (!order) {
+    valid = false;
+  } else {
+    entry.order = order.value();
+  }
+  auto& group = entry.entry;
 
   // Special case to auto insert a locale for an empty group. Label will be used for locale.
   if (root_element->GetChildElements().empty()) {
@@ -728,8 +774,15 @@ bool GlTextureGroupTagHandler(PostProcessingConfiguration* config, Element* root
     return false;
   }
 
-  auto& group = GetOrCreateGroup(label, &config->gl_texture_groups);
   bool valid = true;
+  OrderedEntry<GlTexture>& entry = config->gl_texture_groups[label];
+  Maybe<int32_t> order = GetVersionCodeOrder(root_element, diag);
+  if (!order) {
+    valid = false;
+  } else {
+    entry.order = order.value();
+  }
+  auto& group = entry.entry;
 
   GlTexture result;
   for (auto* child : root_element->GetChildElements()) {
@@ -771,8 +824,15 @@ bool DeviceFeatureGroupTagHandler(PostProcessingConfiguration* config, Element* 
     return false;
   }
 
-  auto& group = GetOrCreateGroup(label, &config->device_feature_groups);
   bool valid = true;
+  OrderedEntry<DeviceFeature>& entry = config->device_feature_groups[label];
+  Maybe<int32_t> order = GetVersionCodeOrder(root_element, diag);
+  if (!order) {
+    valid = false;
+  } else {
+    entry.order = order.value();
+  }
+  auto& group = entry.entry;
 
   for (auto* child : root_element->GetChildElements()) {
     if (child->name != "supports-feature") {
