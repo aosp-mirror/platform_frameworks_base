@@ -21,6 +21,7 @@ import static android.content.ContentProvider.getUserIdFromUri;
 import static android.content.ContentProvider.maybeAddUserId;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.Process.SYSTEM_UID;
 
 import android.Manifest.permission;
 import android.app.ActivityManager;
@@ -68,8 +69,9 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -93,6 +95,7 @@ public class SliceManagerService extends ISliceManager.Stub {
     private final ArraySet<SliceGrant> mUserGrants = new ArraySet<>();
     private final Handler mHandler;
     private final ContentObserver mObserver;
+    @GuardedBy("mSliceAccessFile")
     private final AtomicFile mSliceAccessFile;
     @GuardedBy("mAccessList")
     private final SliceFullAccessList mAccessList;
@@ -253,6 +256,63 @@ public class SliceManagerService extends ISliceManager.Stub {
         synchronized (mLock) {
             for (PinnedSliceState p : mPinnedSlicesByUri.values()) {
                 p.recheckPackage(pkg);
+            }
+        }
+    }
+
+    // Backup/restore interface
+    @Override
+    public byte[] getBackupPayload(int user) {
+        if (Binder.getCallingUid() != SYSTEM_UID) {
+            throw new SecurityException("Caller must be system");
+        }
+        //TODO: http://b/22388012
+        if (user != UserHandle.USER_SYSTEM) {
+            Slog.w(TAG, "getBackupPayload: cannot backup policy for user " + user);
+            return null;
+        }
+        synchronized(mSliceAccessFile) {
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try {
+                XmlSerializer out = XmlPullParserFactory.newInstance().newSerializer();
+                out.setOutput(baos, Encoding.UTF_8.name());
+                synchronized (mAccessList) {
+                    mAccessList.writeXml(out, user);
+                }
+                out.flush();
+                return baos.toByteArray();
+            } catch (IOException | XmlPullParserException e) {
+                Slog.w(TAG, "getBackupPayload: error writing payload for user " + user, e);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void applyRestore(byte[] payload, int user) {
+        if (Binder.getCallingUid() != SYSTEM_UID) {
+            throw new SecurityException("Caller must be system");
+        }
+        if (payload == null) {
+            Slog.w(TAG, "applyRestore: no payload to restore for user " + user);
+            return;
+        }
+        //TODO: http://b/22388012
+        if (user != UserHandle.USER_SYSTEM) {
+            Slog.w(TAG, "applyRestore: cannot restore policy for user " + user);
+            return;
+        }
+        synchronized(mSliceAccessFile) {
+            final ByteArrayInputStream bais = new ByteArrayInputStream(payload);
+            try {
+                XmlPullParser parser = XmlPullParserFactory.newInstance().newPullParser();
+                parser.setInput(bais, Encoding.UTF_8.name());
+                synchronized (mAccessList) {
+                    mAccessList.readXml(parser);
+                }
+                mHandler.post(mSaveAccessList);
+            } catch (NumberFormatException | XmlPullParserException | IOException e) {
+                Slog.w(TAG, "applyRestore: error reading payload", e);
             }
         }
     }
@@ -492,7 +552,7 @@ public class SliceManagerService extends ISliceManager.Stub {
                     XmlSerializer out = XmlPullParserFactory.newInstance().newSerializer();
                     out.setOutput(stream, Encoding.UTF_8.name());
                     synchronized (mAccessList) {
-                        mAccessList.writeXml(out);
+                        mAccessList.writeXml(out, UserHandle.USER_ALL);
                     }
                     out.flush();
                     mSliceAccessFile.finishWrite(stream);

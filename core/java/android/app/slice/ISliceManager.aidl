@@ -31,4 +31,7 @@ interface ISliceManager {
     SliceSpec[] getPinnedSpecs(in Uri uri, String pkg);
     int checkSlicePermission(in Uri uri, String pkg, int pid, int uid);
     void grantPermissionFromUser(in Uri uri, String pkg, String callingPkg, boolean allSlices);
+
+    byte[] getBackupPayload(int user);
+    void applyRestore(in byte[] payload, int user);
 }
