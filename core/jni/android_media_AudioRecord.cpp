@@ -25,6 +25,8 @@
 
 #include <utils/Log.h>
 #include <media/AudioRecord.h>
+#include <media/MicrophoneInfo.h>
+#include <vector>
 
 #include <nativehelper/ScopedUtfChars.h>
 
@@ -32,6 +34,7 @@
 #include "android_media_AudioErrors.h"
 #include "android_media_DeviceCallback.h"
 #include "android_media_MediaMetricsJNI.h"
+#include "android_media_MicrophoneInfo.h"
 
 // ----------------------------------------------------------------------------
 
@@ -40,6 +43,11 @@ using namespace android;
 // ----------------------------------------------------------------------------
 static const char* const kClassPathName = "android/media/AudioRecord";
 static const char* const kAudioAttributesClassPathName = "android/media/AudioAttributes";
+
+static jclass gArrayListClass;
+static struct {
+    jmethodID add;
+} gArrayListMethods;
 
 struct audio_record_fields_t {
     // these fields provide access from C++ to the...
@@ -785,6 +793,46 @@ android_media_AudioRecord_native_getMetrics(JNIEnv *env, jobject thiz)
 }
 
 // ----------------------------------------------------------------------------
+static jint android_media_AudioRecord_get_active_microphones(JNIEnv *env,
+        jobject thiz, jobject jActiveMicrophones) {
+    if (jActiveMicrophones == NULL) {
+        ALOGE("jActiveMicrophones is null");
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+    if (!env->IsInstanceOf(jActiveMicrophones, gArrayListClass)) {
+        ALOGE("getActiveMicrophones not an arraylist");
+        return (jint)AUDIO_JAVA_BAD_VALUE;
+    }
+
+    sp<AudioRecord> lpRecorder = getAudioRecord(env, thiz);
+    if (lpRecorder == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+            "Unable to retrieve AudioRecord pointer for getActiveMicrophones()");
+        return (jint)AUDIO_JAVA_ERROR;
+    }
+
+    jint jStatus = AUDIO_JAVA_SUCCESS;
+    std::vector<media::MicrophoneInfo> activeMicrophones;
+    status_t status = lpRecorder->getActiveMicrophones(&activeMicrophones);
+    if (status != NO_ERROR) {
+        ALOGE_IF(status != NO_ERROR, "AudioRecord::getActiveMicrophones error %d", status);
+        jStatus = nativeToJavaStatus(status);
+        return jStatus;
+    }
+
+    for (size_t i = 0; i < activeMicrophones.size(); i++) {
+        jobject jMicrophoneInfo;
+        jStatus = convertMicrophoneInfoFromNative(env, &jMicrophoneInfo, &activeMicrophones[i]);
+        if (jStatus != AUDIO_JAVA_SUCCESS) {
+            return jStatus;
+        }
+        env->CallBooleanMethod(jActiveMicrophones, gArrayListMethods.add, jMicrophoneInfo);
+        env->DeleteLocalRef(jMicrophoneInfo);
+    }
+    return jStatus;
+}
+
+// ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 static const JNINativeMethod gMethods[] = {
     // name,               signature,  funcPtr
@@ -824,6 +872,8 @@ static const JNINativeMethod gMethods[] = {
                                         (void *)android_media_AudioRecord_disableDeviceCallback},
     {"native_get_timestamp", "(Landroid/media/AudioTimestamp;I)I",
                                        (void *)android_media_AudioRecord_get_timestamp},
+    {"native_get_active_microphones", "(Ljava/util/ArrayList;)I",
+                                        (void *)android_media_AudioRecord_get_active_microphones},
 };
 
 // field names found in android/media/AudioRecord.java
@@ -872,6 +922,10 @@ int register_android_media_AudioRecord(JNIEnv *env)
             GetFieldIDOrDie(env, audioTimestampClass, "framePosition", "J");
     javaAudioTimestampFields.fieldNanoTime =
             GetFieldIDOrDie(env, audioTimestampClass, "nanoTime", "J");
+
+    jclass arrayListClass = FindClassOrDie(env, "java/util/ArrayList");
+    gArrayListClass = MakeGlobalRefOrDie(env, arrayListClass);
+    gArrayListMethods.add = GetMethodIDOrDie(env, arrayListClass, "add", "(Ljava/lang/Object;)Z");
 
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
