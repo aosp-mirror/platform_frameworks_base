@@ -4423,15 +4423,6 @@
     <!-- DO NOT TRANSLATE -->
     <string name="date_picker_day_typeface">sans-serif-medium</string>
 
-    <!-- Notify use that they are in Lock-to-app -->
-    <string name="lock_to_app_toast">To unpin this screen, touch &amp; hold Back and Overview
-        buttons</string>
-
-    <!-- Starting lock-to-app indication. -->
-    <string name="lock_to_app_start">Screen pinned</string>
-    <!-- Exting lock-to-app indication. -->
-    <string name="lock_to_app_exit">Screen unpinned</string>
-
     <!-- Lock-to-app unlock pin string -->
     <string name="lock_to_app_unlock_pin">Ask for PIN before unpinning</string>
     <!-- Lock-to-app unlock pattern string -->
