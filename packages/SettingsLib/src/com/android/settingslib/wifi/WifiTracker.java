@@ -37,7 +37,6 @@ import android.net.wifi.WifiNetworkScoreCache;
 import android.net.wifi.WifiNetworkScoreCache.CacheListener;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.SystemClock;
@@ -112,7 +111,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     private final ConnectivityManager mConnectivityManager;
     private final NetworkRequest mNetworkRequest;
     private final AtomicBoolean mConnected = new AtomicBoolean(false);
-    private final WifiListener mListener;
+    private final WifiListenerExecutor mListener;
     @VisibleForTesting Handler mWorkHandler;
     private HandlerThread mWorkThread;
 
@@ -178,7 +177,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     @Deprecated
     public WifiTracker(Context context, WifiListener wifiListener,
             boolean includeSaved, boolean includeScans) {
-        this(context, wifiListener,
+        this(context, new WifiListenerExecutor(wifiListener),
                 context.getSystemService(WifiManager.class),
                 context.getSystemService(ConnectivityManager.class),
                 context.getSystemService(NetworkScoreManager.class),
@@ -189,7 +188,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     // calling apps once IC window is complete
     public WifiTracker(Context context, WifiListener wifiListener,
             @NonNull Lifecycle lifecycle, boolean includeSaved, boolean includeScans) {
-        this(context, wifiListener,
+        this(context, new WifiListenerExecutor(wifiListener),
                 context.getSystemService(WifiManager.class),
                 context.getSystemService(ConnectivityManager.class),
                 context.getSystemService(NetworkScoreManager.class),
@@ -198,13 +197,13 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     }
 
     @VisibleForTesting
-    WifiTracker(Context context, WifiListener wifiListener,
+    WifiTracker(Context context, WifiListenerExecutor wifiListenerExecutor,
             WifiManager wifiManager, ConnectivityManager connectivityManager,
             NetworkScoreManager networkScoreManager,
             IntentFilter filter) {
         mContext = context;
         mWifiManager = wifiManager;
-        mListener = new WifiListenerWrapper(wifiListener);
+        mListener = wifiListenerExecutor;
         mConnectivityManager = connectivityManager;
 
         // check if verbose logging developer option has been turned on or off
@@ -776,6 +775,8 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                         || WifiManager.LINK_CONFIGURATION_CHANGED_ACTION.equals(action)) {
                     updateAccessPoints();
                 } else if (WifiManager.NETWORK_STATE_CHANGED_ACTION.equals(action)) {
+                    // TODO(sghuman): Refactor these methods so they cannot result in duplicate
+                    // onAccessPointsChanged updates being called from this intent.
                     NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
                     updateNetworkInfo(info);
                     updateAccessPoints();
@@ -886,19 +887,16 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     }
 
     /**
-     * Wraps the given {@link WifiListener} instance and executes it's methods on the Main Thread.
+     * Wraps the given {@link WifiListener} instance and executes its methods on the Main Thread.
      *
-     * <p>This mechanism allows us to no longer need a separate MainHandler and WorkHandler, which
-     * were previously both performing work, while avoiding errors which occur from executing
-     * callbacks which manipulate UI elements from a different thread than the MainThread.
+     * <p>Also logs all callbacks invocations when verbose logging is enabled.
      */
-    private static class WifiListenerWrapper implements WifiListener {
+    @VisibleForTesting
+    public static class WifiListenerExecutor implements WifiListener {
 
-        private final Handler mHandler;
         private final WifiListener mDelegatee;
 
-        public WifiListenerWrapper(WifiListener listener) {
-            mHandler = new Handler(Looper.getMainLooper());
+        public WifiListenerExecutor(WifiListener listener) {
             mDelegatee = listener;
         }
 
@@ -908,7 +906,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                 Log.i(TAG,
                         String.format("Invoking onWifiStateChanged callback with state %d", state));
             }
-            mHandler.post(() -> mDelegatee.onWifiStateChanged(state));
+            ThreadUtils.postOnMainThread(() -> mDelegatee.onWifiStateChanged(state));
         }
 
         @Override
@@ -916,7 +914,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
             if (isVerboseLoggingEnabled()) {
                 Log.i(TAG, "Invoking onConnectedChanged callback");
             }
-            mHandler.post(() -> mDelegatee.onConnectedChanged());
+            ThreadUtils.postOnMainThread(() -> mDelegatee.onConnectedChanged());
         }
 
         @Override
@@ -924,10 +922,15 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
             if (isVerboseLoggingEnabled()) {
                 Log.i(TAG, "Invoking onAccessPointsChanged callback");
             }
-            mHandler.post(() -> mDelegatee.onAccessPointsChanged());
+            ThreadUtils.postOnMainThread(() -> mDelegatee.onAccessPointsChanged());
         }
     }
 
+    /**
+     * WifiListener interface that defines callbacks indicating state changes in WifiTracker.
+     *
+     * <p>All callbacks are invoked on the MainThread.
+     */
     public interface WifiListener {
         /**
          * Called when the state of Wifi has changed, the state will be one of
@@ -958,7 +961,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     }
 
     /**
-     * Invokes {@link WifiListenerWrapper#onAccessPointsChanged()} if {@link #mStaleScanResults}
+     * Invokes {@link WifiListenerExecutor#onAccessPointsChanged()} if {@link #mStaleScanResults}
      * is false.
      */
     private void conditionallyNotifyListeners() {
