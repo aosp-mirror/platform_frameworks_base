@@ -547,7 +547,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             if (allowed) {
                 mAlertWindowNotification.post();
             } else {
-                mAlertWindowNotification.cancel();
+                mAlertWindowNotification.cancel(false /* deleteChannel */);
             }
         }
     }
@@ -586,7 +586,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         if (mAlertWindowNotification == null) {
             return;
         }
-        mAlertWindowNotification.cancel();
+        mAlertWindowNotification.cancel(true /* deleteChannel */);
         mAlertWindowNotification = null;
     }
 
