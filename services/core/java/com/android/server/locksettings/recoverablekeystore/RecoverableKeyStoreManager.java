@@ -37,21 +37,23 @@ import android.security.keystore.recovery.KeyChainProtectionParams;
 import android.security.keystore.recovery.KeyChainSnapshot;
 import android.security.keystore.recovery.RecoveryController;
 import android.security.keystore.recovery.WrappedApplicationKey;
+import android.security.KeyStore;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.HexDump;
+import com.android.server.locksettings.recoverablekeystore.storage.ApplicationKeyStorage;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySessionStorage;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;
 
 import java.security.InvalidKeyException;
-import java.security.KeyStoreException;
 import java.security.KeyFactory;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
-import java.security.UnrecoverableKeyException;
 import java.security.spec.InvalidKeySpecException;
+import java.security.UnrecoverableKeyException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -82,18 +84,23 @@ public class RecoverableKeyStoreManager {
     private final RecoverableKeyGenerator mRecoverableKeyGenerator;
     private final RecoverySnapshotStorage mSnapshotStorage;
     private final PlatformKeyManager mPlatformKeyManager;
+    private final KeyStore mKeyStore;
+    private final ApplicationKeyStorage mApplicationKeyStorage;
 
     /**
      * Returns a new or existing instance.
      *
      * @hide
      */
-    public static synchronized RecoverableKeyStoreManager getInstance(Context context) {
+    public static synchronized RecoverableKeyStoreManager
+            getInstance(Context context, KeyStore keystore) {
         if (mInstance == null) {
             RecoverableKeyStoreDb db = RecoverableKeyStoreDb.newInstance(context);
             PlatformKeyManager platformKeyManager;
+            ApplicationKeyStorage applicationKeyStorage;
             try {
                 platformKeyManager = PlatformKeyManager.getInstance(context, db);
+                applicationKeyStorage = ApplicationKeyStorage.getInstance(keystore);
             } catch (NoSuchAlgorithmException e) {
                 // Impossible: all algorithms must be supported by AOSP
                 throw new RuntimeException(e);
@@ -103,12 +110,14 @@ public class RecoverableKeyStoreManager {
 
             mInstance = new RecoverableKeyStoreManager(
                     context.getApplicationContext(),
+                    keystore,
                     db,
                     new RecoverySessionStorage(),
                     Executors.newSingleThreadExecutor(),
                     new RecoverySnapshotStorage(),
                     new RecoverySnapshotListenersStorage(),
-                    platformKeyManager);
+                    platformKeyManager,
+                    applicationKeyStorage);
         }
         return mInstance;
     }
@@ -116,19 +125,23 @@ public class RecoverableKeyStoreManager {
     @VisibleForTesting
     RecoverableKeyStoreManager(
             Context context,
+            KeyStore keystore,
             RecoverableKeyStoreDb recoverableKeyStoreDb,
             RecoverySessionStorage recoverySessionStorage,
             ExecutorService executorService,
             RecoverySnapshotStorage snapshotStorage,
             RecoverySnapshotListenersStorage listenersStorage,
-            PlatformKeyManager platformKeyManager) {
+            PlatformKeyManager platformKeyManager,
+            ApplicationKeyStorage applicationKeyStorage) {
         mContext = context;
+        mKeyStore = keystore;
         mDatabase = recoverableKeyStoreDb;
         mRecoverySessionStorage = recoverySessionStorage;
         mExecutorService = executorService;
         mListenersStorage = listenersStorage;
         mSnapshotStorage = snapshotStorage;
         mPlatformKeyManager = platformKeyManager;
+        mApplicationKeyStorage = applicationKeyStorage;
 
         try {
             mRecoverableKeyGenerator = RecoverableKeyGenerator.newInstance(mDatabase);
@@ -406,6 +419,7 @@ public class RecoverableKeyStoreManager {
     }
 
     /**
+     * Deprecated
      * Generates a key named {@code alias} in the recoverable store for the calling uid. Then
      * returns the raw key material.
      *
@@ -450,7 +464,53 @@ public class RecoverableKeyStoreManager {
         boolean wasRemoved = mDatabase.removeKey(uid, alias);
         if (wasRemoved) {
             mDatabase.setShouldCreateSnapshot(userId, uid, true);
+            mApplicationKeyStorage.deleteEntry(userId, uid, alias);
         }
+    }
+
+    /**
+     * Generates a key named {@code alias} in caller's namespace.
+     * The key is stored in system service keystore namespace.
+     *
+     * @return grant alias, which caller can use to access the key.
+     */
+    public String generateKey(@NonNull String alias, byte[] account) throws RemoteException {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+
+        PlatformEncryptionKey encryptionKey;
+        try {
+            encryptionKey = mPlatformKeyManager.getEncryptKey(userId);
+        } catch (NoSuchAlgorithmException e) {
+            // Impossible: all algorithms must be supported by AOSP
+            throw new RuntimeException(e);
+        } catch (KeyStoreException | UnrecoverableKeyException e) {
+            throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
+        } catch (InsecureUserException e) {
+            throw new ServiceSpecificException(ERROR_INSECURE_USER, e.getMessage());
+        }
+
+        try {
+            byte[] secretKey =
+                    mRecoverableKeyGenerator.generateAndStoreKey(encryptionKey, userId, uid, alias);
+            mApplicationKeyStorage.setSymmetricKeyEntry(userId, uid, alias, secretKey);
+            String grantAlias = mApplicationKeyStorage.getGrantAlias(userId, uid, alias);
+            return grantAlias;
+        } catch (KeyStoreException | InvalidKeyException | RecoverableKeyStorageException e) {
+            throw new ServiceSpecificException(ERROR_SERVICE_INTERNAL_ERROR, e.getMessage());
+        }
+    }
+
+    /**
+     * Gets a key named {@code alias} in caller's namespace.
+     *
+     * @return grant alias, which caller can use to access the key.
+     */
+    public String getKey(@NonNull String alias) throws RemoteException {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        String grantAlias = mApplicationKeyStorage.getGrantAlias(userId, uid, alias);
+        return grantAlias;
     }
 
     private byte[] decryptRecoveryKey(

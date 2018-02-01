@@ -383,8 +383,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             return KeyStore.getInstance();
         }
 
-        public RecoverableKeyStoreManager getRecoverableKeyStoreManager() {
-            return RecoverableKeyStoreManager.getInstance(mContext);
+        public RecoverableKeyStoreManager getRecoverableKeyStoreManager(KeyStore keyStore) {
+            return RecoverableKeyStoreManager.getInstance(mContext, keyStore);
         }
 
         public IStorageManager getStorageManager() {
@@ -413,7 +413,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mInjector = injector;
         mContext = injector.getContext();
         mKeyStore = injector.getKeyStore();
-        mRecoverableKeyStoreManager = injector.getRecoverableKeyStoreManager();
+        mRecoverableKeyStoreManager = injector.getRecoverableKeyStoreManager(mKeyStore);
         mHandler = injector.getHandler();
         mStrongAuth = injector.getStrongAuth();
         mActivityManager = injector.getActivityManager();
@@ -2062,6 +2062,16 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public byte[] generateAndStoreKey(@NonNull String alias) throws RemoteException {
         return mRecoverableKeyStoreManager.generateAndStoreKey(alias);
+    }
+
+    @Override
+    public String generateKey(@NonNull String alias, byte[] account) throws RemoteException {
+        return mRecoverableKeyStoreManager.generateKey(alias, account);
+    }
+
+    @Override
+    public String getKey(@NonNull String alias) throws RemoteException {
+        return mRecoverableKeyStoreManager.getKey(alias);
     }
 
     private static final String[] VALID_SETTINGS = new String[] {
