@@ -1262,6 +1262,18 @@ static jobject android_media_AudioTrack_get_volume_shaper_state(JNIEnv *env, job
     return VolumeShaperHelper::convertStateToJobject(env, gVolumeShaperFields, state);
 }
 
+static int android_media_AudioTrack_setPresentation(
+                                JNIEnv *env,  jobject thiz, jint presentationId, jint programId) {
+    sp<AudioTrack> lpTrack = getAudioTrack(env, thiz);
+    if (lpTrack == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+            "AudioTrack not initialized");
+        return (jint)AUDIO_JAVA_ERROR;
+    }
+
+    return (jint)lpTrack->selectPresentation((int)presentationId, (int)programId);
+}
+
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
 static const JNINativeMethod gMethods[] = {
@@ -1333,6 +1345,7 @@ static const JNINativeMethod gMethods[] = {
     {"native_getVolumeShaperState",
             "(I)Landroid/media/VolumeShaper$State;",
                                         (void *)android_media_AudioTrack_get_volume_shaper_state},
+    {"native_setPresentation", "(II)I", (void *)android_media_AudioTrack_setPresentation},
 };
 
 
