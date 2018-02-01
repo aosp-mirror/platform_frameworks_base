@@ -1397,23 +1397,6 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     /**
-     * Returns "true" if access to the specified location provider is allowed by the specified
-     * user's settings. Access to all location providers is forbidden to non-location-provider
-     * processes belonging to background users.
-     *
-     * @param provider the name of the location provider
-     * @param uid      the requestor's UID
-     * @param userId   the user id to query
-     */
-    private boolean isAllowedByUserSettingsLockedForUser(
-            String provider, int uid, int userId) {
-        if (!isCurrentProfile(UserHandle.getUserId(uid)) && !isUidALocationProvider(uid)) {
-            return false;
-        }
-        return isLocationProviderEnabledForUser(provider, userId);
-    }
-
-    /**
      * Returns the permission string associated with the specified resolution level.
      *
      * @param resolutionLevel the resolution level
@@ -2585,143 +2568,6 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     /**
-     * Method for enabling or disabling location.
-     *
-     * @param enabled true to enable location. false to disable location
-     * @param userId the user id to set
-     */
-    @Override
-    public void setLocationEnabledForUser(boolean enabled, int userId) {
-        // Check INTERACT_ACROSS_USERS permission if userId is not current user id.
-        checkInteractAcrossUsersPermission(userId);
-
-        // Enable or disable all location providers. Fused provider and passive provider are
-        // excluded.
-        synchronized (mLock) {
-            for(String provider : getAllProvidersForLocationSettings()) {
-                setProviderEnabledForUser(provider, enabled, userId);
-            }
-        }
-    }
-
-    /**
-     * Returns the current enabled/disabled status of location
-     *
-     * @param userId the user id to query
-     * @return true if location is enabled. false if location is disabled.
-     */
-    @Override
-    public boolean isLocationEnabledForUser(int userId) {
-        // Check INTERACT_ACROSS_USERS permission if userId is not current user id.
-        checkInteractAcrossUsersPermission(userId);
-
-        // If at least one location provider is enabled, return true. Fused provider and passive
-        // provider are excluded.
-        synchronized (mLock) {
-            for (String provider : getAllProvidersForLocationSettings()) {
-                if (isProviderEnabledForUser(provider, userId)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
-
-    @Override
-    public boolean isProviderEnabled(String provider) {
-        return isProviderEnabledForUser(provider, UserHandle.getCallingUserId());
-    }
-
-    /**
-     * Method for determining if a location provider is enabled.
-     *
-     * @param provider the location provider to query
-     * @param userId the user id to query
-     * @return true if the provider is enabled
-     */
-    @Override
-    public boolean isProviderEnabledForUser(String provider, int userId) {
-        // Check INTERACT_ACROSS_USERS permission if userId is not current user id.
-        checkInteractAcrossUsersPermission(userId);
-
-        // Fused provider is accessed indirectly via criteria rather than the provider-based APIs,
-        // so we discourage its use
-        if (LocationManager.FUSED_PROVIDER.equals(provider)) return false;
-
-        int uid = Binder.getCallingUid();
-        long identity = Binder.clearCallingIdentity();
-        try {
-            synchronized (mLock) {
-                LocationProviderInterface p = mProvidersByName.get(provider);
-                return p != null
-                    && isAllowedByUserSettingsLockedForUser(provider, uid, userId);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    /**
-     * Method for enabling or disabling a single location provider.
-     *
-     * @param provider the name of the provider
-     * @param enabled true to enable the provider. false to disable the provider
-     * @param userId the user id to set
-     * @return true if the value was set successfully. false on failure.
-     */
-    @Override
-    public boolean setProviderEnabledForUser(
-            String provider, boolean enabled, int userId) {
-        mContext.enforceCallingPermission(
-                android.Manifest.permission.WRITE_SECURE_SETTINGS,
-                "Requires WRITE_SECURE_SETTINGS permission");
-
-        // Check INTERACT_ACROSS_USERS permission if userId is not current user id.
-        checkInteractAcrossUsersPermission(userId);
-
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            synchronized (mLock) {
-                // to ensure thread safety, we write the provider name with a '+' or '-'
-                // and let the SettingsProvider handle it rather than reading and modifying
-                // the list of enabled providers.
-                if (enabled) {
-                    provider = "+" + provider;
-                } else {
-                    provider = "-" + provider;
-                }
-                return Settings.Secure.putStringForUser(
-                        mContext.getContentResolver(),
-                        Settings.Secure.LOCATION_PROVIDERS_ALLOWED,
-                        provider,
-                        userId);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    /**
-     * Return all location providers except fused provider and passive provider. These two
-     * providers are not generating location by themselves, but only echo locations from other
-     * providers.
-     *
-     * @return All location providers except fused provider and passive provider, including
-     *          providers that are not permitted to be accessed by the calling activity or are
-     *          currently disabled.
-     */
-    private List<String> getAllProvidersForLocationSettings() {
-        List<String> providersForSettings = new ArrayList<>(mProviders.size());
-        for (String provider : getAllProviders()) {
-            if (provider.equals(LocationManager.PASSIVE_PROVIDER)) {
-                continue;
-            }
-            providersForSettings.add(provider);
-        }
-        return providersForSettings;
-    }
-
-    /**
      * Read location provider status from Settings.Secure
      *
      * @param provider the location provider to query
@@ -2738,23 +2584,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             return TextUtils.delimitedStringContains(allowedProviders, ',', provider);
         } finally {
             Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    /**
-     * Method for checking INTERACT_ACROSS_USERS permission if specified user id is not the same as
-     * current user id
-     *
-     * @param userId the user id to get or set value
-     */
-    private void checkInteractAcrossUsersPermission(int userId) {
-        int uid = Binder.getCallingUid();
-        if (UserHandle.getUserId(uid) != userId) {
-            if (ActivityManager.checkComponentPermission(
-                android.Manifest.permission.INTERACT_ACROSS_USERS, uid, -1, true)
-                != PERMISSION_GRANTED) {
-                throw new SecurityException("Requires INTERACT_ACROSS_USERS permission");
-            }
         }
     }
 
