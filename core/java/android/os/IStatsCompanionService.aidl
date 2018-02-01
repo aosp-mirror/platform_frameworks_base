@@ -41,7 +41,7 @@ interface IStatsCompanionService {
     oneway void cancelAnomalyAlarm();
 
     /**
-      * Register a repeating alarm for polling to fire at the given timestamp and every
+      * Register a repeating alarm for pulling to fire at the given timestamp and every
       * intervalMs thereafter (in ms since epoch).
       * If polling alarm had already been registered, it will be replaced by new one.
       * Uses AlarmManager.setRepeating API, so if the timestamp is in past, alarm fires immediately,
@@ -49,8 +49,18 @@ interface IStatsCompanionService {
       */
     oneway void setPullingAlarms(long timestampMs, long intervalMs);
 
-    /** Cancel any repeating polling alarm. */
+    /** Cancel any repeating pulling alarm. */
     oneway void cancelPullingAlarms();
+
+    /**
+      * Register an alarm when we want to trigger subscribers at the given
+      * timestamp (in ms since epoch).
+      * If an alarm had already been registered, it will be replaced by new one.
+      */
+    oneway void setAlarmForSubscriberTriggering(long timestampMs);
+
+    /** Cancel any alarm for the purpose of subscriber triggering. */
+    oneway void cancelAlarmForSubscriberTriggering();
 
     /** Pull the specified data. Results will be sent to statsd when complete. */
     StatsLogEventWrapper[] pullData(int pullCode);

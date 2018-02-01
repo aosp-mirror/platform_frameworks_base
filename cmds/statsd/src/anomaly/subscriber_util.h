@@ -17,17 +17,17 @@
 #pragma once
 
 #include "config/ConfigKey.h"
-#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"  // Alert, IncidentdDetails
+#include "HashableDimensionKey.h"
+#include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 
 namespace android {
 namespace os {
 namespace statsd {
 
-/**
- * Calls incidentd to trigger an incident report and put in dropbox for uploading.
- */
-bool GenerateIncidentReport(const IncidentdDetails& config, const int64_t& rule_id,
-                            const ConfigKey& configKey);
+void triggerSubscribers(const int64_t rule_id,
+                        const MetricDimensionKey& dimensionKey,
+                        const ConfigKey& configKey,
+                        const std::vector<Subscription>& subscriptions);
 
 }  // namespace statsd
 }  // namespace os

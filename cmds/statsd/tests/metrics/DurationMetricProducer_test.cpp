@@ -239,6 +239,7 @@ TEST(DurationMetricTrackerTest, TestSumDurationWithUpgradeInFollowingBucket) {
 }
 
 TEST(DurationMetricTrackerTest, TestSumDurationAnomalyWithUpgrade) {
+    sp<AlarmMonitor> alarmMonitor;
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
     uint64_t eventUpgradeTimeNs = bucketStartTimeNs + 15 * NS_PER_SEC;
@@ -263,7 +264,7 @@ TEST(DurationMetricTrackerTest, TestSumDurationAnomalyWithUpgrade) {
             3 /* stop_all index */, false /*nesting*/, wizard, dimensions, bucketStartTimeNs);
     durationProducer.setBucketSize(60 * NS_PER_SEC);
 
-    sp<AnomalyTracker> anomalyTracker = durationProducer.addAnomalyTracker(alert);
+    sp<AnomalyTracker> anomalyTracker = durationProducer.addAnomalyTracker(alert, alarmMonitor);
     EXPECT_TRUE(anomalyTracker != nullptr);
 
     LogEvent start_event(tagId, startTimeNs);

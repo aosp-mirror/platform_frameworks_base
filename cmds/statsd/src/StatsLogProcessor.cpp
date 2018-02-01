@@ -66,11 +66,13 @@ const int FIELD_ID_CURRENT_REPORT_ELAPSED_NANOS = 4;
 #define STATS_DATA_DIR "/data/misc/stats-data"
 
 StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap,
-                                     const sp<AnomalyMonitor>& anomalyMonitor,
+                                     const sp<AlarmMonitor>& anomalyAlarmMonitor,
+                                     const sp<AlarmMonitor>& periodicAlarmMonitor,
                                      const long timeBaseSec,
                                      const std::function<void(const ConfigKey&)>& sendBroadcast)
     : mUidMap(uidMap),
-      mAnomalyMonitor(anomalyMonitor),
+      mAnomalyAlarmMonitor(anomalyAlarmMonitor),
+      mPeriodicAlarmMonitor(periodicAlarmMonitor),
       mSendBroadcast(sendBroadcast),
       mTimeBaseSec(timeBaseSec) {
     StatsPullerManager statsPullerManager;
@@ -82,10 +84,19 @@ StatsLogProcessor::~StatsLogProcessor() {
 
 void StatsLogProcessor::onAnomalyAlarmFired(
         const uint64_t timestampNs,
-        unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> anomalySet) {
+        unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
     for (const auto& itr : mMetricsManagers) {
-        itr.second->onAnomalyAlarmFired(timestampNs, anomalySet);
+        itr.second->onAnomalyAlarmFired(timestampNs, alarmSet);
+    }
+}
+void StatsLogProcessor::onPeriodicAlarmFired(
+        const uint64_t timestampNs,
+        unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> alarmSet) {
+
+    std::lock_guard<std::mutex> lock(mMetricsMutex);
+    for (const auto& itr : mMetricsManagers) {
+        itr.second->onPeriodicAlarmFired(timestampNs, alarmSet);
     }
 }
 
@@ -170,7 +181,9 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event) {
 void StatsLogProcessor::OnConfigUpdated(const ConfigKey& key, const StatsdConfig& config) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
     VLOG("Updated configuration for key %s", key.ToString().c_str());
-    sp<MetricsManager> newMetricsManager = new MetricsManager(key, config, mTimeBaseSec, mUidMap);
+    sp<MetricsManager> newMetricsManager =
+        new MetricsManager(key, config, mTimeBaseSec, mUidMap,
+                           mAnomalyAlarmMonitor, mPeriodicAlarmMonitor);
     auto it = mMetricsManagers.find(key);
     if (it == mMetricsManagers.end() && mMetricsManagers.size() > StatsdStats::kMaxConfigCount) {
         ALOGE("Can't accept more configs!");
@@ -179,7 +192,6 @@ void StatsLogProcessor::OnConfigUpdated(const ConfigKey& key, const StatsdConfig
 
     if (newMetricsManager->isConfigValid()) {
         mUidMap->OnConfigUpdated(key);
-        newMetricsManager->setAnomalyMonitor(mAnomalyMonitor);
         if (newMetricsManager->shouldAddUidMapListener()) {
             // We have to add listener after the MetricsManager is constructed because it's
             // not safe to create wp or sp from this pointer inside its constructor.

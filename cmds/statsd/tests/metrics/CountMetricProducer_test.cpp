@@ -201,6 +201,7 @@ TEST(CountMetricProducerTest, TestEventsWithSlicedCondition) {
 }
 
 TEST(CountMetricProducerTest, TestEventWithAppUpgrade) {
+    sp<AlarmMonitor> alarmMonitor;
     uint64_t bucketStartTimeNs = 10000000000;
     uint64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
     uint64_t eventUpgradeTimeNs = bucketStartTimeNs + 15 * NS_PER_SEC;
@@ -222,7 +223,7 @@ TEST(CountMetricProducerTest, TestEventWithAppUpgrade) {
                                       bucketStartTimeNs);
     countProducer.setBucketSize(60 * NS_PER_SEC);
 
-    sp<AnomalyTracker> anomalyTracker = countProducer.addAnomalyTracker(alert);
+    sp<AnomalyTracker> anomalyTracker = countProducer.addAnomalyTracker(alert, alarmMonitor);
     EXPECT_TRUE(anomalyTracker != nullptr);
 
     // Bucket is flushed yet.
@@ -315,6 +316,7 @@ TEST(CountMetricProducerTest, TestEventWithAppUpgradeInNextBucket) {
 }
 
 TEST(CountMetricProducerTest, TestAnomalyDetectionUnSliced) {
+    sp<AlarmMonitor> alarmMonitor;
     Alert alert;
     alert.set_id(11);
     alert.set_metric_id(1);
@@ -337,7 +339,7 @@ TEST(CountMetricProducerTest, TestAnomalyDetectionUnSliced) {
                                       bucketStartTimeNs);
     countProducer.setBucketSize(60 * NS_PER_SEC);
 
-    sp<AnomalyTracker> anomalyTracker = countProducer.addAnomalyTracker(alert);
+    sp<AnomalyTracker> anomalyTracker = countProducer.addAnomalyTracker(alert, alarmMonitor);
 
     int tagId = 1;
     LogEvent event1(tagId, bucketStartTimeNs + 1);

@@ -37,6 +37,11 @@ public:
     static void writeFile(const char* file, const void* buffer, int numBytes);
 
     /**
+     * Reads the file content to the buffer.
+     */
+    static bool readFileToString(const char* file, string* content);
+
+    /**
      * Deletes a single file given a file name.
      */
     static void deleteFile(const char* file);

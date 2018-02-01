@@ -346,6 +346,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
 }
 
 TEST(ValueMetricProducerTest, TestAnomalyDetection) {
+    sp<AlarmMonitor> alarmMonitor;
     Alert alert;
     alert.set_id(101);
     alert.set_metric_id(metricId);
@@ -365,7 +366,7 @@ TEST(ValueMetricProducerTest, TestAnomalyDetection) {
                                       -1 /*not pulled*/, bucketStartTimeNs);
     valueProducer.setBucketSize(60 * NS_PER_SEC);
 
-    sp<AnomalyTracker> anomalyTracker = valueProducer.addAnomalyTracker(alert);
+    sp<AnomalyTracker> anomalyTracker = valueProducer.addAnomalyTracker(alert, alarmMonitor);
 
 
     shared_ptr<LogEvent> event1

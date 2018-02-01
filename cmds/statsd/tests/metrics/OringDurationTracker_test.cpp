@@ -334,7 +334,9 @@ TEST(OringDurationTrackerTest, TestPredictAnomalyTimestamp) {
     uint64_t bucketNum = 0;
     uint64_t eventStartTimeNs = bucketStartTimeNs + NS_PER_SEC + 1;
 
-    sp<DurationAnomalyTracker> anomalyTracker = new DurationAnomalyTracker(alert, kConfigKey);
+    sp<AlarmMonitor> alarmMonitor;
+    sp<DurationAnomalyTracker> anomalyTracker =
+        new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
     OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
                                  true, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
                                  bucketSizeNs, true, {anomalyTracker});
@@ -403,7 +405,9 @@ TEST(OringDurationTrackerTest, TestAnomalyDetectionExpiredAlarm) {
     uint64_t bucketNum = 0;
     uint64_t eventStartTimeNs = bucketStartTimeNs + NS_PER_SEC + 1;
 
-    sp<DurationAnomalyTracker> anomalyTracker = new DurationAnomalyTracker(alert, kConfigKey);
+    sp<AlarmMonitor> alarmMonitor;
+    sp<DurationAnomalyTracker> anomalyTracker =
+        new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
     OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
                                  true /*nesting*/, bucketStartTimeNs, bucketNum, bucketStartTimeNs,
                                  bucketSizeNs, false, {anomalyTracker});
@@ -453,14 +457,16 @@ TEST(OringDurationTrackerTest, TestAnomalyDetectionFiredAlarm) {
     uint64_t bucketStartTimeNs = 10 * NS_PER_SEC;
     uint64_t bucketSizeNs = 30 * NS_PER_SEC;
 
-    sp<DurationAnomalyTracker> anomalyTracker = new DurationAnomalyTracker(alert, kConfigKey);
+    sp<AlarmMonitor> alarmMonitor;
+    sp<DurationAnomalyTracker> anomalyTracker =
+        new DurationAnomalyTracker(alert, kConfigKey, alarmMonitor);
     OringDurationTracker tracker(kConfigKey, metricId, eventKey, wizard, 1, dimensionInCondition,
                                  true /*nesting*/, bucketStartTimeNs, 0, bucketStartTimeNs,
                                  bucketSizeNs, false, {anomalyTracker});
 
     tracker.noteStart(kEventKey1, true, 15 * NS_PER_SEC, conkey); // start key1
     EXPECT_EQ(1u, anomalyTracker->mAlarms.size());
-    sp<const AnomalyAlarm> alarm = anomalyTracker->mAlarms.begin()->second;
+    sp<const InternalAlarm> alarm = anomalyTracker->mAlarms.begin()->second;
     EXPECT_EQ((long long)(55ULL * NS_PER_SEC), (long long)(alarm->timestampSec * NS_PER_SEC));
     EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey), 0U);
 
@@ -487,7 +493,7 @@ TEST(OringDurationTrackerTest, TestAnomalyDetectionFiredAlarm) {
     EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey), 0U);
 
     // Now, at 60s, which is 38s after key1 started again, we have reached 40s of 'on' time.
-    std::unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> firedAlarms({alarm});
+    std::unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> firedAlarms({alarm});
     anomalyTracker->informAlarmsFired(62 * NS_PER_SEC, firedAlarms);
     EXPECT_EQ(0u, anomalyTracker->mAlarms.size());
     EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(eventKey), 62U + refPeriodSec);

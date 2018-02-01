@@ -47,11 +47,13 @@ const int FIELD_ID_UIDMAP_STATS = 8;
 const int FIELD_ID_ANOMALY_ALARM_STATS = 9;
 // const int FIELD_ID_PULLED_ATOM_STATS = 10; // The proto is written in stats_log_util.cpp
 const int FIELD_ID_LOGGER_ERROR_STATS = 11;
+const int FIELD_ID_SUBSCRIBER_ALARM_STATS = 12;
 
 const int FIELD_ID_ATOM_STATS_TAG = 1;
 const int FIELD_ID_ATOM_STATS_COUNT = 2;
 
 const int FIELD_ID_ANOMALY_ALARMS_REGISTERED = 1;
+const int FIELD_ID_SUBSCRIBER_ALARMS_REGISTERED = 1;
 
 const int FIELD_ID_LOGGER_STATS_TIME = 1;
 const int FIELD_ID_LOGGER_STATS_ERROR_CODE = 2;
@@ -248,6 +250,11 @@ void StatsdStats::noteRegisteredAnomalyAlarmChanged() {
     mAnomalyAlarmRegisteredStats++;
 }
 
+void StatsdStats::noteRegisteredPeriodicAlarmChanged() {
+    lock_guard<std::mutex> lock(mLock);
+    mPeriodicAlarmRegisteredStats++;
+}
+
 void StatsdStats::updateMinPullIntervalSec(int pullAtomId, long intervalSec) {
     lock_guard<std::mutex> lock(mLock);
     mPulledAtomStats[pullAtomId].minPullIntervalSec = intervalSec;
@@ -297,6 +304,7 @@ void StatsdStats::resetInternalLocked() {
     std::fill(mPushedAtomStats.begin(), mPushedAtomStats.end(), 0);
     mAlertStats.clear();
     mAnomalyAlarmRegisteredStats = 0;
+    mPeriodicAlarmRegisteredStats = 0;
     mMatcherStats.clear();
     mLoggerErrors.clear();
     for (auto& config : mConfigStats) {
@@ -462,6 +470,11 @@ void StatsdStats::dumpStats(FILE* out) const {
         fprintf(out, "Anomaly alarm registrations: %d\n", mAnomalyAlarmRegisteredStats);
     }
 
+    if (mPeriodicAlarmRegisteredStats > 0) {
+        fprintf(out, "********SubscriberAlarmStats stats***********\n");
+        fprintf(out, "Subscriber alarm registrations: %d\n", mPeriodicAlarmRegisteredStats);
+    }
+
     fprintf(out,
             "UID map stats: bytes=%d, snapshots=%d, changes=%d, snapshots lost=%d, changes "
             "lost=%d\n",
@@ -528,6 +541,13 @@ void StatsdStats::dumpStats(std::vector<uint8_t>* output, bool reset) {
         long long token = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_ANOMALY_ALARM_STATS);
         proto.write(FIELD_TYPE_INT32 | FIELD_ID_ANOMALY_ALARMS_REGISTERED,
                     mAnomalyAlarmRegisteredStats);
+        proto.end(token);
+    }
+
+    if (mPeriodicAlarmRegisteredStats > 0) {
+        long long token = proto.start(FIELD_TYPE_MESSAGE | FIELD_ID_SUBSCRIBER_ALARM_STATS);
+        proto.write(FIELD_TYPE_INT32 | FIELD_ID_SUBSCRIBER_ALARMS_REGISTERED,
+                    mPeriodicAlarmRegisteredStats);
         proto.end(token);
     }
 

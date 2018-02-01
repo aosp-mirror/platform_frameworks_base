@@ -41,33 +41,34 @@ namespace statsd {
  * threshold.
  * Timestamps are in seconds since epoch in a uint32, so will fail in year 2106.
  */
-struct AnomalyAlarm : public RefBase {
-    AnomalyAlarm(uint32_t timestampSec) : timestampSec(timestampSec) {
+struct InternalAlarm : public RefBase {
+    InternalAlarm(uint32_t timestampSec) : timestampSec(timestampSec) {
     }
 
     const uint32_t timestampSec;
 
-    /** AnomalyAlarm a is smaller (higher priority) than b if its timestamp is sooner. */
+    /** InternalAlarm a is smaller (higher priority) than b if its timestamp is sooner. */
     struct SmallerTimestamp {
-        bool operator()(sp<const AnomalyAlarm> a, sp<const AnomalyAlarm> b) const {
+        bool operator()(sp<const InternalAlarm> a, sp<const InternalAlarm> b) const {
             return (a->timestampSec < b->timestampSec);
         }
     };
 };
 
-// TODO: Rename this file to AnomalyAlarmMonitor.
 /**
- * Manages alarms for Anomaly Detection.
+ * Manages internal alarms that may get registered with the AlarmManager.
  */
-class AnomalyMonitor : public RefBase {
+class AlarmMonitor : public RefBase {
 public:
     /**
      * @param minDiffToUpdateRegisteredAlarmTimeSec If the soonest alarm differs
      * from the registered alarm by more than this amount, update the registered
      * alarm.
      */
-    AnomalyMonitor(uint32_t minDiffToUpdateRegisteredAlarmTimeSec);
-    ~AnomalyMonitor();
+    AlarmMonitor(uint32_t minDiffToUpdateRegisteredAlarmTimeSec,
+                 const std::function<void(const sp<IStatsCompanionService>&, int64_t)>& updateAlarm,
+                 const std::function<void(const sp<IStatsCompanionService>&)>& cancelAlarm);
+    ~AlarmMonitor();
 
     /**
      * Tells AnomalyMonitor what IStatsCompanionService to use and, if
@@ -80,20 +81,20 @@ public:
     /**
      * Adds the given alarm (reference) to the queue.
      */
-    void add(sp<const AnomalyAlarm> alarm);
+    void add(sp<const InternalAlarm> alarm);
 
     /**
      * Removes the given alarm (reference) from the queue.
      * Note that alarm comparison is reference-based; if another alarm exists
      * with the same timestampSec, that alarm will still remain in the queue.
      */
-    void remove(sp<const AnomalyAlarm> alarm);
+    void remove(sp<const InternalAlarm> alarm);
 
     /**
      * Returns and removes all alarms whose timestamp <= the given timestampSec.
      * Always updates the registered alarm if return is non-empty.
      */
-    unordered_set<sp<const AnomalyAlarm>, SpHash<AnomalyAlarm>> popSoonerThan(
+    unordered_set<sp<const InternalAlarm>, SpHash<InternalAlarm>> popSoonerThan(
             uint32_t timestampSec);
 
     /**
@@ -119,7 +120,7 @@ private:
     /**
      * Priority queue of alarms, prioritized by soonest alarm.timestampSec.
      */
-    indexed_priority_queue<AnomalyAlarm, AnomalyAlarm::SmallerTimestamp> mPq;
+    indexed_priority_queue<InternalAlarm, InternalAlarm::SmallerTimestamp> mPq;
 
     /**
      * Binder interface for communicating with StatsCompanionService.
@@ -146,6 +147,13 @@ private:
 
     /** Converts uint32 timestamp in seconds to a Java long in msec. */
     int64_t secToMs(uint32_t timeSec);
+
+    // Callback function to update the alarm via StatsCompanionService.
+    std::function<void(const sp<IStatsCompanionService>, int64_t)> mUpdateAlarm;
+
+    // Callback function to cancel the alarm via StatsCompanionService.
+    std::function<void(const sp<IStatsCompanionService>)> mCancelAlarm;
+
 };
 
 }  // namespace statsd

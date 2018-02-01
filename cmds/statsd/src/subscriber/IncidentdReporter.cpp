@@ -28,10 +28,10 @@ namespace android {
 namespace os {
 namespace statsd {
 
-bool GenerateIncidentReport(const IncidentdDetails& config, const Alert& alert,
+bool GenerateIncidentReport(const IncidentdDetails& config, const int64_t& rule_id,
                             const ConfigKey& configKey) {
     if (config.section_size() == 0) {
-        VLOG("The alert %lld contains zero section in config(%d,%lld)", alert.id(),
+        VLOG("The alert %lld contains zero section in config(%d,%lld)", (unsigned long long)rule_id,
             configKey.GetUid(), (long long) configKey.GetId());
         return false;
     }
@@ -39,7 +39,7 @@ bool GenerateIncidentReport(const IncidentdDetails& config, const Alert& alert,
     IncidentReportArgs incidentReport;
 
     android::os::IncidentHeaderProto header;
-    header.set_alert_id(alert.id());
+    header.set_alert_id(rule_id);
     header.mutable_config_key()->set_uid(configKey.GetUid());
     header.mutable_config_key()->set_id(configKey.GetId());
     incidentReport.addHeader(header);

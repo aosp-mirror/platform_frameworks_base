@@ -65,8 +65,12 @@ MATCHER_P(StatsdConfigEq, id, 0) {
 const int64_t testConfigId = 12345;
 
 TEST(ConfigManagerTest, TestFakeConfig) {
-    auto metricsManager = std::make_unique<MetricsManager>(ConfigKey(0, testConfigId),
-                                                           build_fake_config(), 1000, new UidMap());
+    auto metricsManager = std::make_unique<MetricsManager>(
+        ConfigKey(0, testConfigId), build_fake_config(), 1000, new UidMap(),
+        new AlarmMonitor(10, [](const sp<IStatsCompanionService>&, int64_t){},
+                         [](const sp<IStatsCompanionService>&){}),
+        new AlarmMonitor(10, [](const sp<IStatsCompanionService>&, int64_t){},
+                         [](const sp<IStatsCompanionService>&){}));
     EXPECT_TRUE(metricsManager->isConfigValid());
 }
 

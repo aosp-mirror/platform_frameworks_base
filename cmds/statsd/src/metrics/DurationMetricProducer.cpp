@@ -109,9 +109,11 @@ DurationMetricProducer::~DurationMetricProducer() {
     VLOG("~DurationMetric() called");
 }
 
-sp<AnomalyTracker> DurationMetricProducer::addAnomalyTracker(const Alert &alert) {
+sp<AnomalyTracker> DurationMetricProducer::addAnomalyTracker(
+        const Alert &alert, const sp<AlarmMonitor>& anomalyAlarmMonitor) {
     std::lock_guard<std::mutex> lock(mMutex);
-    sp<DurationAnomalyTracker> anomalyTracker = new DurationAnomalyTracker(alert, mConfigKey);
+    sp<DurationAnomalyTracker> anomalyTracker =
+        new DurationAnomalyTracker(alert, mConfigKey, anomalyAlarmMonitor);
     if (anomalyTracker != nullptr) {
         mAnomalyTrackers.push_back(anomalyTracker);
     }
