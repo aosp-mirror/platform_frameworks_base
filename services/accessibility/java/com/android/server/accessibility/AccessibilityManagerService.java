@@ -22,6 +22,7 @@ import static android.view.accessibility.AccessibilityNodeInfo.ACTION_ACCESSIBIL
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS;
 
 import static com.android.internal.util.FunctionalUtils.ignoreRemoteException;
+import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -100,18 +101,20 @@ import android.view.accessibility.IAccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
 
 import com.android.internal.R;
+import com.android.internal.accessibility.AccessibilityShortcutController;
+import com.android.internal.accessibility.AccessibilityShortcutController.ToggleableFrameworkFeatureInfo;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IntPair;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
-import com.android.internal.accessibility.AccessibilityShortcutController;
-import com.android.internal.accessibility.AccessibilityShortcutController.ToggleableFrameworkFeatureInfo;
 import com.android.server.wm.WindowManagerInternal;
 
 import libcore.util.EmptyArray;
+
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.FileDescriptor;
@@ -126,8 +129,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
+import java.util.function.IntSupplier;
 
 /**
  * This class is instantiated by the system as a system level service and can be
@@ -291,6 +294,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     @Nullable
     public FingerprintGestureDispatcher getFingerprintGestureDispatcher() {
         return mFingerprintGestureDispatcher;
+    }
+
+    private UserState getUserState(int userId) {
+        synchronized (mLock) {
+            return getUserStateLocked(userId);
+        }
     }
 
     private UserState getUserStateLocked(int userId) {
@@ -540,9 +549,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     dispatchEvent = true;
                 }
                 if (mHasInputFilter && mInputFilter != null) {
-                    mMainHandler.obtainMessage(
-                            MainHandler.MSG_SEND_ACCESSIBILITY_EVENT_TO_INPUT_FILTER,
-                            AccessibilityEvent.obtain(event)).sendToTarget();
+                    mMainHandler.sendMessage(obtainMessage(
+                            AccessibilityManagerService::sendAccessibilityEventToInputFilter,
+                            this, AccessibilityEvent.obtain(event)));
                 }
             }
         }
@@ -566,6 +575,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         if (OWN_PROCESS_ID != Binder.getCallingPid()) {
             event.recycle();
         }
+    }
+
+    private void sendAccessibilityEventToInputFilter(AccessibilityEvent event) {
+        synchronized (mLock) {
+            if (mHasInputFilter && mInputFilter != null) {
+                mInputFilter.notifyAccessibilityEvent(event);
+            }
+        }
+        event.recycle();
     }
 
     @Override
@@ -1024,8 +1042,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
             // Disable the local managers for the old user.
             if (oldUserState.mUserClients.getRegisteredCallbackCount() > 0) {
-                mMainHandler.obtainMessage(MainHandler.MSG_SEND_CLEARED_STATE_TO_CLIENTS_FOR_USER,
-                        oldUserState.mUserId, 0).sendToTarget();
+                mMainHandler.sendMessage(obtainMessage(
+                        AccessibilityManagerService::sendStateToClients,
+                        this, 0, oldUserState.mUserId));
             }
 
             // Announce user changes only if more that one exist.
@@ -1045,8 +1064,25 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
             if (announceNewUser) {
                 // Schedule announcement of the current user if needed.
-                mMainHandler.sendEmptyMessageDelayed(MainHandler.MSG_ANNOUNCE_NEW_USER_IF_NEEDED,
+                mMainHandler.sendMessageDelayed(
+                        obtainMessage(AccessibilityManagerService::announceNewUserIfNeeded, this),
                         WAIT_FOR_USER_STATE_FULLY_INITIALIZED_MILLIS);
+            }
+        }
+    }
+
+    private void announceNewUserIfNeeded() {
+        synchronized (mLock) {
+            UserState userState = getCurrentUserStateLocked();
+            if (userState.isHandlingAccessibilityEvents()) {
+                UserManager userManager = (UserManager) mContext.getSystemService(
+                        Context.USER_SERVICE);
+                String message = mContext.getString(R.string.user_switched,
+                        userManager.getUserInfo(mCurrentUserId).name);
+                AccessibilityEvent event = AccessibilityEvent.obtain(
+                        AccessibilityEvent.TYPE_ANNOUNCEMENT);
+                event.getText().add(message);
+                sendAccessibilityEventLocked(event, mCurrentUserId);
             }
         }
     }
@@ -1154,8 +1190,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
         if (potentialTargets == 1) {
             if (state.mIsNavBarMagnificationEnabled) {
-                mMainHandler.obtainMessage(
-                        MainHandler.MSG_SEND_ACCESSIBILITY_BUTTON_TO_INPUT_FILTER).sendToTarget();
+                mMainHandler.sendMessage(obtainMessage(
+                        AccessibilityManagerService::sendAccessibilityButtonToInputFilter, this));
                 return;
             } else {
                 for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
@@ -1169,12 +1205,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         } else {
             if (state.mServiceAssignedToAccessibilityButton == null
                     && !state.mIsNavBarMagnificationAssignedToAccessibilityButton) {
-                mMainHandler.obtainMessage(
-                        MainHandler.MSG_SHOW_ACCESSIBILITY_BUTTON_CHOOSER).sendToTarget();
+                mMainHandler.sendMessage(obtainMessage(
+                        AccessibilityManagerService::showAccessibilityButtonTargetSelection, this));
             } else if (state.mIsNavBarMagnificationEnabled
                     && state.mIsNavBarMagnificationAssignedToAccessibilityButton) {
-                mMainHandler.obtainMessage(
-                        MainHandler.MSG_SEND_ACCESSIBILITY_BUTTON_TO_INPUT_FILTER).sendToTarget();
+                mMainHandler.sendMessage(obtainMessage(
+                        AccessibilityManagerService::sendAccessibilityButtonToInputFilter, this));
                 return;
             } else {
                 for (int i = state.mBoundServices.size() - 1; i >= 0; i--) {
@@ -1187,9 +1223,23 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 }
             }
             // The user may have turned off the assigned service or feature
-            mMainHandler.obtainMessage(
-                    MainHandler.MSG_SHOW_ACCESSIBILITY_BUTTON_CHOOSER).sendToTarget();
+            mMainHandler.sendMessage(obtainMessage(
+                    AccessibilityManagerService::showAccessibilityButtonTargetSelection, this));
         }
+    }
+
+    private void sendAccessibilityButtonToInputFilter() {
+        synchronized (mLock) {
+            if (mHasInputFilter && mInputFilter != null) {
+                mInputFilter.notifyAccessibilityButtonClicked();
+            }
+        }
+    }
+
+    private void showAccessibilityButtonTargetSelection() {
+        Intent intent = new Intent(AccessibilityManager.ACTION_CHOOSE_ACCESSIBILITY_BUTTON);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        mContext.startActivityAsUser(intent, UserHandle.of(mCurrentUserId));
     }
 
     private void notifyAccessibilityButtonVisibilityChangedLocked(boolean available) {
@@ -1555,28 +1605,54 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 && (mGlobalClients.getRegisteredCallbackCount() > 0
                         || userState.mUserClients.getRegisteredCallbackCount() > 0)) {
             userState.mLastSentClientState = clientState;
-            mMainHandler.obtainMessage(MainHandler.MSG_SEND_STATE_TO_CLIENTS,
-                    clientState, userState.mUserId).sendToTarget();
+            mMainHandler.sendMessage(obtainMessage(
+                    AccessibilityManagerService::sendStateToAllClients,
+                    this, clientState, userState.mUserId));
         }
     }
 
-    private void showAccessibilityButtonTargetSelection() {
-        Intent intent = new Intent(AccessibilityManager.ACTION_CHOOSE_ACCESSIBILITY_BUTTON);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        mContext.startActivityAsUser(intent, UserHandle.of(mCurrentUserId));
+    private void sendStateToAllClients(int clientState, int userId) {
+        sendStateToClients(clientState, mGlobalClients);
+        sendStateToClients(clientState, userId);
+    }
+
+    private void sendStateToClients(int clientState, int userId) {
+        sendStateToClients(clientState, getUserState(userId).mUserClients);
+    }
+
+    private void sendStateToClients(int clientState,
+            RemoteCallbackList<IAccessibilityManagerClient> clients) {
+        clients.broadcast(ignoreRemoteException(
+                client -> client.setState(clientState)));
     }
 
     private void scheduleNotifyClientsOfServicesStateChange(UserState userState) {
-        mMainHandler.obtainMessage(MainHandler.MSG_SEND_SERVICES_STATE_CHANGED_TO_CLIENTS,
-                userState.mUserId).sendToTarget();
+        mMainHandler.sendMessage(obtainMessage(
+                AccessibilityManagerService::sendServicesStateChanged,
+                this, userState.mUserClients));
+    }
+
+    private void sendServicesStateChanged(
+            RemoteCallbackList<IAccessibilityManagerClient> userClients) {
+        notifyClientsOfServicesStateChange(mGlobalClients);
+        notifyClientsOfServicesStateChange(userClients);
+    }
+
+    private void notifyClientsOfServicesStateChange(
+            RemoteCallbackList<IAccessibilityManagerClient> clients) {
+        clients.broadcast(ignoreRemoteException(
+                client -> client.notifyServicesStateChanged()));
     }
 
     private void scheduleUpdateInputFilter(UserState userState) {
-        mMainHandler.obtainMessage(MainHandler.MSG_UPDATE_INPUT_FILTER, userState).sendToTarget();
+        mMainHandler.sendMessage(obtainMessage(
+                AccessibilityManagerService::updateInputFilter, this, userState));
     }
 
     private void scheduleUpdateFingerprintGestureHandling(UserState userState) {
-        mMainHandler.obtainMessage(MainHandler.MSG_UPDATE_FINGERPRINT, userState).sendToTarget();
+        mMainHandler.sendMessage(obtainMessage(
+                AccessibilityManagerService::updateFingerprintGestureHandling,
+                this, userState));
     }
 
     private void updateInputFilter(UserState userState) {
@@ -2039,9 +2115,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 return true;
             } else if (mEnableTouchExplorationDialog == null
                     || !mEnableTouchExplorationDialog.isShowing()) {
-                mMainHandler.obtainMessage(
-                        MainHandler.MSG_SHOW_ENABLED_TOUCH_EXPLORATION_DIALOG,
-                        service).sendToTarget();
+                mMainHandler.sendMessage(obtainMessage(
+                        AccessibilityManagerService::showEnableTouchExplorationDialog,
+                        this, service));
             }
         } else {
             // Starting in JB-MR2 we request an accessibility service to declare
@@ -2293,9 +2369,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private void sendAccessibilityEventLocked(AccessibilityEvent event, int userId) {
         // Resync to avoid calling out with the lock held
         event.setEventTime(SystemClock.uptimeMillis());
-        mMainHandler.obtainMessage(
-                MainHandler.MSG_SEND_ACCESSIBILITY_EVENT, userId, 0 /* unused */, event)
-                .sendToTarget();
+        mMainHandler.sendMessage(obtainMessage(
+                AccessibilityManagerService::sendAccessibilityEvent,
+                this, event, userId));
     }
 
     /**
@@ -2419,22 +2495,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    //TODO remove after refactoring KeyEventDispatcherTest
     final class MainHandler extends Handler {
-        public static final int MSG_SEND_ACCESSIBILITY_EVENT_TO_INPUT_FILTER = 1;
-        public static final int MSG_SEND_STATE_TO_CLIENTS = 2;
-        public static final int MSG_SEND_CLEARED_STATE_TO_CLIENTS_FOR_USER = 3;
-        public static final int MSG_ANNOUNCE_NEW_USER_IF_NEEDED = 5;
-        public static final int MSG_UPDATE_INPUT_FILTER = 6;
-        public static final int MSG_SHOW_ENABLED_TOUCH_EXPLORATION_DIALOG = 7;
         public static final int MSG_SEND_KEY_EVENT_TO_INPUT_FILTER = 8;
-        public static final int MSG_CLEAR_ACCESSIBILITY_FOCUS = 9;
-        public static final int MSG_SEND_SERVICES_STATE_CHANGED_TO_CLIENTS = 10;
-        public static final int MSG_UPDATE_FINGERPRINT = 11;
-        public static final int MSG_SEND_RELEVANT_EVENTS_CHANGED_TO_CLIENTS = 12;
-        public static final int MSG_SEND_ACCESSIBILITY_BUTTON_TO_INPUT_FILTER = 13;
-        public static final int MSG_SHOW_ACCESSIBILITY_BUTTON_CHOOSER = 14;
-        public static final int MSG_INIT_SERVICE = 15;
-        public static final int MSG_SEND_ACCESSIBILITY_EVENT = 16;
 
         public MainHandler(Looper looper) {
             super(looper);
@@ -2442,143 +2505,25 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         @Override
         public void handleMessage(Message msg) {
-            final int type = msg.what;
-            switch (type) {
-                case MSG_SEND_ACCESSIBILITY_EVENT_TO_INPUT_FILTER: {
-                    AccessibilityEvent event = (AccessibilityEvent) msg.obj;
-                    synchronized (mLock) {
-                        if (mHasInputFilter && mInputFilter != null) {
-                            mInputFilter.notifyAccessibilityEvent(event);
-                        }
+            if (msg.what == MSG_SEND_KEY_EVENT_TO_INPUT_FILTER) {
+                KeyEvent event = (KeyEvent) msg.obj;
+                final int policyFlags = msg.arg1;
+                synchronized (mLock) {
+                    if (mHasInputFilter && mInputFilter != null) {
+                        mInputFilter.sendInputEvent(event, policyFlags);
                     }
-                    event.recycle();
-                } break;
-
-                case MSG_SEND_KEY_EVENT_TO_INPUT_FILTER: {
-                    KeyEvent event = (KeyEvent) msg.obj;
-                    final int policyFlags = msg.arg1;
-                    synchronized (mLock) {
-                        if (mHasInputFilter && mInputFilter != null) {
-                            mInputFilter.sendInputEvent(event, policyFlags);
-                        }
-                    }
-                    event.recycle();
-                } break;
-
-                case MSG_SEND_STATE_TO_CLIENTS: {
-                    final int clientState = msg.arg1;
-                    final int userId = msg.arg2;
-                    sendStateToClients(clientState, mGlobalClients);
-                    sendStateToClients(clientState, getUserClientsForId(userId));
-                } break;
-
-                case MSG_SEND_CLEARED_STATE_TO_CLIENTS_FOR_USER: {
-                    final int userId = msg.arg1;
-                    sendStateToClients(0, getUserClientsForId(userId));
-                } break;
-
-                case MSG_ANNOUNCE_NEW_USER_IF_NEEDED: {
-                    announceNewUserIfNeeded();
-                } break;
-
-                case MSG_UPDATE_INPUT_FILTER: {
-                    UserState userState = (UserState) msg.obj;
-                    updateInputFilter(userState);
-                } break;
-
-                case MSG_SHOW_ENABLED_TOUCH_EXPLORATION_DIALOG: {
-                    AccessibilityServiceConnection service =
-                            (AccessibilityServiceConnection) msg.obj;
-                    showEnableTouchExplorationDialog(service);
-                } break;
-
-                case MSG_CLEAR_ACCESSIBILITY_FOCUS: {
-                    final int windowId = msg.arg1;
-                    getInteractionBridge().clearAccessibilityFocusNotLocked(windowId);
-                } break;
-
-                case MSG_SEND_SERVICES_STATE_CHANGED_TO_CLIENTS: {
-                    final int userId = msg.arg1;
-                    notifyClientsOfServicesStateChange(mGlobalClients);
-                    notifyClientsOfServicesStateChange(getUserClientsForId(userId));
-                } break;
-
-                case MSG_UPDATE_FINGERPRINT: {
-                    updateFingerprintGestureHandling((UserState) msg.obj);
-                } break;
-
-                case MSG_SEND_RELEVANT_EVENTS_CHANGED_TO_CLIENTS: {
-                    final int userId = msg.arg1;
-                    final int relevantEventTypes = msg.arg2;
-                    final UserState userState;
-                    synchronized (mLock) {
-                        userState = getUserStateLocked(userId);
-                    }
-                    broadcastToClients(userState, ignoreRemoteException(
-                            client -> client.mCallback.setRelevantEventTypes(relevantEventTypes)));
-                } break;
-
-               case MSG_SEND_ACCESSIBILITY_BUTTON_TO_INPUT_FILTER: {
-                    synchronized (mLock) {
-                        if (mHasInputFilter && mInputFilter != null) {
-                            mInputFilter.notifyAccessibilityButtonClicked();
-                        }
-                    }
-                } break;
-
-                case MSG_SHOW_ACCESSIBILITY_BUTTON_CHOOSER: {
-                    showAccessibilityButtonTargetSelection();
-                } break;
-
-                case MSG_INIT_SERVICE: {
-                    final AccessibilityServiceConnection service =
-                            (AccessibilityServiceConnection) msg.obj;
-                    service.initializeService();
-                } break;
-
-                case MSG_SEND_ACCESSIBILITY_EVENT: {
-                    final AccessibilityEvent event = (AccessibilityEvent) msg.obj;
-                    final int userId = msg.arg1;
-                    sendAccessibilityEvent(event, userId);
                 }
+                event.recycle();
             }
         }
+    }
 
-        private void announceNewUserIfNeeded() {
-            synchronized (mLock) {
-                UserState userState = getCurrentUserStateLocked();
-                if (userState.isHandlingAccessibilityEvents()) {
-                    UserManager userManager = (UserManager) mContext.getSystemService(
-                            Context.USER_SERVICE);
-                    String message = mContext.getString(R.string.user_switched,
-                            userManager.getUserInfo(mCurrentUserId).name);
-                    AccessibilityEvent event = AccessibilityEvent.obtain(
-                            AccessibilityEvent.TYPE_ANNOUNCEMENT);
-                    event.getText().add(message);
-                    sendAccessibilityEventLocked(event, mCurrentUserId);
-                }
-            }
-        }
+    void clearAccessibilityFocus(IntSupplier windowId) {
+        clearAccessibilityFocus(windowId.getAsInt());
+    }
 
-        private RemoteCallbackList<IAccessibilityManagerClient> getUserClientsForId(int userId) {
-            final UserState userState;
-            synchronized (mLock) {
-                userState = getUserStateLocked(userId);
-            }
-            return userState.mUserClients;
-        }
-
-        private void sendStateToClients(int clientState,
-                RemoteCallbackList<IAccessibilityManagerClient> clients) {
-            clients.broadcast(ignoreRemoteException(
-                    client -> client.setState(clientState)));
-        }
-
-        private void notifyClientsOfServicesStateChange(
-                RemoteCallbackList<IAccessibilityManagerClient> clients) {
-            clients.broadcast(ignoreRemoteException(
-                    client -> client.notifyServicesStateChanged()));
-        }
+    void clearAccessibilityFocus(int windowId) {
+        getInteractionBridge().clearAccessibilityFocusNotLocked(windowId);
     }
 
     private int findWindowIdLocked(IBinder token) {
@@ -2912,7 +2857,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
          * Has no effect if no item has accessibility focus, if the item with accessibility
          * focus does not expose the specified action, or if the action fails.
          *
-         * @param actionId The id of the action to perform.
+         * @param action The action to perform.
          *
          * @return {@code true} if the action was performed. {@code false} if it was not.
          */
@@ -3353,8 +3298,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 case AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED: {
                     synchronized (mLock) {
                         if (mAccessibilityFocusedWindowId != windowId) {
-                            mMainHandler.obtainMessage(MainHandler.MSG_CLEAR_ACCESSIBILITY_FOCUS,
-                                    mAccessibilityFocusedWindowId, 0).sendToTarget();
+                            mMainHandler.sendMessage(obtainMessage(
+                                    AccessibilityManagerService::clearAccessibilityFocus,
+                                    AccessibilityManagerService.this, 0));
                             mSecurityPolicy.setAccessibilityFocusedWindowLocked(windowId);
                             mAccessibilityFocusNodeId = nodeId;
                         }
@@ -3406,10 +3352,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 if (oldActiveWindow != mSecurityPolicy.mActiveWindowId
                         && mAccessibilityFocusedWindowId == oldActiveWindow
                         && getCurrentUserStateLocked().mAccessibilityFocusOnlyInActiveWindow) {
-                    mMainHandler.obtainMessage(MainHandler.MSG_CLEAR_ACCESSIBILITY_FOCUS,
-                            oldActiveWindow, 0).sendToTarget();
+                    mMainHandler.sendMessage(obtainMessage(
+                            AccessibilityManagerService::clearAccessibilityFocus,
+                            AccessibilityManagerService.this, box(oldActiveWindow)));
                 }
             }
+        }
+
+        private IntSupplier box(int value) {
+            return PooledLambda.obtainSupplier(value).recycleOnUse();
         }
 
         public int getActiveWindowId() {
