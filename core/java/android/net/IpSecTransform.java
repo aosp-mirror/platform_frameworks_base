@@ -462,7 +462,7 @@ public final class IpSecTransform implements AutoCloseable {
             mConfig.setMode(MODE_TUNNEL);
             mConfig.setSourceAddress(sourceAddress.getHostAddress());
             mConfig.setSpiResourceId(spi.getResourceId());
-            return new IpSecTransform(mContext, mConfig);
+            return new IpSecTransform(mContext, mConfig).activate();
         }
 
         /**
