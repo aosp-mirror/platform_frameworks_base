@@ -40,6 +40,7 @@ public final class Suggestion implements Parcelable {
      */
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {
             FLAG_HAS_BUTTON,
+            FLAG_ICON_TINTABLE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Flags {
@@ -49,6 +50,10 @@ public final class Suggestion implements Parcelable {
      * Flag for suggestion type with a single button
      */
     public static final int FLAG_HAS_BUTTON = 1 << 0;
+    /**
+     * @hide
+     */
+    public static final int FLAG_ICON_TINTABLE = 1 << 1;
 
     private final String mId;
     private final CharSequence mTitle;
