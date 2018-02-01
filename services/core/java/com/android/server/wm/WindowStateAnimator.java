@@ -209,6 +209,12 @@ class WindowStateAnimator {
     float mExtraHScale = (float) 1.0;
     float mExtraVScale = (float) 1.0;
 
+    // An offset in pixel of the surface contents from the window position. Used for Wallpaper
+    // to provide the effect of scrolling within a large surface. We just use these values as
+    // a cache.
+    int mXOffset = 0;
+    int mYOffset = 0;
+
     private final Rect mTmpSize = new Rect();
 
     WindowStateAnimator(final WindowState win) {
@@ -436,7 +442,7 @@ class WindowStateAnimator {
             flags |= SurfaceControl.SECURE;
         }
 
-        mTmpSize.set(w.mFrame.left + w.mXOffset, w.mFrame.top + w.mYOffset, 0, 0);
+        mTmpSize.set(0, 0, 0, 0);
         calculateSurfaceBounds(w, attrs);
         final int width = mTmpSize.width();
         final int height = mTmpSize.height();
@@ -677,8 +683,8 @@ class WindowStateAnimator {
 
             // WindowState.prepareSurfaces expands for surface insets (in order they don't get
             // clipped by the WindowState surface), so we need to go into the other direction here.
-            tmpMatrix.postTranslate(mWin.mXOffset + mWin.mAttrs.surfaceInsets.left,
-                    mWin.mYOffset + mWin.mAttrs.surfaceInsets.top);
+            tmpMatrix.postTranslate(mWin.mAttrs.surfaceInsets.left,
+                    mWin.mAttrs.surfaceInsets.top);
 
 
             // "convert" it into SurfaceFlinger's format
@@ -693,9 +699,6 @@ class WindowStateAnimator {
             mDtDx = tmpFloats[Matrix.MSKEW_Y];
             mDtDy = tmpFloats[Matrix.MSKEW_X];
             mDsDy = tmpFloats[Matrix.MSCALE_Y];
-            float x = tmpFloats[Matrix.MTRANS_X];
-            float y = tmpFloats[Matrix.MTRANS_Y];
-            mWin.mShownPosition.set(Math.round(x), Math.round(y));
 
             // Now set the alpha...  but because our current hardware
             // can't do alpha transformation on a non-opaque surface,
@@ -705,8 +708,7 @@ class WindowStateAnimator {
             mShownAlpha = mAlpha;
             if (!mService.mLimitedAlphaCompositing
                     || (!PixelFormat.formatHasAlpha(mWin.mAttrs.format)
-                    || (mWin.isIdentityMatrix(mDsDx, mDtDx, mDtDy, mDsDy)
-                            && x == frame.left && y == frame.top))) {
+                    || (mWin.isIdentityMatrix(mDsDx, mDtDx, mDtDy, mDsDy)))) {
                 //Slog.i(TAG_WM, "Applying alpha transform");
                 if (screenAnimation) {
                     mShownAlpha *= screenRotationAnimation.getEnterTransformation().getAlpha();
@@ -736,10 +738,6 @@ class WindowStateAnimator {
                 TAG, "computeShownFrameLocked: " + this +
                 " not attached, mAlpha=" + mAlpha);
 
-        // WindowState.prepareSurfaces expands for surface insets (in order they don't get
-        // clipped by the WindowState surface), so we need to go into the other direction here.
-        mWin.mShownPosition.set(mWin.mXOffset + mWin.mAttrs.surfaceInsets.left,
-                mWin.mYOffset + mWin.mAttrs.surfaceInsets.top);
         mShownAlpha = mAlpha;
         mHaveMatrix = false;
         mDsDx = mWin.mGlobalScale;
@@ -790,12 +788,6 @@ class WindowStateAnimator {
         if (DEBUG_WINDOW_CROP) Slog.d(TAG, "win=" + w + " Initial clip rect: " + clipRect
                 + " fullscreen=" + fullscreen);
 
-        if (isFreeformResizing && !w.isChildWindow()) {
-            // For freeform resizing non child windows, we are using the big surface positioned
-            // at 0,0. Thus we must express the crop in that coordinate space.
-            clipRect.offset(w.mShownPosition.x, w.mShownPosition.y);
-        }
-
         w.expandForSurfaceInsets(clipRect);
 
         // The clip rect was generated assuming (0,0) as the window origin,
@@ -837,7 +829,7 @@ class WindowStateAnimator {
             return;
         }
 
-        mTmpSize.set(w.mShownPosition.x, w.mShownPosition.y, 0, 0);
+        mTmpSize.set(0, 0, 0, 0);
         calculateSurfaceBounds(w, attrs);
 
         mExtraHScale = (float) 1.0;
@@ -971,11 +963,6 @@ class WindowStateAnimator {
             // then take over the scaling until the new buffer arrives, and things
             // will be seamless.
             mForceScaleUntilResize = true;
-        } else {
-            if (!w.mSeamlesslyRotated) {
-                mSurfaceController.setPositionInTransaction(mTmpSize.left, mTmpSize.top,
-                        recoveringMemory);
-            }
         }
 
         // If we are ending the scaling mode. We switch to SCALING_MODE_FREEZE
@@ -1167,24 +1154,26 @@ class WindowStateAnimator {
         mSurfaceController.setTransparentRegionHint(region);
     }
 
-    void setWallpaperOffset(Point shownPosition) {
-        final LayoutParams attrs = mWin.getAttrs();
-        final int left = shownPosition.x - attrs.surfaceInsets.left;
-        final int top = shownPosition.y - attrs.surfaceInsets.top;
+    boolean setWallpaperOffset(int dx, int dy) {
+        if (mXOffset == dx && mYOffset == dy) {
+            return false;
+        }
+        mXOffset = dx;
+        mYOffset = dy;
 
         try {
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setWallpaperOffset");
             mService.openSurfaceTransaction();
-            mSurfaceController.setPositionInTransaction(mWin.mFrame.left + left,
-                    mWin.mFrame.top + top, false);
+            mSurfaceController.setPositionInTransaction(dx, dy, false);
             applyCrop(null, false);
         } catch (RuntimeException e) {
             Slog.w(TAG, "Error positioning surface of " + mWin
-                    + " pos=(" + left + "," + top + ")", e);
+                    + " pos=(" + dx + "," + dy + ")", e);
         } finally {
             mService.closeSurfaceTransaction("setWallpaperOffset");
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     "<<< CLOSE TRANSACTION setWallpaperOffset");
+            return true;
         }
     }
 
