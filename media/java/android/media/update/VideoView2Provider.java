@@ -16,6 +16,7 @@
 
 package android.media.update;
 
+import android.annotation.SystemApi;
 import android.media.AudioAttributes;
 import android.media.MediaPlayerInterface;
 import android.media.session.MediaController;
@@ -55,6 +56,9 @@ public interface VideoView2Provider extends ViewGroupProvider {
     void setSpeed_impl(float speed);
     void setAudioFocusRequest_impl(int focusGain);
     void setAudioAttributes_impl(AudioAttributes attributes);
+    /**
+     * @hide
+     */
     void setRouteAttributes_impl(List<String> routeCategories, MediaPlayerInterface player);
     // TODO: remove setRouteAttributes_impl with MediaSession.Callback once MediaSession2 is ready.
     void setRouteAttributes_impl(List<String> routeCategories, MediaSession.Callback sessionPlayer);

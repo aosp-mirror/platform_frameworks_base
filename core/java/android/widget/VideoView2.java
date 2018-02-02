@@ -489,4 +489,9 @@ public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
          */
         void onCustomAction(String action, Bundle extras);
     }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        mProvider.onLayout_impl(changed, l, t, r, b);
+    }
 }

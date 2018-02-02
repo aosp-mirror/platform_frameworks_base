@@ -39,7 +39,6 @@ public interface MediaControlView2Provider extends ViewGroupProvider {
     void initialize(AttributeSet attrs, int defStyleAttr, int defStyleRes);
 
     void setController_impl(MediaController controller);
-    boolean isShowing_impl();
     void setButtonVisibility_impl(int button, int visibility);
     void requestPlayButtonFocus_impl();
     void setTimeout_impl(long timeout);
