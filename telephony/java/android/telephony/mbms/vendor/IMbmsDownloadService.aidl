@@ -46,7 +46,7 @@ interface IMbmsDownloadService
 
     int cancelDownload(in DownloadRequest downloadRequest);
 
-    int getDownloadStatus(in DownloadRequest downloadRequest, in FileInfo fileInfo);
+    int requestDownloadState(in DownloadRequest downloadRequest, in FileInfo fileInfo);
 
     int resetDownloadKnowledge(in DownloadRequest downloadRequest);
 
