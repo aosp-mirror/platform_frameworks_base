@@ -42,6 +42,23 @@ import java.util.HashMap;
  */
 public class SEService {
 
+    /**
+     * Error code used with ServiceSpecificException.
+     * Thrown if there was an error communicating with the Secure Element.
+     *
+     * @hide
+     */
+    public static final int IO_ERROR = 1;
+
+    /**
+     * Error code used with ServiceSpecificException.
+     * Thrown if AID cannot be selected or is not available when opening
+     * a logical channel.
+     *
+     * @hide
+     */
+    public static final int NO_SUCH_ELEMENT_ERROR = 2;
+
     private static final String TAG = "OMAPI.SEService";
 
     private final Object mLock = new Object();
