@@ -147,6 +147,19 @@ public final class NfcAdapter {
     public static final String ACTION_TAG_DISCOVERED = "android.nfc.action.TAG_DISCOVERED";
 
     /**
+     * Broadcast Action: Intent to notify an application that an transaction event has occurred
+     * on the Secure Element.
+     *
+     * <p>This intent will only be sent if the application has requested permission for
+     * {@link android.Manifest.permission#NFC_TRANSACTION_EVENT} and if the application has the
+     * necessary access to Secure Element which witnessed the particular event.
+     */
+    @RequiresPermission(android.Manifest.permission.NFC_TRANSACTION_EVENT)
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_TRANSACTION_DETECTED =
+            "android.nfc.action.TRANSACTION_DETECTED";
+
+    /**
      * Broadcast to only the activity that handles ACTION_TAG_DISCOVERED
      * @hide
      */
@@ -196,6 +209,23 @@ public final class NfcAdapter {
      * {@link #STATE_TURNING_OFF},
      */
     public static final String EXTRA_ADAPTER_STATE = "android.nfc.extra.ADAPTER_STATE";
+
+    /**
+     * Mandatory byte[] extra field in {@link #ACTION_TRANSACTION_DETECTED}
+     */
+    public static final String EXTRA_AID = "android.nfc.extra.AID";
+
+    /**
+     * Optional byte[] extra field in {@link #ACTION_TRANSACTION_DETECTED}
+     */
+    public static final String EXTRA_DATA = "android.nfc.extra.DATA";
+
+    /**
+     * Mandatory String extra field in {@link #ACTION_TRANSACTION_DETECTED}
+     * Indicates the Secure Element on which the transaction occurred.
+     * eSE1...eSEn for Embedded Secure Elements, SIM1...SIMn for UICC, etc.
+     */
+    public static final String EXTRA_SE_NAME = "android.nfc.extra.SE_NAME";
 
     public static final int STATE_OFF = 1;
     public static final int STATE_TURNING_ON = 2;
