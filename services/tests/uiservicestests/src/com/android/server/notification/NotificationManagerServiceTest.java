@@ -117,7 +117,7 @@ import java.util.Set;
 public class NotificationManagerServiceTest extends UiServiceTestCase {
     private static final String TEST_CHANNEL_ID = "NotificationManagerServiceTestChannelId";
     private final int mUid = Binder.getCallingUid();
-    private NotificationManagerService mService;
+    private TestableNotificationManagerService mService;
     private INotificationManager mBinderService;
     private NotificationManagerInternal mInternalService;
     @Mock
@@ -152,17 +152,21 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     // Use a Testable subclass so we can simulate calls from the system without failing.
     private static class TestableNotificationManagerService extends NotificationManagerService {
+        int countSystemChecks = 0;
+
         public TestableNotificationManagerService(Context context) {
             super(context);
         }
 
         @Override
         protected boolean isCallingUidSystem() {
+            countSystemChecks++;
             return true;
         }
 
         @Override
         protected boolean isCallerSystemOrPhone() {
+            countSystemChecks++;
             return true;
         }
 
@@ -2428,5 +2432,19 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                         .setPackage(user2.sbn.getPackageName())
                         .setUid(user2.sbn.getUid())
                         .setLastNotified(user2.sbn.getPostTime())));
+    }
+
+    @Test
+    public void testRestore() throws Exception {
+        int systemChecks = mService.countSystemChecks;
+        mBinderService.applyRestore(null, UserHandle.USER_SYSTEM);
+        assertEquals(1, mService.countSystemChecks - systemChecks);
+    }
+
+    @Test
+    public void testBackup() throws Exception {
+        int systemChecks = mService.countSystemChecks;
+        mBinderService.getBackupPayload(1);
+        assertEquals(1, mService.countSystemChecks - systemChecks);
     }
 }
