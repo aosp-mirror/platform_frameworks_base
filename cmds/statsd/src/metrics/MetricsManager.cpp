@@ -189,13 +189,7 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
         return;
     }
 
-    if (event.GetTagId() != android::util::APP_HOOK) {
-        std::lock_guard<std::mutex> lock(mAllowedLogSourcesMutex);
-        if (mAllowedLogSources.find(event.GetUid()) == mAllowedLogSources.end()) {
-            VLOG("log source %d not on the whitelist", event.GetUid());
-            return;
-        }
-    } else { // Check that app hook fields are valid.
+    if (event.GetTagId() == android::util::APP_HOOK) { // Check that app hook fields are valid.
         // TODO: Find a way to make these checks easier to maintain if the app hooks get changed.
 
         // Label is 2nd from last field and must be from [0, 15].
@@ -209,6 +203,21 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
         long apphookState = event.GetLong(event.size(), &err);
         if (err != NO_ERROR || apphookState < 0 || apphookState > 3) {
             VLOG("App hook does not have valid state %ld", apphookState);
+            return;
+        }
+    } else if (event.GetTagId() == android::util::DAVEY_OCCURRED) {
+        // Daveys can be logged from any app since they are logged in libs/hwui/JankTracker.cpp.
+        // Check that the davey duration is reasonable. Max length check is for privacy.
+        status_t err = NO_ERROR;
+        long duration = event.GetLong(event.size(), &err);
+        if (err != NO_ERROR || duration > 100000) {
+            VLOG("Davey duration is unreasonably long: %ld", duration);
+            return;
+        }
+    } else {
+        std::lock_guard<std::mutex> lock(mAllowedLogSourcesMutex);
+        if (mAllowedLogSources.find(event.GetUid()) == mAllowedLogSources.end()) {
+            VLOG("log source %d not on the whitelist", event.GetUid());
             return;
         }
     }
