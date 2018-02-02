@@ -199,7 +199,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         launcherServiceIntent.setComponent(mLauncherComponentName);
         boolean bound = mContext.bindServiceAsUser(launcherServiceIntent,
                 mOverviewServiceConnection, Context.BIND_AUTO_CREATE,
-                UserHandle.getUserHandleForUid(mDeviceProvisionedController.getCurrentUser()));
+                UserHandle.of(mDeviceProvisionedController.getCurrentUser()));
         if (!bound) {
             // Retry after exponential backoff timeout
             final long timeoutMs = (long) Math.scalb(BACKOFF_MILLIS, mConnectionBackoffAttempts);
