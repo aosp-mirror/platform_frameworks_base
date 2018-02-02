@@ -178,6 +178,7 @@ public class AlarmManager {
     public static final int FLAG_IDLE_UNTIL = 1<<4;
 
     private final IAlarmManager mService;
+    private final Context mContext;
     private final String mPackageName;
     private final boolean mAlwaysExact;
     private final int mTargetSdkVersion;
@@ -265,6 +266,7 @@ public class AlarmManager {
     AlarmManager(IAlarmManager service, Context ctx) {
         mService = service;
 
+        mContext = ctx;
         mPackageName = ctx.getPackageName();
         mTargetSdkVersion = ctx.getApplicationInfo().targetSdkVersion;
         mAlwaysExact = (mTargetSdkVersion < Build.VERSION_CODES.KITKAT);
@@ -1028,7 +1030,7 @@ public class AlarmManager {
      * @see #ACTION_NEXT_ALARM_CLOCK_CHANGED
      */
     public AlarmClockInfo getNextAlarmClock() {
-        return getNextAlarmClock(UserHandle.myUserId());
+        return getNextAlarmClock(mContext.getUserId());
     }
 
     /**

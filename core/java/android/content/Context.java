@@ -4705,13 +4705,22 @@ public abstract class Context {
             throws PackageManager.NameNotFoundException;
 
     /**
-     * Get the userId associated with this context
-     * @return user id
-     *
+     * Get the user associated with this context
      * @hide
      */
     @TestApi
-    public abstract @UserIdInt int getUserId();
+    public UserHandle getUser() {
+        return android.os.Process.myUserHandle();
+    }
+
+    /**
+     * Get the user associated with this context
+     * @hide
+     */
+    @TestApi
+    public @UserIdInt int getUserId() {
+        return android.os.UserHandle.myUserId();
+    }
 
     /**
      * Return a new Context object for the current Context but whose resources

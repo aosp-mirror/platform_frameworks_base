@@ -273,7 +273,7 @@ public final class AccessibilityManager {
                                         == PackageManager.PERMISSION_GRANTED) {
                     userId = UserHandle.USER_CURRENT;
                 } else {
-                    userId = UserHandle.myUserId();
+                    userId = context.getUserId();
                 }
                 sInstance = new AccessibilityManager(context, null, userId);
             }

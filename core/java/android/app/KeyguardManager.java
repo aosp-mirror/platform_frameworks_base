@@ -407,7 +407,7 @@ public class KeyguardManager {
      * password.
      */
     public boolean isDeviceLocked() {
-        return isDeviceLocked(UserHandle.myUserId());
+        return isDeviceLocked(mContext.getUserId());
     }
 
     /**
@@ -432,7 +432,7 @@ public class KeyguardManager {
      * @return true if a PIN, pattern or password was set.
      */
     public boolean isDeviceSecure() {
-        return isDeviceSecure(UserHandle.myUserId());
+        return isDeviceSecure(mContext.getUserId());
     }
 
     /**

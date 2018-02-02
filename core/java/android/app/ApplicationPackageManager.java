@@ -140,6 +140,11 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public int getUserId() {
+        return mContext.getUserId();
+    }
+
+    @Override
     public PackageInfo getPackageInfo(String packageName, int flags)
             throws NameNotFoundException {
         return getPackageInfoAsUser(packageName, flags, mContext.getUserId());

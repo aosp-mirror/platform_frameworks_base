@@ -375,7 +375,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
     @RequiresPermission(USE_FINGERPRINT)
     public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
             int flags, @NonNull AuthenticationCallback callback, @Nullable Handler handler) {
-        authenticate(crypto, cancel, flags, callback, handler, UserHandle.myUserId());
+        authenticate(crypto, cancel, flags, callback, handler, mContext.getUserId());
     }
 
     /**
@@ -496,7 +496,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
         if (callback == null) {
             throw new IllegalArgumentException("Must supply a calback");
         }
-        authenticate(UserHandle.myUserId(), null, cancel, bundle, executor, receiver, callback);
+        authenticate(mContext.getUserId(), null, cancel, bundle, executor, receiver, callback);
     }
 
     /**
@@ -532,7 +532,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
         if (callback == null) {
             throw new IllegalArgumentException("Must supply a callback");
         }
-        authenticate(UserHandle.myUserId(), crypto, cancel,
+        authenticate(mContext.getUserId(), crypto, cancel,
                 bundle, executor, receiver, callback);
     }
 
@@ -724,7 +724,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
      */
     @RequiresPermission(USE_FINGERPRINT)
     public List<Fingerprint> getEnrolledFingerprints() {
-        return getEnrolledFingerprints(UserHandle.myUserId());
+        return getEnrolledFingerprints(mContext.getUserId());
     }
 
     /**
@@ -739,7 +739,7 @@ public class FingerprintManager implements BiometricFingerprintConstants {
     public boolean hasEnrolledFingerprints() {
         if (mService != null) try {
             return mService.hasEnrolledFingerprints(
-                    UserHandle.myUserId(), mContext.getOpPackageName());
+                    mContext.getUserId(), mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

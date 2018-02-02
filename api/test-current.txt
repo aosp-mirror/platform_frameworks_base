@@ -183,10 +183,7 @@ package android.content {
   }
 
   public abstract class Context {
-    method public abstract int getUserId();
-  }
-
-  public class ContextWrapper extends android.content.Context {
+    method public android.os.UserHandle getUser();
     method public int getUserId();
   }
 

@@ -2255,7 +2255,7 @@ public final class Settings {
          * @return the corresponding value, or null if not present
          */
         public static String getString(ContentResolver resolver, String name) {
-            return getStringForUser(resolver, name, UserHandle.myUserId());
+            return getStringForUser(resolver, name, resolver.getUserId());
         }
 
         /** @hide */
@@ -2282,7 +2282,7 @@ public final class Settings {
          * @return true if the value was set, false on database errors
          */
         public static boolean putString(ContentResolver resolver, String name, String value) {
-            return putStringForUser(resolver, name, value, UserHandle.myUserId());
+            return putStringForUser(resolver, name, value, resolver.getUserId());
         }
 
         /** @hide */
@@ -2336,7 +2336,7 @@ public final class Settings {
          * or not a valid integer.
          */
         public static int getInt(ContentResolver cr, String name, int def) {
-            return getIntForUser(cr, name, def, UserHandle.myUserId());
+            return getIntForUser(cr, name, def, cr.getUserId());
         }
 
         /** @hide */
@@ -2369,7 +2369,7 @@ public final class Settings {
          */
         public static int getInt(ContentResolver cr, String name)
                 throws SettingNotFoundException {
-            return getIntForUser(cr, name, UserHandle.myUserId());
+            return getIntForUser(cr, name, cr.getUserId());
         }
 
         /** @hide */
@@ -2397,7 +2397,7 @@ public final class Settings {
          * @return true if the value was set, false on database errors
          */
         public static boolean putInt(ContentResolver cr, String name, int value) {
-            return putIntForUser(cr, name, value, UserHandle.myUserId());
+            return putIntForUser(cr, name, value, cr.getUserId());
         }
 
         /** @hide */
@@ -2421,7 +2421,7 @@ public final class Settings {
          * or not a valid {@code long}.
          */
         public static long getLong(ContentResolver cr, String name, long def) {
-            return getLongForUser(cr, name, def, UserHandle.myUserId());
+            return getLongForUser(cr, name, def, cr.getUserId());
         }
 
         /** @hide */
@@ -2456,7 +2456,7 @@ public final class Settings {
          */
         public static long getLong(ContentResolver cr, String name)
                 throws SettingNotFoundException {
-            return getLongForUser(cr, name, UserHandle.myUserId());
+            return getLongForUser(cr, name, cr.getUserId());
         }
 
         /** @hide */
@@ -2484,7 +2484,7 @@ public final class Settings {
          * @return true if the value was set, false on database errors
          */
         public static boolean putLong(ContentResolver cr, String name, long value) {
-            return putLongForUser(cr, name, value, UserHandle.myUserId());
+            return putLongForUser(cr, name, value, cr.getUserId());
         }
 
         /** @hide */
@@ -2508,7 +2508,7 @@ public final class Settings {
          * or not a valid float.
          */
         public static float getFloat(ContentResolver cr, String name, float def) {
-            return getFloatForUser(cr, name, def, UserHandle.myUserId());
+            return getFloatForUser(cr, name, def, cr.getUserId());
         }
 
         /** @hide */
@@ -2542,7 +2542,7 @@ public final class Settings {
          */
         public static float getFloat(ContentResolver cr, String name)
                 throws SettingNotFoundException {
-            return getFloatForUser(cr, name, UserHandle.myUserId());
+            return getFloatForUser(cr, name, cr.getUserId());
         }
 
         /** @hide */
@@ -2573,7 +2573,7 @@ public final class Settings {
          * @return true if the value was set, false on database errors
          */
         public static boolean putFloat(ContentResolver cr, String name, float value) {
-            return putFloatForUser(cr, name, value, UserHandle.myUserId());
+            return putFloatForUser(cr, name, value, cr.getUserId());
         }
 
         /** @hide */
@@ -2591,7 +2591,7 @@ public final class Settings {
          * @param outConfig Where to place the configuration settings.
          */
         public static void getConfiguration(ContentResolver cr, Configuration outConfig) {
-            adjustConfigurationForUser(cr, outConfig, UserHandle.myUserId(),
+            adjustConfigurationForUser(cr, outConfig, cr.getUserId(),
                     false /* updateSettingsIfEmpty */);
         }
 
@@ -2644,7 +2644,7 @@ public final class Settings {
          * @return true if the values were set, false on database errors
          */
         public static boolean putConfiguration(ContentResolver cr, Configuration config) {
-            return putConfigurationForUser(cr, config, UserHandle.myUserId());
+            return putConfigurationForUser(cr, config, cr.getUserId());
         }
 
         /** @hide */
@@ -2664,7 +2664,7 @@ public final class Settings {
         /** @deprecated - Do not use */
         @Deprecated
         public static boolean getShowGTalkServiceStatus(ContentResolver cr) {
-            return getShowGTalkServiceStatusForUser(cr, UserHandle.myUserId());
+            return getShowGTalkServiceStatusForUser(cr, cr.getUserId());
         }
 
         /**
@@ -2680,7 +2680,7 @@ public final class Settings {
         /** @deprecated - Do not use */
         @Deprecated
         public static void setShowGTalkServiceStatus(ContentResolver cr, boolean flag) {
-            setShowGTalkServiceStatusForUser(cr, flag, UserHandle.myUserId());
+            setShowGTalkServiceStatusForUser(cr, flag, cr.getUserId());
         }
 
         /**
@@ -4732,7 +4732,7 @@ public final class Settings {
          * @return the corresponding value, or null if not present
          */
         public static String getString(ContentResolver resolver, String name) {
-            return getStringForUser(resolver, name, UserHandle.myUserId());
+            return getStringForUser(resolver, name, resolver.getUserId());
         }
 
         /** @hide */
@@ -4786,7 +4786,7 @@ public final class Settings {
          * @return true if the value was set, false on database errors
          */
         public static boolean putString(ContentResolver resolver, String name, String value) {
-            return putStringForUser(resolver, name, value, UserHandle.myUserId());
+            return putStringForUser(resolver, name, value, resolver.getUserId());
         }
 
         /** @hide */
@@ -4859,7 +4859,7 @@ public final class Settings {
                 @NonNull String name, @Nullable String value, @Nullable String tag,
                 boolean makeDefault) {
             return putStringForUser(resolver, name, value, tag, makeDefault,
-                    UserHandle.myUserId());
+                    resolver.getUserId());
         }
 
         /**
@@ -4880,7 +4880,7 @@ public final class Settings {
         public static void resetToDefaults(@NonNull ContentResolver resolver,
                 @Nullable String tag) {
             resetToDefaultsAsUser(resolver, tag, RESET_MODE_PACKAGE_DEFAULTS,
-                    UserHandle.myUserId());
+                    resolver.getUserId());
         }
 
         /**
@@ -4947,7 +4947,7 @@ public final class Settings {
          * or not a valid integer.
          */
         public static int getInt(ContentResolver cr, String name, int def) {
-            return getIntForUser(cr, name, def, UserHandle.myUserId());
+            return getIntForUser(cr, name, def, cr.getUserId());
         }
 
         /** @hide */
@@ -4984,7 +4984,7 @@ public final class Settings {
          */
         public static int getInt(ContentResolver cr, String name)
                 throws SettingNotFoundException {
-            return getIntForUser(cr, name, UserHandle.myUserId());
+            return getIntForUser(cr, name, cr.getUserId());
         }
 
         /** @hide */
@@ -5016,7 +5016,7 @@ public final class Settings {
          * @return true if the value was set, false on database errors
          */
         public static boolean putInt(ContentResolver cr, String name, int value) {
-            return putIntForUser(cr, name, value, UserHandle.myUserId());
+            return putIntForUser(cr, name, value, cr.getUserId());
         }
 
         /** @hide */
@@ -5040,7 +5040,7 @@ public final class Settings {
          * or not a valid {@code long}.
          */
         public static long getLong(ContentResolver cr, String name, long def) {
-            return getLongForUser(cr, name, def, UserHandle.myUserId());
+            return getLongForUser(cr, name, def, cr.getUserId());
         }
 
         /** @hide */
@@ -5075,7 +5075,7 @@ public final class Settings {
          */
         public static long getLong(ContentResolver cr, String name)
                 throws SettingNotFoundException {
-            return getLongForUser(cr, name, UserHandle.myUserId());
+            return getLongForUser(cr, name, cr.getUserId());
         }
 
         /** @hide */
@@ -5103,7 +5103,7 @@ public final class Settings {
          * @return true if the value was set, false on database errors
          */
         public static boolean putLong(ContentResolver cr, String name, long value) {
-            return putLongForUser(cr, name, value, UserHandle.myUserId());
+            return putLongForUser(cr, name, value, cr.getUserId());
         }
 
         /** @hide */
@@ -5127,7 +5127,7 @@ public final class Settings {
          * or not a valid float.
          */
         public static float getFloat(ContentResolver cr, String name, float def) {
-            return getFloatForUser(cr, name, def, UserHandle.myUserId());
+            return getFloatForUser(cr, name, def, cr.getUserId());
         }
 
         /** @hide */
@@ -5161,7 +5161,7 @@ public final class Settings {
          */
         public static float getFloat(ContentResolver cr, String name)
                 throws SettingNotFoundException {
-            return getFloatForUser(cr, name, UserHandle.myUserId());
+            return getFloatForUser(cr, name, cr.getUserId());
         }
 
         /** @hide */
@@ -5192,7 +5192,7 @@ public final class Settings {
          * @return true if the value was set, false on database errors
          */
         public static boolean putFloat(ContentResolver cr, String name, float value) {
-            return putFloatForUser(cr, name, value, UserHandle.myUserId());
+            return putFloatForUser(cr, name, value, cr.getUserId());
         }
 
         /** @hide */
@@ -7999,7 +7999,7 @@ public final class Settings {
          */
         @Deprecated
         public static final boolean isLocationProviderEnabled(ContentResolver cr, String provider) {
-            return isLocationProviderEnabledForUser(cr, provider, UserHandle.myUserId());
+            return isLocationProviderEnabledForUser(cr, provider, cr.getUserId());
         }
 
         /**
@@ -8031,7 +8031,7 @@ public final class Settings {
         @Deprecated
         public static final void setLocationProviderEnabled(ContentResolver cr,
                 String provider, boolean enabled) {
-            setLocationProviderEnabledForUser(cr, provider, enabled, UserHandle.myUserId());
+            setLocationProviderEnabledForUser(cr, provider, enabled, cr.getUserId());
         }
 
         /**
@@ -11467,7 +11467,7 @@ public final class Settings {
          * @return the corresponding value, or null if not present
          */
         public static String getString(ContentResolver resolver, String name) {
-            return getStringForUser(resolver, name, UserHandle.myUserId());
+            return getStringForUser(resolver, name, resolver.getUserId());
         }
 
         /** @hide */
@@ -11490,7 +11490,7 @@ public final class Settings {
          */
         public static boolean putString(ContentResolver resolver,
                 String name, String value) {
-            return putStringForUser(resolver, name, value, null, false, UserHandle.myUserId());
+            return putStringForUser(resolver, name, value, null, false, resolver.getUserId());
         }
 
         /**
@@ -11539,7 +11539,7 @@ public final class Settings {
                 @NonNull String name, @Nullable String value, @Nullable String tag,
                 boolean makeDefault) {
             return putStringForUser(resolver, name, value, tag, makeDefault,
-                    UserHandle.myUserId());
+                    resolver.getUserId());
         }
 
         /**
@@ -11560,7 +11560,7 @@ public final class Settings {
         public static void resetToDefaults(@NonNull ContentResolver resolver,
                 @Nullable String tag) {
             resetToDefaultsAsUser(resolver, tag, RESET_MODE_PACKAGE_DEFAULTS,
-                    UserHandle.myUserId());
+                    resolver.getUserId());
         }
 
         /**

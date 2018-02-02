@@ -649,7 +649,7 @@ public final class DisplayManager {
     @TestApi
     @RequiresPermission(Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS)
     public void setBrightnessConfiguration(BrightnessConfiguration c) {
-        setBrightnessConfigurationForUser(c, UserHandle.myUserId(), mContext.getPackageName());
+        setBrightnessConfigurationForUser(c, mContext.getUserId(), mContext.getPackageName());
     }
 
     /**

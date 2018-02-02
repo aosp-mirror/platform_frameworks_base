@@ -109,7 +109,7 @@ public final class BluetoothMap implements BluetoothProfile {
         ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
         intent.setComponent(comp);
         if (comp == null || !mContext.bindServiceAsUser(intent, mConnection, 0,
-                android.os.Process.myUserHandle())) {
+                mContext.getUser())) {
             Log.e(TAG, "Could not bind to Bluetooth MAP Service with " + intent);
             return false;
         }
