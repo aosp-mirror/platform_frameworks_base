@@ -16,9 +16,9 @@ package com.android.server.slice;
 
 import android.content.Context;
 import android.content.pm.UserInfo;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArraySet;
-import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.util.XmlUtils;
@@ -72,7 +72,7 @@ public class SliceFullAccessList {
         pkgs.remove(pkg);
     }
 
-    public void writeXml(XmlSerializer out) throws IOException {
+    public void writeXml(XmlSerializer out, int user) throws IOException {
         out.startTag(null, TAG_LIST);
         out.attribute(null, ATT_VERSION, String.valueOf(DB_VERSION));
 
@@ -80,6 +80,9 @@ public class SliceFullAccessList {
         for (int i = 0 ; i < N; i++) {
             final int userId = mFullAccessPkgs.keyAt(i);
             final ArraySet<String> pkgs = mFullAccessPkgs.valueAt(i);
+            if (user != UserHandle.USER_ALL && user != userId) {
+                continue;
+            }
             out.startTag(null, TAG_USER);
             out.attribute(null, ATT_USER_ID, Integer.toString(userId));
             if (pkgs != null) {
@@ -88,7 +91,6 @@ public class SliceFullAccessList {
                         out.startTag(null, TAG_PKG);
                         out.text(pkgs.valueAt(j));
                         out.endTag(null, TAG_PKG);
-
                 }
             }
             out.endTag(null, TAG_USER);

@@ -20,9 +20,9 @@ import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
+import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.IContentProvider;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
@@ -193,10 +193,15 @@ public class SliceManager {
      * <p>
      * Pinned state is not persisted across reboots, so apps are expected to re-pin any slices
      * they still care about after a reboot.
+     * <p>
+     * This may only be called by apps that are the default launcher for the device
+     * or the default voice interaction service. Otherwise will throw {@link SecurityException}.
      *
      * @param uri The uri of the slice being pinned.
      * @param specs The list of supported {@link SliceSpec}s of the callback.
      * @see SliceProvider#onSlicePinned(Uri)
+     * @see Intent#ACTION_ASSIST
+     * @see Intent#CATEGORY_HOME
      */
     public void pinSlice(@NonNull Uri uri, @NonNull List<SliceSpec> specs) {
         try {
@@ -211,10 +216,15 @@ public class SliceManager {
      * Remove a pin for a slice.
      * <p>
      * If the slice has no other pins/callbacks then the slice will be unpinned.
+     * <p>
+     * This may only be called by apps that are the default launcher for the device
+     * or the default voice interaction service. Otherwise will throw {@link SecurityException}.
      *
      * @param uri The uri of the slice being unpinned.
      * @see #pinSlice
      * @see SliceProvider#onSliceUnpinned(Uri)
+     * @see Intent#ACTION_ASSIST
+     * @see Intent#CATEGORY_HOME
      */
     public void unpinSlice(@NonNull Uri uri) {
         try {
@@ -262,17 +272,13 @@ public class SliceManager {
      */
     public @NonNull Collection<Uri> getSliceDescendants(@NonNull Uri uri) {
         ContentResolver resolver = mContext.getContentResolver();
-        IContentProvider provider = resolver.acquireProvider(uri);
-        try {
+        try (ContentProviderClient provider = resolver.acquireContentProviderClient(uri)) {
             Bundle extras = new Bundle();
             extras.putParcelable(SliceProvider.EXTRA_BIND_URI, uri);
-            final Bundle res = provider.call(resolver.getPackageName(),
-                    SliceProvider.METHOD_GET_DESCENDANTS, null, extras);
+            final Bundle res = provider.call(SliceProvider.METHOD_GET_DESCENDANTS, null, extras);
             return res.getParcelableArrayList(SliceProvider.EXTRA_SLICE_DESCENDANTS);
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to get slice descendants", e);
-        } finally {
-            resolver.releaseProvider(provider);
         }
         return Collections.emptyList();
     }
@@ -288,17 +294,15 @@ public class SliceManager {
     public @Nullable Slice bindSlice(@NonNull Uri uri, @NonNull List<SliceSpec> supportedSpecs) {
         Preconditions.checkNotNull(uri, "uri");
         ContentResolver resolver = mContext.getContentResolver();
-        IContentProvider provider = resolver.acquireProvider(uri);
-        if (provider == null) {
-            throw new IllegalArgumentException("Unknown URI " + uri);
-        }
-        try {
+        try (ContentProviderClient provider = resolver.acquireContentProviderClient(uri)) {
+            if (provider == null) {
+                throw new IllegalArgumentException("Unknown URI " + uri);
+            }
             Bundle extras = new Bundle();
             extras.putParcelable(SliceProvider.EXTRA_BIND_URI, uri);
             extras.putParcelableArrayList(SliceProvider.EXTRA_SUPPORTED_SPECS,
                     new ArrayList<>(supportedSpecs));
-            final Bundle res = provider.call(mContext.getPackageName(), SliceProvider.METHOD_SLICE,
-                    null, extras);
+            final Bundle res = provider.call(SliceProvider.METHOD_SLICE, null, extras);
             Bundle.setDefusable(res, true);
             if (res == null) {
                 return null;
@@ -308,8 +312,6 @@ public class SliceManager {
             // Arbitrary and not worth documenting, as Activity
             // Manager will kill this process shortly anyway.
             return null;
-        } finally {
-            resolver.releaseProvider(provider);
         }
     }
 
@@ -344,15 +346,13 @@ public class SliceManager {
         String authority = providers.get(0).providerInfo.authority;
         Uri uri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(authority).build();
-        IContentProvider provider = resolver.acquireProvider(uri);
-        if (provider == null) {
-            throw new IllegalArgumentException("Unknown URI " + uri);
-        }
-        try {
+        try (ContentProviderClient provider = resolver.acquireContentProviderClient(uri)) {
+            if (provider == null) {
+                throw new IllegalArgumentException("Unknown URI " + uri);
+            }
             Bundle extras = new Bundle();
             extras.putParcelable(SliceProvider.EXTRA_INTENT, intent);
-            final Bundle res = provider.call(mContext.getPackageName(),
-                    SliceProvider.METHOD_MAP_ONLY_INTENT, null, extras);
+            final Bundle res = provider.call(SliceProvider.METHOD_MAP_ONLY_INTENT, null, extras);
             if (res == null) {
                 return null;
             }
@@ -361,8 +361,6 @@ public class SliceManager {
             // Arbitrary and not worth documenting, as Activity
             // Manager will kill this process shortly anyway.
             return null;
-        } finally {
-            resolver.releaseProvider(provider);
         }
     }
 
@@ -399,17 +397,15 @@ public class SliceManager {
         String authority = providers.get(0).providerInfo.authority;
         Uri uri = new Uri.Builder().scheme(ContentResolver.SCHEME_CONTENT)
                 .authority(authority).build();
-        IContentProvider provider = resolver.acquireProvider(uri);
-        if (provider == null) {
-            throw new IllegalArgumentException("Unknown URI " + uri);
-        }
-        try {
+        try (ContentProviderClient provider = resolver.acquireContentProviderClient(uri)) {
+            if (provider == null) {
+                throw new IllegalArgumentException("Unknown URI " + uri);
+            }
             Bundle extras = new Bundle();
             extras.putParcelable(SliceProvider.EXTRA_INTENT, intent);
             extras.putParcelableArrayList(SliceProvider.EXTRA_SUPPORTED_SPECS,
                     new ArrayList<>(supportedSpecs));
-            final Bundle res = provider.call(mContext.getPackageName(),
-                    SliceProvider.METHOD_MAP_INTENT, null, extras);
+            final Bundle res = provider.call(SliceProvider.METHOD_MAP_INTENT, null, extras);
             if (res == null) {
                 return null;
             }
@@ -418,8 +414,6 @@ public class SliceManager {
             // Arbitrary and not worth documenting, as Activity
             // Manager will kill this process shortly anyway.
             return null;
-        } finally {
-            resolver.releaseProvider(provider);
         }
     }
 
