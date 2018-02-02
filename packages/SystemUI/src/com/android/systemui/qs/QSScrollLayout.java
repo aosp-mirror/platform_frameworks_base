@@ -49,6 +49,23 @@ public class QSScrollLayout extends NestedScrollView {
         addView(linearLayout);
     }
 
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (canScrollVertically(1) || canScrollVertically(-1)) {
+            return super.onInterceptTouchEvent(ev);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        if (canScrollVertically(1) || canScrollVertically(-1)) {
+            return super.onTouchEvent(ev);
+        }
+        return false;
+    }
+
     public boolean shouldIntercept(MotionEvent ev) {
         getHitRect(mHitRect);
         if (!mHitRect.contains((int) ev.getX(), (int) ev.getY())) {
