@@ -182,10 +182,11 @@ void Typeface::setRobotoTypefaceForTest() {
 
     std::shared_ptr<minikin::MinikinFont> font = std::make_shared<MinikinFontSkia>(
             std::move(typeface), data, st.st_size, 0, std::vector<minikin::FontVariation>());
-    std::shared_ptr<minikin::FontFamily> family = std::make_shared<minikin::FontFamily>(
-            std::vector<minikin::Font>({minikin::Font(std::move(font), minikin::FontStyle())}));
-    std::shared_ptr<minikin::FontCollection> collection =
-            std::make_shared<minikin::FontCollection>(std::move(family));
+    std::vector<minikin::Font> fonts;
+    fonts.push_back(minikin::Font(std::move(font), minikin::FontStyle()));
+
+    std::shared_ptr<minikin::FontCollection> collection = std::make_shared<minikin::FontCollection>(
+            std::make_shared<minikin::FontFamily>(std::move(fonts)));
 
     Typeface* hwTypeface = new Typeface();
     hwTypeface->fFontCollection = collection;
