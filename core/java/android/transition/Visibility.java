@@ -402,8 +402,11 @@ public abstract class Visibility extends Transition {
                 // Becoming GONE
                 if (startView == endView) {
                     viewToKeep = endView;
-                } else {
+                } else if (mCanRemoveViews) {
                     overlayView = startView;
+                } else {
+                    overlayView = TransitionUtils.copyViewImage(sceneRoot, startView,
+                            (View) startView.getParent());
                 }
             }
         }
