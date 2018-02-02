@@ -27,8 +27,8 @@ import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.media.update.ApiLoader;
-import android.media.update.FrameLayoutHelper;
 import android.media.update.VideoView2Provider;
+import android.media.update.ViewGroupHelper;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.AttributeSet;
@@ -101,7 +101,7 @@ import java.util.concurrent.Executor;
  *
  * @hide
  */
-public class VideoView2 extends FrameLayoutHelper<VideoView2Provider> {
+public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
     /** @hide */
     @IntDef({
             VIEW_TYPE_TEXTUREVIEW,
@@ -139,10 +139,12 @@ public class VideoView2 extends FrameLayoutHelper<VideoView2Provider> {
     public VideoView2(
             @NonNull Context context, @Nullable AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
-        super((instance, superProvider) ->
+        super((instance, superProvider, privateProvider) ->
                 ApiLoader.getProvider(context).createVideoView2(
-                        (VideoView2) instance, superProvider, attrs, defStyleAttr, defStyleRes),
+                        (VideoView2) instance, superProvider, privateProvider,
+                        attrs, defStyleAttr, defStyleRes),
                 context, attrs, defStyleAttr, defStyleRes);
+        mProvider.initialize(attrs, defStyleAttr, defStyleRes);
     }
 
     /**

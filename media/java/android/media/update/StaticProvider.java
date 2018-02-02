@@ -67,10 +67,11 @@ import java.util.concurrent.Executor;
  * @hide
  */
 public interface StaticProvider {
-    MediaControlView2Provider createMediaControlView2(
-            MediaControlView2 instance, ViewProvider superProvider);
-    VideoView2Provider createVideoView2(
-            VideoView2 instance, ViewProvider superProvider,
+    MediaControlView2Provider createMediaControlView2(MediaControlView2 instance,
+            ViewGroupProvider superProvider, ViewGroupProvider privateProvider,
+            @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes);
+    VideoView2Provider createVideoView2(VideoView2 instance,
+            ViewGroupProvider superProvider, ViewGroupProvider privateProvider,
             @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes);
 
     CommandProvider createMediaSession2Command(MediaSession2.Command instance,
