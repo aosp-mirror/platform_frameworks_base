@@ -1126,7 +1126,7 @@
     <bool name="config_hotswapCapable">false</bool>
 
     <!-- Component name of the ICC hotswap prompt for restart dialog -->
-    <string name="config_iccHotswapPromptForRestartDialogComponent" translateable="false">@null</string>
+    <string name="config_iccHotswapPromptForRestartDialogComponent" translatable="false">@null</string>
 
     <!-- Enable puk unlockscreen by default.
          If unlock screen is disabled, the puk should be unlocked through Emergency Dialer -->
@@ -1425,7 +1425,7 @@
          permission.
          [This is only used if config_enableUpdateableTimeZoneRules and
          config_timeZoneRulesUpdateTrackingEnabled are true.] -->
-    <string name="config_timeZoneRulesUpdaterPackage" translateable="false">com.android.timezone.updater</string>
+    <string name="config_timeZoneRulesUpdaterPackage" translatable="false">com.android.timezone.updater</string>
 
     <!-- The package of the time zone rules data application. Expected to be configured
          by OEMs to reference their own priv-app APK package.
@@ -1434,7 +1434,7 @@
          data app packages.
          [This is only used if config_enableUpdateableTimeZoneRules and
          config_timeZoneRulesUpdateTrackingEnabled are true.] -->
-    <string name="config_timeZoneRulesDataPackage" translateable="false"></string>
+    <string name="config_timeZoneRulesDataPackage" translatable="false"></string>
 
     <!-- The allowed time in milliseconds between an update check intent being broadcast and the
          response being considered overdue. Reliability triggers will not fire in this time.
@@ -3252,7 +3252,7 @@
     <string translatable="false" name="config_deviceSpecificAudioService"></string>
 
     <!-- Component name of media projection permission dialog -->
-    <string name="config_mediaProjectionPermissionDialogComponent" translateable="false">com.android.systemui/com.android.systemui.media.MediaProjectionPermissionActivity</string>
+    <string name="config_mediaProjectionPermissionDialogComponent" translatable="false">com.android.systemui/com.android.systemui.media.MediaProjectionPermissionActivity</string>
 
     <!-- Corner radius of system dialogs -->
     <dimen name="config_dialogCornerRadius">2dp</dimen>

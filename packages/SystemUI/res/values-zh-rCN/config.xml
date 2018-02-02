@@ -22,6 +22,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="config_overviewServiceComponent" msgid="2288311504315574053">"com.android.launcher3/com.android.quickstep.TouchInteractionService"</string>
     <string name="doze_pickup_subtype_performs_proximity_check" msgid="533127617385956583"></string>
 </resources>
