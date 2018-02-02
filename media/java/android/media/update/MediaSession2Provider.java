@@ -30,7 +30,7 @@ import android.media.MediaSession2.ControllerInfo;
 import android.media.MediaSession2.PlaylistParams;
 import android.media.MediaSession2.SessionCallback;
 import android.media.SessionToken2;
-import android.media.VolumeProvider;
+import android.media.VolumeProvider2;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 
@@ -44,7 +44,7 @@ import java.util.concurrent.Executor;
 public interface MediaSession2Provider extends TransportControlProvider {
     void close_impl();
     void setPlayer_impl(MediaPlayerInterface player);
-    void setPlayer_impl(MediaPlayerInterface player, VolumeProvider volumeProvider);
+    void setPlayer_impl(MediaPlayerInterface player, VolumeProvider2 volumeProvider);
     MediaPlayerInterface getPlayer_impl();
     SessionToken2 getToken_impl();
     List<ControllerInfo> getConnectedControllers_impl();
@@ -116,7 +116,7 @@ public interface MediaSession2Provider extends TransportControlProvider {
     }
 
     interface BuilderBaseProvider<T extends MediaSession2, C extends SessionCallback> {
-        void setVolumeProvider_impl(VolumeProvider volumeProvider);
+        void setVolumeProvider_impl(VolumeProvider2 volumeProvider);
         void setRatingType_impl(int type);
         void setSessionActivity_impl(PendingIntent pi);
         void setId_impl(String id);
