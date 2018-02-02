@@ -73,6 +73,9 @@ bool parseProtoOutputStream(util::ProtoOutputStream& protoOutput, T* message) {
     return message->ParseFromArray(pbBytes.c_str(), pbBytes.size());
 }
 
+// Returns the truncated timestamp.
+int64_t truncateTimestampNsToFiveMinutes(int64_t timestampNs);
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

@@ -173,11 +173,15 @@ void GaugeMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
                     writeFieldValueTreeToStream(mTagId, *(atom.mFields), protoOutput);
                 }
                 protoOutput->end(atomsToken);
-
                 for (const auto& atom : bucket.mGaugeAtoms) {
+                    const bool truncateTimestamp =
+                        android::util::kNotTruncatingTimestampAtomWhiteList.find(mTagId) ==
+                        android::util::kNotTruncatingTimestampAtomWhiteList.end();
+                    int64_t timestampNs =  truncateTimestamp ?
+                        truncateTimestampNsToFiveMinutes(atom.mTimestamps) : atom.mTimestamps;
                     protoOutput->write(
                         FIELD_TYPE_INT64 | FIELD_COUNT_REPEATED | FIELD_ID_ELAPSED_ATOM_TIMESTAMP,
-                        (long long)atom.mTimestamps);
+                        (long long)timestampNs);
                 }
             }
             protoOutput->end(bucketInfoToken);
