@@ -18,15 +18,36 @@ package android.text.style;
 
 import android.graphics.MaskFilter;
 import android.text.TextPaint;
-
+/**
+ * Span that allows setting a {@link MaskFilter} to the text it's attached to.
+ * <p>
+ * For example, to blur a text, a {@link android.graphics.BlurMaskFilter} can be used:
+ * <pre>
+ * MaskFilter blurMask = new BlurMaskFilter(5f, BlurMaskFilter.Blur.NORMAL);
+ * SpannableString string = new SpannableString("Text with blur mask");
+ * string.setSpan(new MaskFilterSpan(blurMask), 10, 15, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+ * </pre>
+ * <img src="{@docRoot}reference/android/images/text/style/maskfilterspan.png" />
+ * <figcaption>Text blurred with the <code>MaskFilterSpan</code>.</figcaption>
+ */
 public class MaskFilterSpan extends CharacterStyle implements UpdateAppearance {
 
     private MaskFilter mFilter;
 
+    /**
+     * Creates a {@link MaskFilterSpan} from a {@link MaskFilter}.
+     *
+     * @param filter the filter to be applied to the <code>TextPaint</code>
+     */
     public MaskFilterSpan(MaskFilter filter) {
         mFilter = filter;
     }
 
+    /**
+     * Return the mask filter for this span.
+     *
+     * @return the mask filter for this span
+     */
     public MaskFilter getMaskFilter() {
         return mFilter;
     }
