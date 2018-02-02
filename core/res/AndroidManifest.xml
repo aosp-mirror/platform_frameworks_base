@@ -1785,11 +1785,20 @@
 
     <!-- Must be required by an ImsService to ensure that only the
          system can bind to it.
-         <p>Protection level: signature|privileged
+         <p>Protection level: signature|privileged|vendorPrivileged
          @SystemApi
          @hide
     -->
     <permission android:name="android.permission.BIND_IMS_SERVICE"
+        android:protectionLevel="signature|privileged|vendorPrivileged" />
+
+    <!-- Must be required by a DataService to ensure that only the
+         system can bind to it.
+         <p>Protection level: signature|privileged|vendorPrivileged
+         @SystemApi
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_DATA_SERVICE"
         android:protectionLevel="signature|privileged|vendorPrivileged" />
 
     <!-- Allows an application to manage embedded subscriptions (those on a eUICC) through

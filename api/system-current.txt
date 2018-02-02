@@ -19,6 +19,7 @@ package android {
     field public static final java.lang.String BATTERY_STATS = "android.permission.BATTERY_STATS";
     field public static final java.lang.String BIND_APPWIDGET = "android.permission.BIND_APPWIDGET";
     field public static final deprecated java.lang.String BIND_CONNECTION_SERVICE = "android.permission.BIND_CONNECTION_SERVICE";
+    field public static final java.lang.String BIND_DATA_SERVICE = "android.permission.BIND_DATA_SERVICE";
     field public static final java.lang.String BIND_DIRECTORY_SEARCH = "android.permission.BIND_DIRECTORY_SEARCH";
     field public static final java.lang.String BIND_IMS_SERVICE = "android.permission.BIND_IMS_SERVICE";
     field public static final java.lang.String BIND_KEYGUARD_APPWIDGET = "android.permission.BIND_KEYGUARD_APPWIDGET";
