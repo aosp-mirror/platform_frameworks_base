@@ -27,7 +27,6 @@ import android.media.MediaSession2.ControllerInfo;
 import android.media.update.ApiLoader;
 import android.media.update.MediaLibraryService2Provider.LibraryRootProvider;
 import android.media.update.MediaLibraryService2Provider.MediaLibrarySessionProvider;
-import android.media.update.MediaSession2Provider;
 import android.media.update.MediaSessionService2Provider;
 import android.os.Bundle;
 
@@ -63,7 +62,8 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
     public static final String SERVICE_INTERFACE = "android.media.MediaLibraryService2";
 
     /**
-     * Session for the media library service.
+     * Session for the {@link MediaLibraryService2}. Build this object with
+     * {@link MediaLibrarySessionBuilder} and return in {@link #onCreateSession(String)}.
      */
     public static class MediaLibrarySession extends MediaSession2 {
         private final MediaLibrarySessionProvider mProvider;
@@ -101,6 +101,9 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
         }
     }
 
+    /**
+     * Callback for the {@link MediaLibrarySession}.
+     */
     public static class MediaLibrarySessionCallback extends MediaSession2.SessionCallback {
 
         public MediaLibrarySessionCallback(Context context) {
@@ -200,6 +203,8 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
     /**
      * Builder for {@link MediaLibrarySession}.
      */
+    // Override all methods just to show them with the type instead of generics in Javadoc.
+    // This workarounds javadoc issue described in the MediaSession2.BuilderBase.
     public class MediaLibrarySessionBuilder extends BuilderBase<MediaLibrarySession,
             MediaLibrarySessionBuilder, MediaLibrarySessionCallback> {
         public MediaLibrarySessionBuilder(
@@ -209,6 +214,38 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
             super((instance) -> ApiLoader.getProvider(context).createMediaLibraryService2Builder(
                     context, (MediaLibrarySessionBuilder) instance, player, callbackExecutor,
                     callback));
+        }
+
+        @Override
+        public MediaLibrarySessionBuilder setVolumeProvider(
+                @Nullable VolumeProvider2 volumeProvider) {
+            return super.setVolumeProvider(volumeProvider);
+        }
+
+        @Override
+        public MediaLibrarySessionBuilder setRatingType(int type) {
+            return super.setRatingType(type);
+        }
+
+        @Override
+        public MediaLibrarySessionBuilder setSessionActivity(@Nullable PendingIntent pi) {
+            return super.setSessionActivity(pi);
+        }
+
+        @Override
+        public MediaLibrarySessionBuilder setId(String id) {
+            return super.setId(id);
+        }
+
+        @Override
+        public MediaLibrarySessionBuilder setSessionCallback(
+                @NonNull Executor executor, @NonNull MediaLibrarySessionCallback callback) {
+            return super.setSessionCallback(executor, callback);
+        }
+
+        @Override
+        public MediaLibrarySession build() {
+            return super.build();
         }
     }
 
@@ -229,7 +266,7 @@ public abstract class MediaLibraryService2 extends MediaSessionService2 {
      * This method will be called on the main thread.
      *
      * @param sessionId session id written in the AndroidManifest.xml.
-     * @return a new browser session
+     * @return a new library session
      * @see MediaLibrarySessionBuilder
      * @see #getSession()
      * @throws RuntimeException if returned session is invalid

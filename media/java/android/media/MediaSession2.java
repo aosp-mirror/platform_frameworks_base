@@ -580,8 +580,20 @@ public class MediaSession2 implements AutoCloseable {
     };
 
     /**
-     * Base builder class for MediaSession2 and its subclass.
-     *
+     * Base builder class for MediaSession2 and its subclass. Any change in this class should be
+     * also applied to the subclasses {@link MediaSession2.Builder} and
+     * {@link MediaLibraryService2.MediaLibrarySessionBuilder}.
+     * <p>
+     * APIs here should be package private, but should have documentations for developers.
+     * Otherwise, javadoc will generate documentation with the generic types such as follows.
+     * <pre>U extends BuilderBase<T, U, C> setSessionCallback(Executor executor, C callback)</pre>
+     * <p>
+     * This class is hidden to prevent from generating test stub, which fails with
+     * 'unexpected bound' because it tries to auto generate stub class as follows.
+     * <pre>abstract static class BuilderBase<
+     *      T extends android.media.MediaSession2,
+     *      U extends android.media.MediaSession2.BuilderBase<
+     *              T, U, C extends android.media.MediaSession2.SessionCallback>, C></pre>
      * @hide
      */
     static abstract class BuilderBase
@@ -601,7 +613,7 @@ public class MediaSession2 implements AutoCloseable {
          *
          * @param volumeProvider The provider that will handle volume changes. Can be {@code null}.
          */
-        public U setVolumeProvider(@Nullable VolumeProvider2 volumeProvider) {
+        U setVolumeProvider(@Nullable VolumeProvider2 volumeProvider) {
             mProvider.setVolumeProvider_impl(volumeProvider);
             return (U) this;
         }
@@ -619,7 +631,7 @@ public class MediaSession2 implements AutoCloseable {
          * <li>{@link Rating2#RATING_THUMB_UP_DOWN}</li>
          * </ul>
          */
-        public U setRatingType(@Rating2.Style int type) {
+        U setRatingType(@Rating2.Style int type) {
             mProvider.setRatingType_impl(type);
             return (U) this;
         }
@@ -631,7 +643,7 @@ public class MediaSession2 implements AutoCloseable {
          *
          * @param pi The intent to launch to show UI for this session.
          */
-        public U setSessionActivity(@Nullable PendingIntent pi) {
+        U setSessionActivity(@Nullable PendingIntent pi) {
             mProvider.setSessionActivity_impl(pi);
             return (U) this;
         }
@@ -646,7 +658,7 @@ public class MediaSession2 implements AutoCloseable {
          * @throws IllegalArgumentException if id is {@code null}
          * @return
          */
-        public U setId(@NonNull String id) {
+        U setId(@NonNull String id) {
             mProvider.setId_impl(id);
             return (U) this;
         }
@@ -658,7 +670,7 @@ public class MediaSession2 implements AutoCloseable {
          * @param callback session callback.
          * @return
          */
-        public U setSessionCallback(@NonNull @CallbackExecutor Executor executor,
+        U setSessionCallback(@NonNull @CallbackExecutor Executor executor,
                 @NonNull C callback) {
             mProvider.setSessionCallback_impl(executor, callback);
             return (U) this;
@@ -671,7 +683,7 @@ public class MediaSession2 implements AutoCloseable {
          * @throws IllegalStateException if the session with the same id is already exists for the
          *      package.
          */
-        public T build() {
+        T build() {
             return mProvider.build_impl();
         }
     }
@@ -682,12 +694,43 @@ public class MediaSession2 implements AutoCloseable {
      * Any incoming event from the {@link MediaController2} will be handled on the thread
      * that created session with the {@link Builder#build()}.
      */
-    // TODO(jaewan): Add setRatingType()
-    // TODO(jaewan): Add setSessionActivity()
+    // Override all methods just to show them with the type instead of generics in Javadoc.
+    // This workarounds javadoc issue described in the MediaSession2.BuilderBase.
     public static final class Builder extends BuilderBase<MediaSession2, Builder, SessionCallback> {
         public Builder(Context context, @NonNull MediaPlayerInterface player) {
             super((instance) -> ApiLoader.getProvider(context).createMediaSession2Builder(
                     context, (Builder) instance, player));
+        }
+
+        @Override
+        public Builder setVolumeProvider(@Nullable VolumeProvider2 volumeProvider) {
+            return super.setVolumeProvider(volumeProvider);
+        }
+
+        @Override
+        public Builder setRatingType(@Rating2.Style int type) {
+            return super.setRatingType(type);
+        }
+
+        @Override
+        public Builder setSessionActivity(@Nullable PendingIntent pi) {
+            return super.setSessionActivity(pi);
+        }
+
+        @Override
+        public Builder setId(@NonNull String id) {
+            return super.setId(id);
+        }
+
+        @Override
+        public Builder setSessionCallback(@NonNull Executor executor,
+                @Nullable SessionCallback callback) {
+            return super.setSessionCallback(executor, callback);
+        }
+
+        @Override
+        public MediaSession2 build() {
+            return super.build();
         }
     }
 
