@@ -730,8 +730,8 @@ public class RttManager {
                     }
                     dest.writeByte(result.LCR.id);
                     if (result.LCR.id != (byte) 0xFF) {
-                        dest.writeInt((byte) result.LCR.data.length);
-                        dest.writeByte(result.LCR.id);
+                        dest.writeByte((byte) result.LCR.data.length);
+                        dest.writeByteArray(result.LCR.data);
                     }
                 }
             } else {
