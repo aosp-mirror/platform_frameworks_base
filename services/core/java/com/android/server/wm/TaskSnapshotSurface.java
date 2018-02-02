@@ -47,6 +47,7 @@ import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.GraphicBuffer;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -516,7 +517,7 @@ class TaskSnapshotSurface implements StartingSurface {
         @VisibleForTesting
         void drawStatusBarBackground(Canvas c, @Nullable Rect alreadyDrawnFrame,
                 int statusBarHeight) {
-            if (statusBarHeight > 0
+            if (statusBarHeight > 0 && Color.alpha(mStatusBarColor) != 0
                     && (alreadyDrawnFrame == null || c.getWidth() > alreadyDrawnFrame.right)) {
                 final int rightInset = DecorView.getColorViewRightInset(mStableInsets.right,
                         mContentInsets.right);
@@ -531,7 +532,7 @@ class TaskSnapshotSurface implements StartingSurface {
             getNavigationBarRect(c.getWidth(), c.getHeight(), mStableInsets, mContentInsets,
                     navigationBarRect);
             final boolean visible = isNavigationBarColorViewVisible();
-            if (visible && !navigationBarRect.isEmpty()) {
+            if (visible && Color.alpha(mNavigationBarColor) != 0 && !navigationBarRect.isEmpty()) {
                 c.drawRect(navigationBarRect, mNavigationBarPaint);
             }
         }

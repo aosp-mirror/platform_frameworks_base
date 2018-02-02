@@ -27,6 +27,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.os.Environment;
@@ -40,6 +41,7 @@ import android.view.ThreadedRenderer;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.graphics.ColorUtils;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.policy.WindowManagerPolicy.StartingSurface;
 import com.android.server.wm.TaskSnapshotSurface.SystemBarBackgroundPainter;
@@ -324,7 +326,8 @@ class TaskSnapshotController {
         if (mainWindow == null) {
             return null;
         }
-        final int color = task.getTaskDescription().getBackgroundColor();
+        final int color = ColorUtils.setAlphaComponent(
+                task.getTaskDescription().getBackgroundColor(), 255);
         final int statusBarColor = task.getTaskDescription().getStatusBarColor();
         final int navigationBarColor = task.getTaskDescription().getNavigationBarColor();
         final LayoutParams attrs = mainWindow.getAttrs();
