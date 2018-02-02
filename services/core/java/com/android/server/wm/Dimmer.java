@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import android.util.ArrayMap;
 import android.view.SurfaceControl;
 import android.graphics.Rect;
 
@@ -124,14 +123,13 @@ class Dimmer {
         }
     }
 
-    @VisibleForTesting
-    ArrayMap<WindowContainer, DimState> mDimLayerUsers = new ArrayMap<>();
-
     /**
      * The {@link WindowContainer} that our Dim's are bounded to. We may be dimming on behalf of the
      * host, some controller of it, or one of the hosts children.
      */
     private WindowContainer mHost;
+    private WindowContainer mLastRequestedDimContainer;
+    private DimState mDimState;
 
     Dimmer(WindowContainer host) {
         mHost = host;
@@ -146,29 +144,32 @@ class Dimmer {
     }
 
     /**
-     * Retreive the DimState for a given child of the host.
+     * Retrieve the DimState, creating one if it doesn't exist.
      */
     private DimState getDimState(WindowContainer container) {
-        DimState state = mDimLayerUsers.get(container);
-        if (state == null) {
+        if (mDimState == null) {
             final SurfaceControl ctl = makeDimLayer();
-            state = new DimState(ctl);
+            mDimState = new DimState(ctl);
             /**
              * See documentation on {@link #dimAbove} to understand lifecycle management of Dim's
              * via state resetting for Dim's with containers.
              */
             if (container == null) {
-                state.mDontReset = true;
+                mDimState.mDontReset = true;
             }
-            mDimLayerUsers.put(container, state);
         }
-        return state;
+
+        mLastRequestedDimContainer = container;
+        return mDimState;
     }
 
     private void dim(SurfaceControl.Transaction t, WindowContainer container, int relativeLayer,
             float alpha) {
         final DimState d = getDimState(container);
         if (container != null) {
+            // The dim method is called from WindowState.prepareSurfaces(), which is always called
+            // in the correct Z from lowest Z to highest. This ensures that the dim layer is always
+            // relative to the highest Z layer with a dim.
             t.setRelativeLayer(d.mDimLayer, container.getSurfaceControl(), relativeLayer);
         } else {
             t.setLayer(d.mDimLayer, Integer.MAX_VALUE);
@@ -237,11 +238,8 @@ class Dimmer {
      * a chance to request dims to continue.
      */
     void resetDimStates() {
-        for (int i = mDimLayerUsers.size() - 1; i >= 0; i--) {
-            final DimState state = mDimLayerUsers.valueAt(i);
-            if (!state.mDontReset) {
-                state.mDimming = false;
-            }
+        if (mDimState != null && !mDimState.mDontReset) {
+            mDimState.mDimming = false;
         }
     }
 
@@ -254,30 +252,25 @@ class Dimmer {
      * @return true if any Dims were updated.
      */
     boolean updateDims(SurfaceControl.Transaction t, Rect bounds) {
-        boolean didSomething = false;
-        for (int i = mDimLayerUsers.size() - 1; i >= 0; i--) {
-            DimState state = mDimLayerUsers.valueAt(i);
-            WindowContainer container = mDimLayerUsers.keyAt(i);
-
-            // TODO: We want to animate the addition and removal of Dim's instead of immediately
-            // acting. When we do this we need to take care to account for the "Replacing Windows"
-            // case (and seamless dim transfer).
-            if (!state.mDimming) {
-                mDimLayerUsers.removeAt(i);
-                startDimExit(container, state.mSurfaceAnimator, t);
-            } else {
-                didSomething = true;
-                // TODO: Once we use geometry from hierarchy this falls away.
-                t.setSize(state.mDimLayer, bounds.width(), bounds.height());
-                t.setPosition(state.mDimLayer, bounds.left, bounds.top);
-                if (!state.isVisible) {
-                    state.isVisible = true;
-                    t.show(state.mDimLayer);
-                    startDimEnter(container, state.mSurfaceAnimator, t);
-                }
-            }
+        if (mDimState == null) {
+            return false;
         }
-        return didSomething;
+
+        if (!mDimState.mDimming) {
+            startDimExit(mLastRequestedDimContainer, mDimState.mSurfaceAnimator, t);
+            mDimState = null;
+            return false;
+        } else {
+            // TODO: Once we use geometry from hierarchy this falls away.
+            t.setSize(mDimState.mDimLayer, bounds.width(), bounds.height());
+            t.setPosition(mDimState.mDimLayer, bounds.left, bounds.top);
+            if (!mDimState.isVisible) {
+                mDimState.isVisible = true;
+                t.show(mDimState.mDimLayer);
+                startDimEnter(mLastRequestedDimContainer, mDimState.mSurfaceAnimator, t);
+            }
+            return true;
+        }
     }
 
     private void startDimEnter(WindowContainer container, SurfaceAnimator animator,
