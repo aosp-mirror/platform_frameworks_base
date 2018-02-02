@@ -2022,6 +2022,7 @@ package android.hardware.radio {
     method public int describeContents();
     method public android.hardware.radio.RadioManager.BandDescriptor[] getBands();
     method public int getClassId();
+    method public java.util.Map<java.lang.String, java.lang.Integer> getDabFrequencyTable();
     method public int getId();
     method public java.lang.String getImplementor();
     method public int getNumAudioSources();

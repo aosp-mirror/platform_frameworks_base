@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.hardware.broadcastradio.V2_0.AmFmBandRange;
 import android.hardware.broadcastradio.V2_0.AmFmRegionConfig;
 import android.hardware.broadcastradio.V2_0.Announcement;
+import android.hardware.broadcastradio.V2_0.DabTableEntry;
 import android.hardware.broadcastradio.V2_0.IdentifierType;
 import android.hardware.broadcastradio.V2_0.ProgramFilter;
 import android.hardware.broadcastradio.V2_0.ProgramIdentifier;
@@ -196,9 +197,15 @@ class Convert {
         return bands.toArray(new RadioManager.BandDescriptor[bands.size()]);
     }
 
+    private static @Nullable Map<String, Integer> dabConfigFromHal(
+            @Nullable List<DabTableEntry> config) {
+        if (config == null) return null;
+        return config.stream().collect(Collectors.toMap(e -> e.label, e -> e.frequency));
+    }
+
     static @NonNull RadioManager.ModuleProperties
     propertiesFromHal(int id, @NonNull String serviceName, @NonNull Properties prop,
-            @Nullable AmFmRegionConfig amfmConfig) {
+            @Nullable AmFmRegionConfig amfmConfig, @Nullable List<DabTableEntry> dabConfig) {
         Objects.requireNonNull(serviceName);
         Objects.requireNonNull(prop);
 
@@ -228,6 +235,7 @@ class Convert {
                 true,  // isBgScanSupported is deprecated
                 supportedProgramTypes,
                 supportedIdentifierTypes,
+                dabConfigFromHal(dabConfig),
                 vendorInfoFromHal(prop.vendorInfo)
         );
     }

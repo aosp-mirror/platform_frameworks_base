@@ -24,6 +24,7 @@ import android.hardware.radio.ITuner;
 import android.hardware.radio.RadioManager;
 import android.hardware.broadcastradio.V2_0.AmFmRegionConfig;
 import android.hardware.broadcastradio.V2_0.Announcement;
+import android.hardware.broadcastradio.V2_0.DabTableEntry;
 import android.hardware.broadcastradio.V2_0.IAnnouncementListener;
 import android.hardware.broadcastradio.V2_0.IBroadcastRadio;
 import android.hardware.broadcastradio.V2_0.ICloseHandle;
@@ -58,12 +59,17 @@ class RadioModule {
             if (service == null) return null;
 
             Mutable<AmFmRegionConfig> amfmConfig = new Mutable<>();
-            service.getAmFmRegionConfig(false, (int result, AmFmRegionConfig config) -> {
+            service.getAmFmRegionConfig(false, (result, config) -> {
                 if (result == Result.OK) amfmConfig.value = config;
             });
 
-            RadioManager.ModuleProperties prop =
-                    Convert.propertiesFromHal(idx, fqName, service.getProperties(), amfmConfig.value);
+            Mutable<List<DabTableEntry>> dabConfig = new Mutable<>();
+            service.getDabRegionConfig((result, config) -> {
+                if (result == Result.OK) dabConfig.value = config;
+            });
+
+            RadioManager.ModuleProperties prop = Convert.propertiesFromHal(idx, fqName,
+                    service.getProperties(), amfmConfig.value, dabConfig.value);
 
             return new RadioModule(service, prop);
         } catch (RemoteException ex) {

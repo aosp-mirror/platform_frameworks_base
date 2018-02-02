@@ -395,7 +395,8 @@ static JavaRef<jobject> ModulePropertiesFromHal(JNIEnv *env, const V1_0::Propert
             gjni.ModuleProperties.cstor, moduleId, jServiceName.get(), prop10.classId,
             jImplementor.get(), jProduct.get(), jVersion.get(), jSerial.get(), prop10.numTuners,
             prop10.numAudioSources, prop10.supportsCapture, jBands.get(), isBgScanSupported,
-            jSupportedProgramTypes.get(), jSupportedIdentifierTypes.get(), jVendorInfo.get()));
+            jSupportedProgramTypes.get(), jSupportedIdentifierTypes.get(), nullptr,
+            jVendorInfo.get()));
 }
 
 JavaRef<jobject> ModulePropertiesFromHal(JNIEnv *env, const V1_0::Properties &properties,
@@ -712,7 +713,7 @@ void register_android_server_broadcastradio_convert(JNIEnv *env) {
     gjni.ModuleProperties.cstor = GetMethodIDOrDie(env, modulePropertiesClass, "<init>",
             "(ILjava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;"
             "Ljava/lang/String;IIZ[Landroid/hardware/radio/RadioManager$BandDescriptor;Z"
-            "[I[ILjava/util/Map;)V");
+            "[I[ILjava/util/Map;Ljava/util/Map;)V");
 
     auto programInfoClass = FindClassOrDie(env, "android/hardware/radio/RadioManager$ProgramInfo");
     gjni.ProgramInfo.clazz = MakeGlobalRefOrDie(env, programInfoClass);

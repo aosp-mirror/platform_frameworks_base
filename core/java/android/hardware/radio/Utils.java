@@ -56,6 +56,29 @@ final class Utils {
         return map;
     }
 
+    static void writeStringIntMap(@NonNull Parcel dest, @Nullable Map<String, Integer> map) {
+        if (map == null) {
+            dest.writeInt(0);
+            return;
+        }
+        dest.writeInt(map.size());
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+            dest.writeString(entry.getKey());
+            dest.writeInt(entry.getValue());
+        }
+    }
+
+    static @NonNull Map<String, Integer> readStringIntMap(@NonNull Parcel in) {
+        int size = in.readInt();
+        Map<String, Integer> map = new HashMap<>();
+        while (size-- > 0) {
+            String key = in.readString();
+            int value = in.readInt();
+            map.put(key, value);
+        }
+        return map;
+    }
+
     static <T extends Parcelable> void writeSet(@NonNull Parcel dest, @Nullable Set<T> set) {
         if (set == null) {
             dest.writeInt(0);
