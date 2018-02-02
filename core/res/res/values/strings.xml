@@ -4815,7 +4815,7 @@
     A toast message shown when an app shortcut that was restored from a previous device is clicked,
     but it cannot be started because the shortcut was created by a newer version of the app.
     -->
-    <string name="shortcut_restored_on_lower_version">This shortcut requires latest app</string>
+    <string name="shortcut_restored_on_lower_version">App version downgraded, or isn\u2019t compatible with this shortcut</string>
 
     <!--
     A toast message shown when an app shortcut that was restored from a previous device is clicked,
