@@ -16,6 +16,12 @@
 
 package com.android.server.pm;
 
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
+import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
+
 import android.accounts.IAccountManager;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -32,8 +38,10 @@ import android.content.pm.IPackageManager;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
+import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.ApkLite;
 import android.content.pm.PackageParser.PackageLite;
@@ -41,9 +49,6 @@ import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
-import android.content.pm.PackageInstaller.SessionInfo;
-import android.content.pm.PackageInstaller.SessionParams;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
@@ -73,7 +78,6 @@ import android.util.PrintWriterPrinter;
 
 import com.android.internal.content.PackageHelper;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.SizedInputStream;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 
@@ -81,9 +85,8 @@ import dalvik.system.DexFile;
 
 import libcore.io.IoUtils;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -94,12 +97,6 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
-
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK;
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 
 class PackageManagerShellCommand extends ShellCommand {
     /** Path for streaming APK content */
@@ -2213,7 +2210,7 @@ class PackageManagerShellCommand extends ShellCommand {
         final PrintWriter pw = getOutPrintWriter();
         final ParcelFileDescriptor fd;
         if (STDIN_PATH.equals(inPath)) {
-            fd = null;
+            fd = new ParcelFileDescriptor(getInFileDescriptor());
         } else if (inPath != null) {
             fd = openFileForSystem(inPath, "r");
             if (fd == null) {
@@ -2225,53 +2222,27 @@ class PackageManagerShellCommand extends ShellCommand {
                 return -1;
             }
         } else {
-            fd = null;
+            fd = new ParcelFileDescriptor(getInFileDescriptor());
         }
         if (sizeBytes <= 0) {
             getErrPrintWriter().println("Error: must specify a APK size");
             return 1;
         }
 
-        final SessionInfo info = mInterface.getPackageInstaller().getSessionInfo(sessionId);
-
         PackageInstaller.Session session = null;
-        InputStream in = null;
-        OutputStream out = null;
         try {
             session = new PackageInstaller.Session(
                     mInterface.getPackageInstaller().openSession(sessionId));
-
-            if (fd != null) {
-                in = new ParcelFileDescriptor.AutoCloseInputStream(fd);
-            } else {
-                in = new SizedInputStream(getRawInputStream(), sizeBytes);
-            }
-            out = session.openWrite(splitName, 0, sizeBytes);
-
-            int total = 0;
-            byte[] buffer = new byte[1024 * 1024];
-            int c;
-            while ((c = in.read(buffer)) != -1) {
-                total += c;
-                out.write(buffer, 0, c);
-
-                if (info.sizeBytes > 0) {
-                    final float fraction = ((float) c / (float) info.sizeBytes);
-                    session.addProgress(fraction);
-                }
-            }
-            session.fsync(out);
+            session.write(splitName, 0, sizeBytes, fd);
 
             if (logSuccess) {
-                pw.println("Success: streamed " + total + " bytes");
+                pw.println("Success: streamed " + sizeBytes + " bytes");
             }
             return 0;
         } catch (IOException e) {
             getErrPrintWriter().println("Error: failed to write; " + e.getMessage());
             return 1;
         } finally {
-            IoUtils.closeQuietly(out);
-            IoUtils.closeQuietly(in);
             IoUtils.closeQuietly(session);
         }
     }

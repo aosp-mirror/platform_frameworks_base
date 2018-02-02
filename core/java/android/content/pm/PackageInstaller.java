@@ -829,7 +829,19 @@ public class PackageInstaller {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
+        }
 
+        /** {@hide} */
+        public void write(@NonNull String name, long offsetBytes, long lengthBytes,
+                @NonNull ParcelFileDescriptor fd) throws IOException {
+            try {
+                mSession.write(name, offsetBytes, lengthBytes, fd);
+            } catch (RuntimeException e) {
+                ExceptionUtils.maybeUnwrapIOException(e);
+                throw e;
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
 
         /**

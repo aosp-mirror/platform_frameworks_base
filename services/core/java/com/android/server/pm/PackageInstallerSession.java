@@ -77,6 +77,7 @@ import android.os.RevocableFileDescriptor;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.system.ErrnoException;
+import android.system.Int64Ref;
 import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructStat;
@@ -575,14 +576,24 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @Override
     public ParcelFileDescriptor openWrite(String name, long offsetBytes, long lengthBytes) {
         try {
-            return openWriteInternal(name, offsetBytes, lengthBytes);
+            return doWriteInternal(name, offsetBytes, lengthBytes, null);
         } catch (IOException e) {
             throw ExceptionUtils.wrap(e);
         }
     }
 
-    private ParcelFileDescriptor openWriteInternal(String name, long offsetBytes, long lengthBytes)
-            throws IOException {
+    @Override
+    public void write(String name, long offsetBytes, long lengthBytes,
+            ParcelFileDescriptor fd) {
+        try {
+            doWriteInternal(name, offsetBytes, lengthBytes, fd);
+        } catch (IOException e) {
+            throw ExceptionUtils.wrap(e);
+        }
+    }
+
+    private ParcelFileDescriptor doWriteInternal(String name, long offsetBytes, long lengthBytes,
+            ParcelFileDescriptor incomingFd) throws IOException {
         // Quick sanity check of state, and allocate a pipe for ourselves. We
         // then do heavy disk allocation outside the lock, but this open pipe
         // will block any attempted install transitions.
@@ -636,7 +647,44 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 Os.lseek(targetFd, offsetBytes, OsConstants.SEEK_SET);
             }
 
-            if (PackageInstaller.ENABLE_REVOCABLE_FD) {
+            if (incomingFd != null) {
+                switch (Binder.getCallingUid()) {
+                    case android.os.Process.SHELL_UID:
+                    case android.os.Process.ROOT_UID:
+                        break;
+                    default:
+                        throw new SecurityException("Reverse mode only supported from shell");
+                }
+
+                // In "reverse" mode, we're streaming data ourselves from the
+                // incoming FD, which means we never have to hand out our
+                // sensitive internal FD. We still rely on a "bridge" being
+                // inserted above to hold the session active.
+                try {
+                    final Int64Ref last = new Int64Ref(0);
+                    FileUtils.copy(incomingFd.getFileDescriptor(), targetFd, (long progress) -> {
+                        if (params.sizeBytes > 0) {
+                            final long delta = progress - last.value;
+                            last.value = progress;
+                            addClientProgress((float) delta / (float) params.sizeBytes);
+                        }
+                    }, null, lengthBytes);
+                } finally {
+                    IoUtils.closeQuietly(targetFd);
+                    IoUtils.closeQuietly(incomingFd);
+
+                    // We're done here, so remove the "bridge" that was holding
+                    // the session active.
+                    synchronized (mLock) {
+                        if (PackageInstaller.ENABLE_REVOCABLE_FD) {
+                            mFds.remove(fd);
+                        } else {
+                            mBridges.remove(bridge);
+                        }
+                    }
+                }
+                return null;
+            } else if (PackageInstaller.ENABLE_REVOCABLE_FD) {
                 fd.init(mContext, targetFd);
                 return fd.getRevocableFileDescriptor();
             } else {
