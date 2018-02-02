@@ -18,11 +18,9 @@ package com.android.server.wm;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.graphics.Rect;
@@ -32,23 +30,16 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.stubbing.Answer;
 
 /**
  * Build/Install/Run:
  * atest FrameworksServicesTests:com.android.server.wm.DimmerTests;
  */
 @Presubmit
-@Ignore("b/72450130")
 @RunWith(AndroidJUnit4.class)
 public class DimmerTests extends WindowTestsBase {
-
-    public DimmerTests() {
-        super(spy(new SurfaceAnimationRunner()));
-    }
 
     private class TestWindowContainer extends WindowContainer<TestWindowContainer> {
         final SurfaceControl mControl = mock(SurfaceControl.class);
@@ -71,14 +62,11 @@ public class DimmerTests extends WindowTestsBase {
 
     private class MockSurfaceBuildingContainer extends WindowContainer<TestWindowContainer> {
         final SurfaceSession mSession = new SurfaceSession();
+        final SurfaceControl mHostControl = mock(SurfaceControl.class);
         final SurfaceControl.Transaction mHostTransaction = mock(SurfaceControl.Transaction.class);
 
         MockSurfaceBuildingContainer() {
             super(sWm);
-            mSurfaceControl = sWm.makeSurfaceBuilder(mSession)
-                    .setName("test surface")
-                    .setSize(1, 1)
-                    .build();
         }
 
         class MockSurfaceBuilder extends SurfaceControl.Builder {
@@ -88,18 +76,8 @@ public class DimmerTests extends WindowTestsBase {
 
             @Override
             public SurfaceControl build() {
-                return spy(sWm.makeSurfaceBuilder(mSession)
-                        .setName("test surface")
-                        .setSize(1, 1)
-                        .build());
+                return mock(SurfaceControl.class);
             }
-        }
-
-        @Override
-        SurfaceControl.Builder makeSurface() {
-            return sWm.makeSurfaceBuilder(mSession)
-                    .setName("test surface")
-                    .setSize(1, 1);
         }
 
         @Override
@@ -108,14 +86,19 @@ public class DimmerTests extends WindowTestsBase {
         }
 
         @Override
+        public SurfaceControl getSurfaceControl() {
+            return mHostControl;
+        }
+
+        @Override
         public SurfaceControl.Transaction getPendingTransaction() {
             return mHostTransaction;
         }
     }
 
-    MockSurfaceBuildingContainer mHost;
-    Dimmer mDimmer;
-    SurfaceControl.Transaction mTransaction;
+    private MockSurfaceBuildingContainer mHost;
+    private Dimmer mDimmer;
+    private SurfaceControl.Transaction mTransaction;
 
     @Before
     public void setUp() throws Exception {
@@ -123,13 +106,9 @@ public class DimmerTests extends WindowTestsBase {
         mHost = new MockSurfaceBuildingContainer();
 
         mTransaction = mock(SurfaceControl.Transaction.class);
-        mDimmer = new Dimmer(mHost);
-
-        doAnswer((Answer<Void>) invocation -> {
-            Runnable runnable = invocation.getArgument(3);
-            runnable.run();
-            return null;
-        }).when(sWm.mSurfaceAnimationRunner).startAnimation(any(), any(), any(), any());
+        mDimmer = new Dimmer(mHost,
+                (surfaceAnimator, t, anim, hidden) -> surfaceAnimator.mAnimationFinishedCallback
+                        .run());
     }
 
     @Test
@@ -137,7 +116,7 @@ public class DimmerTests extends WindowTestsBase {
         final float alpha = 0.8f;
         mDimmer.dimAbove(mTransaction, alpha);
 
-        SurfaceControl dimLayer = getDimLayer(null);
+        SurfaceControl dimLayer = getDimLayer();
 
         assertNotNull("Dimmer should have created a surface", dimLayer);
 
@@ -149,12 +128,12 @@ public class DimmerTests extends WindowTestsBase {
     public void testDimAboveNoChildRedundantlyUpdatesAlphaOnExistingSurface() throws Exception {
         float alpha = 0.8f;
         mDimmer.dimAbove(mTransaction, alpha);
-        final SurfaceControl firstSurface = getDimLayer(null);
+        final SurfaceControl firstSurface = getDimLayer();
 
         alpha = 0.9f;
         mDimmer.dimAbove(mTransaction, alpha);
 
-        assertEquals(firstSurface, getDimLayer(null));
+        assertEquals(firstSurface, getDimLayer());
         verify(mTransaction).setAlpha(firstSurface, 0.9f);
     }
 
@@ -167,18 +146,18 @@ public class DimmerTests extends WindowTestsBase {
         Rect bounds = new Rect(0, 0, width, height);
         mDimmer.updateDims(mTransaction, bounds);
 
-        verify(mTransaction).setSize(getDimLayer(null), width, height);
-        verify(mTransaction).show(getDimLayer(null));
+        verify(mTransaction).setSize(getDimLayer(), width, height);
+        verify(mTransaction).show(getDimLayer());
     }
 
     @Test
     public void testDimAboveNoChildNotReset() throws Exception {
         mDimmer.dimAbove(mTransaction, 0.8f);
-        SurfaceControl dimLayer = getDimLayer(null);
+        SurfaceControl dimLayer = getDimLayer();
         mDimmer.resetDimStates();
 
         mDimmer.updateDims(mTransaction, new Rect());
-        verify(mTransaction).show(getDimLayer(null));
+        verify(mTransaction).show(getDimLayer());
         verify(dimLayer, never()).destroy();
     }
 
@@ -189,12 +168,12 @@ public class DimmerTests extends WindowTestsBase {
 
         final float alpha = 0.8f;
         mDimmer.dimAbove(mTransaction, child, alpha);
-        SurfaceControl mDimLayer = getDimLayer(child);
+        SurfaceControl dimLayer = getDimLayer();
 
-        assertNotNull("Dimmer should have created a surface", mDimLayer);
+        assertNotNull("Dimmer should have created a surface", dimLayer);
 
-        verify(mTransaction).setAlpha(mDimLayer, alpha);
-        verify(mTransaction).setRelativeLayer(mDimLayer, child.mControl, 1);
+        verify(mTransaction).setAlpha(dimLayer, alpha);
+        verify(mTransaction).setRelativeLayer(dimLayer, child.mControl, 1);
     }
 
     @Test
@@ -204,12 +183,12 @@ public class DimmerTests extends WindowTestsBase {
 
         final float alpha = 0.8f;
         mDimmer.dimBelow(mTransaction, child, alpha);
-        SurfaceControl mDimLayer = getDimLayer(child);
+        SurfaceControl dimLayer = getDimLayer();
 
-        assertNotNull("Dimmer should have created a surface", mDimLayer);
+        assertNotNull("Dimmer should have created a surface", dimLayer);
 
-        verify(mTransaction).setAlpha(mDimLayer, alpha);
-        verify(mTransaction).setRelativeLayer(mDimLayer, child.mControl, -1);
+        verify(mTransaction).setAlpha(dimLayer, alpha);
+        verify(mTransaction).setRelativeLayer(dimLayer, child.mControl, -1);
     }
 
     @Test
@@ -219,7 +198,7 @@ public class DimmerTests extends WindowTestsBase {
 
         final float alpha = 0.8f;
         mDimmer.dimAbove(mTransaction, child, alpha);
-        SurfaceControl dimLayer = getDimLayer(child);
+        SurfaceControl dimLayer = getDimLayer();
         mDimmer.resetDimStates();
 
         mDimmer.updateDims(mTransaction, new Rect());
@@ -233,7 +212,7 @@ public class DimmerTests extends WindowTestsBase {
 
         final float alpha = 0.8f;
         mDimmer.dimAbove(mTransaction, child, alpha);
-        SurfaceControl dimLayer = getDimLayer(child);
+        SurfaceControl dimLayer = getDimLayer();
         mDimmer.resetDimStates();
         mDimmer.dimAbove(mTransaction, child, alpha);
 
@@ -242,7 +221,29 @@ public class DimmerTests extends WindowTestsBase {
         verify(dimLayer, never()).destroy();
     }
 
-    private SurfaceControl getDimLayer(WindowContainer windowContainer) {
-        return mDimmer.mDimLayerUsers.get(windowContainer).mDimLayer;
+    @Test
+    public void testDimUpdateWhileDimming() throws Exception {
+        Rect bounds = new Rect();
+        TestWindowContainer child = new TestWindowContainer();
+        mHost.addChild(child, 0);
+
+        final float alpha = 0.8f;
+        mDimmer.dimAbove(mTransaction, child, alpha);
+
+        SurfaceControl dimLayer = getDimLayer();
+        bounds.set(0, 0, 10, 10);
+        mDimmer.updateDims(mTransaction, bounds);
+        verify(mTransaction, times(1)).show(dimLayer);
+        verify(mTransaction).setSize(dimLayer, bounds.width(), bounds.height());
+        verify(mTransaction).setPosition(dimLayer, 0, 0);
+
+        bounds.set(10, 10, 30, 30);
+        mDimmer.updateDims(mTransaction, bounds);
+        verify(mTransaction).setSize(dimLayer, bounds.width(), bounds.height());
+        verify(mTransaction).setPosition(dimLayer, 10, 10);
+    }
+
+    private SurfaceControl getDimLayer() {
+        return mDimmer.mDimState.mDimLayer;
     }
 }

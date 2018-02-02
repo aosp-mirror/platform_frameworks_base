@@ -129,10 +129,24 @@ class Dimmer {
      */
     private WindowContainer mHost;
     private WindowContainer mLastRequestedDimContainer;
-    private DimState mDimState;
+    @VisibleForTesting
+    DimState mDimState;
+
+    private final SurfaceAnimatorStarter mSurfaceAnimatorStarter;
+
+    @VisibleForTesting
+    interface SurfaceAnimatorStarter {
+        void startAnimation(SurfaceAnimator surfaceAnimator, SurfaceControl.Transaction t,
+                AnimationAdapter anim, boolean hidden);
+    }
 
     Dimmer(WindowContainer host) {
+        this(host, SurfaceAnimator::startAnimation);
+    }
+
+    Dimmer(WindowContainer host, SurfaceAnimatorStarter surfaceAnimatorStarter) {
         mHost = host;
+        mSurfaceAnimatorStarter = surfaceAnimatorStarter;
     }
 
     private SurfaceControl makeDimLayer() {
@@ -285,7 +299,7 @@ class Dimmer {
 
     private void startAnim(WindowContainer container, SurfaceAnimator animator,
             SurfaceControl.Transaction t, float startAlpha, float endAlpha) {
-        animator.startAnimation(t, new LocalAnimationAdapter(
+        mSurfaceAnimatorStarter.startAnimation(animator, t, new LocalAnimationAdapter(
                 new AlphaAnimationSpec(startAlpha, endAlpha, getDimDuration(container)),
                 mHost.mService.mSurfaceAnimationRunner), false /* hidden */);
     }
