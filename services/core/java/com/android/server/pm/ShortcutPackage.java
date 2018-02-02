@@ -703,7 +703,7 @@ class ShortcutPackage extends ShortcutPackageItem {
      */
     public boolean rescanPackageIfNeeded(boolean isNewApp, boolean forceRescan) {
         final ShortcutService s = mShortcutUser.mService;
-        final long start = s.injectElapsedRealtime();
+        final long start = s.getStatStartTime();
 
         final PackageInfo pi;
         try {
