@@ -4087,25 +4087,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             if (activityDisplay == null) {
                 return;
             }
-            final boolean destroyContentOnRemoval
-                    = activityDisplay.shouldDestroyContentOnRemove();
-            while (activityDisplay.getChildCount() > 0) {
-                final ActivityStack stack = activityDisplay.getChildAt(0);
-                if (destroyContentOnRemoval) {
-                    moveStackToDisplayLocked(stack.mStackId, DEFAULT_DISPLAY, false /* onTop */);
-                    stack.finishAllActivitiesLocked(true /* immediately */);
-                } else {
-                    // Moving all tasks to fullscreen stack, because it's guaranteed to be
-                    // a valid launch stack for all activities. This way the task history from
-                    // external display will be preserved on primary after move.
-                    moveTasksToFullscreenStackLocked(stack, true /* onTop */);
-                }
-            }
+
+            activityDisplay.remove();
 
             releaseSleepTokens(activityDisplay);
 
             mActivityDisplays.remove(displayId);
-            mWindowManager.onDisplayRemoved(displayId);
         }
     }
 
