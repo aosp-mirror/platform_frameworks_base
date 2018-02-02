@@ -113,7 +113,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         new StatFs(Environment.getRootDirectory().getAbsolutePath());
     private final StatFs mStatFsTemp =
         new StatFs(Environment.getDownloadCacheDirectory().getAbsolutePath());
-    private final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
 
     public StatsCompanionService(Context context) {
         super();
@@ -677,12 +676,13 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     }
 
     private synchronized BluetoothActivityEnergyInfo pullBluetoothData() {
+        final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
       if (adapter != null) {
-        SynchronousResultReceiver bluetoothReceiver = null;
-        bluetoothReceiver = new SynchronousResultReceiver("bluetooth");
+        SynchronousResultReceiver bluetoothReceiver = new SynchronousResultReceiver("bluetooth");
         adapter.requestControllerActivityEnergyInfo(bluetoothReceiver);
         return awaitControllerInfo(bluetoothReceiver);
       } else {
+          Slog.e(TAG, "Failed to get bluetooth adapter!");
         return null;
       }
     }
