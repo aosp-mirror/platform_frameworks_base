@@ -26,7 +26,6 @@ import android.annotation.ColorInt;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -36,7 +35,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.Shape;
 import android.text.Layout;
-import android.util.TypedValue;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
@@ -54,21 +52,15 @@ import java.util.List;
 final class SmartSelectSprite {
 
     private static final int EXPAND_DURATION = 300;
-    private static final int CORNER_DURATION = 150;
-    private static final float STROKE_WIDTH_DP = 1.5F;
-
-    // GBLUE700
-    @ColorInt
-    private static final int DEFAULT_STROKE_COLOR = 0xFF3367D6;
+    private static final int CORNER_DURATION = 50;
 
     private final Interpolator mExpandInterpolator;
     private final Interpolator mCornerInterpolator;
-    private final float mStrokeWidth;
 
     private Animator mActiveAnimator = null;
     private final Runnable mInvalidator;
     @ColorInt
-    private final int mStrokeColor;
+    private final int mFillColor;
 
     static final Comparator<RectF> RECTANGLE_COMPARATOR = Comparator
             .<RectF>comparingDouble(e -> e.bottom)
@@ -124,26 +116,11 @@ final class SmartSelectSprite {
             return expansionDirection * -1;
         }
 
-        @Retention(SOURCE)
-        @IntDef({RectangleBorderType.FIT, RectangleBorderType.OVERSHOOT})
-        private @interface RectangleBorderType {
-        /** A rectangle which, fully expanded, fits inside of its bounding rectangle. */
-        int FIT = 0;
-        /**
-         * A rectangle which, when fully expanded, clips outside of its bounding rectangle so that
-         * its edges no longer appear rounded.
-         */
-        int OVERSHOOT = 1;
-        }
-
-        private final float mStrokeWidth;
         private final RectF mBoundingRectangle;
         private float mRoundRatio = 1.0f;
         private final @ExpansionDirection int mExpansionDirection;
-        private final @RectangleBorderType int mRectangleBorderType;
 
         private final RectF mDrawRect = new RectF();
-        private final RectF mClipRect = new RectF();
         private final Path mClipPath = new Path();
 
         /** How offset the left edge of the rectangle is from the left side of the bounding box. */
@@ -159,13 +136,9 @@ final class SmartSelectSprite {
         private RoundedRectangleShape(
                 final RectF boundingRectangle,
                 final @ExpansionDirection int expansionDirection,
-                final @RectangleBorderType int rectangleBorderType,
-                final boolean inverted,
-                final float strokeWidth) {
+                final boolean inverted) {
             mBoundingRectangle = new RectF(boundingRectangle);
             mBoundingWidth = boundingRectangle.width();
-            mRectangleBorderType = rectangleBorderType;
-            mStrokeWidth = strokeWidth;
             mInverted = inverted && expansionDirection != ExpansionDirection.CENTER;
 
             if (inverted) {
@@ -182,14 +155,8 @@ final class SmartSelectSprite {
         }
 
         /*
-         * In order to achieve the "rounded rectangle hits the wall" effect, the drawing needs to be
-         * done in two passes. In this context, the wall is the bounding rectangle and in the first
-         * pass we need to draw the rounded rectangle (expanded and with a corner radius as per
-         * object properties) clipped by the bounding box. If the rounded rectangle expands outside
-         * of the bounding box, one more pass needs to be done, as there will now be a hole in the
-         * rounded rectangle where it "flattened" against the bounding box. In order to fill just
-         * this hole, we need to draw the bounding box, but clip it with the rounded rectangle and
-         * this will connect the missing pieces.
+         * In order to achieve the "rounded rectangle hits the wall" effect, we draw an expanding
+         * rounded rectangle that is clipped by the bounding box of the selected text.
          */
         @Override
         public void draw(Canvas canvas, Paint paint) {
@@ -201,31 +168,8 @@ final class SmartSelectSprite {
             final float adjustedCornerRadius = getAdjustedCornerRadius();
 
             mDrawRect.set(mBoundingRectangle);
-            mDrawRect.left = mBoundingRectangle.left + mLeftBoundary;
-            mDrawRect.right = mBoundingRectangle.left + mRightBoundary;
-
-            if (mRectangleBorderType == RectangleBorderType.OVERSHOOT) {
-                mDrawRect.left -= cornerRadius / 2;
-                mDrawRect.right += cornerRadius / 2;
-            } else {
-                switch (mExpansionDirection) {
-                    case ExpansionDirection.CENTER:
-                        break;
-                    case ExpansionDirection.LEFT:
-                        mDrawRect.right += cornerRadius;
-                        break;
-                    case ExpansionDirection.RIGHT:
-                        mDrawRect.left -= cornerRadius;
-                        break;
-                }
-            }
-
-            canvas.save();
-            mClipRect.set(mBoundingRectangle);
-            mClipRect.inset(-mStrokeWidth / 2, -mStrokeWidth / 2);
-            canvas.clipRect(mClipRect);
-            canvas.drawRoundRect(mDrawRect, adjustedCornerRadius, adjustedCornerRadius, paint);
-            canvas.restore();
+            mDrawRect.left = mBoundingRectangle.left + mLeftBoundary - cornerRadius / 2;
+            mDrawRect.right = mBoundingRectangle.left + mRightBoundary + cornerRadius / 2;
 
             canvas.save();
             mClipPath.reset();
@@ -272,11 +216,7 @@ final class SmartSelectSprite {
         }
 
         private float getBoundingWidth() {
-            if (mRectangleBorderType == RectangleBorderType.OVERSHOOT) {
-                return (int) (mBoundingRectangle.width() + getCornerRadius());
-            } else {
-                return mBoundingRectangle.width();
-            }
+            return (int) (mBoundingRectangle.width() + getCornerRadius());
         }
 
     }
@@ -388,19 +328,20 @@ final class SmartSelectSprite {
     }
 
     /**
-     * @param context     the {@link Context} in which the animation will run
+     * @param context the {@link Context} in which the animation will run
+     * @param highlightColor the highlight color of the underlying {@link TextView}
      * @param invalidator a {@link Runnable} which will be called every time the animation updates,
      *                    indicating that the view drawing the animation should invalidate itself
      */
-    SmartSelectSprite(final Context context, final Runnable invalidator) {
+    SmartSelectSprite(final Context context, @ColorInt int highlightColor,
+            final Runnable invalidator) {
         mExpandInterpolator = AnimationUtils.loadInterpolator(
                 context,
                 android.R.interpolator.fast_out_slow_in);
         mCornerInterpolator = AnimationUtils.loadInterpolator(
                 context,
                 android.R.interpolator.fast_out_linear_in);
-        mStrokeWidth = dpToPixel(context, STROKE_WIDTH_DP);
-        mStrokeColor = getStrokeColor(context);
+        mFillColor = highlightColor;
         mInvalidator = Preconditions.checkNotNull(invalidator);
     }
 
@@ -437,17 +378,14 @@ final class SmartSelectSprite {
         RectangleWithTextSelectionLayout centerRectangle = null;
 
         int startingOffset = 0;
-        int startingRectangleIndex = 0;
-        for (int index = 0; index < rectangleCount; ++index) {
-            final RectangleWithTextSelectionLayout rectangleWithTextSelectionLayout =
-                    destinationRectangles.get(index);
+        for (RectangleWithTextSelectionLayout rectangleWithTextSelectionLayout :
+                destinationRectangles) {
             final RectF rectangle = rectangleWithTextSelectionLayout.getRectangle();
             if (contains(rectangle, start)) {
                 centerRectangle = rectangleWithTextSelectionLayout;
                 break;
             }
             startingOffset += rectangle.width();
-            ++startingRectangleIndex;
         }
 
         if (centerRectangle == null) {
@@ -459,9 +397,6 @@ final class SmartSelectSprite {
         final @RoundedRectangleShape.ExpansionDirection int[] expansionDirections =
                 generateDirections(centerRectangle, destinationRectangles);
 
-        final @RoundedRectangleShape.RectangleBorderType int[] rectangleBorderTypes =
-                generateBorderTypes(rectangleCount);
-
         for (int index = 0; index < rectangleCount; ++index) {
             final RectangleWithTextSelectionLayout rectangleWithTextSelectionLayout =
                     destinationRectangles.get(index);
@@ -469,10 +404,8 @@ final class SmartSelectSprite {
             final RoundedRectangleShape shape = new RoundedRectangleShape(
                     rectangle,
                     expansionDirections[index],
-                    rectangleBorderTypes[index],
                     rectangleWithTextSelectionLayout.getTextSelectionLayout()
-                            == Layout.TEXT_SELECTION_LAYOUT_RIGHT_TO_LEFT,
-                    mStrokeWidth);
+                            == Layout.TEXT_SELECTION_LAYOUT_RIGHT_TO_LEFT);
             cornerAnimators.add(createCornerAnimator(shape, updateListener));
             shapes.add(shape);
         }
@@ -480,42 +413,21 @@ final class SmartSelectSprite {
         final RectangleList rectangleList = new RectangleList(shapes);
         final ShapeDrawable shapeDrawable = new ShapeDrawable(rectangleList);
 
-        final float startingOffsetLeft;
-        final float startingOffsetRight;
-
-        final RoundedRectangleShape startingRectangleShape = shapes.get(startingRectangleIndex);
-        final float cornerRadius = startingRectangleShape.getCornerRadius();
-        if (startingRectangleShape.mRectangleBorderType
-                == RoundedRectangleShape.RectangleBorderType.FIT) {
-            switch (startingRectangleShape.mExpansionDirection) {
-                case RoundedRectangleShape.ExpansionDirection.LEFT:
-                    startingOffsetLeft = startingOffsetRight = startingOffset - cornerRadius / 2;
-                    break;
-                case RoundedRectangleShape.ExpansionDirection.RIGHT:
-                    startingOffsetLeft = startingOffsetRight = startingOffset + cornerRadius / 2;
-                    break;
-                case RoundedRectangleShape.ExpansionDirection.CENTER:  // fall through
-                default:
-                    startingOffsetLeft = startingOffset - cornerRadius / 2;
-                    startingOffsetRight = startingOffset + cornerRadius / 2;
-                    break;
-            }
-        } else {
-            startingOffsetLeft = startingOffsetRight = startingOffset;
-        }
-
         final Paint paint = shapeDrawable.getPaint();
-        paint.setColor(mStrokeColor);
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(mStrokeWidth);
+        paint.setColor(mFillColor);
+        paint.setStyle(Paint.Style.FILL);
 
         mExistingRectangleList = rectangleList;
         mExistingDrawable = shapeDrawable;
 
-        mActiveAnimator = createAnimator(rectangleList, startingOffsetLeft, startingOffsetRight,
-                cornerAnimators, updateListener,
-                onAnimationEnd);
+        mActiveAnimator = createAnimator(rectangleList, startingOffset, startingOffset,
+                cornerAnimators, updateListener, onAnimationEnd);
         mActiveAnimator.start();
+    }
+
+    /** Returns whether the sprite is currently animating. */
+    public boolean isAnimationActive() {
+        return mActiveAnimator != null && mActiveAnimator.isRunning();
     }
 
     private Animator createAnimator(
@@ -622,36 +534,6 @@ final class SmartSelectSprite {
             result[i] = RoundedRectangleShape.ExpansionDirection.RIGHT;
         }
 
-        return result;
-    }
-
-    private static @RoundedRectangleShape.RectangleBorderType int[] generateBorderTypes(
-            final int numberOfRectangles) {
-        final @RoundedRectangleShape.RectangleBorderType int[] result = new int[numberOfRectangles];
-
-        for (int i = 1; i < result.length - 1; ++i) {
-            result[i] = RoundedRectangleShape.RectangleBorderType.OVERSHOOT;
-        }
-
-        result[0] = RoundedRectangleShape.RectangleBorderType.FIT;
-        result[result.length - 1] = RoundedRectangleShape.RectangleBorderType.FIT;
-        return result;
-    }
-
-    private static float dpToPixel(final Context context, final float dp) {
-        return TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                dp,
-                context.getResources().getDisplayMetrics());
-    }
-
-    @ColorInt
-    private static int getStrokeColor(final Context context) {
-        final TypedValue typedValue = new TypedValue();
-        final TypedArray array = context.obtainStyledAttributes(typedValue.data, new int[]{
-                android.R.attr.colorControlActivated});
-        final int result = array.getColor(0, DEFAULT_STROKE_COLOR);
-        array.recycle();
         return result;
     }
 
