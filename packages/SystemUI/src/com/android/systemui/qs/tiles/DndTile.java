@@ -19,8 +19,6 @@ package com.android.systemui.qs.tiles;
 import static android.provider.Settings.Global.ZEN_MODE_ALARMS;
 import static android.provider.Settings.Global.ZEN_MODE_OFF;
 
-import android.app.AlarmManager;
-import android.app.AlarmManager.AlarmClockInfo;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -30,11 +28,9 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.provider.Settings.Global;
-import android.service.notification.ScheduleCalendar;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ZenRule;
 import android.service.quicksettings.Tile;
@@ -56,7 +52,6 @@ import com.android.systemui.R;
 import com.android.systemui.SysUIToast;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.DetailAdapter;
-import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
@@ -197,7 +192,8 @@ public class DndTile extends QSTileImpl<BooleanState> {
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.slash.isSlashed = !state.value;
         state.label = getTileLabel();
-        state.secondaryLabel = getSecondaryLabel(zen != Global.ZEN_MODE_OFF);
+        state.secondaryLabel = ZenModeConfig.getDescription(mContext,zen != Global.ZEN_MODE_OFF,
+                mController.getConfig());
         state.icon = ResourceIcon.get(R.drawable.ic_qs_dnd_on);
         checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_ADJUST_VOLUME);
         switch (zen) {
@@ -224,102 +220,6 @@ public class DndTile extends QSTileImpl<BooleanState> {
         state.dualLabelContentDescription = mContext.getResources().getString(
                 R.string.accessibility_quick_settings_open_settings, getTileLabel());
         state.expandedAccessibilityClassName = Switch.class.getName();
-    }
-
-    /**
-     * Returns the secondary label to use for the given instance of do not disturb.
-     * - If turned on manually and end time is known, returns end time.
-     * - If turned on by an automatic rule, returns the automatic rule name.
-     * - If on due to an app, returns the app name.
-     * - If there's a combination of rules/apps that trigger, then shows the one that will
-     *  last the longest if applicable.
-     * @return null if do not disturb is off.
-     */
-    private String getSecondaryLabel(boolean zenOn) {
-        if (!zenOn) {
-            return null;
-        }
-
-        ZenModeConfig config = mController.getConfig();
-        String secondaryText = "";
-        long latestEndTime = -1;
-
-        // DND turned on by manual rule
-        if (config.manualRule != null) {
-            final Uri id = config.manualRule.conditionId;
-            if (config.manualRule.enabler != null) {
-                // app triggered manual rule
-                String appName = ZenModeConfig.getOwnerCaption(mContext, config.manualRule.enabler);
-                if (!appName.isEmpty()) {
-                    secondaryText = appName;
-                }
-            } else {
-                if (id == null) {
-                    // Do not disturb manually triggered to remain on forever until turned off
-                    // No subtext
-                    return null;
-                } else {
-                    latestEndTime = ZenModeConfig.tryParseCountdownConditionId(id);
-                    if (latestEndTime > 0) {
-                        final CharSequence formattedTime = ZenModeConfig.getFormattedTime(mContext,
-                                latestEndTime, ZenModeConfig.isToday(latestEndTime),
-                                mContext.getUserId());
-                        secondaryText = mContext.getString(R.string.qs_dnd_until, formattedTime);
-                    }
-                }
-            }
-        }
-
-        // DND turned on by an automatic rule
-        for (ZenModeConfig.ZenRule automaticRule : config.automaticRules.values()) {
-            if (automaticRule.isAutomaticActive()) {
-                if (ZenModeConfig.isValidEventConditionId(automaticRule.conditionId) ||
-                        ZenModeConfig.isValidScheduleConditionId(automaticRule.conditionId)) {
-                    // set text if automatic rule end time is the latest active rule end time
-                    long endTime = parseAutomaticRuleEndTime(automaticRule.conditionId);
-                    if (endTime > latestEndTime) {
-                        latestEndTime = endTime;
-                        secondaryText = automaticRule.name;
-                    }
-                } else {
-                    // set text if 3rd party rule
-                    return automaticRule.name;
-                }
-            }
-        }
-
-        return !secondaryText.equals("") ? secondaryText : null;
-    }
-
-    private long parseAutomaticRuleEndTime(Uri id) {
-        if (ZenModeConfig.isValidEventConditionId(id)) {
-            // cannot look up end times for events
-            return Long.MAX_VALUE;
-        }
-
-        if (ZenModeConfig.isValidScheduleConditionId(id)) {
-            ScheduleCalendar schedule = ZenModeConfig.toScheduleCalendar(id);
-            long endTimeMs = schedule.getNextChangeTime(System.currentTimeMillis());
-
-            // check if automatic rule will end on next alarm
-            if (schedule.exitAtAlarm()) {
-                long nextAlarm = getNextAlarm(mContext);
-                schedule.maybeSetNextAlarm(System.currentTimeMillis(), nextAlarm);
-                if (schedule.shouldExitForAlarm(endTimeMs)) {
-                    return nextAlarm;
-                }
-            }
-
-            return endTimeMs;
-        }
-
-        return -1;
-    }
-
-    private long getNextAlarm(Context context) {
-        final AlarmManager alarms = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        final AlarmClockInfo info = alarms.getNextAlarmClock(mContext.getUserId());
-        return info != null ? info.getTriggerTime() : 0;
     }
 
     @Override
