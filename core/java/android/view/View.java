@@ -23689,9 +23689,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         Point shadowTouchPoint = new Point();
         shadowBuilder.onProvideShadowMetrics(shadowSize, shadowTouchPoint);
 
-        if ((shadowSize.x <= 0) || (shadowSize.y <= 0)
+        if ((shadowSize.x < 0) || (shadowSize.y < 0)
                 || (shadowTouchPoint.x < 0) || (shadowTouchPoint.y < 0)) {
-            throw new IllegalStateException("Drag shadow dimensions must be positive");
+            throw new IllegalStateException("Drag shadow dimensions must not be negative");
+        }
+
+        // Create 1x1 surface when zero surface size is specified because SurfaceControl.Builder
+        // does not accept zero size surface.
+        if (shadowSize.x == 0  || shadowSize.y == 0) {
+            shadowSize.x = 1;
+            shadowSize.y = 1;
         }
 
         if (ViewDebug.DEBUG_DRAG) {
