@@ -62,13 +62,14 @@ void LogEvent::init() {
         const char* buffer;
         size_t len = android_log_write_list_buffer(mContext, &buffer);
         // turns to reader mode
-        mContext = create_android_log_parser(buffer, len);
-        init(mContext);
-        // destroy the context to save memory.
-        if (mContext) {
+        android_log_context contextForRead = create_android_log_parser(buffer, len);
+        if (contextForRead) {
+            init(contextForRead);
+            // destroy the context to save memory.
             // android_log_destroy will set mContext to NULL
-            android_log_destroy(&mContext);
+            android_log_destroy(&contextForRead);
         }
+        android_log_destroy(&mContext);
     }
 }
 
@@ -188,6 +189,9 @@ void increaseField(Field *field, bool is_child) {
  * of the elements that are written to the log.
  */
 void LogEvent::init(android_log_context context) {
+    if (!context) {
+        return;
+    }
     android_log_list_element elem;
     // TODO: The log is actually structured inside one list.  This is convenient
     // because we'll be able to use it to put the attribution (WorkSource) block first
