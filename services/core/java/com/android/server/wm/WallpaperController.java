@@ -272,6 +272,8 @@ class WallpaperController {
     }
 
     boolean updateWallpaperOffset(WindowState wallpaperWin, int dw, int dh, boolean sync) {
+        int xOffset = 0;
+        int yOffset = 0;
         boolean rawChanged = false;
         // Set the default wallpaper x-offset to either edge of the screen (depending on RTL), to
         // match the behavior of most Launchers
@@ -283,11 +285,8 @@ class WallpaperController {
         if (mLastWallpaperDisplayOffsetX != Integer.MIN_VALUE) {
             offset += mLastWallpaperDisplayOffsetX;
         }
-        boolean changed = wallpaperWin.mXOffset != offset;
-        if (changed) {
-            if (DEBUG_WALLPAPER) Slog.v(TAG, "Update wallpaper " + wallpaperWin + " x: " + offset);
-            wallpaperWin.mXOffset = offset;
-        }
+        xOffset = offset;
+
         if (wallpaperWin.mWallpaperX != wpx || wallpaperWin.mWallpaperXStep != wpxs) {
             wallpaperWin.mWallpaperX = wpx;
             wallpaperWin.mWallpaperXStep = wpxs;
@@ -301,16 +300,15 @@ class WallpaperController {
         if (mLastWallpaperDisplayOffsetY != Integer.MIN_VALUE) {
             offset += mLastWallpaperDisplayOffsetY;
         }
-        if (wallpaperWin.mYOffset != offset) {
-            if (DEBUG_WALLPAPER) Slog.v(TAG, "Update wallpaper " + wallpaperWin + " y: " + offset);
-            changed = true;
-            wallpaperWin.mYOffset = offset;
-        }
+        yOffset = offset;
+
         if (wallpaperWin.mWallpaperY != wpy || wallpaperWin.mWallpaperYStep != wpys) {
             wallpaperWin.mWallpaperY = wpy;
             wallpaperWin.mWallpaperYStep = wpys;
             rawChanged = true;
         }
+
+        boolean changed = wallpaperWin.mWinAnimator.setWallpaperOffset(xOffset, yOffset);
 
         if (rawChanged && (wallpaperWin.mAttrs.privateFlags &
                 WindowManager.LayoutParams.PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS) != 0) {
