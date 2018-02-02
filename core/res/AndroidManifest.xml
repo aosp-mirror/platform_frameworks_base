@@ -2238,7 +2238,8 @@
         android:description="@string/permdesc_install_shortcut"
         android:protectionLevel="normal"/>
 
-    <!--This permission is no longer supported.
+    <!-- <p class="caution"><strong>Don't use this permission in your app.</strong><br>This
+         permission is no longer supported.
     -->
     <permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT"
         android:label="@string/permlab_uninstall_shortcut"
