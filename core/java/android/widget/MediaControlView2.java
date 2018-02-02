@@ -171,13 +171,6 @@ public class MediaControlView2 extends ViewGroupHelper<MediaControlView2Provider
     }
 
     /**
-     * Returns whether the control view is currently shown or hidden.
-     */
-    public boolean isShowing() {
-        return mProvider.isShowing_impl();
-    }
-
-    /**
      * Changes the visibility state of an individual button. Default value is View.Visible.
      *
      * @param button the {@code Button} assigned to individual buttons
@@ -222,5 +215,10 @@ public class MediaControlView2 extends ViewGroupHelper<MediaControlView2Provider
      */
     public long getTimeout() {
         return mProvider.getTimeout_impl();
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        mProvider.onLayout_impl(changed, l, t, r, b);
     }
 }
