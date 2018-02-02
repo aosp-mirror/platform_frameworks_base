@@ -17309,7 +17309,8 @@ Slog.e("TODD",
             // Also, don't fail application installs if the dexopt step fails.
             DexoptOptions dexoptOptions = new DexoptOptions(pkg.packageName,
                     REASON_INSTALL,
-                    DexoptOptions.DEXOPT_BOOT_COMPLETE);
+                    DexoptOptions.DEXOPT_BOOT_COMPLETE |
+                    DexoptOptions.DEXOPT_INSTALL_WITH_DEX_METADATA_FILE);
             mPackageDexOptimizer.performDexOpt(pkg, pkg.usesLibraryFiles,
                     null /* instructionSets */,
                     getOrCreateCompilerPackageStats(pkg),
