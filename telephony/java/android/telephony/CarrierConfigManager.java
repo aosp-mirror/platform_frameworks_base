@@ -154,6 +154,15 @@ public class CarrierConfigManager {
     public static final String KEY_ALLOW_LOCAL_DTMF_TONES_BOOL = "allow_local_dtmf_tones_bool";
 
     /**
+     * Determines if the carrier requires that a tone be played to the remote party when an app is
+     * recording audio during a call (e.g. using a call recording app).
+     * <p>
+     * Note: This requires the Telephony config_supports_telephony_audio_device overlay to be true
+     * in order to work.
+     * @hide
+     */
+    public static final String KEY_PLAY_CALL_RECORDING_TONE_BOOL = "play_call_recording_tone_bool";
+    /**
      * Determines if the carrier requires converting the destination number before sending out an
      * SMS. Certain networks and numbering plans require different formats.
      */
@@ -1809,6 +1818,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_ADDITIONAL_CALL_SETTING_BOOL, true);
         sDefaults.putBoolean(KEY_ALLOW_EMERGENCY_NUMBERS_IN_CALL_LOG_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_LOCAL_DTMF_TONES_BOOL, true);
+        sDefaults.putBoolean(KEY_PLAY_CALL_RECORDING_TONE_BOOL, false);
         sDefaults.putBoolean(KEY_APN_EXPAND_BOOL, true);
         sDefaults.putBoolean(KEY_AUTO_RETRY_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_SETTINGS_ENABLE_BOOL, false);
