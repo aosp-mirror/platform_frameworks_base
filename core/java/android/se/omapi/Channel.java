@@ -25,6 +25,7 @@ package android.se.omapi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.util.Log;
 
 import java.io.IOException;
@@ -168,8 +169,10 @@ public class Channel {
                     throw new IOException("Error in communicating with Secure Element");
                 }
                 return response;
-            } catch (RemoteException e) {
+            } catch (ServiceSpecificException e) {
                 throw new IOException(e.getMessage());
+            } catch (RemoteException e) {
+                throw new IllegalStateException(e.getMessage());
             }
         }
     }
@@ -244,8 +247,10 @@ public class Channel {
             synchronized (mLock) {
                 return mChannel.selectNext();
             }
-        } catch (RemoteException e) {
+        } catch (ServiceSpecificException e) {
             throw new IOException(e.getMessage());
+        } catch (RemoteException e) {
+            throw new IllegalStateException(e.getMessage());
         }
     }
 }

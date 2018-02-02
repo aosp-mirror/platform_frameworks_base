@@ -25,6 +25,7 @@ package android.se.omapi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.util.Log;
 
 import java.io.IOException;
@@ -207,8 +208,16 @@ public class Session {
                     return null;
                 }
                 return new Channel(mService, this, channel);
+            } catch (ServiceSpecificException e) {
+                if (e.errorCode == SEService.IO_ERROR) {
+                    throw new IOException(e.getMessage());
+                } else if (e.errorCode == SEService.NO_SUCH_ELEMENT_ERROR) {
+                    throw new NoSuchElementException(e.getMessage());
+                } else {
+                    throw new IllegalStateException(e.getMessage());
+                }
             } catch (RemoteException e) {
-                throw new IOException(e.getMessage());
+                throw new IllegalStateException(e.getMessage());
             }
         }
     }
@@ -311,8 +320,16 @@ public class Session {
                     return null;
                 }
                 return new Channel(mService, this, channel);
+            } catch (ServiceSpecificException e) {
+                if (e.errorCode == SEService.IO_ERROR) {
+                    throw new IOException(e.getMessage());
+                } else if (e.errorCode == SEService.NO_SUCH_ELEMENT_ERROR) {
+                    throw new NoSuchElementException(e.getMessage());
+                } else {
+                    throw new IllegalStateException(e.getMessage());
+                }
             } catch (RemoteException e) {
-                throw new IOException(e.getMessage());
+                throw new IllegalStateException(e.getMessage());
             }
         }
     }
