@@ -92,8 +92,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
      * and used so as to assist with in-the-field WiFi connectivity debugging  */
     public static boolean sVerboseLogging;
 
-    // TODO(b/36733768): Remove flag includeSaved
-
     // TODO: Allow control of this?
     // Combo scans can take 5-6s to complete - set to 10s.
     private static final int WIFI_RESCAN_INTERVAL_MS = 10 * 1000;
@@ -106,8 +104,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     private final NetworkRequest mNetworkRequest;
     private final AtomicBoolean mConnected = new AtomicBoolean(false);
     private final WifiListener mListener;
-    private final boolean mIncludeSaved;
-    private final boolean mIncludeScans;
     @VisibleForTesting MainHandler mMainHandler;
     @VisibleForTesting WorkHandler mWorkHandler;
     private HandlerThread mWorkThread;
@@ -150,7 +146,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
 
     // TODO(sghuman): Change this to be keyed on AccessPoint.getKey
     private final HashMap<String, ScanResult> mScanResultCache = new HashMap<>();
-    private Integer mScanId = 0;
 
     private NetworkInfo mLastNetworkInfo;
     private WifiInfo mLastInfo;
@@ -189,16 +184,18 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     @Deprecated
     public WifiTracker(Context context, WifiListener wifiListener,
             boolean includeSaved, boolean includeScans) {
-        this(context, wifiListener, includeSaved, includeScans,
+        this(context, wifiListener,
                 context.getSystemService(WifiManager.class),
                 context.getSystemService(ConnectivityManager.class),
                 context.getSystemService(NetworkScoreManager.class),
                 newIntentFilter());
     }
 
+    // TODO(Sghuman): Clean up includeSaved and includeScans from all constructors and linked
+    // calling apps once IC window is complete
     public WifiTracker(Context context, WifiListener wifiListener,
             @NonNull Lifecycle lifecycle, boolean includeSaved, boolean includeScans) {
-        this(context, wifiListener, includeSaved, includeScans,
+        this(context, wifiListener,
                 context.getSystemService(WifiManager.class),
                 context.getSystemService(ConnectivityManager.class),
                 context.getSystemService(NetworkScoreManager.class),
@@ -208,19 +205,13 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
 
     @VisibleForTesting
     WifiTracker(Context context, WifiListener wifiListener,
-            boolean includeSaved, boolean includeScans,
             WifiManager wifiManager, ConnectivityManager connectivityManager,
             NetworkScoreManager networkScoreManager,
             IntentFilter filter) {
-        if (!includeSaved && !includeScans) {
-            throw new IllegalArgumentException("Must include either saved or scans");
-        }
         mContext = context;
         mMainHandler = new MainHandler(Looper.getMainLooper());
         mWifiManager = wifiManager;
-        mIncludeSaved = includeSaved;
-        mIncludeScans = includeScans;
-        mListener = wifiListener;
+        mListener = new WifiListenerWrapper(wifiListener);
         mConnectivityManager = connectivityManager;
 
         // check if verbose logging has been turned on or off
@@ -458,7 +449,6 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     private void handleResume() {
         mScanResultCache.clear();
         mSeenBssids.clear();
-        mScanId = 0;
     }
 
     private Collection<ScanResult> updateScanResultCache(final List<ScanResult> newResults) {
@@ -533,7 +523,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
     /**
      * Update the internal list of access points.
      *
-     * <p>Do not called directly (except for forceUpdate), use {@link #updateAccessPoints()} which
+     * <p>Do not call directly (except for forceUpdate), use {@link #updateAccessPoints()} which
      * respects {@link #mStaleScanResults}.
      */
     @GuardedBy("mLock")
@@ -542,7 +532,7 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
         WifiConfiguration connectionConfig = null;
         if (mLastInfo != null) {
             connectionConfig = getWifiConfigurationForNetworkId(
-                    mLastInfo.getNetworkId(), mWifiManager.getConfiguredNetworks());
+                    mLastInfo.getNetworkId(), configs);
         }
 
         // Swap the current access points into a cached list.
@@ -554,43 +544,12 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
             accessPoint.clearConfig();
         }
 
-    /* Lookup table to more quickly update AccessPoints by only considering objects with the
-     * correct SSID.  Maps SSID -> List of AccessPoints with the given SSID.  */
-        Multimap<String, AccessPoint> existingApMap = new Multimap<String, AccessPoint>();
-
         final Collection<ScanResult> results = updateScanResultCache(newScanResults);
 
-        // TODO(sghuman): This entire block only exists to populate the WifiConfiguration for
-        // APs, remove and refactor
+        final Map<String, WifiConfiguration> configsByKey = new ArrayMap(configs.size());
         if (configs != null) {
             for (WifiConfiguration config : configs) {
-                if (config.selfAdded && config.numAssociation == 0) {
-                    continue;
-                }
-                AccessPoint accessPoint = getCachedOrCreate(config, cachedAccessPoints);
-                if (mLastInfo != null && mLastNetworkInfo != null) {
-                    accessPoint.update(connectionConfig, mLastInfo, mLastNetworkInfo);
-                }
-                if (mIncludeSaved) {
-                    // If saved network not present in scan result then set its Rssi to
-                    // UNREACHABLE_RSSI
-                    boolean apFound = false;
-                    for (ScanResult result : results) {
-                        if (result.SSID.equals(accessPoint.getSsidStr())) {
-                            apFound = true;
-                            break;
-                        }
-                    }
-                    if (!apFound) {
-                        accessPoint.setUnreachable();
-                    }
-                    accessPoints.add(accessPoint);
-                    existingApMap.put(accessPoint.getSsidStr(), accessPoint);
-                } else {
-                    // If we aren't using saved networks, drop them into the cache so that
-                    // we have access to their saved info.
-                    cachedAccessPoints.add(accessPoint);
-                }
+                configsByKey.put(AccessPoint.getKey(config), config);
             }
         }
 
@@ -626,40 +585,20 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
             for (Map.Entry<String, List<ScanResult>> entry : scanResultsByApKey.entrySet()) {
                 // List can not be empty as it is dynamically constructed on each iteration
                 ScanResult firstResult = entry.getValue().get(0);
-                boolean found = false;
-                for (AccessPoint accessPoint : existingApMap.getAll(firstResult.SSID)) {
-                    accessPoint.setScanResults(entry.getValue());
-                    found = true;
-                    break;
+
+                AccessPoint accessPoint =
+                        getCachedOrCreate(entry.getValue(), cachedAccessPoints);
+                if (mLastInfo != null && mLastNetworkInfo != null) {
+                    accessPoint.update(connectionConfig, mLastInfo, mLastNetworkInfo);
                 }
 
-                // Only create a new AP / add to the list if it wasn't already in the saved configs
-                if (!found) {
-                    AccessPoint accessPoint =
-                            getCachedOrCreate(entry.getValue(), cachedAccessPoints);
-                    if (mLastInfo != null && mLastNetworkInfo != null) {
-                        accessPoint.update(connectionConfig, mLastInfo, mLastNetworkInfo);
-                    }
-
-                    // TODO(sghuman): Move isPasspointNetwork logic into AccessPoint.java
-                    if (firstResult.isPasspointNetwork()) {
-                        // Retrieve a WifiConfiguration for a Passpoint provider that matches
-                        // the given ScanResult.  This is used for showing that a given AP
-                        // (ScanResult) is available via a Passpoint provider (provider friendly
-                        // name).
-                        try {
-                            WifiConfiguration config =
-                                    mWifiManager.getMatchingWifiConfig(firstResult);
-                            if (config != null) {
-                                accessPoint.update(config);
-                            }
-                        } catch (UnsupportedOperationException e) {
-                            // Passpoint not supported on the device.
-                        }
-                    }
-
-                    accessPoints.add(accessPoint);
+                // Update the matching config if there is one, to populate saved network info
+                WifiConfiguration config = configsByKey.get(entry.getKey());
+                if (config != null) {
+                    accessPoint.update(config);
                 }
+
+                accessPoints.add(accessPoint);
             }
         }
 
@@ -1049,6 +988,39 @@ public class WifiTracker implements LifecycleObserver, OnStart, OnStop, OnDestro
                 store.put(key, curVals);
             }
             curVals.add(val);
+        }
+    }
+
+    /**
+     * Wraps the given {@link WifiListener} instance and executes it's methods on the Main Thread.
+     *
+     * <p>This mechanism allows us to no longer need a separate MainHandler and WorkHandler, which
+     * were previously both performing work, while avoiding errors which occur from executing
+     * callbacks which manipulate UI elements from a different thread than the MainThread.
+     */
+    private static class WifiListenerWrapper implements WifiListener {
+
+        private final Handler mHandler;
+        private final WifiListener mDelegatee;
+
+        public WifiListenerWrapper(WifiListener listener) {
+            mHandler = new Handler(Looper.getMainLooper());
+            mDelegatee = listener;
+        }
+
+        @Override
+        public void onWifiStateChanged(int state) {
+            mHandler.post(() -> mDelegatee.onWifiStateChanged(state));
+        }
+
+        @Override
+        public void onConnectedChanged() {
+            mHandler.post(() -> mDelegatee.onConnectedChanged());
+        }
+
+        @Override
+        public void onAccessPointsChanged() {
+            mHandler.post(() -> mDelegatee.onAccessPointsChanged());
         }
     }
 
