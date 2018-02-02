@@ -379,29 +379,6 @@ public class SystemServicesProxy {
     }
 
     /**
-     * Returns a global setting.
-     */
-    public int getGlobalSetting(Context context, String setting) {
-        ContentResolver cr = context.getContentResolver();
-        return Settings.Global.getInt(cr, setting, 0);
-    }
-
-    /**
-     * Returns a system setting.
-     */
-    public int getSystemSetting(Context context, String setting) {
-        ContentResolver cr = context.getContentResolver();
-        return Settings.System.getInt(cr, setting, 0);
-    }
-
-    /**
-     * Returns a system property.
-     */
-    public String getSystemProperty(String key) {
-        return SystemProperties.get(key);
-    }
-
-    /**
      * Returns the smallest width/height.
      */
     public int getDeviceSmallestWidth() {
