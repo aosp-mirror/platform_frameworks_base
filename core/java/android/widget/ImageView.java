@@ -23,10 +23,12 @@ import android.annotation.TestApi;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.ImageDecoder;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
@@ -53,7 +55,6 @@ import android.widget.RemoteViews.RemoteView;
 import com.android.internal.R;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * Displays image resources, for example {@link android.graphics.Bitmap}
@@ -946,21 +947,15 @@ public class ImageView extends View {
             }
         } else if (ContentResolver.SCHEME_CONTENT.equals(scheme)
                 || ContentResolver.SCHEME_FILE.equals(scheme)) {
-            InputStream stream = null;
             try {
-                stream = mContext.getContentResolver().openInputStream(uri);
-                return Drawable.createFromResourceStream(sCompatUseCorrectStreamDensity
-                        ? getResources() : null, null, stream, null);
-            } catch (Exception e) {
+                Resources res = sCompatUseCorrectStreamDensity ? getResources() : null;
+                ImageDecoder.Source src = ImageDecoder.createSource(mContext.getContentResolver(),
+                        uri, res);
+                return ImageDecoder.decodeDrawable(src, (decoder, info, s) -> {
+                    decoder.setAllocator(ImageDecoder.ALLOCATOR_SOFTWARE);
+                });
+            } catch (IOException e) {
                 Log.w(LOG_TAG, "Unable to open content: " + uri, e);
-            } finally {
-                if (stream != null) {
-                    try {
-                        stream.close();
-                    } catch (IOException e) {
-                        Log.w(LOG_TAG, "Unable to close content: " + uri, e);
-                    }
-                }
             }
         } else {
             return Drawable.createFromPath(uri.toString());

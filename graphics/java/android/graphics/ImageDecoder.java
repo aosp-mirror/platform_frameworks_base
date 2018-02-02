@@ -74,7 +74,7 @@ public final class ImageDecoder implements AutoCloseable {
         int getDensity() { return Bitmap.DENSITY_NONE; }
 
         /* @hide */
-        int computeDstDensity() {
+        final int computeDstDensity() {
             Resources res = getResources();
             if (res == null) {
                 return Bitmap.getDefaultDensity();
@@ -122,13 +122,19 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     private static class ContentResolverSource extends Source {
-        ContentResolverSource(@NonNull ContentResolver resolver, @NonNull Uri uri) {
+        ContentResolverSource(@NonNull ContentResolver resolver, @NonNull Uri uri,
+                @Nullable Resources res) {
             mResolver = resolver;
             mUri = uri;
+            mResources = res;
         }
 
         private final ContentResolver mResolver;
         private final Uri mUri;
+        private final Resources mResources;
+
+        @Nullable
+        Resources getResources() { return mResources; }
 
         @Override
         public ImageDecoder createImageDecoder() throws IOException {
@@ -512,7 +518,18 @@ public final class ImageDecoder implements AutoCloseable {
     @NonNull
     public static Source createSource(@NonNull ContentResolver cr,
             @NonNull Uri uri) {
-        return new ContentResolverSource(cr, uri);
+        return new ContentResolverSource(cr, uri, null);
+    }
+
+    /**
+     * Provide Resources for density scaling.
+     *
+     * @hide
+     */
+    @NonNull
+    public static Source createSource(@NonNull ContentResolver cr,
+            @NonNull Uri uri, @Nullable Resources res) {
+        return new ContentResolverSource(cr, uri, res);
     }
 
     /**
