@@ -1388,6 +1388,14 @@ public class CarrierConfigManager {
     public static final String KEY_VIDEO_CALLS_CAN_BE_HD_AUDIO = "video_calls_can_be_hd_audio";
 
     /**
+     * When true, indicates that the HD audio icon in the in-call screen should be shown for
+     * GSM/CDMA calls.
+     * @hide
+     */
+    public static final String KEY_GSM_CDMA_CALLS_CAN_BE_HD_AUDIO =
+            "gsm_cdma_calls_can_be_hd_audio";
+
+    /**
      * Whether system apps are allowed to use fallback if carrier video call is not available.
      * Defaults to {@code true}.
      *
@@ -2023,6 +2031,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_ALLOW_ADD_CALL_DURING_VIDEO_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_WIFI_CALLS_CAN_BE_HD_AUDIO, true);
         sDefaults.putBoolean(KEY_VIDEO_CALLS_CAN_BE_HD_AUDIO, true);
+        sDefaults.putBoolean(KEY_GSM_CDMA_CALLS_CAN_BE_HD_AUDIO, false);
         sDefaults.putBoolean(KEY_ALLOW_VIDEO_CALLING_FALLBACK_BOOL, true);
 
         sDefaults.putStringArray(KEY_IMS_REASONINFO_MAPPING_STRING_ARRAY, null);
