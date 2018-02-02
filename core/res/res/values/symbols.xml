@@ -2700,9 +2700,6 @@
   <java-symbol type="string" name="language_selection_title" />
   <java-symbol type="string" name="search_language_hint" />
 
-  <java-symbol type="layout" name="unlaunchable_app_activity" />
-  <java-symbol type="id" name="unlaunchable_app_title" />
-  <java-symbol type="id" name="unlaunchable_app_message" />
   <java-symbol type="string" name="work_mode_off_title" />
   <java-symbol type="string" name="work_mode_off_message" />
   <java-symbol type="string" name="work_mode_turn_on" />
