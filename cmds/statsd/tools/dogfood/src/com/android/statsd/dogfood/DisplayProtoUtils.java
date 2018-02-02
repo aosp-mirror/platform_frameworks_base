@@ -32,11 +32,13 @@ public class DisplayProtoUtils {
 
         for (StatsLog.ConfigMetricsReport report : reports.getReportsList()) {
             sb.append("StatsLogReport size: ").append(report.getMetricsCount()).append("\n");
+            sb.append("Last report time:").append(getDateStr(report.getLastReportNanos())).
+                    append("\n");
+            sb.append("Current report time:").append(getDateStr(report.getCurrentReportNanos())).
+                    append("\n");
             for (StatsLog.StatsLogReport log : report.getMetricsList()) {
                 sb.append("\n\n");
                 sb.append("metric id: ").append(log.getMetricId()).append("\n");
-                sb.append("start time:").append(getDateStr(log.getStartReportNanos())).append("\n");
-                sb.append("end time:").append(getDateStr(log.getEndReportNanos())).append("\n");
 
                 switch (log.getDataCase()) {
                     case DURATION_METRICS:

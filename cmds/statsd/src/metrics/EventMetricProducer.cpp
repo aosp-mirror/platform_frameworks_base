@@ -42,8 +42,6 @@ namespace statsd {
 
 // for StatsLogReport
 const int FIELD_ID_ID = 1;
-const int FIELD_ID_START_REPORT_NANOS = 2;
-const int FIELD_ID_END_REPORT_NANOS = 3;
 const int FIELD_ID_EVENT_METRICS = 4;
 // for EventMetricDataWrapper
 const int FIELD_ID_DATA = 1;
@@ -106,8 +104,6 @@ void EventMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
         return;
     }
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_ID, (long long)mMetricId);
-    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_START_REPORT_NANOS, (long long)mStartTimeNs);
-    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_END_REPORT_NANOS, (long long)dumpTimeNs);
 
     size_t bufferSize = mProto->size();
     VLOG("metric %lld dump report now... proto size: %zu ",

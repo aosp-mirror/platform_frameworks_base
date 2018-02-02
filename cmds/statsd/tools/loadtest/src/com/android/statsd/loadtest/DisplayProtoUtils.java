@@ -36,6 +36,10 @@ public class DisplayProtoUtils {
         int numMetrics = 0;
         for (StatsLog.ConfigMetricsReport report : reports.getReportsList()) {
             sb.append("StatsLogReport size: ").append(report.getMetricsCount()).append("\n");
+            sb.append("Last report time:").append(getDateStr(report.getLastReportNanos())).
+                    append("\n");
+            sb.append("Current report time:").append(getDateStr(report.getCurrentReportNanos())).
+                    append("\n");
             for (StatsLog.StatsLogReport log : report.getMetricsList()) {
                 numMetrics++;
                 if (numMetrics > MAX_NUM_METRICS_TO_DISPLAY) {
@@ -45,8 +49,6 @@ public class DisplayProtoUtils {
                 }
                 sb.append("\n");
                 sb.append("metric id: ").append(log.getMetricId()).append("\n");
-                sb.append("start time:").append(getDateStr(log.getStartReportNanos())).append("\n");
-                sb.append("end time:").append(getDateStr(log.getEndReportNanos())).append("\n");
 
                 switch (log.getDataCase()) {
                     case DURATION_METRICS:
