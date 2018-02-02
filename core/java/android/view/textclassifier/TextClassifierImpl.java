@@ -27,8 +27,10 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.ParcelFileDescriptor;
+import android.os.UserManager;
 import android.provider.Browser;
 import android.provider.CalendarContract;
 import android.provider.ContactsContract;
@@ -541,7 +543,7 @@ public final class TextClassifierImpl implements TextClassifier {
                 case TextClassifier.TYPE_EMAIL:
                     return createForEmail(text);
                 case TextClassifier.TYPE_PHONE:
-                    return createForPhone(text);
+                    return createForPhone(context, text);
                 case TextClassifier.TYPE_ADDRESS:
                     return createForAddress(text);
                 case TextClassifier.TYPE_URL:
@@ -573,15 +575,23 @@ public final class TextClassifierImpl implements TextClassifier {
         }
 
         @NonNull
-        private static List<Intent> createForPhone(String text) {
-            return Arrays.asList(
-                    new Intent(Intent.ACTION_DIAL)
-                            .setData(Uri.parse(String.format("tel:%s", text))),
-                    new Intent(Intent.ACTION_INSERT_OR_EDIT)
-                            .setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE)
-                            .putExtra(ContactsContract.Intents.Insert.PHONE, text),
-                    new Intent(Intent.ACTION_SENDTO)
-                            .setData(Uri.parse(String.format("smsto:%s", text))));
+        private static List<Intent> createForPhone(Context context, String text) {
+            final List<Intent> intents = new ArrayList<>();
+            final UserManager userManager = context.getSystemService(UserManager.class);
+            final Bundle userRestrictions = userManager != null
+                    ? userManager.getUserRestrictions() : new Bundle();
+            if (!userRestrictions.getBoolean(UserManager.DISALLOW_OUTGOING_CALLS, false)) {
+                intents.add(new Intent(Intent.ACTION_DIAL)
+                        .setData(Uri.parse(String.format("tel:%s", text))));
+            }
+            intents.add(new Intent(Intent.ACTION_INSERT_OR_EDIT)
+                    .setType(ContactsContract.Contacts.CONTENT_ITEM_TYPE)
+                    .putExtra(ContactsContract.Intents.Insert.PHONE, text));
+            if (!userRestrictions.getBoolean(UserManager.DISALLOW_SMS, false)) {
+                intents.add(new Intent(Intent.ACTION_SENDTO)
+                        .setData(Uri.parse(String.format("smsto:%s", text))));
+            }
+            return intents;
         }
 
         @NonNull
