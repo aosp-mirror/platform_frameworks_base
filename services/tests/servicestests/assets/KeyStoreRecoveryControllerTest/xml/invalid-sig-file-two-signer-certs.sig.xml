@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<signature>
+  <certificate>
+    signer certificate 1
+  </certificate>
+  <certificate>
+    signer certificate 2
+  </certificate>
+  <value>
+    VEVTVA==
+  </value>
+</signature>
