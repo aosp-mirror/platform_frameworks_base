@@ -771,7 +771,7 @@ abstract public class ManagedServices {
      * Called whenever packages change, the user switches, or the secure setting
      * is altered. (For example in response to USER_SWITCHED in our broadcast receiver)
      */
-    private void rebindServices(boolean forceRebind) {
+    protected void rebindServices(boolean forceRebind) {
         if (DEBUG) Slog.d(TAG, "rebindServices");
         final int[] userIds = mUserProfiles.getCurrentProfileIds();
         final int nUserIds = userIds.length;
