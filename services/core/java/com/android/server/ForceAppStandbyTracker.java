@@ -54,6 +54,7 @@ import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
+import com.android.server.DeviceIdleController.LocalService;
 import com.android.server.ForceAppStandbyTrackerProto.ExemptedPackage;
 import com.android.server.ForceAppStandbyTrackerProto.RunAnyInBackgroundRestrictedPackages;
 
@@ -64,18 +65,15 @@ import java.util.List;
 /**
  * Class to keep track of the information related to "force app standby", which includes:
  * - OP_RUN_ANY_IN_BACKGROUND for each package
- * - UID foreground state
+ * - UID foreground/active state
  * - User+system power save whitelist
  * - Temporary power save whitelist
  * - Global "force all apps standby" mode enforced by battery saver.
  *
- * TODO: In general, we can reduce the number of callbacks by checking all signals before sending
- * each callback. For example, even when an UID comes into the foreground, if it wasn't
- * originally restricted, then there's no need to send an event.
- * Doing this would be error-prone, so we punt it for now, but we should revisit it later.
+ * TODO: Make it a LocalService.
  *
  * Test:
- * atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/servicestests/src/com/android/server/ForceAppStandbyTrackerTest.java
+  atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/servicestests/src/com/android/server/ForceAppStandbyTrackerTest.java
  */
 public class ForceAppStandbyTracker {
     private static final String TAG = "ForceAppStandbyTracker";
@@ -108,6 +106,11 @@ public class ForceAppStandbyTracker {
     @GuardedBy("mLock")
     final ArraySet<Pair<Integer, String>> mRunAnyRestrictedPackages = new ArraySet<>();
 
+    /** UIDs that are active. */
+    @GuardedBy("mLock")
+    final SparseBooleanArray mActiveUids = new SparseBooleanArray();
+
+    /** UIDs that are in the foreground. */
     @GuardedBy("mLock")
     final SparseBooleanArray mForegroundUids = new SparseBooleanArray();
 
@@ -160,18 +163,20 @@ public class ForceAppStandbyTracker {
     boolean mForcedAppStandbyEnabled;
 
     interface Stats {
-        int UID_STATE_CHANGED = 0;
-        int RUN_ANY_CHANGED = 1;
-        int ALL_UNWHITELISTED = 2;
-        int ALL_WHITELIST_CHANGED = 3;
-        int TEMP_WHITELIST_CHANGED = 4;
-        int EXEMPT_CHANGED = 5;
-        int FORCE_ALL_CHANGED = 6;
-        int FORCE_APP_STANDBY_FEATURE_FLAG_CHANGED = 7;
+        int UID_FG_STATE_CHANGED = 0;
+        int UID_ACTIVE_STATE_CHANGED = 1;
+        int RUN_ANY_CHANGED = 2;
+        int ALL_UNWHITELISTED = 3;
+        int ALL_WHITELIST_CHANGED = 4;
+        int TEMP_WHITELIST_CHANGED = 5;
+        int EXEMPT_CHANGED = 6;
+        int FORCE_ALL_CHANGED = 7;
+        int FORCE_APP_STANDBY_FEATURE_FLAG_CHANGED = 8;
     }
 
     private final StatLogger mStatLogger = new StatLogger(new String[] {
-            "UID_STATE_CHANGED",
+            "UID_FG_STATE_CHANGED",
+            "UID_ACTIVE_STATE_CHANGED",
             "RUN_ANY_CHANGED",
             "ALL_UNWHITELISTED",
             "ALL_WHITELIST_CHANGED",
@@ -260,9 +265,16 @@ public class ForceAppStandbyTracker {
          * This is called when the foreground state changed for a UID.
          */
         private void onUidForegroundStateChanged(ForceAppStandbyTracker sender, int uid) {
+            onUidForeground(uid, sender.isUidInForeground(uid));
+        }
+
+        /**
+         * This is called when the active/idle state changed for a UID.
+         */
+        private void onUidActiveStateChanged(ForceAppStandbyTracker sender, int uid) {
             updateJobsForUid(uid);
 
-            if (sender.isInForeground(uid)) {
+            if (sender.isUidActive(uid)) {
                 unblockAlarmsForUid(uid);
             }
         }
@@ -355,6 +367,14 @@ public class ForceAppStandbyTracker {
          */
         public void unblockAlarmsForUidPackage(int uid, String packageName) {
         }
+
+        /**
+         * Called when a UID comes into the foreground or the background.
+         *
+         * @see #isUidInForeground(int)
+         */
+        public void onUidForeground(int uid, boolean foreground) {
+        }
     }
 
     @VisibleForTesting
@@ -404,8 +424,10 @@ public class ForceAppStandbyTracker {
 
             try {
                 mIActivityManager.registerUidObserver(new UidObserver(),
-                        ActivityManager.UID_OBSERVER_GONE | ActivityManager.UID_OBSERVER_IDLE
-                                | ActivityManager.UID_OBSERVER_ACTIVE,
+                        ActivityManager.UID_OBSERVER_GONE
+                                | ActivityManager.UID_OBSERVER_IDLE
+                                | ActivityManager.UID_OBSERVER_ACTIVE
+                                | ActivityManager.UID_OBSERVER_PROCSTATE,
                         ActivityManager.PROCESS_STATE_UNKNOWN, null);
                 mAppOpsService.startWatchingMode(TARGET_OP, null,
                         new AppOpsWatcher());
@@ -563,65 +585,77 @@ public class ForceAppStandbyTracker {
         return true;
     }
 
-    /**
-     * Puts a UID to {@link #mForegroundUids}.
-     */
-    void uidToForeground(int uid) {
-        synchronized (mLock) {
-            if (UserHandle.isCore(uid)) {
-                return;
-            }
-            // TODO This can be optimized by calling indexOfKey and sharing the index for get and
-            // put.
-            if (mForegroundUids.get(uid)) {
-                return;
-            }
-            mForegroundUids.put(uid, true);
-            mHandler.notifyUidForegroundStateChanged(uid);
+    private static boolean addUidToArray(SparseBooleanArray array, int uid) {
+        if (UserHandle.isCore(uid)) {
+            return false;
         }
+        if (array.get(uid)) {
+            return false;
+        }
+        array.put(uid, true);
+        return true;
     }
 
-    /**
-     * Sets false for a UID {@link #mForegroundUids}, or remove it when {@code remove} is true.
-     */
-    void uidToBackground(int uid, boolean remove) {
-        synchronized (mLock) {
-            if (UserHandle.isCore(uid)) {
-                return;
-            }
-            // TODO This can be optimized by calling indexOfKey and sharing the index for get and
-            // put.
-            if (!mForegroundUids.get(uid)) {
-                return;
-            }
-            if (remove) {
-                mForegroundUids.delete(uid);
-            } else {
-                mForegroundUids.put(uid, false);
-            }
-            mHandler.notifyUidForegroundStateChanged(uid);
+    private static boolean removeUidFromArray(SparseBooleanArray array, int uid, boolean remove) {
+        if (UserHandle.isCore(uid)) {
+            return false;
         }
+        if (!array.get(uid)) {
+            return false;
+        }
+        if (remove) {
+            array.delete(uid);
+        } else {
+            array.put(uid, false);
+        }
+        return true;
     }
 
     private final class UidObserver extends IUidObserver.Stub {
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq) {
+            synchronized (mLock) {
+                if (procState > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
+                    if (removeUidFromArray(mForegroundUids, uid, false)) {
+                        mHandler.notifyUidForegroundStateChanged(uid);
+                    }
+                } else {
+                    if (addUidToArray(mForegroundUids, uid)) {
+                        mHandler.notifyUidForegroundStateChanged(uid);
+                    }
+                }
+            }
         }
 
         @Override
         public void onUidGone(int uid, boolean disabled) {
-            uidToBackground(uid, /*remove=*/ true);
+            removeUid(uid, true);
         }
 
         @Override
         public void onUidActive(int uid) {
-            uidToForeground(uid);
+            synchronized (mLock) {
+                if (addUidToArray(mActiveUids, uid)) {
+                    mHandler.notifyUidActiveStateChanged(uid);
+                }
+            }
         }
 
         @Override
         public void onUidIdle(int uid, boolean disabled) {
             // Just to avoid excessive memcpy, don't remove from the array in this case.
-            uidToBackground(uid, /*remove=*/ false);
+            removeUid(uid, false);
+        }
+
+        private void removeUid(int uid, boolean remove) {
+            synchronized (mLock) {
+                if (removeUidFromArray(mActiveUids, uid, remove)) {
+                    mHandler.notifyUidActiveStateChanged(uid);
+                }
+                if (removeUidFromArray(mForegroundUids, uid, remove)) {
+                    mHandler.notifyUidForegroundStateChanged(uid);
+                }
+            }
         }
 
         @Override
@@ -695,22 +729,27 @@ public class ForceAppStandbyTracker {
     }
 
     private class MyHandler extends Handler {
-        private static final int MSG_UID_STATE_CHANGED = 1;
-        private static final int MSG_RUN_ANY_CHANGED = 2;
-        private static final int MSG_ALL_UNWHITELISTED = 3;
-        private static final int MSG_ALL_WHITELIST_CHANGED = 4;
-        private static final int MSG_TEMP_WHITELIST_CHANGED = 5;
-        private static final int MSG_FORCE_ALL_CHANGED = 6;
-        private static final int MSG_USER_REMOVED = 7;
-        private static final int MSG_FORCE_APP_STANDBY_FEATURE_FLAG_CHANGED = 8;
-        private static final int MSG_EXEMPT_CHANGED = 9;
+        private static final int MSG_UID_ACTIVE_STATE_CHANGED = 0;
+        private static final int MSG_UID_FG_STATE_CHANGED = 1;
+        private static final int MSG_RUN_ANY_CHANGED = 3;
+        private static final int MSG_ALL_UNWHITELISTED = 4;
+        private static final int MSG_ALL_WHITELIST_CHANGED = 5;
+        private static final int MSG_TEMP_WHITELIST_CHANGED = 6;
+        private static final int MSG_FORCE_ALL_CHANGED = 7;
+        private static final int MSG_USER_REMOVED = 8;
+        private static final int MSG_FORCE_APP_STANDBY_FEATURE_FLAG_CHANGED = 9;
+        private static final int MSG_EXEMPT_CHANGED = 10;
 
         public MyHandler(Looper looper) {
             super(looper);
         }
 
+        public void notifyUidActiveStateChanged(int uid) {
+            obtainMessage(MSG_UID_ACTIVE_STATE_CHANGED, uid, 0).sendToTarget();
+        }
+
         public void notifyUidForegroundStateChanged(int uid) {
-            obtainMessage(MSG_UID_STATE_CHANGED, uid, 0).sendToTarget();
+            obtainMessage(MSG_UID_FG_STATE_CHANGED, uid, 0).sendToTarget();
         }
 
         public void notifyRunAnyAppOpsChanged(int uid, @NonNull String packageName) {
@@ -718,26 +757,32 @@ public class ForceAppStandbyTracker {
         }
 
         public void notifyAllUnwhitelisted() {
+            removeMessages(MSG_ALL_UNWHITELISTED);
             obtainMessage(MSG_ALL_UNWHITELISTED).sendToTarget();
         }
 
         public void notifyAllWhitelistChanged() {
+            removeMessages(MSG_ALL_WHITELIST_CHANGED);
             obtainMessage(MSG_ALL_WHITELIST_CHANGED).sendToTarget();
         }
 
         public void notifyTempWhitelistChanged() {
+            removeMessages(MSG_TEMP_WHITELIST_CHANGED);
             obtainMessage(MSG_TEMP_WHITELIST_CHANGED).sendToTarget();
         }
 
         public void notifyForceAllAppsStandbyChanged() {
+            removeMessages(MSG_FORCE_ALL_CHANGED);
             obtainMessage(MSG_FORCE_ALL_CHANGED).sendToTarget();
         }
 
         public void notifyForcedAppStandbyFeatureFlagChanged() {
+            removeMessages(MSG_FORCE_APP_STANDBY_FEATURE_FLAG_CHANGED);
             obtainMessage(MSG_FORCE_APP_STANDBY_FEATURE_FLAG_CHANGED).sendToTarget();
         }
 
         public void notifyExemptChanged() {
+            removeMessages(MSG_EXEMPT_CHANGED);
             obtainMessage(MSG_EXEMPT_CHANGED).sendToTarget();
         }
 
@@ -763,11 +808,18 @@ public class ForceAppStandbyTracker {
 
             long start = mStatLogger.getTime();
             switch (msg.what) {
-                case MSG_UID_STATE_CHANGED:
+                case MSG_UID_ACTIVE_STATE_CHANGED:
+                    for (Listener l : cloneListeners()) {
+                        l.onUidActiveStateChanged(sender, msg.arg1);
+                    }
+                    mStatLogger.logDurationStat(Stats.UID_ACTIVE_STATE_CHANGED, start);
+                    return;
+
+                case MSG_UID_FG_STATE_CHANGED:
                     for (Listener l : cloneListeners()) {
                         l.onUidForegroundStateChanged(sender, msg.arg1);
                     }
-                    mStatLogger.logDurationStat(Stats.UID_STATE_CHANGED, start);
+                    mStatLogger.logDurationStat(Stats.UID_FG_STATE_CHANGED, start);
                     return;
 
                 case MSG_RUN_ANY_CHANGED:
@@ -846,15 +898,20 @@ public class ForceAppStandbyTracker {
                     mRunAnyRestrictedPackages.removeAt(i);
                 }
             }
-            for (int i = mForegroundUids.size() - 1; i >= 0; i--) {
-                final int uid = mForegroundUids.keyAt(i);
-                final int userId = UserHandle.getUserId(uid);
-
-                if (userId == removedUserId) {
-                    mForegroundUids.removeAt(i);
-                }
-            }
+            cleanUpArrayForUser(mActiveUids, removedUserId);
+            cleanUpArrayForUser(mForegroundUids, removedUserId);
             mExemptedPackages.remove(removedUserId);
+        }
+    }
+
+    private void cleanUpArrayForUser(SparseBooleanArray array, int removedUserId) {
+        for (int i = array.size() - 1; i >= 0; i--) {
+            final int uid = array.keyAt(i);
+            final int userId = UserHandle.getUserId(uid);
+
+            if (userId == removedUserId) {
+                array.removeAt(i);
+            }
         }
     }
 
@@ -954,7 +1011,7 @@ public class ForceAppStandbyTracker {
      */
     private boolean isRestricted(int uid, @NonNull String packageName,
             boolean useTempWhitelistToo, boolean exemptOnBatterySaver) {
-        if (isInForeground(uid)) {
+        if (isUidActive(uid)) {
             return false;
         }
         synchronized (mLock) {
@@ -982,13 +1039,29 @@ public class ForceAppStandbyTracker {
     }
 
     /**
+     * @return whether a UID is in active or not.
+     *
+     * Note this information is based on the UID proc state callback, meaning it's updated
+     * asynchronously and may subtly be stale. If the fresh data is needed, use
+     * {@link ActivityManagerInternal#getUidProcessState} instead.
+     */
+    public boolean isUidActive(int uid) {
+        if (UserHandle.isCore(uid)) {
+            return true;
+        }
+        synchronized (mLock) {
+            return mActiveUids.get(uid);
+        }
+    }
+
+    /**
      * @return whether a UID is in the foreground or not.
      *
      * Note this information is based on the UID proc state callback, meaning it's updated
      * asynchronously and may subtly be stale. If the fresh data is needed, use
      * {@link ActivityManagerInternal#getUidProcessState} instead.
      */
-    public boolean isInForeground(int uid) {
+    public boolean isUidInForeground(int uid) {
         if (UserHandle.isCore(uid)) {
             return true;
         }
@@ -1062,17 +1135,12 @@ public class ForceAppStandbyTracker {
             pw.println(mIsPluggedIn);
 
             pw.print(indent);
-            pw.print("Foreground uids: [");
+            pw.print("Active uids: ");
+            dumpUids(pw, mActiveUids);
 
-            String sep = "";
-            for (int i = 0; i < mForegroundUids.size(); i++) {
-                if (mForegroundUids.valueAt(i)) {
-                    pw.print(sep);
-                    pw.print(UserHandle.formatUid(mForegroundUids.keyAt(i)));
-                    sep = " ";
-                }
-            }
-            pw.println("]");
+            pw.print(indent);
+            pw.print("Foreground uids: ");
+            dumpUids(pw, mForegroundUids);
 
             pw.print(indent);
             pw.print("Whitelist appids: ");
@@ -1114,6 +1182,20 @@ public class ForceAppStandbyTracker {
         }
     }
 
+    private void dumpUids(PrintWriter pw, SparseBooleanArray array) {
+        pw.print("[");
+
+        String sep = "";
+        for (int i = 0; i < array.size(); i++) {
+            if (array.valueAt(i)) {
+                pw.print(sep);
+                pw.print(UserHandle.formatUid(array.keyAt(i)));
+                sep = " ";
+            }
+        }
+        pw.println("]");
+    }
+
     public void dumpProto(ProtoOutputStream proto, long fieldId) {
         synchronized (mLock) {
             final long token = proto.start(fieldId);
@@ -1124,6 +1206,13 @@ public class ForceAppStandbyTracker {
             proto.write(ForceAppStandbyTrackerProto.FORCE_ALL_APPS_STANDBY_FOR_SMALL_BATTERY,
                     mForceAllAppStandbyForSmallBattery);
             proto.write(ForceAppStandbyTrackerProto.IS_PLUGGED_IN, mIsPluggedIn);
+
+            for (int i = 0; i < mActiveUids.size(); i++) {
+                if (mActiveUids.valueAt(i)) {
+                    proto.write(ForceAppStandbyTrackerProto.ACTIVE_UIDS,
+                            mActiveUids.keyAt(i));
+                }
+            }
 
             for (int i = 0; i < mForegroundUids.size(); i++) {
                 if (mForegroundUids.valueAt(i)) {
