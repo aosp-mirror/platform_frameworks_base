@@ -1099,45 +1099,6 @@ static void android_media_MediaPlayer2_attachAuxEffect(JNIEnv *env,  jobject thi
     process_media_player_call( env, thiz, mp->attachAuxEffect(effectId), NULL, NULL );
 }
 
-static jint
-android_media_MediaPlayer2_setRetransmitEndpoint(JNIEnv *env, jobject thiz,
-                                                jstring addrString, jint port) {
-    sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
-    if (mp == NULL ) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return INVALID_OPERATION;
-    }
-
-    const char *cAddrString = NULL;
-
-    if (NULL != addrString) {
-        cAddrString = env->GetStringUTFChars(addrString, NULL);
-        if (cAddrString == NULL) {  // Out of memory
-            return NO_MEMORY;
-        }
-    }
-    ALOGV("setRetransmitEndpoint: %s:%d",
-            cAddrString ? cAddrString : "(null)", port);
-
-    status_t ret;
-    if (cAddrString && (port > 0xFFFF)) {
-        ret = BAD_VALUE;
-    } else {
-        ret = mp->setRetransmitEndpoint(cAddrString,
-                static_cast<uint16_t>(port));
-    }
-
-    if (NULL != addrString) {
-        env->ReleaseStringUTFChars(addrString, cAddrString);
-    }
-
-    if (ret == INVALID_OPERATION ) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-    }
-
-    return (jint) ret;
-}
-
 static void
 android_media_MediaPlayer2_setNextMediaPlayer(JNIEnv *env, jobject thiz, jobject java_player)
 {
@@ -1418,7 +1379,6 @@ static const JNINativeMethod gMethods[] = {
     {"setAudioSessionId",   "(I)V",                             (void *)android_media_MediaPlayer2_set_audio_session_id},
     {"_setAuxEffectSendLevel", "(F)V",                          (void *)android_media_MediaPlayer2_setAuxEffectSendLevel},
     {"attachAuxEffect",     "(I)V",                             (void *)android_media_MediaPlayer2_attachAuxEffect},
-    {"native_setRetransmitEndpoint", "(Ljava/lang/String;I)I",  (void *)android_media_MediaPlayer2_setRetransmitEndpoint},
     {"setNextMediaPlayer",  "(Landroid/media/MediaPlayer2;)V",  (void *)android_media_MediaPlayer2_setNextMediaPlayer},
     // Modular DRM
     { "_prepareDrm", "([B[B)V",                                 (void *)android_media_MediaPlayer2_prepareDrm },
