@@ -249,15 +249,15 @@ ProtoOutputStream::start(uint64_t fieldId)
     }
 
     uint32_t id = (uint32_t)fieldId;
+    size_t prevPos = mBuffer.wp()->pos();
     mBuffer.writeHeader(id, WIRE_TYPE_LENGTH_DELIMITED);
-
     size_t sizePos = mBuffer.wp()->pos();
 
     mDepth++;
     mObjectId++;
     mBuffer.writeRawFixed64(mExpectedObjectToken); // push previous token into stack.
 
-    mExpectedObjectToken = makeToken(get_varint_size(id),
+    mExpectedObjectToken = makeToken(sizePos - prevPos,
         (bool)(fieldId & FIELD_COUNT_REPEATED), mDepth, mObjectId, sizePos);
     return mExpectedObjectToken;
 }
