@@ -10315,6 +10315,16 @@ public final class Settings {
         public static final String SYS_VDSO = "sys_vdso";
 
         /**
+        * UidCpuPower global setting. This links the sys.uidcpupower system property.
+        * The following values are supported:
+        * 0 -> /proc/uid_cpupower/* are disabled
+        * 1 -> /proc/uid_cpupower/* are enabled
+        * Any other value defaults to enabled.
+        * @hide
+        */
+        public static final String SYS_UIDCPUPOWER = "sys_uidcpupower";
+
+        /**
          * An integer to reduce the FPS by this factor. Only for experiments. Need to reboot the
          * device for this setting to take full effect.
          *
