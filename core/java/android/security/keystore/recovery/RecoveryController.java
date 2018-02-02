@@ -26,9 +26,13 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
+import android.security.KeyStore;
+import android.security.keystore.AndroidKeyStoreProvider;
 
 import com.android.internal.widget.ILockSettings;
 
+import java.security.Key;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
@@ -113,9 +117,11 @@ public class RecoveryController {
 
 
     private final ILockSettings mBinder;
+    private final KeyStore mKeyStore;
 
-    private RecoveryController(ILockSettings binder) {
+    private RecoveryController(ILockSettings binder, KeyStore keystore) {
         mBinder = binder;
+        mKeyStore = keystore;
     }
 
     /**
@@ -133,7 +139,7 @@ public class RecoveryController {
     public static RecoveryController getInstance(Context context) {
         ILockSettings lockSettings =
                 ILockSettings.Stub.asInterface(ServiceManager.getService("lock_settings"));
-        return new RecoveryController(lockSettings);
+        return new RecoveryController(lockSettings, KeyStore.getInstance());
     }
 
     /**
@@ -430,6 +436,7 @@ public class RecoveryController {
     }
 
     /**
+     * Deprecated.
      * Generates a AES256/GCM/NoPADDING key called {@code alias} and loads it into the recoverable
      * key store. Returns the raw material of the key.
      *
@@ -444,7 +451,6 @@ public class RecoveryController {
     public byte[] generateAndStoreKey(@NonNull String alias, byte[] account)
             throws InternalRecoveryServiceException, LockScreenRequiredException {
         try {
-            // TODO: add account
             return mBinder.generateAndStoreKey(alias);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -452,6 +458,72 @@ public class RecoveryController {
             if (e.errorCode == ERROR_INSECURE_USER) {
                 throw new LockScreenRequiredException(e.getMessage());
             }
+            throw wrapUnexpectedServiceSpecificException(e);
+        }
+    }
+
+    /**
+     * Generates a AES256/GCM/NoPADDING key called {@code alias} and loads it into the recoverable
+     * key store. Returns {@link javax.crypto.SecretKey}.
+     *
+     * @param alias The key alias.
+     * @param account The account associated with the key.
+     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
+     *     service.
+     * @throws LockScreenRequiredException if the user has not set a lock screen. This is required
+     *     to generate recoverable keys, as the snapshots are encrypted using a key derived from the
+     *     lock screen.
+     * @hide
+     */
+    public Key generateKey(@NonNull String alias, byte[] account)
+            throws InternalRecoveryServiceException, LockScreenRequiredException {
+        // TODO: update RecoverySession.recoverKeys
+        try {
+            String grantAlias = mBinder.generateKey(alias, account);
+            if (grantAlias == null) {
+                return null;
+            }
+            Key result = AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(
+                    mKeyStore,
+                    grantAlias,
+                    KeyStore.UID_SELF);
+            return result;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (UnrecoverableKeyException e) {
+            throw new InternalRecoveryServiceException("Access to newly generated key failed for");
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ERROR_INSECURE_USER) {
+                throw new LockScreenRequiredException(e.getMessage());
+            }
+            throw wrapUnexpectedServiceSpecificException(e);
+        }
+    }
+
+    /**
+     * Gets a key called {@code alias} from the recoverable key store.
+     *
+     * @param alias The key alias.
+     * @return The key.
+     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
+     *     service.
+     * @throws UnrecoverableKeyException if key is permanently invalidated or not found.
+     * @hide
+     */
+    public @Nullable Key getKey(@NonNull String alias)
+            throws InternalRecoveryServiceException, UnrecoverableKeyException {
+        try {
+            String grantAlias = mBinder.getKey(alias);
+            if (grantAlias == null) {
+                return null;
+            }
+            return AndroidKeyStoreProvider.loadAndroidKeyStoreKeyFromKeystore(
+                    mKeyStore,
+                    grantAlias,
+                    KeyStore.UID_SELF);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (ServiceSpecificException e) {
             throw wrapUnexpectedServiceSpecificException(e);
         }
     }
