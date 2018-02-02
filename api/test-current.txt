@@ -495,11 +495,11 @@ package android.telephony.mbms.vendor {
     method public int cancelDownload(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
     method public void dispose(int) throws android.os.RemoteException;
     method public int download(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
-    method public int getDownloadStatus(android.telephony.mbms.DownloadRequest, android.telephony.mbms.FileInfo) throws android.os.RemoteException;
     method public int initialize(int, android.telephony.mbms.MbmsDownloadSessionCallback) throws android.os.RemoteException;
     method public java.util.List<android.telephony.mbms.DownloadRequest> listPendingDownloads(int) throws android.os.RemoteException;
     method public void onAppCallbackDied(int, int);
     method public int registerStateCallback(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStateCallback) throws android.os.RemoteException;
+    method public int requestDownloadState(android.telephony.mbms.DownloadRequest, android.telephony.mbms.FileInfo) throws android.os.RemoteException;
     method public int requestUpdateFileServices(int, java.util.List<java.lang.String>) throws android.os.RemoteException;
     method public int resetDownloadKnowledge(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
     method public int setTempFileRootDirectory(int, java.lang.String) throws android.os.RemoteException;
