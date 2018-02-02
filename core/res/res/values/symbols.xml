@@ -2351,6 +2351,8 @@
   <java-symbol type="string" name="fingerprint_error_lockout_permanent" />
   <java-symbol type="string" name="fingerprint_name_template" />
   <java-symbol type="string" name="fingerprint_not_recognized" />
+  <java-symbol type="string" name="fingerprint_error_no_fingerprints" />
+  <java-symbol type="string" name="fingerprint_error_hw_not_present" />
 
   <!-- Fingerprint config -->
   <java-symbol type="integer" name="config_fingerprintMaxTemplatesPerUser"/>

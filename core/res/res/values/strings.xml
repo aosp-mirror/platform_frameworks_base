@@ -1351,6 +1351,10 @@
     <string name="fingerprint_error_lockout_permanent">Too many attempts. Fingerprint sensor disabled.</string>
     <!-- Generic error message shown when the fingerprint hardware can't recognize the fingerprint -->
     <string name="fingerprint_error_unable_to_process">Try again.</string>
+    <!-- Generic error message shown when the user has no enrolled fingerprints -->
+    <string name="fingerprint_error_no_fingerprints">No fingerprints enrolled.</string>
+    <!-- Generic error message shown when the app requests fingerprint authentication on a device without a sensor -->
+    <string name="fingerprint_error_hw_not_present">This device does not have a fingerprint sensor</string>
 
     <!-- Template to be used to name enrolled fingerprints by default. -->
     <string name="fingerprint_name_template">Finger <xliff:g id="fingerId" example="1">%d</xliff:g></string>
