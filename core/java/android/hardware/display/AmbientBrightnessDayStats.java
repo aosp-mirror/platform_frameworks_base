@@ -17,6 +17,8 @@
 package android.hardware.display;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -28,11 +30,12 @@ import java.util.Arrays;
 /**
  * AmbientBrightnessDayStats stores and manipulates brightness stats over a single day.
  * {@see DisplayManager.getAmbientBrightnessStats()}
- * TODO: Make this system API
  *
  * @hide
  */
-public class AmbientBrightnessDayStats implements Parcelable {
+@SystemApi
+@TestApi
+public final class AmbientBrightnessDayStats implements Parcelable {
 
     /** The localdate for which brightness stats are being tracked */
     private final LocalDate mLocalDate;
@@ -48,30 +51,30 @@ public class AmbientBrightnessDayStats implements Parcelable {
      */
     public AmbientBrightnessDayStats(@NonNull LocalDate localDate,
             @NonNull float[] bucketBoundaries) {
-        Preconditions.checkNotNull(localDate);
-        Preconditions.checkNotNull(bucketBoundaries);
-        int numBuckets = bucketBoundaries.length;
-        if (numBuckets < 1) {
-            throw new IllegalArgumentException("Bucket boundaries must contain at least 1 value");
-        }
-        mLocalDate = localDate;
-        mBucketBoundaries = bucketBoundaries;
-        mStats = new float[numBuckets];
+        this(localDate, bucketBoundaries, null);
     }
 
     /**
      * @hide
      */
     public AmbientBrightnessDayStats(@NonNull LocalDate localDate,
-            @NonNull float[] bucketBoundaries, @NonNull float[] stats) {
+            @NonNull float[] bucketBoundaries, float[] stats) {
         Preconditions.checkNotNull(localDate);
         Preconditions.checkNotNull(bucketBoundaries);
-        Preconditions.checkNotNull(stats);
+        Preconditions.checkArrayElementsInRange(bucketBoundaries, 0, Float.MAX_VALUE,
+                "bucketBoundaries");
         if (bucketBoundaries.length < 1) {
             throw new IllegalArgumentException("Bucket boundaries must contain at least 1 value");
         }
-        if (bucketBoundaries.length != stats.length) {
-            throw new IllegalArgumentException("Bucket boundaries and stats must be of same size.");
+        checkSorted(bucketBoundaries);
+        if (stats == null) {
+            stats = new float[bucketBoundaries.length];
+        } else {
+            Preconditions.checkArrayElementsInRange(stats, 0, Float.MAX_VALUE, "stats");
+            if (bucketBoundaries.length != stats.length) {
+                throw new IllegalArgumentException(
+                        "Bucket boundaries and stats must be of same size.");
+            }
         }
         mLocalDate = localDate;
         mBucketBoundaries = bucketBoundaries;
@@ -192,5 +195,17 @@ public class AmbientBrightnessDayStats implements Parcelable {
             }
         }
         return low;
+    }
+
+    private static void checkSorted(float[] values) {
+        if (values.length <= 1) {
+            return;
+        }
+        float prevValue = values[0];
+        for (int i = 1; i < values.length; i++) {
+            Preconditions.checkState(prevValue < values[i]);
+            prevValue = values[i];
+        }
+        return;
     }
 }

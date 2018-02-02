@@ -1140,6 +1140,15 @@ package android.hardware.camera2.params {
 
 package android.hardware.display {
 
+  public final class AmbientBrightnessDayStats implements android.os.Parcelable {
+    method public int describeContents();
+    method public float[] getBucketBoundaries();
+    method public java.time.LocalDate getLocalDate();
+    method public float[] getStats();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.hardware.display.AmbientBrightnessDayStats> CREATOR;
+  }
+
   public final class BrightnessChangeEvent implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
