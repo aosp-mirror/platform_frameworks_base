@@ -230,6 +230,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
 
         final ScrimState oldState = mState;
         mState = state;
+        Trace.traceCounter(Trace.TRACE_TAG_APP, "scrim_state", mState.getIndex());
 
         if (mCallback != null) {
             mCallback.onCancelled();
