@@ -2328,7 +2328,9 @@ public class SettingsProvider extends ContentProvider {
                     // Get all uids for the user's packages.
                     final List<PackageInfo> packages;
                     try {
-                        packages = mPackageManager.getInstalledPackages(0, user.id).getList();
+                        packages = mPackageManager.getInstalledPackages(
+                            PackageManager.MATCH_UNINSTALLED_PACKAGES,
+                            user.id).getList();
                     } catch (RemoteException e) {
                         throw new IllegalStateException("Package manager not available");
                     }
@@ -3401,7 +3403,9 @@ public class SettingsProvider extends ContentProvider {
                         // Fill each uid with the legacy ssaid to be backwards compatible.
                         final List<PackageInfo> packages;
                         try {
-                            packages = mPackageManager.getInstalledPackages(0, userId).getList();
+                            packages = mPackageManager.getInstalledPackages(
+                                PackageManager.MATCH_UNINSTALLED_PACKAGES,
+                                userId).getList();
                         } catch (RemoteException e) {
                             throw new IllegalStateException("Package manager not available");
                         }
@@ -3416,6 +3420,9 @@ public class SettingsProvider extends ContentProvider {
                                 // Android Id doesn't exist for this package so create it.
                                 ssaidSettings.insertSettingLocked(uid, legacySsaid, null, true,
                                         info.packageName);
+                                if (DEBUG) {
+                                    Slog.d(LOG_TAG, "Keep the legacy ssaid for uid=" + uid);
+                                }
                             }
                         }
                     }
