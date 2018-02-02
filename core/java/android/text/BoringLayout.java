@@ -322,6 +322,12 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
      */
     public static Metrics isBoring(CharSequence text, TextPaint paint,
             TextDirectionHeuristic textDir, Metrics metrics) {
+        return isBoring(text, null /* precomputed */, paint, textDir, metrics);
+    }
+
+    /** @hide */
+    public static Metrics isBoring(CharSequence text, PrecomputedText precomputed, TextPaint paint,
+            TextDirectionHeuristic textDir, Metrics metrics) {
         final int textLength = text.length();
         if (hasAnyInterestingChars(text, textLength)) {
            return null;  // There are some interesting characters. Not boring.
@@ -344,18 +350,17 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
             fm.reset();
         }
 
-        TextLine line = TextLine.obtain();
-        line.set(paint, text, 0, textLength, Layout.DIR_LEFT_TO_RIGHT,
-                Layout.DIRS_ALL_LEFT_TO_RIGHT, false, null);
-        if (text instanceof MeasuredText) {
-            MeasuredText mt = (MeasuredText) text;
+        if (precomputed != null) {
             // Reaching here means there is only one paragraph.
-            MeasuredParagraph mp = mt.getMeasuredParagraph(0);
+            MeasuredParagraph mp = precomputed.getMeasuredParagraph(0);
             fm.width = (int) Math.ceil(mp.getWidth(0, mp.getTextLength()));
         } else {
+            TextLine line = TextLine.obtain();
+            line.set(paint, text, 0, textLength, Layout.DIR_LEFT_TO_RIGHT,
+                    Layout.DIRS_ALL_LEFT_TO_RIGHT, false, null);
             fm.width = (int) Math.ceil(line.metrics(fm));
+            TextLine.recycle(line);
         }
-        TextLine.recycle(line);
 
         return fm;
     }
