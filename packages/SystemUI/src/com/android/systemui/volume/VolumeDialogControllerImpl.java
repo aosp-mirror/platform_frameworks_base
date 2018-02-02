@@ -49,7 +49,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
-import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.qs.tiles.DndTile;
@@ -340,11 +339,15 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
 
     private boolean shouldShowUI(int flags) {
         updateStatusBar();
-        return mStatusBar != null
-                && mStatusBar.getWakefulnessState() != WakefulnessLifecycle.WAKEFULNESS_ASLEEP
-                && mStatusBar.getWakefulnessState() != WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP
+        // if status bar isn't null, check if phone is in AOD, else check flags
+        // since we could be using a different status bar
+        return mStatusBar != null ?
+                mStatusBar.getWakefulnessState() != WakefulnessLifecycle.WAKEFULNESS_ASLEEP
+                && mStatusBar.getWakefulnessState() !=
+                        WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP
                 && mStatusBar.isDeviceInteractive()
-                && (flags & AudioManager.FLAG_SHOW_UI) != 0;
+                && (flags & AudioManager.FLAG_SHOW_UI) != 0
+                : (flags & AudioManager.FLAG_SHOW_UI) != 0;
     }
 
     boolean onVolumeChangedW(int stream, int flags) {
