@@ -33,6 +33,7 @@ import android.util.Slog;
 import android.webkit.MimeTypeMap;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.SizedInputStream;
 
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
@@ -93,7 +94,7 @@ public class FileUtils {
 
     private static final long COPY_CHECKPOINT_BYTES = 524288;
 
-    public interface CopyListener {
+    public interface ProgressListener {
         public void onProgress(long progress);
     }
 
@@ -202,7 +203,7 @@ public class FileUtils {
     }
 
     /**
-     * @deprecated use {@link #copy(InputStream, OutputStream)} instead.
+     * @deprecated use {@link #copy(File, File)} instead.
      */
     @Deprecated
     public static boolean copyFile(File srcFile, File destFile) {
@@ -215,7 +216,7 @@ public class FileUtils {
     }
 
     /**
-     * @deprecated use {@link #copy(InputStream, OutputStream)} instead.
+     * @deprecated use {@link #copy(File, File)} instead.
      */
     @Deprecated
     public static void copyFileOrThrow(File srcFile, File destFile) throws IOException {
@@ -255,44 +256,124 @@ public class FileUtils {
         }
     }
 
-    public static void copy(File from, File to) throws IOException {
+    /**
+     * Copy the contents of one file to another, replacing any existing content.
+     * <p>
+     * Attempts to use several optimization strategies to copy the data in the
+     * kernel before falling back to a userspace copy as a last resort.
+     *
+     * @return number of bytes copied.
+     */
+    public static long copy(@NonNull File from, @NonNull File to) throws IOException {
+        return copy(from, to, null, null);
+    }
+
+    /**
+     * Copy the contents of one file to another, replacing any existing content.
+     * <p>
+     * Attempts to use several optimization strategies to copy the data in the
+     * kernel before falling back to a userspace copy as a last resort.
+     *
+     * @param listener to be periodically notified as the copy progresses.
+     * @param signal to signal if the copy should be cancelled early.
+     * @return number of bytes copied.
+     */
+    public static long copy(@NonNull File from, @NonNull File to,
+            @Nullable ProgressListener listener, @Nullable CancellationSignal signal)
+            throws IOException {
         try (FileInputStream in = new FileInputStream(from);
                 FileOutputStream out = new FileOutputStream(to)) {
-            copy(in, out);
+            return copy(in, out, listener, signal);
         }
     }
 
-    public static void copy(InputStream in, OutputStream out) throws IOException {
-        copy(in, out, null, null);
+    /**
+     * Copy the contents of one stream to another.
+     * <p>
+     * Attempts to use several optimization strategies to copy the data in the
+     * kernel before falling back to a userspace copy as a last resort.
+     *
+     * @return number of bytes copied.
+     */
+    public static long copy(@NonNull InputStream in, @NonNull OutputStream out) throws IOException {
+        return copy(in, out, null, null);
     }
 
-    public static void copy(InputStream in, OutputStream out, CopyListener listener,
-            CancellationSignal signal) throws IOException {
+    /**
+     * Copy the contents of one stream to another.
+     * <p>
+     * Attempts to use several optimization strategies to copy the data in the
+     * kernel before falling back to a userspace copy as a last resort.
+     *
+     * @param listener to be periodically notified as the copy progresses.
+     * @param signal to signal if the copy should be cancelled early.
+     * @return number of bytes copied.
+     */
+    public static long copy(@NonNull InputStream in, @NonNull OutputStream out,
+            @Nullable ProgressListener listener, @Nullable CancellationSignal signal)
+            throws IOException {
         if (ENABLE_COPY_OPTIMIZATIONS) {
             if (in instanceof FileInputStream && out instanceof FileOutputStream) {
-                copy(((FileInputStream) in).getFD(), ((FileOutputStream) out).getFD(),
+                return copy(((FileInputStream) in).getFD(), ((FileOutputStream) out).getFD(),
                         listener, signal);
             }
         }
 
         // Worse case fallback to userspace
-        copyInternalUserspace(in, out, listener, signal);
+        return copyInternalUserspace(in, out, listener, signal);
     }
 
-    public static void copy(FileDescriptor in, FileDescriptor out) throws IOException {
-        copy(in, out, null, null);
+    /**
+     * Copy the contents of one FD to another.
+     * <p>
+     * Attempts to use several optimization strategies to copy the data in the
+     * kernel before falling back to a userspace copy as a last resort.
+     *
+     * @return number of bytes copied.
+     */
+    public static long copy(@NonNull FileDescriptor in, @NonNull FileDescriptor out)
+            throws IOException {
+        return copy(in, out, null, null);
     }
 
-    public static void copy(FileDescriptor in, FileDescriptor out, CopyListener listener,
-            CancellationSignal signal) throws IOException {
+    /**
+     * Copy the contents of one FD to another.
+     * <p>
+     * Attempts to use several optimization strategies to copy the data in the
+     * kernel before falling back to a userspace copy as a last resort.
+     *
+     * @param listener to be periodically notified as the copy progresses.
+     * @param signal to signal if the copy should be cancelled early.
+     * @return number of bytes copied.
+     */
+    public static long copy(@NonNull FileDescriptor in, @NonNull FileDescriptor out,
+            @Nullable ProgressListener listener, @Nullable CancellationSignal signal)
+            throws IOException {
+        return copy(in, out, listener, signal, Long.MAX_VALUE);
+    }
+
+    /**
+     * Copy the contents of one FD to another.
+     * <p>
+     * Attempts to use several optimization strategies to copy the data in the
+     * kernel before falling back to a userspace copy as a last resort.
+     *
+     * @param listener to be periodically notified as the copy progresses.
+     * @param signal to signal if the copy should be cancelled early.
+     * @param count the number of bytes to copy.
+     * @return number of bytes copied.
+     */
+    public static long copy(@NonNull FileDescriptor in, @NonNull FileDescriptor out,
+            @Nullable ProgressListener listener, @Nullable CancellationSignal signal, long count)
+            throws IOException {
         if (ENABLE_COPY_OPTIMIZATIONS) {
             try {
                 final StructStat st_in = Os.fstat(in);
                 final StructStat st_out = Os.fstat(out);
                 if (S_ISREG(st_in.st_mode) && S_ISREG(st_out.st_mode)) {
-                    copyInternalSendfile(in, out, listener, signal);
+                    return copyInternalSendfile(in, out, listener, signal, count);
                 } else if (S_ISFIFO(st_in.st_mode) || S_ISFIFO(st_out.st_mode)) {
-                    copyInternalSplice(in, out, listener, signal);
+                    return copyInternalSplice(in, out, listener, signal, count);
                 }
             } catch (ErrnoException e) {
                 throw e.rethrowAsIOException();
@@ -300,23 +381,25 @@ public class FileUtils {
         }
 
         // Worse case fallback to userspace
-        copyInternalUserspace(in, out, listener, signal);
+        return copyInternalUserspace(in, out, listener, signal, count);
     }
 
     /**
      * Requires one of input or output to be a pipe.
      */
     @VisibleForTesting
-    public static void copyInternalSplice(FileDescriptor in, FileDescriptor out,
-            CopyListener listener, CancellationSignal signal) throws ErrnoException {
+    public static long copyInternalSplice(FileDescriptor in, FileDescriptor out,
+            ProgressListener listener, CancellationSignal signal, long count)
+            throws ErrnoException {
         long progress = 0;
         long checkpoint = 0;
 
         long t;
-        while ((t = Os.splice(in, null, out, null, COPY_CHECKPOINT_BYTES,
+        while ((t = Os.splice(in, null, out, null, Math.min(count, COPY_CHECKPOINT_BYTES),
                 SPLICE_F_MOVE | SPLICE_F_MORE)) != 0) {
             progress += t;
             checkpoint += t;
+            count -= t;
 
             if (checkpoint >= COPY_CHECKPOINT_BYTES) {
                 if (signal != null) {
@@ -328,21 +411,24 @@ public class FileUtils {
                 checkpoint = 0;
             }
         }
+        return progress;
     }
 
     /**
      * Requires both input and output to be a regular file.
      */
     @VisibleForTesting
-    public static void copyInternalSendfile(FileDescriptor in, FileDescriptor out,
-            CopyListener listener, CancellationSignal signal) throws ErrnoException {
+    public static long copyInternalSendfile(FileDescriptor in, FileDescriptor out,
+            ProgressListener listener, CancellationSignal signal, long count)
+            throws ErrnoException {
         long progress = 0;
         long checkpoint = 0;
 
         long t;
-        while ((t = Os.sendfile(out, in, null, COPY_CHECKPOINT_BYTES)) != 0) {
+        while ((t = Os.sendfile(out, in, null, Math.min(count, COPY_CHECKPOINT_BYTES))) != 0) {
             progress += t;
             checkpoint += t;
+            count -= t;
 
             if (checkpoint >= COPY_CHECKPOINT_BYTES) {
                 if (signal != null) {
@@ -354,17 +440,24 @@ public class FileUtils {
                 checkpoint = 0;
             }
         }
+        return progress;
     }
 
     @VisibleForTesting
-    public static void copyInternalUserspace(FileDescriptor in, FileDescriptor out,
-            CopyListener listener, CancellationSignal signal) throws IOException {
-        copyInternalUserspace(new FileInputStream(in), new FileOutputStream(out), listener, signal);
+    public static long copyInternalUserspace(FileDescriptor in, FileDescriptor out,
+            ProgressListener listener, CancellationSignal signal, long count) throws IOException {
+        if (count != Long.MAX_VALUE) {
+            return copyInternalUserspace(new SizedInputStream(new FileInputStream(in), count),
+                    new FileOutputStream(out), listener, signal);
+        } else {
+            return copyInternalUserspace(new FileInputStream(in),
+                    new FileOutputStream(out), listener, signal);
+        }
     }
 
     @VisibleForTesting
-    public static void copyInternalUserspace(InputStream in, OutputStream out,
-            CopyListener listener, CancellationSignal signal) throws IOException {
+    public static long copyInternalUserspace(InputStream in, OutputStream out,
+            ProgressListener listener, CancellationSignal signal) throws IOException {
         long progress = 0;
         long checkpoint = 0;
         byte[] buffer = new byte[8192];
@@ -386,6 +479,7 @@ public class FileUtils {
                 checkpoint = 0;
             }
         }
+        return progress;
     }
 
     /**
@@ -997,7 +1091,7 @@ public class FileUtils {
                     }
                 }
             } catch (IOException | ErrnoException e) {
-                throw new RuntimeException(e);
+                // Ignored
             } finally {
                 if (sink) {
                     SystemClock.sleep(TimeUnit.SECONDS.toMillis(1));

@@ -54,7 +54,7 @@ public class FileUtilsBenchmark {
         for (int i = 0; i < reps; i++) {
             try (FileInputStream in = new FileInputStream(mSrc);
                     FileOutputStream out = new FileOutputStream(mDest)) {
-                copyInternalUserspace(in.getFD(), out.getFD(), null, null);
+                copyInternalUserspace(in.getFD(), out.getFD(), null, null, Long.MAX_VALUE);
             }
         }
     }
@@ -63,7 +63,7 @@ public class FileUtilsBenchmark {
         for (int i = 0; i < reps; i++) {
             try (FileInputStream in = new FileInputStream(mSrc);
                     FileOutputStream out = new FileOutputStream(mDest)) {
-                copyInternalSendfile(in.getFD(), out.getFD(), null, null);
+                copyInternalSendfile(in.getFD(), out.getFD(), null, null, Long.MAX_VALUE);
             }
         }
     }
@@ -72,7 +72,7 @@ public class FileUtilsBenchmark {
         for (int i = 0; i < reps; i++) {
             try (MemoryPipe in = MemoryPipe.createSource(mData);
                     FileOutputStream out = new FileOutputStream(mDest)) {
-                copyInternalUserspace(in.getFD(), out.getFD(), null, null);
+                copyInternalUserspace(in.getFD(), out.getFD(), null, null, Long.MAX_VALUE);
             }
         }
     }
@@ -81,7 +81,7 @@ public class FileUtilsBenchmark {
         for (int i = 0; i < reps; i++) {
             try (MemoryPipe in = MemoryPipe.createSource(mData);
                     FileOutputStream out = new FileOutputStream(mDest)) {
-                copyInternalSplice(in.getFD(), out.getFD(), null, null);
+                copyInternalSplice(in.getFD(), out.getFD(), null, null, Long.MAX_VALUE);
             }
         }
     }
@@ -90,7 +90,7 @@ public class FileUtilsBenchmark {
         for (int i = 0; i < reps; i++) {
             try (FileInputStream in = new FileInputStream(mSrc);
                     MemoryPipe out = MemoryPipe.createSink(mData)) {
-                copyInternalUserspace(in.getFD(), out.getFD(), null, null);
+                copyInternalUserspace(in.getFD(), out.getFD(), null, null, Long.MAX_VALUE);
             }
         }
     }
@@ -99,7 +99,7 @@ public class FileUtilsBenchmark {
         for (int i = 0; i < reps; i++) {
             try (FileInputStream in = new FileInputStream(mSrc);
                     MemoryPipe out = MemoryPipe.createSink(mData)) {
-                copyInternalSplice(in.getFD(), out.getFD(), null, null);
+                copyInternalSplice(in.getFD(), out.getFD(), null, null, Long.MAX_VALUE);
             }
         }
     }

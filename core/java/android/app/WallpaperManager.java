@@ -51,6 +51,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.DeadSystemException;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -1329,11 +1330,7 @@ public class WallpaperManager {
 
     private void copyStreamToWallpaperFile(InputStream data, FileOutputStream fos)
             throws IOException {
-        byte[] buffer = new byte[32768];
-        int amt;
-        while ((amt=data.read(buffer)) > 0) {
-            fos.write(buffer, 0, amt);
-        }
+        FileUtils.copy(data, fos);
     }
 
     /**
