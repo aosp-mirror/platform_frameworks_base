@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
 import android.support.annotation.VisibleForTesting;
 import android.util.Pair;
 
@@ -90,6 +91,8 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int MSG_FINGERPRINT_ERROR             = 42 << MSG_SHIFT;
     private static final int MSG_FINGERPRINT_HIDE              = 43 << MSG_SHIFT;
     private static final int MSG_SHOW_CHARGING_ANIMATION       = 44 << MSG_SHIFT;
+    private static final int MSG_SHOW_PINNING_TOAST_ENTER_EXIT = 45 << MSG_SHIFT;
+    private static final int MSG_SHOW_PINNING_TOAST_ESCAPE     = 46 << MSG_SHIFT;
 
     public static final int FLAG_EXCLUDE_NONE = 0;
     public static final int FLAG_EXCLUDE_SEARCH_PANEL = 1 << 0;
@@ -148,6 +151,8 @@ public class CommandQueue extends IStatusBar.Stub {
         default void clickTile(ComponentName tile) { }
 
         default void handleSystemKey(int arg1) { }
+        default void showPinningEnterExitToast(boolean entering) { }
+        default void showPinningEscapeToast() { }
         default void handleShowGlobalActionsMenu() { }
         default void handleShowShutdownUi(boolean isReboot, String reason) { }
 
@@ -451,6 +456,21 @@ public class CommandQueue extends IStatusBar.Stub {
             mHandler.obtainMessage(MSG_HANDLE_SYSTEM_KEY, key, 0).sendToTarget();
         }
     }
+
+    @Override
+    public void showPinningEnterExitToast(boolean entering) {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_SHOW_PINNING_TOAST_ENTER_EXIT, entering).sendToTarget();
+        }
+    }
+
+    @Override
+    public void showPinningEscapeToast() {
+        synchronized (mLock) {
+            mHandler.obtainMessage(MSG_SHOW_PINNING_TOAST_ESCAPE).sendToTarget();
+        }
+    }
+
 
     @Override
     public void showGlobalActionsMenu() {
@@ -765,6 +785,16 @@ public class CommandQueue extends IStatusBar.Stub {
                 case MSG_SHOW_CHARGING_ANIMATION:
                     for (int i = 0; i < mCallbacks.size(); i++) {
                         mCallbacks.get(i).showChargingAnimation(msg.arg1);
+                    }
+                    break;
+                case MSG_SHOW_PINNING_TOAST_ENTER_EXIT:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).showPinningEnterExitToast((Boolean) msg.obj);
+                    }
+                    break;
+                case MSG_SHOW_PINNING_TOAST_ESCAPE:
+                    for (int i = 0; i < mCallbacks.size(); i++) {
+                        mCallbacks.get(i).showPinningEscapeToast();
                     }
                     break;
             }

@@ -90,7 +90,6 @@ public class LockTaskControllerTest {
     @Mock private IStatusBarService mStatusBarService;
     @Mock private WindowManagerService mWindowManager;
     @Mock private LockPatternUtils mLockPatternUtils;
-    @Mock private LockTaskNotify mLockTaskNotify;
     @Mock private StatusBarManagerInternal mStatusBarManagerInternal;
     @Mock private TelecomManager mTelecomManager;
     @Mock private RecentTasks mRecentTasks;
@@ -123,7 +122,6 @@ public class LockTaskControllerTest {
         mLockTaskController.mDevicePolicyManager = mDevicePolicyManager;
         mLockTaskController.mTelecomManager = mTelecomManager;
         mLockTaskController.mLockPatternUtils = mLockPatternUtils;
-        mLockTaskController.mLockTaskNotify = mLockTaskNotify;
 
         LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
         LocalServices.addService(StatusBarManagerInternal.class, mStatusBarManagerInternal);
@@ -208,7 +206,7 @@ public class LockTaskControllerTest {
         // THEN lock task mode should be started
         verifyLockTaskStarted(STATUS_BAR_MASK_PINNED, DISABLE2_NONE);
         // THEN screen pinning toast should be shown
-        verify(mLockTaskNotify).showPinningStartToast();
+        verify(mStatusBarService).showPinningEnterExitToast(true /* entering */);
     }
 
     @Test
@@ -377,7 +375,7 @@ public class LockTaskControllerTest {
         // THEN the keyguard should be shown
         verify(mLockPatternUtils).requireCredentialEntry(UserHandle.USER_ALL);
         // THEN screen pinning toast should be shown
-        verify(mLockTaskNotify).showPinningExitToast();
+        verify(mStatusBarService).showPinningEnterExitToast(false /* entering */);
     }
 
     @Test
