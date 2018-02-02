@@ -1056,6 +1056,14 @@ package android.view.autofill {
 
 }
 
+package android.view.inputmethod {
+
+  public final class InputMethodManager {
+    method public boolean isInputMethodPickerShown();
+  }
+
+}
+
 package android.widget {
 
   public abstract class AbsListView extends android.widget.AdapterView implements android.widget.Filter.FilterListener android.text.TextWatcher android.view.ViewTreeObserver.OnGlobalLayoutListener android.view.ViewTreeObserver.OnTouchModeChangeListener {
