@@ -60,6 +60,26 @@ import java.util.List;
  * </service>
  * }
  * </pre>
+ * <p>
+ * In addition to implementing the {@link InCallService} API, you must also declare an activity in
+ * your manifest which handles the {@link Intent#ACTION_DIAL} intent.  The example below illustrates
+ * how this is done:
+ * <pre>
+ * {@code
+ * <activity android:name="your.package.YourDialerActivity"
+ *           android:label="@string/yourDialerActivityLabel">
+ *      <intent-filter>
+ *           <action android:name="android.intent.action.DIAL" />
+ *           <category android:name="android.intent.category.DEFAULT" />
+ *      </intent-filter>
+ * </activity>
+ * }
+ * </pre>
+ * <p>
+ * When a user installs your application and runs it for the first time, you should prompt the user
+ * to see if they would like your application to be the new default phone app.  See the
+ * {@link TelecomManager#ACTION_CHANGE_DEFAULT_DIALER} intent documentation for more information on
+ * how to do this.
  */
 public abstract class InCallService extends Service {
 
