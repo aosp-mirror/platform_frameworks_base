@@ -65,6 +65,7 @@ import com.android.server.am.ActivityManagerService;
 import com.android.server.audio.AudioService;
 import com.android.server.broadcastradio.BroadcastRadioService;
 import com.android.server.camera.CameraServiceProxy;
+import com.android.server.car.CarServiceHelperService;
 import com.android.server.clipboard.ClipboardService;
 import com.android.server.connectivity.IpConnectivityMetrics;
 import com.android.server.coverage.CoverageService;
@@ -219,8 +220,6 @@ public final class SystemServer {
             "com.google.android.things.services.IoTSystemService";
     private static final String SLICE_MANAGER_SERVICE_CLASS =
             "com.android.server.slice.SliceManagerService$Lifecycle";
-    private static final String CAR_SERVICE_HELPER_SERVICE_CLASS =
-            "com.google.android.car.CarServiceHelperService";
 
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
@@ -1752,7 +1751,7 @@ public final class SystemServer {
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
                 traceBeginAndSlog("StartCarServiceHelperService");
-                mSystemServiceManager.startService(CAR_SERVICE_HELPER_SERVICE_CLASS);
+                mSystemServiceManager.startService(CarServiceHelperService.class);
                 traceEnd();
             }
 
