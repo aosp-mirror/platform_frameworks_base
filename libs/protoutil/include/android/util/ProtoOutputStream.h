@@ -123,6 +123,11 @@ public:
     EncodedBuffer::iterator data(); // Get the reader apis of the data.
     bool flush(int fd); // Flush data directly to a file descriptor.
 
+    /**
+     * Clears the ProtoOutputStream so the buffer can be reused instead of deallocation/allocation again.
+     */
+    void clear();
+
     // Please don't use the following functions to dump protos unless you are familiar with protobuf encoding.
     void writeRawVarint(uint64_t varint);
     void writeLengthDelimitedHeader(uint32_t id, size_t size);

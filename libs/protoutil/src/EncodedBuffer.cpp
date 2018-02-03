@@ -106,6 +106,13 @@ EncodedBuffer::at(const Pointer& p) const
     return mBuffers[p.index()] + p.offset();
 }
 
+void
+EncodedBuffer::clear()
+{
+    mWp.rewind();
+    mEp.rewind();
+}
+
 /******************************** Write APIs ************************************************/
 size_t
 EncodedBuffer::size() const

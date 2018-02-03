@@ -40,9 +40,6 @@ public:
 
     virtual ~EventMetricProducer();
 
-protected:
-    void startNewProtoOutputStreamLocked();
-
 private:
     void onMatchedLogEventInternalLocked(
             const size_t matcherIndex, const MetricDimensionKey& eventKey,
