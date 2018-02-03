@@ -360,6 +360,23 @@
     <!-- Regex of wired ethernet ifaces -->
     <string translatable="false" name="config_ethernet_iface_regex">eth\\d</string>
 
+
+
+    <!-- Configuration of Ethernet interfaces in the following format:
+         <interface name|mac address>;[Network Capabilities];[IP config]
+         Where
+               [Network Capabilities] Optional. A comma seprated list of network capabilities.
+                   Values must be from NetworkCapabilities#NET_CAPABILITIES_* constants.
+               [IP config] Optional. If empty or not specified - DHCP will be used, otherwise
+                    static IP address with the mask.
+         -->
+    <string-array translatable="false" name="config_ethernet_interfaces">
+        <!--
+        <item>eth1;12,13,14,15;192.168.0.10/24</item>
+        <item>eth2;;192.168.0.11/24</item>
+        -->
+    </string-array>
+
     <!-- If the mobile hotspot feature requires provisioning, a package name and class name
         can be provided to launch a supported application that provisions the devices.
 
