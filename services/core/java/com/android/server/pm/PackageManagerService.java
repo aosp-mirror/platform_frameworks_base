@@ -5972,7 +5972,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!skipPackageCheck && intent.getPackage() != null) {
             return false;
         }
-        if (!intent.isBrowsableWebIntent()) {
+        if (!intent.isWebIntent()) {
             // for non web intents, we should not resolve externally if an app already exists to
             // handle it or if the caller didn't explicitly request it.
             if ((resolvedActivities != null && resolvedActivities.size() != 0)
@@ -6683,7 +6683,7 @@ public class PackageManagerService extends IPackageManager.Stub
                                         ai.packageName, ai.versionCode, null /* splitName */);
             }
         }
-        if (intent.isBrowsableWebIntent() && auxiliaryResponse == null) {
+        if (intent.isWebIntent() && auxiliaryResponse == null) {
             return result;
         }
         final PackageSetting ps = mSettings.mPackages.get(mInstantAppInstallerActivity.packageName);

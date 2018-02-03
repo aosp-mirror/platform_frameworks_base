@@ -1266,7 +1266,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "resolveIntent");
                 int modifiedFlags = flags
                         | PackageManager.MATCH_DEFAULT_ONLY | ActivityManagerService.STOCK_PM_FLAGS;
-                if (intent.isBrowsableWebIntent()
+                if (intent.isWebIntent()
                             || (intent.getFlags() & Intent.FLAG_ACTIVITY_MATCH_EXTERNAL) != 0) {
                     modifiedFlags |= PackageManager.MATCH_INSTANT;
                 }
