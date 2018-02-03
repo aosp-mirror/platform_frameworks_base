@@ -62,7 +62,6 @@
 
     <permission name="android.permission.WRITE_MEDIA_STORAGE" >
         <group gid="media_rw" />
-        <group gid="sdcard_rw" />
     </permission>
 
     <permission name="android.permission.ACCESS_MTP" >
