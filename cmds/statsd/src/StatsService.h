@@ -183,6 +183,11 @@ private:
     status_t cmd_write_data_to_disk(FILE* out);
 
     /**
+     * Write an AppHook event to the StatsLog buffer, as though StatsLog.write(APP_HOOK).
+     */
+    status_t cmd_log_app_hook(FILE* out, const Vector<String8>& args);
+
+    /**
      * Print contents of a pulled metrics source.
      */
     status_t cmd_print_pulled_metrics(FILE* out, const Vector<String8>& args);

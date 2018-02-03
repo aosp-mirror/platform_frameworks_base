@@ -47,7 +47,7 @@ const int FIELD_ID_METRICS = 1;
 
 MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
                                const long timeBaseSec, sp<UidMap> uidMap)
-    : mConfigKey(key), mUidMap(uidMap) {
+    : mConfigKey(key), mUidMap(uidMap), mStatsdUid(getStatsdUid()) {
     mConfigValid =
             initStatsdConfig(key, config, *uidMap, timeBaseSec, mTagIds, mAllAtomMatchers, mAllConditionTrackers,
                              mAllMetricProducers, mAllAnomalyTrackers, mConditionToMetricMap,
@@ -61,6 +61,7 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
 
         mAllowedUid.push_back(1000);
         mAllowedUid.push_back(0);
+        mAllowedUid.push_back(mStatsdUid);
         mAllowedLogSources.insert(mAllowedUid.begin(), mAllowedUid.end());
     } else {
         for (const auto& source : config.allowed_log_source()) {
@@ -191,18 +192,28 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
 
     if (event.GetTagId() == android::util::APP_HOOK) { // Check that app hook fields are valid.
         // TODO: Find a way to make these checks easier to maintain if the app hooks get changed.
-
-        // Label is 2nd from last field and must be from [0, 15].
         status_t err = NO_ERROR;
-        long label = event.GetLong(event.size()-1, &err);
-        if (err != NO_ERROR || label < 0 || label > 15) {
-            VLOG("App hook does not have valid label %ld", label);
+
+        // Uid is 3rd from last field and must match the caller's uid,
+        // unless that caller is statsd itself (statsd is allowed to spoof uids).
+        long appHookUid = event.GetLong(event.size()-2, &err);
+        int32_t loggerUid = event.GetUid();
+        if (err != NO_ERROR || (loggerUid != appHookUid && loggerUid != mStatsdUid)) {
+            VLOG("AppHook has invalid uid: claimed %ld but caller is %d", appHookUid, loggerUid);
             return;
         }
+
+        // Label is 2nd from last field and must be from [0, 15].
+        long appHookLabel = event.GetLong(event.size()-1, &err);
+        if (err != NO_ERROR || appHookLabel < 0 || appHookLabel > 15) {
+            VLOG("AppHook does not have valid label %ld", appHookLabel);
+            return;
+        }
+
         // The state must be from 0,3. This part of code must be manually updated.
-        long apphookState = event.GetLong(event.size(), &err);
-        if (err != NO_ERROR || apphookState < 0 || apphookState > 3) {
-            VLOG("App hook does not have valid state %ld", apphookState);
+        long appHookState = event.GetLong(event.size(), &err);
+        if (err != NO_ERROR || appHookState < 0 || appHookState > 3) {
+            VLOG("AppHook does not have valid state %ld", appHookState);
             return;
         }
     } else if (event.GetTagId() == android::util::DAVEY_OCCURRED) {
@@ -320,6 +331,16 @@ size_t MetricsManager::byteSize() {
         totalSize += metricProducer->byteSize();
     }
     return totalSize;
+}
+
+int32_t MetricsManager::getStatsdUid() {
+    auto suit = UidMap::sAidToUidMapping.find("AID_STATSD");
+    if (suit != UidMap::sAidToUidMapping.end()) {
+        return suit->second;
+    } else {
+        ALOGE("Statsd failed to find its own uid!");
+        return -1;
+    }
 }
 
 }  // namespace statsd

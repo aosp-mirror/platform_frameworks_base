@@ -75,6 +75,9 @@ private:
 
     sp<UidMap> mUidMap;
 
+    // The uid of statsd.
+    const int32_t mStatsdUid;
+
     bool mConfigValid = false;
 
     // The uid log sources from StatsdConfig.
@@ -135,6 +138,9 @@ private:
     std::unordered_map<int, std::vector<int>> mConditionToMetricMap;
 
     void initLogSourceWhiteList();
+
+    // Fetches the uid of statsd from UidMap.
+    static int32_t getStatsdUid();
 
     // The metrics that don't need to be uploaded or even reported.
     std::set<int64_t> mNoReportMetricIds;

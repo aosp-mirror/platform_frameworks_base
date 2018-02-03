@@ -64,7 +64,7 @@ message FieldValueMatcher {
   oneof value_matcher {
     bool eq_bool = 3;
     string eq_string = 4;
-    int32 eq_int = 5;
+    int64 eq_int = 5;
 
     int64 lt_int = 6;
     int64 gt_int = 7;
