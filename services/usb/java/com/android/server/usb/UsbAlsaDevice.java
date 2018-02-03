@@ -16,6 +16,11 @@
 
 package com.android.server.usb;
 
+import android.annotation.NonNull;
+import android.service.usb.UsbAlsaDeviceProto;
+
+import com.android.internal.util.dump.DualDumpOutputStream;
+
 /**
  * Represents the ALSA specification, and attributes of an ALSA device.
  */
@@ -107,6 +112,22 @@ public final class UsbAlsaDevice {
             + ", name: " + mDeviceName
             + ", hasPlayback: " + mHasPlayback
             + ", hasCapture: " + mHasCapture + "]";
+    }
+
+    /**
+     * Write a description of the device to a dump stream.
+     */
+    public void dump(@NonNull DualDumpOutputStream dump, String idName, long id) {
+        long token = dump.start(idName, id);
+
+        dump.write("card", UsbAlsaDeviceProto.CARD, mCardNum);
+        dump.write("device", UsbAlsaDeviceProto.DEVICE, mDeviceNum);
+        dump.write("name", UsbAlsaDeviceProto.NAME, mDeviceName);
+        dump.write("has_playback", UsbAlsaDeviceProto.HAS_PLAYBACK, mHasPlayback);
+        dump.write("has_capture", UsbAlsaDeviceProto.HAS_CAPTURE, mHasCapture);
+        dump.write("address", UsbAlsaDeviceProto.ADDRESS, mDeviceAddress);
+
+        dump.end(token);
     }
 
     // called by logDevices

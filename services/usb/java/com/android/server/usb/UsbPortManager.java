@@ -16,6 +16,10 @@
 
 package com.android.server.usb;
 
+import static com.android.internal.usb.DumpUtils.writePort;
+import static com.android.internal.usb.DumpUtils.writePortStatus;
+
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.usb.UsbManager;
@@ -38,12 +42,15 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.service.usb.UsbPortInfoProto;
+import android.service.usb.UsbPortManagerProto;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.FgThread;
 
 import java.util.ArrayList;
@@ -390,22 +397,22 @@ public class UsbPortManager {
         }
     }
 
-    public void dump(IndentingPrintWriter pw) {
-        synchronized (mLock) {
-            pw.print("USB Port State:");
-            if (!mSimulatedPorts.isEmpty()) {
-                pw.print(" (simulation active; end with 'dumpsys usb reset')");
-            }
-            pw.println();
+    /**
+     * Dump the USB port state.
+     */
+    public void dump(DualDumpOutputStream dump, String idName, long id) {
+        long token = dump.start(idName, id);
 
-            if (mPorts.isEmpty()) {
-                pw.println("  <no ports>");
-            } else {
-                for (PortInfo portInfo : mPorts.values()) {
-                    pw.println("  " + portInfo.mUsbPort.getId() + ": " + portInfo);
-                }
+        synchronized (mLock) {
+            dump.write("is_simulation_active", UsbPortManagerProto.IS_SIMULATION_ACTIVE,
+                    !mSimulatedPorts.isEmpty());
+
+            for (PortInfo portInfo : mPorts.values()) {
+                portInfo.dump(dump, "usb_ports", UsbPortManagerProto.USB_PORTS);
             }
         }
+
+        dump.end(token);
     }
 
     private static class HALCallback extends IUsbCallback.Stub {
@@ -763,6 +770,20 @@ public class UsbPortManager {
                 return true;
             }
             return false;
+        }
+
+        void dump(@NonNull DualDumpOutputStream dump, @NonNull String idName, long id) {
+            long token = dump.start(idName, id);
+
+            writePort(dump, "port", UsbPortInfoProto.PORT, mUsbPort);
+            writePortStatus(dump, "status", UsbPortInfoProto.STATUS, mUsbPortStatus);
+            dump.write("can_change_mode", UsbPortInfoProto.CAN_CHANGE_MODE, mCanChangeMode);
+            dump.write("can_change_power_role", UsbPortInfoProto.CAN_CHANGE_POWER_ROLE,
+                    mCanChangePowerRole);
+            dump.write("can_change_data_role", UsbPortInfoProto.CAN_CHANGE_DATA_ROLE,
+                    mCanChangeDataRole);
+
+            dump.end(token);
         }
 
         @Override

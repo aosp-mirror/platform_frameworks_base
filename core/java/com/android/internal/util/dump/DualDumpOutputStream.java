@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.print;
+package com.android.internal.util.dump;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -131,27 +131,27 @@ public class DualDumpOutputStream {
         }
     }
 
+    /**
+     * Create a new DualDumpOutputStream.
+     *
+     * @param proto the {@link ProtoOutputStream}
+     */
+    public DualDumpOutputStream(@NonNull ProtoOutputStream proto) {
+        mProtoStream = proto;
+        mIpw = null;
+    }
 
     /**
-     * Create a new DualDumpOutputStream. Only one output should be set.
+     * Create a new DualDumpOutputStream.
      *
-     * @param proto If dumping to proto the {@link ProtoOutputStream}
-     * @param ipw If dumping to a print writer, the {@link IndentingPrintWriter}
+     * @param ipw the {@link IndentingPrintWriter}
      */
-    public DualDumpOutputStream(@Nullable ProtoOutputStream proto,
-            @Nullable IndentingPrintWriter ipw) {
-        if ((proto == null) == (ipw == null)) {
-            Log.e(LOG_TAG, "Cannot dump to clear text and proto at once. Ignoring proto");
-            proto = null;
-        }
-
-        mProtoStream = proto;
+    public DualDumpOutputStream(@NonNull IndentingPrintWriter ipw) {
+        mProtoStream = null;
         mIpw = ipw;
 
-        if (!isProto()) {
-            // Add root object
-            mDumpObjects.add(new DumpObject(null));
-        }
+        // Add root object
+        mDumpObjects.add(new DumpObject(null));
     }
 
     public void write(@NonNull String fieldName, long fieldId, double val) {

@@ -16,6 +16,11 @@
 
 package android.hardware.usb;
 
+import android.annotation.NonNull;
+import android.service.usb.UsbAccessoryFilterProto;
+
+import com.android.internal.util.dump.DualDumpOutputStream;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -141,5 +146,18 @@ public class AccessoryFilter {
         return "AccessoryFilter[mManufacturer=\"" + mManufacturer +
                 "\", mModel=\"" + mModel +
                 "\", mVersion=\"" + mVersion + "\"]";
+    }
+
+    /**
+     * Write a description of the filter to a dump stream.
+     */
+    public void dump(@NonNull DualDumpOutputStream dump, String idName, long id) {
+        long token = dump.start(idName, id);
+
+        dump.write("manufacturer", UsbAccessoryFilterProto.MANUFACTURER, mManufacturer);
+        dump.write("model", UsbAccessoryFilterProto.MODEL, mModel);
+        dump.write("version", UsbAccessoryFilterProto.VERSION, mVersion);
+
+        dump.end(token);
     }
 }

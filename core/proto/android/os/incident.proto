@@ -42,6 +42,7 @@ import "frameworks/base/core/proto/android/service/notification.proto";
 import "frameworks/base/core/proto/android/service/package.proto";
 import "frameworks/base/core/proto/android/service/print.proto";
 import "frameworks/base/core/proto/android/service/procstats.proto";
+import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/util/event_log_tags.proto";
 import "frameworks/base/core/proto/android/util/log.proto";
 import "frameworks/base/libs/incident/proto/android/os/header.proto";
@@ -253,5 +254,10 @@ message IncidentProto {
     optional com.android.server.job.JobSchedulerServiceDumpProto jobscheduler = 3020 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "jobscheduler --proto"
+    ];
+
+    optional android.service.usb.UsbServiceDumpProto usb = 3021 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "usb --proto"
     ];
 }

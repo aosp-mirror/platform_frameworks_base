@@ -20,11 +20,11 @@ import static android.content.pm.PackageManager.GET_META_DATA;
 import static android.content.pm.PackageManager.GET_SERVICES;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 
-import static com.android.internal.print.DumpUtils.writeComponentName;
 import static com.android.internal.print.DumpUtils.writePrintJobInfo;
 import static com.android.internal.print.DumpUtils.writePrinterId;
 import static com.android.internal.print.DumpUtils.writePrinterInfo;
-import static com.android.internal.print.DumpUtils.writeStringIfNotNull;
+import static com.android.internal.util.dump.DumpUtils.writeComponentName;
+import static com.android.internal.util.dump.DumpUtils.writeStringIfNotNull;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.annotation.NonNull;
@@ -81,7 +81,7 @@ import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.print.DualDumpOutputStream;
+import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.print.RemotePrintService.PrintServiceCallbacks;
 import com.android.server.print.RemotePrintServiceRecommendationService
         .RemotePrintServiceRecommendationServiceCallbacks;
