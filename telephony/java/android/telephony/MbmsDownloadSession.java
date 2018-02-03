@@ -437,6 +437,7 @@ public class MbmsDownloadSession implements AutoCloseable {
             int result = downloadService.setTempFileRootDirectory(mSubscriptionId, filePath);
             if (result != MbmsErrors.SUCCESS) {
                 sendErrorToApp(result, null);
+                return;
             }
         } catch (RemoteException e) {
             mService.set(null);
