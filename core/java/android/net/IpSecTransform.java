@@ -21,6 +21,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.Binder;
@@ -266,6 +267,10 @@ public final class IpSecTransform implements AutoCloseable {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_STACK,
+            android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD
+    })
     public void startNattKeepalive(@NonNull NattKeepaliveCallback userCallback,
             int intervalSeconds, @NonNull Handler handler) throws IOException {
         checkNotNull(userCallback);
@@ -305,6 +310,10 @@ public final class IpSecTransform implements AutoCloseable {
      * @hide
      */
     @SystemApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_STACK,
+            android.Manifest.permission.PACKET_KEEPALIVE_OFFLOAD
+    })
     public void stopNattKeepalive() {
         synchronized (mKeepaliveCallback) {
             if (mKeepalive == null) {
@@ -449,6 +458,7 @@ public final class IpSecTransform implements AutoCloseable {
          * @hide
          */
         @SystemApi
+        @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
         public IpSecTransform buildTunnelModeTransform(
                 @NonNull InetAddress sourceAddress,
                 @NonNull IpSecManager.SecurityParameterIndex spi)

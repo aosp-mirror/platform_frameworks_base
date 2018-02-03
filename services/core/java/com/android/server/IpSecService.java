@@ -1438,12 +1438,19 @@ public class IpSecService extends IIpSecService.Stub {
 
         switch (config.getMode()) {
             case IpSecTransform.MODE_TRANSPORT:
+                break;
             case IpSecTransform.MODE_TUNNEL:
+                enforceNetworkStackPermission();
                 break;
             default:
                 throw new IllegalArgumentException(
                         "Invalid IpSecTransform.mode: " + config.getMode());
         }
+    }
+
+    private void enforceNetworkStackPermission() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.NETWORK_STACK,
+                "IpSecService");
     }
 
     private void createOrUpdateTransform(
@@ -1615,6 +1622,7 @@ public class IpSecService extends IIpSecService.Stub {
     @Override
     public synchronized void applyTunnelModeTransform(
             int tunnelResourceId, int direction, int transformResourceId) throws RemoteException {
+        enforceNetworkStackPermission();
         checkDirection(direction);
 
         UserRecord userRecord = mUserResourceTracker.getUserRecord(Binder.getCallingUid());
