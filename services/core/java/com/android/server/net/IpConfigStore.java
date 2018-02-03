@@ -24,11 +24,11 @@ import android.net.NetworkUtils;
 import android.net.ProxyInfo;
 import android.net.RouteInfo;
 import android.net.StaticIpConfiguration;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.net.DelayedDiskWrite;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
@@ -38,8 +38,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetAddress;
 import java.net.Inet4Address;
+import java.net.InetAddress;
 
 public class IpConfigStore {
     private static final String TAG = "IpConfigStore";
@@ -60,7 +60,7 @@ public class IpConfigStore {
     protected static final String EXCLUSION_LIST_KEY = "exclusionList";
     protected static final String EOS = "eos";
 
-    protected static final int IPCONFIG_FILE_VERSION = 2;
+    protected static final int IPCONFIG_FILE_VERSION = 3;
 
     public IpConfigStore(DelayedDiskWrite writer) {
         mWriter = writer;
@@ -70,9 +70,14 @@ public class IpConfigStore {
         this(new DelayedDiskWrite());
     }
 
+    private static boolean writeConfig(DataOutputStream out, String configKey,
+            IpConfiguration config) throws IOException {
+        return writeConfig(out, configKey, config, IPCONFIG_FILE_VERSION);
+    }
+
     @VisibleForTesting
-    public static boolean writeConfig(DataOutputStream out, int configKey,
-                                IpConfiguration config) throws IOException {
+    public static boolean writeConfig(DataOutputStream out, String configKey,
+                                IpConfiguration config, int version) throws IOException {
         boolean written = false;
 
         try {
@@ -153,7 +158,11 @@ public class IpConfigStore {
 
             if (written) {
                 out.writeUTF(ID_KEY);
-                out.writeInt(configKey);
+                if (version < 3) {
+                    out.writeInt(Integer.valueOf(configKey));
+                } else {
+                    out.writeUTF(configKey);
+                }
             }
         } catch (NullPointerException e) {
             loge("Failure in writing " + config + e);
@@ -163,18 +172,47 @@ public class IpConfigStore {
         return written;
     }
 
-    public void writeIpAndProxyConfigurations(String filePath,
+    /**
+     * @Deprecated use {@link #writeIpConfigurations(String, ArrayMap)} instead.
+     * New method uses string as network identifier which could be interface name or MAC address or
+     * other token.
+     */
+    @Deprecated
+    public void writeIpAndProxyConfigurationsToFile(String filePath,
                                               final SparseArray<IpConfiguration> networks) {
-        mWriter.write(filePath, new DelayedDiskWrite.Writer() {
-            public void onWriteCalled(DataOutputStream out) throws IOException{
-                out.writeInt(IPCONFIG_FILE_VERSION);
-                for(int i = 0; i < networks.size(); i++) {
-                    writeConfig(out, networks.keyAt(i), networks.valueAt(i));
-                }
+        mWriter.write(filePath, out -> {
+            out.writeInt(IPCONFIG_FILE_VERSION);
+            for(int i = 0; i < networks.size(); i++) {
+                writeConfig(out, String.valueOf(networks.keyAt(i)), networks.valueAt(i));
             }
         });
     }
 
+    public void writeIpConfigurations(String filePath,
+                                      ArrayMap<String, IpConfiguration> networks) {
+        mWriter.write(filePath, out -> {
+            out.writeInt(IPCONFIG_FILE_VERSION);
+            for(int i = 0; i < networks.size(); i++) {
+                writeConfig(out, networks.keyAt(i), networks.valueAt(i));
+            }
+        });
+    }
+
+    public static ArrayMap<String, IpConfiguration> readIpConfigurations(String filePath) {
+        BufferedInputStream bufferedInputStream;
+        try {
+            bufferedInputStream = new BufferedInputStream(new FileInputStream(filePath));
+        } catch (FileNotFoundException e) {
+            // Return an empty array here because callers expect an empty array when the file is
+            // not present.
+            loge("Error opening configuration file: " + e);
+            return new ArrayMap<>(0);
+        }
+        return readIpConfigurations(bufferedInputStream);
+    }
+
+    /** @Deprecated use {@link #readIpConfigurations(String)} */
+    @Deprecated
     public static SparseArray<IpConfiguration> readIpAndProxyConfigurations(String filePath) {
         BufferedInputStream bufferedInputStream;
         try {
@@ -188,21 +226,40 @@ public class IpConfigStore {
         return readIpAndProxyConfigurations(bufferedInputStream);
     }
 
+    /** @Deprecated use {@link #readIpConfigurations(InputStream)} */
+    @Deprecated
     public static SparseArray<IpConfiguration> readIpAndProxyConfigurations(
             InputStream inputStream) {
-        SparseArray<IpConfiguration> networks = new SparseArray<IpConfiguration>();
+        ArrayMap<String, IpConfiguration> networks = readIpConfigurations(inputStream);
+        if (networks == null) {
+            return null;
+        }
+
+        SparseArray<IpConfiguration> networksById = new SparseArray<>();
+        for (int i = 0; i < networks.size(); i++) {
+            int id = Integer.valueOf(networks.keyAt(i));
+            networksById.put(id, networks.valueAt(i));
+        }
+
+        return networksById;
+    }
+
+    /** Returns a map of network identity token and {@link IpConfiguration}. */
+    public static ArrayMap<String, IpConfiguration> readIpConfigurations(
+            InputStream inputStream) {
+        ArrayMap<String, IpConfiguration> networks = new ArrayMap<>();
         DataInputStream in = null;
         try {
             in = new DataInputStream(inputStream);
 
             int version = in.readInt();
-            if (version != 2 && version != 1) {
+            if (version != 3 && version != 2 && version != 1) {
                 loge("Bad version on IP configuration file, ignore read");
                 return null;
             }
 
             while (true) {
-                int id = -1;
+                String uniqueToken = null;
                 // Default is DHCP with no proxy
                 IpAssignment ipAssignment = IpAssignment.DHCP;
                 ProxySettings proxySettings = ProxySettings.NONE;
@@ -217,7 +274,12 @@ public class IpConfigStore {
                     key = in.readUTF();
                     try {
                         if (key.equals(ID_KEY)) {
-                            id = in.readInt();
+                            if (version < 3) {
+                                int id = in.readInt();
+                                uniqueToken = String.valueOf(id);
+                            } else {
+                                uniqueToken = in.readUTF();
+                            }
                         } else if (key.equals(IP_ASSIGNMENT_KEY)) {
                             ipAssignment = IpAssignment.valueOf(in.readUTF());
                         } else if (key.equals(LINK_ADDRESS_KEY)) {
@@ -280,9 +342,9 @@ public class IpConfigStore {
                     }
                 } while (true);
 
-                if (id != -1) {
+                if (uniqueToken != null) {
                     IpConfiguration config = new IpConfiguration();
-                    networks.put(id, config);
+                    networks.put(uniqueToken, config);
 
                     switch (ipAssignment) {
                         case STATIC:
