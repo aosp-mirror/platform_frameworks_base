@@ -459,10 +459,9 @@ public class AppWidgetManager {
      */
     public static final String META_DATA_APPWIDGET_PROVIDER = "android.appwidget.provider";
 
+    private final Context mContext;
     private final String mPackageName;
-
     private final IAppWidgetService mService;
-
     private final DisplayMetrics mDisplayMetrics;
 
     /**
@@ -481,6 +480,7 @@ public class AppWidgetManager {
      * @hide
      */
     public AppWidgetManager(Context context, IAppWidgetService service) {
+        mContext = context;
         mPackageName = context.getOpPackageName();
         mService = service;
         mDisplayMetrics = context.getResources().getDisplayMetrics();
@@ -845,7 +845,7 @@ public class AppWidgetManager {
         }
 
         if (profile == null) {
-            profile = Process.myUserHandle();
+            profile = mContext.getUser();
         }
 
         try {
@@ -924,7 +924,7 @@ public class AppWidgetManager {
         if (mService == null) {
             return;
         }
-        bindAppWidgetIdIfAllowed(appWidgetId, Process.myUserHandle(), provider, options);
+        bindAppWidgetIdIfAllowed(appWidgetId, mContext.getUser(), provider, options);
     }
 
     /**
@@ -944,7 +944,7 @@ public class AppWidgetManager {
         if (mService == null) {
             return false;
         }
-        return bindAppWidgetIdIfAllowed(appWidgetId, UserHandle.myUserId(), provider, null);
+        return bindAppWidgetIdIfAllowed(appWidgetId, mContext.getUserId(), provider, null);
     }
 
     /**
@@ -968,7 +968,7 @@ public class AppWidgetManager {
         if (mService == null) {
             return false;
         }
-        return bindAppWidgetIdIfAllowed(appWidgetId, UserHandle.myUserId(), provider, options);
+        return bindAppWidgetIdIfAllowed(appWidgetId, mContext.getUserId(), provider, options);
     }
 
     /**
@@ -1030,7 +1030,7 @@ public class AppWidgetManager {
             return false;
         }
         try {
-            return mService.hasBindAppWidgetPermission(packageName, UserHandle.myUserId());
+            return mService.hasBindAppWidgetPermission(packageName, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1050,7 +1050,7 @@ public class AppWidgetManager {
         if (mService == null) {
             return;
         }
-        setBindAppWidgetPermission(packageName, UserHandle.myUserId(), permission);
+        setBindAppWidgetPermission(packageName, mContext.getUserId(), permission);
     }
 
     /**

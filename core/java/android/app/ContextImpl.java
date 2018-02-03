@@ -164,7 +164,7 @@ class ContextImpl extends Context {
 
     private final @Nullable IBinder mActivityToken;
 
-    private final @Nullable UserHandle mUser;
+    private final @NonNull UserHandle mUser;
 
     private final ApplicationContentResolver mContentResolver;
 
@@ -1565,8 +1565,7 @@ class ContextImpl extends Context {
     public boolean bindService(Intent service, ServiceConnection conn,
             int flags) {
         warnIfCallingFromSystemProcess();
-        return bindServiceCommon(service, conn, flags, mMainThread.getHandler(),
-                Process.myUserHandle());
+        return bindServiceCommon(service, conn, flags, mMainThread.getHandler(), getUser());
     }
 
     /** @hide */
@@ -2038,8 +2037,7 @@ class ContextImpl extends Context {
     @Override
     public Context createPackageContext(String packageName, int flags)
             throws NameNotFoundException {
-        return createPackageContextAsUser(packageName, flags,
-                mUser != null ? mUser : Process.myUserHandle());
+        return createPackageContextAsUser(packageName, flags, mUser);
     }
 
     @Override
@@ -2235,6 +2233,12 @@ class ContextImpl extends Context {
 
     /** {@hide} */
     @Override
+    public UserHandle getUser() {
+        return mUser;
+    }
+
+    /** {@hide} */
+    @Override
     public int getUserId() {
         return mUser.getIdentifier();
     }
@@ -2382,7 +2386,7 @@ class ContextImpl extends Context {
             }
         }
 
-        mContentResolver = new ApplicationContentResolver(this, mainThread, user);
+        mContentResolver = new ApplicationContentResolver(this, mainThread);
     }
 
     void setResources(Resources r) {
@@ -2498,13 +2502,10 @@ class ContextImpl extends Context {
 
     private static final class ApplicationContentResolver extends ContentResolver {
         private final ActivityThread mMainThread;
-        private final UserHandle mUser;
 
-        public ApplicationContentResolver(
-                Context context, ActivityThread mainThread, UserHandle user) {
+        public ApplicationContentResolver(Context context, ActivityThread mainThread) {
             super(context);
             mMainThread = Preconditions.checkNotNull(mainThread);
-            mUser = Preconditions.checkNotNull(user);
         }
 
         @Override
@@ -2550,7 +2551,7 @@ class ContextImpl extends Context {
 
         /** @hide */
         protected int resolveUserIdFromAuthority(String auth) {
-            return ContentProvider.getUserIdFromAuthority(auth, mUser.getIdentifier());
+            return ContentProvider.getUserIdFromAuthority(auth, getUserId());
         }
     }
 }

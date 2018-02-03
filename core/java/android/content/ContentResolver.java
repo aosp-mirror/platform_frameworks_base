@@ -2999,6 +2999,11 @@ public abstract class ContentResolver {
     }
 
     /** @hide */
+    public int getUserId() {
+        return mContext.getUserId();
+    }
+
+    /** @hide */
     public Drawable getTypeDrawable(String mimeType) {
         return MimeIconUtils.loadMimeIcon(mContext, mimeType);
     }

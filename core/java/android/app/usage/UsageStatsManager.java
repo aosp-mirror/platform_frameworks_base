@@ -301,7 +301,7 @@ public final class UsageStatsManager {
      */
     public boolean isAppInactive(String packageName) {
         try {
-            return mService.isAppInactive(packageName, UserHandle.myUserId());
+            return mService.isAppInactive(packageName, mContext.getUserId());
         } catch (RemoteException e) {
             // fall through and return default
         }
@@ -313,7 +313,7 @@ public final class UsageStatsManager {
      */
     public void setAppInactive(String packageName, boolean inactive) {
         try {
-            mService.setAppInactive(packageName, inactive, UserHandle.myUserId());
+            mService.setAppInactive(packageName, inactive, mContext.getUserId());
         } catch (RemoteException e) {
             // fall through
         }

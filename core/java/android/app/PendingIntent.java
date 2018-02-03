@@ -345,7 +345,7 @@ public final class PendingIntent implements Parcelable {
                     ActivityManager.INTENT_SENDER_ACTIVITY, packageName,
                     null, null, requestCode, new Intent[] { intent },
                     resolvedType != null ? new String[] { resolvedType } : null,
-                    flags, options, UserHandle.myUserId());
+                    flags, options, context.getUserId());
             return target != null ? new PendingIntent(target) : null;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -486,7 +486,7 @@ public final class PendingIntent implements Parcelable {
                 ActivityManager.getService().getIntentSender(
                     ActivityManager.INTENT_SENDER_ACTIVITY, packageName,
                     null, null, requestCode, intents, resolvedTypes, flags, options,
-                    UserHandle.myUserId());
+                    context.getUserId());
             return target != null ? new PendingIntent(target) : null;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -544,8 +544,7 @@ public final class PendingIntent implements Parcelable {
      */
     public static PendingIntent getBroadcast(Context context, int requestCode,
             Intent intent, @Flags int flags) {
-        return getBroadcastAsUser(context, requestCode, intent, flags,
-                new UserHandle(UserHandle.myUserId()));
+        return getBroadcastAsUser(context, requestCode, intent, flags, context.getUser());
     }
 
     /**
@@ -644,7 +643,7 @@ public final class PendingIntent implements Parcelable {
                     serviceKind, packageName,
                     null, null, requestCode, new Intent[] { intent },
                     resolvedType != null ? new String[] { resolvedType } : null,
-                    flags, null, UserHandle.myUserId());
+                    flags, null, context.getUserId());
             return target != null ? new PendingIntent(target) : null;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

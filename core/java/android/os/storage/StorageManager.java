@@ -1096,7 +1096,7 @@ public class StorageManager {
     public @NonNull List<StorageVolume> getStorageVolumes() {
         final ArrayList<StorageVolume> res = new ArrayList<>();
         Collections.addAll(res,
-                getVolumeList(UserHandle.myUserId(), FLAG_REAL_STATE | FLAG_INCLUDE_INVISIBLE));
+                getVolumeList(mContext.getUserId(), FLAG_REAL_STATE | FLAG_INCLUDE_INVISIBLE));
         return res;
     }
 
@@ -1107,7 +1107,7 @@ public class StorageManager {
      * {@link Context#getExternalFilesDir(String)}.
      */
     public @NonNull StorageVolume getPrimaryStorageVolume() {
-        return getVolumeList(UserHandle.myUserId(), FLAG_REAL_STATE | FLAG_INCLUDE_INVISIBLE)[0];
+        return getVolumeList(mContext.getUserId(), FLAG_REAL_STATE | FLAG_INCLUDE_INVISIBLE)[0];
     }
 
     /** {@hide} */

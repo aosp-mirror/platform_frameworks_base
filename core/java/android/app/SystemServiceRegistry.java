@@ -38,6 +38,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.IRestrictionsManager;
 import android.content.RestrictionsManager;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.CrossProfileApps;
 import android.content.pm.ICrossProfileApps;
 import android.content.pm.IShortcutService;
@@ -724,8 +725,9 @@ final class SystemServiceRegistry {
                     service = IPrintManager.Stub.asInterface(ServiceManager
                             .getServiceOrThrow(Context.PRINT_SERVICE));
                 }
-                return new PrintManager(ctx.getOuterContext(), service, UserHandle.myUserId(),
-                        UserHandle.getAppId(Process.myUid()));
+                final int userId = ctx.getUserId();
+                final int appId = UserHandle.getAppId(ctx.getApplicationInfo().uid);
+                return new PrintManager(ctx.getOuterContext(), service, userId, appId);
             }});
 
         registerService(Context.COMPANION_DEVICE_SERVICE, CompanionDeviceManager.class,
@@ -780,12 +782,12 @@ final class SystemServiceRegistry {
             }});
 
         registerService(Context.TV_INPUT_SERVICE, TvInputManager.class,
-                new StaticServiceFetcher<TvInputManager>() {
+                new CachedServiceFetcher<TvInputManager>() {
             @Override
-            public TvInputManager createService() throws ServiceNotFoundException {
+            public TvInputManager createService(ContextImpl ctx) throws ServiceNotFoundException {
                 IBinder iBinder = ServiceManager.getServiceOrThrow(Context.TV_INPUT_SERVICE);
                 ITvInputManager service = ITvInputManager.Stub.asInterface(iBinder);
-                return new TvInputManager(service, UserHandle.myUserId());
+                return new TvInputManager(service, ctx.getUserId());
             }});
 
         registerService(Context.NETWORK_SCORE_SERVICE, NetworkScoreManager.class,

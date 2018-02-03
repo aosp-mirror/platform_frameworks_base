@@ -140,7 +140,7 @@ public class DevicePolicyManager {
     /** @hide test will override it. */
     @VisibleForTesting
     protected int myUserId() {
-        return UserHandle.myUserId();
+        return mContext.getUserId();
     }
 
     /**
@@ -5511,7 +5511,7 @@ public class DevicePolicyManager {
     @SystemApi
     public @Nullable ComponentName getProfileOwner() throws IllegalArgumentException {
         throwIfParentInstance("getProfileOwner");
-        return getProfileOwnerAsUser(Process.myUserHandle().getIdentifier());
+        return getProfileOwnerAsUser(mContext.getUserId());
     }
 
     /**
@@ -5539,7 +5539,7 @@ public class DevicePolicyManager {
     public @Nullable String getProfileOwnerName() throws IllegalArgumentException {
         if (mService != null) {
             try {
-                return mService.getProfileOwnerName(Process.myUserHandle().getIdentifier());
+                return mService.getProfileOwnerName(mContext.getUserId());
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
