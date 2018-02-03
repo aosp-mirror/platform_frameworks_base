@@ -31,12 +31,12 @@ public enum ScrimState {
     /**
      * Initial state.
      */
-    UNINITIALIZED,
+    UNINITIALIZED(-1),
 
     /**
      * On the lock screen.
      */
-    KEYGUARD {
+    KEYGUARD(0) {
 
         @Override
         public void prepare(ScrimState previousState) {
@@ -61,7 +61,7 @@ public enum ScrimState {
     /**
      * Showing password challenge.
      */
-    BOUNCER {
+    BOUNCER(1) {
         @Override
         public void prepare(ScrimState previousState) {
             mCurrentBehindAlpha = ScrimController.SCRIM_BEHIND_ALPHA_UNLOCKING;
@@ -72,7 +72,7 @@ public enum ScrimState {
     /**
      * Changing screen brightness from quick settings.
      */
-    BRIGHTNESS_MIRROR {
+    BRIGHTNESS_MIRROR(2) {
         @Override
         public void prepare(ScrimState previousState) {
             mCurrentBehindAlpha = 0;
@@ -83,7 +83,7 @@ public enum ScrimState {
     /**
      * Always on display or screen off.
      */
-    AOD {
+    AOD(3) {
         @Override
         public void prepare(ScrimState previousState) {
             if (previousState == ScrimState.PULSING && !mCanControlScreenOff) {
@@ -106,7 +106,7 @@ public enum ScrimState {
     /**
      * When phone wakes up because you received a notification.
      */
-    PULSING {
+    PULSING(4) {
         @Override
         public void prepare(ScrimState previousState) {
             mCurrentInFrontAlpha = 0;
@@ -124,7 +124,7 @@ public enum ScrimState {
     /**
      * Unlocked on top of an app (launcher or any other activity.)
      */
-    UNLOCKED {
+    UNLOCKED(5) {
         @Override
         public void prepare(ScrimState previousState) {
             mCurrentBehindAlpha = 0;
@@ -164,6 +164,11 @@ public enum ScrimState {
     boolean mCanControlScreenOff;
     boolean mWallpaperSupportsAmbientMode;
     KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    int mIndex;
+
+    ScrimState(int index) {
+        mIndex = index;
+    }
 
     public void init(ScrimView scrimInFront, ScrimView scrimBehind, DozeParameters dozeParameters) {
         mScrimInFront = scrimInFront;
@@ -175,6 +180,10 @@ public enum ScrimState {
     }
 
     public void prepare(ScrimState previousState) {
+    }
+
+    public int getIndex() {
+        return mIndex;
     }
 
     public float getFrontAlpha() {
