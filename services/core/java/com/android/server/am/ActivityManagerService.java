@@ -1286,6 +1286,40 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    DevelopmentSettingsObserver mDevelopmentSettingsObserver;
+
+    private final class DevelopmentSettingsObserver extends ContentObserver {
+        private final Uri mUri = Settings.Global
+                .getUriFor(Settings.Global.DEVELOPMENT_SETTINGS_ENABLED);
+
+        private final ComponentName mBugreportStorageProvider = new ComponentName(
+                "com.android.shell", "com.android.shell.BugreportStorageProvider");
+
+        public DevelopmentSettingsObserver() {
+            super(mHandler);
+            mContext.getContentResolver().registerContentObserver(mUri, false, this,
+                    UserHandle.USER_ALL);
+            // Always kick once to ensure that we match current state
+            onChange();
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri, @UserIdInt int userId) {
+            if (mUri.equals(uri)) {
+                onChange();
+            }
+        }
+
+        public void onChange() {
+            final boolean enabled = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, Build.IS_ENG ? 1 : 0) != 0;
+            mContext.getPackageManager().setComponentEnabledSetting(mBugreportStorageProvider,
+                    enabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                            : PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
+                    0);
+        }
+    }
+
     /**
      * Thread-local storage used to carry caller permissions over through
      * indirect content-provider access.
@@ -12426,6 +12460,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mConstants.start(mContext.getContentResolver());
         mCoreSettingsObserver = new CoreSettingsObserver(this);
         mFontScaleSettingObserver = new FontScaleSettingObserver();
+        mDevelopmentSettingsObserver = new DevelopmentSettingsObserver();
         GlobalSettingsToPropertiesMapper.start(mContext.getContentResolver());
 
         // Now that the settings provider is published we can consider sending
