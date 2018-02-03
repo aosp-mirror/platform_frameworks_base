@@ -777,8 +777,11 @@ public class ActivityManagerService extends IActivityManager.Stub
     long mWaitForNetworkTimeoutMs;
 
     /**
-     * Helper class which parses out priority arguments and dumps sections according to their
-     * priority. If priority arguments are omitted, function calls the legacy dump command.
+     * Helper class which strips out priority and proto arguments then calls the dump function with
+     * the appropriate arguments. If priority arguments are omitted, function calls the legacy
+     * dump command.
+     * If priority arguments are omitted all sections are dumped, otherwise sections are dumped
+     * according to their priority.
      */
     private final PriorityDump.PriorityDumper mPriorityDumper = new PriorityDump.PriorityDumper() {
         @Override
@@ -790,24 +793,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void dumpNormal(FileDescriptor fd, PrintWriter pw, String[] args, boolean asProto) {
-            if (asProto) {
-                doDump(fd, pw, new String[0], asProto);
-            } else {
-                doDump(fd, pw, new String[]{"settings"}, asProto);
-                doDump(fd, pw, new String[]{"intents"}, asProto);
-                doDump(fd, pw, new String[]{"broadcasts"}, asProto);
-                doDump(fd, pw, new String[]{"providers"}, asProto);
-                doDump(fd, pw, new String[]{"permissions"}, asProto);
-                doDump(fd, pw, new String[]{"services"}, asProto);
-                doDump(fd, pw, new String[]{"recents"}, asProto);
-                doDump(fd, pw, new String[]{"lastanr"}, asProto);
-                doDump(fd, pw, new String[]{"starter"}, asProto);
-                doDump(fd, pw, new String[]{"containers"}, asProto);
-                if (mAssociations.size() > 0) {
-                    doDump(fd, pw, new String[]{"associations"}, asProto);
-                }
-                doDump(fd, pw, new String[]{"processes"}, asProto);
-            }
+            doDump(fd, pw, new String[]{"-a", "--normal-priority"}, asProto);
         }
 
         @Override
@@ -15455,6 +15441,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean dumpClient = false;
         boolean dumpCheckin = false;
         boolean dumpCheckinFormat = false;
+        boolean dumpNormalPriority = false;
         boolean dumpVisibleStacksOnly = false;
         boolean dumpFocusedStackOnly = false;
         String dumpPackage = null;
@@ -15487,6 +15474,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 dumpCheckin = dumpCheckinFormat = true;
             } else if ("-C".equals(opt)) {
                 dumpCheckinFormat = true;
+            } else if ("--normal-priority".equals(opt)) {
+                dumpNormalPriority = true;
             } else if ("-h".equals(opt)) {
                 ActivityManagerShellCommand.dumpHelp(pw, true);
                 return;
@@ -15888,11 +15877,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                     pw.println("-------------------------------------------------------------------------------");
                 }
                 dumpActivityContainersLocked(pw);
-                pw.println();
-                if (dumpAll) {
-                    pw.println("-------------------------------------------------------------------------------");
+                // Activities section is dumped as part of the Critical priority dump. Exclude the
+                // section if priority is Normal.
+                if (!dumpNormalPriority){
+                    pw.println();
+                    if (dumpAll) {
+                        pw.println("-------------------------------------------------------------------------------");
+                    }
+                    dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
                 }
-                dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
                 if (mAssociations.size() > 0) {
                     pw.println();
                     if (dumpAll) {
