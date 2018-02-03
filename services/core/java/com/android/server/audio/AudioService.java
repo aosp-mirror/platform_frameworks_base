@@ -23,6 +23,7 @@ import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 import static android.os.Process.FIRST_APPLICATION_UID;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -240,6 +241,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_DYN_POLICY_MIX_STATE_UPDATE = 25;
     private static final int MSG_INDICATE_SYSTEM_READY = 26;
     private static final int MSG_ACCESSORY_PLUG_MEDIA_UNMUTE = 27;
+    private static final int MSG_NOTIFY_VOL_EVENT = 28;
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
@@ -1334,11 +1336,9 @@ public class AudioService extends IAudioService.Stub
             extVolCtlr = mExtVolumeController;
         }
         if (extVolCtlr != null) {
-            try {
-                mExtVolumeController.notifyVolumeAdjust(direction);
-            } catch(RemoteException e) {
-                // nothing we can do about this. Do not log error, too much potential for spam
-            }
+            sendMsg(mAudioHandler, MSG_NOTIFY_VOL_EVENT, SENDMSG_QUEUE,
+                    direction, 0 /*ignored*/,
+                    extVolCtlr, 0 /*delay*/);
         } else {
             adjustSuggestedStreamVolume(direction, suggestedStreamType, flags, callingPackage,
                     caller, Binder.getCallingUid());
@@ -5054,6 +5054,15 @@ public class AudioService extends IAudioService.Stub
                     state);
         }
 
+        private void onNotifyVolumeEvent(@NonNull IAudioPolicyCallback apc,
+                @AudioManager.VolumeAdjustment int direction) {
+            try {
+                apc.notifyVolumeAdjust(direction);
+            } catch(Exception e) {
+                // nothing we can do about this. Do not log error, too much potential for spam
+            }
+        }
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -5215,6 +5224,10 @@ public class AudioService extends IAudioService.Stub
 
                 case MSG_DYN_POLICY_MIX_STATE_UPDATE:
                     onDynPolicyMixStateUpdate((String) msg.obj, msg.arg1);
+                    break;
+
+                case MSG_NOTIFY_VOL_EVENT:
+                    onNotifyVolumeEvent((IAudioPolicyCallback) msg.obj, msg.arg1);
                     break;
             }
         }
