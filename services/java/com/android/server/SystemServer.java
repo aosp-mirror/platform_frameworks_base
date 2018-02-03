@@ -1193,7 +1193,6 @@ public final class SystemServer {
             SystemNotificationChannels.createAll(context);
             notification = INotificationManager.Stub.asInterface(
                     ServiceManager.getService(Context.NOTIFICATION_SERVICE));
-            networkPolicy.bindNotificationManager(notification);
             traceEnd();
 
             traceBeginAndSlog("StartDeviceMonitor");
