@@ -417,10 +417,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Овозможува апликацијата да пристапи кон карактеристиките на телефонот на уредот. Оваа дозвола овозможува апликацијата да ги утврди телефонскиот број и ID на уредот, дали повикот е активен и далечинскиот број поврзан со повикот."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"пренасочи повици преку системот"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Дозволете ѝ на апликацијата да ги пренасочи повиците преку системот за да го подобри искуството при јавувањето."</string>
-    <!-- no translation found for permlab_acceptHandover (2661534649736022409) -->
-    <skip />
-    <!-- no translation found for permdesc_acceptHandovers (4570660484220539698) -->
-    <skip />
+    <string name="permlab_acceptHandover" msgid="2661534649736022409">"продолжување повик од друга апликација"</string>
+    <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Овозможува апликацијата да продолжи повик започнат на друга апликација."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"да чита телефонски броеви"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Ѝ дозволува на апликацијата да пристапи до телефонските броеви на уредот."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"спречи режим на штедење кај таблет"</string>
@@ -499,6 +497,10 @@
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Премногу обиди. Обидете се повторно подоцна."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Премногу обиди. Сензорот за отпечатоци е оневозможен."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Обидете се повторно."</string>
+    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Прст <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -997,12 +999,9 @@
     <string name="browse" msgid="1245903488306147205">"Отвори"</string>
     <string name="sms" msgid="4560537514610063430">"Порака"</string>
     <string name="add_contact" msgid="7867066569670597203">"Додај"</string>
-    <!-- no translation found for view_calendar (979609872939597838) -->
-    <skip />
-    <!-- no translation found for add_calendar_event (1953664627192056206) -->
-    <skip />
-    <!-- no translation found for view_flight (7691640491425680214) -->
-    <skip />
+    <string name="view_calendar" msgid="979609872939597838">"Прикажи"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Распоред"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Песна"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"Капацитетот е речиси полн"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"Некои системски функции може да не работат"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"Нема доволно меморија во системот. Проверете дали има слободен простор од 250 МБ и рестартирајте."</string>
@@ -1128,8 +1127,7 @@
       <item quantity="other">Отворени Wi-Fi мрежи се достапни</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Поврзете се на отворена Wi‑Fi-мрежа"</string>
-    <!-- no translation found for wifi_available_carrier_network_title (4527932626916527897) -->
-    <skip />
+    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Поврзете се на Wi‑Fi-мрежа на оператор"</string>
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"Поврзување на отворена Wi‑Fi-мрежа"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Се поврзавте на Wi‑Fi-мрежа"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Не можеше да се поврзе на Wi‑Fi-мрежа"</string>
@@ -1214,13 +1212,23 @@
     <string name="no_permissions" msgid="7283357728219338112">"Не се потребни дозволи"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"ова може да ве чини пари"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Во ред"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"Уредов се полни преку USB"</string>
-    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"Прикачениот уред се напојува преку USB"</string>
-    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB за пренос на датотеки"</string>
-    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB за пренос на фотографии"</string>
-    <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB за МИДИ"</string>
-    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Поврзан со USB додаток"</string>
+    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
+    <skip />
+    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
+    <skip />
+    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
+    <skip />
+    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
+    <skip />
     <string name="usb_notification_message" msgid="3370903770828407960">"Допрете за повеќе опции."</string>
+    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
+    <skip />
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"Откриен е аналоген аудиододаток"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"Приложениот уред не е компатибилен со телефонов. Допрете за да дознаете повеќе."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Поврзано е отстранување грешки преку USB"</string>
@@ -1661,9 +1669,6 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"Работа <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"Втора деловна <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"Трета деловна <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="6820571533009838261">"За откачување на екранов, допрете и задржете ги копчињата „Назад“ и „Краток преглед“."</string>
-    <string name="lock_to_app_start" msgid="6643342070839862795">"Екранот е закачен"</string>
-    <string name="lock_to_app_exit" msgid="8598219838213787430">"Екранот е откачен"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Прашај за PIN пред откачување"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Побарај шема за откл. пред откачување"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Прашај за лозинка пред откачување"</string>
@@ -1760,10 +1765,8 @@
     <string name="work_mode_off_title" msgid="1118691887588435530">"Да се вклучи работниот профил?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"Вашите работни апликации, известувања, податоци и други функции на работниот профил ќе бидат вклучени"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Вклучи"</string>
-    <!-- no translation found for deprecated_target_sdk_message (1449696506742572767) -->
-    <skip />
-    <!-- no translation found for deprecated_target_sdk_app_store (5032340500368495077) -->
-    <skip />
+    <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"Апликацијава е создадена за постара верзија на Android и може да не функционира правилно. Проверете за ажурирања или контактирајте со програмерот."</string>
+    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Проверка за ажурирање"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Имате нови пораки"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Отворете ја апликацијата за SMS за приказ"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Некои функции се ограничени"</string>
@@ -1830,17 +1833,15 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"Не е дозволен телефон за глас"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Појавен прозорец"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"За кратенкава е потребна најновата апликација"</string>
+    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
+    <skip />
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"Не можеше да се врати кратенката бидејќи апликацијата не поддржува бекап и враќање"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"Не можеше да се врати кратенката бидејќи потписот на апликацијата не се совпаѓа"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"Не можеше да се врати кратенката"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"Кратенката е оневозможена"</string>
-    <!-- no translation found for harmful_app_warning_uninstall (4837672735619532931) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_open_anyway (596432803680914321) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_title (8982527462829423432) -->
-    <skip />
+    <string name="harmful_app_warning_uninstall" msgid="4837672735619532931">"ДЕИНСТАЛИРАЈ"</string>
+    <string name="harmful_app_warning_open_anyway" msgid="596432803680914321">"СЕПАК ОТВОРИ"</string>
+    <string name="harmful_app_warning_title" msgid="8982527462829423432">"Откриена е штетна апликација"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> сака да прикажува делови од <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"Измени"</string>
 </resources>
