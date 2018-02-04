@@ -2584,6 +2584,14 @@
     <!-- Flag specifying whether or not IMS will use the dynamic ImsResolver -->
     <bool name="config_dynamic_bind_ims">false</bool>
 
+    <!-- Cellular data service package name to bind to by default. If none is specified in an overlay, an
+         empty string is passed in -->
+    <string name="config_wwan_data_service_package" translatable="false">com.android.phone</string>
+
+    <!-- IWLAN data service package name to bind to by default. If none is specified in an overlay, an
+         empty string is passed in -->
+    <string name="config_wlan_data_service_package" translatable="false"></string>
+
     <bool name="config_networkSamplingWakesDevice">true</bool>
 
     <!-- Home (non-roaming) values for CDMA roaming indicator.

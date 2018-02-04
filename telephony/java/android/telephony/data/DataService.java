@@ -34,6 +34,8 @@ import android.telephony.AccessNetworkConstants;
 import android.telephony.Rlog;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -105,7 +107,9 @@ public abstract class DataService extends Service {
 
     private final SparseArray<DataServiceProvider> mServiceMap = new SparseArray<>();
 
-    private final IBinder mBinder = new IDataServiceWrapper();
+    /** @hide */
+    @VisibleForTesting
+    public final IDataServiceWrapper mBinder = new IDataServiceWrapper();
 
     /**
      * The abstract class of the actual data service implementation. The data service provider
