@@ -19,6 +19,7 @@ package com.android.server.locksettings.recoverablekeystore.storage;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.KeysEntry;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDbContract.RecoveryServiceMetadataEntry;
@@ -28,7 +29,9 @@ import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKe
  * Helper for creating the recoverable key database.
  */
 class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
-    private static final int DATABASE_VERSION = 2;
+    private static final String TAG = "RecoverableKeyStoreDbHp";
+
+    static final int DATABASE_VERSION = 3;
     private static final String DATABASE_NAME = "recoverablekeystore.db";
 
     private static final String SQL_CREATE_KEYS_ENTRY =
@@ -59,6 +62,8 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
                     + RecoveryServiceMetadataEntry.COLUMN_NAME_SNAPSHOT_VERSION + " INTEGER,"
                     + RecoveryServiceMetadataEntry.COLUMN_NAME_SHOULD_CREATE_SNAPSHOT + " INTEGER,"
                     + RecoveryServiceMetadataEntry.COLUMN_NAME_PUBLIC_KEY + " BLOB,"
+                    + RecoveryServiceMetadataEntry.COLUMN_NAME_CERT_PATH + " BLOB,"
+                    + RecoveryServiceMetadataEntry.COLUMN_NAME_CERT_SERIAL + " INTEGER,"
                     + RecoveryServiceMetadataEntry.COLUMN_NAME_SECRET_TYPES + " TEXT,"
                     + RecoveryServiceMetadataEntry.COLUMN_NAME_COUNTER_ID + " INTEGER,"
                     + RecoveryServiceMetadataEntry.COLUMN_NAME_SERVER_PARAMS + " BLOB,"
@@ -88,9 +93,39 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL(SQL_DELETE_KEYS_ENTRY);
-        db.execSQL(SQL_DELETE_USER_METADATA_ENTRY);
-        db.execSQL(SQL_DELETE_RECOVERY_SERVICE_METADATA_ENTRY);
-        onCreate(db);
+        if (oldVersion < 2) {
+            db.execSQL(SQL_DELETE_KEYS_ENTRY);
+            db.execSQL(SQL_DELETE_USER_METADATA_ENTRY);
+            db.execSQL(SQL_DELETE_RECOVERY_SERVICE_METADATA_ENTRY);
+            onCreate(db);
+            return;
+        }
+
+        if (oldVersion < 3) {
+            upgradeDbForVersion3(db);
+        }
+    }
+
+    private void upgradeDbForVersion3(SQLiteDatabase db) {
+        // Add the two columns for cert path and cert serial number
+        addColumnToTable(db, RecoveryServiceMetadataEntry.TABLE_NAME,
+                RecoveryServiceMetadataEntry.COLUMN_NAME_CERT_PATH, "BLOB", /*defaultStr=*/ null);
+        addColumnToTable(db, RecoveryServiceMetadataEntry.TABLE_NAME,
+                RecoveryServiceMetadataEntry.COLUMN_NAME_CERT_SERIAL, "INTEGER", /*defaultStr=*/
+                null);
+    }
+
+    private static void addColumnToTable(
+            SQLiteDatabase db, String tableName, String column, String columnType,
+            String defaultStr) {
+        Log.d(TAG, "Adding column " + column + " to " + tableName + ".");
+
+        String alterStr = "ALTER TABLE " + tableName + " ADD COLUMN " + column + " " + columnType;
+        if (defaultStr != null && !defaultStr.isEmpty()) {
+            alterStr += " DEFAULT " + defaultStr;
+        }
+
+        db.execSQL(alterStr + ";");
     }
 }
+

@@ -275,7 +275,7 @@ public class KeySyncTaskTest {
     }
 
     @Test
-    public void run_sendsEncryptedKeysIfAvailableToSync() throws Exception {
+    public void run_sendsEncryptedKeysIfAvailableToSync_withRawPublicKey() throws Exception {
         mRecoverableKeyStoreDb.setRecoveryServicePublicKey(
                 TEST_USER_ID, TEST_RECOVERY_AGENT_UID, mKeyPair.getPublic());
 
@@ -320,6 +320,26 @@ public class KeySyncTaskTest {
         byte[] appKey = KeySyncUtils.decryptApplicationKey(
                 recoveryKey, keyData.getEncryptedKeyMaterial());
         assertThat(appKey).isEqualTo(applicationKey.getEncoded());
+    }
+
+    @Test
+    public void run_sendsEncryptedKeysIfAvailableToSync_withCertPath() throws Exception {
+        mRecoverableKeyStoreDb.setRecoveryServiceCertPath(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TestData.CERT_PATH_1);
+        mRecoverableKeyStoreDb.setServerParams(
+                TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_VAULT_HANDLE);
+        when(mSnapshotListenersStorage.hasListener(TEST_RECOVERY_AGENT_UID)).thenReturn(true);
+        addApplicationKey(TEST_USER_ID, TEST_RECOVERY_AGENT_UID, TEST_APP_KEY_ALIAS);
+
+        mKeySyncTask.run();
+
+        KeyChainSnapshot keyChainSnapshot = mRecoverySnapshotStorage.get(TEST_RECOVERY_AGENT_UID);
+        verify(mSnapshotListenersStorage).recoverySnapshotAvailable(TEST_RECOVERY_AGENT_UID);
+        List<WrappedApplicationKey> applicationKeys = keyChainSnapshot.getWrappedApplicationKeys();
+        assertThat(applicationKeys).hasSize(1);
+        assertThat(keyChainSnapshot.getTrustedHardwarePublicKey())
+                .isEqualTo(SecureBox.encodePublicKey(
+                        TestData.CERT_PATH_1.getCertificates().get(0).getPublicKey()));
     }
 
     @Test

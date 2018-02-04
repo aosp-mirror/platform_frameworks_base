@@ -238,15 +238,81 @@ public class RecoverableKeyStoreManagerTest {
     }
 
     @Test
-    public void initRecoveryService_updatesShouldCreateSnapshot() throws Exception {
+    public void initRecoveryService_succeeds() throws Exception {
         int uid = Binder.getCallingUid();
         int userId = UserHandle.getCallingUserId();
-        // Sync is not needed.
+        long certSerial = 1000L;
+        mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
+
+        mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS,
+                TestData.getCertXmlWithSerial(certSerial));
+
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid)).isEqualTo(
+                TestData.CERT_PATH_1);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid)).isEqualTo(
+                certSerial);
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isNull();
+    }
+
+    @Test
+    public void initRecoveryService_updatesWithLargerSerial() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        long certSerial = 1000L;
+
+        mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS,
+                TestData.getCertXmlWithSerial(certSerial));
+        mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS,
+                TestData.getCertXmlWithSerial(certSerial + 1));
+
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid))
+                .isEqualTo(certSerial + 1);
+    }
+
+    @Test
+    public void initRecoveryService_ignoresSmallerSerial() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        long certSerial = 1000L;
+
+        mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS,
+                TestData.getCertXmlWithSerial(certSerial));
+        mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS,
+                TestData.getCertXmlWithSerial(certSerial - 1));
+
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid))
+                .isEqualTo(certSerial);
+    }
+
+    @Test
+    public void initRecoveryService_ignoresTheSameSerial() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
+        long certSerial = 1000L;
+
+        mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS,
+                TestData.getCertXmlWithSerial(certSerial));
+        mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
+        mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS,
+                TestData.getCertXmlWithSerial(certSerial));
+
+        // If the second update succeeds, getShouldCreateSnapshot() will return true.
+        assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isFalse();
+    }
+
+    @Test
+    public void initRecoveryService_succeedsWithRawPublicKey() throws Exception {
+        int uid = Binder.getCallingUid();
+        int userId = UserHandle.getCallingUserId();
         mRecoverableKeyStoreDb.setShouldCreateSnapshot(userId, uid, false);
 
         mRecoverableKeyStoreManager.initRecoveryService(ROOT_CERTIFICATE_ALIAS, TEST_PUBLIC_KEY);
 
         assertThat(mRecoverableKeyStoreDb.getShouldCreateSnapshot(userId, uid)).isTrue();
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertPath(userId, uid)).isNull();
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServiceCertSerial(userId, uid)).isNull();
+        assertThat(mRecoverableKeyStoreDb.getRecoveryServicePublicKey(userId, uid)).isNotNull();
     }
 
     @Test
@@ -340,26 +406,6 @@ public class RecoverableKeyStoreManagerTest {
         } catch (UnsupportedOperationException e) {
             assertThat(e.getMessage()).startsWith(
                     "Only a single KeyChainProtectionParams is supported");
-        }
-    }
-
-    @Test
-    public void startRecoverySession_throwsIfBadKey() throws Exception {
-        try {
-            mRecoverableKeyStoreManager.startRecoverySession(
-                    TEST_SESSION_ID,
-                    getUtf8Bytes("0"),
-                    TEST_VAULT_PARAMS,
-                    TEST_VAULT_CHALLENGE,
-                    ImmutableList.of(
-                            new KeyChainProtectionParams(
-                                    TYPE_LOCKSCREEN,
-                                    UI_FORMAT_PASSWORD,
-                                    KeyDerivationParams.createSha256Params(TEST_SALT),
-                                    TEST_SECRET)));
-            fail("should have thrown");
-        } catch (ServiceSpecificException e) {
-            assertEquals("Not a valid X509 key", e.getMessage());
         }
     }
 
