@@ -128,6 +128,9 @@ public class MbmsErrors {
 
         /** Indicates that the middleware has no record of the supplied {@link DownloadRequest}. */
         public static final int ERROR_UNKNOWN_DOWNLOAD_REQUEST = 402;
+
+        /** Indicates the the middleware has no record of the supplied {@link FileInfo} */
+        public static final int ERROR_UNKNOWN_FILE_INFO = 403;
     }
 
     private MbmsErrors() {}

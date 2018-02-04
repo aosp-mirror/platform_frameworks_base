@@ -370,18 +370,18 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
     }
 
     /**
-     * Gets information about the status of a file pending download.
+     * Requests information about the state of a file pending download.
      *
-     * If the middleware has not yet been properly initialized or if it has no records of the
+     * If the middleware has no records of the
      * file indicated by {@code fileInfo} being associated with {@code downloadRequest},
-     * {@link MbmsDownloadSession#STATUS_UNKNOWN} must be returned.
+     * {@link MbmsErrors.DownloadErrors#ERROR_UNKNOWN_FILE_INFO} must be returned.
      *
      * @param downloadRequest The download request to query.
      * @param fileInfo The particular file within the request to get information on.
-     * @return The status of the download.
+     * @return {@link MbmsErrors#SUCCESS} if the request was successful, an error code otherwise.
      */
     @Override
-    public int getDownloadStatus(DownloadRequest downloadRequest, FileInfo fileInfo)
+    public int requestDownloadState(DownloadRequest downloadRequest, FileInfo fileInfo)
             throws RemoteException {
         return 0;
     }
