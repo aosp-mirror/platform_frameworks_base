@@ -196,7 +196,7 @@
     <string name="debug_networking_category" msgid="7044075693643009662">"નેટવર્કિંગ"</string>
     <string name="wifi_display_certification" msgid="8611569543791307533">"વાયરલેસ ડિસ્પ્લે પ્રમાણન"</string>
     <string name="wifi_verbose_logging" msgid="4203729756047242344">"વાઇ-ફાઇ વર્બોઝ લૉગિંગ સક્ષમ કરો"</string>
-    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"MAC ઍડ્રેસ રેન્ડમાઇઝ કરવું ચાલુ કર્યું"</string>
+    <string name="wifi_connected_mac_randomization" msgid="3168165236877957767">"કનેક્ટ કરેલ MAC ઍડ્રેસને રેન્ડમાઇઝ કરવાનું ચાલુ કરો"</string>
     <string name="mobile_data_always_on" msgid="8774857027458200434">"મોબાઇલ ડેટા હંમેશાં સક્રિય"</string>
     <string name="tethering_hardware_offload" msgid="7470077827090325814">"ટિથરિંગ માટે હાર્ડવેર ગતિવૃદ્ધિ"</string>
     <string name="bluetooth_show_devices_without_names" msgid="4708446092962060176">"નામ વિનાના બ્લૂટૂથ ઉપકરણો બતાવો"</string>
