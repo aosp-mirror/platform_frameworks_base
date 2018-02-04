@@ -53,6 +53,8 @@
     <string name="keyguard_accessibility_next_alarm" msgid="5835196989158584991">"Next alarm set for <xliff:g id="ALARM">%1$s</xliff:g>"</string>
     <string name="keyboardview_keycode_delete" msgid="6883116827512721630">"Delete"</string>
     <string name="disable_carrier_button_text" msgid="6914341927421916114">"Disable eSIM"</string>
+    <string name="error_disable_esim_title" msgid="4852978431156228006">"Can’t disable eSIM"</string>
+    <string name="error_disable_esim_msg" msgid="676694908770135639">"The eSIM can’t be disabled due to an error."</string>
     <string name="keyboardview_keycode_enter" msgid="4505833604411016668">"Enter"</string>
     <string name="kg_forgot_pattern_button_text" msgid="534245177645252620">"Forgotten Pattern"</string>
     <string name="kg_wrong_pattern" msgid="7620081431514773802">"Wrong Pattern"</string>
@@ -65,7 +67,7 @@
     <string name="kg_pattern_instructions" msgid="5547646893001491340">"Draw your pattern"</string>
     <string name="kg_sim_pin_instructions" msgid="6389000973113699187">"Enter SIM PIN."</string>
     <string name="kg_sim_pin_instructions_multi" msgid="1643757228644271861">"Enter SIM PIN for \'<xliff:g id="CARRIER">%1$s</xliff:g>\'."</string>
-    <string name="kg_sim_lock_instructions_esim" msgid="4957650659201013804">"Disable eSIM to use device without mobile service."</string>
+    <string name="kg_sim_lock_esim_instructions" msgid="4416732549172148542">"<xliff:g id="PREVIOUS_MSG">%1$s</xliff:g> Disable eSIM to use device without mobile service."</string>
     <string name="kg_pin_instructions" msgid="4069609316644030034">"Enter PIN"</string>
     <string name="kg_password_instructions" msgid="136952397352976538">"Enter Password"</string>
     <string name="kg_puk_enter_puk_hint" msgid="2288964170039899277">"SIM is now disabled. Enter PUK code to continue. Contact carrier for details."</string>

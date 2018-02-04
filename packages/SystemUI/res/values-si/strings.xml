@@ -103,12 +103,9 @@
     <string name="camera_label" msgid="7261107956054836961">"කැමරාව විවෘත කරන්න"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"නව කාර්යය සැකැස්ම තෝරන්න"</string>
     <string name="cancel" msgid="6442560571259935130">"අවලංගු කරන්න"</string>
-    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
-    <skip />
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ඇඟිලි සලකුණු නිරූපකය"</string>
+    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"යෙදුම් නිරූපකය"</string>
+    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"උදවු පණිවිඩ ප්‍රදේශය"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"ගැළපෙන විශාලන බොත්තම."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"විශාල තිරය වෙත කුඩාව විශාලනය කරන්න."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"බ්ලූටූත් සම්බන්ධිතයි."</string>
@@ -311,6 +308,8 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi අක්‍රියයි"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi ක්‍රියාත්මකයි"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Wi-Fi ජාල ලබා ගත නොහැකිය"</string>
+    <!-- no translation found for quick_settings_alarm_title (2416759007342260676) -->
+    <skip />
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"කාස්ට් කිරීම"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"නම් නොකළ උපාංගය"</string>
@@ -327,9 +326,11 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"සම්බන්ධ වෙමින්..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"ටෙදරින්"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"හොට්ස්පොට්"</string>
-    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
-    <skip />
-    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"ක්‍රියාත්මක කරමින්…"</string>
+    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
+      <item quantity="one">උපාංග %d</item>
+      <item quantity="other">උපාංග %d</item>
+    </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"දැනුම්දීම්"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"සැණෙළි ආලෝකය"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"ජංගම දත්ත"</string>
@@ -499,11 +500,24 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"දැන් ක්‍රියාවිරහිත කරන්න"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"දිග හරින්න"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"හකුළන්න"</string>
+    <string name="accessibility_output_chooser" msgid="8185317493017988680">"ප්‍රතිදාන උපාංගය මාරු කරන්න"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"තීරය අමුණන ලදි"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට දළ විශ්ලේෂණය ස්පර්ශ කර ආපසු අල්ලාගෙන සිටින්න."</string>
+    <!-- no translation found for screen_pinning_description_recents_invisible (8281145542163727971) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට දළ විශ්ලේෂණය ස්පර්ශ කර අල්ලාගෙන සිටින්න."</string>
+    <!-- no translation found for screen_pinning_description_recents_invisible_accessible (6134833683151189507) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast (2266705122951934150) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast_recents_invisible (8252402309499161281) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"හරි, තේරුණා"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"එපා ස්තූතියි"</string>
+    <!-- no translation found for screen_pinning_start (1022122128489278317) -->
+    <skip />
+    <!-- no translation found for screen_pinning_exit (5187339744262325372) -->
+    <skip />
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> සඟවන්නද?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"ඊළඟ අවස්ථාවේ සැකසීම් තුළ ඔබ එය සක්‍රිය කළ විට එය නැවත දිසිවේ."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"සඟවන්න"</string>
@@ -583,8 +597,7 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"බල දැනුම්දීම් පාලන සමගින්, ඔබට යෙදුමක දැනුම්දීම් සඳහා වැදගත්කම 0 සිට 5 දක්වා සැකසිය හැකිය. \n\n"<b>"5 මට්ටම"</b>" \n- දැනුම්දීම් ලැයිස්තුවේ ඉහළින්ම පෙන්වන්න \n- පූර්ණ තිර බාධාවට ඉඩ දෙන්න \n- සැම විට එබී බලන්න \n\n"<b>"4 මට්ටම"</b>" \n- පූර්ණ තිර බාධාව වළක්වන්න \n- සැම විට එබී බලන්න \n\n"<b>"3 මට්ටම"</b>" \n- පූර්ණ තිර බාධාව වළක්වන්න \n- කිසි විටක එබී නොබලන්න \n\n"<b>"2 මට්ටම"</b>" \n- පූර්ණ තිර බාධාව වළක්වන්න \n- කිසි විටක එබී නොබලන්න \n- කිසි විටක හඬ සහ කම්පනය සිදු නොකරන්න \n\n"<b>"1 මට්ටම"</b>" \n- පූර්ණ තිර බාධාව වළක්වන්න \n- කිසි විටක එබී නොබලන්න \n- කිසි විටක හඬ සහ කම්පනය සිදු නොකරන්න \n- අගුලු තිරය සහ තත්ත්ව තීරුව වෙතින් සඟවන්න \n- දැනුම්දීම් ලැයිස්තුවේ පහළින්ම පෙන්වන්න \n\n"<b>"0 මට්ටම"</b>" \n- යෙදුම වෙතින් වන සියලු දැනුම් දීම් සඟවන්න."</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"දැනුම් දීම්"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"ඔබට තවදුරටත් මෙම දැනුම්දීම් නොදකිනු ඇත"</string>
-    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
-    <skip />
+    <string name="inline_blocking_helper" msgid="3055064577771478591">"ඔබ සාමාන්‍යයෙන් මෙවැනි දැනුම්දීම් ඉවත දමයි. \nඒවා දිගටම පෙන්වන්නද?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"මෙම දැනුම්දීම් පෙන්වමින් තබන්නද?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"දැනුම්දීම් නවත්වන්න"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"පෙන්වමින් තබන්න"</string>
