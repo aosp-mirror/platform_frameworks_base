@@ -264,10 +264,8 @@
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"സുരക്ഷിത മോഡ്"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android സിസ്റ്റം"</string>
-    <!-- no translation found for user_owner_label (8836124313744349203) -->
-    <skip />
-    <!-- no translation found for managed_profile_label (8947929265267690522) -->
-    <skip />
+    <string name="user_owner_label" msgid="8836124313744349203">"വ്യക്തിഗത പ്രൊഫൈലിലേക്ക് മാറുക"</string>
+    <string name="managed_profile_label" msgid="8947929265267690522">"ഔദ്യോഗിക പ്രൊഫൈലിലേക്ക് മാറുക"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"കോൺടാക്റ്റുകൾ"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"നിങ്ങളുടെ കോൺടാക്റ്റുകൾ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouprequest_contacts" msgid="1601591667800538208">"നിങ്ങളുടെ കോണ്‍ടാക്റ്റുകള്‍ ആക്‌സസ് ചെയ്യാൻ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ആപ്പിനെ അനുവദിക്കുക"</string>
@@ -419,10 +417,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ഉപകരണത്തിന്റെ ഫോൺ സവിശേഷതകൾ ആക്‌സസ്സുചെയ്യാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഈ അനുമതി ഫോൺ നമ്പർ, ഉപകരണ ഐഡികൾ, ഒരു കോൾ സജീവമാണോയെന്നത്, ഒരു കോൾ കണക്റ്റുചെയ്‌ത വിദൂര നമ്പർ എന്നിവ നിർണ്ണയിക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"കോളുകൾ സിസ്റ്റത്തിലൂടെ വിടുക"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"കോളിംഗ് അനുഭവം ‌മെച്ചപ്പെടുത്തുന്നതിനായി തങ്ങളുടെ ‌കോളുകൾ സിസ്റ്റത്തിലേയ്ക്ക് വഴിതിരിച്ചുവിടാൻ ആപ്പുകളെ അനുവദിക്കുന്നു."</string>
-    <!-- no translation found for permlab_acceptHandover (2661534649736022409) -->
-    <skip />
-    <!-- no translation found for permdesc_acceptHandovers (4570660484220539698) -->
-    <skip />
+    <string name="permlab_acceptHandover" msgid="2661534649736022409">"മറ്റൊരു ആപ്പിൽ നിന്നുള്ള കോൾ തുടരുക"</string>
+    <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"മറ്റൊരു ആപ്പിൽ ആരംഭിച്ച കോൾ തുടരാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ഫോൺ നമ്പറുകൾ റീഡുചെയ്യൽ"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"ഉപകരണത്തിന്റെ ഫോൺ നമ്പറുകൾ ആക്‌സസ് ചെയ്യാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"സുഷുപ്‌തിയിലാകുന്നതിൽ നിന്ന് ടാബ്‌ലെറ്റിനെ തടയുക"</string>
@@ -497,11 +493,14 @@
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"വിരലടയാളം സംഭരിക്കാനാവില്ല. നിലവിലുള്ള വിരലടയാളം നീക്കംചെയ്യുക."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"വിരലടയാളം നൽകേണ്ട സമയം കഴിഞ്ഞു. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ഫിംഗർപ്രിന്റ് പ്രവർത്തനം റദ്ദാക്കി."</string>
-    <!-- no translation found for fingerprint_error_user_canceled (7999639584615291494) -->
-    <skip />
+    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"ഉപയോക്താവ് റദ്ദാക്കിയ ഫിംഗർപ്രിന്‍റ് പ്രവർത്തനം."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"നിരവധി തവണ ശ്രമിച്ചു. പിന്നീട് വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"നിരവധി തവണ ശ്രമിച്ചതിനാൽ, വിരലടയാള സെൻസർ പ്രവർത്തനരഹിതമായി."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"വീണ്ടും ശ്രമിക്കൂ."</string>
+    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="5870957565512716938">"കൈവിരൽ <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -1000,12 +999,9 @@
     <string name="browse" msgid="1245903488306147205">"തുറക്കുക"</string>
     <string name="sms" msgid="4560537514610063430">"സന്ദേശം"</string>
     <string name="add_contact" msgid="7867066569670597203">"ചേർക്കുക"</string>
-    <!-- no translation found for view_calendar (979609872939597838) -->
-    <skip />
-    <!-- no translation found for add_calendar_event (1953664627192056206) -->
-    <skip />
-    <!-- no translation found for view_flight (7691640491425680214) -->
-    <skip />
+    <string name="view_calendar" msgid="979609872939597838">"കാണുക"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"ഷെഡ്യൂള്‍‌"</string>
+    <string name="view_flight" msgid="7691640491425680214">"ട്രാക്ക്"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"സംഭരണയിടം കഴിഞ്ഞു"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"ചില സിസ്റ്റം പ്രവർത്തനങ്ങൾ പ്രവർത്തിക്കണമെന്നില്ല."</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"സിസ്‌റ്റത്തിനായി മതിയായ സംഭരണമില്ല. 250MB സൗജന്യ സംഭരണമുണ്ടെന്ന് ഉറപ്പുവരുത്തി പുനരാരംഭിക്കുക."</string>
@@ -1131,8 +1127,7 @@
       <item quantity="one">ലഭ്യമായ വൈഫൈ നെറ്റ്‌വർക്ക് തുറക്കുക</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"ലഭ്യമായ വൈഫൈ നെറ്റ്‌വർക്കിലേക്ക് കണക്റ്റുചെയ്യുക"</string>
-    <!-- no translation found for wifi_available_carrier_network_title (4527932626916527897) -->
-    <skip />
+    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"കാരിയർ വൈഫൈ നെറ്റ്‍വര്‍ക്കിലേക്ക് കണക്റ്റ് ചെയ്യുക"</string>
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"ലഭ്യമായ വൈഫൈ നെറ്റ്‌വർക്കിലേക്ക് കണക്റ്റുചെയ്യുന്നു"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"വൈഫൈ നെറ്റ്‌വർക്കിലേക്ക് കണക്റ്റു‌ചെയ്‌‌തു"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"വൈ-ഫൈ നെറ്റ്‌വർക്കിലേക്ക് കണക്‌റ്റുചെയ്യാനായില്ല"</string>
@@ -1217,13 +1212,23 @@
     <string name="no_permissions" msgid="7283357728219338112">"അനുമതികളൊന്നും ആവശ്യമില്ല"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"ഇത് നിങ്ങൾക്ക് പണച്ചെലവിനിടയാക്കാം"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ശരി"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"USB ഈ ഉപകരണം ചാർജജ് ചെയ്യുന്നു"</string>
-    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"ഘടിപ്പിച്ചിട്ടുള്ള ഉപകരണത്തിന് USB വൈദ്യുതി നൽകുന്നു"</string>
-    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"ഫയൽ കൈമാറ്റത്തിനുള്ള USB"</string>
-    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"ഫോട്ടോ കൈമാറ്റത്തിനായുള്ള USB"</string>
-    <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI-യ്‌ക്കായുള്ള USB"</string>
-    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"ഒരു USB ആക്‌സസ്സറി കണക്റ്റുചെയ്‌തു"</string>
+    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
+    <skip />
+    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
+    <skip />
+    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
+    <skip />
+    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
+    <skip />
     <string name="usb_notification_message" msgid="3370903770828407960">"കൂടുതൽ ഓപ്ഷനുകൾക്ക് ടാപ്പുചെയ്യുക."</string>
+    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
+    <skip />
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"അനലോഗ് ഓഡിയോ ആക്‌സസറി കണ്ടെത്തി"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"അറ്റാച്ചുചെയ്‌ത ഉപകരണം ഈ ഫോണിന് അനുയോജ്യമല്ല. കൂടുതലറിയാൻ ടാപ്പുചെയ്യുക."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ഡീബഗ്ഗിംഗ് കണക്റ്റ് ചെയ്തു"</string>
@@ -1662,9 +1667,6 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"ഔദ്യോഗികം <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"രണ്ടാമത്തെ ഔദ്യോഗിക <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"മൂന്നാമത്തെ ഔദ്യോഗിക <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="6820571533009838261">"ഈ സ്‌ക്രീൻ അൺപിൻ ചെയ്യാൻ, ബാക്ക്, ചുരുക്കവിവരണം എന്നീ ബട്ടണുകൾ സ്‌പർശിച്ച് പിടിക്കുക"</string>
-    <string name="lock_to_app_start" msgid="6643342070839862795">"സ്ക്രീൻ പിൻ ചെയ്തു"</string>
-    <string name="lock_to_app_exit" msgid="8598219838213787430">"സ്ക്രീൻ അൺപിൻ ചെയ്തു"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ചെയ്യുംമുമ്പ് പിൻ ചോദിക്കൂ"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"അൺപിന്നിനുമുമ്പ് അൺലോക്ക് പാറ്റേൺ ആവശ്യപ്പെടൂ"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"അൺപിന്നിനുമുമ്പ് പാസ്‌വേഡ് ആവശ്യപ്പെടൂ"</string>
@@ -1758,15 +1760,11 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"എല്ലാ ഭാഷകളും"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"എല്ലാ പ്രദേശങ്ങളും"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"തിരയുക"</string>
-    <!-- no translation found for work_mode_off_title (1118691887588435530) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (5130856710614337649) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="1118691887588435530">"ഔദ്യോഗിക പ്രൊഫൈൽ ഓണാക്കണോ?"</string>
+    <string name="work_mode_off_message" msgid="5130856710614337649">"നിങ്ങളുടെ ഔദ്യോഗിക ആപ്പുകൾ, അറിയിപ്പുകൾ, ഡാറ്റ, മറ്റ് ഔദ്യോഗിക പ്രൊഫൈൽ ഫീച്ചറുകൾ എന്നിവ ഓണാക്കും"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ഓണാക്കുക"</string>
-    <!-- no translation found for deprecated_target_sdk_message (1449696506742572767) -->
-    <skip />
-    <!-- no translation found for deprecated_target_sdk_app_store (5032340500368495077) -->
-    <skip />
+    <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"ഈ ആപ്പ് Android-ന്റെ പഴയ പതിപ്പിനായി നിർമ്മിച്ചിരിക്കുന്നതിനാൽ ശരിയായി പ്രവർത്തിച്ചേക്കില്ല. അപ്‌ഡേറ്റിനായി പരിശോധിക്കുക, അല്ലെങ്കിൽ ഡെവലപ്പറുമായി ബന്ധപ്പെടുക."</string>
+    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"അപ്‌ഡേറ്റിനായി പരിശോധിക്കുക"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"നിങ്ങൾക്ക് പുതിയ സന്ദേശങ്ങൾ ഉണ്ട്"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"കാണുന്നതിന് SMS ആപ്പ് തുറക്കുക"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"ചില പ്രവർത്തനക്ഷമതകൾ പരിമിതപ്പെടാം"</string>
@@ -1833,17 +1831,15 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"ഫോൺ വോയ്‌സിന് അനുവദനീയമല്ല"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"പോപ്പ് അപ്പ് വിൻഡോ"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"ഈ കുറുക്കുവഴിക്ക് ഏറ്റവും പുതിയ ആപ്പ് ആവശ്യമാണ്"</string>
+    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
+    <skip />
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"ആപ്പ് \'ബാക്കപ്പും പുനഃസ്ഥാപിക്കലും\' പിന്തുണയ്ക്കാത്തതിനാൽ കുറുക്കുവഴി പുനഃസ്ഥാപിക്കാനായില്ല"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"ആപ്പ് സിഗ്നേച്ചർ പൊരുത്തപ്പെടാത്തതിനാൽ കുറുക്കുവഴി പുനഃസ്ഥാപിക്കാനായില്ല"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"കുറുക്കുവഴി പുനഃസ്ഥാപിക്കാനായില്ല"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"കുറുക്കുവഴി പ്രവർത്തനരഹിതമാണ്"</string>
-    <!-- no translation found for harmful_app_warning_uninstall (4837672735619532931) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_open_anyway (596432803680914321) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_title (8982527462829423432) -->
-    <skip />
+    <string name="harmful_app_warning_uninstall" msgid="4837672735619532931">"അൺഇൻസ്‌റ്റാള്‍ ചെയ്യുക"</string>
+    <string name="harmful_app_warning_open_anyway" msgid="596432803680914321">"എന്തായാലും തുറക്കുക"</string>
+    <string name="harmful_app_warning_title" msgid="8982527462829423432">"ദോഷകരമായ ആപ്പ് കണ്ടെത്തി"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_2">%2$s</xliff:g> സ്ലൈസുകൾ കാണിക്കാൻ <xliff:g id="APP_0">%1$s</xliff:g> താൽപ്പര്യപ്പെടുന്നു"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"എഡിറ്റ് ചെയ്യുക"</string>
 </resources>

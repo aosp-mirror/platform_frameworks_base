@@ -264,10 +264,8 @@
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>、<xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系統"</string>
-    <!-- no translation found for user_owner_label (8836124313744349203) -->
-    <skip />
-    <!-- no translation found for managed_profile_label (8947929265267690522) -->
-    <skip />
+    <string name="user_owner_label" msgid="8836124313744349203">"切換至個人設定檔"</string>
+    <string name="managed_profile_label" msgid="8947929265267690522">"切換至 Work 設定檔"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"聯絡人"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"存取你的聯絡人"</string>
     <string name="permgrouprequest_contacts" msgid="1601591667800538208">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」存取你的聯絡人"</string>
@@ -419,10 +417,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"允許應用程式使用裝置的電話功能。這項權限可讓應用程式判讀手機號碼和裝置 ID、是否正在通話中，以及所撥打的對方號碼。"</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"透過系統接通來電"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"允許應用程式透過系統接通來電，以改善通話品質。"</string>
-    <!-- no translation found for permlab_acceptHandover (2661534649736022409) -->
-    <skip />
-    <!-- no translation found for permdesc_acceptHandovers (4570660484220539698) -->
-    <skip />
+    <string name="permlab_acceptHandover" msgid="2661534649736022409">"繼續進行來自其他應用程式的通話"</string>
+    <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"允許應用程式繼續進行在其他應用程式中發起的通話。"</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"讀取電話號碼"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"允許應用程式存取裝置上的電話號碼資料。"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"防止平板電腦進入休眠狀態"</string>
@@ -497,11 +493,14 @@
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"無法儲存指紋，請先移除現有指紋。"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"指紋處理作業逾時，請再試一次。"</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"指紋作業已取消。"</string>
-    <!-- no translation found for fingerprint_error_user_canceled (7999639584615291494) -->
-    <skip />
+    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"使用者已取消指紋驗證作業。"</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"嘗試次數過多，請稍後再試。"</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"嘗試次數過多，指紋感應器已停用。"</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"請再試一次。"</string>
+    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="5870957565512716938">"手指 <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -1000,12 +999,9 @@
     <string name="browse" msgid="1245903488306147205">"開啟"</string>
     <string name="sms" msgid="4560537514610063430">"訊息"</string>
     <string name="add_contact" msgid="7867066569670597203">"新增"</string>
-    <!-- no translation found for view_calendar (979609872939597838) -->
-    <skip />
-    <!-- no translation found for add_calendar_event (1953664627192056206) -->
-    <skip />
-    <!-- no translation found for view_flight (7691640491425680214) -->
-    <skip />
+    <string name="view_calendar" msgid="979609872939597838">"查看"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"時間表"</string>
+    <string name="view_flight" msgid="7691640491425680214">"追蹤"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"儲存空間即將用盡"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"部分系統功能可能無法運作"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"系統儲存空間不足。請確定你已釋出 250MB 的可用空間，然後重新啟動。"</string>
@@ -1131,8 +1127,7 @@
       <item quantity="one">有多個可用的開放 Wi-Fi 網路</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"連線至開放的 Wi‑Fi 網路"</string>
-    <!-- no translation found for wifi_available_carrier_network_title (4527932626916527897) -->
-    <skip />
+    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"連上電信業者的 Wi‑Fi 網路"</string>
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"正在連線至開放的 Wi‑Fi 網路"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"已連線至 Wi-Fi 網路"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"無法連線至 Wi‑Fi 網路"</string>
@@ -1216,13 +1211,23 @@
     <string name="no_permissions" msgid="7283357728219338112">"無須許可"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"這可能需要付費"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"確定"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"正在透過 USB 為這個裝置充電"</string>
-    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"正在透過 USB 為連接的裝置供電"</string>
-    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB 檔案傳輸"</string>
-    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB 相片傳輸"</string>
-    <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB MIDI"</string>
-    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"已連接 USB 配件"</string>
+    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
+    <skip />
+    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
+    <skip />
+    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
+    <skip />
+    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
+    <skip />
     <string name="usb_notification_message" msgid="3370903770828407960">"輕觸即可查看更多選項。"</string>
+    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
+    <skip />
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"偵測到類比音訊配件"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"此外接裝置與這支手機不相容。輕觸即可瞭解詳情。"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"已連接 USB 偵錯工具"</string>
@@ -1661,9 +1666,6 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"公司<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"第 2 項工作：<xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"第 3 項工作：<xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="6820571533009838261">"如要取消固定這個畫面，請按住「返回」按鈕和「總覽」按鈕"</string>
-    <string name="lock_to_app_start" msgid="6643342070839862795">"已固定螢幕"</string>
-    <string name="lock_to_app_exit" msgid="8598219838213787430">"已取消固定螢幕"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"取消固定時必須輸入 PIN"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"取消固定時必須畫出解鎖圖案"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"取消固定時必須輸入密碼"</string>
@@ -1757,15 +1759,11 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"所有語言"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"所有地區"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"搜尋"</string>
-    <!-- no translation found for work_mode_off_title (1118691887588435530) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (5130856710614337649) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="1118691887588435530">"要開啟 Work 設定檔嗎？"</string>
+    <string name="work_mode_off_message" msgid="5130856710614337649">"系統將開啟你的辦公應用程式、通知、資料和其他 Work 設定檔功能"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"開啟"</string>
-    <!-- no translation found for deprecated_target_sdk_message (1449696506742572767) -->
-    <skip />
-    <!-- no translation found for deprecated_target_sdk_app_store (5032340500368495077) -->
-    <skip />
+    <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"這個應用程式是專為舊版 Android 所打造，因此可能無法正常運作。請嘗試檢查更新，或是與開發人員聯絡。"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"檢查更新"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"你有新訊息"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"開啟簡訊應用程式來查看內容"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"部分功能可能受到鎖定"</string>
@@ -1832,17 +1830,15 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"手機不支援語音"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"彈出式視窗"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"你必須擁有最新版的應用程式，才能使用這個捷徑"</string>
+    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
+    <skip />
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"應用程式不支援備份與還原功能，因此無法還原捷徑"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"應用程式簽署不相符，因此無法還原捷徑"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"無法還原捷徑"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"捷徑已停用"</string>
-    <!-- no translation found for harmful_app_warning_uninstall (4837672735619532931) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_open_anyway (596432803680914321) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_title (8982527462829423432) -->
-    <skip />
+    <string name="harmful_app_warning_uninstall" msgid="4837672735619532931">"解除安裝"</string>
+    <string name="harmful_app_warning_open_anyway" msgid="596432803680914321">"仍要開啟"</string>
+    <string name="harmful_app_warning_title" msgid="8982527462829423432">"偵測到有害應用程式"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"「<xliff:g id="APP_0">%1$s</xliff:g>」想要顯示「<xliff:g id="APP_2">%2$s</xliff:g>」的區塊"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"編輯"</string>
 </resources>

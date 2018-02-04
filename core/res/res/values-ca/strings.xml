@@ -264,10 +264,8 @@
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mode segur"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
-    <!-- no translation found for user_owner_label (8836124313744349203) -->
-    <skip />
-    <!-- no translation found for managed_profile_label (8947929265267690522) -->
-    <skip />
+    <string name="user_owner_label" msgid="8836124313744349203">"Canvia al perfil personal"</string>
+    <string name="managed_profile_label" msgid="8947929265267690522">"Canvia al perfil professional"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"Contactes"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"accedir als contactes"</string>
     <string name="permgrouprequest_contacts" msgid="1601591667800538208">"Permet que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; accedeixi als contactes"</string>
@@ -419,10 +417,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"Permet que l\'aplicació accedeixi a les funcions de telèfon del dispositiu. Aquest permís permet que l\'aplicació determini el número de telèfon i els identificadors del dispositiu, si hi ha una trucada activa i el número remot connectat amb una trucada."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"encaminar trucades a través del sistema"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"Permet que l\'aplicació encamini les trucades a través del sistema per millorar-ne l\'experiència."</string>
-    <!-- no translation found for permlab_acceptHandover (2661534649736022409) -->
-    <skip />
-    <!-- no translation found for permdesc_acceptHandovers (4570660484220539698) -->
-    <skip />
+    <string name="permlab_acceptHandover" msgid="2661534649736022409">"Continua una trucada d\'una altra aplicació"</string>
+    <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"Permet que l\'aplicació continuï una trucada que s\'havia iniciat en una altra aplicació."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"llegir els números de telèfon"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"Permet que l\'aplicació accedeixi als números de telèfon del dispositiu."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"evita que la tauleta entri en mode de repòs"</string>
@@ -497,11 +493,14 @@
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"L\'empremta digital no es pot desar. Suprimeix-ne una."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"S\'ha esgotat el temps d\'espera per a l\'empremta digital. Torna-ho a provar."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"S\'ha cancel·lat l\'operació d\'empremta digital."</string>
-    <!-- no translation found for fingerprint_error_user_canceled (7999639584615291494) -->
-    <skip />
+    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"L\'usuari ha cancel·lat l\'operació d\'empremta digital."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"S\'han produït massa intents. Torna-ho a provar més tard."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"S\'han fet massa intents. S\'ha desactivat el sensor d\'empremtes digitals."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Torna-ho a provar."</string>
+    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="5870957565512716938">"Dit <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -1000,12 +999,9 @@
     <string name="browse" msgid="1245903488306147205">"Obre"</string>
     <string name="sms" msgid="4560537514610063430">"Missatge"</string>
     <string name="add_contact" msgid="7867066569670597203">"Afegeix"</string>
-    <!-- no translation found for view_calendar (979609872939597838) -->
-    <skip />
-    <!-- no translation found for add_calendar_event (1953664627192056206) -->
-    <skip />
-    <!-- no translation found for view_flight (7691640491425680214) -->
-    <skip />
+    <string name="view_calendar" msgid="979609872939597838">"Mostra"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"Programa"</string>
+    <string name="view_flight" msgid="7691640491425680214">"Fes un seguiment"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"L\'espai d\'emmagatzematge s\'està esgotant"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"És possible que algunes funcions del sistema no funcionin"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"No hi ha prou espai d\'emmagatzematge per al sistema. Comprova que tinguis 250 MB d\'espai lliure i reinicia."</string>
@@ -1131,8 +1127,7 @@
       <item quantity="one">Xarxa Wi-Fi oberta disponible</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"Connecta\'t a una xarxa Wi-Fi oberta"</string>
-    <!-- no translation found for wifi_available_carrier_network_title (4527932626916527897) -->
-    <skip />
+    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"Connecta\'t a la xarxa Wi-Fi de l\'operador de telefonia mòbil"</string>
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"S\'està connectant a una xarxa Wi-Fi oberta"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"S\'ha connectat a la xarxa Wi-Fi"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"No s\'ha pogut connectar a una xarxa Wi-Fi"</string>
@@ -1216,13 +1211,23 @@
     <string name="no_permissions" msgid="7283357728219338112">"No cal cap permís"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"pot ser que comporti càrrecs"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"D\'acord"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"El dispositiu s\'està carregant per USB"</string>
-    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"L\'USB subministra energia al dispositiu connectat"</string>
-    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB per transferir fitxers"</string>
-    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB per transferir fotos"</string>
-    <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB per a MIDI"</string>
-    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Connectat a un accessori USB"</string>
+    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
+    <skip />
+    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
+    <skip />
+    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
+    <skip />
+    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
+    <skip />
     <string name="usb_notification_message" msgid="3370903770828407960">"Toca per veure més opcions."</string>
+    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
+    <skip />
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"S\'ha detectat un accessori d\'àudio analògic"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"El dispositiu connectat no és compatible amb aquest telèfon. Toca per obtenir més informació."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuració USB activada"</string>
@@ -1661,9 +1666,6 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"<xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2n <xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3r <xliff:g id="LABEL">%1$s</xliff:g> de la feina"</string>
-    <string name="lock_to_app_toast" msgid="6820571533009838261">"Toca i mantén premuts els botons Enrere i Aplicacions recents per deixar de fixar aquesta pantalla"</string>
-    <string name="lock_to_app_start" msgid="6643342070839862795">"Pantalla fixada"</string>
-    <string name="lock_to_app_exit" msgid="8598219838213787430">"Fixació de la pantalla anul·lada"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"Sol·licita el codi PIN per deixar de fixar"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"Sol·licita el patró de desbloqueig per deixar de fixar"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"Demana la contrasenya per deixar de fixar"</string>
@@ -1757,15 +1759,11 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"Tots els idiomes"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"Totes les regions"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"Cerca"</string>
-    <!-- no translation found for work_mode_off_title (1118691887588435530) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (5130856710614337649) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="1118691887588435530">"Activar el perfil professional?"</string>
+    <string name="work_mode_off_message" msgid="5130856710614337649">"S\'activaran les teves aplicacions per a la feina, les notificacions, les dades i altres funcions del perfil professional"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"Activa"</string>
-    <!-- no translation found for deprecated_target_sdk_message (1449696506742572767) -->
-    <skip />
-    <!-- no translation found for deprecated_target_sdk_app_store (5032340500368495077) -->
-    <skip />
+    <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"Aquesta aplicació es va crear per a una versió antiga d\'Android i pot ser que no funcioni correctament. Prova de cercar actualitzacions o contacta amb el desenvolupador."</string>
+    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"Cerca actualitzacions"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"Tens missatges nous"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"Obre l\'aplicació d\'SMS per veure\'ls"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"Algunes funcions es limitaran"</string>
@@ -1832,17 +1830,15 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"El telèfon no és compatible per a la veu"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"Finestra emergent"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"<xliff:g id="NUMBER">%1$d</xliff:g> més"</string>
-    <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"Per fer servir aquesta drecera has de tenir l\'última versió de l\'aplicació"</string>
+    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
+    <skip />
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"No s\'ha pogut restaurar la drecera perquè l\'aplicació no permet la còpia de seguretat ni la restauració"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"No s\'ha pogut restaurar la drecera perquè la signatura de l\'aplicació no coincideix"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"No s\'ha pogut restaurar la drecera"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"S\'ha desactivat la drecera"</string>
-    <!-- no translation found for harmful_app_warning_uninstall (4837672735619532931) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_open_anyway (596432803680914321) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_title (8982527462829423432) -->
-    <skip />
+    <string name="harmful_app_warning_uninstall" msgid="4837672735619532931">"DESINSTAL·LA"</string>
+    <string name="harmful_app_warning_open_anyway" msgid="596432803680914321">"OBRE IGUALMENT"</string>
+    <string name="harmful_app_warning_title" msgid="8982527462829423432">"S\'ha detectat una aplicació perjudicial"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> vol mostrar porcions de l\'aplicació <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"Edita"</string>
 </resources>
