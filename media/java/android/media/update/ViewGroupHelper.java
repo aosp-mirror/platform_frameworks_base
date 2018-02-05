@@ -112,6 +112,11 @@ public abstract class ViewGroupHelper<T extends ViewGroupProvider> extends ViewG
     // setMeasuredDimension is final
 
     @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return mProvider.dispatchTouchEvent_impl(ev);
+    }
+
+    @Override
     protected boolean checkLayoutParams(LayoutParams p) {
         return mProvider.checkLayoutParams_impl(p);
     }
@@ -208,6 +213,11 @@ public abstract class ViewGroupHelper<T extends ViewGroupProvider> extends ViewG
         @Override
         public void setMeasuredDimension_impl(int measuredWidth, int measuredHeight) {
             ViewGroupHelper.super.setMeasuredDimension(measuredWidth, measuredHeight);
+        }
+
+        @Override
+        public boolean dispatchTouchEvent_impl(MotionEvent ev) {
+            return ViewGroupHelper.super.dispatchTouchEvent(ev);
         }
 
         @Override
@@ -309,6 +319,11 @@ public abstract class ViewGroupHelper<T extends ViewGroupProvider> extends ViewG
         @Override
         public void setMeasuredDimension_impl(int measuredWidth, int measuredHeight) {
             ViewGroupHelper.this.setMeasuredDimension(measuredWidth, measuredHeight);
+        }
+
+        @Override
+        public boolean dispatchTouchEvent_impl(MotionEvent ev) {
+            return ViewGroupHelper.this.dispatchTouchEvent(ev);
         }
 
         @Override

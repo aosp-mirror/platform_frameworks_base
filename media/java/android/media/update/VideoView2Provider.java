@@ -48,7 +48,7 @@ import java.util.concurrent.Executor;
 public interface VideoView2Provider extends ViewGroupProvider {
     void initialize(AttributeSet attrs, int defStyleAttr, int defStyleRes);
 
-    void setMediaControlView2_impl(MediaControlView2 mediaControlView);
+    void setMediaControlView2_impl(MediaControlView2 mediaControlView, long intervalMs);
     MediaController getMediaController_impl();
     MediaControlView2 getMediaControlView2_impl();
     void setSubtitleEnabled_impl(boolean enable);

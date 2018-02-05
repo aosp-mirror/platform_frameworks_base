@@ -49,9 +49,8 @@ import java.lang.annotation.RetentionPolicy;
  * There is no separate method that handles the show/hide behavior for MediaControlView2. Instead,
  * one can directly change the visibility of this view by calling View.setVisibility(int). The
  * values supported are View.VISIBLE and View.GONE.
- * In addition, the following customizations are supported:
- * 1. Modify default timeout value of 2 seconds by calling setTimeout(long).
- * 2. Set focus to the play/pause button by calling requestPlayButtonFocus().
+ * In addition, the following customization is supported:
+ * Set focus to the play/pause button by calling requestPlayButtonFocus().
  *
  * <p>
  * It is also possible to add custom buttons with custom icons and actions inside MediaControlView2.
@@ -198,23 +197,6 @@ public class MediaControlView2 extends ViewGroupHelper<MediaControlView2Provider
      */
     public void requestPlayButtonFocus() {
         mProvider.requestPlayButtonFocus_impl();
-    }
-
-    /**
-     * Sets a new timeout value (in milliseconds) for showing MediaControlView2. The default value
-     * is set as 2 seconds.
-     * @param timeout the
-     */
-    public void setTimeout(long timeout) {
-        mProvider.setTimeout_impl(timeout);
-    }
-
-    /**
-     * Retrieves current timeout value (in milliseconds) for showing MediaControlView2. The default
-     * value is set as 2 seconds.
-     */
-    public long getTimeout() {
-        return mProvider.getTimeout_impl();
     }
 
     @Override
