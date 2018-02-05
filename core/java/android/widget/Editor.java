@@ -1299,6 +1299,16 @@ public class Editor {
             if (mSelectionModifierCursorController != null) {
                 mSelectionModifierCursorController.resetTouchOffsets();
             }
+
+            ensureNoSelectionIfNonSelectable();
+        }
+    }
+
+    private void ensureNoSelectionIfNonSelectable() {
+        // This could be the case if a TextLink has been tapped.
+        if (!mTextView.textCanBeSelected() && mTextView.hasSelection()) {
+            Selection.setSelection((Spannable) mTextView.getText(),
+                    mTextView.length(), mTextView.length());
         }
     }
 
@@ -1382,6 +1392,8 @@ public class Editor {
 
             // Don't leave us in the middle of a batch edit. Same as in onFocusChanged
             ensureEndedBatchEdit();
+
+            ensureNoSelectionIfNonSelectable();
         }
     }
 
