@@ -787,6 +787,10 @@ public abstract class Connection extends Conferenceable {
             builder.append(isLong ? " PROPERTY_HAS_CDMA_VOICE_PRIVACY" : " priv");
         }
 
+        if (can(properties, PROPERTY_IS_RTT)) {
+            builder.append(isLong ? " PROPERTY_IS_RTT" : " rtt");
+        }
+
         builder.append("]");
         return builder.toString();
     }
@@ -2646,6 +2650,7 @@ public abstract class Connection extends Conferenceable {
      * side of the coll.
      */
     public final void sendRttSessionRemotelyTerminated() {
+        unsetRttProperty();
         mListeners.forEach((l) -> l.onRttSessionRemotelyTerminated(Connection.this));
     }
 
