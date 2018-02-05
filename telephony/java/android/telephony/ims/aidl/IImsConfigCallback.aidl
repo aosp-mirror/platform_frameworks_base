@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 The Android Open Source Project
+ * Copyright (c) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package android.telephony.ims.internal.aidl;
 
-import android.telephony.ims.internal.stub.ImsFeatureConfiguration;
+package android.telephony.ims.aidl;
 
 /**
- * See ImsService#Listener for more information.
+ * Provides callback interface for ImsConfig when a value has changed.
+ *
  * {@hide}
  */
-oneway interface IImsServiceControllerListener {
-    void onUpdateSupportedImsFeatures(in ImsFeatureConfiguration c);
+oneway interface IImsConfigCallback {
+    void onIntConfigChanged(int item, int value);
+    void onStringConfigChanged(int item, String value);
 }
