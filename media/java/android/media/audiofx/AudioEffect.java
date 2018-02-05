@@ -39,6 +39,7 @@ import java.util.UUID;
  *   <li> {@link android.media.audiofx.BassBoost}</li>
  *   <li> {@link android.media.audiofx.PresetReverb}</li>
  *   <li> {@link android.media.audiofx.EnvironmentalReverb}</li>
+ *   <li> {@link android.media.audiofx.DynamicsProcessing}</li>
  * </ul>
  * <p>To apply the audio effect to a specific AudioTrack or MediaPlayer instance,
  * the application must specify the audio session ID of that instance when creating the AudioEffect.
@@ -126,6 +127,12 @@ public class AudioEffect {
               .fromString("fe3199be-aed0-413f-87bb-11260eb63cf1");
 
     /**
+     * UUID for Dynamics Processing
+     */
+    public static final UUID EFFECT_TYPE_DYNAMICS_PROCESSING = UUID
+              .fromString("7261676f-6d75-7369-6364-28e2fd3ac39e");
+
+    /**
      * Null effect UUID. Used when the UUID for effect type of
      * @hide
      */
@@ -203,7 +210,8 @@ public class AudioEffect {
      * {@link AudioEffect#EFFECT_TYPE_AEC}, {@link AudioEffect#EFFECT_TYPE_AGC},
      * {@link AudioEffect#EFFECT_TYPE_BASS_BOOST}, {@link AudioEffect#EFFECT_TYPE_ENV_REVERB},
      * {@link AudioEffect#EFFECT_TYPE_EQUALIZER}, {@link AudioEffect#EFFECT_TYPE_NS},
-     * {@link AudioEffect#EFFECT_TYPE_PRESET_REVERB}, {@link AudioEffect#EFFECT_TYPE_VIRTUALIZER}.
+     * {@link AudioEffect#EFFECT_TYPE_PRESET_REVERB}, {@link AudioEffect#EFFECT_TYPE_VIRTUALIZER},
+     * {@link AudioEffect#EFFECT_TYPE_DYNAMICS_PROCESSING}.
      *  </li>
      *  <li>uuid: UUID for this particular implementation</li>
      *  <li>connectMode: {@link #EFFECT_INSERT} or {@link #EFFECT_AUXILIARY}</li>
@@ -224,7 +232,8 @@ public class AudioEffect {
          * {@link AudioEffect#EFFECT_TYPE_BASS_BOOST}, {@link AudioEffect#EFFECT_TYPE_ENV_REVERB},
          * {@link AudioEffect#EFFECT_TYPE_EQUALIZER}, {@link AudioEffect#EFFECT_TYPE_NS},
          * {@link AudioEffect#EFFECT_TYPE_PRESET_REVERB},
-         * {@link AudioEffect#EFFECT_TYPE_VIRTUALIZER}.
+         * {@link AudioEffect#EFFECT_TYPE_VIRTUALIZER},
+         * {@link AudioEffect#EFFECT_TYPE_DYNAMICS_PROCESSING}.
          * @param uuid         UUID for this particular implementation
          * @param connectMode  {@link #EFFECT_INSERT} or {@link #EFFECT_AUXILIARY}
          * @param name         human readable effect name
@@ -246,7 +255,8 @@ public class AudioEffect {
          *  {@link AudioEffect#EFFECT_TYPE_AGC}, {@link AudioEffect#EFFECT_TYPE_BASS_BOOST},
          *  {@link AudioEffect#EFFECT_TYPE_ENV_REVERB}, {@link AudioEffect#EFFECT_TYPE_EQUALIZER},
          *  {@link AudioEffect#EFFECT_TYPE_NS}, {@link AudioEffect#EFFECT_TYPE_PRESET_REVERB}
-         *   or {@link AudioEffect#EFFECT_TYPE_VIRTUALIZER}.<br>
+         *  {@link AudioEffect#EFFECT_TYPE_VIRTUALIZER}
+         *   or {@link AudioEffect#EFFECT_TYPE_DYNAMICS_PROCESSING}.<br>
          *  For reverberation, bass boost, EQ and virtualizer, the UUID
          *  corresponds to the OpenSL ES Interface ID.
          */
@@ -1338,6 +1348,34 @@ public class AudioEffect {
         converter.order(ByteOrder.nativeOrder());
         short sValue = (short) value;
         converter.putShort(sValue);
+        return converter.array();
+    }
+
+    /**
+     * @hide
+     */
+    public static float byteArrayToFloat(byte[] valueBuf) {
+        return byteArrayToFloat(valueBuf, 0);
+
+    }
+
+    /**
+     * @hide
+     */
+    public static float byteArrayToFloat(byte[] valueBuf, int offset) {
+        ByteBuffer converter = ByteBuffer.wrap(valueBuf);
+        converter.order(ByteOrder.nativeOrder());
+        return converter.getFloat(offset);
+
+    }
+
+    /**
+     * @hide
+     */
+    public static byte[] floatToByteArray(float value) {
+        ByteBuffer converter = ByteBuffer.allocate(4);
+        converter.order(ByteOrder.nativeOrder());
+        converter.putFloat(value);
         return converter.array();
     }
 
