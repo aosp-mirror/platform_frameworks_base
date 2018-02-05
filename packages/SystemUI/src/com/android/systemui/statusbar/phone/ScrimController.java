@@ -30,6 +30,7 @@ import android.os.Handler;
 import android.os.Trace;
 import android.util.Log;
 import android.util.MathUtils;
+import android.view.Choreographer;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -111,7 +112,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     protected static final float SCRIM_IN_FRONT_ALPHA_LOCKED = GRADIENT_SCRIM_ALPHA_BUSY;
 
     static final int TAG_KEY_ANIM = R.id.scrim;
-    static final int TAG_KEY_ANIM_BLANK = R.id.scrim_blanking;
     private static final int TAG_KEY_ANIM_TARGET = R.id.scrim_target;
     private static final int TAG_START_ALPHA = R.id.scrim_alpha_start;
     private static final int TAG_END_ALPHA = R.id.scrim_alpha_end;
@@ -166,6 +166,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     private boolean mScreenBlankingCallbackCalled;
     private Callback mCallback;
     private boolean mWallpaperSupportsAmbientMode;
+    private Choreographer.FrameCallback mPendingFrameCallback;
 
     private final WakeLock mWakeLock;
     private boolean mWakeLockHeld;
@@ -247,6 +248,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
         mCurrentBehindTint = state.getBehindTint();
         mCurrentInFrontAlpha = state.getFrontAlpha();
         mCurrentBehindAlpha = state.getBehindAlpha();
+
+        if (mPendingFrameCallback != null) {
+            Choreographer.getInstance().removeFrameCallback(mPendingFrameCallback);
+            mPendingFrameCallback = null;
+        }
 
         // Showing/hiding the keyguard means that scrim colors have to be switched, not necessary
         // to do the same when you're just showing the brightness mirror.
@@ -687,11 +693,12 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
             }
         }
 
-        final boolean blankingInProgress = mScrimInFront.getTag(TAG_KEY_ANIM_BLANK) != null;
-        if (mBlankScreen || blankingInProgress) {
-            if (!blankingInProgress) {
-                blankDisplay();
-            }
+        if (mPendingFrameCallback != null) {
+            // Display is off and we're waiting.
+            return;
+        } else if (mBlankScreen) {
+            // Need to blank the display before continuing.
+            blankDisplay();
             return;
         } else if (!mScreenBlankingCallbackCalled) {
             // Not blanking the screen. Letting the callback know that we're ready
@@ -745,45 +752,33 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener,
     }
 
     private void blankDisplay() {
-        final float initialAlpha = mScrimInFront.getViewAlpha();
-        final int initialTint = mScrimInFront.getTint();
-        ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
-        anim.addUpdateListener(animation -> {
-            final float amount = (float) animation.getAnimatedValue();
-            float animAlpha = MathUtils.lerp(initialAlpha, 1, amount);
-            int animTint = ColorUtils.blendARGB(initialTint, Color.BLACK, amount);
-            updateScrimColor(mScrimInFront, animAlpha, animTint);
-            dispatchScrimsVisible();
-        });
-        anim.setInterpolator(getInterpolator());
-        anim.setDuration(mDozeParameters.getPulseInDuration());
-        anim.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                if (mCallback != null) {
-                    mCallback.onDisplayBlanked();
-                    mScreenBlankingCallbackCalled = true;
-                }
-                Runnable blankingCallback = () -> {
-                    mScrimInFront.setTag(TAG_KEY_ANIM_BLANK, null);
-                    mBlankScreen = false;
-                    // Try again.
-                    updateScrims();
-                };
+        updateScrimColor(mScrimInFront, 1, Color.BLACK);
 
-                // Setting power states can happen after we push out the frame. Make sure we
-                // stay fully opaque until the power state request reaches the lower levels.
-                getHandler().postDelayed(blankingCallback, 100);
-
+        // Notify callback that the screen is completely black and we're
+        // ready to change the display power mode
+        mPendingFrameCallback = frameTimeNanos -> {
+            if (mCallback != null) {
+                mCallback.onDisplayBlanked();
+                mScreenBlankingCallbackCalled = true;
             }
-        });
-        anim.start();
-        mScrimInFront.setTag(TAG_KEY_ANIM_BLANK, anim);
 
-        // Finish animation if we're already at its final state
-        if (initialAlpha == 1 && mScrimInFront.getTint() == Color.BLACK) {
-            anim.end();
-        }
+            Runnable blankingCallback = () -> {
+                mPendingFrameCallback = null;
+                mBlankScreen = false;
+                // Try again.
+                updateScrims();
+            };
+
+            // Setting power states can happen after we push out the frame. Make sure we
+            // stay fully opaque until the power state request reaches the lower levels.
+            getHandler().postDelayed(blankingCallback, 100);
+        };
+        doOnTheNextFrame(mPendingFrameCallback);
+    }
+
+    @VisibleForTesting
+    protected void doOnTheNextFrame(Choreographer.FrameCallback callback) {
+        Choreographer.getInstance().postFrameCallback(callback);
     }
 
     @VisibleForTesting
