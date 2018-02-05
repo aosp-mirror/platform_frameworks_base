@@ -103,12 +103,9 @@
     <string name="camera_label" msgid="7261107956054836961">"open camera"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Select new task layout"</string>
     <string name="cancel" msgid="6442560571259935130">"Cancel"</string>
-    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
-    <skip />
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Fingerprint icon"</string>
+    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Application icon"</string>
+    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Help message area"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Compatibility zoom button."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom smaller to larger screen."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth connected."</string>
@@ -311,6 +308,8 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi Off"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi On"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"No Wi-Fi networks available"</string>
+    <!-- no translation found for quick_settings_alarm_title (2416759007342260676) -->
+    <skip />
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Cast"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Casting"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Unnamed device"</string>
@@ -327,9 +326,11 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Connecting..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Tethering"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Hotspot"</string>
-    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
-    <skip />
-    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"Turning on..."</string>
+    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
+      <item quantity="other">%d devices</item>
+      <item quantity="one">%d device</item>
+    </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Notifications"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Flashlight"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Mobile data"</string>
@@ -499,11 +500,24 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"Turn off now"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Expand"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Collapse"</string>
+    <string name="accessibility_output_chooser" msgid="8185317493017988680">"Switch output device"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"Screen is pinned"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"This keeps it in view until you unpin. Touch &amp; hold Back and Overview to unpin."</string>
+    <!-- no translation found for screen_pinning_description_recents_invisible (8281145542163727971) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"This keeps it in view until you unpin. Touch &amp; hold Overview to unpin."</string>
+    <!-- no translation found for screen_pinning_description_recents_invisible_accessible (6134833683151189507) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast (2266705122951934150) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast_recents_invisible (8252402309499161281) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Got it"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"No, thanks"</string>
+    <!-- no translation found for screen_pinning_start (1022122128489278317) -->
+    <skip />
+    <!-- no translation found for screen_pinning_exit (5187339744262325372) -->
+    <skip />
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Hide <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"It will reappear the next time you turn it on in settings."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Hide"</string>
@@ -583,8 +597,7 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"With power notification controls, you can set an importance level from 0 to 5 for an app\'s notifications. \n\n"<b>"Level 5"</b>" \n- Show at the top of the notification list \n- Allow full screen interruption \n- Always peek \n\n"<b>"Level 4"</b>" \n- Prevent full screen interruption \n- Always peek \n\n"<b>"Level 3"</b>" \n- Prevent full screen interruption \n- Never peek \n\n"<b>"Level 2"</b>" \n- Prevent full screen interruption \n- Never peek \n- Never make sound and vibration \n\n"<b>"Level 1"</b>" \n- Prevent full screen interruption \n- Never peek \n- Never make sound or vibrate \n- Hide from lock screen and status bar \n- Show at the bottom of the notification list \n\n"<b>"Level 0"</b>" \n- Block all notifications from the app"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Notifications"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"You won\'t see these notifications anymore"</string>
-    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
-    <skip />
+    <string name="inline_blocking_helper" msgid="3055064577771478591">"You usually dismiss these notifications. \nKeep showing them?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Keep showing these notifications?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Stop notifications"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Keep showing"</string>

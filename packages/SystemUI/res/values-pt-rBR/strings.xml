@@ -103,12 +103,9 @@
     <string name="camera_label" msgid="7261107956054836961">"abrir câmera"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Selecionar novo layout da tarefa"</string>
     <string name="cancel" msgid="6442560571259935130">"Cancelar"</string>
-    <!-- no translation found for accessibility_fingerprint_dialog_fingerprint_icon (3125122495414253226) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_app_icon (3228052542929174609) -->
-    <skip />
-    <!-- no translation found for accessibility_fingerprint_dialog_help_area (5730471601819225159) -->
-    <skip />
+    <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Ícone de impressão digital"</string>
+    <string name="accessibility_fingerprint_dialog_app_icon" msgid="3228052542929174609">"Ícone do app"</string>
+    <string name="accessibility_fingerprint_dialog_help_area" msgid="5730471601819225159">"Área da mensagem de ajuda"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Botão de zoom da compatibilidade."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Aumentar a tela com zoom."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth conectado."</string>
@@ -313,6 +310,8 @@
     <string name="quick_settings_wifi_off_label" msgid="7558778100843885864">"Wi-Fi desligado"</string>
     <string name="quick_settings_wifi_on_label" msgid="7607810331387031235">"Wi-Fi ativado"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="269990350383909226">"Nenhuma rede Wi-Fi disponível"</string>
+    <!-- no translation found for quick_settings_alarm_title (2416759007342260676) -->
+    <skip />
     <string name="quick_settings_cast_title" msgid="7709016546426454729">"Transmitir"</string>
     <string name="quick_settings_casting" msgid="6601710681033353316">"Transmitindo"</string>
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Dispositivo sem nome"</string>
@@ -329,9 +328,11 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"Conectando..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"Tethering"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"Ponto de acesso"</string>
-    <!-- no translation found for quick_settings_hotspot_secondary_label_transient (7161046712706277215) -->
-    <skip />
-    <!-- no translation found for quick_settings_hotspot_secondary_label_num_devices (2324635800672199428) -->
+    <string name="quick_settings_hotspot_secondary_label_transient" msgid="7161046712706277215">"Ativando…"</string>
+    <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="2324635800672199428">
+      <item quantity="one">%d dispositivo</item>
+      <item quantity="other">%d dispositivos</item>
+    </plurals>
     <string name="quick_settings_notifications_label" msgid="4818156442169154523">"Notificações"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"Lanterna"</string>
     <string name="quick_settings_cellular_detail_title" msgid="3661194685666477347">"Dados móveis"</string>
@@ -501,11 +502,24 @@
     <string name="volume_zen_end_now" msgid="6930243045593601084">"Desativar agora"</string>
     <string name="accessibility_volume_expand" msgid="5946812790999244205">"Expandir"</string>
     <string name="accessibility_volume_collapse" msgid="3609549593031810875">"Recolher"</string>
+    <string name="accessibility_output_chooser" msgid="8185317493017988680">"Alterar dispositivo de saída"</string>
     <string name="screen_pinning_title" msgid="3273740381976175811">"A tela está fixada"</string>
     <string name="screen_pinning_description" msgid="8909878447196419623">"Ela é mantida à vista até que seja liberada. Toque em Voltar e em Visão geral e mantenha essas opções pressionadas para liberar."</string>
+    <!-- no translation found for screen_pinning_description_recents_invisible (8281145542163727971) -->
+    <skip />
     <string name="screen_pinning_description_accessible" msgid="426190689254018656">"Ela é mantida à vista até que seja liberada. Toque em Visão geral e mantenha essa opção pressionada para liberar."</string>
+    <!-- no translation found for screen_pinning_description_recents_invisible_accessible (6134833683151189507) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast (2266705122951934150) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast_recents_invisible (8252402309499161281) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3783985798366751226">"Entendi"</string>
     <string name="screen_pinning_negative" msgid="3741602308343880268">"Não, obrigado"</string>
+    <!-- no translation found for screen_pinning_start (1022122128489278317) -->
+    <skip />
+    <!-- no translation found for screen_pinning_exit (5187339744262325372) -->
+    <skip />
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Esconder <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Ela reaparecerá na próxima vez que você ativá-la nas configurações."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Ocultar"</string>
@@ -585,8 +599,7 @@
     <string name="power_notification_controls_description" msgid="4372459941671353358">"Com controles de ativação de notificações, é possível definir o nível de importância de 0 a 5 para as notificações de um app. \n\n"<b>"Nível 5"</b>" \n- Exibir na parte superior da lista de notificações \n- Permitir interrupção em tela cheia \n- Sempre exibir \n\n"<b>"Nível 4"</b>" \n- Impedir interrupções em tela cheia \n- Sempre exibir \n\n"<b>"Nível 3"</b>" \n- Impedir interrupções em tela cheia \n- Nunca exibir \n\n"<b>"Nível 2"</b>" \n- Impedir interrupções em tela cheia \n- Nunca exibir \n- Nunca emitir som ou vibrar \n\n"<b>"Nível 1"</b>" \n- Impedir interrupções em tela cheia \n- Nunca exibir \n- Nunca emitir som ou vibrar \n- Ocultar da tela de bloqueio e barra de status \n- Exibir na parte inferior da lista de notificações \n\n"<b>"Nível 0"</b>" \n- Bloquear todas as notificações do app"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Notificações"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Você deixará de ver essas notificações"</string>
-    <!-- no translation found for inline_blocking_helper (3055064577771478591) -->
-    <skip />
+    <string name="inline_blocking_helper" msgid="3055064577771478591">"Geralmente você dispensa essas notificações. \nQuer que elas continuem a ser exibidas?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Continuar mostrando essas notificações?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Bloquear notificações"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Continuar mostrando"</string>
