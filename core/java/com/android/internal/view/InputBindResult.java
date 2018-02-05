@@ -139,6 +139,10 @@ public final class InputBindResult implements Parcelable {
          * @see com.android.server.wm.WindowManagerService#inputMethodClientHasFocus(IInputMethodClient)
          */
         int ERROR_NOT_IME_TARGET_WINDOW = 11;
+        /**
+         * Indicates that focused view in the current window is not an editor.
+         */
+        int ERROR_NO_EDITOR = 12;
     }
 
     @ResultCode
@@ -258,6 +262,8 @@ public final class InputBindResult implements Parcelable {
                 return "ERROR_NULL";
             case ResultCode.ERROR_NO_IME:
                 return "ERROR_NO_IME";
+            case ResultCode.ERROR_NO_EDITOR:
+                return "ERROR_NO_EDITOR";
             case ResultCode.ERROR_INVALID_PACKAGE_NAME:
                 return "ERROR_INVALID_PACKAGE_NAME";
             case ResultCode.ERROR_SYSTEM_NOT_READY:
@@ -287,6 +293,10 @@ public final class InputBindResult implements Parcelable {
      * Predefined error object for {@link ResultCode#NO_IME}.
      */
     public static final InputBindResult NO_IME = error(ResultCode.ERROR_NO_IME);
+    /**
+     * Predefined error object for {@link ResultCode#NO_EDITOR}.
+     */
+    public static final InputBindResult NO_EDITOR = error(ResultCode.ERROR_NO_EDITOR);
     /**
      * Predefined error object for {@link ResultCode#ERROR_INVALID_PACKAGE_NAME}.
      */
