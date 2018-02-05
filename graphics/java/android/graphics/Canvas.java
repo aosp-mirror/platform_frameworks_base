@@ -1219,10 +1219,14 @@ public class Canvas extends BaseCanvas {
         nFreeTextLayoutCaches();
     }
 
+    /** @hide */
+    public static void setCompatibilityVersion(int apiLevel) { nSetCompatibilityVersion(apiLevel); }
+
     private static native void nFreeCaches();
     private static native void nFreeTextLayoutCaches();
     private static native long nInitRaster(Bitmap bitmap);
     private static native long nGetNativeFinalizer();
+    private static native void nSetCompatibilityVersion(int apiLevel);
 
     // ---------------- @FastNative -------------------
 
