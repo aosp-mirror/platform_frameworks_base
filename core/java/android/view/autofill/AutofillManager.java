@@ -619,6 +619,7 @@ public final class AutofillManager {
     /**
      * @hide
      */
+    @GuardedBy("mLock")
     public boolean isCompatibilityModeEnabledLocked() {
         return mCompatibilityBridge != null;
     }
@@ -709,6 +710,7 @@ public final class AutofillManager {
         notifyViewEntered(view, 0);
     }
 
+    @GuardedBy("mLock")
     private boolean shouldIgnoreViewEnteredLocked(@NonNull View view, int flags) {
         if (isDisabledByServiceLocked()) {
             if (sVerbose) {
@@ -749,6 +751,7 @@ public final class AutofillManager {
     }
 
     /** Returns AutofillCallback if need fire EVENT_INPUT_UNAVAILABLE */
+    @GuardedBy("mLock")
     private AutofillCallback notifyViewEnteredLocked(@NonNull View view, int flags) {
         if (shouldIgnoreViewEnteredLocked(view, flags)) return null;
 
@@ -792,6 +795,7 @@ public final class AutofillManager {
         }
     }
 
+    @GuardedBy("mLock")
     void notifyViewExitedLocked(@NonNull View view) {
         ensureServiceClientAddedIfNeededLocked();
 
@@ -893,6 +897,7 @@ public final class AutofillManager {
     }
 
     /** Returns AutofillCallback if need fire EVENT_INPUT_UNAVAILABLE */
+    @GuardedBy("mLock")
     private AutofillCallback notifyViewEnteredLocked(View view, int virtualId, Rect bounds,
                                                      int flags) {
         AutofillCallback callback = null;
@@ -936,6 +941,7 @@ public final class AutofillManager {
         }
     }
 
+    @GuardedBy("mLock")
     private void notifyViewExitedLocked(@NonNull View view, int virtualId) {
         ensureServiceClientAddedIfNeededLocked();
 
@@ -1087,6 +1093,7 @@ public final class AutofillManager {
         }
     }
 
+    @GuardedBy("mLock")
     private void commitLocked() {
         if (!mEnabled && !isActiveLocked()) {
             return;
@@ -1115,6 +1122,7 @@ public final class AutofillManager {
         }
     }
 
+    @GuardedBy("mLock")
     private void cancelLocked() {
         if (!mEnabled && !isActiveLocked()) {
             return;
@@ -1378,6 +1386,7 @@ public final class AutofillManager {
         return new AutofillId(parent.getAutofillViewId(), virtualId);
     }
 
+    @GuardedBy("mLock")
     private void startSessionLocked(@NonNull AutofillId id, @NonNull Rect bounds,
             @NonNull AutofillValue value, int flags) {
         if (sVerbose) {
@@ -1408,6 +1417,7 @@ public final class AutofillManager {
         }
     }
 
+    @GuardedBy("mLock")
     private void finishSessionLocked() {
         if (sVerbose) Log.v(TAG, "finishSessionLocked(): " + getStateAsStringLocked());
 
@@ -1422,6 +1432,7 @@ public final class AutofillManager {
         resetSessionLocked();
     }
 
+    @GuardedBy("mLock")
     private void cancelSessionLocked() {
         if (sVerbose) Log.v(TAG, "cancelSessionLocked(): " + getStateAsStringLocked());
 
@@ -1436,6 +1447,7 @@ public final class AutofillManager {
         resetSessionLocked();
     }
 
+    @GuardedBy("mLock")
     private void resetSessionLocked() {
         mSessionId = NO_SESSION;
         mState = STATE_UNKNOWN;
@@ -1444,6 +1456,7 @@ public final class AutofillManager {
         mSaveTriggerId = null;
     }
 
+    @GuardedBy("mLock")
     private void updateSessionLocked(AutofillId id, Rect bounds, AutofillValue value, int action,
             int flags) {
         if (sVerbose && action != ACTION_VIEW_EXITED) {
@@ -1478,6 +1491,7 @@ public final class AutofillManager {
         }
     }
 
+    @GuardedBy("mLock")
     private void ensureServiceClientAddedIfNeededLocked() {
         if (getClient() == null) {
             return;
@@ -1947,6 +1961,7 @@ public final class AutofillManager {
         pw.print(" verbose: "); pw.println(sVerbose);
     }
 
+    @GuardedBy("mLock")
     private String getStateAsStringLocked() {
         switch (mState) {
             case STATE_UNKNOWN:
@@ -1964,14 +1979,17 @@ public final class AutofillManager {
         }
     }
 
+    @GuardedBy("mLock")
     private boolean isActiveLocked() {
         return mState == STATE_ACTIVE;
     }
 
+    @GuardedBy("mLock")
     private boolean isDisabledByServiceLocked() {
         return mState == STATE_DISABLED_BY_SERVICE;
     }
 
+    @GuardedBy("mLock")
     private boolean isFinishedLocked() {
         return mState == STATE_FINISHED;
     }
@@ -2167,6 +2185,7 @@ public final class AutofillManager {
                     AutofillValue.forText(node.getText()));
         }
 
+        @GuardedBy("mLock")
         private void updateTrackedViewsLocked() {
             if (mTrackedViews != null) {
                 mTrackedViews.onVisibleForAutofillChangedLocked();
@@ -2311,6 +2330,7 @@ public final class AutofillManager {
          * @param id the id of the view/virtual view whose visibility changed.
          * @param isVisible visible if the view is visible in the view hierarchy.
          */
+        @GuardedBy("mLock")
         void notifyViewVisibilityChangedLocked(@NonNull AutofillId id, boolean isVisible) {
             if (sDebug) {
                 Log.d(TAG, "notifyViewVisibilityChangedLocked(): id=" + id + " isVisible="
@@ -2344,6 +2364,7 @@ public final class AutofillManager {
          *
          * @see AutofillClient#autofillClientIsVisibleForAutofill()
          */
+        @GuardedBy("mLock")
         void onVisibleForAutofillChangedLocked() {
             // The visibility of the views might have changed while the client was not be visible,
             // hence update the visibility state for all views.

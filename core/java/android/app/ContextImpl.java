@@ -409,6 +409,7 @@ class ContextImpl extends Context {
         return sp;
     }
 
+    @GuardedBy("ContextImpl.class")
     private ArrayMap<File, SharedPreferencesImpl> getSharedPreferencesCacheLocked() {
         if (sSharedPrefsCache == null) {
             sSharedPrefsCache = new ArrayMap<>();
