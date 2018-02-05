@@ -1353,6 +1353,7 @@ public class MediaRecorder implements AudioRouting
     /*
      * Call BEFORE adding a routing callback handler or AFTER removing a routing callback handler.
      */
+    @GuardedBy("mRoutingChangeListeners")
     private void enableNativeRoutingCallbacksLocked(boolean enabled) {
         if (mRoutingChangeListeners.size() == 0) {
             native_enableDeviceCallback(enabled);
