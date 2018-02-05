@@ -318,7 +318,7 @@ class PackageSignatures {
                         mSigningDetails.signatures[i].hashCode()));
             }
         }
-        buf.append("]}");
+        buf.append("]");
         buf.append(", past signatures:[");
         if (mSigningDetails.pastSigningCertificates != null) {
             for (int i = 0; i < mSigningDetails.pastSigningCertificates.length; i++) {
@@ -329,6 +329,7 @@ class PackageSignatures {
                 buf.append(Integer.toHexString(mSigningDetails.pastSigningCertificatesFlags[i]));
             }
         }
+        buf.append("]}");
         return buf.toString();
     }
 }
