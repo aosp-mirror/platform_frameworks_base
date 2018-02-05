@@ -53,7 +53,8 @@ class SurfaceAnimator {
     SurfaceControl mLeash;
     private final Animatable mAnimatable;
     private final OnAnimationFinishedCallback mInnerAnimationFinishedCallback;
-    private final Runnable mAnimationFinishedCallback;
+    @VisibleForTesting
+    final Runnable mAnimationFinishedCallback;
     private boolean mAnimationStartDelayed;
 
     /**

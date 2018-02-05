@@ -69,11 +69,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     private Runnable mRunnableWhenAddingSplashScreen;
 
     static synchronized WindowManagerService getWindowManagerService(Context context) {
-        return getWindowManagerService(context, new SurfaceAnimationRunner());
-    }
-
-    static synchronized WindowManagerService getWindowManagerService(Context context,
-            SurfaceAnimationRunner surfaceAnimationRunner) {
         if (sWm == null) {
             // We only want to do this once for the test process as we don't want WM to try to
             // register a bunch of local services again.
@@ -111,7 +106,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
             }
 
             sWm = WindowManagerService.main(context, ims, true, false,
-                    false, new TestWindowManagerPolicy(), surfaceAnimationRunner);
+                    false, new TestWindowManagerPolicy());
         }
         return sWm;
     }
