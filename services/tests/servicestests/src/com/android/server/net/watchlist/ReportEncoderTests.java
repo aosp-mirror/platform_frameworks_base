@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,12 @@
 
 package com.android.server.net.watchlist;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-
-import com.android.internal.util.HexDump;
 
 import org.junit.After;
 import org.junit.Before;
@@ -37,18 +35,21 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 
+import com.android.service.nano.NetworkWatchlistReportProto;
+import com.android.service.nano.NetworkWatchlistAppResultProto;
+
 /**
- * runtest frameworks-services -c com.android.server.net.watchlist.ReportUtilsTests
+ * runtest frameworks-services -c com.android.server.net.watchlist.ReportEncoderTests
  */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class ReportUtilsTests {
+public class ReportEncoderTests {
 
     private static final String TEST_XML_1 = "NetworkWatchlistTest/watchlist_config_test1.xml";
     private static final String TEST_XML_1_HASH =
             "C99F27A08B1FDB15B101098E12BB2A0AA0D474E23C50F24920A52AB2322BFD94";
-    private static final String REPORT_HEADER_MAGIC = "8D370AAC";
-    private static final String REPORT_HEADER_VERSION = "0001";
+    private static final int REPORT_VERSION = 1;
+    private static final int EXPECTED_REPORT_VERSION = 1;
 
     private Context mContext;
     private File mTestXmlFile;
@@ -56,7 +57,7 @@ public class ReportUtilsTests {
     @Before
     public void setUp() throws Exception {
         mContext = InstrumentationRegistry.getContext();
-        mTestXmlFile =  new File(mContext.getFilesDir(), "test_watchlist_config.xml");
+        mTestXmlFile = new File(mContext.getFilesDir(), "test_watchlist_config.xml");
         mTestXmlFile.delete();
     }
 
@@ -67,26 +68,28 @@ public class ReportUtilsTests {
 
     @Test
     public void testReportUtils_serializeReport() throws Exception {
-        final byte[] expectedResult = HexDump.hexStringToByteArray(
-                REPORT_HEADER_MAGIC + REPORT_HEADER_VERSION + TEST_XML_1_HASH
-                        + "B86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB43" + "01"
-                        + "C86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB44" + "00"
-                        + "D86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB45" + "00"
-                        + "E86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB46" + "01"
-                        + "F86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB47" + "01"
-        );
-        HashMap<String, Boolean> input = new HashMap<>();
-        input.put("C86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB44", false);
-        input.put("B86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB43", true);
-        input.put("D86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB45", false);
-        input.put("E86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB46", true);
-        input.put("F86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB47", true);
+        HashMap<String, Boolean> map = new HashMap<>();
+        map.put("C86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB44", false);
+        map.put("B86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB43", true);
+        map.put("D86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB45", false);
+        map.put("E86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB46", true);
+        map.put("F86F9D37425340B635F43D6BC2506630761ADA71F5E6BBDBCA4651C479F9FB47", true);
 
         copyWatchlistConfigXml(mContext, TEST_XML_1, mTestXmlFile);
         WatchlistConfig config = new WatchlistConfig(mTestXmlFile);
 
-        byte[] result = ReportEncoder.serializeReport(config, input);
-        assertArrayEquals(expectedResult, result);
+        final byte[] result = ReportEncoder.serializeReport(config, map);
+
+        // Parse result back to NetworkWatchlistReportDumpProto
+        final NetworkWatchlistReportProto reportProto =
+                NetworkWatchlistReportProto.parseFrom(result);
+        assertEquals(REPORT_VERSION, reportProto.reportVersion);
+        assertEquals(TEST_XML_1_HASH, reportProto.watchlistConfigHash);
+        assertEquals(map.size(), reportProto.appResult.length);
+        for (NetworkWatchlistAppResultProto appProto : reportProto.appResult) {
+            final String digest = appProto.appDigest;
+            assertEquals(map.get(digest), appProto.encodedResult);
+        }
     }
 
     private static void copyWatchlistConfigXml(Context context, String xmlAsset, File outFile)
