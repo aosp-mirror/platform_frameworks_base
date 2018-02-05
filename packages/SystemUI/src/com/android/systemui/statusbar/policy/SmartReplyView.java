@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 
 /** View which displays smart reply buttons in notifications. */
@@ -19,8 +20,11 @@ public class SmartReplyView extends LinearLayout {
 
     private static final String TAG = "SmartReplyView";
 
+    private final SmartReplyConstants mConstants;
+
     public SmartReplyView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mConstants = Dependency.get(SmartReplyConstants.class);
     }
 
     public void setRepliesFromRemoteInput(RemoteInput remoteInput, PendingIntent pendingIntent) {

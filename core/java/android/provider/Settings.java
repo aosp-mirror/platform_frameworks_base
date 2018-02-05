@@ -12089,11 +12089,22 @@ public final class Settings {
                 "zram_enabled";
 
         /**
-         * Whether smart replies in notifications are enabled.
+         * Configuration flags for smart replies in notifications.
+         * This is encoded as a key=value list, separated by commas. Ex:
+         *
+         * "enabled=1,max_squeeze_remeasure_count=3"
+         *
+         * The following keys are supported:
+         *
+         * <pre>
+         * enabled                         (boolean)
+         * max_squeeze_remeasure_attempts  (int)
+         * </pre>
+         * @see com.android.systemui.statusbar.policy.SmartReplyConstants
          * @hide
          */
-        public static final String ENABLE_SMART_REPLIES_IN_NOTIFICATIONS =
-                "enable_smart_replies_in_notifications";
+        public static final String SMART_REPLIES_IN_NOTIFICATIONS_FLAGS =
+                "smart_replies_in_notifications_flags";
 
         /**
          * If nonzero, crashes in foreground processes will bring up a dialog.

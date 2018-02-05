@@ -22,7 +22,6 @@ import android.app.RemoteInput;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Build;
-import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -36,6 +35,7 @@ import android.widget.LinearLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.NotificationColorUtil;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.HybridGroupManager;
 import com.android.systemui.statusbar.notification.HybridNotificationView;
@@ -44,6 +44,7 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.NotificationViewWrapper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.RemoteInputView;
+import com.android.systemui.statusbar.policy.SmartReplyConstants;
 import com.android.systemui.statusbar.policy.SmartReplyView;
 
 /**
@@ -75,6 +76,8 @@ public class NotificationContentView extends FrameLayout {
 
     private RemoteInputView mExpandedRemoteInput;
     private RemoteInputView mHeadsUpRemoteInput;
+
+    private SmartReplyConstants mSmartReplyConstants;
     private SmartReplyView mExpandedSmartReplyView;
 
     private NotificationViewWrapper mContractedWrapper;
@@ -145,6 +148,7 @@ public class NotificationContentView extends FrameLayout {
     public NotificationContentView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mHybridGroupManager = new HybridGroupManager(getContext(), this);
+        mSmartReplyConstants = Dependency.get(SmartReplyConstants.class);
         initView();
     }
 
@@ -1166,8 +1170,7 @@ public class NotificationContentView extends FrameLayout {
             return;
         }
 
-        boolean enableSmartReplies = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.ENABLE_SMART_REPLIES_IN_NOTIFICATIONS, 0) != 0;
+        boolean enableSmartReplies = mSmartReplyConstants.isEnabled();
 
         boolean hasRemoteInput = false;
         RemoteInput remoteInputWithChoices = null;
