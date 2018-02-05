@@ -40,6 +40,7 @@ import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.os.AsyncTask;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
@@ -82,6 +83,7 @@ import com.android.server.autofill.ui.AutoFillUI;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -273,8 +275,7 @@ final class AutofillManagerServiceImpl {
         }
         try {
             if (serviceInfo != null) {
-                mInfo = new AutofillServiceInfo(mContext.getPackageManager(),
-                        serviceComponent, mUserId);
+                mInfo = new AutofillServiceInfo(mContext, serviceComponent, mUserId);
                 if (sDebug) Slog.d(TAG, "Set component for user " + mUserId + " as " + mInfo);
             } else {
                 mInfo = null;
@@ -986,6 +987,21 @@ final class AutofillManagerServiceImpl {
             output.add((mInfo != null ? mInfo.getServiceInfo().getComponentName()
                     : null) + ":" + mSessions.keyAt(i));
         }
+    }
+
+    boolean isCompatibilityModeRequestedLocked(@NonNull String packageName,
+            long versionCode) {
+        if (mInfo == null || !mInfo.isCompatibilityModeRequested(packageName, versionCode)) {
+            return false;
+        }
+        if (!Build.IS_ENG) {
+            // TODO: Build a map and watch for settings changes (this is called on app start)
+            final String whiteListedPackages = Settings.Global.getString(
+                    mContext.getContentResolver(),
+                    Settings.Global.AUTOFILL_COMPAT_ALLOWED_PACKAGES);
+            return whiteListedPackages != null && whiteListedPackages.contains(packageName);
+        }
+        return true;
     }
 
     private void sendStateToClients(boolean resetClient) {

@@ -4,6 +4,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.Context;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.net.Uri;
@@ -500,9 +501,8 @@ public class AssistStructure implements Parcelable {
             ViewNodeBuilder builder = new ViewNodeBuilder(assist, mRoot, false);
             if ((root.getWindowFlags() & WindowManager.LayoutParams.FLAG_SECURE) != 0) {
                 if (forAutoFill) {
-                    final int autofillFlags = (flags & FillRequest.FLAG_MANUAL_REQUEST) != 0
-                            ? View.AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS : 0;
-                    view.onProvideAutofillStructure(builder, autofillFlags);
+                    final int viewFlags = resolveViewAutofillFlags(view.getContext(), flags);
+                    view.onProvideAutofillStructure(builder, viewFlags);
                 } else {
                     // This is a secure window, so it doesn't want a screenshot, and that
                     // means we should also not copy out its view hierarchy for Assist
@@ -512,9 +512,8 @@ public class AssistStructure implements Parcelable {
                 }
             }
             if (forAutoFill) {
-                final int autofillFlags = (flags & FillRequest.FLAG_MANUAL_REQUEST) != 0
-                        ? View.AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS : 0;
-                view.dispatchProvideAutofillStructure(builder, autofillFlags);
+                final int viewFlags = resolveViewAutofillFlags(view.getContext(), flags);
+                view.dispatchProvideAutofillStructure(builder, viewFlags);
             } else {
                 view.dispatchProvideStructure(builder);
             }
@@ -530,6 +529,12 @@ public class AssistStructure implements Parcelable {
             mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             mDisplayId = in.readInt();
             mRoot = new ViewNode(reader, 0);
+        }
+
+        int resolveViewAutofillFlags(Context context, int fillRequestFlags) {
+            return (fillRequestFlags & FillRequest.FLAG_MANUAL_REQUEST) != 0
+                        || context.isAutofillCompatibilityEnabled()
+                    ? View.AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS : 0;
         }
 
         void writeSelfToParcel(Parcel out, PooledStringWriter pwriter, float[] tmpMatrix) {

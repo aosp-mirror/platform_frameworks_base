@@ -2868,6 +2868,7 @@
       <public name="accessibilityHeading" />
       <public name="outlineSpotShadowColor" />
       <public name="outlineAmbientShadowColor" />
+      <public name="maxLongVersionCode" />
     </public-group>
 
     <public-group type="style" first-id="0x010302e0">

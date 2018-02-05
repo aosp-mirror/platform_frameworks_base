@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppGlobals;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
@@ -27,6 +28,8 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.metrics.LogMaker;
 import android.os.RemoteException;
+import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
@@ -35,11 +38,13 @@ import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
+import com.android.internal.util.XmlUtils;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * {@link ServiceInfo} and meta-data about an {@link AutofillService}.
@@ -48,6 +53,9 @@ import java.io.IOException;
  */
 public final class AutofillServiceInfo {
     private static final String TAG = "AutofillServiceInfo";
+
+    private static final String TAG_AUTOFILL_SERVICE = "autofill-service";
+    private static final String TAG_COMPATIBILITY_PACKAGE = "compatibility-package";
 
     private static ServiceInfo getServiceInfoOrThrow(ComponentName comp, int userHandle)
             throws PackageManager.NameNotFoundException {
@@ -70,29 +78,15 @@ public final class AutofillServiceInfo {
     @Nullable
     private final String mSettingsActivity;
 
-    public AutofillServiceInfo(PackageManager pm, ComponentName comp, int userHandle)
-            throws PackageManager.NameNotFoundException {
-        this(pm, getServiceInfoOrThrow(comp, userHandle));
-    }
-
-    public AutofillServiceInfo(PackageManager pm, ServiceInfo si) {
-        mServiceInfo = si;
-        final TypedArray metaDataArray = getMetaDataArray(pm, si);
-        if (metaDataArray != null) {
-            mSettingsActivity = metaDataArray
-                    .getString(R.styleable.AutofillService_settingsActivity);
-            metaDataArray.recycle();
-        } else {
-            mSettingsActivity = null;
-        }
-    }
-
-    /**
-     * Gets the meta-data as a {@link TypedArray}, or {@code null} if not provided,
-     * or throws if invalid.
-     */
     @Nullable
-    private static TypedArray getMetaDataArray(PackageManager pm, ServiceInfo si) {
+    private final Map<String, Long> mCompatibilityPackages;
+
+    public AutofillServiceInfo(Context context, ComponentName comp, int userHandle)
+            throws PackageManager.NameNotFoundException {
+        this(context, getServiceInfoOrThrow(comp, userHandle));
+    }
+
+    public AutofillServiceInfo(Context context, ServiceInfo si) {
         // Check for permissions.
         if (!Manifest.permission.BIND_AUTOFILL_SERVICE.equals(si.permission)) {
             if (Manifest.permission.BIND_AUTOFILL.equals(si.permission)) {
@@ -111,45 +105,115 @@ public final class AutofillServiceInfo {
             }
         }
 
+        mServiceInfo = si;
+
         // Get the AutoFill metadata, if declared.
-        XmlResourceParser parser = si.loadXmlMetaData(pm, AutofillService.SERVICE_META_DATA);
+        final XmlResourceParser parser = si.loadXmlMetaData(context.getPackageManager(),
+                AutofillService.SERVICE_META_DATA);
         if (parser == null) {
-            return null;
+            mSettingsActivity = null;
+            mCompatibilityPackages = null;
+            return;
         }
 
-        // Parse service info and get the <autofill-service> tag as an AttributeSet.
-        AttributeSet attrs;
+        String settingsActivity = null;
+        Map<String, Long> compatibilityPackages = null;
+
         try {
-            // Move the XML parser to the first tag.
-            try {
-                int type;
-                while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                        && type != XmlPullParser.START_TAG) {
+            final Resources resources = context.getPackageManager().getResourcesForApplication(
+                    si.applicationInfo);
+
+            int type = 0;
+            while (type != XmlPullParser.END_DOCUMENT && type != XmlPullParser.START_TAG) {
+                type = parser.next();
+            }
+
+            if (TAG_AUTOFILL_SERVICE.equals(parser.getName())) {
+                final AttributeSet allAttributes = Xml.asAttributeSet(parser);
+                TypedArray afsAttributes = null;
+                try {
+                    afsAttributes = resources.obtainAttributes(allAttributes,
+                            com.android.internal.R.styleable.AutofillService);
+                    settingsActivity = afsAttributes.getString(
+                            R.styleable.AutofillService_settingsActivity);
+                } finally {
+                    if (afsAttributes != null) {
+                        afsAttributes.recycle();
+                    }
                 }
-            } catch (XmlPullParserException | IOException e) {
-                Log.e(TAG, "Error parsing auto fill service meta-data", e);
-                return null;
-            }
-
-            if (!"autofill-service".equals(parser.getName())) {
+                compatibilityPackages = parseCompatibilityPackages(parser, resources);
+            } else {
                 Log.e(TAG, "Meta-data does not start with autofill-service tag");
-                return null;
             }
-            attrs = Xml.asAttributeSet(parser);
-
-            // Get resources required to read the AttributeSet.
-            Resources res;
-            try {
-                res = pm.getResourcesForApplication(si.applicationInfo);
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.e(TAG, "Error getting application resources", e);
-                return null;
-            }
-
-            return res.obtainAttributes(attrs, R.styleable.AutofillService);
-        } finally {
-            parser.close();
+        } catch (PackageManager.NameNotFoundException | IOException | XmlPullParserException e) {
+            Log.e(TAG, "Error parsing auto fill service meta-data", e);
         }
+
+        mSettingsActivity = settingsActivity;
+        mCompatibilityPackages = compatibilityPackages;
+    }
+
+    private Map<String, Long> parseCompatibilityPackages(XmlPullParser parser, Resources resources)
+            throws IOException, XmlPullParserException {
+        Map<String, Long> compatibilityPackages = null;
+
+        final int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+
+            if (TAG_COMPATIBILITY_PACKAGE.equals(parser.getName())) {
+                TypedArray cpAttributes = null;
+                try {
+                    final AttributeSet allAttributes = Xml.asAttributeSet(parser);
+
+                    cpAttributes = resources.obtainAttributes(allAttributes,
+                           R.styleable.AutofillService_CompatibilityPackage);
+
+                    final String name = cpAttributes.getString(
+                            R.styleable.AutofillService_CompatibilityPackage_name);
+                    if (TextUtils.isEmpty(name)) {
+                        Log.e(TAG, "Invalid compatibility package:" + name);
+                        break;
+                    }
+
+                    final String maxVersionCodeStr = cpAttributes.getString(
+                            R.styleable.AutofillService_CompatibilityPackage_maxLongVersionCode);
+                    final Long maxVersionCode;
+                    if (maxVersionCodeStr != null) {
+                        try {
+                            maxVersionCode = Long.parseLong(maxVersionCodeStr);
+                        } catch (NumberFormatException e) {
+                            Log.e(TAG, "Invalid compatibility max version code:"
+                                    + maxVersionCodeStr);
+                            break;
+                        }
+                        if (maxVersionCode < 0) {
+                            Log.e(TAG, "Invalid compatibility max version code:"
+                                    + maxVersionCode);
+                            break;
+                        }
+                    } else {
+                        maxVersionCode = Long.MAX_VALUE;
+                    }
+
+                    if (compatibilityPackages == null) {
+                        compatibilityPackages = new ArrayMap<>();
+                    }
+                    compatibilityPackages.put(name, maxVersionCode);
+                } finally {
+                    XmlUtils.skipCurrentTag(parser);
+                    if (cpAttributes != null) {
+                        cpAttributes.recycle();
+                    }
+                }
+            }
+        }
+
+        return compatibilityPackages;
     }
 
     public ServiceInfo getServiceInfo() {
@@ -161,8 +225,26 @@ public final class AutofillServiceInfo {
         return mSettingsActivity;
     }
 
+    @Nullable
+    public boolean isCompatibilityModeRequested(String packageName, long versionCode) {
+        if (mCompatibilityPackages == null) {
+            return false;
+        }
+        final Long maxVersionCode = mCompatibilityPackages.get(packageName);
+        if (maxVersionCode == null) {
+            return false;
+        }
+        return versionCode <= maxVersionCode;
+    }
+
     @Override
     public String toString() {
-        return mServiceInfo == null ? "null" : mServiceInfo.toString();
+        final StringBuilder builder = new StringBuilder();
+        builder.append(getClass().getSimpleName());
+        builder.append("[").append(mServiceInfo);
+        builder.append(", settings:").append(mSettingsActivity);
+        builder.append(", hasCompatPckgs:").append(mCompatibilityPackages != null
+                && !mCompatibilityPackages.isEmpty()).append("]");
+        return builder.toString();
     }
 }

@@ -115,6 +115,7 @@ public class SettingsBackupTest {
                     Settings.Global.APP_STANDBY_ENABLED,
                     Settings.Global.ASSISTED_GPS_ENABLED,
                     Settings.Global.AUDIO_SAFE_VOLUME_STATE,
+                    Settings.Global.AUTOFILL_COMPAT_ALLOWED_PACKAGES,
                     Settings.Global.BATTERY_DISCHARGE_DURATION_THRESHOLD,
                     Settings.Global.BATTERY_DISCHARGE_THRESHOLD,
                     Settings.Global.BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS,

@@ -16,10 +16,9 @@
 
 package android.view.accessibility;
 
-import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_ENABLE_ACCESSIBILITY_VOLUME;
-
 import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.accessibilityservice.AccessibilityServiceInfo.FeedbackType;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -44,13 +43,15 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.IWindow;
 import android.view.View;
-
+import android.view.accessibility.AccessibilityEvent.EventType;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IntPair;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_ENABLE_ACCESSIBILITY_VOLUME;
 
 /**
  * System level service that serves as an event dispatch for {@link AccessibilityEvent}s,
@@ -131,6 +132,8 @@ public final class AccessibilityManager {
     boolean mIsTouchExplorationEnabled;
 
     boolean mIsHighTextContrastEnabled;
+
+    AccessibilityPolicy mAccessibilityPolicy;
 
     private final ArrayMap<AccessibilityStateChangeListener, Handler>
             mAccessibilityStateChangeListeners = new ArrayMap<>();
@@ -213,6 +216,60 @@ public final class AccessibilityManager {
          * @param enabled Whether high text contrast is enabled.
          */
         void onHighTextContrastStateChanged(boolean enabled);
+    }
+
+    /**
+     * Policy to inject behavior into the accessibility manager.
+     *
+     * @hide
+     */
+    public interface AccessibilityPolicy {
+        /**
+         * Checks whether accessibility is enabled.
+         *
+         * @param accessibilityEnabled Whether the accessibility layer is enabled.
+         * @return whether accessibility is enabled.
+         */
+        boolean isEnabled(boolean accessibilityEnabled);
+
+        /**
+         * Notifies the policy for an accessibility event.
+         *
+         * @param event The event.
+         * @param accessibilityEnabled Whether the accessibility layer is enabled.
+         * @param relevantEventTypes The events relevant events.
+         * @return The event to dispatch or null.
+         */
+        @Nullable AccessibilityEvent onAccessibilityEvent(@NonNull AccessibilityEvent event,
+                boolean accessibilityEnabled, @EventType int relevantEventTypes);
+
+        /**
+         * Gets the list of relevant events.
+         *
+         * @param relevantEventTypes The relevant events.
+         * @return The relevant events to report.
+         */
+        @EventType int getRelevantEventTypes(@EventType int relevantEventTypes);
+
+        /**
+         * Gets the list of installed services to report.
+         *
+         * @param installedService The installed services.
+         * @return The services to report.
+         */
+        @NonNull List<AccessibilityServiceInfo> getInstalledAccessibilityServiceList(
+                @Nullable List<AccessibilityServiceInfo> installedService);
+
+        /**
+         * Gets the list of enabled accessibility services.
+         *
+         * @param feedbackTypeFlags The feedback type to query for.
+         * @param enabledService The enabled services.
+         * @return The services to report.
+         */
+        @Nullable List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(
+                @FeedbackType int feedbackTypeFlags,
+                @Nullable List<AccessibilityServiceInfo> enabledService);
     }
 
     private final IAccessibilityManagerClient.Stub mClient =
@@ -341,11 +398,8 @@ public final class AccessibilityManager {
      */
     public boolean isEnabled() {
         synchronized (mLock) {
-            IAccessibilityManager service = getServiceLocked();
-            if (service == null) {
-                return false;
-            }
-            return mIsEnabled;
+            return mIsEnabled || (mAccessibilityPolicy != null
+                    && mAccessibilityPolicy.isEnabled(mIsEnabled));
         }
     }
 
@@ -401,12 +455,23 @@ public final class AccessibilityManager {
     public void sendAccessibilityEvent(AccessibilityEvent event) {
         final IAccessibilityManager service;
         final int userId;
+        final AccessibilityEvent dispatchedEvent;
         synchronized (mLock) {
             service = getServiceLocked();
             if (service == null) {
                 return;
             }
-            if (!mIsEnabled) {
+            event.setEventTime(SystemClock.uptimeMillis());
+            if (mAccessibilityPolicy != null) {
+                dispatchedEvent = mAccessibilityPolicy.onAccessibilityEvent(event,
+                        mIsEnabled, mRelevantEventTypes);
+                if (dispatchedEvent == null) {
+                    return;
+                }
+            } else {
+                dispatchedEvent = event;
+            }
+            if (!isEnabled()) {
                 Looper myLooper = Looper.myLooper();
                 if (myLooper == Looper.getMainLooper()) {
                     throw new IllegalStateException(
@@ -420,9 +485,9 @@ public final class AccessibilityManager {
                     return;
                 }
             }
-            if ((event.getEventType() & mRelevantEventTypes) == 0) {
+            if ((dispatchedEvent.getEventType() & mRelevantEventTypes) == 0) {
                 if (DEBUG) {
-                    Log.i(LOG_TAG, "Not dispatching irrelevant event: " + event
+                    Log.i(LOG_TAG, "Not dispatching irrelevant event: " + dispatchedEvent
                             + " that is not among "
                             + AccessibilityEvent.eventTypeToString(mRelevantEventTypes));
                 }
@@ -431,23 +496,25 @@ public final class AccessibilityManager {
             userId = mUserId;
         }
         try {
-            event.setEventTime(SystemClock.uptimeMillis());
             // it is possible that this manager is in the same process as the service but
             // client using it is called through Binder from another process. Example: MMS
             // app adds a SMS notification and the NotificationManagerService calls this method
             long identityToken = Binder.clearCallingIdentity();
             try {
-                service.sendAccessibilityEvent(event, userId);
+                service.sendAccessibilityEvent(dispatchedEvent, userId);
             } finally {
                 Binder.restoreCallingIdentity(identityToken);
             }
             if (DEBUG) {
-                Log.i(LOG_TAG, event + " sent");
+                Log.i(LOG_TAG, dispatchedEvent + " sent");
             }
         } catch (RemoteException re) {
-            Log.e(LOG_TAG, "Error during sending " + event + " ", re);
+            Log.e(LOG_TAG, "Error during sending " + dispatchedEvent + " ", re);
         } finally {
-            event.recycle();
+            if (event != dispatchedEvent) {
+                event.recycle();
+            }
+            dispatchedEvent.recycle();
         }
     }
 
@@ -462,7 +529,7 @@ public final class AccessibilityManager {
             if (service == null) {
                 return;
             }
-            if (!mIsEnabled) {
+            if (!isEnabled()) {
                 Looper myLooper = Looper.myLooper();
                 if (myLooper == Looper.getMainLooper()) {
                     throw new IllegalStateException(
@@ -532,6 +599,9 @@ public final class AccessibilityManager {
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while obtaining the installed AccessibilityServices. ", re);
         }
+        if (mAccessibilityPolicy != null) {
+            services = mAccessibilityPolicy.getInstalledAccessibilityServiceList(services);
+        }
         if (services != null) {
             return Collections.unmodifiableList(services);
         } else {
@@ -573,6 +643,10 @@ public final class AccessibilityManager {
             }
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while obtaining the installed AccessibilityServices. ", re);
+        }
+        if (mAccessibilityPolicy != null) {
+            services = mAccessibilityPolicy.getEnabledAccessibilityServiceList(
+                    feedbackTypeFlags, services);
         }
         if (services != null) {
             return Collections.unmodifiableList(services);
@@ -783,6 +857,19 @@ public final class AccessibilityManager {
     }
 
     /**
+     * Sets the {@link AccessibilityPolicy} controlling this manager.
+     *
+     * @param policy The policy.
+     *
+     * @hide
+     */
+    public void setAccessibilityPolicy(@Nullable AccessibilityPolicy policy) {
+        synchronized (mLock) {
+            mAccessibilityPolicy = policy;
+        }
+    }
+
+    /**
      * Check if the accessibility volume stream is active.
      *
      * @return True if accessibility volume is active (i.e. some service has requested it). False
@@ -834,7 +921,7 @@ public final class AccessibilityManager {
         final boolean highTextContrastEnabled =
                 (stateFlags & STATE_FLAG_HIGH_TEXT_CONTRAST_ENABLED) != 0;
 
-        final boolean wasEnabled = mIsEnabled;
+        final boolean wasEnabled = isEnabled();
         final boolean wasTouchExplorationEnabled = mIsTouchExplorationEnabled;
         final boolean wasHighTextContrastEnabled = mIsHighTextContrastEnabled;
 
@@ -843,7 +930,7 @@ public final class AccessibilityManager {
         mIsTouchExplorationEnabled = touchExplorationEnabled;
         mIsHighTextContrastEnabled = highTextContrastEnabled;
 
-        if (wasEnabled != enabled) {
+        if (wasEnabled != isEnabled()) {
             notifyAccessibilityStateChanged();
         }
 
@@ -1052,16 +1139,15 @@ public final class AccessibilityManager {
             if (mAccessibilityStateChangeListeners.isEmpty()) {
                 return;
             }
-            isEnabled = mIsEnabled;
+            isEnabled = isEnabled();
             listeners = new ArrayMap<>(mAccessibilityStateChangeListeners);
         }
 
-        int numListeners = listeners.size();
+        final int numListeners = listeners.size();
         for (int i = 0; i < numListeners; i++) {
-            final AccessibilityStateChangeListener listener =
-                    mAccessibilityStateChangeListeners.keyAt(i);
-            mAccessibilityStateChangeListeners.valueAt(i)
-                    .post(() -> listener.onAccessibilityStateChanged(isEnabled));
+            final AccessibilityStateChangeListener listener = listeners.keyAt(i);
+            listeners.valueAt(i).post(() ->
+                    listener.onAccessibilityStateChanged(isEnabled));
         }
     }
 
@@ -1079,12 +1165,11 @@ public final class AccessibilityManager {
             listeners = new ArrayMap<>(mTouchExplorationStateChangeListeners);
         }
 
-        int numListeners = listeners.size();
+        final int numListeners = listeners.size();
         for (int i = 0; i < numListeners; i++) {
-            final TouchExplorationStateChangeListener listener =
-                    mTouchExplorationStateChangeListeners.keyAt(i);
-            mTouchExplorationStateChangeListeners.valueAt(i)
-                    .post(() -> listener.onTouchExplorationStateChanged(isTouchExplorationEnabled));
+            final TouchExplorationStateChangeListener listener = listeners.keyAt(i);
+            listeners.valueAt(i).post(() ->
+                    listener.onTouchExplorationStateChanged(isTouchExplorationEnabled));
         }
     }
 
@@ -1102,12 +1187,11 @@ public final class AccessibilityManager {
             listeners = new ArrayMap<>(mHighTextContrastStateChangeListeners);
         }
 
-        int numListeners = listeners.size();
+        final int numListeners = listeners.size();
         for (int i = 0; i < numListeners; i++) {
-            final HighTextContrastChangeListener listener =
-                    mHighTextContrastStateChangeListeners.keyAt(i);
-            mHighTextContrastStateChangeListeners.valueAt(i)
-                    .post(() -> listener.onHighTextContrastStateChanged(isHighTextContrastEnabled));
+            final HighTextContrastChangeListener listener = listeners.keyAt(i);
+            listeners.valueAt(i).post(() ->
+                    listener.onHighTextContrastStateChanged(isHighTextContrastEnabled));
         }
     }
 
