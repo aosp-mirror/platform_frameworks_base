@@ -26,6 +26,7 @@ import android.metrics.LogMaker;
 import android.os.Handler;
 import android.os.Message;
 import android.service.quicksettings.Tile;
+import android.support.v4.widget.Space;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -97,7 +98,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             R.layout.quick_settings_brightness_dialog, this, false);
         mTileLayout = new TileLayout(mContext);
         mTileLayout.setListening(mListening);
-        mScrollLayout = new QSScrollLayout(mContext, mBrightnessView, (View) mTileLayout);
+        Space space = new Space(mContext);
+        space.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT,
+                mContext.getResources().getDimensionPixelSize(R.dimen.qs_footer_height)));
+        mScrollLayout = new QSScrollLayout(mContext, mBrightnessView, (View) mTileLayout, space);
         addView(mScrollLayout);
 
         addDivider();

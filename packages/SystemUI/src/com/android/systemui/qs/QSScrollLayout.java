@@ -15,13 +15,14 @@
 package com.android.systemui.qs;
 
 import android.content.Context;
-import android.graphics.Rect;
 import android.support.v4.widget.NestedScrollView;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewParent;
 import android.widget.LinearLayout;
+
+import com.android.systemui.R;
 
 /**
  * Quick setting scroll view containing the brightness slider and the QS tiles.
@@ -32,12 +33,13 @@ import android.widget.LinearLayout;
  */
 public class QSScrollLayout extends NestedScrollView {
     private final int mTouchSlop;
+    private final int mFooterHeight;
     private int mLastMotionY;
-    private Rect mHitRect = new Rect();
 
     public QSScrollLayout(Context context, View... children) {
         super(context);
         mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+        mFooterHeight = getResources().getDimensionPixelSize(R.dimen.qs_footer_height);
         LinearLayout linearLayout = new LinearLayout(mContext);
         linearLayout.setLayoutParams(new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -50,9 +52,8 @@ public class QSScrollLayout extends NestedScrollView {
     }
 
     public boolean shouldIntercept(MotionEvent ev) {
-        getHitRect(mHitRect);
-        if (!mHitRect.contains((int) ev.getX(), (int) ev.getY())) {
-            // Do not intercept touches that are not within this view's bounds.
+        if (ev.getY() > (getBottom() - mFooterHeight)) {
+            // Do not intercept touches that are below the divider between QS and the footer.
             return false;
         }
         if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
