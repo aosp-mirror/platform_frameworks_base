@@ -17,6 +17,9 @@
 package com.android.server.usb;
 
 import android.annotation.NonNull;
+import android.media.AudioSystem;
+import android.media.IAudioService;
+import android.os.RemoteException;
 import android.service.usb.UsbAlsaDeviceProto;
 import android.util.Slog;
 
@@ -32,20 +35,26 @@ public final class UsbAlsaDevice {
 
     private final int mCardNum;
     private final int mDeviceNum;
+    private final String mDeviceAddress;
     private final boolean mHasOutput;
     private final boolean mHasInput;
 
     private final boolean mIsInputHeadset;
     private final boolean mIsOutputHeadset;
 
-    private final String mDeviceAddress;
+    private boolean mSelected = false;
+    private int mOutputState;
+    private int mInputState;
+    private UsbAlsaJackDetector mJackDetector;
+    private IAudioService mAudioService;
 
     private String mDeviceName = "";
     private String mDeviceDescription = "";
 
-    public UsbAlsaDevice(int card, int device, String deviceAddress,
+    public UsbAlsaDevice(IAudioService audioService, int card, int device, String deviceAddress,
             boolean hasOutput, boolean hasInput,
             boolean isInputHeadset, boolean isOutputHeadset) {
+        mAudioService = audioService;
         mCardNum = card;
         mDeviceNum = device;
         mDeviceAddress = deviceAddress;
@@ -115,6 +124,110 @@ public final class UsbAlsaDevice {
     public boolean isOutputHeadset() {
         return mIsOutputHeadset;
     }
+
+    /**
+     * @returns true if input jack is detected or jack detection is not supported.
+     */
+    private synchronized boolean isInputJackConnected() {
+        if (mJackDetector == null) {
+            return true;  // If jack detect isn't supported, say it's connected.
+        }
+        return mJackDetector.isInputJackConnected();
+    }
+
+    /**
+     * @returns true if input jack is detected or jack detection is not supported.
+     */
+    private synchronized boolean isOutputJackConnected() {
+        if (mJackDetector == null) {
+            return true;  // if jack detect isn't supported, say it's connected.
+        }
+        return mJackDetector.isOutputJackConnected();
+    }
+
+    /** Begins a jack-detection thread. */
+    private synchronized void startJackDetect() {
+        // If no jack detect capabilities exist, mJackDetector will be null.
+        mJackDetector = UsbAlsaJackDetector.startJackDetect(this);
+    }
+
+    /** Stops a jack-detection thread. */
+    private synchronized void stopJackDetect() {
+        if (mJackDetector != null) {
+            mJackDetector.pleaseStop();
+        }
+        mJackDetector = null;
+    }
+
+    /** Start using this device as the selected USB Audio Device. */
+    public synchronized void start() {
+        mSelected = true;
+        mInputState = 0;
+        mOutputState = 0;
+        startJackDetect();
+        updateWiredDeviceConnectionState(true);
+    }
+
+    /** Stop using this device as the selected USB Audio Device. */
+    public synchronized void stop() {
+        stopJackDetect();
+        updateWiredDeviceConnectionState(false);
+        mSelected = false;
+    }
+
+    /** Updates AudioService with the connection state of the alsaDevice.
+     *  Checks ALSA Jack state for inputs and outputs before reporting.
+     */
+    public synchronized void updateWiredDeviceConnectionState(boolean enable) {
+        if (!mSelected) {
+            Slog.e(TAG, "updateWiredDeviceConnectionState on unselected AlsaDevice!");
+            return;
+        }
+        String alsaCardDeviceString = getAlsaCardDeviceString();
+        if (alsaCardDeviceString == null) {
+            return;
+        }
+        try {
+            // Output Device
+            if (mHasOutput) {
+                int device = mIsOutputHeadset
+                        ? AudioSystem.DEVICE_OUT_USB_HEADSET
+                        : AudioSystem.DEVICE_OUT_USB_DEVICE;
+                if (DEBUG) {
+                    Slog.d(TAG, "pre-call device:0x" + Integer.toHexString(device)
+                            + " addr:" + alsaCardDeviceString
+                            + " name:" + mDeviceName);
+                }
+                boolean connected = isOutputJackConnected();
+                Slog.i(TAG, "OUTPUT JACK connected: " + connected);
+                int outputState = (enable && connected) ? 1 : 0;
+                if (outputState != mOutputState) {
+                    mOutputState = outputState;
+                    mAudioService.setWiredDeviceConnectionState(device, outputState,
+                                                                alsaCardDeviceString,
+                                                                mDeviceName, TAG);
+                }
+            }
+
+            // Input Device
+            if (mHasInput) {
+                int device = mIsInputHeadset ? AudioSystem.DEVICE_IN_USB_HEADSET
+                        : AudioSystem.DEVICE_IN_USB_DEVICE;
+                boolean connected = isInputJackConnected();
+                Slog.i(TAG, "INPUT JACK connected: " + connected);
+                int inputState = (enable && connected) ? 1 : 0;
+                if (inputState != mInputState) {
+                    mInputState = inputState;
+                    mAudioService.setWiredDeviceConnectionState(
+                            device, inputState, alsaCardDeviceString,
+                            mDeviceName, TAG);
+                }
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "RemoteException in setWiredDeviceConnectionState");
+        }
+    }
+
 
     /**
      * @Override
