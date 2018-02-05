@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.telephony.ims.internal.aidl;
+package android.telephony.ims.aidl;
 
 import com.android.ims.ImsStreamMediaProfile;
 import com.android.ims.ImsCallProfile;

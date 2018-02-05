@@ -18,10 +18,10 @@ package com.android.ims.internal;
 
 import android.os.Message;
 import android.os.RemoteException;
+import android.telephony.ims.aidl.IImsCallSessionListener;
 
 import java.util.Objects;
 
-import android.telephony.ims.stub.ImsCallSessionListenerImplBase;
 import android.util.Log;
 import com.android.ims.ImsCallProfile;
 import com.android.ims.ImsConferenceState;
@@ -987,7 +987,6 @@ public class ImsCallSession {
      * Sends Rtt Message
      *
      * @param rttMessage rtt text to be sent
-     * @throws ImsException if call is absent
      */
     public void sendRttMessage(String rttMessage) {
         if (mClosed) {
@@ -1004,7 +1003,6 @@ public class ImsCallSession {
      * Sends RTT Upgrade request
      *
      * @param to   : expected profile
-     * @throws CallStateException
      */
     public void sendRttModifyRequest(ImsCallProfile to) {
         if (mClosed) {
@@ -1021,7 +1019,6 @@ public class ImsCallSession {
      * Sends RTT Upgrade response
      *
      * @param response : response for upgrade
-     * @throws CallStateException
      */
     public void sendRttModifyResponse(boolean response) {
         if (mClosed) {
@@ -1040,37 +1037,33 @@ public class ImsCallSession {
      * the application is notified by having one of the methods called on
      * the {@link IImsCallSessionListener}.
      */
-    private class IImsCallSessionListenerProxy extends ImsCallSessionListenerImplBase {
+    private class IImsCallSessionListenerProxy extends IImsCallSessionListener.Stub {
         /**
          * Notifies the result of the basic session operation (setup / terminate).
          */
         @Override
-        public void callSessionProgressing(IImsCallSession session,
-                ImsStreamMediaProfile profile) {
+        public void callSessionProgressing(ImsStreamMediaProfile profile) {
             if (mListener != null) {
                 mListener.callSessionProgressing(ImsCallSession.this, profile);
             }
         }
 
         @Override
-        public void callSessionStarted(IImsCallSession session,
-                ImsCallProfile profile) {
+        public void callSessionInitiated(ImsCallProfile profile) {
             if (mListener != null) {
                 mListener.callSessionStarted(ImsCallSession.this, profile);
             }
         }
 
         @Override
-        public void callSessionStartFailed(IImsCallSession session,
-                ImsReasonInfo reasonInfo) {
+        public void callSessionInitiatedFailed(ImsReasonInfo reasonInfo) {
             if (mListener != null) {
                 mListener.callSessionStartFailed(ImsCallSession.this, reasonInfo);
             }
         }
 
         @Override
-        public void callSessionTerminated(IImsCallSession session,
-                ImsReasonInfo reasonInfo) {
+        public void callSessionTerminated(ImsReasonInfo reasonInfo) {
             if (mListener != null) {
                 mListener.callSessionTerminated(ImsCallSession.this, reasonInfo);
             }
@@ -1080,48 +1073,42 @@ public class ImsCallSession {
          * Notifies the result of the call hold/resume operation.
          */
         @Override
-        public void callSessionHeld(IImsCallSession session,
-                ImsCallProfile profile) {
+        public void callSessionHeld(ImsCallProfile profile) {
             if (mListener != null) {
                 mListener.callSessionHeld(ImsCallSession.this, profile);
             }
         }
 
         @Override
-        public void callSessionHoldFailed(IImsCallSession session,
-                ImsReasonInfo reasonInfo) {
+        public void callSessionHoldFailed(ImsReasonInfo reasonInfo) {
             if (mListener != null) {
                 mListener.callSessionHoldFailed(ImsCallSession.this, reasonInfo);
             }
         }
 
         @Override
-        public void callSessionHoldReceived(IImsCallSession session,
-                ImsCallProfile profile) {
+        public void callSessionHoldReceived(ImsCallProfile profile) {
             if (mListener != null) {
                 mListener.callSessionHoldReceived(ImsCallSession.this, profile);
             }
         }
 
         @Override
-        public void callSessionResumed(IImsCallSession session,
-                ImsCallProfile profile) {
+        public void callSessionResumed(ImsCallProfile profile) {
             if (mListener != null) {
                 mListener.callSessionResumed(ImsCallSession.this, profile);
             }
         }
 
         @Override
-        public void callSessionResumeFailed(IImsCallSession session,
-                ImsReasonInfo reasonInfo) {
+        public void callSessionResumeFailed(ImsReasonInfo reasonInfo) {
             if (mListener != null) {
                 mListener.callSessionResumeFailed(ImsCallSession.this, reasonInfo);
             }
         }
 
         @Override
-        public void callSessionResumeReceived(IImsCallSession session,
-                ImsCallProfile profile) {
+        public void callSessionResumeReceived(ImsCallProfile profile) {
             if (mListener != null) {
                 mListener.callSessionResumeReceived(ImsCallSession.this, profile);
             }
@@ -1130,13 +1117,11 @@ public class ImsCallSession {
         /**
          * Notifies the start of a call merge operation.
          *
-         * @param session The call session.
          * @param newSession The merged call session.
          * @param profile The call profile.
          */
         @Override
-        public void callSessionMergeStarted(IImsCallSession session,
-                IImsCallSession newSession, ImsCallProfile profile) {
+        public void callSessionMergeStarted(IImsCallSession newSession, ImsCallProfile profile) {
             // This callback can be used for future use to add additional
             // functionality that may be needed between conference start and complete
             Log.d(TAG, "callSessionMergeStarted");
@@ -1173,12 +1158,10 @@ public class ImsCallSession {
         /**
          * Notifies of a failure to perform a call merge operation.
          *
-         * @param session The call session.
          * @param reasonInfo The merge failure reason.
          */
         @Override
-        public void callSessionMergeFailed(IImsCallSession session,
-                ImsReasonInfo reasonInfo) {
+        public void callSessionMergeFailed(ImsReasonInfo reasonInfo) {
             if (mListener != null) {
                 mListener.callSessionMergeFailed(ImsCallSession.this, reasonInfo);
             }
@@ -1188,24 +1171,21 @@ public class ImsCallSession {
          * Notifies the result of call upgrade / downgrade or any other call updates.
          */
         @Override
-        public void callSessionUpdated(IImsCallSession session,
-                ImsCallProfile profile) {
+        public void callSessionUpdated(ImsCallProfile profile) {
             if (mListener != null) {
                 mListener.callSessionUpdated(ImsCallSession.this, profile);
             }
         }
 
         @Override
-        public void callSessionUpdateFailed(IImsCallSession session,
-                ImsReasonInfo reasonInfo) {
+        public void callSessionUpdateFailed(ImsReasonInfo reasonInfo) {
             if (mListener != null) {
                 mListener.callSessionUpdateFailed(ImsCallSession.this, reasonInfo);
             }
         }
 
         @Override
-        public void callSessionUpdateReceived(IImsCallSession session,
-                ImsCallProfile profile) {
+        public void callSessionUpdateReceived(ImsCallProfile profile) {
             if (mListener != null) {
                 mListener.callSessionUpdateReceived(ImsCallSession.this, profile);
             }
@@ -1215,8 +1195,8 @@ public class ImsCallSession {
          * Notifies the result of conference extension.
          */
         @Override
-        public void callSessionConferenceExtended(IImsCallSession session,
-                IImsCallSession newSession, ImsCallProfile profile) {
+        public void callSessionConferenceExtended(IImsCallSession newSession,
+                ImsCallProfile profile) {
             if (mListener != null) {
                 mListener.callSessionConferenceExtended(ImsCallSession.this,
                         new ImsCallSession(newSession), profile);
@@ -1224,16 +1204,15 @@ public class ImsCallSession {
         }
 
         @Override
-        public void callSessionConferenceExtendFailed(IImsCallSession session,
-                ImsReasonInfo reasonInfo) {
+        public void callSessionConferenceExtendFailed(ImsReasonInfo reasonInfo) {
             if (mListener != null) {
                 mListener.callSessionConferenceExtendFailed(ImsCallSession.this, reasonInfo);
             }
         }
 
         @Override
-        public void callSessionConferenceExtendReceived(IImsCallSession session,
-                IImsCallSession newSession, ImsCallProfile profile) {
+        public void callSessionConferenceExtendReceived(IImsCallSession newSession,
+                ImsCallProfile profile) {
             if (mListener != null) {
                 mListener.callSessionConferenceExtendReceived(ImsCallSession.this,
                         new ImsCallSession(newSession), profile);
@@ -1245,15 +1224,14 @@ public class ImsCallSession {
          * the conference session.
          */
         @Override
-        public void callSessionInviteParticipantsRequestDelivered(IImsCallSession session) {
+        public void callSessionInviteParticipantsRequestDelivered() {
             if (mListener != null) {
                 mListener.callSessionInviteParticipantsRequestDelivered(ImsCallSession.this);
             }
         }
 
         @Override
-        public void callSessionInviteParticipantsRequestFailed(IImsCallSession session,
-                ImsReasonInfo reasonInfo) {
+        public void callSessionInviteParticipantsRequestFailed(ImsReasonInfo reasonInfo) {
             if (mListener != null) {
                 mListener.callSessionInviteParticipantsRequestFailed(ImsCallSession.this,
                         reasonInfo);
@@ -1261,15 +1239,14 @@ public class ImsCallSession {
         }
 
         @Override
-        public void callSessionRemoveParticipantsRequestDelivered(IImsCallSession session) {
+        public void callSessionRemoveParticipantsRequestDelivered() {
             if (mListener != null) {
                 mListener.callSessionRemoveParticipantsRequestDelivered(ImsCallSession.this);
             }
         }
 
         @Override
-        public void callSessionRemoveParticipantsRequestFailed(IImsCallSession session,
-                ImsReasonInfo reasonInfo) {
+        public void callSessionRemoveParticipantsRequestFailed(ImsReasonInfo reasonInfo) {
             if (mListener != null) {
                 mListener.callSessionRemoveParticipantsRequestFailed(ImsCallSession.this,
                         reasonInfo);
@@ -1280,8 +1257,7 @@ public class ImsCallSession {
          * Notifies the changes of the conference info. in the conference session.
          */
         @Override
-        public void callSessionConferenceStateUpdated(IImsCallSession session,
-                ImsConferenceState state) {
+        public void callSessionConferenceStateUpdated(ImsConferenceState state) {
             if (mListener != null) {
                 mListener.callSessionConferenceStateUpdated(ImsCallSession.this, state);
             }
@@ -1291,8 +1267,7 @@ public class ImsCallSession {
          * Notifies the incoming USSD message.
          */
         @Override
-        public void callSessionUssdMessageReceived(IImsCallSession session,
-                int mode, String ussdMessage) {
+        public void callSessionUssdMessageReceived(int mode, String ussdMessage) {
             if (mListener != null) {
                 mListener.callSessionUssdMessageReceived(ImsCallSession.this, mode, ussdMessage);
             }
@@ -1301,7 +1276,6 @@ public class ImsCallSession {
         /**
          * Notifies of a case where a {@link com.android.ims.internal.ImsCallSession} may
          * potentially handover from one radio technology to another.
-         * @param session
          * @param srcAccessTech The source radio access technology; one of the access technology
          *                      constants defined in {@link android.telephony.ServiceState}.  For
          *                      example
@@ -1312,8 +1286,7 @@ public class ImsCallSession {
          *                      {@link android.telephony.ServiceState#RIL_RADIO_TECHNOLOGY_LTE}.
          */
         @Override
-        public void callSessionMayHandover(IImsCallSession session,
-                int srcAccessTech, int targetAccessTech) {
+        public void callSessionMayHandover(int srcAccessTech, int targetAccessTech) {
             if (mListener != null) {
                 mListener.callSessionMayHandover(ImsCallSession.this, srcAccessTech,
                         targetAccessTech);
@@ -1324,9 +1297,8 @@ public class ImsCallSession {
          * Notifies of handover information for this call
          */
         @Override
-        public void callSessionHandover(IImsCallSession session,
-                                 int srcAccessTech, int targetAccessTech,
-                                 ImsReasonInfo reasonInfo) {
+        public void callSessionHandover(int srcAccessTech, int targetAccessTech,
+                ImsReasonInfo reasonInfo) {
             if (mListener != null) {
                 mListener.callSessionHandover(ImsCallSession.this, srcAccessTech,
                         targetAccessTech, reasonInfo);
@@ -1337,9 +1309,8 @@ public class ImsCallSession {
          * Notifies of handover failure info for this call
          */
         @Override
-        public void callSessionHandoverFailed(IImsCallSession session,
-                                       int srcAccessTech, int targetAccessTech,
-                                       ImsReasonInfo reasonInfo) {
+        public void callSessionHandoverFailed(int srcAccessTech, int targetAccessTech,
+                ImsReasonInfo reasonInfo) {
             if (mListener != null) {
                 mListener.callSessionHandoverFailed(ImsCallSession.this, srcAccessTech,
                         targetAccessTech, reasonInfo);
@@ -1350,8 +1321,7 @@ public class ImsCallSession {
          * Notifies the TTY mode received from remote party.
          */
         @Override
-        public void callSessionTtyModeReceived(IImsCallSession session,
-                int mode) {
+        public void callSessionTtyModeReceived(int mode) {
             if (mListener != null) {
                 mListener.callSessionTtyModeReceived(ImsCallSession.this, mode);
             }
@@ -1360,21 +1330,17 @@ public class ImsCallSession {
         /**
          * Notifies of a change to the multiparty state for this {@code ImsCallSession}.
          *
-         * @param session The call session.
          * @param isMultiParty {@code true} if the session became multiparty, {@code false}
          *      otherwise.
          */
-        public void callSessionMultipartyStateChanged(IImsCallSession session,
-                boolean isMultiParty) {
-
+        public void callSessionMultipartyStateChanged(boolean isMultiParty) {
             if (mListener != null) {
                 mListener.callSessionMultipartyStateChanged(ImsCallSession.this, isMultiParty);
             }
         }
 
         @Override
-        public void callSessionSuppServiceReceived(IImsCallSession session,
-                ImsSuppServiceNotification suppServiceInfo ) {
+        public void callSessionSuppServiceReceived(ImsSuppServiceNotification suppServiceInfo ) {
             if (mListener != null) {
                 mListener.callSessionSuppServiceReceived(ImsCallSession.this, suppServiceInfo);
             }
@@ -1384,8 +1350,7 @@ public class ImsCallSession {
          * Received RTT modify request from remote party
          */
         @Override
-        public void callSessionRttModifyRequestReceived(IImsCallSession session,
-                ImsCallProfile callProfile) {
+        public void callSessionRttModifyRequestReceived(ImsCallProfile callProfile) {
             if (mListener != null) {
                 mListener.callSessionRttModifyRequestReceived(ImsCallSession.this, callProfile);
             }
