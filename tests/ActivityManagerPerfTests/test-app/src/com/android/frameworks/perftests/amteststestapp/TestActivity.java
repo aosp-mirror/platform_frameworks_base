@@ -17,16 +17,19 @@
 package com.android.frameworks.perftests.amteststestapp;
 
 import android.app.Activity;
-import android.os.Bundle;
+import android.os.Looper;
+import android.os.MessageQueue;
 
 import com.android.frameworks.perftests.am.util.Constants;
 import com.android.frameworks.perftests.am.util.Utils;
 
 public class TestActivity extends Activity {
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        Utils.sendTime(getIntent(), Constants.TYPE_ACTIVITY_CREATED);
+    protected void onResume() {
+        super.onResume();
+        Looper.myQueue().addIdleHandler(() -> {
+            Utils.sendTime(getIntent(), Constants.TYPE_TARGET_PACKAGE_START);
+            return false;
+        });
     }
 }
