@@ -678,7 +678,8 @@ public class BatteryStatsImpl extends BatteryStats {
     StopwatchTimer mCameraOnTimer;
 
     int mGpsSignalQualityBin = -1;
-    final StopwatchTimer[] mGpsSignalQualityTimer =
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    protected final StopwatchTimer[] mGpsSignalQualityTimer =
         new StopwatchTimer[GnssMetrics.NUM_GPS_SIGNAL_QUALITY_LEVELS];
 
     int mPhoneSignalStrengthBin = -1;
