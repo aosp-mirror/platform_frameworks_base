@@ -38,7 +38,6 @@ import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_PINNABLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
@@ -114,7 +113,7 @@ public class LockTaskController {
         STATUS_BAR_FLAG_MAP_LOCKED.append(DevicePolicyManager.LOCK_TASK_FEATURE_HOME,
                 new Pair<>(StatusBarManager.DISABLE_HOME, StatusBarManager.DISABLE2_NONE));
 
-        STATUS_BAR_FLAG_MAP_LOCKED.append(DevicePolicyManager.LOCK_TASK_FEATURE_RECENTS,
+        STATUS_BAR_FLAG_MAP_LOCKED.append(DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW,
                 new Pair<>(StatusBarManager.DISABLE_RECENT, StatusBarManager.DISABLE2_NONE));
 
         STATUS_BAR_FLAG_MAP_LOCKED.append(DevicePolicyManager.LOCK_TASK_FEATURE_GLOBAL_ACTIONS,
@@ -308,7 +307,7 @@ public class LockTaskController {
 
     private boolean isRecentsAllowed(int userId) {
         return (getLockTaskFeaturesForUser(userId)
-                & DevicePolicyManager.LOCK_TASK_FEATURE_RECENTS) != 0;
+                & DevicePolicyManager.LOCK_TASK_FEATURE_OVERVIEW) != 0;
     }
 
     private boolean isKeyguardAllowed(int userId) {

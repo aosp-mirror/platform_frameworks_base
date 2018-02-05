@@ -164,7 +164,7 @@ public class ActivityOptions {
 
     /**
      * Whether the activity should be launched into LockTask mode.
-     * @see #setLockTaskMode(boolean)
+     * @see #setLockTaskEnabled(boolean)
      */
     private static final String KEY_LOCK_TASK_MODE = "android:activity.lockTaskMode";
 
@@ -1148,7 +1148,7 @@ public class ActivityOptions {
      * @see Activity#startLockTask()
      * @see android.app.admin.DevicePolicyManager#setLockTaskPackages(ComponentName, String[])
      */
-    public ActivityOptions setLockTaskMode(boolean lockTaskMode) {
+    public ActivityOptions setLockTaskEnabled(boolean lockTaskMode) {
         mLockTaskMode = lockTaskMode;
         return this;
     }

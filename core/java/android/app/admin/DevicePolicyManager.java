@@ -1642,11 +1642,15 @@ public class DevicePolicyManager {
     public static final int LOCK_TASK_FEATURE_HOME = 1 << 2;
 
     /**
-     * Enable the Recents button and the Recents screen during LockTask mode.
+     * Enable the Overview button and the Overview screen during LockTask mode. This feature flag
+     * can only be used in combination with {@link #LOCK_TASK_FEATURE_HOME}, and
+     * {@link #setLockTaskFeatures(ComponentName, int)} will throw an
+     * {@link IllegalArgumentException} if this feature flag is defined without
+     * {@link #LOCK_TASK_FEATURE_HOME}.
      *
      * @see #setLockTaskFeatures(ComponentName, int)
      */
-    public static final int LOCK_TASK_FEATURE_RECENTS = 1 << 3;
+    public static final int LOCK_TASK_FEATURE_OVERVIEW = 1 << 3;
 
     /**
      * Enable the global actions dialog during LockTask mode. This is the dialog that shows up when
@@ -1678,7 +1682,7 @@ public class DevicePolicyManager {
             LOCK_TASK_FEATURE_SYSTEM_INFO,
             LOCK_TASK_FEATURE_NOTIFICATIONS,
             LOCK_TASK_FEATURE_HOME,
-            LOCK_TASK_FEATURE_RECENTS,
+            LOCK_TASK_FEATURE_OVERVIEW,
             LOCK_TASK_FEATURE_GLOBAL_ACTIONS,
             LOCK_TASK_FEATURE_KEYGUARD
     })
@@ -7189,7 +7193,7 @@ public class DevicePolicyManager {
      *              {@link #LOCK_TASK_FEATURE_SYSTEM_INFO},
      *              {@link #LOCK_TASK_FEATURE_NOTIFICATIONS},
      *              {@link #LOCK_TASK_FEATURE_HOME},
-     *              {@link #LOCK_TASK_FEATURE_RECENTS},
+     *              {@link #LOCK_TASK_FEATURE_OVERVIEW},
      *              {@link #LOCK_TASK_FEATURE_GLOBAL_ACTIONS},
      *              {@link #LOCK_TASK_FEATURE_KEYGUARD}
      * @throws SecurityException if {@code admin} is not the device owner, the profile owner of an
