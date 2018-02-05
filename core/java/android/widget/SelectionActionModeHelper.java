@@ -93,7 +93,7 @@ public final class SelectionActionModeHelper {
 
         if (SMART_SELECT_ANIMATION_ENABLED) {
             mSmartSelectSprite = new SmartSelectSprite(mTextView.getContext(),
-                    mTextView::invalidate);
+                    editor.getTextView().mHighlightColor, mTextView::invalidate);
         } else {
             mSmartSelectSprite = null;
         }
@@ -200,9 +200,13 @@ public final class SelectionActionModeHelper {
     }
 
     public void onDraw(final Canvas canvas) {
-        if (mSmartSelectSprite != null) {
+        if (isDrawingHighlight() && mSmartSelectSprite != null) {
             mSmartSelectSprite.draw(canvas);
         }
+    }
+
+    public boolean isDrawingHighlight() {
+        return mSmartSelectSprite != null && mSmartSelectSprite.isAnimationActive();
     }
 
     private void cancelAsyncTask() {
