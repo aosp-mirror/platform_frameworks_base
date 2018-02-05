@@ -20,11 +20,12 @@ import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnLayoutChangeListener;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.plugins.qs.*;
+import com.android.systemui.plugins.qs.QS;
+import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.qs.PagedTileLayout.PageListener;
-import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSHost.Callback;
+import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.TouchAnimator.Builder;
 import com.android.systemui.qs.TouchAnimator.Listener;
 import com.android.systemui.tuner.TunerService;
@@ -61,6 +62,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private TouchAnimator mTranslationXAnimator;
     private TouchAnimator mTranslationYAnimator;
     private TouchAnimator mNonfirstPageAnimator;
+    private TouchAnimator mNonfirstPageDelayedAnimator;
     private TouchAnimator mBrightnessAnimator;
 
     private boolean mOnKeyguard;
@@ -83,10 +85,10 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         QSTileLayout tileLayout = mQsPanel.getTileLayout();
         if (tileLayout instanceof PagedTileLayout) {
             mPagedLayout = ((PagedTileLayout) tileLayout);
-            mPagedLayout.setPageListener(this);
         } else {
             Log.w(TAG, "QS Not using page layout");
         }
+        panel.setPageListener(this);
     }
 
     public void onRtlChanged() {
@@ -271,6 +273,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 .setListener(mNonFirstPageListener)
                 .setEndDelay(.5f)
                 .build();
+        mNonfirstPageDelayedAnimator = new TouchAnimator.Builder()
+                .setStartDelay(.14f)
+                .addFloat(tileLayout, "alpha", 0, 1).build();
     }
 
     private boolean isIconInAnimatedRow(int count) {
@@ -315,6 +320,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             }
         } else {
             mNonfirstPageAnimator.setPosition(position);
+            mNonfirstPageDelayedAnimator.setPosition(position);
         }
     }
 

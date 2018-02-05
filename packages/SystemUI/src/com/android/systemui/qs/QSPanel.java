@@ -285,6 +285,20 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         }
     }
 
+    public void setPageListener(final PagedTileLayout.PageListener pageListener) {
+        if (mTileLayout instanceof PagedTileLayout) {
+            ((PagedTileLayout) mTileLayout).setPageListener(pageListener);
+        } else {
+            mScrollLayout.setOnScrollChangeListener(new OnScrollChangeListener() {
+                @Override
+                public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX,
+                        int oldScrollY) {
+                    pageListener.onPageChanged(scrollY == 0);
+                }
+            });
+        }
+    }
+
     public boolean isExpanded() {
         return mExpanded;
     }
