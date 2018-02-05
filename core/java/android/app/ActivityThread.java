@@ -488,12 +488,14 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
         }
 
-        public boolean isPreHoneycomb() {
-            if (activity != null) {
-                return activity.getApplicationInfo().targetSdkVersion
-                        < android.os.Build.VERSION_CODES.HONEYCOMB;
-            }
-            return false;
+        private boolean isPreHoneycomb() {
+            return activity != null && activity.getApplicationInfo().targetSdkVersion
+                    < android.os.Build.VERSION_CODES.HONEYCOMB;
+        }
+
+        private boolean isPreP() {
+            return activity != null && activity.getApplicationInfo().targetSdkVersion
+                    < android.os.Build.VERSION_CODES.P;
         }
 
         public boolean isPersistable() {
@@ -4165,9 +4167,12 @@ public final class ActivityThread extends ClientTransactionHandler {
      * {@link Activity#onSaveInstanceState(Bundle)} is also executed in the same call.
      */
     private void callActivityOnStop(ActivityClientRecord r, boolean saveState, String reason) {
+        // Before P onSaveInstanceState was called before onStop, starting with P it's
+        // called after. Before Honeycomb state was always saved before onPause.
         final boolean shouldSaveState = saveState && !r.activity.mFinished && r.state == null
                 && !r.isPreHoneycomb();
-        if (shouldSaveState) {
+        final boolean isPreP = r.isPreP();
+        if (shouldSaveState && isPreP) {
             callActivityOnSaveInstanceState(r);
         }
 
@@ -4186,6 +4191,10 @@ public final class ActivityThread extends ClientTransactionHandler {
         r.setState(ON_STOP);
         EventLog.writeEvent(LOG_AM_ON_STOP_CALLED, UserHandle.myUserId(),
                 r.activity.getComponentName().getClassName(), reason);
+
+        if (shouldSaveState && !isPreP) {
+            callActivityOnSaveInstanceState(r);
+        }
     }
 
     private void updateVisibility(ActivityClientRecord r, boolean show) {

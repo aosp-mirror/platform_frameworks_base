@@ -1351,6 +1351,10 @@
     <string name="fingerprint_error_lockout_permanent">Too many attempts. Fingerprint sensor disabled.</string>
     <!-- Generic error message shown when the fingerprint hardware can't recognize the fingerprint -->
     <string name="fingerprint_error_unable_to_process">Try again.</string>
+    <!-- Generic error message shown when the user has no enrolled fingerprints -->
+    <string name="fingerprint_error_no_fingerprints">No fingerprints enrolled.</string>
+    <!-- Generic error message shown when the app requests fingerprint authentication on a device without a sensor -->
+    <string name="fingerprint_error_hw_not_present">This device does not have a fingerprint sensor</string>
 
     <!-- Template to be used to name enrolled fingerprints by default. -->
     <string name="fingerprint_name_template">Finger <xliff:g id="fingerId" example="1">%d</xliff:g></string>
@@ -4423,15 +4427,6 @@
     <!-- DO NOT TRANSLATE -->
     <string name="date_picker_day_typeface">sans-serif-medium</string>
 
-    <!-- Notify use that they are in Lock-to-app -->
-    <string name="lock_to_app_toast">To unpin this screen, touch &amp; hold Back and Overview
-        buttons</string>
-
-    <!-- Starting lock-to-app indication. -->
-    <string name="lock_to_app_start">Screen pinned</string>
-    <!-- Exting lock-to-app indication. -->
-    <string name="lock_to_app_exit">Screen unpinned</string>
-
     <!-- Lock-to-app unlock pin string -->
     <string name="lock_to_app_unlock_pin">Ask for PIN before unpinning</string>
     <!-- Lock-to-app unlock pattern string -->
@@ -4815,7 +4810,7 @@
     A toast message shown when an app shortcut that was restored from a previous device is clicked,
     but it cannot be started because the shortcut was created by a newer version of the app.
     -->
-    <string name="shortcut_restored_on_lower_version">This shortcut requires latest app</string>
+    <string name="shortcut_restored_on_lower_version">App version downgraded, or isn\u2019t compatible with this shortcut</string>
 
     <!--
     A toast message shown when an app shortcut that was restored from a previous device is clicked,

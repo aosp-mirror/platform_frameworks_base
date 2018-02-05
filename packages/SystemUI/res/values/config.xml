@@ -46,7 +46,7 @@
     <string name="config_statusBarComponent" translatable="false">com.android.systemui.statusbar.phone.StatusBar</string>
 
     <!-- Component name of launcher service for overview to connect to -->
-    <string name="config_overviewServiceComponent" translateable="false">com.android.launcher3/com.android.quickstep.TouchInteractionService</string>
+    <string name="config_overviewServiceComponent" translatable="false">com.android.launcher3/com.android.quickstep.TouchInteractionService</string>
 
     <!-- Whether or not we show the number in the bar. -->
     <bool name="config_statusBarShowNumber">false</bool>

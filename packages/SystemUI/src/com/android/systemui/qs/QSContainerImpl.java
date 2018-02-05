@@ -36,7 +36,6 @@ import com.android.systemui.statusbar.ExpandableOutlineView;
 public class QSContainerImpl extends FrameLayout {
 
     private final Point mSizePoint = new Point();
-    private final Path mClipPath = new Path();
 
     private int mHeightOverride = -1;
     protected View mQSPanel;
@@ -46,7 +45,6 @@ public class QSContainerImpl extends FrameLayout {
     private QSCustomizer mQSCustomizer;
     private View mQSFooter;
     private View mBackground;
-    private float mRadius;
     private int mSideMargins;
 
     public QSContainerImpl(Context context, AttributeSet attrs) {
@@ -62,8 +60,6 @@ public class QSContainerImpl extends FrameLayout {
         mQSCustomizer = findViewById(R.id.qs_customize);
         mQSFooter = findViewById(R.id.qs_footer);
         mBackground = findViewById(R.id.quick_settings_background);
-        mRadius = getResources().getDimensionPixelSize(
-                Utils.getThemeAttr(mContext, android.R.attr.dialogCornerRadius));
         mSideMargins = getResources().getDimensionPixelSize(R.dimen.notification_side_paddings);
 
         setClickable(true);
@@ -115,18 +111,6 @@ public class QSContainerImpl extends FrameLayout {
         updateExpansion();
     }
 
-    @Override
-    protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
-        boolean ret;
-        canvas.save();
-        if (child != mQSCustomizer) {
-            canvas.clipPath(mClipPath);
-        }
-        ret = super.drawChild(canvas, child, drawingTime);
-        canvas.restore();
-        return ret;
-    }
-
     /**
      * Overrides the height of this view (post-layout), so that the content is clipped to that
      * height and the background is set to that height.
@@ -146,10 +130,6 @@ public class QSContainerImpl extends FrameLayout {
         mQSFooter.setTranslationY(height - mQSFooter.getHeight());
         mBackground.setTop(mQSPanel.getTop());
         mBackground.setBottom(height);
-
-        ExpandableOutlineView.getRoundedRectPath(0, 0, getWidth(), height, mRadius,
-                mRadius,
-                mClipPath);
     }
 
     protected int calculateContainerHeight() {

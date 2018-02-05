@@ -56,8 +56,9 @@ std::shared_ptr<minikin::FontFamily> buildFamily(const char* fileName) {
     LOG_ALWAYS_FATAL_IF(typeface == nullptr, "Failed to make typeface from %s", fileName);
     std::shared_ptr<minikin::MinikinFont> font = std::make_shared<MinikinFontSkia>(
             std::move(typeface), data, st.st_size, 0, std::vector<minikin::FontVariation>());
-    return std::make_shared<minikin::FontFamily>(
-            std::vector<minikin::Font>({minikin::Font(std::move(font), minikin::FontStyle())}));
+    std::vector<minikin::Font> fonts;
+    fonts.push_back(minikin::Font(std::move(font), minikin::FontStyle()));
+    return std::make_shared<minikin::FontFamily>(std::move(fonts));
 }
 
 std::vector<std::shared_ptr<minikin::FontFamily>> makeSingleFamlyVector(const char* fileName) {

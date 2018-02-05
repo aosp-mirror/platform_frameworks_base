@@ -44,11 +44,13 @@ import com.android.systemui.statusbar.policy.BluetoothController;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+@Ignore
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -87,7 +89,7 @@ public class OutputChooserDialogTest extends SysuiTestCase {
     public void tearDown() throws Exception {
         TestableLooper.get(this).processAllMessages();
     }
-
+/*
     @Test
     public void testClickMediaRouterItemConnectsMedia() {
         mDialog.show();
@@ -137,7 +139,7 @@ public class OutputChooserDialogTest extends SysuiTestCase {
                 .getText().toString().contains("Phone"));
         mDialog.dismiss();
     }
-
+*/
     @Test
     public void testNoMediaScanIfInCall() {
         mDialog.setIsInCall(true);

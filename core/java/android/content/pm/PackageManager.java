@@ -2965,6 +2965,11 @@ public abstract class PackageManager {
      */
     public static final int VERSION_CODE_HIGHEST = -1;
 
+    /** {@hide} */
+    public int getUserId() {
+        return UserHandle.myUserId();
+    }
+
     /**
      * Retrieve overall information about an application package that is
      * installed on the system.
@@ -5212,7 +5217,7 @@ public abstract class PackageManager {
      */
     @Deprecated
     public void getPackageSizeInfo(String packageName, IPackageStatsObserver observer) {
-        getPackageSizeInfoAsUser(packageName, UserHandle.myUserId(), observer);
+        getPackageSizeInfoAsUser(packageName, getUserId(), observer);
     }
 
     /**

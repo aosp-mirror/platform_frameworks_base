@@ -1670,7 +1670,7 @@ public class AppOpsManager {
     /** @hide */
     public void resetAllModes() {
         try {
-            mService.resetAllModes(UserHandle.myUserId(), null);
+            mService.resetAllModes(mContext.getUserId(), null);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

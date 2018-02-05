@@ -417,10 +417,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"උපාංගයේ දුරකථන විශේෂාංග වෙත ප්‍රවේශයට යෙදුමට ඉඩ දෙයි.  ඇමතුම සක්‍රිය වුවත්, සහ ඇමතුමකින් දුරස්ථ අංකය සම්බන්ධ වුවත් දුරකථන අංකය සහ උපාංග ID හඳුනා ගැනීමට මෙම අවසරය යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"පද්ධතිය හරහා ඇමතුම් මාර්ගගත කරන්න"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"ඇමතුම් අත්දැකීම වැඩිදියුණු කිරීම සඳහා යෙදුමට පද්ධතිය හරහා එහි ඇමතුම් මාර්ගගත කිරීමට ඉඩ දෙයි."</string>
-    <!-- no translation found for permlab_acceptHandover (2661534649736022409) -->
-    <skip />
-    <!-- no translation found for permdesc_acceptHandovers (4570660484220539698) -->
-    <skip />
+    <string name="permlab_acceptHandover" msgid="2661534649736022409">"වෙනත් යෙදුමක් වෙතින් වන ඇමතුමක් දිගටම කරගෙන යන්න"</string>
+    <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"වෙනත් යෙදුමක ආරම්භ කරන ලද ඇමතුමක් දිගටම කරගෙන යාමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"දුරකථන අංක කියවන්න"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"උපාංගයේ දුරකථන අංක වෙත ප්‍රවේශයට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ටැබ්ලටය නින්දෙන් වැළක්වීම"</string>
@@ -499,6 +497,10 @@
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"උත්සාහයන් ඉතා වැඩි ගණනකි. කරුණාකර පසුව නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"උත්සාහයන් ඉතා වැඩි ගණනකි. ඇඟිලි සලකුණු සංවේදකය අබල කරන ලදී."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"නැවත උත්සාහ කරන්න."</string>
+    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="5870957565512716938">"ඇඟිලි <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -999,12 +1001,9 @@
     <string name="browse" msgid="1245903488306147205">"විවෘත කරන්න"</string>
     <string name="sms" msgid="4560537514610063430">"පණිවිඩය"</string>
     <string name="add_contact" msgid="7867066569670597203">"එක් කරන්න"</string>
-    <!-- no translation found for view_calendar (979609872939597838) -->
-    <skip />
-    <!-- no translation found for add_calendar_event (1953664627192056206) -->
-    <skip />
-    <!-- no translation found for view_flight (7691640491425680214) -->
-    <skip />
+    <string name="view_calendar" msgid="979609872939597838">"බලන්න"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"කාල සටහන"</string>
+    <string name="view_flight" msgid="7691640491425680214">"ශ්‍රව්‍ය ඛණ්ඩය"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"ආචයනය ඉඩ ප්‍රමාණය අඩු වී ඇත"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"සමහර පද්ධති කාර්යයන් ක්‍රියා නොකරනු ඇත"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"පද්ධතිය සඳහා ප්‍රමාණවත් ඉඩ නොමැත. ඔබට 250MB නිදහස් ඉඩක් තිබෙන ඔබට තිබෙන බව සහතික කරගෙන නැවත උත්සාහ කරන්න."</string>
@@ -1130,8 +1129,7 @@
       <item quantity="other">විවෘත Wi-Fi ජාල තිබේ</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"විවෘත Wi-Fi ජාලය වෙත සම්බන්ධ වෙන්න"</string>
-    <!-- no translation found for wifi_available_carrier_network_title (4527932626916527897) -->
-    <skip />
+    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"වාහක Wi-Fi ජාලයට සම්බන්ධ වන්න"</string>
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"විවෘත Wi-Fi ජාලය වෙත සම්බන්ධ වෙමින්"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"Wi-Fi ජාලයක් වෙත සම්බන්ධ විය"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"Wi-Fi ජාලයක් වෙත සම්බන්ධ විය නොහැකි විය"</string>
@@ -1215,13 +1213,23 @@
     <string name="no_permissions" msgid="7283357728219338112">"අවසර අවශ්‍ය නොමැත"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"මෙමඟින් ඔබට මුදල් වැය විය හැක"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"හරි"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"මෙම උපාංගය USB වෙතින් ආරෝපණය"</string>
-    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"අමුණා ඇති උපාංගයට USB මඟින් බලය සපයමින්"</string>
-    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"ගොනු හුවමාරුව සඳහා USB"</string>
-    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"ඡායාරූප හුවමාරුව සඳහා USB"</string>
-    <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI සඳහා USB"</string>
-    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB මෙවලමකට සම්බන්ධිතයි"</string>
+    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
+    <skip />
+    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
+    <skip />
+    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
+    <skip />
+    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
+    <skip />
     <string name="usb_notification_message" msgid="3370903770828407960">"තවත් විකල්ප සඳහා තට්ටු කරන්න."</string>
+    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
+    <skip />
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"ප්‍රතිසම ශ්‍රව්‍ය උපාංගය අනාවරණය කර ගන්නා ලදී"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"මෙම දුරකථනය සමඟ සම්බන්ධිත උපාංගය නොගැළපෙයි. තව දැන ගැනීමට තට්ටු කරන්න."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB නිදොස්කරණය සම්බන්ධිතයි"</string>
@@ -1660,9 +1668,6 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"වැඩ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2වන වැඩ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3වන වැඩ <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="6820571533009838261">"මෙම තිර ඇමුණුම ගැලවීමට, දළ විශ්ලේෂණය බොත්තම් ස්පර්ශ කර අල්ලා ගෙන සිටින්න"</string>
-    <string name="lock_to_app_start" msgid="6643342070839862795">"තිරය අගුළු දමා ඇත"</string>
-    <string name="lock_to_app_exit" msgid="8598219838213787430">"තිරයේ අගුළු ඇර ඇත"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"ගැලවීමට පෙර PIN විමසන්න"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"ගැලවීමට පෙර අගුළු අරින රටාව සඳහා අසන්න"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"ගැලවීමට පෙර මුරපදය විමසන්න"</string>
@@ -1759,10 +1764,8 @@
     <string name="work_mode_off_title" msgid="1118691887588435530">"කාර්යාල පැතිකඩ ක්‍රියාත්මක කරන්නද?"</string>
     <string name="work_mode_off_message" msgid="5130856710614337649">"ඔබගේ වැඩ යෙදුම්, දැනුම්දීම්, දත්ත සහ වෙනත් කාර්යාල පැතිකඩ විශේෂාංග ක්‍රියාත්මක කරනු ඇත"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ක්‍රියාත්මක කරන්න"</string>
-    <!-- no translation found for deprecated_target_sdk_message (1449696506742572767) -->
-    <skip />
-    <!-- no translation found for deprecated_target_sdk_app_store (5032340500368495077) -->
-    <skip />
+    <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"මෙම යෙදුම Android හි පැරණි අනුවාදයක් සඳහා තනා ඇති අතර නිසියාකාරව ක්‍රියා නොකරනු ඇත. යාවත්කාලීන සඳහා පරික්ෂා කිරීම උත්සාහ කරන්න, නැතහොත් සංවර්ධක අමතන්න."</string>
+    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"යාවත්කාලීන සඳහා පරික්ෂා කරන්න"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"ඔබට නව පණිවිඩ තිබේ"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"බැලීමට විවෘත SMS යෙදුම විවෘත කරන්න"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"ඇතැම් ක්‍රියාකාරිත්ව සීමිත විය හැකිය"</string>
@@ -1829,17 +1832,15 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"දුරකථනය හඬ සඳහා ඉඩ නොදේ"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"උත්පතන කවුළුව"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"මෙම කෙටි මගට නවතම යෙදුම අවශ්‍යයි"</string>
+    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
+    <skip />
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"යෙදුම උපස්ථ සහ ප්‍රතිසාධනය සඳහා සහාය නොදක්වන බැවින් කෙටි මග ප්‍රතිසාධනය කළ නොහැකි විය"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"යෙදුම් අත්සන නොගැළපෙන බැවින් කෙටි මග ප්‍රතිසාධනය කළ නොහැකි විය"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"කෙටි මග ප්‍රතිසාධනය කළ නොහැකි විය"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"කෙටි මග අබල කර ඇත"</string>
-    <!-- no translation found for harmful_app_warning_uninstall (4837672735619532931) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_open_anyway (596432803680914321) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_title (8982527462829423432) -->
-    <skip />
+    <string name="harmful_app_warning_uninstall" msgid="4837672735619532931">"අස්ථාපනය කරන්න"</string>
+    <string name="harmful_app_warning_open_anyway" msgid="596432803680914321">"කෙසේ වුවත් විවෘත කරන්න"</string>
+    <string name="harmful_app_warning_title" msgid="8982527462829423432">"හානිකර යෙදුමක් අනාවරණය කර ගන්නා ලදී"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g> හට කොටස් <xliff:g id="APP_2">%2$s</xliff:g>ක් පෙන්වීමට අවශ්‍යයි"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"සංස්කරණය"</string>
 </resources>

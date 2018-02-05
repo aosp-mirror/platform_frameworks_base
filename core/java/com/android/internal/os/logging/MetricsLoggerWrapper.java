@@ -96,4 +96,14 @@ public class MetricsLoggerWrapper {
                 context.getApplicationInfo().className,
                 StatsLog.PICTURE_IN_PICTURE_STATE_CHANGED__STATE__EXPANDED_TO_FULL_SCREEN);
     }
+
+    public static void logAppOverlayEnter(int uid, String packageName, boolean usingAlertWindow) {
+        StatsLog.write(StatsLog.OVERLAY_STATE_CHANGED, uid, packageName, usingAlertWindow,
+                StatsLog.OVERLAY_STATE_CHANGED__STATE__ENTERED);
+    }
+
+    public static void logAppOverlayExit(int uid, String packageName, boolean usingAlertWindow) {
+        StatsLog.write(StatsLog.OVERLAY_STATE_CHANGED, uid, packageName, usingAlertWindow,
+                StatsLog.OVERLAY_STATE_CHANGED__STATE__EXITED);
+    }
 }

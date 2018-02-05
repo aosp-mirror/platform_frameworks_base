@@ -277,7 +277,7 @@ public class ResolveInfo implements Parcelable {
             dr = pm.getDrawable(ci.packageName, iconResourceId, ai);
         }
         if (dr != null) {
-            return pm.getUserBadgedIcon(dr, new UserHandle(UserHandle.myUserId()));
+            return pm.getUserBadgedIcon(dr, new UserHandle(pm.getUserId()));
         }
         return ci.loadIcon(pm);
     }

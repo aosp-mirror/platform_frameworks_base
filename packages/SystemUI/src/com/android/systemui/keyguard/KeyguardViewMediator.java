@@ -707,6 +707,9 @@ public class KeyguardViewMediator extends SystemUI {
                     && !mLockPatternUtils.isLockScreenDisabled(
                             KeyguardUpdateMonitor.getCurrentUser()),
                     mSecondaryDisplayShowing, true /* forceCallbacks */);
+        } else {
+            // The system's keyguard is disabled or missing.
+            setShowingLocked(false, mSecondaryDisplayShowing, true);
         }
 
         mStatusBarKeyguardViewManager =

@@ -81,13 +81,15 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
     }
 
     mBucketSizeNs = bucketSizeMills * 1000000;
-    mDimensions = metric.dimensions_in_what();
+    mDimensionsInWhat = metric.dimensions_in_what();
+    mDimensionsInCondition = metric.dimensions_in_condition();
 
     if (metric.links().size() > 0) {
         mConditionLinks.insert(mConditionLinks.begin(), metric.links().begin(),
                                metric.links().end());
-        mConditionSliced = true;
     }
+    mConditionSliced = (metric.links().size() > 0)||
+        (mDimensionsInCondition.has_field() && mDimensionsInCondition.child_size() > 0);
 
     if (!metric.has_condition() && mPullTagId != -1) {
         VLOG("Setting up periodic pulling for %d", mPullTagId);
@@ -124,7 +126,10 @@ void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs, StatsLog
     auto value_metrics = report->mutable_value_metrics();
     for (const auto& pair : mPastBuckets) {
         ValueMetricData* metricData = value_metrics->add_data();
-        *metricData->mutable_dimensions_in_what() = pair.first.getDimensionsValue();
+        *metricData->mutable_dimensions_in_what() =
+            pair.first.getDimensionKeyInWhat().getDimensionsValue();
+        *metricData->mutable_dimensions_in_condition() =
+            pair.first.getDimensionKeyInCondition().getDimensionsValue();
         for (const auto& bucket : pair.second) {
             ValueBucketInfo* bucketInfo = metricData->add_bucket_info();
             bucketInfo->set_start_bucket_nanos(bucket.mBucketStartNs);
@@ -146,16 +151,24 @@ void ValueMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
     long long protoToken = protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_ID_VALUE_METRICS);
 
     for (const auto& pair : mPastBuckets) {
-        const HashableDimensionKey& hashableKey = pair.first;
-        VLOG("  dimension key %s", hashableKey.c_str());
+        const MetricDimensionKey& dimensionKey = pair.first;
+        VLOG("  dimension key %s", dimensionKey.c_str());
         long long wrapperToken =
                 protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
 
         // First fill dimension.
         long long dimensionToken = protoOutput->start(
             FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_WHAT);
-        writeDimensionsValueProtoToStream(hashableKey.getDimensionsValue(), protoOutput);
+        writeDimensionsValueProtoToStream(
+            dimensionKey.getDimensionKeyInWhat().getDimensionsValue(), protoOutput);
         protoOutput->end(dimensionToken);
+        if (dimensionKey.hasDimensionKeyInCondition()) {
+            long long dimensionInConditionToken = protoOutput->start(
+                    FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_CONDITION);
+            writeDimensionsValueProtoToStream(
+                dimensionKey.getDimensionKeyInCondition().getDimensionsValue(), protoOutput);
+            protoOutput->end(dimensionInConditionToken);
+        }
 
         // Then fill bucket_info (ValueBucketInfo).
         for (const auto& bucket : pair.second) {
@@ -239,7 +252,7 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
     }
 }
 
-bool ValueMetricProducer::hitGuardRailLocked(const HashableDimensionKey& newKey) {
+bool ValueMetricProducer::hitGuardRailLocked(const MetricDimensionKey& newKey) {
     // ===========GuardRail==============
     // 1. Report the tuple count if the tuple count > soft limit
     if (mCurrentSlicedBucket.find(newKey) != mCurrentSlicedBucket.end()) {
@@ -260,7 +273,7 @@ bool ValueMetricProducer::hitGuardRailLocked(const HashableDimensionKey& newKey)
 }
 
 void ValueMetricProducer::onMatchedLogEventInternalLocked(
-        const size_t matcherIndex, const HashableDimensionKey& eventKey,
+        const size_t matcherIndex, const MetricDimensionKey& eventKey,
         const ConditionKey& conditionKey, bool condition,
         const LogEvent& event) {
     uint64_t eventTimeNs = event.GetTimestampNs();

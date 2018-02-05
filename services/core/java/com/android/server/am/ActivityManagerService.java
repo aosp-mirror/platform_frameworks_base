@@ -802,6 +802,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 doDump(fd, pw, new String[]{"recents"}, asProto);
                 doDump(fd, pw, new String[]{"lastanr"}, asProto);
                 doDump(fd, pw, new String[]{"starter"}, asProto);
+                doDump(fd, pw, new String[]{"containers"}, asProto);
                 if (mAssociations.size() > 0) {
                     doDump(fd, pw, new String[]{"associations"}, asProto);
                 }
@@ -1282,6 +1283,40 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (mFontScaleUri.equals(uri)) {
                 updateFontScaleIfNeeded(userId);
             }
+        }
+    }
+
+    DevelopmentSettingsObserver mDevelopmentSettingsObserver;
+
+    private final class DevelopmentSettingsObserver extends ContentObserver {
+        private final Uri mUri = Settings.Global
+                .getUriFor(Settings.Global.DEVELOPMENT_SETTINGS_ENABLED);
+
+        private final ComponentName mBugreportStorageProvider = new ComponentName(
+                "com.android.shell", "com.android.shell.BugreportStorageProvider");
+
+        public DevelopmentSettingsObserver() {
+            super(mHandler);
+            mContext.getContentResolver().registerContentObserver(mUri, false, this,
+                    UserHandle.USER_ALL);
+            // Always kick once to ensure that we match current state
+            onChange();
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri, @UserIdInt int userId) {
+            if (mUri.equals(uri)) {
+                onChange();
+            }
+        }
+
+        public void onChange() {
+            final boolean enabled = Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, Build.IS_ENG ? 1 : 0) != 0;
+            mContext.getPackageManager().setComponentEnabledSetting(mBugreportStorageProvider,
+                    enabled ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                            : PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
+                    0);
         }
     }
 
@@ -4027,8 +4062,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 runtimeFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
             }
             String genDebugInfoProperty = SystemProperties.get("debug.generate-debug-info");
-            if ("true".equals(genDebugInfoProperty)) {
+            if ("1".equals(genDebugInfoProperty) || "true".equals(genDebugInfoProperty)) {
                 runtimeFlags |= Zygote.DEBUG_GENERATE_DEBUG_INFO;
+            }
+            String genMiniDebugInfoProperty = SystemProperties.get("dalvik.vm.minidebuginfo");
+            if ("1".equals(genMiniDebugInfoProperty) || "true".equals(genMiniDebugInfoProperty)) {
+                runtimeFlags |= Zygote.DEBUG_GENERATE_MINI_DEBUG_INFO;
             }
             if ("1".equals(SystemProperties.get("debug.jni.logging"))) {
                 runtimeFlags |= Zygote.DEBUG_ENABLE_JNI_LOGGING;
@@ -4331,7 +4370,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         final BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
         StatsLog.write(StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED,
             component.userId, component.realActivity.getPackageName(),
-            component.realActivity.getShortClassName(), resumed ? 1 : 0);
+            component.realActivity.getShortClassName(), resumed ?
+                        StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__ACTIVITY__MOVE_TO_FOREGROUND :
+                        StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED__ACTIVITY__MOVE_TO_BACKGROUND);
         if (resumed) {
             if (mUsageStatsService != null) {
                 mUsageStatsService.reportEvent(component.realActivity, component.userId,
@@ -12419,6 +12460,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mConstants.start(mContext.getContentResolver());
         mCoreSettingsObserver = new CoreSettingsObserver(this);
         mFontScaleSettingObserver = new FontScaleSettingObserver();
+        mDevelopmentSettingsObserver = new DevelopmentSettingsObserver();
         GlobalSettingsToPropertiesMapper.start(mContext.getContentResolver());
 
         // Now that the settings provider is published we can consider sending
@@ -12844,7 +12886,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         // TODO: Where should the corresponding '1' (start) write go?
-        StatsLog.write(StatsLog.DEVICE_ON_STATUS_CHANGED, 0);
+        StatsLog.write(StatsLog.DEVICE_ON_STATUS_CHANGED,
+                StatsLog.DEVICE_ON_STATUS_CHANGED__STATE__OFF);
 
         boolean timedout = false;
 

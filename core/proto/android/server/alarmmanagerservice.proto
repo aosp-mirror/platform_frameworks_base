@@ -27,6 +27,7 @@ package com.android.server;
 
 option java_multiple_files = true;
 
+// next ID: 43
 message AlarmManagerServiceProto {
   option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
@@ -114,7 +115,14 @@ message AlarmManagerServiceProto {
     optional int32 uid = 1;
     // In the 'elapsed' timebase.
     optional int64 time_ms = 2;
+
+    // Time when the next while-idle is allowed, in the 'elapsed' timebase.
+    optional int64 next_allowed_ms = 3;
   }
+
+  // Whether the short or long while-idle timeout should be used for each UID.
+  repeated int32 use_allow_while_idle_short_time = 42;
+
   // For each uid, this is the last time we dispatched an "allow while idle"
   // alarm, used to determine the earliest we can dispatch the next such alarm.
   repeated LastAllowWhileIdleDispatch last_allow_while_idle_dispatch_times = 36;

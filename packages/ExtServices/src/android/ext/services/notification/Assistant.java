@@ -94,7 +94,7 @@ public class Assistant extends NotificationAssistantService {
                 infile = mFile.openRead();
                 readXml(infile);
             } catch (FileNotFoundException e) {
-                // No data yet
+                Log.d(TAG, "File doesn't exist or isn't readable yet");
             } catch (IOException e) {
                 Log.e(TAG, "Unable to read channel impressions", e);
             } catch (NumberFormatException | XmlPullParserException e) {

@@ -348,7 +348,9 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
         if (mState == null) {
             throw new IllegalStateException("called stop on empty AnimatedImageDrawable");
         }
-        nStop(mState.mNativePtr);
+        if (nStop(mState.mNativePtr)) {
+            postOnAnimationEnd();
+        }
     }
 
     // Animatable2 overrides
@@ -365,21 +367,31 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
             nSetOnAnimationEndListener(mState.mNativePtr, this);
         }
 
-        mAnimationCallbacks.add(callback);
+        if (!mAnimationCallbacks.contains(callback)) {
+            mAnimationCallbacks.add(callback);
+        }
     }
 
     @Override
     public boolean unregisterAnimationCallback(@NonNull AnimationCallback callback) {
-        if (callback == null || mAnimationCallbacks == null) {
+        if (callback == null || mAnimationCallbacks == null
+                || !mAnimationCallbacks.remove(callback)) {
             return false;
         }
 
-        return mAnimationCallbacks.remove(callback);
+        if (mAnimationCallbacks.isEmpty()) {
+            clearAnimationCallbacks();
+        }
+
+        return true;
     }
 
     @Override
     public void clearAnimationCallbacks() {
-        mAnimationCallbacks = null;
+        if (mAnimationCallbacks != null) {
+            mAnimationCallbacks = null;
+            nSetOnAnimationEndListener(mState.mNativePtr, null);
+        }
     }
 
     private void postOnAnimationStart() {
@@ -413,6 +425,21 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
         return mHandler;
     }
 
+    /**
+     *  Called by JNI.
+     *
+     *  The JNI code has already posted this to the thread that created the
+     *  callback, so no need to post.
+     */
+    @SuppressWarnings("unused")
+    private void onAnimationEnd() {
+        if (mAnimationCallbacks != null) {
+            for (Animatable2.AnimationCallback callback : mAnimationCallbacks) {
+                callback.onAnimationEnd(this);
+            }
+        }
+    }
+
 
     private static native long nCreate(long nativeImageDecoder,
             @Nullable ImageDecoder decoder, int width, int height, Rect cropRect)
@@ -432,7 +459,7 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
     @FastNative
     private static native boolean nStart(long nativePtr);
     @FastNative
-    private static native void nStop(long nativePtr);
+    private static native boolean nStop(long nativePtr);
     @FastNative
     private static native void nSetLoopCount(long nativePtr, int loopCount);
     // Pass the drawable down to native so it can call onAnimationEnd.

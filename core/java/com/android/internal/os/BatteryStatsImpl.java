@@ -3880,7 +3880,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public void addIsolatedUidLocked(int isolatedUid, int appUid) {
         mIsolatedUids.put(isolatedUid, appUid);
-        StatsLog.write(StatsLog.ISOLATED_UID_CHANGED, appUid, isolatedUid, 1);
+        StatsLog.write(StatsLog.ISOLATED_UID_CHANGED, appUid, isolatedUid,
+                StatsLog.ISOLATED_UID_CHANGED__EVENT__CREATED);
         final Uid u = getUidStatsLocked(appUid);
         u.addIsolatedUid(isolatedUid);
     }
@@ -3904,7 +3905,8 @@ public class BatteryStatsImpl extends BatteryStats {
      */
     public void removeIsolatedUidLocked(int isolatedUid) {
         StatsLog.write(
-            StatsLog.ISOLATED_UID_CHANGED, mIsolatedUids.get(isolatedUid, -1), isolatedUid, 0);
+                StatsLog.ISOLATED_UID_CHANGED, mIsolatedUids.get(isolatedUid, -1),
+                isolatedUid, StatsLog.ISOLATED_UID_CHANGED__EVENT__REMOVED);
         final int idx = mIsolatedUids.indexOfKey(isolatedUid);
         if (idx >= 0) {
             final int ownerUid = mIsolatedUids.valueAt(idx);
@@ -4255,10 +4257,12 @@ public class BatteryStatsImpl extends BatteryStats {
 
             if (wc != null) {
                 StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, wc.getUids(), wc.getTags(),
-                        getPowerManagerWakeLockLevel(type), name, 1);
+                        getPowerManagerWakeLockLevel(type), name,
+                        StatsLog.WAKELOCK_STATE_CHANGED__STATE__ACQUIRE);
             } else {
                 StatsLog.write_non_chained(StatsLog.WAKELOCK_STATE_CHANGED, uid, null,
-                        getPowerManagerWakeLockLevel(type), name, 1);
+                        getPowerManagerWakeLockLevel(type), name,
+                        StatsLog.WAKELOCK_STATE_CHANGED__STATE__ACQUIRE);
             }
         }
     }
@@ -4298,10 +4302,12 @@ public class BatteryStatsImpl extends BatteryStats {
             getUidStatsLocked(uid).noteStopWakeLocked(pid, name, type, elapsedRealtime);
             if (wc != null) {
                 StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, wc.getUids(), wc.getTags(),
-                        getPowerManagerWakeLockLevel(type), name, 0);
+                        getPowerManagerWakeLockLevel(type), name,
+                        StatsLog.WAKELOCK_STATE_CHANGED__STATE__RELEASE);
             } else {
                 StatsLog.write_non_chained(StatsLog.WAKELOCK_STATE_CHANGED, uid, null,
-                        getPowerManagerWakeLockLevel(type), name, 0);
+                        getPowerManagerWakeLockLevel(type), name,
+                        StatsLog.WAKELOCK_STATE_CHANGED__STATE__RELEASE);
             }
         }
     }
@@ -4426,7 +4432,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public void noteLongPartialWakelockStart(String name, String historyName, int uid) {
         StatsLog.write_non_chained(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
-                uid, null, name, historyName, 1);
+                uid, null, name, historyName,
+                StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__ON);
 
         uid = mapUid(uid);
         noteLongPartialWakeLockStartInternal(name, historyName, uid);
@@ -4439,7 +4446,8 @@ public class BatteryStatsImpl extends BatteryStats {
             final int uid = mapUid(workSource.get(i));
             noteLongPartialWakeLockStartInternal(name, historyName, uid);
             StatsLog.write_non_chained(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
-                    workSource.get(i), workSource.getName(i), name, historyName, 1);
+                    workSource.get(i), workSource.getName(i), name, historyName,
+                    StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__ON);
         }
 
         final ArrayList<WorkChain> workChains = workSource.getWorkChains();
@@ -4450,7 +4458,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 noteLongPartialWakeLockStartInternal(name, historyName, uid);
 
                 StatsLog.write(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
-                        workChain.getUids(), workChain.getTags(), name, historyName, 1);
+                        workChain.getUids(), workChain.getTags(), name, historyName,
+                        StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__ON);
             }
         }
     }
@@ -4470,8 +4479,8 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public void noteLongPartialWakelockFinish(String name, String historyName, int uid) {
-        StatsLog.write_non_chained(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
-                uid, null, name, historyName, 0);
+        StatsLog.write_non_chained(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED, uid, null,
+                name, historyName, StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__OFF);
 
         uid = mapUid(uid);
         noteLongPartialWakeLockFinishInternal(name, historyName, uid);
@@ -4484,7 +4493,8 @@ public class BatteryStatsImpl extends BatteryStats {
             final int uid = mapUid(workSource.get(i));
             noteLongPartialWakeLockFinishInternal(name, historyName, uid);
             StatsLog.write_non_chained(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
-                    workSource.get(i), workSource.getName(i), name, historyName, 0);
+                    workSource.get(i), workSource.getName(i), name, historyName,
+                    StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__OFF);
         }
 
         final ArrayList<WorkChain> workChains = workSource.getWorkChains();
@@ -4494,7 +4504,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 final int uid = workChain.getAttributionUid();
                 noteLongPartialWakeLockFinishInternal(name, historyName, uid);
                 StatsLog.write(StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED,
-                        workChain.getUids(), workChain.getTags(), name, historyName, 0);
+                        workChain.getUids(), workChain.getTags(), name, historyName,
+                        StatsLog.LONG_PARTIAL_WAKELOCK_STATE_CHANGED__STATE__OFF);
             }
         }
     }
@@ -4518,7 +4529,8 @@ public class BatteryStatsImpl extends BatteryStats {
             long deltaUptime = uptimeMs - mLastWakeupUptimeMs;
             SamplingTimer timer = getWakeupReasonTimerLocked(mLastWakeupReason);
             timer.add(deltaUptime * 1000, 1); // time in in microseconds
-            StatsLog.write(StatsLog.KERNEL_WAKEUP_REPORTED, mLastWakeupReason, deltaUptime * 1000);
+            StatsLog.write(StatsLog.KERNEL_WAKEUP_REPORTED, mLastWakeupReason,
+                    /* duration_usec */ deltaUptime * 1000);
             mLastWakeupReason = null;
         }
     }
@@ -4659,10 +4671,12 @@ public class BatteryStatsImpl extends BatteryStats {
         mGpsNesting++;
 
         if (workChain == null) {
-            StatsLog.write_non_chained(StatsLog.GPS_SCAN_STATE_CHANGED, uid, null, 1);
+            StatsLog.write_non_chained(StatsLog.GPS_SCAN_STATE_CHANGED, uid, null,
+                    StatsLog.GPS_SCAN_STATE_CHANGED__STATE__ON);
         } else {
             StatsLog.write(StatsLog.GPS_SCAN_STATE_CHANGED,
-                    workChain.getUids(), workChain.getTags(), 1);
+                    workChain.getUids(), workChain.getTags(),
+                    StatsLog.GPS_SCAN_STATE_CHANGED__STATE__ON);
         }
 
         getUidStatsLocked(uid).noteStartGps(elapsedRealtime);
@@ -4683,10 +4697,11 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         if (workChain == null) {
-            StatsLog.write_non_chained(StatsLog.GPS_SCAN_STATE_CHANGED, uid, null, 0);
+            StatsLog.write_non_chained(StatsLog.GPS_SCAN_STATE_CHANGED, uid, null,
+                    StatsLog.GPS_SCAN_STATE_CHANGED__STATE__OFF);
         } else {
             StatsLog.write(StatsLog.GPS_SCAN_STATE_CHANGED, workChain.getUids(),
-                    workChain.getTags(), 0);
+                    workChain.getTags(), StatsLog.GPS_SCAN_STATE_CHANGED__STATE__OFF);
         }
 
         getUidStatsLocked(uid).noteStopGps(elapsedRealtime);
@@ -4941,7 +4956,9 @@ public class BatteryStatsImpl extends BatteryStats {
                 mPowerSaveModeEnabledTimer.stopRunningLocked(elapsedRealtime);
             }
             addHistoryRecordLocked(elapsedRealtime, uptime);
-            StatsLog.write(StatsLog.BATTERY_SAVER_MODE_STATE_CHANGED, enabled ? 1 : 0);
+            StatsLog.write(StatsLog.BATTERY_SAVER_MODE_STATE_CHANGED, enabled ?
+                    StatsLog.BATTERY_SAVER_MODE_STATE_CHANGED__STATE__ON :
+                    StatsLog.BATTERY_SAVER_MODE_STATE_CHANGED__STATE__OFF);
         }
     }
 
@@ -5545,16 +5562,19 @@ public class BatteryStatsImpl extends BatteryStats {
 
         if (workChain != null) {
             StatsLog.write(StatsLog.BLE_SCAN_STATE_CHANGED,
-                    workChain.getUids(), workChain.getTags(), 1);
+                    workChain.getUids(), workChain.getTags(),
+                    StatsLog.BLE_SCAN_STATE_CHANGED__STATE__ON);
             if (isUnoptimized) {
                 StatsLog.write(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED,
-                        workChain.getUids(), workChain.getTags(), 1);
+                        workChain.getUids(), workChain.getTags(),
+                        StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED__STATE__ON);
             }
         } else {
-            StatsLog.write_non_chained(StatsLog.BLE_SCAN_STATE_CHANGED, uid, null, 1);
+            StatsLog.write_non_chained(StatsLog.BLE_SCAN_STATE_CHANGED, uid, null,
+                    StatsLog.BLE_SCAN_STATE_CHANGED__STATE__ON);
             if (isUnoptimized) {
                 StatsLog.write_non_chained(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED, uid, null,
-                        1);
+                        StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED__STATE__ON);
             }
         }
 
@@ -5594,16 +5614,19 @@ public class BatteryStatsImpl extends BatteryStats {
 
         if (workChain != null) {
             StatsLog.write(
-                    StatsLog.BLE_SCAN_STATE_CHANGED, workChain.getUids(), workChain.getTags(), 0);
+                    StatsLog.BLE_SCAN_STATE_CHANGED, workChain.getUids(), workChain.getTags(),
+                    StatsLog.BLE_SCAN_STATE_CHANGED__STATE__OFF);
             if (isUnoptimized) {
                 StatsLog.write(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED,
-                        workChain.getUids(), workChain.getTags(), 0);
+                        workChain.getUids(), workChain.getTags(),
+                        StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED__STATE__OFF);
             }
         } else {
-            StatsLog.write_non_chained(StatsLog.BLE_SCAN_STATE_CHANGED, uid, null, 0);
+            StatsLog.write_non_chained(StatsLog.BLE_SCAN_STATE_CHANGED, uid, null,
+                    StatsLog.BLE_SCAN_STATE_CHANGED__STATE__OFF);
             if (isUnoptimized) {
                 StatsLog.write_non_chained(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED, uid, null,
-                        0);
+                        StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED__STATE__OFF);
             }
         }
 
@@ -5656,7 +5679,8 @@ public class BatteryStatsImpl extends BatteryStats {
                     for (int j = 0; j < allWorkChains.size(); ++j) {
                         StatsLog.write(StatsLog.BLE_SCAN_STATE_CHANGED,
                                 allWorkChains.get(j).getUids(),
-                                allWorkChains.get(j).getTags(), 0);
+                                allWorkChains.get(j).getTags(),
+                                StatsLog.BLE_SCAN_STATE_CHANGED__STATE__OFF);
                     }
                     allWorkChains.clear();
                 }
@@ -5666,7 +5690,8 @@ public class BatteryStatsImpl extends BatteryStats {
                     for (int j = 0; j < unoptimizedWorkChains.size(); ++j) {
                         StatsLog.write(StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED,
                                 unoptimizedWorkChains.get(j).getUids(),
-                                unoptimizedWorkChains.get(j).getTags(), 0);
+                                unoptimizedWorkChains.get(j).getTags(),
+                                StatsLog.BLE_UNOPTIMIZED_SCAN_STATE_CHANGED__STATE__OFF);
                     }
                     unoptimizedWorkChains.clear();
                 }
@@ -6011,7 +6036,8 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<N; i++) {
             final int uid = mapUid(ws.get(i));
             noteFullWifiLockAcquiredLocked(uid);
-            StatsLog.write_non_chained(StatsLog.WIFI_LOCK_STATE_CHANGED, ws.get(i), ws.getName(i), 1);
+            StatsLog.write_non_chained(StatsLog.WIFI_LOCK_STATE_CHANGED, ws.get(i), ws.getName(i),
+                    StatsLog.WIFI_LOCK_STATE_CHANGED__STATE__ON);
         }
 
         final List<WorkChain> workChains = ws.getWorkChains();
@@ -6021,7 +6047,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 final int uid = mapUid(workChain.getAttributionUid());
                 noteFullWifiLockAcquiredLocked(uid);
                 StatsLog.write(StatsLog.WIFI_LOCK_STATE_CHANGED,
-                        workChain.getUids(), workChain.getTags(), 1);
+                        workChain.getUids(), workChain.getTags(),
+                        StatsLog.WIFI_LOCK_STATE_CHANGED__STATE__ON);
             }
         }
     }
@@ -6031,7 +6058,8 @@ public class BatteryStatsImpl extends BatteryStats {
         for (int i=0; i<N; i++) {
             final int uid = mapUid(ws.get(i));
             noteFullWifiLockReleasedLocked(uid);
-            StatsLog.write_non_chained(StatsLog.WIFI_LOCK_STATE_CHANGED, ws.get(i), ws.getName(i), 0);
+            StatsLog.write_non_chained(StatsLog.WIFI_LOCK_STATE_CHANGED, ws.get(i), ws.getName(i),
+                    StatsLog.WIFI_LOCK_STATE_CHANGED__STATE__OFF);
         }
 
         final List<WorkChain> workChains = ws.getWorkChains();
@@ -6041,7 +6069,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 final int uid = mapUid(workChain.getAttributionUid());
                 noteFullWifiLockReleasedLocked(uid);
                 StatsLog.write(StatsLog.WIFI_LOCK_STATE_CHANGED,
-                        workChain.getUids(), workChain.getTags(), 0);
+                        workChain.getUids(), workChain.getTags(),
+                        StatsLog.WIFI_LOCK_STATE_CHANGED__STATE__OFF);
             }
         }
     }
@@ -6052,7 +6081,7 @@ public class BatteryStatsImpl extends BatteryStats {
             final int uid = mapUid(ws.get(i));
             noteWifiScanStartedLocked(uid);
             StatsLog.write_non_chained(StatsLog.WIFI_SCAN_STATE_CHANGED, ws.get(i), ws.getName(i),
-                    1);
+                    StatsLog.WIFI_SCAN_STATE_CHANGED__STATE__ON);
         }
 
         final List<WorkChain> workChains = ws.getWorkChains();
@@ -6062,7 +6091,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 final int uid = mapUid(workChain.getAttributionUid());
                 noteWifiScanStartedLocked(uid);
                 StatsLog.write(StatsLog.WIFI_SCAN_STATE_CHANGED, workChain.getUids(),
-                        workChain.getTags(), 1);
+                        workChain.getTags(), StatsLog.WIFI_SCAN_STATE_CHANGED__STATE__ON);
             }
         }
     }
@@ -6073,7 +6102,7 @@ public class BatteryStatsImpl extends BatteryStats {
             final int uid = mapUid(ws.get(i));
             noteWifiScanStoppedLocked(uid);
             StatsLog.write_non_chained(StatsLog.WIFI_SCAN_STATE_CHANGED, ws.get(i), ws.getName(i),
-                    0);
+                    StatsLog.WIFI_SCAN_STATE_CHANGED__STATE__OFF);
         }
 
         final List<WorkChain> workChains = ws.getWorkChains();
@@ -6083,7 +6112,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 final int uid = mapUid(workChain.getAttributionUid());
                 noteWifiScanStoppedLocked(uid);
                 StatsLog.write(StatsLog.WIFI_SCAN_STATE_CHANGED,
-                        workChain.getUids(), workChain.getTags(), 0);
+                        workChain.getUids(), workChain.getTags(),
+                        StatsLog.WIFI_SCAN_STATE_CHANGED__STATE__OFF);
             }
         }
     }
@@ -7035,7 +7065,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 }
                 mWifiMulticastTimer.startRunningLocked(elapsedRealtimeMs);
                 StatsLog.write_non_chained(
-                        StatsLog.WIFI_MULTICAST_LOCK_STATE_CHANGED, getUid(), null, 1);
+                        StatsLog.WIFI_MULTICAST_LOCK_STATE_CHANGED, getUid(), null,
+                        StatsLog.WIFI_MULTICAST_LOCK_STATE_CHANGED__STATE__ON);
             }
         }
 
@@ -7045,7 +7076,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 mWifiMulticastEnabled = false;
                 mWifiMulticastTimer.stopRunningLocked(elapsedRealtimeMs);
                 StatsLog.write_non_chained(
-                        StatsLog.WIFI_MULTICAST_LOCK_STATE_CHANGED, getUid(), null, 0);
+                        StatsLog.WIFI_MULTICAST_LOCK_STATE_CHANGED, getUid(), null,
+                        StatsLog.WIFI_MULTICAST_LOCK_STATE_CHANGED__STATE__OFF);
             }
         }
 
@@ -7098,14 +7130,16 @@ public class BatteryStatsImpl extends BatteryStats {
 
         public void noteAudioTurnedOnLocked(long elapsedRealtimeMs) {
             createAudioTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
-            StatsLog.write_non_chained(StatsLog.AUDIO_STATE_CHANGED, getUid(), null, 1);
+            StatsLog.write_non_chained(StatsLog.AUDIO_STATE_CHANGED, getUid(), null,
+                    StatsLog.AUDIO_STATE_CHANGED__STATE__ON);
         }
 
         public void noteAudioTurnedOffLocked(long elapsedRealtimeMs) {
             if (mAudioTurnedOnTimer != null) {
                 mAudioTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
                 if (!mAudioTurnedOnTimer.isRunningLocked()) { // only tell statsd if truly stopped
-                    StatsLog.write_non_chained(StatsLog.AUDIO_STATE_CHANGED, getUid(), null, 0);
+                    StatsLog.write_non_chained(StatsLog.AUDIO_STATE_CHANGED, getUid(), null,
+                            StatsLog.AUDIO_STATE_CHANGED__STATE__OFF);
                 }
             }
         }
@@ -7113,7 +7147,8 @@ public class BatteryStatsImpl extends BatteryStats {
         public void noteResetAudioLocked(long elapsedRealtimeMs) {
             if (mAudioTurnedOnTimer != null) {
                 mAudioTurnedOnTimer.stopAllRunningLocked(elapsedRealtimeMs);
-                StatsLog.write_non_chained(StatsLog.AUDIO_STATE_CHANGED, getUid(), null, 0);
+                StatsLog.write_non_chained(StatsLog.AUDIO_STATE_CHANGED, getUid(), null,
+                        StatsLog.AUDIO_STATE_CHANGED__STATE__OFF);
             }
         }
 
@@ -7127,7 +7162,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
         public void noteVideoTurnedOnLocked(long elapsedRealtimeMs) {
             createVideoTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
-            StatsLog.write_non_chained(StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED, getUid(), null, 1);
+            StatsLog.write_non_chained(StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED, getUid(), null,
+                    StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED__STATE__ON);
         }
 
         public void noteVideoTurnedOffLocked(long elapsedRealtimeMs) {
@@ -7135,7 +7171,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 mVideoTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
                 if (!mVideoTurnedOnTimer.isRunningLocked()) { // only tell statsd if truly stopped
                     StatsLog.write_non_chained(StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED, getUid(),
-                            null, 0);
+                            null, StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED__STATE__OFF);
                 }
             }
         }
@@ -7144,7 +7180,7 @@ public class BatteryStatsImpl extends BatteryStats {
             if (mVideoTurnedOnTimer != null) {
                 mVideoTurnedOnTimer.stopAllRunningLocked(elapsedRealtimeMs);
                 StatsLog.write_non_chained(StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED, getUid(), null,
-                        0);
+                        StatsLog.MEDIA_CODEC_ACTIVITY_CHANGED__STATE__OFF);
             }
         }
 
@@ -7158,7 +7194,8 @@ public class BatteryStatsImpl extends BatteryStats {
 
         public void noteFlashlightTurnedOnLocked(long elapsedRealtimeMs) {
             createFlashlightTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
-            StatsLog.write_non_chained(StatsLog.FLASHLIGHT_STATE_CHANGED, getUid(), null,1);
+            StatsLog.write_non_chained(StatsLog.FLASHLIGHT_STATE_CHANGED, getUid(), null,
+                    StatsLog.FLASHLIGHT_STATE_CHANGED__STATE__ON);
         }
 
         public void noteFlashlightTurnedOffLocked(long elapsedRealtimeMs) {
@@ -7166,7 +7203,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 mFlashlightTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
                 if (!mFlashlightTurnedOnTimer.isRunningLocked()) {
                     StatsLog.write_non_chained(StatsLog.FLASHLIGHT_STATE_CHANGED, getUid(), null,
-                            0);
+                            StatsLog.FLASHLIGHT_STATE_CHANGED__STATE__OFF);
                 }
             }
         }
@@ -7174,7 +7211,8 @@ public class BatteryStatsImpl extends BatteryStats {
         public void noteResetFlashlightLocked(long elapsedRealtimeMs) {
             if (mFlashlightTurnedOnTimer != null) {
                 mFlashlightTurnedOnTimer.stopAllRunningLocked(elapsedRealtimeMs);
-                StatsLog.write_non_chained(StatsLog.FLASHLIGHT_STATE_CHANGED, getUid(), null, 0);
+                StatsLog.write_non_chained(StatsLog.FLASHLIGHT_STATE_CHANGED, getUid(), null,
+                        StatsLog.FLASHLIGHT_STATE_CHANGED__STATE__OFF);
             }
         }
 
@@ -7188,14 +7226,16 @@ public class BatteryStatsImpl extends BatteryStats {
 
         public void noteCameraTurnedOnLocked(long elapsedRealtimeMs) {
             createCameraTurnedOnTimerLocked().startRunningLocked(elapsedRealtimeMs);
-            StatsLog.write_non_chained(StatsLog.CAMERA_STATE_CHANGED, getUid(), null, 1);
+            StatsLog.write_non_chained(StatsLog.CAMERA_STATE_CHANGED, getUid(), null,
+                    StatsLog.CAMERA_STATE_CHANGED__STATE__ON);
         }
 
         public void noteCameraTurnedOffLocked(long elapsedRealtimeMs) {
             if (mCameraTurnedOnTimer != null) {
                 mCameraTurnedOnTimer.stopRunningLocked(elapsedRealtimeMs);
                 if (!mCameraTurnedOnTimer.isRunningLocked()) { // only tell statsd if truly stopped
-                    StatsLog.write_non_chained(StatsLog.CAMERA_STATE_CHANGED, getUid(), null, 0);
+                    StatsLog.write_non_chained(StatsLog.CAMERA_STATE_CHANGED, getUid(), null,
+                            StatsLog.CAMERA_STATE_CHANGED__STATE__OFF);
                 }
             }
         }
@@ -7203,7 +7243,8 @@ public class BatteryStatsImpl extends BatteryStats {
         public void noteResetCameraLocked(long elapsedRealtimeMs) {
             if (mCameraTurnedOnTimer != null) {
                 mCameraTurnedOnTimer.stopAllRunningLocked(elapsedRealtimeMs);
-                StatsLog.write_non_chained(StatsLog.CAMERA_STATE_CHANGED, getUid(), null, 0);
+                StatsLog.write_non_chained(StatsLog.CAMERA_STATE_CHANGED, getUid(), null,
+                        StatsLog.CAMERA_STATE_CHANGED__STATE__OFF);
             }
         }
 
@@ -9777,7 +9818,8 @@ public class BatteryStatsImpl extends BatteryStats {
             DualTimer t = mSyncStats.startObject(name);
             if (t != null) {
                 t.startRunningLocked(elapsedRealtimeMs);
-                StatsLog.write_non_chained(StatsLog.SYNC_STATE_CHANGED, getUid(), null, name, 1);
+                StatsLog.write_non_chained(StatsLog.SYNC_STATE_CHANGED, getUid(), null, name,
+                        StatsLog.SYNC_STATE_CHANGED__STATE__ON);
             }
         }
 
@@ -9786,7 +9828,8 @@ public class BatteryStatsImpl extends BatteryStats {
             if (t != null) {
                 t.stopRunningLocked(elapsedRealtimeMs);
                 if (!t.isRunningLocked()) { // only tell statsd if truly stopped
-                    StatsLog.write_non_chained(StatsLog.SYNC_STATE_CHANGED, getUid(), null, name, 0);
+                    StatsLog.write_non_chained(StatsLog.SYNC_STATE_CHANGED, getUid(), null, name,
+                            StatsLog.SYNC_STATE_CHANGED__STATE__OFF);
                 }
             }
         }
@@ -9796,7 +9839,7 @@ public class BatteryStatsImpl extends BatteryStats {
             if (t != null) {
                 t.startRunningLocked(elapsedRealtimeMs);
                 StatsLog.write_non_chained(StatsLog.SCHEDULED_JOB_STATE_CHANGED, getUid(), null,
-                        name, 1);
+                        name, StatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__STARTED);
             }
         }
 
@@ -9806,7 +9849,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 t.stopRunningLocked(elapsedRealtimeMs);
                 if (!t.isRunningLocked()) { // only tell statsd if truly stopped
                     StatsLog.write_non_chained(StatsLog.SCHEDULED_JOB_STATE_CHANGED, getUid(), null,
-                            name, 0);
+                            name, StatsLog.SCHEDULED_JOB_STATE_CHANGED__STATE__FINISHED);
                 }
             }
             if (mBsi.mOnBatteryTimeBase.isRunning()) {
@@ -9919,7 +9962,7 @@ public class BatteryStatsImpl extends BatteryStats {
             t.startRunningLocked(elapsedRealtimeMs);
             if (sensor != Sensor.GPS) {
                 StatsLog.write_non_chained(StatsLog.SENSOR_STATE_CHANGED, getUid(), null, sensor,
-                        1);
+                        StatsLog.SENSOR_STATE_CHANGED__STATE__ON);
             }
         }
 
@@ -9930,7 +9973,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 t.stopRunningLocked(elapsedRealtimeMs);
                 if (sensor != Sensor.GPS) {
                     StatsLog.write_non_chained(StatsLog.SENSOR_STATE_CHANGED, getUid(), null,
-                             sensor, 0);
+                             sensor, StatsLog.SENSOR_STATE_CHANGED__STATE__OFF);
                 }
             }
         }

@@ -19,12 +19,12 @@ package com.android.server.wm;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.platform.test.annotations.Postsubmit;
 import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -134,6 +134,32 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
 
         verify(mMockRunner).onAnimationCancelled();
         verify(mFinishedCallback).onAnimationFinished(eq(adapter));
+    }
+
+    @Test
+    public void testTimeout_scaled() throws Exception {
+        sWm.setAnimationScale(2, 5.0f);
+        try{
+            final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
+            final AnimationAdapter adapter = mController.createAnimationAdapter(win.mAppToken,
+                    new Point(50, 100), new Rect(50, 100, 150, 150));
+            adapter.startAnimation(mMockLeash, mMockTransaction, mFinishedCallback);
+            mController.goodToGo();
+
+            mClock.fastForward(2500);
+            mHandler.timeAdvance();
+
+            verify(mMockRunner, never()).onAnimationCancelled();
+
+            mClock.fastForward(10000);
+            mHandler.timeAdvance();
+
+            verify(mMockRunner).onAnimationCancelled();
+            verify(mFinishedCallback).onAnimationFinished(eq(adapter));
+        } finally {
+            sWm.setAnimationScale(2, 1.0f);
+        }
+
     }
 
     @Test

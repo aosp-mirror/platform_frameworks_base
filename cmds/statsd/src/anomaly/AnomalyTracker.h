@@ -48,19 +48,19 @@ public:
     // Adds a bucket.
     // Bucket index starts from 0.
     void addPastBucket(std::shared_ptr<DimToValMap> bucketValues, const int64_t& bucketNum);
-    void addPastBucket(const HashableDimensionKey& key, const int64_t& bucketValue,
+    void addPastBucket(const MetricDimensionKey& key, const int64_t& bucketValue,
                        const int64_t& bucketNum);
 
     // Returns true if detected anomaly for the existing buckets on one or more dimension keys.
-    bool detectAnomaly(const int64_t& currBucketNum, const HashableDimensionKey& key,
+    bool detectAnomaly(const int64_t& currBucketNum, const MetricDimensionKey& key,
                        const int64_t& currentBucketValue);
 
     // Informs incidentd about the detected alert.
-    void declareAnomaly(const uint64_t& timestampNs, const HashableDimensionKey& key);
+    void declareAnomaly(const uint64_t& timestampNs, const MetricDimensionKey& key);
 
     // Detects the alert and informs the incidentd when applicable.
     void detectAndDeclareAnomaly(const uint64_t& timestampNs, const int64_t& currBucketNum,
-                                 const HashableDimensionKey& key,
+                                 const MetricDimensionKey& key,
                                  const int64_t& currentBucketValue);
 
     // Init the AnomalyMonitor which is shared across anomaly trackers.
@@ -69,10 +69,10 @@ public:
     }
 
     // Helper function to return the sum value of past buckets at given dimension.
-    int64_t getSumOverPastBuckets(const HashableDimensionKey& key) const;
+    int64_t getSumOverPastBuckets(const MetricDimensionKey& key) const;
 
     // Helper function to return the value for a past bucket.
-    int64_t getPastBucketValue(const HashableDimensionKey& key, const int64_t& bucketNum) const;
+    int64_t getPastBucketValue(const MetricDimensionKey& key, const int64_t& bucketNum) const;
 
     // Returns the anomaly threshold.
     inline int64_t getAnomalyThreshold() const {
@@ -81,7 +81,7 @@ public:
 
     // Returns the refractory period timestamp (in seconds) for the given key.
     // If there is no stored refractory period ending timestamp, returns 0.
-    uint32_t getRefractoryPeriodEndsSec(const HashableDimensionKey& key) const {
+    uint32_t getRefractoryPeriodEndsSec(const MetricDimensionKey& key) const {
         const auto& it = mRefractoryPeriodEndsSec.find(key);
         return it != mRefractoryPeriodEndsSec.end() ? it->second : 0;
     }
@@ -124,7 +124,7 @@ protected:
     // declared for that dimension) ends, in seconds. Only anomalies that occur after this period
     // ends will be declared.
     // Entries may be, but are not guaranteed to be, removed after the period is finished.
-    unordered_map<HashableDimensionKey, uint32_t> mRefractoryPeriodEndsSec;
+    unordered_map<MetricDimensionKey, uint32_t> mRefractoryPeriodEndsSec;
 
     void flushPastBuckets(const int64_t& currBucketNum);
 
@@ -135,7 +135,7 @@ protected:
     // and remove any items with value 0.
     void subtractBucketFromSum(const shared_ptr<DimToValMap>& bucket);
 
-    bool isInRefractoryPeriod(const uint64_t& timestampNs, const HashableDimensionKey& key);
+    bool isInRefractoryPeriod(const uint64_t& timestampNs, const MetricDimensionKey& key);
 
     // Calculates the corresponding bucket index within the circular array.
     size_t index(int64_t bucketNum) const;
@@ -144,7 +144,7 @@ protected:
     virtual void resetStorage();
 
     // Informs the subscribers that an anomaly has occurred.
-    void informSubscribers(const HashableDimensionKey& key);
+    void informSubscribers(const MetricDimensionKey& key);
 
     FRIEND_TEST(AnomalyTrackerTest, TestConsecutiveBuckets);
     FRIEND_TEST(AnomalyTrackerTest, TestSparseBuckets);

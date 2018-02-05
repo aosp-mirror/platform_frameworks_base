@@ -27,6 +27,9 @@ import java.util.ArrayList;
  * @hide
  * Retrieves information from an ALSA "devices" file.
  */
+/*
+ * NOTE: This class is currently not being used, but may be needed in the future.
+ */
 public class AlsaDevicesParser {
     private static final String TAG = "AlsaDevicesParser";
     protected static final boolean DEBUG = false;
@@ -207,12 +210,6 @@ public class AlsaDevicesParser {
     //
     // Predicates
     //
-/*
-   public boolean hasPlaybackDevices() {
-        return mHasPlaybackDevices;
-    }
-*/
-
     public boolean hasPlaybackDevices(int card) {
         for (AlsaDeviceRecord deviceRecord : mDeviceRecords) {
             if (deviceRecord.mCardNum == card &&
@@ -224,12 +221,6 @@ public class AlsaDevicesParser {
         return false;
     }
 
-/*
-    public boolean hasCaptureDevices() {
-        return mHasCaptureDevices;
-    }
-*/
-
     public boolean hasCaptureDevices(int card) {
         for (AlsaDeviceRecord deviceRecord : mDeviceRecords) {
             if (deviceRecord.mCardNum == card &&
@@ -240,12 +231,6 @@ public class AlsaDevicesParser {
         }
         return false;
     }
-
-/*
-    public boolean hasMIDIDevices() {
-        return mHasMIDIDevices;
-    }
-*/
 
     public boolean hasMIDIDevices(int card) {
         for (AlsaDeviceRecord deviceRecord : mDeviceRecords) {
@@ -280,6 +265,7 @@ public class AlsaDevicesParser {
                 if (isLineDeviceRecord(line)) {
                     AlsaDeviceRecord deviceRecord = new AlsaDeviceRecord();
                     deviceRecord.parse(line);
+                    Slog.i(TAG, deviceRecord.textFormat());
                     mDeviceRecords.add(deviceRecord);
                 }
             }

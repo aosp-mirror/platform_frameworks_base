@@ -232,14 +232,6 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         public Rect getFrameLw();
 
         /**
-         * Retrieve the current position of the window that is actually shown.
-         * Must be called with the window manager lock held.
-         *
-         * @return Point The point holding the shown window position.
-         */
-        public Point getShownPositionLw();
-
-        /**
          * Retrieve the frame of the display that this window was last
          * laid out in.  Must be called with the
          * window manager lock held.

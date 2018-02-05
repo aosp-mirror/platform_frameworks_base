@@ -1691,7 +1691,7 @@ public class ActivityManager {
             if (maxNum < 0) {
                 throw new IllegalArgumentException("The requested number of tasks should be >= 0");
             }
-            return getService().getRecentTasks(maxNum, flags, UserHandle.myUserId()).getList();
+            return getService().getRecentTasks(maxNum, flags, mContext.getUserId()).getList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2685,7 +2685,7 @@ public class ActivityManager {
     public boolean clearApplicationUserData(String packageName, IPackageDataObserver observer) {
         try {
             return getService().clearApplicationUserData(packageName, false,
-                    observer, UserHandle.myUserId());
+                    observer, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2724,7 +2724,7 @@ public class ActivityManager {
         try {
             @SuppressWarnings("unchecked")
             final ParceledListSlice<GrantedUriPermission> castedList = getService()
-                    .getGrantedUriPermissions(packageName, UserHandle.myUserId());
+                    .getGrantedUriPermissions(packageName, mContext.getUserId());
             return castedList;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -2743,7 +2743,7 @@ public class ActivityManager {
     public void clearGrantedUriPermissions(String packageName) {
         try {
             getService().clearGrantedUriPermissions(packageName,
-                    UserHandle.myUserId());
+                    mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3528,7 +3528,7 @@ public class ActivityManager {
     public void killBackgroundProcesses(String packageName) {
         try {
             getService().killBackgroundProcesses(packageName,
-                    UserHandle.myUserId());
+                    mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3586,7 +3586,7 @@ public class ActivityManager {
     @SystemApi
     @RequiresPermission(Manifest.permission.FORCE_STOP_PACKAGES)
     public void forceStopPackage(String packageName) {
-        forceStopPackageAsUser(packageName, UserHandle.myUserId());
+        forceStopPackageAsUser(packageName, mContext.getUserId());
     }
 
     /**

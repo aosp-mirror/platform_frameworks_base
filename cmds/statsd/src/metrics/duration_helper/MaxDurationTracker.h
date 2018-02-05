@@ -29,10 +29,15 @@ namespace statsd {
 class MaxDurationTracker : public DurationTracker {
 public:
     MaxDurationTracker(const ConfigKey& key, const int64_t& id,
-                       const HashableDimensionKey& eventKey, sp<ConditionWizard> wizard,
-                       int conditionIndex, bool nesting, uint64_t currentBucketStartNs,
-                       uint64_t bucketSizeNs, bool conditionSliced,
+                       const MetricDimensionKey& eventKey, sp<ConditionWizard> wizard,
+                       int conditionIndex, const FieldMatcher& dimensionInCondition, bool nesting,
+                       uint64_t currentBucketStartNs, uint64_t bucketSizeNs, bool conditionSliced,
                        const std::vector<sp<DurationAnomalyTracker>>& anomalyTrackers);
+
+    MaxDurationTracker(const MaxDurationTracker& tracker) = default;
+
+    unique_ptr<DurationTracker> clone(const uint64_t eventTime) override;
+
     void noteStart(const HashableDimensionKey& key, bool condition, const uint64_t eventTime,
                    const ConditionKey& conditionKey) override;
     void noteStop(const HashableDimensionKey& key, const uint64_t eventTime,
@@ -41,7 +46,7 @@ public:
 
     bool flushIfNeeded(
             uint64_t timestampNs,
-            std::unordered_map<HashableDimensionKey, std::vector<DurationBucket>>* output) override;
+            std::unordered_map<MetricDimensionKey, std::vector<DurationBucket>>* output) override;
 
     void onSlicedConditionMayChange(const uint64_t timestamp) override;
     void onConditionChanged(bool condition, const uint64_t timestamp) override;

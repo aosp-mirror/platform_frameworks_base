@@ -59,6 +59,11 @@ bool StatsPuller::Pull(std::vector<std::shared_ptr<LogEvent>>* data) {
     return ret;
 }
 
+void StatsPuller::ClearCache() {
+    lock_guard<std::mutex> lock(mLock);
+    mCachedData.clear();
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

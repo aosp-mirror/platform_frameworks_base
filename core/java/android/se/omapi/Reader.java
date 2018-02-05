@@ -24,6 +24,7 @@ package android.se.omapi;
 
 import android.annotation.NonNull;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.util.Log;
 
 import java.io.IOException;
@@ -45,8 +46,7 @@ public class Reader {
     private final Object mLock = new Object();
 
 
-    Reader(SEService service, String name, ISecureElementReader reader) throws
-            IOException {
+    Reader(SEService service, String name, ISecureElementReader reader) {
         if (reader == null || service == null || name == null) {
             throw new IllegalArgumentException("Parameters cannot be null");
         }
@@ -96,8 +96,10 @@ public class Reader {
             ISecureElementSession session;
             try {
                 session = mReader.openSession();
-            } catch (RemoteException e) {
+            } catch (ServiceSpecificException e) {
                 throw new IOException(e.getMessage());
+            } catch (RemoteException e) {
+                throw new IllegalStateException(e.getMessage());
             }
             if (session == null) {
                 throw new IOException("service session is null.");

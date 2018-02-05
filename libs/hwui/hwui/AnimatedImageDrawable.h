@@ -68,7 +68,9 @@ public:
     // Returns true if the animation was started; false otherwise (e.g. it was
     // already running)
     bool start();
-    void stop();
+    // Returns true if the animation was stopped; false otherwise (e.g. it was
+    // already stopped)
+    bool stop();
     bool isRunning();
     void setRepetitionCount(int count) { mSkAnimatedImage->setRepetitionCount(count); }
 

@@ -33,4 +33,9 @@ public interface MediaLibraryService2Provider extends MediaSessionService2Provid
         void notifyChildrenChanged_impl(ControllerInfo controller, String parentId, Bundle options);
         void notifyChildrenChanged_impl(String parentId, Bundle options);
     }
+
+    interface LibraryRootProvider {
+        String getRootId_impl();
+        Bundle getExtras_impl();
+    }
 }

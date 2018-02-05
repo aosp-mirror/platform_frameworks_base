@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "ConditionWizard.h"
+#include <unordered_set>
 
 namespace android {
 namespace os {
@@ -23,12 +24,24 @@ using std::map;
 using std::string;
 using std::vector;
 
-ConditionState ConditionWizard::query(const int index,
-                                      const ConditionKey& parameters) {
+ConditionState ConditionWizard::query(
+    const int index, const ConditionKey& parameters,
+    const FieldMatcher& dimensionFields,
+    std::unordered_set<HashableDimensionKey> *dimensionKeySet) {
+
     vector<ConditionState> cache(mAllConditions.size(), ConditionState::kNotEvaluated);
 
-    mAllConditions[index]->isConditionMet(parameters, mAllConditions, cache);
+    mAllConditions[index]->isConditionMet(
+        parameters, mAllConditions, dimensionFields, cache, *dimensionKeySet);
     return cache[index];
+}
+
+ConditionState ConditionWizard::getMetConditionDimension(
+    const int index, const FieldMatcher& dimensionFields,
+    std::unordered_set<HashableDimensionKey> *dimensionsKeySet) const {
+
+    return mAllConditions[index]->getMetConditionDimension(mAllConditions, dimensionFields,
+                                 *dimensionsKeySet);
 }
 
 }  // namespace statsd

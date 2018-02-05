@@ -22,11 +22,13 @@ import static android.app.StatusBarManager.windowStateToString;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_SEMI_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.StatusBar.DEBUG_WINDOW_STATE;
 import static com.android.systemui.statusbar.phone.StatusBar.dumpBarTransitions;
+import static com.android.systemui.OverviewProxyService.OverviewProxyListener;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.annotation.IdRes;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerNative;
@@ -69,6 +71,7 @@ import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener;
+import android.widget.Button;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -153,6 +156,18 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     private Animator mRotateShowAnimator;
     private Animator mRotateHideAnimator;
 
+    private final OverviewProxyListener mOverviewProxyListener = new OverviewProxyListener() {
+        @Override
+        public void onConnectionChanged(boolean isConnected) {
+            mNavigationBarView.onOverviewProxyConnectionChanged(isConnected);
+            updateScreenPinningGestures();
+        }
+
+        @Override
+        public void onRecentsAnimationStarted() {
+            mNavigationBarView.setRecentsAnimationStarted(true);
+        }
+    };
 
     // ----- Fragment Lifecycle Callbacks -----
 
@@ -239,12 +254,14 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         filter.addAction(Intent.ACTION_SCREEN_ON);
         getContext().registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL, filter, null, null);
         notifyNavigationBarScreenOn();
+        mOverviewProxyService.addCallback(mOverviewProxyListener);
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         mNavigationBarView.getLightTransitionsController().destroy(getContext());
+        mOverviewProxyService.removeCallback(mOverviewProxyListener);
         getContext().unregisterReceiver(mBroadcastReceiver);
     }
 
@@ -514,6 +531,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         if (masked != mDisabledFlags1) {
             mDisabledFlags1 = masked;
             if (mNavigationBarView != null) mNavigationBarView.setDisabledFlags(state1);
+            updateScreenPinningGestures();
         }
     }
 
@@ -528,7 +546,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     private boolean shouldDisableNavbarGestures() {
         return !mStatusBar.isDeviceProvisioned()
                 || (mDisabledFlags1 & StatusBarManager.DISABLE_SEARCH) != 0
-                || mOverviewProxyService.getProxy() != null;
+                || mNavigationBarView.getRecentsButton().getVisibility() != View.VISIBLE;
     }
 
     private void repositionNavigationBar() {
@@ -538,6 +556,24 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
         mWindowManager.updateViewLayout((View) mNavigationBarView.getParent(),
                 ((View) mNavigationBarView.getParent()).getLayoutParams());
+    }
+
+    private void updateScreenPinningGestures() {
+        if (mNavigationBarView == null) {
+            return;
+        }
+
+        // Change the cancel pin gesture to home and back if recents button is invisible
+        boolean recentsVisible = mNavigationBarView.isRecentsButtonVisible();
+        ButtonDispatcher homeButton = mNavigationBarView.getHomeButton();
+        ButtonDispatcher backButton = mNavigationBarView.getBackButton();
+        if (recentsVisible) {
+            homeButton.setOnLongClickListener(this::onHomeLongClick);
+            backButton.setOnLongClickListener(this::onLongPressBackRecents);
+        } else {
+            homeButton.setOnLongClickListener(this::onLongPressBackHome);
+            backButton.setOnLongClickListener(this::onLongPressBackHome);
+        }
     }
 
     private void notifyNavigationBarScreenOn() {
@@ -555,11 +591,9 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
         ButtonDispatcher backButton = mNavigationBarView.getBackButton();
         backButton.setLongClickable(true);
-        backButton.setOnLongClickListener(this::onLongPressBackRecents);
 
         ButtonDispatcher homeButton = mNavigationBarView.getHomeButton();
         homeButton.setOnTouchListener(this::onHomeTouch);
-        homeButton.setOnLongClickListener(this::onHomeLongClick);
 
         ButtonDispatcher accessibilityButton = mNavigationBarView.getAccessibilityButton();
         accessibilityButton.setOnClickListener(this::onAccessibilityClick);
@@ -569,6 +603,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         ButtonDispatcher rotateSuggestionButton = mNavigationBarView.getRotateSuggestionButton();
         rotateSuggestionButton.setOnClickListener(this::onRotateSuggestionClick);
         rotateSuggestionButton.setOnHoverListener(this::onRotateSuggestionHover);
+        updateScreenPinningGestures();
     }
 
     private boolean onHomeTouch(View v, MotionEvent event) {
@@ -649,20 +684,29 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         mCommandQueue.toggleRecentApps();
     }
 
+    private boolean onLongPressBackHome(View v) {
+        return onLongPressNavigationButtons(v, R.id.back, R.id.home);
+    }
+
+    private boolean onLongPressBackRecents(View v) {
+        return onLongPressNavigationButtons(v, R.id.back, R.id.recent_apps);
+    }
+
     /**
-     * This handles long-press of both back and recents.  They are
-     * handled together to capture them both being long-pressed
+     * This handles long-press of both back and recents/home. Back is the common button with
+     * combination of recents if it is visible or home if recents is invisible.
+     * They are handled together to capture them both being long-pressed
      * at the same time to exit screen pinning (lock task).
      *
-     * When accessibility mode is on, only a long-press from recents
+     * When accessibility mode is on, only a long-press from recents/home
      * is required to exit.
      *
      * In all other circumstances we try to pass through long-press events
      * for Back, so that apps can still use it.  Which can be from two things.
      * 1) Not currently in screen pinning (lock task).
-     * 2) Back is long-pressed without recents.
+     * 2) Back is long-pressed without recents/home.
      */
-    private boolean onLongPressBackRecents(View v) {
+    private boolean onLongPressNavigationButtons(View v, @IdRes int btnId1, @IdRes int btnId2) {
         try {
             boolean sendBackLongPress = false;
             IActivityManager activityManager = ActivityManagerNative.getDefault();
@@ -670,6 +714,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
             boolean inLockTaskMode = activityManager.isInLockTaskMode();
             if (inLockTaskMode && !touchExplorationEnabled) {
                 long time = System.currentTimeMillis();
+
                 // If we recently long-pressed the other button then they were
                 // long-pressed 'together'
                 if ((time - mLastLockToAppLongPress) < LOCK_TO_APP_GESTURE_TOLERENCE) {
@@ -677,26 +722,32 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
                     // When exiting refresh disabled flags.
                     mNavigationBarView.setDisabledFlags(mDisabledFlags1, true);
                     return true;
-                } else if ((v.getId() == R.id.back)
-                        && !mNavigationBarView.getRecentsButton().getCurrentView().isPressed()) {
-                    // If we aren't pressing recents right now then they presses
-                    // won't be together, so send the standard long-press action.
-                    sendBackLongPress = true;
+                } else if (v.getId() == btnId1) {
+                    ButtonDispatcher button = btnId2 == R.id.recent_apps
+                            ? mNavigationBarView.getRecentsButton()
+                            : mNavigationBarView.getHomeButton();
+                    if (!button.getCurrentView().isPressed()) {
+                        // If we aren't pressing recents/home right now then they presses
+                        // won't be together, so send the standard long-press action.
+                        sendBackLongPress = true;
+                    }
                 }
                 mLastLockToAppLongPress = time;
             } else {
                 // If this is back still need to handle sending the long-press event.
-                if (v.getId() == R.id.back) {
+                if (v.getId() == btnId1) {
                     sendBackLongPress = true;
                 } else if (touchExplorationEnabled && inLockTaskMode) {
-                    // When in accessibility mode a long press that is recents (not back)
+                    // When in accessibility mode a long press that is recents/home (not back)
                     // should stop lock task.
                     activityManager.stopSystemLockTaskMode();
                     // When exiting refresh disabled flags.
                     mNavigationBarView.setDisabledFlags(mDisabledFlags1, true);
                     return true;
-                } else if (v.getId() == R.id.recent_apps) {
-                    return onLongPressRecents();
+                } else if (v.getId() == btnId2) {
+                    return btnId2 == R.id.recent_apps
+                            ? onLongPressRecents()
+                            : onHomeLongClick(mNavigationBarView.getHomeButton().getCurrentView());
                 }
             }
             if (sendBackLongPress) {

@@ -363,6 +363,23 @@
     <!-- Regex of wired ethernet ifaces -->
     <string translatable="false" name="config_ethernet_iface_regex">eth\\d</string>
 
+
+
+    <!-- Configuration of Ethernet interfaces in the following format:
+         <interface name|mac address>;[Network Capabilities];[IP config]
+         Where
+               [Network Capabilities] Optional. A comma seprated list of network capabilities.
+                   Values must be from NetworkCapabilities#NET_CAPABILITIES_* constants.
+               [IP config] Optional. If empty or not specified - DHCP will be used, otherwise
+                    static IP address with the mask.
+         -->
+    <string-array translatable="false" name="config_ethernet_interfaces">
+        <!--
+        <item>eth1;12,13,14,15;192.168.0.10/24</item>
+        <item>eth2;;192.168.0.11/24</item>
+        -->
+    </string-array>
+
     <!-- If the mobile hotspot feature requires provisioning, a package name and class name
         can be provided to launch a supported application that provisions the devices.
 
@@ -431,12 +448,6 @@
 
     <!-- Activity name to enable wifi tethering after provisioning app succeeds -->
     <string translatable="false" name="config_wifi_tether_enable">com.android.settings/.wifi.tether.TetherService</string>
-
-    <!-- Controls the WiFi wakeup feature.
-          0 = Not available.
-          1 = Available.
-     -->
-    <integer translatable="false" name="config_wifi_wakeup_available">1</integer>
 
     <!-- Array of ConnectivityManager.TYPE_xxxx values allowable for tethering.
 
@@ -1132,7 +1143,7 @@
     <bool name="config_hotswapCapable">false</bool>
 
     <!-- Component name of the ICC hotswap prompt for restart dialog -->
-    <string name="config_iccHotswapPromptForRestartDialogComponent" translateable="false">@null</string>
+    <string name="config_iccHotswapPromptForRestartDialogComponent" translatable="false">@null</string>
 
     <!-- Enable puk unlockscreen by default.
          If unlock screen is disabled, the puk should be unlocked through Emergency Dialer -->
@@ -1431,7 +1442,7 @@
          permission.
          [This is only used if config_enableUpdateableTimeZoneRules and
          config_timeZoneRulesUpdateTrackingEnabled are true.] -->
-    <string name="config_timeZoneRulesUpdaterPackage" translateable="false">com.android.timezone.updater</string>
+    <string name="config_timeZoneRulesUpdaterPackage" translatable="false">com.android.timezone.updater</string>
 
     <!-- The package of the time zone rules data application. Expected to be configured
          by OEMs to reference their own priv-app APK package.
@@ -1440,7 +1451,7 @@
          data app packages.
          [This is only used if config_enableUpdateableTimeZoneRules and
          config_timeZoneRulesUpdateTrackingEnabled are true.] -->
-    <string name="config_timeZoneRulesDataPackage" translateable="false"></string>
+    <string name="config_timeZoneRulesDataPackage" translatable="false"></string>
 
     <!-- The allowed time in milliseconds between an update check intent being broadcast and the
          response being considered overdue. Reliability triggers will not fire in this time.
@@ -2573,6 +2584,14 @@
     <!-- Flag specifying whether or not IMS will use the dynamic ImsResolver -->
     <bool name="config_dynamic_bind_ims">false</bool>
 
+    <!-- Cellular data service package name to bind to by default. If none is specified in an overlay, an
+         empty string is passed in -->
+    <string name="config_wwan_data_service_package" translatable="false">com.android.phone</string>
+
+    <!-- IWLAN data service package name to bind to by default. If none is specified in an overlay, an
+         empty string is passed in -->
+    <string name="config_wlan_data_service_package" translatable="false"></string>
+
     <bool name="config_networkSamplingWakesDevice">true</bool>
 
     <!-- Home (non-roaming) values for CDMA roaming indicator.
@@ -3258,7 +3277,7 @@
     <string translatable="false" name="config_deviceSpecificAudioService"></string>
 
     <!-- Component name of media projection permission dialog -->
-    <string name="config_mediaProjectionPermissionDialogComponent" translateable="false">com.android.systemui/com.android.systemui.media.MediaProjectionPermissionActivity</string>
+    <string name="config_mediaProjectionPermissionDialogComponent" translatable="false">com.android.systemui/com.android.systemui.media.MediaProjectionPermissionActivity</string>
 
     <!-- Corner radius of system dialogs -->
     <dimen name="config_dialogCornerRadius">2dp</dimen>
@@ -3277,4 +3296,11 @@
     <bool name="config_supportBluetoothPersistedState">true</bool>
 
     <bool name="config_keepRestrictedProfilesInBackground">true</bool>
+
+    <!-- Cellular network service package name to bind to by default. -->
+    <string name="config_wwan_network_service_package" translatable="false">com.android.phone</string>
+
+    <!-- IWLAN network service package name to bind to by default. If none is specified in an overlay, an
+         empty string is passed in -->
+    <string name="config_wlan_network_service_package" translatable="false"></string>
 </resources>

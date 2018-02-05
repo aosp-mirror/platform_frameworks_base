@@ -2328,7 +2328,9 @@ public class SettingsProvider extends ContentProvider {
                     // Get all uids for the user's packages.
                     final List<PackageInfo> packages;
                     try {
-                        packages = mPackageManager.getInstalledPackages(0, user.id).getList();
+                        packages = mPackageManager.getInstalledPackages(
+                            PackageManager.MATCH_UNINSTALLED_PACKAGES,
+                            user.id).getList();
                     } catch (RemoteException e) {
                         throw new IllegalStateException("Package manager not available");
                     }
@@ -3015,7 +3017,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 152;
+            private static final int SETTINGS_VERSION = 153;
 
             private final int mUserId;
 
@@ -3401,7 +3403,9 @@ public class SettingsProvider extends ContentProvider {
                         // Fill each uid with the legacy ssaid to be backwards compatible.
                         final List<PackageInfo> packages;
                         try {
-                            packages = mPackageManager.getInstalledPackages(0, userId).getList();
+                            packages = mPackageManager.getInstalledPackages(
+                                PackageManager.MATCH_UNINSTALLED_PACKAGES,
+                                userId).getList();
                         } catch (RemoteException e) {
                             throw new IllegalStateException("Package manager not available");
                         }
@@ -3416,6 +3420,9 @@ public class SettingsProvider extends ContentProvider {
                                 // Android Id doesn't exist for this package so create it.
                                 ssaidSettings.insertSettingLocked(uid, legacySsaid, null, true,
                                         info.packageName);
+                                if (DEBUG) {
+                                    Slog.d(LOG_TAG, "Keep the legacy ssaid for uid=" + uid);
+                                }
                             }
                         }
                     }
@@ -3540,21 +3547,9 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 146) {
-                    // Version 147: Set the default value for WIFI_WAKEUP_AVAILABLE.
-                    if (userId == UserHandle.USER_SYSTEM) {
-                        final SettingsState globalSettings = getGlobalSettingsLocked();
-                        final Setting currentSetting = globalSettings.getSettingLocked(
-                                Settings.Global.WIFI_WAKEUP_AVAILABLE);
-                        if (currentSetting.getValue() == null) {
-                            final int defaultValue = getContext().getResources().getInteger(
-                                    com.android.internal.R.integer.config_wifi_wakeup_available);
-                            globalSettings.insertSettingLocked(
-                                    Settings.Global.WIFI_WAKEUP_AVAILABLE,
-                                    String.valueOf(defaultValue),
-                                    null, true, SettingsState.SYSTEM_PACKAGE_NAME);
-                        }
-                    }
-
+                    // Version 147: Removed. (This version previously allowed showing the
+                    // "wifi_wakeup_available" setting).
+                    // The setting that was added here is deleted in 153.
                     currentVersion = 147;
                 }
 
@@ -3621,16 +3616,15 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 151) {
-                    // Version 152: Reset wifi wake available for upgrading users
-                    final SettingsState globalSettings = getGlobalSettingsLocked();
-                    final int defaultValue = getContext().getResources().getInteger(
-                            com.android.internal.R.integer.config_wifi_wakeup_available);
-                    globalSettings.insertSettingLocked(
-                            Settings.Global.WIFI_WAKEUP_AVAILABLE,
-                            String.valueOf(defaultValue),
-                            null, true, SettingsState.SYSTEM_PACKAGE_NAME);
-
+                    // Version 152: Removed. (This version made the setting for wifi_wakeup enabled
+                    // by default but it is now no longer configurable).
+                    // The setting updated here is deleted in 153.
                     currentVersion = 152;
+                }
+
+                if (currentVersion == 152) {
+                    getGlobalSettingsLocked().deleteSettingLocked("wifi_wakeup_available");
+                    currentVersion = 153;
                 }
 
                 // vXXX: Add new settings above this point.

@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
+import android.media.AudioPresentation;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.media.MediaHTTPService;
@@ -40,6 +41,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -393,6 +395,17 @@ final public class MediaExtractor {
             }
         }
         return null;
+    }
+
+    /**
+     * Get the list of available audio presentations for the track.
+     * @param trackIndex index of the track.
+     * @return a list of available audio presentations for a given valid audio track index.
+     * The list will be empty if the source does not contain any audio presentations.
+     */
+    @NonNull
+    public List<AudioPresentation> getAudioPresentations(int trackIndex) {
+        return new ArrayList<AudioPresentation>();
     }
 
     /**

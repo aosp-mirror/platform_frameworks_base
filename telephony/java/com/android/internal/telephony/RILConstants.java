@@ -220,11 +220,6 @@ public interface RILConstants {
     String SETUP_DATA_PROTOCOL_IPV6   = "IPV6";
     String SETUP_DATA_PROTOCOL_IPV4V6 = "IPV4V6";
 
-    /* Deactivate data call reasons */
-    int DEACTIVATE_REASON_NONE = 0;
-    int DEACTIVATE_REASON_RADIO_OFF = 1;
-    int DEACTIVATE_REASON_PDP_RESET = 2;
-
     /* NV config radio reset types. */
     int NV_CONFIG_RELOAD_RESET = 1;
     int NV_CONFIG_ERASE_RESET = 2;

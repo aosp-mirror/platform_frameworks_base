@@ -15,6 +15,8 @@
  */
 #include "MetricProducer.h"
 
+#include "dimension.h"
+
 namespace android {
 namespace os {
 namespace statsd {
@@ -30,29 +32,51 @@ void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const Lo
 
     bool condition;
     ConditionKey conditionKey;
+
+    std::unordered_set<HashableDimensionKey> dimensionKeysInCondition;
     if (mConditionSliced) {
         for (const auto& link : mConditionLinks) {
             getDimensionKeysForCondition(event, link, &conditionKey[link.condition()]);
         }
-        if (mWizard->query(mConditionTrackerIndex, conditionKey) != ConditionState::kTrue) {
-            condition = false;
-        } else {
-            condition = true;
-        }
+        auto conditionState =
+            mWizard->query(mConditionTrackerIndex, conditionKey, mDimensionsInCondition,
+                           &dimensionKeysInCondition);
+        condition = (conditionState == ConditionState::kTrue);
     } else {
         condition = mCondition;
     }
 
-    if (mDimensions.has_field() && mDimensions.child_size() > 0) {
-        vector<DimensionsValue> dimensionValues;
-        getDimensionKeys(event, mDimensions, &dimensionValues);
-        for (const DimensionsValue& dimensionValue : dimensionValues) {
+    vector<DimensionsValue> dimensionInWhatValues;
+    if (mDimensionsInWhat.has_field() && mDimensionsInWhat.child_size() > 0) {
+        getDimensionKeys(event, mDimensionsInWhat, &dimensionInWhatValues);
+    }
+
+    if (dimensionInWhatValues.empty() && dimensionKeysInCondition.empty()) {
+        onMatchedLogEventInternalLocked(
+            matcherIndex, DEFAULT_METRIC_DIMENSION_KEY, conditionKey, condition, event);
+    } else if (dimensionKeysInCondition.empty()) {
+        for (const DimensionsValue& whatValue : dimensionInWhatValues) {
             onMatchedLogEventInternalLocked(
-                matcherIndex, HashableDimensionKey(dimensionValue), conditionKey, condition, event);
+                matcherIndex,
+                MetricDimensionKey(HashableDimensionKey(whatValue), DEFAULT_DIMENSION_KEY),
+                conditionKey, condition, event);
+        }
+    } else if (dimensionInWhatValues.empty()) {
+        for (const auto& conditionDimensionKey : dimensionKeysInCondition) {
+            onMatchedLogEventInternalLocked(
+                matcherIndex,
+                MetricDimensionKey(DEFAULT_DIMENSION_KEY, conditionDimensionKey),
+                conditionKey, condition, event);
         }
     } else {
-        onMatchedLogEventInternalLocked(
-            matcherIndex, DEFAULT_DIMENSION_KEY, conditionKey, condition, event);
+        for (const DimensionsValue& whatValue : dimensionInWhatValues) {
+            for (const auto& conditionDimensionKey : dimensionKeysInCondition) {
+                onMatchedLogEventInternalLocked(
+                    matcherIndex,
+                    MetricDimensionKey(HashableDimensionKey(whatValue), conditionDimensionKey),
+                    conditionKey, condition, event);
+            }
+        }
     }
 }
 

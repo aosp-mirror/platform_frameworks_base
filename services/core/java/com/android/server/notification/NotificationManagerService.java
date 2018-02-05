@@ -2891,6 +2891,7 @@ public class NotificationManagerService extends SystemService {
         // Backup/restore interface
         @Override
         public byte[] getBackupPayload(int user) {
+            checkCallerIsSystem();
             if (DBG) Slog.d(TAG, "getBackupPayload u=" + user);
             //TODO: http://b/22388012
             if (user != UserHandle.USER_SYSTEM) {
@@ -2911,6 +2912,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public void applyRestore(byte[] payload, int user) {
+            checkCallerIsSystem();
             if (DBG) Slog.d(TAG, "applyRestore u=" + user + " payload="
                     + (payload != null ? new String(payload, StandardCharsets.UTF_8) : null));
             if (payload == null) {
@@ -5685,6 +5687,12 @@ public class NotificationManagerService extends SystemService {
         @GuardedBy("mNotificationLock")
         protected void onServiceRemovedLocked(ManagedServiceInfo removed) {
             mListeners.unregisterService(removed.service, removed.userid);
+        }
+
+        @Override
+        public void onUserUnlocked(int user) {
+            if (DEBUG) Slog.d(TAG, "onUserUnlocked u=" + user);
+            rebindServices(true);
         }
 
         public void onNotificationEnqueued(final NotificationRecord r) {

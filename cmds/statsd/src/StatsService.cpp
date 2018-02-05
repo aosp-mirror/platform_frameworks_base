@@ -34,6 +34,7 @@
 #include <private/android_filesystem_config.h>
 #include <utils/Looper.h>
 #include <utils/String16.h>
+#include <statslog.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/system_properties.h>
@@ -235,6 +236,10 @@ status_t StatsService::command(FILE* in, FILE* out, FILE* err, Vector<String8>& 
         if (!args[0].compare(String8("write-to-disk"))) {
             return cmd_write_data_to_disk(out);
         }
+
+        if (!args[0].compare(String8("log-app-hook"))) {
+            return cmd_log_app_hook(out, args);
+        }
     }
 
     print_cmd_help(out);
@@ -270,6 +275,15 @@ void StatsService::print_cmd_help(FILE* out) {
     fprintf(out, "usage: adb shell cmd stats write-to-disk \n");
     fprintf(out, "\n");
     fprintf(out, "  Flushes all data on memory to disk.\n");
+    fprintf(out, "\n");
+    fprintf(out, "\n");
+    fprintf(out, "usage: adb shell cmd stats log-app-hook [UID] LABEL STATE\n");
+    fprintf(out, "  Writes an AppHook event to the statslog buffer.\n");
+    fprintf(out, "  UID           The uid to use. It is only possible to pass a UID\n");
+    fprintf(out, "                parameter on eng builds. If UID is omitted the calling\n");
+    fprintf(out, "                uid is used.\n");
+    fprintf(out, "  LABEL         Integer in [0, 15], as per atoms.proto.\n");
+    fprintf(out, "  STATE         Integer in [0, 3], as per atoms.proto.\n");
     fprintf(out, "\n");
     fprintf(out, "\n");
     fprintf(out, "usage: adb shell cmd stats config remove [UID] [NAME]\n");
@@ -523,6 +537,42 @@ status_t StatsService::cmd_write_data_to_disk(FILE* out) {
     return NO_ERROR;
 }
 
+status_t StatsService::cmd_log_app_hook(FILE* out, const Vector<String8>& args) {
+    bool good = false;
+    int32_t uid;
+    int32_t label;
+    int32_t state;
+    const int argCount = args.size();
+    if (argCount == 3) {
+        // Automatically pick the UID
+        uid = IPCThreadState::self()->getCallingUid();
+        label = atoi(args[1].c_str());
+        state = atoi(args[2].c_str());
+        good = true;
+    } else if (argCount == 4) {
+        uid = atoi(args[1].c_str());
+        // If it's a userdebug or eng build, then the shell user can impersonate other uids.
+        // Otherwise, the uid must match the actual caller's uid.
+        if (mEngBuild || (uid >= 0 && (uid_t)uid == IPCThreadState::self()->getCallingUid())) {
+            label = atoi(args[2].c_str());
+            state = atoi(args[3].c_str());
+            good = true;
+        } else {
+            fprintf(out,
+                    "Selecting a UID for writing AppHook can only be dumped for other UIDs on eng"
+                            " or userdebug builds.\n");
+        }
+    }
+    if (good) {
+        fprintf(out, "Logging AppHook(%d, %d, %d) to statslog.\n", uid, label, state);
+        android::util::stats_write(android::util::APP_HOOK, uid, label, state);
+    } else {
+        print_cmd_help(out);
+        return UNKNOWN_ERROR;
+    }
+    return NO_ERROR;
+}
+
 status_t StatsService::cmd_print_pulled_metrics(FILE* out, const Vector<String8>& args) {
     int s = atoi(args[1].c_str());
     vector<shared_ptr<LogEvent> > stats;
@@ -548,6 +598,12 @@ status_t StatsService::cmd_dump_memory_info(FILE* out) {
     std::string s = dumpMemInfo(100);
     fprintf(out, "Memory Info\n");
     fprintf(out, "%s", s.c_str());
+    return NO_ERROR;
+}
+
+status_t StatsService::cmd_clear_puller_cache(FILE* out) {
+    mStatsPullerManager.ClearPullerCache();
+    fprintf(out, "Puller cached data removed!\n");
     return NO_ERROR;
 }
 

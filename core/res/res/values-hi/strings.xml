@@ -264,10 +264,8 @@
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"सुरक्षित मोड"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android सिस्‍टम"</string>
-    <!-- no translation found for user_owner_label (8836124313744349203) -->
-    <skip />
-    <!-- no translation found for managed_profile_label (8947929265267690522) -->
-    <skip />
+    <string name="user_owner_label" msgid="8836124313744349203">"प्रोफ़ाइल बदलकर निजी प्रोफ़ाइल पर जाएं"</string>
+    <string name="managed_profile_label" msgid="8947929265267690522">"प्रोफ़ाइल बदलकर कार्य प्रोफ़ाइल पर जाएं"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"संपर्क"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"अपने संपर्कों को ऐक्सेस करने की"</string>
     <string name="permgrouprequest_contacts" msgid="1601591667800538208">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को अपने संपर्क तक पहुंचने दें"</string>
@@ -419,10 +417,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"ऐप्स  को डिवाइस की फ़ोन सुविधाओं तक पहुंचने देता है. यह अनुमति ऐप्स  को फ़ोन नंबर और डिवाइस आईडी, कॉल सक्रिय है या नहीं, और कॉल द्वारा कनेक्ट किया गया दूरस्‍थ नंबर निर्धारित करने देती है."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"सिस्टम के माध्यम से कॉल रूट करें"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"कॉल करने के अनुभव को बेहतर बनाने के लिए ऐप्लिकेशन को सिस्टम के माध्यम से उसके कॉल रूट करने देती है."</string>
-    <!-- no translation found for permlab_acceptHandover (2661534649736022409) -->
-    <skip />
-    <!-- no translation found for permdesc_acceptHandovers (4570660484220539698) -->
-    <skip />
+    <string name="permlab_acceptHandover" msgid="2661534649736022409">"दूसरे ऐप्लिकेशन से शुरू किया गया कॉल जारी रखें"</string>
+    <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"इसके ज़रिए आप, किसी ऐप्लिकेशन में शुरू किया गया कॉल दूसरे ऐप्लिकेशन में जारी रख सकते हैं."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"फ़ोन नंबर पढ़ना"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"ऐप को डिवाइस के फ़ोन नंबर का इस्तेमाल करने देती है."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"टैबलेट को सोने (कम बैटरी मोड) से रोकें"</string>
@@ -497,11 +493,14 @@
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"फ़िंगरप्रिंट को संग्रहित नहीं किया जा सका. कृपया कोई मौजूदा फ़िंगरप्रिंट निकालें."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"फ़िंगरप्रिंट का समय समाप्त हो गया. पुनः प्रयास करें."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"फ़िंगरप्रिंट क्रियान्वयन रोक दिया गया."</string>
-    <!-- no translation found for fingerprint_error_user_canceled (7999639584615291494) -->
-    <skip />
+    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"उपयोगकर्ता ने फिंगरप्रिंट की पुष्टि की कार्रवाई रद्द कर दी है."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"बहुत अधिक प्रयास कर लिए गए हैं. बाद में पुन: प्रयास करें."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"बहुत अधिक कोशिशें. फ़िंगरप्रिंट सेंसर अक्षम है."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"पुन: प्रयास करें."</string>
+    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="5870957565512716938">"उंगली <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -1000,12 +999,9 @@
     <string name="browse" msgid="1245903488306147205">"खोलें"</string>
     <string name="sms" msgid="4560537514610063430">"मैसेज"</string>
     <string name="add_contact" msgid="7867066569670597203">"जोड़ें"</string>
-    <!-- no translation found for view_calendar (979609872939597838) -->
-    <skip />
-    <!-- no translation found for add_calendar_event (1953664627192056206) -->
-    <skip />
-    <!-- no translation found for view_flight (7691640491425680214) -->
-    <skip />
+    <string name="view_calendar" msgid="979609872939597838">"देखें"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"शेड्यूल करें"</string>
+    <string name="view_flight" msgid="7691640491425680214">"मौजूदा स्थिति जानें"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"मेमोरी में जगह नहीं बची है"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"हो सकता है कुछ सिस्टम फ़ंक्शन कार्य न करें"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"सिस्टम के लिए ज़रूरी मेमोरी नहीं है. पक्का करें कि आपके पास 250एमबी की खाली जगह है और फिर से शुरू करें."</string>
@@ -1131,8 +1127,7 @@
       <item quantity="other">खुले वाई-फ़ाई नेटवर्क उपलब्‍ध</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"खुले वाई-फ़ाई नेटवर्क से कनेक्ट करें"</string>
-    <!-- no translation found for wifi_available_carrier_network_title (4527932626916527897) -->
-    <skip />
+    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"मोबाइल और इंटरनेट सेवा देने वाली कंपनी के वाई-फ़ाई नेटवर्क से कनेक्ट करें"</string>
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"खुले वाई-फ़ाई नेटवर्क से कनेक्ट हो रहा है"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"वाई-फ़ाई नेटवर्क से कनेक्‍ट हो गया है"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"वाई-फ़ाई  नेटवर्क से कनेक्‍ट नहीं हो सका"</string>
@@ -1216,13 +1211,23 @@
     <string name="no_permissions" msgid="7283357728219338112">"किसी अनुमति की आवश्‍यकता नहीं है"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"इससे आपको धन देना पड़ सकता है"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ठीक है"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"यह डिवाइस USB से चार्ज हो रहा है"</string>
-    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"अटैच किए गए डिवाइस को USB से पावर मिल रही है"</string>
-    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"फ़ाइल स्‍थानांतरण के लिए USB"</string>
-    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"फ़ोटो स्‍थानांतरण के लिए USB"</string>
-    <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI के लिए USB"</string>
-    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB सहायक सामग्री से कनेक्‍ट कि‍या गया"</string>
+    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
+    <skip />
+    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
+    <skip />
+    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
+    <skip />
+    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
+    <skip />
     <string name="usb_notification_message" msgid="3370903770828407960">"ज़्यादा विकल्पों के लिए टैप करें."</string>
+    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
+    <skip />
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"एनालॉग ऑडियो एक्सेसरी का पता चला"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"अटैच किया गया डिवाइस इस फ़ोन से संगत नहीं है. अधिक जानने के लिए टैप करें."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB डीबग कनेक्ट किया गया"</string>
@@ -1661,9 +1666,6 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"कार्यस्थल का <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"दूसरा कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"तीसरा कार्य <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="6820571533009838261">"इस स्क्रीन को अनपिन करने के लिए, \'वापस जाएं\' और \'खास जानकारी\' के बटन को दबाकर रखें"</string>
-    <string name="lock_to_app_start" msgid="6643342070839862795">"स्‍क्रीन पिन की गई"</string>
-    <string name="lock_to_app_exit" msgid="8598219838213787430">"स्‍क्रीन अनपिन की गई"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"अनपिन करने से पहले पिन के लिए पूछें"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"अनपिन करने से पहले लॉक खोलने के पैटर्न के लिए पूछें"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"अनपिन करने से पहले पासवर्ड के लिए पूछें"</string>
@@ -1757,15 +1759,11 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"सभी भाषाएं"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"सभी क्षेत्र"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"सर्च करें"</string>
-    <!-- no translation found for work_mode_off_title (1118691887588435530) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (5130856710614337649) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="1118691887588435530">"कार्य प्रोफ़ाइल चालू करें?"</string>
+    <string name="work_mode_off_message" msgid="5130856710614337649">"आपके काम से जुड़े ऐप्लिकेशन, सूचनाएं, डेटा और कार्य प्रोफ़ाइल से जुड़ी दूसरी सुविधाएं चालू हो जाएंगी"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"चालू करें"</string>
-    <!-- no translation found for deprecated_target_sdk_message (1449696506742572767) -->
-    <skip />
-    <!-- no translation found for deprecated_target_sdk_app_store (5032340500368495077) -->
-    <skip />
+    <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"यह ऐप्लिकेशन Android के पुराने वर्शन के लिए बनाया गया था, इसलिए हो सकता है कि यह सही से काम न करे. देखें कि अपडेट मौजूद हैं या नहीं, या फिर डेवलपर से संपर्क करें."</string>
+    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"देखें कि अपडेट मौजूद है या नहीं"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"आपके पास नए संदेश हैं"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"देखने के लिए मैसेज (एसएमएस) ऐप खोलें"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"कुछ कार्य क्षमताएं सीमित हो सकती हैं"</string>
@@ -1832,17 +1830,15 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"फ़ोन से कॉल करने की इजाज़त नहीं है"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"पॉपअप विंडो"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"इस शॉर्टकट वाला ऐप चलाने के लिए इसका नया वर्शन डाउनलोड करें"</string>
+    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
+    <skip />
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"शॉर्टकट बहाल नहीं किया जा सका क्योंकि इस ऐप में बैकअप लेने और उसे बहाल करने की सुविधा नहीं है"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"ऐप सिग्नेचर अलग होने के कारण शॉर्टकट बहाल नहीं किया जा सका"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"शॉर्टकट बहाल नहीं किया जा सका"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"शॉर्टकट बंद है"</string>
-    <!-- no translation found for harmful_app_warning_uninstall (4837672735619532931) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_open_anyway (596432803680914321) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_title (8982527462829423432) -->
-    <skip />
+    <string name="harmful_app_warning_uninstall" msgid="4837672735619532931">"अनइंस्‍टॉल करें"</string>
+    <string name="harmful_app_warning_open_anyway" msgid="596432803680914321">"फिर भी खोलें"</string>
+    <string name="harmful_app_warning_title" msgid="8982527462829423432">"नुकसान पहुंचाने वाले ऐप का पता चला"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g>, <xliff:g id="APP_2">%2$s</xliff:g> के हिस्से (स्लाइस) दिखाना चाहता है"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"बदलाव करें"</string>
 </resources>

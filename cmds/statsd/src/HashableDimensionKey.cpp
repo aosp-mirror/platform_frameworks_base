@@ -67,12 +67,16 @@ android::hash_t hashDimensionsValue(const DimensionsValue& value) {
     return hashDimensionsValue(0, value);
 }
 
+android::hash_t hashMetricDimensionKey(int64_t seed, const MetricDimensionKey& dimensionKey) {
+    android::hash_t hash = seed;
+    hash = android::JenkinsHashMix(hash, std::hash<MetricDimensionKey>{}(dimensionKey));
+    return JenkinsHashWhiten(hash);
+}
+
 using std::string;
 
 string HashableDimensionKey::toString() const {
-    string flattened;
-    DimensionsValueToString(getDimensionsValue(), &flattened);
-    return flattened;
+    return DimensionsValueToString(getDimensionsValue());
 }
 
 bool EqualsTo(const DimensionsValue& s1, const DimensionsValue& s2) {
@@ -161,6 +165,22 @@ bool HashableDimensionKey::operator==(const HashableDimensionKey& that) const {
 bool HashableDimensionKey::operator<(const HashableDimensionKey& that) const {
     return LessThan(getDimensionsValue(), that.getDimensionsValue());
 };
+
+string MetricDimensionKey::toString() const {
+    string flattened = mDimensionKeyInWhat.toString();
+    flattened += mDimensionKeyInCondition.toString();
+    return flattened;
+}
+
+bool MetricDimensionKey::operator==(const MetricDimensionKey& that) const {
+    return mDimensionKeyInWhat == that.getDimensionKeyInWhat() &&
+        mDimensionKeyInCondition == that.getDimensionKeyInCondition();
+};
+
+bool MetricDimensionKey::operator<(const MetricDimensionKey& that) const {
+    return toString().compare(that.toString()) < 0;
+};
+
 
 }  // namespace statsd
 }  // namespace os

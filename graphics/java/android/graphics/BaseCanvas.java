@@ -541,10 +541,19 @@ public abstract class BaseCanvas {
         return mAllowHwBitmapsInSwMode;
     }
 
+    /**
+     * @hide
+     */
+    protected void onHwBitmapInSwMode() {
+        if (!mAllowHwBitmapsInSwMode) {
+            throw new IllegalArgumentException(
+                    "Software rendering doesn't support hardware bitmaps");
+        }
+    }
+
     private void throwIfHwBitmapInSwMode(Bitmap bitmap) {
-        if (!mAllowHwBitmapsInSwMode && !isHardwareAccelerated()
-                && bitmap.getConfig() == Bitmap.Config.HARDWARE) {
-            throw new IllegalStateException("Software rendering doesn't support hardware bitmaps");
+        if (!isHardwareAccelerated() && bitmap.getConfig() == Bitmap.Config.HARDWARE) {
+            onHwBitmapInSwMode();
         }
     }
 

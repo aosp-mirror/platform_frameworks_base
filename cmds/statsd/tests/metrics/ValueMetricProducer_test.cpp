@@ -299,26 +299,26 @@ TEST(ValueMetricProducerTest, TestAnomalyDetection) {
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event1);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event2);
     // Value sum == 30 <= 130.
-    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_DIMENSION_KEY), 0U);
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_METRIC_DIMENSION_KEY), 0U);
 
     // One event in bucket #2. No alarm as bucket #0 is trashed out.
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event3);
     // Value sum == 130 <= 130.
-    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_DIMENSION_KEY), 0U);
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_METRIC_DIMENSION_KEY), 0U);
 
     // Three events in bucket #3.
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event4);
     // Anomaly at event 4 since Value sum == 131 > 130!
-    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_DIMENSION_KEY),
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_METRIC_DIMENSION_KEY),
             event4->GetTimestampNs() / NS_PER_SEC + refPeriodSec);
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event5);
     // Event 5 is within 3 sec refractory period. Thus last alarm timestamp is still event4.
-    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_DIMENSION_KEY),
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_METRIC_DIMENSION_KEY),
             event4->GetTimestampNs() / NS_PER_SEC + refPeriodSec);
 
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event6);
     // Anomaly at event 6 since Value sum == 160 > 130 and after refractory period.
-    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_DIMENSION_KEY),
+    EXPECT_EQ(anomalyTracker->getRefractoryPeriodEndsSec(DEFAULT_METRIC_DIMENSION_KEY),
             event6->GetTimestampNs() / NS_PER_SEC + refPeriodSec);
 }
 

@@ -425,6 +425,12 @@ import java.util.List;
  * safely called after {@link #onPause()} and allows and application to safely
  * wait until {@link #onStop()} to save persistent state.</p>
  *
+ * <p class="note">For applications targeting platforms starting with
+ * {@link android.os.Build.VERSION_CODES#P} {@link #onSaveInstanceState(Bundle)}
+ * will always be called after {@link #onStop}, so an application may safely
+ * perform fragment transactions in {@link #onStop} and will be able to save
+ * persistent state later.</p>
+ *
  * <p>For those methods that are not marked as being killable, the activity's
  * process will not be killed by the system starting from the time the method
  * is called and continuing after it returns.  Thus an activity is in the killable
@@ -1577,8 +1583,11 @@ public class Activity extends ContextThemeWrapper
      * call through to the default implementation, otherwise be prepared to save
      * all of the state of each view yourself.
      *
-     * <p>If called, this method will occur before {@link #onStop}.  There are
-     * no guarantees about whether it will occur before or after {@link #onPause}.
+     * <p>If called, this method will occur after {@link #onStop} for applications
+     * targeting platforms starting with {@link android.os.Build.VERSION_CODES#P}.
+     * For applications targeting earlier platform versions this method will occur
+     * before {@link #onStop} and there are no guarantees about whether it will
+     * occur before or after {@link #onPause}.
      *
      * @param outState Bundle in which to place your saved state.
      *
@@ -5823,7 +5832,7 @@ public class Activity extends ContextThemeWrapper
                         ActivityManager.INTENT_SENDER_ACTIVITY_RESULT, packageName,
                         mParent == null ? mToken : mParent.mToken,
                         mEmbeddedID, requestCode, new Intent[] { data }, null, flags, null,
-                        UserHandle.myUserId());
+                        getUserId());
             return target != null ? new PendingIntent(target) : null;
         } catch (RemoteException e) {
             // Empty

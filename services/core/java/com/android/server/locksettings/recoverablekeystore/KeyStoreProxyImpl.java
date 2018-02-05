@@ -16,9 +16,12 @@
 
 package com.android.server.locksettings.recoverablekeystore;
 
+import java.io.IOException;
+import java.security.cert.CertificateException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 
@@ -27,6 +30,7 @@ import java.security.UnrecoverableKeyException;
  */
 public class KeyStoreProxyImpl implements KeyStoreProxy {
 
+    private static final String ANDROID_KEY_STORE_PROVIDER = "AndroidKeyStore";
     private final KeyStore mKeyStore;
 
     /**
@@ -56,5 +60,22 @@ public class KeyStoreProxyImpl implements KeyStoreProxy {
     @Override
     public void deleteEntry(String alias) throws KeyStoreException {
         mKeyStore.deleteEntry(alias);
+    }
+
+    /**
+     * Returns AndroidKeyStore-provided {@link KeyStore}, having already invoked
+     * {@link KeyStore#load(KeyStore.LoadStoreParameter)}.
+     *
+     * @throws KeyStoreException if there was a problem getting or initializing the key store.
+     */
+    public static KeyStore getAndLoadAndroidKeyStore() throws KeyStoreException {
+        KeyStore keyStore = KeyStore.getInstance(ANDROID_KEY_STORE_PROVIDER);
+        try {
+            keyStore.load(/*param=*/ null);
+        } catch (CertificateException | IOException | NoSuchAlgorithmException e) {
+            // Should never happen.
+            throw new KeyStoreException("Unable to load keystore.", e);
+        }
+        return keyStore;
     }
 }

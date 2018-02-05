@@ -19,12 +19,16 @@
 #define LOG_TAG "MediaPlayer2-JNI"
 #include "utils/Log.h"
 
+#include <sys/stat.h>
+
 #include <media/mediaplayer2.h>
 #include <media/AudioResamplerPublic.h>
+#include <media/DataSourceDesc.h>
 #include <media/MediaHTTPService.h>
 #include <media/MediaPlayer2Interface.h>
 #include <media/MediaAnalyticsItem.h>
 #include <media/NdkWrapper.h>
+#include <media/stagefright/Utils.h>
 #include <media/stagefright/foundation/ByteUtils.h>  // for FOURCC definition
 #include <stdio.h>
 #include <assert.h>
@@ -234,7 +238,8 @@ static sp<MediaPlayer2> setMediaPlayer(JNIEnv* env, jobject thiz, const sp<Media
 // event to the client application; otherwise, if exception is not NULL and
 // opStatus is not OK, this method throws the given exception to the client
 // application.
-static void process_media_player_call(JNIEnv *env, jobject thiz, status_t opStatus, const char* exception, const char *message)
+static void process_media_player_call(
+    JNIEnv *env, jobject thiz, status_t opStatus, const char* exception, const char *message)
 {
     if (exception == NULL) {  // Don't throw exception. Instead, send an event.
         if (opStatus != (status_t) OK) {
@@ -268,7 +273,7 @@ android_media_MediaPlayer2_setDataSourceAndHeaders(
         jobjectArray keys, jobjectArray values) {
 
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
-    if (mp == NULL ) {
+    if (mp == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         return;
     }
@@ -282,16 +287,25 @@ android_media_MediaPlayer2_setDataSourceAndHeaders(
     if (tmp == NULL) {  // Out of memory
         return;
     }
-    ALOGV("setDataSource: path %s", tmp);
+    ALOGV("setDataSourceAndHeaders: path %s", tmp);
 
-    String8 pathStr(tmp);
+    if (strncmp(tmp, "content://", 10) == 0) {
+        ALOGE("setDataSourceAndHeaders: content scheme is not supported in native code");
+        jniThrowException(env, "java/io/IOException",
+                          "content scheme is not supported in native code");
+        return;
+    }
+
+    sp<DataSourceDesc> dsd = new DataSourceDesc();
+    dsd->mType = DataSourceDesc::TYPE_URL;
+    dsd->mUrl = tmp;
+
     env->ReleaseStringUTFChars(path, tmp);
     tmp = NULL;
 
     // We build a KeyedVector out of the key and val arrays
-    KeyedVector<String8, String8> headersVector;
     if (!ConvertKeyValueArraysToKeyedVector(
-            env, keys, values, &headersVector)) {
+            env, keys, values, &dsd->mHeaders)) {
         return;
     }
 
@@ -299,20 +313,16 @@ android_media_MediaPlayer2_setDataSourceAndHeaders(
     if (httpServiceObj != NULL) {
         httpService = new JMedia2HTTPService(env, httpServiceObj);
     }
-
-    status_t opStatus =
-        mp->setDataSource(
-                httpService,
-                pathStr,
-                headersVector.size() > 0? &headersVector : NULL);
+    dsd->mHttpService = httpService;
 
     process_media_player_call(
-            env, thiz, opStatus, "java/io/IOException",
-            "setDataSource failed." );
+            env, thiz, mp->setDataSource(dsd), "java/io/IOException",
+            "setDataSourceAndHeaders failed." );
 }
 
 static void
-android_media_MediaPlayer2_setDataSourceFD(JNIEnv *env, jobject thiz, jobject fileDescriptor, jlong offset, jlong length)
+android_media_MediaPlayer2_setDataSourceFD(
+    JNIEnv *env, jobject thiz, jobject fileDescriptor, jlong offset, jlong length)
 {
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
@@ -325,12 +335,46 @@ android_media_MediaPlayer2_setDataSourceFD(JNIEnv *env, jobject thiz, jobject fi
         return;
     }
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
-    ALOGV("setDataSourceFD: fd %d", fd);
-    process_media_player_call( env, thiz, mp->setDataSource(fd, offset, length), "java/io/IOException", "setDataSourceFD failed." );
+    ALOGV("setDataSourceFD: fd=%d (%s), offset=%lld, length=%lld",
+          fd, nameForFd(fd).c_str(), (long long)offset, (long long)length);
+
+    struct stat sb;
+    int ret = fstat(fd, &sb);
+    if (ret != 0) {
+        ALOGE("setDataSourceFD: fstat(%d) failed: %d, %s", fd, ret, strerror(errno));
+        jniThrowException(env, "java/io/IOException", "setDataSourceFD failed fstat");
+        return;
+    }
+
+    ALOGV("st_dev  = %llu", static_cast<unsigned long long>(sb.st_dev));
+    ALOGV("st_mode = %u", sb.st_mode);
+    ALOGV("st_uid  = %lu", static_cast<unsigned long>(sb.st_uid));
+    ALOGV("st_gid  = %lu", static_cast<unsigned long>(sb.st_gid));
+    ALOGV("st_size = %llu", static_cast<unsigned long long>(sb.st_size));
+
+    if (offset >= sb.st_size) {
+        ALOGE("setDataSourceFD: offset is out of range");
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "setDataSourceFD failed, offset is out of range.");
+        return;
+    }
+    if (offset + length > sb.st_size) {
+        length = sb.st_size - offset;
+        ALOGV("setDataSourceFD: adjusted length = %lld", (long long)length);
+    }
+
+    sp<DataSourceDesc> dsd = new DataSourceDesc();
+    dsd->mType = DataSourceDesc::TYPE_FD;
+    dsd->mFD = fd;
+    dsd->mFDOffset = offset;
+    dsd->mFDLength = length;
+    process_media_player_call(env, thiz, mp->setDataSource(dsd),
+                              "java/io/IOException", "setDataSourceFD failed." );
 }
 
 static void
-android_media_MediaPlayer2_setDataSourceCallback(JNIEnv *env, jobject thiz, jobject dataSource)
+android_media_MediaPlayer2_setDataSourceCallback(
+    JNIEnv *env, jobject thiz, jobject dataSource)
 {
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
@@ -343,7 +387,11 @@ android_media_MediaPlayer2_setDataSourceCallback(JNIEnv *env, jobject thiz, jobj
         return;
     }
     sp<DataSource> callbackDataSource = new JMedia2DataSource(env, dataSource);
-    process_media_player_call(env, thiz, mp->setDataSource(callbackDataSource), "java/lang/RuntimeException", "setDataSourceCallback failed." );
+    sp<DataSourceDesc> dsd = new DataSourceDesc();
+    dsd->mType = DataSourceDesc::TYPE_CALLBACK;
+    dsd->mCallbackSource = callbackDataSource;
+    process_media_player_call(env, thiz, mp->setDataSource(dsd),
+                              "java/lang/RuntimeException", "setDataSourceCallback failed." );
 }
 
 static sp<ANativeWindowWrapper>
@@ -1099,45 +1147,6 @@ static void android_media_MediaPlayer2_attachAuxEffect(JNIEnv *env,  jobject thi
     process_media_player_call( env, thiz, mp->attachAuxEffect(effectId), NULL, NULL );
 }
 
-static jint
-android_media_MediaPlayer2_setRetransmitEndpoint(JNIEnv *env, jobject thiz,
-                                                jstring addrString, jint port) {
-    sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
-    if (mp == NULL ) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return INVALID_OPERATION;
-    }
-
-    const char *cAddrString = NULL;
-
-    if (NULL != addrString) {
-        cAddrString = env->GetStringUTFChars(addrString, NULL);
-        if (cAddrString == NULL) {  // Out of memory
-            return NO_MEMORY;
-        }
-    }
-    ALOGV("setRetransmitEndpoint: %s:%d",
-            cAddrString ? cAddrString : "(null)", port);
-
-    status_t ret;
-    if (cAddrString && (port > 0xFFFF)) {
-        ret = BAD_VALUE;
-    } else {
-        ret = mp->setRetransmitEndpoint(cAddrString,
-                static_cast<uint16_t>(port));
-    }
-
-    if (NULL != addrString) {
-        env->ReleaseStringUTFChars(addrString, cAddrString);
-    }
-
-    if (ret == INVALID_OPERATION ) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-    }
-
-    return (jint) ret;
-}
-
 static void
 android_media_MediaPlayer2_setNextMediaPlayer(JNIEnv *env, jobject thiz, jobject java_player)
 {
@@ -1418,7 +1427,6 @@ static const JNINativeMethod gMethods[] = {
     {"setAudioSessionId",   "(I)V",                             (void *)android_media_MediaPlayer2_set_audio_session_id},
     {"_setAuxEffectSendLevel", "(F)V",                          (void *)android_media_MediaPlayer2_setAuxEffectSendLevel},
     {"attachAuxEffect",     "(I)V",                             (void *)android_media_MediaPlayer2_attachAuxEffect},
-    {"native_setRetransmitEndpoint", "(Ljava/lang/String;I)I",  (void *)android_media_MediaPlayer2_setRetransmitEndpoint},
     {"setNextMediaPlayer",  "(Landroid/media/MediaPlayer2;)V",  (void *)android_media_MediaPlayer2_setNextMediaPlayer},
     // Modular DRM
     { "_prepareDrm", "([B[B)V",                                 (void *)android_media_MediaPlayer2_prepareDrm },

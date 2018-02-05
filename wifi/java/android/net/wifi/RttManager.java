@@ -7,21 +7,20 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
-import android.os.Binder;
-import android.os.Bundle;
-import android.os.Handler;
+import android.content.pm.PackageManager;
+import android.net.wifi.rtt.RangingRequest;
+import android.net.wifi.rtt.RangingResult;
+import android.net.wifi.rtt.RangingResultCallback;
+import android.net.wifi.rtt.WifiRttManager;
 import android.os.Looper;
-import android.os.Message;
-import android.os.Messenger;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.RemoteException;
 import android.util.Log;
-import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
+
+import java.util.List;
 
 /** @hide */
 @SystemApi
@@ -175,7 +174,8 @@ public class RttManager {
     @Deprecated
     @SuppressLint("Doclava125")
     public Capabilities getCapabilities() {
-        return new Capabilities();
+        throw new UnsupportedOperationException(
+                "getCapabilities is not supported in the adaptation layer");
     }
 
     /**
@@ -316,16 +316,7 @@ public class RttManager {
 
     @RequiresPermission(Manifest.permission.LOCATION_HARDWARE)
     public RttCapabilities getRttCapabilities() {
-        synchronized (mCapabilitiesLock) {
-            if (mRttCapabilities == null) {
-                try {
-                    mRttCapabilities = mService.getRttCapabilities();
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
-            }
-            return mRttCapabilities;
-        }
+        return mRttCapabilities;
     }
 
     /** specifies parameters for RTT request */
@@ -972,69 +963,6 @@ public class RttManager {
         }
     }
 
-    private boolean rttParamSanity(RttParams params, int index) {
-        if (mRttCapabilities == null) {
-            if(getRttCapabilities() == null) {
-                Log.e(TAG, "Can not get RTT capabilities");
-                throw new IllegalStateException("RTT chip is not working");
-            }
-        }
-
-        if (params.deviceType != RTT_PEER_TYPE_AP) {
-            return false;
-        } else if (params.requestType != RTT_TYPE_ONE_SIDED && params.requestType !=
-                RTT_TYPE_TWO_SIDED) {
-            Log.e(TAG, "Request " + index + ": Illegal Request Type: " + params.requestType);
-            return false;
-        } else if (params.requestType == RTT_TYPE_ONE_SIDED &&
-                !mRttCapabilities.oneSidedRttSupported) {
-            Log.e(TAG, "Request " + index + ": One side RTT is not supported");
-            return false;
-        } else if (params.requestType == RTT_TYPE_TWO_SIDED &&
-                !mRttCapabilities.twoSided11McRttSupported) {
-            Log.e(TAG, "Request " + index + ": two side RTT is not supported");
-            return false;
-        }  else if(params.bssid == null || params.bssid.isEmpty()) {
-            Log.e(TAG,"No BSSID in params");
-            return false;
-        } else if ( params.numberBurst != 0 ) {
-            Log.e(TAG, "Request " + index + ": Illegal number of burst: " + params.numberBurst);
-            return false;
-        } else if (params.numSamplesPerBurst <= 0 || params.numSamplesPerBurst > 31) {
-            Log.e(TAG, "Request " + index + ": Illegal sample number per burst: " +
-                    params.numSamplesPerBurst);
-            return false;
-        } else if (params.numRetriesPerMeasurementFrame < 0 ||
-                params.numRetriesPerMeasurementFrame > 3) {
-            Log.e(TAG, "Request " + index + ": Illegal measurement frame retry number:" +
-                    params.numRetriesPerMeasurementFrame);
-            return false;
-        } else if(params.numRetriesPerFTMR < 0 ||
-                params.numRetriesPerFTMR > 3) {
-            Log.e(TAG, "Request " + index + ": Illegal FTMR frame retry number:" +
-                    params.numRetriesPerFTMR);
-            return false;
-        } else if (params.LCIRequest && !mRttCapabilities.lciSupported) {
-            Log.e(TAG, "Request " + index + ": LCI is not supported");
-            return false;
-        } else if (params.LCRRequest && !mRttCapabilities.lcrSupported) {
-            Log.e(TAG, "Request " + index + ": LCR is not supported");
-            return false;
-        } else if (params.burstTimeout < 1 ||
-                (params.burstTimeout > 11 && params.burstTimeout != 15)){
-            Log.e(TAG, "Request " + index + ": Illegal burst timeout: " + params.burstTimeout);
-            return false;
-        } else if ((params.preamble & mRttCapabilities.preambleSupported) == 0) {
-            Log.e(TAG, "Request " + index + ": Do not support this preamble: " + params.preamble);
-            return false;
-        } else if ((params.bandwidth & mRttCapabilities.bwSupported) == 0) {
-            Log.e(TAG, "Request " + index + ": Do not support this bandwidth: " + params.bandwidth);
-            return false;
-        }
-
-        return true;
-    }
-
     /**
      * Request to start an RTT ranging
      *
@@ -1045,24 +973,72 @@ public class RttManager {
      */
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void startRanging(RttParams[] params, RttListener listener) {
-        int index  = 0;
-        for(RttParams rttParam : params) {
-            if (!rttParamSanity(rttParam, index)) {
-                throw new IllegalArgumentException("RTT Request Parameter Illegal");
-            }
-            index++;
-        }
-        validateChannel();
-        ParcelableRttParams parcelableParams = new ParcelableRttParams(params);
         Log.i(TAG, "Send RTT request to RTT Service");
-        mAsyncChannel.sendMessage(CMD_OP_START_RANGING,
-                0, putListener(listener), parcelableParams);
+
+        if (!mNewService.isAvailable()) {
+            listener.onFailure(REASON_NOT_AVAILABLE, "");
+            return;
+        }
+
+        RangingRequest.Builder builder = new RangingRequest.Builder();
+        for (RttParams rttParams : params) {
+            if (rttParams.deviceType != RTT_PEER_TYPE_AP) {
+                listener.onFailure(REASON_INVALID_REQUEST, "Only AP peers are supported");
+                return;
+            }
+
+            ScanResult reconstructed = new ScanResult();
+            reconstructed.BSSID = rttParams.bssid;
+            if (rttParams.requestType == RTT_TYPE_TWO_SIDED) {
+                reconstructed.setFlag(ScanResult.FLAG_80211mc_RESPONDER);
+            }
+            reconstructed.channelWidth = rttParams.channelWidth;
+            reconstructed.frequency = rttParams.frequency;
+            reconstructed.centerFreq0 = rttParams.centerFreq0;
+            reconstructed.centerFreq1 = rttParams.centerFreq1;
+            builder.addResponder(
+                    android.net.wifi.rtt.ResponderConfig.fromScanResult(reconstructed));
+        }
+        try {
+            mNewService.startRanging(builder.build(), new RangingResultCallback() {
+                @Override
+                public void onRangingFailure(int code) {
+                    int localCode = REASON_UNSPECIFIED;
+                    if (code == STATUS_CODE_FAIL_RTT_NOT_AVAILABLE) {
+                        localCode = REASON_NOT_AVAILABLE;
+                    }
+                    listener.onFailure(localCode, "");
+                }
+
+                @Override
+                public void onRangingResults(List<RangingResult> results) {
+                    RttResult[] legacyResults = new RttResult[results.size()];
+                    int i = 0;
+                    for (RangingResult result : results) {
+                        legacyResults[i] = new RttResult();
+                        legacyResults[i].status = result.getStatus();
+                        legacyResults[i].bssid = result.getMacAddress().toString();
+                        legacyResults[i].distance = result.getDistanceMm() / 10;
+                        legacyResults[i].distanceStandardDeviation =
+                                result.getDistanceStdDevMm() / 10;
+                        legacyResults[i].rssi = result.getRssi();
+                        legacyResults[i].ts = result.getRangingTimestampUs();
+                    }
+                    listener.onSuccess(legacyResults);
+                }
+            }, null);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "startRanging: invalid arguments - " + e);
+            listener.onFailure(REASON_INVALID_REQUEST, e.getMessage());
+        } catch (SecurityException e) {
+            Log.e(TAG, "startRanging: security exception - " + e);
+            listener.onFailure(REASON_PERMISSION_DENIED, e.getMessage());
+        }
     }
 
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void stopRanging(RttListener listener) {
-        validateChannel();
-        mAsyncChannel.sendMessage(CMD_OP_STOP_RANGING, 0, removeListener(listener));
+        Log.e(TAG, "stopRanging: unsupported operation - nop");
     }
 
     /**
@@ -1095,12 +1071,8 @@ public class RttManager {
      */
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void enableResponder(ResponderCallback callback) {
-        if (callback == null) {
-            throw new IllegalArgumentException("callback cannot be null");
-        }
-        validateChannel();
-        int key = putListenerIfAbsent(callback);
-        mAsyncChannel.sendMessage(CMD_OP_ENABLE_RESPONDER, 0, key);
+        throw new UnsupportedOperationException(
+                "enableResponder is not supported in the adaptation layer");
     }
 
     /**
@@ -1115,16 +1087,8 @@ public class RttManager {
      */
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public void disableResponder(ResponderCallback callback) {
-        if (callback == null) {
-            throw new IllegalArgumentException("callback cannot be null");
-        }
-        validateChannel();
-        int key = removeListener(callback);
-        if (key == INVALID_KEY) {
-            Log.e(TAG, "responder not enabled yet");
-            return;
-        }
-        mAsyncChannel.sendMessage(CMD_OP_DISABLE_RESPONDER, 0, key);
+        throw new UnsupportedOperationException(
+                "disableResponder is not supported in the adaptation layer");
     }
 
     /**
@@ -1238,17 +1202,9 @@ public class RttManager {
     /** @hide */
     public static final int CMD_OP_REG_BINDER           = BASE + 9;
 
-    private static final int INVALID_KEY = 0;
-
     private final Context mContext;
-    private final IRttManager mService;
-    private final SparseArray mListenerMap = new SparseArray();
-    private final Object mListenerMapLock = new Object();
-    private final Object mCapabilitiesLock = new Object();
-
+    private final WifiRttManager mNewService;
     private RttCapabilities mRttCapabilities;
-    private int mListenerKey = 1;
-    private AsyncChannel mAsyncChannel;
 
     /**
      * Create a new WifiScanner instance.
@@ -1263,170 +1219,20 @@ public class RttManager {
      */
     public RttManager(Context context, IRttManager service, Looper looper) {
         mContext = context;
-        mService = service;
-        Messenger messenger = null;
-        int[] key = new int[1];
-        try {
-            Log.d(TAG, "Get the messenger from " + mService);
-            messenger = mService.getMessenger(new Binder(), key);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        mNewService = (WifiRttManager) mContext.getSystemService(Context.WIFI_RTT_RANGING_SERVICE);
 
-        if (messenger == null) {
-            throw new IllegalStateException("getMessenger() returned null!  This is invalid.");
-        }
+        boolean rttSupported = mContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_WIFI_RTT);
 
-        mAsyncChannel = new AsyncChannel();
-
-        Handler handler = new ServiceHandler(looper);
-        mAsyncChannel.connectSync(mContext, handler, messenger);
-        // We cannot use fullyConnectSync because it sends the FULL_CONNECTION message
-        // synchronously, which causes RttService to receive the wrong replyTo value.
-        mAsyncChannel.sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION,
-                new RttClient(context.getPackageName()));
-        mAsyncChannel.sendMessage(CMD_OP_REG_BINDER, key[0]);
+        mRttCapabilities = new RttCapabilities();
+        mRttCapabilities.oneSidedRttSupported = rttSupported;
+        mRttCapabilities.twoSided11McRttSupported = rttSupported;
+        mRttCapabilities.lciSupported = false;
+        mRttCapabilities.lcrSupported = false;
+        mRttCapabilities.preambleSupported = PREAMBLE_HT | PREAMBLE_VHT;
+        mRttCapabilities.bwSupported = RTT_BW_40_SUPPORT | RTT_BW_80_SUPPORT;
+        mRttCapabilities.responderSupported = false;
+        mRttCapabilities.secureRttSupported = false;
     }
-
-    private void validateChannel() {
-        if (mAsyncChannel == null) throw new IllegalStateException(
-                "No permission to access and change wifi or a bad initialization");
-    }
-
-    private int putListener(Object listener) {
-        if (listener == null) return INVALID_KEY;
-        int key;
-        synchronized (mListenerMapLock) {
-            do {
-                key = mListenerKey++;
-            } while (key == INVALID_KEY);
-            mListenerMap.put(key, listener);
-        }
-        return key;
-    }
-
-    // Insert a listener if it doesn't exist in mListenerMap. Returns the key of the listener.
-    private int putListenerIfAbsent(Object listener) {
-        if (listener == null) return INVALID_KEY;
-        synchronized (mListenerMapLock) {
-            int key = getListenerKey(listener);
-            if (key != INVALID_KEY) {
-                return key;
-            }
-            do {
-                key = mListenerKey++;
-            } while (key == INVALID_KEY);
-            mListenerMap.put(key, listener);
-            return key;
-        }
-
-    }
-
-    private Object getListener(int key) {
-        if (key == INVALID_KEY) return null;
-        synchronized (mListenerMapLock) {
-            Object listener = mListenerMap.get(key);
-            return listener;
-        }
-    }
-
-    private int getListenerKey(Object listener) {
-        if (listener == null) return INVALID_KEY;
-        synchronized (mListenerMapLock) {
-            int index = mListenerMap.indexOfValue(listener);
-            if (index == -1) {
-                return INVALID_KEY;
-            } else {
-                return mListenerMap.keyAt(index);
-            }
-        }
-    }
-
-    private Object removeListener(int key) {
-        if (key == INVALID_KEY) return null;
-        synchronized (mListenerMapLock) {
-            Object listener = mListenerMap.get(key);
-            mListenerMap.remove(key);
-            return listener;
-        }
-    }
-
-    private int removeListener(Object listener) {
-        int key = getListenerKey(listener);
-        if (key == INVALID_KEY) return key;
-        synchronized (mListenerMapLock) {
-            mListenerMap.remove(key);
-            return key;
-        }
-    }
-
-    private class ServiceHandler extends Handler {
-        ServiceHandler(Looper looper) {
-            super(looper);
-        }
-        @Override
-        public void handleMessage(Message msg) {
-            Log.i(TAG, "RTT manager get message: " + msg.what);
-            switch (msg.what) {
-                case AsyncChannel.CMD_CHANNEL_FULLY_CONNECTED:
-                    return;
-                case AsyncChannel.CMD_CHANNEL_DISCONNECTED:
-                    Log.e(TAG, "Channel connection lost");
-                    // This will cause all further async API calls on the WifiManager
-                    // to fail and throw an exception
-                    mAsyncChannel = null;
-                    getLooper().quit();
-                    return;
-            }
-
-            Object listener = getListener(msg.arg2);
-            if (listener == null) {
-                Log.e(TAG, "invalid listener key = " + msg.arg2 );
-                return;
-            } else {
-                Log.i(TAG, "listener key = " + msg.arg2);
-            }
-
-            switch (msg.what) {
-                /* ActionListeners grouped together */
-                case CMD_OP_SUCCEEDED :
-                    reportSuccess(listener, msg);
-                    removeListener(msg.arg2);
-                    break;
-                case CMD_OP_FAILED :
-                    reportFailure(listener, msg);
-                    removeListener(msg.arg2);
-                    break;
-                case CMD_OP_ABORTED :
-                    ((RttListener) listener).onAborted();
-                    removeListener(msg.arg2);
-                    break;
-                case CMD_OP_ENALBE_RESPONDER_SUCCEEDED:
-                    ResponderConfig config = (ResponderConfig) msg.obj;
-                    ((ResponderCallback) (listener)).onResponderEnabled(config);
-                    break;
-                case CMD_OP_ENALBE_RESPONDER_FAILED:
-                    ((ResponderCallback) (listener)).onResponderEnableFailure(msg.arg1);
-                    removeListener(msg.arg2);
-                    break;
-                default:
-                    if (DBG) Log.d(TAG, "Ignoring message " + msg.what);
-                    return;
-            }
-        }
-
-        void reportSuccess(Object listener, Message msg) {
-            RttListener rttListener = (RttListener) listener;
-            ParcelableRttResults parcelableResults = (ParcelableRttResults) msg.obj;
-            ((RttListener) listener).onSuccess(parcelableResults.mResults);
-        }
-
-        void reportFailure(Object listener, Message msg) {
-            RttListener rttListener = (RttListener) listener;
-            Bundle bundle = (Bundle) msg.obj;
-            ((RttListener) listener).onFailure(msg.arg1, bundle.getString(DESCRIPTION_KEY));
-        }
-    }
-
 }
 

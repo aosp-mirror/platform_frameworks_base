@@ -63,7 +63,7 @@ message WifiLog {
   // Number scans that returned at least one result.
   optional int32 num_non_empty_scan_results = 13;
 
-  // Number of scans that were one time.
+  // Number of single scans requests.
   optional int32 num_oneshot_scans = 14;
 
   // Number of repeated background scans that were scheduled to the chip.
@@ -376,6 +376,9 @@ message WifiLog {
 
   // Wifi power statistics
   optional WifiPowerStats wifi_power_stats = 92;
+
+  // Number of connectivity single scan requests.
+  optional int32 num_connectivity_oneshot_scans = 93;
 }
 
 // Information that gets logged for every WiFi connection.

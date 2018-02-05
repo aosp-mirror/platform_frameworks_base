@@ -32,10 +32,10 @@ public:
     virtual ~DurationAnomalyTracker();
 
     // Starts the alarm at the given timestamp.
-    void startAlarm(const HashableDimensionKey& dimensionKey, const uint64_t& eventTime);
+    void startAlarm(const MetricDimensionKey& dimensionKey, const uint64_t& eventTime);
 
     // Stops the alarm.
-    void stopAlarm(const HashableDimensionKey& dimensionKey);
+    void stopAlarm(const MetricDimensionKey& dimensionKey);
 
     // Stop all the alarms owned by this tracker.
     void stopAllAlarms();
@@ -46,7 +46,7 @@ public:
     }
 
     // Declares the anomaly when the alarm expired given the current timestamp.
-    void declareAnomalyIfAlarmExpired(const HashableDimensionKey& dimensionKey,
+    void declareAnomalyIfAlarmExpired(const MetricDimensionKey& dimensionKey,
                                       const uint64_t& timestampNs);
 
     // Declares an anomaly for each alarm in firedAlarms that belongs to this DurationAnomalyTracker
@@ -59,7 +59,7 @@ public:
 protected:
     // The alarms owned by this tracker. The alarm monitor also shares the alarm pointers when they
     // are still active.
-    std::unordered_map<HashableDimensionKey, sp<const AnomalyAlarm>> mAlarms;
+    std::unordered_map<MetricDimensionKey, sp<const AnomalyAlarm>> mAlarms;
 
     // Anomaly alarm monitor.
     sp<AnomalyMonitor> mAnomalyMonitor;

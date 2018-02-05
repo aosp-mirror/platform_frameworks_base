@@ -39,6 +39,7 @@ import android.Manifest;
 import android.os.Binder;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
+import android.security.KeyStore;
 import android.security.keystore.AndroidKeyStoreSecretKey;
 import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.KeyProperties;
@@ -49,6 +50,7 @@ import android.support.test.filters.SmallTest;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
+import com.android.server.locksettings.recoverablekeystore.storage.ApplicationKeyStorage;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverableKeyStoreDb;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySessionStorage;
 import com.android.server.locksettings.recoverablekeystore.storage.RecoverySnapshotStorage;
@@ -135,6 +137,8 @@ public class RecoverableKeyStoreManagerTest {
     @Mock private RecoverySnapshotListenersStorage mMockListenersStorage;
     @Mock private KeyguardManager mKeyguardManager;
     @Mock private PlatformKeyManager mPlatformKeyManager;
+    @Mock private KeyStore mKeyStore;
+    @Mock private ApplicationKeyStorage mApplicationKeyStorage;
 
     private RecoverableKeyStoreDb mRecoverableKeyStoreDb;
     private File mDatabaseFile;
@@ -164,12 +168,14 @@ public class RecoverableKeyStoreManagerTest {
 
         mRecoverableKeyStoreManager = new RecoverableKeyStoreManager(
                 mMockContext,
+                mKeyStore,
                 mRecoverableKeyStoreDb,
                 mRecoverySessionStorage,
                 Executors.newSingleThreadExecutor(),
                 mRecoverySnapshotStorage,
                 mMockListenersStorage,
-                mPlatformKeyManager);
+                mPlatformKeyManager,
+                mApplicationKeyStorage);
     }
 
     @After

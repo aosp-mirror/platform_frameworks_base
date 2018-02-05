@@ -62,9 +62,9 @@ TEST(DurationMetricTrackerTest, TestNoCondition) {
     durationProducer.onMatchedLogEvent(2 /* stop index*/, event2);
     durationProducer.flushIfNeededLocked(bucketStartTimeNs + 2 * bucketSizeNs + 1);
     EXPECT_EQ(1UL, durationProducer.mPastBuckets.size());
-    EXPECT_TRUE(durationProducer.mPastBuckets.find(DEFAULT_DIMENSION_KEY) !=
+    EXPECT_TRUE(durationProducer.mPastBuckets.find(DEFAULT_METRIC_DIMENSION_KEY) !=
                 durationProducer.mPastBuckets.end());
-    const auto& buckets = durationProducer.mPastBuckets[DEFAULT_DIMENSION_KEY];
+    const auto& buckets = durationProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY];
     EXPECT_EQ(2UL, buckets.size());
     EXPECT_EQ(bucketStartTimeNs, buckets[0].mBucketStartNs);
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, buckets[0].mBucketEndNs);
@@ -107,9 +107,9 @@ TEST(DurationMetricTrackerTest, TestNonSlicedCondition) {
     durationProducer.onMatchedLogEvent(2 /* stop index*/, event4);
     durationProducer.flushIfNeededLocked(bucketStartTimeNs + 2 * bucketSizeNs + 1);
     EXPECT_EQ(1UL, durationProducer.mPastBuckets.size());
-    EXPECT_TRUE(durationProducer.mPastBuckets.find(DEFAULT_DIMENSION_KEY) !=
+    EXPECT_TRUE(durationProducer.mPastBuckets.find(DEFAULT_METRIC_DIMENSION_KEY) !=
                 durationProducer.mPastBuckets.end());
-    const auto& buckets2 = durationProducer.mPastBuckets[DEFAULT_DIMENSION_KEY];
+    const auto& buckets2 = durationProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY];
     EXPECT_EQ(1UL, buckets2.size());
     EXPECT_EQ(bucketStartTimeNs + bucketSizeNs, buckets2[0].mBucketStartNs);
     EXPECT_EQ(bucketStartTimeNs + 2 * bucketSizeNs, buckets2[0].mBucketEndNs);

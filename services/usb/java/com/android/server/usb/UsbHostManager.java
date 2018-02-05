@@ -16,6 +16,10 @@
 
 package com.android.server.usb;
 
+import static com.android.internal.usb.DumpUtils.writeDevice;
+import static com.android.internal.util.dump.DumpUtils.writeComponentName;
+
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
@@ -23,11 +27,16 @@ import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.service.ServiceProtoEnums;
+import android.service.usb.UsbConnectionRecordProto;
+import android.service.usb.UsbHostManagerProto;
+import android.service.usb.UsbIsHeadsetProto;
 import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.usb.descriptors.UsbDescriptor;
 import com.android.server.usb.descriptors.UsbDescriptorParser;
 import com.android.server.usb.descriptors.UsbDeviceDescriptor;
@@ -44,7 +53,7 @@ import java.util.LinkedList;
  */
 public class UsbHostManager {
     private static final String TAG = UsbHostManager.class.getSimpleName();
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     private final Context mContext;
 
@@ -84,10 +93,13 @@ public class UsbHostManager {
         long mTimestamp;        // Same time-base as system log.
         String mDeviceAddress;
 
-        static final int CONNECT = 0;
-        static final int CONNECT_BADPARSE = 1;
-        static final int CONNECT_BADDEVICE = 2;
-        static final int DISCONNECT = -1;
+        static final int CONNECT = ServiceProtoEnums.USB_CONNECTION_RECORD_MODE_CONNECT; // 0
+        static final int CONNECT_BADPARSE =
+                ServiceProtoEnums.USB_CONNECTION_RECORD_MODE_CONNECT_BADPARSE; // 1
+        static final int CONNECT_BADDEVICE =
+                ServiceProtoEnums.USB_CONNECTION_RECORD_MODE_CONNECT_BADDEVICE; // 2
+        static final int DISCONNECT =
+                ServiceProtoEnums.USB_CONNECTION_RECORD_MODE_DISCONNECT; // -1
 
         final int mMode;
         final byte[] mDescriptors;
@@ -101,6 +113,31 @@ public class UsbHostManager {
 
         private String formatTime() {
             return (new StringBuilder(sFormat.format(new Date(mTimestamp)))).toString();
+        }
+
+        void dump(@NonNull DualDumpOutputStream dump, String idName, long id) {
+            long token = dump.start(idName, id);
+
+            dump.write("device_address", UsbConnectionRecordProto.DEVICE_ADDRESS, mDeviceAddress);
+            dump.write("mode", UsbConnectionRecordProto.MODE, mMode);
+            dump.write("timestamp", UsbConnectionRecordProto.TIMESTAMP, mTimestamp);
+
+            if (mMode != DISCONNECT) {
+                UsbDescriptorParser parser = new UsbDescriptorParser(mDeviceAddress, mDescriptors);
+
+                UsbDeviceDescriptor deviceDescriptor = parser.getDeviceDescriptor();
+
+                dump.write("manufacturer", UsbConnectionRecordProto.MANUFACTURER,
+                        deviceDescriptor.getVendorID());
+                dump.write("product", UsbConnectionRecordProto.PRODUCT,
+                        deviceDescriptor.getProductID());
+                long isHeadSetToken = dump.start("is_headset", UsbConnectionRecordProto.IS_HEADSET);
+                dump.write("in", UsbIsHeadsetProto.IN, parser.isInputHeadset());
+                dump.write("out", UsbIsHeadsetProto.OUT, parser.isOutputHeadset());
+                dump.end(isHeadSetToken);
+            }
+
+            dump.end(token);
         }
 
         void dumpShort(IndentingPrintWriter pw) {
@@ -230,6 +267,7 @@ public class UsbHostManager {
     }
 
     private boolean isBlackListed(String deviceAddress) {
+        Slog.i(TAG, "isBlackListed(" + deviceAddress + ")");
         int count = mHostBlacklist.length;
         for (int i = 0; i < count; i++) {
             if (deviceAddress.startsWith(mHostBlacklist[i])) {
@@ -241,6 +279,7 @@ public class UsbHostManager {
 
     /* returns true if the USB device should not be accessible by applications */
     private boolean isBlackListed(int clazz, int subClass) {
+        Slog.i(TAG, "isBlackListed(" + clazz + ", " + subClass + ")");
         // blacklist hubs
         if (clazz == UsbConstants.USB_CLASS_HUB) return true;
 
@@ -312,13 +351,7 @@ public class UsbHostManager {
                                 usbDeviceConnectionHandler);
                     }
 
-                    // Headset?
-                    boolean isInputHeadset = parser.isInputHeadset();
-                    boolean isOutputHeadset = parser.isOutputHeadset();
-                    Slog.i(TAG, "---- isHeadset[in: " + isInputHeadset
-                            + " , out: " + isOutputHeadset + "]");
-
-                    mUsbAlsaManager.usbDeviceAdded(newDevice, isInputHeadset, isOutputHeadset);
+                    mUsbAlsaManager.usbDeviceAdded(deviceAddress, newDevice, parser);
 
                     // Tracking
                     addConnectionRecord(deviceAddress, ConnectionRecord.CONNECT,
@@ -343,10 +376,13 @@ public class UsbHostManager {
     /* Called from JNI in monitorUsbHostBus to report USB device removal */
     @SuppressWarnings("unused")
     private void usbDeviceRemoved(String deviceAddress) {
+        if (DEBUG) {
+            Slog.d(TAG, "usbDeviceRemoved(" + deviceAddress + ") - start");
+        }
         synchronized (mLock) {
             UsbDevice device = mDevices.remove(deviceAddress);
             if (device != null) {
-                mUsbAlsaManager.usbDeviceRemoved(device);
+                mUsbAlsaManager.usbDeviceRemoved(deviceAddress/*device*/);
                 mSettingsManager.usbDeviceRemoved(device);
                 getCurrentUserSettings().usbDeviceRemoved(device);
 
@@ -395,30 +431,30 @@ public class UsbHostManager {
 
     /**
      * Dump out various information about the state of USB device connections.
-     *
      */
-    public void dump(IndentingPrintWriter pw, String[] args) {
-        pw.println("USB Host State:");
+    public void dump(DualDumpOutputStream dump, String idName, long id) {
+        long token = dump.start(idName, id);
+
         synchronized (mHandlerLock) {
             if (mUsbDeviceConnectionHandler != null) {
-                pw.println("Default USB Host Connection handler: " + mUsbDeviceConnectionHandler);
+                writeComponentName(dump, "default_usb_host_connection_handler",
+                        UsbHostManagerProto.DEFAULT_USB_HOST_CONNECTION_HANDLER,
+                        mUsbDeviceConnectionHandler);
             }
         }
         synchronized (mLock) {
             for (String name : mDevices.keySet()) {
-                pw.println("  " + name + ": " + mDevices.get(name));
+                writeDevice(dump, "devices", UsbHostManagerProto.DEVICES, mDevices.get(name));
             }
 
-            // Connections
-            pw.println("" + mNumConnects + " total connects/disconnects");
-            pw.println("Last " + mConnections.size() + " connections/disconnections");
+            dump.write("num_connects", UsbHostManagerProto.NUM_CONNECTS, mNumConnects);
+
             for (ConnectionRecord rec : mConnections) {
-                rec.dumpShort(pw);
+                rec.dump(dump, "connections", UsbHostManagerProto.CONNECTIONS);
             }
-
         }
 
-        mUsbAlsaManager.dump(pw);
+        dump.end(token);
     }
 
     /**

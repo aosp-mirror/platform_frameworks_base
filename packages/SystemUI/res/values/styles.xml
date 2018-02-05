@@ -410,16 +410,11 @@
         <item name="android:textColor">?android:attr/textColorSecondary</item>
     </style>
 
-    <style name="TextAppearance.Volume.ZenSummary">
-        <item name="android:textSize">14sp</item>
-        <item name="android:fontFamily">sans-serif-medium</item>
+    <style name="TextAppearance.Volume.Header.Secondary">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">?android:attr/textColorTertiary</item>
     </style>
 
-    <style name="TextAppearance.Volume.ZenDetail">
-        <item name="android:textSize">14sp</item>
-        <item name="android:fontFamily">sans-serif</item>
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
-    </style>
 
     <style name="VolumeButtons" parent="@android:style/Widget.Material.Button.Borderless">
         <item name="android:background">@drawable/btn_borderless_rect</item>

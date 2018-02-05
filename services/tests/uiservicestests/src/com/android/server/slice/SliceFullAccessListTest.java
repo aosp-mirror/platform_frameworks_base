@@ -18,6 +18,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import android.os.UserHandle;
 import android.support.test.filters.SmallTest;
 import android.util.Xml.Encoding;
 
@@ -67,6 +68,15 @@ public class SliceFullAccessListTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testRemoveAccess() {
+        mAccessList.grantFullAccess("pkg", 0);
+        assertTrue(mAccessList.hasFullAccess("pkg", 0));
+
+        mAccessList.removeGrant("pkg", 0);
+        assertFalse(mAccessList.hasFullAccess("pkg", 0));
+    }
+
+    @Test
     public void testSerialization() throws XmlPullParserException, IOException {
         mAccessList.grantFullAccess("pkg", 0);
         mAccessList.grantFullAccess("pkg1", 0);
@@ -76,7 +86,7 @@ public class SliceFullAccessListTest extends UiServiceTestCase {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         XmlSerializer out = XmlPullParserFactory.newInstance().newSerializer();
         out.setOutput(output, Encoding.UTF_8.name());
-        mAccessList.writeXml(out);
+        mAccessList.writeXml(out, UserHandle.USER_ALL);
         out.flush();
 
         assertEquals(TEST_XML, output.toString(Encoding.UTF_8.name()));

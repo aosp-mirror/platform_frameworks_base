@@ -44,9 +44,10 @@ StatsdConfig CreateStatsdConfig() {
     auto screenIsOffPredicate = CreateScreenIsOffPredicate();
 
     auto isSyncingPredicate = CreateIsSyncingPredicate();
-    *isSyncingPredicate.mutable_simple_predicate()->mutable_dimensions() =
-        CreateDimensions(
-            android::util::SYNC_STATE_CHANGED, {1 /* uid field */, 2 /* name field*/});
+    auto syncDimension = isSyncingPredicate.mutable_simple_predicate()->mutable_dimensions();
+    *syncDimension = CreateAttributionUidDimensions(
+        android::util::SYNC_STATE_CHANGED, {Position::FIRST});
+    syncDimension->add_child()->set_field(2 /* name field*/);
 
     auto isInBackgroundPredicate = CreateIsInBackgroundPredicate();
     *isInBackgroundPredicate.mutable_simple_predicate()->mutable_dimensions() =
@@ -78,9 +79,8 @@ StatsdConfig CreateStatsdConfig() {
     auto dimensionWhat = links->mutable_fields_in_what();
     dimensionWhat->set_field(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
     dimensionWhat->add_child()->set_field(1);  // uid field.
-    auto dimensionCondition = links->mutable_fields_in_condition();
-    dimensionCondition->set_field(android::util::SYNC_STATE_CHANGED);
-    dimensionCondition->add_child()->set_field(1);  // uid field.
+    *links->mutable_fields_in_condition() = CreateAttributionUidDimensions(
+            android::util::SYNC_STATE_CHANGED, {Position::FIRST});
 
     // Links between crash atom and condition of app is in background.
     links = countMetric->add_links();
@@ -88,7 +88,7 @@ StatsdConfig CreateStatsdConfig() {
     dimensionWhat = links->mutable_fields_in_what();
     dimensionWhat->set_field(android::util::PROCESS_LIFE_CYCLE_STATE_CHANGED);
     dimensionWhat->add_child()->set_field(1);  // uid field.
-    dimensionCondition = links->mutable_fields_in_condition();
+    auto dimensionCondition = links->mutable_fields_in_condition();
     dimensionCondition->set_field(android::util::ACTIVITY_FOREGROUND_STATE_CHANGED);
     dimensionCondition->add_child()->set_field(1);  // uid field.
     return config;
@@ -132,12 +132,14 @@ TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks) {
         CreateScreenStateChangedEvent(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
                                       bucketStartTimeNs + 2 * bucketSizeNs - 100);
 
+    std::vector<AttributionNode> attributions =
+        {CreateAttribution(appUid, "App1"), CreateAttribution(appUid + 1, "GMSCoreModule1")};
     auto syncOnEvent1 =
-        CreateSyncStartEvent(appUid, "ReadEmail", bucketStartTimeNs + 50);
+        CreateSyncStartEvent(attributions, "ReadEmail", bucketStartTimeNs + 50);
     auto syncOffEvent1 =
-        CreateSyncEndEvent(appUid, "ReadEmail", bucketStartTimeNs + bucketSizeNs + 300);
+        CreateSyncEndEvent(attributions, "ReadEmail", bucketStartTimeNs + bucketSizeNs + 300);
     auto syncOnEvent2 =
-        CreateSyncStartEvent(appUid, "ReadDoc", bucketStartTimeNs + bucketSizeNs + 2000);
+        CreateSyncStartEvent(attributions, "ReadDoc", bucketStartTimeNs + bucketSizeNs + 2000);
 
     auto moveToBackgroundEvent1 =
         CreateMoveToBackgroundEvent(appUid, bucketStartTimeNs + 15);

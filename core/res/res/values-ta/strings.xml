@@ -264,10 +264,8 @@
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"பாதுகாப்பு பயன்முறை"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android அமைப்பு"</string>
-    <!-- no translation found for user_owner_label (8836124313744349203) -->
-    <skip />
-    <!-- no translation found for managed_profile_label (8947929265267690522) -->
-    <skip />
+    <string name="user_owner_label" msgid="8836124313744349203">"தனிப்பட்ட சுயவிவரத்திற்கு மாற்றவும்"</string>
+    <string name="managed_profile_label" msgid="8947929265267690522">"பணிச் சுயவிவரத்திற்கு மாற்றவும்"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"தொடர்புகள்"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"தொடர்புகளை அணுக வேண்டும்"</string>
     <string name="permgrouprequest_contacts" msgid="1601591667800538208">"தொடர்புகளை அணுக, &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;க்கு அனுமதி வழங்கவும்"</string>
@@ -419,10 +417,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"சாதனத்தின் மொபைல் அம்சங்களை அணுகப் பயன்பாட்டை அனுமதிக்கிறது. மொபைல் மற்றும் சாதன ஐடிகள், அழைப்பு செயலில் உள்ளதா மற்றும் அழைப்பு மூலம் இணைக்கப்பட்ட தொலைக் கட்டுப்பாட்டு எண் ஆகியவற்றைத் தீர்மானிக்க இந்த அனுமதி பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"சிஸ்டம் மூலம் அழைப்புகளை ரூட் செய்தல்"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"அழைக்கும் அனுபவத்தை மேம்படுத்தும் பொருட்டு, சிஸ்டம் மூலம் தனது அழைப்புகளை ரூட் செய்ய பயன்பாட்டை அனுமதிக்கும்."</string>
-    <!-- no translation found for permlab_acceptHandover (2661534649736022409) -->
-    <skip />
-    <!-- no translation found for permdesc_acceptHandovers (4570660484220539698) -->
-    <skip />
+    <string name="permlab_acceptHandover" msgid="2661534649736022409">"மற்றொரு பயன்பாட்டிலிருந்து அழைப்பைத் தொடருதல்"</string>
+    <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"மற்றொரு பயன்பாட்டில் தொடங்கப்பட்ட அழைப்பைத் தொடருவதற்கு, பயன்பாட்டை அனுமதிக்கிறது."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ஃபோன் எண்களைப் படித்தல்"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"சாதனத்தின் ஃபோன் எண்களை அணுக, பயன்பாட்டை அனுமதிக்கும்."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"டேப்லெட் உறக்க நிலைக்குச் செல்வதைத் தடுத்தல்"</string>
@@ -497,11 +493,14 @@
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"கைரேகையைச் சேமிக்க முடியவில்லை. ஏற்கனவே உள்ள கைரேகையை அகற்றவும்."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"கைரேகைக்கான நேரம் முடிந்தது. மீண்டும் முயலவும்."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"கைரேகை செயல்பாடு ரத்துசெய்யப்பட்டது."</string>
-    <!-- no translation found for fingerprint_error_user_canceled (7999639584615291494) -->
-    <skip />
+    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"பயனர், கைரேகை உறுதிப்படுத்துதலை ரத்துசெய்தார்."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"அதிகமான முயற்சிகள். பிறகு முயற்சிக்கவும்."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"பலமுறை முயன்றுவிட்டீர்கள். கைரேகை சென்சார் முடக்கப்பட்டது."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"மீண்டும் முயற்சிக்கவும்."</string>
+    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="5870957565512716938">"கைரேகை <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -1000,12 +999,9 @@
     <string name="browse" msgid="1245903488306147205">"திற"</string>
     <string name="sms" msgid="4560537514610063430">"செய்தி"</string>
     <string name="add_contact" msgid="7867066569670597203">"சேர்"</string>
-    <!-- no translation found for view_calendar (979609872939597838) -->
-    <skip />
-    <!-- no translation found for add_calendar_event (1953664627192056206) -->
-    <skip />
-    <!-- no translation found for view_flight (7691640491425680214) -->
-    <skip />
+    <string name="view_calendar" msgid="979609872939597838">"காண்பி"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"திட்டமிடுதல்"</string>
+    <string name="view_flight" msgid="7691640491425680214">"கண்கானி"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"சேமிப்பிடம் குறைகிறது"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"சில அமைப்பு செயல்பாடுகள் வேலை செய்யாமல் போகலாம்"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"முறைமையில் போதுமான சேமிப்பகம் இல்லை. 250மெ.பை. அளவு காலி இடவசதி இருப்பதை உறுதிசெய்து மீண்டும் தொடங்கவும்."</string>
@@ -1131,8 +1127,7 @@
       <item quantity="one">பொது வைஃபை நெட்வொர்க் உள்ளது</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"திறந்த வைஃபை நெட்வொர்க்குடன் இணைக்கவும்"</string>
-    <!-- no translation found for wifi_available_carrier_network_title (4527932626916527897) -->
-    <skip />
+    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"தொலைத்தொடர்பு சேவை வழங்கும் நிறுவனத்தின் வைஃபை நெட்வொர்க்குடன் இணைக்கிறது"</string>
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"திறந்த வைஃபை நெட்வொர்க்குடன் இணைக்கிறது"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"வைஃபை நெட்வொர்க்குடன் இணைக்கப்பட்டது"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"வைஃபை நெட்வொர்க்குடன் இணைக்க முடியவில்லை"</string>
@@ -1217,13 +1212,23 @@
     <string name="no_permissions" msgid="7283357728219338112">"அனுமதிகள் தேவையில்லை"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"இதனால் நீங்கள் கட்டணம் செலுத்த வேண்டியிருக்கலாம்"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"சரி"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"சாதனம் USB சார்ஜிங் செய்யப்படுகிறது"</string>
-    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"இணைத்துள்ள சாதனத்திற்கு USB சக்தி அளிக்கிறது"</string>
-    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"USB, கோப்புப் பரிமாற்றத்துக்கு மட்டும்"</string>
-    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"USB, படப் பரிமாற்றத்துக்கு மட்டும்"</string>
-    <string name="usb_midi_notification_title" msgid="4850904915889144654">"USB, MIDIக்கு மட்டும்"</string>
-    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB துணைக்கருவியுடன் இணைக்கப்பட்டுள்ளது"</string>
+    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
+    <skip />
+    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
+    <skip />
+    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
+    <skip />
+    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
+    <skip />
     <string name="usb_notification_message" msgid="3370903770828407960">"மேலும் விருப்பங்களுக்கு, தட்டவும்."</string>
+    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
+    <skip />
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"அனலாக் ஆடியோ துணைக்கருவி கண்டறியப்பட்டது"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"இணைத்துள்ள சாதனமானது இந்த மொபைலுடன் இணங்கவில்லை. மேலும் அறிய, தட்டவும்."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB பிழைத் திருத்தம் இணைக்கப்பட்டது"</string>
@@ -1662,9 +1667,6 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"பணியிடம் <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2வது பணி <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3வது பணி <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="6820571533009838261">"இந்தத் திரையை அகற்ற, முந்தையது, மேலோட்டப் பார்வை ஆகிய இரண்டு பொத்தானையும் தொட்டுப் பிடித்திருக்கவும்"</string>
-    <string name="lock_to_app_start" msgid="6643342070839862795">"திரை பின் செய்யப்பட்டது"</string>
-    <string name="lock_to_app_exit" msgid="8598219838213787430">"திரையின் பின் அகற்றப்பட்டது"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"அகற்றும் முன் PINஐக் கேள்"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"அகற்றும் முன் திறத்தல் வடிவத்தைக் கேள்"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"அகற்றும் முன் கடவுச்சொல்லைக் கேள்"</string>
@@ -1758,15 +1760,11 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"எல்லா மொழிகளும்"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"எல்லா மண்டலங்களும்"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"தேடு"</string>
-    <!-- no translation found for work_mode_off_title (1118691887588435530) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (5130856710614337649) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="1118691887588435530">"பணிச் சுயவிவரத்தை ஆன் செய்யவா?"</string>
+    <string name="work_mode_off_message" msgid="5130856710614337649">"பணி ஆப்ஸ், அறிவிப்புகள், தரவு மற்றும் பிற பணிச் சுயவிவர அம்சங்கள் ஆன் செய்யப்படும்"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"இயக்கு"</string>
-    <!-- no translation found for deprecated_target_sdk_message (1449696506742572767) -->
-    <skip />
-    <!-- no translation found for deprecated_target_sdk_app_store (5032340500368495077) -->
-    <skip />
+    <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"இந்தப் பயன்பாடு Android இன் பழைய பதிப்புக்காக உருவாக்கப்பட்டதால், சரியாக வேலை செய்யாமல் போகலாம். புதுப்பிப்புகள் ஏதேனும் உள்ளதா எனப் பார்க்கவும் அல்லது டெவெலப்பரைத் தொடர்புகொள்ளவும்."</string>
+    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"புதுப்பிப்பு உள்ளதா எனப் பார்"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"புதிய செய்திகள் வந்துள்ளன"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"பார்க்க, SMS பயன்பாட்டைத் திறக்கவும்"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"சில செயல்பாடு வரம்பிடப்பட்டிருக்கலாம்"</string>
@@ -1833,17 +1831,15 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"குரல் அழைப்பை மேற்கொள்ள இந்த ஃபோனுக்கு அனுமதி இல்லை"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"பாப்அப் சாளரம்"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"இந்த ஷார்ட்கட்டைப் பயன்படுத்த, சமீபத்திய பயன்பாடு வேண்டும்"</string>
+    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
+    <skip />
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"காப்புப் பிரதி மற்றும் மீட்டமைவைப் பயன்பாடு ஆதரிக்காத காரணத்தால், ஷார்ட்கட்டை மீட்டமைக்க முடியவில்லை"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"பயன்பாட்டுச் சான்றுகள் பொருந்தாத காரணத்தினால், ஷார்ட்கட்டை மீட்டமைக்க முடியவில்லை"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"ஷார்ட்கட்டை மீட்டமைக்க முடியவில்லை"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"குறுக்குவழி முடக்கப்பட்டுள்ளது"</string>
-    <!-- no translation found for harmful_app_warning_uninstall (4837672735619532931) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_open_anyway (596432803680914321) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_title (8982527462829423432) -->
-    <skip />
+    <string name="harmful_app_warning_uninstall" msgid="4837672735619532931">"நிறுவல் நீக்கு"</string>
+    <string name="harmful_app_warning_open_anyway" msgid="596432803680914321">"பரவாயில்லை, திற"</string>
+    <string name="harmful_app_warning_title" msgid="8982527462829423432">"தீங்கிழைக்கும் பயன்பாடு உள்ளது"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_2">%2$s</xliff:g> பயன்பாட்டின் விழிப்பூட்டல்களைக் காண்பிக்க, <xliff:g id="APP_0">%1$s</xliff:g> அனுமதி கேட்கிறது"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"திருத்து"</string>
 </resources>

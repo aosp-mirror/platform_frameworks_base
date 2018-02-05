@@ -60,9 +60,19 @@ public class StatsManager {
      */
     @RequiresPermission(Manifest.permission.DUMP)
     public boolean addConfiguration(String configKey, byte[] config, String pkg, String cls) {
-        // To prevent breakages of dependencies on old API.
-
-        return false;
+        synchronized (this) {
+            try {
+                IStatsManager service = getIStatsManagerLocked();
+                if (service == null) {
+                    Slog.d(TAG, "Failed to find statsd when adding configuration");
+                    return false;
+                }
+                return service.addConfiguration(Long.parseLong(configKey), config, pkg, cls);
+            } catch (RemoteException e) {
+                Slog.d(TAG, "Failed to connect to statsd when adding configuration");
+                return false;
+            }
+        }
     }
 
     /**
@@ -99,7 +109,19 @@ public class StatsManager {
     @RequiresPermission(Manifest.permission.DUMP)
     public boolean removeConfiguration(String configKey) {
         // To prevent breakages of old dependencies.
-        return false;
+        synchronized (this) {
+            try {
+                IStatsManager service = getIStatsManagerLocked();
+                if (service == null) {
+                    Slog.d(TAG, "Failed to find statsd when removing configuration");
+                    return false;
+                }
+                return service.removeConfiguration(Long.parseLong(configKey));
+            } catch (RemoteException e) {
+                Slog.d(TAG, "Failed to connect to statsd when removing configuration");
+                return false;
+            }
+        }
     }
 
     /**
@@ -132,7 +154,19 @@ public class StatsManager {
     public byte[] getData(String configKey) {
         // TODO: remove this and all other methods with String-based config keys.
         // To prevent build breakages of dependencies.
-        return null;
+        synchronized (this) {
+            try {
+                IStatsManager service = getIStatsManagerLocked();
+                if (service == null) {
+                    Slog.d(TAG, "Failed to find statsd when getting data");
+                    return null;
+                }
+                return service.getData(Long.parseLong(configKey));
+            } catch (RemoteException e) {
+                Slog.d(TAG, "Failed to connecto statsd when getting data");
+                return null;
+            }
+        }
     }
 
     /**

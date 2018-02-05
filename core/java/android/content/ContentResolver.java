@@ -166,6 +166,26 @@ public abstract class ContentResolver {
     public static final String SYNC_EXTRAS_DISALLOW_METERED = "allow_metered";
 
     /**
+     * {@hide} Flag only used by the requestsync command to treat a request as if it was made by
+     * a foreground app.
+     *
+     * Only the system and the shell user can set it.
+     *
+     * This extra is "virtual". Once passed to the system server, it'll be removed from the bundle.
+     */
+    public static final String SYNC_VIRTUAL_EXTRAS_FORCE_FG_SYNC = "force_fg_sync";
+
+    /**
+     * {@hide} Flag only used by the requestsync command to treat a request as if it was made by
+     * a background app.
+     *
+     * Only the system and the shell user can set it.
+     *
+     * This extra is "virtual". Once passed to the system server, it'll be removed from the bundle.
+     */
+    public static final String SYNC_VIRTUAL_EXTRAS_FORCE_BG_SYNC = "force_bg_sync";
+
+    /**
      * Set by the SyncManager to request that the SyncAdapter initialize itself for
      * the given account/authority pair. One required initialization step is to
      * ensure that {@link #setIsSyncable(android.accounts.Account, String, int)} has been
@@ -2435,13 +2455,7 @@ public abstract class ContentResolver {
     public static void addPeriodicSync(Account account, String authority, Bundle extras,
             long pollFrequency) {
         validateSyncExtrasBundle(extras);
-        if (extras.getBoolean(SYNC_EXTRAS_MANUAL, false)
-                || extras.getBoolean(SYNC_EXTRAS_DO_NOT_RETRY, false)
-                || extras.getBoolean(SYNC_EXTRAS_IGNORE_BACKOFF, false)
-                || extras.getBoolean(SYNC_EXTRAS_IGNORE_SETTINGS, false)
-                || extras.getBoolean(SYNC_EXTRAS_INITIALIZE, false)
-                || extras.getBoolean(SYNC_EXTRAS_FORCE, false)
-                || extras.getBoolean(SYNC_EXTRAS_EXPEDITED, false)) {
+        if (invalidPeriodicExtras(extras)) {
             throw new IllegalArgumentException("illegal extras were set");
         }
         try {
@@ -2996,6 +3010,11 @@ public abstract class ContentResolver {
     /** @hide */
     public int resolveUserId(Uri uri) {
         return ContentProvider.getUserIdFromUri(uri, mContext.getUserId());
+    }
+
+    /** @hide */
+    public int getUserId() {
+        return mContext.getUserId();
     }
 
     /** @hide */

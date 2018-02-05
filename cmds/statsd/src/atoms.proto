@@ -95,11 +95,13 @@ message Atom {
         AppStartMemoryStateCaptured app_start_memory_state_captured = 55;
         ShutdownSequenceReported shutdown_sequence_reported = 56;
         BootSequenceReported boot_sequence_reported = 57;
+        DaveyOccurred davey_occurred = 58;
+        OverlayStateChanged overlay_state_changed = 59;
         // TODO: Reorder the numbering so that the most frequent occur events occur in the first 15.
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10019
+    // Next: 10021
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -120,6 +122,8 @@ message Atom {
         CpuActiveTime cpu_active_time = 10016;
         CpuClusterTime cpu_cluster_time = 10017;
         DiskSpace disk_space = 10018;
+        RemainingBatteryCapacity remaining_battery_capacity = 10019;
+        FullBatteryCapacity full_battery_capacity = 10020;
     }
 }
 
@@ -721,6 +725,17 @@ message BootSequenceReported {
 }
 
 /**
+ * Logs the duration of a davey (jank of >=700ms) when it occurs
+ *
+ * Logged from:
+ *   frameworks/base/libs/hwui/JankTracker.cpp
+ */
+message DaveyOccurred {
+    // Amount of time it took to render the frame. Should be >=700ms.
+    optional int64 jank_duration_ms = 1;
+}
+
+/**
  * Logs phone signal strength changes.
  *
  * Logged from:
@@ -757,8 +772,8 @@ message SettingChanged {
     // The tag used with the is_default for resetting sets of settings. This is generally null.
     optional string tag = 5;
 
-    // 1 indicates that this setting with tag should be resettable.
-    optional int32 is_default = 6;
+    // True if this setting with tag should be resettable.
+    optional bool is_default = 6;
 
     // The user ID associated. Defined in android/os/UserHandle.java
     optional int32 user = 7;
@@ -965,6 +980,25 @@ message PictureInPictureStateChanged {
 }
 
 /**
+ * Logs overlay action
+ * Logged from:
+ *     services/core/java/com/android/server/wm/Session.java
+ */
+message OverlayStateChanged {
+    optional int32 uid = 1;
+
+    optional string package_name = 2;
+
+    optional bool using_alert_window = 3;
+
+    enum State {
+        ENTERED = 1;
+        EXITED = 2;
+    }
+    optional State state = 4;
+}
+
+/**
  * Pulls bytes transferred via wifi (Sum of foreground and background usage).
  *
  * Pulled from:
@@ -1105,9 +1139,12 @@ message IsolatedUidChanged {
 
     optional int32 isolated_uid = 2;
 
-    // 1 denotes we're creating an isolated uid and 0 denotes removal. We expect an isolated uid to
-    // be removed before if it's used for another parent uid.
-    optional int32 is_create = 3;
+    // We expect an isolated uid to be removed before if it's used for another parent uid.
+    enum Event {
+        REMOVED = 0;
+        CREATED = 1;
+    }
+    optional Event event = 3;
 }
 
 /**
@@ -1409,4 +1446,20 @@ message DiskSpace {
     optional uint64 system_available_bytes = 2;
     // available bytes in download cache or temp directories
     optional uint64 temp_available_bytes = 3;
+}
+
+/**
+ * Pulls battery coulomb counter, which is the remaining battery charge in uAh.
+ * Logged from: frameworks/base/cmds/statsd/src/external/ResourceHealthManagerPuller.cpp
+ */
+message RemainingBatteryCapacity {
+    optional int32 charge_uAh = 1;
+}
+
+/**
+ * Pulls battery capacity, which is the battery capacity when full in uAh.
+ * Logged from: frameworks/base/cmds/statsd/src/external/ResourceHealthManagerPuller.cpp
+ */
+message FullBatteryCapacity {
+    optional int32 capacity_uAh = 1;
 }

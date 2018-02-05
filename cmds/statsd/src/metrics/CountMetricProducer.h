@@ -50,7 +50,7 @@ public:
 
 protected:
     void onMatchedLogEventInternalLocked(
-            const size_t matcherIndex, const HashableDimensionKey& eventKey,
+            const size_t matcherIndex, const MetricDimensionKey& eventKey,
             const ConditionKey& conditionKey, bool condition,
             const LogEvent& event) override;
 
@@ -74,14 +74,14 @@ private:
     void flushIfNeededLocked(const uint64_t& newEventTime);
 
     // TODO: Add a lock to mPastBuckets.
-    std::unordered_map<HashableDimensionKey, std::vector<CountBucket>> mPastBuckets;
+    std::unordered_map<MetricDimensionKey, std::vector<CountBucket>> mPastBuckets;
 
     // The current bucket.
     std::shared_ptr<DimToValMap> mCurrentSlicedCounter = std::make_shared<DimToValMap>();
 
     static const size_t kBucketSize = sizeof(CountBucket{});
 
-    bool hitGuardRailLocked(const HashableDimensionKey& newKey);
+    bool hitGuardRailLocked(const MetricDimensionKey& newKey);
 
     FRIEND_TEST(CountMetricProducerTest, TestNonDimensionalEvents);
     FRIEND_TEST(CountMetricProducerTest, TestEventsWithNonSlicedCondition);

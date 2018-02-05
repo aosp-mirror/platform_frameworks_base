@@ -30,7 +30,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.ContentObserver;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.display.BrightnessChangeEvent;
@@ -195,7 +194,9 @@ public class BrightnessTrackerTest {
         mInjector.incrementTime(TimeUnit.SECONDS.toMillis(1));
 
         final int systemUpdatedBrightness = 20;
-        notifyBrightnessChanged(mTracker, systemUpdatedBrightness, false /*userInitiated*/);
+        notifyBrightnessChanged(mTracker, systemUpdatedBrightness, false /*userInitiated*/,
+                0.5f /*powerBrightnessFactor(*/, false /*isUserSetBrightness*/,
+                false /*isDefaultBrightnessConfig*/);
         List<BrightnessChangeEvent> events = mTracker.getEvents(0, true).getList();
         // No events because we filtered out our change.
         assertEquals(0, events.size());
@@ -285,7 +286,8 @@ public class BrightnessTrackerTest {
                 + "lastNits=\"32.333\" "
                 + "batteryLevel=\"1.0\" nightMode=\"false\" colorTemperature=\"0\"\n"
                 + "lux=\"32.2,31.1\" luxTimestamps=\""
-                + Long.toString(someTimeAgo) + "," + Long.toString(someTimeAgo) + "\"/>"
+                + Long.toString(someTimeAgo) + "," + Long.toString(someTimeAgo) + "\""
+                + "defaultConfig=\"true\" powerSaveFactor=\"0.5\" userPoint=\"true\" />"
                 + "<event nits=\"71\" timestamp=\""
                 + Long.toString(someTimeAgo) + "\" packageName=\""
                 + "com.android.anapp\" user=\"11\" "
@@ -315,6 +317,9 @@ public class BrightnessTrackerTest {
         assertFalse(event.nightMode);
         assertEquals(1.0f, event.batteryLevel, FLOAT_DELTA);
         assertEquals("com.example.app", event.packageName);
+        assertTrue(event.isDefaultBrightnessConfig);
+        assertEquals(0.5f, event.powerBrightnessFactor, FLOAT_DELTA);
+        assertTrue(event.isUserSetBrightness);
 
         events = tracker.getEvents(1, true).getList();
         assertEquals(1, events.size());
@@ -329,6 +334,10 @@ public class BrightnessTrackerTest {
         assertEquals(3235, event.colorTemperature);
         assertEquals(0.5f, event.batteryLevel, FLOAT_DELTA);
         assertEquals("com.android.anapp", event.packageName);
+        // Not present in the event so default to false.
+        assertFalse(event.isDefaultBrightnessConfig);
+        assertEquals(1.0, event.powerBrightnessFactor, FLOAT_DELTA);
+        assertFalse(event.isUserSetBrightness);
     }
 
     @Test
@@ -379,7 +388,9 @@ public class BrightnessTrackerTest {
         mInjector.mSensorListener.onSensorChanged(createSensorEvent(3000.0f));
         final long secondSensorTime = mInjector.currentTimeMillis();
         mInjector.incrementTime(TimeUnit.SECONDS.toMillis(3));
-        notifyBrightnessChanged(mTracker, brightness);
+        notifyBrightnessChanged(mTracker, brightness, true /*userInitiated*/,
+                0.5f /*powerPolicyDim(*/, true /*hasUserBrightnessPoints*/,
+                false /*isDefaultBrightnessConfig*/);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         mTracker.writeEventsLocked(baos);
         mTracker.stop();
@@ -399,6 +410,9 @@ public class BrightnessTrackerTest {
         assertEquals(0.3, event.batteryLevel, FLOAT_DELTA);
         assertTrue(event.nightMode);
         assertEquals(3339, event.colorTemperature);
+        assertEquals(0.5f, event.powerBrightnessFactor, FLOAT_DELTA);
+        assertTrue(event.isUserSetBrightness);
+        assertFalse(event.isDefaultBrightnessConfig);
     }
 
     @Test
@@ -539,12 +553,16 @@ public class BrightnessTrackerTest {
     }
 
     private void notifyBrightnessChanged(BrightnessTracker tracker, float brightness) {
-        notifyBrightnessChanged(tracker, brightness, true /*userInitiated*/);
+        notifyBrightnessChanged(tracker, brightness, true /*userInitiated*/,
+                1.0f /*powerBrightnessFactor*/, false /*isUserSetBrightness*/,
+                false /*isDefaultBrightnessConfig*/);
     }
 
     private void notifyBrightnessChanged(BrightnessTracker tracker, float brightness,
-            boolean userInitiated) {
-        tracker.notifyBrightnessChanged(brightness, userInitiated);
+            boolean userInitiated, float powerBrightnessFactor, boolean isUserSetBrightness,
+            boolean isDefaultBrightnessConfig) {
+        tracker.notifyBrightnessChanged(brightness, userInitiated, powerBrightnessFactor,
+                isUserSetBrightness, isDefaultBrightnessConfig);
         mInjector.waitForHandler();
     }
 
@@ -573,7 +591,6 @@ public class BrightnessTrackerTest {
     private class TestInjector extends BrightnessTracker.Injector {
         SensorEventListener mSensorListener;
         BroadcastReceiver mBroadcastReceiver;
-        Map<String, Integer> mSystemIntSettings = new HashMap<>();
         Map<String, Integer> mSecureIntSettings = new HashMap<>();
         long mCurrentTimeMillis = System.currentTimeMillis();
         long mElapsedRealtimeNanos = SystemClock.elapsedRealtimeNanos();
@@ -639,7 +656,7 @@ public class BrightnessTrackerTest {
         }
 
         @Override
-        public AtomicFile getFile() {
+        public AtomicFile getFile(String filename) {
             // Don't have the test write / read from anywhere.
             return null;
         }

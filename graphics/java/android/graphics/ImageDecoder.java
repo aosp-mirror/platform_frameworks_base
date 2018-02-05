@@ -74,7 +74,7 @@ public final class ImageDecoder implements AutoCloseable {
         int getDensity() { return Bitmap.DENSITY_NONE; }
 
         /* @hide */
-        int computeDstDensity() {
+        final int computeDstDensity() {
             Resources res = getResources();
             if (res == null) {
                 return Bitmap.getDefaultDensity();
@@ -122,13 +122,19 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     private static class ContentResolverSource extends Source {
-        ContentResolverSource(@NonNull ContentResolver resolver, @NonNull Uri uri) {
+        ContentResolverSource(@NonNull ContentResolver resolver, @NonNull Uri uri,
+                @Nullable Resources res) {
             mResolver = resolver;
             mUri = uri;
+            mResources = res;
         }
 
         private final ContentResolver mResolver;
         private final Uri mUri;
+        private final Resources mResources;
+
+        @Nullable
+        Resources getResources() { return mResources; }
 
         @Override
         public ImageDecoder createImageDecoder() throws IOException {
@@ -438,6 +444,7 @@ public final class ImageDecoder implements AutoCloseable {
     private boolean mPreferRamOverQuality = false;
     private boolean mAsAlphaMask = false;
     private Rect    mCropRect;
+    private Rect    mOutPaddingRect;
     private Source  mSource;
 
     private PostProcessor          mPostProcessor;
@@ -511,7 +518,18 @@ public final class ImageDecoder implements AutoCloseable {
     @NonNull
     public static Source createSource(@NonNull ContentResolver cr,
             @NonNull Uri uri) {
-        return new ContentResolverSource(cr, uri);
+        return new ContentResolverSource(cr, uri, null);
+    }
+
+    /**
+     * Provide Resources for density scaling.
+     *
+     * @hide
+     */
+    @NonNull
+    public static Source createSource(@NonNull ContentResolver cr,
+            @NonNull Uri uri, @Nullable Resources res) {
+        return new ContentResolverSource(cr, uri, res);
     }
 
     /**
@@ -765,6 +783,18 @@ public final class ImageDecoder implements AutoCloseable {
     }
 
     /**
+     *  Set a Rect for retrieving nine patch padding.
+     *
+     *  If the image is a nine patch, this Rect will be set to the padding
+     *  rectangle during decode. Otherwise it will not be modified.
+     *
+     *  @hide
+     */
+    public void setOutPaddingRect(@NonNull Rect outPadding) {
+        mOutPaddingRect = outPadding;
+    }
+
+    /**
      *  Specify whether the {@link Bitmap} should be mutable.
      *
      *  <p>By default, a {@link Bitmap} created will be immutable, but that can
@@ -875,7 +905,6 @@ public final class ImageDecoder implements AutoCloseable {
                 postProcessPtr, mDesiredWidth, mDesiredHeight, mCropRect,
                 mMutable, mAllocator, mRequireUnpremultiplied,
                 mPreferRamOverQuality, mAsAlphaMask);
-
     }
 
     private void callHeaderDecoded(@Nullable OnHeaderDecodedListener listener,
@@ -948,7 +977,10 @@ public final class ImageDecoder implements AutoCloseable {
             if (np != null && NinePatch.isNinePatchChunk(np)) {
                 Rect opticalInsets = new Rect();
                 bm.getOpticalInsets(opticalInsets);
-                Rect padding = new Rect();
+                Rect padding = decoder.mOutPaddingRect;
+                if (padding == null) {
+                    padding = new Rect();
+                }
                 nGetPadding(decoder.mNativePtr, padding);
                 return new NinePatchDrawable(res, bm, np, padding,
                         opticalInsets, null);
@@ -991,6 +1023,15 @@ public final class ImageDecoder implements AutoCloseable {
             final int srcDensity = computeDensity(src, decoder);
             Bitmap bm = decoder.decodeBitmap();
             bm.setDensity(srcDensity);
+
+            Rect padding = decoder.mOutPaddingRect;
+            if (padding != null) {
+                byte[] np = bm.getNinePatchChunk();
+                if (np != null && NinePatch.isNinePatchChunk(np)) {
+                    nGetPadding(decoder.mNativePtr, padding);
+                }
+            }
+
             return bm;
         }
     }

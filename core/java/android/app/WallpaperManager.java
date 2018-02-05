@@ -51,6 +51,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.DeadSystemException;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -1002,7 +1003,7 @@ public class WallpaperManager {
                 Log.w(TAG, "WallpaperService not running");
                 throw new RuntimeException(new DeadSystemException());
             } else {
-                return sGlobals.mService.getWallpaperInfo(UserHandle.myUserId());
+                return sGlobals.mService.getWallpaperInfo(mContext.getUserId());
             }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1150,7 +1151,7 @@ public class WallpaperManager {
             ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(
                     "res:" + resources.getResourceName(resid),
                     mContext.getOpPackageName(), null, false, result, which, completion,
-                    UserHandle.myUserId());
+                    mContext.getUserId());
             if (fd != null) {
                 FileOutputStream fos = null;
                 boolean ok = false;
@@ -1255,7 +1256,7 @@ public class WallpaperManager {
             boolean allowBackup, @SetWallpaperFlags int which)
             throws IOException {
         return setBitmap(fullImage, visibleCropHint, allowBackup, which,
-                UserHandle.myUserId());
+                mContext.getUserId());
     }
 
     /**
@@ -1329,11 +1330,7 @@ public class WallpaperManager {
 
     private void copyStreamToWallpaperFile(InputStream data, FileOutputStream fos)
             throws IOException {
-        byte[] buffer = new byte[32768];
-        int amt;
-        while ((amt=data.read(buffer)) > 0) {
-            fos.write(buffer, 0, amt);
-        }
+        FileUtils.copy(data, fos);
     }
 
     /**
@@ -1406,7 +1403,7 @@ public class WallpaperManager {
         try {
             ParcelFileDescriptor fd = sGlobals.mService.setWallpaper(null,
                     mContext.getOpPackageName(), visibleCropHint, allowBackup,
-                    result, which, completion, UserHandle.myUserId());
+                    result, which, completion, mContext.getUserId());
             if (fd != null) {
                 FileOutputStream fos = null;
                 try {
@@ -1643,7 +1640,7 @@ public class WallpaperManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_COMPONENT)
     public boolean setWallpaperComponent(ComponentName name) {
-        return setWallpaperComponent(name, UserHandle.myUserId());
+        return setWallpaperComponent(name, mContext.getUserId());
     }
 
     /**

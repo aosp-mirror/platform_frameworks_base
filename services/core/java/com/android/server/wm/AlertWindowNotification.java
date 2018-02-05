@@ -72,20 +72,23 @@ class AlertWindowNotification {
     }
 
     /** Cancels the notification */
-    void cancel() {
+    void cancel(boolean deleteChannel) {
         // We can't call into NotificationManager with WM lock held since it might call into AM.
         // So, we post a message to do it later.
-        mService.mH.post(this::onCancelNotification);
+        mService.mH.post(() -> onCancelNotification(deleteChannel));
     }
 
     /** Don't call with the window manager lock held! */
-    private void onCancelNotification() {
+    private void onCancelNotification(boolean deleteChannel) {
         if (!mPosted) {
             // Notification isn't currently posted...
             return;
         }
         mPosted = false;
         mNotificationManager.cancel(mNotificationTag, NOTIFICATION_ID);
+        if (deleteChannel) {
+            mNotificationManager.deleteNotificationChannel(mNotificationTag);
+        }
     }
 
     /** Don't call with the window manager lock held! */
@@ -146,8 +149,12 @@ class AlertWindowNotification {
 
         final String nameChannel =
                 context.getString(R.string.alert_windows_notification_channel_name, appName);
-        final NotificationChannel channel =
-                new NotificationChannel(mNotificationTag, nameChannel, IMPORTANCE_MIN);
+
+        NotificationChannel channel = mNotificationManager.getNotificationChannel(mNotificationTag);
+        if (channel != null) {
+            return;
+        }
+        channel = new NotificationChannel(mNotificationTag, nameChannel, IMPORTANCE_MIN);
         channel.enableLights(false);
         channel.enableVibration(false);
         channel.setBlockableSystem(true);

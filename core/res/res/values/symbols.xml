@@ -266,6 +266,10 @@
   <java-symbol type="bool" name="config_mms_content_disposition_support" />
   <java-symbol type="string" name="config_ims_package" />
   <java-symbol type="bool" name="config_dynamic_bind_ims" />
+  <java-symbol type="string" name="config_wwan_network_service_package" />
+  <java-symbol type="string" name="config_wlan_network_service_package" />
+  <java-symbol type="string" name="config_wwan_data_service_package" />
+  <java-symbol type="string" name="config_wlan_data_service_package" />
   <java-symbol type="bool" name="config_networkSamplingWakesDevice" />
   <java-symbol type="bool" name="config_showMenuShortcutsWhenKeyboardPresent" />
   <java-symbol type="bool" name="config_sip_wifi_only" />
@@ -656,6 +660,7 @@
   <java-symbol type="string" name="chooseActivity" />
   <java-symbol type="string" name="config_default_dns_server" />
   <java-symbol type="string" name="config_ethernet_iface_regex" />
+  <java-symbol type="array" name="config_ethernet_interfaces" />
   <java-symbol type="string" name="config_forceVoiceInteractionServicePackage" />
   <java-symbol type="string" name="config_mms_user_agent" />
   <java-symbol type="string" name="config_mms_user_agent_profile_url" />
@@ -767,9 +772,6 @@
   <java-symbol type="string" name="kilobyteShort" />
   <java-symbol type="string" name="last_month" />
   <java-symbol type="string" name="launchBrowserDefault" />
-  <java-symbol type="string" name="lock_to_app_toast" />
-  <java-symbol type="string" name="lock_to_app_start" />
-  <java-symbol type="string" name="lock_to_app_exit" />
   <java-symbol type="string" name="lock_to_app_unlock_pin" />
   <java-symbol type="string" name="lock_to_app_unlock_pattern" />
   <java-symbol type="string" name="lock_to_app_unlock_password" />
@@ -2155,7 +2157,6 @@
   <java-symbol type="string" name="config_mobile_hotspot_provision_response" />
   <java-symbol type="integer" name="config_mobile_hotspot_provision_check_period" />
   <java-symbol type="string" name="config_wifi_tether_enable" />
-  <java-symbol type="integer" name="config_wifi_wakeup_available" />
   <java-symbol type="bool" name="config_intrusiveNotificationLed" />
   <java-symbol type="bool" name="config_notificationBadging" />
   <java-symbol type="dimen" name="preference_fragment_padding_bottom" />
@@ -2354,6 +2355,8 @@
   <java-symbol type="string" name="fingerprint_error_lockout_permanent" />
   <java-symbol type="string" name="fingerprint_name_template" />
   <java-symbol type="string" name="fingerprint_not_recognized" />
+  <java-symbol type="string" name="fingerprint_error_no_fingerprints" />
+  <java-symbol type="string" name="fingerprint_error_hw_not_present" />
 
   <!-- Fingerprint config -->
   <java-symbol type="integer" name="config_fingerprintMaxTemplatesPerUser"/>
@@ -2702,9 +2705,6 @@
   <java-symbol type="string" name="language_selection_title" />
   <java-symbol type="string" name="search_language_hint" />
 
-  <java-symbol type="layout" name="unlaunchable_app_activity" />
-  <java-symbol type="id" name="unlaunchable_app_title" />
-  <java-symbol type="id" name="unlaunchable_app_message" />
   <java-symbol type="string" name="work_mode_off_title" />
   <java-symbol type="string" name="work_mode_off_message" />
   <java-symbol type="string" name="work_mode_turn_on" />
@@ -3153,6 +3153,7 @@
   <java-symbol type="integer" name="config_storageManagerDaystoRetainDefault" />
   <java-symbol type="string" name="config_headlineFontFamily" />
   <java-symbol type="string" name="config_headlineFontFamilyLight" />
+  <java-symbol type="string" name="config_headlineFontFamilyMedium" />
 
   <java-symbol type="drawable" name="stat_sys_vitals" />
 

@@ -48,6 +48,7 @@ import com.android.systemui.plugins.VolumeDialogController.State;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -55,6 +56,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.function.Predicate;
 
+@Ignore
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
@@ -111,7 +113,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                     + " failed test", condition.test(view));
         }
     }
-
+/*
     @Test
     public void testContentDescriptions() {
         mDialog.show(SHOW_REASON_UNKNOWN);
@@ -218,4 +220,5 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         verify(mController, times(1)).setRingerMode(RINGER_MODE_NORMAL, false);
         verify(mController, times(1)).setStreamVolume(STREAM_RING, 0);
     }
+    */
 }

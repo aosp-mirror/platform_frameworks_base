@@ -54,6 +54,9 @@ const int FIELD_ID_MIN_PULL_INTERVAL_SEC = 4;
 
 void writeDimensionsValueProtoToStream(const DimensionsValue& dimensionsValue,
                                        ProtoOutputStream* protoOutput) {
+    if (!dimensionsValue.has_field()) {
+        return;
+    }
     protoOutput->write(FIELD_TYPE_INT32 | DIMENSIONS_VALUE_FIELD, dimensionsValue.field());
     switch (dimensionsValue.value_case()) {
         case DimensionsValue::ValueCase::kValueStr:
@@ -103,6 +106,9 @@ const int FIELD_CHILD = 3;
 
 void writeFieldProtoToStream(
     const Field& field, util::ProtoOutputStream* protoOutput) {
+    if (!field.has_field()) {
+        return;
+    }
     protoOutput->write(FIELD_TYPE_INT32 | FIELD_FIELD, field.field());
     if (field.has_position_index()) {
       protoOutput->write(FIELD_TYPE_INT32 | FIELD_POSITION_INDEX, field.position_index());

@@ -21,6 +21,7 @@ import static android.content.ContentProvider.getUserIdFromUri;
 import static android.content.ContentProvider.maybeAddUserId;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.Process.SYSTEM_UID;
 
 import android.Manifest.permission;
 import android.app.ActivityManager;
@@ -31,9 +32,11 @@ import android.app.slice.ISliceListener;
 import android.app.slice.ISliceManager;
 import android.app.slice.SliceManager;
 import android.app.slice.SliceSpec;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
@@ -66,8 +69,9 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -91,7 +95,9 @@ public class SliceManagerService extends ISliceManager.Stub {
     private final ArraySet<SliceGrant> mUserGrants = new ArraySet<>();
     private final Handler mHandler;
     private final ContentObserver mObserver;
+    @GuardedBy("mSliceAccessFile")
     private final AtomicFile mSliceAccessFile;
+    @GuardedBy("mAccessList")
     private final SliceFullAccessList mAccessList;
 
     public SliceManagerService(Context context) {
@@ -127,11 +133,19 @@ public class SliceManagerService extends ISliceManager.Stub {
                 InputStream input = mSliceAccessFile.openRead();
                 XmlPullParser parser = XmlPullParserFactory.newInstance().newPullParser();
                 parser.setInput(input, Encoding.UTF_8.name());
-                mAccessList.readXml(parser);
+                synchronized (mAccessList) {
+                    mAccessList.readXml(parser);
+                }
             } catch (IOException | XmlPullParserException e) {
                 Slog.d(TAG, "Can't read slice access file", e);
             }
         }
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
+        filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addDataScheme("package");
+        mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, filter, null, mHandler);
     }
 
     ///  ----- Lifecycle stuff -----
@@ -223,7 +237,9 @@ public class SliceManagerService extends ISliceManager.Stub {
         getContext().enforceCallingOrSelfPermission(permission.MANAGE_SLICE_PERMISSIONS,
                 "Slice granting requires MANAGE_SLICE_PERMISSIONS");
         if (allSlices) {
-            mAccessList.grantFullAccess(pkg, Binder.getCallingUserHandle().getIdentifier());
+            synchronized (mAccessList) {
+                mAccessList.grantFullAccess(pkg, Binder.getCallingUserHandle().getIdentifier());
+            }
             mHandler.post(mSaveAccessList);
         } else {
             synchronized (mLock) {
@@ -244,7 +260,71 @@ public class SliceManagerService extends ISliceManager.Stub {
         }
     }
 
+    // Backup/restore interface
+    @Override
+    public byte[] getBackupPayload(int user) {
+        if (Binder.getCallingUid() != SYSTEM_UID) {
+            throw new SecurityException("Caller must be system");
+        }
+        //TODO: http://b/22388012
+        if (user != UserHandle.USER_SYSTEM) {
+            Slog.w(TAG, "getBackupPayload: cannot backup policy for user " + user);
+            return null;
+        }
+        synchronized(mSliceAccessFile) {
+            final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try {
+                XmlSerializer out = XmlPullParserFactory.newInstance().newSerializer();
+                out.setOutput(baos, Encoding.UTF_8.name());
+                synchronized (mAccessList) {
+                    mAccessList.writeXml(out, user);
+                }
+                out.flush();
+                return baos.toByteArray();
+            } catch (IOException | XmlPullParserException e) {
+                Slog.w(TAG, "getBackupPayload: error writing payload for user " + user, e);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void applyRestore(byte[] payload, int user) {
+        if (Binder.getCallingUid() != SYSTEM_UID) {
+            throw new SecurityException("Caller must be system");
+        }
+        if (payload == null) {
+            Slog.w(TAG, "applyRestore: no payload to restore for user " + user);
+            return;
+        }
+        //TODO: http://b/22388012
+        if (user != UserHandle.USER_SYSTEM) {
+            Slog.w(TAG, "applyRestore: cannot restore policy for user " + user);
+            return;
+        }
+        synchronized(mSliceAccessFile) {
+            final ByteArrayInputStream bais = new ByteArrayInputStream(payload);
+            try {
+                XmlPullParser parser = XmlPullParserFactory.newInstance().newPullParser();
+                parser.setInput(bais, Encoding.UTF_8.name());
+                synchronized (mAccessList) {
+                    mAccessList.readXml(parser);
+                }
+                mHandler.post(mSaveAccessList);
+            } catch (NumberFormatException | XmlPullParserException | IOException e) {
+                Slog.w(TAG, "applyRestore: error reading payload", e);
+            }
+        }
+    }
+
     ///  ----- internal code -----
+    private void removeFullAccess(String pkg, int userId) {
+        synchronized (mAccessList) {
+            mAccessList.removeGrant(pkg, userId);
+        }
+        mHandler.post(mSaveAccessList);
+    }
+
     protected void removePinnedSlice(Uri uri) {
         synchronized (mLock) {
             mPinnedSlicesByUri.remove(uri).destroy();
@@ -444,7 +524,9 @@ public class SliceManagerService extends ISliceManager.Stub {
     }
 
     private boolean isGrantedFullAccess(String pkg, int userId) {
-        return mAccessList.hasFullAccess(pkg, userId);
+        synchronized (mAccessList) {
+            return mAccessList.hasFullAccess(pkg, userId);
+        }
     }
 
     private static ServiceThread createHandler() {
@@ -469,13 +551,44 @@ public class SliceManagerService extends ISliceManager.Stub {
                 try {
                     XmlSerializer out = XmlPullParserFactory.newInstance().newSerializer();
                     out.setOutput(stream, Encoding.UTF_8.name());
-                    mAccessList.writeXml(out);
+                    synchronized (mAccessList) {
+                        mAccessList.writeXml(out, UserHandle.USER_ALL);
+                    }
                     out.flush();
                     mSliceAccessFile.finishWrite(stream);
                 } catch (IOException | XmlPullParserException e) {
                     Slog.w(TAG, "Failed to save access file, restoring backup", e);
                     mSliceAccessFile.failWrite(stream);
                 }
+            }
+        }
+    };
+
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final int userId  = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+            if (userId == UserHandle.USER_NULL) {
+                Slog.w(TAG, "Intent broadcast does not contain user handle: " + intent);
+                return;
+            }
+            Uri data = intent.getData();
+            String pkg = data != null ? data.getSchemeSpecificPart() : null;
+            if (pkg == null) {
+                Slog.w(TAG, "Intent broadcast does not contain package name: " + intent);
+                return;
+            }
+            switch (intent.getAction()) {
+                case Intent.ACTION_PACKAGE_REMOVED:
+                    final boolean replacing =
+                            intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
+                    if (!replacing) {
+                        removeFullAccess(pkg, userId);
+                    }
+                    break;
+                case Intent.ACTION_PACKAGE_DATA_CLEARED:
+                    removeFullAccess(pkg, userId);
+                    break;
             }
         }
     };

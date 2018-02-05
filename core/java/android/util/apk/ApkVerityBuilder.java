@@ -106,18 +106,22 @@ abstract class ApkVerityBuilder {
         calculateFsveritySignatureInternal(apk, signatureInfo, null, null, header, extensions);
 
         MessageDigest md = MessageDigest.getInstance(JCA_DIGEST_ALGORITHM);
-        md.update(DEFAULT_SALT);
-        md.update(verityBlock);
+        md.update(header);
+        md.update(extensions);
         md.update(apkDigest);
         return md.digest();
     }
 
+    /**
+     * Internal method to generate various parts of FSVerity constructs, including the header,
+     * extensions, Merkle tree, and the tree's root hash.  The output buffer is flipped to the
+     * generated data size and is readey for consuming.
+     */
     private static void calculateFsveritySignatureInternal(
             RandomAccessFile apk, SignatureInfo signatureInfo, ByteBuffer treeOutput,
             ByteBuffer rootHashOutput, ByteBuffer headerOutput, ByteBuffer extensionsOutput)
             throws IOException, NoSuchAlgorithmException, DigestException {
         assertSigningBlockAlignedAndHasFullPages(signatureInfo);
-
         long signingBlockSize =
                 signatureInfo.centralDirOffset - signatureInfo.apkSigningBlockOffset;
         long dataSize = apk.length() - signingBlockSize - ZIP_EOCD_CENTRAL_DIR_OFFSET_FIELD_SIZE;
@@ -128,6 +132,7 @@ abstract class ApkVerityBuilder {
                     levelOffset, treeOutput);
             if (rootHashOutput != null) {
                 rootHashOutput.put(apkRootHash);
+                rootHashOutput.flip();
             }
         }
 
@@ -333,9 +338,9 @@ abstract class ApkVerityBuilder {
         buffer.put((byte) 0);               // auth block offset, disabled here
         buffer.put((byte) 2);               // extension count
         buffer.put(salt);                   // salt (8 bytes)
-        // skip(buffer, 22);                // reserved
+        skip(buffer, 22);                   // reserved
 
-        buffer.rewind();
+        buffer.flip();
         return buffer;
     }
 
@@ -396,12 +401,10 @@ abstract class ApkVerityBuilder {
             buffer.put((byte) ZIP_EOCD_CENTRAL_DIR_OFFSET_FIELD_SIZE);  // length
             skip(buffer, 7);                                            // reserved
             buffer.putInt(Math.toIntExact(signingBlockOffset));         // databytes
-
-            // There are extra kPadding bytes of 0s here, included in the total size field of the
-            // extension header. The output ByteBuffer is assumed to be initialized to 0.
+            skip(buffer, kPadding);                                     // padding
         }
 
-        buffer.rewind();
+        buffer.flip();
         return buffer;
     }
 

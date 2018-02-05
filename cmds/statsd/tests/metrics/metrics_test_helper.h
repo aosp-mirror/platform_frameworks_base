@@ -25,10 +25,12 @@ namespace statsd {
 
 class MockConditionWizard : public ConditionWizard {
 public:
-    MOCK_METHOD2(
+    MOCK_METHOD4(
             query,
             ConditionState(const int conditionIndex,
-                           const ConditionKey& conditionParameters));
+                           const ConditionKey& conditionParameters,
+                           const FieldMatcher& dimensionFields,
+                           std::unordered_set<HashableDimensionKey> *dimensionKeySet));
 };
 
 class MockStatsPullerManager : public StatsPullerManager {
@@ -39,6 +41,7 @@ public:
 };
 
 HashableDimensionKey getMockedDimensionKey(int tagId, int key, std::string value);
+MetricDimensionKey getMockedMetricDimensionKey(int tagId, int key, std::string value);
 
 }  // namespace statsd
 }  // namespace os

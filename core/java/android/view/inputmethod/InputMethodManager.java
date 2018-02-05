@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
@@ -2131,6 +2132,26 @@ public final class InputMethodManager {
     private void showInputMethodPickerLocked() {
         try {
             mService.showInputMethodPickerFromClient(mClient, SHOW_IM_PICKER_MODE_AUTO);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * A test API for CTS to make sure that {@link #showInputMethodPicker()} works as expected.
+     *
+     * <p>When customizing the implementation of {@link #showInputMethodPicker()} API, make sure
+     * that this test API returns when and only while and only while
+     * {@link #showInputMethodPicker()} is showing UI. Otherwise your OS implementation may not
+     * pass CTS.</p>
+     *
+     * @return {@code true} while and only while {@link #showInputMethodPicker()} is showing UI.
+     * @hide
+     */
+    @TestApi
+    public boolean isInputMethodPickerShown() {
+        try {
+            return mService.isInputMethodPickerShownForTest();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -383,8 +383,8 @@ public class LockSettingsService extends ILockSettings.Stub {
             return KeyStore.getInstance();
         }
 
-        public RecoverableKeyStoreManager getRecoverableKeyStoreManager() {
-            return RecoverableKeyStoreManager.getInstance(mContext);
+        public RecoverableKeyStoreManager getRecoverableKeyStoreManager(KeyStore keyStore) {
+            return RecoverableKeyStoreManager.getInstance(mContext, keyStore);
         }
 
         public IStorageManager getStorageManager() {
@@ -413,7 +413,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mInjector = injector;
         mContext = injector.getContext();
         mKeyStore = injector.getKeyStore();
-        mRecoverableKeyStoreManager = injector.getRecoverableKeyStoreManager();
+        mRecoverableKeyStoreManager = injector.getRecoverableKeyStoreManager(mKeyStore);
         mHandler = injector.getHandler();
         mStrongAuth = injector.getStrongAuth();
         mActivityManager = injector.getActivityManager();
@@ -1887,7 +1887,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mSpManager.removeUser(userId);
         mStorage.removeUser(userId);
         mStrongAuth.removeUser(userId);
-        cleanSpCache();
+        tryRemoveUserFromSpCacheLater(userId);
 
         final KeyStore ks = KeyStore.getInstance();
         ks.onUserRemoved(userId);
@@ -2064,6 +2064,16 @@ public class LockSettingsService extends ILockSettings.Stub {
         return mRecoverableKeyStoreManager.generateAndStoreKey(alias);
     }
 
+    @Override
+    public String generateKey(@NonNull String alias, byte[] account) throws RemoteException {
+        return mRecoverableKeyStoreManager.generateKey(alias, account);
+    }
+
+    @Override
+    public String getKey(@NonNull String alias) throws RemoteException {
+        return mRecoverableKeyStoreManager.getKey(alias);
+    }
+
     private static final String[] VALID_SETTINGS = new String[] {
             LockPatternUtils.LOCKOUT_PERMANENT_KEY,
             LockPatternUtils.LOCKOUT_ATTEMPT_DEADLINE,
@@ -2141,6 +2151,13 @@ public class LockSettingsService extends ILockSettings.Stub {
     private SparseArray<AuthenticationToken> mSpCache = new SparseArray();
 
     private void onAuthTokenKnownForUser(@UserIdInt int userId, AuthenticationToken auth) {
+        // Preemptively cache the SP and then try to remove it in a handler.
+        Slog.i(TAG, "Caching SP for user " + userId);
+        synchronized (mSpManager) {
+            mSpCache.put(userId, auth);
+        }
+        tryRemoveUserFromSpCacheLater(userId);
+
         // Pass the primary user's auth secret to the HAL
         if (mAuthSecretService != null && mUserManager.getUserInfo(userId).isPrimary()) {
             try {
@@ -2154,33 +2171,25 @@ public class LockSettingsService extends ILockSettings.Stub {
                 Slog.w(TAG, "Failed to pass primary user secret to AuthSecret HAL", e);
             }
         }
-
-        // Update the SP cache, removing the entry when allowed
-        synchronized (mSpManager) {
-            if (shouldCacheSpForUser(userId)) {
-                Slog.i(TAG, "Caching SP for user " + userId);
-                mSpCache.put(userId, auth);
-            } else {
-                Slog.i(TAG, "Not caching SP for user " + userId);
-                mSpCache.delete(userId);
-            }
-        }
     }
 
-    /** Clean up the SP cache by removing unneeded entries. */
-    private void cleanSpCache() {
-        synchronized (mSpManager) {
-            // Preserve indicies after removal by iterating backwards
-            for (int i = mSpCache.size() - 1; i >= 0; --i) {
-                final int userId = mSpCache.keyAt(i);
-                if (!shouldCacheSpForUser(userId)) {
-                    Slog.i(TAG, "Uncaching SP for user " + userId);
-                    mSpCache.removeAt(i);
+    private void tryRemoveUserFromSpCacheLater(@UserIdInt int userId) {
+        mHandler.post(() -> {
+            if (!shouldCacheSpForUser(userId)) {
+                // The transition from 'should not cache' to 'should cache' can only happen if
+                // certain admin apps are installed after provisioning e.g. via adb. This is not
+                // a common case and we do not seamlessly support; it may result in the SP not
+                // being cached when it is needed. The cache can be re-populated by verifying
+                // the credential again.
+                Slog.i(TAG, "Removing SP from cache for user " + userId);
+                synchronized (mSpManager) {
+                    mSpCache.remove(userId);
                 }
             }
-        }
+        });
     }
 
+    /** Do not hold any of the locks from this service when calling. */
     private boolean shouldCacheSpForUser(@UserIdInt int userId) {
         // Before the user setup has completed, an admin could be installed that requires the SP to
         // be cached (see below).
@@ -2731,7 +2740,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         @Override
-        public void onChange(boolean selfChange, Uri uri) {
+        public void onChange(boolean selfChange, Uri uri, @UserIdInt int userId) {
             if (mDeviceProvisionedUri.equals(uri)) {
                 updateRegistration();
 
@@ -2741,7 +2750,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                     clearFrpCredentialIfOwnerNotSecure();
                 }
             } else if (mUserSetupCompleteUri.equals(uri)) {
-                cleanSpCache();
+                tryRemoveUserFromSpCacheLater(userId);
             }
         }
 

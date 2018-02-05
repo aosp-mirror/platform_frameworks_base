@@ -16,39 +16,54 @@
 
 package android.text.style;
 
+import android.annotation.IntRange;
+import android.annotation.Px;
+
 /**
- * Represents a single tab stop on a line.
+ * Paragraph affecting span that changes the position of the tab with respect to
+ * the leading margin of the line. <code>TabStopSpan</code> will only affect the first tab
+ * encountered on the first line of the text.
  */
-public interface TabStopSpan
-extends ParagraphStyle
-{
-    /**
-     * Returns the offset of the tab stop from the leading margin of the
-     * line.
-     * @return the offset
-     */
-    public int getTabStop();
+public interface TabStopSpan extends ParagraphStyle {
 
     /**
-     * The default implementation of TabStopSpan.
+     * Returns the offset of the tab stop from the leading margin of the line, in pixels.
+     *
+     * @return the offset, in pixels
      */
-    public static class Standard
-    implements TabStopSpan
-    {
+    int getTabStop();
+
+    /**
+     * The default implementation of TabStopSpan that allows setting the offset of the tab stop
+     * from the leading margin of the first line of text.
+     * <p>
+     * Let's consider that we have the following text: <i>"\tParagraph text beginning with tab."</i>
+     * and we want to move the tab stop with 100px. This can be achieved like this:
+     * <pre>
+     * SpannableString string = new SpannableString("\tParagraph text beginning with tab.");
+     * string.setSpan(new TabStopSpan.Standard(100), 0, string.length(),
+     * Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);</pre>
+     * <img src="{@docRoot}reference/android/images/text/style/tabstopspan.png" />
+     * <figcaption>Text with a tab stop and a <code>TabStopSpan</code></figcaption>
+     */
+    class Standard implements TabStopSpan {
+
+        @Px
+        private int mTabOffset;
+
         /**
-         * Constructor.
+         * Constructs a {@link TabStopSpan.Standard} based on an offset.
          *
-         * @param where the offset of the tab stop from the leading margin of
-         *        the line
+         * @param offset the offset of the tab stop from the leading margin of
+         *               the line, in pixels
          */
-        public Standard(int where) {
-            mTab = where;
+        public Standard(@IntRange(from = 0) int offset) {
+            mTabOffset = offset;
         }
 
+        @Override
         public int getTabStop() {
-            return mTab;
+            return mTabOffset;
         }
-
-        private int mTab;
     }
 }

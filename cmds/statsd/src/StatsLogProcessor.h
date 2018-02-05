@@ -104,7 +104,10 @@ private:
     FRIEND_TEST(MetricConditionLinkE2eTest, TestMultiplePredicatesAndLinks);
     FRIEND_TEST(AttributionE2eTest, TestAttributionMatchAndSlice);
     FRIEND_TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent);
-
+    FRIEND_TEST(DimensionInConditionE2eTest, TestCountMetricNoLink);
+    FRIEND_TEST(DimensionInConditionE2eTest, TestCountMetricWithLink);
+    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetricNoLink);
+    FRIEND_TEST(DimensionInConditionE2eTest, TestDurationMetricWithLink);
 };
 
 }  // namespace statsd

@@ -27,7 +27,6 @@ import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.uidPoliciesToString;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
-import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.telephony.CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED;
 import static android.telephony.CarrierConfigManager.DATA_CYCLE_THRESHOLD_DISABLED;
@@ -35,12 +34,12 @@ import static android.telephony.CarrierConfigManager.DATA_CYCLE_USE_PLATFORM_DEF
 import static android.telephony.CarrierConfigManager.KEY_DATA_LIMIT_THRESHOLD_BYTES_LONG;
 import static android.telephony.CarrierConfigManager.KEY_DATA_WARNING_THRESHOLD_BYTES_LONG;
 import static android.telephony.CarrierConfigManager.KEY_MONTHLY_DATA_CYCLE_DAY_INT;
-import static android.telephony.SubscriptionPlan.LIMIT_BEHAVIOR_THROTTLED;
-import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
+import static android.telephony.SubscriptionPlan.LIMIT_BEHAVIOR_DISABLED;
 import static android.text.format.Time.TIMEZONE_UTC;
 
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT_SNOOZED;
+import static com.android.server.net.NetworkPolicyManagerService.TYPE_RAPID;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_WARNING;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -72,9 +71,9 @@ import android.Manifest;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IActivityManager;
-import android.app.INotificationManager;
 import android.app.IUidObserver;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.Context;
 import android.content.Intent;
@@ -107,12 +106,12 @@ import android.os.PowerSaveState;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionPlan;
 import android.telephony.TelephonyManager;
+import android.test.suitebuilder.annotation.MediumTest;
 import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.DataUnit;
@@ -193,6 +192,8 @@ public class NetworkPolicyManagerServiceTest {
     private static final String TEST_IFACE = "test0";
     private static final String TEST_SSID = "AndroidAP";
     private static final String TEST_IMSI = "310210";
+    private static final int TEST_SUB_ID = 42;
+    private static final int TEST_NET_ID = 24;
 
     private static NetworkTemplate sTemplateWifi = NetworkTemplate.buildTemplateWifi(TEST_SSID);
 
@@ -216,7 +217,7 @@ public class NetworkPolicyManagerServiceTest {
     private @Mock INetworkManagementService mNetworkManager;
     private @Mock TrustedTime mTime;
     private @Mock IConnectivityManager mConnManager;
-    private @Mock INotificationManager mNotifManager;
+    private @Mock NotificationManager mNotifManager;
     private @Mock PackageManager mPackageManager;
     private @Mock IPackageManager mIpm;
     private @Mock SubscriptionManager mSubscriptionManager;
@@ -312,6 +313,8 @@ public class NetworkPolicyManagerServiceTest {
                         return mCarrierConfigManager;
                     case Context.TELEPHONY_SERVICE:
                         return mTelephonyManager;
+                    case Context.NOTIFICATION_SERVICE:
+                        return mNotifManager;
                     default:
                         return super.getSystemService(name);
                 }
@@ -340,7 +343,6 @@ public class NetworkPolicyManagerServiceTest {
         mService = new NetworkPolicyManagerService(mServiceContext, mActivityManager, mStatsService,
                 mNetworkManager, mIpm, mTime, mPolicyDir, true);
         mService.bindConnectivityManager(mConnManager);
-        mService.bindNotificationManager(mNotifManager);
         mPolicyListener = new NetworkPolicyListenerAnswer(mService);
 
         // Sets some common expectations.
@@ -960,124 +962,12 @@ public class NetworkPolicyManagerServiceTest {
                 sTemplateWifi, CYCLE_DAY, TIMEZONE_UTC, 1 * MB_IN_BYTES, 2 * MB_IN_BYTES, false));
         mPolicyListener.waitAndVerify().onMeteredIfacesChanged(eq(new String[]{TEST_IFACE}));
 
-        // TODO: consider making strongly ordered mock
-        verifyPolicyDataEnable(TYPE_WIFI, true);
-        verifyRemoveInterfaceQuota(TEST_IFACE);
-        verifySetInterfaceQuota(TEST_IFACE, (2 * MB_IN_BYTES) - 512);
+        verify(mNetworkManager, atLeastOnce()).setInterfaceQuota(TEST_IFACE,
+                (2 * MB_IN_BYTES) - 512);
     }
 
     @Test
-    public void testOverWarningLimitNotification() throws Exception {
-        NetworkState[] state = null;
-        NetworkStats stats = null;
-        Future<String> tagFuture = null;
-
-        final int CYCLE_DAY = 15;
-        final long NOW = parseTime("2007-03-10T00:00Z");
-        final long CYCLE_START = parseTime("2007-02-15T00:00Z");
-        final long CYCLE_END = parseTime("2007-03-15T00:00Z");
-
-        setCurrentTimeMillis(NOW);
-
-        // assign wifi policy
-        state = new NetworkState[] {};
-        stats = new NetworkStats(getElapsedRealtime(), 1)
-                .addIfaceValues(TEST_IFACE, 0L, 0L, 0L, 0L);
-
-        {
-            expectCurrentTime();
-            when(mConnManager.getAllNetworkState()).thenReturn(state);
-            when(mStatsService.getNetworkTotalBytes(sTemplateWifi, CYCLE_START,
-                    CYCLE_END)).thenReturn(stats.getTotalBytes());
-
-            mPolicyListener.expect().onMeteredIfacesChanged(any());
-            setNetworkPolicies(new NetworkPolicy(sTemplateWifi, CYCLE_DAY, TIMEZONE_UTC, 1
-                    * MB_IN_BYTES, 2 * MB_IN_BYTES, false));
-            mPolicyListener.waitAndVerify().onMeteredIfacesChanged(any());
-            verifyPolicyDataEnable(TYPE_WIFI, true);
-        }
-
-        // bring up wifi network
-        incrementCurrentTime(MINUTE_IN_MILLIS);
-        state = new NetworkState[] { buildWifi() };
-        stats = new NetworkStats(getElapsedRealtime(), 1)
-                .addIfaceValues(TEST_IFACE, 0L, 0L, 0L, 0L);
-
-        {
-            expectCurrentTime();
-            when(mConnManager.getAllNetworkState()).thenReturn(state);
-            when(mStatsService.getNetworkTotalBytes(sTemplateWifi, CYCLE_START,
-                    CYCLE_END)).thenReturn(stats.getTotalBytes());
-
-            mPolicyListener.expect().onMeteredIfacesChanged(any());
-            mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
-            mPolicyListener.waitAndVerify().onMeteredIfacesChanged(eq(new String[]{TEST_IFACE}));
-
-            verifyPolicyDataEnable(TYPE_WIFI, true);
-            verifyRemoveInterfaceQuota(TEST_IFACE);
-            verifySetInterfaceQuota(TEST_IFACE, 2 * MB_IN_BYTES);
-        }
-
-        // go over warning, which should kick notification
-        incrementCurrentTime(MINUTE_IN_MILLIS);
-        stats = new NetworkStats(getElapsedRealtime(), 1)
-                .addIfaceValues(TEST_IFACE, 1536 * KB_IN_BYTES, 15L, 0L, 0L);
-
-        {
-            expectCurrentTime();
-            when(mStatsService.getNetworkTotalBytes(sTemplateWifi, CYCLE_START,
-                    CYCLE_END)).thenReturn(stats.getTotalBytes());
-            tagFuture = expectEnqueueNotification();
-
-            mNetworkObserver.limitReached(null, TEST_IFACE);
-
-            assertNotificationType(TYPE_WARNING, tagFuture.get());
-            verifyPolicyDataEnable(TYPE_WIFI, true);
-
-        }
-
-        // go over limit, which should kick notification and dialog
-        incrementCurrentTime(MINUTE_IN_MILLIS);
-        stats = new NetworkStats(getElapsedRealtime(), 1)
-                .addIfaceValues(TEST_IFACE, 5 * MB_IN_BYTES, 512L, 0L, 0L);
-
-        {
-            expectCurrentTime();
-            when(mStatsService.getNetworkTotalBytes(sTemplateWifi, CYCLE_START,
-                    CYCLE_END)).thenReturn(stats.getTotalBytes());
-            tagFuture = expectEnqueueNotification();
-
-            mNetworkObserver.limitReached(null, TEST_IFACE);
-
-            assertNotificationType(TYPE_LIMIT, tagFuture.get());
-            verifyPolicyDataEnable(TYPE_WIFI, false);
-        }
-
-        // now snooze policy, which should remove quota
-        incrementCurrentTime(MINUTE_IN_MILLIS);
-
-        {
-            expectCurrentTime();
-            when(mConnManager.getAllNetworkState()).thenReturn(state);
-            when(mStatsService.getNetworkTotalBytes(sTemplateWifi, CYCLE_START,
-                    CYCLE_END)).thenReturn(stats.getTotalBytes());
-            tagFuture = expectEnqueueNotification();
-
-            mPolicyListener.expect().onMeteredIfacesChanged(any());
-            mService.snoozeLimit(sTemplateWifi);
-            mPolicyListener.waitAndVerify().onMeteredIfacesChanged(eq(new String[]{TEST_IFACE}));
-
-            assertNotificationType(TYPE_LIMIT_SNOOZED, tagFuture.get());
-            // snoozed interface still has high quota so background data is
-            // still restricted.
-            verifyRemoveInterfaceQuota(TEST_IFACE);
-            verifySetInterfaceQuota(TEST_IFACE, Long.MAX_VALUE);
-            verifyPolicyDataEnable(TYPE_WIFI, true);
-        }
-    }
-
-    @Test
-    public void testRapidNotification() throws Exception {
+    public void testNotificationWarningLimitSnooze() throws Exception {
         // Create a place to store fake usage
         final NetworkStatsHistory history = new NetworkStatsHistory(TimeUnit.HOURS.toMillis(1));
         when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
@@ -1090,38 +980,133 @@ public class NetworkPolicyManagerServiceTest {
                     }
                 });
 
-        // Define simple data plan which gives us effectively 60MB/day
+        // Get active mobile network in place
+        expectMobileDefaults();
+        mService.updateNetworks();
+
+        // Define simple data plan
         final SubscriptionPlan plan = SubscriptionPlan.Builder
                 .createRecurringMonthly(ZonedDateTime.parse("2015-11-01T00:00:00.00Z"))
-                .setDataLimit(DataUnit.MEGABYTES.toBytes(1800), LIMIT_BEHAVIOR_THROTTLED)
+                .setDataLimit(DataUnit.MEGABYTES.toBytes(1800), LIMIT_BEHAVIOR_DISABLED)
                 .build();
-        mService.setSubscriptionPlans(42, new SubscriptionPlan[] { plan },
+        mService.setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[] { plan },
                 mServiceContext.getOpPackageName());
-
-        // And get that active network in place
-        when(mConnManager.getAllNetworkState()).thenReturn(new NetworkState[] {
-                new NetworkState(null, new LinkProperties(),
-                        new NetworkCapabilities().addTransportType(TRANSPORT_CELLULAR)
-                                .setNetworkSpecifier(new StringNetworkSpecifier("42")),
-                        new Network(42), TEST_IMSI, null)
-        });
-        mService.updateNetworks();
 
         // We're 20% through the month (6 days)
         final long start = parseTime("2015-11-01T00:00Z");
         final long end = parseTime("2015-11-07T00:00Z");
         setCurrentTimeMillis(end);
+        expectCurrentTime();
 
-        // Using 20% of data in 20% is normal
+        // Normal usage means no notification
+        {
+            history.removeBucketsBefore(Long.MAX_VALUE);
+            history.recordData(start, end,
+                    new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(360), 0L, 0L, 0L, 0));
+
+            reset(mTelephonyManager, mNetworkManager, mNotifManager);
+            expectMobileDefaults();
+
+            mService.updateNetworks();
+
+            verify(mTelephonyManager, atLeastOnce()).setPolicyDataEnabled(true, TEST_SUB_ID);
+            verify(mNetworkManager, atLeastOnce()).setInterfaceQuota(TEST_IFACE,
+                    DataUnit.MEGABYTES.toBytes(1800 - 360));
+            verify(mNotifManager, never()).notifyAsUser(any(), anyInt(), any(), any());
+        }
+
+        // Push over warning
+        {
+            history.removeBucketsBefore(Long.MAX_VALUE);
+            history.recordData(start, end,
+                    new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1799), 0L, 0L, 0L, 0));
+
+            reset(mTelephonyManager, mNetworkManager, mNotifManager);
+            expectMobileDefaults();
+
+            mService.updateNetworks();
+
+            verify(mTelephonyManager, atLeastOnce()).setPolicyDataEnabled(true, TEST_SUB_ID);
+            verify(mNetworkManager, atLeastOnce()).setInterfaceQuota(TEST_IFACE,
+                    DataUnit.MEGABYTES.toBytes(1800 - 1799));
+            verify(mNotifManager, atLeastOnce()).notifyAsUser(any(), eq(TYPE_WARNING),
+                    isA(Notification.class), eq(UserHandle.ALL));
+        }
+
+        // Push over limit
+        {
+            history.removeBucketsBefore(Long.MAX_VALUE);
+            history.recordData(start, end,
+                    new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1810), 0L, 0L, 0L, 0));
+
+            reset(mTelephonyManager, mNetworkManager, mNotifManager);
+            expectMobileDefaults();
+
+            mService.updateNetworks();
+
+            verify(mTelephonyManager, atLeastOnce()).setPolicyDataEnabled(false, TEST_SUB_ID);
+            verify(mNetworkManager, atLeastOnce()).setInterfaceQuota(TEST_IFACE, 1);
+            verify(mNotifManager, atLeastOnce()).notifyAsUser(any(), eq(TYPE_LIMIT),
+                    isA(Notification.class), eq(UserHandle.ALL));
+        }
+
+        // Snooze limit
+        {
+            reset(mTelephonyManager, mNetworkManager, mNotifManager);
+            expectMobileDefaults();
+
+            mService.snoozeLimit(NetworkTemplate.buildTemplateMobileAll(TEST_IMSI));
+            mService.updateNetworks();
+
+            verify(mTelephonyManager, atLeastOnce()).setPolicyDataEnabled(true, TEST_SUB_ID);
+            verify(mNetworkManager, atLeastOnce()).setInterfaceQuota(TEST_IFACE,
+                    Long.MAX_VALUE);
+            verify(mNotifManager, atLeastOnce()).notifyAsUser(any(), eq(TYPE_LIMIT_SNOOZED),
+                    isA(Notification.class), eq(UserHandle.ALL));
+        }
+    }
+
+    @Test
+    public void testNotificationRapid() throws Exception {
+        // Create a place to store fake usage
+        final NetworkStatsHistory history = new NetworkStatsHistory(TimeUnit.HOURS.toMillis(1));
+        when(mStatsService.getNetworkTotalBytes(any(), anyLong(), anyLong()))
+                .thenAnswer(new Answer<Long>() {
+                    @Override
+                    public Long answer(InvocationOnMock invocation) throws Throwable {
+                        final NetworkStatsHistory.Entry entry = history.getValues(
+                                invocation.getArgument(1), invocation.getArgument(2), null);
+                        return entry.rxBytes + entry.txBytes;
+                    }
+                });
+
+        // Get active mobile network in place
+        expectMobileDefaults();
+        mService.updateNetworks();
+
+        // Define simple data plan which gives us effectively 60MB/day
+        final SubscriptionPlan plan = SubscriptionPlan.Builder
+                .createRecurringMonthly(ZonedDateTime.parse("2015-11-01T00:00:00.00Z"))
+                .setDataLimit(DataUnit.MEGABYTES.toBytes(1800), LIMIT_BEHAVIOR_DISABLED)
+                .build();
+        mService.setSubscriptionPlans(TEST_SUB_ID, new SubscriptionPlan[] { plan },
+                mServiceContext.getOpPackageName());
+
+        // We're 20% through the month (6 days)
+        final long start = parseTime("2015-11-01T00:00Z");
+        final long end = parseTime("2015-11-07T00:00Z");
+        setCurrentTimeMillis(end);
+        expectCurrentTime();
+
+        // Using 20% data in 20% time is normal
         {
             history.removeBucketsBefore(Long.MAX_VALUE);
             history.recordData(start, end,
                     new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(360), 0L, 0L, 0L, 0));
 
             reset(mNotifManager);
-            mService.updateNotifications();
-            verify(mNotifManager, never()).enqueueNotificationWithTag(any(), any(), any(),
-                    anyInt(), any(), anyInt());
+            mService.updateNetworks();
+            verify(mNotifManager, never()).notifyAsUser(any(), anyInt(), any(), any());
         }
 
         // Using 80% data in 20% time is alarming
@@ -1131,9 +1116,9 @@ public class NetworkPolicyManagerServiceTest {
                     new NetworkStats.Entry(DataUnit.MEGABYTES.toBytes(1440), 0L, 0L, 0L, 0));
 
             reset(mNotifManager);
-            mService.updateNotifications();
-            verify(mNotifManager, atLeastOnce()).enqueueNotificationWithTag(any(), any(), any(),
-                    anyInt(), any(), anyInt());
+            mService.updateNetworks();
+            verify(mNotifManager, atLeastOnce()).notifyAsUser(any(), eq(TYPE_RAPID),
+                    isA(Notification.class), eq(UserHandle.ALL));
         }
     }
 
@@ -1165,9 +1150,8 @@ public class NetworkPolicyManagerServiceTest {
                     true));
             mPolicyListener.waitAndVerify().onMeteredIfacesChanged(eq(new String[]{TEST_IFACE}));
 
-            verifyPolicyDataEnable(TYPE_WIFI, true);
-            verifyRemoveInterfaceQuota(TEST_IFACE);
-            verifySetInterfaceQuota(TEST_IFACE, Long.MAX_VALUE);
+            verify(mNetworkManager, atLeastOnce()).setInterfaceQuota(TEST_IFACE,
+                    Long.MAX_VALUE);
         }
     }
 
@@ -1426,6 +1410,26 @@ public class NetworkPolicyManagerServiceTest {
                 true);
     }
 
+    private NetworkInfo buildNetworkInfo() {
+        final NetworkInfo ni = new NetworkInfo(ConnectivityManager.TYPE_MOBILE,
+                TelephonyManager.NETWORK_TYPE_LTE, null, null);
+        ni.setDetailedState(NetworkInfo.DetailedState.CONNECTED, null, null);
+        return ni;
+    }
+
+    private LinkProperties buildLinkProperties(String iface) {
+        final LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName(iface);
+        return lp;
+    }
+
+    private NetworkCapabilities buildNetworkCapabilities(int subId) {
+        final NetworkCapabilities nc = new NetworkCapabilities();
+        nc.addTransportType(TRANSPORT_CELLULAR);
+        nc.setNetworkSpecifier(new StringNetworkSpecifier(String.valueOf(subId)));
+        return nc;
+    }
+
     private NetworkPolicy buildDefaultFakeMobilePolicy() {
         NetworkPolicy p = mService.buildDefaultMobilePolicy(FAKE_SUB_ID, FAKE_SUBSCRIBER_ID);
         // set a deterministic cycle date
@@ -1478,30 +1482,21 @@ public class NetworkPolicyManagerServiceTest {
         when(mTime.getCacheCertainty()).thenReturn(0L);
     }
 
-    private Future<String> expectEnqueueNotification() throws Exception {
-        final FutureAnswer<String> futureAnswer = new FutureAnswer<String>(2);
-        doAnswer(futureAnswer).when(mNotifManager).enqueueNotificationWithTag(
-                anyString(), anyString(), anyString() /* capture here (index 2)*/,
-                anyInt(), isA(Notification.class), anyInt());
-        return futureAnswer;
-    }
-
     private void expectHasInternetPermission(int uid, boolean hasIt) throws Exception {
         when(mIpm.checkUidPermission(Manifest.permission.INTERNET, uid)).thenReturn(
                 hasIt ? PackageManager.PERMISSION_GRANTED : PackageManager.PERMISSION_DENIED);
     }
 
-    private void verifySetInterfaceQuota(String iface, long quotaBytes) throws Exception {
-        verify(mNetworkManager, atLeastOnce()).setInterfaceQuota(iface, quotaBytes);
-    }
-
-    private void verifyRemoveInterfaceQuota(String iface) throws Exception {
-        verify(mNetworkManager, atLeastOnce()).removeInterfaceQuota(iface);
-    }
-
-    private Future<Void> verifyPolicyDataEnable(int type, boolean enabled) throws Exception {
-        // TODO: bring back this test
-        return null;
+    private void expectMobileDefaults() throws Exception {
+        when(mSubscriptionManager.getActiveSubscriptionIdList()).thenReturn(
+                new int[] { TEST_SUB_ID });
+        when(mTelephonyManager.getSubscriberId(TEST_SUB_ID)).thenReturn(TEST_IMSI);
+        when(mConnManager.getAllNetworkState()).thenReturn(new NetworkState[] {
+                new NetworkState(buildNetworkInfo(),
+                        buildLinkProperties(TEST_IFACE),
+                        buildNetworkCapabilities(TEST_SUB_ID),
+                        new Network(TEST_NET_ID), TEST_IMSI, null)
+        });
     }
 
     private void verifyAdvisePersistThreshold() throws Exception {
@@ -1516,21 +1511,6 @@ public class NetworkPolicyManagerServiceTest {
             } catch (TimeoutException e) {
                 throw new RuntimeException(e);
             }
-        }
-    }
-
-    private static class FutureAnswer<T> extends TestAbstractFuture<T> implements Answer<Void> {
-        private final int index;
-
-        FutureAnswer(int index) {
-            this.index = index;
-        }
-        @Override
-        public Void answer(InvocationOnMock invocation) throws Throwable {
-            @SuppressWarnings("unchecked")
-            T captured = (T) invocation.getArguments()[index];
-            set(captured);
-            return null;
         }
     }
 

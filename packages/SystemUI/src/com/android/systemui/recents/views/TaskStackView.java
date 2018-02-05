@@ -95,6 +95,7 @@ import com.android.systemui.recents.views.grid.GridTaskView;
 import com.android.systemui.recents.views.grid.TaskGridLayoutAlgorithm;
 import com.android.systemui.recents.views.grid.TaskViewFocusFrame;
 
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -2187,8 +2188,7 @@ public class TaskStackView extends FrameLayout implements TaskStack.TaskStackCal
     private void readSystemFlags() {
         SystemServicesProxy ssp = Recents.getSystemServices();
         mTouchExplorationEnabled = ssp.isTouchExplorationEnabled();
-        mScreenPinningEnabled = ssp.getSystemSetting(getContext(),
-                Settings.System.LOCK_TO_APP_ENABLED) != 0;
+        mScreenPinningEnabled = ActivityManagerWrapper.getInstance().isLockToAppEnabled();
     }
 
     private void updateStackActionButtonVisibility() {

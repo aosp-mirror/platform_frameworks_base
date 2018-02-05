@@ -55,7 +55,7 @@ public final class MicrophoneInfo {
     /**
      * Unknown microphone directionality.
      */
-    public static final int DIRECTIONALITY_UNKNOW = 0;
+    public static final int DIRECTIONALITY_UNKNOWN = 0;
 
     /**
      * Microphone directionality type: omni.
@@ -104,7 +104,7 @@ public final class MicrophoneInfo {
 
     /** @hide */
     @IntDef(flag = true, prefix = { "DIRECTIONALITY_" }, value = {
-            DIRECTIONALITY_UNKNOW,
+            DIRECTIONALITY_UNKNOWN,
             DIRECTIONALITY_OMNI,
             DIRECTIONALITY_BI_DIRECTIONAL,
             DIRECTIONALITY_CARDIOID,
@@ -309,7 +309,7 @@ public final class MicrophoneInfo {
 
     /**
      * Returns the directionality of microphone. The return value is one of
-     * {@link #DIRECTIONALITY_UNKNOW}, {@link #DIRECTIONALITY_OMNI},
+     * {@link #DIRECTIONALITY_UNKNOWN}, {@link #DIRECTIONALITY_OMNI},
      * {@link #DIRECTIONALITY_BI_DIRECTIONAL}, {@link #DIRECTIONALITY_CARDIOID},
      * {@link #DIRECTIONALITY_HYPER_CARDIOID}, or {@link #DIRECTIONALITY_SUPER_CARDIOID}.
      *

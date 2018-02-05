@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+
 import com.android.internal.util.Preconditions;
 
 /**
@@ -103,6 +104,17 @@ public class UsbConfiguration implements Parcelable {
      */
     public boolean isRemoteWakeup() {
         return (mAttributes & ATTR_REMOTE_WAKEUP) != 0;
+    }
+
+    /**
+     * Returns the attributes of this configuration
+     *
+     * @return the configuration's attributes
+     *
+     * @hide
+     */
+    public int getAttributes() {
+        return mAttributes;
     }
 
     /**

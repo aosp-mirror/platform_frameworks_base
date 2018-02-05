@@ -23,19 +23,25 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
-import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
+import android.content.pm.PackageManager;
+import android.hardware.biometrics.BiometricAuthenticator;
+import android.hardware.biometrics.BiometricFingerprintConstants;
+import android.hardware.biometrics.CryptoObject;
 import android.hardware.fingerprint.IFingerprintDialogReceiver;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.text.TextUtils;
 
+import java.security.Signature;
 import java.util.concurrent.Executor;
+
+import javax.crypto.Cipher;
+import javax.crypto.Mac;
 
 /**
  * A class that manages a system-provided fingerprint dialog.
  */
-public class FingerprintDialog {
+public class FingerprintDialog implements BiometricAuthenticator, BiometricFingerprintConstants {
 
     /**
      * @hide
@@ -200,6 +206,7 @@ public class FingerprintDialog {
         }
     }
 
+    private PackageManager mPackageManager;
     private FingerprintManager mFingerprintManager;
     private Bundle mBundle;
     private ButtonInfo mPositiveButtonInfo;
@@ -227,37 +234,209 @@ public class FingerprintDialog {
         mPositiveButtonInfo = positiveButtonInfo;
         mNegativeButtonInfo = negativeButtonInfo;
         mFingerprintManager = context.getSystemService(FingerprintManager.class);
+        mPackageManager = context.getPackageManager();
     }
+
+    /**
+     * A wrapper class for the crypto objects supported by FingerprintManager. Currently the
+     * framework supports {@link Signature}, {@link Cipher} and {@link Mac} objects.
+     */
+    public static final class CryptoObject extends android.hardware.biometrics.CryptoObject {
+        public CryptoObject(@NonNull Signature signature) {
+            super(signature);
+        }
+
+        public CryptoObject(@NonNull Cipher cipher) {
+            super(cipher);
+        }
+
+        public CryptoObject(@NonNull Mac mac) {
+            super(mac);
+        }
+
+        /**
+         * Get {@link Signature} object.
+         * @return {@link Signature} object or null if this doesn't contain one.
+         */
+        public Signature getSignature() {
+            return super.getSignature();
+        }
+
+        /**
+         * Get {@link Cipher} object.
+         * @return {@link Cipher} object or null if this doesn't contain one.
+         */
+        public Cipher getCipher() {
+            return super.getCipher();
+        }
+
+        /**
+         * Get {@link Mac} object.
+         * @return {@link Mac} object or null if this doesn't contain one.
+         */
+        public Mac getMac() {
+            return super.getMac();
+        }
+    }
+
+    /**
+     * Container for callback data from {@link #authenticate(
+     * CancellationSignal, Executor, AuthenticationCallback)} and
+     * {@link #authenticate(CryptoObject, CancellationSignal, Executor,
+     * AuthenticationCallback)}
+     */
+    public static class AuthenticationResult extends BiometricAuthenticator.AuthenticationResult {
+        /**
+         * Authentication result
+         * @param crypto
+         * @param identifier
+         * @param userId
+         * @hide
+         */
+        public AuthenticationResult(CryptoObject crypto, BiometricIdentifier identifier,
+                int userId) {
+            super(crypto, identifier, userId);
+        }
+        /**
+         * Obtain the crypto object associated with this transaction
+         * @return crypto object provided to {@link #authenticate(
+         * CryptoObject, CancellationSignal, Executor, AuthenticationCallback)}
+         */
+        public CryptoObject getCryptoObject() {
+            return (CryptoObject) super.getCryptoObject();
+        }
+    }
+
+    /**
+     * Callback structure provided to {@link FingerprintDialog#authenticate(CancellationSignal,
+     * Executor, AuthenticationCallback)} or {@link FingerprintDialog#authenticate(CryptoObject,
+     * CancellationSignal, Executor, AuthenticationCallback)}. Users must provide an implementation
+     * of this for listening to authentication events.
+     */
+    public static abstract class AuthenticationCallback extends
+            BiometricAuthenticator.AuthenticationCallback {
+        /**
+         * Called when an unrecoverable error has been encountered and the operation is complete.
+         * No further actions will be made on this object.
+         * @param errorCode An integer identifying the error message
+         * @param errString A human-readable error string that can be shown on an UI
+         */
+        @Override
+        public void onAuthenticationError(int errorCode, CharSequence errString) {}
+
+        /**
+         * Called when a recoverable error has been encountered during authentication. The help
+         * string is provided to give the user guidance for what went wrong, such as "Sensor dirty,
+         * please clean it."
+         * @param helpCode An integer identifying the error message
+         * @param helpString A human-readable string that can be shown on an UI
+         */
+        @Override
+        public void onAuthenticationHelp(int helpCode, CharSequence helpString) {}
+
+        /**
+         * Called when a biometric is recognized.
+         * @param result An object containing authentication-related data
+         */
+        public void onAuthenticationSucceeded(AuthenticationResult result) {}
+
+        /**
+         * Called when a biometric is valid but not recognized.
+         */
+        @Override
+        public void onAuthenticationFailed() {}
+
+        /**
+         * Called when a biometric has been acquired, but hasn't been processed yet.
+         * @hide
+         */
+        @Override
+        public void onAuthenticationAcquired(int acquireInfo) {}
+
+        /**
+         * @param result An object containing authentication-related data
+         * @hide
+         */
+        @Override
+        public void onAuthenticationSucceeded(BiometricAuthenticator.AuthenticationResult result) {
+            onAuthenticationSucceeded(new AuthenticationResult(
+                    (CryptoObject) result.getCryptoObject(),
+                    result.getId(),
+                    result.getUserId()));
+        }
+    }
+
+
+    /**
+     * @param crypto Object associated with the call
+     * @param cancel An object that can be used to cancel authentication
+     * @param executor An executor to handle callback events
+     * @param callback An object to receive authentication events
+     * @hide
+     */
+    @Override
+    public void authenticate(@NonNull android.hardware.biometrics.CryptoObject crypto,
+            @NonNull CancellationSignal cancel,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull BiometricAuthenticator.AuthenticationCallback callback) {
+        if (!(callback instanceof FingerprintDialog.AuthenticationCallback)) {
+            throw new IllegalArgumentException("Callback cannot be casted");
+        }
+        authenticate(crypto, cancel, executor, (AuthenticationCallback) callback);
+    }
+
+    /**
+     *
+     * @param cancel An object that can be used to cancel authentication
+     * @param executor An executor to handle callback events
+     * @param callback An object to receive authentication events
+     * @hide
+     */
+    @Override
+    public void authenticate(@NonNull CancellationSignal cancel,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull BiometricAuthenticator.AuthenticationCallback callback) {
+        if (!(callback instanceof FingerprintDialog.AuthenticationCallback)) {
+            throw new IllegalArgumentException("Callback cannot be casted");
+        }
+        authenticate(cancel, executor, (AuthenticationCallback) callback);
+    }
+
 
     /**
      * This call warms up the fingerprint hardware, displays a system-provided dialog,
      * and starts scanning for a fingerprint. It terminates when
-     * {@link AuthenticationCallback#onAuthenticationError(int, CharSequence)} is called, when
-     * {@link AuthenticationCallback#onAuthenticationSucceeded(AuthenticationResult)} is called,
-     * when {@link AuthenticationCallback#onAuthenticationFailed()} is called or when the user
-     * dismisses the system-provided dialog, at which point the crypto object becomes invalid.
-     * This operation can be canceled by using the provided cancel object. The application will
-     * receive authentication errors through {@link AuthenticationCallback}, and button events
-     * through the corresponding callback set in
-     * {@link Builder#setNegativeButton(CharSequence, Executor, DialogInterface.OnClickListener)}.
-     * It is safe to reuse the {@link FingerprintDialog} object, and calling
-     * {@link FingerprintDialog#authenticate(CancellationSignal, Executor, AuthenticationCallback)}
-     * while an existing authentication attempt is occurring will stop the previous client and
-     * start a new authentication. The interrupted client will receive a cancelled notification
-     * through {@link AuthenticationCallback#onAuthenticationError(int, CharSequence)}.
+     * {@link AuthenticationCallback#onAuthenticationError(int,
+     * CharSequence)} is called, when
+     * {@link AuthenticationCallback#onAuthenticationSucceeded(
+     * AuthenticationResult)}, or when the user dismisses the system-provided dialog, at which point
+     * the crypto object becomes invalid. This operation can be canceled by using the provided
+     * cancel object. The application will receive authentication errors through
+     * {@link AuthenticationCallback}, and button events through the
+     * corresponding callback set in {@link Builder#setNegativeButton(CharSequence,
+     * Executor, DialogInterface.OnClickListener)}. It is safe to reuse the
+     * {@link FingerprintDialog} object, and calling {@link FingerprintDialog#authenticate(
+     * CancellationSignal, Executor, AuthenticationCallback)} while an
+     * existing authentication attempt is occurring will stop the previous client and start a
+     * new authentication. The interrupted client will receive a cancelled notification through
+     * {@link AuthenticationCallback#onAuthenticationError(int,
+     * CharSequence)}.
      *
-     * @throws IllegalArgumentException if any of the arguments are null
+     * @throws IllegalArgumentException If any of the arguments are null
      *
-     * @param crypto object associated with the call
-     * @param cancel an object that can be used to cancel authentication
-     * @param executor an executor to handle callback events
-     * @param callback an object to receive authentication events
+     * @param crypto Object associated with the call
+     * @param cancel An object that can be used to cancel authentication
+     * @param executor An executor to handle callback events
+     * @param callback An object to receive authentication events
      */
     @RequiresPermission(USE_FINGERPRINT)
-    public void authenticate(@NonNull FingerprintManager.CryptoObject crypto,
+    public void authenticate(@NonNull CryptoObject crypto,
             @NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull FingerprintManager.AuthenticationCallback callback) {
+            @NonNull AuthenticationCallback callback) {
+        if (handlePreAuthenticationErrors(callback, executor)) {
+            return;
+        }
         mFingerprintManager.authenticate(crypto, cancel, mBundle, executor, mDialogReceiver,
                 callback);
     }
@@ -265,29 +444,57 @@ public class FingerprintDialog {
     /**
      * This call warms up the fingerprint hardware, displays a system-provided dialog,
      * and starts scanning for a fingerprint. It terminates when
-     * {@link AuthenticationCallback#onAuthenticationError(int, CharSequence)} is called, when
-     * {@link AuthenticationCallback#onAuthenticationSucceeded(AuthenticationResult)} is called,
-     * when {@link AuthenticationCallback#onAuthenticationFailed()} is called or when the user
-     * dismisses the system-provided dialog. This operation can be canceled by using the provided
-     * cancel object. The application will receive authentication errors through
-     * {@link AuthenticationCallback}, and button events through the corresponding callback set in
+     * {@link AuthenticationCallback#onAuthenticationError(int,
+     * CharSequence)} is called, when
+     * {@link AuthenticationCallback#onAuthenticationSucceeded(
+     * AuthenticationResult)} is called, or when the user dismisses the system-provided dialog.
+     * This operation can be canceled by using the provided cancel object. The application will
+     * receive authentication errors through {@link AuthenticationCallback},
+     * and button events through the corresponding callback set in
      * {@link Builder#setNegativeButton(CharSequence, Executor, DialogInterface.OnClickListener)}.
      * It is safe to reuse the {@link FingerprintDialog} object, and calling
-     * {@link FingerprintDialog#authenticate(CancellationSignal, Executor, AuthenticationCallback)}
-     * while an existing authentication attempt is occurring will stop the previous client and
-     * start a new authentication. The interrupted client will receive a cancelled notification
-     * through {@link AuthenticationCallback#onAuthenticationError(int, CharSequence)}.
+     * {@link FingerprintDialog#authenticate(CancellationSignal, Executor,
+     * AuthenticationCallback)} while an existing authentication attempt is
+     * occurring will stop the previous client and start a new authentication. The interrupted
+     * client will receive a cancelled notification through
+     * {@link AuthenticationCallback#onAuthenticationError(int,
+     * CharSequence)}.
      *
-     * @throws IllegalArgumentException if any of the arguments are null
+     * @throws IllegalArgumentException If any of the arguments are null
      *
-     * @param cancel an object that can be used to cancel authentication
-     * @param executor an executor to handle callback events
-     * @param callback an object to receive authentication events
+     * @param cancel An object that can be used to cancel authentication
+     * @param executor An executor to handle callback events
+     * @param callback An object to receive authentication events
      */
     @RequiresPermission(USE_FINGERPRINT)
     public void authenticate(@NonNull CancellationSignal cancel,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull FingerprintManager.AuthenticationCallback callback) {
+            @NonNull AuthenticationCallback callback) {
+        if (handlePreAuthenticationErrors(callback, executor)) {
+            return;
+        }
         mFingerprintManager.authenticate(cancel, mBundle, executor, mDialogReceiver, callback);
+    }
+
+    private boolean handlePreAuthenticationErrors(AuthenticationCallback callback,
+            Executor executor) {
+        if (!mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)) {
+            sendError(FINGERPRINT_ERROR_HW_NOT_PRESENT, callback, executor);
+            return true;
+        } else if (!mFingerprintManager.isHardwareDetected()) {
+            sendError(FINGERPRINT_ERROR_HW_UNAVAILABLE, callback, executor);
+            return true;
+        } else if (!mFingerprintManager.hasEnrolledFingerprints()) {
+            sendError(FINGERPRINT_ERROR_NO_FINGERPRINTS, callback, executor);
+            return true;
+        }
+        return false;
+    }
+
+    private void sendError(int error, AuthenticationCallback callback, Executor executor) {
+        executor.execute(() -> {
+            callback.onAuthenticationError(error, mFingerprintManager.getErrorString(
+                    error, 0 /* vendorCode */));
+        });
     }
 }

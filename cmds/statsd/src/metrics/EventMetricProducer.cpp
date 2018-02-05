@@ -128,7 +128,7 @@ void EventMetricProducer::onConditionChangedLocked(const bool conditionMet,
 }
 
 void EventMetricProducer::onMatchedLogEventInternalLocked(
-        const size_t matcherIndex, const HashableDimensionKey& eventKey,
+        const size_t matcherIndex, const MetricDimensionKey& eventKey,
         const ConditionKey& conditionKey, bool condition,
         const LogEvent& event) {
     if (!condition) {

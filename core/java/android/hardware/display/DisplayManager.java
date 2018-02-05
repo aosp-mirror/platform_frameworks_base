@@ -631,6 +631,16 @@ public final class DisplayManager {
     }
 
     /**
+     * Fetch {@link AmbientBrightnessDayStats}s.
+     *
+     * @hide until we make it a system api
+     */
+    @RequiresPermission(Manifest.permission.ACCESS_AMBIENT_LIGHT_STATS)
+    public List<AmbientBrightnessDayStats> getAmbientBrightnessStats() {
+        return mGlobal.getAmbientBrightnessStats();
+    }
+
+    /**
      * Sets the global display brightness configuration.
      *
      * @hide
@@ -639,7 +649,7 @@ public final class DisplayManager {
     @TestApi
     @RequiresPermission(Manifest.permission.CONFIGURE_DISPLAY_BRIGHTNESS)
     public void setBrightnessConfiguration(BrightnessConfiguration c) {
-        setBrightnessConfigurationForUser(c, UserHandle.myUserId(), mContext.getPackageName());
+        setBrightnessConfigurationForUser(c, mContext.getUserId(), mContext.getPackageName());
     }
 
     /**

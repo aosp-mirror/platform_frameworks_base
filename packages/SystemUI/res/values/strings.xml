@@ -1281,12 +1281,23 @@
     <string name="screen_pinning_title">Screen is pinned</string>
     <!-- Screen pinning dialog description. -->
     <string name="screen_pinning_description">This keeps it in view until you unpin. Touch &amp; hold Back and Overview to unpin.</string>
+    <string name="screen_pinning_description_recents_invisible">This keeps it in view until you unpin. Touch &amp; hold Back and Home to unpin.</string>
     <!-- Screen pinning dialog description. -->
     <string name="screen_pinning_description_accessible">This keeps it in view until you unpin. Touch &amp; hold Overview to unpin.</string>
+    <string name="screen_pinning_description_recents_invisible_accessible">This keeps it in view until you unpin. Touch &amp; hold Home to unpin.</string>
+    <!-- Notify use that they are in Lock-to-app -->
+    <string name="screen_pinning_toast">To unpin this screen, touch &amp; hold Back and Overview
+        buttons</string>
+    <string name="screen_pinning_toast_recents_invisible">To unpin this screen, touch &amp; hold Back
+        and Home buttons</string>
     <!-- Screen pinning positive response. -->
     <string name="screen_pinning_positive">Got it</string>
     <!-- Screen pinning negative response. -->
     <string name="screen_pinning_negative">No thanks</string>
+    <!-- Enter/Exiting screen pinning indication. -->
+    <string name="screen_pinning_start">Screen pinned</string>
+    <string name="screen_pinning_exit">Screen unpinned</string>
+
 
     <!-- Hide quick settings tile confirmation title -->
     <string name="quick_settings_reset_confirmation_title">Hide <xliff:g id="tile_label" example="Hotspot">%1$s</xliff:g>?</string>

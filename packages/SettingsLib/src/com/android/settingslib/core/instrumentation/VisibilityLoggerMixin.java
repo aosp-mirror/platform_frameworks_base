@@ -17,21 +17,20 @@
 package com.android.settingslib.core.instrumentation;
 
 import android.app.Activity;
-import android.content.Context;
+import android.arch.lifecycle.Lifecycle.Event;
+import android.arch.lifecycle.LifecycleObserver;
+import android.arch.lifecycle.OnLifecycleEvent;
 import android.content.Intent;
 
 import android.os.SystemClock;
 import com.android.internal.logging.nano.MetricsProto;
-import com.android.settingslib.core.lifecycle.LifecycleObserver;
-import com.android.settingslib.core.lifecycle.events.OnPause;
-import com.android.settingslib.core.lifecycle.events.OnResume;
 
 import static com.android.settingslib.core.instrumentation.Instrumentable.METRICS_CATEGORY_UNKNOWN;
 
 /**
  * Logs visibility change of a fragment.
  */
-public class VisibilityLoggerMixin implements LifecycleObserver, OnResume, OnPause {
+public class VisibilityLoggerMixin implements LifecycleObserver {
 
     private static final String TAG = "VisibilityLoggerMixin";
 
@@ -55,7 +54,7 @@ public class VisibilityLoggerMixin implements LifecycleObserver, OnResume, OnPau
         mMetricsFeature = metricsFeature;
     }
 
-    @Override
+    @OnLifecycleEvent(Event.ON_RESUME)
     public void onResume() {
         mVisibleTimestamp = SystemClock.elapsedRealtime();
         if (mMetricsFeature != null && mMetricsCategory != METRICS_CATEGORY_UNKNOWN) {
@@ -63,7 +62,7 @@ public class VisibilityLoggerMixin implements LifecycleObserver, OnResume, OnPau
         }
     }
 
-    @Override
+    @OnLifecycleEvent(Event.ON_PAUSE)
     public void onPause() {
         mVisibleTimestamp = 0;
         if (mMetricsFeature != null && mMetricsCategory != METRICS_CATEGORY_UNKNOWN) {

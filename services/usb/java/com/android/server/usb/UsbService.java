@@ -37,17 +37,22 @@ import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.service.usb.UsbServiceDumpProto;
+import android.util.ArraySet;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.SystemService;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.Collections;
 
 /**
  * UsbService manages all USB related state, including both host and device support.
@@ -503,21 +508,38 @@ public class UsbService extends IUsbManager.Stub {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
         final long ident = Binder.clearCallingIdentity();
         try {
-            if (args == null || args.length == 0 || "-a".equals(args[0])) {
-                pw.println("USB Manager State:");
-                pw.increaseIndent();
+            ArraySet<String> argsSet = new ArraySet<>();
+            Collections.addAll(argsSet, args);
+
+            boolean dumpAsProto = false;
+            if (argsSet.contains("--proto")) {
+                dumpAsProto = true;
+            }
+
+            if (args == null || args.length == 0 || args[0].equals("-a") || dumpAsProto) {
+                DualDumpOutputStream dump;
+                if (dumpAsProto) {
+                    dump = new DualDumpOutputStream(new ProtoOutputStream(fd));
+                } else {
+                    pw.println("USB MANAGER STATE (dumpsys usb):");
+
+                    dump = new DualDumpOutputStream(new IndentingPrintWriter(pw, "  "));
+                }
+
                 if (mDeviceManager != null) {
-                    mDeviceManager.dump(pw);
+                    mDeviceManager.dump(dump, "device_manager", UsbServiceDumpProto.DEVICE_MANAGER);
                 }
                 if (mHostManager != null) {
-                    mHostManager.dump(pw, args);
+                    mHostManager.dump(dump, "host_manager", UsbServiceDumpProto.HOST_MANAGER);
                 }
                 if (mPortManager != null) {
-                    mPortManager.dump(pw);
+                    mPortManager.dump(dump, "port_manager", UsbServiceDumpProto.PORT_MANAGER);
                 }
-                mAlsaManager.dump(pw);
+                mAlsaManager.dump(dump, "alsa_manager", UsbServiceDumpProto.ALSA_MANAGER);
 
-                mSettingsManager.dump(pw);
+                mSettingsManager.dump(dump, "settings_manager",
+                        UsbServiceDumpProto.SETTINGS_MANAGER);
+                dump.flush();
             } else if ("set-port-roles".equals(args[0]) && args.length == 4) {
                 final String portId = args[1];
                 final int powerRole;
@@ -558,7 +580,8 @@ public class UsbService extends IUsbManager.Stub {
                     // during debugging, it might be worth adding a sleep here before
                     // dumping the new state.
                     pw.println();
-                    mPortManager.dump(pw);
+                    mPortManager.dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
+                            "", 0);
                 }
             } else if ("add-port".equals(args[0]) && args.length == 3) {
                 final String portId = args[1];
@@ -583,7 +606,8 @@ public class UsbService extends IUsbManager.Stub {
                 if (mPortManager != null) {
                     mPortManager.addSimulatedPort(portId, supportedModes, pw);
                     pw.println();
-                    mPortManager.dump(pw);
+                    mPortManager.dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
+                            "", 0);
                 }
             } else if ("connect-port".equals(args[0]) && args.length == 5) {
                 final String portId = args[1];
@@ -630,31 +654,36 @@ public class UsbService extends IUsbManager.Stub {
                     mPortManager.connectSimulatedPort(portId, mode, canChangeMode,
                             powerRole, canChangePowerRole, dataRole, canChangeDataRole, pw);
                     pw.println();
-                    mPortManager.dump(pw);
+                    mPortManager.dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
+                            "", 0);
                 }
             } else if ("disconnect-port".equals(args[0]) && args.length == 2) {
                 final String portId = args[1];
                 if (mPortManager != null) {
                     mPortManager.disconnectSimulatedPort(portId, pw);
                     pw.println();
-                    mPortManager.dump(pw);
+                    mPortManager.dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
+                            "", 0);
                 }
             } else if ("remove-port".equals(args[0]) && args.length == 2) {
                 final String portId = args[1];
                 if (mPortManager != null) {
                     mPortManager.removeSimulatedPort(portId, pw);
                     pw.println();
-                    mPortManager.dump(pw);
+                    mPortManager.dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
+                            "", 0);
                 }
             } else if ("reset".equals(args[0]) && args.length == 1) {
                 if (mPortManager != null) {
                     mPortManager.resetSimulation(pw);
                     pw.println();
-                    mPortManager.dump(pw);
+                    mPortManager.dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
+                            "", 0);
                 }
             } else if ("ports".equals(args[0]) && args.length == 1) {
                 if (mPortManager != null) {
-                    mPortManager.dump(pw);
+                    mPortManager.dump(new DualDumpOutputStream(new IndentingPrintWriter(pw, "  ")),
+                            "", 0);
                 }
             } else if ("dump-descriptors".equals(args[0])) {
                 mHostManager.dumpDescriptors(pw, args);

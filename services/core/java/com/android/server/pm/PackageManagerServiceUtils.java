@@ -693,7 +693,7 @@ public class PackageManagerServiceUtils {
                 InputStream fileIn = new GZIPInputStream(new FileInputStream(srcFile));
                 OutputStream fileOut = new FileOutputStream(dstFile, false /*append*/);
         ) {
-            Streams.copy(fileIn, fileOut);
+            FileUtils.copy(fileIn, fileOut);
             Os.chmod(dstFile.getAbsolutePath(), 0644);
             return PackageManager.INSTALL_SUCCEEDED;
         } catch (IOException e) {

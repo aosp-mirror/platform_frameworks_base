@@ -265,6 +265,12 @@ public final class AudioFormat implements Parcelable {
     public static final int ENCODING_AAC_XHE = 16;
     /** Audio data format: AC-4 sync frame transport format */
     public static final int ENCODING_AC4 = 17;
+    /** Audio data format: E-AC-3-JOC compressed
+     * E-AC-3-JOC streams can be decoded by downstream devices supporting {@link #ENCODING_E_AC3}.
+     * Use {@link #ENCODING_E_AC3} as the AudioTrack encoding when the downstream device
+     * supports {@link #ENCODING_E_AC3} but not {@link #ENCODING_E_AC3_JOC}.
+     **/
+    public static final int ENCODING_E_AC3_JOC = 18;
 
     /** @hide */
     public static String toLogFriendlyEncoding(int enc) {
@@ -512,6 +518,7 @@ public final class AudioFormat implements Parcelable {
         case ENCODING_PCM_FLOAT:
         case ENCODING_AC3:
         case ENCODING_E_AC3:
+        case ENCODING_E_AC3_JOC:
         case ENCODING_DTS:
         case ENCODING_DTS_HD:
         case ENCODING_MP3:
@@ -537,6 +544,7 @@ public final class AudioFormat implements Parcelable {
         case ENCODING_PCM_FLOAT:
         case ENCODING_AC3:
         case ENCODING_E_AC3:
+        case ENCODING_E_AC3_JOC:
         case ENCODING_DTS:
         case ENCODING_DTS_HD:
         case ENCODING_IEC61937:
@@ -564,6 +572,7 @@ public final class AudioFormat implements Parcelable {
             return true;
         case ENCODING_AC3:
         case ENCODING_E_AC3:
+        case ENCODING_E_AC3_JOC:
         case ENCODING_DTS:
         case ENCODING_DTS_HD:
         case ENCODING_MP3:
@@ -593,6 +602,7 @@ public final class AudioFormat implements Parcelable {
             return true;
         case ENCODING_AC3:
         case ENCODING_E_AC3:
+        case ENCODING_E_AC3_JOC:
         case ENCODING_DTS:
         case ENCODING_DTS_HD:
         case ENCODING_MP3:
@@ -829,6 +839,7 @@ public final class AudioFormat implements Parcelable {
                 case ENCODING_PCM_FLOAT:
                 case ENCODING_AC3:
                 case ENCODING_E_AC3:
+                case ENCODING_E_AC3_JOC:
                 case ENCODING_DTS:
                 case ENCODING_DTS_HD:
                 case ENCODING_IEC61937:
@@ -1044,6 +1055,7 @@ public final class AudioFormat implements Parcelable {
         ENCODING_PCM_FLOAT,
         ENCODING_AC3,
         ENCODING_E_AC3,
+        ENCODING_E_AC3_JOC,
         ENCODING_DTS,
         ENCODING_DTS_HD,
         ENCODING_IEC61937,

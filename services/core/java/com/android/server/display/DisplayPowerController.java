@@ -34,6 +34,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.hardware.display.AmbientBrightnessDayStats;
 import android.hardware.display.BrightnessChangeEvent;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerCallbacks;
@@ -478,6 +479,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mScreenBrightnessForVr = getScreenBrightnessForVrSetting();
         mAutoBrightnessAdjustment = getAutoBrightnessAdjustmentSetting();
         mTemporaryScreenBrightness = -1;
+        mPendingScreenBrightnessSetting = -1;
         mTemporaryAutoBrightnessAdjustment = Float.NaN;
     }
 
@@ -498,11 +500,20 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         return mBrightnessTracker.getEvents(userId, includePackage);
     }
 
+    public void onSwitchUser(@UserIdInt int newUserId) {
+        mBrightnessTracker.onSwitchUser(newUserId);
+    }
+
+    public ParceledListSlice<AmbientBrightnessDayStats> getAmbientBrightnessStats(
+            @UserIdInt int userId) {
+        return mBrightnessTracker.getAmbientBrightnessStats(userId);
+    }
+
     /**
-     * Persist the brightness slider events to disk.
+     * Persist the brightness slider events and ambient brightness stats to disk.
      */
-    public void persistBrightnessSliderEvents() {
-        mBrightnessTracker.persistEvents();
+    public void persistBrightnessTrackerState() {
+        mBrightnessTracker.persistBrightnessTrackerState();
     }
 
     /**
@@ -795,13 +806,15 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             brightness = PowerManager.BRIGHTNESS_ON;
         }
 
-        // If the brightness is already set then it's been overriden by something other than the
+        // If the brightness is already set then it's been overridden by something other than the
         // user, or is a temporary adjustment.
         final boolean userInitiatedChange = brightness < 0
                 && (autoBrightnessAdjustmentChanged || userSetBrightnessChanged);
 
+        boolean hadUserBrightnessPoint = false;
         // Configure auto-brightness.
         if (mAutomaticBrightnessController != null) {
+            hadUserBrightnessPoint = mAutomaticBrightnessController.hasUserDataPoints();
             mAutomaticBrightnessController.configure(autoBrightnessEnabled,
                     mBrightnessConfiguration,
                     mLastUserSetScreenBrightness / (float) PowerManager.BRIGHTNESS_ON,
@@ -930,7 +943,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             }
 
             if (!brightnessIsTemporary) {
-                notifyBrightnessChanged(brightness, userInitiatedChange);
+                notifyBrightnessChanged(brightness, userInitiatedChange, hadUserBrightnessPoint);
             }
 
         }
@@ -1464,18 +1477,26 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mPendingScreenBrightnessSetting = -1;
             return false;
         }
+        mCurrentScreenBrightnessSetting = mPendingScreenBrightnessSetting;
         mLastUserSetScreenBrightness = mPendingScreenBrightnessSetting;
         mPendingScreenBrightnessSetting = -1;
         return true;
     }
 
-    private void notifyBrightnessChanged(int brightness, boolean userInitiated) {
+    private void notifyBrightnessChanged(int brightness, boolean userInitiated,
+            boolean hadUserDataPoint) {
         final float brightnessInNits = convertToNits(brightness);
-        if (brightnessInNits >= 0.0f) {
+        if (mPowerRequest.useAutoBrightness && brightnessInNits >= 0.0f
+                && mAutomaticBrightnessController != null) {
             // We only want to track changes on devices that can actually map the display backlight
             // values into a physical brightness unit since the value provided by the API is in
             // nits and not using the arbitrary backlight units.
-            mBrightnessTracker.notifyBrightnessChanged(brightnessInNits, userInitiated);
+            final float powerFactor = mPowerRequest.lowPowerMode
+                    ? mPowerRequest.screenLowPowerBrightnessFactor
+                    : 1.0f;
+            mBrightnessTracker.notifyBrightnessChanged(brightnessInNits, userInitiated,
+                    powerFactor, hadUserDataPoint,
+                    mAutomaticBrightnessController.isDefaultConfig());
         }
     }
 

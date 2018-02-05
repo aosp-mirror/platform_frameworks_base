@@ -272,12 +272,20 @@ public class NotificationLockscreenUserManager implements Dumpable {
      * package-specific override.
      */
     public boolean shouldHideNotifications(String key) {
+        if (mEntryManager == null) {
+            Log.wtf(TAG, "mEntryManager was null!", new Throwable());
+            return true;
+        }
         return isLockscreenPublicMode(mCurrentUserId)
                 && mEntryManager.getNotificationData().getVisibilityOverride(key) ==
                         Notification.VISIBILITY_SECRET;
     }
 
     public boolean shouldShowOnKeyguard(StatusBarNotification sbn) {
+        if (mEntryManager == null) {
+            Log.wtf(TAG, "mEntryManager was null!", new Throwable());
+            return false;
+        }
         return mShowLockscreenNotifications
                 && !mEntryManager.getNotificationData().isAmbient(sbn.getKey());
     }
@@ -397,6 +405,10 @@ public class NotificationLockscreenUserManager implements Dumpable {
     }
 
     private boolean packageHasVisibilityOverride(String key) {
+        if (mEntryManager == null) {
+            Log.wtf(TAG, "mEntryManager was null!", new Throwable());
+            return true;
+        }
         return mEntryManager.getNotificationData().getVisibilityOverride(key) ==
                 Notification.VISIBILITY_PRIVATE;
     }

@@ -14,12 +14,16 @@
      limitations under the License.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.frameworks.perftests.amteststestapp">
+        package="com.android.frameworks.perftests.amteststestapp">
     <application android:name=".TestApplication">
         <activity android:name=".TestActivity" android:exported="true"/>
+        <provider
+                android:authorities="com.android.frameworks.perftests.amteststestapp"
+                android:name=".TestContentProvider"
+                android:exported="true" />
         <receiver
-            android:name=".TestBroadcastReceiver"
-            android:exported="true">
+                android:name=".TestBroadcastReceiver"
+                android:exported="true">
             <intent-filter>
                 <action android:name="com.android.frameworks.perftests.ACTION_BROADCAST_MANIFEST_RECEIVE" />
                 <category android:name="android.intent.category.DEFAULT" />

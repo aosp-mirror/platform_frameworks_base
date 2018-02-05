@@ -129,43 +129,60 @@ bool matchesNonRepeatedField(const UidMap& uidMap, const FieldValueMap& fieldMap
         }
         bool matched = false;
         switch (matcher.value_matcher_case()) {
-            case FieldValueMatcher::ValueMatcherCase::kEqBool:
-                 // Logd does not support bool, it is int instead.
-                 matched = ((ret.first->second.value_int() > 0) == matcher.eq_bool());
-                 break;
-            case FieldValueMatcher::ValueMatcherCase::kEqString:
-                 {
-                    if (IsAttributionUidField(*rootField)) {
-                        const int uid = ret.first->second.value_int();
-                        std::set<string> packageNames =
+            case FieldValueMatcher::ValueMatcherCase::kEqBool: {
+                // Logd does not support bool, it is int instead.
+                matched = ((ret.first->second.value_int() > 0) == matcher.eq_bool());
+                break;
+            }
+            case FieldValueMatcher::ValueMatcherCase::kEqString: {
+                if (IsAttributionUidField(*rootField)) {
+                    const int uid = ret.first->second.value_int();
+                    std::set<string> packageNames =
                             uidMap.getAppNamesFromUid(uid, true /* normalize*/);
-                        matched = packageNames.find(matcher.eq_string()) != packageNames.end();
-                    } else {
-                        matched = (ret.first->second.value_str() == matcher.eq_string());
-                    }
-                 }
-                 break;
-            case FieldValueMatcher::ValueMatcherCase::kEqInt:
-                 matched = (ret.first->second.value_int() == matcher.eq_int());
-                 break;
-            case FieldValueMatcher::ValueMatcherCase::kLtInt:
-                 matched = (ret.first->second.value_int() < matcher.lt_int());
-                 break;
-            case FieldValueMatcher::ValueMatcherCase::kGtInt:
-                 matched = (ret.first->second.value_int() > matcher.gt_int());
-                 break;
-            case FieldValueMatcher::ValueMatcherCase::kLtFloat:
-                 matched = (ret.first->second.value_float() < matcher.lt_float());
-                 break;
-            case FieldValueMatcher::ValueMatcherCase::kGtFloat:
-                 matched = (ret.first->second.value_float() > matcher.gt_float());
-                 break;
-            case FieldValueMatcher::ValueMatcherCase::kLteInt:
-                 matched = (ret.first->second.value_int() <= matcher.lte_int());
-                 break;
-            case FieldValueMatcher::ValueMatcherCase::kGteInt:
-                 matched = (ret.first->second.value_int() >= matcher.gte_int());
-                 break;
+                    matched = packageNames.find(matcher.eq_string()) != packageNames.end();
+                } else {
+                    matched = (ret.first->second.value_str() == matcher.eq_string());
+                }
+                break;
+            }
+            case FieldValueMatcher::ValueMatcherCase::kEqInt: {
+                    int64_t val = ret.first->second.has_value_int() ?
+                                  ret.first->second.value_int() : ret.first->second.value_long();
+                    matched = (val == matcher.eq_int());
+                break;
+            }
+            case FieldValueMatcher::ValueMatcherCase::kLtInt: {
+                int64_t val = ret.first->second.has_value_int() ?
+                              ret.first->second.value_int() : ret.first->second.value_long();
+                matched = (val < matcher.lt_int());
+                break;
+            }
+            case FieldValueMatcher::ValueMatcherCase::kGtInt: {
+                int64_t val = ret.first->second.has_value_int() ?
+                              ret.first->second.value_int() : ret.first->second.value_long();
+                matched = (val > matcher.gt_int());
+                break;
+            }
+            case FieldValueMatcher::ValueMatcherCase::kLtFloat: {
+                matched = (ret.first->second.value_float() < matcher.lt_float());
+                break;
+            }
+            case FieldValueMatcher::ValueMatcherCase::kGtFloat: {
+                matched = (ret.first->second.value_float() > matcher.gt_float());
+                break;
+            }
+            case FieldValueMatcher::ValueMatcherCase::kLteInt: {
+                int64_t val = ret.first->second.has_value_int() ?
+                              ret.first->second.value_int() : ret.first->second.value_long();
+                matched = (val <= matcher.lte_int());
+                break;
+            }
+            case FieldValueMatcher::ValueMatcherCase::kGteInt: {
+                int64_t val = ret.first->second.has_value_int() ?
+                              ret.first->second.value_int() : ret.first->second.value_long();
+                matched = (val >= matcher.gte_int());
+                break;
+            }
             default:
                 break;
         }

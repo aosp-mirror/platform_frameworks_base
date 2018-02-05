@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <gtest/gtest.h>
 #include "statsd_test_util.h"
 
 namespace android {
@@ -24,6 +23,22 @@ AtomMatcher CreateSimpleAtomMatcher(const string& name, int atomId) {
     atom_matcher.set_id(StringToId(name));
     auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
     simple_atom_matcher->set_atom_id(atomId);
+    return atom_matcher;
+}
+
+AtomMatcher CreateScreenBrightnessChangedAtomMatcher() {
+    AtomMatcher atom_matcher;
+    atom_matcher.set_id(StringToId("ScreenBrightnessChanged"));
+    auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
+    simple_atom_matcher->set_atom_id(android::util::SCREEN_BRIGHTNESS_CHANGED);
+    return atom_matcher;
+}
+
+AtomMatcher CreateUidProcessStateChangedAtomMatcher() {
+    AtomMatcher atom_matcher;
+    atom_matcher.set_id(StringToId("UidProcessStateChanged"));
+    auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
+    simple_atom_matcher->set_atom_id(android::util::UID_PROCESS_STATE_CHANGED);
     return atom_matcher;
 }
 
@@ -47,6 +62,30 @@ AtomMatcher CreateReleaseWakelockAtomMatcher() {
     return CreateWakelockStateChangedAtomMatcher("ReleaseWakelock", WakelockStateChanged::RELEASE);
 }
 
+AtomMatcher CreateBatterySaverModeStateChangedAtomMatcher(
+    const string& name, BatterySaverModeStateChanged::State state) {
+    AtomMatcher atom_matcher;
+    atom_matcher.set_id(StringToId(name));
+    auto simple_atom_matcher = atom_matcher.mutable_simple_atom_matcher();
+    simple_atom_matcher->set_atom_id(android::util::BATTERY_SAVER_MODE_STATE_CHANGED);
+    auto field_value_matcher = simple_atom_matcher->add_field_value_matcher();
+    field_value_matcher->set_field(1);  // State field.
+    field_value_matcher->set_eq_int(state);
+    return atom_matcher;
+}
+
+AtomMatcher CreateBatterySaverModeStartAtomMatcher() {
+    return CreateBatterySaverModeStateChangedAtomMatcher(
+        "BatterySaverModeStart", BatterySaverModeStateChanged::ON);
+}
+
+
+AtomMatcher CreateBatterySaverModeStopAtomMatcher() {
+    return CreateBatterySaverModeStateChangedAtomMatcher(
+        "BatterySaverModeStop", BatterySaverModeStateChanged::OFF);
+}
+
+
 AtomMatcher CreateScreenStateChangedAtomMatcher(
     const string& name, android::view::DisplayStateEnum state) {
     AtomMatcher atom_matcher;
@@ -58,6 +97,7 @@ AtomMatcher CreateScreenStateChangedAtomMatcher(
     field_value_matcher->set_eq_int(state);
     return atom_matcher;
 }
+
 
 AtomMatcher CreateScreenTurnedOnAtomMatcher() {
     return CreateScreenStateChangedAtomMatcher("ScreenTurnedOn",
@@ -128,6 +168,13 @@ AtomMatcher CreateProcessCrashAtomMatcher() {
         "ProcessCrashed", ProcessLifeCycleStateChanged::PROCESS_CRASHED);
 }
 
+Predicate CreateBatterySaverModePredicate() {
+    Predicate predicate;
+    predicate.set_id(StringToId("BatterySaverIsOn"));
+    predicate.mutable_simple_predicate()->set_start(StringToId("BatterySaverModeStart"));
+    predicate.mutable_simple_predicate()->set_stop(StringToId("BatterySaverModeStop"));
+    return predicate;
+}
 
 Predicate CreateScreenIsOnPredicate() {
     Predicate predicate;
@@ -218,6 +265,31 @@ std::unique_ptr<LogEvent> CreateScreenStateChangedEvent(
     return event;
 }
 
+std::unique_ptr<LogEvent> CreateBatterySaverOnEvent(uint64_t timestampNs) {
+    auto event = std::make_unique<LogEvent>(
+        android::util::BATTERY_SAVER_MODE_STATE_CHANGED, timestampNs);
+    EXPECT_TRUE(event->write(BatterySaverModeStateChanged::ON));
+    event->init();
+    return event;
+}
+
+std::unique_ptr<LogEvent> CreateBatterySaverOffEvent(uint64_t timestampNs) {
+    auto event = std::make_unique<LogEvent>(
+        android::util::BATTERY_SAVER_MODE_STATE_CHANGED, timestampNs);
+    EXPECT_TRUE(event->write(BatterySaverModeStateChanged::OFF));
+    event->init();
+    return event;
+}
+
+std::unique_ptr<LogEvent> CreateScreenBrightnessChangedEvent(
+    int level, uint64_t timestampNs) {
+    auto event = std::make_unique<LogEvent>(android::util::SCREEN_BRIGHTNESS_CHANGED, timestampNs);
+    EXPECT_TRUE(event->write(level));
+    event->init();
+    return event;
+
+}
+
 std::unique_ptr<LogEvent> CreateWakelockStateChangedEvent(
     const std::vector<AttributionNode>& attributions, const string& wakelockName,
     const WakelockStateChanged::State state, uint64_t timestampNs) {
@@ -267,9 +339,10 @@ std::unique_ptr<LogEvent> CreateMoveToForegroundEvent(const int uid, uint64_t ti
 }
 
 std::unique_ptr<LogEvent> CreateSyncStateChangedEvent(
-    const int uid, const string& name, const SyncStateChanged::State state, uint64_t timestampNs) {
+    const std::vector<AttributionNode>& attributions,
+    const string& name, const SyncStateChanged::State state, uint64_t timestampNs) {
     auto event = std::make_unique<LogEvent>(android::util::SYNC_STATE_CHANGED, timestampNs);
-    event->write(uid);
+    event->write(attributions);
     event->write(name);
     event->write(state);
     event->init();
@@ -277,13 +350,13 @@ std::unique_ptr<LogEvent> CreateSyncStateChangedEvent(
 }
 
 std::unique_ptr<LogEvent> CreateSyncStartEvent(
-    const int uid, const string& name, uint64_t timestampNs){
-    return CreateSyncStateChangedEvent(uid, name, SyncStateChanged::ON, timestampNs);
+    const std::vector<AttributionNode>& attributions, const string& name, uint64_t timestampNs){
+    return CreateSyncStateChangedEvent(attributions, name, SyncStateChanged::ON, timestampNs);
 }
 
 std::unique_ptr<LogEvent> CreateSyncEndEvent(
-    const int uid, const string& name, uint64_t timestampNs) {
-    return CreateSyncStateChangedEvent(uid, name, SyncStateChanged::OFF, timestampNs);
+    const std::vector<AttributionNode>& attributions, const string& name, uint64_t timestampNs) {
+    return CreateSyncStateChangedEvent(attributions, name, SyncStateChanged::OFF, timestampNs);
 }
 
 std::unique_ptr<LogEvent> CreateProcessLifeCycleStateChangedEvent(

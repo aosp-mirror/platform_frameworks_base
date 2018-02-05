@@ -91,6 +91,7 @@ public:
         std::lock_guard<std::mutex> lock(mMutex);
         return onDumpReportLocked(dumpTimeNs, protoOutput);
     }
+
     void onDumpReport(const uint64_t dumpTimeNs, StatsLogReport* report) {
         std::lock_guard<std::mutex> lock(mMutex);
         return onDumpReportLocked(dumpTimeNs, report);
@@ -156,7 +157,8 @@ protected:
 
     int mConditionTrackerIndex;
 
-    FieldMatcher mDimensions;  // The dimension defined in statsd_config
+    FieldMatcher mDimensionsInWhat;  // The dimensions_in_what defined in statsd_config
+    FieldMatcher mDimensionsInCondition;  // The dimensions_in_condition defined in statsd_config
 
     std::vector<MetricConditionLink> mConditionLinks;
 
@@ -178,7 +180,7 @@ protected:
      * [event]: the log event, just in case the metric needs its data, e.g., EventMetric.
      */
     virtual void onMatchedLogEventInternalLocked(
-            const size_t matcherIndex, const HashableDimensionKey& eventKey,
+            const size_t matcherIndex, const MetricDimensionKey& eventKey,
             const ConditionKey& conditionKey, bool condition,
             const LogEvent& event) = 0;
 

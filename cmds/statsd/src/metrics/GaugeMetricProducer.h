@@ -44,7 +44,7 @@ struct GaugeBucket {
     uint64_t mBucketNum;
 };
 
-typedef std::unordered_map<HashableDimensionKey, std::vector<GaugeAtom>>
+typedef std::unordered_map<MetricDimensionKey, std::vector<GaugeAtom>>
     DimToGaugeAtomsMap;
 
 // This gauge metric producer first register the puller to automatically pull the gauge at the
@@ -64,7 +64,7 @@ public:
 
 protected:
     void onMatchedLogEventInternalLocked(
-            const size_t matcherIndex, const HashableDimensionKey& eventKey,
+            const size_t matcherIndex, const MetricDimensionKey& eventKey,
             const ConditionKey& conditionKey, bool condition,
             const LogEvent& event) override;
 
@@ -99,7 +99,7 @@ private:
 
     // Save the past buckets and we can clear when the StatsLogReport is dumped.
     // TODO: Add a lock to mPastBuckets.
-    std::unordered_map<HashableDimensionKey, std::vector<GaugeBucket>> mPastBuckets;
+    std::unordered_map<MetricDimensionKey, std::vector<GaugeBucket>> mPastBuckets;
 
     // The current bucket.
     std::shared_ptr<DimToGaugeAtomsMap> mCurrentSlicedBucket;
@@ -119,7 +119,7 @@ private:
     std::shared_ptr<FieldValueMap> getGaugeFields(const LogEvent& event);
 
     // Util function to check whether the specified dimension hits the guardrail.
-    bool hitGuardRailLocked(const HashableDimensionKey& newKey);
+    bool hitGuardRailLocked(const MetricDimensionKey& newKey);
 
     static const size_t kBucketSize = sizeof(GaugeBucket{});
 

@@ -172,6 +172,14 @@ public class MediaController2 implements AutoCloseable {
         }
 
         /**
+         * @hide
+         */
+        @SystemApi
+        public PlaybackInfoProvider getProvider() {
+            return mProvider;
+        }
+
+        /**
          * Get the type of playback which affects volume handling. One of:
          * <ul>
          * <li>{@link #PLAYBACK_TYPE_LOCAL}</li>
@@ -199,9 +207,9 @@ public class MediaController2 implements AutoCloseable {
         /**
          * Get the type of volume control that can be used. One of:
          * <ul>
-         * <li>{@link VolumeProvider#VOLUME_CONTROL_ABSOLUTE}</li>
-         * <li>{@link VolumeProvider#VOLUME_CONTROL_RELATIVE}</li>
-         * <li>{@link VolumeProvider#VOLUME_CONTROL_FIXED}</li>
+         * <li>{@link VolumeProvider2#VOLUME_CONTROL_ABSOLUTE}</li>
+         * <li>{@link VolumeProvider2#VOLUME_CONTROL_RELATIVE}</li>
+         * <li>{@link VolumeProvider2#VOLUME_CONTROL_FIXED}</li>
          * </ul>
          *
          * @return The type of volume control that may be used with this session.
@@ -472,7 +480,7 @@ public class MediaController2 implements AutoCloseable {
 
     /**
      * Set the volume of the output this session is playing on. The command will be ignored if it
-     * does not support {@link VolumeProvider#VOLUME_CONTROL_ABSOLUTE}.
+     * does not support {@link VolumeProvider2#VOLUME_CONTROL_ABSOLUTE}.
      * <p>
      * If the session is local playback, this changes the device's volume with the stream that
      * session's player is using. Flags will be specified for the {@link AudioManager}.
@@ -494,8 +502,8 @@ public class MediaController2 implements AutoCloseable {
      * must be one of {@link AudioManager#ADJUST_LOWER},
      * {@link AudioManager#ADJUST_RAISE}, or {@link AudioManager#ADJUST_SAME}.
      * The command will be ignored if the session does not support
-     * {@link VolumeProvider#VOLUME_CONTROL_RELATIVE} or
-     * {@link VolumeProvider#VOLUME_CONTROL_ABSOLUTE}.
+     * {@link VolumeProvider2#VOLUME_CONTROL_RELATIVE} or
+     * {@link VolumeProvider2#VOLUME_CONTROL_ABSOLUTE}.
      * <p>
      * If the session is local playback, this changes the device's volume with the stream that
      * session's player is using. Flags will be specified for the {@link AudioManager}.

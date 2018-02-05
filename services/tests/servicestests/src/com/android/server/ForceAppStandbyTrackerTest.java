@@ -54,7 +54,6 @@ import android.os.PowerSaveState;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -64,7 +63,6 @@ import android.util.Pair;
 
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
-import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.ForceAppStandbyTracker.Listener;
 
 import org.junit.Before;
@@ -83,6 +81,12 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+/**
+ * Tests for {@link ForceAppStandbyTracker}
+ *
+ * Run with:
+ atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/servicestests/src/com/android/server/ForceAppStandbyTrackerTest.java
+ */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ForceAppStandbyTrackerTest {
@@ -236,7 +240,8 @@ public class ForceAppStandbyTrackerTest {
         verify(mMockIActivityManager).registerUidObserver(
                 uidObserverArgumentCaptor.capture(),
                 eq(ActivityManager.UID_OBSERVER_GONE | ActivityManager.UID_OBSERVER_IDLE
-                        | ActivityManager.UID_OBSERVER_ACTIVE),
+                        | ActivityManager.UID_OBSERVER_ACTIVE
+                        | ActivityManager.UID_OBSERVER_PROCSTATE),
                 eq(ActivityManager.PROCESS_STATE_UNKNOWN),
                 isNull());
         verify(mMockIAppOpsService).startWatchingMode(
@@ -333,23 +338,23 @@ public class ForceAppStandbyTrackerTest {
         mPowerSaveMode = true;
         mPowerSaveObserver.accept(getPowerSaveState());
 
-        assertFalse(instance.isInForeground(UID_1));
-        assertFalse(instance.isInForeground(UID_2));
-        assertTrue(instance.isInForeground(Process.SYSTEM_UID));
+        assertFalse(instance.isUidActive(UID_1));
+        assertFalse(instance.isUidActive(UID_2));
+        assertTrue(instance.isUidActive(Process.SYSTEM_UID));
 
         mIUidObserver.onUidActive(UID_1);
         areRestricted(instance, UID_1, PACKAGE_1, NONE);
         areRestricted(instance, UID_2, PACKAGE_2, JOBS_AND_ALARMS);
         areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
-        assertTrue(instance.isInForeground(UID_1));
-        assertFalse(instance.isInForeground(UID_2));
+        assertTrue(instance.isUidActive(UID_1));
+        assertFalse(instance.isUidActive(UID_2));
 
         mIUidObserver.onUidGone(UID_1, /*disable=*/ false);
         areRestricted(instance, UID_1, PACKAGE_1, JOBS_AND_ALARMS);
         areRestricted(instance, UID_2, PACKAGE_2, JOBS_AND_ALARMS);
         areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
-        assertFalse(instance.isInForeground(UID_1));
-        assertFalse(instance.isInForeground(UID_2));
+        assertFalse(instance.isUidActive(UID_1));
+        assertFalse(instance.isUidActive(UID_2));
 
         mIUidObserver.onUidActive(UID_1);
         areRestricted(instance, UID_1, PACKAGE_1, NONE);
@@ -360,8 +365,8 @@ public class ForceAppStandbyTrackerTest {
         areRestricted(instance, UID_1, PACKAGE_1, JOBS_AND_ALARMS);
         areRestricted(instance, UID_2, PACKAGE_2, JOBS_AND_ALARMS);
         areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
-        assertFalse(instance.isInForeground(UID_1));
-        assertFalse(instance.isInForeground(UID_2));
+        assertFalse(instance.isUidActive(UID_1));
+        assertFalse(instance.isUidActive(UID_2));
 
         // Toggle the app ops.
         mPowerSaveMode = false;
@@ -453,6 +458,88 @@ public class ForceAppStandbyTrackerTest {
         assertFalse(instance.isUidTempPowerSaveWhitelisted(UID_10_1));
         assertTrue(instance.isUidTempPowerSaveWhitelisted(UID_2));
         assertTrue(instance.isUidTempPowerSaveWhitelisted(UID_10_2));
+    }
+
+    @Test
+    public void testUidStateForeground() throws Exception {
+        final ForceAppStandbyTrackerTestable instance = newInstance();
+        callStart(instance);
+
+        mIUidObserver.onUidActive(UID_1);
+
+        assertTrue(instance.isUidActive(UID_1));
+        assertFalse(instance.isUidActive(UID_2));
+        assertTrue(instance.isUidActive(Process.SYSTEM_UID));
+
+        assertFalse(instance.isUidInForeground(UID_1));
+        assertFalse(instance.isUidInForeground(UID_2));
+        assertTrue(instance.isUidInForeground(Process.SYSTEM_UID));
+
+
+        mIUidObserver.onUidStateChanged(UID_2,
+                ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE, 0);
+
+        assertTrue(instance.isUidActive(UID_1));
+        assertFalse(instance.isUidActive(UID_2));
+        assertTrue(instance.isUidActive(Process.SYSTEM_UID));
+
+        assertFalse(instance.isUidInForeground(UID_1));
+        assertTrue(instance.isUidInForeground(UID_2));
+        assertTrue(instance.isUidInForeground(Process.SYSTEM_UID));
+
+
+        mIUidObserver.onUidStateChanged(UID_1,
+                ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0);
+
+        assertTrue(instance.isUidActive(UID_1));
+        assertFalse(instance.isUidActive(UID_2));
+        assertTrue(instance.isUidActive(Process.SYSTEM_UID));
+
+        assertTrue(instance.isUidInForeground(UID_1));
+        assertTrue(instance.isUidInForeground(UID_2));
+        assertTrue(instance.isUidInForeground(Process.SYSTEM_UID));
+
+        mIUidObserver.onUidGone(UID_1, true);
+
+        assertFalse(instance.isUidActive(UID_1));
+        assertFalse(instance.isUidActive(UID_2));
+        assertTrue(instance.isUidActive(Process.SYSTEM_UID));
+
+        assertFalse(instance.isUidInForeground(UID_1));
+        assertTrue(instance.isUidInForeground(UID_2));
+        assertTrue(instance.isUidInForeground(Process.SYSTEM_UID));
+
+        mIUidObserver.onUidIdle(UID_2, true);
+
+        assertFalse(instance.isUidActive(UID_1));
+        assertFalse(instance.isUidActive(UID_2));
+        assertTrue(instance.isUidActive(Process.SYSTEM_UID));
+
+        assertFalse(instance.isUidInForeground(UID_1));
+        assertFalse(instance.isUidInForeground(UID_2));
+        assertTrue(instance.isUidInForeground(Process.SYSTEM_UID));
+
+        mIUidObserver.onUidStateChanged(UID_1,
+                ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0);
+
+        assertFalse(instance.isUidActive(UID_1));
+        assertFalse(instance.isUidActive(UID_2));
+        assertTrue(instance.isUidActive(Process.SYSTEM_UID));
+
+        assertTrue(instance.isUidInForeground(UID_1));
+        assertFalse(instance.isUidInForeground(UID_2));
+        assertTrue(instance.isUidInForeground(Process.SYSTEM_UID));
+
+        mIUidObserver.onUidStateChanged(UID_1,
+                ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 0);
+
+        assertFalse(instance.isUidActive(UID_1));
+        assertFalse(instance.isUidActive(UID_2));
+        assertTrue(instance.isUidActive(Process.SYSTEM_UID));
+
+        assertFalse(instance.isUidInForeground(UID_1));
+        assertFalse(instance.isUidInForeground(UID_2));
+        assertTrue(instance.isUidInForeground(Process.SYSTEM_UID));
     }
 
     @Test
@@ -953,8 +1040,8 @@ public class ForceAppStandbyTrackerTest {
         setAppOps(UID_2, PACKAGE_2, true);
         setAppOps(UID_10_2, PACKAGE_2, true);
 
-        assertTrue(instance.isInForeground(UID_1));
-        assertTrue(instance.isInForeground(UID_10_1));
+        assertTrue(instance.isUidActive(UID_1));
+        assertTrue(instance.isUidActive(UID_10_1));
 
         assertFalse(instance.isRunAnyInBackgroundAppOpsAllowed(UID_2, PACKAGE_2));
         assertFalse(instance.isRunAnyInBackgroundAppOpsAllowed(UID_10_2, PACKAGE_2));
@@ -965,8 +1052,8 @@ public class ForceAppStandbyTrackerTest {
 
         waitUntilMainHandlerDrain();
 
-        assertTrue(instance.isInForeground(UID_1));
-        assertFalse(instance.isInForeground(UID_10_1));
+        assertTrue(instance.isUidActive(UID_1));
+        assertFalse(instance.isUidActive(UID_10_1));
 
         assertFalse(instance.isRunAnyInBackgroundAppOpsAllowed(UID_2, PACKAGE_2));
         assertTrue(instance.isRunAnyInBackgroundAppOpsAllowed(UID_10_2, PACKAGE_2));

@@ -166,7 +166,7 @@ public class DateFormat {
      * @return true if 24 hour time format is selected, false otherwise.
      */
     public static boolean is24HourFormat(Context context) {
-        return is24HourFormat(context, UserHandle.myUserId());
+        return is24HourFormat(context, context.getUserId());
     }
 
     /**
@@ -270,7 +270,7 @@ public class DateFormat {
      * @hide
      */
     public static String getTimeFormatString(Context context) {
-        return getTimeFormatString(context, UserHandle.myUserId());
+        return getTimeFormatString(context, context.getUserId());
     }
 
     /**

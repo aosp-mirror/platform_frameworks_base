@@ -253,6 +253,9 @@ void buildAttributionFieldMatcher(const int tagId, const Position position, Fiel
 }
 
 void DimensionsValueToString(const DimensionsValue& value, std::string *flattened) {
+    if (!value.has_field()) {
+        return;
+    }
     *flattened += std::to_string(value.field());
     *flattened += ":";
     switch (value.value_case()) {
@@ -349,6 +352,46 @@ long getLongFromDimenValue(const DimensionsValue& dimensionValue) {
         case DimensionsValue::ValueCase::kValueStr:
         case DimensionsValue::ValueCase::VALUE_NOT_SET:
             return 0;
+    }
+}
+
+bool getSubDimension(const DimensionsValue& dimension, const FieldMatcher& matcher,
+                     DimensionsValue* subDimension) {
+    if (!matcher.has_field()) {
+        return false;
+    }
+    if (matcher.field() != dimension.field()) {
+        return false;
+    }
+    if (matcher.child_size() <= 0) {
+        if (dimension.value_case() == DimensionsValue::ValueCase::kValueTuple ||
+            dimension.value_case() == DimensionsValue::ValueCase::VALUE_NOT_SET) {
+            return false;
+        }
+        *subDimension = dimension;
+        return true;
+    } else {
+        if (dimension.value_case() != DimensionsValue::ValueCase::kValueTuple) {
+            return false;
+        }
+        bool found_value = true;
+        auto value_tuple = dimension.value_tuple();
+        subDimension->set_field(dimension.field());
+        for (int i = 0; found_value && i < matcher.child_size(); ++i) {
+            int j = 0;
+            for (; j < value_tuple.dimensions_value_size(); ++j) {
+                if (value_tuple.dimensions_value(j).field() == matcher.child(i).field()) {
+                    break;
+                }
+            }
+            if (j < value_tuple.dimensions_value_size()) {
+                found_value &= getSubDimension(value_tuple.dimensions_value(j), matcher.child(i),
+                    subDimension->mutable_value_tuple()->add_dimensions_value());
+            } else {
+                found_value = false;
+            }
+        }
+        return found_value;
     }
 }
 

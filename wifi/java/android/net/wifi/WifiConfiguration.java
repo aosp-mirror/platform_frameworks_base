@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.pm.PackageManager;
 import android.net.IpConfiguration;
@@ -439,6 +440,7 @@ public class WifiConfiguration implements Parcelable {
     /**
      * @hide
      */
+    @NonNull
     private IpConfiguration mIpConfiguration;
 
     /**
@@ -2023,6 +2025,7 @@ public class WifiConfiguration implements Parcelable {
 
     /** @hide */
     public void setIpConfiguration(IpConfiguration ipConfiguration) {
+        if (ipConfiguration == null) ipConfiguration = new IpConfiguration();
         mIpConfiguration = ipConfiguration;
     }
 
@@ -2306,7 +2309,7 @@ public class WifiConfiguration implements Parcelable {
                 config.allowedGroupCiphers    = readBitSet(in);
 
                 config.enterpriseConfig = in.readParcelable(null);
-                config.mIpConfiguration = in.readParcelable(null);
+                config.setIpConfiguration(in.readParcelable(null));
                 config.dhcpServer = in.readString();
                 config.defaultGwMacAddress = in.readString();
                 config.selfAdded = in.readInt() != 0;

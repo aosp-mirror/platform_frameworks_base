@@ -33,14 +33,14 @@ namespace statsd {
 
 const ConfigKey kConfigKey(0, 12345);
 
-HashableDimensionKey getMockDimensionKey(int key, string value) {
+MetricDimensionKey getMockMetricDimensionKey(int key, string value) {
     DimensionsValue dimensionsValue;
     dimensionsValue.set_field(key);
     dimensionsValue.set_value_str(value);
-    return HashableDimensionKey(dimensionsValue);
+    return MetricDimensionKey(HashableDimensionKey(dimensionsValue), DEFAULT_DIMENSION_KEY);
 }
 
-void AddValueToBucket(const std::vector<std::pair<HashableDimensionKey, long>>& key_value_pair_list,
+void AddValueToBucket(const std::vector<std::pair<MetricDimensionKey, long>>& key_value_pair_list,
                       std::shared_ptr<DimToValMap> bucket) {
     for (auto itr = key_value_pair_list.begin(); itr != key_value_pair_list.end(); itr++) {
         (*bucket)[itr->first] += itr->second;
@@ -48,7 +48,7 @@ void AddValueToBucket(const std::vector<std::pair<HashableDimensionKey, long>>& 
 }
 
 std::shared_ptr<DimToValMap> MockBucket(
-        const std::vector<std::pair<HashableDimensionKey, long>>& key_value_pair_list) {
+        const std::vector<std::pair<MetricDimensionKey, long>>& key_value_pair_list) {
     std::shared_ptr<DimToValMap> bucket = std::make_shared<DimToValMap>();
     AddValueToBucket(key_value_pair_list, bucket);
     return bucket;
@@ -56,7 +56,7 @@ std::shared_ptr<DimToValMap> MockBucket(
 
 // Returns the value, for the given key, in that bucket, or 0 if not present.
 int64_t getBucketValue(const std::shared_ptr<DimToValMap>& bucket,
-                       const HashableDimensionKey& key) {
+                       const MetricDimensionKey& key) {
     const auto& itr = bucket->find(key);
     if (itr != bucket->end()) {
         return itr->second;
@@ -68,14 +68,14 @@ int64_t getBucketValue(const std::shared_ptr<DimToValMap>& bucket,
 bool detectAnomaliesPass(AnomalyTracker& tracker,
                          const int64_t& bucketNum,
                          const std::shared_ptr<DimToValMap>& currentBucket,
-                         const std::set<const HashableDimensionKey>& trueList,
-                         const std::set<const HashableDimensionKey>& falseList) {
-    for (HashableDimensionKey key : trueList) {
+                         const std::set<const MetricDimensionKey>& trueList,
+                         const std::set<const MetricDimensionKey>& falseList) {
+    for (MetricDimensionKey key : trueList) {
         if (!tracker.detectAnomaly(bucketNum, key, getBucketValue(currentBucket, key))) {
             return false;
         }
     }
-    for (HashableDimensionKey key : falseList) {
+    for (MetricDimensionKey key : falseList) {
         if (tracker.detectAnomaly(bucketNum, key, getBucketValue(currentBucket, key))) {
             return false;
         }
@@ -100,7 +100,7 @@ void detectAndDeclareAnomalies(AnomalyTracker& tracker,
 void checkRefractoryTimes(AnomalyTracker& tracker,
                           const int64_t& currTimestampNs,
                           const int32_t& refractoryPeriodSec,
-                          const std::unordered_map<HashableDimensionKey, int64_t>& timestamps) {
+                          const std::unordered_map<MetricDimensionKey, int64_t>& timestamps) {
     for (const auto& kv : timestamps) {
         if (kv.second < 0) {
             // Make sure that, if there is a refractory period, it is already past.
@@ -124,9 +124,9 @@ TEST(AnomalyTrackerTest, TestConsecutiveBuckets) {
     alert.set_trigger_if_sum_gt(2);
 
     AnomalyTracker anomalyTracker(alert, kConfigKey);
-    HashableDimensionKey keyA = getMockDimensionKey(1, "a");
-    HashableDimensionKey keyB = getMockDimensionKey(1, "b");
-    HashableDimensionKey keyC = getMockDimensionKey(1, "c");
+    MetricDimensionKey keyA = getMockMetricDimensionKey(1, "a");
+    MetricDimensionKey keyB = getMockMetricDimensionKey(1, "b");
+    MetricDimensionKey keyC = getMockMetricDimensionKey(1, "c");
 
     int64_t eventTimestamp0 = 10 * NS_PER_SEC;
     int64_t eventTimestamp1 = bucketSizeNs + 11 * NS_PER_SEC;
@@ -269,11 +269,11 @@ TEST(AnomalyTrackerTest, TestSparseBuckets) {
     alert.set_trigger_if_sum_gt(2);
 
     AnomalyTracker anomalyTracker(alert, kConfigKey);
-    HashableDimensionKey keyA = getMockDimensionKey(1, "a");
-    HashableDimensionKey keyB = getMockDimensionKey(1, "b");
-    HashableDimensionKey keyC = getMockDimensionKey(1, "c");
-    HashableDimensionKey keyD = getMockDimensionKey(1, "d");
-    HashableDimensionKey keyE = getMockDimensionKey(1, "e");
+    MetricDimensionKey keyA = getMockMetricDimensionKey(1, "a");
+    MetricDimensionKey keyB = getMockMetricDimensionKey(1, "b");
+    MetricDimensionKey keyC = getMockMetricDimensionKey(1, "c");
+    MetricDimensionKey keyD = getMockMetricDimensionKey(1, "d");
+    MetricDimensionKey keyE = getMockMetricDimensionKey(1, "e");
 
     std::shared_ptr<DimToValMap> bucket9 = MockBucket({{keyA, 1}, {keyB, 2}, {keyC, 1}});
     std::shared_ptr<DimToValMap> bucket16 = MockBucket({{keyB, 4}});

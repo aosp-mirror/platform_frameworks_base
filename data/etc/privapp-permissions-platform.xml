@@ -145,6 +145,7 @@ applications that come with the platform
         <permission name="android.permission.BIND_CARRIER_MESSAGING_SERVICE"/>
         <permission name="android.permission.BIND_CARRIER_SERVICES"/>
         <permission name="android.permission.BIND_IMS_SERVICE"/>
+        <permission name="android.permission.BIND_TELEPHONY_DATA_SERVICE"/>
         <permission name="android.permission.BIND_VISUAL_VOICEMAIL_SERVICE"/>
         <permission name="android.permission.CALL_PRIVILEGED"/>
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/>
@@ -157,6 +158,7 @@ applications that come with the platform
         <permission name="android.permission.LOCAL_MAC_ADDRESS"/>
         <permission name="android.permission.MANAGE_USERS"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
+        <permission name="android.permission.PACKAGE_USAGE_STATS"/>
         <permission name="android.permission.PERFORM_CDMA_PROVISIONING"/>
         <permission name="android.permission.READ_NETWORK_USAGE_HISTORY"/>
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
@@ -227,6 +229,7 @@ applications that come with the platform
         <permission name="android.permission.CALL_PRIVILEGED"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MANAGE_USERS"/>
+        <permission name="android.permission.MODIFY_AUDIO_ROUTING" />
         <permission name="android.permission.MODIFY_PHONE_STATE"/>
         <permission name="android.permission.STOP_APP_SWITCHES"/>
         <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"/>

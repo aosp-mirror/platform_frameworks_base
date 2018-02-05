@@ -232,7 +232,7 @@ public class StaticLayoutPerfTest {
         while (state.keepRunning()) {
             state.pauseTiming();
             final MeasuredText text = new MeasuredText.Builder(
-                    mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT)
+                    mTextUtil.nextRandomParagraph(WORD_LENGTH, STYLE_TEXT), PAINT)
                     .setBreakStrategy(Layout.BREAK_STRATEGY_SIMPLE)
                     .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
                     .build();

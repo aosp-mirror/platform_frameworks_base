@@ -230,7 +230,7 @@ public class TaskStackBuilder {
      * Context.startActivity(Intent, Bundle)} for more details.
      */
     public void startActivities(Bundle options) {
-        startActivities(options, new UserHandle(UserHandle.myUserId()));
+        startActivities(options, mSourceContext.getUser());
     }
 
     /**

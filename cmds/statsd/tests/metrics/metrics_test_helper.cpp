@@ -26,6 +26,13 @@ HashableDimensionKey getMockedDimensionKey(int tagId, int key, string value) {
     return HashableDimensionKey(dimensionsValue);
 }
 
+MetricDimensionKey getMockedMetricDimensionKey(int tagId, int key, string value) {
+    DimensionsValue dimensionsValue;
+    dimensionsValue.set_field(tagId);
+    dimensionsValue.mutable_value_tuple()->add_dimensions_value()->set_field(key);
+    dimensionsValue.mutable_value_tuple()->mutable_dimensions_value(0)->set_value_str(value);
+    return MetricDimensionKey(HashableDimensionKey(dimensionsValue), DEFAULT_DIMENSION_KEY);
+}
 }  // namespace statsd
 }  // namespace os
 }  // namespace android

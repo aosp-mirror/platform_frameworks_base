@@ -116,28 +116,32 @@ public class MainActivity extends Activity {
         findViewById(R.id.plug).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                StatsLog.write(StatsLog.PLUGGED_STATE_CHANGED, 1);
+                StatsLog.write(StatsLog.PLUGGED_STATE_CHANGED,
+                        StatsLog.PLUGGED_STATE_CHANGED__STATE__BATTERY_PLUGGED_AC);
             }
         });
 
         findViewById(R.id.unplug).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                StatsLog.write(StatsLog.PLUGGED_STATE_CHANGED, 0);
+                StatsLog.write(StatsLog.PLUGGED_STATE_CHANGED,
+                        StatsLog.PLUGGED_STATE_CHANGED__STATE__BATTERY_PLUGGED_NONE);
             }
         });
 
         findViewById(R.id.screen_on).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                StatsLog.write(StatsLog.SCREEN_STATE_CHANGED, 2);
+                StatsLog.write(StatsLog.SCREEN_STATE_CHANGED,
+                        StatsLog.SCREEN_STATE_CHANGED__STATE__DISPLAY_STATE_ON);
             }
         });
 
         findViewById(R.id.screen_off).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                StatsLog.write(StatsLog.SCREEN_STATE_CHANGED, 1);
+                StatsLog.write(StatsLog.SCREEN_STATE_CHANGED,
+                        StatsLog.SCREEN_STATE_CHANGED__STATE__DISPLAY_STATE_OFF);
             }
         });
 
@@ -255,7 +259,9 @@ public class MainActivity extends Activity {
         }
         int[] uids = new int[] {mUids[id]};
         String[] tags  = new String[] {"acquire"};
-        StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, uids, tags, 0, name, 1);
+        StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, uids, tags,
+                StatsLog.WAKELOCK_STATE_CHANGED__LEVEL__PARTIAL_WAKE_LOCK, name,
+                StatsLog.WAKELOCK_STATE_CHANGED__STATE__ACQUIRE);
         StringBuilder sb = new StringBuilder();
         sb.append("StagsLog.write(10, ").append(mUids[id]).append(", ").append(0)
                 .append(", ").append(name).append(", 1);");
@@ -269,7 +275,9 @@ public class MainActivity extends Activity {
         }
         int[] uids = new int[] {mUids[id]};
         String[] tags  = new String[] {"release"};
-        StatsLog.write(10, uids, tags, 0, name, 0);
+        StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, uids, tags,
+                StatsLog.WAKELOCK_STATE_CHANGED__LEVEL__PARTIAL_WAKE_LOCK, name,
+                StatsLog.WAKELOCK_STATE_CHANGED__STATE__RELEASE);
         StringBuilder sb = new StringBuilder();
         sb.append("StagsLog.write(10, ").append(mUids[id]).append(", ").append(0)
                 .append(", ").append(name).append(", 0);");

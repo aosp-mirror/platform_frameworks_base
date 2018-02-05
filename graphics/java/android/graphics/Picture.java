@@ -31,8 +31,9 @@ import java.io.OutputStream;
  * be replayed on a hardware accelerated canvas.</p>
  */
 public class Picture {
-    private Canvas mRecordingCanvas;
+    private PictureCanvas mRecordingCanvas;
     private long mNativePicture;
+    private boolean mRequiresHwAcceleration;
 
     private static final int WORKING_STREAM_STORAGE = 16 * 1024;
 
@@ -78,8 +79,12 @@ public class Picture {
      * into it.
      */
     public Canvas beginRecording(int width, int height) {
+        if (mRecordingCanvas != null) {
+            throw new IllegalStateException("Picture already recording, must call #endRecording()");
+        }
         long ni = nativeBeginRecording(mNativePicture, width, height);
-        mRecordingCanvas = new RecordingCanvas(this, ni);
+        mRecordingCanvas = new PictureCanvas(this, ni);
+        mRequiresHwAcceleration = false;
         return mRecordingCanvas;
     }
 
@@ -91,6 +96,7 @@ public class Picture {
      */
     public void endRecording() {
         if (mRecordingCanvas != null) {
+            mRequiresHwAcceleration = mRecordingCanvas.mHoldsHwBitmap;
             mRecordingCanvas = null;
             nativeEndRecording(mNativePicture);
         }
@@ -113,6 +119,18 @@ public class Picture {
     }
 
     /**
+     * Indicates whether or not this Picture contains recorded commands that only work when
+     * drawn to a hardware-accelerated canvas. If this returns true then this Picture can only
+     * be drawn to another Picture or to a Canvas where canvas.isHardwareAccelerated() is true.
+     *
+     * @return true if the Picture can only be drawn to a hardware-accelerated canvas,
+     *         false otherwise.
+     */
+    public boolean requiresHardwareAcceleration() {
+        return mRequiresHwAcceleration;
+    }
+
+    /**
      * Draw this picture on the canvas.
      * <p>
      * Prior to {@link android.os.Build.VERSION_CODES#LOLLIPOP}, this call could
@@ -128,6 +146,9 @@ public class Picture {
     public void draw(Canvas canvas) {
         if (mRecordingCanvas != null) {
             endRecording();
+        }
+        if (mRequiresHwAcceleration && !canvas.isHardwareAccelerated()) {
+            canvas.onHwBitmapInSwMode();
         }
         nativeDraw(canvas.getNativeCanvasWrapper(), mNativePicture);
     }
@@ -164,8 +185,7 @@ public class Picture {
         if (stream == null) {
             throw new NullPointerException();
         }
-        if (!nativeWriteToStream(mNativePicture, stream,
-                             new byte[WORKING_STREAM_STORAGE])) {
+        if (!nativeWriteToStream(mNativePicture, stream, new byte[WORKING_STREAM_STORAGE])) {
             throw new RuntimeException();
         }
     }
@@ -182,10 +202,11 @@ public class Picture {
                                            OutputStream stream, byte[] storage);
     private static native void nativeDestructor(long nativePicture);
 
-    private static class RecordingCanvas extends Canvas {
+    private static class PictureCanvas extends Canvas {
         private final Picture mPicture;
+        boolean mHoldsHwBitmap;
 
-        public RecordingCanvas(Picture pict, long nativeCanvas) {
+        public PictureCanvas(Picture pict, long nativeCanvas) {
             super(nativeCanvas);
             mPicture = pict;
         }
@@ -201,6 +222,11 @@ public class Picture {
                 throw new RuntimeException("Cannot draw a picture into its recording canvas");
             }
             super.drawPicture(picture);
+        }
+
+        @Override
+        protected void onHwBitmapInSwMode() {
+            mHoldsHwBitmap = true;
         }
     }
 }

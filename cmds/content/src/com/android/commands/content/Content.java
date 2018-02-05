@@ -26,6 +26,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
@@ -34,6 +35,7 @@ import android.text.TextUtils;
 
 import libcore.io.Streams;
 
+import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
@@ -583,7 +585,7 @@ public class Content {
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
             try (ParcelFileDescriptor fd = provider.openFile(null, mUri, "r", null, null)) {
-                Streams.copy(new FileInputStream(fd.getFileDescriptor()), System.out);
+                FileUtils.copy(fd.getFileDescriptor(), FileDescriptor.out);
             }
         }
     }
@@ -596,7 +598,7 @@ public class Content {
         @Override
         public void onExecute(IContentProvider provider) throws Exception {
             try (ParcelFileDescriptor fd = provider.openFile(null, mUri, "w", null, null)) {
-                Streams.copy(System.in, new FileOutputStream(fd.getFileDescriptor()));
+                FileUtils.copy(FileDescriptor.in, fd.getFileDescriptor());
             }
         }
     }

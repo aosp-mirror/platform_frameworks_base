@@ -325,7 +325,8 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
         int dismiss2 = 777;
         String key2 = mAssistant.getKey("pkg2", 2, "channel2");
 
-        String xml = "<assistant version=\"1\">\n"
+        String xml = "<?xml version='1.0' encoding='utf-8' standalone='yes' ?>"
+                + "<assistant version=\"1\">\n"
                 + "<impression-set key=\"" + key1 + "\" "
                 + "dismisses=\"" + dismiss1 + "\" views=\"" + views1
                 + "\" streak=\"" + streak1 + "\"/>\n"
@@ -376,7 +377,6 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
         mAssistant.insertImpressions(key1, ci1);
         mAssistant.insertImpressions(key2, ci2);
         mAssistant.insertImpressions(key3, ci3);
-
 
         XmlSerializer serializer = new FastXmlSerializer();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

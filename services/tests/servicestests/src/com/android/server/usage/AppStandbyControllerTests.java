@@ -24,6 +24,7 @@ import static android.app.usage.UsageStatsManager.REASON_PREDICTED;
 import static android.app.usage.UsageStatsManager.REASON_TIMEOUT;
 import static android.app.usage.UsageStatsManager.REASON_USAGE;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_ACTIVE;
+import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_EXEMPTED;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_FREQUENT;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_NEVER;
 import static android.app.usage.UsageStatsManager.STANDBY_BUCKET_RARE;
@@ -35,6 +36,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -80,6 +82,8 @@ public class AppStandbyControllerTests {
 
     private static final String PACKAGE_1 = "com.example.foo";
     private static final int UID_1 = 10000;
+    private static final String PACKAGE_EXEMPTED_1 = "com.android.exempted";
+    private static final int UID_EXEMPTED_1 = 10001;
     private static final int USER_ID = 0;
     private static final int USER_ID2 = 10;
 
@@ -116,7 +120,7 @@ public class AppStandbyControllerTests {
         List<String> mPowerSaveWhitelistExceptIdle = new ArrayList<>();
         boolean mDisplayOn;
         DisplayManager.DisplayListener mDisplayListener;
-        String mBoundWidgetPackage;
+        String mBoundWidgetPackage = PACKAGE_EXEMPTED_1;
 
         MyInjector(Context context, Looper looper) {
             super(context, looper);
@@ -223,10 +227,21 @@ public class AppStandbyControllerTests {
         pi.packageName = PACKAGE_1;
         packages.add(pi);
 
+        PackageInfo pie = new PackageInfo();
+        pie.applicationInfo = new ApplicationInfo();
+        pie.applicationInfo.uid = UID_EXEMPTED_1;
+        pie.packageName = PACKAGE_EXEMPTED_1;
+        packages.add(pie);
+
         doReturn(packages).when(mockPm).getInstalledPackagesAsUser(anyInt(), anyInt());
         try {
-            doReturn(UID_1).when(mockPm).getPackageUidAsUser(anyString(), anyInt(), anyInt());
-            doReturn(pi.applicationInfo).when(mockPm).getApplicationInfo(anyString(), anyInt());
+            doReturn(UID_1).when(mockPm).getPackageUidAsUser(eq(PACKAGE_1), anyInt(), anyInt());
+            doReturn(UID_EXEMPTED_1).when(mockPm).getPackageUidAsUser(eq(PACKAGE_EXEMPTED_1),
+                    anyInt(), anyInt());
+            doReturn(pi.applicationInfo).when(mockPm).getApplicationInfo(eq(pi.packageName),
+                    anyInt());
+            doReturn(pie.applicationInfo).when(mockPm).getApplicationInfo(eq(pie.packageName),
+                    anyInt());
         } catch (PackageManager.NameNotFoundException nnfe) {}
     }
 
@@ -239,14 +254,21 @@ public class AppStandbyControllerTests {
 
     private AppStandbyController setupController() throws Exception {
         mInjector.mElapsedRealtime = 0;
+        setupPm(mInjector.getContext().getPackageManager());
         AppStandbyController controller = new AppStandbyController(mInjector);
+        controller.initializeDefaultsForSystemApps(USER_ID);
         controller.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
         controller.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
         mInjector.setDisplayOn(false);
         mInjector.setDisplayOn(true);
         setChargingState(controller, false);
-        setupPm(mInjector.getContext().getPackageManager());
         controller.checkIdleStates(USER_ID);
+        assertEquals(STANDBY_BUCKET_EXEMPTED,
+                controller.getAppStandbyBucket(PACKAGE_EXEMPTED_1, USER_ID,
+                        mInjector.mElapsedRealtime, false));
+        assertNotEquals(STANDBY_BUCKET_EXEMPTED,
+                controller.getAppStandbyBucket(PACKAGE_1, USER_ID,
+                        mInjector.mElapsedRealtime, false));
 
         return controller;
     }

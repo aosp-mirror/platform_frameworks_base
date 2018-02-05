@@ -38,8 +38,11 @@ statsd_common_src := \
     src/external/StatsPuller.cpp \
     src/external/StatsCompanionServicePuller.cpp \
     src/external/SubsystemSleepStatePuller.cpp \
+    src/external/ResourceHealthManagerPuller.cpp \
     src/external/CpuTimePerUidPuller.cpp \
     src/external/CpuTimePerUidFreqPuller.cpp \
+    src/external/KernelUidCpuActiveTimeReader.cpp \
+    src/external/KernelUidCpuClusterTimeReader.cpp \
     src/external/StatsPullerManagerImpl.cpp \
     src/logd/LogEvent.cpp \
     src/logd/LogListener.cpp \
@@ -75,7 +78,8 @@ statsd_common_aidl_includes := \
     $(LOCAL_PATH)/../../core/java
 
 statsd_common_static_libraries := \
-    libplatformprotos
+    libhealthhalutils \
+    libplatformprotos \
 
 statsd_common_shared_libraries := \
     libbase \
@@ -93,6 +97,7 @@ statsd_common_shared_libraries := \
     libhidlbase \
     libhidltransport \
     libhwbinder \
+    android.hardware.health@2.0 \
     android.hardware.power@1.0 \
     android.hardware.power@1.1 \
     libmemunreachable
@@ -165,6 +170,7 @@ LOCAL_CFLAGS += \
 
 LOCAL_SRC_FILES := \
     $(statsd_common_src) \
+    tests/dimension_test.cpp \
     tests/AnomalyMonitor_test.cpp \
     tests/anomaly/AnomalyTracker_test.cpp \
     tests/ConfigManager_test.cpp \
@@ -190,7 +196,8 @@ LOCAL_SRC_FILES := \
     tests/e2e/WakelockDuration_e2e_test.cpp \
     tests/e2e/MetricConditionLink_e2e_test.cpp \
     tests/e2e/Attribution_e2e_test.cpp \
-    tests/e2e/GaugeMetric_e2e_test.cpp
+    tests/e2e/GaugeMetric_e2e_test.cpp \
+    tests/e2e/DimensionInCondition_e2e_test.cpp
 
 LOCAL_STATIC_LIBRARIES := \
     $(statsd_common_static_libraries) \

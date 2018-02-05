@@ -1671,35 +1671,6 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
     public abstract void deselectTrack(int index);
 
     /**
-     * Sets the target UDP re-transmit endpoint for the low level player.
-     * Generally, the address portion of the endpoint is an IP multicast
-     * address, although a unicast address would be equally valid.  When a valid
-     * retransmit endpoint has been set, the media player will not decode and
-     * render the media presentation locally.  Instead, the player will attempt
-     * to re-multiplex its media data using the Android@Home RTP profile and
-     * re-transmit to the target endpoint.  Receiver devices (which may be
-     * either the same as the transmitting device or different devices) may
-     * instantiate, prepare, and start a receiver player using a setDataSource
-     * URL of the form...
-     *
-     * aahRX://&lt;multicastIP&gt;:&lt;port&gt;
-     *
-     * to receive, decode and render the re-transmitted content.
-     *
-     * setRetransmitEndpoint may only be called before setDataSource has been
-     * called; while the player is in the Idle state.
-     *
-     * @param endpoint the address and UDP port of the re-transmission target or
-     * null if no re-transmission is to be performed.
-     * @throws IllegalStateException if it is called in an invalid state
-     * @throws IllegalArgumentException if the retransmit endpoint is supplied,
-     * but invalid.
-     *
-     * {@hide} pending API council
-     */
-    public void setRetransmitEndpoint(InetSocketAddress endpoint) { }
-
-    /**
      * Releases the resources held by this {@code MediaPlayer2} object.
      *
      * It is considered good practice to call this method when you're

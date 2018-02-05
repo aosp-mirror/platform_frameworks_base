@@ -23,10 +23,11 @@
 #include <climits>
 #include "CpuTimePerUidFreqPuller.h"
 #include "CpuTimePerUidPuller.h"
-#include "SubsystemSleepStatePuller.h"
+#include "ResourceHealthManagerPuller.h"
 #include "StatsCompanionServicePuller.h"
 #include "StatsPullerManagerImpl.h"
 #include "StatsService.h"
+#include "SubsystemSleepStatePuller.h"
 #include "logd/LogEvent.h"
 #include "statslog.h"
 
@@ -83,7 +84,10 @@ StatsPullerManagerImpl::StatsPullerManagerImpl()
              make_shared<StatsCompanionServicePuller>(android::util::WIFI_ACTIVITY_ENERGY_INFO)});
     mPullers.insert({android::util::MODEM_ACTIVITY_INFO,
                      make_shared<StatsCompanionServicePuller>(android::util::MODEM_ACTIVITY_INFO)});
-
+    mPullers.insert({android::util::REMAINING_BATTERY_CAPACITY,
+                     make_shared<ResourceHealthManagerPuller>(android::util::REMAINING_BATTERY_CAPACITY)});
+    mPullers.insert({android::util::FULL_BATTERY_CAPACITY,
+                     make_shared<ResourceHealthManagerPuller>(android::util::FULL_BATTERY_CAPACITY)});
     mStatsCompanionService = StatsService::getStatsCompanionService();
 }
 
@@ -192,6 +196,12 @@ void StatsPullerManagerImpl::OnAlarmFired() {
                 }
             }
         }
+    }
+}
+
+void StatsPullerManagerImpl::ClearPullerCache() {
+    for (auto puller : mPullers) {
+        puller.second->ClearCache();
     }
 }
 

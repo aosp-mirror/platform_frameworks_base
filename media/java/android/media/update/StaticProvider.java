@@ -17,6 +17,7 @@
 package android.media.update;
 
 import android.annotation.Nullable;
+import android.app.Notification;
 import android.content.Context;
 import android.media.DataSourceDesc;
 import android.media.MediaBrowser2;
@@ -25,25 +26,31 @@ import android.media.MediaController2;
 import android.media.MediaController2.ControllerCallback;
 import android.media.MediaItem2;
 import android.media.MediaLibraryService2;
+import android.media.MediaLibraryService2.LibraryRoot;
 import android.media.MediaLibraryService2.MediaLibrarySession;
 import android.media.MediaLibraryService2.MediaLibrarySessionBuilder;
 import android.media.MediaLibraryService2.MediaLibrarySessionCallback;
 import android.media.MediaMetadata2;
 import android.media.MediaPlayerInterface;
 import android.media.MediaSession2;
+import android.media.MediaSession2.CommandButton.Builder;
 import android.media.MediaSession2.PlaylistParams;
 import android.media.MediaSession2.SessionCallback;
 import android.media.MediaSessionService2;
+import android.media.MediaSessionService2.MediaNotification;
 import android.media.PlaybackState2;
 import android.media.Rating2;
 import android.media.SessionPlayer2;
 import android.media.SessionToken2;
 import android.media.VolumeProvider2;
+import android.media.update.MediaLibraryService2Provider.LibraryRootProvider;
 import android.media.update.MediaSession2Provider.BuilderBaseProvider;
+import android.media.update.MediaSession2Provider.CommandButtonProvider.BuilderProvider;
 import android.media.update.MediaSession2Provider.CommandGroupProvider;
 import android.media.update.MediaSession2Provider.CommandProvider;
 import android.media.update.MediaSession2Provider.ControllerInfoProvider;
 import android.media.update.MediaSession2Provider.PlaylistParamsProvider;
+import android.media.update.MediaSessionService2Provider.MediaNotificationProvider;
 import android.os.Bundle;
 import android.os.IInterface;
 import android.util.AttributeSet;
@@ -60,10 +67,11 @@ import java.util.concurrent.Executor;
  * @hide
  */
 public interface StaticProvider {
-    MediaControlView2Provider createMediaControlView2(
-            MediaControlView2 instance, ViewProvider superProvider);
-    VideoView2Provider createVideoView2(
-            VideoView2 instance, ViewProvider superProvider,
+    MediaControlView2Provider createMediaControlView2(MediaControlView2 instance,
+            ViewGroupProvider superProvider, ViewGroupProvider privateProvider,
+            @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes);
+    VideoView2Provider createVideoView2(VideoView2 instance,
+            ViewGroupProvider superProvider, ViewGroupProvider privateProvider,
             @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes);
 
     CommandProvider createMediaSession2Command(MediaSession2.Command instance,
@@ -79,6 +87,7 @@ public interface StaticProvider {
             PlaylistParams playlistParams, int repeatMode, int shuffleMode,
             MediaMetadata2 playlistMetadata);
     PlaylistParams fromBundle_PlaylistParams(Context context, Bundle bundle);
+    BuilderProvider createMediaSession2CommandButtonBuilder(Context context, Builder builder);
     BuilderBaseProvider<MediaSession2, SessionCallback> createMediaSession2Builder(
             Context context, MediaSession2.Builder instance, MediaPlayerInterface player);
 
@@ -89,12 +98,16 @@ public interface StaticProvider {
             SessionToken2 token, Executor executor, BrowserCallback callback);
 
     MediaSessionService2Provider createMediaSessionService2(MediaSessionService2 instance);
+    MediaNotificationProvider createMediaSessionService2MediaNotification(Context context,
+            MediaNotification mediaNotification, int notificationId, Notification notification);
 
     MediaSessionService2Provider createMediaLibraryService2(MediaLibraryService2 instance);
     BuilderBaseProvider<MediaLibrarySession, MediaLibrarySessionCallback>
         createMediaLibraryService2Builder(
             Context context, MediaLibrarySessionBuilder instance, MediaPlayerInterface player,
             Executor callbackExecutor, MediaLibrarySessionCallback callback);
+    LibraryRootProvider createMediaLibraryService2LibraryRoot(Context context, LibraryRoot instance,
+            String rootId, Bundle extras);
 
     SessionToken2Provider createSessionToken2(Context context, SessionToken2 instance,
             String packageName, String serviceName, int uid);

@@ -115,6 +115,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
     private int mActivityType;
     private int mTaskId;
     private boolean mIsTaskOverlay;
+    private boolean mIsLockTask;
 
     final boolean mDumping;
 
@@ -278,6 +279,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
         mActivityType = ACTIVITY_TYPE_UNDEFINED;
         mTaskId = INVALID_TASK_ID;
         mIsTaskOverlay = false;
+        mIsLockTask = false;
 
         return Intent.parseCommandArgs(this, new Intent.CommandOptionHandler() {
             @Override
@@ -334,6 +336,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     mTaskId = Integer.parseInt(getNextArgRequired());
                 } else if (opt.equals("--task-overlay")) {
                     mIsTaskOverlay = true;
+                } else if (opt.equals("--lock-task")) {
+                    mIsLockTask = true;
                 } else {
                     return false;
                 }
@@ -429,12 +433,21 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 options.setLaunchActivityType(mActivityType);
             }
             if (mTaskId != INVALID_TASK_ID) {
-                options = ActivityOptions.makeBasic();
+                if (options == null) {
+                    options = ActivityOptions.makeBasic();
+                }
                 options.setLaunchTaskId(mTaskId);
 
                 if (mIsTaskOverlay) {
                     options.setTaskOverlay(true, true /* canResume */);
                 }
+            }
+            android.util.Log.d("bfranz", "I was here: " + mIsLockTask);
+            if (mIsLockTask) {
+                if (options == null) {
+                    options = ActivityOptions.makeBasic();
+                }
+                options.setLockTaskMode(true);
             }
             if (mWaitOption) {
                 result = mInterface.startActivityAndWait(null, null, intent, mimeType,

@@ -132,6 +132,12 @@ oneway interface IStatusBar
     void clickQsTile(in ComponentName tile);
     void handleSystemKey(in int key);
 
+    /**
+     * Methods to show toast messages for screen pinning
+     */
+    void showPinningEnterExitToast(boolean entering);
+    void showPinningEscapeToast();
+
     void showShutdownUi(boolean isReboot, String reason);
 
     // Used to show the dialog when FingerprintService starts authentication

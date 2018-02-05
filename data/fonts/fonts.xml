@@ -333,6 +333,9 @@
     <family lang="und-Cari">
         <font weight="400" style="normal">NotoSansCarian-Regular.ttf</font>
     </family>
+    <family lang="und-Cakm">
+        <font weight="400" style="normal">NotoSansChakma-Regular.ttf</font>
+    </family>
     <family lang="und-Cher">
         <font weight="400" style="normal">NotoSansCherokee-Regular.ttf</font>
     </family>
@@ -428,6 +431,9 @@
     </family>
     <family lang="und-Orkh">
         <font weight="400" style="normal">NotoSansOldTurkic-Regular.ttf</font>
+    </family>
+    <family lang="und-Osge">
+        <font weight="400" style="normal">NotoSansOsage-Regular.ttf</font>
     </family>
     <family lang="und-Osma">
         <font weight="400" style="normal">NotoSansOsmanya-Regular.ttf</font>

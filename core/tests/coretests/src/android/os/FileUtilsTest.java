@@ -21,16 +21,19 @@ import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
+import android.os.FileUtils.MemoryPipe;
 import android.provider.DocumentsContract.Document;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
 import libcore.io.IoUtils;
+import libcore.io.Streams;
 
 import com.google.android.collect.Sets;
 
@@ -40,11 +43,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Random;
 
 @RunWith(AndroidJUnit4.class)
 public class FileUtilsTest {
@@ -55,6 +60,8 @@ public class FileUtilsTest {
     private File mTestFile;
     private File mCopyFile;
     private File mTarget;
+
+    private final int[] DATA_SIZES = { 32, 32_000, 32_000_000 };
 
     private Context getContext() {
         return InstrumentationRegistry.getContext();
@@ -80,7 +87,7 @@ public class FileUtilsTest {
 
     @Test
     public void testCopyFile() throws Exception {
-        stageFile(mTestFile, TEST_DATA);
+        writeFile(mTestFile, TEST_DATA);
         assertFalse(mCopyFile.exists());
         FileUtils.copyFile(mTestFile, mCopyFile);
         assertTrue(mCopyFile.exists());
@@ -97,6 +104,104 @@ public class FileUtilsTest {
     }
 
     @Test
+    public void testCopy_FileToFile() throws Exception {
+        for (int size : DATA_SIZES) {
+            final File src = new File(mTarget, "src");
+            final File dest = new File(mTarget, "dest");
+
+            byte[] expected = new byte[size];
+            byte[] actual = new byte[size];
+            new Random().nextBytes(expected);
+            writeFile(src, expected);
+
+            try (FileInputStream in = new FileInputStream(src);
+                    FileOutputStream out = new FileOutputStream(dest)) {
+                FileUtils.copy(in, out);
+            }
+
+            actual = readFile(dest);
+            assertArrayEquals(expected, actual);
+        }
+    }
+
+    @Test
+    public void testCopy_FileToPipe() throws Exception {
+        for (int size : DATA_SIZES) {
+            final File src = new File(mTarget, "src");
+
+            byte[] expected = new byte[size];
+            byte[] actual = new byte[size];
+            new Random().nextBytes(expected);
+            writeFile(src, expected);
+
+            try (FileInputStream in = new FileInputStream(src);
+                    MemoryPipe out = MemoryPipe.createSink(actual)) {
+                FileUtils.copy(in.getFD(), out.getFD());
+                out.join();
+            }
+
+            assertArrayEquals(expected, actual);
+        }
+    }
+
+    @Test
+    public void testCopy_PipeToFile() throws Exception {
+        for (int size : DATA_SIZES) {
+            final File dest = new File(mTarget, "dest");
+
+            byte[] expected = new byte[size];
+            byte[] actual = new byte[size];
+            new Random().nextBytes(expected);
+
+            try (MemoryPipe in = MemoryPipe.createSource(expected);
+                    FileOutputStream out = new FileOutputStream(dest)) {
+                FileUtils.copy(in.getFD(), out.getFD());
+            }
+
+            actual = readFile(dest);
+            assertArrayEquals(expected, actual);
+        }
+    }
+
+    @Test
+    public void testCopy_PipeToPipe() throws Exception {
+        for (int size : DATA_SIZES) {
+            byte[] expected = new byte[size];
+            byte[] actual = new byte[size];
+            new Random().nextBytes(expected);
+
+            try (MemoryPipe in = MemoryPipe.createSource(expected);
+                    MemoryPipe out = MemoryPipe.createSink(actual)) {
+                FileUtils.copy(in.getFD(), out.getFD());
+                out.join();
+            }
+
+            assertArrayEquals(expected, actual);
+        }
+    }
+
+    @Test
+    public void testCopy_ShortPipeToFile() throws Exception {
+        byte[] source = new byte[33_000_000];
+        new Random().nextBytes(source);
+
+        for (int size : DATA_SIZES) {
+            final File dest = new File(mTarget, "dest");
+
+            byte[] expected = Arrays.copyOf(source, size);
+            byte[] actual = new byte[size];
+
+            try (MemoryPipe in = MemoryPipe.createSource(source);
+                    FileOutputStream out = new FileOutputStream(dest)) {
+                FileUtils.copy(in.getFD(), out.getFD(), null, null, size);
+            }
+
+            actual = readFile(dest);
+            assertArrayEquals(expected, actual);
+        }
+    }
+
+    @Test
     public void testIsFilenameSafe() throws Exception {
         assertTrue(FileUtils.isFilenameSafe(new File("foobar")));
         assertTrue(FileUtils.isFilenameSafe(new File("a_b-c=d.e/0,1+23")));
@@ -106,7 +211,7 @@ public class FileUtilsTest {
 
     @Test
     public void testReadTextFile() throws Exception {
-        stageFile(mTestFile, TEST_DATA);
+        writeFile(mTestFile, TEST_DATA);
 
         assertEquals(TEST_DATA, FileUtils.readTextFile(mTestFile, 0, null));
 
@@ -127,7 +232,7 @@ public class FileUtilsTest {
 
     @Test
     public void testReadTextFileWithZeroLengthFile() throws Exception {
-        stageFile(mTestFile, TEST_DATA);
+        writeFile(mTestFile, TEST_DATA);
         new FileOutputStream(mTestFile).close();  // Zero out the file
         assertEquals("", FileUtils.readTextFile(mTestFile, 0, null));
         assertEquals("", FileUtils.readTextFile(mTestFile, 1, "<>"));
@@ -381,12 +486,21 @@ public class FileUtilsTest {
         file.setLastModified(System.currentTimeMillis() - age);
     }
 
-    private void stageFile(File file, String data) throws Exception {
-        FileWriter writer = new FileWriter(file);
-        try {
-            writer.write(data, 0, data.length());
-        } finally {
-            writer.close();
+    private void writeFile(File file, String data) throws Exception {
+        writeFile(file, data.getBytes());
+    }
+
+    private void writeFile(File file, byte[] data) throws Exception {
+        try (FileOutputStream out = new FileOutputStream(file)) {
+            out.write(data);
+        }
+    }
+
+    private byte[] readFile(File file) throws Exception {
+        try (FileInputStream in = new FileInputStream(file);
+                ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            Streams.copy(in, out);
+            return out.toByteArray();
         }
     }
 

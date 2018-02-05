@@ -27,8 +27,8 @@ import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.media.update.ApiLoader;
-import android.media.update.FrameLayoutHelper;
 import android.media.update.VideoView2Provider;
+import android.media.update.ViewGroupHelper;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.AttributeSet;
@@ -101,7 +101,7 @@ import java.util.concurrent.Executor;
  *
  * @hide
  */
-public class VideoView2 extends FrameLayoutHelper<VideoView2Provider> {
+public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
     /** @hide */
     @IntDef({
             VIEW_TYPE_TEXTUREVIEW,
@@ -139,10 +139,12 @@ public class VideoView2 extends FrameLayoutHelper<VideoView2Provider> {
     public VideoView2(
             @NonNull Context context, @Nullable AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
-        super((instance, superProvider) ->
+        super((instance, superProvider, privateProvider) ->
                 ApiLoader.getProvider(context).createVideoView2(
-                        (VideoView2) instance, superProvider, attrs, defStyleAttr, defStyleRes),
+                        (VideoView2) instance, superProvider, privateProvider,
+                        attrs, defStyleAttr, defStyleRes),
                 context, attrs, defStyleAttr, defStyleRes);
+        mProvider.initialize(attrs, defStyleAttr, defStyleRes);
     }
 
     /**
@@ -179,11 +181,21 @@ public class VideoView2 extends FrameLayoutHelper<VideoView2Provider> {
 
     /**
      * Shows or hides closed caption or subtitles if there is any.
-     * The first subtitle track will be chosen by default if there multiple subtitle tracks exist.
-     * @param show shows closed caption or subtitles if this value is true, or hides.
+     * The first subtitle track will be chosen if there multiple subtitle tracks exist.
+     * Default behavior of VideoView2 is not showing subtitle.
+     * @param enable shows closed caption or subtitles if this value is true, or hides.
      */
-    public void showSubtitle(boolean show) {
-        mProvider.showSubtitle_impl(show);
+    public void setSubtitleEnabled(boolean enable) {
+        mProvider.setSubtitleEnabled_impl(enable);
+    }
+
+    /**
+     * Returns true if showing subtitle feature is enabled or returns false.
+     * Although there is no subtitle track or closed caption, it can return true, if the feature
+     * has been enabled by {@link #setSubtitleEnabled}.
+     */
+    public boolean isSubtitleEnabled() {
+        return mProvider.isSubtitleEnabled_impl();
     }
 
     /**
@@ -486,5 +498,10 @@ public class VideoView2 extends FrameLayoutHelper<VideoView2Provider> {
          * @param extras Optional extras.
          */
         void onCustomAction(String action, Bundle extras);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        mProvider.onLayout_impl(changed, l, t, r, b);
     }
 }

@@ -5149,7 +5149,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     .forAllShortcuts(si -> {
                         switch (package1DisabledReason) {
                             case ShortcutInfo.DISABLED_REASON_VERSION_LOWER:
-                                assertEquals("This shortcut requires latest app",
+                                assertEquals("App version downgraded, or isn’t compatible"
+                                        + " with this shortcut",
                                         si.getDisabledMessage());
                                 break;
                             case ShortcutInfo.DISABLED_REASON_SIGNATURE_MISMATCH:

@@ -36,6 +36,7 @@
 #define ENCODING_AAC_ELD        15
 #define ENCODING_AAC_XHE        16
 #define ENCODING_AC4            17
+#define ENCODING_E_AC3_JOC      18
 
 #define ENCODING_INVALID    0
 #define ENCODING_DEFAULT    1
@@ -80,6 +81,8 @@ static inline audio_format_t audioFormatToNative(int audioFormat)
         return AUDIO_FORMAT_AAC; // FIXME temporary value, needs addition of xHE-AAC
     case ENCODING_AC4:
         return AUDIO_FORMAT_AC4;
+    // case ENCODING_E_AC3_JOC:  // FIXME Not defined on the native side yet
+    //     return AUDIO_FORMAT_E_AC3_JOC;
     case ENCODING_DEFAULT:
         return AUDIO_FORMAT_DEFAULT;
     default:
@@ -130,6 +133,8 @@ static inline int audioFormatFromNative(audio_format_t nativeFormat)
     //    return ENCODING_AAC_XHE;
     case AUDIO_FORMAT_AC4:
         return ENCODING_AC4;
+    // case AUDIO_FORMAT_E_AC3_JOC: // FIXME Not defined on the native side yet
+    //     return ENCODING_E_AC3_JOC;
     case AUDIO_FORMAT_DEFAULT:
         return ENCODING_DEFAULT;
     default:

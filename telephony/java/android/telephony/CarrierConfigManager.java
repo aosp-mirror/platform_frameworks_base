@@ -77,6 +77,14 @@ public class CarrierConfigManager {
     public static final String
             KEY_CARRIER_VOLTE_PROVISIONED_BOOL = "carrier_volte_provisioned_bool";
 
+   /**
+    * Boolean indicating if the "Call barring" item is visible in the Call Settings menu.
+    * true means visible. false means gone.
+    * @hide
+    */
+    public static final String KEY_CALL_BARRING_VISIBILITY_BOOL =
+            "call_barring_visibility_bool";
+
     /**
      * Flag indicating whether the Phone app should ignore EVENT_SIM_NETWORK_LOCKED
      * events from the Sim.
@@ -145,6 +153,15 @@ public class CarrierConfigManager {
      */
     public static final String KEY_ALLOW_LOCAL_DTMF_TONES_BOOL = "allow_local_dtmf_tones_bool";
 
+    /**
+     * Determines if the carrier requires that a tone be played to the remote party when an app is
+     * recording audio during a call (e.g. using a call recording app).
+     * <p>
+     * Note: This requires the Telephony config_supports_telephony_audio_device overlay to be true
+     * in order to work.
+     * @hide
+     */
+    public static final String KEY_PLAY_CALL_RECORDING_TONE_BOOL = "play_call_recording_tone_bool";
     /**
      * Determines if the carrier requires converting the destination number before sending out an
      * SMS. Certain networks and numbering plans require different formats.
@@ -502,6 +519,20 @@ public class CarrierConfigManager {
      *  */
     public static final String KEY_CARRIER_VOLTE_OVERRIDE_WFC_PROVISIONING_BOOL
             = "carrier_volte_override_wfc_provisioning_bool";
+
+    /**
+     * Override the device's configuration for the cellular data service to use for this SIM card.
+     * @hide
+     */
+    public static final String KEY_CARRIER_DATA_SERVICE_WWAN_PACKAGE_OVERRIDE_STRING
+            = "carrier_data_service_wwan_package_override_string";
+
+    /**
+     * Override the device's configuration for the IWLAN data service to use for this SIM card.
+     * @hide
+     */
+    public static final String KEY_CARRIER_DATA_SERVICE_WLAN_PACKAGE_OVERRIDE_STRING
+            = "carrier_data_service_wlan_package_override_string";
 
     /** Flag specifying whether VoLTE TTY is supported. */
     public static final String KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL
@@ -1381,6 +1412,14 @@ public class CarrierConfigManager {
     public static final String KEY_VIDEO_CALLS_CAN_BE_HD_AUDIO = "video_calls_can_be_hd_audio";
 
     /**
+     * When true, indicates that the HD audio icon in the in-call screen should be shown for
+     * GSM/CDMA calls.
+     * @hide
+     */
+    public static final String KEY_GSM_CDMA_CALLS_CAN_BE_HD_AUDIO =
+            "gsm_cdma_calls_can_be_hd_audio";
+
+    /**
      * Whether system apps are allowed to use fallback if carrier video call is not available.
      * Defaults to {@code true}.
      *
@@ -1783,6 +1822,22 @@ public class CarrierConfigManager {
     public static final String KEY_LTE_RSRP_THRESHOLDS_INT_ARRAY =
             "lte_rsrp_thresholds_int_array";
 
+    /**
+     * Decides when clients try to bind to iwlan network service, which package name will
+     * the binding intent go to.
+     * @hide
+     */
+    public static final String KEY_CARRIER_NETWORK_SERVICE_WLAN_PACKAGE_OVERRIDE_STRING
+             = "carrier_network_service_wlan_package_override_string";
+
+    /**
+     * Decides when clients try to bind to wwan (cellular) network service, which package name will
+     * the binding intent go to.
+     * @hide
+     */
+    public static final String KEY_CARRIER_NETWORK_SERVICE_WWAN_PACKAGE_OVERRIDE_STRING
+            = "carrier_network_service_wwan_package_override_string";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -1793,6 +1848,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_ADDITIONAL_CALL_SETTING_BOOL, true);
         sDefaults.putBoolean(KEY_ALLOW_EMERGENCY_NUMBERS_IN_CALL_LOG_BOOL, false);
         sDefaults.putBoolean(KEY_ALLOW_LOCAL_DTMF_TONES_BOOL, true);
+        sDefaults.putBoolean(KEY_PLAY_CALL_RECORDING_TONE_BOOL, false);
         sDefaults.putBoolean(KEY_APN_EXPAND_BOOL, true);
         sDefaults.putBoolean(KEY_AUTO_RETRY_ENABLED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_SETTINGS_ENABLE_BOOL, false);
@@ -1820,6 +1876,10 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CARRIER_IMS_GBA_REQUIRED_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_INSTANT_LETTERING_AVAILABLE_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_USE_IMS_FIRST_FOR_EMERGENCY_BOOL, true);
+        sDefaults.putString(KEY_CARRIER_NETWORK_SERVICE_WWAN_PACKAGE_OVERRIDE_STRING, "");
+        sDefaults.putString(KEY_CARRIER_NETWORK_SERVICE_WLAN_PACKAGE_OVERRIDE_STRING, "");
+        sDefaults.putString(KEY_CARRIER_DATA_SERVICE_WWAN_PACKAGE_OVERRIDE_STRING, "");
+        sDefaults.putString(KEY_CARRIER_DATA_SERVICE_WLAN_PACKAGE_OVERRIDE_STRING, "");
         sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_INVALID_CHARS_STRING, "");
         sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_ESCAPED_CHARS_STRING, "");
         sDefaults.putString(KEY_CARRIER_INSTANT_LETTERING_ENCODING_STRING, "");
@@ -1833,6 +1893,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_HIDE_SIM_LOCK_SETTINGS_BOOL, false);
 
         sDefaults.putBoolean(KEY_CARRIER_VOLTE_PROVISIONED_BOOL, false);
+        sDefaults.putBoolean(KEY_CALL_BARRING_VISIBILITY_BOOL, false);
         sDefaults.putBoolean(KEY_IGNORE_SIM_NETWORK_LOCKED_EVENTS_BOOL, false);
         sDefaults.putBoolean(KEY_MDN_IS_ADDITIONAL_VOICEMAIL_NUMBER_BOOL, false);
         sDefaults.putBoolean(KEY_OPERATOR_SELECTION_EXPAND_BOOL, true);
@@ -2033,6 +2094,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_ALLOW_ADD_CALL_DURING_VIDEO_CALL_BOOL, true);
         sDefaults.putBoolean(KEY_WIFI_CALLS_CAN_BE_HD_AUDIO, true);
         sDefaults.putBoolean(KEY_VIDEO_CALLS_CAN_BE_HD_AUDIO, true);
+        sDefaults.putBoolean(KEY_GSM_CDMA_CALLS_CAN_BE_HD_AUDIO, false);
         sDefaults.putBoolean(KEY_ALLOW_VIDEO_CALLING_FALLBACK_BOOL, true);
 
         sDefaults.putStringArray(KEY_IMS_REASONINFO_MAPPING_STRING_ARRAY, null);

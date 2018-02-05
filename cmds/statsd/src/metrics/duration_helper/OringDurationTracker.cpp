@@ -25,15 +25,23 @@ namespace statsd {
 using std::pair;
 
 OringDurationTracker::OringDurationTracker(
-        const ConfigKey& key, const int64_t& id, const HashableDimensionKey& eventKey,
-        sp<ConditionWizard> wizard, int conditionIndex, bool nesting, uint64_t currentBucketStartNs,
+        const ConfigKey& key, const int64_t& id, const MetricDimensionKey& eventKey,
+        sp<ConditionWizard> wizard, int conditionIndex,
+        const FieldMatcher& dimensionInCondition, bool nesting, uint64_t currentBucketStartNs,
         uint64_t bucketSizeNs, bool conditionSliced,
         const vector<sp<DurationAnomalyTracker>>& anomalyTrackers)
-    : DurationTracker(key, id, eventKey, wizard, conditionIndex, nesting, currentBucketStartNs,
-                      bucketSizeNs, conditionSliced, anomalyTrackers),
+    : DurationTracker(key, id, eventKey, wizard, conditionIndex, dimensionInCondition, nesting,
+                      currentBucketStartNs, bucketSizeNs, conditionSliced, anomalyTrackers),
       mStarted(),
       mPaused() {
     mLastStartTime = 0;
+}
+
+unique_ptr<DurationTracker> OringDurationTracker::clone(const uint64_t eventTime) {
+    auto clonedTracker = make_unique<OringDurationTracker>(*this);
+    clonedTracker->mLastStartTime = eventTime;
+    clonedTracker->mDuration = 0;
+    return clonedTracker;
 }
 
 bool OringDurationTracker::hitGuardRail(const HashableDimensionKey& newKey) {
@@ -45,7 +53,7 @@ bool OringDurationTracker::hitGuardRail(const HashableDimensionKey& newKey) {
     if (mConditionKeyMap.size() > StatsdStats::kDimensionKeySizeSoftLimit - 1) {
         size_t newTupleCount = mConditionKeyMap.size() + 1;
         StatsdStats::getInstance().noteMetricDimensionSize(
-            mConfigKey, hashDimensionsValue(mTrackerId, mEventKey.getDimensionsValue()),
+            mConfigKey, hashMetricDimensionKey(mTrackerId, mEventKey),
             newTupleCount);
         // 2. Don't add more tuples, we are above the allowed threshold. Drop the data.
         if (newTupleCount > StatsdStats::kDimensionKeySizeHardLimit) {
@@ -76,7 +84,6 @@ void OringDurationTracker::noteStart(const HashableDimensionKey& key, bool condi
     if (mConditionSliced && mConditionKeyMap.find(key) == mConditionKeyMap.end()) {
         mConditionKeyMap[key] = conditionKey;
     }
-
     VLOG("Oring: %s start, condition %d", key.c_str(), condition);
 }
 
@@ -128,7 +135,7 @@ void OringDurationTracker::noteStopAll(const uint64_t timestamp) {
 }
 
 bool OringDurationTracker::flushIfNeeded(
-        uint64_t eventTime, unordered_map<HashableDimensionKey, vector<DurationBucket>>* output) {
+        uint64_t eventTime, unordered_map<MetricDimensionKey, vector<DurationBucket>>* output) {
     if (eventTime < mCurrentBucketStartTimeNs + mBucketSizeNs) {
         return false;
     }
@@ -184,8 +191,14 @@ void OringDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) 
                 ++it;
                 continue;
             }
-            if (mWizard->query(mConditionTrackerIndex, mConditionKeyMap[key]) !=
-                ConditionState::kTrue) {
+            std::unordered_set<HashableDimensionKey> conditionDimensionKeySet;
+            ConditionState conditionState =
+                mWizard->query(mConditionTrackerIndex, mConditionKeyMap[key],
+                               mDimensionInCondition, &conditionDimensionKeySet);
+            if (conditionState != ConditionState::kTrue ||
+                (mDimensionInCondition.has_field() &&
+                 conditionDimensionKeySet.find(mEventKey.getDimensionKeyInCondition()) ==
+                    conditionDimensionKeySet.end())) {
                 startedToPaused.push_back(*it);
                 it = mStarted.erase(it);
                 VLOG("Key %s started -> paused", key.c_str());
@@ -210,8 +223,14 @@ void OringDurationTracker::onSlicedConditionMayChange(const uint64_t timestamp) 
                 ++it;
                 continue;
             }
-            if (mWizard->query(mConditionTrackerIndex, mConditionKeyMap[key]) ==
-                ConditionState::kTrue) {
+            std::unordered_set<HashableDimensionKey> conditionDimensionKeySet;
+            ConditionState conditionState =
+                mWizard->query(mConditionTrackerIndex, mConditionKeyMap[key],
+                               mDimensionInCondition, &conditionDimensionKeySet);
+            if (conditionState == ConditionState::kTrue &&
+                (!mDimensionInCondition.has_field() ||
+                 conditionDimensionKeySet.find(mEventKey.getDimensionKeyInCondition())
+                    != conditionDimensionKeySet.end())) {
                 pausedToStarted.push_back(*it);
                 it = mPaused.erase(it);
                 VLOG("Key %s paused -> started", key.c_str());

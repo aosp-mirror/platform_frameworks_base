@@ -19,12 +19,11 @@ package android.widget;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.content.Context;
 import android.media.session.MediaController;
 import android.media.update.ApiLoader;
-import android.media.update.FrameLayoutHelper;
 import android.media.update.MediaControlView2Provider;
+import android.media.update.ViewGroupHelper;
 import android.util.AttributeSet;
 
 import java.lang.annotation.Retention;
@@ -62,7 +61,7 @@ import java.lang.annotation.RetentionPolicy;
  * TODO PUBLIC API
  * @hide
  */
-public class MediaControlView2 extends FrameLayoutHelper<MediaControlView2Provider> {
+public class MediaControlView2 extends ViewGroupHelper<MediaControlView2Provider> {
     /** @hide */
     @IntDef({
             BUTTON_PLAY_PAUSE,
@@ -156,18 +155,12 @@ public class MediaControlView2 extends FrameLayoutHelper<MediaControlView2Provid
 
     public MediaControlView2(@NonNull Context context, @Nullable AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
-        super((instance, superProvider) ->
+        super((instance, superProvider, privateProvider) ->
                 ApiLoader.getProvider(context).createMediaControlView2(
-                        (MediaControlView2) instance, superProvider),
+                        (MediaControlView2) instance, superProvider, privateProvider,
+                        attrs, defStyleAttr, defStyleRes),
                 context, attrs, defStyleAttr, defStyleRes);
-    }
-
-    /**
-     * @hide
-     */
-    @SystemApi
-    public MediaControlView2Provider getProvider() {
-        return mProvider;
+        mProvider.initialize(attrs, defStyleAttr, defStyleRes);
     }
 
     /**
@@ -175,13 +168,6 @@ public class MediaControlView2 extends FrameLayoutHelper<MediaControlView2Provid
      */
     public void setController(MediaController controller) {
         mProvider.setController_impl(controller);
-    }
-
-    /**
-     * Returns whether the control view is currently shown or hidden.
-     */
-    public boolean isShowing() {
-        return mProvider.isShowing_impl();
     }
 
     /**
@@ -232,9 +218,7 @@ public class MediaControlView2 extends FrameLayoutHelper<MediaControlView2Provid
     }
 
     @Override
-    // TODO Move this method to ViewProvider
-    public void onVisibilityAggregated(boolean isVisible) {
-
-        mProvider.onVisibilityAggregated_impl(isVisible);
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        mProvider.onLayout_impl(changed, l, t, r, b);
     }
 }

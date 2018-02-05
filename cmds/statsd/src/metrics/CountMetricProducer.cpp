@@ -21,6 +21,7 @@
 #include "guardrail/StatsdStats.h"
 #include "stats_util.h"
 #include "stats_log_util.h"
+#include "dimension.h"
 
 #include <limits.h>
 #include <stdlib.h>
@@ -71,13 +72,15 @@ CountMetricProducer::CountMetricProducer(const ConfigKey& key, const CountMetric
     }
 
     // TODO: use UidMap if uid->pkg_name is required
-    mDimensions = metric.dimensions_in_what();
+    mDimensionsInWhat = metric.dimensions_in_what();
+    mDimensionsInCondition = metric.dimensions_in_condition();
 
     if (metric.links().size() > 0) {
         mConditionLinks.insert(mConditionLinks.begin(), metric.links().begin(),
                                metric.links().end());
-        mConditionSliced = true;
     }
+    mConditionSliced = (metric.links().size() > 0)||
+        (mDimensionsInCondition.has_field() && mDimensionsInCondition.child_size() > 0);
 
     VLOG("metric %lld created. bucket size %lld start_time: %lld", (long long)metric.id(),
          (long long)mBucketSizeNs, (long long)mStartTimeNs);
@@ -99,7 +102,10 @@ void CountMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs, StatsLog
     auto count_metrics = report->mutable_count_metrics();
     for (const auto& counter : mPastBuckets) {
         CountMetricData* metricData = count_metrics->add_data();
-        *metricData->mutable_dimensions_in_what() = counter.first.getDimensionsValue();
+        *metricData->mutable_dimensions_in_what() =
+            counter.first.getDimensionKeyInWhat().getDimensionsValue();
+        *metricData->mutable_dimensions_in_condition() =
+            counter.first.getDimensionKeyInCondition().getDimensionsValue();
         for (const auto& bucket : counter.second) {
             CountBucketInfo* bucketInfo = metricData->add_bucket_info();
             bucketInfo->set_start_bucket_nanos(bucket.mBucketStartNs);
@@ -123,17 +129,26 @@ void CountMetricProducer::onDumpReportLocked(const uint64_t dumpTimeNs,
     VLOG("metric %lld dump report now...",(long long)mMetricId);
 
     for (const auto& counter : mPastBuckets) {
-        const HashableDimensionKey& hashableKey = counter.first;
-        VLOG("  dimension key %s", hashableKey.c_str());
+        const MetricDimensionKey& dimensionKey = counter.first;
+        VLOG("  dimension key %s", dimensionKey.c_str());
 
         long long wrapperToken =
                 protoOutput->start(FIELD_TYPE_MESSAGE | FIELD_COUNT_REPEATED | FIELD_ID_DATA);
 
         // First fill dimension.
-        long long dimensionToken = protoOutput->start(
+        long long dimensionInWhatToken = protoOutput->start(
                 FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_WHAT);
-        writeDimensionsValueProtoToStream(hashableKey.getDimensionsValue(), protoOutput);
-        protoOutput->end(dimensionToken);
+        writeDimensionsValueProtoToStream(
+            dimensionKey.getDimensionKeyInWhat().getDimensionsValue(), protoOutput);
+        protoOutput->end(dimensionInWhatToken);
+
+        if (dimensionKey.hasDimensionKeyInCondition()) {
+            long long dimensionInConditionToken = protoOutput->start(
+                    FIELD_TYPE_MESSAGE | FIELD_ID_DIMENSION_IN_CONDITION);
+            writeDimensionsValueProtoToStream(
+                dimensionKey.getDimensionKeyInCondition().getDimensionsValue(), protoOutput);
+            protoOutput->end(dimensionInConditionToken);
+        }
 
         // Then fill bucket_info (CountBucketInfo).
         for (const auto& bucket : counter.second) {
@@ -166,7 +181,7 @@ void CountMetricProducer::onConditionChangedLocked(const bool conditionMet,
     mCondition = conditionMet;
 }
 
-bool CountMetricProducer::hitGuardRailLocked(const HashableDimensionKey& newKey) {
+bool CountMetricProducer::hitGuardRailLocked(const MetricDimensionKey& newKey) {
     if (mCurrentSlicedCounter->find(newKey) != mCurrentSlicedCounter->end()) {
         return false;
     }
@@ -187,7 +202,7 @@ bool CountMetricProducer::hitGuardRailLocked(const HashableDimensionKey& newKey)
 }
 
 void CountMetricProducer::onMatchedLogEventInternalLocked(
-        const size_t matcherIndex, const HashableDimensionKey& eventKey,
+        const size_t matcherIndex, const MetricDimensionKey& eventKey,
         const ConditionKey& conditionKey, bool condition,
         const LogEvent& event) {
     uint64_t eventTimeNs = event.GetTimestampNs();

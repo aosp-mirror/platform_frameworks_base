@@ -24,12 +24,13 @@ import android.media.MediaPlayerInterface.PlaybackListener;
 import android.media.MediaSession2;
 import android.media.MediaSession2.Command;
 import android.media.MediaSession2.CommandButton;
+import android.media.MediaSession2.CommandButton.Builder;
 import android.media.MediaSession2.CommandGroup;
 import android.media.MediaSession2.ControllerInfo;
 import android.media.MediaSession2.PlaylistParams;
 import android.media.MediaSession2.SessionCallback;
 import android.media.SessionToken2;
-import android.media.VolumeProvider;
+import android.media.VolumeProvider2;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 
@@ -43,7 +44,7 @@ import java.util.concurrent.Executor;
 public interface MediaSession2Provider extends TransportControlProvider {
     void close_impl();
     void setPlayer_impl(MediaPlayerInterface player);
-    void setPlayer_impl(MediaPlayerInterface player, VolumeProvider volumeProvider);
+    void setPlayer_impl(MediaPlayerInterface player, VolumeProvider2 volumeProvider);
     MediaPlayerInterface getPlayer_impl();
     SessionToken2 getToken_impl();
     List<ControllerInfo> getConnectedControllers_impl();
@@ -82,6 +83,23 @@ public interface MediaSession2Provider extends TransportControlProvider {
         Bundle toBundle_impl();
     }
 
+    interface CommandButtonProvider {
+        Command getCommand_impl();
+        int getIconResId_impl();
+        String getDisplayName_impl();
+        Bundle getExtra_impl();
+        boolean isEnabled_impl();
+
+        interface BuilderProvider {
+            Builder setCommand_impl(Command command);
+            Builder setIconResId_impl(int resId);
+            Builder setDisplayName_impl(String displayName);
+            Builder setEnabled_impl(boolean enabled);
+            Builder setExtra_impl(Bundle extra);
+            CommandButton build_impl();
+        }
+    }
+
     interface ControllerInfoProvider {
         String getPackageName_impl();
         int getUid_impl();
@@ -98,7 +116,7 @@ public interface MediaSession2Provider extends TransportControlProvider {
     }
 
     interface BuilderBaseProvider<T extends MediaSession2, C extends SessionCallback> {
-        void setVolumeProvider_impl(VolumeProvider volumeProvider);
+        void setVolumeProvider_impl(VolumeProvider2 volumeProvider);
         void setRatingType_impl(int type);
         void setSessionActivity_impl(PendingIntent pi);
         void setId_impl(String id);

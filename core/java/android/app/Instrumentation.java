@@ -1679,7 +1679,7 @@ public class Instrumentation {
     public void execStartActivities(Context who, IBinder contextThread,
             IBinder token, Activity target, Intent[] intents, Bundle options) {
         execStartActivitiesAsUser(who, contextThread, token, target, intents, options,
-                UserHandle.myUserId());
+                who.getUserId());
     }
 
     /**

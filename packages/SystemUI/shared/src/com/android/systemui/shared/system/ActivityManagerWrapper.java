@@ -16,6 +16,8 @@
 
 package com.android.systemui.shared.system;
 
+import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
+import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
 import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
@@ -31,6 +33,7 @@ import android.app.ActivityOptions;
 import android.app.AppGlobals;
 import android.app.IAssistDataReceiver;
 import android.app.WindowConfiguration.ActivityType;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -47,6 +50,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.view.IRecentsAnimationController;
@@ -435,5 +439,24 @@ public class ActivityManagerWrapper {
         } catch (RemoteException e) {
             Log.w(TAG, "Failed to cancel window transition for task=" + taskId, e);
         }
+    }
+
+    /**
+     * @return whether there is currently a locked task (ie. in screen pinning).
+     */
+    public boolean isLockToAppActive() {
+        try {
+            return ActivityManager.getService().getLockTaskModeState() != LOCK_TASK_MODE_NONE;
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
+    /**
+     * @return whether screen pinning is enabled.
+     */
+    public boolean isLockToAppEnabled() {
+        final ContentResolver cr = AppGlobals.getInitialApplication().getContentResolver();
+        return Settings.System.getInt(cr, Settings.System.LOCK_TO_APP_ENABLED, 0) != 0;
     }
 }

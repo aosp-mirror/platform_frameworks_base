@@ -351,7 +351,7 @@ public class NotificationManager {
      */
     public void notify(String tag, int id, Notification notification)
     {
-        notifyAsUser(tag, id, notification, new UserHandle(UserHandle.myUserId()));
+        notifyAsUser(tag, id, notification, mContext.getUser());
     }
 
     /**
@@ -412,7 +412,7 @@ public class NotificationManager {
      */
     public void cancel(String tag, int id)
     {
-        cancelAsUser(tag, id, new UserHandle(UserHandle.myUserId()));
+        cancelAsUser(tag, id, mContext.getUser());
     }
 
     /**
@@ -440,7 +440,7 @@ public class NotificationManager {
         String pkg = mContext.getPackageName();
         if (localLOGV) Log.v(TAG, pkg + ": cancelAll()");
         try {
-            service.cancelAllNotifications(pkg, UserHandle.myUserId());
+            service.cancelAllNotifications(pkg, mContext.getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1264,7 +1264,7 @@ public class NotificationManager {
         final String pkg = mContext.getPackageName();
         try {
             final ParceledListSlice<StatusBarNotification> parceledList
-                    = service.getAppActiveNotifications(pkg, UserHandle.myUserId());
+                    = service.getAppActiveNotifications(pkg, mContext.getUserId());
             final List<StatusBarNotification> list = parceledList.getList();
             return list.toArray(new StatusBarNotification[list.size()]);
         } catch (RemoteException e) {

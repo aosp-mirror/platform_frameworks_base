@@ -28,11 +28,13 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.database.Cursor;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
@@ -47,21 +49,16 @@ import android.util.Log;
 
 import com.android.internal.database.SortCursor;
 
-import libcore.io.Streams;
-
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
-
-import static android.content.ContentProvider.maybeAddUserId;
-import static android.content.pm.PackageManager.NameNotFoundException;
 
 /**
  * RingtoneManager provides access to ringtones, notification, and other types
@@ -855,7 +852,7 @@ public class RingtoneManager {
             final Uri cacheUri = getCacheForType(type, context.getUserId());
             try (InputStream in = openRingtone(context, ringtoneUri);
                     OutputStream out = resolver.openOutputStream(cacheUri)) {
-                Streams.copy(in, out);
+                FileUtils.copy(in, out);
             } catch (IOException e) {
                 Log.w(TAG, "Failed to cache ringtone: " + e);
             }
@@ -960,7 +957,7 @@ public class RingtoneManager {
         // Copy contents to external ringtone storage. Throws IOException if the copy fails.
         try (final InputStream input = mContext.getContentResolver().openInputStream(fileUri);
                 final OutputStream output = new FileOutputStream(outFile)) {
-            Streams.copy(input, output);
+            FileUtils.copy(input, output);
         }
 
         // Tell MediaScanner about the new file. Wait for it to assign a {@link Uri}.

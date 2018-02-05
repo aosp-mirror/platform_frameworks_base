@@ -55,6 +55,8 @@ public final class Zygote {
     public static final int ONLY_USE_SYSTEM_OAT_FILES = 1 << 10;
     /** Do not enfore hidden API access restrictions. */
     public static final int DISABLE_HIDDEN_API_CHECKS = 1 << 11;
+    /** Force generation of native debugging information for backtraces. */
+    public static final int DEBUG_GENERATE_MINI_DEBUG_INFO = 1 << 12;
 
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = IVold.REMOUNT_MODE_NONE;

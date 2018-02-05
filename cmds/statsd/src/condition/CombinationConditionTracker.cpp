@@ -78,6 +78,7 @@ bool CombinationConditionTracker::init(const vector<Predicate>& allConditionConf
             return false;
         }
 
+
         bool initChildSucceeded = childTracker->init(allConditionConfig, allConditionTrackers,
                                                      conditionIdIndexMap, stack);
 
@@ -88,8 +89,10 @@ bool CombinationConditionTracker::init(const vector<Predicate>& allConditionConf
             ALOGW("Child initialization success %lld ", (long long)child);
         }
 
+        if (allConditionTrackers[childIndex]->isSliced()) {
+            setSliced(true);
+        }
         mChildren.push_back(childIndex);
-
         mTrackerIndex.insert(childTracker->getLogTrackerIndex().begin(),
                              childTracker->getLogTrackerIndex().end());
     }
@@ -105,11 +108,15 @@ bool CombinationConditionTracker::init(const vector<Predicate>& allConditionConf
 void CombinationConditionTracker::isConditionMet(
         const ConditionKey& conditionParameters,
         const vector<sp<ConditionTracker>>& allConditions,
-        vector<ConditionState>& conditionCache) const {
+        const FieldMatcher& dimensionFields,
+        vector<ConditionState>& conditionCache,
+        std::unordered_set<HashableDimensionKey> &dimensionsKeySet) const {
+    // So far, this is fine as there is at most one child having sliced output.
     for (const int childIndex : mChildren) {
         if (conditionCache[childIndex] == ConditionState::kNotEvaluated) {
             allConditions[childIndex]->isConditionMet(conditionParameters, allConditions,
-                                                      conditionCache);
+                                                      dimensionFields, conditionCache,
+                                                      dimensionsKeySet);
         }
     }
     conditionCache[mIndex] =
@@ -127,6 +134,7 @@ void CombinationConditionTracker::evaluateCondition(
     }
 
     for (const int childIndex : mChildren) {
+        // So far, this is fine as there is at most one child having sliced output.
         if (nonSlicedConditionCache[childIndex] == ConditionState::kNotEvaluated) {
             const sp<ConditionTracker>& child = mAllConditions[childIndex];
             child->evaluateCondition(event, eventMatcherValues, mAllConditions,
@@ -157,6 +165,24 @@ void CombinationConditionTracker::evaluateCondition(
         VLOG("CombinationPredicate %lld sliced may changed? %d", (long long)mConditionId,
             conditionChangedCache[mIndex] == true);
     }
+}
+
+ConditionState CombinationConditionTracker::getMetConditionDimension(
+        const std::vector<sp<ConditionTracker>>& allConditions,
+        const FieldMatcher& dimensionFields,
+        std::unordered_set<HashableDimensionKey> &dimensionsKeySet) const {
+    vector<ConditionState> conditionCache(allConditions.size(), ConditionState::kNotEvaluated);
+    // So far, this is fine as there is at most one child having sliced output.
+    for (const int childIndex : mChildren) {
+        conditionCache[childIndex] = conditionCache[childIndex] |
+            allConditions[childIndex]->getMetConditionDimension(
+                allConditions, dimensionFields, dimensionsKeySet);
+    }
+    evaluateCombinationCondition(mChildren, mLogicalOperation, conditionCache);
+    if (conditionCache[mIndex] == ConditionState::kTrue && dimensionsKeySet.empty()) {
+        dimensionsKeySet.insert(DEFAULT_DIMENSION_KEY);
+    }
+    return conditionCache[mIndex];
 }
 
 }  // namespace statsd

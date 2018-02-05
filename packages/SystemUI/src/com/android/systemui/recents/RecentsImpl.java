@@ -386,8 +386,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
     public void toggleRecents(int growTarget) {
         // Skip preloading if the task is locked
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        if (ssp.isScreenPinningActive()) {
+        if (ActivityManagerWrapper.getInstance().isLockToAppActive()) {
             return;
         }
 
@@ -409,8 +408,8 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
             MutableBoolean isHomeStackVisible = new MutableBoolean(true);
             long elapsedTime = SystemClock.elapsedRealtime() - mLastToggleTime;
 
+            SystemServicesProxy ssp = Recents.getSystemServices();
             if (ssp.isRecentsActivityVisible(isHomeStackVisible)) {
-                RecentsDebugFlags debugFlags = Recents.getDebugFlags();
                 RecentsConfiguration config = Recents.getConfiguration();
                 RecentsActivityLaunchState launchState = config.getLaunchState();
                 if (!launchState.launchedWithAltTab) {
@@ -466,8 +465,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
 
     public void preloadRecents() {
         // Skip preloading if the task is locked
-        SystemServicesProxy ssp = Recents.getSystemServices();
-        if (ssp.isScreenPinningActive()) {
+        if (ActivityManagerWrapper.getInstance().isLockToAppActive()) {
             return;
         }
 
@@ -481,6 +479,7 @@ public class RecentsImpl implements ActivityOptions.OnAnimationFinishedListener 
         // RecentsActivity) only if there is a task to animate to.  Post this to ensure that we
         // don't block the touch feedback on the nav bar button which triggers this.
         mHandler.post(() -> {
+            SystemServicesProxy ssp = Recents.getSystemServices();
             if (!ssp.isRecentsActivityVisible(null)) {
                 ActivityManager.RunningTaskInfo runningTask =
                         ActivityManagerWrapper.getInstance().getRunningTask();

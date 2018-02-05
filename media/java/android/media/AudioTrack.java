@@ -2008,6 +2008,25 @@ public class AudioTrack extends PlayerBase
     }
 
     /**
+     * Sets the audio presentation.
+     * If the audio presentation is invalid then {@link #ERROR_BAD_VALUE} will be returned.
+     * If a multi-stream decoder (MSD) is not present, or the format does not support
+     * multiple presentations, then {@link #ERROR_INVALID_OPERATION} will be returned.
+     * @param presentation see {@link AudioPresentation}. In particular, id should be set.
+     * @return error code or success, see {@link #SUCCESS}, {@link #ERROR_BAD_VALUE},
+     *    {@link #ERROR_INVALID_OPERATION}
+     * @throws IllegalArgumentException if the audio presentation is null.
+     * @throws IllegalStateException if track is not initialized.
+     */
+    public int setPresentation(@NonNull AudioPresentation presentation) {
+        if (presentation == null) {
+            throw new IllegalArgumentException("audio presentation is null");
+        }
+        return native_setPresentation(presentation.getPresentationId(),
+                presentation.getProgramId());
+    }
+
+    /**
      * Sets the initialization state of the instance. This method was originally intended to be used
      * in an AudioTrack subclass constructor to set a subclass-specific post-initialization state.
      * However, subclasses of AudioTrack are no longer recommended, so this method is obsolete.
@@ -3245,6 +3264,7 @@ public class AudioTrack extends PlayerBase
             @NonNull VolumeShaper.Operation operation);
 
     private native @Nullable VolumeShaper.State native_getVolumeShaperState(int id);
+    private native final int native_setPresentation(int presentationId, int programId);
 
     //---------------------------------------------------------
     // Utility methods

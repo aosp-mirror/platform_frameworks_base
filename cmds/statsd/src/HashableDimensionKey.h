@@ -41,6 +41,10 @@ public:
         return mDimensionsValue;
     }
 
+    inline DimensionsValue* getMutableDimensionsValue() {
+        return &mDimensionsValue;
+    }
+
     bool operator==(const HashableDimensionKey& that) const;
 
     bool operator<(const HashableDimensionKey& that) const;
@@ -53,8 +57,52 @@ private:
     DimensionsValue mDimensionsValue;
 };
 
+class MetricDimensionKey {
+ public:
+    explicit MetricDimensionKey(const HashableDimensionKey& dimensionKeyInWhat,
+                                const HashableDimensionKey& dimensionKeyInCondition)
+        : mDimensionKeyInWhat(dimensionKeyInWhat),
+          mDimensionKeyInCondition(dimensionKeyInCondition) {};
+
+    MetricDimensionKey(){};
+
+    MetricDimensionKey(const MetricDimensionKey& that)
+        : mDimensionKeyInWhat(that.getDimensionKeyInWhat()),
+          mDimensionKeyInCondition(that.getDimensionKeyInCondition()) {};
+
+    MetricDimensionKey& operator=(const MetricDimensionKey& from) = default;
+
+    std::string toString() const;
+
+    inline const HashableDimensionKey& getDimensionKeyInWhat() const {
+        return mDimensionKeyInWhat;
+    }
+
+    inline const HashableDimensionKey& getDimensionKeyInCondition() const {
+        return mDimensionKeyInCondition;
+    }
+
+    bool hasDimensionKeyInCondition() const {
+        return mDimensionKeyInCondition.getDimensionsValue().has_field();
+    }
+
+    bool operator==(const MetricDimensionKey& that) const;
+
+    bool operator<(const MetricDimensionKey& that) const;
+
+    inline const char* c_str() const {
+        return toString().c_str();
+    }
+  private:
+      HashableDimensionKey mDimensionKeyInWhat;
+      HashableDimensionKey mDimensionKeyInCondition;
+};
+
+bool compareDimensionsValue(const DimensionsValue& s1, const DimensionsValue& s2);
+
 android::hash_t hashDimensionsValue(int64_t seed, const DimensionsValue& value);
 android::hash_t hashDimensionsValue(const DimensionsValue& value);
+android::hash_t hashMetricDimensionKey(int64_t see, const MetricDimensionKey& dimensionKey);
 
 }  // namespace statsd
 }  // namespace os
@@ -63,6 +111,7 @@ android::hash_t hashDimensionsValue(const DimensionsValue& value);
 namespace std {
 
 using android::os::statsd::HashableDimensionKey;
+using android::os::statsd::MetricDimensionKey;
 
 template <>
 struct hash<HashableDimensionKey> {
@@ -71,4 +120,14 @@ struct hash<HashableDimensionKey> {
     }
 };
 
+template <>
+struct hash<MetricDimensionKey> {
+    std::size_t operator()(const MetricDimensionKey& key) const {
+        android::hash_t hash = hashDimensionsValue(
+            key.getDimensionKeyInWhat().getDimensionsValue());
+        hash = android::JenkinsHashMix(hash,
+                    hashDimensionsValue(key.getDimensionKeyInCondition().getDimensionsValue()));
+        return android::JenkinsHashWhiten(hash);
+    }
+};
 }  // namespace std

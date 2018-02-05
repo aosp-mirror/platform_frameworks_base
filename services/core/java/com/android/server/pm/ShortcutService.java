@@ -99,6 +99,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
+import com.android.server.StatLogger;
 import com.android.server.SystemService;
 import com.android.server.pm.ShortcutUser.PackageWithUser;
 
@@ -367,7 +368,7 @@ public class ShortcutService extends IShortcutService.Stub {
         int COUNT = GET_DEFAULT_LAUNCHER + 1;
     }
 
-    private static final String[] STAT_LABELS = {
+    private final StatLogger mStatLogger = new StatLogger(new String[] {
             "getHomeActivities()",
             "Launcher permission check",
             "getPackageInfo()",
@@ -385,15 +386,7 @@ public class ShortcutService extends IShortcutService.Stub {
             "packageUpdateCheck",
             "asyncPreloadUserDelay",
             "getDefaultLauncher()"
-    };
-
-    final Object mStatLock = new Object();
-
-    @GuardedBy("mStatLock")
-    private final int[] mCountStats = new int[Stats.COUNT];
-
-    @GuardedBy("mStatLock")
-    private final long[] mDurationStats = new long[Stats.COUNT];
+    });
 
     private static final int PROCESS_STATE_FOREGROUND_THRESHOLD =
             ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
@@ -480,11 +473,12 @@ public class ShortcutService extends IShortcutService.Stub {
                 | ActivityManager.UID_OBSERVER_GONE);
     }
 
+    long getStatStartTime() {
+        return mStatLogger.getTime();
+    }
+
     void logDurationStat(int statId, long start) {
-        synchronized (mStatLock) {
-            mCountStats[statId]++;
-            mDurationStats[statId] += (injectElapsedRealtime() - start);
-        }
+        mStatLogger.logDurationStat(statId, start);
     }
 
     public String injectGetLocaleTagsForUser(@UserIdInt int userId) {
@@ -621,7 +615,7 @@ public class ShortcutService extends IShortcutService.Stub {
         // late since the launcher would already have started.
         // So we just create a new thread.  This code runs rarely, so we don't use a thread pool
         // or anything.
-        final long start = injectElapsedRealtime();
+        final long start = getStatStartTime();
         injectRunOnNewThread(() -> {
             synchronized (mLock) {
                 logDurationStat(Stats.ASYNC_PRELOAD_USER_DELAY, start);
@@ -1289,7 +1283,7 @@ public class ShortcutService extends IShortcutService.Stub {
         if (DEBUG) {
             Slog.d(TAG, "cleanupDanglingBitmaps: userId=" + userId);
         }
-        final long start = injectElapsedRealtime();
+        final long start = getStatStartTime();
 
         final ShortcutUser user = getUserShortcutsLocked(userId);
 
@@ -1485,7 +1479,7 @@ public class ShortcutService extends IShortcutService.Stub {
         final Resources publisherRes = injectGetResourcesForApplicationAsUser(
                 si.getPackage(), si.getUserId());
         if (publisherRes != null) {
-            final long start = injectElapsedRealtime();
+            final long start = getStatStartTime();
             try {
                 si.lookupAndFillInResourceNames(publisherRes);
             } finally {
@@ -2264,7 +2258,7 @@ public class ShortcutService extends IShortcutService.Stub {
         if (canSeeAnyPinnedShortcut(callingPackage, userId, callingPid, callingUid)) {
             return true;
         }
-        final long start = injectElapsedRealtime();
+        final long start = getStatStartTime();
         try {
             return hasShortcutHostPermissionInner(callingPackage, userId);
         } finally {
@@ -2327,7 +2321,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @Nullable
     ComponentName getDefaultLauncher(@UserIdInt int userId) {
-        final long start = injectElapsedRealtime();
+        final long start = getStatStartTime();
         final long token = injectClearCallingIdentity();
         try {
             synchronized (mLock) {
@@ -2338,7 +2332,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 final List<ResolveInfo> allHomeCandidates = new ArrayList<>();
 
                 // Default launcher from package manager.
-                final long startGetHomeActivitiesAsUser = injectElapsedRealtime();
+                final long startGetHomeActivitiesAsUser = getStatStartTime();
                 final ComponentName defaultLauncher = mPackageManagerInternal
                         .getHomeActivitiesAsUser(allHomeCandidates, userId);
                 logDurationStat(Stats.GET_DEFAULT_HOME, startGetHomeActivitiesAsUser);
@@ -2910,7 +2904,7 @@ public class ShortcutService extends IShortcutService.Stub {
             return;
         }
 
-        final long start = injectElapsedRealtime();
+        final long start = getStatStartTime();
         try {
             final ArrayList<PackageWithUser> gonePackages = new ArrayList<>();
 
@@ -3087,7 +3081,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @VisibleForTesting
     PackageInfo injectPackageInfoWithUninstalled(String packageName, @UserIdInt int userId,
             boolean getSignatures) {
-        final long start = injectElapsedRealtime();
+        final long start = getStatStartTime();
         final long token = injectClearCallingIdentity();
         try {
             return mIPackageManager.getPackageInfo(
@@ -3122,7 +3116,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @VisibleForTesting
     ApplicationInfo injectApplicationInfoWithUninstalled(
             String packageName, @UserIdInt int userId) {
-        final long start = injectElapsedRealtime();
+        final long start = getStatStartTime();
         final long token = injectClearCallingIdentity();
         try {
             return mIPackageManager.getApplicationInfo(packageName, PACKAGE_MATCH_FLAGS, userId);
@@ -3153,7 +3147,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @VisibleForTesting
     ActivityInfo injectGetActivityInfoWithMetadataWithUninstalled(
             ComponentName activity, @UserIdInt int userId) {
-        final long start = injectElapsedRealtime();
+        final long start = getStatStartTime();
         final long token = injectClearCallingIdentity();
         try {
             return mIPackageManager.getActivityInfo(activity,
@@ -3175,7 +3169,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @NonNull
     @VisibleForTesting
     final List<PackageInfo> getInstalledPackages(@UserIdInt int userId) {
-        final long start = injectElapsedRealtime();
+        final long start = getStatStartTime();
         final long token = injectClearCallingIdentity();
         try {
             final List<PackageInfo> all = injectGetPackagesWithUninstalled(userId);
@@ -3280,7 +3274,7 @@ public class ShortcutService extends IShortcutService.Stub {
 
     @Nullable
     Resources injectGetResourcesForApplicationAsUser(String packageName, int userId) {
-        final long start = injectElapsedRealtime();
+        final long start = getStatStartTime();
         final long token = injectClearCallingIdentity();
         try {
             return mContext.getPackageManager().getResourcesForApplicationAsUser(
@@ -3348,7 +3342,7 @@ public class ShortcutService extends IShortcutService.Stub {
      */
     @Nullable
     ComponentName injectGetDefaultMainActivity(@NonNull String packageName, int userId) {
-        final long start = injectElapsedRealtime();
+        final long start = getStatStartTime();
         try {
             final List<ResolveInfo> resolved =
                     queryActivities(getMainActivityIntent(), packageName, null, userId);
@@ -3362,7 +3356,7 @@ public class ShortcutService extends IShortcutService.Stub {
      * Return whether an activity is enabled, exported and main.
      */
     boolean injectIsMainActivity(@NonNull ComponentName activity, int userId) {
-        final long start = injectElapsedRealtime();
+        final long start = getStatStartTime();
         try {
             if (activity == null) {
                 wtf("null activity detected");
@@ -3397,7 +3391,7 @@ public class ShortcutService extends IShortcutService.Stub {
      */
     @NonNull
     List<ResolveInfo> injectGetMainActivities(@NonNull String packageName, int userId) {
-        final long start = injectElapsedRealtime();
+        final long start = getStatStartTime();
         try {
             return queryActivities(getMainActivityIntent(), packageName, null, userId);
         } finally {
@@ -3411,7 +3405,7 @@ public class ShortcutService extends IShortcutService.Stub {
     @VisibleForTesting
     boolean injectIsActivityEnabledAndExported(
             @NonNull ComponentName activity, @UserIdInt int userId) {
-        final long start = injectElapsedRealtime();
+        final long start = getStatStartTime();
         try {
             return queryActivities(new Intent(), activity.getPackageName(), activity, userId)
                     .size() > 0;
@@ -3831,12 +3825,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 pw.println(mMaxShortcuts);
                 pw.println();
 
-                pw.println("  Stats:");
-                synchronized (mStatLock) {
-                    for (int i = 0; i < Stats.COUNT; i++) {
-                        dumpStatLS(pw, "    ", i);
-                    }
-                }
+                mStatLogger.dump(pw, "  ");
 
                 pw.println();
                 pw.print("  #Failures: ");
@@ -3900,15 +3889,6 @@ public class ShortcutService extends IShortcutService.Stub {
 
     private void dumpCurrentTime(PrintWriter pw) {
         pw.print(formatTime(injectCurrentTimeMillis()));
-    }
-
-    private void dumpStatLS(PrintWriter pw, String prefix, int statId) {
-        pw.print(prefix);
-        final int count = mCountStats[statId];
-        final long dur = mDurationStats[statId];
-        pw.println(String.format("%s: count=%d, total=%dms, avg=%.1fms",
-                STAT_LABELS[statId], count, dur,
-                (count == 0 ? 0 : ((double) dur) / count)));
     }
 
     /**

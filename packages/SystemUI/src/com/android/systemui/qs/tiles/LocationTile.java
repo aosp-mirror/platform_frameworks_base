@@ -102,7 +102,7 @@ public class LocationTile extends QSTileImpl<BooleanState> {
         state.value = locationEnabled;
         checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_SHARE_LOCATION);
         if (state.disabledByPolicy == false) {
-            checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_CONFIG_LOCATION_MODE);
+            checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_CONFIG_LOCATION);
         }
         state.icon = mIcon;
         state.slash.isSlashed = !state.value;

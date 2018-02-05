@@ -7,7 +7,7 @@
     <string name="no_data_notification_id" msgid="668400731803969521">"Prijenos podataka na mobilnoj mreži je deaktiviran"</string>
     <string name="portal_notification_detail" msgid="2295729385924660881">"Dodirnite da posjetite %s web lokaciju"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"Obratite se pružaocu usluga %s"</string>
-    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Nema mobilnog prijenosa podataka"</string>
+    <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Nema veze za prijenos podataka na mobilnoj mreži"</string>
     <string name="no_mobile_data_connection" msgid="544980465184147010">"Dodajte plan prijenosa podataka ili rominga putem operatera %s"</string>
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"Status prijenosa podataka na mobilnoj mreži"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"Prijava na mobilnu mrežu"</string>

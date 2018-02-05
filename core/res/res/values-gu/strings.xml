@@ -264,10 +264,8 @@
     <string name="foreground_service_multiple_separator" msgid="4021901567939866542">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="2788228061547930246">"સુરક્ષિત મોડ"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android સિસ્ટમ"</string>
-    <!-- no translation found for user_owner_label (8836124313744349203) -->
-    <skip />
-    <!-- no translation found for managed_profile_label (8947929265267690522) -->
-    <skip />
+    <string name="user_owner_label" msgid="8836124313744349203">"વ્યક્તિગત પ્રોફાઇલ પર સ્વિચ કરો"</string>
+    <string name="managed_profile_label" msgid="8947929265267690522">"કાર્યાલયની પ્રોફાઇલ પર સ્વિચ કરો"</string>
     <string name="permgrouplab_contacts" msgid="3657758145679177612">"સંપર્કો"</string>
     <string name="permgroupdesc_contacts" msgid="6951499528303668046">"તમારા સંપર્કોને ઍક્સેસ કરવાની"</string>
     <string name="permgrouprequest_contacts" msgid="1601591667800538208">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ને તમારા સંપર્કોને ઍક્સેસ કરવાની મંજૂરી આપો"</string>
@@ -419,10 +417,8 @@
     <string name="permdesc_readPhoneState" msgid="1639212771826125528">"એપ્લિકેશનને ફોન સુવિધાઓને ઍક્સેસ કરવાની મંજૂરી આપે છે. આ પરવાનગી એપ્લિકેશનને ફોન નંબર અને ઉપકરણ ID, કૉલ સક્રિય છે અને કોઈ કૉલ દ્વારા કનેક્ટ થયેલ રિમોટ નંબર નિર્ધારિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_manageOwnCalls" msgid="1503034913274622244">"સિસ્ટમ મારફતે કૉલ બીજે વાળો"</string>
     <string name="permdesc_manageOwnCalls" msgid="6552974537554717418">"કૉલિંગ અનુભવ સુધારવા માટે ઍપ્લિકેશનને સિસ્ટમ મારફતે કૉલ બીજે વાળવાની મંજૂરી આપે છે."</string>
-    <!-- no translation found for permlab_acceptHandover (2661534649736022409) -->
-    <skip />
-    <!-- no translation found for permdesc_acceptHandovers (4570660484220539698) -->
-    <skip />
+    <string name="permlab_acceptHandover" msgid="2661534649736022409">"તૃતીય પક્ષ ઍપમાંનો કૉલ ચાલુ રાખો"</string>
+    <string name="permdesc_acceptHandovers" msgid="4570660484220539698">"એક અન્ય તૃતીય પક્ષ ઍપમાં ચાલુ થયેલા કૉલને આ ઍપમાં ચાલુ રાખવાની મંજૂરી આપે છે."</string>
     <string name="permlab_readPhoneNumbers" msgid="6108163940932852440">"ફોન નંબર વાંચો"</string>
     <string name="permdesc_readPhoneNumbers" msgid="8559488833662272354">"ઍપ્લિકેશનને ઉપકરણનાં ફોન નંબરને ઍક્સેસ કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1531731435011495015">"ટેબ્લેટને નિષ્ક્રિય થતું અટકાવો"</string>
@@ -497,11 +493,14 @@
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ફિંગરપ્રિન્ટ સંગ્રહિત કરી શકાતી નથી. કૃપા કરીને અસ્તિત્વમાંની ફિંગરપ્રિન્ટ દૂર કરો."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ફિંગરપ્રિન્ટનો સમય બાહ્ય થયો. ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"ફિંગરપ્રિન્ટ ઓપરેશન રદ કર્યું."</string>
-    <!-- no translation found for fingerprint_error_user_canceled (7999639584615291494) -->
-    <skip />
+    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"ફિંગરપ્રિન્ટ ચકાસવાની પ્રક્રિયા વપરાશકર્તાએ રદ કરી."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"ઘણા બધા પ્રયત્નો. પછીથી ફરી પ્રયાસ કરો."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"ઘણા વધુ પ્રયત્નો. ફિંગરપ્રિન્ટ સેન્સર અક્ષમ કરવામાં આવ્યું છે."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"ફરી પ્રયાસ કરો."</string>
+    <!-- no translation found for fingerprint_error_no_fingerprints (7654382120628334248) -->
+    <skip />
+    <!-- no translation found for fingerprint_error_hw_not_present (5729436878065119329) -->
+    <skip />
     <string name="fingerprint_name_template" msgid="5870957565512716938">"આંગળી <xliff:g id="FINGERID">%d</xliff:g>"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
@@ -1000,12 +999,9 @@
     <string name="browse" msgid="1245903488306147205">"ખોલો"</string>
     <string name="sms" msgid="4560537514610063430">"સંદેશ મોકલો"</string>
     <string name="add_contact" msgid="7867066569670597203">"ઉમેરો"</string>
-    <!-- no translation found for view_calendar (979609872939597838) -->
-    <skip />
-    <!-- no translation found for add_calendar_event (1953664627192056206) -->
-    <skip />
-    <!-- no translation found for view_flight (7691640491425680214) -->
-    <skip />
+    <string name="view_calendar" msgid="979609872939597838">"જુઓ"</string>
+    <string name="add_calendar_event" msgid="1953664627192056206">"શેડ્યૂલ કરો"</string>
+    <string name="view_flight" msgid="7691640491425680214">"ટ્રૅક કરો"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"સ્ટોરેજ સ્થાન સમાપ્ત થયું"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"કેટલાક સિસ્ટમ કાર્યો કામ કરી શકશે નહીં"</string>
     <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"સિસ્ટમ માટે પર્યાપ્ત સ્ટોરેજ નથી. ખાતરી કરો કે તમારી પાસે 250MB ખાલી સ્થાન છે અને ફરીથી પ્રારંભ કરો."</string>
@@ -1131,8 +1127,7 @@
       <item quantity="other">ખુલ્લા વાઇ-ફાઇ નેટવર્ક્સ ઉપલબ્ધ છે</item>
     </plurals>
     <string name="wifi_available_title" msgid="3817100557900599505">"ખુલ્લા વાઇ-ફાઇ નેટવર્ક સાથે કનેક્ટ કરો"</string>
-    <!-- no translation found for wifi_available_carrier_network_title (4527932626916527897) -->
-    <skip />
+    <string name="wifi_available_carrier_network_title" msgid="4527932626916527897">"કૅરિઅરના વાઇ-ફાઇ નેટવર્ક સાથે કનેક્ટ કરો"</string>
     <string name="wifi_available_title_connecting" msgid="1557292688310330032">"ખુલ્લા વાઇ-ફાઇ નેટવર્ક સાથે કનેક્ટ કરી રહ્યાં છીએ"</string>
     <string name="wifi_available_title_connected" msgid="7542672851522241548">"વાઇ-ફાઇ નેટવર્ક સાથે કનેક્ટ કર્યુ"</string>
     <string name="wifi_available_title_failed_to_connect" msgid="6861772233582618132">"વાઇ-ફાઇ નેટવર્ક સાથે કનેક્ટ કરી શકાયું નથી"</string>
@@ -1217,13 +1212,23 @@
     <string name="no_permissions" msgid="7283357728219338112">"કોઈ પરવાનગીઓ જરૂરી નથી"</string>
     <string name="perm_costs_money" msgid="4902470324142151116">"આનાથી તમારા પૈસા ખર્ચ થઈ શકે છે"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"ઓકે"</string>
-    <string name="usb_charging_notification_title" msgid="6895185153353640787">"આ ઉપકરણને USB થી ચાર્જ કરે છે"</string>
-    <string name="usb_supplying_notification_title" msgid="5310642257296510271">"જોડાયેલ ઉપકરણ માટે USB પાવર પૂરો પાડે છે"</string>
-    <string name="usb_mtp_notification_title" msgid="8396264943589760855">"ફાઇલ ટ્રાન્સફર માટે USB"</string>
-    <string name="usb_ptp_notification_title" msgid="1347328437083192112">"ફોટો ટ્રાન્સફર માટે USB"</string>
-    <string name="usb_midi_notification_title" msgid="4850904915889144654">"MIDI માટે USB"</string>
-    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB ઍક્સેસરીથી કનેક્ટ થયાં"</string>
+    <!-- no translation found for usb_charging_notification_title (1595122345358177163) -->
+    <skip />
+    <!-- no translation found for usb_supplying_notification_title (4631045789893086181) -->
+    <skip />
+    <!-- no translation found for usb_mtp_notification_title (4238227258391151029) -->
+    <skip />
+    <!-- no translation found for usb_ptp_notification_title (5425857879922006878) -->
+    <skip />
+    <!-- no translation found for usb_tether_notification_title (3716143122035802501) -->
+    <skip />
+    <!-- no translation found for usb_midi_notification_title (5356040379749154805) -->
+    <skip />
+    <!-- no translation found for usb_accessory_notification_title (1899977434994900306) -->
+    <skip />
     <string name="usb_notification_message" msgid="3370903770828407960">"વધુ વિકલ્પો માટે ટૅપ કરો."</string>
+    <!-- no translation found for usb_power_notification_message (4647527153291917218) -->
+    <skip />
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"એનાલોગ ઑડિઓ ઍક્સેસરી મળી"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"જોડેલ ઉપકરણ આ ફોન સાથે સુસંગત નથી. વધુ જાણવા માટે ટૅપ કરો."</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"USB ડીબગિંગ કનેક્ટ થયું."</string>
@@ -1662,9 +1667,6 @@
     <string name="managed_profile_label_badge" msgid="2355652472854327647">"કાર્યાલય <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5048136430082124036">"2જું કાર્ય <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="2808305070321719040">"3જું કાર્ય <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_toast" msgid="6820571533009838261">"આ સ્ક્રીનને અનપિન કરવા માટે, પાછળ અને ઝલક બટનોને સ્પર્શ કરી રાખો"</string>
-    <string name="lock_to_app_start" msgid="6643342070839862795">"સ્ક્રીન પિન કરી"</string>
-    <string name="lock_to_app_exit" msgid="8598219838213787430">"સ્ક્રીન અનપિન કરી"</string>
     <string name="lock_to_app_unlock_pin" msgid="2552556656504331634">"અનપિન કરતા પહેલાં પિન માટે પૂછો"</string>
     <string name="lock_to_app_unlock_pattern" msgid="4182192144797225137">"અનપિન કરતા પહેલાં અનલૉક પૅટર્ન માટે પૂછો"</string>
     <string name="lock_to_app_unlock_password" msgid="6380979775916974414">"અનપિન કરતાં પહેલાં પાસવર્ડ માટે પૂછો"</string>
@@ -1758,15 +1760,11 @@
     <string name="language_picker_section_all" msgid="3097279199511617537">"બધી ભાષાઓ"</string>
     <string name="region_picker_section_all" msgid="8966316787153001779">"તમામ પ્રદેશ"</string>
     <string name="locale_search_menu" msgid="2560710726687249178">"શોધ"</string>
-    <!-- no translation found for work_mode_off_title (1118691887588435530) -->
-    <skip />
-    <!-- no translation found for work_mode_off_message (5130856710614337649) -->
-    <skip />
+    <string name="work_mode_off_title" msgid="1118691887588435530">"કાર્યાલયની પ્રોફાઇલ ચાલુ કરીએ?"</string>
+    <string name="work_mode_off_message" msgid="5130856710614337649">"તમારી કાર્યાલયની ઍપ, નોટિફિકેશન, ડેટા અને અન્ય કાર્યાલયની પ્રોફાઇલ સુવિધાઓ ચાલુ કરવામાં આવશે"</string>
     <string name="work_mode_turn_on" msgid="2062544985670564875">"ચાલુ કરો"</string>
-    <!-- no translation found for deprecated_target_sdk_message (1449696506742572767) -->
-    <skip />
-    <!-- no translation found for deprecated_target_sdk_app_store (5032340500368495077) -->
-    <skip />
+    <string name="deprecated_target_sdk_message" msgid="1449696506742572767">"આ ઍપ Androidના જૂના વર્ઝન માટે બનાવવામાં આવ્યું હતું અને તે કદાચ તે યોગ્ય રીતે કાર્ય કરી શકશે નહીં. અપડેટ માટે તપાસવાનો પ્રયાસ કરો અથવા ડેવલપરનો સંપર્ક કરો."</string>
+    <string name="deprecated_target_sdk_app_store" msgid="5032340500368495077">"અપડેટ માટે તપાસો"</string>
     <string name="new_sms_notification_title" msgid="8442817549127555977">"તમારી પાસે નવા સંદેશા છે"</string>
     <string name="new_sms_notification_content" msgid="7002938807812083463">"જોવા માટે SMS ઍપ્લિકેશન ખોલો"</string>
     <string name="user_encrypted_title" msgid="9054897468831672082">"કેટલીક કાર્યક્ષમતા મર્યાદિત હોઈ શકે છે"</string>
@@ -1833,17 +1831,15 @@
     <string name="mmcc_illegal_me" msgid="1950705155760872972">"વૉઇસ માટે આ ફોનને મંજૂરી નથી"</string>
     <string name="popup_window_default_title" msgid="4874318849712115433">"પૉપઅપ વિંડો"</string>
     <string name="slice_more_content" msgid="8504342889413274608">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
-    <string name="shortcut_restored_on_lower_version" msgid="5270675146351613828">"આ શૉર્ટકટ માટે નવી ઍપ જરૂરી છે"</string>
+    <!-- no translation found for shortcut_restored_on_lower_version (4860853725206702336) -->
+    <skip />
     <string name="shortcut_restore_not_supported" msgid="5028808567940014190">"શૉર્ટકટ ફરી મેળવી શકાયો નથી કારણ કે ઍપ બૅકઅપ અને ફરી મેળવવાનું સમર્થન કરતી નથી"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="2406209324521327518">"શૉર્ટકટ ફરી મેળવી શકાયો નથી કારણ કે ઍપમાં છે તે સહી મેળ ખાતી નથી"</string>
     <string name="shortcut_restore_unknown_issue" msgid="8703738064603262597">"શૉર્ટકટ પાછો મેળવી શકાયો નથી"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="5276016910284687075">"શૉર્ટકટને બંધ કરવામાં આવ્યો છે"</string>
-    <!-- no translation found for harmful_app_warning_uninstall (4837672735619532931) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_open_anyway (596432803680914321) -->
-    <skip />
-    <!-- no translation found for harmful_app_warning_title (8982527462829423432) -->
-    <skip />
+    <string name="harmful_app_warning_uninstall" msgid="4837672735619532931">"અનઇન્સ્ટૉલ કરો"</string>
+    <string name="harmful_app_warning_open_anyway" msgid="596432803680914321">"કોઈપણ રીતે ખોલો"</string>
+    <string name="harmful_app_warning_title" msgid="8982527462829423432">"નુકસાનકારક ઍપ મળી આવી છે"</string>
     <string name="slices_permission_request" msgid="8484943441501672932">"<xliff:g id="APP_0">%1$s</xliff:g>એ <xliff:g id="APP_2">%2$s</xliff:g> સ્લાઇસ બતાવવા માગે છે"</string>
     <string name="screenshot_edit" msgid="7867478911006447565">"ફેરફાર કરો"</string>
 </resources>

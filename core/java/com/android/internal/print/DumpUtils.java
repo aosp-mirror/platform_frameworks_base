@@ -16,10 +16,9 @@
 
 package com.android.internal.print;
 
+import static com.android.internal.util.dump.DumpUtils.writeComponentName;
+
 import android.annotation.NonNull;
-import android.annotation.Nullable;
-import android.content.ComponentName;
-import android.content.ComponentNameProto;
 import android.content.Context;
 import android.print.PageRange;
 import android.print.PrintAttributes;
@@ -40,41 +39,12 @@ import android.service.print.PrinterIdProto;
 import android.service.print.PrinterInfoProto;
 import android.service.print.ResolutionProto;
 
+import com.android.internal.util.dump.DualDumpOutputStream;
+
 /**
  * Utilities for dumping print related proto buffer
  */
 public class DumpUtils {
-    /**
-     * Write a string to a proto if the string is not {@code null}.
-     *
-     * @param proto The proto to write to
-     * @param idName Clear text name of the proto-id
-     * @param id The proto-id of the string
-     * @param string The string to write
-     */
-    public static void writeStringIfNotNull(@NonNull DualDumpOutputStream proto, String idName,
-            long id, @Nullable String string) {
-        if (string != null) {
-            proto.write(idName, id, string);
-        }
-    }
-
-    /**
-     * Write a {@link ComponentName} to a proto.
-     *
-     * @param proto The proto to write to
-     * @param idName Clear text name of the proto-id
-     * @param id The proto-id of the component name
-     * @param component The component name to write
-     */
-    public static void writeComponentName(@NonNull DualDumpOutputStream proto, String idName,
-            long id, @NonNull ComponentName component) {
-        long token = proto.start(idName, id);
-        proto.write("package_name", ComponentNameProto.PACKAGE_NAME, component.getPackageName());
-        proto.write("class_name", ComponentNameProto.CLASS_NAME, component.getClassName());
-        proto.end(token);
-    }
-
     /**
      * Write a {@link PrinterId} to a proto.
      *

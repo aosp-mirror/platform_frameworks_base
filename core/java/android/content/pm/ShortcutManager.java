@@ -770,6 +770,6 @@ public class ShortcutManager {
     /** @hide injection point */
     @VisibleForTesting
     protected int injectMyUserId() {
-        return UserHandle.myUserId();
+        return mContext.getUserId();
     }
 }

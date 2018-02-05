@@ -1840,14 +1840,6 @@ class AlarmManagerService extends SystemService {
             if (!blocked) {
                 pw.println("    none");
             }
-            pw.print("  mUseAllowWhileIdleShortTime: [");
-            for (int i = 0; i < mUseAllowWhileIdleShortTime.size(); i++) {
-                if (mUseAllowWhileIdleShortTime.valueAt(i)) {
-                    UserHandle.formatUid(pw, mUseAllowWhileIdleShortTime.keyAt(i));
-                    pw.print(" ");
-                }
-            }
-            pw.println("]");
 
             pw.println("  mLastAlarmDeliveredForPackage:");
             for (int i = 0; i < mLastAlarmDeliveredForPackage.size(); i++) {
@@ -1913,14 +1905,32 @@ class AlarmManagerService extends SystemService {
             if (mLastAllowWhileIdleDispatch.size() > 0) {
                 pw.println("  Last allow while idle dispatch times:");
                 for (int i=0; i<mLastAllowWhileIdleDispatch.size(); i++) {
-                    pw.print("  UID ");
-                    UserHandle.formatUid(pw, mLastAllowWhileIdleDispatch.keyAt(i));
+                    pw.print("    UID ");
+                    final int uid = mLastAllowWhileIdleDispatch.keyAt(i);
+                    UserHandle.formatUid(pw, uid);
                     pw.print(": ");
-                    TimeUtils.formatDuration(mLastAllowWhileIdleDispatch.valueAt(i),
-                            nowELAPSED, pw);
+                    final long lastTime = mLastAllowWhileIdleDispatch.valueAt(i);
+                    TimeUtils.formatDuration(lastTime, nowELAPSED, pw);
+
+                    final long minInterval = getWhileIdleMinIntervalLocked(uid);
+                    pw.print("  Next allowed:");
+                    TimeUtils.formatDuration(lastTime + minInterval, nowELAPSED, pw);
+                    pw.print(" (");
+                    TimeUtils.formatDuration(minInterval, 0, pw);
+                    pw.print(")");
+
                     pw.println();
                 }
             }
+
+            pw.print("  mUseAllowWhileIdleShortTime: [");
+            for (int i = 0; i < mUseAllowWhileIdleShortTime.size(); i++) {
+                if (mUseAllowWhileIdleShortTime.valueAt(i)) {
+                    UserHandle.formatUid(pw, mUseAllowWhileIdleShortTime.keyAt(i));
+                    pw.print(" ");
+                }
+            }
+            pw.println("]");
             pw.println();
 
             if (mLog.dump(pw, "  Recent problems", "    ")) {
@@ -2181,11 +2191,21 @@ class AlarmManagerService extends SystemService {
             for (int i = 0; i < mLastAllowWhileIdleDispatch.size(); ++i) {
                 final long token = proto.start(
                         AlarmManagerServiceProto.LAST_ALLOW_WHILE_IDLE_DISPATCH_TIMES);
-                proto.write(AlarmManagerServiceProto.LastAllowWhileIdleDispatch.UID,
-                        mLastAllowWhileIdleDispatch.keyAt(i));
-                proto.write(AlarmManagerServiceProto.LastAllowWhileIdleDispatch.TIME_MS,
-                        mLastAllowWhileIdleDispatch.valueAt(i));
+                final int uid = mLastAllowWhileIdleDispatch.keyAt(i);
+                final long lastTime = mLastAllowWhileIdleDispatch.valueAt(i);
+
+                proto.write(AlarmManagerServiceProto.LastAllowWhileIdleDispatch.UID, uid);
+                proto.write(AlarmManagerServiceProto.LastAllowWhileIdleDispatch.TIME_MS, lastTime);
+                proto.write(AlarmManagerServiceProto.LastAllowWhileIdleDispatch.NEXT_ALLOWED_MS,
+                        lastTime + getWhileIdleMinIntervalLocked(uid));
                 proto.end(token);
+            }
+
+            for (int i = 0; i < mUseAllowWhileIdleShortTime.size(); i++) {
+                if (mUseAllowWhileIdleShortTime.valueAt(i)) {
+                    proto.write(AlarmManagerServiceProto.USE_ALLOW_WHILE_IDLE_SHORT_TIME,
+                            mUseAllowWhileIdleShortTime.keyAt(i));
+                }
             }
 
             mLog.writeToProto(proto, AlarmManagerServiceProto.RECENT_PROBLEMS);
@@ -2866,6 +2886,23 @@ class AlarmManagerService extends SystemService {
     private native int setKernelTime(long nativeData, long millis);
     private native int setKernelTimezone(long nativeData, int minuteswest);
 
+    private long getWhileIdleMinIntervalLocked(int uid) {
+        final boolean dozing = mPendingIdleUntil != null;
+        final boolean ebs = mForceAppStandbyTracker.isForceAllAppsStandbyEnabled();
+        if (!dozing && !ebs) {
+            return mConstants.ALLOW_WHILE_IDLE_SHORT_TIME;
+        }
+        if (dozing) {
+            return mConstants.ALLOW_WHILE_IDLE_LONG_TIME;
+        }
+        if (mUseAllowWhileIdleShortTime.get(uid)) {
+            // if the last allow-while-idle went off while uid was fg, or the uid
+            // recently came into fg, don't block the alarm for long.
+            return mConstants.ALLOW_WHILE_IDLE_SHORT_TIME;
+        }
+        return mConstants.ALLOW_WHILE_IDLE_LONG_TIME;
+    }
+
     boolean triggerAlarmsLocked(ArrayList<Alarm> triggerList, final long nowELAPSED,
             final long nowRTC) {
         boolean hasWakeup = false;
@@ -2891,20 +2928,7 @@ class AlarmManagerService extends SystemService {
                     // If this is an ALLOW_WHILE_IDLE alarm, we constrain how frequently the app can
                     // schedule such alarms.
                     final long lastTime = mLastAllowWhileIdleDispatch.get(alarm.creatorUid, 0);
-                    final boolean dozing = mPendingIdleUntil != null;
-                    final boolean ebs = mForceAppStandbyTracker.isForceAllAppsStandbyEnabled();
-                    final long minTime;
-                    if (!dozing && !ebs) {
-                        minTime = lastTime + mConstants.ALLOW_WHILE_IDLE_SHORT_TIME;
-                    } else if (dozing) {
-                        minTime = lastTime + mConstants.ALLOW_WHILE_IDLE_LONG_TIME;
-                    } else if (mUseAllowWhileIdleShortTime.get(alarm.creatorUid)) {
-                        // if the last allow-while-idle went off while uid was fg, or the uid
-                        // recently came into fg, don't block the alarm for long.
-                        minTime = lastTime + mConstants.ALLOW_WHILE_IDLE_SHORT_TIME;
-                    } else {
-                        minTime = lastTime + mConstants.ALLOW_WHILE_IDLE_LONG_TIME;
-                    }
+                    final long minTime = lastTime + getWhileIdleMinIntervalLocked(alarm.creatorUid);
                     if (nowELAPSED < minTime) {
                         // Whoops, it hasn't been long enough since the last ALLOW_WHILE_IDLE
                         // alarm went off for this app.  Reschedule the alarm to be in the
@@ -3641,6 +3665,7 @@ class AlarmManagerService extends SystemService {
                 } else if (Intent.ACTION_UID_REMOVED.equals(action)) {
                     if (uid >= 0) {
                         mLastAllowWhileIdleDispatch.delete(uid);
+                        mUseAllowWhileIdleShortTime.delete(uid);
                     }
                 } else {
                     if (Intent.ACTION_PACKAGE_REMOVED.equals(action)
@@ -3693,7 +3718,6 @@ class AlarmManagerService extends SystemService {
 
         @Override public void onUidGone(int uid, boolean disabled) {
             synchronized (mLock) {
-                mUseAllowWhileIdleShortTime.delete(uid);
                 if (disabled) {
                     removeForStoppedLocked(uid);
                 }
@@ -3701,9 +3725,6 @@ class AlarmManagerService extends SystemService {
         }
 
         @Override public void onUidActive(int uid) {
-            synchronized (mLock) {
-                mUseAllowWhileIdleShortTime.put(uid, true);
-            }
         }
 
         @Override public void onUidIdle(int uid, boolean disabled) {
@@ -3764,6 +3785,18 @@ class AlarmManagerService extends SystemService {
         public void unblockAlarmsForUidPackage(int uid, String packageName) {
             synchronized (mLock) {
                 sendPendingBackgroundAlarmsLocked(uid, packageName);
+            }
+        }
+
+        @Override
+        public void onUidForeground(int uid, boolean foreground) {
+            synchronized (mLock) {
+                if (foreground) {
+                    mUseAllowWhileIdleShortTime.put(uid, true);
+
+                    // Note we don't have to drain the pending while-idle alarms here, because
+                    // this event should coincide with unblockAlarmsForUid().
+                }
             }
         }
     };
@@ -4026,7 +4059,7 @@ class AlarmManagerService extends SystemService {
             if (allowWhileIdle) {
                 // Record the last time this uid handled an ALLOW_WHILE_IDLE alarm.
                 mLastAllowWhileIdleDispatch.put(alarm.creatorUid, nowELAPSED);
-                if (mForceAppStandbyTracker.isInForeground(alarm.creatorUid)) {
+                if (mForceAppStandbyTracker.isUidInForeground(alarm.creatorUid)) {
                     mUseAllowWhileIdleShortTime.put(alarm.creatorUid, true);
                 } else {
                     mUseAllowWhileIdleShortTime.put(alarm.creatorUid, false);

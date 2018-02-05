@@ -262,7 +262,11 @@
     <!-- The width of the panel that holds the quick settings. -->
     <dimen name="qs_panel_width">@dimen/notification_panel_width</dimen>
 
-    <dimen name="volume_dialog_panel_width">120dp</dimen>
+    <!-- the amount the volume panel should be offset at the end from the view next to it (or
+    the scren edge, in portrait-->
+    <dimen name="volume_dialog_base_margin">12dp</dimen>
+
+    <dimen name="volume_dialog_panel_width">100dp</dimen>
 
     <dimen name="output_chooser_panel_width">320dp</dimen>
 
@@ -332,6 +336,8 @@
     <dimen name="qs_footer_padding_start">16dp</dimen>
     <dimen name="qs_footer_padding_end">24dp</dimen>
     <dimen name="qs_footer_icon_size">16dp</dimen>
+    <!-- Difference between drag handle margin in QQS and expanded QS -->
+    <dimen name="qs_footer_drag_handle_offset">6dp</dimen>
 
     <dimen name="qs_notif_collapsed_space">64dp</dimen>
 
@@ -902,4 +908,11 @@
     <dimen name="config_batteryLevelTextSizeEnd" format="float">32.0</dimen>
     <!-- Wireless Charging battery level text animation duration -->
     <integer name="config_batteryLevelTextAnimationDuration">400</integer>
+
+    <!-- Wired charging on AOD, text animation duration -->
+    <integer name="wired_charging_aod_text_animation_duration_down">500</integer>
+    <!-- Wired charging on AOD, text animation duration -->
+    <integer name="wired_charging_aod_text_animation_duration_up">300</integer>
+    <!-- Wired charging on AOD, text animation distance -->
+    <integer name="wired_charging_aod_text_animation_distance">-30</integer>
 </resources>

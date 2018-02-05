@@ -47,6 +47,7 @@ import com.android.server.EventLogTags;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static android.app.AppOpsManager.MODE_ALLOWED;
@@ -126,7 +127,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     boolean mOrientationChangeComplete = true;
     boolean mWallpaperActionPending = false;
 
-    private final ArrayList<Integer> mChangedStackList = new ArrayList();
+    private final ArrayList<TaskStack> mTmpStackList = new ArrayList();
+    private final ArrayList<Integer> mTmpStackIds = new ArrayList<>();
 
     // State for the RemoteSurfaceTrace system used in testing. If this is enabled SurfaceControl
     // instances will be replaced with an instance that writes a binary representation of all
@@ -333,7 +335,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
     /**
      * Set new display override config and return array of ids of stacks that were changed during
-     * update. If called for the default display, global configuration will also be updated.
+     * update. If called for the default display, global configuration will also be updated. Stacks
+     * that are marked for deferred removal are excluded from the returned array.
      */
     int[] setDisplayOverrideConfigurationIfNeeded(Configuration newConfiguration, int displayId) {
         final DisplayContent displayContent = getDisplayContent(displayId);
@@ -346,24 +349,42 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         if (!configChanged) {
             return null;
         }
+
         displayContent.onOverrideConfigurationChanged(newConfiguration);
 
+        mTmpStackList.clear();
         if (displayId == DEFAULT_DISPLAY) {
             // Override configuration of the default display duplicates global config. In this case
             // we also want to update the global config.
-            return setGlobalConfigurationIfNeeded(newConfiguration);
+            setGlobalConfigurationIfNeeded(newConfiguration, mTmpStackList);
         } else {
-            return updateStackBoundsAfterConfigChange(displayId);
+            updateStackBoundsAfterConfigChange(displayId, mTmpStackList);
         }
+
+        mTmpStackIds.clear();
+        final int stackCount = mTmpStackList.size();
+
+        for (int i = 0; i < stackCount; ++i) {
+            final TaskStack stack = mTmpStackList.get(i);
+
+            // We only include stacks that are not marked for removal as they do not exist outside
+            // of WindowManager at this point.
+            if (!stack.mDeferRemoval) {
+                mTmpStackIds.add(stack.mStackId);
+            }
+        }
+
+        return mTmpStackIds.isEmpty() ? null : ArrayUtils.convertToIntArray(mTmpStackIds);
     }
 
-    private int[] setGlobalConfigurationIfNeeded(Configuration newConfiguration) {
+    private void setGlobalConfigurationIfNeeded(Configuration newConfiguration,
+            List<TaskStack> changedStacks) {
         final boolean configChanged = getConfiguration().diff(newConfiguration) != 0;
         if (!configChanged) {
-            return null;
+            return;
         }
         onConfigurationChanged(newConfiguration);
-        return updateStackBoundsAfterConfigChange();
+        updateStackBoundsAfterConfigChange(changedStacks);
     }
 
     @Override
@@ -378,26 +399,18 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
      * Callback used to trigger bounds update after configuration change and get ids of stacks whose
      * bounds were updated.
      */
-    private int[] updateStackBoundsAfterConfigChange() {
-        mChangedStackList.clear();
-
+    private void updateStackBoundsAfterConfigChange(List<TaskStack> changedStacks) {
         final int numDisplays = mChildren.size();
         for (int i = 0; i < numDisplays; ++i) {
             final DisplayContent dc = mChildren.get(i);
-            dc.updateStackBoundsAfterConfigChange(mChangedStackList);
+            dc.updateStackBoundsAfterConfigChange(changedStacks);
         }
-
-        return mChangedStackList.isEmpty() ? null : ArrayUtils.convertToIntArray(mChangedStackList);
     }
 
     /** Same as {@link #updateStackBoundsAfterConfigChange()} but only for a specific display. */
-    private int[] updateStackBoundsAfterConfigChange(int displayId) {
-        mChangedStackList.clear();
-
+    private void updateStackBoundsAfterConfigChange(int displayId, List<TaskStack> changedStacks) {
         final DisplayContent dc = getDisplayContent(displayId);
-        dc.updateStackBoundsAfterConfigChange(mChangedStackList);
-
-        return mChangedStackList.isEmpty() ? null : ArrayUtils.convertToIntArray(mChangedStackList);
+        dc.updateStackBoundsAfterConfigChange(changedStacks);
     }
 
     private void prepareFreezingTaskBounds() {
@@ -598,6 +611,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
         }
+
+        mService.mAnimator.executeAfterPrepareSurfacesRunnables();
 
         final WindowSurfacePlacer surfacePlacer = mService.mWindowPlacerLocked;
 

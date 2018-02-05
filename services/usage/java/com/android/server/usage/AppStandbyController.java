@@ -183,6 +183,8 @@ public class AppStandbyController {
     boolean mCharging;
     private long mLastAppIdleParoledTime;
     private boolean mSystemServicesReady = false;
+    // There was a system update, defaults need to be initialized after services are ready
+    private boolean mPendingInitializeDefaults;
 
     private final DeviceStateReceiver mDeviceStateReceiver;
 
@@ -279,6 +281,7 @@ public class AppStandbyController {
     public void onBootPhase(int phase) {
         mInjector.onBootPhase(phase);
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
+            Slog.d(TAG, "Setting app idle enabled state");
             setAppIdleEnabled(mInjector.isAppIdleEnabled());
             // Observe changes to the threshold
             SettingsObserver settingsObserver = new SettingsObserver(mHandler);
@@ -293,11 +296,15 @@ public class AppStandbyController {
                 mAppIdleHistory.updateDisplay(isDisplayOn(), mInjector.elapsedRealtime());
             }
 
+            mSystemServicesReady = true;
+
+            if (mPendingInitializeDefaults) {
+                initializeDefaultsForSystemApps(UserHandle.USER_SYSTEM);
+            }
+
             if (mPendingOneTimeCheckIdleStates) {
                 postOneTimeCheckIdleStates();
             }
-
-            mSystemServicesReady = true;
         } else if (phase == PHASE_BOOT_COMPLETED) {
             setChargingState(mInjector.isCharging());
         }
@@ -451,7 +458,8 @@ public class AppStandbyController {
                         UserHandle.getAppId(pi.applicationInfo.uid),
                         userId);
                 if (DEBUG) {
-                    Slog.d(TAG, "   Checking idle state for " + packageName);
+                    Slog.d(TAG, "   Checking idle state for " + packageName + " special=" +
+                            isSpecial);
                 }
                 if (isSpecial) {
                     synchronized (mAppIdleLock) {
@@ -523,6 +531,7 @@ public class AppStandbyController {
                     elapsedRealtime, bucket)) {
                 StandbyUpdateRecord r = StandbyUpdateRecord.obtain(packageName, userId,
                         bucket, userStartedInteracting);
+                if (DEBUG) Slog.d(TAG, "Standby bucket for " + packageName + "=" + bucket);
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_INFORM_LISTENERS,
                         StandbyUpdateRecord.obtain(packageName, userId,
                                 bucket, userStartedInteracting)));
@@ -1087,7 +1096,13 @@ public class AppStandbyController {
     }
 
     void initializeDefaultsForSystemApps(int userId) {
-        Slog.d(TAG, "Initializing defaults for system apps on user " + userId);
+        if (!mSystemServicesReady) {
+            // Do it later, since SettingsProvider wasn't queried yet for app_standby_enabled
+            mPendingInitializeDefaults = true;
+            return;
+        }
+        Slog.d(TAG, "Initializing defaults for system apps on user " + userId + ", "
+                + "appIdleEnabled=" + mAppIdleEnabled);
         final long elapsedRealtime = mInjector.elapsedRealtime();
         List<PackageInfo> packages = mPackageManager.getInstalledPackagesAsUser(
                 PackageManager.MATCH_DISABLED_COMPONENTS,
@@ -1102,11 +1117,6 @@ public class AppStandbyController {
                     // past usage pattern was.
                     mAppIdleHistory.reportUsage(packageName, userId, STANDBY_BUCKET_ACTIVE, 0,
                             elapsedRealtime + 4 * ONE_HOUR);
-                    if (isAppSpecial(packageName, UserHandle.getAppId(pi.applicationInfo.uid),
-                            userId)) {
-                        mAppIdleHistory.setAppStandbyBucket(packageName, userId, elapsedRealtime,
-                                STANDBY_BUCKET_EXEMPTED, REASON_DEFAULT);
-                    }
                 }
             }
         }

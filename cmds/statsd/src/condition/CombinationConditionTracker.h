@@ -41,12 +41,20 @@ public:
                            std::vector<ConditionState>& conditionCache,
                            std::vector<bool>& changedCache) override;
 
-    void isConditionMet(const ConditionKey& conditionParameters,
-                        const std::vector<sp<ConditionTracker>>& allConditions,
-                        std::vector<ConditionState>& conditionCache) const override;
+    void isConditionMet(
+        const ConditionKey& conditionParameters,
+        const std::vector<sp<ConditionTracker>>& allConditions,
+        const FieldMatcher& dimensionFields,
+        std::vector<ConditionState>& conditionCache,
+        std::unordered_set<HashableDimensionKey> &dimensionsKeySet) const override;
 
+    ConditionState getMetConditionDimension(
+            const std::vector<sp<ConditionTracker>>& allConditions,
+            const FieldMatcher& dimensionFields,
+            std::unordered_set<HashableDimensionKey> &dimensionsKeySet) const override;
 private:
     LogicalOperation mLogicalOperation;
+
     // Store index of the children Predicates.
     // We don't store string name of the Children, because we want to get rid of the hash map to
     // map the name to object. We don't want to store smart pointers to children, because it

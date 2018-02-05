@@ -29,7 +29,9 @@ package android {
     field public static final java.lang.String BIND_RESOLVER_RANKER_SERVICE = "android.permission.BIND_RESOLVER_RANKER_SERVICE";
     field public static final java.lang.String BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE = "android.permission.BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE";
     field public static final java.lang.String BIND_SETTINGS_SUGGESTIONS_SERVICE = "android.permission.BIND_SETTINGS_SUGGESTIONS_SERVICE";
+    field public static final java.lang.String BIND_TELEPHONY_DATA_SERVICE = "android.permission.BIND_TELEPHONY_DATA_SERVICE";
     field public static final java.lang.String BIND_TEXTCLASSIFIER_SERVICE = "android.permission.BIND_TEXTCLASSIFIER_SERVICE";
+    field public static final java.lang.String BIND_TELEPHONY_NETWORK_SERVICE = "android.permission.BIND_TELEPHONY_NETWORK_SERVICE";
     field public static final java.lang.String BIND_TRUST_AGENT = "android.permission.BIND_TRUST_AGENT";
     field public static final java.lang.String BIND_TV_REMOTE_SERVICE = "android.permission.BIND_TV_REMOTE_SERVICE";
     field public static final java.lang.String BLUETOOTH_PRIVILEGED = "android.permission.BLUETOOTH_PRIVILEGED";
@@ -773,6 +775,7 @@ package android.content {
   public abstract class Context {
     method public boolean bindServiceAsUser(android.content.Intent, android.content.ServiceConnection, int, android.os.UserHandle);
     method public abstract android.content.Context createCredentialProtectedStorageContext();
+    method public android.content.Context createPackageContextAsUser(java.lang.String, int, android.os.UserHandle) throws android.content.pm.PackageManager.NameNotFoundException;
     method public abstract java.io.File getPreloadsFileCache();
     method public abstract boolean isCredentialProtectedStorage();
     method public abstract void sendBroadcast(android.content.Intent, java.lang.String, android.os.Bundle);
@@ -1140,6 +1143,15 @@ package android.hardware.camera2.params {
 
 package android.hardware.display {
 
+  public final class AmbientBrightnessDayStats implements android.os.Parcelable {
+    method public int describeContents();
+    method public float[] getBucketBoundaries();
+    method public java.time.LocalDate getLocalDate();
+    method public float[] getStats();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.hardware.display.AmbientBrightnessDayStats> CREATOR;
+  }
+
   public final class BrightnessChangeEvent implements android.os.Parcelable {
     method public int describeContents();
     method public void writeToParcel(android.os.Parcel, int);
@@ -1147,11 +1159,14 @@ package android.hardware.display {
     field public final float batteryLevel;
     field public final float brightness;
     field public final int colorTemperature;
+    field public final boolean isDefaultBrightnessConfig;
+    field public final boolean isUserSetBrightness;
     field public final float lastBrightness;
     field public final long[] luxTimestamps;
     field public final float[] luxValues;
     field public final boolean nightMode;
     field public final java.lang.String packageName;
+    field public final float powerBrightnessFactor;
     field public final long timeStamp;
   }
 
@@ -2009,6 +2024,7 @@ package android.hardware.radio {
     method public int describeContents();
     method public android.hardware.radio.RadioManager.BandDescriptor[] getBands();
     method public int getClassId();
+    method public java.util.Map<java.lang.String, java.lang.Integer> getDabFrequencyTable();
     method public int getId();
     method public java.lang.String getImplementor();
     method public int getNumAudioSources();
@@ -5887,11 +5903,11 @@ package android.telephony.mbms.vendor {
     method public int cancelDownload(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
     method public void dispose(int) throws android.os.RemoteException;
     method public int download(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
-    method public int getDownloadStatus(android.telephony.mbms.DownloadRequest, android.telephony.mbms.FileInfo) throws android.os.RemoteException;
     method public int initialize(int, android.telephony.mbms.MbmsDownloadSessionCallback) throws android.os.RemoteException;
     method public java.util.List<android.telephony.mbms.DownloadRequest> listPendingDownloads(int) throws android.os.RemoteException;
     method public void onAppCallbackDied(int, int);
     method public int registerStateCallback(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStateCallback) throws android.os.RemoteException;
+    method public int requestDownloadState(android.telephony.mbms.DownloadRequest, android.telephony.mbms.FileInfo) throws android.os.RemoteException;
     method public int requestUpdateFileServices(int, java.util.List<java.lang.String>) throws android.os.RemoteException;
     method public int resetDownloadKnowledge(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;
     method public int setTempFileRootDirectory(int, java.lang.String) throws android.os.RemoteException;

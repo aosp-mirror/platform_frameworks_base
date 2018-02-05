@@ -80,7 +80,7 @@ public:
      */
     void alertBroadcastSubscriber(const ConfigKey& configKey,
                                   const Subscription& subscription,
-                                  const HashableDimensionKey& dimKey) const;
+                                  const MetricDimensionKey& dimKey) const;
 
 private:
     SubscriberReporter() {};
@@ -101,7 +101,7 @@ private:
     void sendBroadcastLocked(const sp<android::IBinder>& intentSender,
                              const ConfigKey& configKey,
                              const Subscription& subscription,
-                             const HashableDimensionKey& dimKey) const;
+                             const MetricDimensionKey& dimKey) const;
 
     /** Converts a stats_log.proto DimensionsValue to a StatsDimensionsValue. */
     static StatsDimensionsValue protoToStatsDimensionsValue(
@@ -109,7 +109,7 @@ private:
 
     /** Converts a HashableDimensionKey to a StatsDimensionsValue. */
     static StatsDimensionsValue protoToStatsDimensionsValue(
-            const HashableDimensionKey& dimKey);
+            const MetricDimensionKey& dimKey);
 };
 
 }  // namespace statsd

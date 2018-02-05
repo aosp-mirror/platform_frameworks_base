@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.dex.ArtManager;
+import android.content.pm.dex.DexMetadataHelper;
 import android.os.FileUtils;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -209,6 +210,13 @@ public class PackageDexOptimizer {
 
             String profileName = ArtManager.getProfileName(i == 0 ? null : pkg.splitNames[i - 1]);
 
+            String dexMetadataPath = null;
+            if (options.isDexoptInstallWithDexMetadata()) {
+                File dexMetadataFile = DexMetadataHelper.findDexMetadataForFile(new File(path));
+                dexMetadataPath = dexMetadataFile == null
+                        ? null : dexMetadataFile.getAbsolutePath();
+            }
+
             final boolean isUsedByOtherApps = options.isDexoptAsSharedLibrary()
                     || packageUseInfo.isUsedByOtherApps(path);
             final String compilerFilter = getRealCompilerFilter(pkg.applicationInfo,
@@ -223,7 +231,7 @@ public class PackageDexOptimizer {
             for (String dexCodeIsa : dexCodeInstructionSets) {
                 int newResult = dexOptPath(pkg, path, dexCodeIsa, compilerFilter,
                         profileUpdated, classLoaderContexts[i], dexoptFlags, sharedGid,
-                        packageStats, options.isDowngrade(), profileName);
+                        packageStats, options.isDowngrade(), profileName, dexMetadataPath);
                 // The end result is:
                 //  - FAILED if any path failed,
                 //  - PERFORMED if at least one path needed compilation,
@@ -248,7 +256,7 @@ public class PackageDexOptimizer {
     private int dexOptPath(PackageParser.Package pkg, String path, String isa,
             String compilerFilter, boolean profileUpdated, String classLoaderContext,
             int dexoptFlags, int uid, CompilerStats.PackageStats packageStats, boolean downgrade,
-            String profileName) {
+            String profileName, String dexMetadataPath) {
         int dexoptNeeded = getDexoptNeeded(path, isa, compilerFilter, classLoaderContext,
                 profileUpdated, downgrade);
         if (Math.abs(dexoptNeeded) == DexFile.NO_DEXOPT_NEEDED) {
@@ -275,7 +283,7 @@ public class PackageDexOptimizer {
             mInstaller.dexopt(path, uid, pkg.packageName, isa, dexoptNeeded, oatDir, dexoptFlags,
                     compilerFilter, pkg.volumeUuid, classLoaderContext, pkg.applicationInfo.seInfo,
                     false /* downgrade*/, pkg.applicationInfo.targetSdkVersion,
-                    profileName);
+                    profileName, dexMetadataPath);
 
             if (packageStats != null) {
                 long endTime = System.currentTimeMillis();
@@ -396,7 +404,8 @@ public class PackageDexOptimizer {
                 mInstaller.dexopt(path, info.uid, info.packageName, isa, /*dexoptNeeded*/ 0,
                         /*oatDir*/ null, dexoptFlags,
                         compilerFilter, info.volumeUuid, classLoaderContext, info.seInfoUser,
-                        options.isDowngrade(), info.targetSdkVersion, /*profileName*/ null);
+                        options.isDowngrade(), info.targetSdkVersion, /*profileName*/ null,
+                        /*dexMetadataPath*/ null);
             }
 
             return DEX_OPT_PERFORMED;
@@ -511,9 +520,13 @@ public class PackageDexOptimizer {
     private int getDexFlags(ApplicationInfo info, String compilerFilter, DexoptOptions options) {
         int flags = info.flags;
         boolean debuggable = (flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-        // Profile guide compiled oat files should not be public.
+        // Profile guide compiled oat files should not be public unles they are based
+        // on profiles from dex metadata archives.
+        // The flag isDexoptInstallWithDexMetadata applies only on installs when we know that
+        // the user does not have an existing profile.
         boolean isProfileGuidedFilter = isProfileGuidedCompilerFilter(compilerFilter);
-        boolean isPublic = !info.isForwardLocked() && !isProfileGuidedFilter;
+        boolean isPublic = !info.isForwardLocked() &&
+                (!isProfileGuidedFilter || options.isDexoptInstallWithDexMetadata());
         int profileFlag = isProfileGuidedFilter ? DEXOPT_PROFILE_GUIDED : 0;
         // System apps are invoked with a runtime flag which exempts them from
         // restrictions on hidden API usage. We dexopt with the same runtime flag

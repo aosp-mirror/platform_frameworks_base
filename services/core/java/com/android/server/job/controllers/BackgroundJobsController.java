@@ -92,7 +92,7 @@ public final class BackgroundJobsController extends StateController {
             jobStatus.printUniqueId(pw);
             pw.print(" from ");
             UserHandle.formatUid(pw, uid);
-            pw.print(mForceAppStandbyTracker.isInForeground(uid) ? " foreground" : " background");
+            pw.print(mForceAppStandbyTracker.isUidActive(uid) ? " active" : " idle");
             if (mForceAppStandbyTracker.isUidPowerSaveWhitelisted(uid) ||
                     mForceAppStandbyTracker.isUidTempPowerSaveWhitelisted(uid)) {
                 pw.print(", whitelisted");
@@ -136,7 +136,7 @@ public final class BackgroundJobsController extends StateController {
             proto.write(TrackedJob.SOURCE_PACKAGE_NAME, sourcePkg);
 
             proto.write(TrackedJob.IS_IN_FOREGROUND,
-                    mForceAppStandbyTracker.isInForeground(sourceUid));
+                    mForceAppStandbyTracker.isUidActive(sourceUid));
             proto.write(TrackedJob.IS_WHITELISTED,
                     mForceAppStandbyTracker.isUidPowerSaveWhitelisted(sourceUid) ||
                     mForceAppStandbyTracker.isUidTempPowerSaveWhitelisted(sourceUid));

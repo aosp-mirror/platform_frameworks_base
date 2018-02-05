@@ -87,6 +87,9 @@ interface IDisplayManager {
     // Requires BRIGHTNESS_SLIDER_USAGE permission.
     ParceledListSlice getBrightnessEvents(String callingPackage);
 
+    // Requires ACCESS_AMBIENT_LIGHT_STATS permission.
+    ParceledListSlice getAmbientBrightnessStats();
+
     // Sets the global brightness configuration for a given user. Requires
     // CONFIGURE_DISPLAY_BRIGHTNESS, and INTERACT_ACROSS_USER if the user being configured is not
     // the same as the calling user.

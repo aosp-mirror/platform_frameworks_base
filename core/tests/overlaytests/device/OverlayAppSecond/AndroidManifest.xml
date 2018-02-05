@@ -1,6 +1,0 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.overlaytest.second_app_overlay"
-        android:versionCode="1"
-        android:versionName="1.0">
-        <overlay android:targetPackage="com.android.overlaytest" android:priority="2"/>
-</manifest>

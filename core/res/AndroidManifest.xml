@@ -323,6 +323,7 @@
     <protected-broadcast android:name="com.android.server.usb.ACTION_OPEN_IN_APPS" />
     <protected-broadcast android:name="com.android.server.am.DELETE_DUMPHEAP" />
     <protected-broadcast android:name="com.android.server.net.action.SNOOZE_WARNING" />
+    <protected-broadcast android:name="com.android.server.net.action.SNOOZE_RAPID" />
     <protected-broadcast android:name="com.android.server.wifi.ConnectToNetworkNotification.USER_DISMISSED_NOTIFICATION" />
     <protected-broadcast android:name="com.android.server.wifi.ConnectToNetworkNotification.CONNECT_TO_NETWORK" />
     <protected-broadcast android:name="com.android.server.wifi.ConnectToNetworkNotification.PICK_WIFI_NETWORK" />
@@ -1785,12 +1786,30 @@
 
     <!-- Must be required by an ImsService to ensure that only the
          system can bind to it.
-         <p>Protection level: signature|privileged
+         <p>Protection level: signature|privileged|vendorPrivileged
          @SystemApi
          @hide
     -->
     <permission android:name="android.permission.BIND_IMS_SERVICE"
         android:protectionLevel="signature|privileged|vendorPrivileged" />
+
+    <!-- Must be required by a telephony data service to ensure that only the
+         system can bind to it.
+         <p>Protection level: signature
+         @SystemApi
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_TELEPHONY_DATA_SERVICE"
+        android:protectionLevel="signature" />
+
+    <!-- Must be required by a NetworkService to ensure that only the
+         system can bind to it.
+         <p>Protection level: signature
+         @SystemApi
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_TELEPHONY_NETWORK_SERVICE"
+                android:protectionLevel="signature" />
 
     <!-- Allows an application to manage embedded subscriptions (those on a eUICC) through
          EuiccManager APIs.
@@ -3027,6 +3046,13 @@
          @hide
          @SystemApi -->
     <permission android:name="android.permission.BRIGHTNESS_SLIDER_USAGE"
+        android:protectionLevel="signature|privileged|development" />
+
+    <!-- Allows an application to collect ambient light stats.
+         <p>Not for use by third party applications.</p>
+         TODO: Make a system API
+         @hide -->
+    <permission android:name="android.permission.ACCESS_AMBIENT_LIGHT_STATS"
         android:protectionLevel="signature|privileged|development" />
 
     <!-- Allows an application to modify the display brightness configuration

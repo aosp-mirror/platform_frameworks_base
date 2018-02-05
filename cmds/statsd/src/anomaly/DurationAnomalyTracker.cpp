@@ -37,8 +37,8 @@ void DurationAnomalyTracker::resetStorage() {
     if (!mAlarms.empty()) VLOG("AnomalyTracker.resetStorage() called but mAlarms is NOT empty!");
 }
 
-void DurationAnomalyTracker::declareAnomalyIfAlarmExpired(const HashableDimensionKey& dimensionKey,
-                                                  const uint64_t& timestampNs) {
+void DurationAnomalyTracker::declareAnomalyIfAlarmExpired(const MetricDimensionKey& dimensionKey,
+                                                          const uint64_t& timestampNs) {
     auto itr = mAlarms.find(dimensionKey);
     if (itr == mAlarms.end()) {
         return;
@@ -51,7 +51,7 @@ void DurationAnomalyTracker::declareAnomalyIfAlarmExpired(const HashableDimensio
     }
 }
 
-void DurationAnomalyTracker::startAlarm(const HashableDimensionKey& dimensionKey,
+void DurationAnomalyTracker::startAlarm(const MetricDimensionKey& dimensionKey,
                                 const uint64_t& timestampNs) {
 
     uint32_t timestampSec = static_cast<uint32_t>(timestampNs / NS_PER_SEC);
@@ -66,7 +66,7 @@ void DurationAnomalyTracker::startAlarm(const HashableDimensionKey& dimensionKey
     }
 }
 
-void DurationAnomalyTracker::stopAlarm(const HashableDimensionKey& dimensionKey) {
+void DurationAnomalyTracker::stopAlarm(const MetricDimensionKey& dimensionKey) {
     auto itr = mAlarms.find(dimensionKey);
     if (itr != mAlarms.end()) {
         mAlarms.erase(dimensionKey);
@@ -77,7 +77,7 @@ void DurationAnomalyTracker::stopAlarm(const HashableDimensionKey& dimensionKey)
 }
 
 void DurationAnomalyTracker::stopAllAlarms() {
-    std::set<HashableDimensionKey> keys;
+    std::set<MetricDimensionKey> keys;
     for (auto itr = mAlarms.begin(); itr != mAlarms.end(); ++itr) {
         keys.insert(itr->first);
     }
@@ -95,7 +95,7 @@ void DurationAnomalyTracker::informAlarmsFired(const uint64_t& timestampNs,
     // seldomly called. The alternative would be having AnomalyAlarms store information about the
     // DurationAnomalyTracker and key, but that's a lot of data overhead to speed up something that is
     // rarely ever called.
-    unordered_map<HashableDimensionKey, sp<const AnomalyAlarm>> matchedAlarms;
+    unordered_map<MetricDimensionKey, sp<const AnomalyAlarm>> matchedAlarms;
     for (const auto& kv : mAlarms) {
         if (firedAlarms.count(kv.second) > 0) {
             matchedAlarms.insert({kv.first, kv.second});

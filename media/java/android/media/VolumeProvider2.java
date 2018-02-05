@@ -32,7 +32,7 @@ import java.lang.annotation.RetentionPolicy;
  * {@link #setCurrentVolume(int)} each time the volume being provided changes.
  * <p>
  * You can set a volume provider on a session by calling
- * {@link MediaSession2#setPlayer(MediaPlayerInterface, VolumeProvider)}.
+ * {@link MediaSession2#setPlayer(MediaPlayerInterface, VolumeProvider2)}.
  *
  * @hide
  */
