@@ -343,6 +343,7 @@ public class ForceAppStandbyTrackerTest {
         assertTrue(instance.isUidActive(Process.SYSTEM_UID));
 
         mIUidObserver.onUidActive(UID_1);
+        waitUntilMainHandlerDrain();
         areRestricted(instance, UID_1, PACKAGE_1, NONE);
         areRestricted(instance, UID_2, PACKAGE_2, JOBS_AND_ALARMS);
         areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
@@ -350,6 +351,7 @@ public class ForceAppStandbyTrackerTest {
         assertFalse(instance.isUidActive(UID_2));
 
         mIUidObserver.onUidGone(UID_1, /*disable=*/ false);
+        waitUntilMainHandlerDrain();
         areRestricted(instance, UID_1, PACKAGE_1, JOBS_AND_ALARMS);
         areRestricted(instance, UID_2, PACKAGE_2, JOBS_AND_ALARMS);
         areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
@@ -357,11 +359,13 @@ public class ForceAppStandbyTrackerTest {
         assertFalse(instance.isUidActive(UID_2));
 
         mIUidObserver.onUidActive(UID_1);
+        waitUntilMainHandlerDrain();
         areRestricted(instance, UID_1, PACKAGE_1, NONE);
         areRestricted(instance, UID_2, PACKAGE_2, JOBS_AND_ALARMS);
         areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
 
         mIUidObserver.onUidIdle(UID_1, /*disable=*/ false);
+        waitUntilMainHandlerDrain();
         areRestricted(instance, UID_1, PACKAGE_1, JOBS_AND_ALARMS);
         areRestricted(instance, UID_2, PACKAGE_2, JOBS_AND_ALARMS);
         areRestricted(instance, Process.SYSTEM_UID, PACKAGE_SYSTEM, NONE);
@@ -467,6 +471,7 @@ public class ForceAppStandbyTrackerTest {
 
         mIUidObserver.onUidActive(UID_1);
 
+        waitUntilMainHandlerDrain();
         assertTrue(instance.isUidActive(UID_1));
         assertFalse(instance.isUidActive(UID_2));
         assertTrue(instance.isUidActive(Process.SYSTEM_UID));
@@ -479,6 +484,7 @@ public class ForceAppStandbyTrackerTest {
         mIUidObserver.onUidStateChanged(UID_2,
                 ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE, 0);
 
+        waitUntilMainHandlerDrain();
         assertTrue(instance.isUidActive(UID_1));
         assertFalse(instance.isUidActive(UID_2));
         assertTrue(instance.isUidActive(Process.SYSTEM_UID));
@@ -491,6 +497,7 @@ public class ForceAppStandbyTrackerTest {
         mIUidObserver.onUidStateChanged(UID_1,
                 ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0);
 
+        waitUntilMainHandlerDrain();
         assertTrue(instance.isUidActive(UID_1));
         assertFalse(instance.isUidActive(UID_2));
         assertTrue(instance.isUidActive(Process.SYSTEM_UID));
@@ -501,6 +508,7 @@ public class ForceAppStandbyTrackerTest {
 
         mIUidObserver.onUidGone(UID_1, true);
 
+        waitUntilMainHandlerDrain();
         assertFalse(instance.isUidActive(UID_1));
         assertFalse(instance.isUidActive(UID_2));
         assertTrue(instance.isUidActive(Process.SYSTEM_UID));
@@ -511,6 +519,7 @@ public class ForceAppStandbyTrackerTest {
 
         mIUidObserver.onUidIdle(UID_2, true);
 
+        waitUntilMainHandlerDrain();
         assertFalse(instance.isUidActive(UID_1));
         assertFalse(instance.isUidActive(UID_2));
         assertTrue(instance.isUidActive(Process.SYSTEM_UID));
@@ -522,6 +531,7 @@ public class ForceAppStandbyTrackerTest {
         mIUidObserver.onUidStateChanged(UID_1,
                 ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0);
 
+        waitUntilMainHandlerDrain();
         assertFalse(instance.isUidActive(UID_1));
         assertFalse(instance.isUidActive(UID_2));
         assertTrue(instance.isUidActive(Process.SYSTEM_UID));
@@ -533,6 +543,7 @@ public class ForceAppStandbyTrackerTest {
         mIUidObserver.onUidStateChanged(UID_1,
                 ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 0);
 
+        waitUntilMainHandlerDrain();
         assertFalse(instance.isUidActive(UID_1));
         assertFalse(instance.isUidActive(UID_2));
         assertTrue(instance.isUidActive(Process.SYSTEM_UID));
@@ -1036,6 +1047,8 @@ public class ForceAppStandbyTrackerTest {
 
         mIUidObserver.onUidActive(UID_1);
         mIUidObserver.onUidActive(UID_10_1);
+
+        waitUntilMainHandlerDrain();
 
         setAppOps(UID_2, PACKAGE_2, true);
         setAppOps(UID_10_2, PACKAGE_2, true);
