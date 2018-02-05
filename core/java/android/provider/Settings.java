@@ -10333,6 +10333,15 @@ public final class Settings {
         public static final String FPS_DEVISOR = "fps_divisor";
 
         /**
+         * Flag to enable or disable display panel low power mode (lpm)
+         * false -> Display panel power saving mode is disabled.
+         * true  -> Display panel power saving mode is enabled.
+         *
+         * @hide
+         */
+        public static final String DISPLAY_PANEL_LPM = "display_panel_lpm";
+
+        /**
          * App standby (app idle) specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          * <p>

@@ -196,6 +196,7 @@ public class SettingsBackupTest {
                     Settings.Global.DEVICE_PROVISIONED,
                     Settings.Global.DEVICE_PROVISIONING_MOBILE_DATA_ENABLED,
                     Settings.Global.DISK_FREE_CHANGE_REPORTING_THRESHOLD,
+                    Settings.Global.DISPLAY_PANEL_LPM,
                     Settings.Global.DISPLAY_SCALING_FORCE,
                     Settings.Global.DISPLAY_SIZE_FORCED,
                     Settings.Global.DNS_RESOLVER_MAX_SAMPLES,
