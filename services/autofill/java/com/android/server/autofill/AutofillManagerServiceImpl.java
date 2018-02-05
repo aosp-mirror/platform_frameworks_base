@@ -861,8 +861,13 @@ final class AutofillManagerServiceImpl {
 
         pw.print(prefix); pw.print("User: "); pw.println(mUserId);
         pw.print(prefix); pw.print("UID: "); pw.println(getServiceUidLocked());
-        pw.print(prefix); pw.print("Component: "); pw.println(mInfo != null
-                ? mInfo.getServiceInfo().getComponentName() : null);
+        pw.print(prefix); pw.print("Autofill Service Info: ");
+        if (mInfo == null) {
+            pw.println("N/A");
+        } else {
+            pw.println();
+            mInfo.dump(prefix2, pw);
+        }
         pw.print(prefix); pw.print("Component from settings: ");
             pw.println(getComponentNameFromSettings());
         pw.print(prefix); pw.print("Default component: ");
@@ -870,6 +875,7 @@ final class AutofillManagerServiceImpl {
         pw.print(prefix); pw.print("Disabled: "); pw.println(mDisabled);
         pw.print(prefix); pw.print("Field classification enabled: ");
             pw.println(isFieldClassificationEnabledLocked());
+        pw.print(prefix); pw.print("Compat pkgs: "); pw.println(getWhitelistedCompatModePackages());
         pw.print(prefix); pw.print("Setup complete: "); pw.println(mSetupComplete);
         pw.print(prefix); pw.print("Last prune: "); pw.println(mLastPrune);
 
@@ -996,12 +1002,16 @@ final class AutofillManagerServiceImpl {
         }
         if (!Build.IS_ENG) {
             // TODO: Build a map and watch for settings changes (this is called on app start)
-            final String whiteListedPackages = Settings.Global.getString(
-                    mContext.getContentResolver(),
-                    Settings.Global.AUTOFILL_COMPAT_ALLOWED_PACKAGES);
+            final String whiteListedPackages = getWhitelistedCompatModePackages();
             return whiteListedPackages != null && whiteListedPackages.contains(packageName);
         }
         return true;
+    }
+
+    private String getWhitelistedCompatModePackages() {
+        return Settings.Global.getString(
+                mContext.getContentResolver(),
+                Settings.Global.AUTOFILL_COMPAT_ALLOWED_PACKAGES);
     }
 
     private void sendStateToClients(boolean resetClient) {
