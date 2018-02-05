@@ -198,7 +198,11 @@ public final class TextLinks implements Parcelable {
         /**
          * Create a new TextLink.
          *
-         * @throws IllegalArgumentException if entityScores is null or empty.
+         * @param start The start index of the identified subsequence
+         * @param end The end index of the identified subsequence
+         * @param entityScores A mapping of entity type to confidence score
+         *
+         * @throws IllegalArgumentException if entityScores is null or empty
          */
         TextLink(int start, int end, Map<String, Float> entityScores) {
             Preconditions.checkNotNull(entityScores);
@@ -212,7 +216,7 @@ public final class TextLinks implements Parcelable {
         /**
          * Returns the start index of this link in the original text.
          *
-         * @return the start index.
+         * @return the start index
          */
         public int getStart() {
             return mStart;
@@ -221,7 +225,7 @@ public final class TextLinks implements Parcelable {
         /**
          * Returns the end index of this link in the original text.
          *
-         * @return the end index.
+         * @return the end index
          */
         public int getEnd() {
             return mEnd;
@@ -230,7 +234,7 @@ public final class TextLinks implements Parcelable {
         /**
          * Returns the number of entity types that have confidence scores.
          *
-         * @return the entity count.
+         * @return the entity count
          */
         public int getEntityCount() {
             return mEntityScores.getEntities().size();
@@ -239,7 +243,7 @@ public final class TextLinks implements Parcelable {
         /**
          * Returns the entity type at a given index. Entity types are sorted by confidence.
          *
-         * @return the entity type at the provided index.
+         * @return the entity type at the provided index
          */
         @NonNull public @EntityType String getEntity(int index) {
             return mEntityScores.getEntities().get(index);
@@ -248,7 +252,7 @@ public final class TextLinks implements Parcelable {
         /**
          * Returns the confidence score for a particular entity type.
          *
-         * @param entityType the entity type.
+         * @param entityType the entity type
          */
         public @FloatRange(from = 0.0, to = 1.0) float getConfidenceScore(
                 @EntityType String entityType) {
@@ -371,7 +375,7 @@ public final class TextLinks implements Parcelable {
 
         /**
          * @return ordered list of locale preferences that can be used to disambiguate
-         *      the provided text.
+         *      the provided text
          */
         @Nullable
         public LocaleList getDefaultLocales() {
@@ -389,7 +393,7 @@ public final class TextLinks implements Parcelable {
 
         /**
          * @return the strategy for resolving conflictswhen applying generated links to text that
-         * already have links.
+         * already have links
          *
          * @see #APPLY_STRATEGY_IGNORE
          * @see #APPLY_STRATEGY_REPLACE
@@ -494,7 +498,7 @@ public final class TextLinks implements Parcelable {
         /**
          * Create a new TextLinks.Builder.
          *
-         * @param fullText The full text to annotate with links.
+         * @param fullText The full text to annotate with links
          */
         public Builder(@NonNull String fullText) {
             mFullText = Preconditions.checkNotNull(fullText);
@@ -504,7 +508,7 @@ public final class TextLinks implements Parcelable {
         /**
          * Adds a TextLink.
          *
-         * @return this instance.
+         * @return this instance
          *
          * @throws IllegalArgumentException if entityScores is null or empty.
          */
@@ -524,7 +528,7 @@ public final class TextLinks implements Parcelable {
         /**
          * Constructs a TextLinks instance.
          *
-         * @return the constructed TextLinks.
+         * @return the constructed TextLinks
          */
         public TextLinks build() {
             return new TextLinks(mFullText, mLinks);
