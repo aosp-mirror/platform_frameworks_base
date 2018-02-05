@@ -3522,7 +3522,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mHistoryLastWritten.cmd = HistoryItem.CMD_NULL;
     }
 
-    void addHistoryBufferLocked(long elapsedRealtimeMs, long uptimeMs, HistoryItem cur) {
+    void addHistoryBufferLocked(long elapsedRealtimeMs, HistoryItem cur) {
         if (!mHaveBatteryLevel || !mRecordingHistory) {
             return;
         }
@@ -3603,8 +3603,8 @@ public class BatteryStatsImpl extends BatteryStats {
         } else if (dataSize >= MAX_HISTORY_BUFFER) {
             if (!mHistoryOverflow) {
                 mHistoryOverflow = true;
-                addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_UPDATE, cur);
-                addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_OVERFLOW, cur);
+                addHistoryBufferLocked(elapsedRealtimeMs, HistoryItem.CMD_UPDATE, cur);
+                addHistoryBufferLocked(elapsedRealtimeMs, HistoryItem.CMD_OVERFLOW, cur);
                 return;
             }
 
@@ -3642,7 +3642,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 return;
             }
 
-            addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_UPDATE, cur);
+            addHistoryBufferLocked(elapsedRealtimeMs, HistoryItem.CMD_UPDATE, cur);
             return;
         }
 
@@ -3650,15 +3650,14 @@ public class BatteryStatsImpl extends BatteryStats {
             // The history is currently empty; we need it to start with a time stamp.
             cur.currentTime = System.currentTimeMillis();
             if (recordResetDueToOverflow) {
-                addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_OVERFLOW, cur);
+                addHistoryBufferLocked(elapsedRealtimeMs, HistoryItem.CMD_OVERFLOW, cur);
             }
-            addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_RESET, cur);
+            addHistoryBufferLocked(elapsedRealtimeMs, HistoryItem.CMD_RESET, cur);
         }
-        addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_UPDATE, cur);
+        addHistoryBufferLocked(elapsedRealtimeMs, HistoryItem.CMD_UPDATE, cur);
     }
 
-    private void addHistoryBufferLocked(long elapsedRealtimeMs, long uptimeMs, byte cmd,
-            HistoryItem cur) {
+    private void addHistoryBufferLocked(long elapsedRealtimeMs, byte cmd, HistoryItem cur) {
         if (mIteratingHistory) {
             throw new IllegalStateException("Can't do this while iterating history!");
         }
@@ -3692,17 +3691,17 @@ public class BatteryStatsImpl extends BatteryStats {
                 mHistoryAddTmp.wakeReasonTag = null;
                 mHistoryAddTmp.eventCode = HistoryItem.EVENT_NONE;
                 mHistoryAddTmp.states &= ~HistoryItem.STATE_CPU_RUNNING_FLAG;
-                addHistoryRecordInnerLocked(wakeElapsedTime, uptimeMs, mHistoryAddTmp);
+                addHistoryRecordInnerLocked(wakeElapsedTime, mHistoryAddTmp);
             }
         }
         mHistoryCur.states |= HistoryItem.STATE_CPU_RUNNING_FLAG;
         mTrackRunningHistoryElapsedRealtime = elapsedRealtimeMs;
         mTrackRunningHistoryUptime = uptimeMs;
-        addHistoryRecordInnerLocked(elapsedRealtimeMs, uptimeMs, mHistoryCur);
+        addHistoryRecordInnerLocked(elapsedRealtimeMs, mHistoryCur);
     }
 
-    void addHistoryRecordInnerLocked(long elapsedRealtimeMs, long uptimeMs, HistoryItem cur) {
-        addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, cur);
+    void addHistoryRecordInnerLocked(long elapsedRealtimeMs, HistoryItem cur) {
+        addHistoryBufferLocked(elapsedRealtimeMs, cur);
 
         if (!USE_OLD_HISTORY) {
             return;
@@ -3743,7 +3742,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         if (mNumHistoryItems == MAX_HISTORY_ITEMS
                 || mNumHistoryItems == MAX_MAX_HISTORY_ITEMS) {
-            addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_OVERFLOW, cur);
+            addHistoryBufferLocked(elapsedRealtimeMs, HistoryItem.CMD_OVERFLOW, cur);
         }
 
         if (mNumHistoryItems >= MAX_HISTORY_ITEMS) {
@@ -3760,7 +3759,7 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         }
 
-        addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_UPDATE, cur);
+        addHistoryBufferLocked(elapsedRealtimeMs, HistoryItem.CMD_UPDATE, cur);
     }
 
     public void addHistoryEventLocked(long elapsedRealtimeMs, long uptimeMs, int code,
@@ -12307,7 +12306,7 @@ public class BatteryStatsImpl extends BatteryStats {
             boolean reset) {
         mRecordingHistory = true;
         mHistoryCur.currentTime = System.currentTimeMillis();
-        addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs,
+        addHistoryBufferLocked(elapsedRealtimeMs,
                 reset ? HistoryItem.CMD_RESET : HistoryItem.CMD_CURRENT_TIME,
                 mHistoryCur);
         mHistoryCur.currentTime = 0;
@@ -12320,8 +12319,7 @@ public class BatteryStatsImpl extends BatteryStats {
             final long uptimeMs) {
         if (mRecordingHistory) {
             mHistoryCur.currentTime = currentTime;
-            addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_CURRENT_TIME,
-                    mHistoryCur);
+            addHistoryBufferLocked(elapsedRealtimeMs, HistoryItem.CMD_CURRENT_TIME, mHistoryCur);
             mHistoryCur.currentTime = 0;
         }
     }
@@ -12329,8 +12327,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private void recordShutdownLocked(final long elapsedRealtimeMs, final long uptimeMs) {
         if (mRecordingHistory) {
             mHistoryCur.currentTime = System.currentTimeMillis();
-            addHistoryBufferLocked(elapsedRealtimeMs, uptimeMs, HistoryItem.CMD_SHUTDOWN,
-                    mHistoryCur);
+            addHistoryBufferLocked(elapsedRealtimeMs, HistoryItem.CMD_SHUTDOWN, mHistoryCur);
             mHistoryCur.currentTime = 0;
         }
     }
@@ -13274,7 +13271,7 @@ public class BatteryStatsImpl extends BatteryStats {
             if (USE_OLD_HISTORY) {
                 addHistoryRecordLocked(elapsedRealtime, uptime, HistoryItem.CMD_START, mHistoryCur);
             }
-            addHistoryBufferLocked(elapsedRealtime, uptime, HistoryItem.CMD_START, mHistoryCur);
+            addHistoryBufferLocked(elapsedRealtime, HistoryItem.CMD_START, mHistoryCur);
             startRecordingHistory(elapsedRealtime, uptime, false);
         }
 
