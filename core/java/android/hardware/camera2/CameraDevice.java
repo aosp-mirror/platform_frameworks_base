@@ -923,6 +923,14 @@ public abstract class CameraDevice implements AutoCloseable {
      * {@link CameraCaptureSession#setRepeatingRequest} or
      * {@link CameraCaptureSession#setRepeatingBurst}</p>
      *
+     * <p>Individual physical camera settings will only be honored for camera session
+     * that was initialiazed with corresponding physical camera id output configuration
+     * {@link OutputConfiguration#setPhysicalCameraId} and the same output targets are
+     * also attached in the request by {@link CaptureRequest.Builder#addTarget}.</p>
+     *
+     * <p>The output is undefined for any logical camera streams in case valid physical camera
+     * settings are attached.</p>
+     *
      * @param templateType An enumeration selecting the use case for this request. Not all template
      * types are supported on every device. See the documentation for each template type for
      * details.
