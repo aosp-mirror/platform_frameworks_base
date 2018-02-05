@@ -181,11 +181,21 @@ public class VideoView2 extends ViewGroupHelper<VideoView2Provider> {
 
     /**
      * Shows or hides closed caption or subtitles if there is any.
-     * The first subtitle track will be chosen by default if there multiple subtitle tracks exist.
-     * @param show shows closed caption or subtitles if this value is true, or hides.
+     * The first subtitle track will be chosen if there multiple subtitle tracks exist.
+     * Default behavior of VideoView2 is not showing subtitle.
+     * @param enable shows closed caption or subtitles if this value is true, or hides.
      */
-    public void showSubtitle(boolean show) {
-        mProvider.showSubtitle_impl(show);
+    public void setSubtitleEnabled(boolean enable) {
+        mProvider.setSubtitleEnabled_impl(enable);
+    }
+
+    /**
+     * Returns true if showing subtitle feature is enabled or returns false.
+     * Although there is no subtitle track or closed caption, it can return true, if the feature
+     * has been enabled by {@link #setSubtitleEnabled}.
+     */
+    public boolean isSubtitleEnabled() {
+        return mProvider.isSubtitleEnabled_impl();
     }
 
     /**

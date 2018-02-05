@@ -8798,7 +8798,7 @@
     <!-- Attributes that are read when parsing a  tag. -->
     <declare-styleable name="VideoView2">
         <attr name="enableControlView" format="boolean" />
-        <attr name="showSubtitle" format="boolean" />
+        <attr name="enableSubtitle" format="boolean" />
         <attr name="viewType" format="enum">
             <enum name="surfaceView" value="0" />
             <enum name="textureView" value="1" />
