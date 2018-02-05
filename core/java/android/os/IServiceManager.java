@@ -76,9 +76,15 @@ public interface IServiceManager extends IInterface
     int DUMP_FLAG_PRIORITY_CRITICAL = 1 << 0;
     int DUMP_FLAG_PRIORITY_HIGH = 1 << 1;
     int DUMP_FLAG_PRIORITY_NORMAL = 1 << 2;
+    /**
+     * Services are by default registered with a DEFAULT dump priority. DEFAULT priority has the
+     * same priority as NORMAL priority but the services are not called with dump priority
+     * arguments.
+     */
+    int DUMP_FLAG_PRIORITY_DEFAULT = 1 << 3;
     int DUMP_FLAG_PRIORITY_ALL = DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PRIORITY_HIGH
-            | DUMP_FLAG_PRIORITY_NORMAL;
+            | DUMP_FLAG_PRIORITY_NORMAL | DUMP_FLAG_PRIORITY_DEFAULT;
     /* Allows services to dump sections in protobuf format. */
-    int DUMP_FLAG_PROTO = 1 << 3;
+    int DUMP_FLAG_PROTO = 1 << 4;
 
 }
