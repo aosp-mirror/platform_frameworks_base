@@ -63,7 +63,7 @@ public class NetworkWatchlistService extends INetworkWatchlistManager.Stub {
         @Override
         public void onStart() {
             if (Settings.Global.getInt(getContext().getContentResolver(),
-                    Settings.Global.NETWORK_WATCHLIST_ENABLED, 0) == 0) {
+                    Settings.Global.NETWORK_WATCHLIST_ENABLED, 1) == 0) {
                 // Watchlist service is disabled
                 Slog.i(TAG, "Network Watchlist service is disabled");
                 return;
@@ -76,7 +76,7 @@ public class NetworkWatchlistService extends INetworkWatchlistManager.Stub {
         public void onBootPhase(int phase) {
             if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
                 if (Settings.Global.getInt(getContext().getContentResolver(),
-                        Settings.Global.NETWORK_WATCHLIST_ENABLED, 0) == 0) {
+                        Settings.Global.NETWORK_WATCHLIST_ENABLED, 1) == 0) {
                     // Watchlist service is disabled
                     Slog.i(TAG, "Network Watchlist service is disabled");
                     return;
