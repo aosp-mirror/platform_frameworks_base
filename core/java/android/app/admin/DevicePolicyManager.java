@@ -7682,6 +7682,7 @@ public class DevicePolicyManager {
             throw re.rethrowFromSystemServer();
         }
     }
+
     /**
      * Called by a device owner or profile owner of secondary users that is affiliated with the
      * device to disable the keyguard altogether.
@@ -8314,6 +8315,22 @@ public class DevicePolicyManager {
                 // Rate limit exceeded.
                 return null;
             }
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Forces a batch of security logs to be fetched from logd and makes it available for DPC.
+     * Only callable by ADB. If throttled, returns time to wait in milliseconds, otherwise 0.
+     * @hide
+     */
+    public long forceSecurityLogs() {
+        if (mService == null) {
+            return 0;
+        }
+        try {
+            return mService.forceSecurityLogs();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

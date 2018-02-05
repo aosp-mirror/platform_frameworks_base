@@ -16,6 +16,9 @@
 
 package com.android.server.devicepolicy;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+
 import android.app.admin.DeviceAdminReceiver;
 import android.app.admin.SecurityLog;
 import android.app.admin.SecurityLog.SecurityEvent;
@@ -30,6 +33,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -55,6 +59,7 @@ class SecurityLogMonitor implements Runnable {
     SecurityLogMonitor(DevicePolicyManagerService service, long id) {
         this.mService = service;
         this.mId = id;
+        this.mLastForceNanos = System.nanoTime();
     }
 
     private static final boolean DEBUG = false;  // STOPSHIP if true.
@@ -77,20 +82,22 @@ class SecurityLogMonitor implements Runnable {
     /**
      * How often should Device Owner be notified under normal circumstances.
      */
-    private static final long RATE_LIMIT_INTERVAL_MILLISECONDS = TimeUnit.HOURS.toMillis(2);
+    private static final long RATE_LIMIT_INTERVAL_MS = TimeUnit.HOURS.toMillis(2);
     /**
      * How often to retry the notification about available logs if it is ignored or missed by DO.
      */
-    private static final long BROADCAST_RETRY_INTERVAL_MILLISECONDS = TimeUnit.MINUTES.toMillis(30);
+    private static final long BROADCAST_RETRY_INTERVAL_MS = TimeUnit.MINUTES.toMillis(30);
     /**
      * Internally how often should the monitor poll the security logs from logd.
      */
-    private static final long POLLING_INTERVAL_MILLISECONDS = TimeUnit.MINUTES.toMillis(1);
+    private static final long POLLING_INTERVAL_MS = TimeUnit.MINUTES.toMillis(1);
     /**
      * Overlap between two subsequent log requests, required to avoid losing out of order events.
      */
-    private static final long OVERLAP_NANOS = TimeUnit.SECONDS.toNanos(3);
+    private static final long OVERLAP_NS = TimeUnit.SECONDS.toNanos(3);
 
+    /** Minimum time between forced fetch attempts. */
+    private static final long FORCE_FETCH_THROTTLE_NS = TimeUnit.SECONDS.toNanos(10);
 
     @GuardedBy("mLock")
     private Thread mMonitorThread = null;
@@ -121,6 +128,13 @@ class SecurityLogMonitor implements Runnable {
     private long mNextAllowedRetrievalTimeMillis = -1;
     @GuardedBy("mLock")
     private boolean mPaused = false;
+
+    /** Semaphore used to force log fetching on request from adb. */
+    private final Semaphore mForceSemaphore = new Semaphore(0 /* permits */);
+
+    /** The last timestamp when force fetch was used, to prevent abuse. */
+    @GuardedBy("mForceSemaphore")
+    private long mLastForceNanos = 0;
 
     void start() {
         Slog.i(TAG, "Starting security logging.");
@@ -203,7 +217,7 @@ class SecurityLogMonitor implements Runnable {
 
         Slog.i(TAG, "Resumed.");
         try {
-            notifyDeviceOwnerIfNeeded();
+            notifyDeviceOwnerIfNeeded(false /* force */);
         } catch (InterruptedException e) {
             Log.w(TAG, "Thread interrupted.", e);
         }
@@ -231,7 +245,7 @@ class SecurityLogMonitor implements Runnable {
             if (mAllowedToRetrieve) {
                 mAllowedToRetrieve = false;
                 mNextAllowedRetrievalTimeMillis = SystemClock.elapsedRealtime()
-                        + RATE_LIMIT_INTERVAL_MILLISECONDS;
+                        + RATE_LIMIT_INTERVAL_MS;
                 List<SecurityEvent> result = mPendingLogs;
                 mPendingLogs = new ArrayList<>();
                 mCriticalLevelLogged = false;
@@ -247,8 +261,7 @@ class SecurityLogMonitor implements Runnable {
     /**
      * Requests the next (or the first) batch of events from the log with appropriate timestamp.
      */
-    private void getNextBatch(ArrayList<SecurityEvent> newLogs)
-            throws IOException, InterruptedException {
+    private void getNextBatch(ArrayList<SecurityEvent> newLogs) throws IOException {
         if (mLastEventNanos < 0) {
             // Non-blocking read that returns all logs immediately.
             if (DEBUG) Slog.d(TAG, "SecurityLog.readEvents");
@@ -257,7 +270,7 @@ class SecurityLogMonitor implements Runnable {
             // If we have last events from the previous batch, request log events with time overlap
             // with previously retrieved messages to avoid losing events due to reordering in logd.
             final long startNanos = mLastEvents.isEmpty()
-                    ? mLastEventNanos : Math.max(0, mLastEventNanos - OVERLAP_NANOS);
+                    ? mLastEventNanos : Math.max(0, mLastEventNanos - OVERLAP_NS);
             if (DEBUG) Slog.d(TAG, "SecurityLog.readEventsSince: " + startNanos);
             // Non-blocking read that returns all logs with timestamps >= startNanos immediately.
             SecurityLog.readEventsSince(startNanos, newLogs);
@@ -293,7 +306,7 @@ class SecurityLogMonitor implements Runnable {
         // Position of the earliest event that has to be saved. Start from the penultimate event,
         // going backward.
         int pos = newLogs.size() - 2;
-        while (pos >= 0 && mLastEventNanos - newLogs.get(pos).getTimeNanos() < OVERLAP_NANOS) {
+        while (pos >= 0 && mLastEventNanos - newLogs.get(pos).getTimeNanos() < OVERLAP_NS) {
             pos--;
         }
         // We either run past the start of the list or encountered an event that is too old to keep.
@@ -401,10 +414,11 @@ class SecurityLogMonitor implements Runnable {
     public void run() {
         Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
 
-        ArrayList<SecurityEvent> newLogs = new ArrayList<>();
+        final ArrayList<SecurityEvent> newLogs = new ArrayList<>();
         while (!Thread.currentThread().isInterrupted()) {
             try {
-                Thread.sleep(POLLING_INTERVAL_MILLISECONDS);
+                final boolean force = mForceSemaphore.tryAcquire(POLLING_INTERVAL_MS, MILLISECONDS);
+
                 getNextBatch(newLogs);
 
                 mLock.lockInterruptibly();
@@ -416,7 +430,7 @@ class SecurityLogMonitor implements Runnable {
 
                 saveLastEvents(newLogs);
                 newLogs.clear();
-                notifyDeviceOwnerIfNeeded();
+                notifyDeviceOwnerIfNeeded(force);
             } catch (IOException e) {
                 Log.e(TAG, "Failed to read security log", e);
             } catch (InterruptedException e) {
@@ -437,7 +451,7 @@ class SecurityLogMonitor implements Runnable {
         Slog.i(TAG, "MonitorThread exit.");
     }
 
-    private void notifyDeviceOwnerIfNeeded() throws InterruptedException {
+    private void notifyDeviceOwnerIfNeeded(boolean force) throws InterruptedException {
         boolean allowRetrievalAndNotifyDO = false;
         mLock.lockInterruptibly();
         try {
@@ -445,8 +459,8 @@ class SecurityLogMonitor implements Runnable {
                 return;
             }
             final int logSize = mPendingLogs.size();
-            if (logSize >= BUFFER_ENTRIES_NOTIFICATION_LEVEL) {
-                // Allow DO to retrieve logs if too many pending logs
+            if (logSize >= BUFFER_ENTRIES_NOTIFICATION_LEVEL || (force && logSize > 0)) {
+                // Allow DO to retrieve logs if too many pending logs or if forced.
                 if (!mAllowedToRetrieve) {
                     allowRetrievalAndNotifyDO = true;
                 }
@@ -461,7 +475,7 @@ class SecurityLogMonitor implements Runnable {
                 mAllowedToRetrieve = true;
                 // Set the timeout to retry the notification if the DO misses it.
                 mNextAllowedRetrievalTimeMillis = SystemClock.elapsedRealtime()
-                        + BROADCAST_RETRY_INTERVAL_MILLISECONDS;
+                        + BROADCAST_RETRY_INTERVAL_MS;
             }
         } finally {
             mLock.unlock();
@@ -470,6 +484,28 @@ class SecurityLogMonitor implements Runnable {
             Slog.i(TAG, "notify DO");
             mService.sendDeviceOwnerCommand(DeviceAdminReceiver.ACTION_SECURITY_LOGS_AVAILABLE,
                     null);
+        }
+    }
+
+    /**
+     * Forces the logs to be fetched and made available. Returns 0 on success or timeout to wait
+     * before attempting in milliseconds.
+     */
+    public long forceLogs() {
+        final long nowNanos = System.nanoTime();
+        // We only synchronize with another calls to this function, not with the fetching thread.
+        synchronized (mForceSemaphore) {
+            final long toWaitNanos = mLastForceNanos + FORCE_FETCH_THROTTLE_NS - nowNanos;
+            if (toWaitNanos > 0) {
+                return NANOSECONDS.toMillis(toWaitNanos) + 1; // Round up.
+            }
+            mLastForceNanos = nowNanos;
+            // There is a race condition with the fetching thread below, but if the last permit is
+            // acquired just after we do the check, logs are forced anyway and that's what we need.
+            if (mForceSemaphore.availablePermits() == 0) {
+                mForceSemaphore.release();
+            }
+            return 0;
         }
     }
 }

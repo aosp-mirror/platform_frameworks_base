@@ -11659,6 +11659,15 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return logs != null ? new ParceledListSlice<SecurityEvent>(logs) : null;
     }
 
+    @Override
+    public long forceSecurityLogs() {
+        enforceShell("forceSecurityLogs");
+        if (!mInjector.securityLogGetLoggingEnabledProperty()) {
+            throw new IllegalStateException("logging is not available");
+        }
+        return mSecurityLogMonitor.forceLogs();
+    }
+
     private void enforceCanManageDeviceAdmin() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS,
                 null);
