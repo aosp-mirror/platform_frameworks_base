@@ -16,11 +16,11 @@
 ifeq ($(LOCAL_USE_AAPT2),true)
 LOCAL_STATIC_JAVA_LIBRARIES += \
     android-support-annotations \
-    apptoolkit-lifecycle-common
+    android-arch-lifecycle-common
 
 LOCAL_STATIC_ANDROID_LIBRARIES += \
     android-support-v4 \
-    apptoolkit-lifecycle-runtime \
+    android-arch-lifecycle-runtime \
     android-support-v7-recyclerview \
     android-support-v7-preference \
     android-support-v7-appcompat \
