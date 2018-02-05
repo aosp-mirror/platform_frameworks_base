@@ -424,7 +424,7 @@ public class MediaController2 implements AutoCloseable {
      * @param extras Optional extras that can include extra information about the media item
      *               to be played.
      */
-    public void playFromUri(@NonNull String uri, @Nullable Bundle extras) {
+    public void playFromUri(@NonNull Uri uri, @Nullable Bundle extras) {
         mProvider.playFromUri_impl(uri, extras);
     }
 
