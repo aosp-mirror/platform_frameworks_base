@@ -38,7 +38,11 @@ public:
 
     bool Pull(std::vector<std::shared_ptr<LogEvent>>* data);
 
-    void ClearCache();
+    // Clear cache immediately
+    int ForceClearCache();
+
+    // Clear cache if elapsed time is more than cooldown time
+    int ClearCacheIfNecessary(long timestampSec);
 
 protected:
     // The atom tag id this puller pulls
@@ -61,6 +65,8 @@ private:
     std::vector<std::shared_ptr<LogEvent>> mCachedData;
 
     long mLastPullTimeSec;
+
+    int clearCache();
 };
 
 }  // namespace statsd

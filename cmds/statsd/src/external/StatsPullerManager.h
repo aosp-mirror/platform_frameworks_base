@@ -54,8 +54,12 @@ class StatsPullerManager {
         mPullerManager.SetTimeBaseSec(timeBaseSec);
     }
 
-    void ClearPullerCache() {
-        mPullerManager.ClearPullerCache();
+    int ForceClearPullerCache() {
+        return mPullerManager.ForceClearPullerCache();
+    }
+
+    int ClearPullerCacheIfNecessary(long timestampSec) {
+        return mPullerManager.ClearPullerCacheIfNecessary(timestampSec);
     }
 
  private:
