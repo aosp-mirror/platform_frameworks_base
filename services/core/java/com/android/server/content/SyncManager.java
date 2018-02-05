@@ -576,9 +576,10 @@ public class SyncManager {
         mSyncStorageEngine = SyncStorageEngine.getSingleton();
         mSyncStorageEngine.setOnSyncRequestListener(new OnSyncRequestListener() {
             @Override
-            public void onSyncRequest(SyncStorageEngine.EndPoint info, int reason, Bundle extras) {
+            public void onSyncRequest(SyncStorageEngine.EndPoint info, int reason, Bundle extras,
+                    boolean isAppStandbyExempted) {
                 scheduleSync(info.account, info.userId, reason, info.provider, extras,
-                        AuthorityInfo.UNDEFINED);
+                        AuthorityInfo.UNDEFINED, isAppStandbyExempted);
             }
         });
 
@@ -608,7 +609,8 @@ public class SyncManager {
                 if (!removed) {
                     scheduleSync(null, UserHandle.USER_ALL,
                             SyncOperation.REASON_SERVICE_CHANGED,
-                            type.authority, null, AuthorityInfo.UNDEFINED);
+                            type.authority, null, AuthorityInfo.UNDEFINED,
+                            /*isAppStandbyExempted=*/ false);
                 }
             }
         }, mSyncHandler);
@@ -656,7 +658,8 @@ public class SyncManager {
             if (mAccountManagerInternal.hasAccountAccess(account, uid)) {
                 scheduleSync(account, UserHandle.getUserId(uid),
                         SyncOperation.REASON_ACCOUNTS_UPDATED,
-                        null, null, AuthorityInfo.SYNCABLE_NO_ACCOUNT_ACCESS);
+                        null, null, AuthorityInfo.SYNCABLE_NO_ACCOUNT_ACCESS,
+                        /*isAppStandbyExempted=*/ false);
             }
         });
 
@@ -881,17 +884,19 @@ public class SyncManager {
      *           Use {@link AuthorityInfo#UNDEFINED} to sync all authorities.
      */
     public void scheduleSync(Account requestedAccount, int userId, int reason,
-                             String requestedAuthority, Bundle extras, int targetSyncState) {
+            String requestedAuthority, Bundle extras, int targetSyncState,
+            boolean isAppStandbyExempted) {
         scheduleSync(requestedAccount, userId, reason, requestedAuthority, extras, targetSyncState,
-                0 /* min delay */, true /* checkIfAccountReady */);
+                0 /* min delay */, true /* checkIfAccountReady */, isAppStandbyExempted);
     }
 
     /**
      * @param minDelayMillis The sync can't land before this delay expires.
      */
     private void scheduleSync(Account requestedAccount, int userId, int reason,
-                             String requestedAuthority, Bundle extras, int targetSyncState,
-                             final long minDelayMillis, boolean checkIfAccountReady) {
+            String requestedAuthority, Bundle extras, int targetSyncState,
+            final long minDelayMillis, boolean checkIfAccountReady,
+            boolean isAppStandbyExempted) {
         final boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
         if (extras == null) {
             extras = new Bundle();
@@ -1009,7 +1014,8 @@ public class SyncManager {
                                         && result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT)) {
                                     scheduleSync(account.account, userId, reason, authority,
                                             finalExtras, targetSyncState, minDelayMillis,
-                                            true /* checkIfAccountReady */);
+                                            true /* checkIfAccountReady */,
+                                            isAppStandbyExempted);
                                 }
                             }
                         ));
@@ -1060,7 +1066,7 @@ public class SyncManager {
                         sendOnUnsyncableAccount(mContext, syncAdapterInfo, account.userId,
                                 () -> scheduleSync(account.account, account.userId, reason,
                                         authority, finalExtras, targetSyncState, minDelayMillis,
-                                        false));
+                                        false, isAppStandbyExempted));
                     } else {
                         // Initialisation sync.
                         Bundle newExtras = new Bundle();
@@ -1078,7 +1084,8 @@ public class SyncManager {
                         postScheduleSyncMessage(
                                 new SyncOperation(account.account, account.userId,
                                         owningUid, owningPackage, reason, source,
-                                        authority, newExtras, allowParallelSyncs),
+                                        authority, newExtras, allowParallelSyncs,
+                                        isAppStandbyExempted),
                                 minDelayMillis
                         );
                     }
@@ -1095,7 +1102,7 @@ public class SyncManager {
                     postScheduleSyncMessage(
                             new SyncOperation(account.account, account.userId,
                                     owningUid, owningPackage, reason, source,
-                                    authority, extras, allowParallelSyncs),
+                                    authority, extras, allowParallelSyncs, isAppStandbyExempted),
                             minDelayMillis
                     );
                 }
@@ -1208,11 +1215,13 @@ public class SyncManager {
      * Schedule sync based on local changes to a provider. We wait for at least LOCAL_SYNC_DELAY
      * ms to batch syncs.
      */
-    public void scheduleLocalSync(Account account, int userId, int reason, String authority) {
+    public void scheduleLocalSync(Account account, int userId, int reason, String authority,
+            boolean isAppStandbyExempted) {
         final Bundle extras = new Bundle();
         extras.putBoolean(ContentResolver.SYNC_EXTRAS_UPLOAD, true);
         scheduleSync(account, userId, reason, authority, extras,
-                AuthorityInfo.UNDEFINED, LOCAL_SYNC_DELAY, true /* checkIfAccountReady */);
+                AuthorityInfo.UNDEFINED, LOCAL_SYNC_DELAY, true /* checkIfAccountReady */,
+                isAppStandbyExempted);
     }
 
     public SyncAdapterType[] getSyncAdapterTypes(int userId) {
@@ -1480,7 +1489,11 @@ public class SyncManager {
         }
 
         // Check if duplicate syncs are pending. If found, keep one with least expected run time.
+
+        // If any of the duplicate ones has exemption, then we inherit it.
         if (!syncOperation.isPeriodic) {
+            boolean inheritAppStandbyExemption = false;
+
             // Check currently running syncs
             for (ActiveSyncContext asc: mActiveSyncContexts) {
                 if (asc.mSyncOperation.key.equals(syncOperation.key)) {
@@ -1496,14 +1509,14 @@ public class SyncManager {
             long now = SystemClock.elapsedRealtime();
             syncOperation.expectedRuntime = now + minDelay;
             List<SyncOperation> pending = getAllPendingSyncs();
-            SyncOperation opWithLeastExpectedRuntime = syncOperation;
+            SyncOperation syncToRun = syncOperation;
             for (SyncOperation op : pending) {
                 if (op.isPeriodic) {
                     continue;
                 }
                 if (op.key.equals(syncOperation.key)) {
-                    if (opWithLeastExpectedRuntime.expectedRuntime > op.expectedRuntime) {
-                        opWithLeastExpectedRuntime = op;
+                    if (syncToRun.expectedRuntime > op.expectedRuntime) {
+                        syncToRun = op;
                     }
                     duplicatesCount++;
                 }
@@ -1511,25 +1524,53 @@ public class SyncManager {
             if (duplicatesCount > 1) {
                 Slog.e(TAG, "FATAL ERROR! File a bug if you see this.");
             }
+
+            if (syncOperation != syncToRun) {
+                // If there's a duplicate with an earlier run time that's not exempted,
+                // and if the current operation is exempted with no minDelay,
+                // cancel the duplicate one and keep the current one.
+                //
+                // This means the duplicate one has a negative expected run time, but it hasn't
+                // been executed possibly because of app-standby.
+
+                if (syncOperation.isAppStandbyExempted
+                        && (minDelay == 0)
+                        && !syncToRun.isAppStandbyExempted) {
+                    syncToRun = syncOperation;
+                }
+            }
+
+            // Cancel all other duplicate syncs.
             for (SyncOperation op : pending) {
                 if (op.isPeriodic) {
                     continue;
                 }
                 if (op.key.equals(syncOperation.key)) {
-                    if (op != opWithLeastExpectedRuntime) {
+                    if (op != syncToRun) {
                         if (isLoggable) {
                             Slog.v(TAG, "Cancelling duplicate sync " + op);
+                        }
+                        if (op.isAppStandbyExempted) {
+                            inheritAppStandbyExemption = true;
                         }
                         cancelJob(op, "scheduleSyncOperationH-duplicate");
                     }
                 }
             }
-            if (opWithLeastExpectedRuntime != syncOperation) {
+            if (syncToRun != syncOperation) {
                 // Don't schedule because a duplicate sync with earlier expected runtime exists.
                 if (isLoggable) {
                     Slog.v(TAG, "Not scheduling because a duplicate exists.");
                 }
+
+                // TODO Should we give the winning one SYNC_EXTRAS_APP_STANDBY_EXEMPTED
+                // if the current one has it?
                 return;
+            }
+
+            // If any of the duplicates had exemption, we exempt the current one.
+            if (inheritAppStandbyExemption) {
+                syncOperation.isAppStandbyExempted = true;
             }
         }
 
@@ -1547,12 +1588,18 @@ public class SyncManager {
         final int networkType = syncOperation.isNotAllowedOnMetered() ?
                 JobInfo.NETWORK_TYPE_UNMETERED : JobInfo.NETWORK_TYPE_ANY;
 
+        // Note this logic means when an exempted sync fails,
+        // the back-off one will inherit it too, and will be exempted from app-standby.
+        final int jobFlags = syncOperation.isAppStandbyExempted
+                ? JobInfo.FLAG_EXEMPT_FROM_APP_STANDBY : 0;
+
         JobInfo.Builder b = new JobInfo.Builder(syncOperation.jobId,
                 new ComponentName(mContext, SyncJobService.class))
                 .setExtras(syncOperation.toJobInfoExtras())
                 .setRequiredNetworkType(networkType)
                 .setPersisted(true)
-                .setPriority(priority);
+                .setPriority(priority)
+                .setFlags(jobFlags);
 
         if (syncOperation.isPeriodic) {
             b.setPeriodic(syncOperation.periodMillis, syncOperation.flexMillis);
@@ -1683,12 +1730,12 @@ public class SyncManager {
         EndPoint target = new EndPoint(null, null, userId);
         updateRunningAccounts(target);
 
-        // Schedule sync for any accounts under started user.
+        // Schedule sync for any accounts under started user, but only the NOT_INITIALIZED adapters.
         final Account[] accounts = AccountManagerService.getSingleton().getAccounts(userId,
                 mContext.getOpPackageName());
         for (Account account : accounts) {
             scheduleSync(account, userId, SyncOperation.REASON_USER_START, null, null,
-                    AuthorityInfo.NOT_INITIALIZED);
+                    AuthorityInfo.NOT_INITIALIZED, /*isAppStandbyExempted=*/ false);
         }
     }
 
@@ -3144,7 +3191,8 @@ public class SyncManager {
             if (syncTargets != null) {
                 scheduleSync(syncTargets.account, syncTargets.userId,
                         SyncOperation.REASON_ACCOUNTS_UPDATED, syncTargets.provider,
-                null, AuthorityInfo.NOT_INITIALIZED);
+                        null, AuthorityInfo.NOT_INITIALIZED,
+                        /*isAppStandbyExempted=*/ false);
             }
         }
 
@@ -3211,7 +3259,7 @@ public class SyncManager {
                     syncAdapterInfo.componentName.getPackageName(), SyncOperation.REASON_PERIODIC,
                     SyncStorageEngine.SOURCE_PERIODIC, extras,
                     syncAdapterInfo.type.allowParallelSyncs(), true, SyncOperation.NO_JOB_ID,
-                    pollFrequencyMillis, flexMillis);
+                    pollFrequencyMillis, flexMillis, /*isAppStandbyExempted=*/ false);
 
             final int syncOpState = computeSyncOpState(op);
             switch (syncOpState) {
@@ -3590,7 +3638,8 @@ public class SyncManager {
                                 syncOperation.owningUid, syncOperation.owningPackage,
                                 syncOperation.reason,
                                 syncOperation.syncSource, info.provider, new Bundle(),
-                                syncOperation.allowParallelSyncs));
+                                syncOperation.allowParallelSyncs,
+                                syncOperation.isAppStandbyExempted));
             }
         }
 
@@ -3808,6 +3857,10 @@ public class SyncManager {
         if (key.equals(ContentResolver.SYNC_EXTRAS_INITIALIZE)) {
             return true;
         }
+//        if (key.equals(ContentResolver.SYNC_EXTRAS_APP_STANDBY_EXEMPTED)) {
+//            return true;
+//        }
+        // No need to check virtual flags such as SYNC_VIRTUAL_EXTRAS_FORCE_FG_SYNC.
         return false;
     }
 

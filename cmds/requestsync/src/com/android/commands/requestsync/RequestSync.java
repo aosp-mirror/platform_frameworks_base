@@ -19,6 +19,7 @@ package com.android.commands.requestsync;
 
 import android.accounts.Account;
 import android.content.ContentResolver;
+import android.content.SyncRequest;
 import android.os.Bundle;
 
 import java.net.URISyntaxException;
@@ -28,12 +29,31 @@ public class RequestSync {
     private String[] mArgs;
     private int mNextArg;
     private String mCurArgData;
+    private boolean mIsForegroundRequest;
 
     enum Operation {
         REQUEST_SYNC {
             @Override
             void invoke(RequestSync caller) {
-                ContentResolver.requestSync(caller.mAccount, caller.mAuthority, caller.mExtras);
+                if (caller.mIsForegroundRequest) {
+                    caller.mExtras.putBoolean(
+                            ContentResolver.SYNC_VIRTUAL_EXTRAS_FORCE_FG_SYNC, true);
+                } else {
+                    caller.mExtras.putBoolean(
+                            ContentResolver.SYNC_VIRTUAL_EXTRAS_FORCE_BG_SYNC, true);
+                    System.out.println(
+                            "Making a sync request as a background app.\n"
+                            + "Note: request may be throttled by App Standby.\n"
+                            + "To override this behavior and run a sync immediately,"
+                            + " pass a -f option.\n");
+                }
+                final SyncRequest request =
+                        new SyncRequest.Builder()
+                                .setSyncAdapter(caller.mAccount, caller.mAuthority)
+                                .setExtras(caller.mExtras)
+                                .syncOnce()
+                                .build();
+                ContentResolver.requestSync(request);
             }
         },
         ADD_PERIODIC_SYNC {
@@ -191,6 +211,10 @@ public class RequestSync {
                 final String key = nextArgRequired();
                 final String value = nextArgRequired();
                 mExtras.putBoolean(key, Boolean.valueOf(value));
+
+            } else if (opt.equals("-f") || opt.equals("--foreground")) {
+                mIsForegroundRequest = true;
+
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 showUsage();
@@ -267,6 +291,9 @@ public class RequestSync {
                 "       -n|--account-name <ACCOUNT-NAME>\n" +
                 "       -t|--account-type <ACCOUNT-TYPE>\n" +
                 "       -a|--authority <AUTHORITY>\n" +
+                "    App-standby related options\n" +
+                "\n" +
+                "       -f|--foreground (Exempt a sync from app standby)\n" +
                 "    ContentResolver extra options:\n" +
                 "      --is|--ignore-settings: Add SYNC_EXTRAS_IGNORE_SETTINGS\n" +
                 "      --ib|--ignore-backoff: Add SYNC_EXTRAS_IGNORE_BACKOFF\n" +
