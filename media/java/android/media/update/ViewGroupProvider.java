@@ -51,6 +51,7 @@ public interface ViewGroupProvider {
     int getSuggestedMinimumWidth_impl();
     int getSuggestedMinimumHeight_impl();
     void setMeasuredDimension_impl(int measuredWidth, int measuredHeight);
+    boolean dispatchTouchEvent_impl(MotionEvent ev);
 
     // ViewGroup methods
     boolean checkLayoutParams_impl(LayoutParams p);
