@@ -386,6 +386,7 @@ public class SettingsBackupTest {
                     Settings.Global.TZINFO_UPDATE_METADATA_URL,
                     Settings.Global.INSTALLED_INSTANT_APP_MIN_CACHE_PERIOD,
                     Settings.Global.INSTALLED_INSTANT_APP_MAX_CACHE_PERIOD,
+                    Settings.Global.UID_CPUPOWER,
                     Settings.Global.UNINSTALLED_INSTANT_APP_MIN_CACHE_PERIOD,
                     Settings.Global.UNINSTALLED_INSTANT_APP_MAX_CACHE_PERIOD,
                     Settings.Global.UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD,
