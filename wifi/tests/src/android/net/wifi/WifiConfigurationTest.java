@@ -176,6 +176,8 @@ public class WifiConfigurationTest {
     @Test
     public void testGetOrCreateRandomizedMacAddress_SavesAndReturnsSameAddress() {
         WifiConfiguration config = new WifiConfiguration();
+        assertEquals(MacAddress.ALL_ZEROS_ADDRESS, config.getRandomizedMacAddress());
+
         MacAddress firstMacAddress = config.getOrCreateRandomizedMacAddress();
         MacAddress secondMacAddress = config.getOrCreateRandomizedMacAddress();
 
@@ -185,6 +187,8 @@ public class WifiConfigurationTest {
     @Test
     public void testSetRandomizedMacAddress_ChangesSavedAddress() {
         WifiConfiguration config = new WifiConfiguration();
+        assertEquals(MacAddress.ALL_ZEROS_ADDRESS, config.getRandomizedMacAddress());
+
         MacAddress macToChangeInto = MacAddress.createRandomUnicastAddress();
         config.setRandomizedMacAddress(macToChangeInto);
         MacAddress macAfterChange = config.getOrCreateRandomizedMacAddress();

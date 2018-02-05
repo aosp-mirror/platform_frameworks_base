@@ -917,6 +917,9 @@ public class WifiConfiguration implements Parcelable {
      * Does not guarantee that the returned address is valid for use.
      */
     public MacAddress getRandomizedMacAddress() {
+        if (mRandomizedMacAddress == null) {
+            mRandomizedMacAddress = MacAddress.ALL_ZEROS_ADDRESS;
+        }
         return mRandomizedMacAddress;
     }
 
@@ -1617,6 +1620,7 @@ public class WifiConfiguration implements Parcelable {
         creatorUid = -1;
         shared = true;
         dtimInterval = 0;
+        mRandomizedMacAddress = MacAddress.ALL_ZEROS_ADDRESS;
     }
 
     /**
