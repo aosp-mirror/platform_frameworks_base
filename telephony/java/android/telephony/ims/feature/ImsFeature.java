@@ -363,8 +363,9 @@ public abstract class ImsFeature {
     /**
      * @return The current state of the feature, defined as {@link #STATE_UNAVAILABLE},
      * {@link #STATE_INITIALIZING}, or {@link #STATE_READY}.
+     * @hide
      */
-    public final int getFeatureState() {
+    public int getFeatureState() {
         synchronized (mLock) {
             return mState;
         }
@@ -489,7 +490,7 @@ public abstract class ImsFeature {
      */
     @VisibleForTesting
     public final void requestChangeEnabledCapabilities(CapabilityChangeRequest request,
-            IImsCapabilityCallback c) throws RemoteException {
+            IImsCapabilityCallback c) {
         if (request == null) {
             throw new IllegalArgumentException(
                     "ImsFeature#requestChangeEnabledCapabilities called with invalid params.");

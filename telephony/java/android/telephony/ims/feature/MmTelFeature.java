@@ -70,7 +70,11 @@ public class MmTelFeature extends ImsFeature {
         @Override
         public int getFeatureState() throws RemoteException {
             synchronized (mLock) {
-                return MmTelFeature.this.getFeatureState();
+                try {
+                    return MmTelFeature.this.getFeatureState();
+                } catch (Exception e) {
+                    throw new RemoteException(e.getMessage());
+                }
             }
         }
 
@@ -79,15 +83,18 @@ public class MmTelFeature extends ImsFeature {
         public ImsCallProfile createCallProfile(int callSessionType, int callType)
                 throws RemoteException {
             synchronized (mLock) {
-                return MmTelFeature.this.createCallProfile(callSessionType,  callType);
+                try {
+                    return MmTelFeature.this.createCallProfile(callSessionType, callType);
+                } catch (Exception e) {
+                    throw new RemoteException(e.getMessage());
+                }
             }
         }
 
         @Override
         public IImsCallSession createCallSession(ImsCallProfile profile) throws RemoteException {
             synchronized (mLock) {
-                ImsCallSessionImplBase s = MmTelFeature.this.createCallSession(profile);
-                return s != null ? s.getServiceImpl() : null;
+                return createCallSessionInterface(profile);
             }
         }
 
@@ -101,30 +108,32 @@ public class MmTelFeature extends ImsFeature {
         @Override
         public IImsUt getUtInterface() throws RemoteException {
             synchronized (mLock) {
-                return MmTelFeature.this.getUt().getInterface();
+                return MmTelFeature.this.getUtInterface();
             }
         }
 
         @Override
         public IImsEcbm getEcbmInterface() throws RemoteException {
             synchronized (mLock) {
-                ImsEcbmImplBase ecbm = MmTelFeature.this.getEcbm();
-                return ecbm != null ? ecbm.getImsEcbm() : null;
+                return MmTelFeature.this.getEcbmInterface();
             }
         }
 
         @Override
         public void setUiTtyMode(int uiTtyMode, Message onCompleteMessage) throws RemoteException {
             synchronized (mLock) {
-                MmTelFeature.this.setUiTtyMode(uiTtyMode, onCompleteMessage);
+                try {
+                    MmTelFeature.this.setUiTtyMode(uiTtyMode, onCompleteMessage);
+                } catch (Exception e) {
+                    throw new RemoteException(e.getMessage());
+                }
             }
         }
 
         @Override
         public IImsMultiEndpoint getMultiEndpointInterface() throws RemoteException {
             synchronized (mLock) {
-                ImsMultiEndpointImplBase multiEndPoint = MmTelFeature.this.getMultiEndpoint();
-                return multiEndPoint != null ? multiEndPoint.getIImsMultiEndpoint() : null;
+                return MmTelFeature.this.getMultiEndpointInterface();
             }
         }
 
@@ -317,18 +326,18 @@ public class MmTelFeature extends ImsFeature {
     }
 
     /**
-     * To be returned by {@link #shouldProcessCall(Uri[])} when the ImsService should process the
+     * To be returned by {@link #shouldProcessCall(String[])} when the ImsService should process the
      * outgoing call as IMS.
      */
     public static final int PROCESS_CALL_IMS = 0;
     /**
-     * To be returned by {@link #shouldProcessCall(Uri[])} when the telephony framework should not
-     * process the outgoing NON_EMERGENCY call as IMS and should instead use circuit switch.
+     * To be returned by {@link #shouldProcessCall(String[])} when the telephony framework should
+     * not process the outgoing NON_EMERGENCY call as IMS and should instead use circuit switch.
      */
     public static final int PROCESS_CALL_CSFB = 1;
     /**
-     * To be returned by {@link #shouldProcessCall(Uri[])} when the telephony framework should not
-     * process the outgoing EMERGENCY call as IMS and should instead use circuit switch.
+     * To be returned by {@link #shouldProcessCall(String[])} when the telephony framework should
+     * not process the outgoing EMERGENCY call as IMS and should instead use circuit switch.
      */
     public static final int PROCESS_CALL_EMERGENCY_CSFB = 2;
 
@@ -401,10 +410,7 @@ public class MmTelFeature extends ImsFeature {
     /**
      * Notify the framework of an incoming call.
      * @param c The {@link ImsCallSessionImplBase} of the new incoming call.
-     *
-     * @throws RuntimeException if the connection to the framework is not available. If this
-     * happens, the call should be no longer considered active and should be cleaned up.
-     * */
+     */
     public final void notifyIncomingCall(ImsCallSessionImplBase c, Bundle extras) {
         synchronized (mLock) {
             if (mListener == null) {
@@ -412,6 +418,40 @@ public class MmTelFeature extends ImsFeature {
             }
             try {
                 mListener.onIncomingCall(c.getServiceImpl(), extras);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    /**
+     *
+     * @hide
+     */
+    public final void notifyIncomingCallSession(IImsCallSession c, Bundle extras) {
+        synchronized (mLock) {
+            if (mListener == null) {
+                throw new IllegalStateException("Session is not available.");
+            }
+            try {
+                mListener.onIncomingCall(c, extras);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    /**
+     * Notify the framework of a change in the Voice Message count.
+     * @link count the new Voice Message count.
+     */
+    public final void notifyVoiceMessageCountUpdate(int count) {
+        synchronized (mLock) {
+            if (mListener == null) {
+                throw new IllegalStateException("Session is not available.");
+            }
+            try {
+                mListener.onVoiceMessageCountUpdate(count);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
@@ -474,6 +514,15 @@ public class MmTelFeature extends ImsFeature {
     }
 
     /**
+     * @hide
+     */
+    public IImsCallSession createCallSessionInterface(ImsCallProfile profile)
+            throws RemoteException {
+        ImsCallSessionImplBase s = MmTelFeature.this.createCallSession(profile);
+        return s != null ? s.getServiceImpl() : null;
+    }
+
+    /**
      * Creates an {@link ImsCallSession} with the specified call profile.
      * Use other methods, if applicable, instead of interacting with
      * {@link ImsCallSession} directly.
@@ -489,13 +538,38 @@ public class MmTelFeature extends ImsFeature {
      * Called by the framework to determine if the outgoing call, designated by the outgoing
      * {@link Uri}s, should be processed as an IMS call or CSFB call.
      * @param numbers An array of {@link String}s that will be used for placing the call. There can
-     *         be multiple {@link Strings}s listed in the case when we want to place an outgoing
+     *         be multiple {@link String}s listed in the case when we want to place an outgoing
      *         call as a conference.
      * @return a {@link ProcessCallResult} to the framework, which will be used to determine if the
      *        call wil lbe placed over IMS or via CSFB.
      */
     public @ProcessCallResult int shouldProcessCall(String[] numbers) {
         return PROCESS_CALL_IMS;
+    }
+
+    /**
+     *
+     * @hide
+     */
+    protected IImsUt getUtInterface() throws RemoteException {
+        ImsUtImplBase utImpl = getUt();
+        return utImpl != null ? utImpl.getInterface() : null;
+    }
+
+    /**
+     * @hide
+     */
+    protected IImsEcbm getEcbmInterface() throws RemoteException {
+        ImsEcbmImplBase ecbmImpl = getEcbm();
+        return ecbmImpl != null ? ecbmImpl.getImsEcbm() : null;
+    }
+
+    /**
+     * @hide
+     */
+    public IImsMultiEndpoint getMultiEndpointInterface() throws RemoteException {
+        ImsMultiEndpointImplBase multiendpointImpl = getMultiEndpoint();
+        return multiendpointImpl != null ? multiendpointImpl.getIImsMultiEndpoint() : null;
     }
 
     /**
@@ -534,7 +608,7 @@ public class MmTelFeature extends ImsFeature {
      *         {@link TelecomManager#TTY_MODE_VCO}
      * @param onCompleteMessage A {@link Message} to be used when the mode has been set.
      */
-    void setUiTtyMode(int mode, Message onCompleteMessage) {
+    public void setUiTtyMode(int mode, Message onCompleteMessage) {
         // Base Implementation - Should be overridden
     }
 
