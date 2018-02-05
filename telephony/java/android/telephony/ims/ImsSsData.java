@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,21 +11,21 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ * limitations under the License
  */
-package com.android.ims;
+package android.telephony.ims;
 
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import java.util.ArrayList;
 
 /**
  * Provided STK Call Control Suplementary Service information
  *
  * {@hide}
  */
-public class ImsSsData implements Parcelable {
+@SystemApi
+public final class ImsSsData implements Parcelable {
 
     //ServiceType
     public static final int SS_CFU = 0;
@@ -68,30 +68,38 @@ public class ImsSsData implements Parcelable {
     public static final int SS_ALL_TELESERVICES_EXCEPT_SMS = 5;
 
     // Refer to ServiceType
+    /** @hide */
     public int serviceType;
     // Refere to SSRequestType
+    /** @hide */
     public int requestType;
     // Refer to TeleserviceType
+    /** @hide */
     public int teleserviceType;
     // Service Class
+    /** @hide */
     public int serviceClass;
     // Error information
+    /** @hide */
     public int result;
 
+    /** @hide */
     public int[] ssInfo; /* Valid for all supplementary services.
                              This field will be empty for RequestType SS_INTERROGATION
                              and ServiceType SS_CF_*, SS_INCOMING_BARRING_DN,
                              SS_INCOMING_BARRING_ANONYMOUS.*/
 
+    /** @hide */
     public ImsCallForwardInfo[] cfInfo; /* Valid only for supplementary services
                                             ServiceType SS_CF_* and RequestType SS_INTERROGATION */
 
+    /** @hide */
     public ImsSsInfo[] imsSsInfo;   /* Valid only for ServiceType SS_INCOMING_BARRING_DN and
                                         ServiceType SS_INCOMING_BARRING_ANONYMOUS */
 
     public ImsSsData() {}
 
-    public ImsSsData(Parcel in) {
+    private ImsSsData(Parcel in) {
         readFromParcel(in);
     }
 
@@ -133,18 +141,34 @@ public class ImsSsData implements Parcelable {
         return 0;
     }
 
+    /**
+     * Old method, kept for compatibility. See {@link #isTypeCf()}
+     * @hide
+     */
     public boolean isTypeCF() {
         return (serviceType == SS_CFU || serviceType == SS_CF_BUSY ||
               serviceType == SS_CF_NO_REPLY || serviceType == SS_CF_NOT_REACHABLE ||
               serviceType == SS_CF_ALL || serviceType == SS_CF_ALL_CONDITIONAL);
     }
 
+    public boolean isTypeCf() {
+        return isTypeCF();
+    }
+
     public boolean isTypeUnConditional() {
         return (serviceType == SS_CFU || serviceType == SS_CF_ALL);
     }
 
+    /**
+     * Old method, kept for compatibility. See {@link #isTypeCf()}
+     * @hide
+     */
     public boolean isTypeCW() {
         return (serviceType == SS_WAIT);
+    }
+
+    public boolean isTypeCw() {
+        return isTypeCW();
     }
 
     public boolean isTypeClip() {

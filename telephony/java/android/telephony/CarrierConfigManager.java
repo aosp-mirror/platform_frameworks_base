@@ -27,8 +27,8 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.service.carrier.CarrierService;
+import android.telephony.ims.ImsReasonInfo;
 
-import com.android.ims.ImsReasonInfo;
 import com.android.internal.telephony.ICarrierConfigLoader;
 
 /**
@@ -1423,7 +1423,7 @@ public class CarrierConfigManager {
             "allow_video_calling_fallback_bool";
 
     /**
-     * Defines operator-specific {@link com.android.ims.ImsReasonInfo} mappings.
+     * Defines operator-specific {@link ImsReasonInfo} mappings.
      *
      * Format: "ORIGINAL_CODE|MESSAGE|NEW_CODE"
      * Where {@code ORIGINAL_CODE} corresponds to a {@link ImsReasonInfo#getCode()} code,

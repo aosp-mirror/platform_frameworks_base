@@ -16,6 +16,7 @@
 
 package android.telephony.ims.stub;
 
+import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -42,10 +43,10 @@ import java.util.HashMap;
  * performed every time.
  * @hide
  */
-
+@SystemApi
 public class ImsConfigImplBase {
 
-    static final private String TAG = "ImsConfigImplBase";
+    private static final String TAG = "ImsConfigImplBase";
 
     /**
      * Implements the IImsConfig AIDL interface, which is called by potentially many processes
@@ -89,11 +90,12 @@ public class ImsConfigImplBase {
 
         /**
          * Gets the value for ims service/capabilities parameters. It first checks its local cache,
-         * if missed, it will call ImsConfigImplBase.getProvisionedValue.
+         * if missed, it will call ImsConfigImplBase.getConfigInt.
          * Synchronous blocking call.
          *
-         * @param item, as defined in com.android.ims.ImsConfig#ConfigConstants.
-         * @return value in Integer format.
+         * @param item integer key
+         * @return value in Integer format or {@link #CONFIG_RESULT_UNKNOWN} if
+         * unavailable.
          */
         @Override
         public synchronized int getConfigInt(int item) throws RemoteException {
@@ -110,10 +112,10 @@ public class ImsConfigImplBase {
 
         /**
          * Gets the value for ims service/capabilities parameters. It first checks its local cache,
-         * if missed, it will call #ImsConfigImplBase.getProvisionedValue.
+         * if missed, it will call #ImsConfigImplBase.getConfigString.
          * Synchronous blocking call.
          *
-         * @param item, as defined in com.android.ims.ImsConfig#ConfigConstants.
+         * @param item integer key
          * @return value in String format.
          */
         @Override
@@ -135,9 +137,10 @@ public class ImsConfigImplBase {
          * from which the master value is derived, and write it into local cache.
          * Synchronous blocking call.
          *
-         * @param item, as defined in com.android.ims.ImsConfig#ConfigConstants.
+         * @param item integer key
          * @param value in Integer format.
-         * @return as defined in com.android.ims.ImsConfig#OperationStatusConstants.
+         * @return the result of setting the configuration value, defined as either
+         * {@link #CONFIG_RESULT_FAILED} or {@link #CONFIG_RESULT_SUCCESS}.
          */
         @Override
         public synchronized int setConfigInt(int item, int value) throws RemoteException {
@@ -161,7 +164,8 @@ public class ImsConfigImplBase {
          *
          * @param item as defined in com.android.ims.ImsConfig#ConfigConstants.
          * @param value in String format.
-         * @return as defined in com.android.ims.ImsConfig#OperationStatusConstants.
+         * @return the result of setting the configuration value, defined as either
+         * {@link #CONFIG_RESULT_FAILED} or {@link #CONFIG_RESULT_SUCCESS}.
          */
         @Override
         public synchronized int setConfigString(int item, String value)
@@ -244,12 +248,31 @@ public class ImsConfigImplBase {
         }
     }
 
+    /**
+     * The configuration requested resulted in an unknown result. This may happen if the
+     * IMS configurations are unavailable.
+     */
+    public static final int CONFIG_RESULT_UNKNOWN = -1;
+    /**
+     * Setting the configuration value completed.
+     */
+    public static final int CONFIG_RESULT_SUCCESS = 0;
+    /**
+     * Setting the configuration value failed.
+     */
+    public static final int CONFIG_RESULT_FAILED =  1;
+
     private final RemoteCallbackList<IImsConfigCallback> mCallbacks = new RemoteCallbackList<>();
     ImsConfigStub mImsConfigStub;
 
+    /**
+     * Used for compatibility between older versions of the ImsService.
+     * @hide
+     */
     public ImsConfigImplBase(Context context) {
         mImsConfigStub = new ImsConfigStub(this);
     }
+
     public ImsConfigImplBase() {
         mImsConfigStub = new ImsConfigStub(this);
     }
@@ -272,7 +295,11 @@ public class ImsConfigImplBase {
         mCallbacks.unregister(c);
     }
 
-    void notifyConfigChanged(int item, int value) {
+    /**
+     * @param item
+     * @param value
+     */
+    private final void notifyConfigChanged(int item, int value) {
         // can be null in testing
         if (mCallbacks == null) {
             return;
@@ -300,14 +327,17 @@ public class ImsConfigImplBase {
         });
     }
 
+    /**
+     * @hide
+     */
     public IImsConfig getIImsConfig() { return mImsConfigStub; }
 
     /**
      * Updates provisioning value and notifies the framework of the change.
-     * Doesn't call #setProvisionedValue and assumes the result succeeded.
-     * This should only be used by modem when they implicitly changed provisioned values.
+     * Doesn't call {@link #setConfig(int,int)} and assumes the result succeeded.
+     * This should only be used when the IMS implementer implicitly changed provisioned values.
      *
-     * @param item, as defined in com.android.ims.ImsConfig#ConfigConstants.
+     * @param item an integer key.
      * @param value in Integer format.
      */
     public final void notifyProvisionedValueChanged(int item, int value) {
@@ -320,10 +350,10 @@ public class ImsConfigImplBase {
 
     /**
      * Updates provisioning value and notifies the framework of the change.
-     * Doesn't call #setProvisionedValue and assumes the result succeeded.
-     * This should only be used by modem when they implicitly changed provisioned values.
+     * Doesn't call {@link #setConfig(int,String)} and assumes the result succeeded.
+     * This should only be used when the IMS implementer implicitly changed provisioned values.
      *
-     * @param item, as defined in com.android.ims.ImsConfig#ConfigConstants.
+     * @param item an integer key.
      * @param value in String format.
      */
     public final void notifyProvisionedValueChanged(int item, String value) {
@@ -335,51 +365,51 @@ public class ImsConfigImplBase {
     }
 
     /**
-     * Sets the value for IMS service/capabilities parameters by the operator device
-     * management entity. It sets the config item value in the provisioned storage
-     * from which the master value is derived.
+     * Sets the configuration value for this ImsService.
      *
-     * @param item as defined in com.android.ims.ImsConfig#ConfigConstants.
-     * @param value in Integer format.
-     * @return as defined in com.android.ims.ImsConfig#OperationStatusConstants.
+     * @param item an integer key.
+     * @param value an integer containing the configuration value.
+     * @return the result of setting the configuration value, defined as either
+     * {@link #CONFIG_RESULT_FAILED} or {@link #CONFIG_RESULT_SUCCESS}.
      */
     public int setConfig(int item, int value) {
         // Base Implementation - To be overridden.
-        return ImsConfig.OperationStatusConstants.FAILED;
+        return CONFIG_RESULT_FAILED;
     }
 
     /**
-     * Sets the value for IMS service/capabilities parameters by the operator device
-     * management entity. It sets the config item value in the provisioned storage
-     * from which the master value is derived.
+     * Sets the configuration value for this ImsService.
      *
-     * @param item as defined in com.android.ims.ImsConfig#ConfigConstants.
-     * @param value in String format.
-     * @return as defined in com.android.ims.ImsConfig#OperationStatusConstants.
+     * @param item an integer key.
+     * @param value a String containing the new configuration value.
+     * @return Result of setting the configuration value, defined as either
+     * {@link #CONFIG_RESULT_FAILED} or {@link #CONFIG_RESULT_SUCCESS}.
      */
     public int setConfig(int item, String value) {
-        return ImsConfig.OperationStatusConstants.FAILED;
+        // Base Implementation - To be overridden.
+        return CONFIG_RESULT_FAILED;
     }
 
     /**
-     * Gets the value for ims service/capabilities parameters from the provisioned
-     * value storage.
+     * Gets the currently stored value configuration value from the ImsService for {@code item}.
      *
-     * @param item as defined in com.android.ims.ImsConfig#ConfigConstants.
-     * @return value in Integer format.
+     * @param item an integer key.
+     * @return configuration value, stored in integer format or {@link #CONFIG_RESULT_UNKNOWN} if
+     * unavailable.
      */
     public int getConfigInt(int item) {
-        return ImsConfig.OperationStatusConstants.FAILED;
+        // Base Implementation - To be overridden.
+        return CONFIG_RESULT_UNKNOWN;
     }
 
     /**
-     * Gets the value for ims service/capabilities parameters from the provisioned
-     * value storage.
+     * Gets the currently stored value configuration value from the ImsService for {@code item}.
      *
-     * @param item as defined in com.android.ims.ImsConfig#ConfigConstants.
-     * @return value in String format.
+     * @param item an integer key.
+     * @return configuration value, stored in String format or {@code null} if unavailable.
      */
     public String getConfigString(int item) {
+        // Base Implementation - To be overridden.
         return null;
     }
 }

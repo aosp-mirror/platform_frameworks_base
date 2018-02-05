@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.ims;
+package android.telephony.ims;
 
-parcelable ImsConferenceState;
+parcelable ImsSsInfo;

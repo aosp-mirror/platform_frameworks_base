@@ -19,8 +19,8 @@ package com.android.ims.internal;
 import android.os.Message;
 import android.telephony.ims.aidl.IImsCallSessionListener;
 
-import com.android.ims.ImsCallProfile;
-import com.android.ims.ImsStreamMediaProfile;
+import android.telephony.ims.ImsCallProfile;
+import android.telephony.ims.ImsStreamMediaProfile;
 import com.android.ims.internal.IImsVideoCallProvider;
 
 /**
