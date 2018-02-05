@@ -42,6 +42,7 @@ class GlobalSettingsToPropertiesMapper {
         {Settings.Global.SYS_VDSO, "sys.vdso"},
         {Settings.Global.FPS_DEVISOR, ThreadedRenderer.DEBUG_FPS_DIVISOR},
         {Settings.Global.UID_CPUPOWER, "uid.cpupower"},
+        {Settings.Global.DISPLAY_PANEL_LPM, "sys.display_panel_lpm"},
     };
 
 

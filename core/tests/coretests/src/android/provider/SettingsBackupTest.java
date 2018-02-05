@@ -17,9 +17,11 @@
 package android.provider;
 
 import static com.google.android.collect.Sets.newHashSet;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+
 import static java.lang.reflect.Modifier.isFinal;
 import static java.lang.reflect.Modifier.isPublic;
 import static java.lang.reflect.Modifier.isStatic;
@@ -194,6 +196,7 @@ public class SettingsBackupTest {
                     Settings.Global.DEVICE_PROVISIONED,
                     Settings.Global.DEVICE_PROVISIONING_MOBILE_DATA_ENABLED,
                     Settings.Global.DISK_FREE_CHANGE_REPORTING_THRESHOLD,
+                    Settings.Global.DISPLAY_PANEL_LPM,
                     Settings.Global.DISPLAY_SCALING_FORCE,
                     Settings.Global.DISPLAY_SIZE_FORCED,
                     Settings.Global.DNS_RESOLVER_MAX_SAMPLES,
