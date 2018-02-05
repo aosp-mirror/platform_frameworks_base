@@ -81,6 +81,7 @@ public class OutputChooserDialog extends Dialog
     private final MediaRouterWrapper mRouter;
     private final MediaRouterCallback mRouterCallback;
     private long mLastUpdateTime;
+    static final boolean INCLUDE_MEDIA_ROUTES = false;
     private boolean mIsInCall;
     protected boolean isAttached;
 
@@ -174,7 +175,7 @@ public class OutputChooserDialog extends Dialog
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
 
-        if (!mIsInCall) {
+        if (!mIsInCall && INCLUDE_MEDIA_ROUTES) {
             mRouter.addCallback(mRouteSelector, mRouterCallback,
                     MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN);
         }
@@ -272,7 +273,7 @@ public class OutputChooserDialog extends Dialog
         addBluetoothDevices(items);
 
         // Add remote displays
-        if (!mIsInCall) {
+        if (!mIsInCall && INCLUDE_MEDIA_ROUTES) {
             addRemoteDisplayRoutes(items);
         }
 
