@@ -123,27 +123,26 @@ public class MediaItem2 {
     }
 
     /**
-     * Set a metadata. Metadata shouldn't be {@code null} and its id should be match
-     * with this instance's id.
+     * Set a metadata. If the metadata is not null, its id should be matched with this instance's
+     * media id.
      *
      * @param metadata metadata to update
      */
-    public void setMetadata(@NonNull MediaMetadata2 metadata) {
+    public void setMetadata(@Nullable MediaMetadata2 metadata) {
         mProvider.setMetadata_impl(metadata);
     }
 
     /**
      * Returns the metadata of the media.
      */
-    public @NonNull MediaMetadata2 getMetadata() {
+    public @Nullable MediaMetadata2 getMetadata() {
         return mProvider.getMetadata_impl();
     }
 
     /**
-     * Returns the media id in the {@link MediaMetadata2} for this item.
-     * @see MediaMetadata2#METADATA_KEY_MEDIA_ID
+     * Returns the media id for this item.
      */
-    public @Nullable String getMediaId() {
+    public @NonNull String getMediaId() {
         return mProvider.getMediaId_impl();
     }
 
