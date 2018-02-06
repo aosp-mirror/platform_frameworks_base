@@ -227,7 +227,6 @@ message PowerServiceSettingsAndConfigurationDumpProto {
         optional int32 setting_minimum = 1;
         optional int32 setting_maximum = 2;
         optional int32 setting_default = 3;
-        optional int32 setting_for_vr_default = 4;
     }
 
     // True to decouple auto-suspend mode from the display state.
@@ -293,44 +292,27 @@ message PowerServiceSettingsAndConfigurationDumpProto {
     // The stay on while plugged in setting.
     // A set of battery conditions under which to make the screen stay on.
     optional StayOnWhilePluggedInProto stay_on_while_plugged_in = 29;
-    // The screen brightness setting, from 0 to 255.
-    // Use -1 if no value has been set.
-    optional sint32 screen_brightness_setting = 30;
-    // The screen auto-brightness adjustment setting, from -1 to 1.
-    // Use 0 if there is no adjustment.
-    optional float screen_auto_brightness_adjustment_setting = 31;
     // The screen brightness mode.
-    optional .android.providers.settings.SettingsProto.ScreenBrightnessMode screen_brightness_mode_setting = 32;
+    optional .android.providers.settings.SettingsProto.ScreenBrightnessMode screen_brightness_mode_setting = 30;
     // The screen brightness setting override from the window manager
     // to allow the current foreground activity to override the brightness.
     // Use -1 to disable.
-    optional sint32 screen_brightness_override_from_window_manager = 33;
+    optional sint32 screen_brightness_override_from_window_manager = 31;
     // The user activity timeout override from the window manager
     // to allow the current foreground activity to override the user activity
     // timeout. Use -1 to disable.
-    optional sint64 user_activity_timeout_override_from_window_manager_ms = 34;
+    optional sint64 user_activity_timeout_override_from_window_manager_ms = 32;
     // The window manager has determined the user to be inactive via other means.
     // Set this to false to disable.
-    optional bool is_user_inactive_override_from_window_manager = 35;
-    // The screen brightness setting override from the settings application
-    // to temporarily adjust the brightness until next updated,
-    // Use -1 to disable.
-    optional sint32 temporary_screen_brightness_setting_override = 36;
-    // The screen brightness adjustment setting override from the settings
-    // application to temporarily adjust the auto-brightness adjustment factor
-    // until next updated, in the range -1..1.
-    // Use NaN to disable.
-    optional float temporary_screen_auto_brightness_adjustment_setting_override = 37;
+    optional bool is_user_inactive_override_from_window_manager = 33;
     // The screen state to use while dozing.
-    optional .android.view.DisplayStateEnum doze_screen_state_override_from_dream_manager = 38;
+    optional .android.view.DisplayStateEnum doze_screen_state_override_from_dream_manager = 34;
     // The screen brightness to use while dozing.
-    optional float dozed_screen_brightness_override_from_dream_manager = 39;
+    optional float dozed_screen_brightness_override_from_dream_manager = 35;
     // Screen brightness settings limits.
-    optional ScreenBrightnessSettingLimitsProto screen_brightness_setting_limits = 40;
-    // The screen brightness setting, from 0 to 255, to be used while in VR Mode.
-    optional int32 screen_brightness_for_vr_setting = 41;
+    optional ScreenBrightnessSettingLimitsProto screen_brightness_setting_limits = 36;
     // True if double tap to wake is enabled
-    optional bool is_double_tap_wake_enabled = 42;
+    optional bool is_double_tap_wake_enabled = 37;
     // True if we are currently in VR Mode.
-    optional bool is_vr_mode_enabled = 43;
+    optional bool is_vr_mode_enabled = 38;
 }
