@@ -158,8 +158,9 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
                     } catch (RemoteException e) {
                         Log.e(TAG, "Failed to send start of quick switch.", e);
                     }
+                    return true;
                 }
-                return true;
+                return false;
             }
         };
 
@@ -189,6 +190,10 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
         mNavigationBarView = navigationBarView;
     }
 
+    /**
+     * @return true if we want to intercept touch events for quick scrub/switch and prevent proxying
+     *         the event to the overview service.
+     */
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
         final IOverviewProxy overviewProxy = mOverviewEventSender.getProxy();
@@ -197,7 +202,10 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
             homeButton.setDelayTouchFeedback(false);
             return false;
         }
-        mGestureDetector.onTouchEvent(event);
+        if (mGestureDetector.onTouchEvent(event)) {
+            // If the fling has been handled, then skip proxying the UP
+            return true;
+        }
         int action = event.getAction();
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
@@ -240,8 +248,9 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
                         offset = pos - mTrackRect.left;
                         trackSize = mTrackRect.width();
                     }
-                    // Do not start scrubbing when dragging in the perpendicular direction
-                    if (!mDraggingActive && exceededPerpendicularTouchSlop) {
+                    // Do not start scrubbing when dragging in the perpendicular direction if we
+                    // haven't already started quickscrub
+                    if (!mDraggingActive && !mQuickScrubActive && exceededPerpendicularTouchSlop) {
                         mHandler.removeCallbacksAndMessages(null);
                         return false;
                     }
@@ -295,6 +304,22 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
         return mDraggingActive || mQuickScrubActive;
     }
 
+    /**
+     * @return true if we want to handle touch events for quick scrub/switch and prevent proxying
+     *         the event to the overview service.
+     */
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (mGestureDetector.onTouchEvent(event)) {
+            // If the fling has been handled, then skip proxying the UP
+            return true;
+        }
+        if (event.getAction() == MotionEvent.ACTION_UP) {
+            endQuickScrub();
+        }
+        return mDraggingActive || mQuickScrubActive;
+    }
+
     @Override
     public void onDraw(Canvas canvas) {
         int color = (int) mTrackColorEvaluator.evaluate(mDarkIntensity, mLightTrackColor,
@@ -338,14 +363,6 @@ public class QuickScrubController extends GestureDetector.SimpleOnGestureListene
     public void onDarkIntensityChange(float intensity) {
         mDarkIntensity = intensity;
         mNavigationBarView.invalidate();
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_UP) {
-            endQuickScrub();
-        }
-        return false;
     }
 
     @Override

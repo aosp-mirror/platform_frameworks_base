@@ -277,14 +277,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (mGestureHelper.onTouchEvent(event)) {
-            return true;
-        }
-        return mRecentsAnimationStarted || super.onTouchEvent(event);
-    }
-
-    @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
         int action = event.getActionMasked();
         if (action == MotionEvent.ACTION_DOWN) {
@@ -300,7 +292,16 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                 }
             }
         }
+
         return mGestureHelper.onInterceptTouchEvent(event) || mRecentsAnimationStarted;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (mGestureHelper.onTouchEvent(event)) {
+            return true;
+        }
+        return mRecentsAnimationStarted || super.onTouchEvent(event);
     }
 
     public void abortCurrentGesture() {
