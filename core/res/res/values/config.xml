@@ -3134,4 +3134,11 @@
     <bool name="config_display_no_service_when_sim_unready">false</bool>
 
     <bool name="config_supportBluetoothPersistedState">true</bool>
+
+    <!-- Cellular network service package name to bind to by default. -->
+    <string name="config_wwan_network_service_package" translatable="false">com.android.phone</string>
+
+    <!-- IWLAN network service package name to bind to by default. If none is specified in an overlay, an
+         empty string is passed in -->
+    <string name="config_wlan_network_service_package" translatable="false"></string>
 </resources>
