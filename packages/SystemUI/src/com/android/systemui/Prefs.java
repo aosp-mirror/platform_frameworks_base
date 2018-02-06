@@ -49,7 +49,7 @@ public final class Prefs {
         Key.QS_NIGHTDISPLAY_ADDED,
         Key.SEEN_MULTI_USER,
         Key.NUM_APPS_LAUNCHED,
-        Key.HAS_SWIPED_UP_FOR_RECENTS,
+        Key.HAS_SEEN_RECENTS_ONBOARDING,
     })
     public @interface Key {
         @Deprecated
@@ -78,7 +78,7 @@ public final class Prefs {
         String QS_NIGHTDISPLAY_ADDED = "QsNightDisplayAdded";
         String SEEN_MULTI_USER = "HasSeenMultiUser";
         String NUM_APPS_LAUNCHED = "NumAppsLaunched";
-        String HAS_SWIPED_UP_FOR_RECENTS = "HasSwipedUpForRecents";
+        String HAS_SEEN_RECENTS_ONBOARDING = "HasSeenRecentsOnboarding";
     }
 
     public static boolean getBoolean(Context context, @Key String key, boolean defaultValue) {

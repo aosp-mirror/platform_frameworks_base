@@ -16,13 +16,11 @@
 
 package com.android.systemui.recents;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -31,6 +29,8 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.os.Build;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +41,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.systemui.OverviewProxyService;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
@@ -50,9 +51,9 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
  * Shows onboarding for the new recents interaction in P (codenamed quickstep).
  */
 @TargetApi(Build.VERSION_CODES.P)
-public class SwipeUpOnboarding {
+public class RecentsOnboarding {
 
-    private static final String TAG = "SwipeUpOnboarding";
+    private static final String TAG = "RecentsOnboarding";
     private static final boolean RESET_PREFS_FOR_DEBUG = false;
     private static final long SHOW_DELAY_MS = 500;
     private static final long SHOW_HIDE_DURATION_MS = 300;
@@ -61,6 +62,7 @@ public class SwipeUpOnboarding {
 
     private final Context mContext;
     private final WindowManager mWindowManager;
+    private final OverviewProxyService mOverviewProxyService;
     private final View mLayout;
     private final TextView mTextView;
     private final ImageView mDismissView;
@@ -113,11 +115,12 @@ public class SwipeUpOnboarding {
         }
     };
 
-    public SwipeUpOnboarding(Context context) {
+    public RecentsOnboarding(Context context, OverviewProxyService overviewProxyService) {
         mContext = context;
+        mOverviewProxyService = overviewProxyService;
         final Resources res = context.getResources();
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-        mLayout = LayoutInflater.from(mContext).inflate(R.layout.recents_swipe_up_onboarding, null);
+        mLayout = LayoutInflater.from(mContext).inflate(R.layout.recents_onboarding, null);
         mTextView = mLayout.findViewById(R.id.onboarding_text);
         mDismissView = mLayout.findViewById(R.id.dismiss);
         mDarkBackgroundColor = res.getColor(android.R.color.background_dark);
@@ -135,25 +138,25 @@ public class SwipeUpOnboarding {
         mDismissView.setOnClickListener(v -> hide(true));
 
         if (RESET_PREFS_FOR_DEBUG) {
-            Prefs.putBoolean(mContext, Prefs.Key.HAS_SWIPED_UP_FOR_RECENTS, false);
+            Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_RECENTS_ONBOARDING, false);
             Prefs.putInt(mContext, Prefs.Key.NUM_APPS_LAUNCHED, 0);
         }
     }
 
     public void onConnectedToLauncher() {
-        boolean alreadyLearnedSwipeUpForRecents = Prefs.getBoolean(mContext,
-                Prefs.Key.HAS_SWIPED_UP_FOR_RECENTS, false);
-        if (!mTaskListenerRegistered && !alreadyLearnedSwipeUpForRecents) {
+        boolean alreadySeenRecentsOnboarding = Prefs.getBoolean(mContext,
+                Prefs.Key.HAS_SEEN_RECENTS_ONBOARDING, false);
+        if (!mTaskListenerRegistered && !alreadySeenRecentsOnboarding) {
             ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskListener);
             mTaskListenerRegistered = true;
         }
     }
 
     public void onRecentsAnimationStarted() {
-        boolean alreadyLearnedSwipeUpForRecents = Prefs.getBoolean(mContext,
-                Prefs.Key.HAS_SWIPED_UP_FOR_RECENTS, false);
-        if (!alreadyLearnedSwipeUpForRecents) {
-            Prefs.putBoolean(mContext, Prefs.Key.HAS_SWIPED_UP_FOR_RECENTS, true);
+        boolean alreadySeenRecentsOnboarding = Prefs.getBoolean(mContext,
+                Prefs.Key.HAS_SEEN_RECENTS_ONBOARDING, false);
+        if (!alreadySeenRecentsOnboarding) {
+            Prefs.putBoolean(mContext, Prefs.Key.HAS_SEEN_RECENTS_ONBOARDING, true);
             onDisconnectedFromLauncher();
         }
     }
@@ -173,6 +176,12 @@ public class SwipeUpOnboarding {
     }
 
     public void show() {
+        CharSequence onboardingText = mOverviewProxyService.getOnboardingText();
+        if (TextUtils.isEmpty(onboardingText)) {
+            Log.w(TAG, "Unable to get onboarding text");
+            return;
+        }
+        mTextView.setText(onboardingText);
         // Only show in portrait.
         int orientation = mContext.getResources().getConfiguration().orientation;
         if (!mLayoutAttachedToWindow && orientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -239,7 +248,7 @@ public class SwipeUpOnboarding {
                 flags,
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
-        lp.setTitle("SwipeUpOnboarding");
+        lp.setTitle("RecentsOnboarding");
         lp.gravity = Gravity.BOTTOM;
         return lp;
     }

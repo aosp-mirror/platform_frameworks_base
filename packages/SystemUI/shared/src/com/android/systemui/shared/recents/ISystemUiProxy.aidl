@@ -39,4 +39,9 @@ interface ISystemUiProxy {
      * Called when the overview service has started the recents animation.
      */
     void onRecentsAnimationStarted();
+
+    /**
+     * Specifies the text to be shown for onboarding the new swipe-up gesture to access recents.
+     */
+    void setRecentsOnboardingText(CharSequence text);
 }
