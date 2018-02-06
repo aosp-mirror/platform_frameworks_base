@@ -3971,15 +3971,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Layout debugging code which draws rectangles around layout params.
-     *
-     * <p>This function is called automatically when the developer setting is enabled.<p/>
-     *
-     * <p>It is strongly advised to only call this function from debug builds as there is
-     * a risk of leaking unwanted layout information.<p/>
-     *
-     * @param canvas the canvas on which to draw
-     * @param paint the paint used to draw through
+     * @hide
      */
     protected void onDebugDrawMargins(Canvas canvas, Paint paint) {
         for (int i = 0; i < getChildCount(); i++) {
@@ -3989,19 +3981,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
-     * Layout debugging code which draws rectangles around:
-     * <ul>
-     *     <li>optical bounds<li/>
-     *     <li>margins<li/>
-     *     <li>clip bounds<li/>
-     * <ul/>
-     *
-     * <p>This function is called automatically when the developer setting is enabled.<p/>
-     *
-     * <p>It is strongly advised to only call this function from debug builds as there is
-     * a risk of leaking unwanted layout information.<p/>
-     *
-     * @param canvas the canvas on which to draw
+     * @hide
      */
     protected void onDebugDraw(Canvas canvas) {
         Paint paint = getDebugPaint();
@@ -7732,14 +7712,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         /**
          * Use {@code canvas} to draw suitable debugging annotations for these LayoutParameters.
          *
-         * <p>This function is called automatically when the developer setting is enabled.<p/>
-         *
-         * <p>It is strongly advised to only call this function from debug builds as there is
-         * a risk of leaking unwanted layout information.<p/>
-         *
          * @param view the view that contains these layout parameters
          * @param canvas the canvas on which to draw
-         * @param paint the paint used to draw through
+         *
+         * @hide
          */
         public void onDebugDraw(View view, Canvas canvas, Paint paint) {
         }
@@ -8243,6 +8219,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             return ((mMarginFlags & LAYOUT_DIRECTION_MASK) == View.LAYOUT_DIRECTION_RTL);
         }
 
+        /**
+         * @hide
+         */
         @Override
         public void onDebugDraw(View view, Canvas canvas, Paint paint) {
             Insets oi = isLayoutModeOptical(view.mParent) ? view.getOpticalInsets() : Insets.NONE;
